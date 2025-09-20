@@ -1,77 +1,75 @@
 export const LANG_LIST: ILangItem[] = [
   {
-    langId: "zh-CN",
+    langId: "zh-Hans",
+    googleLangId: "zh-CN",
     deeplLangId: "ZH",
     youdaoLangId: "zh-CHS",
     baiduLangId: "zh",
     tencentLangId: "zh",
     aliyunLangId: "zh",
-    microsoftLangId: "zh-Hans",
     langTitle: "Chinese-Simplified",
-    voice: "Ting-Ting",
+  },
+  {
+    langId: "zh-Hant",
+    googleLangId: "zh-TW",
+    youdaoLangId: "zh-CHT",
+    baiduLangId: "cht",
+    tencentLangId: "zh-TW",
+    aliyunLangId: "zh-tw",
+    langTitle: "Chinese-Traditional",
   },
   {
     langId: "en",
     deeplLangId: "EN",
     langTitle: "English",
-    voice: "Alex",
   },
   {
     langId: "es",
     deeplLangId: "ES",
     baiduLangId: "spa",
     langTitle: "Spanish",
-    voice: "Jorge",
   },
   {
     langId: "hi",
     baiduLangId: "spa",
     langTitle: "Hindi",
-    voice: "Lekha",
   },
   {
     langId: "fr",
     deeplLangId: "FR",
     baiduLangId: "fra",
     langTitle: "French",
-    voice: "Thomas",
   },
   {
     langId: "ru",
     deeplLangId: "RU",
     langTitle: "Russian",
-    voice: "Yuri",
   },
   {
     langId: "pt",
     deeplLangId: "PT",
     microsoftLangId: "pt-pt",
     langTitle: "Portuguese",
-    voice: "Joana",
   },
   {
     langId: "id",
     deeplLangId: "ID",
     langTitle: "Indonesian",
-    voice: "Damayanti",
   },
   {
     langId: "ja",
     deeplLangId: "JA",
     baiduLangId: "jp",
     langTitle: "Japanese",
-    voice: "Kyoko",
   },
   {
     langId: "ko",
     baiduLangId: "kor",
     langTitle: "Korean",
-    voice: "Yuna",
   },
   {
     langId: "th",
     langTitle: "Thai",
-    voice: "Kanya",
   },
   {
     langId: "vi",
@@ -81,19 +79,16 @@ export const LANG_LIST: ILangItem[] = [
     langId: "ar",
     baiduLangId: "ara",
     langTitle: "Arabic",
-    voice: "Maged",
   },
   {
     langId: "de",
     deeplLangId: "DE",
     langTitle: "German",
-    voice: "Anna",
   },
   {
     langId: "it",
     deeplLangId: "IT",
     langTitle: "Italian",
-    voice: "Alice",
   },
   {
     langId: "bg",
@@ -104,20 +99,17 @@ export const LANG_LIST: ILangItem[] = [
     langId: "cs",
     deeplLangId: "CS",
     langTitle: "Czech",
-    voice: "Zuzana",
   },
   {
     langId: "da",
     baiduLangId: "dan",
     deeplLangId: "DA",
     langTitle: "Danish",
-    voice: "Sara",
   },
   {
     langId: "el",
     langTitle: "Greek",
     deeplLangId: "EL",
-    voice: "Melina",
   },
   {
     langId: "et",
@@ -130,13 +122,11 @@ export const LANG_LIST: ILangItem[] = [
     baiduLangId: "fin",
     deeplLangId: "FI",
     langTitle: "Finnish",
-    voice: "Satu",
   },
   {
     langId: "hu",
     deeplLangId: "HU",
     langTitle: "Hungarian",
-    voice: "Mariska",
   },
   {
     langId: "lt",
@@ -154,26 +144,22 @@ export const LANG_LIST: ILangItem[] = [
     langId: "nl",
     deeplLangId: "NL",
     langTitle: "Dutch",
-    voice: "Xander",
   },
   {
     langId: "pl",
     deeplLangId: "PL",
     langTitle: "Polish",
-    voice: "Zosia",
   },
   {
     langId: "ro",
     baiduLangId: "roma",
     deeplLangId: "RO",
     langTitle: "Romanian",
-    voice: "Ioana",
   },
   {
     langId: "sk",
     deeplLangId: "SK",
     langTitle: "Slovak",
-    voice: "Laura",
   },
   {
     langId: "sl",
@@ -186,13 +172,11 @@ export const LANG_LIST: ILangItem[] = [
     baiduLangId: "swe",
     deeplLangId: "SV",
     langTitle: "Swedish",
-    voice: "Alva",
   },
   {
     langId: "tr",
     deeplLangId: "TR",
     langTitle: "Turkish",
-    voice: "Yelda",
   },
   {
     langId: "uk",
@@ -202,7 +186,6 @@ export const LANG_LIST: ILangItem[] = [
   {
     langId: "no",
     langTitle: "Norwegian",
-    voice: "Nora",
   },
   {
     langId: "fa",
@@ -256,6 +239,7 @@ export enum GoogleFreeAPITLD {
 
 export const HistoriesCacheKey = "$HistoriesCacheKey$";
 export const BaiduOCRTokenCacheKey = "$BaiduOCRTokenCacheKey$";
+export const VoiceCachePerfixKey = "$VoiceCachePerfixKey$";
 
 export const TRANS_SERVICES_NAMES = new Map<TransServiceProviderTp, string>([
   [TransServiceProviderTp.Google, "Google(Free)"],
@@ -271,7 +255,7 @@ export const TRANS_SERVICES_NAMES = new Map<TransServiceProviderTp, string>([
 export const TRANS_SERVICES_NOT_SUPPORT_LANGS = new Map<TransServiceProviderTp, string[]>([
   [TransServiceProviderTp.Google, []],
   [TransServiceProviderTp.GoogleCouldTrans, []],
-  [TransServiceProviderTp.DeepL, ["ar", "hi", "ko", "th", "vi", "no", "fa", "sr", "cy"]],
+  [TransServiceProviderTp.DeepL, ["ar", "hi", "ko", "th", "vi", "no", "fa", "sr", "cy", "zh-Hant"]],
   [TransServiceProviderTp.MicrosoftAzure, []],
   [TransServiceProviderTp.Youdao, []],
   [TransServiceProviderTp.Baidu, ["tr", "uk", "no", "fa", "sr", "cy"]],

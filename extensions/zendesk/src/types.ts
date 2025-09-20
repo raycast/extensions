@@ -1,9 +1,4 @@
-export interface Preferences {
-  supportCenter: string;
-  locale: string;
-}
-
-export interface ZendeskArticle {
+interface ZendeskArticle {
   author_id?: number;
   body?: string;
   comments_disabled?: boolean;
@@ -31,9 +26,13 @@ export interface ZendeskArticle {
 }
 
 export interface ArticleFetchRes {
-  isLoading?: boolean;
-  data?: { results: ZendeskArticle[] };
-  error?: Error;
+  count: number;
+  next_page: string | null;
+  page: number;
+  page_count: number;
+  per_page: number;
+  previous_page: string | null;
+  results: ZendeskArticle[];
 }
 
 export interface FilteredArticle {
@@ -44,7 +43,7 @@ export interface FilteredArticle {
   body?: string;
 }
 
-export interface ZendeskLocale {
+interface ZendeskLocale {
   createdAt: string;
   id: number;
   locale: string;
@@ -54,7 +53,7 @@ export interface ZendeskLocale {
 }
 
 export interface LocaleFetchRes {
-  data: { locales: ZendeskLocale[] };
+  locales: ZendeskLocale[];
 }
 
 export interface FilteredLocale {

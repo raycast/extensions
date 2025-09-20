@@ -2,7 +2,7 @@ import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { daysInSeconds, hashRecord, projectIconUrl, showErrorToast } from "../utils";
+import { daysInSeconds, getFirstChar, hashRecord, projectIconUrl, showErrorToast } from "../utils";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
@@ -19,32 +19,41 @@ import {
   OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
+  CopyProjectUrlToClipboardAction,
+  CreateNewProjectIssuePushAction,
 } from "./project_actions";
-import { getTextIcon, useImage } from "../icons";
+import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
 import { CacheActionPanelSection } from "./cache_actions";
 
-function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
-  return getTextIcon((project.name ? project.name[0] : "?").toUpperCase());
+export enum ProjectScope {
+  membership = "membership",
+  all = "all",
 }
 
-export function ProjectListItem(props: { project: Project }): JSX.Element {
+function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
+  return getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase());
+}
+
+export function ProjectListItem(props: { project: Project; nameOnly?: boolean }) {
   const project = props.project;
   const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
-
+  const accessories = [];
+  if (project.archived) {
+    accessories.push({ tooltip: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow } });
+  }
+  accessories.push({
+    text: project.star_count.toString(),
+    icon: {
+      source: Icon.Star,
+      tintColor: project.star_count > 0 ? Color.Yellow : null,
+    },
+    tooltip: `Number of stars: ${project.star_count}`,
+  });
   return (
     <List.Item
-      title={project.name_with_namespace}
-      accessories={[
-        {
-          icon: {
-            source: Icon.Star,
-            tintColor: project.star_count > 0 ? Color.Yellow : null,
-          },
-          text: `${project.star_count}`,
-          tooltip: `Number of stars: ${project.star_count}`,
-        },
-      ]}
+      title={props.nameOnly === true ? project.name : project.name_with_namespace}
+      accessories={accessories}
       icon={localImageFilepath ? { source: localImageFilepath } : getProjectTextIcon(project)}
       actions={
         <ActionPanel>
@@ -53,7 +62,10 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyProjectIDToClipboardAction project={project} />
+            <CopyProjectUrlToClipboardAction project={project} />
             <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <OpenProjectIssuesPushAction project={project} />
             <OpenProjectMergeRequestsPushAction project={project} />
             <OpenProjectBranchesPushAction project={project} />
@@ -63,6 +75,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
+            <CreateNewProjectIssuePushAction project={project} />
             <OpenProjectLabelsInBrowserAction project={project} />
             <OpenProjectSecurityComplianceInBrowserAction project={project} />
             <OpenProjectSettingsInBrowserAction project={project} />
@@ -83,7 +96,11 @@ interface ProjectListProps {
   starred?: boolean;
 }
 
-export function ProjectList({ membership = true, starred = false }: ProjectListProps): JSX.Element {
+export function ProjectListEmptyView() {
+  return <List.EmptyView title="No Projects" icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }} />;
+}
+
+export function ProjectList({ membership = true, starred = false }: ProjectListProps) {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Project[]>(
     hashRecord({ membership: membership, starred: starred }, "projects"),
@@ -108,7 +125,7 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
         });
       },
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
 
   if (error) {
@@ -117,14 +134,20 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
 
   return (
     <List
-      searchBarPlaceholder="Filter Projects by name..."
+      searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
     >
-      {data?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+      <List.Section
+        title={searchText && searchText.length > 0 ? "Search Results" : "Projects"}
+        subtitle={`${data?.length}`}
+      >
+        {data?.map((project) => (
+          <ProjectListItem key={project.id} project={project} />
+        ))}
+      </List.Section>
+      <ProjectListEmptyView />
     </List>
   );
 }
@@ -153,12 +176,12 @@ export function useMyProjects(): { projects: Project[] | undefined; error?: stri
     {
       deps: [],
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { projects, error, isLoading };
 }
 
-function MyProjectsDropdownItem(props: { project: Project }): JSX.Element {
+function MyProjectsDropdownItem(props: { project: Project }) {
   const pro = props.project;
   const { localFilepath } = useImage(projectIconUrl(pro));
   return (
@@ -170,7 +193,7 @@ function MyProjectsDropdownItem(props: { project: Project }): JSX.Element {
   );
 }
 
-export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): JSX.Element | null {
+export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): React.ReactNode | null {
   const { projects: myprojects } = useMyProjects();
   if (myprojects) {
     return (

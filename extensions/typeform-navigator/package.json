@@ -3,8 +3,11 @@
   "name": "typeform",
   "title": "Typeform Navigator",
   "description": "Manage your Typeform account",
-  "icon": "command-icon.png",
+  "icon": "tf.png",
   "author": "jdvr",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Web",
     "Other"
@@ -19,19 +22,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "date-fns": "^2.29.3",
-    "got": "^12.5.1"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^2.29.3"
   },
   "devDependencies": {
-    "@types/node": "^18.8.0",
-    "@types/react": "^18.0.21",
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
-    "@typescript-eslint/parser": "^5.38.1",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^8.24.0",
-    "eslint-config-prettier": "^8.5.0",
     "prettier": "^2.7.1",
-    "react-devtools": "^4.26.0",
+    "react": "^18.2.0",
     "typescript": "^4.8.4"
   },
   "preferences": [
@@ -40,8 +41,25 @@
       "type": "password",
       "required": true,
       "title": "Personal token",
-      "description": "Add your personal token for typeform",
-      "placeholder": "Personal token"
+      "description": "Add your personal token for Typeform",
+      "placeholder": "tfp_XX...xxx"
+    },
+    {
+      "name": "dataCenter",
+      "type": "dropdown",
+      "required": true,
+      "title": "Data Center",
+      "description": "The data center your acccount is configured to store responses in",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "EU",
+          "value": "eu"
+        }
+      ]
     }
   ],
   "scripts": {

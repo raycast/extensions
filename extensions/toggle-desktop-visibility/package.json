@@ -5,6 +5,10 @@
   "description": "Toggle Desktop file or folder visible and hidden",
   "icon": "logo.png",
   "author": "Haojen",
+  "contributors": [
+    "vatsalsanjay",
+    "heytommy"
+  ],
   "license": "MIT",
   "categories": [
     "System",
@@ -12,31 +16,68 @@
   ],
   "commands": [
     {
-      "name": "toggle-desktop-visibility",
-      "title": "Toggle Visibility",
+      "name": "toggle-desktop-icons",
+      "title": "Toggle Icon Visibility",
       "subtitle": "Desktop",
-      "description": "Toggle Desktop file or folder visible and hidden",
+      "description": "Toggle Desktop icons visible or hidden",
       "mode": "no-view"
+    },
+    {
+      "name": "show-desktop-icons",
+      "title": "Show Icons",
+      "subtitle": "Desktop",
+      "description": "Show Desktop icons",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "hide-desktop-icons",
+      "title": "Hide Icons",
+      "subtitle": "Desktop",
+      "description": "Hide Desktop icons",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-desktop-widgets",
+      "title": "Toggle Widget Visibility",
+      "subtitle": "Desktop",
+      "description": "Toggle Desktop widgets visible or hidden",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-desktop-widgets",
+      "title": "Show Widgets",
+      "subtitle": "Desktop",
+      "description": "Show Desktop widgets",  
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "hide-desktop-widgets",
+      "title": "Hide Widgets",
+      "subtitle": "Desktop",
+      "description": "Hide Desktop widgets",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.59.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "20.8.0",
+    "@types/react": "18.2.24",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shadcn-ui",
+  "title": "shadcn/ui",
+  "description": "Browse shadcn/ui documentation, components and examples",
+  "icon": "extension-icon.png",
+  "author": "luisFilipePT",
+  "contributors": [
+    "williamwelsh",
+    "Olivier-OG",
+    "ridemountainpig",
+    "siddharth-2382"
+  ],
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "subtitle": "shadcn/ui",
+      "description": "Search shadcn/ui documentation and open it in the browser",
+      "keywords": [
+        "css",
+        "ui",
+        "documentation"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-components",
+      "title": "Search Components",
+      "subtitle": "shadcn/ui",
+      "keywords": [
+        "css",
+        "ui",
+        "components"
+      ],
+      "description": "Search shadcn/ui components",
+      "mode": "view"
+    },
+    {
+      "name": "search-examples",
+      "title": "Search Examples",
+      "subtitle": "shadcn/ui",
+      "description": "Search shadcn/ui examples",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@octokit/rest": "^19.0.11",
+    "@octokit/types": "^9.2.3",
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.4.8",
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^3.3.1",
+    "octokit": "^2.0.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

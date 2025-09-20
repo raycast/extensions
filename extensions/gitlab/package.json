@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitlab",
   "title": "GitLab",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "tonka3000",
   "license": "MIT",
   "description": "Create, search and modify issues, manage merge requests, projects and more.",
@@ -72,10 +72,17 @@
       "mode": "view"
     },
     {
-      "name": "project_search",
-      "title": "Search Project",
+      "name": "group_search",
+      "title": "Search Groups",
       "subtitle": "GitLab",
-      "description": "Search GitLab Project",
+      "description": "Search GitLab Groups",
+      "mode": "view"
+    },
+    {
+      "name": "project_search",
+      "title": "Search Projects",
+      "subtitle": "GitLab",
+      "description": "Search GitLab Projects",
       "mode": "view"
     },
     {
@@ -97,7 +104,17 @@
       "title": "My Groups",
       "subtitle": "GitLab",
       "description": "GitLab Groups",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "flatlist",
+          "description": "Show Groups as Flat List at once",
+          "type": "checkbox",
+          "required": false,
+          "label": "Flat List View",
+          "default": false
+        }
+      ]
     },
     {
       "name": "epics",
@@ -115,7 +132,7 @@
     },
     {
       "name": "event_my",
-      "title": "My Recent Activities",
+      "title": "Recent Activities",
       "subtitle": "GitLab",
       "description": "Recent GitLab Activities",
       "mode": "view"
@@ -173,6 +190,98 @@
           "required": false,
           "label": "Grayscale Icon",
           "default": false
+        }
+      ]
+    },
+    {
+      "name": "mrmenu",
+      "title": "Merge Requests Menu Bar",
+      "description": "Display Merge Request directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Merge Requests shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Merge Requests",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Merge Requests Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Merge Requests Count",
+          "title": "Appearance",
+          "default": true
+        },
+        {
+          "name": "assignedLabels",
+          "description": "Only show Assigned MRs with these labels (comma-separated)",
+          "type": "textfield",
+          "required": false,
+          "title": "Assigned MRs Labels",
+          "placeholder": "e.g. bug,feature,urgent"
+        },
+        {
+          "name": "createdLabels",
+          "description": "Only show My MRs with these labels (comma-separated)",
+          "type": "textfield",
+          "required": false,
+          "title": "My MRs Labels",
+          "placeholder": "e.g. Action Required,WIP"
+        },
+        {
+          "name": "reviewLabels",
+          "description": "Only show Reviews with these labels (comma-separated)",
+          "type": "textfield",
+          "required": false,
+          "title": "Reviews Labels",
+          "placeholder": "e.g. Human Review Required,Ready for Review"
+        }
+      ]
+    },
+    {
+      "name": "issuemenu",
+      "title": "Issues Menu Bar",
+      "description": "Display Issues directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Issues shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Issues",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Issues Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Issues Count",
+          "title": "Appearance",
+          "default": true
+        },
+        {
+          "name": "includeLabels",
+          "description": "Only show issues with these labels (comma-separated)",
+          "type": "textfield",
+          "required": false,
+          "title": "Include Labels",
+          "placeholder": "e.g. bug,feature,urgent"
+        },
+        {
+          "name": "excludeLabels",
+          "description": "Exclude issues with these labels (comma-separated)",
+          "type": "textfield",
+          "required": false,
+          "title": "Exclude Labels",
+          "placeholder": "e.g. WIP,blocked"
         }
       ]
     }
@@ -240,6 +349,14 @@
       "description": "Show details in merge request lists via a metadata view"
     },
     {
+      "name": "includeEpicAncestor",
+      "type": "checkbox",
+      "label": "Include Group Ancestors for Epics",
+      "required": false,
+      "default": false,
+      "description": "Include Group Ancestors for Epics when a higher group is not getable from with the top-level flag"
+    },
+    {
       "name": "ignorecerts",
       "type": "checkbox",
       "label": "Ignore Certificate Errors (not recommended)",
@@ -276,45 +393,76 @@
   "categories": [
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "contributors": [
     "Loskir",
     "immint023",
     "duboiss",
     "metakirby5",
     "macbookandrew",
-    "shaoye"
+    "shaoye",
+    "charlej",
+    "emlez",
+    "hendrikbunnick",
+    "stelo",
+    "romanschmid",
+    "jessedobbelaere",
+    "heavyrisem",
+    "constantins2001",
+    "pernielsentikaer",
+    "tane_van_wifferen",
+    "1weiho"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.45.0",
-    "@raycast/utils": "^1.0.6",
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^1.17.0",
     "apollo-link-context": "^1.0.20",
+    "cross-fetch": "^4.0.0",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
     "javascript-time-ago": "^2.3.10",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.2.10",
     "open": "^8.2.1",
     "url-join": "^4.0.1",
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
     "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
+    "@types/react": "19.0.10",
     "@types/url-join": "^4.0.1",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.3.5"
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "fix-prettier": "prettier --write src"
-  }
+    "fix-prettier": "prettier --write src",
+    "evals": "ray evals",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    { "name": "search-projects", "title": "Search Projects", "description": "Search gitlab projects" },
+    { "name": "search-issues", "title": "Search Issues", "description": "Search gitlab issues" },
+    { "name": "search-merge-requests", "title": "Search Merge Requests", "description": "Search gitlab merge requests" },
+    { "name": "get-todos", "title": "Get Todos", "description": "Get my gitlab todos" },
+    { "name": "close-issue", "title": "Close Issue", "description": "Close an issue by project and iid" },
+    { "name": "reopen-issue", "title": "Reopen Issue", "description": "Reopen an issue by project and iid" },
+    { "name": "close-merge-request", "title": "Close Merge Request", "description": "Close a merge request by project and iid" },
+    { "name": "reopen-merge-request", "title": "Reopen Merge Request", "description": "Reopen a merge request by project and iid" },
+    { "name": "merge-merge-request", "title": "Merge Merge Request", "description": "Merge a merge request with options" },
+    { "name": "get-activities", "title": "Get Activities", "description": "Get recent gitlab activities" },
+    { "name": "get-recent-commits", "title": "Get Recent Commits", "description": "Get my recent commits" },
+    { "name": "open-in-browser", "title": "Open in Browser", "description": "Open a URL in Browser" }
+  ]
 }

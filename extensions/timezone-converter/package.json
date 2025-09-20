@@ -6,7 +6,10 @@
   "description": "Converts any time to any timezone",
   "icon": "command-icon.png",
   "author": "joao.mainka",
-  "contributors": ["pernielsentikaer"],
+  "contributors": [
+    "pernielsentikaer",
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -57,6 +60,15 @@
           "value": "manually"
         }
       ]
+    },
+    {
+      "name": "hideWorldMap",
+      "description": "Hide world map to display more time zones in the list",
+      "label": "Hide World Map",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide World Map",
+      "default": false
     }
   ]
 }

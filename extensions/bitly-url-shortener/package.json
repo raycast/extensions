@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitly-url-shortener",
   "title": "Bitly URL Shortener",
-  "description": "Quickly shorten the current clipboard URL with Bitly",
+  "description": "Quickly shorten the selected URL or current clipboard URL with Bitly",
   "icon": "command-icon.png",
   "author": "blessanm86",
   "license": "MIT",
@@ -23,6 +23,14 @@
       "title": "Access Token",
       "description": "Your Bitly access token.",
       "placeholder": "Can be found at https://app.bitly.com/settings/api"
+    },
+    {
+      "name": "pasteAfterShortening",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Automatically paste shortened URL",
+      "description": "Automatically paste the shortened URL after shortening it."
     }
   ],
   "dependencies": {
@@ -45,5 +53,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

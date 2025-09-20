@@ -6,14 +6,27 @@
   "icon": "command-icon.png",
   "author": "ThatNerd",
   "contributors": [
-    "marcjulian",
     "GastroGeek",
     "pernielsentikaer",
-    "lokot0k"
+    "lokot0k",
+    "mitchwu",
+    "a-laughlin"
+  ],
+  "pastContributors": [
+    "marcjulian"
   ],
   "categories": [
     "Productivity",
     "System"
+  ],
+  "keywords": [
+    "timer",
+    "stopwatch",
+    "alert",
+    "pom",
+    "pomodoro",
+    "alarm",
+    "clock"
   ],
   "license": "MIT",
   "commands": [
@@ -21,61 +34,73 @@
       "name": "start2MinuteTimer",
       "title": "Start 2 Minute Timer",
       "description": "Set a countdown for 2 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start5MinuteTimer",
       "title": "Start 5 Minute Timer",
       "description": "Set a countdown for 5 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start10MinuteTimer",
       "title": "Start 10 Minute Timer",
       "description": "Set a countdown for 10 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start15MinuteTimer",
       "title": "Start 15 Minute Timer",
       "description": "Set a countdown for 15 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start25MinuteTimer",
       "title": "Start 25 Minute Timer",
       "description": "Set a countdown for 25 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start30MinuteTimer",
       "title": "Start 30 Minute Timer",
       "description": "Set a countdown for 30 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start45MinuteTimer",
       "title": "Start 45 Minute Timer",
       "description": "Set a countdown for 45 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start60MinuteTimer",
       "title": "Start 60 Minute Timer",
       "description": "Set a countdown for 60 minutes.",
-      "mode": "view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start90MinuteTimer",
       "title": "Start 90 Minute Timer",
       "description": "Set a countdown for 90 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "startCustomTimer",
       "title": "Start Custom Timer",
       "description": "Set a countdown for a custom amount of time.",
       "mode": "view",
+      "keywords": [
+        "new"
+      ],
       "arguments": [
         {
           "name": "hours",
@@ -132,15 +157,50 @@
     },
     {
       "name": "dismissTimerAlert",
-      "title": "Dismiss Timer Alert",
+      "title": "Dismiss Ringing Timer",
+      "keywords": [
+        "Dismiss Timer Alert",
+        "Alert"
+      ],
       "description": "Stop a ringing alert from a finished timer.",
       "mode": "no-view"
+    },
+    {
+      "name": "stopwatchMenuBar",
+      "title": "Stopwatch Menu Bar",
+      "description": "View, start, or stop existing stopwatches from the Menu Bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
     },
     {
       "name": "previewAlertSounds",
       "title": "Preview Alert Sounds",
       "description": "Play samples of different alert sound effects.",
       "mode": "view"
+    },
+    {
+      "name": "stopRunningTimer",
+      "title": "Stop Running Timer",
+      "description": "Stop the running timer closest to completion.",
+      "mode": "no-view"
+    },
+    {
+      "name": "configureMenubarPresets",
+      "title": "Configure Presets in Menu Bar",
+      "description": "Configure which presets to show in the Timers Menu Bar.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Start a new timer, optionally saving it as a preset."
+    },
+    {
+      "name": "start-preset",
+      "title": "Start Preset",
+      "description": "Start a timer from an existing preset. Note that this will only work for presets that have already been saved."
     }
   ],
   "preferences": [
@@ -183,9 +243,88 @@
       ]
     },
     {
+      "name": "volumeSetting",
+      "type": "textfield",
+      "required": false,
+      "title": "Timer Alert Volume",
+      "description": "Volume of the alert sound. Decimal between 0 and 1.",
+      "default": "1"
+    },
+    {
+      "name": "ringContinuously",
+      "type": "checkbox",
+      "required": false,
+      "title": "Timer Alert Type",
+      "description": "Whether or not to play the timer alert sound continuously until dismissed.",
+      "label": "Ring Continuously",
+      "default": true
+    },
+    {
+      "name": "showMenuBarIconWhen",
+      "type": "dropdown",
+      "required": false,
+      "title": "Show Menu Bar Icon When",
+      "description": "When to show icon in menubar.",
+      "default": "always",
+      "data": [
+        {
+          "title": "Always",
+          "value": "always"
+        },
+        {
+          "title": "Only When Not Running",
+          "value": "onlyWhenNotRunning"
+        },
+        {
+          "title": "Only When Running",
+          "value": "onlyWhenRunning"
+        },
+        {
+          "title": "Never",
+          "value": "never"
+        }
+      ]
+    },
+    {
+      "name": "showTitleInMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Title in Menu Bar",
+      "description": "Whether or not to show the timer or stopwatch title in the menu bar.",
+      "label": "Show title",
+      "default": true
+    },
+    {
+      "name": "copyOnSwStop",
+      "type": "checkbox",
+      "required": false,
+      "title": "Copy on Stopwatch Stop",
+      "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
+      "label": "Copy elapsed time",
+      "default": false
+    },
+    {
+      "name": "closeWindowOnTimerStart",
+      "type": "checkbox",
+      "required": false,
+      "title": "Close Window on Timer Start",
+      "description": "Whether or not to close the Raycast window when a timer or stopwatch is started.",
+      "label": "Automatically close window on start",
+      "default": false
+    },
+    {
+      "name": "customTimerFormBypass",
+      "label": "Skip form if arguments are given",
+      "title": "Custom Timer Form Bypass",
+      "type": "checkbox",
+      "required": false,
+      "description": "For the 'Start Custom Timer' command, skip the timer add form if any hour, minute, or second arguments are given.",
+      "default": false
+    },
+    {
       "name": "newTimerInputOrder",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "New Timer Input Order",
       "description": "Order for input fields in new timer form.",
       "default": "Hours , Minutes, Seconds",
@@ -199,47 +338,167 @@
           "value": "ssmmhh"
         }
       ]
-    },
-    {
-      "name": "ringContinuously",
-      "type": "checkbox",
-      "required": true,
-      "title": "Timer Alert Type",
-      "description": "Whether or not to play the timer alert sound continuously until dismissed.",
-      "label": "Ring Continuously",
-      "default": false
-    },
-    {
-      "name": "copyOnSwStop",
-      "type": "checkbox",
-      "required": true,
-      "title": "Copy on Stopwatch Stop",
-      "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
-      "label": "Copy elapsed time",
-      "default": false
-    },
-    {
-      "name": "volumeSetting",
-      "type": "textfield",
-      "required": true,
-      "title": "Timer Alert Volume",
-      "description": "Volume of the alert sound. Decimal between 0 and 1.",
-      "default": "1"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8"
+    "@raycast/api": "^1.91.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.48",
-    "eslint": "^7.32.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "~20.14.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.56.0",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "lint-fix": "ray lint --fix"
+  },
+  "ai": {
+    "instructions": "The user will request for a timer of a certain length to be started, in hours, minutes, and seconds. Some of these may be left out. For example, the user may ask, 'Start a 25 minute timer'. In this case the input is hours: 0, minutes: 25, seconds: 0. Always respond telling the user a timer has been successfully started, and include the length of the timer in hours, minutes, and seconds. The user can also add a name for the timer. Do not change the capitalisation or formatting of the name.",
+    "evals": [
+      {
+        "input": "@timers start a 10 min timer",
+        "mocks": {
+          "start-timer": {
+            "timeInSeconds": 600,
+            "timerName": null,
+            "saved": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "hours": 0,
+                "minutes": 10,
+                "seconds": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@timers start a 1h30m 'deep work' timer and save it",
+        "mocks": {
+          "start-timer": {
+            "timeInSeconds": 5400,
+            "timerName": "deep work",
+            "saved": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "hours": 1,
+                "minutes": 30,
+                "seconds": 0,
+                "name": "deep work",
+                "shouldBeSaved": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@timers start a 90s timer for fighting bears in woods",
+        "mocks": {
+          "start-timer": {
+            "timeInSeconds": 90,
+            "timerName": "fighting bears in woods"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "hours": 0,
+                "minutes": 1,
+                "seconds": 30,
+                "name": "fighting bears in woods"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@timers start a 'tea steeping' timer for 4 min",
+        "mocks": {
+          "start-timer": {
+            "timeInSeconds": 240,
+            "timerName": "tea steeping",
+            "saved": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "hours": 0,
+                "minutes": 4,
+                "seconds": 0,
+                "name": "tea steeping"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@timers start pomodoro preset",
+        "mocks": {
+          "start-preset": "pomodoro"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-preset",
+              "arguments": {
+                "name": "pomodoro"
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "start-timer"
+            }
+          },
+          {
+            "meetsCriteria": "Tells the user that the 'pomodoro' preset timer has been successfully started."
+          }
+        ]
+      },
+      {
+        "input": "@timers start dark magic preset",
+        "usedAsExample": false,
+        "mocks": {
+          "start-preset": null
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-preset",
+              "arguments": {
+                "name": "dark magic"
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "start-timer"
+            }
+          },
+          {
+            "meetsCriteria": "Tells the user that this preset does not exist."
+          }
+        ]
+      }
+    ]
   }
 }

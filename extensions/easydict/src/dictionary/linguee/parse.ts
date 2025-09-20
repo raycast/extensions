@@ -10,7 +10,7 @@
 
 import { parse } from "node-html-parser";
 import { getLanguageEnglishName, getLanguageItemFromDeepLSourceCode } from "../../language/languages";
-import { DicionaryType, DisplaySection, ListDisplayItem, QueryTypeResult } from "../../types";
+import { DictionaryType, DisplaySection, ListDisplayItem, QueryTypeResult } from "../../types";
 import { checkIsWord } from "../../utils";
 import { QueryWordInfo } from "../youdao/types";
 import { getValidLingueeLanguagePair } from "./languages";
@@ -107,7 +107,7 @@ export function parseLingueeHTML(html: string): QueryTypeResult {
   queryWordInfo.isWord = hasEntries;
   const result = hasEntries ? lingueeResult : undefined;
   const lingueeTypeResult: QueryTypeResult = {
-    type: DicionaryType.Linguee,
+    type: DictionaryType.Linguee,
     result: result,
     translations: [],
     queryWordInfo: queryWordInfo,
@@ -172,7 +172,7 @@ function getWordItemList(lemmas: HTMLElement[] | undefined): LingueeWordItem[] {
       const tag_area_text = tag_area ? `${tag_area?.textContent}` : "";
       const posText = `${tag_wordtype?.textContent ?? ""} ${tag_forms_text} ${tag_area_text}`;
       const tag_type = lemma?.querySelector(".tag_type"); // related word pos
-      const pos = tag_wordtype ? posText : tag_type?.textContent ?? "";
+      const pos = tag_wordtype ? posText : (tag_type?.textContent ?? "");
       const featured = lemma.getAttribute("class")?.includes("featured") ?? false;
       // * note: audio is not always exist.
       const audio = tag_lemma?.querySelector(".audio")?.getAttribute("id");
@@ -226,7 +226,7 @@ function getWordItemList(lemmas: HTMLElement[] | undefined): LingueeWordItem[] {
 function getWordExplanationList(
   translations: HTMLElement[] | undefined,
   isFeatured = false,
-  designatedFrequencey?: LingueeListItemType
+  designatedFrequency?: LingueeListItemType,
 ) {
   // console.log(`---> getWordExplanationList, length: ${translations?.length} , isFeatured: ${isFeatured}`);
   const explanationItems: LingueeWordExplanation[] = [];
@@ -265,7 +265,7 @@ function getWordExplanationList(
         examples: exampleItems,
         frequencyTag: {
           tagForms: tag,
-          displayType: designatedFrequencey ?? wordFrequency,
+          displayType: designatedFrequency ?? wordFrequency,
         },
       };
       // console.log(`---> explanation: ${JSON.stringify(explanation, null, 4)}`);
@@ -320,7 +320,7 @@ function getExampleList(exampleLemma: HTMLElement[] | undefined) {
     for (const lemma of exampleLemma) {
       const exampleElement = lemma.querySelector(".line .dictLink");
       const tagType = lemma.querySelector(".line .tag_type");
-      const exmaple: LingueePosText = {
+      const example: LingueePosText = {
         pos: tagType?.textContent ?? "",
         text: exampleElement?.textContent ?? "",
       };
@@ -339,7 +339,7 @@ function getExampleList(exampleLemma: HTMLElement[] | undefined) {
       });
       // console.log(`---> translations: ${JSON.stringify(translations, null, 4)}`);
       const lingueeExample: LingueeExample = {
-        example: exmaple,
+        example: example,
         translations: translations,
       };
       exampleItems.push(lingueeExample);
@@ -407,13 +407,13 @@ export function getLingueeWebDictionaryURL(queryWordInfo: QueryWordInfo): string
 
   const sourceLanguage = getLanguageEnglishName(fromLanguage).toLowerCase();
   const lingueeUrl = `https://www.linguee.com/${validLanguagePair}/search?source=${sourceLanguage}&query=${encodeURIComponent(
-    queryWordInfo.word
+    queryWordInfo.word,
   )}`;
   return lingueeUrl;
 }
 
 /**
- * Formate linguee display result
+ * Format linguee display result
  */
 export function formatLingueeDisplaySections(lingueeTypeResult: QueryTypeResult): DisplaySection[] {
   const displayResults: DisplaySection[] = [];
@@ -423,7 +423,7 @@ export function formatLingueeDisplaySections(lingueeTypeResult: QueryTypeResult)
 
   const { queryWordInfo, wordItems, examples, relatedWords, wikipedias } =
     lingueeTypeResult.result as LingueeDictionaryResult;
-  const lingueeType = DicionaryType.Linguee;
+  const lingueeType = DictionaryType.Linguee;
 
   // add a Linguee flag section
   const word = queryWordInfo.word;
@@ -565,7 +565,7 @@ export function formatLingueeDisplaySections(lingueeTypeResult: QueryTypeResult)
       return displayItem;
     });
     const exampleSection: DisplaySection = {
-      type: DicionaryType.Linguee,
+      type: DictionaryType.Linguee,
       sectionTitle: sectionTitle,
       items: displayItems.slice(0, 3), // show up to 3 examples.
     };

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "not-diamond",
+  "title": "Not Diamond",
+  "description": "Not Diamond is an AI model router that automatically determines which LLM is best-suited to respond to any query, improving LLM output quality by combining multiple LLMs into a meta-model that learns when to call each LLM. This extension answers always with the best model depending on the prompt.",
+  "icon": "extension-icon.png",
+  "author": "dragos_nedelcu",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "not-diamond",
+      "title": "Chat Not Diamond",
+      "description": "Not Diamond is an AI model router that automatically determines which LLM is best-suited to respond to any query, improving LLM output quality by combining multiple LLMs into a meta-model that learns when to call each LLM. This extension answers always with the best model depending on the prompt.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Not Diamond API Key",
+      "description": "API Key from Not Diamond. Generate your own key at https://app.notdiamond.ai/keys",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "openAIApiKey",
+      "title": "OpenAI API Key",
+      "description": "API Key from OpenAI.com. Generate your own key at https://openai.com",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "anthropicApiKey",
+      "title": "Anthropic API Key",
+      "description": "API Key from Anthropic.com. Generate your own key at https://www.anthropic.com/api",
+      "type": "textfield",
+      "placeholder": "type skip if you don't want to use it",
+      "required": true
+    },
+    {
+      "name": "perplexityApiKey",
+      "title": "Perplexity API Key",
+      "description": "API Key from Perplexity.ai. Generate your own key at https://docs.perplexity.ai/guides/getting-started",
+      "type": "textfield",
+      "placeholder": "type skip if you don't want to use it",
+      "required": true
+    },
+    {
+      "name": "googleApiKey",
+      "title": "Google API Key",
+      "description": "API Key from Google. Generate your own key at https://ai.google.dev/gemini-api/docs/api-key",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "mistralApiKey",
+      "title": "Mistral API Key",
+      "description": "API Key from Mistral.ai. Generate your own key at https://console.mistral.ai/api-keys/",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "cohereApiKey",
+      "title": "Cohere API Key",
+      "description": "API Key from Cohere.ai. Generate your own key at https://dashboard.cohere.com/",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "togetherApiKey",
+      "title": "Together API Key",
+      "description": "API Key from Together.ai. Generate your own key at https://docs.together.ai/docs/quickstart",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "tradeoff",
+      "title": "Tradeoff",
+      "description": "Tradeoff between latency and cost",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Quality",
+          "value": ""
+        },
+        {
+          "title": "Latency",
+          "value": "latency"
+        },
+        {
+          "title": "Cost",
+          "value": "cost"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "notdiamond": "^0.3.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

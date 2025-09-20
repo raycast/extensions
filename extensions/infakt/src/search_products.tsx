@@ -1,4 +1,4 @@
-import SearchProducts from "./components/products/SearchProducts";
+import { SearchProducts } from "@/components/products/SearchProducts";
 
 export default function Command() {
   return <SearchProducts />;

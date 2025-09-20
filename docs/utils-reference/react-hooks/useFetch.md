@@ -1,21 +1,27 @@
 # `useFetch`
 
-Hook which fetches the URL and returns the [AsyncState](#asyncstate) corresponding to the execution of the fetch. The last value will be kept between command runs.
+Hook which fetches the URL and returns the [AsyncState](#asyncstate) corresponding to the execution of the fetch.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useFetch` first returns the data from cache (stale), then sends the request (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
 
 ## Signature
 
 ```ts
-function useFetch<T, U>(
-  url: string,
+export function useFetch<V, U, T = V>(
+  url: RequestInfo,
   options?: RequestInit & {
-    parseResponse?: (response: Response) => Promise<T>;
+    parseResponse?: (response: Response) => Promise<V>;
+    mapResult?: (result: V) => { data: T };
     initialData?: U;
     keepPreviousData?: boolean;
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: [string, RequestInit]) -> void;
-  }
+    onWillExecute?: (args: [string, RequestInit]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  },
 ): AsyncState<T> & {
   revalidate: () => void;
   mutate: MutatePromise<T | U | undefined>;
@@ -29,11 +35,12 @@ function useFetch<T, U>(
 With a few options:
 
 - `options` extends [`RequestInit`](https://github.com/nodejs/undici/blob/v5.7.0/types/fetch.d.ts#L103-L117) allowing you to specify a body, headers, etc. to apply to the request.
-- `options.parseResponse` is a function that accepts the Response as an argument and returns the data the hooks will return. By default, the hook will return `response.json()` if the response has a JSON `Content-Type` header or `response.text()` otherwise.
+- `options.parseResponse` is a function that accepts the Response as an argument and returns the data the hook will return. By default, the hook will return `response.json()` if the response has a JSON `Content-Type` header or `response.text()` otherwise.
+- `options.mapResult` is an optional function that accepts whatever `options.parseResponse` returns as an argument, processes the response, and returns an object wrapping the result, i.e. `(response) => { return { data: response> } };`.
 
 Including the [useCachedPromise](./useCachedPromise.md)'s options:
 
-- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See [Argument dependent on List search text](#argument-dependent-on-list-search-text) for more information.
 
 Including the [useCachedState](./useCachedState.md)'s options:
 
@@ -45,6 +52,7 @@ Including the [usePromise](./usePromise.md)'s options:
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
 - `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
 
 ### Return
 
@@ -60,7 +68,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, revalidate } = useFetch("https://api.example");
 
   return (
@@ -74,7 +82,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Argument dependent on List search text
@@ -88,7 +96,7 @@ import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(`https://api.example?q=${searchText}`, {
     // to make sure the screen isn't flickering when the searchText changes
@@ -102,7 +110,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -117,7 +125,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate } = useFetch("https://api.example");
 
   const appendFoo = async () => {
@@ -132,7 +140,7 @@ const Demo = () => {
           optimisticUpdate(data) {
             return data + "foo";
           },
-        }
+        },
       );
       // yay, the API call worked!
       toast.style = Toast.Style.Success;
@@ -157,7 +165,126 @@ const Demo = () => {
       }
     />
   );
-};
+}
+```
+
+## Pagination
+
+{% hint style="info" %}
+When paginating, the hook will only cache the result of the first page.
+{% endhint %}
+
+The hook has built-in support for pagination. In order to enable pagination, `url`s type needs to change from `RequestInfo` to a function that receives a [PaginationOptions](#paginationoptions) argument, and returns a `RequestInfo`.
+
+In practice, this means going from
+
+```ts
+const { isLoading, data } = useFetch(
+  "https://api.ycombinator.com/v0.1/companies?" + new URLSearchParams({ q: searchText }).toString(),
+  {
+    mapResult(result: SearchResult) {
+      return {
+        data: result.companies,
+      };
+    },
+    keepPreviousData: true,
+    initialData: [],
+  },
+);
+```
+
+to
+
+```ts
+const { isLoading, data, pagination } = useFetch(
+  (options) =>
+    "https://api.ycombinator.com/v0.1/companies?" +
+    new URLSearchParams({ page: String(options.page + 1), q: searchText }).toString(),
+  {
+    mapResult(result: SearchResult) {
+      return {
+        data: result.companies,
+        hasMore: result.page < result.totalPages,
+      };
+    },
+    keepPreviousData: true,
+    initialData: [],
+  },
+);
+```
+
+or, if your data source uses cursor-based pagination, you can return a `cursor` alongside `data` and `hasMore`, and the cursor will be passed as an argument the next time the function gets called:
+
+```ts
+const { isLoading, data, pagination } = useFetch(
+  (options) =>
+    "https://api.ycombinator.com/v0.1/companies?" +
+    new URLSearchParams({ cursor: options.cursor, q: searchText }).toString(),
+  {
+    mapResult(result: SearchResult) {
+      const { companies, nextCursor } = result;
+      const hasMore = nextCursor !== undefined;
+      return { data: companies, hasMore, cursor: nextCursor, };
+    },
+    keepPreviousData: true,
+    initialData: [],
+  },
+);
+```
+
+You'll notice that, in the second case, the hook returns an additional item: `pagination`. This can be passed to Raycast's `List` or `Grid` components in order to enable pagination.
+Another thing to notice is that `mapResult`, which is normally optional, is actually required when using pagination. Furthermore, its return type is
+
+```ts
+{
+  data: any[],
+  hasMore?: boolean;
+  cursor?: any;
+}
+```
+
+Every time the URL is fetched, the hook needs to figure out if it should paginate further, or if it should stop, and it uses the `hasMore` for this.
+In addition to this, the hook also needs `data`, and needs it to be an array, because internally it appends it to a list, thus making sure the `data` that the hook _returns_ always contains the data for all of the pages that have been fetched so far.
+
+### Full Example
+
+```tsx
+import { Icon, Image, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
+
+type SearchResult = { companies: Company[]; page: number; totalPages: number };
+type Company = { id: number; name: string; smallLogoUrl?: string };
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+  const { isLoading, data, pagination } = useFetch(
+    (options) =>
+      "https://api.ycombinator.com/v0.1/companies?" +
+      new URLSearchParams({ page: String(options.page + 1), q: searchText }).toString(),
+    {
+      mapResult(result: SearchResult) {
+        return {
+          data: result.companies,
+          hasMore: result.page < result.totalPages,
+        };
+      },
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
+
+  return (
+    <List isLoading={isLoading} pagination={pagination} onSearchTextChange={setSearchText}>
+      {data.map((company) => (
+        <List.Item
+          key={company.id}
+          icon={{ source: company.smallLogoUrl ?? Icon.MinusCircle, mask: Image.Mask.RoundedRectangle }}
+          title={company.name}
+        />
+      ))}
+    </List>
+  );
+}
 ```
 
 ## Types
@@ -207,6 +334,22 @@ export type MutatePromise<T> = (
     optimisticUpdate?: (data: T) => T;
     rollbackOnError?: boolean | ((data: T) => T);
     shouldRevalidateAfter?: boolean;
-  }
+  },
 ) => Promise<any>;
+```
+
+### PaginationOptions
+
+An object passed to a `PaginatedRequestInfo`, it has two properties:
+
+- `page`: 0-indexed, this it's incremented every time the promise resolves, and is reset whenever `revalidate()` is called.
+- `lastItem`: this is a copy of the last item in the `data` array from the last time the promise was executed. Provided for APIs that implement cursor-based pagination.
+- `cursor`: this is the `cursor` property returned after the previous execution of `PaginatedPromise`. Useful when working with APIs that provide the next cursor explicitly.
+
+```ts
+export type PaginationOptions<T = any> = {
+  page: number;
+  lastItem?: T;
+  cursor?: any;
+};
 ```

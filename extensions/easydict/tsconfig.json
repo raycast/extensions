@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Node 18.10",
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "exclude": ["src/translation/**/*"],
   "compilerOptions": {
     "lib": ["es2021", "dom"],

@@ -5,8 +5,9 @@
 
 ## What can you do with this extension?
 
-1. Support compress files(password is optional)
-2. Support extract files(password if need)
+1. Compress files (password optional)
+2. Extract files (password if needed)
+3. Preview ZIP files
 
 ---
 

@@ -11,39 +11,27 @@ jobs:
     if: ${{ !github.event.issue.pull_request }} && github.repository == 'raycast/extensions'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
+      - uses: oven-sh/setup-bun@v2
         with:
-          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-          script: |
-            const { data } = await github.rest.repos.getContent({
-              mediaType: {
-                format: "raw",
-              },
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: "scripts/issue-bot.js",
-            });
-
-            const fn = Buffer.from(data.content, 'base64')
-            require('fs').writeFileSync('./issue-bot.js', fn)
-
-            const script = require('./issue-bot')
-            await script({
-              github,
-              context,
-              core
-            })
+          bun-version: latest
+      - name: Setup Bot
+        run: bun create github.com/raycast/github-action-bot
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+      - name: Run bot
+        run: |
+          cd github-action-bot
+          bun run index.ts
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          SCRIPT: "scripts/bots/issue-bot.ts"
 
       - name: Notify Failure to Slack
         if: failure()
-        uses: edge/simple-slack-notify@master
+        uses: raycast/github-actions/slack-send@master
         with:
+          webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "danger"
-          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
-          fields: |
-            [
-              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
-              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
-            ]
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
+          text: |
+            :no_entry_sign: ${env.GITHUB_WORKFLOW} has failed
+            <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Action logs> | <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }|Commit: ${ env.GITHUB_SHA.substr(0,8) }>

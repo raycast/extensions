@@ -2,7 +2,6 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { Preferences, SearchResult } from "./types";
 import fetch from "node-fetch";
-import iconv from "iconv-lite";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
@@ -41,9 +40,9 @@ export function getStaticResult(searchText: string): SearchResult[] {
 export async function getAutoSearchResults(searchText: string, signal: any): Promise<SearchResult[]> {
   const response = await fetch(`https://www.bing.com/asjson.aspx?query=${encodeURIComponent(searchText)}`, {
     method: "get",
-    signal: signal,
+    signal,
     headers: {
-      "Content-Type": "text/plain; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
     },
   });
 
@@ -51,8 +50,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
     return Promise.reject(response.statusText);
   }
 
-  const buffer = await response.arrayBuffer();
-  const text = iconv.decode(Buffer.from(buffer), "iso-8859-1");
+  const text = await response.text();
   const json = JSON.parse(text);
 
   const results: SearchResult[] = [];

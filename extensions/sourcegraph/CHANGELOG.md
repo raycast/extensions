@@ -1,5 +1,40 @@
 # Changelog
 
+## [Branding updates and workspaces](https://github.com/raycast/extensions/pull/16793) - 2025-02-03
+
+- **search**: We've updated colors throughout the extension to match Sourcegraph's refreshed branding.
+- **doc**: [Sourcegraph workspaces](https://workspaces.sourcegraph.com) are a new, easy way to get started with using Sourcegraph for Raycast to search your private code - we've added a few links throughout the extension and our setup docs.
+
+## [New logo](https://github.com/raycast/extensions/pull/16697) - 2025-01-29
+
+- **all**: Sourcegraph got a new logo! All extension and command icons have been updated.
+- **doc**: Updated documentation to indicate [Sourcegraph workspaces](https://workspaces.sourcegraph.com) compatibility.
+- **batch-changes**: The Batch Changes command is now disabled by default.
+- **notebooks**: The Notebook command is now disabled by default.
+
+## [Bug fixes](https://github.com/raycast/extensions/pull/15956) - 2024-12-19
+
+- **search**: Fix some issues where results do not reset when a search returns no results or fails.
+
+## [Smoother search and bug fixes](https://github.com/raycast/extensions/pull/15862) - 2024-12-14
+
+- **search**: Opening a query in browser now correctly preserves the selected pattern type from the pattern type selector.
+- **search**: Typing during ongoing searches should feel less jittery, as the suggestion view is now less likely to show up randomly.
+- **search**: Loading state looks better with a better no-results view that shows progress and options to continue the search in browser or cancel it entirely.
+- **dotcom**: When using 'Public code on Sourcegraph.com' commands, if an access token is not provided a random anonymous user ID is now generated and used with API requests and telemetry for diagnostics. Telemetry can be disabled in the extension preferences.
+- **doc**: 'Sourcegraph.com' commands are now called 'Public code on Sourcegraph.com', and 'Sourcegraph instance' commands are now just referred to as 'Sourcegraph' commands.
+
+## [Search improvements, pattern selector, and proxy support](https://github.com/raycast/extensions/pull/15625) - 2024-11-30
+
+- **search**: The search pattern selector is now enabled by default, allowing you to easily toggle between standard, literal, regexp, and other search patterns. This can be disabled in the extension preferences if you find the dropdown takes up too much space in the search bar.
+- **search**: For search results that have associated file paths, you can now easily copy the path of the file associated with a result or open it in the browser with the new `Copy File Path` and `Open File in Browser` actions.
+- **search**: The `Cmd-Enter` shortcut used for options like "Open Query in Browser" is now `Cmd-Shift-Enter` to avoid conflicts with reserved Raycast shortcuts.
+- **search**: Fixed cases where a title may be missing in results, improved handling of unknown result types, and improved results views.
+- **proxy**: Proxying requests over Unix domain socket for custom Sourcegraph instances is now supported via the new `Sourcegraph Instance: Proxy` option; note that HTTP proxies are not yet supported ([#21](https://github.com/bobheadxi/raycast-sourcegraph/pull/21))
+- **notebooks**: Notebooks have been disabled on Sourcegraph.com for some time now, so the command for interacting with public notebooks on Sourcegraph.com has been removed. The "Find Search Notebooks" command for custom instances is still available for the time being.
+- **internal**: The extension now exports some basic telemetry to the connected Sourcegraph instance only. If you are using a self-hosted or on-prem instance, telemetry will be managed according to the instance's telemetry settings. This can be disabled in the extension preferences.
+- **internal**: Updated dependencies.
+
 ## [Code Search History and improved search results metadata](https://github.com/raycast/extensions/pull/4018) - 2022-12-23
 
 - **search-history**: Introduce 'Code Search History' command - unique searches are now stored locally, and past searches can now be listed in this new command ([#19](https://github.com/bobheadxi/raycast-sourcegraph/pull/19))
@@ -24,7 +59,7 @@
 
 ## [Sourcegraph.com update, fix for match repository text](https://github.com/raycast/extensions/pull/2165) - 2022-07-04
 
-- **all**: [The future of Sourcegraph is single-tenant](https://about.sourcegraph.com/blog/single-tenant-cloud) - this means that support for private code on Sourcegraph.com will soon be going away. This means that soon, the default "Search code" command - which searches Sourcegraph.com - will only be able to search the 2.2m+ open source repositories available on Sourcegraph.com. To search your private code, please reach out to [get a demo of the single-tenant solution](https://about.sourcegraph.com/demo), or [try out a self-hosted installation of Sourcegraph](https://about.sourcegraph.com/get-started/self-hosted). Various documentation updates, renames, and internal changes have been made to reflect this upcoming change.
+- **all**: [The future of Sourcegraph is single-tenant](https://about.sourcegraph.com/blog/single-tenant-cloud) - this means that support for private code on Sourcegraph.com will soon be going away. This means that soon, the default "Search code" command - which searches Sourcegraph.com - will only be able to search the many open source repositories available on Sourcegraph.com. To search your private code, please reach out to [get a demo of the single-tenant solution](https://about.sourcegraph.com/demo), or [try out a self-hosted installation of Sourcegraph](https://about.sourcegraph.com/get-started/self-hosted). Various documentation updates, renames, and internal changes have been made to reflect this upcoming change.
 - **search**: Fix issue where matches for which the associated repository is not tied to a specific revision associated would mistakenly have `@` appended.
 - **internal**: Dependency updates.
 

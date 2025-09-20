@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wifi-share",
+  "title": "Wifi Share QR-Code",
+  "description": "Share any saved wifi qr code to other devices to join the network",
+  "icon": "wifi.png",
+  "author": "abul_kalam_robin",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "share-wifi",
+      "title": "Share Wifi QR-Code",
+      "description": "Select wifi to share the qr code with others",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.1",
+    "@types/qrcode": "^1.5.2",
+    "qrcode": "^1.5.3",
+    "qrcode.react": "^3.1.0",
+    "react-qr-code": "^2.0.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

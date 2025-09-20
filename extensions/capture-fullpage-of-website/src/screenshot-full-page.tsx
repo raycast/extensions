@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Icon, showToast, Toast, Action, showInFinder } from "@raycast/api";
+import { ActionPanel, Form, Icon, showToast, Toast, Action, showInFinder, getPreferenceValues } from "@raycast/api";
 import { chromium } from "playwright";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -7,6 +7,7 @@ import { URL } from "node:url";
 import { useRef } from "react";
 
 export default function Command() {
+  const { outputDirectory } = getPreferenceValues<Preferences.ScreenshotFullPage>();
   const urlWebSite = useRef<Form.TextField>(null);
 
   function ScreenshotFullPageAction() {
@@ -39,14 +40,15 @@ export default function Command() {
         const imageName = webSiteUrl.hostname + "_" + timeStamp + ".png";
 
         const base64Img = buffer.toString("base64");
-        const outputFile = desktopdir(imageName);
+        const outputFile = outputDir(imageName);
         await writeFile(outputFile, base64Img, "base64");
 
         await browser.close();
 
         toast.style = Toast.Style.Success;
         toast.title = "Took screenshot of website";
-        toast.message = "Look for it on the desktop";
+        const msgSuffix = outputDirectory ? `in "${outputDirectory}"` : "on the Desktop";
+        toast.message = `Look for it ${msgSuffix}`;
         toast.primaryAction = {
           title: "Show in Finder",
           onAction: async () => {
@@ -83,6 +85,10 @@ export default function Command() {
   );
 }
 
-function desktopdir(...paths: string[]) {
+function outputDir(...paths: string[]) {
+  const { outputDirectory } = getPreferenceValues<Preferences.ScreenshotFullPage>();
+  if (outputDirectory) {
+    return join(outputDirectory, ...paths);
+  }
   return join(homedir(), "Desktop", ...paths);
 }

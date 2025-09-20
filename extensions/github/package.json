@@ -11,7 +11,34 @@
     "tholanda",
     "tonka3000",
     "khasbilegt",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "loxygenk",
+    "oilbeater",
+    "LunaticMuch",
+    "aeorge",
+    "daquinoaldo",
+    "ppy",
+    "lin",
+    "marcotf",
+    "qeude",
+    "nesl247",
+    "xilopaint",
+    "antonengelhardt",
+    "johanthorell",
+    "dennis_zoma",
+    "litomore",
+    "dmitrii_mitrofanov",
+    "j3lte",
+    "stelo",
+    "vlasischar",
+    "javalangruntimeexception",
+    "shyaka",
+    "sushichan044",
+    "luarmr",
+    "nicolas-marien",
+    "iontea",
+    "ridemountainpig",
+    "kud"
   ],
   "categories": [
     "Developer Tools",
@@ -23,7 +50,50 @@
       "name": "my-pull-requests",
       "title": "My Pull Requests",
       "description": "List pull requests you created, participated in, or were mentioned in.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeAssigned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "title": "Categories to Display",
+          "description": "Includes pull request you were assigned to in the menu list."
+        },
+        {
+          "name": "includeMentioned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes pull request you were mentioned in the menu list."
+        },
+        {
+          "name": "includeReviewRequests",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Review Requests",
+          "description": "Includes pull request you were requested to review in the menu list."
+        },
+        {
+          "name": "includeReviewed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Reviewed",
+          "description": "Includes pull request you reviewed in the menu list."
+        },
+        {
+          "name": "includeRecentlyClosed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes pull request you recently closed in the menu list."
+        }
+      ]
     },
     {
       "name": "search-pull-requests",
@@ -38,16 +108,49 @@
       "mode": "view"
     },
     {
-      "name": "created-issues",
-      "title": "Created Issues",
-      "description": "List issues created by you.",
-      "mode": "view"
-    },
-    {
-      "name": "open-issues",
-      "title": "Open Issues",
-      "description": "List issues assigned to you or mentioning you.",
-      "mode": "view"
+      "name": "my-issues",
+      "title": "My Issues",
+      "description": "List issues created by you, assigned to you or mentioning you.",
+      "mode": "view",
+      "keywords": [
+        "open issues",
+        "created issues"
+      ],
+      "preferences": [
+        {
+          "name": "showCreated",
+          "description": "Show issues you created",
+          "type": "checkbox",
+          "required": false,
+          "label": "Created",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
+          "name": "showAssigned",
+          "description": "Show issues assigned to you",
+          "type": "checkbox",
+          "required": false,
+          "label": "Assigned",
+          "default": true
+        },
+        {
+          "name": "showMentioned",
+          "description": "Show issues where you are mentioned",
+          "type": "checkbox",
+          "required": false,
+          "label": "Mentioned",
+          "default": true
+        },
+        {
+          "name": "showRecentlyClosed",
+          "description": "Show recently closed issues",
+          "type": "checkbox",
+          "required": false,
+          "label": "Recently Closed",
+          "default": false
+        }
+      ]
     },
     {
       "name": "search-issues",
@@ -65,7 +168,8 @@
       "name": "create-branch",
       "title": "Create Branch",
       "description": "Create a branch in one of your GitHub repositories",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "search-repositories",
@@ -73,6 +177,15 @@
       "description": "Search in your public or private repositories by name.",
       "mode": "view",
       "preferences": [
+        {
+          "name": "application",
+          "type": "appPicker",
+          "required": false,
+          "title": "IDE Application",
+          "default": "/Applications/Visual Studio Code.app",
+          "placeholder": "/Applications/Visual Studio Code.app",
+          "description": "Will be used to open the cloned repository."
+        },
         {
           "name": "includeForks",
           "type": "checkbox",
@@ -101,6 +214,18 @@
       ]
     },
     {
+      "name": "my-latest-repositories",
+      "title": "My Latest Repositories",
+      "description": "List your repositories by latest updated",
+      "mode": "view"
+    },
+    {
+      "name": "my-starred-repositories",
+      "title": "My Starred Repositories",
+      "description": "List repositories you have starred",
+      "mode": "view"
+    },
+    {
       "name": "workflow-runs",
       "title": "Workflow Runs",
       "description": "Manage workflow runs for a selected GitHub repository.",
@@ -126,56 +251,655 @@
           "description": "Show the menu bar extra even when you don't have any unread notifications.",
           "default": true,
           "required": false
+        },
+        {
+          "type": "checkbox",
+          "label": "Show unread count",
+          "name": "showUnreadCount",
+          "description": "Show the unread count in the menu bar.",
+          "default": true,
+          "required": false
         }
       ]
+    },
+    {
+      "name": "search-discussions",
+      "title": "Search Discussions",
+      "description": "Search recent Discussions globally in all repositories",
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "my-discussions",
       "title": "My Discussions",
       "description": "Show your Discussions",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "my-projects",
+      "title": "My Projects",
+      "description": "Show your Projects",
       "mode": "view"
+    },
+    {
+      "name": "my-issues-menu",
+      "title": "My Issues Menu Bar",
+      "description": "Display My Issues in the Menu Bar",
+      "mode": "menu-bar",
+      "keywords": [
+        "open issues"
+      ],
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "showtext",
+          "description": "Show issues count with menu bar icon.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Count",
+          "title": "Appearance",
+          "default": true
+        },
+        {
+          "name": "useUnreadIndicator",
+          "description": "Show unread indicator for pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Unread Indicator",
+          "default": false
+        },
+        {
+          "name": "maxitems",
+          "description": "Maximum issues shown per category.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Issues per category",
+          "placeholder": "10"
+        },
+        {
+          "name": "showCreated",
+          "description": "Show issues you created",
+          "type": "checkbox",
+          "required": false,
+          "label": "Created",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
+          "name": "showAssigned",
+          "description": "Show issues assigned to you",
+          "type": "checkbox",
+          "required": false,
+          "label": "Assigned",
+          "default": true
+        },
+        {
+          "name": "showMentioned",
+          "description": "Show issues where you are mentioned",
+          "type": "checkbox",
+          "required": false,
+          "label": "Mentioned",
+          "default": true
+        },
+        {
+          "name": "showRecentlyClosed",
+          "description": "Show recently closed issues",
+          "type": "checkbox",
+          "required": false,
+          "label": "Recently Closed",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "my-pull-requests-menu",
+      "title": "My Pull Requests Menu Bar",
+      "description": "Display My Pull Requests in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "showtext",
+          "description": "Show pull requests count with menu bar icon.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show",
+          "title": "Icon Count",
+          "default": true
+        },
+        {
+          "name": "useUnreadIndicator",
+          "description": "Show unread indicator for pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Unread Indicator",
+          "default": false
+        },
+        {
+          "name": "includeAssigned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "title": "Categories to Display",
+          "description": "Includes pull request you were assigned to in the menu list."
+        },
+        {
+          "name": "includeMentioned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes pull request you were mentioned in the menu list."
+        },
+        {
+          "name": "includeReviewRequests",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Review Requests",
+          "description": "Includes pull request you were requested to review in the menu list."
+        },
+        {
+          "name": "includeReviewed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Reviewed",
+          "description": "Includes pull request you reviewed in the menu list."
+        },
+        {
+          "name": "includeRecentlyClosed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
+          "name": "maxitems",
+          "description": "Maximum pull requests shown per category.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Pull Requests per category",
+          "placeholder": "5"
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-notifications",
+      "title": "Get Notifications",
+      "description": "Get the list of notifications of current user"
+    },
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "description": "Search github issues"
+    },
+    {
+      "name": "search-pull-requests",
+      "title": "Search Pull Requests",
+      "description": "Search github pull requests"
+    },
+    {
+      "name": "search-repositories",
+      "title": "Search Repositories",
+      "description": "Search github repositories"
+    },
+    {
+      "name": "merge-pull-request",
+      "title": "Merge Pull Request",
+      "description": "Merge Pull Request"
+    },
+    {
+      "name": "close-pull-request",
+      "title": "Close Pull Request",
+      "description": "Close Pull Request"
+    },
+    {
+      "name": "reopen-pull-request",
+      "title": "Reopen Pull Request",
+      "description": "Reopen Pull Request"
+    },
+    {
+      "name": "close-issue",
+      "title": "Close Issue",
+      "description": "Close the issue with provided reason"
+    },
+    {
+      "name": "reopen-issue",
+      "title": "Reopen Issue",
+      "description": "Reopen Issue"
+    },
+    {
+      "name": "list-workflow-runs",
+      "title": "List Workflow Runs",
+      "description": "List Workflow Runs"
+    },
+    {
+      "name": "rerun-workflow-run",
+      "title": "Re-run Workflow",
+      "description": "Re-run Workflow"
+    },
+    {
+      "name": "cancel-workflow-run",
+      "title": "Cancel Workflow",
+      "description": "Cancel Workflow"
+    },
+    {
+      "name": "run-workflow",
+      "title": "Run Workflow",
+      "description": "Run Workflow"
+    }
+  ],
+  "ai": {
+    "instructions": "- Always format pull requests and issues as markdown links: [pull-request-title](https://github.com/:org/:repo/pull/:number) and [issue-title](https://github.com/:org/:repo/issues/:number).\\n- IMPORTANT: Use repo name from user input ONLY when it is in format `owner/repo`. Otherwise always search for repos using `search-repositories` tool as a first step and use the best match. When user ask for any action with issue, always use `search-issues` to get the actual `issueId`. When user ask for any action with pull request, always use `search-pull-requests` to get the actual `pullRequestId`",
+    "evals": [
+      {
+        "input": "@github what's in my inbox?",
+        "mocks": {
+          "get-notifications": []
+        },
+        "expected": [
+          {
+            "callsTool": "get-notifications"
+          }
+        ]
+      },
+      {
+        "input": "@github any open prs in extensions?",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:raycast/extensions"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/raycast/extensions",
+              "owner": {
+                "login": "raycast",
+                "avatarUrl": "https://avatars.githubusercontent.com/u/58117316?s=64&v=4"
+              },
+              "nameWithOwner": "raycast/extensions",
+              "name": "extensions",
+              "id": "R_kgDOGF6u2g"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Implement notifications",
+              "permalink": "https://github.com/raycast/extensions/pull/15602",
+              "id": "PR_kwDOGF6u2s6Dj4Lx",
+              "number": 15602
+            }
+          ]
+        }
+      },
+      {
+        "input": "@github close the eslint issue in frontend repo",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-issues",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/frontend"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "close-issue",
+              "arguments": {
+                "issueId": "ISS_kwDOGF6u2s6Dj4Lx"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/frontend",
+              "nameWithOwner": "org/frontend",
+              "name": "frontend",
+              "id": "R_kgDOGF6u2g"
+            }
+          ],
+          "search-issues": [
+            {
+              "title": "[Simple-Reminder] Figure out how to use eslint in the repo",
+              "permalink": "https://github.com/org/frontend/issues/15602",
+              "closed": false,
+              "id": "ISS_kwDOGF6u2s6Dj4Lx"
+            }
+          ],
+          "close-issue": {}
+        }
+      },
+      {
+        "input": "@github squash and merge release PR in macos repo",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/macos"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "merge-pull-request",
+              "arguments": {
+                "pullRequestId": "pr_123"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/macos",
+              "nameWithOwner": "org/macos",
+              "name": "macos",
+              "id": "REPO_123"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Release",
+              "id": "pr_123"
+            }
+          ],
+          "merge-pull-request": {}
+        }
+      },
+      {
+        "input": "@github what is the status of migration PR in auth repo?",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/auth"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/auth",
+              "nameWithOwner": "org/auth",
+              "name": "auth",
+              "id": "REPO_123"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Migration",
+              "id": "pr_123",
+              "status": "opened"
+            }
+          ]
+        }
+      },
+      {
+        "input": "@github show latest notifications",
+        "mocks": {
+          "get-notifications": []
+        },
+        "expected": [
+          {
+            "callsTool": "get-notifications"
+          }
+        ]
+      },
+      {
+        "input": "@github re-run linter workflow in raycast-frontend",
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/raycast/frontend",
+              "owner": {
+                "login": "raycast",
+                "avatarUrl": "https://avatars.githubusercontent.com/u/58117316?s=64&v=4"
+              },
+              "nameWithOwner": "raycast/frontend",
+              "name": "frontend",
+              "id": "R_kgDOGF6u2g"
+            }
+          ],
+          "list-workflow-runs": [
+            {
+              "id": 123,
+              "name": "linter",
+              "status": "failed"
+            },
+            {
+              "id": 124,
+              "name": "tests",
+              "status": "completed"
+            }
+          ],
+          "rerun-workflow-run": {
+            "status": "in_progress"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rerun-workflow-run",
+              "arguments": {
+                "owner": "raycast",
+                "repo": "frontend",
+                "runId": "123"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@github run release.yml in raycast-macos",
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/raycast/raycast-macos",
+              "owner": {
+                "login": "raycast"
+              },
+              "nameWithOwner": "raycast/raycast-macos",
+              "name": "raycast-macos",
+              "default_branch": "main"
+            }
+          ],
+          "run-workflow": {
+            "status": "in_progress"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-workflow",
+              "arguments": {
+                "owner": "raycast",
+                "repo": "raycast-macos",
+                "workflowId": "release.yml",
+                "ref": "main"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "personalAccessToken",
       "type": "password",
       "required": false,
       "title": "GitHub Token",
-      "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo project read:org read:user.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
+    },
+    {
+      "name": "defaultSearchTerms",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Search Terms",
+      "description": "Default search to be populated when searching issues, pull requests and discussions.",
+      "default": "author:@me"
+    },
+    {
+      "name": "numberOfResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of search results",
+      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "placeholder": "50"
+    },
+    {
+      "name": "baseClonePath",
+      "type": "directory",
+      "required": false,
+      "title": "Clone Path",
+      "description": "Path in which the repositories will be cloned. If not specified here, you will need to select directory within a form."
+    },
+    {
+      "name": "repositoryCloneProtocol",
+      "title": "Repository Clone Protocol",
+      "label": "Protocol for Cloning Repositories",
+      "description": "The protocol to use when cloning a repository.",
+      "type": "dropdown",
+      "required": false,
+      "default": "https",
+      "data": [
+        {
+          "title": "HTTPS",
+          "value": "https"
+        },
+        {
+          "title": "SSH",
+          "value": "ssh"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "title": "Actions",
+      "label": "Open PRs in browser by default",
+      "name": "isOpenInBrowser",
+      "description": "If checked, pull requests will be opened in the browser by default instead of viewing them within Raycast.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeTeamReviewRequests",
+      "type": "checkbox",
+      "required": false,
+      "title": "Advanced",
+      "default": true,
+      "label": "PRs include team review requests",
+      "description": "Include PRs where your team's review was requested as well as your own."
+    },
+    {
+      "name": "repositoryFilterMode",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "title": "Repository Filter Mode",
+      "description": "How to filter repositories",
+      "data": [
+        {
+          "title": "All Repositories",
+          "value": "all"
+        },
+        {
+          "title": "Include Only Listed Repositories",
+          "value": "include"
+        },
+        {
+          "title": "Exclude Listed Repositories",
+          "value": "exclude"
+        }
+      ]
+    },
+    {
+      "name": "repositoryList",
+      "type": "textfield",
+      "required": false,
+      "title": "Repository List",
+      "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
+      "placeholder": "owner/repo1, owner/repo2, owner/repo3"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.1",
-    "@raycast/utils": "^1.5.2",
-    "date-fns": "^2.29.3",
-    "graphql-request": "^5.1.0",
+    "@octokit/rest": "^21.0.1",
+    "@raycast/api": "^1.87.0",
+    "@raycast/utils": "^1.16.0",
+    "date-fns": "^3.6.0",
+    "graphql-request": "^6.1.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.1",
-    "octokit": "^2.0.14"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^3.2.2",
-    "@graphql-codegen/typescript": "^3.0.2",
-    "@graphql-codegen/typescript-graphql-request": "^4.5.9",
-    "@graphql-codegen/typescript-operations": "^3.0.2",
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/lodash": "^4.14.184",
-    "@types/node": "^18.15.11",
-    "concurrently": "^8.0.1",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.37.0",
-    "eslint-plugin-import": "^2.27.5",
-    "prettier": "^2.8.7",
-    "typescript": "^5.0.3"
+    "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/typescript": "^4.0.7",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
+    "@graphql-codegen/typescript-operations": "^4.2.1",
+    "@parcel/watcher": "^2.4.1",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "^22.1.0",
+    "@types/react": "^18.3.3",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "graphql": "^16.8.2",
+    "prettier": "^3.3.2",
+    "react": "^18.3.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "concurrently \"ray develop\" \"yarn generate --watch\"",
-    "format": "ray lint --fix",
+    "dev": "concurrently \"ray develop\" \"npm run generate -- --watch\"",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

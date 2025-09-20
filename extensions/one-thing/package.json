@@ -2,44 +2,122 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "one-thing",
   "title": "One Thing",
-  "description": "Put a single task or goal in your menu bar",
+  "description": "Put a thing in your Menu Bar.",
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
-  "contributors": ["mathieudutour"],
+  "contributors": [
+    "Ek217",
+    "mathieudutour",
+    "thomaslombart",
+    "CreazioN"
+  ],
+  "keywords": [
+    "menubar message",
+    "menubar",
+    "menu bar todo",
+    "menu bar"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "show-one-thing",
       "title": "One Thing",
-      "description": "Put a single task or goal in your menu bar",
+      "description": "Put a thing in your Menu Bar.",
       "mode": "menu-bar",
       "interval": "1m"
     },
     {
       "name": "set-one-thing",
       "title": "Set One Thing",
-      "description": "set a single task or goal to show in your menu bar",
+      "description": "Set a thing to display in your Menu Bar.",
       "mode": "view",
       "arguments": [
         {
           "type": "text",
-          "placeholder": "thing",
+          "placeholder": "Title",
           "name": "oneThing"
         }
       ]
+    },
+    {
+      "name": "remove-one-thing",
+      "title": "Remove One Thing",
+      "description": "Remove the thing displayed in your Menu Bar.",
+      "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "set-one-thing",
+      "title": "Set One Thing",
+      "description": "Set a thing to display in your Menu Bar."
+    },
+    {
+      "name": "remove-one-thing",
+      "title": "Remove One Thing",
+      "description": "Clear the thing displayed in your Menu Bar."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "mocks": {
+          "set-one-thing": "One thing set"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "text": {
+                  "includes": "biscuit!"
+                }
+              },
+              "name": "set-one-thing"
+            }
+          }
+        ],
+        "input": "@one-thing set text to Eat a biscuit!"
+      },
+      {
+        "input": "@one-thing remove",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "remove-one-thing",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "remove-one-thing": "One thing cleared"
+        }
+      },
+      {
+        "input": "@one-thing clear menu bar",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "remove-one-thing",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "remove-one-thing": "One thing cleared"
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.42.0"
+    "@raycast/api": "^1.79.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

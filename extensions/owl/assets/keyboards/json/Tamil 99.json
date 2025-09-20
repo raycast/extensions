@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "1",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "2",
+        "upper": "@"
+    },
+    "Digit3": {
+        "lower": "3",
+        "upper": "#"
+    },
+    "Digit4": {
+        "lower": "4",
+        "upper": "$"
+    },
+    "Digit5": {
+        "lower": "5",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "6",
+        "upper": "^"
+    },
+    "Digit7": {
+        "lower": "7",
+        "upper": "&"
+    },
+    "Digit8": {
+        "lower": "8",
+        "upper": "*"
+    },
+    "Digit9": {
+        "lower": "9",
+        "upper": "("
+    },
+    "Digit0": {
+        "lower": "0",
+        "upper": ")"
+    },
+    "Minus": {
+        "lower": "-",
+        "upper": "_"
+    },
+    "Equal": {
+        "lower": "=",
+        "upper": "+"
+    },
+    "KeyQ": {
+        "lower": "ஆ",
+        "upper": "ஸ"
+    },
+    "KeyW": {
+        "lower": "ஈ",
+        "upper": "ஷ"
+    },
+    "KeyE": {
+        "lower": "ஊ",
+        "upper": "ஜ"
+    },
+    "KeyR": {
+        "lower": "ஐ",
+        "upper": "ஹ"
+    },
+    "KeyT": {
+        "lower": "ஏ",
+        "upper": "X"
+    },
+    "KeyY": {
+        "lower": "ள",
+        "upper": "ஸ்ரீ"
+    },
+    "KeyU": {
+        "lower": "ற",
+        "upper": "ஶ"
+    },
+    "KeyI": {
+        "lower": "ன",
+        "upper": "ஈ"
+    },
+    "KeyO": {
+        "lower": "ட",
+        "upper": "["
+    },
+    "KeyP": {
+        "lower": "ண",
+        "upper": "]"
+    },
+    "BracketLeft": {
+        "lower": "ச",
+        "upper": "{"
+    },
+    "BracketRight": {
+        "lower": "ஞ",
+        "upper": "}"
+    },
+    "KeyA": {
+        "lower": "அ",
+        "upper": "௹"
+    },
+    "KeyS": {
+        "lower": "இ",
+        "upper": "௺"
+    },
+    "KeyD": {
+        "lower": "உ",
+        "upper": "௸"
+    },
+    "KeyF": {
+        "lower": "்",
+        "upper": "ஃ"
+    },
+    "KeyG": {
+        "lower": "எ",
+        "upper": ""
+    },
+    "KeyH": {
+        "lower": "க",
+        "upper": ""
+    },
+    "KeyJ": {
+        "lower": "ப",
+        "upper": ""
+    },
+    "KeyK": {
+        "lower": "ம",
+        "upper": "\""
+    },
+    "KeyL": {
+        "lower": "த",
+        "upper": ":"
+    },
+    "Semicolon": {
+        "lower": "ந",
+        "upper": ";"
+    },
+    "Quote": {
+        "lower": "ய",
+        "upper": "'"
+    },
+    "Backquote": {
+        "lower": "`",
+        "upper": "~"
+    },
+    "Backslash": {
+        "lower": "\\",
+        "upper": "|"
+    },
+    "KeyZ": {
+        "lower": "ஔ",
+        "upper": "௳"
+    },
+    "KeyX": {
+        "lower": "ஓ",
+        "upper": "௴"
+    },
+    "KeyC": {
+        "lower": "ஒ",
+        "upper": "௵"
+    },
+    "KeyV": {
+        "lower": "வ",
+        "upper": "௶"
+    },
+    "KeyB": {
+        "lower": "ங",
+        "upper": "௷"
+    },
+    "KeyN": {
+        "lower": "ல",
+        "upper": ""
+    },
+    "KeyM": {
+        "lower": "ர",
+        "upper": "/"
+    },
+    "Comma": {
+        "lower": ",",
+        "upper": "<"
+    },
+    "Period": {
+        "lower": ".",
+        "upper": ">"
+    },
+    "Slash": {
+        "lower": "ழ",
+        "upper": "?"
+    }
+}

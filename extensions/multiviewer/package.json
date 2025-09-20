@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "multiviewer",
+  "title": "Multi Viewer",
+  "description": "Controls your MultiViewer for F1 setup",
+  "icon": "multiviewer.png",
+  "author": "secustor",
+  "categories": [
+    "Applications",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-stop",
+      "title": "Start / Stop",
+      "description": "Toggle the play/pause for all players",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-players",
+      "title": "Manage Players",
+      "description": "Allows to interact with MultiViewer players",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "graphql-endpoint",
+      "title": "GraphQL URI",
+      "description": "URL to the API. Change this if you want to control the setup on another machine",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:10101/api/graphql"
+    }
+  ],
+  "dependencies": {
+    "@apollo/client": "^3.11.8",
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0",
+    "cross-fetch": "^4.0.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.3",
+    "@graphql-codegen/client-preset": "^4.4.0",
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "graphql": "^16.9.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "codegen": "graphql-codegen",
+    "codegen-watch": "graphql-codegen -w"
+  }
+}

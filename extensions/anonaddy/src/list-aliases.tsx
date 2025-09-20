@@ -2,119 +2,122 @@ import {
   Action,
   ActionPanel,
   Clipboard,
-  closeMainWindow,
-  confirmAlert,
+  Color,
   Icon,
   List,
+  Toast,
+  closeMainWindow,
+  confirmAlert,
   popToRoot,
   showHUD,
+  showToast,
+  useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
-import { useEffect, useState } from "react";
-import { deleteAlias } from "./utils/delete";
-import { aliasObject, listAllAliases } from "./utils/list";
-import { toggleAlias } from "./utils/toggle";
+import * as api from "./api";
+import EditAlias from "./edit-alias";
+import useAliases from "./useAliases";
 
-const ListAliases = () => {
-  const [loading, setLoading] = useState(true);
-  const [filteredList, filterList] = useState<aliasObject[]>([]);
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  const init = async () => {
-    const allAliases = await listAllAliases();
-
-    filterList(allAliases);
-    setLoading(false);
-  };
+const MyAliases = () => {
+  const { data: list = [], isLoading, revalidate } = useAliases();
+  const navigation = useNavigation();
 
   return (
-    <List searchBarPlaceholder="Search emails and descriptions..." isLoading={loading}>
-      {filteredList.map((alias) => {
+    <List isLoading={isLoading} searchBarPlaceholder="Search emails and descriptions...">
+      {list.map((alias) => {
         const description = alias.description || "";
-        const keywords = description.split(" ");
-        keywords.push(alias.email);
+        const keywords = [alias.email, ...description.split(" ")];
 
         return (
           <List.Item
             key={alias.id}
-            title={alias.email}
-            subtitle={description}
-            keywords={keywords}
             accessories={[
-              { tooltip: "Forwarded", text: `F: ${alias.emails_forwarded}` },
-              { tooltip: "Blocked", text: `B: ${alias.emails_blocked}` },
-              { tooltip: "Replied", text: `R: ${alias.emails_replied}` },
-              { tooltip: "Sent", text: `S: ${alias.emails_sent}` },
+              {
+                icon: Icon.Envelope,
+                text: `${alias.emails_forwarded} | ${alias.emails_blocked}`,
+                tooltip: "Forwarded | Blocked",
+              },
+              {
+                icon: Icon.TextInput,
+                text: `${alias.emails_replied} | ${alias.emails_sent}`,
+                tooltip: "Replied | Sent",
+              },
+              ...alias.recipients.map((recipient) => ({ tag: recipient.email })),
             ]}
-            icon={alias.active ? Icon.Envelope : Icon.LightBulbOff}
             actions={
               <ActionPanel>
                 <Action
-                  title="Copy to Clipboard"
-                  onAction={() => {
-                    Clipboard.copy(alias.email);
-                    closeMainWindow();
-                    showHUD("Alias copied");
-                  }}
                   icon={Icon.Clipboard}
+                  title="Copy to Clipboard"
+                  onAction={async () => {
+                    await Clipboard.copy(alias.email);
+                    await showHUD("Alias copied");
+                    await popToRoot();
+                  }}
                 />
-                {!alias.active ? (
-                  <Action
-                    title="Activate"
-                    onAction={async () => {
-                      const success = await toggleAlias(alias.id, true);
-
-                      if (success) {
-                        showHUD("✅ Alias activated");
-                      } else {
-                        showHUD("❌ Error activating alias");
-                      }
-                    }}
-                    icon={Icon.Checkmark}
-                  />
-                ) : (
-                  <Action
-                    title="Deactivate"
-                    onAction={async () => {
-                      const success = await toggleAlias(alias.id, false);
-
-                      if (success) {
-                        showHUD("✅ Alias deactivated");
-                        popToRoot();
-                      } else {
-                        showHUD("❌ Error deactivating alias");
-                      }
-                    }}
-                    icon={Icon.XMarkCircle}
-                  />
-                )}
                 <Action
-                  title="Delete Alias"
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  icon={alias.active ? Icon.XMarkCircle : Icon.CheckCircle}
+                  title={alias.active ? "Deactivate" : "Activate"}
+                  onAction={async () => {
+                    try {
+                      await api.alias.toggle(alias.id, !alias.active);
+
+                      await showHUD(`✅ Alias ${alias.active ? "deactivated" : "activated"}`);
+                      await closeMainWindow();
+                    } catch (error) {
+                      await showFailureToast(error, { title: "Error toggling alias" });
+                    }
+                  }}
+                />
+                <Action
+                  icon={Icon.Pencil}
+                  shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
+                  title="Edit"
+                  onAction={() => {
+                    navigation.push(<EditAlias id={alias.id} />);
+                  }}
+                />
+                <Action
                   icon={Icon.Trash}
+                  shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                  title="Delete Alias"
                   onAction={async () => {
                     const choice = await confirmAlert({
-                      title: "Delete alias?",
                       message: "You can restore the alias in the dashboard.",
+                      title: "Delete alias?",
                     });
 
                     if (choice) {
-                      const success = await deleteAlias(alias.id);
+                      const toast = await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Deleting alias...",
+                      });
 
-                      if (success) {
-                        showHUD("✅ Alias deleted");
-                        popToRoot();
-                      } else {
-                        showHUD("❌ Error deleting alias");
+                      try {
+                        await api.alias.remove(alias.id);
+
+                        toast.style = Toast.Style.Success;
+                        toast.title = "Alias deleted";
+
+                        revalidate();
+                      } catch (error) {
+                        toast.style = Toast.Style.Failure;
+                        toast.title = "Error deleting alias";
+                        toast.message = (error as Error).message;
                       }
                     }
                   }}
                 />
               </ActionPanel>
             }
+            icon={{
+              source: alias.active ? Icon.CircleProgress100 : Icon.Circle,
+              tintColor: alias.active ? Color.Green : Color.Red,
+            }}
+            keywords={keywords}
+            subtitle={description}
+            title={alias.email}
           />
         );
       })}
@@ -122,4 +125,4 @@ const ListAliases = () => {
   );
 };
 
-export default ListAliases;
+export default MyAliases;

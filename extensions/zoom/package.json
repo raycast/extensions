@@ -6,6 +6,10 @@
   "icon": "zoom.png",
   "author": "thomaslombart",
   "owner": "raycast",
+  "contributors": [
+    "Visual-Studio-Coder",
+    "samuelkraft"
+  ],
   "access": "public",
   "categories": [
     "Communication"
@@ -27,7 +31,7 @@
     {
       "name": "upcoming-meetings",
       "title": "Upcoming Meetings",
-      "description": "List of you upcoming Zoom meetings.",
+      "description": "List of your upcoming Zoom meetings.",
       "mode": "view"
     },
     {
@@ -53,9 +57,253 @@
       "interval": "15m"
     }
   ],
+  "tools": [
+    {
+      "name": "get-upcoming-meetings",
+      "title": "Get Upcoming Meetings",
+      "description": "Get your upcoming Zoom meetings"
+    },
+    {
+      "name": "create-meeting-link",
+      "title": "Create Meeting Link",
+      "description": "Create a Zoom meeting link"
+    },
+    {
+      "name": "schedule-meeting",
+      "title": "Schedule Meeting",
+      "description": "Schedule a Zoom meeting for a specific time"
+    },
+    {
+      "name": "delete-meeting",
+      "title": "Delete Meeting",
+      "description": "Delete a Zoom meeting"
+    },
+    {
+      "name": "join-meeting",
+      "title": "Join Meeting",
+      "description": "Join a Zoom meeting"
+    },
+    {
+      "name": "edit-meeting",
+      "title": "Edit Meeting",
+      "description": "Edit a Zoom meeting - like updating the time, day, topic, etc."
+    }
+  ],
+  "ai": {
+    "instructions": "- When referring to a meeting, always include a link to the meeting if possible.\n- When the user asks to block time, this means creating a scheduled meeting with a topic of 'Blocked'.",
+    "evals": [
+      {
+        "input": "@zoom When is my next meeting?",
+        "mocks": {
+          "get-upcoming-meetings": {
+            "meetings": [
+              {
+                "id": 78384199554,
+                "start_time": "2025-01-24T16:00:00Z",
+                "topic": "Zoom Meeting",
+                "duration": 140,
+                "type": 2,
+                "timezone": "Europe/Stockholm",
+                "join_url": "https://us04web.zoom.us/j/78384199554?pwd=Ju1aNaUPySRjmI1FnxBUcWXIvRIV8D.1"
+              }
+            ],
+            "next_page_token": "",
+            "total_records": 1,
+            "page_size": 30
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-upcoming-meetings"
+          },
+          {
+            "meetsCriteria": "Includes the details of the meeting and a link to join the meeting"
+          }
+        ]
+      },
+      {
+        "input": "@zoom Create a new meeting for lunch tomorrow",
+        "mocks": {
+          "schedule-meeting": {
+            "topic": "Lunch Meeting",
+            "duration": 60,
+            "id": 73198224411,
+            "timezone": "Europe/Stockholm",
+            "start_time": "2025-01-24T11:00:00Z",
+            "join_url": "https://us04web.zoom.us/j/73198224411?pwd=LJeR0yJattBQaaksLnblNxLP5BusPF.1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "schedule-meeting"
+          },
+          {
+            "meetsCriteria": "Includes the details of the scheduled meeting and a link to join the meeting"
+          }
+        ]
+      },
+      {
+        "input": "@zoom Start an instant meeting",
+        "mocks": {
+          "create-meeting-link": {
+            "id": 72215732889,
+            "join_url": "https://us04web.zoom.us/j/72215732889?pwd=70kiuo2QYYIjj6aJSO03eCpzGSxu9o.1",
+            "topic": "Zoom Meeting",
+            "timezone": "Europe/Stockholm"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-meeting-link"
+          },
+          {
+            "meetsCriteria": "Includes a link to join the meeting"
+          },
+          {
+            "includes": "https://us04web.zoom.us/j/72215732889?pwd=70kiuo2QYYIjj6aJSO03eCpzGSxu9o.1"
+          }
+        ]
+      },
+      {
+        "input": "@zoom What's my schedule for today?",
+        "mocks": {
+          "get-upcoming-meetings": {
+            "meetings": [
+              {
+                "id": 78384199554,
+                "start_time": "2025-01-24T16:00:00Z",
+                "topic": "Zoom Meeting",
+                "duration": 140,
+                "type": 2,
+                "timezone": "Europe/Stockholm",
+                "join_url": "https://us04web.zoom.us/j/78384199554?pwd=Ju1aNaUPySRjmI1FnxBUcWXIvRIV8D.1"
+              }
+            ],
+            "next_page_token": "",
+            "total_records": 1,
+            "page_size": 30
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-upcoming-meetings"
+          },
+          {
+            "meetsCriteria": "Includes the details of the meeting and a link to join the meeting"
+          }
+        ]
+      },
+      {
+        "input": "@zoom Create a new event for tomorrow 3pm",
+        "mocks": {
+          "schedule-meeting": {
+            "topic": "Afternoon Meeting",
+            "duration": 60,
+            "id": 73198224411,
+            "timezone": "Europe/Stockholm",
+            "start_time": "2025-01-24T15:00:00Z",
+            "join_url": "https://us04web.zoom.us/j/73198224411?pwd=LJeR0yJattBQaaksLnblNxLP5BusPF.1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "schedule-meeting"
+          },
+          {
+            "meetsCriteria": "Includes the details of the scheduled meeting and a link to join the meeting"
+          }
+        ]
+      },
+      {
+        "input": "@zoom Block today from 4pm",
+        "mocks": {
+          "schedule-meeting": {
+            "topic": "Blocked",
+            "duration": 60,
+            "id": 73198224411,
+            "timezone": "Europe/Stockholm",
+            "start_time": "2025-01-24T16:00:00Z",
+            "join_url": "https://us04web.zoom.us/j/73198224411?pwd=LJeR0yJattBQaaksLnblNxLP5BusPF.1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "schedule-meeting"
+          },
+          {
+            "meetsCriteria": "Includes the details of the scheduled meeting and a link to join the meeting"
+          }
+        ]
+      },
+      {
+        "input": "@zoom When is my meeting with my team this week?",
+        "mocks": {
+          "get-upcoming-meetings": {
+            "meetings": [
+              {
+                "id": 78384199554,
+                "start_time": "2025-01-24T16:00:00Z",
+                "topic": "Team Meeting",
+                "duration": 140,
+                "type": 2,
+                "timezone": "Europe/Stockholm",
+                "join_url": "https://us04web.zoom.us/j/78384199554?pwd=Ju1aNaUPySRjmI1FnxBUcWXIvRIV8D.1"
+              }
+            ],
+            "next_page_token": "",
+            "total_records": 1,
+            "page_size": 30
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-upcoming-meetings"
+          },
+          {
+            "meetsCriteria": "Includes the details of the meeting and a link to join the meeting"
+          }
+        ]
+      },
+      {
+        "input": "@zoom Move my next meeting to next week",
+        "mocks": {
+          "get-upcoming-meetings": {
+            "meetings": [
+              {
+                "id": 78384199554,
+                "start_time": "2025-01-24T16:00:00Z",
+                "topic": "Zoom Meeting",
+                "duration": 140,
+                "type": 2,
+                "timezone": "Europe/Stockholm",
+                "join_url": "https://us04web.zoom.us/j/78384199554?pwd=Ju1aNaUPySRjmI1FnxBUcWXIvRIV8D.1"
+              }
+            ],
+            "next_page_token": "",
+            "total_records": 1,
+            "page_size": 30
+          },
+          "edit-meeting": "Successfully called \"edit-meeting\""
+        },
+        "expected": [
+          {
+            "callsTool": "get-upcoming-meetings"
+          },
+          {
+            "callsTool": {
+              "name": "edit-meeting",
+              "arguments": {
+                "meetingId": "78384199554"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.1",
+    "@raycast/api": "^1.53.3",
+    "@raycast/utils": "^1.18.1",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.8"
@@ -72,6 +320,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

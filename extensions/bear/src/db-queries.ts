@@ -31,6 +31,8 @@ WHERE
   )
 GROUP BY
   notes.ZUNIQUEIDENTIFIER
+HAVING
+  (:tag IS NULL OR group_concat('#' || tags.ZTITLE || '#') LIKE '%#' || :tag || '#%')
 ORDER BY
   -- Sort title matches ahead of body matches
   CASE WHEN (
@@ -51,7 +53,8 @@ SELECT
   notes.ZMODIFICATIONDATE AS modified_at,
   notes.ZCREATIONDATE AS created_at,
   group_concat(tags.ZTITLE) AS tags,
-  notes.ZENCRYPTED AS encrypted
+  notes.ZENCRYPTED AS encrypted,
+  notes.ZPINNED AS pinned
 FROM
   ZSFNOTE AS notes
 LEFT OUTER JOIN
@@ -76,6 +79,8 @@ WHERE
   )
 GROUP BY
   notes.ZUNIQUEIDENTIFIER
+HAVING
+  (:tag IS NULL OR group_concat('#' || tags.ZTITLE || '#') LIKE '%#' || :tag || '#%')
 ORDER BY
   -- Sort title matches ahead of body matches
   CASE WHEN (
@@ -192,3 +197,26 @@ LIMIT 400
 `;
 
 export const TABLE_EXISTS = `SELECT name FROM sqlite_master WHERE type='table' AND name=:name`;
+
+export const ALL_TAGS_V1 = `
+SELECT DISTINCT 
+  tags.ZTITLE AS tags 
+FROM
+  ZSFNOTE AS notes
+  LEFT OUTER JOIN Z_7TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_7NOTES
+  LEFT OUTER JOIN ZSFNOTETAG AS tags ON notes_to_tags.Z_14TAGS = tags.Z_PK 
+-- Ignore tags for trashed and archived notes
+WHERE notes.ZARCHIVED = 0 AND notes.ZTRASHED = 0
+ORDER BY tags.ZTITLE ASC
+`;
+export const ALL_TAGS_V2 = `
+SELECT DISTINCT 
+  tags.ZTITLE AS tags 
+FROM
+  ZSFNOTE AS notes
+  LEFT OUTER JOIN Z_5TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_5NOTES
+  LEFT OUTER JOIN ZSFNOTETAG AS tags ON notes_to_tags.Z_13TAGS = tags.Z_PK 
+-- Ignore tags for trashed and archived notes
+WHERE notes.ZARCHIVED = 0 AND notes.ZTRASHED = 0
+ORDER BY tags.ZTITLE ASC
+`;

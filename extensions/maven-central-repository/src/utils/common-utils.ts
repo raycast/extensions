@@ -4,11 +4,6 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-export const buildUpdatedDate = (timeStamp: number) => {
-  const time = new Date(timeStamp).toDateString().substring(4).replaceAll(" ", "-");
-  return time.substring(4, 6) + "-" + time.substring(0, 3) + "-" + time.substring(7);
-};
-
 export enum DependencyType {
   APACHE_MAVEN = "Apache Maven",
   GRADLE_GROOVY_DSL = "Gradle Groovy DSL",

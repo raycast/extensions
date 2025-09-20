@@ -1,18 +1,20 @@
-import { Action, ActionPanel, Icon, List, Grid } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Grid, List } from "@raycast/api";
 import { useState } from "react";
-import WikipediaPage from "./components/wikipedia-page";
-import { findPagesByTitle, getPageData } from "./utils/api";
-import { toSentenceCase } from "./utils/formatting";
+
+import { PageItem } from "./components/page-item";
+import useFindPagesByTitle from "./hooks/useFindPagesByTitle";
 import { languages, Locale, useLanguage } from "./utils/language";
-import { openInBrowser, prefersListView } from "./utils/preferences";
+import { prefersListView } from "./utils/preferences";
+import { useRecentArticles } from "./utils/recents";
 
 const View = prefersListView ? List : Grid;
 
 export default function SearchPage(props: { arguments: { title: string } }) {
   const [language, setLanguage] = useLanguage();
   const [search, setSearch] = useState(props.arguments.title);
-  const { data, isLoading } = useCachedPromise(findPagesByTitle, [search, language]);
+  const { readArticles } = useRecentArticles();
+
+  const { data, isLoading } = useFindPagesByTitle(search, language);
 
   return (
     <View
@@ -24,6 +26,15 @@ export default function SearchPage(props: { arguments: { title: string } }) {
       searchText={search}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search pages by name..."
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            title="Search in Browser"
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            url={`https://${language}.wikipedia.org/w/index.php?fulltext=1&profile=advanced&search=${search}&title=Special%3ASearch&ns0=1`}
+          />
+        </ActionPanel>
+      }
       searchBarAccessory={
         <View.Dropdown tooltip="Language" value={language} onChange={(value) => setLanguage(value as Locale)}>
           {languages.map((language) => (
@@ -37,54 +48,21 @@ export default function SearchPage(props: { arguments: { title: string } }) {
         </View.Dropdown>
       }
     >
-      {data?.language === language &&
-        data?.results.map((title: string) => <PageItem key={title} title={title} language={language} />)}
+      {search ? (
+        data?.language === language && (
+          <View.Section title="Results">
+            {data?.results.map((res) => (
+              <PageItem key={res.pageid} search={search} title={res.title} language={language} />
+            ))}
+          </View.Section>
+        )
+      ) : (
+        <View.Section title="Recent Articles">
+          {readArticles.map((title) => (
+            <PageItem key={title} search={search} title={title} language={language} />
+          ))}
+        </View.Section>
+      )}
     </View>
-  );
-}
-
-function PageItem({ title, language }: { title: string; language: string }) {
-  const { data: page } = useCachedPromise(getPageData, [title, language]);
-
-  return (
-    <View.Item
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      content={{ source: page?.thumbnail?.source || Icon.Image }}
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      icon={{ source: page?.thumbnail?.source || "../assets/wikipedia.png" }}
-      id={title}
-      title={title}
-      subtitle={page?.description ? toSentenceCase(page.description) : ""}
-      actions={
-        <ActionPanel>
-          {openInBrowser ? (
-            <>
-              <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
-              <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
-            </>
-          ) : (
-            <>
-              <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
-              <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
-            </>
-          )}
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-              title="Copy URL"
-              content={page?.content_urls.desktop.page || ""}
-            />
-            <Action.CopyToClipboard shortcut={{ modifiers: ["cmd"], key: "," }} title="Copy Title" content={title} />
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-              title="Copy Subtitle"
-              content={page?.description ?? ""}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
   );
 }

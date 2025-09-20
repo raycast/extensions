@@ -1,23 +1,31 @@
 import { dirname, basename } from "path";
-import { fileURLToPath } from "url";
 import tildify from "tildify";
+import { Workspace, ZedWorkspaceType } from "./workspaces";
 
 export interface Entry {
-  uri: string;
+  id: number;
   path: string;
+  uri: string;
   title: string;
   subtitle: string;
+  type: ZedWorkspaceType;
 }
 
-export function getEntry(uri: string): Entry {
-  const path = fileURLToPath(uri);
-  const title = decodeURIComponent(basename(uri));
-  const subtitle = tildify(dirname(path));
+export function getEntry(workspace: Workspace): Entry | null {
+  try {
+    const title = decodeURIComponent(basename(workspace.path)) || workspace.path;
+    const subtitle =
+      tildify(dirname(workspace.path)) + (workspace.type === "remote" ? " [SSH: " + workspace.host + "]" : "");
 
-  return {
-    uri,
-    path,
-    title,
-    subtitle,
-  };
+    return {
+      id: workspace.id,
+      type: workspace.type,
+      path: workspace.path,
+      uri: workspace.uri,
+      title,
+      subtitle,
+    };
+  } catch {
+    return null;
+  }
 }

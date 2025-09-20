@@ -49,7 +49,10 @@ Raycast extension to browsing and searching on [Crossbell](https://crossbell.io/
 - View character and note details
 - View IPFS file content
 - Quickly open in browser
+- Upload files from clipboard or finder to IPFS
 
 ### Screencast
 
 https://user-images.githubusercontent.com/22665058/192088735-3322144d-a341-463b-9847-963c9ac3017b.mp4
+
+https://github.com/hyoban/crossbell/assets/38493346/ccf7b058-bcae-415d-b18b-65a161d66aa4

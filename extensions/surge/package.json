@@ -4,13 +4,45 @@
   "title": "Surge",
   "description": "Switch outbound mode, change proxy tunnel and other Surge settings from Raycast.",
   "icon": "AppIcon.png",
-  "author": "ysj151215",
+  "type": "module",
+  "author": "litomore",
+  "platforms": [
+    "macOS"
+  ],
+  "contributors": [
+    "Hopsken",
+    "CaffeineCat"
+  ],
+  "pastContributors": [
+    "ysj151215"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Surge",
       "description": "Switch outbound mode, change proxy tunnel and other Surge settings from Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-proxy",
+      "title": "Toggle Proxy",
+      "subtitle": "Surge",
+      "description": "Toggle Surge \"Set as System Proxy\" setting",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-mode",
+      "title": "Switch Mode",
+      "subtitle": "Surge",
+      "description": "Switch outbound mode",
+      "mode": "view"
+    },
+    {
+      "name": "switch-proxy",
+      "title": "Switch Proxy",
+      "subtitle": "Surge",
+      "description": "Switch between proxy",
       "mode": "view"
     }
   ],
@@ -30,21 +62,44 @@
       "placeholder": "6171",
       "type": "textfield",
       "required": true
+    },
+    {
+      "name": "host",
+      "title": "Host",
+      "description": "The IP address of the machine running Surge.",
+      "placeholder": "127.0.0.1",
+      "type": "textfield",
+      "default": "127.0.0.1",
+      "required": true
+    },
+    {
+      "name": "tls_enabled",
+      "title": "Is TLS enabled?",
+      "description": "Is using http over tls?",
+      "label": "Enabled",
+      "type": "checkbox",
+      "default": true,
+      "required": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.2",
-    "axios": "^0.24.0"
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "axios": "^1.11.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.21.0"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.3.0",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "swift-evolution",
   "title": "Swift Evolution",
-  "description": "Search and see details for the Swift langauge proposals from swift evolution web page https://apple.github.io/swift-evolution/",
+  "description": "Search and see details for the Swift language proposals from swift evolution web page https://apple.github.io/swift-evolution/",
   "icon": "swift.png",
   "author": "BProg",
+  "contributors": [
+    "dehesa",
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools",
@@ -15,26 +19,30 @@
       "name": "index",
       "title": "Search Proposals",
       "subtitle": "Swift Evolution",
-      "description": "Search and see details for the Swift langauge proposals from swift evolution web page https://apple.github.io/swift-evolution/",
+      "description": "Search and see details for the Swift language proposals from swift evolution web page https://apple.github.io/swift-evolution/",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
+    "@raycast/api": "^1.74.0",
+    "@raycast/utils": "^1.10.1",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "react": "^18.2.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

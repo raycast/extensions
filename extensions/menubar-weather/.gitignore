@@ -3,5 +3,14 @@
 # dependencies
 /node_modules
 
+# Raycast specific files
+.raycast-swift-build
+raycast-env.d.ts
+compiled_raycast_swift
+
+# IDEs
+.vscode
+
 # misc
 .DS_Store
+.swiftpm

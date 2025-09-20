@@ -1,16 +1,20 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  getPreferenceValues,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { setInterval } from "timers";
 import { fetch } from "undici";
 import { Machine } from "./machine";
-import { Preferences } from "./preferences";
 import Style = Toast.Style;
 
 export function usePaperspace<RESPONSE = unknown>(
   method: "GET" | "POST",
   apiUrl: string
 ) {
-  const { paperspaceApiKey } = getPreferenceValues<Preferences>();
+  const { paperspaceApiKey } = getPreferenceValues<Preferences.Index>();
 
   return useFetch<RESPONSE>(`https://api.paperspace.io${apiUrl}`, {
     execute: !!paperspaceApiKey,
@@ -24,6 +28,10 @@ export function usePaperspace<RESPONSE = unknown>(
           style: Style.Failure,
           title: "Could not connect to Paperspace",
           message: "Please check your API key in the extension's preferences.",
+          primaryAction: {
+            title: "Open Extension Preferences",
+            onAction: openExtensionPreferences,
+          },
         }).then();
       }
     },
@@ -31,7 +39,7 @@ export function usePaperspace<RESPONSE = unknown>(
 }
 
 function fetchPaperspace(method: "GET" | "POST", apiUrl: string) {
-  const { paperspaceApiKey } = getPreferenceValues<Preferences>();
+  const { paperspaceApiKey } = getPreferenceValues<Preferences.Index>();
   return fetch(`https://api.paperspace.io${apiUrl}`, {
     method,
     headers: {

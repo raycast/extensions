@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "runcloud",
+  "title": "RunCloud",
+  "description": "Search Your RunCloud Servers + Webapps",
+  "icon": "icon.png",
+  "author": "itsjustxan",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "servers",
+      "title": "Search Servers",
+      "subtitle": "RunCloud",
+      "description": "View and search through index of all of your RunCloud Servers",
+      "mode": "view"
+    },
+    {
+      "name": "webapps",
+      "title": "Search Webapps",
+      "subtitle": "RunCloud",
+      "description": "View an index of all of your RunCloud Webapps",
+      "mode": "view"
+    },
+    {
+      "name": "cacheWebapps",
+      "title": "Rebuild Webapps Cache",
+      "subtitle": "RunCloud",
+      "description": "Cache the list of webapps to greatly improve the performance of the webapps command",
+      "mode": "no-view",
+      "interval": "60s"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "Your RunCloud API Key, copied from https://manage.runcloud.io/settings/apikey",
+      "type": "textfield",
+      "required": true,
+      "defaultValue": ""
+    },
+    {
+      "title": "API Seret",
+      "name": "apiSecret",
+      "description": "Your RunCloud API Secret, copied from https://manage.runcloud.io/settings/apikey",
+      "type": "textfield",
+      "required": true,
+      "defaultValue": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.0",
+    "@raycast/utils": "^1.4.8",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/lodash": "^4.14.196",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "lodash": "^4.17.21",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

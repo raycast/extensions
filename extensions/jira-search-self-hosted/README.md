@@ -26,7 +26,7 @@ search extension built by sven to work with JIRA server instances.
 
 ## Setup
 
-To connect the extension to your Jira instance you need to fill the following prefernces:
+To connect the extension to your Jira instance you need to fill the following preferences:
 
 - **Jira Domain:** The domain of your Jira instance like `mycompany.atlassian.net` or with a base URL like `mycompany.atlassian.net/baseUrl/jira`.
 - **Personal Access Token:** A personal access token created as described in [Using Personal Access Tokens](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html).

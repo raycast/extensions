@@ -4,10 +4,24 @@
   "title": "Pomodoro",
   "description": "Pomodoro extension with menu-bar timer",
   "icon": "icon.png",
+  "crossExtensions": [
+    "yakitrak/do-not-disturb"
+  ],
   "author": "asubbotin",
   "contributors": [
     "pernielsentikaer",
-    "brodelp"
+    "brodelp",
+    "susan_thapa",
+    "mikikiv",
+    "MartinGonzalez",
+    "nathanjms",
+    "cchalop1",
+    "hayden_barnes",
+    "j3lte",
+    "litomore",
+    "ridemountainpig",
+    "meganpearson",
+    "alastair_scheuermann"
   ],
   "keywords": [
     "pomodoro",
@@ -32,9 +46,217 @@
       "subtitle": "Start / Stop Pomodoro Timer",
       "description": "Start, pause, stop or continue pomodoro intervals",
       "mode": "view"
+    },
+    {
+      "name": "stats-pomodoro-timer",
+      "title": "View Pomodoro Stats",
+      "mode": "view",
+      "description": "Shows the stats of the Pomodoro timer",
+      "preferences": [
+        {
+          "name": "showWeeklyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Weekly Stats",
+          "label": "Show weekly stats",
+          "description": "Shows the weekly stats of the Pomodoro timer",
+          "default": false
+        },
+        {
+          "name": "showDailyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Daily Stats",
+          "label": "Show Daily stats",
+          "description": "Shows the daily stats of the Pomodoro timer",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "slack-pomodoro-menu-bar",
+      "title": "Slack Pomodoro in Menu Bar",
+      "subtitle": "Control timers from menu-bar and updates Slack status",
+      "description": "Start, pause, stop or continue pomodoro intervals and update Slack status",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "disabledByDefault": true
+    },
+    {
+      "name": "slack-pomodoro-control-timer",
+      "title": "Slack Control Pomodoro Timer",
+      "subtitle": "Start / Stop Pomodoro Timer and update Slack status",
+      "description": "Start, pause, stop or continue pomodoro intervals and update Slack status",
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
+  "tools": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Starts a new timer"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Stops any running timer"
+    },
+    {
+      "name": "pause-timer",
+      "title": "Pause Timer",
+      "description": "Pauses the pomodoro timer"
+    },
+    {
+      "name": "continue-timer",
+      "title": "Continue Timer",
+      "description": "Continues the paused pomodoro timer"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@pomodoro start a long timer",
+        "mocks": {
+          "start-timer": "Started long-break timer"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "type": "long-break"
+              },
+              "name": "start-timer"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@pomodoro start a focus timer",
+        "mocks": {
+          "start-timer": "Started focus timer"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "type": "focus"
+              },
+              "name": "start-timer"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@pomodoro start a break",
+        "mocks": {
+          "start-timer": "Started short-break timer"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "type": "short-break"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "stop-timer"
+            }
+          }
+        ],
+        "input": "@pomodoro stop timer",
+        "mocks": {
+          "stop-timer": "Timer stopped"
+        }
+      },
+      {
+        "mocks": {
+          "pause-timer": "Timer paused"
+        },
+        "input": "@pomodoro pause break",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "pause-timer"
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "continue-timer": "Timer continued"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "continue-timer"
+            }
+          }
+        ],
+        "input": "@pomodoro continue the timer"
+      },
+      {
+        "input": "@pomodoro start a 4min 30 sec timer",
+        "mocks": {
+          "start-timer": {
+            "id": 17,
+            "length": 270,
+            "parts": [
+              {
+                "startedAt": 1737715952
+              }
+            ],
+            "type": "short-break"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": {
+                "duration": 270,
+                "type": "short-break"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
+    {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
+    },
+    {
+      "name": "hideTimeWhenStopped",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Time When Stopped",
+      "description": "Hide time on the Menu Bar when the timer is stopped",
+      "default": true,
+      "label": "Hide the time when stopped"
+    },
+    {
+      "name": "enableFocusWhileFocused",
+      "title": "Enable Mac Do Not Disturb while Focused",
+      "type": "checkbox",
+      "label": "Do Not Disturb while focused",
+      "required": false,
+      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+    },
     {
       "name": "focusIntervalDuration",
       "type": "dropdown",
@@ -238,12 +460,60 @@
       ]
     },
     {
-      "name": "completionImage",
-      "type": "textfield",
+      "name": "longBreakStartThreshold",
+      "type": "dropdown",
       "required": false,
-      "title": "Image Markdown Link",
-      "description": "Image on interval completion, URL",
-      "default": "![The Best Thank You GIF by SWR3](https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif)"
+      "title": "Long Break Start Threshold",
+      "description": "Pomodoro cycles after which you want to take a long break",
+      "default": "4",
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "enableConfetti",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Confetti (Deprecated)",
+      "description": "Shows confetti when interval finishes",
+      "default": false,
+      "label": "Shows confetti when interval finishes"
+    },
+    {
+      "name": "enableQuote",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Quote",
+      "description": "Shows a random quote from zenquotes.io when interval finishes",
+      "default": false,
+      "label": "Shows quote when interval finishes"
     },
     {
       "name": "sound",
@@ -270,18 +540,80 @@
           "value": "Ping"
         }
       ]
+    },
+    {
+      "name": "enableImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Image",
+      "description": "Shows the image configured below when interval finishes",
+      "default": true,
+      "label": "Shows image when interval finishes"
+    },
+    {
+      "name": "completionImage",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Image Link",
+      "description": "Image on interval completion, URL",
+      "default": "https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif"
+    },
+    {
+      "name": "giphyAPIKey",
+      "type": "textfield",
+      "required": false,
+      "title": "Giphy API Key",
+      "description": "Use an API key from Giphy to get random images on interval completion. Get your API key here: https://developers.giphy.com/docs/api#quick-start-guide"
+    },
+    {
+      "name": "giphyTag",
+      "type": "textfield",
+      "required": false,
+      "title": "Giphy Tag",
+      "description": "Tag to use for Giphy API. Default is 'success'.",
+      "default": "success"
+    },
+    {
+      "name": "giphyRating",
+      "type": "dropdown",
+      "required": false,
+      "title": "Giphy Rating",
+      "description": "Rating to use for Giphy API. Default is 'g'.",
+      "default": "g",
+      "data": [
+        {
+          "value": "g",
+          "title": "G"
+        },
+        {
+          "value": "pg",
+          "title": "PG"
+        },
+        {
+          "value": "pg-13",
+          "title": "PG-13"
+        },
+        {
+          "value": "r",
+          "title": "R"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8"
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.1",
+    "react": "^18.3.1",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

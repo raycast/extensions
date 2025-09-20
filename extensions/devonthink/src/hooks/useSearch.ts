@@ -10,7 +10,7 @@ type State = {
   results: SearchResult[];
 };
 
-const useSearch = ({ appExists }: UseAppExists, query: string, databaseUUID: string) => {
+const useSearch = ({ appExists, appName }: UseAppExists, query: string, databaseUUID: string) => {
   const [state, setState] = useState<State>({ isLoading: true, results: [] });
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const useSearch = ({ appExists }: UseAppExists, query: string, databaseUUID: str
 
     Promise.resolve()
       .then(() => setState((prev) => ({ ...prev, isLoading: true })))
-      .then(() => searchInDEVONThink(databaseUUID, query))
+      .then(() => searchInDEVONThink(appName, databaseUUID, query))
       .then((results) => setState((prev) => ({ ...prev, results })))
       .catch(handleError)
       .finally(() => setState((prev) => ({ ...prev, isLoading: false })));
@@ -32,10 +32,10 @@ const useSearch = ({ appExists }: UseAppExists, query: string, databaseUUID: str
 
 export default useSearch;
 
-const searchInDEVONThink = async (databaseUUID: string, query: string) => {
+const searchInDEVONThink = async (appName: string, databaseUUID: string, query: string) => {
   // language=JavaScript
   const resultsString = (await jxa({ parse: true })`
-      const DT = Application("DEVONthink 3");
+      const DT = Application("${appName}");
 
       let results;
 
@@ -51,7 +51,7 @@ const searchInDEVONThink = async (databaseUUID: string, query: string) => {
           return "[]";
       }
 
-      return JSON.stringify(results.map(result => result.properties()));
+      return JSON.stringify(results.slice(0, 20).map(result => result.properties()));
   `) as string;
 
   const results = JSON.parse(resultsString) as SearchResult[];

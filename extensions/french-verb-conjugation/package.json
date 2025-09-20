@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "french-verb-conjugation",
+  "title": "French Verb Conjugation",
+  "description": "Quickly conjugate french verbs on the fly",
+  "icon": "french-conjugation.png",
+  "author": "Joellee",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Conjugate",
+      "description": "Quickly conjugate french verbs",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "verb",
+          "placeholder": "aller",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.0",
+    "conjugation-fr": "^0.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

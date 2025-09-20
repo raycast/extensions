@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timezone-buddy",
+  "title": "Timezone Buddy",
+  "description": "Show friends in other timezones",
+  "icon": "icon.png",
+  "author": "andrebreia",
+  "contributors": [
+    "jelias"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "timezone-buddy",
+      "title": "Timezone Buddy",
+      "description": "View buddies and the time for their timezones.",
+      "mode": "view"
+    },
+    {
+      "name": "timezone-buddy-menubar",
+      "title": "Timezone Buddy Menu Bar",
+      "description": "See your buddies at a glance",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,173 @@
+---
+title: Legacy filters
+shortDescription: Legacy version of the Filters component. Used to filter the items of a list or table.
+category: Deprecated
+keywords:
+  - filters
+  - filtering
+  - filter control
+  - resource list
+  - index
+  - list filter
+  - table
+status: Deprecated
+examples:
+  - fileName: legacy-filters-with-a-resource-list.tsx
+    title: With a resource list
+  - fileName: legacy-filters-with-a-data-table.tsx
+    title: With a data table
+  - fileName: legacy-filters-with-children-content.tsx
+    title: With children content
+  - fileName: legacy-filters-disabled.tsx
+    title: Disabled
+  - fileName: legacy-filters-some-disabled.tsx
+    title: Some disabled
+  - fileName: legacy-filters-without-clear-button.tsx
+    title: Without clear button
+  - fileName: legacy-filters-with-help-text.tsx
+    title: With help text
+  - fileName: legacy-filters-with-query-field-hidden.tsx
+    title: With query field hidden
+  - fileName: legacy-filters-with-query-field-disabled.tsx
+    title: With query field disabled
+previewImg: /images/components/deprecated/legacy-filters.png
+---
+
+# {frontmatter.title}
+
+<Lede>
+
+This is a legacy version of the Filters component, which is a composite component that filters the items of a list or table.
+
+</Lede>
+
+<StatusBanner status={frontmatter.status}>
+  This component is no longer supported. The new [Filters
+  component](/components/selection-and-input/filters) can be used as a
+  standalone component, but is used primarily within the
+  [IndexFilters](/components/selection-and-input/index-filters) for sorting and
+  filtering IndexTables.
+</StatusBanner>
+
+<Examples />
+
+<Props componentName={frontmatter.title} />
+
+Merchants use filters to:
+
+- view different subsets of items in a list or table
+- filter by typing into a text field
+- filter by selecting filters or promoted filters
+
+The way that merchants interact with filters depends on the components that you decide to incorporate. In its simplest form, filters includes a text field and a set of filters, which can be displayed in different ways. For example, you could show promoted filters and a More button that opens a [sheet](https://polaris.shopify.com/components/deprecated/sheet) containing more filters. What the filters are and how they’re exposed to merchants is flexible.
+
+---
+
+## Accessibility
+
+The filters component relies on the accessibility features of multiple other components:
+
+- [Text field](https://polaris.shopify.com/components/selection-and-input/text-field)
+- [Button](https://polaris.shopify.com/components/actions/button)
+- [Popover](https://polaris.shopify.com/components/overlays/popover)
+- [Sheet](https://polaris.shopify.com/components/deprecated/sheet)
+- [Collapsible](https://polaris.shopify.com/components/collapsible)
+
+### Maintain accessibility with custom features
+
+Since custom HTML can be passed to the component for additional actions, ensure that the filtering system you build is accessible as a whole.
+
+All merchants must:
+
+- be able to identify and understand labels for all controls
+- be notified of state changes
+- be able to complete all actions with the keyboard
+
+---
+
+## Best practices
+
+The filters component should:
+
+- help reduce merchant effort by promoting the filtering categories that are most commonly used
+- include no more than 2 or 3 promoted filters
+- consider small screen sizes when designing the interface for each filter and the total number filters to include
+- use children only for content that’s related or relevant to filtering
+
+---
+
+## Content guidelines
+
+### Text field
+
+The text field should be clearly labeled so it’s obvious to merchants what they should enter into the field.
+
+<DoDont>
+
+#### Do
+
+- Filter orders
+
+#### Don’t
+
+- Enter text here
+
+</DoDont>
+
+### Filter badges
+
+Use the name of the filter if the purpose of the name is clear on its own. For example, when you see a filter badge that reads **Fulfilled**, it’s intuitive that it falls under the Fulfillment status category.
+
+<DoDont>
+
+#### Do
+
+- Fulfilled, Unfulfilled
+
+#### Don’t
+
+- Fulfillment: Fulfilled, Unfulfilled
+
+</DoDont>
+
+If the filter name is ambiguous on its own, add a descriptive word related to the status. For example, **Low** doesn’t make sense out of context. Add the word “risk” so that merchants know it’s from the Risk category.
+
+<DoDont>
+
+#### Do
+
+- High risk, Low risk
+
+#### Don’t
+
+- High, Low
+
+</DoDont>
+
+Group tags from the same category together.
+
+<DoDont>
+
+#### Do
+
+- (Unfulfilled, Fulfilled)
+
+#### Don’t
+
+- (Unfulfilled) (fulfilled)
+
+</DoDont>
+
+If all tag pills selected: truncate in the middle
+
+<DoDont>
+
+#### Do
+
+- Paid, par… unpaid
+
+#### Don’t
+
+- All payment status filters selected, Paid, unpa…
+
+</DoDont>

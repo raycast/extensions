@@ -1,36 +1,190 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "producthunt",
-  "title": "Product Hunt - Today's Hunts",
-  "description": "Get the latest products from the fontpage of Product Hunt.",
+  "title": "Product Hunt",
+  "description": "View today's featured products on Product Hunt.",
   "icon": "icon.png",
   "author": "ragnor",
+  "contributors": [
+    "pernielsentikaer",
+    "thomasjost",
+    "marcmagn1",
+    "chrismessina"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "frontpage",
-      "title": "Check Today's Hunts",
+      "title": "View Today's Featured Products",
       "subtitle": "Product Hunt",
-      "description": "Get the latest products from the fontpage of Product Hunt.",
+      "description": "View today's featured products on Product Hunt.",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Your Product Hunt username",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Verbose Logging",
+      "description": "Enable detailed console logging for debugging purposes",
+      "type": "checkbox",
+      "required": false,
+      "label": "Enable",
+      "default": false
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-latest-products",
+      "title": "Get Today's Featured Products",
+      "description": "Get today's featured products from Product Hunt with their details, votes, and taglines."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@producthunt what are the top 3 products today?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-latest-products"
+            }
+          }
+        ],
+        "mocks": {
+          "get-latest-products": [
+            {
+              "author": "Anton Selikhov",
+              "title": "Talo",
+              "description": "Real-time AI voice translator for video-calls",
+              "votesCount": 245,
+              "commentsCount": 18,
+              "link": "https://www.producthunt.com/posts/talo-ai"
+            },
+            {
+              "author": "Mohamed Ghaith",
+              "title": "Stunning",
+              "description": "Design client websites fast with AI",
+              "votesCount": 187,
+              "commentsCount": 12,
+              "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
+            },
+            {
+              "author": "Joseph LeBlanc",
+              "title": "Practice Pro ",
+              "description": "Practice widgets for musicians you can customize",
+              "votesCount": 156,
+              "commentsCount": 7,
+              "link": "https://www.producthunt.com/posts/practice-pro-2"
+            }
+          ]
+        }
+      },
+      {
+        "input": "@producthunt show me today's AI products",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-latest-products",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "get-latest-products": [
+            {
+              "author": "Anton Selikhov",
+              "title": "Talo",
+              "description": "Real-time AI voice translator for video-calls",
+              "votesCount": 245,
+              "commentsCount": 18,
+              "link": "https://www.producthunt.com/posts/talo-ai"
+            },
+            {
+              "author": "Mohamed Ghaith",
+              "title": "Stunning",
+              "description": "Design client websites fast with AI",
+              "votesCount": 187,
+              "commentsCount": 12,
+              "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
+            },
+            {
+              "author": "Joseph LeBlanc",
+              "title": "Practice Pro ",
+              "description": "Practice widgets for musicians you can customize",
+              "votesCount": 156,
+              "commentsCount": 7,
+              "link": "https://www.producthunt.com/posts/practice-pro-2"
+            }
+          ]
+        }
+      },
+      {
+        "input": "@producthunt what's trending on Product Hunt right now?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-latest-products",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "get-latest-products": [
+            {
+              "author": "Mohamed Ghaith",
+              "title": "Stunning",
+              "description": "Design client websites fast with AI",
+              "votesCount": 312,
+              "commentsCount": 24,
+              "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
+            },
+            {
+              "author": "Zac Zuo",
+              "title": "Pikadditions",
+              "description": "Bring your videos to life with images",
+              "votesCount": 287,
+              "commentsCount": 19,
+              "link": "https://www.producthunt.com/posts/pikadditions"
+            },
+            {
+              "author": "Markiian Pukshin",
+              "title": "Moodcare Journal",
+              "description": "Make your thoughts as clear as possible",
+              "votesCount": 253,
+              "commentsCount": 15,
+              "link": "https://www.producthunt.com/posts/moodcare-journal"
+            }
+          ]
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "got": "^11.8.2",
-    "rss-parser": "^3.12.0"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "cheerio": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/cheerio": "^0.22.35",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx ray evals"
   }
 }

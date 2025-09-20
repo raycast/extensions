@@ -1,44 +1,26 @@
-import { userInfo } from "os";
-
 import {
   Action,
   ActionPanel,
   Color,
-  Form,
   Icon,
   List,
-  LocalStorage,
-  Toast,
   closeMainWindow,
-  environment,
   popToRoot,
-  showToast,
-  showHUD,
-  confirmAlert,
   open,
-  getSelectedFinderItems,
+  Keyboard,
+  LaunchProps,
+  getPreferenceValues,
 } from "@raycast/api";
-
-import { usePromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
-
+import React, { useRef } from "react";
+import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log, logDiagnostics } from "./utils";
 import { runAppleScript } from "run-applescript";
-
-import { searchSpotlight } from "./search-spotlight";
-import { FolderSearchPlugin, SpotlightSearchResult } from "./types";
-
-import {
-  loadPlugins,
-  folderName,
-  enclosingFolderName,
-  showFolderInfoInFinder,
-  copyFolderToClipboard,
-  maybeMoveResultToTrash,
-  lastUsedSort,
-} from "./utils";
-
-import fse from "fs-extra";
-import path = require("node:path");
+import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
+import { useFolderSearch } from "./hooks/useFolderSearch";
+import { moveFinderItems } from "./moveUtils";
+import { FolderListSection, Directory } from "./components";
+import path from "path";
+import { userInfo } from "os";
+import { showFailureToast } from "@raycast/utils";
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -47,381 +29,242 @@ interface IconDictionary {
 
 const IconDictionaried: IconDictionary = Icon as IconDictionary;
 
-export default function Command() {
-  const [searchText, setSearchText] = useState<string>("");
-  const [pinnedResults, setPinnedResults] = useState<SpotlightSearchResult[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<string>("");
-  const [searchScope, setSearchScope] = useState<string>("");
-  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
-  const [results, setResults] = useState<SpotlightSearchResult[]>([]);
+function Command(props: LaunchProps) {
+  const {
+    searchText,
+    setSearchText,
+    results,
+    isQuerying,
+    isShowingDetail,
+    setIsShowingDetail,
+    searchScope,
+    setSearchScope,
+    selectedItemId,
+    pinnedResults,
+    plugins,
+    resultIsPinned,
+    toggleResultPinnedStatus,
+    removeResultFromPinnedResults,
+    movePinUp,
+    movePinDown,
+    hasCheckedPlugins,
+    hasCheckedPreferences,
+    refreshPinsFromStorage,
+    hasSearched,
+  } = useFolderSearch();
 
-  const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
+  // Use a ref to track if we've logged
+  const hasLoggedRef = useRef(false);
 
-  const [isQuerying, setIsQuerying] = useState<boolean>(false);
-  const [canExecute, setCanExecute] = useState<boolean>(false);
-
-  const [hasCheckedPlugins, setHasCheckedPlugins] = useState<boolean>(false);
-  const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
-
-  const abortable = useRef<AbortController>();
-
-  // check plugins
-  usePromise(
-    async () => {
-      const plugins = await loadPlugins();
-      setPlugins(plugins);
-    },
-    [],
-    {
-      onData() {
-        setHasCheckedPlugins(true);
-      },
-      onError() {
-        showToast({
-          title: "An Error Occured",
-          message: "Could not read plugins",
-          style: Toast.Style.Failure,
-        });
-
-        setHasCheckedPlugins(true);
-      },
+  // Simple launch logging - only once per mount
+  React.useEffect(() => {
+    if (!hasLoggedRef.current) {
+      log("debug", "search", "Command launched", {
+        searchText,
+        timestamp: new Date().toISOString(),
+      });
+      hasLoggedRef.current = true;
     }
-  );
+  }, []); // Empty dependency array ensures this only runs once
 
-  // check prefs
-  usePromise(
-    async () => {
-      const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
+  // Handle returning from directory view
+  const handleReturnFromDirectory = () => {
+    log("debug", "search", `handleReturnFromDirectory called with ${pinnedResults.length} current pins`);
 
-      if (maybePreferences) {
-        try {
-          return JSON.parse(maybePreferences as string);
-        } catch (_) {
-          // noop
-        }
-      }
-    },
-    [],
-    {
-      onData(preferences) {
-        setPinnedResults(preferences?.pinned || []);
-        setSearchScope(preferences?.searchScope || "");
-        setIsShowingDetail(preferences?.isShowingDetail);
-        setHasCheckedPreferences(true);
-      },
-      onError() {
-        showToast({
-          title: "An Error Occured",
-          message: "Could not read preferences",
-          style: Toast.Style.Failure,
-        });
+    // Add a short timestamp to help correlate logs
+    const timestamp = new Date().toISOString().slice(11, 23);
+    log("debug", "search", `[${timestamp}] Refreshing pins from storage via directory return`);
 
-        setHasCheckedPreferences(true);
-      },
-    }
-  );
+    // Run full diagnostics before refreshing pins
+    logDiagnostics("search", "Pre-refresh state diagnostics");
 
-  // perform search
-  usePromise(
-    searchSpotlight,
-    [
-      searchText,
-      searchScope,
-      abortable,
-      (result: SpotlightSearchResult) => {
-        setResults((results) => [result, ...results].sort(lastUsedSort));
-      },
-    ],
-    {
-      onWillExecute: () => {
-        setIsQuerying(true);
-        setCanExecute(false);
-      },
-      onData: () => {
-        setIsQuerying(false);
-      },
-      onError: (e) => {
-        if (e.name !== "AbortError") {
-          showToast({
-            title: "An Error Occured",
-            message: "Something went wrong. Try again.",
-            style: Toast.Style.Failure,
-          });
-        }
+    // Let refreshPinsFromStorage handle everything, including pending states
+    refreshPinsFromStorage();
 
-        setIsQuerying(false);
-      },
-      execute: hasCheckedPlugins && hasCheckedPreferences && canExecute && !!searchText,
-      abortable,
-    }
-  );
-
-  // save preferences
-  useEffect(() => {
-    (async () => {
-      if (!(hasCheckedPlugins && hasCheckedPreferences)) {
-        return;
-      }
-
-      await LocalStorage.setItem(
-        `${environment.extensionName}-preferences`,
-        JSON.stringify({
-          pinned: pinnedResults,
-          searchScope,
-          isShowingDetail,
-        })
-      );
-    })();
-  }, [pinnedResults, searchScope, isShowingDetail]);
-
-  useEffect(() => {
-    (async () => {
-      abortable.current?.abort();
-
-      setResults([]);
-      setIsQuerying(false);
-
-      // short-circuit for 'pinned'
-      if (searchScope === "pinned") {
-        setResults(
-          pinnedResults.filter((pin) =>
-            pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-          )
-        );
-        setCanExecute(false);
-      } else {
-        setCanExecute(true);
-      }
-    })();
-  }, [searchText, searchScope]);
-
-  const resultIsPinned = (result: SpotlightSearchResult) => {
-    return pinnedResults.map((pin) => pin.path).includes(result.path);
+    // Add debug logs to check state after a short delay
+    setTimeout(() => {
+      log("debug", "search", `[${timestamp}+250ms] Pin count after refresh: ${pinnedResults.length}`);
+      // Run diagnostics again after refresh
+      logDiagnostics("search", "Post-refresh state diagnostics");
+    }, 250);
   };
 
-  const removeResultFromPinnedResults = (result: SpotlightSearchResult) => {
-    setPinnedResults((pinnedResults) => pinnedResults.filter((pinnedResult) => pinnedResult.path !== result.path));
-  };
-
-  const toggleResultPinnedStatus = (result: SpotlightSearchResult, resultIndex: number) => {
-    if (!resultIsPinned(result)) {
-      setPinnedResults((pinnedResults) => [result, ...pinnedResults]);
-    } else {
-      // extracted out so we can re-use for maybeMoveResultToTrash calls
-      removeResultFromPinnedResults(result);
-    }
-
-    setSelectedItemId(`result-${resultIndex.toString()}`);
-  };
-
-  // re-usable for results and 'pinned/favourites'
-  const ListSection = (props: { title: string; results: SpotlightSearchResult[] }) => {
+  // Render actions for the folder list items
+  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
+    const enclosingFolder = path.dirname(result.path);
     return (
-      <List.Section title={props.title}>
-        {props.results.map((result: SpotlightSearchResult, resultIndex: number) => (
-          <List.Item
-            id={`result-${resultIndex.toString()}`}
-            key={resultIndex}
-            title={folderName(result)}
-            subtitle={!isShowingDetail ? enclosingFolderName(result) : ""}
-            icon={{ fileIcon: result.path }}
-            accessories={resultIsPinned(result) ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Metadata" />
-                    <List.Item.Detail.Metadata.Label title="Name" text={result.kMDItemFSName} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Where" text={result.path} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Type" text={result.kMDItemKind} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Created"
-                      text={result.kMDItemFSCreationDate?.toLocaleString()}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Modified"
-                      text={result.kMDItemContentModificationDate?.toLocaleString()}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Last used"
-                      text={result.kMDItemLastUsedDate?.toLocaleString() || "-"}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Use count"
-                      text={result.kMDItemUseCount?.toLocaleString() || "-"}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                  </List.Item.Detail.Metadata>
+      <ActionPanel title={folderName(result)}>
+        <Action.Open
+          title="Open in Finder"
+          icon={Icon.Folder}
+          target={result.path}
+          onOpen={() => popToRoot({ clearSearchBar: true })}
+        />
+        <Action
+          title="Move Finder Selection"
+          icon={Icon.NewFolder}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          onAction={async () => {
+            try {
+              const moveResult = await moveFinderItems(result.path);
+              if (moveResult.success) {
+                // Only open the folder if the preference is enabled
+                const { openFolderAfterMove } = getPreferenceValues<SpotlightSearchPreferences>();
+                if (openFolderAfterMove) {
+                  open(result.path);
                 }
+                closeMainWindow();
+                popToRoot({ clearSearchBar: true });
+              }
+            } catch (error) {
+              // Show error to user with showFailureToast
+              showFailureToast(error, { title: "Could not move Finder selection" });
+            }
+          }}
+        />
+        <Action.OpenWith
+          title="Open with…"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          path={result.path}
+          onOpen={() => popToRoot({ clearSearchBar: true })}
+        />
+        <Action
+          title="Toggle Details"
+          icon={Icon.Sidebar}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          onAction={() => setIsShowingDetail(!isShowingDetail)}
+        />
+        <Action
+          title={!resultIsPinned(result) ? "Pin" : "Unpin"}
+          icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          onAction={() => toggleResultPinnedStatus(result)}
+        />
+        {resultIsPinned(result) && isPinnedSection && (
+          <>
+            {resultIndex > 0 && (
+              <Action
+                title="Move Pin up"
+                icon={Icon.ArrowUpCircle}
+                shortcut={Keyboard.Shortcut.Common.MoveUp}
+                onAction={() => movePinUp(result, resultIndex)}
               />
-            }
-            actions={
-              <ActionPanel title={folderName(result)}>
-                <Action.Open
-                  title="Open"
-                  icon={Icon.Folder}
-                  target={result.path}
-                  onOpen={() => popToRoot({ clearSearchBar: true })}
-                />
-                <Action.ShowInFinder
-                  title="Show in Finder"
-                  path={result.path}
-                  onShow={() => popToRoot({ clearSearchBar: true })}
-                />
-                <Action
-                  title="Send Finder selection to Folder"
-                  icon={Icon.Folder}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                  onAction={async () => {
-                    const selectedItems = await getSelectedFinderItems();
-
-                    if (selectedItems.length === 0) {
-                      await showHUD(`⚠️  No Finder selection to send.`);
-                    } else {
-                      for (const item of selectedItems) {
-                        // Source path = item
-                        // Source file name = path.basename(item)
-                        //
-                        // Destination folder = result.path
-                        // Destination file = result.path + '/' + path.basename(item)
-
-                        const sourceFileName = path.basename(item.path);
-                        const destinationFolder = result.path;
-                        const destinationFile = result.path + "/" + path.basename(item.path);
-
-                        try {
-                          const exists = await fse.pathExists(destinationFile);
-                          if (exists) {
-                            const overwrite = await confirmAlert({
-                              title: "Ooverwrite the existing file?",
-                              message: sourceFileName + " already exists in " + destinationFolder,
-                            });
-
-                            if (overwrite) {
-                              if (item.path == destinationFile) {
-                                await showHUD("The source and destination file are the same");
-                              }
-                              fse.moveSync(item.path, destinationFile, { overwrite: true });
-                              await showHUD("Moved file " + path.basename(item.path) + " to " + destinationFolder);
-                            } else {
-                              await showHUD("Cancelling move");
-                            }
-                          } else {
-                            fse.moveSync(item.path, destinationFile);
-                            await showHUD("Moved file " + sourceFileName + " to " + destinationFolder);
-                          }
-
-                          open(result.path);
-                        } catch (e) {
-                          console.error("ERROR " + String(e));
-                          await showToast(Toast.Style.Failure, "Error moving file " + String(e));
-                        }
-                      }
-                    }
-
-                    closeMainWindow();
-                    popToRoot({ clearSearchBar: true });
-                  }}
-                />
-                <Action.OpenWith
-                  title="Open With..."
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  path={result.path}
-                  onOpen={() => popToRoot({ clearSearchBar: true })}
-                />
-                <Action
-                  title="Show Info in Finder"
-                  icon={Icon.Finder}
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  onAction={() => showFolderInfoInFinder(result)}
-                />
-                <Action
-                  title="Toggle Details"
-                  icon={Icon.Sidebar}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                  onAction={() => setIsShowingDetail(!isShowingDetail)}
-                />
-                <Action
-                  title={!resultIsPinned(result) ? "Pin" : "Unpin"}
-                  icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                  onAction={() => toggleResultPinnedStatus(result, resultIndex)}
-                />
-                <ActionPanel.Section>
-                  <Action.CopyToClipboard
-                    title="Copy Folder"
-                    shortcut={{ modifiers: ["cmd"], key: "." }}
-                    content={``}
-                    onCopy={() => copyFolderToClipboard(result)}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Name"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                    content={folderName(result)}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Path"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-                    content={result.path}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action.CreateQuicklink
-                    title="Create Quicklink"
-                    icon={Icon.Link}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-                    quicklink={{ link: result.path, name: folderName(result) }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action
-                    title="Move to Trash"
-                    style={Action.Style.Destructive}
-                    icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={() => maybeMoveResultToTrash(result, () => removeResultFromPinnedResults(result))}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Plugins">
-                  {plugins.map((plugin: FolderSearchPlugin, pluginIndex) => (
-                    <Action
-                      key={pluginIndex}
-                      title={plugin.title}
-                      icon={IconDictionaried[plugin.icon]}
-                      shortcut={{ ...plugin.shortcut }}
-                      onAction={() => {
-                        popToRoot({ clearSearchBar: true });
-                        closeMainWindow({ clearRootSearch: true });
-                        runAppleScript(plugin.appleScript(result));
-                      }}
-                    />
-                  ))}
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
+            )}
+            {resultIndex < pinnedResults.length - 1 && (
+              <Action
+                title="Move Pin Down"
+                icon={Icon.ArrowDownCircle}
+                shortcut={Keyboard.Shortcut.Common.MoveDown}
+                onAction={() => movePinDown(result, resultIndex)}
+              />
+            )}
+          </>
+        )}
+        <ActionPanel.Section>
+          <Action.Push
+            title="Enclosing Folder"
+            icon={Icon.ArrowUp}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+            target={<Directory path={enclosingFolder} onReturn={handleReturnFromDirectory} />}
           />
-        ))}
-      </List.Section>
+          <Action.Push
+            title="Enter Folder"
+            icon={Icon.ArrowDown}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            target={<Directory path={result.path} onReturn={handleReturnFromDirectory} />}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.CopyToClipboard
+            title="Copy Folder"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+            content={``}
+            onCopy={() => copyFolderToClipboard(result)}
+          />
+          <Action.CopyToClipboard
+            title="Copy Name"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+            content={folderName(result)}
+          />
+          <Action.CopyToClipboard
+            title="Copy Path"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            content={result.path}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action.CreateQuicklink
+            title="Create Quicklink"
+            icon={Icon.Link}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            quicklink={{ link: result.path, name: folderName(result) }}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action
+            title="Move to Trash"
+            style={Action.Style.Destructive}
+            icon={{ source: Icon.Trash, tintColor: Color.Red }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onAction={() => maybeMoveResultToTrash(result, () => removeResultFromPinnedResults(result))}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section title="Plugins">
+          {plugins.map(
+            (
+              plugin: {
+                title: string;
+                icon: string;
+                shortcut: Keyboard.Shortcut;
+                appleScript: (result: SpotlightSearchResult) => string;
+              },
+              pluginIndex: number,
+            ) => (
+              <Action
+                key={pluginIndex}
+                title={plugin.title}
+                icon={IconDictionaried[plugin.icon] || plugin.icon}
+                shortcut={{ ...plugin.shortcut }}
+                onAction={() => {
+                  // Debug logging to see which plugin is failing
+                  log("debug", "search", "Plugin action triggered", {
+                    title: plugin.title,
+                    appleScriptType: typeof plugin.appleScript,
+                    isFunction: typeof plugin.appleScript === "function",
+                  });
+
+                  try {
+                    popToRoot({ clearSearchBar: true });
+                    closeMainWindow({ clearRootSearch: true });
+                    runAppleScript(plugin.appleScript(result));
+                  } catch (error) {
+                    // Show user-friendly error message
+                    showFailureToast(error, { title: `Plugin "${plugin.title}" failed` });
+                    // Keep debug logging for developers
+                    log("error", "search", "Plugin execution failed", {
+                      title: plugin.title,
+                      error: error instanceof Error ? error.message : String(error),
+                      appleScriptType: typeof plugin.appleScript,
+                    });
+                  }
+                }}
+              />
+            ),
+          )}
+        </ActionPanel.Section>
+      </ActionPanel>
     );
   };
 
-  return !(hasCheckedPlugins && hasCheckedPreferences) ? (
-    // prevent flicker due to details pref being async
-    <Form />
-  ) : (
+  return (
     <List
-      isLoading={isQuerying}
-      enableFiltering={false}
+      isLoading={!(hasCheckedPlugins && hasCheckedPreferences)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
       isShowingDetail={isShowingDetail}
-      selectedItemId={selectedItemId}
+      throttle={true}
+      searchText={searchText}
+      selectedItemId={selectedItemId || undefined}
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (
           <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>
@@ -432,11 +275,68 @@ export default function Command() {
         ) : null
       }
     >
-      {!searchText ? (
-        <ListSection title="Pinned" results={pinnedResults} />
+      {!(hasCheckedPlugins && hasCheckedPreferences) ? (
+        // Show loading state while checking preferences and plugins
+        <List.EmptyView title="Loading..." description="Setting up folder search" icon={Icon.MagnifyingGlass} />
+      ) : !searchText && !props.fallbackText && pinnedResults.length > 0 ? (
+        <FolderListSection
+          title="Pinned"
+          results={pinnedResults}
+          isShowingDetail={isShowingDetail}
+          resultIsPinned={resultIsPinned}
+          renderActions={renderFolderActions}
+          isPinnedSection={true}
+        />
+      ) : !searchText && !props.fallbackText ? (
+        // No pins and no search text (and not fallback mode)
+        <List.EmptyView
+          title="No Pinned Folders"
+          description="Search to find folders or pin your favorites"
+          icon={Icon.Star}
+        />
       ) : (
-        <ListSection title="Results" results={results} />
+        <>
+          {isQuerying ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for matching folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : searchText && !hasSearched ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for matching folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : props.fallbackText && !hasSearched ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for matching folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : hasSearched && results.length === 0 ? (
+            <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
+          ) : results.length > 0 ? (
+            <FolderListSection
+              title="Results"
+              results={results}
+              isShowingDetail={isShowingDetail}
+              resultIsPinned={resultIsPinned}
+              renderActions={renderFolderActions}
+              isPinnedSection={false}
+            />
+          ) : (
+            // Only show this when there's truly no search text and no fallback
+            <List.EmptyView
+              title="Enter a search term"
+              description="Type to search for folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          )}
+        </>
       )}
     </List>
   );
 }
+
+export default Command;

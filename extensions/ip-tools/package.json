@@ -1,0 +1,164 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ip-tools",
+  "title": "IP Tools",
+  "description": "This is an extension plugin for converting, validating, and calculating IP subnets. (net, mask, netmask, ip2long, long2ip, cidr, ipv4, ipv6 & geoLocation)",
+  "icon": "extension_icon.png",
+  "author": "meguoe",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ip2long",
+      "title": "Convert IP Address to Number",
+      "description": "Convert IPv4 or IPv6 Address to Number",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "IP Address",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "long2ip",
+      "title": "Convert Number to IP Address",
+      "description": "Convert Number to IPv4 or IPv6",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "IP Number",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ip2BinHex",
+      "title": "Convert IP Address to Bin and Hex",
+      "description": "Convert IPv4 or IPv6 Address to binary and hexadecimal",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "IP Address",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "parseCIDR",
+      "title": "Convert CIDR to IP Range",
+      "description": "Convert CIDR to IPv4 or IPv6 Range",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "CIDR",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "isValidIP",
+      "title": "Verify IP Address Is Valid",
+      "description": "Verify if the IP address Is valid",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "IP Address",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "isValidCIDR",
+      "title": "Verify CIDR Is Valid",
+      "description": "Verify if the CIDR is valid",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "CIDR",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "toIPv6Format",
+      "title": "Converts IPv4 to IPv6 Address",
+      "description": "Converts IPv4 address to IPv6 address",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "IPv4 Address",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "toIPv6Expand",
+      "title": "Converts IPv6 to Expanded or Compressed",
+      "description": "Converts IPv6 to expanded or compressed format",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "IPv6 Address",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "geoLocation",
+      "title": "Query IP Geolocation Information",
+      "description": "Query IPv4 or Ipv6 Geolocation Information",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keywork",
+          "placeholder": "IP Address",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.3",
+    "@raycast/utils": "^1.10.1",
+    "axios": "^1.8.4",
+    "ip-toolkit": "^1.0.10",
+    "json-bigint": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/json-bigint": "^1.0.4",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.45",
+    "eslint": "^8.52.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

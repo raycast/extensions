@@ -98,6 +98,7 @@ export enum AbstractGameCodeEnum {
   V = "V",
   W = "W",
   X = "X",
+  P = "P",
 }
 
 export interface GameInfo {

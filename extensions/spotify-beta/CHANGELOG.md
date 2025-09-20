@@ -1,6 +1,10 @@
 # Spotify Player Changelog
 
-## [Version 2] - 2023-04-12
+## [Version 2.1.1] - 2024-01-29
+
+Sunset. Added a new view to let users know they must update.
+
+## [Version 2] - 2023-04-27
 
 ### Spotify Player v2
 
@@ -24,18 +28,49 @@ Spotify Beta is a complete re-write, focusing on performance, maintainability, a
 - **Search:** A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
 - **Your Library:** Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the "Search" command, it includes a category dropdown and contextual actions.
 - **Quick Actions:** This is a list of lots of Spotify actions. For example: Play/Pause, Like/Dislike current song, Change Volume, and more. If you'd like to have any of these available as a Root Command, you can create Quicklinks via the actions menu (⌘ K).
+- **Toggle Play/Pause:** Use this to toggle the playback of the current song.
+- **Next:** Use this to skip to the next song/episode.
+- **Previous:** Use this to skip to the previous song/episode.
+
+#### Disabled Commands
+
+This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings. These commands are:
+
+- **Like:**
+  Use this to like the current song.
+- **Dislike:**
+  Use this to dislike the current song.
+- **Set Volume to 0%:**
+  Use this to mute the volume.
+- **Set Volume to 25%:**
+  Use this to set the volume to 25%.
+- **Set Volume to 50%:**
+  Use this to set the volume to 50%.
+- **Set Volume to 75%:**
+  Use this to set the volume to 75%.
+- **Set Volume to 100%:**
+  Use this to set the volume to 100%.
+- **Turn Volume Down:**
+  Use this to turn the volume down by 10%.
+- **Turn Volume Up:**
+  Use this to turn the volume up by 10%.
+- **Toggle Shuffle:**
+  Use this to toggle shuffle.
+- **Toggle Repeat:**
+  Use this to toggle repeat.
+- **Start Radio:**
+  Use this to start a radio station based on the current song.
+- **Copy URL:**
+  Use this to copy the URL of the current song/episode.
+- **Just Play:**
+  Use this to quickly start playing a song based on your query.
 
 #### Removed Commands
 
-- **Just Play:** Use "Search" instead. If you'd like quick access to search, you can assign it a hotkey
 - **Search Artists:** Use "Search" instead. You can use the dropdown menu to narrow your search to artists only
 - **Search Albums:** Use "Search" instead. You can use the dropdown menu to narrow your search to albums only
 - **Search Tracks:** Use "Search" instead. You can use the dropdown menu to narrow your search to songs only
 - **Search Playlists:** Use "Search" instead. You can use the dropdown menu to narrow your search to playlists only
-- **Start Radio:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
-- **Like Current Song:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
-- **Dislike Current Song:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
-- **Dislike Current Song:** Available as an action under "Now Playing"/"Menu Bar Player" or in "Quick Actions"
 - **Browse All:** Use the Spotify App instead
 - **Featured Playlists:** Use the Spotify App instead
 

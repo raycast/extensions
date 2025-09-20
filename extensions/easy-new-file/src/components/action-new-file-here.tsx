@@ -1,57 +1,77 @@
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
-import { getFinderPath } from "../utils/common-utils";
-import NewFileWithName from "../new-file-with-name";
+import { Action, ActionPanel, Icon, Toast } from "@raycast/api";
+import { getFinderPath, showCustomToast } from "../utils/common-utils";
+import NewFileWithDetails from "../new-file-with-details";
 import { homedir } from "os";
 import AddFileTemplate from "../add-file-template";
 import React from "react";
-import { createNewFile } from "../new-file-here";
+import { createNewFile } from "../new-file-with-template";
 import { FileType, TemplateType } from "../types/file-type";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import { MutatePromise } from "@raycast/utils";
 
 export function ActionNewFileHere(props: {
   fileType: FileType;
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  folder: string;
+  mutate: MutatePromise<TemplateType[]>;
 }) {
-  const { fileType, newFileType, templateFiles, setRefresh } = props;
+  const { fileType, newFileType, templateFiles, folder, mutate } = props;
   return (
     <ActionPanel>
       <Action
-        title={"New File Here"}
+        title={`New File in ${folder}`}
         icon={Icon.Finder}
         onAction={async () => {
           try {
             await createNewFile(fileType, await getFinderPath());
           } catch (e) {
-            await showToast(Toast.Style.Failure, "Failed to create file.", String(e));
+            await showCustomToast({
+              title: "Failed to create file.",
+              message: String(e),
+              style: Toast.Style.Failure,
+            });
           }
         }}
       />
       <Action.Push
-        title="New File with Name"
+        title="New File with Details"
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.NewDocument}
-        target={<NewFileWithName newFileType={newFileType} templateFiles={templateFiles} />}
+        target={
+          <NewFileWithDetails
+            newFileType={newFileType}
+            templateFiles={templateFiles}
+            folder={folder}
+            isLoading={false}
+            navigationTitle={"New File with Details"}
+          />
+        }
       />
-      <Action
-        title={"New File in Desktop"}
-        icon={Icon.Window}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
-        onAction={async () => {
-          try {
-            await createNewFile(fileType, `${homedir()}/Desktop/`);
-          } catch (e) {
-            await showToast(Toast.Style.Failure, "Failed to create file.", String(e));
-          }
-        }}
-      />
+      {folder !== "Desktop" && (
+        <Action
+          title={"New File in Desktop"}
+          icon={Icon.Desktop}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          onAction={async () => {
+            try {
+              await createNewFile(fileType, `${homedir()}/Desktop/`);
+            } catch (e) {
+              await showCustomToast({
+                title: "Failed to create file.",
+                message: String(e),
+                style: Toast.Style.Failure,
+              });
+            }
+          }}
+        />
+      )}
       <ActionPanel.Section>
         <Action.Push
           title={"Add File Template"}
           icon={Icon.Document}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          target={<AddFileTemplate setRefresh={setRefresh} />}
+          target={<AddFileTemplate mutate={mutate} />}
         />
       </ActionPanel.Section>
       <ActionOpenCommandPreferences />

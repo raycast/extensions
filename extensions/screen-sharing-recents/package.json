@@ -2,6 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screen-sharing-recents",
   "title": "Screen Sharing Recents",
+  "version": "1.1.0",
   "description": "Adds shortcuts to recent screen sharing locations",
   "icon": "command-icon.png",
   "author": "bix",
@@ -22,10 +23,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.66.1",
+    "node-fetch": "^3.0.0",
+    "plist": "^3.1.0"
   },
   "devDependencies": {
+    "@types/plist": "^3.0.5",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

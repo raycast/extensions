@@ -1,30 +1,136 @@
 {
-  "name": "vault",
-  "title": "Vault",
-  "description": "Manage Secrets in Vault",
-  "icon": "icon.png",
-  "author": "ricoberger",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vault-manager",
+  "title": "Vault Manager",
+  "description": "Vault extension for Raycast",
+  "icon": "vault.png",
+  "author": "fonimus",
+  "contributors": [
+    "ricoberger",
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "list",
-      "title": "List Secrets",
-      "subtitle": "Vault",
-      "description": "Show a list of secrets",
+      "name": "vault",
+      "title": "Vault Manager",
+      "description": "Explore, display, edit, delete vault secrets, list entities",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "url",
+      "title": "Vault url",
+      "description": "Vault url",
+      "type": "textfield",
+      "default": "http://localhost:8200",
+      "required": true
+    },
+    {
+      "name": "secretEngine",
+      "title": "Secret engine",
+      "description": "Used only if not set by 'List Engines' action",
+      "type": "textfield",
+      "default": "secret",
+      "required": true
+    },
+    {
+      "name": "loginMethod",
+      "title": "Login method",
+      "description": "Login method (oidc, ldap, token)",
+      "type": "dropdown",
+      "default": "oidc",
+      "data": [
+        {
+          "title": "Oidc",
+          "value": "oidc"
+        },
+        {
+          "title": "Ldap",
+          "value": "ldap"
+        },
+        {
+          "title": "Token",
+          "value": "token"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "ldap",
+      "title": "Ldap",
+      "description": "Ldap identifier (only for ldap method)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Ldap password (only for ldap method)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "token",
+      "title": "Token",
+      "description": "Token (only for token method)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "technicalPaths",
+      "title": "Technical paths",
+      "description": "Technical paths to hide, separated by space",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "favoriteNamespaces",
+      "title": "Favorite namespaces",
+      "description": "Favorite namespaces, separated by space (for easy switch)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "enableWrite",
+      "title": "Enable write",
+      "label": "Enable write",
+      "description": "Enable write",
+      "type": "checkbox",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "enableDelete",
+      "title": "Enable delete",
+      "label": "Enable delete",
+      "description": "Enable delete",
+      "type": "checkbox",
+      "default": false,
+      "required": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "1.52.1",
+    "@raycast/utils": "1.7.0",
+    "got": "12.5.3",
+    "human-date": "1.4.0",
+    "node-vault": "0.9.22"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "1.0.5",
+    "@types/human-date": "1.4.2",
+    "@types/node": "18.14.2",
+    "@types/react": "18.0.28",
+    "eslint": "8.35.0",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "prettier": "2.8.4",
+    "typescript": "4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -32,21 +138,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  },
-  "preferences": [
-    {
-      "name": "address",
-      "type": "textfield",
-      "required": true,
-      "title": "Address",
-      "description": "Address of the Vault instance"
-    },
-    {
-      "name": "token",
-      "type": "password",
-      "required": true,
-      "title": "Token",
-      "description": "Token to access the Vault instance"
-    }
-  ]
+  }
 }

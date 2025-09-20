@@ -12,9 +12,12 @@ import {
 import { RefData, Preferences } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 import { exportRef, exportRefPaste, exportBibtexRef, exportBibtexRefPaste } from "./clipboard";
+import { useState } from "react";
+import CollectionDropdown from "./CollectionDropdown";
 
 type Props = {
   sectionNames: string[];
+  collections: string[];
   queryResults: RefData[][];
   isLoading: boolean;
   onSearchTextChange?: (text: string) => void;
@@ -43,8 +46,10 @@ const copyBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "
 const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "5" };
 const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
 
-const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
-const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "." };
+const copyURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
+const copyPDFURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "p" };
+const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "." };
+const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
 
@@ -138,8 +143,12 @@ function getItemIcon(item: RefData): string {
       return "conferencePaper.png";
     case "document":
       return "document.png";
+    case "preprint":
+      return "preprint.png";
+    case "patent":
+      return "patent.png";
     default:
-      return "zotero.png";
+      return "default.png";
   }
 }
 
@@ -176,81 +185,127 @@ ${item.tags ? "**Tagged With:** " + item.tags.join(", ") : ""}
 `;
 }
 
-export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange, throttle }: Props): JSX.Element => {
+export const View = ({
+  sectionNames,
+  collections,
+  queryResults,
+  isLoading,
+  onSearchTextChange,
+  throttle,
+}: Props): JSX.Element => {
   const [urls, onOpen] = useVisitedUrls();
+  const [collection, setCollection] = useState<string>("All");
   const preferences: Preferences = getPreferenceValues();
+  const [searchText, setSearchText] = useState<string>("");
   return (
     <List
       isShowingDetail={queryResults[0].length > 0}
       isLoading={isLoading}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={(text) => {
+        setSearchText(text);
+        onSearchTextChange?.(text);
+      }}
       throttle={throttle}
+      searchBarPlaceholder="Search Zotero..."
+      searchBarAccessory={<CollectionDropdown onSelection={setCollection} collections={collections} />}
     >
-      {queryResults[0].length < 1 ? (
+      {searchText.length === 0 ? (
         <List.EmptyView icon={{ source: "no-view.png" }} title="Type something to search Zotero Database!" />
       ) : (
         sectionNames.map((sectionName, sectionIndex) => (
           <List.Section key={sectionIndex} title={sectionName} subtitle={`${queryResults[sectionIndex].length}`}>
-            {queryResults[sectionIndex].map((item) => (
-              <List.Item
-                key={item.key}
-                id={`${item.id}`}
-                title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
-                icon={getItemIcon(item)}
-                detail={<List.Item.Detail markdown={getItemDetail(item)} />}
-                actions={
-                  <ActionPanel>
-                    <Action.OpenInBrowser
-                      icon={Icon.Link}
-                      title="Open in Zotero"
-                      url={`zotero://select/items/${item.library ? item.library : 0}_${item.key}`}
-                      onOpen={onOpen}
-                    />
-                    {item.attachment && item.attachment.key !== `` && (
+            {queryResults[sectionIndex]
+              .filter((item) => item.collection?.includes(collection) || collection == "All")
+              .map((item) => (
+                <List.Item
+                  key={item.key}
+                  id={`${item.id}`}
+                  title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
+                  icon={getItemIcon(item)}
+                  detail={<List.Item.Detail markdown={getItemDetail(item)} />}
+                  actions={
+                    <ActionPanel>
+                      {item.attachment && item.attachment.key && item.attachment.key !== `` && (
+                        <Action.OpenInBrowser
+                          icon={Icon.ArrowRightCircleFilled}
+                          title="Open PDF"
+                          url={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                          onOpen={onOpen}
+                        />
+                      )}
                       <Action.OpenInBrowser
-                        icon={Icon.Document}
-                        title="Open PDF"
-                        url={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                        icon={Icon.Link}
+                        title="Open in Zotero"
+                        url={`zotero://select/items/${item.library ? item.library : 0}_${item.key}`}
                         onOpen={onOpen}
                       />
-                    )}
-                    {getURL(item) !== "" && (
-                      <Action.OpenInBrowser
-                        title="Open Original Link"
-                        url={getURL(item)}
-                        shortcut={openExtLinkCommandShortcut}
-                        onOpen={onOpen}
-                      />
-                    )}
+                      {getURL(item) !== "" && (
+                        <Action.OpenInBrowser
+                          title="Open Original Link"
+                          url={getURL(item)}
+                          shortcut={openExtLinkCommandShortcut}
+                          onOpen={onOpen}
+                        />
+                      )}
 
-                    {preferences.use_bibtex && (
-                      <Action.CopyToClipboard
-                        title="Copy Bibtex Citation Key"
-                        content={item.citekey}
-                        shortcut={copyRefCommandShortcut}
-                      />
-                    )}
-                    {preferences.use_bibtex && <RefCopyToClipboardAction selected={item.citekey} />}
-                    {preferences.use_bibtex && <BibCopyToClipboardAction selected={item.citekey} />}
-                    {preferences.use_bibtex && <RefPasteAction selected={item.citekey} />}
-                    {preferences.use_bibtex && <BibPasteAction selected={item.citekey} />}
+                      {preferences.use_bibtex && (
+                        <Action.CopyToClipboard
+                          title="Copy Bibtex Citation Key"
+                          content={item.citekey}
+                          shortcut={copyRefCommandShortcut}
+                        />
+                      )}
+                      {preferences.use_bibtex && <RefCopyToClipboardAction selected={item.citekey} />}
+                      {preferences.use_bibtex && <BibCopyToClipboardAction selected={item.citekey} />}
+                      {preferences.use_bibtex && <RefPasteAction selected={item.citekey} />}
+                      {preferences.use_bibtex && <BibPasteAction selected={item.citekey} />}
 
-                    <ActionPanel.Section>
-                      {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
-                      {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
-                      {getItemZotUrl(item) && <ZoteroUrlCopyToClipboard zotUrl={getItemZotUrl(item)} />}
-                      {getItemDoi(item) !== "" && <DoiCopyToClipboardAction itemDoi={getItemDoi(item)} />}
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
-            ))}
+                      <ActionPanel.Section>
+                        {item.attachment && item.attachment.key && item.attachment.key !== `` && (
+                          <PDFURLCopyToClipboardAction
+                            itemURL={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                          />
+                        )}
+                        {getURL(item) !== "" && <URLCopyToClipboardAction itemURL={getURL(item)} />}
+                        {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
+                        {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
+                        {getItemZotUrl(item) && <ZoteroUrlCopyToClipboard zotUrl={getItemZotUrl(item)} />}
+                        {getItemDoi(item) !== "" && <DoiCopyToClipboardAction itemDoi={getItemDoi(item)} />}
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              ))}
           </List.Section>
         ))
       )}
     </List>
   );
 };
+
+function URLCopyToClipboardAction({ itemURL }: { itemURL: string }) {
+  return (
+    <CopyToClipboard
+      content={itemURL}
+      icon={Icon.Clipboard}
+      title="Copy Original Link"
+      shortcut={copyURLShortcut}
+      message="Copied original URL to clipboard"
+    />
+  );
+}
+
+function PDFURLCopyToClipboardAction({ itemURL }: { itemURL: string }) {
+  return (
+    <CopyToClipboard
+      content={itemURL}
+      icon={Icon.Clipboard}
+      title="Copy PDF Link"
+      shortcut={copyPDFURLShortcut}
+      message="Copied PDF URL to clipboard"
+    />
+  );
+}
 
 function TitleCopyToClipboardAction({ itemTitle }: { itemTitle: string }) {
   return (

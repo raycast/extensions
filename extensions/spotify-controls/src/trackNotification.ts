@@ -1,5 +1,5 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { PreferenceValues } from "@raycast/api/types/api/environment/preferences";
+import { PreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export async function showPreviousTrackNotification() {
@@ -20,16 +20,16 @@ export async function showNextTrackNotification() {
   await showNotification();
 }
 
-async function showNotification() {
+export async function showNotification() {
   const script = `
       if application "Spotify" is not running then
           return "Not playing"
       end if
-    
+
       property currentTrackName : "Unknown Track"
       property currentTrackArtist : "Unknown Artist"
       property playerState : "stopped"
-    
+
       tell application "Spotify"
           try
               set currentTrackName to name of the current track
@@ -37,7 +37,7 @@ async function showNotification() {
               set playerState to player state as string
           end try
       end tell
-      
+
       if playerState is "playing" then
         return currentTrackName & " by " & currentTrackArtist
       else if playerState is "paused" then

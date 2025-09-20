@@ -5,7 +5,18 @@
   "description": "List devices in your Tailnet and copy the IPv4, IPv6, or MagicDNS address to your clipboard.",
   "icon": "command-icon.png",
   "author": "samlinville",
-  "contributors": [],
+  "owner": "tailscale",
+  "access": "public",
+  "contributors": [
+    "rosszurowski",
+    "kradalby",
+    "itsmingjie",
+    "erics118",
+    "brandenw",
+    "j3lte",
+    "itsmatteomanf",
+    "MatteoGauthier"
+  ],
   "categories": [
     "Developer Tools",
     "Applications",
@@ -16,9 +27,30 @@
   "commands": [
     {
       "name": "devices",
-      "title": "Network Devices",
+      "title": "All Devices",
       "subtitle": "Tailscale",
-      "description": "View any device connected to your Tailnet and quickly copy an address to your clipboard",
+      "description": "View a list of every device in the tailnet",
+      "mode": "view"
+    },
+    {
+      "name": "my-devices",
+      "title": "My Devices",
+      "subtitle": "Tailscale",
+      "description": "View a list of your own devices",
+      "mode": "view"
+    },
+    {
+      "name": "account-switcher",
+      "title": "Switch Account",
+      "subtitle": "Tailscale",
+      "description": "View logged-in Tailscale accounts and quickly switch between them",
+      "mode": "view"
+    },
+    {
+      "name": "exit",
+      "title": "Exit Node",
+      "subtitle": "Tailscale",
+      "description": "View any available Exit node in your Tailnet and quickly activate one",
       "mode": "view"
     },
     {
@@ -26,28 +58,90 @@
       "title": "Admin Console",
       "subtitle": "Tailscale",
       "description": "Open the Tailscale Admin Console",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "adminConsoleURL",
+          "type": "textfield",
+          "required": false,
+          "title": "Admin Console URL",
+          "description": "URL to the Tailscale Admin Console. Intended to be used with self-hosted Tailscale installations.",
+          "default": "https://login.tailscale.com/admin/machines",
+          "placeholder": "https://login.tailscale.com/admin/machines"
+        }
+      ]
+    },
+    {
+      "name": "status",
+      "title": "Status",
+      "subtitle": "Tailscale",
+      "description": "Show Tailscale's connection status.",
+      "mode": "no-view",
+      "interval": "30s"
+    },
+    {
+      "name": "connect",
+      "title": "Connect",
+      "subtitle": "Tailscale",
+      "description": "Tailscale up",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "Tailscale",
+      "description": "Tailscale down",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Connection",
+      "subtitle": "Tailscale",
+      "description": "Toggle Tailscale connection on/off",
+      "mode": "no-view"
+    },
+    {
+      "name": "netcheck",
+      "title": "Netcheck",
+      "subtitle": "Tailscale",
+      "description": "Tailscale netcheck",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "tailscalePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Tailscale CLI Path",
+      "description": "Location to the Tailscale CLI (Defaults to `/Applications/Tailscale.app/Contents/MacOS/Tailscale`)"
+    },
+    {
+      "name": "tailscaleExecMaxBuffersMB",
+      "type": "textfield",
+      "required": false,
+      "title": "Buffer size for parsing CLI output (in megabytes)",
+      "description": "Max buffer size (in megabytes, defaults to 10)"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.77.3",
+    "@raycast/utils": "^1.9.0",
+    "country-emoji": "^1.5.6"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "run-applescript": "^6.0.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.53.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

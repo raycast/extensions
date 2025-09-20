@@ -49,7 +49,7 @@ export default function GetTables() {
               icon: Icon.Goal,
               text: `${team.RETIFATTE} - ${team.RETISUBITE}`,
               tooltip: "Goals For - Goals Against",
-            }
+            },
           );
         }
 

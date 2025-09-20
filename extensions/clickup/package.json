@@ -1,12 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "manage-clickup-tasks",
-  "title": "ClickUp - Tasks Explorer",
-  "description": "Browse ClickUp tasks from Raycast",
+  "title": "ClickUp - Tasks & Docs Explorer",
+  "description": "Browse ClickUp tasks and docs from Raycast",
   "icon": "clickup-icon.png",
   "author": "aparandeh",
   "contributors": [
-    "aesadde"
+    "aesadde",
+    "joltcode",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -23,6 +25,13 @@
       "subtitle": "ClickUp",
       "description": "Quickly capture tasks to your default ClickUp list",
       "mode": "view"
+    },
+    {
+      "name": "explore-docs",
+      "title": "Docs Explorer",
+      "subtitle": "ClickUp",
+      "description": "Browse ClickUp docs from Raycast",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -31,9 +40,9 @@
       "type": "password",
       "required": true,
       "title": "API Token",
-      "description": "Your ClickUp API token taken from User Settings > apps > API Token in ClickUp Desktop",
+      "description": "Your ClickUp API token taken from User Settings > Apps > API Token in ClickUp Desktop",
       "link": "https://github.com/Ali-Parandeh/raycast-clickup-extension",
-      "placeholder": "Enter your ClickUp API token."
+      "placeholder": "pk_12345...XXXX"
     },
     {
       "name": "teamId",
@@ -63,25 +72,133 @@
       "placeholder": "123456789"
     }
   ],
+  "tools": [
+    {
+      "name": "get-teams",
+      "title": "Get Teams",
+      "description": "Get ClickUp teams"
+    },
+    {
+      "name": "get-spaces",
+      "title": "Get Spaces",
+      "description": "Get ClickUp spaces"
+    },
+    {
+      "name": "get-docs",
+      "title": "Get Docs",
+      "description": "Get ClickUp docs"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@manage-clickup-tasks Which teams am I in?",
+        "mocks": {
+          "get-teams": [
+            {
+              "avatar": null,
+              "id": "1234567890",
+              "name": "Raycast"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@manage-clickup-tasks How many spaces are in Raycast team?",
+        "mocks": {
+          "get-teams": [
+            {
+              "avatar": null,
+              "id": "1234567890",
+              "name": "Raycast"
+            }
+          ],
+          "get-spaces": [
+            {
+              "id": "98765432101",
+              "name": "Team Space"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-spaces",
+              "arguments": {
+                "teamId": "1234567890"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@manage-clickup-tasks Show me my docs",
+        "mocks": {
+          "get-teams": [
+            {
+              "avatar": null,
+              "id": "1234567890",
+              "name": "Raycast"
+            }
+          ],
+          "get-docs": [
+            {
+              "public": false,
+              "deleted": false,
+              "id": "raycast-123",
+              "name": "Raycast Docs"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-docs",
+              "arguments": {
+                "teamId": "1234567890"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.45.2",
-    "@raycast/utils": "^1.4.14",
-    "axios": "^0.24.0",
-    "prettier": "^2.5.1"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^0.24.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

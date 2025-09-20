@@ -13,22 +13,28 @@ import {
   selectTab,
 } from "./arc";
 import { Space, Tab } from "./types";
-import { getSpaceTitle, showFailureToast } from "./utils";
+import { getSpaceTitle, isTab, showFailureToast } from "./utils";
 
-function OpenInArcAction(props: { url: string }) {
+function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {
     try {
-      const openTab = await findTab(props.url);
-
-      if (openTab) {
-        await closeMainWindow();
-        await selectTab(openTab);
+      if (typeof props.tabOrUrl === "string") {
+        await open(props.tabOrUrl, "company.thebrowser.Browser");
       } else {
-        await open(props.url, "company.thebrowser.Browser");
+        await closeMainWindow();
+        try {
+          await selectTab(props.tabOrUrl);
+        } catch (e) {
+          if (props.tabOrUrl.url) {
+            await open(props.tabOrUrl.url, "company.thebrowser.Browser");
+          } else {
+            throw e;
+          }
+        }
       }
     } catch (e) {
       console.error(e);
-      await open(props.url, "company.thebrowser.Browser");
+      await showFailureToast(e, { title: "Failed opening in Arc" });
     }
   }
 
@@ -109,9 +115,7 @@ function OpenInSpaceAction(props: { url: string }) {
       shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
       onOpen={() => setOpen(true)}
     >
-      {data?.map((space) => (
-        <Action key={space.id} title={getSpaceTitle(space)} onAction={() => openSpace(space)} />
-      ))}
+      {data?.map((space) => <Action key={space.id} title={getSpaceTitle(space)} onAction={() => openSpace(space)} />)}
     </ActionPanel.Submenu>
   );
 }
@@ -239,7 +243,7 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
             return;
           }
 
-          return data.filter((t) => !(t.windowId === props.tab.windowId && t.tabId === props.tab.tabId));
+          return data.filter((t) => !(t.id === props.tab.id));
         },
       });
 
@@ -261,18 +265,27 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
 
 // Sections
 
-export function OpenLinkActionSections(props: { url: string; searchText: string }) {
+export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchText: string }) {
+  let url = props.tabOrUrl as string;
+
+  if (isTab(props.tabOrUrl)) {
+    url = props.tabOrUrl.url;
+  } else {
+    const hasProto = /^https?:\/\//i.test(url);
+    url = hasProto ? url : "https://" + url;
+  }
+
   return (
     <>
       <ActionPanel.Section>
-        <OpenInArcAction url={props.url} />
-        <OpenInLittleArc url={props.url} />
+        <OpenInArcAction tabOrUrl={isTab(props.tabOrUrl) ? props.tabOrUrl : url} />
+        <OpenInLittleArc url={url} />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <OpenInNewWindowAction url={props.url} />
-        <OpenInNewIncognitoWindowAction url={props.url} />
-        <OpenInSpaceAction url={props.url} />
-        <OpenInOtherBrowserAction url={props.url} />
+        <OpenInNewWindowAction url={url} />
+        <OpenInNewIncognitoWindowAction url={url} />
+        <OpenInSpaceAction url={url} />
+        <OpenInOtherBrowserAction url={url} />
         <SearchWithGoogleAction searchText={props.searchText} />
       </ActionPanel.Section>
     </>

@@ -6,6 +6,10 @@
   "icon": "reddit_icon_512.png",
   "author": "ewlcheng",
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "index",

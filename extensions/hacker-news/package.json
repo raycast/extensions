@@ -8,12 +8,18 @@
   "contributors": [
     "GastroGeek",
     "sxn",
-    "itsnwa"
+    "itsnwa",
+    "andreaselia",
+    "russellyeo"
   ],
   "categories": [
     "News"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "frontpage",
@@ -22,25 +28,214 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-stories",
+      "title": "Get Hacker News Stories",
+      "description": "Get the latest stories from Hacker News."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "readwiseToken",
+      "type": "password",
+      "title": "Readwise API Token",
+      "description": "Your Readwise API token (found in https://readwise.io/access_token)",
+      "required": false
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@hacker-news What are the latest stories?",
+        "mocks": {
+          "get-stories": [
+            {
+              "comments": "https://news.ycombinator.com/item?id=42887329",
+              "dc:creator": "mkagenius",
+              "content": "\n<p>Hello HN,<p>Keeping up with security vulnerabilities each week can be overwhelming. To make it easier, we’ve created The Exploit Podcast—an automated weekly podcast covering CVEs and security news.<p>You can listen on:<p>Apple Podcasts: <a href=\"https://podcasts.apple.com/us/podcast/the-exploit-podcast-cves-and-security-news/id1793719887\" rel=\"nofollow\">https://podcasts.apple.com/us/podcast/the-exploit-podcast-cv...</a><p>Spotify: <a href=\"https://open.spotify.com/show/6d4yfU1geTLIKtaY7lQJvm?si=YCrhdcziRCyraXMrrI9esw\" rel=\"nofollow\">https://open.spotify.com/show/6d4yfU1geTLIKtaY7lQJvm?si=YCrh...</a><p>We have tried to make it automated so that the creation of podcast is not a burden to us. To help in this, we built CVEingest[1], a tool that:<p>1. Crawls GitHub Advisory and CVE.org, along with referenced sources.\n2. Fetches code diffs (if patch is present)\n3. Generates a SSML script where host and guest are talking which can be used to create audio.\n4. Creates an audio podcast via Microsoft Speech (or lets you download CVE data in JSON).<p>This podcast will help you stay ahead of emerging threats.<p>1. CVEingest: <a href=\"https://github.com/BandarLabs/cveingest\">https://github.com/BandarLabs/cveingest</a></p>\n<hr>\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42887329\">https://news.ycombinator.com/item?id=42887329</a></p>\n<p>Points: 1</p>\n<p># Comments: 0</p>\n",
+              "title": "Show HN: Weekly Podcast on CVEs",
+              "link": "https://podcasts.apple.com/us/podcast/the-exploit-podcast-cves-and-security-news/id1793719887",
+              "pubDate": "Fri, 31 Jan 2025 13:15:24 +0000",
+              "contentSnippet": "Hello HN,\nKeeping up with security vulnerabilities each week can be overwhelming. To make it easier, we’ve created The Exploit Podcast—an automated weekly podcast covering CVEs and security news.\nYou can listen on:\nApple Podcasts: https://podcasts.apple.com/us/podcast/the-exploit-podcast-cv...\nSpotify: https://open.spotify.com/show/6d4yfU1geTLIKtaY7lQJvm?si=YCrh...\nWe have tried to make it automated so that the creation of podcast is not a burden to us. To help in this, we built CVEingest[1], a tool that:\n1. Crawls GitHub Advisory and CVE.org, along with referenced sources.\n2. Fetches code diffs (if patch is present)\n3. Generates a SSML script where host and guest are talking which can be used to create audio.\n4. Creates an audio podcast via Microsoft Speech (or lets you download CVE data in JSON).\nThis podcast will help you stay ahead of emerging threats.\n1. CVEingest: https://github.com/BandarLabs/cveingest\nComments URL: https://news.ycombinator.com/item?id=42887329\nPoints: 1\n# Comments: 0",
+              "creator": "mkagenius",
+              "guid": "https://news.ycombinator.com/item?id=42887329",
+              "isoDate": "2025-01-31T13:15:24.000Z"
+            },
+            {
+              "comments": "https://news.ycombinator.com/item?id=42887321",
+              "dc:creator": "42lux",
+              "content": "\n<p>Article URL: <a href=\"https://archive.gamehistory.org\">https://archive.gamehistory.org</a></p>\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42887321\">https://news.ycombinator.com/item?id=42887321</a></p>\n<p>Points: 1</p>\n<p># Comments: 0</p>\n",
+              "title": "Video Game History Foundation Open Access",
+              "link": "https://archive.gamehistory.org",
+              "pubDate": "Fri, 31 Jan 2025 13:14:32 +0000",
+              "contentSnippet": "Article URL: https://archive.gamehistory.org\nComments URL: https://news.ycombinator.com/item?id=42887321\nPoints: 1\n# Comments: 0",
+              "creator": "42lux",
+              "guid": "https://news.ycombinator.com/item?id=42887321",
+              "isoDate": "2025-01-31T13:14:32.000Z"
+            },
+            {
+              "comments": "https://news.ycombinator.com/item?id=42887301",
+              "dc:creator": "zardinality",
+              "content": "\n<p>Article URL: <a href=\"https://deepclaude.com/\">https://deepclaude.com/</a></p>\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42887301\">https://news.ycombinator.com/item?id=42887301</a></p>\n<p>Points: 1</p>\n<p># Comments: 0</p>\n",
+              "title": "DeepClaude – Free API that wraps DeepSeek R1 and Claude sonnet into one",
+              "link": "https://deepclaude.com/",
+              "pubDate": "Fri, 31 Jan 2025 13:11:45 +0000",
+              "contentSnippet": "Article URL: https://deepclaude.com/\nComments URL: https://news.ycombinator.com/item?id=42887301\nPoints: 1\n# Comments: 0",
+              "creator": "zardinality",
+              "guid": "https://news.ycombinator.com/item?id=42887301",
+              "isoDate": "2025-01-31T13:11:45.000Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-stories",
+              "arguments": {
+                "topic": "newest"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the latest stories from Hacker News"
+          }
+        ]
+      },
+      {
+        "input": "@hacker-news What is the top story today?",
+        "mocks": {
+          "get-stories": [
+            {
+              "comments": "https://news.ycombinator.com/item?id=42887329",
+              "dc:creator": "mkagenius",
+              "content": "\n<p>Hello HN,<p>Keeping up with security vulnerabilities each week can be overwhelming. To make it easier, we’ve created The Exploit Podcast—an automated weekly podcast covering CVEs and security news.<p>You can listen on:<p>Apple Podcasts: <a href=\"https://podcasts.apple.com/us/podcast/the-exploit-podcast-cves-and-security-news/id1793719887\" rel=\"nofollow\">https://podcasts.apple.com/us/podcast/the-exploit-podcast-cv...</a><p>Spotify: <a href=\"https://open.spotify.com/show/6d4yfU1geTLIKtaY7lQJvm?si=YCrhdcziRCyraXMrrI9esw\" rel=\"nofollow\">https://open.spotify.com/show/6d4yfU1geTLIKtaY7lQJvm?si=YCrh...</a><p>We have tried to make it automated so that the creation of podcast is not a burden to us. To help in this, we built CVEingest[1], a tool that:<p>1. Crawls GitHub Advisory and CVE.org, along with referenced sources.\n2. Fetches code diffs (if patch is present)\n3. Generates a SSML script where host and guest are talking which can be used to create audio.\n4. Creates an audio podcast via Microsoft Speech (or lets you download CVE data in JSON).<p>This podcast will help you stay ahead of emerging threats.<p>1. CVEingest: <a href=\"https://github.com/BandarLabs/cveingest\">https://github.com/BandarLabs/cveingest</a></p>\n<hr>\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42887329\">https://news.ycombinator.com/item?id=42887329</a></p>\n<p>Points: 1</p>\n<p># Comments: 0</p>\n",
+              "title": "Show HN: Weekly Podcast on CVEs",
+              "link": "https://podcasts.apple.com/us/podcast/the-exploit-podcast-cves-and-security-news/id1793719887",
+              "pubDate": "Fri, 31 Jan 2025 13:15:24 +0000",
+              "contentSnippet": "Hello HN,\nKeeping up with security vulnerabilities each week can be overwhelming. To make it easier, we’ve created The Exploit Podcast—an automated weekly podcast covering CVEs and security news.\nYou can listen on:\nApple Podcasts: https://podcasts.apple.com/us/podcast/the-exploit-podcast-cv...\nSpotify: https://open.spotify.com/show/6d4yfU1geTLIKtaY7lQJvm?si=YCrh...\nWe have tried to make it automated so that the creation of podcast is not a burden to us. To help in this, we built CVEingest[1], a tool that:\n1. Crawls GitHub Advisory and CVE.org, along with referenced sources.\n2. Fetches code diffs (if patch is present)\n3. Generates a SSML script where host and guest are talking which can be used to create audio.\n4. Creates an audio podcast via Microsoft Speech (or lets you download CVE data in JSON).\nThis podcast will help you stay ahead of emerging threats.\n1. CVEingest: https://github.com/BandarLabs/cveingest\nComments URL: https://news.ycombinator.com/item?id=42887329\nPoints: 1\n# Comments: 0",
+              "creator": "mkagenius",
+              "guid": "https://news.ycombinator.com/item?id=42887329",
+              "isoDate": "2025-01-31T13:15:24.000Z"
+            },
+            {
+              "comments": "https://news.ycombinator.com/item?id=42887321",
+              "dc:creator": "42lux",
+              "content": "\n<p>Article URL: <a href=\"https://archive.gamehistory.org\">https://archive.gamehistory.org</a></p>\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42887321\">https://news.ycombinator.com/item?id=42887321</a></p>\n<p>Points: 1</p>\n<p># Comments: 0</p>\n",
+              "title": "Video Game History Foundation Open Access",
+              "link": "https://archive.gamehistory.org",
+              "pubDate": "Fri, 31 Jan 2025 13:14:32 +0000",
+              "contentSnippet": "Article URL: https://archive.gamehistory.org\nComments URL: https://news.ycombinator.com/item?id=42887321\nPoints: 1\n# Comments: 0",
+              "creator": "42lux",
+              "guid": "https://news.ycombinator.com/item?id=42887321",
+              "isoDate": "2025-01-31T13:14:32.000Z"
+            },
+            {
+              "comments": "https://news.ycombinator.com/item?id=42887301",
+              "dc:creator": "zardinality",
+              "content": "\n<p>Article URL: <a href=\"https://deepclaude.com/\">https://deepclaude.com/</a></p>\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42887301\">https://news.ycombinator.com/item?id=42887301</a></p>\n<p>Points: 1</p>\n<p># Comments: 0</p>\n",
+              "title": "DeepClaude – Free API that wraps DeepSeek R1 and Claude sonnet into one",
+              "link": "https://deepclaude.com/",
+              "pubDate": "Fri, 31 Jan 2025 13:11:45 +0000",
+              "contentSnippet": "Article URL: https://deepclaude.com/\nComments URL: https://news.ycombinator.com/item?id=42887301\nPoints: 1\n# Comments: 0",
+              "creator": "zardinality",
+              "guid": "https://news.ycombinator.com/item?id=42887301",
+              "isoDate": "2025-01-31T13:11:45.000Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-stories",
+              "arguments": {
+                "topic": "frontpage"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the top story from Hacker News"
+          }
+        ]
+      },
+      {
+        "input": "@hacker-news What are the latest jobs?",
+        "mocks": {
+          "get-stories": [
+            {
+              "comments": "https://news.ycombinator.com/item?id=42882121",
+              "dc:creator": "tasn",
+              "content": "\n<p>Article URL: <a href=\"https://www.svix.com/careers/\">https://www.svix.com/careers/</a></p>\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42882121\">https://news.ycombinator.com/item?id=42882121</a></p>\n<p>Points: 0</p>\n<p># Comments: 0</p>\n",
+              "title": "Svix (YC W21) Is Hiring a Developer Marketer (US Remote)",
+              "link": "https://www.svix.com/careers/",
+              "pubDate": "Thu, 30 Jan 2025 21:00:10 +0000",
+              "contentSnippet": "Article URL: https://www.svix.com/careers/\nComments URL: https://news.ycombinator.com/item?id=42882121\nPoints: 0\n# Comments: 0",
+              "creator": "tasn",
+              "guid": "https://news.ycombinator.com/item?id=42882121",
+              "isoDate": "2025-01-30T21:00:10.000Z"
+            },
+            {
+              "comments": "https://news.ycombinator.com/item?id=42879663",
+              "dc:creator": "nedwin",
+              "content": "\n<p>Article URL: <a href=\"https://www.ycombinator.com/companies/great-question/jobs/T5RTrue-lead-product-designer\">https://www.ycombinator.com/companies/great-question/jobs/T5RTrue-lead-product-designer</a></p>\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42879663\">https://news.ycombinator.com/item?id=42879663</a></p>\n<p>Points: 0</p>\n<p># Comments: 0</p>\n",
+              "title": "Great Question (YC W21) Is Hiring Lead Product Designer",
+              "link": "https://www.ycombinator.com/companies/great-question/jobs/T5RTrue-lead-product-designer",
+              "pubDate": "Thu, 30 Jan 2025 17:00:00 +0000",
+              "contentSnippet": "Article URL: https://www.ycombinator.com/companies/great-question/jobs/T5RTrue-lead-product-designer\nComments URL: https://news.ycombinator.com/item?id=42879663\nPoints: 0\n# Comments: 0",
+              "creator": "nedwin",
+              "guid": "https://news.ycombinator.com/item?id=42879663",
+              "isoDate": "2025-01-30T17:00:00.000Z"
+            },
+            {
+              "comments": "https://news.ycombinator.com/item?id=42877004",
+              "dc:creator": "alvaroriv",
+              "content": "\n\n<p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=42877004\">https://news.ycombinator.com/item?id=42877004</a></p>\n<p>Points: 0</p>\n<p># Comments: 0</p>\n",
+              "title": "Codes Health (YC S24) Is Hiring",
+              "link": "https://news.ycombinator.com/item?id=42877004",
+              "pubDate": "Thu, 30 Jan 2025 12:00:46 +0000",
+              "contentSnippet": "Comments URL: https://news.ycombinator.com/item?id=42877004\nPoints: 0\n# Comments: 0",
+              "creator": "alvaroriv",
+              "guid": "https://news.ycombinator.com/item?id=42877004",
+              "isoDate": "2025-01-30T12:00:46.000Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-stories",
+              "arguments": {
+                "topic": "jobs"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the latest job postings from Hacker News"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.16",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
     "lodash": "^4.17.21",
-    "rss-parser": "3.12.0"
+    "rss-parser": "^3.13.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.180",
-    "@typescript-eslint/eslint-plugin": "5.15.0",
-    "@typescript-eslint/parser": "5.15.0",
-    "eslint": "8.11.0",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-react-hooks": "4.3.0",
-    "react-devtools": "^4.24.1",
-    "typescript": "4.6.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "format": "prettier 'src/**' '!**/.DS_Store' --write",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

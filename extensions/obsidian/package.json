@@ -1,14 +1,22 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian",
   "title": "Obsidian",
   "description": "Control Obsidian with Raycast",
-  "icon": "command-icon.png",
+  "icon": "extension_icon.png",
   "author": "marcjulian",
   "categories": [
     "Productivity"
   ],
-  "contributes": [
-    "iancanderson"
+  "contributors": [
+    "KevinBatdorf",
+    "iancanderson",
+    "pernielsentikaer",
+    "ofalvai",
+    "adamadamsmusic",
+    "fservais",
+    "psychomane",
+    "denis_ufimtsev"
   ],
   "license": "MIT",
   "preferences": [
@@ -19,6 +27,15 @@
       "title": "Path to Vault",
       "required": false,
       "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+    },
+    {
+      "name": "configFileName",
+      "type": "textfield",
+      "placeholder": ".obsidian",
+      "title": "Config filename",
+      "required": false,
+      "default": ".obsidian",
+      "description": "Override the vault config filename (default: .obsidian)"
     },
     {
       "name": "excludedFolders",
@@ -115,6 +132,15 @@
           "default": false
         },
         {
+          "name": "fuzzySearch",
+          "type": "checkbox",
+          "label": "Use Fuzzy Search",
+          "title": "Use Fuzzy Search",
+          "required": false,
+          "description": "If fuzzy search should be used",
+          "default": false
+        },
+        {
           "name": "primaryAction",
           "type": "dropdown",
           "title": "Primary Action",
@@ -131,8 +157,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }
@@ -140,9 +170,9 @@
     },
     {
       "name": "starredNotesCommand",
-      "title": "Starred Notes",
+      "title": "Bookmarked Notes",
       "subtitle": "Obsidian",
-      "description": "Search, open, view, copy, paste and edit starred notes in Obsidian.",
+      "description": "Search, open, view, copy, paste and edit bookmarked notes in Obsidian.",
       "mode": "view",
       "arguments": [
         {
@@ -217,8 +247,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }
@@ -266,6 +300,15 @@
           "title": "Name of heading in note in which to append",
           "required": false,
           "description": "If no heading is set, text will be appended to the end of the daily note"
+        },
+        {
+          "name": "prepend",
+          "type": "checkbox",
+          "label": "Prepend",
+          "title": "Prepend",
+          "required": false,
+          "description": "Prepend the text instead of appending",
+          "default": false
         },
         {
           "name": "silent",
@@ -411,8 +454,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }
@@ -477,26 +524,104 @@
       "subtitle": "Obsidian",
       "description": "See your pinned notes at a glance and control actions from the menu bar.",
       "mode": "menu-bar"
+    },
+    {
+      "name": "appendTaskCommand",
+      "title": "Append Task",
+      "subtitle": "Obsidian",
+      "description": "Append a task to a note of your choice",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Your task",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "dueDate",
+          "placeholder": "YYYY-MM-DD",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Path of note",
+          "name": "notePath",
+          "required": true,
+          "title": "Path of the note you wish to append the task to",
+          "type": "textfield"
+        },
+        {
+          "name": "noteTag",
+          "required": false,
+          "title": "Tag to append to the beginning of the task.",
+          "description": "Defaults to #task for compatibility with Obsidian Tasks.",
+          "type": "textfield",
+          "default": "#task"
+        },
+        {
+          "name": "creationDate",
+          "type": "checkbox",
+          "title": "Creation Date",
+          "label": "Append creation date to the task",
+          "required": false,
+          "description": "➕ YYYY-MM-DD (Current date)",
+          "default": false
+        },
+        {
+          "description": "Name of Obsidian vault where note is",
+          "name": "vaultName",
+          "required": false,
+          "title": "Name of Obsidian vault where note is",
+          "type": "textfield"
+        },
+        {
+          "description": "If no heading is not set, text will be appended to the end of the note",
+          "name": "heading",
+          "required": false,
+          "title": "Name of heading in note in which to append",
+          "type": "textfield"
+        },
+        {
+          "default": true,
+          "description": "Don't open note when appending.",
+          "label": "Silent Mode",
+          "name": "silent",
+          "required": false,
+          "title": "Silent Mode",
+          "type": "checkbox"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.0",
+    "@raycast/api": "^1.94.0",
     "@types/uuid": "^8.3.4",
+    "fuse.js": "^7.0.0",
+    "luxon": "^3.4.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.52",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.42.0",
+    "prettier": "^2.8.8",
     "typescript": "^4.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -5,6 +5,9 @@
   "description": "This extension helps you to search prayer time for the user location",
   "icon": "command-icon.png",
   "author": "mzaien",
+  "contributors": [
+    "menisy"
+  ],
   "categories": [
     "Applications",
     "News"
@@ -57,6 +60,15 @@
       "label": "Activate 12 hours system",
       "type": "checkbox",
       "default": false,
+      "required": false
+    },
+    {
+      "name": "menu_bar_icon_only",
+      "title": "Menu Bar Display",
+      "description": "Display icon only in Menu Bar",
+      "label": "Display icon only in Menu Bar",
+      "type": "checkbox",
+      "default": true,
       "required": false
     },
     {
@@ -125,6 +137,10 @@
         {
           "title": "MOONSIGHTING",
           "value": "15"
+        },
+        {
+          "title": "MOROCCO",
+          "value": "21"
         }
       ],
       "required": false

@@ -1,70 +1,6 @@
-import { Color, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
-
-interface Domain {
-  display: string;
-  banned?: boolean;
-  active?: boolean;
-}
-
-const fetchAccountAPI = async (auth: string, API_URL: string) => {
-  try {
-    const apiResponseAccount = await fetch(API_URL + "account", {
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
-
-    const apiResponseJSON: any = await apiResponseAccount.json();
-
-    if (apiResponseJSON.success === false) {
-      const errorMessage = apiResponseJSON.error ?? "ImprovMX API Error";
-      await showToast(Toast.Style.Failure, "ImprovMX Error", errorMessage);
-      return;
-    }
-
-    const { email, plan } = apiResponseJSON.account ?? {};
-
-    if (email) {
-      await LocalStorage.setItem("improvmx_email", email);
-      await LocalStorage.setItem("improvmx_unix_timestamp", Math.floor(Date.now() / 1000));
-
-      if (plan) {
-        await LocalStorage.setItem("improvmx_plan", plan.name);
-      } else {
-        await LocalStorage.setItem("improvmx_plan", "Free");
-      }
-
-      return email;
-    } else {
-      const errorMessage = "Failed to parse ImprovMX API response";
-      await showToast(Toast.Style.Failure, "ImprovMX Error", errorMessage);
-      return;
-    }
-  } catch (error) {
-    showToast(Toast.Style.Failure, "ImprovMX Error", "Failed to fetch account details, please check your API key");
-    return;
-  }
-};
-
-const fetchAccont = async (auth: string, API_URL: string) => {
-  const improvmx_email = await LocalStorage.getItem("improvmx_email");
-  const improvmx_unix_timestamp = (await LocalStorage.getItem("improvmx_unix_timestamp")) as number;
-
-  if (improvmx_unix_timestamp && improvmx_email) {
-    const current_unix_timestamp = Math.floor(Date.now() / 1000);
-    const difference = current_unix_timestamp - improvmx_unix_timestamp;
-    const hours = Math.floor(difference / 3600);
-    if (hours < 24) {
-      return improvmx_email;
-    } else {
-      return fetchAccountAPI(auth, API_URL);
-    }
-  } else {
-    return fetchAccountAPI(auth, API_URL);
-  }
-};
+import { Color, Icon } from "@raycast/api";
+import { randomInt } from "node:crypto";
+import { Domain, ErrorResponse } from "./types";
 
 const domainIcon = (domain: Domain) => {
   if (domain.banned || domain.active == false) {
@@ -79,9 +15,62 @@ const generatePassword = () => {
   return Array(12)
     .fill(chars)
     .map(function (x) {
-      return x[Math.floor(Math.random() * x.length)];
+      return x[randomInt(x.length)];
     })
     .join("");
 };
 
-export { fetchAccont, domainIcon, generatePassword, fetchAccountAPI };
+const generateAlias = () => {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
+/**
+ * Parses the ImprovMX API response.
+ *
+ * @template T The type of the expected successful response data.
+ *
+ * @param {Response} response The fetch response object.
+ * @param {object} [options={pagination: true}] Options to control the response parsing.
+ * @param {boolean} [options.pagination=true] Whether to handle pagination in the response.
+ *
+ * @returns {Promise<{ data: T; hasMore?: boolean }>} A promise that resolves to an object containing the parsed data and pagination info (if applicable).
+ *
+ * @throws Will throw an error if the response is not successful, or if there is an issue with the API token.
+ */
+export async function parseImprovMXResponse<T>(response: Response, options = { pagination: true }) {
+  const { pagination } = options;
+
+  type PageMeta = {
+    total: number;
+    limit: number;
+    page: number;
+  };
+  type SuccessResponse = {
+    success: true;
+  } & T;
+
+  if (!response.ok) {
+    const result = (await response.json()) as ErrorResponse;
+    if (result.code === 401) throw new Error("Invalid API Token");
+
+    if ("error" in result) throw new Error(result.error);
+    else if ("errors" in result) throw new Error(Object.values(result.errors).flat()[0]);
+    throw new Error(
+      "There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com",
+    );
+  }
+  if (pagination) {
+    const result = (await response.json()) as SuccessResponse & PageMeta;
+    return {
+      data: result,
+      hasMore: result.page * result.limit < result.total,
+    };
+  } else {
+    const result = (await response.json()) as SuccessResponse;
+    return {
+      data: result,
+    };
+  }
+}
+
+export { domainIcon, generatePassword, generateAlias };

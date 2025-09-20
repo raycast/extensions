@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "day-one",
+  "title": "Day One",
+  "description": "Add entries to Day One",
+  "icon": "day-one.png",
+  "author": "AntonNiklasson",
+  "contributors": [
+    "bestemic"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-entry",
+      "title": "Add Entry",
+      "subtitle": "Day One",
+      "description": "Add a new entry to one of your journals in Day One",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

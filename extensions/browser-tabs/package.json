@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browser-tabs",
+  "title": "Browser Tabs",
+  "description": "Search and open tabs in Chrome, Safari, Edge, Arc, Brave, Vivaldi, Opera and Orion, etc.",
+  "icon": "browser-tabs-icon.png",
+  "author": "koinzhang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Browser Tabs",
+      "description": "Search and open tabs from your browsers.",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Tabs",
+          "name": "showDomain",
+          "label": "Show Domain",
+          "description": "When enabled, the domain of the tab will be displayed as a subtitle.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "recentOnTop",
+          "label": "Recent Tabs on Top",
+          "description": "When enabled, the recent tabs will be displayed on top.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "title": "Advanced",
+          "name": "rememberFilterTag",
+          "label": "Remember Filter Tag",
+          "description": "When enabled, the last used filter tag will be remembered and used as the default filter tag.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "searchEngine",
+          "type": "dropdown",
+          "required": false,
+          "title": "Search Engine",
+          "description": "Search Engine when searching text.",
+          "default": "Google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "Google"
+            },
+            {
+              "title": "Bing",
+              "value": "Bing"
+            },
+            {
+              "title": "Baidu",
+              "value": "Baidu"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "DuckDuckGo"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.1.0",
+    "fuse.js": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.10",
+    "@types/react": "19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

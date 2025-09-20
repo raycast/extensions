@@ -6,14 +6,14 @@ const SearchModeAction = () => {
   const [searchMode, setSearchMode] = useAtom(searchModeAtom);
   return (
     <Action
-      title={`Switch to ${searchMode ? "insert" : "search"} mode`}
+      icon={{ source: searchMode ? Icon.Pencil : Icon.MagnifyingGlass }}
       onAction={async () => {
         await showToast(Toast.Style.Success, `Switched to ${searchMode ? "insert" : "search"} mode.`);
         setSearchMode(!searchMode);
         await clearSearchBar();
       }}
-      icon={{ source: searchMode ? Icon.Pencil : Icon.MagnifyingGlass }}
       shortcut={{ key: "s", modifiers: ["cmd"] }}
+      title={`Switch to ${searchMode ? "insert" : "search"} mode`}
     />
   );
 };

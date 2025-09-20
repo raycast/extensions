@@ -1,6 +1,6 @@
+import { Clipboard } from "@raycast/api";
 import fetch from "node-fetch";
 import path from "path";
-import { runAppleScript } from "run-applescript";
 import { FileOptions, temporaryWrite } from "tempy";
 
 export default async function copyFileToClipboard(url: string, name?: string) {
@@ -30,7 +30,7 @@ export default async function copyFileToClipboard(url: string, name?: string) {
   }
 
   try {
-    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
+    await Clipboard.copy({ file });
   } catch (e) {
     const error = e as Error;
     throw new Error(`Failed to copy Meme: "${error.message}"`);

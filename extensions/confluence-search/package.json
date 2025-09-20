@@ -1,94 +1,137 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "confluence-search",
-  "title": "Confluence Search",
-  "description": "Search through Confluence",
-  "icon": "confluence-icon.png",
-  "author": "daviddkkim",
+  "name": "confluence",
+  "title": "Confluence",
+  "description": "Quickly navigate, create and search Confluence through Raycast.",
+  "icon": "command-icon.png",
+  "author": "tbrown",
   "contributors": [
-    "lr1980"
+    "xmok",
+    "litomore"
+  ],
+  "categories": [
+    "Productivity",
+    "Documentation"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Wiki",
+      "name": "search",
+      "title": "Search",
       "subtitle": "Confluence",
-      "description": "Showing search results in Confleunce Wiki",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "instanceType",
-      "type": "dropdown",
-      "required": true,
-      "title": "Confluence instance type",
-      "description": "Cloud or on-premise",
-      "data": [
+      "description": "Search for pages and blogs across Confluence.",
+      "mode": "view",
+      "preferences": [
         {
-          "value": "cloud",
-          "title": "Cloud"
+          "name": "searchAttachments",
+          "label": "Include Attachments",
+          "description": "Include attachments in search results.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
         },
         {
-          "value": "on-premise",
-          "title": "On-premise"
+          "name": "sort",
+          "type": "dropdown",
+          "required": false,
+          "title": "Sort by",
+          "description": "Sort search results by",
+          "data": [
+            {
+              "value": "",
+              "title": "--"
+            },
+            {
+              "value": "lastmodified desc",
+              "title": "Last modified (desc)"
+            },
+            {
+              "value": "created desc",
+              "title": "Created (desc)"
+            },
+            {
+              "value": "title",
+              "title": "Title"
+            }
+          ]
         }
       ]
     },
     {
-      "name": "instance",
-      "type": "textfield",
-      "required": true,
-      "title": "Domain",
-      "description": "Domain of your Atlassian instance",
-      "placeholder": "my.atlassian.net"
+      "name": "people",
+      "title": "People",
+      "subtitle": "Confluence",
+      "description": "Search for people in Confluence.",
+      "mode": "view"
     },
     {
-      "name": "unsafeHttps",
-      "type": "checkbox",
-      "required": false,
-      "title": "Unsafe HTTPS",
-      "description": "Activate unsafe HTTPS mode for self-signed certificates",
-      "default": false,
-      "label": "Enable"
+      "name": "recent",
+      "title": "Recent",
+      "subtitle": "Confluence",
+      "description": "See your recently viewed pages.",
+      "mode": "view"
     },
     {
-      "name": "user",
-      "type": "textfield",
-      "required": false,
-      "title": "Username (cloud only)",
-      "description": "Your Account",
-      "placeholder": "me@company.com"
+      "name": "popular",
+      "title": "Popular",
+      "subtitle": "Confluence",
+      "description": "See what's popular in Confluence.",
+      "mode": "view"
     },
     {
-      "name": "token",
-      "type": "password",
-      "required": true,
-      "title": "API Token",
-      "description": "Your Atlassian API token.",
-      "link": "https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html",
-      "placeholder": "Enter your Atlassian API token."
+      "name": "go",
+      "title": "Go",
+      "subtitle": "Confluence",
+      "description": "Quickly jump to useful places in Confluence.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-site",
+      "title": "Switch Site",
+      "subtitle": "Confluence",
+      "description": "Switch your active Confluence site.",
+      "mode": "view"
+    },
+    {
+      "name": "new-page",
+      "title": "Create Page",
+      "subtitle": "Confluence",
+      "description": "Create a new page.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-blog",
+      "title": "Create Blog",
+      "subtitle": "Confluence",
+      "description": "Create a new blog.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
-    "node-fetch": "^3.0.0",
-    "prettier": "^2.5.1"
+    "@apollo/client": "^3.13.8",
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.0",
+    "apollo-link-rest": "^0.9.0",
+    "apollo3-cache-persist": "^0.15.0",
+    "async-mutex": "^0.5.0",
+    "cross-fetch": "^4.1.0",
+    "graphql": "^15.0.0",
+    "qs": "^6.14.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.3",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

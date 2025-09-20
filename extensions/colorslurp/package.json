@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "colorslurp",
   "title": "ColorSlurp",
-  "description": "Control ColorSlurp's color picker features from Raycast",
+  "description": "Pick colors and convert them to different formats with ColorSlurp.",
   "icon": "colorslurp-icon.png",
   "author": "Jordan-Ellis",
   "categories": [
@@ -20,6 +20,66 @@
       "keywords": [
         "dropper",
         "magnifier"
+      ]
+    },
+    {
+      "name": "recent-colors",
+      "title": "Recent Colors",
+      "description": "View recent colors",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action for the selected color.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "convert-color",
+      "title": "Convert Color",
+      "description": "Convert a color to a different format",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "color",
+          "placeholder": "Color",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action for the selected color.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
+          ]
+        }
       ]
     },
     {
@@ -85,6 +145,11 @@
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.38.3"
-  }
+    "@raycast/api": "^1.38.3",
+    "@raycast/utils": "^1.4.16",
+    "osascript-tag": "^0.1.2"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

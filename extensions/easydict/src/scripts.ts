@@ -12,7 +12,7 @@ import { showToast, Toast } from "@raycast/api";
 import { exec, execFile } from "child_process";
 import { execa } from "execa";
 import querystring from "node:querystring";
-import { DetectedLangModel, LanguageDetectType } from "./detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "./detectLanguage/types";
 import { QueryWordInfo } from "./dictionary/youdao/types";
 import { getAppleLangCode, getYoudaoLangCodeFromAppleCode } from "./language/languages";
 import { RequestErrorInfo, RequestType, TranslationType } from "./types";
@@ -27,7 +27,7 @@ const execCommandTimeout = 10000; // 10s
 export function appleTranslate(
   queryTextInfo: QueryWordInfo,
   abortController?: AbortController,
-  timeout = execCommandTimeout
+  timeout = execCommandTimeout,
 ): Promise<string | undefined> {
   console.log(`---> start Apple translate`);
 
@@ -116,7 +116,7 @@ export function appleTranslate(
 export function appleLanguageDetect(
   text: string,
   abortController?: AbortController,
-  timeout = execCommandTimeout
+  timeout = execCommandTimeout,
 ): Promise<DetectedLangModel> {
   console.log(`start apple detect: ${text}`);
   const startTime = new Date().getTime();

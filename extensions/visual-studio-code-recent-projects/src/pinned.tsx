@@ -1,7 +1,7 @@
-import { isDeepStrictEqual } from "util";
-import { EntryLike, PinnedMovement } from "./types";
-import { layout } from "./preferences";
 import { useCachedState } from "@raycast/utils";
+import { isDeepStrictEqual } from "util";
+import { layout } from "./preferences";
+import { EntryLike, PinnedMovement } from "./types";
 
 const GRID_COLUMNS = 6;
 

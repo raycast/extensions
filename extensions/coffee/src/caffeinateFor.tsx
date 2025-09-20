@@ -1,66 +1,37 @@
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
-import { useForm } from "@raycast/utils";
-import { CaffeinateFormValues } from "./interfaces";
+import { showToast, Toast } from "@raycast/api";
 import { startCaffeinate } from "./utils";
 
-export default function Command() {
-  const { handleSubmit, itemProps } = useForm<CaffeinateFormValues>({
-    async onSubmit(values) {
-      const hasValue = Object.keys(values).some((key) => values[key] !== "");
+interface Arguments {
+  hours: string;
+  minutes: string;
+  seconds: string;
+}
 
-      if (!hasValue) {
-        await showToast(Toast.Style.Failure, "No values set for caffeinate length");
-        return;
-      }
+export default async function Command(props: { arguments: Arguments }) {
+  const { hours, minutes, seconds } = props.arguments;
+  const hasValue = hours || minutes || seconds;
 
-      let seconds = 0;
-      let caffeinateString = "";
-      const mapping = [
-        { multiplier: 1, value: values.seconds, string: "s" },
-        { multiplier: 60, value: values.minutes, string: "m" },
-        { multiplier: 3600, value: values.hours, string: "h" },
-      ];
+  if (!hasValue) {
+    await showToast(Toast.Style.Failure, "No values set for caffeinate length");
+    return;
+  }
 
-      mapping.forEach((item) => {
-        if (item.value) {
-          seconds += parseInt(item.value) * item.multiplier;
-          caffeinateString += item.value + item.string;
-        }
-      });
+  const validInput =
+    (!hours || (Number.isInteger(Number(hours)) && Number(hours) >= 0)) &&
+    (!minutes || (Number.isInteger(Number(minutes)) && Number(minutes) >= 0)) &&
+    (!seconds || (Number.isInteger(Number(seconds)) && Number(seconds) >= 0));
 
-      await startCaffeinate(true, `Caffeinating your Mac for ${caffeinateString}`, `-t ${seconds}`);
-      await popToRoot();
-    },
-    validation: {
-      hours: (value) => {
-        if (value && isNaN(parseInt(value, 10))) {
-          return "Hours must be a number";
-        }
-      },
-      minutes: (value) => {
-        if (value && isNaN(parseInt(value, 10))) {
-          return "Minutes must be a number";
-        }
-      },
-      seconds: (value) => {
-        if (value && isNaN(parseInt(value, 10))) {
-          return "Seconds must be a number";
-        }
-      },
-    },
-  });
+  if (!validInput) {
+    await showToast(Toast.Style.Failure, "Please ensure all arguments are whole numbers");
+    return;
+  }
 
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Caffeinate" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField title="Hours" {...itemProps.hours} />
-      <Form.TextField title="Minutes" {...itemProps.minutes} />
-      <Form.TextField title="Seconds" {...itemProps.seconds} />
-    </Form>
+  const totalSeconds = Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+  const formattedTime = `${hours ? `${hours}h` : ""}${minutes ? `${minutes}m` : ""}${seconds ? `${seconds}s` : ""}`;
+
+  await startCaffeinate(
+    { menubar: true, status: true },
+    `Caffeinating your Mac for ${formattedTime}`,
+    `-t ${totalSeconds}`,
   );
 }

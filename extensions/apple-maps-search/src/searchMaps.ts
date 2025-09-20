@@ -1,12 +1,18 @@
-import open from "open";
-import { makeSearchURL } from "./utils";
+import { LaunchProps, open } from "@raycast/api";
+import { makePlatformSearchURL } from "./utils";
 
-interface SearchQueryArguments {
-  query: "string";
-}
-
-export default async (props: { arguments: SearchQueryArguments }) => {
+export default async (props: LaunchProps) => {
   const { query } = props.arguments;
-  const searchURL = makeSearchURL(query);
-  open(searchURL);
+
+  // Ensure we have a valid query string
+  const searchQuery = query || props.fallbackText || "";
+
+  if (!searchQuery.trim()) {
+    console.error("No search query provided");
+    return;
+  }
+
+  const searchURL = makePlatformSearchURL(searchQuery);
+  console.log("Opening URL:", searchURL);
+  await open(searchURL);
 };

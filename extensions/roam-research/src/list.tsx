@@ -1,45 +1,55 @@
 import { ActionPanel, Action, Icon, List, confirmAlert, Alert, useNavigation } from "@raycast/api";
-import { useGraphConfigCache, graphConfigCache } from "./cache";
-import { UpdateAction } from "./components";
+import { useGraphsConfig } from "./utils";
 import { GraphDetail } from "./detail";
 import { keys } from "./utils";
 
-export const graphList = (graphCache: CachedGraphMap, onAction: (graph: CachedGraph) => void) => {
-  if (keys(graphCache).length === 0) {
+interface OnActionProps {
+  onAction: (graphConfig: GraphConfig) => void;
+  title?: string;
+}
+
+export const graphList = (
+  graphsConfig: GraphsConfigMap,
+  onActionProps: OnActionProps,
+  removeGraphFunction?: (graphName: string) => void
+) => {
+  if (keys(graphsConfig).length === 0) {
     return <List.EmptyView icon={Icon.Tray} title="Please add graph first" />;
   }
-  return keys(graphCache).map((key) => {
+  return keys(graphsConfig).map((graphName) => {
     return (
       <List.Item
-        title={key}
-        key={key}
+        title={graphName}
+        key={graphName}
         icon={Icon.MagnifyingGlass}
         actions={
           <ActionPanel>
             <Action
               icon={Icon.MagnifyingGlass}
-              title="Detail"
+              title={onActionProps.title ?? "Detail"}
               onAction={() => {
-                onAction(graphCache[key]);
+                onActionProps.onAction(graphsConfig[graphName]);
               }}
             />
-            <UpdateAction graph={graphCache[key]} />
-            <Action
-              icon={Icon.Trash}
-              title={"Delete"}
-              onAction={async () => {
-                await confirmAlert({
-                  title: "Delete the graph?",
-                  primaryAction: {
-                    title: "Delete",
-                    onAction() {
-                      graphConfigCache.delete();
+            {/* removeGraphFunction is optional and we only show the "Remove Graph" as a possible option when it is passed */}
+            {removeGraphFunction && (
+              <Action
+                icon={Icon.Trash}
+                title={"Remove Graph"}
+                onAction={async () => {
+                  await confirmAlert({
+                    title: "Remove this graph from Raycast?",
+                    primaryAction: {
+                      title: "Delete",
+                      onAction() {
+                        removeGraphFunction(graphName);
+                      },
+                      style: Alert.ActionStyle.Destructive,
                     },
-                    style: Alert.ActionStyle.Destructive,
-                  },
-                });
-              }}
-            />
+                  });
+                }}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -48,12 +58,14 @@ export const graphList = (graphCache: CachedGraphMap, onAction: (graph: CachedGr
 };
 
 export default function Command() {
-  const [graphCache] = useGraphConfigCache();
+  const { graphsConfig } = useGraphsConfig();
   const { push } = useNavigation();
   return (
     <List>
-      {graphList(graphCache, (graph) => {
-        push(<GraphDetail graph={graph} />);
+      {graphList(graphsConfig, {
+        onAction: (graphConfig) => {
+          push(<GraphDetail graphConfig={graphConfig} />);
+        },
       })}
     </List>
   );

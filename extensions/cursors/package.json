@@ -1,0 +1,95 @@
+{
+  "name": "cursors",
+  "title": "Cursors",
+  "description": "All macOS cursors at your fingertips",
+  "icon": "cursors.png",
+  "author": "storm",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Cursors",
+      "description": "All macOS cursors at your fingertips",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "gridSize",
+      "title": "Grid Size",
+      "description": "Number of columns to display in the grid",
+      "type": "dropdown",
+      "required": false,
+      "default": "8",
+      "data": [
+        {
+          "title": "3 Columns",
+          "value": "3"
+        },
+        {
+          "title": "4 Columns",
+          "value": "4"
+        },
+        {
+          "title": "5 Columns",
+          "value": "5"
+        },
+        {
+          "title": "6 Columns",
+          "value": "6"
+        },
+        {
+          "title": "7 Columns",
+          "value": "7x"
+        },
+        {
+          "title": "8 Columns",
+          "value": "8"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0"
+  },
+  "devDependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

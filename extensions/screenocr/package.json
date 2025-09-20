@@ -1,0 +1,198 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenocr",
+  "title": "ScreenOCR",
+  "description": "Extract text from screen captures locally via OCR",
+  "icon": "command-icon.png",
+  "author": "huzef44",
+  "contributors": [
+    "anwarulislam",
+    "xilopaint"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryLanguage",
+      "title": "Primary Language",
+      "description": "Primary language for text recognition",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "🇺🇸 English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "🇫🇷 French (France)",
+          "value": "fr-FR"
+        },
+        {
+          "title": "🇮🇹 Italian (Italy)",
+          "value": "it-IT"
+        },
+        {
+          "title": "🇩🇪 German (Germany)",
+          "value": "de-DE"
+        },
+        {
+          "title": "🇪🇸 Spanish (Spain)",
+          "value": "es-ES"
+        },
+        {
+          "title": "🇧🇷 Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "🇨🇳 Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "🇹🇼 Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "🇨🇳 Cantonese (Simplified)",
+          "value": "yue-Hans"
+        },
+        {
+          "title": "🇭🇰 Cantonese (Traditional)",
+          "value": "yue-Hant"
+        },
+        {
+          "title": "🇰🇷 Korean (South Korea)",
+          "value": "ko-KR"
+        },
+        {
+          "title": "🇯🇵 Japanese (Japan)",
+          "value": "ja-JP"
+        },
+        {
+          "title": "🇷🇺 Russian (Russia)",
+          "value": "ru-RU"
+        },
+        {
+          "title": "🇺🇦 Ukrainian (Ukraine)",
+          "value": "uk-UA"
+        },
+        {
+          "title": "🇹🇭 Thai (Thailand)",
+          "value": "th-TH"
+        },
+        {
+          "title": "🇻🇳 Vietnamese (Vietnam)",
+          "value": "vi-VT"
+        },
+        {
+          "title": "🇸🇦 Arabic (Saudi Arabia)",
+          "value": "ar-SA"
+        },
+        {
+          "title": "🇸🇦 Arabic, Najdi (Saudi Arabia)",
+          "value": "ars-SA"
+        }
+      ]
+    },
+    {
+      "name": "ocrMode",
+      "title": "Recognition Level",
+      "description": "Affects performance and accuracy of the text recognition",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Accurate",
+          "value": "accurate"
+        },
+        {
+          "title": "Fast",
+          "value": "fast"
+        }
+      ]
+    },
+    {
+      "name": "languageCorrection",
+      "title": "Options",
+      "description": "Disabling this property returns the raw recognition results, which provides performance benefits but less accurate results",
+      "type": "checkbox",
+      "required": true,
+      "label": "Use language correction",
+      "default": true
+    },
+    {
+      "name": "ignoreLineBreaks",
+      "description": "Ignores Line Breaks",
+      "type": "checkbox",
+      "required": false,
+      "label": "Ignore line breaks",
+      "default": false
+    },
+    {
+      "name": "keepImage",
+      "description": "Keep the image in the clipboard after text recognition",
+      "type": "checkbox",
+      "required": true,
+      "label": "Keep image in clipboard",
+      "default": false
+    },
+    {
+      "name": "customWordsList",
+      "title": "Custom Words List",
+      "description": "You can improve text recognition by providing a list of words that are special to your text",
+      "type": "textfield",
+      "required": false,
+      "label": "Custom Words List"
+    }
+  ],
+  "commands": [
+    {
+      "title": "Select Recognition Languages",
+      "description": "Choose which languages will be used for text recognition",
+      "name": "preferences",
+      "mode": "view"
+    },
+    {
+      "name": "recognize-text",
+      "title": "Recognize Text",
+      "description": "Detect all text from the captured screen area",
+      "mode": "no-view"
+    },
+    {
+      "name": "recognize-text-fullscreen",
+      "title": "Recognize Text on Entire Screen",
+      "description": "Detect all text from the captured screen",
+      "mode": "no-view"
+    },
+    {
+      "name": "detect-barcode",
+      "title": "Detect Barcode/QR Code",
+      "description": "Detect barcodes and QR codes from the captured screen area",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
+    "use-immer": "^0.11.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "24.0.13",
+    "@types/react": "19.1.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

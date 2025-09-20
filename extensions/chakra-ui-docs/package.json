@@ -6,7 +6,8 @@
   "icon": "chakra.png",
   "author": "pgvr",
   "contributors": [
-    "Ansub"
+    "Ansub",
+    "stanley_ding"
   ],
   "license": "MIT",
   "commands": [
@@ -52,22 +53,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3"
+    "@raycast/api": "^1.77.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/uuid": "^8.3.4",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/react": "^18.3.3",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.14.1",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0-rc.12",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "doc:update-component": "npx tsx utils/updateComponentsDoc.ts && ray lint --fix"
   }
 }

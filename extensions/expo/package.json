@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "expo",
+  "title": "Expo",
+  "description": "Manage your expo.dev Projects, Apple Devices and Environment Variables",
+  "icon": "extension-icon.png",
+  "author": "patrick-web",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-projects",
+      "title": "Projects",
+      "subtitle": "Manage expo projects",
+      "description": "Manage project builds,submissions and updates",
+      "mode": "view"
+    },
+    {
+      "name": "apple-devices",
+      "title": "Apple Devices",
+      "subtitle": "Manage EAS apple devices",
+      "description": "View, Create and Edit apple devices",
+      "mode": "view"
+    },
+    {
+      "name": "manage-envs",
+      "title": "Environment Variables",
+      "subtitle": "Manage project environment variables",
+      "description": "View, Create, Edit and Delete environment variables",
+      "mode": "view"
+    },
+    {
+      "name": "push-notification",
+      "title": "Push Notification",
+      "subtitle": "Test Expo push notifications",
+      "description": "Send customized push notifications to your Expo application users",
+      "mode": "view"
+    },
+    {
+      "name": "login",
+      "title": "Login",
+      "subtitle": "Login to your expo account",
+      "description": "Login to your expo account",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0",
+    "@tanstack/react-query": "^5.66.0",
+    "@types/qrcode": "^1.5.5",
+    "axios": "^1.8.4",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

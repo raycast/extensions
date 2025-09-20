@@ -14,7 +14,7 @@ import { useState } from "react";
 import Style = Toast.Style;
 import { LocalStorage } from "@raycast/api";
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
-import { CallbackBasUrls } from "./utils/Defines";
+import { CallbackBaseUrls } from "./utils/Defines";
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 
 class Draft {
@@ -62,7 +62,7 @@ interface CommandForm {
 
 function AppendToDraft(draft: DraftPreAppend) {
   async function handleAppendAction(values: CommandForm) {
-    const callbackUrl = new CallbackUrl(CallbackBasUrls.APPEND_TO_DRAFT);
+    const callbackUrl = new CallbackUrl(CallbackBaseUrls.APPEND_TO_DRAFT);
     callbackUrl.addParam({ name: "uuid", value: draft.draftUuid });
     callbackUrl.addParam({ name: "text", value: draft.draftPrefix + values.content });
     callbackUrl.openCallbackUrl();
@@ -90,7 +90,7 @@ function AppendToDraft(draft: DraftPreAppend) {
 
 function PrependToDraft(draft: DraftPreAppend) {
   async function handlePrependAction(values: CommandForm) {
-    const callbackUrl = new CallbackUrl(CallbackBasUrls.PREPEND_TO_DRAFT);
+    const callbackUrl = new CallbackUrl(CallbackBaseUrls.PREPEND_TO_DRAFT);
     callbackUrl.addParam({ name: "uuid", value: draft.draftUuid });
     callbackUrl.addParam({ name: "text", value: draft.draftPrefix + values.content });
     callbackUrl.openCallbackUrl();
@@ -253,7 +253,15 @@ export default function Command() {
     if (draft.preferPrepend) {
       return (
         <Action.CreateQuicklink
-          quicklink={{ link: CallbackBasUrls.PREPEND_TO_DRAFT + "uuid=" + draft.uuid + "&text={text}" }}
+          quicklink={{
+            link:
+              CallbackBaseUrls.PREPEND_TO_DRAFT +
+              "uuid=" +
+              draft.uuid +
+              "&text=" +
+              encodeURIComponent(draft.prefix) +
+              "{text}",
+          }}
           icon={Icon.Link}
           title={'Create Quicklink to Prepend to Draft "' + draft.title + '"'}
         />
@@ -261,7 +269,15 @@ export default function Command() {
     } else {
       return (
         <Action.CreateQuicklink
-          quicklink={{ link: CallbackBasUrls.APPEND_TO_DRAFT + "uuid=" + draft.uuid + "&text={text}" }}
+          quicklink={{
+            link:
+              CallbackBaseUrls.APPEND_TO_DRAFT +
+              "uuid=" +
+              draft.uuid +
+              "&text=" +
+              encodeURIComponent(draft.prefix) +
+              "{text}",
+          }}
           icon={Icon.Link}
           title={'Create Quicklink to Append to Draft "' + draft.title + '"'}
         />

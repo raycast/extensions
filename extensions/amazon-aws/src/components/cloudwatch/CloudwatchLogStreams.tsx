@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchLogStreams } from "../../actions";
-import { getActionOpenInBrowser, getFilterPlaceholder, resourceToConsoleLink } from "../../util";
+import { getFilterPlaceholder, resourceToConsoleLink } from "../../util";
 import { LogStartTimes } from "../../interfaces";
 import CloudwatchLogs from "./CloudwatchLogs";
 import CloudwatchLogsTimeDropdown from "../searchbar/CloudwatchLogsTimeDropdown";
+import { AwsAction } from "../common/action";
 
 function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
   const [logStartTime, setLogStartTime] = useState<LogStartTimes>(LogStartTimes.OneHour);
@@ -20,7 +21,6 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
       {streams ? (
         streams.map((s) => (
           <List.Item
-            id={s.logStreamName}
             key={s.logStreamName}
             title={s.logStreamName || ""}
             icon={"aws-icons/cw.png"}
@@ -35,10 +35,10 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
                       logGroupName={logGroupName}
                       startTime={logStartTime}
                       logGroupStreamName={s.logStreamName || ""}
-                    ></CloudwatchLogs>
+                    />
                   }
                 />
-                {getActionOpenInBrowser(resourceToConsoleLink(logGroupName, "AWS::Logs::LogGroup"))}
+                <AwsAction.Console url={resourceToConsoleLink(logGroupName, "AWS::Logs::LogGroup")} />
                 <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
                     title="Copy Stream ARN"

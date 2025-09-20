@@ -1,5 +1,59 @@
 # Changelog
 
+## [✨AI: View Env & DNS] - 2025-03-11
+
+- AI Tools to:
+    1. Get Environment Variables
+    2. Get DNS Records
+- fix typo in Create DNS Records (`Differenet` -> `Different`)
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Add AI Tools to:
+    1. Get Teams
+    2. Get Domains
+    3. Get Sites
+    4. Get Deployments
+    5. Search Docs
+
+## [Paginated Sites] - 2024-12-19
+
+### Enhancements
+- Sites are now cached (and show up to 100 by default)
+- View more than 30 Sites at a time thanks to Pagination
+- When Inviting, you can now choose from up to 100 Sites
+
+### Chore
+- Bump `@raycast/api` from 1.79.0 to 1.87.5
+- Bump `@raycast/utils` from 1.16.3 to 1.18.1
+
+## [View Site Environment Variables] - 2024-07-29
+
+### Enhancements
+
+- Added `Show Environment Variables` subcommand
+
+### Chore
+
+- Bump `@raycast/api` from 1.72.0 to 1.79.0
+- Bump `@raycast/utils` from 1.14.0 to 1.16.3
+
+## [Manage DNS Commands] - 2024-05-07
+
+### Enhancements
+
+- Renamed `Search Domains` (title) -> `Search Domains and Manage DNS Records`.
+    - Added `Manage DNS Records` subcommand to `View`, `Create`, `Delete` DNS Records
+
+### Chore
+
+- Bump `@raycast/api` from 1.42.0 to 1.72.0
+- Bump `@raycast/utils` from 1.4.14 to 1.14.0
+
+## [New Logo] - 2023-05-26
+
+- Updated the logo
+
 ## [New Logo] - 2023-03-07
 
 - Updated the logo to match the refreshed brand assets

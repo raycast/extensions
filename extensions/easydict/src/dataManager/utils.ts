@@ -19,9 +19,9 @@ import {
   maxLineLengthOfChineseTextDisplay,
   maxLineLengthOfEnglishTextDisplay,
 } from "../language/languages";
-import { AppKeyStore, myPreferences } from "../preferences";
+import { myPreferences } from "../preferences";
 import {
-  DicionaryType,
+  DictionaryType,
   ListDisplayItem,
   QueryResult,
   QueryTypeResult,
@@ -64,11 +64,13 @@ export function sortedQueryResults(queryResults: QueryResult[]) {
  */
 export function getSortOrder(): string[] {
   const defaultOrderList = [
-    DicionaryType.Youdao,
-    DicionaryType.Linguee,
+    DictionaryType.Youdao,
+    DictionaryType.Linguee,
 
     TranslationType.OpenAI,
+    TranslationType.Gemini,
     TranslationType.DeepL,
+    TranslationType.DeepLX,
     TranslationType.Google,
     TranslationType.Bing,
     TranslationType.Apple,
@@ -184,11 +186,11 @@ export function checkIfDictionaryHasEntries(dictionaryResult: QueryResult): bool
 
   let hasEntries = false;
   switch (dictionaryType) {
-    case DicionaryType.Linguee: {
+    case DictionaryType.Linguee: {
       hasEntries = hasLingueeDictionaryEntries(sourceResult.result as LingueeDictionaryResult);
       break;
     }
-    case DicionaryType.Youdao: {
+    case DictionaryType.Youdao: {
       hasEntries = hasYoudaoDictionaryEntries(sourceResult.result as YoudaoDictionaryFormatResult);
       break;
     }
@@ -340,9 +342,9 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
   const markdown = translations.map((translation) => translation.text).join("\n");
   // console.log(`---> type: ${queryResult.type},  markdown: ${markdown}`);
 
-  const listDiplayItem = displaySections[0].items;
-  if (listDiplayItem?.length) {
-    listDiplayItem[0].detailsMarkdown = markdown;
+  const listDisplayItem = displaySections[0].items;
+  if (listDisplayItem?.length) {
+    listDisplayItem[0].detailsMarkdown = markdown;
   }
 }
 
@@ -355,14 +357,4 @@ export function checkIfEnableYoudaoDictionary(queryWordInfo: QueryWordInfo) {
   const enableYoudaoDictionary = myPreferences.enableYoudaoDictionary && isValidYoudaoDictionaryLanguageQuery && isWord;
   console.log(`---> enable Youdao Dictionary: ${enableYoudaoDictionary}`);
   return enableYoudaoDictionary;
-}
-
-/**
- * Check if enable Youdao API translation.
- */
-export function hasYoudaoAppKey() {
-  if (AppKeyStore.youdaoAppId && AppKeyStore.youdaoAppSecret) {
-    return true;
-  }
-  return false;
 }

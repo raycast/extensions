@@ -1,72 +1,153 @@
-import { ComponentType, createContext, useContext, useEffect, useState } from "react";
-import { List, Action, Application, getApplications, Detail } from "@raycast/api";
-import { existsSync } from "fs";
-import { URL } from "url";
-import { getEntry } from "./lib/entry";
-import { ZED_BUNDLE_ID } from "./lib/zed";
-import { useZedEntries } from "./hooks/useZedEntries";
-import { EntryItem } from "./components/EntryItem";
-
-const ZedContext = createContext<{
-  zed?: Application;
-}>({
-  zed: undefined,
-});
-
-export const withZed = <P extends object>(Component: ComponentType<P>) => {
-  return (props: P) => {
-    const [zed, setZed] = useState<Application>();
-    const [isLoading, setIsloading] = useState(true);
-
-    useEffect(() => {
-      getApplications()
-        .then((apps) => {
-          const zedApp = apps.find((a) => a.bundleId === ZED_BUNDLE_ID);
-          if (zedApp) {
-            setZed(zedApp);
-          }
-        })
-        .finally(() => setIsloading(false));
-    }, []);
-
-    if (!zed) {
-      return <Detail isLoading={isLoading} markdown={isLoading ? "" : `No Zed app detected`} />;
-    }
-
-    return (
-      <ZedContext.Provider value={{ zed }}>
-        <Component {...props} />
-      </ZedContext.Provider>
-    );
-  };
-};
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useZedContext, withZed } from "./components/with-zed";
+import { exists } from "./lib/utils";
+import { Entry, getEntry } from "./lib/entry";
+import { EntryItem } from "./components/entry-item";
+import { usePinnedEntries } from "./hooks/use-pinned-entries";
+import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 
 export function Command() {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const zed = useContext(ZedContext).zed!;
-  const { entries, setEntry } = useZedEntries();
+  const { app, dbPath, workspaceDbVersion } = useZedContext();
+  const { workspaces, isLoading, error, removeEntry, removeAllEntries } = useRecentWorkspaces(
+    dbPath,
+    workspaceDbVersion,
+  );
+  const { pinnedEntries, pinEntry, unpinEntry, unpinAllEntries, moveUp, moveDown } = usePinnedEntries();
+
+  const pinned = Object.values(pinnedEntries)
+    .filter((e) => e.type === "remote" || exists(e.uri))
+    .sort((a, b) => a.order - b.order);
+
+  const zedIcon = { fileIcon: app.path };
+
+  const removeAndUnpinEntry = async (entry: Pick<Entry, "id" | "uri">) => {
+    await removeEntry(entry.id);
+    unpinEntry(entry);
+  };
+
+  const removeAllAndUnpinEntries = async () => {
+    await removeAllEntries();
+    unpinAllEntries();
+  };
 
   return (
-    <List>
-      {Object.values(entries)
-        .filter((e) => existsSync(new URL(e.uri)))
-        .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
-        .map((e) => {
-          const entry = getEntry(e.uri);
+    <List isLoading={isLoading}>
+      <List.EmptyView
+        title="No Recent Projects"
+        description={error ? "Check that Zed is up-to-date" : undefined}
+        icon="no-view.png"
+      />
+      <List.Section title="Pinned Projects">
+        {pinned.map((entry) => {
+          if (!entry) {
+            return null;
+          }
+
           return (
-            <EntryItem key={entry.uri} entry={entry} icon={entry.path && { fileIcon: entry.path }}>
-              <Action.Open
-                title="Open in Zed"
-                onOpen={() => setEntry(entry.uri, true)}
-                target={entry.path}
-                application={zed}
-                icon={{ fileIcon: zed.path }}
-              />
-              <Action.ShowInFinder path={entry.path} />
-            </EntryItem>
+            <EntryItem
+              key={entry.uri}
+              entry={entry}
+              actions={
+                <ActionPanel>
+                  <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
+                  {entry.type === "local" && <Action.ShowInFinder path={entry.path} />}
+                  <Action
+                    title="Unpin Entry"
+                    icon={Icon.PinDisabled}
+                    onAction={() => unpinEntry(entry)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                  />
+                  {entry.order > 0 ? (
+                    <Action
+                      title="Move up"
+                      icon={Icon.ArrowUp}
+                      onAction={() => moveUp(entry)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                    />
+                  ) : null}
+                  {entry.order < pinned.length - 1 ? (
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      onAction={() => moveDown(entry)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                    />
+                  ) : null}
+                  <RemoveActionSection
+                    onRemoveEntry={() => removeAndUnpinEntry(entry)}
+                    onRemoveAllEntries={removeAllAndUnpinEntries}
+                  />
+                </ActionPanel>
+              }
+            />
           );
         })}
+      </List.Section>
+
+      <List.Section title="Recent Projects">
+        {Object.values(workspaces)
+          .filter((e) => !pinnedEntries[e.uri] && (!!e.host || exists(e.uri)))
+          .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
+          .map((e) => {
+            const entry = getEntry(e);
+
+            if (!entry) {
+              return null;
+            }
+
+            return (
+              <EntryItem
+                key={entry.uri}
+                entry={entry}
+                actions={
+                  <ActionPanel>
+                    <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
+                    {entry.type === "local" && <Action.ShowInFinder path={entry.path} />}
+                    <Action
+                      title="Pin Entry"
+                      icon={Icon.Pin}
+                      onAction={() => pinEntry(entry)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    />
+                    <RemoveActionSection
+                      onRemoveEntry={() => removeAndUnpinEntry(entry)}
+                      onRemoveAllEntries={removeAllAndUnpinEntries}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+      </List.Section>
     </List>
+  );
+}
+
+function RemoveActionSection({
+  onRemoveEntry,
+  onRemoveAllEntries,
+}: {
+  onRemoveEntry: () => void;
+  onRemoveAllEntries: () => void;
+}) {
+  return (
+    <ActionPanel.Section>
+      <Action
+        icon={Icon.Trash}
+        title="Remove from Recent Projects"
+        style={Action.Style.Destructive}
+        onAction={() => onRemoveEntry()}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      />
+
+      <Action
+        icon={Icon.Trash}
+        title="Remove All Recent Projects"
+        style={Action.Style.Destructive}
+        onAction={() => onRemoveAllEntries()}
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+      />
+    </ActionPanel.Section>
   );
 }
 

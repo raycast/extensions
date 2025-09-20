@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-text-to-calendar",
+  "title": "AI Text to Calendar",
+  "description": "Convert selected text to Google Calendar event with OpenAI",
+  "icon": "extension-icon.png",
+  "author": "izm51",
+  "contributors": [
+    "ViGeng"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ai-text-to-calendar",
+      "title": "AI Text to Calendar",
+      "description": "Convert selected text to Google Calendar event with OpenAI",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "title": "AI Service API Key",
+          "description": "API Key is used to authenticate with OpenAI or other AI service",
+          "type": "password",
+          "required": true
+        },
+        {
+          "name": "endpoint",
+          "title": "Custom API Endpoint",
+          "description": "Overide the default API endpoint",
+          "type": "textfield",
+          "default": "https://api.openai.com/v1",
+          "required": false
+        },
+        {
+          "name": "model",
+          "title": "Model Name",
+          "description": "Model name to use for the AI service",
+          "type": "textfield",
+          "default": "gpt-4o-mini",
+          "required": false
+        },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Language of the output",
+          "type": "dropdown",
+          "default": "English",
+          "data": [
+            { "title": "English","value": "English" },
+            { "title": "Chinese", "value": "Chinese"},
+            { "title": "Japanese", "value": "Japanese"},
+            { "title": "Korean", "value": "Korean"},
+            { "title": "Spanish", "value": "Spanish"},
+            { "title": "French", "value": "French"},
+            { "title": "German", "value": "German"},
+            { "title": "Italian", "value": "Italian"},
+            { "title": "Dutch", "value": "Dutch"},
+            { "title": "Portuguese", "value": "Portuguese"},
+            { "title": "Russian", "value": "Russian"},
+            { "title": "Arabic", "value": "Arabic"}
+          ],
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.17.0",
+    "openai": "^4.73.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,16 +1,20 @@
-# cURL Changelog
+# cURL – Keyboard-first HTTP Client for Raycast
 
-## [Add PATCH method and change methods icons] - 2023-01-18
+**cURL** is a keyboard-first HTTP client for [Raycast](https://www.raycast.com/), designed for developers and power users who want to quickly make, inspect, and manage HTTP requests directly from Raycast!
 
-- Add PATCH method to methods' list
-- Add new methods icons in requests list
+## Features
 
-## [Add requests metadata title and description + small fixes] - 2022-09-29
+- ⚡ **Keyboard-first**: Create and send HTTP requests without leaving your keyboard.
+- 📝 **Request Builder**: Easily set method, URL, headers, parameters, and body.
+- 📋 **cURL Generation**: Instantly copy the generated cURL command for any request.
+- 📜 **Request History**: View and re-run previous requests, including their metadata.
+- 🧩 **JSONPath Support**: Extract and copy data from JSON responses using JSONPath.
+- 🪟 **Windows Support**: Works on both macOS and Windows Raycast clients.
 
-- Add title and/or description to requests list items using cmd + M on selected item
-- Add method's icons for requests
-- Add loading state "true" as default when using the requests command and fetching history to avoid flickering empty state.
+## Available Commands and Actions
 
- ## [Initial Release] - 2022-09-01
-
-Keyboard-first HTTP client
+- **New HTTP Request**: Quickly create and configure a new HTTP request.
+- **View Request History**: Browse and re-run your previous requests.
+- **Copy cURL Command**: Instantly copy the cURL equivalent of any request.
+- **Extract JSON Data**: Use JSONPath to extract and copy data from JSON responses.
+- **Import/Export Requests**: Save and share your requests with others.

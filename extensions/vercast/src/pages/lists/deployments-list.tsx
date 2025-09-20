@@ -1,7 +1,7 @@
-import { Icon, Color, List, ActionPanel, useNavigation, Action } from "@raycast/api";
+import { Icon, Color, List, ActionPanel, Action } from "@raycast/api";
 import useVercel from "../../hooks/use-vercel-info";
 import fromNow from "../../utils/time";
-import { Deployment, DeploymentState } from "../../types";
+import { Deployment, DeploymentState, Team } from "../../types";
 import InspectDeployment from "../inspect-deployment";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../vercel";
@@ -11,22 +11,25 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
   const { user, teams, selectedTeam } = useVercel();
   const url = getFetchDeploymentsURL(selectedTeam, projectId);
 
-  const { isLoading, data, revalidate } = useFetch<{
-    deployments: Deployment[];
-    // TODO: why can't I `{ headers: FetchHeaders }` here?
-  }>(url, {
-    // @ts-expect-error Type 'null' is not assignable to type 'string'.
-    headers: FetchHeaders.get("Authorization") ? [["Authorization", FetchHeaders.get("Authorization")]] : [[]],
+  const {
+    isLoading,
+    data: deployments,
+    revalidate,
+  } = useFetch(url, {
+    headers: FetchHeaders,
+    mapResult(result: { deployments: Deployment[] }) {
+      return {
+        data: result.deployments,
+      };
+    },
+    initialData: [],
   });
-
-  const deployments = data?.deployments;
 
   const onTeamChange = () => {
     revalidate();
   };
 
-  const { push } = useNavigation();
-  const team = teams?.find((team) => team.id === selectedTeam);
+  const team = teams?.find((team: Team) => team.id === selectedTeam);
   return (
     <List
       throttle
@@ -35,7 +38,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
       isLoading={isLoading || !user}
       searchBarAccessory={<>{user && <SearchBarAccessory onTeamChange={onTeamChange} />}</>}
     >
-      {deployments?.map((deployment) => {
+      {deployments.map((deployment) => {
         const branchName = getCommitDeploymentBranch(deployment);
         return (
           <List.Item
@@ -46,12 +49,10 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
             key={deployment.uid}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Show Details"
                   icon={Icon.Binoculars}
-                  onAction={() => {
-                    push(<InspectDeployment username={user?.username} deployment={deployment} selectedTeam={team} />);
-                  }}
+                  target={<InspectDeployment username={user?.username} deployment={deployment} selectedTeam={team} />}
                 />
                 <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
                 {user && (
@@ -61,11 +62,18 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                       team?.slug || user.username,
                       deployment.name,
                       /* @ts-expect-error Property id does not exist on type Deployment */
-                      deployment.id || deployment.uid
+                      deployment.id || deployment.uid,
                     )}
                     icon={Icon.Link}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
                   />
                 )}
+                <Action.CopyToClipboard
+                  title={`Copy URL`}
+                  content={`https://${deployment.url}`}
+                  icon={Icon.CopyClipboard}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                />
               </ActionPanel>
             }
             accessories={[

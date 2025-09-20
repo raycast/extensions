@@ -1,57 +1,26 @@
 import {
+  Action,
   ActionPanel,
-  List,
+  Application,
+  Cache,
+  Clipboard,
+  closeMainWindow,
+  Color,
+  environment,
+  getFrontmostApplication,
   getPreferenceValues,
   getSelectedText,
-  Action,
   Icon,
-  Color,
-  Clipboard,
+  LaunchProps,
+  List,
+  popToRoot,
   showHUD,
-  closeMainWindow,
   showToast,
   Toast,
-  Cache,
-  Application,
-  getFrontmostApplication,
+  Keyboard,
 } from "@raycast/api";
-import * as changeCase from "change-case-all";
-import { execa } from "execa";
-import React, { useEffect, useState } from "react";
-
-const cases = [
-  "Camel Case",
-  "Capital Case",
-  "Constant Case",
-  "Dot Case",
-  "Header Case",
-  "Kebab Case",
-  "Lower Case",
-  "Lower First",
-  "Macro Case",
-  "No Case",
-  "Param Case",
-  "Pascal Case",
-  "Path Case",
-  "Random Case",
-  "Sentence Case",
-  "Snake Case",
-  "Swap Case",
-  "Title Case",
-  "Upper Case",
-  "Upper First",
-  "Sponge Case",
-] as const;
-
-type CaseType = (typeof cases)[number];
-type Cases = { [key: string]: (input: string, options?: object) => string };
-
-async function runShellScript(command: string) {
-  const { stdout } = await execa(command, {
-    env: { LC_CTYPE: "UTF-8" },
-  });
-  return stdout;
-}
+import { useEffect, useState } from "react";
+import { CaseType, aliases, convert, functions, modifyCasesWrapper } from "./cases.js";
 
 class NoTextError extends Error {
   constructor() {
@@ -69,19 +38,18 @@ async function getSelection() {
 }
 
 async function readContent(preferredSource: string) {
+  const clipboard = await Clipboard.readText();
+  const selected = await getSelection();
+
   if (preferredSource === "clipboard") {
-    const clipboard = await runShellScript("pbpaste");
-    if (clipboard.length > 0) return clipboard;
-    const selection = await getSelection();
-    if (selection.length > 0) return selection;
-    throw new NoTextError();
+    if (clipboard) return clipboard;
+    if (selected) return selected;
   } else {
-    const selection = await getSelection();
-    if (selection.length > 0) return selection;
-    const clipboard = await runShellScript("pbpaste");
-    if (clipboard.length > 0) return clipboard;
-    throw new NoTextError();
+    if (selected) return selected;
+    if (clipboard) return clipboard;
   }
+
+  throw new NoTextError();
 }
 
 const cache = new Cache();
@@ -90,50 +58,51 @@ const getPinnedCases = (): CaseType[] => {
   const pinned = cache.get("pinned");
   return pinned ? JSON.parse(pinned) : [];
 };
+
 const getRecentCases = (): CaseType[] => {
   const recent = cache.get("recent");
   return recent ? JSON.parse(recent) : [];
 };
+
 const setPinnedCases = (pinned: CaseType[]) => {
   cache.set("pinned", JSON.stringify(pinned));
 };
+
 const setRecentCases = (recent: CaseType[]) => {
   cache.set("recent", JSON.stringify(recent));
 };
 
-export default function Command() {
-  const functions: Cases = {
-    "Camel Case": changeCase.camelCase,
-    "Capital Case": changeCase.capitalCase,
-    "Constant Case": changeCase.constantCase,
-    "Dot Case": changeCase.dotCase,
-    "Header Case": changeCase.headerCase,
-    "Kebab Case": changeCase.paramCase,
-    "Lower Case": changeCase.lowerCase,
-    "Lower First": changeCase.lowerCaseFirst,
-    "Macro Case": changeCase.constantCase,
-    "No Case": changeCase.noCase,
-    "Param Case": changeCase.paramCase,
-    "Pascal Case": changeCase.pascalCase,
-    "Path Case": changeCase.pathCase,
-    "Random Case": changeCase.spongeCase,
-    "Sentence Case": changeCase.sentenceCase,
-    "Snake Case": changeCase.snakeCase,
-    "Swap Case": changeCase.swapCase,
-    "Title Case": changeCase.titleCase,
-    "Upper Case": changeCase.upperCase,
-    "Upper First": changeCase.upperCaseFirst,
-    "Sponge Case": changeCase.spongeCase,
-  };
+export default function Command(props: LaunchProps) {
+  const preferences = getPreferenceValues<Preferences>();
+  const preferredSource = preferences.source;
+  const preferredAction = preferences.action;
+  const hideHUD = preferences.hideHUD;
 
-  const [clipboard, setClipboard] = useState<string>("");
+  const immediatelyConvertToCase = props.launchContext?.case;
+  if (immediatelyConvertToCase) {
+    (async () => {
+      const content = await readContent(preferredSource);
+      const modified = convert(content, immediatelyConvertToCase);
+
+      if (preferredAction === "paste") {
+        Clipboard.paste(modified);
+      } else {
+        Clipboard.copy(modified);
+      }
+
+      if (!hideHUD) {
+        showHUD(`Converted to ${immediatelyConvertToCase}`);
+      }
+      popToRoot();
+    })();
+    return;
+  }
+
+  const [content, setContent] = useState<string>("");
   const [frontmostApp, setFrontmostApp] = useState<Application>();
 
   const [pinned, setPinned] = useState<CaseType[]>([]);
   const [recent, setRecent] = useState<CaseType[]>([]);
-
-  const preferences = getPreferenceValues();
-  const preferredSource = preferences["source"];
 
   useEffect(() => {
     setPinned(getPinnedCases());
@@ -144,23 +113,28 @@ export default function Command() {
   useEffect(() => {
     setPinnedCases(pinned);
   }, [pinned]);
+
   useEffect(() => {
     setRecentCases(recent);
   }, [recent]);
 
+  const refreshContent = async () => {
+    try {
+      setContent(await readContent(preferredSource));
+    } catch (error) {
+      if (error instanceof NoTextError) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to convert",
+          message: "Please ensure that text is either selected or copied",
+        });
+      }
+    }
+  };
+
   useEffect(() => {
-    readContent(preferredSource)
-      .then((c) => setClipboard(c))
-      .catch((error) => {
-        if (error instanceof NoTextError) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Nothing to convert",
-            message: "Please ensure that text is either selected or copied",
-          });
-        }
-      });
-  }, [preferredSource]);
+    refreshContent();
+  }, []);
 
   const CopyToClipboard = (props: {
     case: CaseType;
@@ -173,12 +147,16 @@ export default function Command() {
         title="Copy to Clipboard"
         icon={Icon.Clipboard}
         onAction={() => {
-          if (!props.pinned) {
-            setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4));
+          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
+          if (!hideHUD) {
+            showHUD("Copied to Clipboard");
           }
-          showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
-          closeMainWindow();
+          if (preferences.popToRoot) {
+            popToRoot();
+          } else {
+            closeMainWindow();
+          }
         }}
       />
     );
@@ -195,36 +173,51 @@ export default function Command() {
         title={`Paste in ${frontmostApp.name}`}
         icon={{ fileIcon: frontmostApp.path }}
         onAction={() => {
-          if (!props.pinned) {
-            setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4));
+          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
+          if (!hideHUD) {
+            showHUD(`Pasted in ${frontmostApp.name}`);
           }
-          showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
-          closeMainWindow();
+          if (preferences.popToRoot) {
+            popToRoot();
+          } else {
+            closeMainWindow();
+          }
         }}
       />
     ) : null;
   };
 
-  const CaseItem = (props: { case: CaseType; modified: string; pinned?: boolean; recent?: boolean }): JSX.Element => {
+  const CaseItem = (props: {
+    case: CaseType;
+    modified: string;
+    detail: string;
+    pinned?: boolean;
+    recent?: boolean;
+  }): JSX.Element => {
+    const context = encodeURIComponent(`{"case":"${props.case}"}`);
+    const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
+
     return (
       <List.Item
         id={props.case}
         title={props.case}
-        detail={<List.Item.Detail markdown={props.modified} />}
+        accessories={[{ text: props.modified }]}
+        detail={<List.Item.Detail markdown={props.detail} />}
+        keywords={aliases[props.case]}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              {preferences["action"] === "paste" && <PasteToActiveApp {...props} />}
+              {preferredAction === "paste" && <PasteToActiveApp {...props} />}
               <CopyToClipboard {...props} />
-              {preferences["action"] === "copy" && <PasteToActiveApp {...props} />}
+              {preferredAction === "copy" && <PasteToActiveApp {...props} />}
             </ActionPanel.Section>
             <ActionPanel.Section>
               {!props.pinned ? (
                 <Action
                   title="Pin Case"
                   icon={Icon.Pin}
-                  shortcut={{ key: "p", modifiers: ["cmd"] }}
+                  shortcut={Keyboard.Shortcut.Common.Pin}
                   onAction={() => {
                     setPinned([props.case, ...pinned]);
                     if (props.recent) {
@@ -233,31 +226,32 @@ export default function Command() {
                   }}
                 />
               ) : (
-                <React.Fragment>
+                <>
                   <Action
                     title="Remove Pinned Case"
                     icon={Icon.PinDisabled}
-                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => {
                       setPinned(pinned.filter((c) => c !== props.case));
                     }}
                   />
                   <Action
                     title="Clear Pinned Cases"
-                    icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                    style={Action.Style.Destructive}
+                    icon={{ source: Icon.XMarkCircle }}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     onAction={() => {
                       setPinned([]);
                     }}
                   />
-                </React.Fragment>
+                </>
               )}
               {props.recent && (
-                <React.Fragment>
+                <>
                   <Action
                     title="Remove Recent Case"
                     icon={Icon.XMarkCircle}
-                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => {
                       setRecent(recent.filter((c) => c !== props.case));
                     }}
@@ -265,13 +259,25 @@ export default function Command() {
                   <Action
                     title="Clear Recent Cases"
                     icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     onAction={() => {
                       setRecent([]);
                     }}
                   />
-                </React.Fragment>
+                </>
               )}
+              <Action.CreateQuicklink
+                title={`Create Quicklink to Convert to ${props.case}`}
+                quicklink={{ name: `Convert to ${props.case}`, link: deeplink }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action
+                title="Refresh Content"
+                icon={Icon.RotateAntiClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={refreshContent}
+              />
             </ActionPanel.Section>
           </ActionPanel>
         }
@@ -280,28 +286,49 @@ export default function Command() {
   };
 
   return (
-    <List isShowingDetail={true} selectedItemId={pinned[0] || recent[0]}>
+    <List isShowingDetail={true} isLoading={!pinned || !recent} selectedItemId={recent[0]}>
       <List.Section title="Pinned">
-        {pinned?.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} pinned={true} />
-        ))}
+        {pinned?.map((key) => {
+          const modified = modifyCasesWrapper(content, key);
+          return (
+            <CaseItem
+              key={key}
+              case={key as CaseType}
+              modified={modified.rawText}
+              detail={modified.markdown}
+              pinned={true}
+            />
+          );
+        })}
       </List.Section>
       <List.Section title="Recent">
-        {recent.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} recent={true} />
-        ))}
+        {recent
+          .filter((key) => !pinned.includes(key))
+          .map((key) => {
+            const modified = modifyCasesWrapper(content, key);
+            return (
+              <CaseItem
+                key={key}
+                case={key as CaseType}
+                modified={modified.rawText}
+                detail={modified.markdown}
+                recent={true}
+              />
+            );
+          })}
       </List.Section>
       <List.Section title="All Cases">
-        {Object.entries(functions)
+        {Object.keys(functions)
           .filter(
-            ([key, func]) =>
-              preferences[key.replace(/ +/g, "")] &&
+            (key) =>
+              preferences[key.replace(/ +/g, "") as keyof ExtensionPreferences] &&
               !recent.includes(key as CaseType) &&
-              !pinned.includes(key as CaseType)
+              !pinned.includes(key as CaseType),
           )
-          .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={func(clipboard)} />
-          ))}
+          .map((key) => {
+            const modified = modifyCasesWrapper(content, key);
+            return <CaseItem key={key} case={key as CaseType} modified={modified.rawText} detail={modified.markdown} />;
+          })}
       </List.Section>
     </List>
   );

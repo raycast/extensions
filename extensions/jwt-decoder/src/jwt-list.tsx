@@ -38,7 +38,7 @@ const JwtView = () => {
 
     const markdown = showDetail
       ? [
-          `<img alt="view token" width="400" src="data:image/svg+xml,${encodeURI(
+          `<img alt="view token" width="400" src="data:image/svg+xml,${encodeURIComponent(
             renderToString(
               <TokenSvg
                 {...{
@@ -57,7 +57,7 @@ const JwtView = () => {
 
     const detail = !!showDetail && <List.Item.Detail markdown={markdown.join("\n\n")} />;
 
-    const selectionChange = (id?: string | undefined) => {
+    const selectionChange = (id?: string | null) => {
       const parts = id ? id.split(".") : [];
       setSelected({ type: parts[0] ?? "", value: parts[1] ?? "" });
     };

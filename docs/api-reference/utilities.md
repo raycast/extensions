@@ -6,7 +6,7 @@ This set of utilities exposes some of Raycast's native functionality to allow de
 
 ### getApplications
 
-Returns all applications that can open the file.
+Returns all applications that can open the file or URL.
 
 #### Signature
 
@@ -15,6 +15,23 @@ async function getApplications(path?: PathLike): Promise<Application[]>;
 ```
 
 #### Example
+
+{% tabs %}
+{% tab title="Find Application" %}
+
+```typescript
+import { getApplications, Application } from "@raycast/api";
+
+// it is a lot more reliable to get an app by its bundle ID than its path
+async function findApplication(bundleId: string): Application | undefined {
+  const installedApplications = await getApplications();
+  return installedApplications.filter((application) => application.bundleId == bundleId);
+}
+```
+
+{% endtab %}
+
+{% tab title="List Installed Applications" %}
 
 ```typescript
 import { getApplications } from "@raycast/api";
@@ -26,6 +43,9 @@ export default async function Command() {
 }
 ```
 
+{% endtab %}
+{% endtabs %}
+
 #### Parameters
 
 <FunctionParametersTableFromJSDoc name="getApplications" />
@@ -36,7 +56,7 @@ An array of [Application](#application).
 
 ### getDefaultApplication
 
-Returns the default application that the file would be opened with.
+Returns the default application that the file or URL would be opened with.
 
 #### Signature
 
@@ -61,7 +81,7 @@ export default async function Command() {
 
 #### Return
 
-A Promise that resolves with the default [Application](#application) that would open the file. If no application was found, the promise will be rejected.
+A Promise that resolves with the default [Application](#application) that would open the file or URL. If no application was found, the promise will be rejected.
 
 ### getFrontmostApplication
 
@@ -79,7 +99,7 @@ async function getFrontmostApplication(): Promise<Application>;
 import { getFrontmostApplication } from "@raycast/api";
 
 export default async function Command() => {
-  const defaultApplication = await getFrontmostApplication();
+  const frontmostApplication = await getFrontmostApplication();
   console.log(`The frontmost application is: ${frontmostApplication.name}`);
 };
 ```
@@ -179,41 +199,40 @@ export default async function Command() {
 
 A Promise that resolves when the target has been opened.
 
-### launchCommand
+### captureException
 
-Launches another command of the same extension. If the command does not exist, or if it's not enabled, an error will be thrown.
-Use this method if your command needs to open another command based on user interaction,
-or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
+Report the provided exception to the Developer Hub.
+This helps in handling failures gracefully while staying informed about the occurrence of the failure.
 
 #### Signature
 
 ```typescript
-async function launchCommand(options: {
-  name: string;
-  type: LaunchType;
-  arguments?: Arguments | null;
-  context?: LaunchContext | null;
-  fallbackText?: string | null;
-}): Promise<void>;
+function captureException(exception: unknown): void;
 ```
 
 #### Example
 
 ```typescript
-import { launchCommand, LaunchType } from "@raycast/api";
+import { open, captureException, showToast, Toast } from "@raycast/api";
 
-export default async function Command() => {
-  await launchCommand({ name: "list", type: LaunchType.UserInitiated, context: { foo: "bar" } });
-};
+export default async function Command() {
+  const url = "https://www.raycast.com";
+  const app = "Google Chrome";
+  try {
+    await open(url, app);
+  } catch (e: unknown) {
+    captureException(e);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Could not open ${url} in ${app}.`,
+    });
+  }
+}
 ```
 
 #### Parameters
 
-<FunctionParametersTableFromJSDoc name="launchCommand" />
-
-#### Return
-
-A Promise that resolves when the command has been launched. (Note that this does not indicate that the launched command has finished executing.)
+<FunctionParametersTableFromJSDoc name="open" />
 
 ## Types
 
@@ -221,7 +240,7 @@ A Promise that resolves when the command has been launched. (Note that this does
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or
+It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or 
 [getDefaultApplication](#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties
@@ -235,11 +254,3 @@ PathLike: string | Buffer | URL;
 ```
 
 Supported path types.
-
-### LaunchContext
-
-Represents the passed context object of programmatic command launches.
-
-### LaunchOptions
-
-A parameter object used to decide which command should be launched and what data (arguments, context) it should receive.

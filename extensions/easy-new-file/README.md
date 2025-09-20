@@ -1,6 +1,6 @@
 ## Easy New File
 
-Quickly create file in the current Finder window or on the desktop.
+Quickly create file in the open Finder window.
 
 **Build-in File Type**
 
@@ -9,8 +9,6 @@ Quickly create file in the current Finder window or on the desktop.
 - Script: Apple, Perl, Python, Ruby, Shell
 
 **Tips**:
-
-- When use the **New File Here** command, please activate the Finder folder windows or Desktop window where you want to create the new file.
 
 - When use the **Add File Template** command, the extension will automatically detect the selected file in the front-most Finder window. How to get the file path automatically?
 

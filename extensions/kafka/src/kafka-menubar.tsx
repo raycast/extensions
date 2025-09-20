@@ -7,12 +7,14 @@ import {
   LaunchType,
   MenuBarExtra,
   openCommandPreferences,
+  showHUD,
 } from "@raycast/api";
 import { ConsumerGroupState, GroupDescription, GroupOverview } from "kafkajs";
 import { useCallback, useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { buildAdmin, getConfig, getConsumerInfo, getEnvs } from "./utils";
 import moment from "moment";
+import { runAppleScript } from "run-applescript";
 
 type State = "Loaded" | "NotLoaded" | "Loading";
 
@@ -23,11 +25,7 @@ interface ConsumerInfo {
   overall: number;
 }
 
-interface KafkaMenuBarPreferences {
-  hideWithoutLag: boolean;
-}
-
-const preferences = getPreferenceValues<KafkaMenuBarPreferences>();
+const preferences = getPreferenceValues<Preferences.KafkaMenubar>();
 
 const cacheNamespace = "kafka-menubar";
 const cacheKeyLag = "kafkaLagConsumers";
@@ -44,6 +42,27 @@ export function MenuConsumer(props: { consumer: ConsumerInfo }) {
       }
     />
   );
+}
+
+async function notify(consumers: ConsumerInfo[]) {
+  if (!preferences.sendNotification) {
+    return;
+  }
+  const max = Number(preferences.notificationThreshold);
+  if (isNaN(max)) {
+    return;
+  }
+  let nbConsumersExceedMax = 0;
+  for (const consumer of consumers) {
+    if (consumer.overall > max) {
+      nbConsumersExceedMax++;
+    }
+  }
+  if (nbConsumersExceedMax > 0) {
+    const title = "Kafka lag detected";
+    const message = nbConsumersExceedMax + " consumers have lag above threshold";
+    await runAppleScript(`display notification "${message}" with title "${title}" sound name "default"`);
+  }
 }
 
 export default function KafkaLag() {
@@ -63,9 +82,14 @@ export default function KafkaLag() {
         }
         return;
       }
+
       console.info("[background] get kafka consumers for env:", env);
       setIsLoading(true);
       setState("Loading");
+      if (isNaN(Number(preferences.notificationThreshold))) {
+        console.error("[background] notification threshold should be a number");
+        await showHUD("Kafka menu bar: notification threshold should be a number");
+      }
       try {
         const admin = await buildAdmin(env);
         const filterConsumers = getConfig(env).filterConsumers;
@@ -107,6 +131,7 @@ export default function KafkaLag() {
         cache.set(cacheKeyLag, JSON.stringify(consumers));
         cache.set(cacheKeyLastUpdate, moment(new Date()).format("HH:mm:ss"));
         setState("Loaded");
+        await notify(consumers);
         setConsumers(consumers);
       } catch (e) {
         console.error("Unable to get kafka consumers", e);

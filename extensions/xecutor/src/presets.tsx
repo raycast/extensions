@@ -11,8 +11,6 @@ import {
   clearSearchBar,
   confirmAlert,
   getApplications,
-  open,
-  showHUD,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -23,9 +21,10 @@ import xorby from "lodash.xorby";
 import { URL } from "url";
 
 import { Preset, PresetFormValues } from "./types";
+import { executePreset } from "./utils/utils";
+import { showFailureToast } from "@raycast/utils";
 
 const StringIndexableIcon = Icon as { [index: string]: string };
-const StringIndexableColor = Color as { [index: string]: string };
 
 const CreateOrEditPresetName = (props: {
   name?: string;
@@ -81,7 +80,7 @@ const CreateOrEditPresetName = (props: {
             key={color}
             title={color}
             value={color}
-            icon={{ source: Icon.CircleFilled, tintColor: StringIndexableColor[color] }}
+            icon={{ source: Icon.CircleFilled, tintColor: color }}
           />
         ))}
       </Form.Dropdown>
@@ -300,7 +299,9 @@ export default function Command() {
           const appPresets = JSON.parse(maybeAppPresets as string);
           setAppPresets(appPresets);
         } catch (e) {
-          // noop
+          showFailureToast(e, {
+            title: "Error retrieving presets",
+          });
         }
       }
 
@@ -313,13 +314,6 @@ export default function Command() {
       await LocalStorage.setItem("xecutor", JSON.stringify(appPresets));
     })();
   }, [appPresets]);
-
-  const executePreset = async (preset: Preset) => {
-    await Promise.all([
-      ...preset.apps.map(async (app) => open(app.path)),
-      ...preset.urls.map(async (url) => open(url)),
-    ]);
-  };
 
   const handleOnCreateOrEditPreset = (preset: Preset) => {
     if (preset.new) {
@@ -379,10 +373,6 @@ export default function Command() {
     });
   };
 
-  const countPluralizer = (items: Application[] | string[], singular: string, plural: string) => {
-    return items.length === 1 ? `${singular}` : `${plural}`;
-  };
-
   return (
     <List
       isLoading={!hasLoadedPresets}
@@ -402,7 +392,7 @@ export default function Command() {
         <List.Item
           key={preset.id}
           title={preset.name}
-          icon={{ source: StringIndexableIcon[preset.icon], tintColor: StringIndexableColor[preset.color] }}
+          icon={{ source: StringIndexableIcon[preset.icon], tintColor: preset.color }}
           accessories={[
             { icon: Icon.Link, text: `x${preset.urls.length}` },
             { icon: Icon.Window, text: `x${preset.apps.length}` },
@@ -439,11 +429,6 @@ export default function Command() {
                 icon={Icon.Play}
                 onAction={() => {
                   executePreset(preset);
-                  showHUD(
-                    `${preset.apps.length} ${countPluralizer(preset.apps, "App", "Apps")}, ${
-                      preset.urls.length
-                    } ${countPluralizer(preset.apps, "URL", "URLs")} Launched via Preset: ${preset.name}`
-                  );
                 }}
               />
               <Action.Push
@@ -462,6 +447,14 @@ export default function Command() {
                 icon={Icon.AppWindowSidebarRight}
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
                 onAction={() => setIsShowingDetail(!isShowingDetail)}
+              />
+              <Action.CreateQuicklink
+                title="Create Quicklink"
+                icon={Icon.Link}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                quicklink={{
+                  link: `raycast://extensions/GastroGeek/xecutor/launch_preset?arguments=%7B%22preset_name%22%3A%22${preset.name}%22%7D`,
+                }}
               />
               <Action.Push
                 title="Create Preset"

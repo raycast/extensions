@@ -7,16 +7,16 @@ export function ActionOpenCommandPreferences(props: { command: boolean; extensio
       {command && (
         <Action
           icon={Icon.Gear}
-          title="Open Command Preferences"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          title="Configure Command"
+          shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
           onAction={openCommandPreferences}
         />
       )}
       {extension && (
         <Action
           icon={Icon.Gear}
-          title="Open Extension Preferences"
-          shortcut={{ modifiers: ["ctrl", "cmd"], key: "," }}
+          title="Configure Extension"
+          shortcut={{ modifiers: ["opt", "cmd"], key: "," }}
           onAction={openExtensionPreferences}
         />
       )}

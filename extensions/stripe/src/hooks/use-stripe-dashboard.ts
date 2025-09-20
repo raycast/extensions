@@ -1,6 +1,6 @@
 import { useEnvContext } from "./use-env-context";
 
-const BASE_URL = "https://dashboard.stripe.com/";
+const BASE_URL = "https://dashboard.stripe.com";
 
 type StripeDashboard = {
   dashboardUrl: string;
@@ -9,6 +9,6 @@ type StripeDashboard = {
 export const useStripeDashboard = (): StripeDashboard => {
   const { environment } = useEnvContext();
 
-  const dashboardUrl = `${BASE_URL}${environment === "test" ? "test" : ""}`;
+  const dashboardUrl = `${BASE_URL}${environment === "test" ? "/test" : ""}`;
   return { dashboardUrl };
 };

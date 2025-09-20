@@ -1,17 +1,24 @@
-import { List } from "@raycast/api";
-import { BookEntry } from "../types";
+import { memo } from "react";
+
+import { Icon, List } from "@raycast/api";
+
+import type { BookEntry } from "@/types";
+
 import { BookActionPanel } from "./book-action-panel";
 
-export function BookItem(props: { book: BookEntry }, key: number) {
-  const { book } = props;
-  const markdown = `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
+interface BookItemProps {
+  book: BookEntry;
+}
+
+function BookItemF({ book }: BookItemProps) {
+  const markdown = book.coverUrl === "N/A" ? "## Cover N/A" : `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
 
   return (
     <List.Item
-      key={key}
       title={book.title}
       icon={{
         source: book.coverUrl,
+        fallback: Icon.Book,
       }}
       actions={<BookActionPanel book={book}></BookActionPanel>}
       detail={
@@ -50,3 +57,5 @@ export function BookItem(props: { book: BookEntry }, key: number) {
     />
   );
 }
+
+export const BookItem = memo(BookItemF);

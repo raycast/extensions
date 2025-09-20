@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "random-color",
+  "title": "Random Color",
+  "description": "Pick a random color.",
+  "icon": "icon.png",
+  "author": "srcrip",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "random-color",
+      "title": "Copy Random Color",
+      "description": "Get a random color, copy it to your clipboard, or paste it into the current app.",
+      "mode": "no-view"
+    },
+    {
+      "name": "select-color",
+      "title": "Select Color",
+      "description": "Choose from a set of random colors.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ],
+      "default": "copy",
+      "description": "The primary action to perform on a selected color.",
+      "name": "primaryAction",
+      "required": false,
+      "title": "Primary Action",
+      "type": "dropdown"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

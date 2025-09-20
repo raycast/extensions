@@ -1,5 +1,4 @@
 import { Detail, environment, MenuBarExtra } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
 import { GraphQLClient } from "graphql-request";
 import { Octokit } from "octokit";
 import { useMemo, useState } from "react";
@@ -16,9 +15,8 @@ export function withGithubClient(component: JSX.Element) {
   // we use a `useMemo` instead of `useEffect` to avoid a render
   useMemo(() => {
     (async function () {
-      const { personalAccessToken } = getPreferenceValues();
-      const token = personalAccessToken || (await authorize());
-      const authorization = personalAccessToken ? `token ${token}` : `bearer ${token}`;
+      const token = await authorize();
+      const authorization = `bearer ${token}`;
       github = getSdk(new GraphQLClient("https://api.github.com/graphql", { headers: { authorization } }));
 
       octokit = new Octokit({ auth: token });

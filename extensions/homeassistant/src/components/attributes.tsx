@@ -1,13 +1,8 @@
-import { ActionPanel, List, Action } from "@raycast/api";
-import { State } from "../haapi";
-import { formatToHumanDateTime, stringToDate } from "../utils";
+import { State } from "@lib/haapi";
+import { formatToHumanDateTime, stringToDate } from "@lib/utils";
+import { Action, ActionPanel, List } from "@raycast/api";
 
-function ListAttributeItem(props: {
-  attributeKey: string;
-  value: string | undefined;
-  tooltip?: string;
-  state: State;
-}): JSX.Element {
+function ListAttributeItem(props: { attributeKey: string; value: string | undefined; tooltip?: string; state: State }) {
   const k = props.attributeKey;
   const v = props.value || "?";
   return (
@@ -46,8 +41,7 @@ function ListAttributeItem(props: {
   );
 }
 
-function TimestampItems(props: { state: State }): JSX.Element | null {
-  const s = props.state;
+function TimestampItems({ state: s }: { state: State }) {
   const lc = stringToDate(s.last_changed);
   const lu = stringToDate(s.last_updated);
   return (
@@ -68,8 +62,7 @@ function TimestampItems(props: { state: State }): JSX.Element | null {
   );
 }
 
-export function EntityAttributesList(props: { state: State }): JSX.Element {
-  const state = props.state;
+export function EntityAttributesList({ state }: { state: State }) {
   const title = state.attributes.friendly_name
     ? `${state.attributes.friendly_name} (${state.entity_id})`
     : `${state.entity_id}`;

@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import React from "react";
 import { ActionToPexels } from "./action-to-pexels";
 import { Collection } from "pexels";
 import ViewCollectionMedias from "../view-collection-medias";
@@ -10,7 +9,7 @@ export function ActionOnCollection(props: { collection: Collection }) {
   return (
     <ActionPanel>
       <Action.Push
-        icon={Icon.Terminal}
+        icon={Icon.AppWindowGrid2x2}
         title={"View Collections"}
         target={<ViewCollectionMedias id={collection.id} title={collection.title} />}
       />

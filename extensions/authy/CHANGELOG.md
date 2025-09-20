@@ -1,9 +1,33 @@
 # Authy Extension Changelog
 
+## [Refactoring] - 2024-07-09
+
+- Code refactoring
+- Assets cleanup 
+- Speed extension loading
+- Add Export Tokens action
+
+## [API Update, Accuracy and UI] - 2024-06-24
+
+- Update decoding in line with updated API response
+- Use tag for OTP so it gets priority over subtitle
+- Update interval to be more accurate
+- Use built in progress icon
+
+## [UI] - 2024-04-15
+
+- Move the timer icon to right side. So the icon can be always aligned for a better visual
+
+## [Updated extension title] - 2024-04-03
+
+## [Updated extension name] - 2023-10-16
+
+## [Updated Contributors] - 2023-06-14
+
 ## [Bug fix] - 2023-03-30
 
 - Update deps
-- [#4485](https://github.com/raycast/extensions/issues/4485) Don't fail all OTPs in case extension couldn't decrypt some OTPs  
+- [#4485](https://github.com/raycast/extensions/issues/4485) Don't fail all OTPs in case extension couldn't decrypt some OTPs
 
 ## [Sort OTP by usage] - 2022-04-04
 
@@ -33,7 +57,7 @@
 
 ## [Bug fix] - 2021-12-06
 
-- [#485](https://github.com/raycast/extensions/issues/485) Authy OTPs are too short 
+- [#485](https://github.com/raycast/extensions/issues/485) Authy OTPs are too short
 
 ## [Authy integration] - 2021-12-03
 

@@ -1,0 +1,227 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "convert-3d-models",
+  "title": "Convert 3D Models",
+  "description": "An extension to convert 3D models to different formats.",
+  "icon": "extension_icon.png",
+  "author": "mrnoisytiger",
+  "categories": [
+    "Design Tools",
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "FreeCAD Application",
+      "name": "freeCADPath",
+      "description": "Select the FreeCAD application.",
+      "type": "appPicker",
+      "value": "/Applications/FreeCAD.app",
+      "default": "/Applications/FreeCAD.app",
+      "required": true
+    },
+    {
+      "title": "Model Input",
+      "name": "inputMethod",
+      "description": "Where to obtain the model file to modify.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Selection In Finder",
+          "value": "Finder"
+        },
+        {
+          "title": "Selection In Path Finder",
+          "value": "Path Finder"
+        }
+      ],
+      "default": "Finder",
+      "required": false
+    },
+    {
+      "title": "Model Output",
+      "name": "modelResultHandling",
+      "description": "How to handle the result of the model conversion, i.e. where to save the modified model, or whether to copy it to the clipboard.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Replace Original",
+          "value": "replaceOriginal"
+        },
+        {
+          "title": "Save To Downloads",
+          "value": "saveToDownloads"
+        },
+        {
+          "title": "Save to Desktop",
+          "value": "saveToDesktop"
+        }
+      ],
+      "default": "replaceOriginal",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert 3D Model Files",
+      "description": "Convert the selected model to the specified format.",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Enabled Export Formats",
+          "label": "AMF",
+          "name": "showAMF",
+          "description": "Whether to show AMF as a conversion option. Export only.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "BREP/BRP",
+          "name": "showBRP",
+          "description": "Whether to show BREP/BRP as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "IGS",
+          "name": "showIGS",
+          "description": "Whether to show IGS as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "IV",
+          "name": "showIV",
+          "description": "Whether to show IV (Inventor) as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "OBJ",
+          "name": "showOBJ",
+          "description": "Whether to show OBJ as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "OFF",
+          "name": "showOFF",
+          "description": "Whether to show OFF as a conversion option. Export only.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "SMF",
+          "name": "showSMF",
+          "description": "Whether to show SMF as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "STEP",
+          "name": "showSTEP",
+          "description": "Whether to show STEP as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "STL",
+          "name": "showSTL",
+          "description": "Whether to show STL as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "title": "Experimental Formats",
+          "label": "3MF (Not recommended)",
+          "name": "show3MF",
+          "description": "Whether to show 3MF as a conversion option. Results may be subpar and low accuracy.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "label": "DAE",
+          "name": "showDAE",
+          "description": "Whether to show Collada/DAE as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PLY (Not recommended)",
+          "name": "showPLY",
+          "description": "Whether to show PLY as a conversion option. Results may be subpar and low accuracy.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "label": "X3D (Untested)",
+          "name": "showX3D",
+          "description": "Whether to show X3D as a conversion option. This option is untested. Use at your own risk.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "label": "X3DZ (Untested)",
+          "name": "showX3DZ",
+          "description": "Whether to show X3DZ as a conversion option. This option is untested. Use at your own risk.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quickConvertSTL",
+      "title": "Quick Convert to STL",
+      "description": "Quickly convert selected models to STL",
+      "mode": "no-view"
+    },
+    {
+      "name": "quickConvertOBJ",
+      "title": "Quick Convert to OBJ",
+      "description": "Quickly convert selected models to OBJ",
+      "mode": "no-view"
+    },
+    {
+      "name": "quickConvertSTP",
+      "title": "Quick Convert to STP",
+      "description": "Quickly convert selected models to STP",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.4.18"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

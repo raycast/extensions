@@ -31,7 +31,7 @@ export function useDurationFormatter() {
         minutes,
         seconds,
       },
-      locale
+      locale,
     );
   };
 

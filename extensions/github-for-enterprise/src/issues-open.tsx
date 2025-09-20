@@ -20,7 +20,7 @@ export default function Command() {
         ignoreLocation: true,
         keys: ["title", "number", "repository.nameWithOwner"],
       }),
-    [data]
+    [data],
   );
 
   const searchIssues = useCallback(
@@ -35,7 +35,7 @@ export default function Command() {
 
       return fuseIssues.search(str);
     },
-    [data]
+    [data],
   );
 
   if (error) {

@@ -1,17 +1,26 @@
 import { cn2tw } from "cjk-conv";
 import { fetchInputItem } from "./utils/input-item";
-import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
+import { Clipboard, getPreferenceValues, LaunchProps, showHUD } from "@raycast/api";
 import { Preferences } from "./types/preferences";
+import { TextArguments } from "./types/types";
 
-export default async () => {
-  const { actionAfterConversion } = getPreferenceValues<Preferences>();
-  const inputItem = await fetchInputItem();
-  const tw = cn2tw(inputItem, { safe: false });
+export default async (props: LaunchProps<{ arguments: TextArguments }>) => {
+  const { text } = props.arguments;
+  const { actionAfterConversion, simplifiedToTraditionalQuoteStyle } = getPreferenceValues<Preferences>();
+  let input = text;
+  if (!input) {
+    input = await fetchInputItem();
+  }
+  const tw = cn2tw(input, { safe: false });
+  let finalTw = tw;
+  if (simplifiedToTraditionalQuoteStyle) {
+    finalTw = tw.replace(/‘/g, "「").replace(/’/g, "」").replace(/“/g, "『").replace(/”/g, "』");
+  }
   if (actionAfterConversion === "Paste") {
-    await Clipboard.paste(tw);
-    await showHUD(`Paste: ${tw}`);
+    await Clipboard.paste(finalTw);
+    await showHUD(`📋 ${finalTw}`);
   } else {
-    await Clipboard.copy(tw);
-    await showHUD(`Copy: ${tw}`);
+    await Clipboard.copy(finalTw);
+    await showHUD(`📋 ${finalTw}`);
   }
 };

@@ -1,16 +1,18 @@
-<p align="center">
-  <img src="assets/tim-icon.png" height="128" />
-  <h1 align="center">Tim</h1>
-</p>
+<div align="center">
+  <img src="assets/tim-icon.png" width="128" height="128" />
 
-A [Raycast](https://raycast.com/) extension that lets you manage [Tim](https://tim.neat.software/). Tim is a simple time tracker for macOS.
+  <br/>
 
-**Commands:**
+# Tim
 
-- Toggle current active time record
-- Create new task
-- Open active record
-- Open navigator
-- Open task manager
-- Export time records
-- Import time records
+Access your [Tim](https://tim.neat.software/) data directly from Raycast.
+
+🔎 &nbsp; Search your time records &nbsp; 📋 &nbsp; Copy and paste fields &nbsp; 🆕 &nbsp; Create new tasks &nbsp; ⏯︎ &nbsp; Start/Stop tasks
+
+</div>
+
+<br/>
+
+## Setup
+
+[Tim](https://tim.neat.software/) is a simple time tracking app for macOS which needs to be installed to use this extension.

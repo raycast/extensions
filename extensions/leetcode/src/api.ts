@@ -18,6 +18,11 @@ query dailyChallenge {
       topicTags {
         name
       }
+      codeSnippets {
+        lang
+        langSlug
+        code
+      }
     }
   }
 }
@@ -31,13 +36,19 @@ query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $fi
     skip: $skip
     filters: $filters
   ) {
-    problems: data {
+    total: totalNum
+    data {
       difficulty
       questionFrontendId
       isPaidOnly
       title
       titleSlug
       stats
+      codeSnippets {
+        lang
+        langSlug
+        code
+      }
     }
   }
 }
@@ -57,6 +68,11 @@ query problem($titleSlug: String!) {
     stats
     topicTags {
       name
+    }
+    codeSnippets {
+      lang
+      langSlug
+      code
     }
   }
 }

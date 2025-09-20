@@ -1,7 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
+import { OutdatedCask, OutdatedFormula, OutdatedResults, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { preferences } from "./preferences";
@@ -29,8 +29,8 @@ function OutdatedCaskListItem(props: { outdated: OutdatedCask; onAction: () => v
     <List.Item
       id={outdated.name}
       title={outdated.name}
-      accessoryTitle={version}
-      icon={{ source: Icon.Checkmark, tintColor: Color.Red }}
+      accessories={[{ text: version }]}
+      icon={{ source: Icon.CheckCircle, tintColor: Color.Red }}
       actions={<OutdatedActionPanel outdated={outdated} onAction={props.onAction} />}
     />
   );
@@ -48,8 +48,8 @@ function OutdatedFormulaeListItem(props: { outdated: OutdatedFormula; onAction: 
       id={outdated.name}
       title={outdated.name}
       subtitle={outdated.pinned ? "Pinned" : ""}
-      accessoryTitle={version}
-      icon={{ source: Icon.Checkmark, tintColor: Color.Red }}
+      accessories={[{ text: version }]}
+      icon={{ source: Icon.CheckCircle, tintColor: Color.Red }}
       actions={<OutdatedActionPanel outdated={outdated} onAction={props.onAction} />}
     />
   );
@@ -64,8 +64,8 @@ interface OutdatedListProps {
 }
 
 function OutdatedList(props: OutdatedListProps) {
-  const formulae = props.filterType != InstallableFilterType.casks ? props.outdated?.formulae ?? [] : [];
-  const casks = props.filterType != InstallableFilterType.formulae ? props.outdated?.casks ?? [] : [];
+  const formulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
+  const casks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
 
   return (
     <List

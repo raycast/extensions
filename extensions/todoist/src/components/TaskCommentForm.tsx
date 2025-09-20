@@ -1,45 +1,49 @@
-import { Comment, Task } from "@doist/todoist-api-typescript";
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
-import { useState } from "react";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
-import { todoist, handleError } from "../api";
+import { Task, Comment, updateComment, addComment, uploadFile } from "../api";
+import useCachedData from "../hooks/useCachedData";
 
-interface TaskCommentFormProps {
+type TaskCommentFormProps = {
   comment?: Comment;
   task: Task;
-  mutateTasks?: MutatePromise<Task[] | undefined>;
-  mutateComments?: MutatePromise<Comment[] | undefined>;
-}
+};
 
-export default function TaskEdit({ comment, task, mutateComments, mutateTasks }: TaskCommentFormProps) {
+export default function TaskCommentForm({ comment, task }: TaskCommentFormProps) {
   const { pop } = useNavigation();
 
-  const [content, setContent] = useState(comment ? comment.content : "");
+  const [data, setData] = useCachedData();
 
-  async function submit() {
-    await showToast({ style: Toast.Style.Animated, title: `${comment ? "Updating" : "Adding"} comment` });
+  const { itemProps, handleSubmit } = useForm<{ comment: string; files: string[] }>({
+    async onSubmit(values) {
+      try {
+        if (comment) {
+          await showToast({ style: Toast.Style.Animated, title: "Updating comment" });
+          await updateComment({ id: comment.id, content: values.comment }, { data, setData });
+          await showToast({ style: Toast.Style.Success, title: "Comment updated" });
+        } else if (values.files.length > 0) {
+          await showToast({ style: Toast.Style.Animated, title: "Uploading file" });
+          const file = await uploadFile(values.files[0]);
+          await showToast({ style: Toast.Style.Animated, title: "Adding comment" });
+          await addComment({ item_id: task.id, content: values.comment, file_attachment: file }, { data, setData });
+          await showToast({ style: Toast.Style.Success, title: "Comment added" });
+        } else {
+          await addComment({ item_id: task.id, content: values.comment }, { data, setData });
+          await showToast({ style: Toast.Style.Success, title: "Comment added" });
+        }
 
-    try {
-      comment
-        ? await todoist.updateComment(comment.id, { content })
-        : await todoist.addComment({ content, taskId: task.id });
-
-      await showToast({ style: Toast.Style.Success, title: `Comment ${comment ? "updated" : "added"}` });
-
-      if (mutateComments) {
-        mutateComments();
+        pop();
+      } catch (error) {
+        await showFailureToast(error, { title: comment ? "Unable to update comment" : "Unable to add comment" });
       }
-
-      if (mutateTasks) {
-        mutateTasks();
-      }
-
-      pop();
-    } catch (error) {
-      handleError({ error, title: `Unable to ${comment ? "update" : "add"} comment` });
-    }
-  }
+    },
+    initialValues: {
+      comment: comment ? comment.content : "",
+    },
+    validation: {
+      comment: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -47,19 +51,22 @@ export default function TaskEdit({ comment, task, mutateComments, mutateTasks }:
         <ActionPanel>
           <Action.SubmitForm
             title={comment ? "Edit Comment" : "Add Comment"}
-            onSubmit={submit}
+            onSubmit={handleSubmit}
             icon={comment ? Icon.Pencil : Icon.Plus}
           />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="comment"
-        title="Comment"
-        placeholder="This is a dummy comment."
-        value={content}
-        onChange={setContent}
-      />
+      <Form.TextArea {...itemProps.comment} title="Comment" placeholder="This is a dummy comment." />
+
+      {comment ? null : (
+        <Form.FilePicker
+          {...itemProps.files}
+          title="File"
+          canChooseDirectories={false}
+          allowMultipleSelection={false}
+        />
+      )}
     </Form>
   );
 }

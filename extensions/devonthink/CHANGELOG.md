@@ -1,5 +1,18 @@
 # DEVONthink Changelog
 
+## [Update] - 2025-05-24
+
+- Recognize DEVONthink 4 (search for another app name)
+
+## [Update] - 2023-09-04
+
+- Limit number of results the extension returns to avoid the extension crash
+
+## [Update] - 2023-05-10
+
+- Add two more actions — copy item link and copy link as markdown
+
+
 ## [Fix] - 2023-03-17
 
 - Removed geolocation since it caused crash for some users

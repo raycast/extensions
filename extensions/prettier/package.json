@@ -1,28 +1,99 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prettier",
-  "title": "Prettier Markdown",
+  "title": "Prettier Code",
   "description": "Format code with Prettier",
   "icon": "prettier-logo.png",
   "author": "lin",
+  "contributors": [
+    "jasonwaters",
+    "xmok"
+  ],
   "categories": [
     "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Format Code",
-      "description": "Apply Prettier to Clipboard content",
-      "mode": "no-view"
+      "name": "formatJavaScript",
+      "title": "Format JavaScript",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "js",
+        "javascript"
+      ]
+    },
+    {
+      "name": "formatTypeScript",
+      "title": "Format TypeScript",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "ts",
+        "typescript"
+      ]
+    },
+    {
+      "name": "formatJSON",
+      "title": "Format JSON",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "json"
+      ]
+    },
+    {
+      "name": "formatCSS",
+      "title": "Format CSS",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "css"
+      ]
+    },
+    {
+      "name": "formatHTML",
+      "title": "Format HTML",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "html"
+      ]
     }
   ],
   "preferences": [
     {
-      "name": "parser",
+      "name": "copyImmediately",
+      "type": "checkbox",
+      "title": "Clipboard",
+      "label": "Copy formatted code to clipboard",
+      "description": "Copies the formatted code to the clipboard immediately.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "pasteImmediately",
+      "type": "checkbox",
+      "label": "Paste formatted code to active window",
+      "description": "Pastes the formatted code to the active window.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "formatAsMarkdownCodeBlock",
+      "type": "checkbox",
+      "title": "Markdown",
+      "label": "Format as Markdown code block",
+      "description": "Wraps the code so it can be easily pasted as a code block within a Markdown document.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "jsParser",
       "type": "dropdown",
-      "title": "Select parser",
-      "description": "Specify which parser to use.",
+      "title": "Select JavaScript parser",
+      "description": "Specify which parser to use for JavaScript.",
       "data": [
         {
           "title": "flow",
@@ -43,31 +114,47 @@
         {
           "title": "typescript",
           "value": "typescript"
+        }
+      ],
+      "default": "babel",
+      "required": false
+    },
+    {
+      "name": "tsParser",
+      "type": "dropdown",
+      "title": "Select TypeScript parser",
+      "description": "Specify which parser to use for TypeScript.",
+      "data": [
+        {
+          "title": "flow",
+          "value": "flow"
         },
         {
-          "title": "acorn",
-          "value": "acorn"
+          "title": "babel",
+          "value": "babel"
         },
         {
-          "title": "espree",
-          "value": "espree"
+          "title": "babel-flow",
+          "value": "babel-flow"
         },
         {
-          "title": "meriyah",
-          "value": "meriyah"
+          "title": "babel-ts",
+          "value": "babel-ts"
         },
         {
-          "title": "css",
-          "value": "css"
-        },
-        {
-          "title": "less",
-          "value": "less"
-        },
-        {
-          "title": "scss",
-          "value": "scss"
-        },
+          "title": "typescript",
+          "value": "typescript"
+        }
+      ],
+      "default": "babel-ts",
+      "required": false
+    },
+    {
+      "name": "jsonParser",
+      "type": "dropdown",
+      "title": "Select JSON parser",
+      "description": "Specify which parser to use for JSON.",
+      "data": [
         {
           "title": "json",
           "value": "json"
@@ -79,31 +166,39 @@
         {
           "title": "json-stringify",
           "value": "json-stringify"
+        }
+      ],
+      "default": "json",
+      "required": false
+    },
+    {
+      "name": "cssParser",
+      "type": "dropdown",
+      "title": "Select CSS parser",
+      "description": "Specify which parser to use for CSS.",
+      "data": [
+        {
+          "title": "css",
+          "value": "css"
         },
         {
-          "title": "graphql",
-          "value": "graphql"
+          "title": "less",
+          "value": "less"
         },
         {
-          "title": "markdown",
-          "value": "markdown"
-        },
-        {
-          "title": "mdx",
-          "value": "mdx"
-        },
-        {
-          "title": "vue",
-          "value": "vue"
-        },
-        {
-          "title": "yaml",
-          "value": "yaml"
-        },
-        {
-          "title": "glimmer",
-          "value": "glimmer"
-        },
+          "title": "scss",
+          "value": "scss"
+        }
+      ],
+      "default": "css",
+      "required": false
+    },
+    {
+      "name": "htmlParser",
+      "type": "dropdown",
+      "title": "Select HTML parser",
+      "description": "Specify which parser to use for HTML.",
+      "data": [
         {
           "title": "html",
           "value": "html"
@@ -113,31 +208,31 @@
           "value": "angular"
         },
         {
-          "title": "lwc",
-          "value": "lwc"
+          "title": "vue",
+          "value": "vue"
         },
         {
-          "title": "doc-explorer",
-          "value": "doc-explorer"
+          "title": "lwc",
+          "value": "lwc"
         }
       ],
-      "default": "babel",
+      "default": "html",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.1"
+    "@raycast/api": "^1.79.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
+    "@types/node": "^20.8.10",
     "@types/prettier": "^2.7.2",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.8.3",
-    "typescript": "^4.4.3"
+    "@types/react": "^18.3.3",
+    "@raycast/eslint-config": "^1.0.8",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.7",
+    "react": "^18.2.0",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",

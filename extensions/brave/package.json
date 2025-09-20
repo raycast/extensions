@@ -7,7 +7,8 @@
   "author": "ron-myers",
   "contributors": [
     "Codely",
-    "crisboarna"
+    "crisboarna",
+    "tleo19"
   ],
   "categories": [
     "Applications",
@@ -73,6 +74,28 @@
         {
           "title": "Original Profile",
           "value": "profile_original"
+        }
+      ]
+    },
+    {
+      "name": "browserOption",
+      "title": "Brave Browser Option",
+      "description": "Select the Brave Browser you want to use.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "Brave Browser",
+          "value": "Brave Browser"
+        },
+        {
+          "title": "Brave Browser Beta",
+          "value": "Brave Browser Beta"
+        },
+        {
+          "title": "Brave Browser Nightly",
+          "value": "Brave Browser Nightly"
         }
       ]
     }

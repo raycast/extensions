@@ -1,42 +1,51 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { getOpenTabs } from "../actions";
-import { Preferences, SearchResult, Tab } from "../interfaces";
-import { getPreferenceValues } from "@raycast/api";
-import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { SearchResult, Tab } from "../types/interfaces";
 import { NotInstalledError, UnknownError } from "../components";
+import { geNotInstalledMessage } from "../utils/messageUtils";
+
+const getTabs = async (_profile?: string, query?: string) => {
+  let tabs = await getOpenTabs();
+
+  if (query) {
+    tabs = tabs.filter(function (tab) {
+      return (
+        tab.title.toLowerCase().includes(query.toLowerCase()) ||
+        tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
+      );
+    });
+  }
+  return tabs;
+};
 
 export function useTabSearch(query?: string): SearchResult<Tab> {
-  const { useOriginalFavicon } = getPreferenceValues<Preferences>();
   const [data, setData] = useState<Tab[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
+  const [profile, setProfile] = useState<string>();
 
-  const getTabs = useCallback(async () => {
-    let tabs = await getOpenTabs(useOriginalFavicon);
-
-    if (query) {
-      tabs = tabs.filter(function (tab) {
-        return (
-          tab.title.toLowerCase().includes(query.toLowerCase()) ||
-          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
-        );
-      });
-    }
-    setData(tabs);
-  }, [query]);
+  const revalidate = useCallback(
+    (profileId: string) => {
+      setProfile(profileId);
+    },
+    [profile],
+  );
 
   useEffect(() => {
-    getTabs()
-      .then(() => setIsLoading(false))
+    getTabs(profile, query)
+      .then((tabs) => {
+        setData(tabs);
+        setIsLoading(false);
+      })
       .catch((e) => {
-        if (e.message === NOT_INSTALLED_MESSAGE) {
+        if (e.message === geNotInstalledMessage()) {
           setErrorView(<NotInstalledError />);
         } else {
           setErrorView(<UnknownError />);
         }
         setIsLoading(false);
       });
-  }, [query]);
+  }, [query, profile]);
 
-  return { data, isLoading, errorView, revalidate: getTabs };
+  return { data, isLoading, errorView, revalidate };
 }

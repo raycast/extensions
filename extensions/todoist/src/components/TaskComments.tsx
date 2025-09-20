@@ -1,28 +1,22 @@
-import { Comment, Task } from "@doist/todoist-api-typescript";
 import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Color } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import { formatDistanceToNow } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
-import { todoist, handleError } from "../api";
+import { Task, Comment, deleteComment as apiDeleteComment } from "../api";
+import { getCollaboratorIcon, getUserIcon } from "../helpers/collaborators";
+import useCachedData from "../hooks/useCachedData";
 
 import TaskCommentForm from "./TaskCommentForm";
 
-interface TaskCommentsProps {
+type TaskCommentsProps = {
   task: Task;
-}
+};
 
 export default function TaskComments({ task }: TaskCommentsProps) {
-  const {
-    data,
-    isLoading,
-    error,
-    mutate: mutateComments,
-  } = useCachedPromise((taskId) => todoist.getComments({ taskId }), [task.id]);
+  const [data, setData] = useCachedData();
 
-  if (error) {
-    handleError({ error, title: "Unable to get comments" });
-  }
+  const comments = data?.notes.filter((note) => note.item_id === task.id);
 
   async function deleteComment(comment: Comment) {
     if (
@@ -35,48 +29,80 @@ export default function TaskComments({ task }: TaskCommentsProps) {
       await showToast({ style: Toast.Style.Animated, title: "Deleting comment" });
 
       try {
-        await todoist.deleteComment(comment.id);
-        mutateComments();
+        await apiDeleteComment(comment.id, { data, setData });
         await showToast({ style: Toast.Style.Success, title: "Comment deleted" });
       } catch (error) {
-        handleError({ error, title: "Unable to delete comment" });
+        await showFailureToast(error, { title: "Unable to delete comment" });
       }
     }
   }
 
   return (
-    <List isShowingDetail isLoading={isLoading} navigationTitle={`${task.content} - Comments`}>
-      {data?.map((comment, index) => (
-        <List.Item
-          key={comment.id}
-          keywords={removeMarkdown(comment.content).split(" ")}
-          title={`Comment #${index + 1}`}
-          subtitle={formatDistanceToNow(new Date(comment.postedAt), { addSuffix: true })}
-          detail={<List.Item.Detail markdown={comment.content} />}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Edit Comment"
-                icon={Icon.Pencil}
-                target={<TaskCommentForm task={task} comment={comment} mutateComments={mutateComments} />}
-              />
+    <List isShowingDetail navigationTitle={`${task.content} - Comments`}>
+      {comments?.map((comment) => {
+        const collaborator = data?.collaborators.find((collaborator) => collaborator.id === comment.posted_uid);
 
-              <Action.Push
-                title="Add New Comment"
-                icon={Icon.Plus}
-                target={<TaskCommentForm task={task} mutateComments={mutateComments} />}
-              />
+        const reactions = comment.reactions
+          ? Object.entries(comment.reactions).map(([key, value]) => `${key} ${value.length}`)
+          : null;
 
-              <Action
-                title="Delete Comment"
-                icon={Icon.Trash}
-                onAction={() => deleteComment(comment)}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+        const markdown = `${comment.content}${
+          comment.file_attachment
+            ? `${comment.content ? "\n\n---\n\n" : "\n\n"}[${comment.file_attachment.file_name}](${
+                comment.file_attachment.file_url
+              })${reactions ? "\n\n---" : ""}`
+            : ""
+        }${reactions ? `\n\n**${reactions.join("   ")}**` : ""}`;
+
+        // If there are no collaborators, it means the user isn't sharing any projects with anyone else.
+        // In that case, we can just use the user's own icon.
+        const icon = collaborator ? getCollaboratorIcon(collaborator) : data ? getUserIcon(data.user) : Icon.Person;
+        const title = collaborator?.full_name ?? data?.user.full_name ?? "Unknown";
+
+        return (
+          <List.Item
+            key={comment.id}
+            keywords={removeMarkdown(comment.content).split(" ")}
+            icon={icon}
+            title={title}
+            subtitle={formatDistanceToNow(new Date(comment.posted_at), { addSuffix: true })}
+            detail={<List.Item.Detail markdown={markdown} />}
+            {...(comment.file_attachment ? { accessories: [{ icon: Icon.Link }] } : {})}
+            actions={
+              <ActionPanel>
+                {data?.user.id === comment.posted_uid ? (
+                  <Action.Push
+                    title="Edit Comment"
+                    icon={Icon.Pencil}
+                    target={<TaskCommentForm task={task} comment={comment} />}
+                  />
+                ) : null}
+
+                <Action.Push title="Add New Comment" icon={Icon.Plus} target={<TaskCommentForm task={task} />} />
+
+                <ActionPanel.Section>
+                  {comment.file_attachment ? (
+                    <Action.OpenInBrowser
+                      title="Open File Attachment"
+                      icon={Icon.Link}
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      url={comment.file_attachment.file_url}
+                    />
+                  ) : null}
+
+                  <Action
+                    title="Delete Comment"
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
+                    onAction={() => deleteComment(comment)}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

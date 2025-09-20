@@ -1,5 +1,5 @@
-import { List, Icon, Color } from "@raycast/api";
-import { Fragment, useState } from "react";
+import { List, Icon, Color, getSelectedText } from "@raycast/api";
+import { Fragment, useEffect, useState } from "react";
 
 import ServicesContext from "./components/ServicesContext";
 import ColorListItem from "./components/ColorListItem";
@@ -13,6 +13,7 @@ import ColorPickers from "./components/ColorPickers";
 import TypeFilter from "./TypeFilter";
 import { ColorType } from "./colors/Color";
 import { SavedColor } from "./hooks/colorSaver";
+import { getValidColor } from "./validators";
 
 export interface Services {
   renderer: RenderColor;
@@ -29,6 +30,27 @@ export default function Extension({
   history: Storage;
   favorites: FavoritesStorage;
 }) {
+  const [searchText, setSearchText] = useState("");
+  const [readingSelection, setReadingSelection] = useState(true);
+
+  useEffect(() => {
+    renderer.render(searchText);
+  }, [searchText]);
+
+  useEffect(() => {
+    getSelectedText()
+      .then((text) => {
+        const color = getValidColor(text.trim());
+        if (color && !searchText) {
+          setSearchText(color);
+        }
+        setReadingSelection(false);
+      })
+      .catch(() => {
+        setReadingSelection(false);
+      });
+  }, []);
+
   const timeAgo = useTimeAgo();
 
   const [filterType, setFilterType] = useState("All");
@@ -48,8 +70,11 @@ export default function Extension({
   return (
     <ServicesContext.Provider value={{ renderer, history, favorites }}>
       <List
-        isLoading={renderer.state.isLoading || history.isLoading || favorites.isLoading}
-        onSearchTextChange={renderer.render}
+        isLoading={
+          (readingSelection && !searchText) || renderer.state.isLoading || history.isLoading || favorites.isLoading
+        }
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
         searchBarPlaceholder="#000000, rbg(0, 0, 0), hsl(0, 0, 0), black..."
         searchBarAccessory={<TypeFilter onColorTypeChange={onColorTypeChange} />}
         throttle

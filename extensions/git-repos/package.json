@@ -5,6 +5,17 @@
   "description": "Quickly access your local git repositories and open them in your favorite editor or any app",
   "icon": "git-repos-icon.png",
   "author": "moored",
+  "contributors": [
+    "nitishpdmn",
+    "go_dima",
+    "cameronsstone",
+    "hacdias",
+    "AaronMoat"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "private": true,
   "commands": [
@@ -51,7 +62,7 @@
           "value": "6"
         }
       ],
-      "description": "Maximnum depth to scan for repos",
+      "description": "Maximum depth to scan for repos",
       "default": "3"
     },
     {
@@ -62,6 +73,24 @@
       "label": "Include submodules",
       "default": false,
       "description": "Include submodules in scan"
+    },
+    {
+      "name": "searchKeys",
+      "type": "dropdown",
+      "required": true,
+      "title": "Search by",
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Path",
+          "value": "fullPath"
+        }
+      ],
+      "default": "name",
+      "description": "What to match against when searching"
     },
     {
       "name": "openWith1",
@@ -104,32 +133,29 @@
       "default": ""
     }
   ],
-  "categories": [
-    "Developer Tools",
-    "Productivity"
-  ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "default-browser": "^3.0.0",
-    "node-fetch": "^3.0.0",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.5.2",
+    "get-installed-browsers": "^0.1.7",
+    "default-browser": "^4.0.0",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"
   },
   "devDependencies": {
-    "@types/node": "^16.10.0",
-    "@types/node-fetch": "^2.5.12",
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3",
     "@types/parse-git-config": "^3.0.1",
-    "@types/parse-github-url": "^1.0.0",
-    "@types/react": "^17.0.15",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.3.5"
+    "@types/parse-github-url": "^1.0.0"
   },
   "scripts": {
+    "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "build": "ray build -e dist"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

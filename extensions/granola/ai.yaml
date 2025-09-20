@@ -1,0 +1,220 @@
+instructions: |
+    You are an AI assistant for Granola. When you answer, follow these core rules:
+
+    - CRITICAL: every `ai-notes` call must include the `includeTranscript` flag. Set it to true only when the user explicitly wants the transcript or a transcript summary; otherwise set it to false. Skip the flag only when you use `listFolders: true`. This applies even when you add other parameters like `date`, `contentFilter`, or `contentType`.
+    - For task or action-item requests about the "latest" meeting (e.g., "What are the tasks from my latest meeting"), first call `list-meetings` with `{ "date": "latest", "limit": 1 }`, then call `ai-notes` with `{ "noteId": "<id>", "includeTranscript": false }`. Do not add `contentFilter` or `excludeContent` in that flow.
+    - Use `list-meetings` only when the user wants a meeting list, when you need IDs before another tool (such as saving to Notion), or when you must disambiguate multiple candidates. For any single-note request based on recency—including "list my most recent meeting", "summarize the transcript of my latest note", or "last meeting about the product launch"—call `ai-notes` directly (no `list-meetings` beforehand) with the appropriate `title`/`contentType` and set `includeTranscript` according to the user's request.
+    - Use the `title` parameter for topical queries ("meeting about the product launch"). Use `contentFilter` for note categories or types ("meeting notes", "client calls"). If the user only specifies time ("latest meeting"), avoid `contentFilter`. When the user names a meeting type in plural ("project meetings"), normalise the filter to the singular form (use `"project meeting"`).
+    - When the user wants meeting notes exported (e.g., "save my last 3 meeting notes"), first call `ai-notes` with `contentFilter: "meeting"` and `includeTranscript: false` to gather the note IDs, then call the export tool.
+    - Respect content-type preferences: set `contentType: "original"` for requests like "my notes" or "original"; set `contentType: "enhanced"` for "AI/enhanced" requests; otherwise omit it.
+    - Turn on `includeTranscript` when the user asks for the transcript, what was said, or to summarise a transcript; keep it false for summaries such as TL;DR requests unless the transcript is mentioned.
+    - Use `ai-notes` to retrieve transcripts and transcript summaries. Only call `get-transcript` when the user supplies a specific note ID and wants the raw transcript alone.
+    - For folder questions, call `ai-notes` with `listFolders: true`. When the user needs notes from a specific folder, supply that folder's ID via `folderId`.
+    - Always call the `recipes` tool (action `"get"`) before any other tool when the user invokes `/slug` or explicitly requests a recipe; the recipes call must be the very first tool call for that query (e.g., `/tldr` → `recipes({ "action": "get", "slug": "tldr" })`). After fetching the recipe, continue with the necessary note tools.
+    - After you have the right note IDs, call `save-to-notion` if the user wants to export notes to Notion.
+
+evals:
+    - input: "@granola Please summarize my last note"
+      mocks:
+        ai-notes:
+          - content: "### Meeting Context\n\n*   Testing session for Granola application's transcription capabilities\n*   Two participants simulating back-and-forth conversation..."
+            date: "2025-03-06T16:15:20.057Z"
+            title: "Summary"
+            id: "sample-id-123"
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments: {}
+    
+    - input: "@granola Show me the transcript of my last meeting about the product launch"
+      mocks:
+        list-meetings:
+          - id: "sample-id-456"
+            title: "Product Launch"
+            date: "2025-03-06T16:15:20.057Z"
+        ai-notes:
+          - content: "Product launch planning discussion"
+            date: "2025-03-06T16:15:20.057Z"
+            title: "Product Launch"
+            id: "sample-id-456"
+            transcript: "John: Let's discuss the product launch timeline.\nSarah: I think we should aim for next quarter.\nJohn: That makes sense, we still need to finalize the marketing materials."
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              title: "product launch"
+              includeTranscript: true
+    
+    - input: "@granola summarize the transcript of my latest note"
+      mocks:
+        ai-notes:
+          - content: "Weekly team sync discussion"
+            date: "2025-04-10T14:30:00.000Z"
+            title: "Team Sync"
+            id: "sample-id-789"
+            transcript: "**Me:** Let's review our progress for this sprint.\n\n**Sarah:** We've completed the new dashboard feature.\n\n**John:** QA found two minor bugs we need to fix before release."
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              includeTranscript: true
+    
+    - input: "@granola what folders do I have"
+      mocks:
+        ai-notes:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              listFolders: true
+    
+    - input: "@granola save my last 3 meeting notes to Notion"
+      mocks:
+        list-meetings:
+          - id: "note-1"
+            title: "Team Sync"
+            date: "2025-03-15T14:00:00.000Z"
+          - id: "note-2"
+            title: "Client Call"
+            date: "2025-03-14T16:30:00.000Z"
+          - id: "note-3"
+            title: "Planning Session"
+            date: "2025-03-13T11:00:00.000Z"
+        ai-notes:
+          - id: "note-1"
+            title: "Team Sync"
+            date: "2025-03-15T14:00:00.000Z"
+          - id: "note-2" 
+            title: "Client Call"
+            date: "2025-03-14T16:30:00.000Z"
+          - id: "note-3"
+            title: "Planning Session"
+            date: "2025-03-13T11:00:00.000Z"
+        save-to-notion:
+          results:
+            - noteId: "note-1"
+              title: "Team Sync"
+              status: "success"
+              pageUrl: "https://www.notion.so/team-sync-123"
+            - noteId: "note-2"
+              title: "Client Call"
+              status: "success" 
+              pageUrl: "https://www.notion.so/client-call-456"
+            - noteId: "note-3"
+              title: "Planning Session"
+              status: "success"
+              pageUrl: "https://www.notion.so/planning-789"
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              contentFilter: "meeting"
+        - callsTool: "save-to-notion"
+    
+    - input: "@granola list my most recent meeting"
+      mocks:
+        ai-notes:
+          - content: "Product roadmap discussion with engineering team"
+            date: "2025-03-16T10:00:00.000Z"
+            title: "Engineering Sync"
+            id: "latest-meeting-123"
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              includeTranscript: false
+
+    - input: "@granola show me my original notes from yesterday"
+      mocks:
+        ai-notes:
+          - content: "Raw user-written content about the meeting"
+            date: "2025-03-15T14:00:00.000Z"
+            title: "User Notes"
+            id: "original-notes-123"
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              contentType: "original"
+              date: "yesterday"
+              includeTranscript: false
+
+    - input: "@granola get the enhanced AI notes for my project meetings"
+      mocks:
+        ai-notes:
+          - content: "AI-enhanced structured notes with key insights"
+            date: "2025-03-16T09:00:00.000Z"
+            title: "Project Meeting"
+            id: "enhanced-notes-456"
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              contentType: "enhanced"
+              contentFilter: "project meeting"
+              includeTranscript: false
+
+    - input: "@granola what are the tasks from my latest meeting?"
+      mocks:
+        list-meetings:
+          - id: "latest-meeting-123"
+            title: "Product Launch Planning"
+            date: "2025-03-16T14:00:00.000Z"
+            folderIds: ["work-folder-456"]
+            folderNames: ["Work Projects"]
+        ai-notes:
+          - content: "### Product Launch Tasks\n\n- Finalize marketing materials by Friday\n- Schedule demo with engineering team\n- Prepare presentation for stakeholders\n- Review budget allocation for Q2"
+            date: "2025-03-16T14:00:00.000Z"
+            title: "Product Launch Planning"
+            id: "latest-meeting-123"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              date: "latest"
+              limit: 1
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              noteId: "latest-meeting-123"
+              includeTranscript: false 
+
+    
+
+    - input: "@granola /tldr my latest meeting"
+      mocks:
+        recipes:
+          - slug: "tldr"
+            id: "r-101"
+            config:
+              instructions: "Provide a concise TL;DR"
+        list-meetings:
+          - id: "latest-meeting-123"
+            title: "Engineering Sync"
+            date: "2025-03-16T10:00:00.000Z"
+        ai-notes:
+          - content: "Product roadmap discussion with engineering team"
+            date: "2025-03-16T10:00:00.000Z"
+            title: "Engineering Sync"
+            id: "latest-meeting-123"
+      expected:
+        - callsTool:
+            name: "recipes"
+            arguments:
+              action: "get"
+              slug: "tldr"
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              includeTranscript: false

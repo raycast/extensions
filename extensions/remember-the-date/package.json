@@ -3,16 +3,28 @@
   "name": "remember-the-date",
   "title": "Remember the Date",
   "description": "Creates and shows the most important date which should be remembered.",
-  "icon": "countdown.png",
+  "icon": "icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "samuelkraft",
+    "ridemountainpig",
+    "aryan_thatte"
+  ],
   "license": "MIT",
+  "keywords": [
+    "date",
+    "remember",
+    "countdown",
+    "important"
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Create Date",
       "subtitle": "Remember the Date",
       "description": "Create new date to remember",
-      "mode": "view"
+      "mode": "view",
+      "icon": "add.png"
     },
     {
       "name": "list",
@@ -20,6 +32,20 @@
       "subtitle": "Remember the Date",
       "description": "List of all dates to remember",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Days List",
+      "description": "List of all dates to remember in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1d"
+    },
+    {
+      "name": "up-next",
+      "title": "Up Next",
+      "description": "Show the next date to remember",
+      "mode": "no-view",
+      "interval": "1d"
     }
   ],
   "preferences": [
@@ -31,29 +57,38 @@
       "title": "Show the date",
       "description": "Should the date be visible in the list",
       "label": "Yes, show date in the list"
+    },
+    {
+      "name": "showCountdownByDay",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Countdown unit",
+      "description": "Show the countdown in days.",
+      "label": "Show the countdown in days"
     }
   ],
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
+    "@raycast/api": "^1.58.0",
+    "@raycast/utils": "^1.14.0",
     "moment": "^2.29.1",
     "nanoid": "^3.3.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.21.0",
+    "prettier": "^3.0.3",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

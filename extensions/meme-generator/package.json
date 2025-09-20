@@ -5,6 +5,9 @@
   "description": "Generate memes with the help of Imgflip API",
   "icon": "command-icon.png",
   "author": "timoransky",
+  "contributors": [
+    "Visual-Studio-Coder"
+  ],
   "categories": [
     "Fun",
     "Media"
@@ -19,6 +22,95 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "find-meme-template",
+      "title": "Find Meme Template",
+      "description": "Fetches the complete list of available meme templates from Imgflip. Useful if you don't know what type of meme you want to create yet."
+    },
+    {
+      "name": "generate-meme-from-template",
+      "title": "Generate Meme from Template",
+      "description": "Generates a meme using a specific template ID and text for its boxes. It is useful when you already know the template ID (which could be found by calling the find-meme-template or search-meme-template tool) and want to create a meme with specific text."
+    },
+    {
+      "name": "search-meme-templates",
+      "title": "Search Meme Templates",
+      "description": "Searches available meme templates based on a query string and returns matching templates. It is useful if you already know what type of meme you want to create."
+    }
+  ],
+  "ai": {
+    "instructions": "When asked to generate a meme, first try to search for a suitable template using 'search-meme-templates' based on the user's description. If the user specifies a known template name or provides text, use 'generate-meme-from-template'. If the user asks to list templates, use 'find-meme-template'. Always confirm the template ID and the text for each box before calling 'generate-meme-from-template'.",
+    "evals": [
+      {
+        "input": "@meme-generator search for drake meme",
+        "mocks": {
+          "search-meme-templates": [
+            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-meme-templates",
+              "arguments": {
+                "query": {
+                  "includes": "drake"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The response should list the 'Drake Hotline Bling' template."
+          }
+        ]
+      },
+      {
+        "input": "@meme-generator create drake hotline bling meme with text 'Searching templates' and 'Generating the meme'",
+        "mocks": {
+          "find-meme-template": [
+            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 },
+            { "id": "87743020", "title": "Two Buttons", "url": "https://i.imgflip.com/1g8my4.jpg", "boxCount": 3 }
+          ],
+          "search-meme-templates": [
+            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 }
+          ],
+          "generate-meme-from-template": { "url": "https://i.imgflip.com/generated_meme.jpg" }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-meme-from-template",
+              "arguments": {
+                "template_id": "181913649"
+              }
+            }
+          },
+          {
+            "includes": "https://i.imgflip.com/generated_meme.jpg"
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@meme-generator list available templates",
+        "mocks": {
+          "find-meme-template": [
+            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 },
+            { "id": "87743020", "title": "Two Buttons", "url": "https://i.imgflip.com/1g8my4.jpg", "boxCount": 3 }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "find-meme-template"
+          },
+          {
+            "meetsCriteria": "The response should list the names of the available templates like 'Drake Hotline Bling' and 'Two Buttons'."
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "username",
@@ -38,26 +130,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "node-fetch": "^3.2.10",
-    "run-applescript": "^6.0.0",
-    "tempy": "^3.0.0"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.2",
+    "tempy": "3.0.0"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

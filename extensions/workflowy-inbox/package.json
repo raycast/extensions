@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "workflowy-inbox",
+  "title": "Send to Workflowy Inbox",
+  "description": "Quickly add items to your Workflowy inbox. (This is an independent extension and is not created by Workflowy.)",
+  "icon": "send-to-workflowy.png",
+  "author": "cameron_pak",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Send to Workflowy Inbox",
+      "description": "Send a note, task, or link to your Workflowy inbox with ease.\n\nGet your API Key at https://workflowy.com/api-key/.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "label": "API Key",
+      "type": "password",
+      "description": "Get your Workflowy API key at https://workflowy.com/api-key/",
+      "name": "apiKey",
+      "title": "Workflowy API Key",
+      "placeholder": "Enter your Workflowy API key",
+      "required": true
+    },
+    {
+      "label": "Save Location URL",
+      "type": "textfield",
+      "description": "Identify the bullet you want to be your inbox bullet and copy the internal link",
+      "name": "saveLocationUrl",
+      "title": "Workflowy Save Location URL",
+      "placeholder": "Enter your Workflowy save location URL",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.12.5",
+    "cross-fetch": "^4.0.0",
+    "nanoid": "^5.0.6",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

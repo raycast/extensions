@@ -3,11 +3,11 @@ import { mkdirSync } from "fs";
 import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD } from "@raycast/api";
 import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
-import { dirname, basename, join } from "path";
-import { compressImageResponseScheme } from "./zodSchema";
-import { Preference } from "./types";
+import { dirname, basename, join, extname } from "path";
+import { compressImageResponseScheme } from "./lib/zodSchema";
+import { resolveOutputPath } from "./lib/utils";
 
-const preferences = getPreferenceValues<Preference>();
+const preferences = getPreferenceValues<Preferences>();
 
 export default async function main() {
   let filePaths: string[];
@@ -34,7 +34,7 @@ export default async function main() {
     const totalCompressedSize = results.reduce((acc, cur) => acc + cur[0].compressedSize, 0);
 
     await showHUD(
-      `Compression successful 🎉  (-${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%)`
+      `Compression successful 🎉  (-${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%)`,
     );
   } catch (e) {
     toast.style = Toast.Style.Failure;
@@ -44,13 +44,13 @@ export default async function main() {
 }
 
 const _compressImage = async (
-  filePath: string
+  filePath: string,
 ): Promise<
   [
     {
       originalSize: number;
       compressedSize: number;
-    }
+    },
   ]
 > => {
   const { size } = statSync(filePath);
@@ -81,13 +81,18 @@ const _compressImage = async (
   // Save compressed image
   let outputDir = dirname(filePath);
   if (!preferences.overwrite) {
-    outputDir = join(dirname(filePath), "compressed-images");
+    outputDir = resolveOutputPath(filePath, preferences.destinationFolderPath);
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir);
     }
   }
 
-  const outputPath = join(outputDir, basename(filePath));
+  let outputPath = join(outputDir, basename(filePath));
+  if (outputPath === filePath && !preferences.overwrite) {
+    const ext = extname(filePath);
+    outputPath = join(outputDir, `${basename(filePath, ext)}.compressed${ext}`);
+  }
+
   const outputFileStream = createWriteStream(outputPath);
 
   await new Promise((resolve, reject) => {

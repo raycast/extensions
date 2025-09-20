@@ -21,6 +21,7 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
   const nameFieldRef = useRef<Form.TextField>(null);
   const linksFieldRef = useRef<Form.TextArea>(null);
   const initialValues = props.data ?? { name: "", links: "", id: "", browser: "com.google.Chrome" };
+  const [selectedBrowser, setSelectedBrowser] = useState<string>("com.google.Chrome");
   const mode = props.data ? "edit" : "create";
   const { pop, push } = useNavigation();
   let updateBrowserList = true;
@@ -73,19 +74,24 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
         "com.microsoft.edgemac",
         "com.operasoftware.Opera",
         "org.chromium.Chromium",
+        "com.vivaldi.Vivaldi",
+        "company.thebrowser.Browser",
+        "com.sigmaos.sigmaos.macos",
+        "company.thebrowser.dia",
       ];
 
       const browsers = installedApplications.filter((app) => browserIds.includes(String(app.bundleId)));
 
       if (updateBrowserList) {
         setBrowsers(browsers);
+        setSelectedBrowser(initialValues.browser);
       }
     })();
 
     return () => {
       updateBrowserList = false;
     };
-  });
+  }, []);
 
   return (
     <Form
@@ -116,7 +122,7 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
         ref={linksFieldRef}
       />
 
-      <Form.Dropdown id="browser" title="Open with" defaultValue={initialValues.browser}>
+      <Form.Dropdown id="browser" title="Open with" value={selectedBrowser} onChange={setSelectedBrowser}>
         {browsers.map((app) => (
           <Form.Dropdown.Item key={app.bundleId} value={String(app.bundleId)} title={app.name} />
         ))}

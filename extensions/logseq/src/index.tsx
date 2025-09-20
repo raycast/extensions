@@ -15,12 +15,13 @@ interface CommandForm {
 export default function Command() {
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: CommandForm) {
+  async function handleSubmit(values: CommandForm): Promise<boolean> {
     if (!values.content) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "🐝 Type something to get started",
       });
+      return false;
     }
 
     const content = addLeadingTimeToContentIfNecessary(values.content);
@@ -37,6 +38,8 @@ export default function Command() {
       .then(pop)
       .catch((e) => showToast({ style: Toast.Style.Failure, title: "Failed", message: e }))
       .catch(noop);
+
+    return true;
   }
 
   return (

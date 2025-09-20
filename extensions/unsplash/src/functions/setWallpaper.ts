@@ -1,5 +1,5 @@
 import { showToast, Toast, environment, getPreferenceValues, showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { existsSync } from "fs";
 import { resolveHome } from "./utils";
 
@@ -17,20 +17,20 @@ const displayMessage = async (msg: string, type: "hud" | "toast") => {
 };
 
 export const setWallpaper = async ({ url, id, every, useHud = false, isBackground = false }: SetWallpaperProps) => {
-  const { downloadSize, wallpaperPath } = getPreferenceValues<UnsplashPreferences>();
+  const { downloadSize, wallpaperPath } = getPreferenceValues<Preferences>();
   const selectedPath = resolveHome(wallpaperPath || environment.supportPath);
 
   let toast;
 
-  if (existsSync(selectedPath)) {
-    if (isBackground) return;
-    toast = await displayMessage("Downloading and setting wallpaper...", useHud ? "hud" : "toast");
-  } else {
-    if (isBackground) return;
-    toast = await displayMessage(
-      "The selected path does not exist. Please select a valid path.",
-      useHud ? "hud" : "toast"
-    );
+  if (!isBackground) {
+    if (existsSync(selectedPath)) {
+      toast = await displayMessage("Downloading and setting wallpaper...", useHud ? "hud" : "toast");
+    } else {
+      toast = await displayMessage(
+        "The selected path does not exist. Please select a valid path.",
+        useHud ? "hud" : "toast",
+      );
+    }
   }
 
   const fixedPathName = selectedPath.endsWith("/")
@@ -75,7 +75,7 @@ export const setWallpaper = async ({ url, id, every, useHud = false, isBackgroun
 
     if (result !== "ok") throw new Error("Error setting wallpaper.");
     else if (useHud) {
-      !isBackground && (await showHUD("Wallpaper set!"));
+      if (!isBackground) await showHUD("Wallpaper set!");
     } else if (toast) {
       toast.style = Toast.Style.Success;
       toast.title = "Wallpaper set!";

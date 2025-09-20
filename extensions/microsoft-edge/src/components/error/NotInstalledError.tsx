@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { DEFAULT_ERROR_TITLE, DownloadText } from "../../constants";
+import { DEFAULT_ERROR_TITLE } from "../../constants";
 import { cpus } from "os";
 import { join } from "path";
-import { ExecError } from "../../interfaces";
+import { ExecError } from "../../types/interfaces";
+import { getDownloadText } from "../../utils/messageUtils";
+import { isStableVersion } from "../../utils/appUtils";
 
 export const brewPrefix: string = (() => {
   try {
@@ -33,39 +35,41 @@ function execBrew(cask: string) {
 }
 
 export function NotInstalledError() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [showAction, setShowAction] = useState(isStableVersion());
+
   return (
     <Detail
       actions={
         <ActionPanel>
-          {isLoading && (
-            <ActionPanel.Item
+          {showAction && (
+            <Action
               title="Install with Homebrew"
               onAction={async () => {
-                if (!isLoading) return;
+                if (!showAction) return;
+                setShowAction(false);
                 const toast = new Toast({ style: Toast.Style.Animated, title: "Installing..." });
                 await toast.show();
                 try {
-                  execBrew("microsoft-edge");
+                  execBrew("microsoft-edge"); // No cask versions available for Edge Insider builds yet
                   await toast.hide();
-                } catch (e) {
+                } catch {
+                  setShowAction(true);
                   await toast.hide();
                   await showToast(
                     Toast.Style.Failure,
                     DEFAULT_ERROR_TITLE,
-                    "An unknown error occurred while trying to install"
+                    "An unknown error occurred while trying to install",
                   );
                 }
                 toast.title = "Installed! Please go back and try again.";
                 toast.style = Toast.Style.Success;
                 await toast.show();
-                setIsLoading(false);
               }}
             />
           )}
         </ActionPanel>
       }
-      markdown={DownloadText}
+      markdown={getDownloadText()}
     />
   );
 }

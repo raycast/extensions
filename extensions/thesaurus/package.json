@@ -5,6 +5,9 @@
   "description": "Search Merrian-Webster's Thesaurus",
   "icon": "extension_icon.png",
   "author": "ABukSwienty",
+  "contributors": [
+    "YourMCGeek"
+  ],
   "categories": [
     "Web",
     "Other"
@@ -16,21 +19,30 @@
       "title": "Thesaurus Search",
       "description": "Thesaurus search",
       "mode": "view"
+    },
+    {
+      "name": "thesaurus-search-selected",
+      "title": "Thesaurus Search Selected",
+      "description": "Search the thesaurus using the selected text",
+      "mode": "view",
+      "subtitle": "Thesaurus"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "axios": "^1.3.4",
-    "cheerio": "^1.0.0-rc.12",
-    "zustand": "^4.3.6"
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.1.2",
+    "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -38,5 +50,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

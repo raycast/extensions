@@ -1,51 +1,17 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import get from "lodash/get";
 import omit from "lodash/omit";
+import type Stripe from "stripe";
 import { useStripeApi, useStripeDashboard } from "./hooks";
 import { convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
 
-type ConnectedAccountResp = {
-  id: string;
-  created: number;
-  cancelled_at: number | null;
-  currency: string;
-  status: string;
-  business_profile: any;
-  capabilities: any;
-  default_currency: string;
-  company: {
-    address: {
-      city: string | null;
-      country: string | null;
-      line1: string | null;
-      line2: string | null;
-      postal_code: string | null;
-      state: string | null;
-    };
-  };
-  individual: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    dob: {
-      day: number;
-      month: number;
-      year: number;
-    };
-  };
-};
-
 type ConnectedAccount = {
   id: string;
-  email: string;
-  created_at: string;
+  created: string;
   first_name: string;
   last_name: string;
-  cancelled_at: string;
-  currency: string;
+  email: string;
   capabilities: string;
   default_currency: string;
   company_address: string;
@@ -54,37 +20,41 @@ type ConnectedAccount = {
 
 const omittedFields = ["client_secret"];
 
-const resolveConnectedAccount = ({
-  currency = "",
-  default_currency = "",
-  created,
-  cancelled_at,
-  ...rest
-}: ConnectedAccountResp): ConnectedAccount => {
-  const { month, year, day } = get(rest, "individual.dob", {});
-  const dateOfBirth = day && month && year ? `${day}/${month}/${year}` : "";
-  const { city, country, line1, postal_code, state } = get(rest, "company.address", {});
+const createDateOfBirth = (connectedAccount: Stripe.Account) => {
+  const year = connectedAccount.individual?.dob?.year ?? "";
+  const month = connectedAccount.individual?.dob?.month ?? "";
+  const day = connectedAccount.individual?.dob?.day ?? "";
+
+  if (!year || !month || !day) {
+    return "";
+  }
+
+  return `${day}/${month}/${year}`;
+};
+
+const resolveConnectedAccount = (connectedAccount: Stripe.Account): ConnectedAccount => {
+  const { city, country, line1, postal_code, state } = connectedAccount.company?.address ?? {};
   const companyAddress = [line1, city, state, postal_code, country].filter(Boolean).join(", ");
 
-  return {
-    ...rest,
-    currency: currency.toUpperCase(),
-    default_currency: default_currency.toUpperCase(),
-    created_at: convertTimestampToDate(created),
-    cancelled_at: convertTimestampToDate(cancelled_at),
-    dob: dateOfBirth,
+  const resolvedConnectedAccount: ConnectedAccount = {
+    ...connectedAccount,
+    default_currency: connectedAccount.default_currency?.toUpperCase() ?? "",
+    created: connectedAccount.created ? convertTimestampToDate(connectedAccount.created) : "",
+    dob: createDateOfBirth(connectedAccount),
     company_address: companyAddress,
-    capabilities: Object.keys(get(rest, "capabilities", {})).join(", "),
-    first_name: titleCase(get(rest, "individual.first_name", "")),
-    last_name: titleCase(get(rest, "individual.last_name", "")),
-    email: get(rest, "email", ""),
+    capabilities: Object.keys(connectedAccount.capabilities ?? {}).join(", "),
+    first_name: titleCase(connectedAccount.individual?.first_name ?? ""),
+    last_name: titleCase(connectedAccount.individual?.last_name ?? ""),
+    email: connectedAccount.email ?? "",
   };
+
+  return resolvedConnectedAccount;
 };
 
 const ConnectedAccounts = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CONNECTED_ACCOUNTS, true);
   const { dashboardUrl } = useStripeDashboard();
-  const formattedConnectedAccounts = data.map(resolveConnectedAccount);
+  const formattedConnectedAccounts = (data as Stripe.Account[]).map(resolveConnectedAccount);
 
   const renderConnectedAccounts = (connectedAccount: ConnectedAccount) => {
     const { email, id } = connectedAccount;

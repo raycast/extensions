@@ -1,8 +1,11 @@
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 
 import { DiscussionFieldsFragment } from "../generated/graphql";
+import { DISCUSSION_SORT_TYPES_TO_QUERIES } from "../helpers/discussion";
 import { getGitHubUser } from "../helpers/users";
+
+import { SortAction, SortActionProps } from "./SortAction";
 
 function getDiscussionIcon(discussion: DiscussionFieldsFragment): List.Item.Props["icon"] {
   const categoryText = discussion.category?.name ? `Category: ${discussion.category?.name}` : "Unknown";
@@ -29,7 +32,7 @@ function getDiscussionIcon(discussion: DiscussionFieldsFragment): List.Item.Prop
   return fb;
 }
 
-export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment }): JSX.Element {
+export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment } & SortActionProps): JSX.Element {
   const d = props.discussion;
   const user = getGitHubUser(d.author);
   return (
@@ -43,7 +46,7 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
           tooltip: d.answer ? "Answered" : undefined,
         },
         {
-          icon: { source: Icon.ArrowUp, tintColor: Color.Purple },
+          icon: Icon.ArrowUp,
           text: `${d.upvoteCount}`,
           tooltip: `${d.upvoteCount} Upvotes`,
         },
@@ -61,6 +64,9 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={d.url} />
+          <ActionPanel.Section>
+            <SortAction data={DISCUSSION_SORT_TYPES_TO_QUERIES} {...props} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

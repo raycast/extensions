@@ -2,15 +2,24 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitwarden",
   "title": "Bitwarden Vault",
-  "description": "Access a Bitwarden account. Requires installing the Bitwarden CLI.",
+  "description": "Access your Bitwarden vault directly from Raycast",
   "icon": "bitwarden-512.png",
   "author": "jomifepe",
   "contributors": [
     "daniel-stoneuk",
-    "pomdtr",
     "andreaselia",
     "pernielsentikaer",
-    "eth-p"
+    "eth-p",
+    "Yamen",
+    "undefinedzack",
+    "anirudhganwal06",
+    "samuel_ivarsson",
+    "gaspihabif",
+    "marinsokol",
+    "jose-elias-alvarez"
+  ],
+  "pastContributors": [
+    "pomdtr"
   ],
   "license": "MIT",
   "keywords": [
@@ -28,6 +37,7 @@
       "title": "Search Vault",
       "subtitle": "Bitwarden",
       "description": "Search all items in the authenticated Bitwarden vault.",
+      "icon": "search.png",
       "mode": "view",
       "preferences": [
         {
@@ -35,16 +45,16 @@
           "type": "dropdown",
           "description": "The primary action to perform on a vault item.",
           "required": false,
-          "title": "Primary Action",
+          "title": "Primary Password Action",
           "default": "copy",
           "data": [
             {
-              "title": "Paste to Active App",
-              "value": "paste"
-            },
-            {
               "title": "Copy to Clipboard",
               "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
             }
           ]
         },
@@ -56,9 +66,50 @@
           "title": "Copy Values Temporarily",
           "description": "Whether values should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
-            {"title": "Always", "value": "always"},
-            {"title": "Only Passwords", "value": "passwords"},
-            {"title": "Never", "value": "never"}
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "Only Passwords",
+              "value": "passwords"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "authenticator",
+      "title": "Authenticator",
+      "subtitle": "Bitwarden",
+      "description": "Search all items with TOTP and generate codes.",
+      "icon": "authenticator.png",
+      "mode": "view",
+      "keywords": [
+        "totp",
+        "otp"
+      ],
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action to perform on an authenticator code.",
+          "required": false,
+          "title": "Primary Code Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
           ]
         }
       ]
@@ -68,6 +119,7 @@
       "title": "Generate Password",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden.",
+      "icon": "generate-password.png",
       "mode": "view",
       "preferences": [
         {
@@ -78,8 +130,14 @@
           "title": "Copy Values Temporarily",
           "description": "Whether values should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
-            {"title": "Always", "value": "always"},
-            {"title": "Never", "value": "never"}
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
           ]
         }
       ]
@@ -89,6 +147,7 @@
       "title": "Generate Password (Quick)",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden and copy and/or paste it into the active app right away.",
+      "icon": "generate-password-quick.png",
       "mode": "no-view",
       "preferences": [
         {
@@ -121,11 +180,81 @@
           "title": "Copy Values Temporarily",
           "description": "Whether values should be copied to the clipboard temporarily, and therefore omitted from the clipboard history",
           "data": [
-            {"title": "Always", "value": "always"},
-            {"title": "Never", "value": "never"}
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
           ]
         }
       ]
+    },
+    {
+      "name": "create-folder",
+      "title": "Create Folder",
+      "subtitle": "Bitwarden",
+      "description": "Create a folder in the authenticated Bitwarden vault.",
+      "icon": "create-folder.png",
+      "mode": "view"
+    },
+    {
+      "name": "lock-vault",
+      "title": "Lock Vault",
+      "subtitle": "Bitwarden",
+      "description": "Lock your bitwarden vault",
+      "icon": "lock-vault.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "logout-vault",
+      "title": "Logout",
+      "subtitle": "Bitwarden",
+      "description": "Logout from your bitwarden vault account",
+      "icon": "logout-vault.png",
+      "mode": "no-view",
+      "keywords": [
+        "log out",
+        "account"
+      ]
+    },
+    {
+      "name": "create-send",
+      "title": "Create Send",
+      "subtitle": "Bitwarden",
+      "description": "Securely share information directly with anyone.",
+      "icon": "create-send.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-sends",
+      "title": "Search Sends",
+      "subtitle": "Bitwarden",
+      "description": "List and search all the Sends owned by you.",
+      "icon": "search-sends.png",
+      "mode": "view"
+    },
+    {
+      "name": "receive-send",
+      "title": "Receive Send",
+      "subtitle": "Bitwarden",
+      "description": "Receive a send from a URL",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "url",
+          "placeholder": "url"
+        },
+        {
+          "type": "password",
+          "name": "password",
+          "placeholder": "password"
+        }
+      ],
+      "icon": "receive-send.png",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -134,7 +263,7 @@
       "type": "password",
       "required": true,
       "title": "Client ID",
-      "description": "The client_id value seen in the My Account section of a Bitwarden web vault.",
+      "description": "The client_id value seen in your Bitwarden account settings.",
       "placeholder": "client_id"
     },
     {
@@ -142,45 +271,16 @@
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.",
+      "description": "The client_secret value seen in your Bitwarden account settings.",
       "placeholder": "client_secret"
-    },
-    {
-      "name": "repromptIgnoreDuration",
-      "type": "dropdown",
-      "required": false,
-      "title": "Vault Timeout",
-      "description": "The amount of time before the password must be re-entered to access the vault again.",
-      "default": "900000",
-      "data": [
-        {"title": "Immediately", "value": "0"},
-        {"title": "1 Minute", "value": "60000"},
-        {"title": "5 Minutes", "value": "300000"},
-        {"title": "15 Minutes", "value": "900000"},
-        {"title": "30 Minutes", "value": "1800000"},
-        {"title": "1 Hour", "value": "3600000"},
-        {"title": "4 Hours", "value": "14400000"},
-        {"title": "8 Hours", "value": "28800000"},
-        {"title": "1 Day", "value": "86400000"},
-        {"title": "Never", "value": "-1"}
-      ]
-    },
-    {
-      "name": "fetchFavicons",
-      "type": "checkbox",
-      "required": true,
-      "default": true,
-      "title": "Privacy",
-      "label": "Fetch Vault Items Icons",
-      "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
     },
     {
       "name": "cliPath",
       "type": "textfield",
       "required": false,
-      "title": "Bitwarden CLI Installation Path",
-      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1.",
-      "placeholder": "CLI Installation Path"
+      "title": "Bitwarden CLI Path",
+      "description": "If you wish to use your own CLI, type here the location of your local installation. The typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs.",
+      "placeholder": "CLI Path"
     },
     {
       "name": "serverUrl",
@@ -198,28 +298,148 @@
       "title": "Self-signed Certificates Path",
       "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
       "placeholder": "absolute/path/to/your/certs.pem"
+    },
+    {
+      "name": "syncOnLaunch",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Customization",
+      "label": "Sync Vault on Launch",
+      "description": "Sync the vault on command launch. If unchecked, the vault will only be synced when the Sync Vault action is used."
+    },
+    {
+      "name": "fetchFavicons",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "label": "Fetch Vault Icons",
+      "description": "Use the Bitwarden icon server (icons.bitwarden.net) to fetch icons for vault items. If unchecked, built-in icons will be used."
+    },
+    {
+      "name": "repromptIgnoreDuration",
+      "type": "dropdown",
+      "required": false,
+      "title": "Vault Timeout",
+      "description": "The amount of time before the password must be re-entered to access the vault again.",
+      "default": "900000",
+      "data": [
+        {
+          "title": "Immediately",
+          "value": "0"
+        },
+        {
+          "title": "1 Minute",
+          "value": "60000"
+        },
+        {
+          "title": "5 Minutes",
+          "value": "300000"
+        },
+        {
+          "title": "15 Minutes",
+          "value": "900000"
+        },
+        {
+          "title": "30 Minutes",
+          "value": "1800000"
+        },
+        {
+          "title": "1 Hour",
+          "value": "3600000"
+        },
+        {
+          "title": "4 Hours",
+          "value": "14400000"
+        },
+        {
+          "title": "8 Hours",
+          "value": "28800000"
+        },
+        {
+          "title": "1 Day",
+          "value": "86400000"
+        },
+        {
+          "title": "On system lock (experimental)",
+          "value": "-2"
+        },
+        {
+          "title": "On system sleep (experimental)",
+          "value": "-3"
+        },
+        {
+          "title": "Never",
+          "value": "-1"
+        }
+      ]
+    },
+    {
+      "name": "windowActionOnCopy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Window Behaviour On Copy",
+      "description": "What to do with the window when copying a value to the clipboard.",
+      "default": "close",
+      "data": [
+        {
+          "title": "Keep Open",
+          "value": "keepOpen"
+        },
+        {
+          "title": "Close",
+          "value": "close"
+        },
+        {
+          "title": "Close And Exit Command",
+          "value": "closeAndPopToRoot"
+        }
+      ]
+    },
+    {
+      "name": "shouldCacheVaultItems",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Performance",
+      "label": "Enable Caching",
+      "description": "Whether to cache vault items for faster load times. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other non-sensitive labels."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.4",
-    "execa": "^7.0.0"
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.19.1",
+    "execa": "^7.0.0",
+    "fast-fuzzy": "^1.12.0",
+    "node-stream-zip": "^1.15.0",
+    "otpauth": "^9.4.0"
   },
   "devDependencies": {
-    "@types/node": "~18.14.2",
+    "@faker-js/faker": "^7.6.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "~22.14.0",
     "@types/react": "^18.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.53.0",
-    "@typescript-eslint/parser": "^5.53.0",
-    "eslint": "^8.35.0",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "^8.56.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "jest": "^29.5.0",
     "prettier": "^2.8.4",
-    "react-devtools": "^4.27.2",
-    "typescript": "^4.9.5"
+    "react-devtools": "^5.2.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "test": "jest --verbose",
+    "test:watch": "jest --watch"
   }
 }

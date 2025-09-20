@@ -2,165 +2,772 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spotify-player",
   "title": "Spotify Player",
-  "description": "Search and Play Spotify music from Raycast, and control your library with convenient commands.",
-  "icon": "icon.png",
+  "description": "Spotify's most common features, now at your fingertips. Search for music and podcasts, browse your library, and control the playback. Glance at what's currently playing directly from the menu bar.",
+  "icon": "extension-icon.png",
   "author": "mattisssa",
-  "license": "MIT",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
   "contributors": [
+    "peduarte",
+    "sxn",
     "dillionverma",
     "andreaselia",
     "stuart",
     "tonka3000",
     "dancannon",
-    "sxn"
+    "pernielsentikaer",
+    "stevensd2m",
+    "erics118",
+    "hjoelh",
+    "hobhouse",
+    "jatindotdev",
+    "devbear",
+    "rfaccio",
+    "badta5te",
+    "andyburris",
+    "thomaslombart",
+    "rhesamu",
+    "themitpatel",
+    "litomore",
+    "enneemme",
+    "lineville",
+    "tsibog",
+    "viethung0823",
+    "eyal_levy",
+    "vmrjnvc",
+    "karthik_manikandan",
+    "kartheesan05",
+    "joshkat",
+    "CaffeineCat"
+  ],
+  "pastContributors": [
+    "bkeys818",
+    "jonasengelmann"
+  ],
+  "debug": {
+    "reloadShortcut": {
+      "key": "r",
+      "modifiers": [
+        "command",
+        "shift"
+      ]
+    }
+  },
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "closeWindowOnAction",
+      "description": "If enabled, the Raycast window will be closed after performing an action",
+      "type": "checkbox",
+      "label": "Close window on action",
+      "default": false,
+      "required": false
+    }
   ],
   "commands": [
     {
-      "name": "justPlay",
-      "title": "Just Play",
+      "name": "search",
+      "title": "Search",
       "subtitle": "Spotify",
-      "description": "Starts the song by query straightway in Spotify",
-      "mode": "no-view",
-      "arguments": [
+      "description": "A single unified search command. Search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.",
+      "mode": "view",
+      "preferences": [
         {
-          "name": "query",
-          "placeholder": "Track / Artist",
-          "type": "text",
-          "required": true
+          "title": "Filters",
+          "label": "Music Only",
+          "default": false,
+          "description": "Only show results for music. Podcasts and episodes are excluded.",
+          "name": "musicOnly",
+          "required": false,
+          "type": "checkbox"
+        },
+        {
+          "title": "Top View",
+          "data": [
+            {
+              "title": "Playlists",
+              "value": "playlists"
+            },
+            {
+              "title": "Albums",
+              "value": "albums"
+            },
+            {
+              "title": "Artists",
+              "value": "artists"
+            },
+            {
+              "title": "Songs",
+              "value": "tracks"
+            },
+            {
+              "title": "Podcasts & Shows",
+              "value": "shows"
+            },
+            {
+              "title": "Episodes",
+              "value": "episodes"
+            }
+          ],
+          "default": "artists",
+          "description": "Show a specific view at the top of the results list by default",
+          "name": "topView",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Top View"
+        }
+      ]
+    },
+    {
+      "name": "yourLibrary",
+      "title": "Your Library",
+      "subtitle": "Spotify",
+      "description": "See your saved artists, albums, songs, playlists, and podcasts. Similar to the \"Search\" command, it includes a category dropdown and contextual actions.",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Default View",
+          "data": [
+            {
+              "title": "All",
+              "value": "all"
+            },
+            {
+              "title": "Playlists",
+              "value": "playlists"
+            },
+            {
+              "title": "Albums",
+              "value": "albums"
+            },
+            {
+              "title": "Artists",
+              "value": "artists"
+            },
+            {
+              "title": "Songs",
+              "value": "tracks"
+            },
+            {
+              "title": "Podcasts & Shows",
+              "value": "shows"
+            },
+            {
+              "title": "Episodes",
+              "value": "episodes"
+            }
+          ],
+          "default": "All",
+          "description": "Open a specific view by default",
+          "name": "Default-View",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Default View"
         }
       ]
     },
     {
       "name": "nowPlaying",
       "title": "Now Playing",
-      "description": "Shows currently playing song",
       "subtitle": "Spotify",
+      "description": "See what's currently playing. Use the actions (⌘ K) for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more.",
       "mode": "view"
     },
     {
       "name": "nowPlayingMenuBar",
       "title": "Menu Bar Player",
-      "description": "Shows currently playing song in the Subtitle and in the Menu Bar. It also automatically refreshes in the background once per minute.",
       "subtitle": "Spotify",
+      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more. Refreshes every 10 seconds.",
       "mode": "menu-bar",
       "interval": "10s",
       "preferences": [
         {
-          "name": "maxtitlelength",
-          "description": "Max Menubar title length. Leave empty for no limitation.",
-          "type": "textfield",
-          "required": false,
-          "title": "Max. Menubar Title length"
+          "name": "hideIconWhenIdle",
+          "description": "If enabled, the icon in the Menu Bar will be hidden when Spotify is not running or when nothing is playing",
+          "type": "checkbox",
+          "label": "Hide icon when idle",
+          "default": false,
+          "required": false
         },
         {
-          "name": "showEllipsis",
-          "description": "Check to show ellipsis if title is longer than the max length.",
+          "name": "hideArtistName",
+          "description": "If enabled, the artist's name will be hidden in the Menu Bar",
           "type": "checkbox",
-          "title": "Show Ellipsis",
-          "label": "Show ellipsis (...) if title is truncated.",
+          "label": "Hide artist's name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cleanupTitle",
+          "description": "If enabled cleans up extra info like remix titles or versions from the song name",
+          "type": "checkbox",
+          "label": "Cleanup song title",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "maxTextLength",
+          "title": "Now Playing Text Length",
+          "description": "Maximum number of characters to show for the currently playing track in the menu bar. Leave empty to use default (30 characters)",
+          "type": "textfield",
+          "default": "30",
+          "required": false
+        },
+        {
+          "name": "iconType",
+          "title": "Menu Bar Icon",
+          "description": "Choose between the default Spotify icon, or the cover image of the current track or episode.",
+          "type": "dropdown",
+          "default": "spotify-icon",
+          "data": [
+            {
+              "title": "Spotify Icon",
+              "value": "spotify-icon"
+            },
+            {
+              "title": "Cover Image",
+              "value": "cover-image"
+            }
+          ],
           "required": false
         }
       ]
     },
     {
-      "name": "playSimilar",
+      "name": "togglePlayPause",
+      "title": "Toggle Play/Pause",
+      "subtitle": "Spotify",
+      "description": "Toggle the playback of the current song.",
+      "mode": "no-view"
+    },
+    {
+      "name": "addPlayingSongToPlaylist",
+      "title": "Add Playing Song to Playlist",
+      "subtitle": "Spotify",
+      "description": "Adds the current song to a playlist of your choice.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "duplicateSongCheck",
+          "description": "Prevents duplicate song addition. Significantly slows performance of non cached playlists.",
+          "type": "checkbox",
+          "label": "Check for duplicate songs",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cacheRefreshTime",
+          "title": "Cache Refresh Rate",
+          "description": "How often to refresh cached playlists",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "7 Days",
+              "value": "7"
+            },
+            {
+              "title": "14 Days",
+              "value": "14"
+            },
+            {
+              "title": "1 Month",
+              "value": "30"
+            }
+          ],
+          "required": false,
+          "default": "30"
+        }
+      ]
+    },
+    {
+      "name": "removeSongFromPlaylist",
+      "title": "Remove Playing Song from Playlist",
+      "subtitle": "Spotify",
+      "description": "Remove the current song from a playlist of your choice.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "next",
+      "title": "Next",
+      "subtitle": "Spotify",
+      "description": "Skip to the next song/episode.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous",
+      "subtitle": "Spotify",
+      "description": "Skip to the previous song/episode.",
+      "mode": "no-view"
+    },
+    {
+      "name": "like",
+      "title": "Like",
+      "subtitle": "Spotify",
+      "description": "Like the current song.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "dislike",
+      "title": "Dislike",
+      "subtitle": "Spotify",
+      "description": "Dislike the current song.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "devices",
+      "title": "Select Device",
+      "subtitle": "Spotify",
+      "description": "Select a device to play music on.",
+      "mode": "view"
+    },
+    {
+      "name": "volume",
+      "title": "Set Volume",
+      "subtitle": "Spotify",
+      "description": "Set the volume to an arbitrary percent.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "volume",
+          "placeholder": "Volume",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "volume0",
+      "title": "Set Volume to 0%",
+      "subtitle": "Spotify",
+      "description": "Mute the volume.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume25",
+      "title": "Set Volume to 25%",
+      "subtitle": "Spotify",
+      "description": "Set the volume to 25%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume50",
+      "title": "Set Volume to 50%",
+      "subtitle": "Spotify",
+      "description": "Set the volume to 50%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume75",
+      "title": "Set Volume to 75%",
+      "subtitle": "Spotify",
+      "description": "Set the volume to 75%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volume100",
+      "title": "Set Volume to 100%",
+      "subtitle": "Spotify",
+      "description": "Set the volume to 100%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volumeDown",
+      "title": "Turn Volume Down",
+      "subtitle": "Spotify",
+      "description": "Turn the volume down by 10%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "volumeUp",
+      "title": "Turn Volume Up",
+      "subtitle": "Spotify",
+      "description": "Turn the volume up by 10%.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggleShuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Spotify",
+      "description": "Toggle shuffle.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "cycleRepeat",
+      "title": "Cycle Repeat",
+      "subtitle": "Spotify",
+      "description": "Cycle the repeat state between off, context (meaning the current playlist/album), and track.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "replay",
+      "title": "Replay",
+      "subtitle": "Spotify",
+      "description": "Replay the current song/episode form the beginning.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "current-track",
+      "title": "Current Track",
+      "description": "Show the current song/episode state.",
+      "mode": "no-view",
+      "interval": "30s",
+      "disabledByDefault": true
+    },
+    {
+      "name": "startRadio",
       "title": "Start Radio",
       "subtitle": "Spotify",
-      "description": "Starts playing similar tracks to the currently playing. The command initiate the Song's Radio",
-      "mode": "no-view"
+      "description": "Start a radio station based on the current song.",
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
-      "name": "searchTracks",
-      "title": "Search Tracks",
+      "name": "copyUrl",
+      "title": "Copy URL",
       "subtitle": "Spotify",
-      "description": "Search & Play tracks in Spotify",
+      "description": "Copy the URL of the current song/episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "copyArtistAndTitle",
+      "title": "Copy Artist And Title",
+      "subtitle": "Spotify",
+      "description": "Copy the artist and track title of the current song/episode",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "justPlay",
+      "title": "Just Play",
+      "subtitle": "Spotify",
+      "description": "Quickly start playing a song based on your query.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Song / Artist",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "subtitle": "Spotify",
+      "description": "See your queue.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "generatePlaylist",
+      "title": "Generate Playlist",
+      "subtitle": "Spotify",
+      "description": "Generate a Spotify playlist using Raycast AI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Playlist description",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "startDJ",
+      "title": "Start DJ",
+      "subtitle": "Spotify",
+      "description": "Start the DJ.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "copyEmbed",
+      "title": "Copy Embed Code",
+      "subtitle": "Spotify",
+      "description": "Copy the iframe embed code for the currently playing song or podcast episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "skip15",
+      "title": "Skip 15 Seconds",
+      "subtitle": "Spotify",
+      "description": "Skip 15 seconds forward in an episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "back15",
+      "title": "Back 15 Seconds",
+      "subtitle": "Spotify",
+      "description": "Back 15 seconds in an episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "findLyrics",
+      "title": "Find Lyrics",
+      "subtitle": "Spotify",
+      "description": "Find and display lyrics for the currently playing song from Genius.",
       "mode": "view"
-    },
-    {
-      "name": "searchAlbums",
-      "title": "Search Albums",
-      "subtitle": "Spotify",
-      "description": "Search & Play albums in Spotify",
-      "mode": "view"
-    },
-    {
-      "name": "searchPlaylists",
-      "title": "Search Playlists",
-      "subtitle": "Spotify",
-      "description": "Search & Play playlists in Spotify",
-      "mode": "view"
-    },
-    {
-      "name": "searchArtists",
-      "title": "Search Artists",
-      "subtitle": "Spotify",
-      "description": "Search Artists in Spotify",
-      "mode": "view"
-    },
-    {
-      "name": "featuredPlaylists",
-      "title": "Featured Playlists",
-      "subtitle": "Spotify",
-      "description": "View featured playlists in Spotify",
-      "mode": "view"
-    },
-    {
-      "name": "browseAll",
-      "title": "Browse All",
-      "subtitle": "Spotify",
-      "description": "Browse genres in Spotify",
-      "mode": "view"
-    },
-    {
-      "name": "likeCurrentSong",
-      "subtitle": "Spotify",
-      "title": "Like Current Song",
-      "description": "Likes currently playing song",
-      "mode": "no-view"
-    },
-    {
-      "name": "dislikeCurrentSong",
-      "subtitle": "Spotify",
-      "title": "Dislike Current Song",
-      "description": "Dislikes currently playing song",
-      "mode": "no-view"
     }
   ],
-  "preferences": [
+  "tools": [
     {
-      "name": "closeWindowOnAction",
-      "type": "checkbox",
-      "label": "Yes/No",
-      "required": false,
-      "default": true,
-      "title": "Close Window On Action",
-      "description": "If checked then the Raycast window will be closed on action (Play/Pause)"
+      "name": "search",
+      "title": "Search",
+      "description": "Search for music and podcasts on Spotify. Get Spotify catalog information about albums, artists, playlists, tracks, shows, episodes or audiobooks that match a keyword string."
+    },
+    {
+      "name": "play",
+      "title": "Play",
+      "description": "Play a song or episode on Spotify."
+    },
+    {
+      "name": "get-current-user",
+      "title": "Get Current User",
+      "description": "Get detailed profile information about the current user (including the current user's username)."
+    },
+    {
+      "name": "get-current-track",
+      "title": "Get Current Track",
+      "description": "Gets the currently playing track"
+    },
+    {
+      "name": "create-playlist",
+      "title": "Create Playlist",
+      "description": "Creates a new playlist"
+    },
+    {
+      "name": "add-track-to-playlist",
+      "title": "Add Track to Playlist",
+      "description": "Adds a track to a playlist"
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "description": "Add tracks to queue and get the current queue state"
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.38.1",
-    "lodash": "^4.17.21",
-    "node-fetch": "^3.2.3",
-    "run-applescript": "^6.0.0",
-    "spotify-web-api-node": "^5.0.2"
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "@types/async-retry": "^1.4.9",
+    "@types/node-fetch": "^2.6.13",
+    "async-retry": "^1.3.3",
+    "genius-lyrics": "^4.4.7",
+    "node-fetch": "^3.3.2",
+    "oazapfts": "^4.10.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.180",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/spotify-web-api-node": "^5.0.7",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.6.2",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.17.2",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "generate-spotify-client": "oazapfts --optimistic ./fixed-spotify-open-api.yml ./src/helpers/spotify.api.ts"
+  },
+  "ai": {
+    "evals": [
+      {
+        "input": "@spotify-player latest album of fred again",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": {
+                  "includes": "fred again"
+                },
+                "types": {
+                  "includes": "album"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search": {
+            "albums": [
+              {
+                "id": "1FJVbtVFLARPKbn1HepNh1",
+                "releaseDate": "2023-05-05",
+                "name": "Secret Life",
+                "type": "album",
+                "artists": [
+                  "Fred again..",
+                  "Brian Eno"
+                ]
+              },
+              {
+                "id": "3DQueEd1Ft9PHWgovDzPKh",
+                "releaseDate": "2024-09-06",
+                "name": "ten days",
+                "type": "album",
+                "artists": [
+                  "Fred again.."
+                ]
+              },
+              {
+                "id": "6CNWkUVb8kLkM3B464RMTx",
+                "releaseDate": "2024-06-14",
+                "name": "USB",
+                "type": "album",
+                "artists": [
+                  "Fred again.."
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@spotify-player show me songs by The Beatles",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": {
+                  "includes": "beatles"
+                },
+                "types": {
+                  "includes": "track"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search": {
+            "tracks": []
+          }
+        }
+      },
+      {
+        "input": "@spotify-player show me rock songs the 70s",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "year:1970-1979"
+                  },
+                  {
+                    "includes": "genre:rock"
+                  }
+                ],
+                "types": {
+                  "includes": "track"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search": {
+            "tracks": []
+          }
+        }
+      },
+      {
+        "input": "@spotify-player create me a new playlist with some london hip hop",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": {
+                  "includes": "london hip hop"
+                },
+                "types": {
+                  "includes": "track"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-playlist",
+              "arguments": {
+                "trackIDs": [
+                  {
+                    "includes": "1"
+                  },
+                  {
+                    "includes": "2"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search": {
+            "tracks": [
+              {
+                "id": "1",
+                "name": "Track 1",
+                "artists": [
+                  "Artist 1"
+                ]
+              },
+              {
+                "id": "2",
+                "name": "Track 2",
+                "artists": [
+                  "Artist 2"
+                ]
+              }
+            ]
+          },
+          "create-playlist": {
+            "id": "playlist123",
+            "name": "London Hip Hop"
+          },
+          "get-current-user": {
+            "id": "id",
+            "displayName": "user",
+            "email": "user@gmail.com",
+            "product": ""
+          }
+        }
+      }
+    ]
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

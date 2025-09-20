@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "badges",
+  "title": "Badges - shields.io",
+  "type": "module",
+  "description": "Concise, consistent, and legible badges.",
+  "icon": "badges-icon.png",
+  "author": "litomore",
+  "crossExtensions": [
+    "litomore/simple-icons",
+    "thomas/color-picker"
+  ],
+  "categories": [
+    "Documentation",
+    "Design Tools",
+    "Developer Tools",
+    "Media"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "createDynamicBadge",
+      "title": "Create Dynamic Badge",
+      "description": "Create a dynamic badge with shields.io",
+      "mode": "view"
+    },
+    {
+      "name": "createEndpointBadge",
+      "title": "Create Endpoint Badge",
+      "description": "Create a endpoint badge with shields.io",
+      "mode": "view"
+    },
+    {
+      "name": "createSocialBadge",
+      "title": "Create Social Badge",
+      "description": "Create a social badge with shields.io",
+      "mode": "view"
+    },
+    {
+      "name": "createStaticBadge",
+      "title": "Create Static Badge",
+      "description": "Create a static badge with shields.io",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "resetOnCopy",
+      "label": "Reset on Copy",
+      "required": false,
+      "description": "Reset the badge after copying to the clipboard.",
+      "type": "checkbox",
+      "defaultValue": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.2.0",
+    "css-color-converter": "^2.0.0",
+    "lodash": "^4.17.21",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.2.0",
+    "@types/react": "^19.1.9",
+    "eslint": "^9.32.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}

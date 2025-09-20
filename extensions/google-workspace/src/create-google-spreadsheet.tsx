@@ -1,7 +1,8 @@
 import { createDocFromUrl } from "./helpers/docs";
+import { withGoogleAuth } from "./components/withGoogleAuth";
 
-// The command doesn't have a title argument because
-// Google doesn't seem to support this search query parameter
-export default async function Command() {
+async function Command() {
   await createDocFromUrl("spreadsheets");
 }
+
+export default withGoogleAuth(Command);

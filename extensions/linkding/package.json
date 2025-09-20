@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linkding",
+  "title": "Linkding",
+  "description": "Manage Linkding through Raycast",
+  "icon": "command-icon.png",
+  "author": "InteractiveNinja",
+  "contributors": [
+    "xmok",
+    "jose-elias-alvarez"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-bookmarks",
+      "title": "Search Linkding",
+      "description": "Search Linkding bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "create-bookmarks",
+      "title": "Create Bookmark",
+      "description": "Create new bookmark",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Options",
+          "name": "useCurrentBrowserTab",
+          "type": "checkbox",
+          "label": "Use current browser tab",
+          "description": "If the focused app is a browser, try to get the current tab's URL and prefill it when creating a bookmark.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "save-browser-tab",
+      "title": "Save Browser Tab",
+      "description": "Save current browser tab to Linkding",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Server URL",
+      "name": "serverUrl",
+      "description": "URL from Linkding instance",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "title": "API key",
+      "name": "apiKey",
+      "description": "API key from Linkding instance",
+      "type": "password",
+      "required": true
+    },
+    {
+      "title": "New bookmarks",
+      "name": "createBookmarksAsUnread",
+      "label": "Create bookmarks as unread by default",
+      "description": "Sets the default state for the \"Mark as unread\" option when creating a new bookmark. Setting this option will make all new bookmarks default to unread. This can be overridden when creating each new bookmark.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "title": "Search bookmarks",
+      "name": "showDescription",
+      "label": "Show description",
+      "description": "Whether to show a description for each bookmark in search results.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "title": "",
+      "name": "showTags",
+      "label": "Show tags",
+      "description": "Whether to show a list of tags for each bookmark in search results.",
+      "type": "checkbox",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

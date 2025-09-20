@@ -1,29 +1,48 @@
-import { Cache, getPreferenceValues, Icon } from "@raycast/api";
+import { getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import { execSync } from "node:child_process";
 
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
-import { useEffect, useState } from "react";
 
-import { CategoryName, Item } from "./types";
+import { Category, CategoryName, Item, User, Vault } from "./types";
+import { useExec } from "@raycast/utils";
 
-export type ActionID = "open-in-1password" | "open-in-browser" | "copy-username" | "copy-password";
+export type ActionID = string;
 
-export type Preferences = {
-  cliPath: string;
-  version: "v7" | "v8";
-  primaryAction: ActionID;
-  secondaryAction: ActionID;
+const preferences = getPreferenceValues<ExtensionPreferences>();
+
+export class ExtensionError extends Error {
+  public title: string;
+  constructor(title: string, message?: string) {
+    if (!message) message = title;
+    super(message);
+    this.title = title;
+  }
+}
+
+export class NotFoundError extends ExtensionError {}
+export class CommandLineMissingError extends ExtensionError {}
+export class ZshMissingError extends ExtensionError {}
+export class ConnectionError extends ExtensionError {}
+
+export const getCliPath = () => {
+  const cliPath = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"]
+    .filter(Boolean)
+    .find((path) => (path ? existsSync(path) : false));
+
+  if (!cliPath) {
+    throw new CommandLineMissingError("1Password CLI is not found. Please set the path in the extension preferences.");
+  }
+  return cliPath;
 };
 
-export const cache = new Cache();
+export const ZSH_PATH = [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
 
-const preferences = getPreferenceValues<Preferences>();
+export const errorRegex = new RegExp(/\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+(.*)$/m);
 
-export const CLI_PATH =
-  preferences.cliPath || ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
-export const CATEGORIES_CACHE_NAME = "@categories";
-export const ITEMS_CACHE_NAME = "@items";
-export const ACCOUNT_CACHE_NAME = "@account";
+export function capitalizeWords(str: string): string {
+  return str.replace(/\b\w/g, (char: string) => char.toUpperCase());
+}
 
 export function hrefToOpenInBrowser(item: Item): string | undefined {
   if (item.category === "LOGIN") {
@@ -34,71 +53,160 @@ export function hrefToOpenInBrowser(item: Item): string | undefined {
 }
 
 export function actionsForItem(item: Item): ActionID[] {
-  if (item.category === "LOGIN") {
-    // user-configured primary action first, then secondary action,
-    // then all the actions in the default order,
-    // with duplicates removed
-    return [
-      ...new Set<ActionID>([
-        preferences.primaryAction,
-        preferences.secondaryAction,
-        "open-in-1password",
-        "open-in-browser",
-        "copy-username",
-        "copy-password",
-      ]),
-    ];
-  } else {
-    return ["open-in-1password"];
+  // all actions in the default order
+  const defaultActions: ActionID[] = [
+    "open-in-1password",
+    "open-in-browser",
+    "copy-username",
+    "copy-password",
+    "copy-one-time-password",
+    "share-item",
+    "switch-account",
+  ];
+  // prioritize primary and secondary actions, then append the rest and remove duplicates
+  const deduplicatedActions = [
+    ...new Set<ActionID>([preferences.primaryAction, preferences.secondaryAction, ...defaultActions]),
+  ];
+
+  switch (item.category) {
+    case "LOGIN":
+      return deduplicatedActions;
+    case "PASSWORD":
+      return deduplicatedActions.filter((action) => action !== "copy-username");
+    default:
+      return ["open-in-1password"];
   }
 }
 
 export function op(args: string[]) {
-  if (CLI_PATH) {
-    const stdout = execFileSync(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
+  const cliPath = getCliPath();
+  if (cliPath) {
+    const stdout = execFileSync(cliPath, args, { maxBuffer: 4096 * 1024 });
     return stdout.toString();
   }
   throw Error("1Password CLI is not found!");
 }
 
-export function useOp<T>(args: string[], cacheKey?: string) {
-  const [data, setData] = useState<T>();
-  const [error, setError] = useState<unknown>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (cacheKey && cache.has(cacheKey)) {
-      setIsLoading(false);
-      return setData(JSON.parse(cache.get(cacheKey) as string));
-    }
-
-    try {
-      const items = op([...args, "--format=json"]);
-
-      if (cacheKey) {
-        cache.set(cacheKey, items);
-        return setData(JSON.parse(cache.get(cacheKey) as string));
-      }
-      return setData(JSON.parse(items));
-    } catch (error: unknown) {
-      setError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cacheKey]);
-
-  return { data, error, isLoading };
-}
-
-export function clearCache(key?: string) {
-  if (!cache.isEmpty) {
-    if (key && cache.has(key)) {
-      cache.remove(key);
-    } else {
-      cache.clear({ notifySubscribers: false });
-    }
+export const handleErrors = (stderr: string) => {
+  if (stderr.includes("no such host")) {
+    throw new ConnectionError("No connection to 1Password.", "Verify Your Internet Connection.");
+  } else if (stderr.includes("could not get item") || stderr.includes("isn't an item")) {
+    throw new NotFoundError("Item not found on 1Password.", "Check it on your 1Password app.");
+  } else if (stderr.includes("ENOENT") || stderr.includes("file") || stderr.includes("enoent")) {
+    throw new CommandLineMissingError("1Password CLI not found.");
+  } else if (stderr.includes("does not have a field")) {
+    throw new ExtensionError(`Item does not contain the field ${stderr.split("does not have a field ")[1].trim()}.`);
+  } else {
+    throw new ExtensionError(stderr);
   }
-}
+};
+
+export const checkZsh = () => {
+  if (!ZSH_PATH) {
+    return false;
+  }
+  return true;
+};
+
+export const signIn = (account?: string) =>
+  execSync(`${getCliPath()} signin ${account ? account : ""}`, { shell: ZSH_PATH });
+
+export const getSignInStatus = () => {
+  try {
+    execSync(`${getCliPath()} whoami`);
+    return true;
+  } catch (stderr) {
+    return false;
+  }
+};
+
+export const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) => {
+  return useExec<T, U>(getCliPath(), [...args, "--format=json"], {
+    parseOutput: ({ stdout, stderr, error, exitCode }) => {
+      if (error) handleErrors(error.message);
+      if (stderr) handleErrors(stderr);
+      if (exitCode != 0) handleErrors(stdout);
+      if (callback) return callback(JSON.parse(stdout));
+      return JSON.parse(stdout);
+    },
+    onError: async (e) => {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: e.message,
+      });
+    },
+  });
+};
+
+export const usePasswords2 = ({
+  flags = [],
+  account,
+  execute = true,
+}: {
+  flags?: string[];
+  account: string;
+  execute: boolean;
+}) =>
+  useExec<Item[], ExtensionError>(
+    getCliPath(),
+    ["--account", account, "items", "list", "--long", "--format=json", ...flags],
+    {
+      parseOutput: ({ stdout, stderr, error, exitCode }) => {
+        if (error) handleErrors(error.message);
+        if (stderr) handleErrors(stderr);
+        if (exitCode != 0) handleErrors(stdout);
+        const items = JSON.parse(stdout) as Item[];
+        return items.sort((a, b) => {
+          if (a.favorite && !b.favorite) {
+            return -1;
+          } else if (!a.favorite && b.favorite) {
+            return 1;
+          } else {
+            return a.title.localeCompare(b.title);
+          }
+        });
+      },
+      execute,
+      onError: async (e) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: e.message,
+        });
+      },
+    },
+  );
+
+export const usePasswords = (flags: string[] = []) =>
+  useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>
+    data.sort((a, b) => a.title.localeCompare(b.title)),
+  );
+
+export const useVaults = () =>
+  useOp<Vault[], ExtensionError>(["vault", "list"], (data) => data.sort((a, b) => a.name.localeCompare(b.name)));
+
+export const useCategories = () =>
+  useOp<Category[], ExtensionError>(["item", "template", "list"], (data) =>
+    data.sort((a, b) => a.name.localeCompare(b.name)),
+  );
+
+export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
+
+export const useAccounts = <T = User[], U = ExtensionError>(execute = true) =>
+  useExec<T, U>(getCliPath(), ["account", "list", "--format=json"], {
+    parseOutput: ({ stdout, stderr, error, exitCode }) => {
+      if (error) handleErrors(error.message);
+      if (stderr) handleErrors(stderr);
+      if (exitCode != 0) handleErrors(stdout);
+      return JSON.parse(stdout);
+    },
+    onError: async (e) => {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: e.message,
+      });
+    },
+    execute: execute,
+  });
 
 export function getCategoryIcon(category: CategoryName) {
   switch (category) {
@@ -153,5 +261,5 @@ export function getCategoryIcon(category: CategoryName) {
 
 export function titleCaseWord(word: string) {
   if (!word) return word;
-  return word[0].toUpperCase() + word.substr(1).toLowerCase();
+  return word[0].toUpperCase() + word.slice(1).toLowerCase();
 }

@@ -1,6 +1,7 @@
 name: PR Bot
 on:
   pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "extensions/**"
     branches: [main, master]
@@ -11,40 +12,34 @@ jobs:
     name: "PR Bot"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js
-        uses: raycast/github-actions/setup-node@master
-
-      - name: Get changed files
-        id: changed-files
-        uses: Ana06/get-changed-files@v2.1.0
+      - name: Get changed extensions
+        id: get_changed_extensions
+        uses: raycast/github-actions/get-changed-extensions@v1.17.0
         with:
-          format: "json"
+          github_event_name: ${{ github.event_name }}
 
-      - uses: actions/github-script@v6
+      - uses: oven-sh/setup-bun@v2
         with:
-          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-          script: |
-            const script = require('./scripts/pr-bot')
-            await script({
-              github,
-              context,
-              core,
-              changedFiles: ${{ steps.changed-files.outputs.all }}
-            })
+          bun-version: latest
+      - name: Setup Bot
+        run: bun create github.com/raycast/github-action-bot
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+      - name: Run bot
+        run: |
+          cd github-action-bot
+          bun run index.ts
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          SCRIPT: "scripts/bots/pr-bot.ts"
+          CHANGED_EXTENSIONS: ${{ steps.get_changed_extensions.outputs.paths }}
 
       - name: Notify Failure to Slack
         if: failure()
-        uses: edge/simple-slack-notify@master
+        uses: raycast/github-actions/slack-send@master
         with:
+          webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "danger"
-          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
-          fields: |
-            [
-              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
-              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
-            ]
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
+          text: |
+            :no_entry_sign: ${env.GITHUB_WORKFLOW} has failed
+            <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Action logs> | <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }|Commit: ${ env.GITHUB_SHA.substr(0,8) }>

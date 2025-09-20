@@ -14,7 +14,7 @@ import * as cheerio from "cheerio";
 import querystring from "node:querystring";
 import { getProxyAgent, getSystemProxyURL, httpsAgent } from "../axiosConfig";
 import { userAgent } from "../consts";
-import { DetectedLangModel, LanguageDetectType } from "../detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "../detectLanguage/types";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { autoDetectLanguageItem, englishLanguageItem } from "../language/consts";
 import { getGoogleLangCode, getYoudaoLangCodeFromGoogleCode } from "../language/languages";

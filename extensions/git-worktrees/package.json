@@ -1,0 +1,269 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git-worktrees",
+  "title": "Git Worktrees",
+  "description": "Efficiently managing Git worktrees with actions for cloning, listing, adding, renaming and removing worktrees within projects",
+  "icon": "extension_icon.png",
+  "author": "philstainer",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clone-project",
+      "title": "Clone Project",
+      "subtitle": "Git Worktrees",
+      "description": "Clones and sets up bare repo",
+      "mode": "view"
+    },
+    {
+      "name": "view-projects",
+      "title": "View Projects",
+      "subtitle": "Git Worktrees",
+      "description": "View projects",
+      "mode": "view"
+    },
+    {
+      "name": "view-worktrees",
+      "title": "View Worktrees",
+      "subtitle": "Git Worktrees",
+      "description": "View worktrees",
+      "mode": "view"
+    },
+    {
+      "name": "add-worktree",
+      "title": "Add Worktree",
+      "subtitle": "Git Worktrees",
+      "description": "Add Worktree",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "directory",
+      "name": "projectsPath",
+      "title": "Projects Path",
+      "description": "The path to the folder containing your projects",
+      "required": true,
+      "placeholder": "~/dev"
+    },
+    {
+      "type": "checkbox",
+      "label": "Enable Worktree Caching",
+      "name": "enableWorktreeCaching",
+      "title": "Enable Worktree Caching",
+      "description": "Enable caching of worktrees to avoid scanning directories every time (you can clear it by using the \"Clear Cache\" command)",
+      "required": true,
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "label": "Enable Worktree Grouping",
+      "name": "enableWorktreesGrouping",
+      "title": "Enable Worktree Grouping",
+      "description": "Enable grouping of worktrees by project",
+      "required": true,
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "label": "Enable Projects Frecency Sorting",
+      "name": "enableProjectsFrequencySorting",
+      "title": "Enable Projects Frecency Sorting",
+      "description": "Enable sorting of projects by frequency",
+      "required": true,
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "label": "Enable Worktrees Frecency Sorting",
+      "name": "enableWorktreesFrequencySorting",
+      "title": "Enable Worktrees Frecency Sorting",
+      "description": "Enable sorting of worktrees by frequency",
+      "required": true,
+      "default": false
+    },
+    {
+      "type": "textfield",
+      "name": "maxScanningLevels",
+      "title": "Max Scanning Levels (folder recursion)",
+      "description": "The max number of levels to scan for projects",
+      "required": false,
+      "default": "3",
+      "placeholder": "3"
+    },
+    {
+      "name": "editorApp",
+      "description": "The editor app to use",
+      "type": "appPicker",
+      "required": true,
+      "title": "Preferred editor",
+      "default": "Visual Studio Code"
+    },
+    {
+      "name": "terminalApp",
+      "description": "The terminal app to use",
+      "type": "appPicker",
+      "required": true,
+      "title": "Preferred terminal",
+      "default": "Terminal"
+    },
+    {
+      "type": "dropdown",
+      "name": "shouldAutomaticallyPushWorktree",
+      "title": "Should Automatically Push Worktree",
+      "description": "Should automatically push worktree after adding or renaming",
+      "required": false,
+      "default": "yes",
+      "data": [
+        {
+          "title": "Yes",
+          "value": "yes"
+        },
+        {
+          "title": "No",
+          "value": "no"
+        },
+        {
+          "title": "Ask",
+          "value": "ask"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "label": "Skip Git Hooks When Pushing",
+      "name": "skipGitHooksWhenPushing",
+      "title": "Skip Git Hooks When Pushing",
+      "description": "Skip git hooks when pushing new branches to remote",
+      "required": false,
+      "default": false
+    },
+    {
+      "type": "dropdown",
+      "name": "shouldAutomaticallyOpenWorktree",
+      "title": "Should Automatically Open Worktree",
+      "description": "Should automatically open worktree after creation",
+      "required": false,
+      "default": "no",
+      "data": [
+        {
+          "title": "Yes",
+          "value": "yes"
+        },
+        {
+          "title": "No",
+          "value": "no"
+        },
+        {
+          "title": "Ask",
+          "value": "ask"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "label": "Resize Editor Window After Launch",
+      "name": "resizeEditorWindowAfterLaunch",
+      "title": "Resize Editor Window After Launch",
+      "description": "Resize the editor window after launching a project",
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "name": "windowResizeMode",
+      "title": "Resize Mode",
+      "description": "The mode to use when resizing the editor window",
+      "required": false,
+      "default": "almost-maximize",
+      "placeholder": "almost-maximize",
+      "data": [
+        {
+          "title": "Reasonable Size",
+          "value": "reasonable-size"
+        },
+        {
+          "title": "Almost Maximize",
+          "value": "almost-maximize"
+        },
+        {
+          "title": "Toggle Fullscreen",
+          "value": "toggle-fullscreen"
+        },
+        {
+          "title": "Maximize",
+          "value": "maximize"
+        },
+        {
+          "title": "Left Half",
+          "value": "left-half"
+        },
+        {
+          "title": "Center Half",
+          "value": "center-half"
+        },
+        {
+          "title": "Right Half",
+          "value": "right-half"
+        },
+        {
+          "title": "Top Half",
+          "value": "top-half"
+        },
+        {
+          "title": "Bottom Half",
+          "value": "bottom-half"
+        },
+        {
+          "title": "Previous Display",
+          "value": "previous-display"
+        },
+        {
+          "title": "Next Display",
+          "value": "next-display"
+        },
+        {
+          "title": "Previous Desktop",
+          "value": "previous-desktop"
+        },
+        {
+          "title": "Next Desktop",
+          "value": "next-desktop"
+        }
+      ]
+    },
+    {
+      "type": "textfield",
+      "name": "branchPrefixesToRemove",
+      "title": "Branch Prefixes to Remove",
+      "description": "Comma-separated list of prefixes to automatically remove when pasting branch names (e.g., 'git checkout -b ,checkout -b ,git switch -c ')",
+      "required": false,
+      "default": "git checkout -b,checkout -b,git switch -c"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.19.1",
+    "fast-glob": "^3.3.3",
+    "parse-url": "^9.2.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "check:types": "tsc -p tsconfig.json --noEmit"
+  }
+}

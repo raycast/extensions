@@ -24,6 +24,26 @@
         "trans",
         "fanyi",
         "翻译"
+      ],
+      "preferences": [
+        {
+          "name": "selectedDefault",
+          "type": "checkbox",
+          "required": false,
+          "title": "Translate Default",
+          "label": "Selected Content",
+          "description": "Translate the selected content as the default",
+          "default": true
+        },
+        {
+          "name": "quickSwitchLang",
+          "type": "checkbox",
+          "required": false,
+          "title": "Switch Language",
+          "label": "Enable Quick Switch",
+          "description": "You can quickly switch the target language in the action panel",
+          "default": true
+        }
       ]
     },
     {
@@ -53,6 +73,356 @@
         "itranslate",
         "multiple",
         "mul"
+      ],
+      "preferences": [
+        {
+          "name": "selectedDefault",
+          "type": "checkbox",
+          "required": false,
+          "title": "Translate Default",
+          "label": "Selected Content",
+          "description": "Translate the selected content as the default",
+          "default": true
+        },
+        {
+          "name": "multipleServiceProvider",
+          "type": "dropdown",
+          "required": false,
+          "title": "Multiple Languages Translation Service Provider",
+          "description": "Select multiple languages translation service provider",
+          "default": "google",
+          "data": [
+            {
+              "title": "Google(Free)",
+              "value": "google"
+            },
+            {
+              "title": "Google Could Translation",
+              "value": "googleCouldTranslation"
+            },
+            {
+              "title": "DeepL",
+              "value": "deepl"
+            },
+            {
+              "title": "Microsoft Azure",
+              "value": "microsoftAzure"
+            },
+            {
+              "title": "Youdao",
+              "value": "youdao"
+            },
+            {
+              "title": "Baidu",
+              "value": "baidu"
+            },
+            {
+              "title": "Tencent",
+              "value": "tencent"
+            },
+            {
+              "title": "Aliyun",
+              "value": "aliyun"
+            }
+          ]
+        },
+        {
+          "name": "mulZh-Hans",
+          "type": "checkbox",
+          "required": false,
+          "title": "Multiple Languages to be Translated into",
+          "label": "Chinese-Simplified",
+          "description": "Chinese-Simplified option",
+          "default": true
+        },
+        {
+          "name": "mulZh-Hant",
+          "type": "checkbox",
+          "required": false,
+          "label": "Chinese-Traditional",
+          "description": "Chinese-Traditional option",
+          "default": true
+        },
+        {
+          "name": "mulEn",
+          "type": "checkbox",
+          "required": false,
+          "label": "English",
+          "description": "English option",
+          "default": true
+        },
+        {
+          "name": "mulEs",
+          "type": "checkbox",
+          "required": false,
+          "label": "Spanish",
+          "description": "Spanish option",
+          "default": true
+        },
+        {
+          "name": "mulHi",
+          "type": "checkbox",
+          "required": false,
+          "label": "Hindi",
+          "description": "Hindi option",
+          "default": true
+        },
+        {
+          "name": "mulFr",
+          "type": "checkbox",
+          "required": false,
+          "label": "French",
+          "description": "French option",
+          "default": false
+        },
+        {
+          "name": "mulRu",
+          "type": "checkbox",
+          "required": false,
+          "label": "Russian",
+          "description": "Russian option",
+          "default": false
+        },
+        {
+          "name": "mulPt",
+          "type": "checkbox",
+          "required": false,
+          "label": "Portuguese",
+          "description": "Portuguese option",
+          "default": false
+        },
+        {
+          "name": "mulId",
+          "type": "checkbox",
+          "required": false,
+          "label": "Indonesian",
+          "description": "Indonesian option",
+          "default": false
+        },
+        {
+          "name": "mulJa",
+          "type": "checkbox",
+          "required": false,
+          "label": "Japanese",
+          "description": "Japanese option",
+          "default": false
+        },
+        {
+          "name": "mulKo",
+          "type": "checkbox",
+          "required": false,
+          "label": "Korean",
+          "description": "Korean option",
+          "default": false
+        },
+        {
+          "name": "mulTh",
+          "type": "checkbox",
+          "required": false,
+          "label": "Thai",
+          "description": "Thai option",
+          "default": false
+        },
+        {
+          "name": "mulVi",
+          "type": "checkbox",
+          "required": false,
+          "label": "Vietnamese",
+          "description": "Vietnamese option",
+          "default": false
+        },
+        {
+          "name": "mulAr",
+          "type": "checkbox",
+          "required": false,
+          "label": "Arabic",
+          "description": "Arabic option",
+          "default": false
+        },
+        {
+          "name": "mulDe",
+          "type": "checkbox",
+          "required": false,
+          "label": "German",
+          "description": "German option",
+          "default": false
+        },
+        {
+          "name": "mulIt",
+          "type": "checkbox",
+          "required": false,
+          "label": "Italian",
+          "description": "Italian option",
+          "default": false
+        },
+        {
+          "name": "mulBg",
+          "type": "checkbox",
+          "required": false,
+          "label": "Bulgarian",
+          "description": "Bulgarian option",
+          "default": false
+        },
+        {
+          "name": "mulCs",
+          "type": "checkbox",
+          "required": false,
+          "label": "Czech",
+          "description": "Czech option",
+          "default": false
+        },
+        {
+          "name": "mulDa",
+          "type": "checkbox",
+          "required": false,
+          "label": "Danish",
+          "description": "Danish option",
+          "default": false
+        },
+        {
+          "name": "mulEl",
+          "type": "checkbox",
+          "required": false,
+          "label": "Greek",
+          "description": "Greek option",
+          "default": false
+        },
+        {
+          "name": "mulEt",
+          "type": "checkbox",
+          "required": false,
+          "label": "Estonian",
+          "description": "Estonian option",
+          "default": false
+        },
+        {
+          "name": "mulFi",
+          "type": "checkbox",
+          "required": false,
+          "label": "Finnish",
+          "description": "Finnish option",
+          "default": false
+        },
+        {
+          "name": "mulHu",
+          "type": "checkbox",
+          "required": false,
+          "label": "Hungarian",
+          "description": "Hungarian option",
+          "default": false
+        },
+        {
+          "name": "mulLt",
+          "type": "checkbox",
+          "required": false,
+          "label": "Lithuanian",
+          "description": "Lithuanian option",
+          "default": false
+        },
+        {
+          "name": "mulLv",
+          "type": "checkbox",
+          "required": false,
+          "label": "Latvian",
+          "description": "Latvian option",
+          "default": false
+        },
+        {
+          "name": "mulNl",
+          "type": "checkbox",
+          "required": false,
+          "label": "Dutch",
+          "description": "Dutch option",
+          "default": false
+        },
+        {
+          "name": "mulPl",
+          "type": "checkbox",
+          "required": false,
+          "label": "Polish",
+          "description": "Polish option",
+          "default": false
+        },
+        {
+          "name": "mulRo",
+          "type": "checkbox",
+          "required": false,
+          "label": "Romanian",
+          "description": "Romanian option",
+          "default": false
+        },
+        {
+          "name": "mulSk",
+          "type": "checkbox",
+          "required": false,
+          "label": "Slovak",
+          "description": "Slovak option",
+          "default": false
+        },
+        {
+          "name": "mulSl",
+          "type": "checkbox",
+          "required": false,
+          "label": "Slovenian",
+          "description": "Slovenian option",
+          "default": false
+        },
+        {
+          "name": "mulSv",
+          "type": "checkbox",
+          "required": false,
+          "label": "Swedish",
+          "description": "Swedish option",
+          "default": false
+        },
+        {
+          "name": "mulTr",
+          "type": "checkbox",
+          "required": false,
+          "label": "Turkish",
+          "description": "Turkish option",
+          "default": false
+        },
+        {
+          "name": "mulUk",
+          "type": "checkbox",
+          "required": false,
+          "label": "Ukrainian",
+          "description": "Ukrainian option",
+          "default": false
+        },
+        {
+          "name": "mulNo",
+          "type": "checkbox",
+          "required": false,
+          "label": "Norwegian",
+          "description": "Norwegian option",
+          "default": false
+        },
+        {
+          "name": "mulFa",
+          "type": "checkbox",
+          "required": false,
+          "label": "Persian",
+          "description": "Persian option",
+          "default": false
+        },
+        {
+          "name": "mulSr",
+          "type": "checkbox",
+          "required": false,
+          "label": "Serbian (Cyrillic)",
+          "description": "Serbian (Cyrillic) option",
+          "default": false
+        },
+        {
+          "name": "mulCy",
+          "type": "checkbox",
+          "required": false,
+          "label": "Welsh",
+          "description": "Welsh option",
+          "default": false
+        }
       ]
     },
     {
@@ -67,6 +437,147 @@
         "translate",
         "itranslate",
         "OCR"
+      ],
+      "preferences": [
+        {
+          "name": "quickSwitchLang",
+          "type": "checkbox",
+          "required": false,
+          "title": "Switch Language",
+          "label": "Enable Quick Switch",
+          "description": "You can quickly switch the target language in the action panel",
+          "default": true
+        },
+        {
+          "name": "ocrServiceProvider",
+          "type": "dropdown",
+          "required": false,
+          "title": "OCR Service Provider",
+          "description": "Select OCR service provider",
+          "default": "spaceOCR",
+          "data": [
+            {
+              "title": "OCRSpace API",
+              "value": "spaceOCR"
+            },
+            {
+              "title": "Google Could Vision",
+              "value": "googleOCR"
+            },
+            {
+              "title": "Microsoft Azure Computer Vision",
+              "value": "microsoftAzureOCR"
+            },
+            {
+              "title": "Youdao OCR",
+              "value": "youdaoOCR"
+            },
+            {
+              "title": "Baidu OCR",
+              "value": "baiduOCR"
+            },
+            {
+              "title": "Tencent OCR",
+              "value": "tencentOCR"
+            }
+          ]
+        },
+        {
+          "name": "spaceOCRApiKey",
+          "type": "password",
+          "required": false,
+          "title": "OCRSpace API Key(English only)",
+          "description": "OCRSpace API Key(There is a built-in api key, you can apply your own to avoid rate limit)",
+          "placeholder": "EnterOCR Space API Key"
+        },
+        {
+          "name": "googleOCRApiKey",
+          "type": "password",
+          "required": false,
+          "title": "Google Could Vision API Key",
+          "description": "Google Could Vision API Key",
+          "placeholder": "Enter Google Could Vision API Key"
+        },
+        {
+          "name": "microsoftOCRResourceName",
+          "type": "textfield",
+          "required": false,
+          "title": "Microsoft Azure Computer Vision Resource Name",
+          "description": "Microsoft Azure Computer Vision Resource Name",
+          "placeholder": "Enter Microsoft Azure Computer Vision Resource Name"
+        },
+        {
+          "name": "microsoftOCRAccessKey",
+          "type": "password",
+          "required": false,
+          "title": "Microsoft Azure Cognitive Service API Key",
+          "description": "Microsoft Azure Cognitive Service API Key",
+          "placeholder": "Enter Microsoft Azure Cognitive Service API Key"
+        },
+        {
+          "name": "youdaoOCRAppId",
+          "type": "password",
+          "required": false,
+          "title": "Youdao OCR App ID",
+          "description": "Youdao OCR App ID",
+          "placeholder": "Enter Youdao OCR App ID"
+        },
+        {
+          "name": "youdaoOCRAppKey",
+          "type": "password",
+          "required": false,
+          "title": "Youdao OCR App Secret",
+          "description": "Youdao OCR App Secret",
+          "placeholder": "Enter Youdao OCR App Secret"
+        },
+        {
+          "name": "baiduOCRApiKey",
+          "type": "password",
+          "required": false,
+          "title": "Baidu OCR API Key",
+          "description": "Baidu OCR API Key",
+          "placeholder": "Enter Baidu OCR API Key"
+        },
+        {
+          "name": "baiduOCRSecretKey",
+          "type": "password",
+          "required": false,
+          "title": "Baidu OCR Secret Key",
+          "description": "Baidu OCR Secret Key",
+          "placeholder": "Baidu OCR Secret Key"
+        },
+        {
+          "name": "tencentOCRSecretId",
+          "type": "password",
+          "required": false,
+          "title": "Tencent OCR Secret ID",
+          "description": "Tencent OCR Secret ID",
+          "placeholder": "Enter Tencent OCR Secret ID"
+        },
+        {
+          "name": "tencentOCRSecretKey",
+          "type": "password",
+          "required": false,
+          "title": "Tencent OCR Secret Key",
+          "description": "Tencent OCR Secret Key",
+          "placeholder": "Enter Tencent OCR Secret Key"
+        },
+        {
+          "name": "captureOnActivated",
+          "type": "checkbox",
+          "required": false,
+          "label": "Capture when activated",
+          "description": "Capture immediately when the command is active",
+          "default": true
+        },
+        {
+          "name": "closeOnCapture",
+          "type": "checkbox",
+          "required": false,
+          "label": "Close window when capture",
+          "description": "Close the main Raycast window when capture",
+          "default": false
+        }
       ]
     }
   ],
@@ -80,7 +591,11 @@
       "data": [
         {
           "title": "Chinese-Simplified",
-          "value": "zh-CN"
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-Hant"
         },
         {
           "title": "English",
@@ -237,7 +752,11 @@
         },
         {
           "title": "Chinese-Simplified",
-          "value": "zh-CN"
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-Hant"
         },
         {
           "title": "Spanish",
@@ -469,6 +988,14 @@
           "value": "5000"
         }
       ]
+    },
+    {
+      "name": "disableGoogleFree",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable Google Free Translation",
+      "description": "Disable Google Free translation service provider",
+      "default": false
     },
     {
       "name": "googleApiKey",
@@ -753,24 +1280,6 @@
       "default": false
     },
     {
-      "name": "selectedDefault",
-      "type": "checkbox",
-      "required": false,
-      "title": "Translate Default",
-      "label": "Selected Content",
-      "description": "Translate the selected content as the default",
-      "default": true
-    },
-    {
-      "name": "quickSwitchLang",
-      "type": "checkbox",
-      "required": false,
-      "title": "Switch Language",
-      "label": "Enable Quick Switch",
-      "description": "You can quickly switch the target language in the action panel",
-      "default": true
-    },
-    {
       "name": "delayTransInterval",
       "type": "dropdown",
       "required": false,
@@ -830,467 +1339,6 @@
           "value": "500"
         }
       ]
-    },
-    {
-      "name": "multipleServiceProvider",
-      "type": "dropdown",
-      "required": false,
-      "title": "Multiple Languages Translation Service Provider",
-      "description": "Select multiple languages translation service provider",
-      "default": "google",
-      "data": [
-        {
-          "title": "Google(Free)",
-          "value": "google"
-        },
-        {
-          "title": "Google Could Translation",
-          "value": "googleCouldTranslation"
-        },
-        {
-          "title": "DeepL",
-          "value": "deepl"
-        },
-        {
-          "title": "Microsoft Azure",
-          "value": "microsoftAzure"
-        },
-        {
-          "title": "Youdao",
-          "value": "youdao"
-        },
-        {
-          "title": "Baidu",
-          "value": "baidu"
-        },
-        {
-          "title": "Tencent",
-          "value": "tencent"
-        },
-        {
-          "title": "Aliyun",
-          "value": "aliyun"
-        }
-      ]
-    },
-    {
-      "name": "mulZh-CN",
-      "type": "checkbox",
-      "required": false,
-      "title": "Multiple Languages to be Translated into",
-      "label": "Chinese-Simplified",
-      "description": "Chinese-Simplified option",
-      "default": true
-    },
-    {
-      "name": "mulEn",
-      "type": "checkbox",
-      "required": false,
-      "label": "English",
-      "description": "English option",
-      "default": true
-    },
-    {
-      "name": "mulEs",
-      "type": "checkbox",
-      "required": false,
-      "label": "Spanish",
-      "description": "Spanish option",
-      "default": true
-    },
-    {
-      "name": "mulHi",
-      "type": "checkbox",
-      "required": false,
-      "label": "Hindi",
-      "description": "Hindi option",
-      "default": true
-    },
-    {
-      "name": "mulFr",
-      "type": "checkbox",
-      "required": false,
-      "label": "French",
-      "description": "French option",
-      "default": false
-    },
-    {
-      "name": "mulRu",
-      "type": "checkbox",
-      "required": false,
-      "label": "Russian",
-      "description": "Russian option",
-      "default": false
-    },
-    {
-      "name": "mulPt",
-      "type": "checkbox",
-      "required": false,
-      "label": "Portuguese",
-      "description": "Portuguese option",
-      "default": false
-    },
-    {
-      "name": "mulId",
-      "type": "checkbox",
-      "required": false,
-      "label": "Indonesian",
-      "description": "Indonesian option",
-      "default": false
-    },
-    {
-      "name": "mulJa",
-      "type": "checkbox",
-      "required": false,
-      "label": "Japanese",
-      "description": "Japanese option",
-      "default": false
-    },
-    {
-      "name": "mulKo",
-      "type": "checkbox",
-      "required": false,
-      "label": "Korean",
-      "description": "Korean option",
-      "default": false
-    },
-    {
-      "name": "mulTh",
-      "type": "checkbox",
-      "required": false,
-      "label": "Thai",
-      "description": "Thai option",
-      "default": false
-    },
-    {
-      "name": "mulVi",
-      "type": "checkbox",
-      "required": false,
-      "label": "Vietnamese",
-      "description": "Vietnamese option",
-      "default": false
-    },
-    {
-      "name": "mulAr",
-      "type": "checkbox",
-      "required": false,
-      "label": "Arabic",
-      "description": "Arabic option",
-      "default": false
-    },
-    {
-      "name": "mulDe",
-      "type": "checkbox",
-      "required": false,
-      "label": "German",
-      "description": "German option",
-      "default": false
-    },
-    {
-      "name": "mulIt",
-      "type": "checkbox",
-      "required": false,
-      "label": "Italian",
-      "description": "Italian option",
-      "default": false
-    },
-    {
-      "name": "mulBg",
-      "type": "checkbox",
-      "required": false,
-      "label": "Bulgarian",
-      "description": "Bulgarian option",
-      "default": false
-    },
-    {
-      "name": "mulCs",
-      "type": "checkbox",
-      "required": false,
-      "label": "Czech",
-      "description": "Czech option",
-      "default": false
-    },
-    {
-      "name": "mulDa",
-      "type": "checkbox",
-      "required": false,
-      "label": "Danish",
-      "description": "Danish option",
-      "default": false
-    },
-    {
-      "name": "mulEl",
-      "type": "checkbox",
-      "required": false,
-      "label": "Greek",
-      "description": "Greek option",
-      "default": false
-    },
-    {
-      "name": "mulEt",
-      "type": "checkbox",
-      "required": false,
-      "label": "Estonian",
-      "description": "Estonian option",
-      "default": false
-    },
-    {
-      "name": "mulFi",
-      "type": "checkbox",
-      "required": false,
-      "label": "Finnish",
-      "description": "Finnish option",
-      "default": false
-    },
-    {
-      "name": "mulHu",
-      "type": "checkbox",
-      "required": false,
-      "label": "Hungarian",
-      "description": "Hungarian option",
-      "default": false
-    },
-    {
-      "name": "mulLt",
-      "type": "checkbox",
-      "required": false,
-      "label": "Lithuanian",
-      "description": "Lithuanian option",
-      "default": false
-    },
-    {
-      "name": "mulLv",
-      "type": "checkbox",
-      "required": false,
-      "label": "Latvian",
-      "description": "Latvian option",
-      "default": false
-    },
-    {
-      "name": "mulNl",
-      "type": "checkbox",
-      "required": false,
-      "label": "Dutch",
-      "description": "Dutch option",
-      "default": false
-    },
-    {
-      "name": "mulPl",
-      "type": "checkbox",
-      "required": false,
-      "label": "Polish",
-      "description": "Polish option",
-      "default": false
-    },
-    {
-      "name": "mulRo",
-      "type": "checkbox",
-      "required": false,
-      "label": "Romanian",
-      "description": "Romanian option",
-      "default": false
-    },
-    {
-      "name": "mulSk",
-      "type": "checkbox",
-      "required": false,
-      "label": "Slovak",
-      "description": "Slovak option",
-      "default": false
-    },
-    {
-      "name": "mulSl",
-      "type": "checkbox",
-      "required": false,
-      "label": "Slovenian",
-      "description": "Slovenian option",
-      "default": false
-    },
-    {
-      "name": "mulSv",
-      "type": "checkbox",
-      "required": false,
-      "label": "Swedish",
-      "description": "Swedish option",
-      "default": false
-    },
-    {
-      "name": "mulTr",
-      "type": "checkbox",
-      "required": false,
-      "label": "Turkish",
-      "description": "Turkish option",
-      "default": false
-    },
-    {
-      "name": "mulUk",
-      "type": "checkbox",
-      "required": false,
-      "label": "Ukrainian",
-      "description": "Ukrainian option",
-      "default": false
-    },
-    {
-      "name": "mulNo",
-      "type": "checkbox",
-      "required": false,
-      "label": "Norwegian",
-      "description": "Norwegian option",
-      "default": false
-    },
-    {
-      "name": "mulFa",
-      "type": "checkbox",
-      "required": false,
-      "label": "Persian",
-      "description": "Persian option",
-      "default": false
-    },
-    {
-      "name": "mulSr",
-      "type": "checkbox",
-      "required": false,
-      "label": "Serbian (Cyrillic)",
-      "description": "Serbian (Cyrillic) option",
-      "default": false
-    },
-    {
-      "name": "mulCy",
-      "type": "checkbox",
-      "required": false,
-      "label": "Welsh",
-      "description": "Welsh option",
-      "default": false
-    },
-    {
-      "name": "ocrServiceProvider",
-      "type": "dropdown",
-      "required": false,
-      "title": "OCR Service Provider",
-      "description": "Select OCR service provider",
-      "default": "spaceOCR",
-      "data": [
-        {
-          "title": "OCRSpace API",
-          "value": "spaceOCR"
-        },
-        {
-          "title": "Google Could Vision",
-          "value": "googleOCR"
-        },
-        {
-          "title": "Microsoft Azure Computer Vision",
-          "value": "microsoftAzureOCR"
-        },
-        {
-          "title": "Youdao OCR",
-          "value": "youdaoOCR"
-        },
-        {
-          "title": "Baidu OCR",
-          "value": "baiduOCR"
-        },
-        {
-          "title": "Tencent OCR",
-          "value": "tencentOCR"
-        }
-      ]
-    },
-    {
-      "name": "spaceOCRApiKey",
-      "type": "password",
-      "required": false,
-      "title": "OCRSpace API Key(English only)",
-      "description": "OCRSpace API Key(There is a built-in api key, you can apply your own to avoid rate limit)",
-      "placeholder": "EnterOCR Space API Key"
-    },
-    {
-      "name": "googleOCRApiKey",
-      "type": "password",
-      "required": false,
-      "title": "Google Could Vision API Key",
-      "description": "Google Could Vision API Key",
-      "placeholder": "Enter Google Could Vision API Key"
-    },
-    {
-      "name": "microsoftOCRResourceName",
-      "type": "textfield",
-      "required": false,
-      "title": "Microsoft Azure Computer Vision Resource Name",
-      "description": "Microsoft Azure Computer Vision Resource Name",
-      "placeholder": "Enter Microsoft Azure Computer Vision Resource Name"
-    },
-    {
-      "name": "microsoftOCRAccessKey",
-      "type": "password",
-      "required": false,
-      "title": "Microsoft Azure Cognitive Service API Key",
-      "description": "Microsoft Azure Cognitive Service API Key",
-      "placeholder": "Enter Microsoft Azure Cognitive Service API Key"
-    },
-    {
-      "name": "youdaoOCRAppId",
-      "type": "password",
-      "required": false,
-      "title": "Youdao OCR App ID",
-      "description": "Youdao OCR App ID",
-      "placeholder": "Enter Youdao OCR App ID"
-    },
-    {
-      "name": "youdaoOCRAppKey",
-      "type": "password",
-      "required": false,
-      "title": "Youdao OCR App Secret",
-      "description": "Youdao OCR App Secret",
-      "placeholder": "Enter Youdao OCR App Secret"
-    },
-    {
-      "name": "baiduOCRApiKey",
-      "type": "password",
-      "required": false,
-      "title": "Baidu OCR API Key",
-      "description": "Baidu OCR API Key",
-      "placeholder": "Enter Baidu OCR API Key"
-    },
-    {
-      "name": "baiduOCRSecretKey",
-      "type": "password",
-      "required": false,
-      "title": "Baidu OCR Secret Key",
-      "description": "Baidu OCR Secret Key",
-      "placeholder": "Baidu OCR Secret Key"
-    },
-    {
-      "name": "tencentOCRSecretId",
-      "type": "password",
-      "required": false,
-      "title": "Tencent OCR Secret ID",
-      "description": "Tencent OCR Secret ID",
-      "placeholder": "Enter Tencent OCR Secret ID"
-    },
-    {
-      "name": "tencentOCRSecretKey",
-      "type": "password",
-      "required": false,
-      "title": "Tencent OCR Secret Key",
-      "description": "Tencent OCR Secret Key",
-      "placeholder": "Enter Tencent OCR Secret Key"
-    },
-    {
-      "name": "captureOnActivated",
-      "type": "checkbox",
-      "required": false,
-      "label": "Capture when activated",
-      "description": "Capture immediately when the command is active",
-      "default": true
-    },
-    {
-      "name": "closeOnCapture",
-      "type": "checkbox",
-      "required": false,
-      "label": "Close window when capture",
-      "description": "Close the main Raycast window when capture",
-      "default": false
     }
   ],
   "dependencies": {
@@ -1316,7 +1364,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.24.6",
     "typescript": "^4.4.3"
   },
   "scripts": {

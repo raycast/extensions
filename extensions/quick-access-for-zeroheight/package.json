@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-access-for-zeroheight",
+  "title": "Quick Access for zeroheight",
+  "description": "Find and view pages in zeroheight",
+  "icon": "extension-icon.png",
+  "author": "zeroheight",
+  "categories": [
+    "Documentation",
+    "Design Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-styleguides",
+      "title": "Show Styleguides",
+      "subtitle": "List accessible styleguides",
+      "description": "Show a list of all accessible styleguides in your chosen organization",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "title": "Client ID",
+      "name": "clientId",
+      "description": "Client ID generated in the Organization -> Developers section",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "zhci_*****ABCDE12345"
+    },
+    {
+      "title": "Access token",
+      "name": "accessToken",
+      "description": "Access token generated in the Organization -> Developers section, keep this secure.",
+      "type": "password",
+      "required": true,
+      "placeholder": "zhat_*****ABCDE12345"
+    }
+  ]
+}

@@ -6,7 +6,11 @@
   "icon": "youtube.png",
   "author": "tonka3000",
   "contributors": [
-    "HelloImSteven"
+    "HelloImSteven",
+    "madza",
+    "xilopaint",
+    "yug2005",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -136,7 +140,8 @@
   "dependencies": {
     "@google-cloud/local-auth": "^1.0.1",
     "@googleapis/youtube": "^2.0.0",
-    "@raycast/api": "^1.49.0",
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
     "duration-iso-8601": "^1.1.0",
     "he": "^1.2.0",
     "javascript-time-ago": "^2.3.10",
@@ -145,12 +150,15 @@
   },
   "devDependencies": {
     "@types/he": "^1.1.2",
-    "@types/node": "^18.8.3",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.0",
+    "react": "^18.2.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
@@ -158,6 +166,11 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

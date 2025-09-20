@@ -1,10 +1,19 @@
+/**
+ * This file defines components and hooks for displaying and managing the user's GitLab issues in Raycast.
+ * - MyIssues: Top-level component for filtering issues by project, scope, and state.
+ * - MyIssueList: Renders the list of issues.
+ * - useMyIssues: Custom hook to fetch issues with caching and refetch logic.
+ *
+ * The code ensures efficient rendering and avoids render loops by using stable dependencies in hooks.
+ */
+
 import { List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Issue, Project } from "../gitlabapi";
 import { daysInSeconds, showErrorToast } from "../utils";
-import { IssueListItem, IssueScope, IssueState } from "./issues";
+import { IssueListEmptyView, IssueListItem, IssueScope, IssueState } from "./issues";
 import { MyProjectsDropdown } from "./project";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -18,7 +27,7 @@ function MyIssueList(props: {
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
-}): JSX.Element {
+}) {
   const issues = props.issues;
 
   const refresh = () => {
@@ -30,17 +39,19 @@ function MyIssueList(props: {
       searchBarPlaceholder="Search issues by name..."
       isLoading={props.isLoading}
       searchBarAccessory={props.searchBarAccessory}
+      throttle
     >
       <List.Section title={props.title} subtitle={issues?.length.toString() || ""}>
         {issues?.map((issue) => (
           <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
+      <IssueListEmptyView />
     </List>
   );
 }
 
-export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.Element {
+export function MyIssues(props: { scope: IssueScope; state: IssueState }) {
   const scope = props.scope;
   const state = props.state;
   const [project, setProject] = useState<Project>();
@@ -61,10 +72,11 @@ export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.E
   );
 }
 
-function useMyIssues(
+export function useMyIssues(
   scope: IssueScope,
   state: IssueState,
-  project: Project | undefined
+  project: Project | undefined,
+  params?: Record<string, any>,
 ): {
   issues: Issue[] | undefined;
   isLoading: boolean;
@@ -77,19 +89,21 @@ function useMyIssues(
     error,
     performRefetch,
   } = useCache<Issue[] | undefined>(
-    `myissues_${scope}_${state}`,
+    `myissues_${scope}_${state}_${params ? JSON.stringify(params) : ""}`,
     async (): Promise<Issue[] | undefined> => {
+      // Merge state/scope with any additional params
+      const apiParams = { state, scope, ...(params || {}) };
       return await gitlab.getIssues(
-        { state, scope },
+        apiParams,
         undefined,
-        scope === IssueScope.assigned_to_me && state === IssueState.opened ? true : false
+        scope === IssueScope.assigned_to_me && state === IssueState.opened ? true : false,
       );
     },
     {
-      deps: [project, scope, state],
+      deps: [project?.id, scope, state, JSON.stringify(params)], // Use project?.id for stable dependency
       secondsToRefetch: 10,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { issues, isLoading, error, performRefetch };
 }

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "language-detector",
+  "title": "Language Detector",
+  "type": "module",
+  "description": "Detect languages through Raycast AI or third-party language detectors.",
+  "icon": "language-detector-icon.png",
+  "author": "litomore",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Media",
+    "Other",
+    "Productivity",
+    "System"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "selectedTextToDetect",
+      "title": "Selected Text to Detect",
+      "description": "Detect the language of the selected text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "textToDetect",
+      "title": "Text to Detect",
+      "description": "Detect the language of the text.",
+      "mode": "view"
+    },
+    {
+      "name": "typeToDetect",
+      "title": "Type to Detect",
+      "description": "Detect the language of the text.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "content",
+          "placeholder": "Type to Detect",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "mac-say": "^0.3.3",
+    "raycast-backend-api": "^0.1.2",
+    "raycast-cross-extension": "^0.2.3",
+    "raycast-language-detector": "^0.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.11",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}

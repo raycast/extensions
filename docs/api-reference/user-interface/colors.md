@@ -38,17 +38,17 @@ export default function Command() {
 
 #### Enumeration members
 
-| Name          | Dark Theme                                               | Light Theme                                         |
-| :------------ | :------------------------------------------------------- | :-------------------------------------------------- |
-| Blue          | ![](../../.gitbook/assets/color-dark-blue.png)           | ![](../../.gitbook/assets/color-blue.png)           |
-| Green         | ![](../../.gitbook/assets/color-dark-green.png)          | ![](../../.gitbook/assets/color-green.png)          |
-| Magenta       | ![](../../.gitbook/assets/color-dark-magenta.png)        | ![](../../.gitbook/assets/color-magenta.png)        |
-| Orange        | ![](../../.gitbook/assets/color-dark-orange.png)         | ![](../../.gitbook/assets/color-orange.png)         |
-| Purple        | ![](../../.gitbook/assets/color-dark-purple.png)         | ![](../../.gitbook/assets/color-purple.png)         |
-| Red           | ![](../../.gitbook/assets/color-dark-red.png)            | ![](../../.gitbook/assets/color-red.png)            |
-| Yellow        | ![](../../.gitbook/assets/color-dark-yellow.png)         | ![](../../.gitbook/assets/color-yellow.png)         |
-| PrimaryText   | ![](../../.gitbook/assets/color-dark-primary-text.png)   | ![](../../.gitbook/assets/color-primary-text.png)   |
-| SecondaryText | ![](../../.gitbook/assets/color-dark-secondary-text.png) | ![](../../.gitbook/assets/color-secondary-text.png) |
+| Name          | Dark Theme                                                | Light Theme                                          |
+| :------------ | :-------------------------------------------------------- | :--------------------------------------------------- |
+| Blue          | ![](../../.gitbook/assets/color-dark-blue.webp)           | ![](../../.gitbook/assets/color-blue.webp)           |
+| Green         | ![](../../.gitbook/assets/color-dark-green.webp)          | ![](../../.gitbook/assets/color-green.webp)          |
+| Magenta       | ![](../../.gitbook/assets/color-dark-magenta.webp)        | ![](../../.gitbook/assets/color-magenta.webp)        |
+| Orange        | ![](../../.gitbook/assets/color-dark-orange.webp)         | ![](../../.gitbook/assets/color-orange.webp)         |
+| Purple        | ![](../../.gitbook/assets/color-dark-purple.webp)         | ![](../../.gitbook/assets/color-purple.webp)         |
+| Red           | ![](../../.gitbook/assets/color-dark-red.webp)            | ![](../../.gitbook/assets/color-red.webp)            |
+| Yellow        | ![](../../.gitbook/assets/color-dark-yellow.webp)         | ![](../../.gitbook/assets/color-yellow.webp)         |
+| PrimaryText   | ![](../../.gitbook/assets/color-dark-primary-text.webp)   | ![](../../.gitbook/assets/color-primary-text.webp)   |
+| SecondaryText | ![](../../.gitbook/assets/color-dark-secondary-text.webp) | ![](../../.gitbook/assets/color-secondary-text.webp) |
 
 ## Types
 
@@ -60,7 +60,7 @@ ColorLike: Color | Color.Dynamic | Color.Raw;
 
 Union type for the supported color types.
 
-When using a [Raw Color](#color.raw), it will be dynamically adjusted to achieve high contrast with the Raycast user interface.
+When using a [Raw Color](#color.raw), it will be adjusted to achieve high contrast with the Raycast user interface. To disable color adjustment, you need to switch to using a [Dynamic Color](#color.dynamic). However, we recommend leaving color adjustment on, unless your extension depends on exact color reproduction.
 
 #### Example
 
@@ -92,6 +92,8 @@ export default function Command() {
 
 A dynamic color applies different colors depending on the active Raycast theme.
 
+When using a [Dynamic Color](#color.dynamic), it will be adjusted to achieve high contrast with the Raycast user interface. To disable color adjustment, you can set the `adjustContrast` property to `false`. However, we recommend leaving color adjustment on, unless your extension depends on exact color reproduction.
+
 #### Example
 
 ```typescript
@@ -107,7 +109,7 @@ export default function Command() {
           tintColor: {
             light: "#FF01FF",
             dark: "#FFFF50",
-            adjustContrast: true,
+            adjustContrast: false,
           },
         }}
       />

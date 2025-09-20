@@ -60,6 +60,7 @@ interface Standings {
 
 interface Season {
   currentMatchday: number;
+  startDate: string;
   endDate: string;
   previousMatchday: number;
 }

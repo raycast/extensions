@@ -1,10 +1,19 @@
-import { getPreferenceValues } from "@raycast/api";
-import SearchAnimeList from "../components/searchAnimeList";
-import SearchAnimeGrid from "../components/searchAnimeGrid";
+import { useContext } from "react";
+
+import SearchAnimeGrid from "./components/index/searchAnimeGrid";
+import SearchAnimeList from "./components/index/searchAnimeList";
+import { ViewTypeCtx, ViewTypeCtxProvider } from "./components/ViewTypeCtx";
+
+function RenderView() {
+  const { viewType } = useContext(ViewTypeCtx);
+
+  return viewType === "grid" ? <SearchAnimeGrid /> : <SearchAnimeList />;
+}
 
 export default function Index() {
-  const preferences = getPreferenceValues();
-  const chosenView = preferences.view;
-  if (chosenView === "grid") return <SearchAnimeGrid />;
-  else return <SearchAnimeList />;
+  return (
+    <ViewTypeCtxProvider>
+      <RenderView />
+    </ViewTypeCtxProvider>
+  );
 }

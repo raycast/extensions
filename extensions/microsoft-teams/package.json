@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "microsoft-teams",
+  "title": "Microsoft Teams",
+  "description": "Easily manage your Microsoft Teams presence and status message with this Raycast extension. Search chats and open them in with a keystroke in the Teams app.",
+  "icon": "teams.png",
+  "author": "sven",
+  "categories": [
+    "Applications",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "findChat",
+      "title": "Find Chat",
+      "subtitle": "Microsoft Teams",
+      "icon": "chat.png",
+      "description": "Find a chat by title.",
+      "mode": "view"
+    },
+    {
+      "name": "setPresence",
+      "title": "Set Presence",
+      "subtitle": "Microsoft Teams",
+      "icon": "presence.png",
+      "description": "Set your Microsoft Teams presence.",
+      "mode": "view"
+    },
+    {
+      "name": "setStatus",
+      "title": "Set Status",
+      "subtitle": "Microsoft Teams",
+      "icon": "status.png",
+      "description": "Set your Microsoft Teams status message (and optionally your presence).",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "clientId",
+      "title": "Application ID",
+      "description": "The \"Application (client) ID\" (see extension's documentation)",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "name": "tenantId",
+      "title": "Directory ID",
+      "description": "The \"Directory (tenant) ID\" (see extension's documentation)",
+      "required": true
+    },
+    {
+      "type": "dropdown",
+      "name": "urlTarget",
+      "title": "Open in",
+      "description": "Where to open objects: In the Teams web app or the desktop app?",
+      "required": true,
+      "data": [
+        {
+          "title": "Web App",
+          "value": "web"
+        },
+        {
+          "title": "Desktop App",
+          "value": "desktop"
+        }
+      ],
+      "default": "desktop"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.0",
+    "@raycast/utils": "^1.15.0",
+    "@types/luxon": "^3.3.0",
+    "luxon": "^3.3.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

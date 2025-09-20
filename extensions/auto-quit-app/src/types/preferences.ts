@@ -1,11 +1,4 @@
-export interface Preferences {
-  preview: boolean;
-  textEdit: boolean;
-  messages: boolean;
-  terminal: boolean;
-  quickTimePlayer: boolean;
-  mail: boolean;
-  notes: boolean;
-  shortcuts: boolean;
-  tv: boolean;
-}
+import { getPreferenceValues } from "@raycast/api";
+
+export const { layout, columns, itemInset } = getPreferenceValues<Preferences.SetAutoQuitApp>();
+export const { refreshInterval } = getPreferenceValues<Preferences.AutoQuitAppMenubar>();

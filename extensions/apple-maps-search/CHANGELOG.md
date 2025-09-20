@@ -1,5 +1,16 @@
 # Apple Maps Search Changelog
 
+## [Windows Support] - 2025-08-27
+
+- Added support for Windows users to open Apple Maps links in the browser
+- Update dependencies to latest versions
+- Update eslint configuration to latest recommended settings
+- Update tsconfig to latest recommended settings
+
+## [Fix] - 2023-08-08
+
+- Fixed so the extension work correctly in fallback searches
+
 ## [Enhancement] - 2023-02-06
 
 - Set default origin value to "home" when using "Directions To" command.

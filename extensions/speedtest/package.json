@@ -2,41 +2,55 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "speedtest",
   "title": "Speedtest",
-  "description": "Speedtest via speedtest.net",
+  "description": "Test the performance and quality of your internet connection via speedtest.net",
   "icon": "speedtest.png",
   "author": "tonka3000",
+  "contributors": [
+    "koayon",
+    "pernielsentikaer",
+    "stevensd2m",
+    "aliaksandr_zhebit",
+    "xilopaint"
+  ],
   "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "index",
-      "title": "Speedtest",
-      "description": "Speedtest via speedtest.net",
+      "title": "Test Internet Speed",
+      "description": "Test the performance and quality of your internet connection via speedtest.net",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.0",
-    "download": "^8.0.0",
+    "@raycast/api": "^1.77.1",
+    "axios": "^1.8.4",
+    "extract-zip": "^2.0.1",
     "sha256-file": "^1.0.0",
-    "tar": "^6.1.11"
+    "tar": "^7.2.0"
   },
   "devDependencies": {
-    "@types/download": "^8.0.1",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sha256-file": "^1.0.1",
-    "@types/tar": "^6.1.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/sha256-file": "^1.0.3",
+    "@types/tar": "^6.1.13",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
-  }
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,13 +1,65 @@
 # DocSearch Changelog
 
+## [Added support for new documentation] - 2025-07-11
+
+- 📄 Support [TailwindCSS V4](https://tailwindcss.com/)
+- 📄 Support [Next.js](https://nextjs.org/)
+- 📄 Support [MassTransit](https://masstransit.io/)
+- 📄 Support [Pinia](https://pinia.vuejs.org/)
+- 🐛 Fix icon sizing
+
+## [New feature] - 2024-9-17
+
+- 📄 Support [TypeScript](https://www.typescriptlang.org/)
+
+## [New feature] - 2024-5-15
+
+- 📄 Support [Deno](https://deno.com/)
+
+## [New feature] - 2024-5-11
+
+- 📄 Support [Sass](https://sass-lang.com/)
+- 📄 Support [Less](https://lesscss.org/)
+
+## [New feature] - 2024-2-3
+
+- 🌟 Use searchBarAccessory to switch different version of docs
+
+## [New feature and documentation] - 2024-01-16
+
+- 📄 Support [Element Plus](https://element-plus.org/en-US/)
+
+## [New feature and documentation] - 2023-10-22
+
+- 📄 Support [NvChad](https://nvchad.com/)
+
+## [New feature and documentation] - 2023-08-12
+
+- 🌟 Support auto generate entry file and config
+- 📄 Support [taro](https://docs.taro.zone/docs/)
+
+## [Support for new documentation] - 2023-08-11
+
+- 📄 Support [Antd](https://ant.design/)
+- 📄 Support [Antdv](https://antdv.com/components/overview)
+
+## [Fix SearchDocumentation Component] - 2023-05-25
+
+- 🐛 Fix the title of the documentation is not displayed.
+
+## [Supoort Meilisearch] - 2023-05-23
+
+- 🌟 Support Meilisearch
+- 📄 Move RSSHub to use MeiliSearch as an entry point.
+
 ## [Fix searchbar text] - 2021-12-31
 
 - 🐛 Fix searchbar text disappearing each time the query is changed by the user.
 - 📄 add algolia keyword to package.json
 
-## [Fix for TailwindCSS V3] - 20220-11-17
+## [Support for new documentation] - 2022-11-23
 
-- 🐛 Fix TailwindCSS V3 which was searching results not just is V3
+- 📄 Support [Flet](https://flet.dev)
 
 ## [Support for new documentation] - 2022-11-11
 

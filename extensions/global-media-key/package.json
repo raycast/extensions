@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "global-media-key",
+  "title": "Media Key Emulate",
+  "description": "Emulate keyboard media keys press. Reassign hotkey for media keys.",
+  "icon": "extension_icon.png",
+  "author": "douo",
+  "categories": [
+    "System",
+    "Media"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "isShowHUD",
+      "label": "Enable",
+      "description": "Show compact message when keys are triggered.",
+      "type": "checkbox",
+      "title": "Show HUD",
+      "default": false,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "play",
+      "description": "Toggle Play/Pause",
+      "title": "Play/Pause",
+      "icon": "play.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "description": "Send Next KeyEvent",
+      "title": "Next",
+      "icon": "next.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "description": "Send Previous KeyEvent",
+      "title": "Previous",
+      "icon": "previous.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "fast",
+      "description": "Send Forward KeyEvent",
+      "title": "Forward",
+      "icon": "fast.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "rewind",
+      "description": "Send Rewind KeyEvent",
+      "title": "Rewind",
+      "icon": "rewind.png",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "20.4.2",
+    "@types/react": "18.2.15",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/media-key assets",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

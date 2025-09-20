@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "shubzkothekar",
   "contributors": [
-    "thomas"
+    "thomas",
+    "ErikFisher"
   ],
   "categories": [
     "Developer Tools",
@@ -35,8 +36,16 @@
           "value": "com.microsoft.VSCode"
         },
         {
+          "title": "Visual Studio Code - Insiders",
+          "value": "com.microsoft.VSCodeInsiders"
+        },
+        {
           "title": "VSCodium",
           "value": "com.vscodium"
+        },
+        {
+          "title": "Cursor",
+          "value": "com.todesktop.230313mzl4w4u92"
         }
       ]
     }
@@ -58,5 +67,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

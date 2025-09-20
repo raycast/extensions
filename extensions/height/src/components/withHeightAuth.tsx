@@ -1,6 +1,7 @@
 import { Detail, environment, MenuBarExtra } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { authorize } from "../api/oauth";
+
+import { authorize } from "@/api/oauth";
 
 let token: string | null = null;
 

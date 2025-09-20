@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Detail, useNavigation } from "@raycast/api";
+/* eslint-disable @raycast/prefer-title-case */
+import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { AxiosRequestConfig } from "axios";
 import { methodColors } from "../../utils";
 
@@ -16,8 +17,18 @@ type Result = {
   response: AxiosResponse;
 };
 
-export default function ResultView({ result, curl }: { result: Result; curl: string }) {
+export default function ResultView({
+  result,
+  curl,
+  jsonPathResult,
+}: {
+  result: Result;
+  curl: string;
+  jsonPathResult: string;
+}) {
   const markdown = "### Response\n\n" + "```json\n" + JSON.stringify(result.response.data, null, 2) + "\n\n";
+
+  const jsonPathResultToClipboard = jsonPathResult ?? "";
 
   return (
     <Detail
@@ -47,10 +58,15 @@ export default function ResultView({ result, curl }: { result: Result; curl: str
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy cURL" content={curl} />
+          <Action.CopyToClipboard
+            title="Copy JSONPath Result"
+            content={jsonPathResultToClipboard}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
           <Action.CopyToClipboard title="Copy Response" content={JSON.stringify(result.response.data, null, 2)} />
           <Action.CopyToClipboard
             title="Copy Headers"
-            content={JSON.stringify(result.response.data, null, 2)}
+            content={JSON.stringify(result.response.headers, null, 2)}
             shortcut={{ modifiers: ["cmd"], key: "h" }}
           />
         </ActionPanel>

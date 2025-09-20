@@ -1,106 +1,78 @@
-import {
-  List,
-  showToast,
-  ToastStyle,
-  preferences,
-  Icon,
-  ImageLike,
-  ActionPanel,
-  Detail,
-  useNavigation,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { Client, Queue, QueueSlot, Results } from "sabnzbd-api";
+import { List, showToast, Icon, ActionPanel, Detail, Action, Image, Toast, Keyboard } from "@raycast/api";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { QueueSlot } from "sabnzbd-api";
+import { client } from "./sabnzbd";
 
+type Mutate = MutatePromise<QueueSlot[]>;
 export default function SlotList() {
-  const [init, setInit] = useState<boolean>(false);
-  const [slots, setSlots] = useState<QueueSlot[]>([]);
-
-  useEffect(() => {
-    async function fetch() {
-      const slots = await fetchSlots();
-
-      setSlots(slots);
-      setInit(true);
-    }
-
-    fetch();
-  }, []);
-
-  const onSearchTextChange = async (text: string) => {
-    let slots = await fetchSlots();
-    slots = slots.filter((slot) => {
-      return slot.filename.includes(text);
-    });
-
-    setSlots(slots);
-  };
+  const {
+    isLoading,
+    data: slots,
+    mutate,
+  } = useCachedPromise(
+    async () => {
+      const queue = await client.queue();
+      return queue.slots;
+    },
+    [],
+    {
+      initialData: [],
+      keepPreviousData: true,
+      failureToastOptions: {
+        title: "Could not load Slots",
+      },
+    },
+  );
 
   return (
-    <List isLoading={!init} searchBarPlaceholder="Filter slots by filename..." onSearchTextChange={onSearchTextChange}>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter slots by filename">
       {slots.map((slot) => (
-        <SlotListItem key={slot.nzo_id} slot={slot} setSlots={setSlots} slots={slots} />
+        <SlotListItem key={slot.nzo_id} slot={slot} slots={slots} mutate={mutate} />
       ))}
     </List>
   );
 }
 
-function SlotListItem(props: { slot: QueueSlot; setSlots: any; slots: any }) {
-  const { push } = useNavigation();
-
+function SlotListItem(props: { slot: QueueSlot; slots: QueueSlot[]; mutate: Mutate }) {
   const slot = props.slot;
-  const setSlots = props.setSlots;
   const slots = props.slots;
   const noOfSlots = slots.length - 1;
+  const mutate = props.mutate;
 
-  let icon: ImageLike;
+  let icon: Image.ImageLike;
 
-  let actions: any;
+  let actions: ActionPanel.Children;
 
-  const detailAction = (
-    <ActionPanel.Item
-      title="Details"
-      icon={{ source: { light: "file-light.png", dark: "file-dark.png" } }}
-      onAction={() => push(<Details slot={slot} setSlots={setSlots} />)}
-    />
-  );
+  const detailAction = <Action.Push title="Details" icon={Icon.Document} target={<Details slot={slot} />} />;
 
-  const first = slot.index == 0;
-  const last = slot.index == noOfSlots;
+  const first = slot.index === 0;
+  const last = slot.index === noOfSlots;
 
-  const moveUpAction = (
-    <ActionPanel.Item
-      title={"Move Up"}
-      onAction={() => onMoveUp(slot, slots, setSlots)}
-      icon={{ source: { light: "arrow-up-light.png", dark: "arrow-up-dark.png" } }}
-    />
-  );
+  const moveUpAction = <Action title="Move Up" onAction={() => onMoveUp(slot, slots, mutate)} icon={Icon.ArrowUp} />;
   const moveDownAction = (
-    <ActionPanel.Item
-      title={"Move Down"}
-      onAction={() => onMoveDown(slot, slots, setSlots)}
-      icon={{ source: { light: "arrow-down-light.png", dark: "arrow-down-dark.png" } }}
+    <Action title="Move Down" onAction={() => onMoveDown(slot, slots, mutate)} icon={Icon.ArrowDown} />
+  );
+
+  const DeleteAction = () => (
+    <Action
+      title="Delete"
+      onAction={() => onDelete(slot, mutate)}
+      icon={Icon.Trash}
+      shortcut={Keyboard.Shortcut.Common.Remove}
+      style={Action.Style.Destructive}
     />
   );
 
   switch (slot.status) {
     case "Paused":
-      icon = { source: { light: "pause-light.png", dark: "pause-dark.png" } };
+      icon = Icon.Pause;
 
       actions = (
         <ActionPanel>
           <ActionPanel.Section title="State">
             {detailAction}
-            <ActionPanel.Item
-              title={"Resume"}
-              onAction={() => onResume(slot, setSlots)}
-              icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
-            />
-            <ActionPanel.Item
-              title={"Delete"}
-              onAction={() => onDelete(slot, setSlots)}
-              icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-            />
+            <Action title="Resume" onAction={() => onResume(slot, mutate)} icon={Icon.Play} />
+            <DeleteAction />
           </ActionPanel.Section>
           <ActionPanel.Section title="Position">
             {first && moveDownAction}
@@ -114,42 +86,26 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any; slots: any }) {
       break;
 
     case "Downloading":
-      icon = { source: { light: "play-light.png", dark: "play-dark.png" } };
+      icon = Icon.Play;
 
       actions = (
         <ActionPanel>
           {detailAction}
-          <ActionPanel.Item
-            title={"Pause"}
-            onAction={() => onPause(slot, setSlots)}
-            icon={{ source: { light: "pause-light.png", dark: "pause-dark.png" } }}
-          />
-          <ActionPanel.Item
-            title={"Delete"}
-            onAction={() => onDelete(slot, setSlots)}
-            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-          />
+          <Action title="Pause" onAction={() => onPause(slot, mutate)} icon={Icon.Pause} />
+          <DeleteAction />
         </ActionPanel>
       );
 
       break;
 
     case "Queued":
-      icon = { source: { light: "hourglass-light.png", dark: "hourglass-dark.png" } };
+      icon = Icon.Hourglass;
 
       actions = (
         <ActionPanel>
           {detailAction}
-          <ActionPanel.Item
-            title={"Resume"}
-            onAction={() => onResume(slot, setSlots)}
-            icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
-          />
-          <ActionPanel.Item
-            title={"Delete"}
-            onAction={() => onDelete(slot, setSlots)}
-            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-          />
+          <Action title="Resume" onAction={() => onResume(slot, mutate)} icon={Icon.Play} />
+          <DeleteAction />
         </ActionPanel>
       );
 
@@ -159,11 +115,7 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any; slots: any }) {
       actions = (
         <ActionPanel>
           {detailAction}
-          <ActionPanel.Item
-            title={"Delete"}
-            onAction={() => onDelete(slot, setSlots)}
-            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-          />
+          <DeleteAction />
         </ActionPanel>
       );
 
@@ -186,13 +138,14 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any; slots: any }) {
       key={slot.nzo_id}
       title={slot.filename}
       subtitle={timeleft}
+      accessories={[{ tag: slot.status }]}
       icon={icon}
       actions={actions}
     />
   );
 }
 
-function Details(props: { slot: QueueSlot; setSlots: any }) {
+function Details(props: { slot: QueueSlot }) {
   const slot = props.slot;
 
   let labels: string;
@@ -208,111 +161,111 @@ function Details(props: { slot: QueueSlot; setSlots: any }) {
   return <Detail markdown={markdown} navigationTitle={slot.filename} />;
 }
 
-async function onMoveUp(slot: QueueSlot, slots: QueueSlot[], setSlots: any) {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
-
-  // The job being moved up
-  const firstId = slot.nzo_id;
-  // The job being shifted down
-  const secondId = slots[slot.index - 1].nzo_id;
-
-  try {
-    const results = (await client.jobMove(firstId, secondId)) as Results;
-
-    const slots = await fetchSlots();
-
-    setSlots(slots);
-
-    showToast(ToastStyle.Success, "Moved job");
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not move job");
-  }
+async function onMoveUp(slot: QueueSlot, slots: QueueSlot[], mutate: Mutate) {
+  await moveJob(slot, slots, "up", mutate);
 }
 
-async function onMoveDown(slot: QueueSlot, slots: QueueSlot[], setSlots: any) {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+async function onMoveDown(slot: QueueSlot, slots: QueueSlot[], mutate: Mutate) {
+  await moveJob(slot, slots, "down", mutate);
+}
 
+async function moveJob(slot: QueueSlot, slots: QueueSlot[], direction: "up" | "down", mutate: Mutate) {
   // The job being shifted up
-  const firstId = slots[slot.index + 1].nzo_id;
+  const firstSlot = direction === "up" ? slot : slots[slot.index + 1];
   // The job being moved down
-  const secondId = slot.nzo_id;
+  const secondSlot = direction === "up" ? slots[slot.index - 1] : slot;
 
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Moving Job" });
   try {
-    const results = (await client.jobMove(firstId, secondId)) as Results;
-
-    const slots = await fetchSlots();
-
-    setSlots(slots);
-
-    showToast(ToastStyle.Success, "Moved job");
+    await mutate(
+      client
+        .jobMove(firstSlot.nzo_id, secondSlot.nzo_id)
+        .then((result: { result: { position: number; priority: number } }) => {
+          if (result.result.position === -1) throw new Error();
+        }),
+      {
+        optimisticUpdate(data) {
+          const from = firstSlot.index;
+          const to = secondSlot.index;
+          const newQueue = data;
+          [newQueue[from], newQueue[to]] = [newQueue[to], newQueue[from]];
+          return newQueue;
+        },
+      },
+    );
+    toast.style = Toast.Style.Success;
+    toast.title = "Moved Job";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not move job");
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not move Job";
   }
 }
 
-async function onDelete(slot: QueueSlot, setSlots: any) {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
-
+async function onDelete(slot: QueueSlot, mutate: Mutate) {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting Job" });
   try {
-    const results = (await client.jobDelete(slot.nzo_id)) as Results;
-
-    const slots = await fetchSlots();
-
-    setSlots(slots);
-
-    showToast(ToastStyle.Success, "Deleted job");
+    await mutate(
+      client.jobDelete(slot.nzo_id).then((result) => {
+        if (!result.status || result.error) throw new Error();
+      }),
+      {
+        optimisticUpdate(data) {
+          return data.filter((item) => item.nzo_id !== slot.nzo_id);
+        },
+      },
+    );
+    toast.style = Toast.Style.Success;
+    toast.title = "Deleted Job";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not delete job");
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not delete Job";
   }
 }
 
-async function onPause(slot: QueueSlot, setSlots: any) {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
-
+async function onPause(slot: QueueSlot, mutate: Mutate) {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Pausing Job" });
   try {
-    const results = (await client.jobPause(slot.nzo_id)) as Results;
-
-    const slots = await fetchSlots();
-
-    setSlots(slots);
-
-    showToast(ToastStyle.Success, "Paused job");
+    await mutate(
+      client.jobPause(slot.nzo_id).then((result) => {
+        if (!result.status || result.error) throw new Error();
+      }),
+      {
+        optimisticUpdate(data) {
+          const newQueue = data;
+          const index = data.findIndex((item) => item.nzo_id === slot.nzo_id);
+          newQueue[index].status = "Paused";
+          return newQueue;
+        },
+      },
+    );
+    toast.style = Toast.Style.Success;
+    toast.title = "Paused Job";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not pause job");
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not pause Job";
   }
 }
 
-async function onResume(slot: QueueSlot, setSlots: any) {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
-
+async function onResume(slot: QueueSlot, mutate: Mutate) {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Resuming Job" });
   try {
-    const results = (await client.jobResume(slot.nzo_id)) as Results;
-
-    const slots = await fetchSlots();
-
-    setSlots(slots);
-
-    showToast(ToastStyle.Success, "Resumed job");
+    await mutate(
+      client.jobResume(slot.nzo_id).then((result) => {
+        if (!result.status || result.error) throw new Error();
+      }),
+      {
+        optimisticUpdate(data) {
+          const newQueue = data;
+          const index = data.findIndex((item) => item.nzo_id === slot.nzo_id);
+          newQueue[index].status = "Downloading";
+          return newQueue;
+        },
+      },
+    );
+    toast.style = Toast.Style.Success;
+    toast.title = "Resumed Job";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not resume job");
-  }
-}
-
-async function fetchSlots(): Promise<QueueSlot[]> {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
-
-  try {
-    const queue = (await client.queue()) as Queue;
-
-    return Promise.resolve(queue.slots);
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not load slots");
-    return Promise.resolve([]);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not resume Job";
   }
 }

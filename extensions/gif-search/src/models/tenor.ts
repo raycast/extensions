@@ -1,63 +1,79 @@
-import formatRelative from "date-fns/formatRelative";
-import fromUnixTime from "date-fns/fromUnixTime";
+import { formatRelative, fromUnixTime } from "date-fns";
 import fetch from "node-fetch";
-import path from "path";
 
-import { environment } from "@raycast/api";
-
-import { getAPIKey, GIF_SERVICE } from "../preferences";
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
+import { getTenorLocale } from "../preferences";
 
 export interface TenorResults {
-  results?: TenorGif[];
-  error?: string;
-  code?: number;
+  results: TenorGif[];
+  next: string;
 }
 
 export interface TenorGif {
   created: number;
   hasaudio: boolean;
-  hascaption: boolean;
   id: string;
+  media_formats: {
+    [format: string]: TenorMediaFormat;
+  };
+  tags: string[];
   title: string;
-  h1_title: string;
   content_description: string;
   itemurl: string;
+  hascaption: boolean;
+  flags: string;
+  bg_color: string;
   url: string;
-  media: TenorMedia[];
-  tags: string[];
 }
 
-interface TenorMedia {
-  [format: string]: {
-    preview: string;
-    url: string;
-    dims: number[];
-    size: number;
-  };
+interface TenorMediaFormat {
+  url: string;
+  dims: number[];
+  duration: number;
+  size: number;
 }
 
-let tenorAPI: TenorAPI;
-export async function getAPI(force?: boolean) {
-  if (!tenorAPI || force) {
-    tenorAPI = new TenorAPI(await getAPIKey(GIF_SERVICE.TENOR, force));
-  }
+const API_BASE_URL = "https://gif-search.raycast.com/api/tenor";
 
-  return tenorAPI;
-}
-
-export default async function tenor(force?: boolean) {
-  const api = await getAPI(force);
-
+export default async function tenor() {
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0, limit, abort } = opt || {};
-      return (await api.search(term, { offset, limit, abort })).results?.map(mapTenorResponse) ?? [];
+      const reqUrl = new URL(API_BASE_URL);
+      reqUrl.searchParams.set("locale", getTenorLocale());
+      reqUrl.searchParams.set("q", term);
+      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
+
+      if (opt?.next) {
+        reqUrl.searchParams.set("pos", opt.next);
+      }
+
+      const response = await fetch(reqUrl.toString());
+      if (!response.ok) {
+        throw new Error("Could not search gifs from Tenor");
+      }
+      const results = (await response.json()) as TenorResults;
+
+      return { results: results.results?.map(mapTenorResponse) ?? [], next: results.next };
     },
 
     async trending(opt?: APIOpt) {
-      const { offset = 0, limit = 10, abort } = opt || {};
-      return (await api.trending({ offset, limit, abort })).results?.map(mapTenorResponse) ?? [];
+      const reqUrl = new URL(API_BASE_URL);
+      reqUrl.searchParams.set("locale", getTenorLocale());
+      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
+
+      if (opt?.next) {
+        reqUrl.searchParams.set("pos", opt.next);
+      }
+
+      const response = await fetch(reqUrl.toString());
+      if (!response.ok) {
+        throw new Error("Could not get trending gifs from Tenor");
+      }
+      const results = (await response.json()) as TenorResults;
+
+      return { results: results.results?.map(mapTenorResponse) ?? [], next: results.next };
     },
 
     async gifs(ids: string[], opt?: APIOpt) {
@@ -65,94 +81,38 @@ export default async function tenor(force?: boolean) {
         return [];
       }
 
-      const { abort } = opt || {};
-      return (await api.gifs(ids, { abort })).results?.map(mapTenorResponse) ?? [];
+      const reqUrl = new URL(API_BASE_URL);
+      reqUrl.searchParams.set("ids", ids.join(","));
+      reqUrl.searchParams.set("media_filter", "gif,nanogif");
+      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
+
+      const response = await fetch(reqUrl.toString());
+      const results = (await response.json()) as TenorResults;
+
+      return results.results?.map(mapTenorResponse) ?? [];
     },
   };
 }
 
-const API_BASE_URL = "https://g.tenor.com/";
-
-export class TenorAPI {
-  private static locale = "en_US";
-  private static mediaFilter = "basic";
-
-  private apiKey: string;
-
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-
-  async trending(options: { offset?: number; limit?: number; abort?: AbortController }) {
-    const reqUrl = new URL("/v1/trending", API_BASE_URL);
-    reqUrl.searchParams.set("key", this.apiKey);
-    reqUrl.searchParams.set("locale", TenorAPI.locale);
-    reqUrl.searchParams.set("media_filter", TenorAPI.mediaFilter);
-    reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
-    reqUrl.searchParams.set("media_filter", "minimal");
-
-    if (options?.offset) {
-      reqUrl.searchParams.set("pos", options.offset.toString());
-    }
-
-    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
-    if (!resp.ok) {
-      throw new Error(resp.statusText);
-    }
-    return (await resp.json()) as TenorResults;
-  }
-
-  async search(term: string, options: { offset?: number; limit?: number; abort?: AbortController }) {
-    const reqUrl = new URL("/v1/search", API_BASE_URL);
-    reqUrl.searchParams.set("key", this.apiKey);
-    reqUrl.searchParams.set("q", term);
-    reqUrl.searchParams.set("locale", TenorAPI.locale);
-    reqUrl.searchParams.set("media_filter", TenorAPI.mediaFilter);
-    reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
-    reqUrl.searchParams.set("media_filter", "minimal");
-
-    if (options?.offset) {
-      reqUrl.searchParams.set("pos", options.offset.toString());
-    }
-
-    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
-    if (!resp.ok) {
-      throw new Error(resp.statusText);
-    }
-    return (await resp.json()) as TenorResults;
-  }
-
-  async gifs(ids: string[], options: { limit?: number; abort?: AbortController }) {
-    const reqUrl = new URL("/v1/gifs", API_BASE_URL);
-    reqUrl.searchParams.set("key", this.apiKey);
-    reqUrl.searchParams.set("ids", ids.join(","));
-    reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
-    reqUrl.searchParams.set("media_filter", "minimal");
-
-    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
-    if (!resp.ok) {
-      throw new Error(resp.statusText);
-    }
-    return (await resp.json()) as TenorResults;
-  }
-}
-
-export function mapTenorResponse(tenorResp: TenorGif) {
-  const mediaItem = tenorResp.media[0];
-  const title = tenorResp.title || tenorResp.h1_title || tenorResp.content_description;
+export function mapTenorResponse(response: TenorGif) {
+  const medias = response.media_formats;
+  const title = response.title || response.content_description;
+  const slug = slugify(title);
   return <IGif>{
-    id: tenorResp.id,
+    id: response.id,
     title: title,
-    url: tenorResp.itemurl,
-    slug: slugify(title),
-    preview_gif_url: mediaItem.tinygif.url,
-    gif_url: mediaItem.gif.url,
+    url: response.itemurl,
+    slug,
+    download_url: medias.gif.url,
+    download_name: `${slug}.gif`,
+    preview_gif_url: medias.nanogif.url,
+    gif_url: medias.gif.url,
     metadata: {
-      width: mediaItem.gif.dims[0],
-      height: mediaItem.gif.dims[1],
-      size: mediaItem.gif.size,
-      labels: [{ title: "Created", text: formatRelative(fromUnixTime(tenorResp.created), new Date()) }],
-      tags: tenorResp.tags,
+      width: medias.gif.dims[0],
+      height: medias.gif.dims[1],
+      size: medias.gif.size,
+      labels: [{ title: "Created", text: formatRelative(fromUnixTime(response.created), new Date()) }],
+      tags: response.tags,
     },
     attribution: "tenor-logo-square-180.png",
   };

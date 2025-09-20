@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brave-search-with-results",
+  "title": "Brave Search with Results",
+  "description": "Search Brave and get direct results",
+  "icon": "command-icon.png",
+  "author": "electerious",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Web",
+      "subtitle": "Brave",
+      "description": "Search web with Brave",
+      "mode": "view"
+    },
+    {
+      "name": "imageSearch",
+      "title": "Search Images",
+      "subtitle": "Brave",
+      "description": "Search images with Brave",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "suggest_api_key",
+      "description": "Your Brave 'Suggest' API key",
+      "type": "password",
+      "required": true,
+      "title": "Suggest API Key"
+    },
+    {
+      "name": "data_for_search_api_key",
+      "description": "Your Brave 'Data for Search' API key",
+      "type": "password",
+      "required": true,
+      "title": "Data for Search API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

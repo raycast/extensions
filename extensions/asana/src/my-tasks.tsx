@@ -12,8 +12,8 @@ function MyTasks() {
   const [workspace, setWorkspace] = useState<string>();
 
   const { data: me } = useMe();
-  const { data: workspaces } = useWorkspaces();
-  const { data: tasks, isLoading, mutate: mutateList } = useMyTasks(workspace);
+  const { data: workspaces, isLoading: isLoadingWorkspaces } = useWorkspaces();
+  const { data: tasks, isLoading: isLoadingMyTasks, mutate: mutateList } = useMyTasks(workspace);
 
   useEffect(() => {
     if (workspaces?.length === 1) {
@@ -24,7 +24,7 @@ function MyTasks() {
   const tasksBySection = groupBy(tasks, "assignee_section.gid");
   const sections = uniqBy(
     tasks?.map((task) => task.assignee_section),
-    "gid"
+    "gid",
   ).map((section) => {
     const tasks = tasksBySection[section.gid];
 
@@ -38,7 +38,7 @@ function MyTasks() {
   return (
     <List
       searchBarPlaceholder="Filter by task name, project, section, or custom fields"
-      isLoading={isLoading}
+      isLoading={isLoadingWorkspaces || isLoadingMyTasks}
       {...(workspaces && workspaces.length > 1
         ? {
             searchBarAccessory: (
@@ -79,6 +79,4 @@ function MyTasks() {
   );
 }
 
-export default function Command() {
-  return withAsanaAuth(<MyTasks />);
-}
+export default withAsanaAuth(MyTasks);

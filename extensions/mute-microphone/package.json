@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mute-microphone",
+  "title": "Toggle Audio Input (Microphone)",
+  "description": "Extension to mute/unmute audio input (Microphone)",
+  "icon": "mute-command-icon.png",
+  "author": "Quentin23Soleil",
+  "contributors": [
+    "iamyeizi",
+    "aliaksandr_zhebit",
+    "thewinger"
+  ],
+  "pastContributors": [
+    "danulqua"
+  ],
+  "categories": [
+    "Communication",
+    "System",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mute-menu-bar",
+      "title": "Menubar Toggle Mute Audio Input",
+      "description": "See microphone toggle on the menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "hideIconWhenUnmuted",
+          "description": "Hide the icon in the Menu Bar when Audio Input is unmuted",
+          "type": "checkbox",
+          "label": "Hide icon when unmuted",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "tint",
+          "description": "Select muted icon color for Menu Bar",
+          "type": "dropdown",
+          "required": false,
+          "default": "true",
+          "title": "Muted icon color",
+          "data": [
+            {
+              "title": "Red",
+              "value": "true"
+            },
+            {
+              "title": "System",
+              "value": "false"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute Audio Input",
+      "description": "Mute/unmute audio input (microphone)",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-level",
+      "title": "Set Level of Audio Input",
+      "description": "Set level of audio input (microphone)",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "default-level",
+          "title": "Default Input level",
+          "description": "Default level of audio input",
+          "type": "textfield",
+          "placeholder": "Must be a number from 0 to 100",
+          "default": "100",
+          "required": true
+        }
+      ],
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "0 - 100 or empty for default.",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.2",
+    "@raycast/utils": "^1.8.0",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "script:run": "cd script && swift run script",
+    "script:build": "cd script && swift build -c release --arch arm64 --arch x86_64 && npm run script:move",
+    "script:move": "cd script && cp .build/apple/Products/Release/script ../assets/scripts/input-volume",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

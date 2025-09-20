@@ -37,5 +37,5 @@ export function useTabSearch(query?: string): SearchResult<Tab> {
       });
   }, [query]);
 
-  return { data, isLoading, errorView, revalidate: getTabs };
+  return { data, isLoading, errorView, revalidate: getTabs, profile: { name: "", id: "" } };
 }

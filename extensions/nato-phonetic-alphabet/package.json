@@ -5,6 +5,10 @@
   "description": "For knowing and conveniently using the NATO phonetic alphabet.",
   "icon": "command-icon.png",
   "author": "jns",
+  "contributors": [
+    "j3lte",
+    "pernielsentikaer"
+  ],
   "categories": [
     "Communication"
   ],
@@ -32,23 +36,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2"
+    "@raycast/api": "^1.79.1"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.11",
+    "@types/react": "18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   }
 }

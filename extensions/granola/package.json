@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "granola",
+  "title": "Granola",
+  "description": "Create, manage, and review notes in Granola",
+  "icon": "extension-icon.png",
+  "author": "Rob",
+  "contributors": [
+    "jlokos"
+  ],
+  "categories": [
+    "Productivity",
+    "Documentation",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search all notes from Granola",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Create a new note in Granola",
+      "mode": "no-view"
+    },
+    {
+      "name": "export-transcripts",
+      "title": "Export Transcripts",
+      "description": "Select multiple notes and export their transcripts",
+      "mode": "view"
+    },
+    {
+      "name": "export-notes",
+      "title": "Export Notes",
+      "description": "Select multiple notes and export them",
+      "mode": "view"
+    },
+        {
+      "name": "create-note-from-transcript",
+      "title": "Create Note from Transcript",
+      "description": "Create a new note in Granola from a transcript",
+      "mode": "view"
+    },
+    {
+      "name": "search-people",
+      "title": "Search People",
+      "description": "Search people from your Granola meetings",
+      "mode": "view"
+    },
+    {
+      "name": "search-companies",
+      "title": "Search Companies",
+      "description": "Search companies from your Granola meetings",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ai-notes",
+      "title": "AI Notes",
+      "description": "Ask AI about your notes, meetings, and transcripts from Granola"
+    },
+    {
+      "name": "list-meetings",
+      "title": "List Meetings",
+      "description": "List meetings with basic metadata (title, date, folders) without content"
+    },
+    {
+      "name": "get-transcript",
+      "title": "Get Transcript",
+      "description": "Retrieve the full transcript for a specific note"
+    },
+    {
+      "name": "save-to-notion",
+      "title": "Save to Notion",
+      "description": "Save one or more notes to Notion"
+      },
+      {
+        "name": "recipes",
+        "title": "Recipes",
+        "description": "List and search Granola recipes"
+      }
+  ],
+  "dependencies": {
+    "@danielxceron/youtube-transcript": "^1.2.3",
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.1",
+    "@types/turndown": "^5.0.5",
+    "archiver": "^7.0.1",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/archiver": "^6.0.2",
+    "@types/node": "^20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

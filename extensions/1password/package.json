@@ -5,15 +5,26 @@
   "description": "Search, open or edit your 1Password passwords from Raycast",
   "icon": "1password-icon.png",
   "author": "khasbilegt",
-  "categories": [
-    "Security"
-  ],
   "contributors": [
     "thomas",
     "dteare",
     "pernielsentikaer",
     "cb372",
-    "Davidwalser"
+    "henrik-dmg",
+    "superwhys",
+    "lukah",
+    "litomore",
+    "vimtor",
+    "pavelas"
+  ],
+  "past_contributors": [
+    "Davidwalser",
+    "JakeMoosey",
+    "spacedog",
+    "Lemon"
+  ],
+  "categories": [
+    "Security"
   ],
   "license": "MIT",
   "commands": [
@@ -22,21 +33,52 @@
       "title": "My Passwords",
       "subtitle": "1Password",
       "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
-      "mode": "view",
       "keywords": [
         "1p",
         "1password",
         "password",
         "login"
-      ]
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "renew-auth",
+      "title": "Auto Renew Authorization",
+      "subtitle": "1Password",
+      "description": "Renews the authorization each 9 minutes. Avoiding the prompt for user's password each use after 10 minutes.",
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "interval": "9m",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "vault-list",
+      "title": "My Vaults",
+      "subtitle": "1Password",
+      "description": "List of all your 1Password vaults. Then open all items related to each vault.",
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "1Password",
+      "description": "Generate a random password with 1Password.",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "version",
-      "type": "dropdown",
-      "title": "1Password App Version",
-      "description": "Select the version of the 1Password app you want to use",
       "data": [
         {
           "title": "1Password 8",
@@ -47,7 +89,11 @@
           "value": "v7"
         }
       ],
-      "required": true
+      "description": "Select the version of the 1Password app you want to use",
+      "name": "version",
+      "required": true,
+      "title": "1Password App Version",
+      "type": "dropdown"
     },
     {
       "data": [
@@ -66,12 +112,16 @@
         {
           "title": "Copy Password",
           "value": "copy-password"
+        },
+        {
+          "title": "Copy One-time Password",
+          "value": "copy-one-time-password"
         }
       ],
+      "default": "open-in-1password",
       "description": "Primary action for 1Password login items (v8 only)",
       "name": "primaryAction",
       "required": false,
-      "default": "open-in-1password",
       "title": "Primary Action",
       "type": "dropdown"
     },
@@ -92,39 +142,58 @@
         {
           "title": "Copy Password",
           "value": "copy-password"
+        },
+        {
+          "title": "Copy One-time Password",
+          "value": "copy-one-time-password"
         }
       ],
+      "default": "open-in-browser",
       "description": "Secondary action for 1Password login items (v8 only)",
       "name": "secondaryAction",
       "required": false,
-      "default": "open-in-browser",
       "title": "Secondary Action",
       "type": "dropdown"
     },
     {
-      "name": "cliPath",
-      "type": "textfield",
-      "title": "1Password CLI path",
+      "name": "closeWindowAfterCopying",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Close window after copying.",
+      "description": "Close Raycast window after copying a username or password."
+    },
+    {
       "description": "Enter the CLI binary path",
-      "default": "/usr/local/bin/op",
+      "name": "cliPath",
       "placeholder": "e.g., /usr/local/bin/op",
-      "required": false
+      "required": false,
+      "title": "1Password CLI path",
+      "type": "textfield"
+    },
+    {
+      "description": "Enter your ZSH binary path",
+      "name": "zshPath",
+      "placeholder": "e.g., /bin/zsh",
+      "required": false,
+      "title": "1Password SHELL path",
+      "type": "textfield",
+      "default": "/bin/zsh"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.1",
-    "@raycast/utils": "^1.4.9",
-    "fast-glob": "^3.2.12"
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1",
+    "fast-glob": "^3.3.3"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.7",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "react": "^18.3.1",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

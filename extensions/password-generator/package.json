@@ -5,36 +5,86 @@
   "description": "Generates a password from 5–64 characters with options for case, special characters, and more",
   "icon": "password-generator-icon.png",
   "author": "joshuaiz",
+  "contributors": [
+    "teziovsky",
+    "pernielsentikaer",
+    "hnsn",
+    "yusifaliyevpro"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "hideAfterCopy",
+      "description": "Hide the raycast panel after the password is copied to the clipboard.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Options",
+      "label": "Hide Raycast after copy"
+    }
+  ],
   "commands": [
     {
-      "name": "generate-password",
-      "title": "Generate Password",
-      "description": "Generates a password from 5–32 characters in length with options for case, numbers, special characters, and more.",
-      "mode": "view"
+      "name": "generate-random-password",
+      "title": "Generate Random Password",
+      "description": "Generates a password from 5–64 characters in length with options for case, numbers, special characters, and more.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "storePasswordLength",
+          "description": "Remember the last password length between runs.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Remember password length"
+        }
+      ]
+    },
+    {
+      "name": "generate-memorable-password",
+      "title": "Generate Memorable Password",
+      "description": "Generates a password with a specified format, with options for words, special characters, and random characters and numbers.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberCustomFormat",
+          "description": "Remember the last custom format between runs.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Remember custom format"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "prettier": "^2.5.1"
+    "@raycast/api": "^1.102.6"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/bun": "latest",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
-  }
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions",
+    "test": "bun test"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

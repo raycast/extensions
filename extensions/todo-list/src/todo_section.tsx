@@ -3,13 +3,19 @@ import { useAtom } from "jotai";
 import { todoAtom, TodoSections } from "./atoms";
 import { SECTIONS_DATA } from "./config";
 import SingleTodoItem from "./todo_item";
-const TodoSection = ({ sectionKey }: { sectionKey: keyof TodoSections }) => {
+import { sortTodoItem } from "./utils";
+const TodoSection = ({ sectionKey, selectedTag }: { sectionKey: keyof TodoSections; selectedTag: string }) => {
   const [todoSections] = useAtom(todoAtom);
+
   return (
     <List.Section title={SECTIONS_DATA[sectionKey].name}>
-      {todoSections[sectionKey].map((item, i) => (
-        <SingleTodoItem item={item} key={i} idx={i} sectionKey={sectionKey} />
-      ))}
+      {todoSections[sectionKey]
+        .sort(sortTodoItem)
+        .map((item, i) =>
+          selectedTag == item.tag || selectedTag == "All" ? (
+            <SingleTodoItem idx={i} item={item} key={i} sectionKey={sectionKey} />
+          ) : null
+        )}
     </List.Section>
   );
 };

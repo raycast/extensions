@@ -1,21 +1,16 @@
-import { closeMainWindow, getPreferenceValues, getApplications, open } from "@raycast/api";
-import { Page } from "./types";
+import { closeMainWindow, getPreferenceValues, open } from "@raycast/api";
 
-export async function handleOnOpenPage(
-  page: Page,
-  storeRecentlyOpenedPage: (page: Page) => Promise<void>
-): Promise<void> {
-  if (!page.url) {
-    return;
-  }
-  const openIn = getPreferenceValues().open_in;
-  let isNotionInstalled;
-  if (!openIn || openIn === "app") {
-    const installedApplications = await getApplications();
-    isNotionInstalled = installedApplications.some((app) => app.bundleId === "notion.id");
-  }
-  open(isNotionInstalled ? page.url.replace("https", "notion") : page.url);
+import { Page } from "./notion/page";
 
-  await storeRecentlyOpenedPage(page);
+const open_in = getPreferenceValues<Preferences>().open_in;
+
+export async function handleOnOpenPage(page: Page, setRecentPage: (page: Page) => Promise<void>): Promise<void> {
+  if (!page.url) return;
+  open(page.url, open_in);
+  await setRecentPage(page);
   closeMainWindow();
+}
+
+export function urlForPreferredMethod(url: string) {
+  return open_in?.name === "Notion" ? url.replace(/^https:\/\/(?:www\.)?notion\.so\/(?:native\/)?/i, "notion://") : url;
 }

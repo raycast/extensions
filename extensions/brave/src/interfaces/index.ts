@@ -5,6 +5,13 @@ import { getFavicon } from "@raycast/utils";
 export interface Preferences {
   readonly useOriginalFavicon: boolean;
   readonly openTabInProfile: SettingsProfileOpenBehaviour;
+  readonly browserOption: SettingsBrowserOption;
+}
+
+export enum SettingsBrowserOption {
+  Default = "Brave Browser",
+  Beta = "Brave Browser Beta",
+  Nightly = "Brave Browser Nightly",
 }
 
 export enum SettingsProfileOpenBehaviour {
@@ -18,6 +25,7 @@ export interface SearchResult<T> {
   readonly errorView?: ReactNode;
   readonly data?: T[];
   readonly revalidate?: (profileId: string) => void;
+  readonly profile: BraveProfile;
 }
 
 export interface HistoryEntry {

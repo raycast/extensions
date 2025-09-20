@@ -44,14 +44,99 @@
       "subtitle": "Fip Radio",
       "description": "Pause fip radio stream on VLC",
       "mode": "no-view"
+    },
+    {
+      "name": "choose_radio",
+      "title": "Choose Radio",
+      "subtitle": "Fip Radio",
+      "description": "Choose a radio to play",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.58.0",
     "@types/node-fetch": "^2.6.1",
     "node-fetch": "^3.2.4",
     "run-applescript": "^6.0.0"
   },
+  "preferences": [
+    {
+      "name": "defaultRadio",
+      "description": "The radio to play by default when you start the extension",
+      "type": "dropdown",
+      "required": false,
+      "default": "FIP",
+      "title": "Default Radio",
+      "data": [
+        {
+          "title": "FIP",
+          "value": "FIP"
+        },
+        {
+          "title": "Hip-Hop",
+          "value": "Hip-Hop"
+        },
+        {
+          "title": "Rock",
+          "value": "Rock"
+        },
+        {
+          "title": "Jazz",
+          "value": "Jazz"
+        },
+        {
+          "title": "Groove",
+          "value": "Groove"
+        },
+        {
+          "title": "Electro",
+          "value": "Electro"
+        },
+        {
+          "title": "Reggae",
+          "value": "Reggae"
+        },
+        {
+          "title": "Sacré français !",
+          "value": "Sacré français !"
+        },
+        {
+          "title": "Pop",
+          "value": "Pop"
+        },
+        {
+          "title": "Monde",
+          "value": "Monde"
+        },
+        {
+          "title": "Nouveautés",
+          "value": "Nouveautés"
+        },
+        {
+          "title": "Metal",
+          "value": "Metal"
+        }
+      ]
+    },
+    {
+      "name": "defaultApp",
+      "description": "The app to use to play the radio",
+      "type": "dropdown",
+      "required": false,
+      "default": "QuickTime Player",
+      "title": "Default Player",
+      "data": [
+        {
+          "title": "QuickTime Player",
+          "value": "QuickTime Player"
+        },
+        {
+          "title": "VLC",
+          "value": "VLC"
+        }
+      ]
+    }
+  ],
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
@@ -67,5 +152,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

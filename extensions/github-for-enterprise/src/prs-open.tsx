@@ -20,7 +20,7 @@ export default function Command() {
         ignoreLocation: true,
         keys: ["title", "number", "repository.nameWithOwner"],
       }),
-    [data]
+    [data],
   );
 
   const searchPRs = useCallback(
@@ -35,7 +35,7 @@ export default function Command() {
 
       return fusePRs.search(str);
     },
-    [data]
+    [data],
   );
 
   if (error) {

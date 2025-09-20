@@ -5,108 +5,182 @@
   "description": "Automatically quit the application after all windows are closed",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "alextlopez11"
+  ],
   "categories": [
     "Applications",
     "System"
   ],
+  "keywords": [
+    "quit",
+    "app"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "auto-quit-app",
+      "name": "set-auto-quit-app",
+      "title": "Set Auto Quit App",
+      "description": "Set the applications that need to exit automatically",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "layout",
+          "type": "dropdown",
+          "description": "Set the layout of the app items.",
+          "required": false,
+          "title": "App Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "columns",
+          "type": "dropdown",
+          "description": "Set the number of columns of the app items. (Only works with Grid layout)",
+          "required": false,
+          "title": "App Item Columns",
+          "default": "8",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            }
+          ]
+        },
+        {
+          "name": "itemInset",
+          "type": "dropdown",
+          "description": "Set the inset of the app items. (Only works with Grid layout)",
+          "required": false,
+          "title": "App Item Inset",
+          "default": "sm",
+          "data": [
+            {
+              "title": "No Inset",
+              "value": ""
+            },
+            {
+              "title": "Small",
+              "value": "sm"
+            },
+            {
+              "title": "Medium",
+              "value": "md"
+            },
+            {
+              "title": "Large",
+              "value": "lg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "auto-quit-app-menubar",
       "title": "Auto Quit App",
       "description": "Automatically quit the application after all windows are closed",
       "mode": "menu-bar",
-      "interval": "10m",
+      "interval": "1m",
       "preferences": [
         {
-          "name": "notes",
-          "type": "checkbox",
-          "title": "Auto-Quit Apps",
-          "label": "Notes",
-          "default": true,
-          "description": "Auto exit Notes app",
-          "required": false
-        },
-        {
-          "name": "preview",
-          "type": "checkbox",
-          "label": "Preview",
-          "default": true,
-          "description": "Auto exit Preview app",
-          "required": false
-        },
-        {
-          "name": "textEdit",
-          "type": "checkbox",
-          "label": "TextEdit",
-          "default": true,
-          "description": "Auto exit TextEdit app",
-          "required": false
-        },
-        {
-          "name": "messages",
-          "type": "checkbox",
-          "label": "Messages",
-          "default": true,
-          "description": "Auto exit Messages app",
-          "required": false
-        },
-        {
-          "name": "terminal",
-          "type": "checkbox",
-          "label": "Terminal",
-          "default": true,
-          "description": "Auto exit Terminal app",
-          "required": false
-        },
-        {
-          "name": "shortcuts",
-          "type": "checkbox",
-          "label": "Shortcuts",
-          "default": true,
-          "description": "Auto exit Shortcuts app",
-          "required": false
-        },
-        {
-          "name": "tv",
-          "type": "checkbox",
-          "label": "TV",
-          "default": true,
-          "description": "Auto exit TV app",
-          "required": false
-        },
-        {
-          "name": "quickTimePlayer",
-          "type": "checkbox",
-          "label": "QuickTime Player",
-          "default": true,
-          "description": "Auto exit QuickTime Player app",
-          "required": false
-        },
-        {
-          "name": "mail",
-          "type": "checkbox",
-          "label": "Mail",
-          "default": false,
-          "description": "Auto exit Mail app",
-          "required": false
+          "name": "refreshInterval",
+          "type": "dropdown",
+          "description": "Set the refresh interval for auto-quit app extensions.",
+          "required": false,
+          "title": "Refresh Interval",
+          "default": "3",
+          "data": [
+            {
+              "title": "1m",
+              "value": "1"
+            },
+            {
+              "title": "3m",
+              "value": "3"
+            },
+            {
+              "title": "5m",
+              "value": "5"
+            },
+            {
+              "title": "10m",
+              "value": "10"
+            },
+            {
+              "title": "15m",
+              "value": "15"
+            },
+            {
+              "title": "20m",
+              "value": "20"
+            },
+            {
+              "title": "30m",
+              "value": "30"
+            },
+            {
+              "title": "45m",
+              "value": "45"
+            },
+            {
+              "title": "60m",
+              "value": "60"
+            }
+          ]
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "22.7.3",
+    "@types/react": "18.3.9",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -114,5 +188,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

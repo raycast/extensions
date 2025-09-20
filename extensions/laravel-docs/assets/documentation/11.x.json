@@ -1,0 +1,406 @@
+{
+  "Prologue": [
+    {
+      "title": "Release Notes",
+      "url": "https://laravel.com/docs/11.x/releases"
+    },
+    {
+      "title": "Upgrade Guide",
+      "url": "https://laravel.com/docs/11.x/upgrade"
+    },
+    {
+      "title": "Contribution Guide",
+      "url": "https://laravel.com/docs/11.x/contributions"
+    }
+  ],
+  "Getting Started": [
+    {
+      "title": "Installation",
+      "url": "https://laravel.com/docs/11.x/installation"
+    },
+    {
+      "title": "Configuration",
+      "url": "https://laravel.com/docs/11.x/configuration"
+    },
+    {
+      "title": "Directory Structure",
+      "url": "https://laravel.com/docs/11.x/structure"
+    },
+    {
+      "title": "Frontend",
+      "url": "https://laravel.com/docs/11.x/frontend"
+    },
+    {
+      "title": "Starter Kits",
+      "url": "https://laravel.com/docs/11.x/starter-kits"
+    },
+    {
+      "title": "Deployment",
+      "url": "https://laravel.com/docs/11.x/deployment"
+    }
+  ],
+  "Architecture Concepts": [
+    {
+      "title": "Request Lifecycle",
+      "url": "https://laravel.com/docs/11.x/lifecycle"
+    },
+    {
+      "title": "Service Container",
+      "url": "https://laravel.com/docs/11.x/container"
+    },
+    {
+      "title": "Service Providers",
+      "url": "https://laravel.com/docs/11.x/providers"
+    },
+    {
+      "title": "Facades",
+      "url": "https://laravel.com/docs/11.x/facades"
+    }
+  ],
+  "The Basics": [
+    {
+      "title": "Routing",
+      "url": "https://laravel.com/docs/11.x/routing"
+    },
+    {
+      "title": "Middleware",
+      "url": "https://laravel.com/docs/11.x/middleware"
+    },
+    {
+      "title": "CSRF Protection",
+      "url": "https://laravel.com/docs/11.x/csrf"
+    },
+    {
+      "title": "Controllers",
+      "url": "https://laravel.com/docs/11.x/controllers"
+    },
+    {
+      "title": "Requests",
+      "url": "https://laravel.com/docs/11.x/requests"
+    },
+    {
+      "title": "Responses",
+      "url": "https://laravel.com/docs/11.x/responses"
+    },
+    {
+      "title": "Views",
+      "url": "https://laravel.com/docs/11.x/views"
+    },
+    {
+      "title": "Blade Templates",
+      "url": "https://laravel.com/docs/11.x/blade"
+    },
+    {
+      "title": "Asset Bundling",
+      "url": "https://laravel.com/docs/11.x/vite"
+    },
+    {
+      "title": "URL Generation",
+      "url": "https://laravel.com/docs/11.x/urls"
+    },
+    {
+      "title": "Session",
+      "url": "https://laravel.com/docs/11.x/session"
+    },
+    {
+      "title": "Validation",
+      "url": "https://laravel.com/docs/11.x/validation"
+    },
+    {
+      "title": "Error Handling",
+      "url": "https://laravel.com/docs/11.x/errors"
+    },
+    {
+      "title": "Logging",
+      "url": "https://laravel.com/docs/11.x/logging"
+    }
+  ],
+  "Digging Deeper": [
+    {
+      "title": "Artisan Console",
+      "url": "https://laravel.com/docs/11.x/artisan"
+    },
+    {
+      "title": "Broadcasting",
+      "url": "https://laravel.com/docs/11.x/broadcasting"
+    },
+    {
+      "title": "Cache",
+      "url": "https://laravel.com/docs/11.x/cache"
+    },
+    {
+      "title": "Collections",
+      "url": "https://laravel.com/docs/11.x/collections"
+    },
+    {
+      "title": "Context",
+      "url": "https://laravel.com/docs/11.x/context"
+    },
+    {
+      "title": "Contracts",
+      "url": "https://laravel.com/docs/11.x/contracts"
+    },
+    {
+      "title": "Events",
+      "url": "https://laravel.com/docs/11.x/events"
+    },
+    {
+      "title": "File Storage",
+      "url": "https://laravel.com/docs/11.x/filesystem"
+    },
+    {
+      "title": "Helpers",
+      "url": "https://laravel.com/docs/11.x/helpers"
+    },
+    {
+      "title": "HTTP Client",
+      "url": "https://laravel.com/docs/11.x/http-client"
+    },
+    {
+      "title": "Localization",
+      "url": "https://laravel.com/docs/11.x/localization"
+    },
+    {
+      "title": "Mail",
+      "url": "https://laravel.com/docs/11.x/mail"
+    },
+    {
+      "title": "Notifications",
+      "url": "https://laravel.com/docs/11.x/notifications"
+    },
+    {
+      "title": "Package Development",
+      "url": "https://laravel.com/docs/11.x/packages"
+    },
+    {
+      "title": "Processes",
+      "url": "https://laravel.com/docs/11.x/processes"
+    },
+    {
+      "title": "Queues",
+      "url": "https://laravel.com/docs/11.x/queues"
+    },
+    {
+      "title": "Rate Limiting",
+      "url": "https://laravel.com/docs/11.x/rate-limiting"
+    },
+    {
+      "title": "Strings",
+      "url": "https://laravel.com/docs/11.x/strings"
+    },
+    {
+      "title": "Task Scheduling",
+      "url": "https://laravel.com/docs/11.x/scheduling"
+    }
+  ],
+  "Security": [
+    {
+      "title": "Authentication",
+      "url": "https://laravel.com/docs/11.x/authentication"
+    },
+    {
+      "title": "Authorization",
+      "url": "https://laravel.com/docs/11.x/authorization"
+    },
+    {
+      "title": "Email Verification",
+      "url": "https://laravel.com/docs/11.x/verification"
+    },
+    {
+      "title": "Encryption",
+      "url": "https://laravel.com/docs/11.x/encryption"
+    },
+    {
+      "title": "Hashing",
+      "url": "https://laravel.com/docs/11.x/hashing"
+    },
+    {
+      "title": "Password Reset",
+      "url": "https://laravel.com/docs/11.x/passwords"
+    }
+  ],
+  "Database": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/11.x/database"
+    },
+    {
+      "title": "Query Builder",
+      "url": "https://laravel.com/docs/11.x/queries"
+    },
+    {
+      "title": "Pagination",
+      "url": "https://laravel.com/docs/11.x/pagination"
+    },
+    {
+      "title": "Migrations",
+      "url": "https://laravel.com/docs/11.x/migrations"
+    },
+    {
+      "title": "Seeding",
+      "url": "https://laravel.com/docs/11.x/seeding"
+    },
+    {
+      "title": "Redis",
+      "url": "https://laravel.com/docs/11.x/redis"
+    }
+  ],
+  "Eloquent ORM": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/11.x/eloquent"
+    },
+    {
+      "title": "Relationships",
+      "url": "https://laravel.com/docs/11.x/eloquent-relationships"
+    },
+    {
+      "title": "Collections",
+      "url": "https://laravel.com/docs/11.x/eloquent-collections"
+    },
+    {
+      "title": "Mutators / Casts",
+      "url": "https://laravel.com/docs/11.x/eloquent-mutators"
+    },
+    {
+      "title": "API Resources",
+      "url": "https://laravel.com/docs/11.x/eloquent-resources"
+    },
+    {
+      "title": "Serialization",
+      "url": "https://laravel.com/docs/11.x/eloquent-serialization"
+    },
+    {
+      "title": "Factories",
+      "url": "https://laravel.com/docs/11.x/eloquent-factories"
+    }
+  ],
+  "Testing": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/11.x/testing"
+    },
+    {
+      "title": "HTTP Tests",
+      "url": "https://laravel.com/docs/11.x/http-tests"
+    },
+    {
+      "title": "Console Tests",
+      "url": "https://laravel.com/docs/11.x/console-tests"
+    },
+    {
+      "title": "Browser Tests",
+      "url": "https://laravel.com/docs/11.x/dusk"
+    },
+    {
+      "title": "Database",
+      "url": "https://laravel.com/docs/11.x/database-testing"
+    },
+    {
+      "title": "Mocking",
+      "url": "https://laravel.com/docs/11.x/mocking"
+    }
+  ],
+  "Packages": [
+    {
+      "title": "Breeze",
+      "url": "https://laravel.com/docs/11.x/starter-kits#laravel-breeze"
+    },
+    {
+      "title": "Cashier (Stripe)",
+      "url": "https://laravel.com/docs/11.x/billing"
+    },
+    {
+      "title": "Cashier (Paddle)",
+      "url": "https://laravel.com/docs/11.x/cashier-paddle"
+    },
+    {
+      "title": "Dusk",
+      "url": "https://laravel.com/docs/11.x/dusk"
+    },
+    {
+      "title": "Envoy",
+      "url": "https://laravel.com/docs/11.x/envoy"
+    },
+    {
+      "title": "Fortify",
+      "url": "https://laravel.com/docs/11.x/fortify"
+    },
+    {
+      "title": "Folio",
+      "url": "https://laravel.com/docs/11.x/folio"
+    },
+    {
+      "title": "Homestead",
+      "url": "https://laravel.com/docs/11.x/homestead"
+    },
+    {
+      "title": "Horizon",
+      "url": "https://laravel.com/docs/11.x/horizon"
+    },
+    {
+      "title": "Jetstream",
+      "url": "https://jetstream.laravel.com/"
+    },
+    {
+      "title": "Mix",
+      "url": "https://laravel.com/docs/11.x/mix"
+    },
+    {
+      "title": "Octane",
+      "url": "https://laravel.com/docs/11.x/octane"
+    },
+    {
+      "title": "Passport",
+      "url": "https://laravel.com/docs/11.x/passport"
+    },
+    {
+      "title": "Pennant",
+      "url": "https://laravel.com/docs/11.x/pennant"
+    },
+    {
+      "title": "Pint",
+      "url": "https://laravel.com/docs/11.x/pint"
+    },
+    {
+      "title": "Precognition",
+      "url": "https://laravel.com/docs/11.x/precognition"
+    },
+    {
+      "title": "Prompts",
+      "url": "https://laravel.com/docs/11.x/prompts"
+    },
+    {
+      "title": "Pulse",
+      "url": "https://laravel.com/docs/11.x/pulse"
+    },
+    {
+      "title": "Reverb",
+      "url": "https://laravel.com/docs/11.x/reverb"
+    },
+    {
+      "title": "Sail",
+      "url": "https://laravel.com/docs/11.x/sail"
+    },
+    {
+      "title": "Sanctum",
+      "url": "https://laravel.com/docs/11.x/sanctum"
+    },
+    {
+      "title": "Scout",
+      "url": "https://laravel.com/docs/11.x/scout"
+    },
+    {
+      "title": "Socialite",
+      "url": "https://laravel.com/docs/11.x/socialite"
+    },
+    {
+      "title": "Telescope",
+      "url": "https://laravel.com/docs/11.x/telescope"
+    },
+    {
+      "title": "Valet",
+      "url": "https://laravel.com/docs/11.x/valet"
+    }
+  ]
+}

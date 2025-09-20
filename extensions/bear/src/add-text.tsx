@@ -50,13 +50,13 @@ export default function AddText({ note }: { note: Note }) {
         `bear://x-callback-url/add-text?id=${note.id}${
           values.header === "none" ? "" : "&header=" + encodeURIComponent(values.header)
         }&mode=${values.mode}&new_line=${values.newLine ? "yes" : "no"}&tags=${encodeURIComponent(
-          values.tags
+          values.tags,
         )}&open_note=${values.openNote !== "no" ? "yes" : "no"}&new_window=${
           values.openNote === "new" ? "yes" : "no"
         }&show_window=${values.openNote !== "no" ? "yes" : "no"}&edit=${
           values.openNote === "no" ? "no" : "yes"
         }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
-        { background: values.openNote === "no" ? true : false }
+        { background: values.openNote === "no" },
       );
 
       await closeMainWindow();
@@ -80,7 +80,7 @@ export default function AddText({ note }: { note: Note }) {
         <Form.Dropdown.Item value="replace" title="Replace" />
         <Form.Dropdown.Item value="replace_all" title="Replace All" />
       </Form.Dropdown>
-      <Form.TextArea id="text" title="Text" placeholder="Text to add to note ..." />
+      <Form.TextArea id="text" title="Text" placeholder="Text to add to note" />
       <Form.Separator />
       <Form.TextField id="tags" title="Tags" placeholder="comma,separated,tags" />
       <Form.Dropdown id="header" title="Append To Header">

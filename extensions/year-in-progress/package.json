@@ -5,21 +5,84 @@
   "description": "Stay motivated by see the progress of the year.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "anothertempore",
+    "akshay_khade",
+    "teemu_suvinen"
+  ],
+  "pastContributors": [
+    "danulqua"
+  ],
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Fun"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "year-in-progress",
-      "title": "Year in Progress",
+      "title": "Progress",
       "description": "Displays the year in progress inline.",
       "mode": "no-view",
       "interval": "4h"
+    },
+    {
+      "name": "index",
+      "title": "Show X in Progress in Menu Bar",
+      "description": "Display X In Progress In Menu Bar",
+      "mode": "menu-bar",
+      "interval": "2m"
+    },
+    {
+      "name": "x-in-progress",
+      "title": "X in Progress",
+      "description": "Display and manage X In Progress In Command",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "weekStartsOn",
+      "description": "Week starts date",
+      "type": "dropdown",
+      "required": true,
+      "title": "Week Starts On",
+      "placeholder": "Monday",
+      "data": [
+        {
+          "title": "Sunday",
+          "value": "0"
+        },
+        {
+          "title": "Monday",
+          "value": "1"
+        },
+        {
+          "title": "Tuesday",
+          "value": "2"
+        },
+        {
+          "title": "Wednesday",
+          "value": "3"
+        },
+        {
+          "title": "Thursday",
+          "value": "4"
+        },
+        {
+          "title": "Friday",
+          "value": "5"
+        },
+        {
+          "title": "Saturday",
+          "value": "6"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.8",
     "date-fns": "^2.29.3"
   },
   "devDependencies": {

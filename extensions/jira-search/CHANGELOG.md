@@ -1,5 +1,14 @@
 # Jira Search Changelog
 
+## [Fixes] - 2025-09-09
+
+- Fixed issue search to work again
+
+## [Update] - 2023-05-16
+
+- Show board type in board search
+- Fixed board search for boards without location ([#6561](https://github.com/raycast/extensions/issues/6561))
+
 ## [Update] - 2023-03-22
 
 - Support searching by assignee using `~username` syntax

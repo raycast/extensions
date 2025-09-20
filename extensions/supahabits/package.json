@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "habits",
+  "title": "SupaHabits",
+  "description": "Extension for quickly adding habits to your daily routine, tracking your progress and add journal entries",
+  "icon": "command-icon.png",
+  "author": "gbarba",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "My Habits",
+      "subtitle": "SupaHabits",
+      "description": "Track habits",
+      "mode": "view"
+    },
+    {
+      "name": "journal",
+      "title": "New Journal Entry",
+      "subtitle": "SupaHabits",
+      "description": "Create a new journal entry",
+      "mode": "view"
+    },
+    {
+      "name": "journal-list",
+      "title": "Journal Entries",
+      "subtitle": "SupaHabits",
+      "description": "List journal entries",
+      "mode": "view"
+    },
+    {
+      "name": "mood",
+      "title": "Mood Tracker",
+      "subtitle": "SupaHabits",
+      "description": "Track your mood",
+      "mode": "view"
+    },
+    {
+      "name": "goals",
+      "title": "Goals",
+      "subtitle": "SupaHabits",
+      "description": "Track your goals",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "View extension's README for instructions.",
+      "name": "secret",
+      "placeholder": "HK_...",
+      "required": true,
+      "title": "SupaHabits Secret",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.12",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

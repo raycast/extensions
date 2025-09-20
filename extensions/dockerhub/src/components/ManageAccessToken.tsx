@@ -59,7 +59,7 @@ export default function SearchAccessTokens() {
       fn();
       return () => abortCtrl.abort();
     },
-    [setLoading, setTokens]
+    [setLoading, setTokens],
   );
 
   useEffect(() => {

@@ -2,13 +2,26 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notion",
   "title": "Notion",
-  "description": "Fastest way to search and create Notion page.",
+  "description": "The fastest way to search, create and update Notion pages.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
+  "owner": "notion",
+  "access": "public",
   "license": "MIT",
   "contributors": [
     "mathieudutour",
-    "metakirby5"
+    "metakirby5",
+    "thomaslombart",
+    "erics118",
+    "bkeys818",
+    "alexs",
+    "yakitrak",
+    "tleo19",
+    "dariuszpaluch",
+    "zsidnam",
+    "edomora97",
+    "samuelkraft",
+    "abesto"
   ],
   "categories": [
     "Applications",
@@ -20,63 +33,249 @@
       "title": "Create Database Page",
       "subtitle": "Notion",
       "description": "Create a page in a Notion database.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "closeAfterCreate",
+          "type": "checkbox",
+          "label": "Close Raycast after creating the page",
+          "required": false,
+          "default": false,
+          "description": "This action will be set as the primary action (⌘ + ⏎)."
+        }
+      ]
     },
     {
       "name": "search-page",
       "title": "Search Notion",
       "description": "Search for Notion databases and pages.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "title": "Primary Action",
+          "required": false,
+          "default": "notion",
+          "data": [
+            {
+              "title": "Open in Notion",
+              "value": "notion"
+            },
+            {
+              "title": "Preview in Raycast",
+              "value": "raycast"
+            }
+          ],
+          "description": "Choose the primary action for the Notion Pages list."
+        }
+      ]
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Capture something and put it out in a Notion page.",
       "mode": "view"
+    },
+    {
+      "description": "Append or prepend text, along with date, to a Notion page.",
+      "mode": "view",
+      "name": "add-text-to-page",
+      "subtitle": "Notion",
+      "title": "Add Text to Page",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "title": "Text",
+          "placeholder": "Text",
+          "required": false
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "description": "Search for pages in Notion."
+    },
+    {
+      "name": "get-page",
+      "title": "Get Page",
+      "description": "Get the content of a Notion page."
+    },
+    {
+      "name": "add-to-page",
+      "title": "Add to Page",
+      "description": "Append markdown to a Notion page."
+    },
+    {
+      "name": "create-page",
+      "title": "Create Page",
+      "description": "Create a Notion page in a specific database."
+    },
+    {
+      "name": "get-databases",
+      "title": "Get Databases",
+      "description": "Get Notion databases."
+    },
+    {
+      "name": "search-database",
+      "title": "Search Database",
+      "description": "Search for pages and/or databases contained in the given Notion database."
+    }
+  ],
+  "ai": {
+    "instructions": "-If asked to summarize or view a document, look for pages with the title of the document.\\n - When referring to a page or database, always include a link to the page or database. \\n - When creating a page, always include the database name. Ask for the database name if it's not provided.",
+    "evals": [
+      {
+        "input": "@notion Summarize the last marketing meeting notes",
+        "mocks": {
+          "search-pages": [
+            {
+              "id": "12345678-a123-12ab-a1b2-1234567a12ab",
+              "title": "Marketing Meeting Notes",
+              "url": "https://www.notion.so/12345678a12312aba1b21234567a12ab"
+            }
+          ],
+          "get-page": {
+            "markdown": "\n## Marketing meeting notes\n Publish tweets about new launch"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-pages"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-page",
+              "arguments": {
+                "pageId": "12345678-a123-12ab-a1b2-1234567a12ab"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@notion Add \"remember to call Joe\" to \"meeting notes\"",
+        "mocks": {
+          "search-pages": [
+            {
+              "id": "123abc",
+              "title": "Marketing Meeting Notes",
+              "url": "https://www.notion.so/Marketing-Meeting-Notes-123abc"
+            }
+          ],
+          "add-to-page": {
+            "markdown": "\n\nremember to call joe"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-pages"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "pageId": "123abc"
+              },
+              "name": "add-to-page"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@notion Create page in \"Marketing\" with the title \"Meeting Notes\" saying: \"Publish tweets about new launch\"",
+        "mocks": {
+          "get-databases": [
+            {
+              "id": "123abc",
+              "title": "Marketing"
+            }
+          ],
+          "create-page": {
+            "id": "123abc123abc"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-databases"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "databaseId": "123abc"
+              },
+              "name": "create-page"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "notion_token",
       "type": "password",
-      "title": "Notion Token",
+      "title": "Internal Integration Secret",
       "required": false,
-      "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
-      "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
-      "link": "https://www.notion.so/my-integrations"
+      "description": "In Notion, go to Settings & members > My connections > Develop or manage integrations > New integration",
+      "placeholder": "secret_FGDeSrZNodQuaJEqWzvxcTyrPlpBHYvdLpTZykrWEu"
     },
     {
       "name": "open_in",
-      "type": "dropdown",
-      "title": "Open in...",
+      "type": "appPicker",
+      "title": "Open Page in",
       "required": false,
-      "default": "app",
-      "data": [
-        {
-          "title": "Notion Application",
-          "value": "app"
-        },
-        {
-          "title": "Default Browser",
-          "value": "web"
-        }
-      ],
+      "default": "Notion",
       "description": "Choose where to open Notion page."
+    },
+    {
+      "name": "properties_in_page_previews",
+      "type": "checkbox",
+      "title": "Properties in Previews",
+      "required": false,
+      "default": false,
+      "description": "Show properties in page previews.",
+      "label": "Show properties in page previews."
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^1.0.0",
-    "@raycast/api": "^1.37.0",
+    "@mozilla/readability": "^0.5.0",
+    "@notionhq/client": "^2.2.15",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.18.1",
     "@tryfabric/martian": "^1.2.4",
-    "jotai": "^1.7.3",
-    "moment": "^2.29.4",
-    "node-fetch": "^3.2.6",
-    "notion-to-md": "^2.5.1"
+    "date-fns": "^3.3.1",
+    "linkedom": "^0.16.8",
+    "node-fetch": "^3.3.2",
+    "notion-to-md": "^3.1.1"
   },
   "devDependencies": {
-    "@types/node-fetch": "^2.6.2",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.3.5"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.11.20",
+    "@types/react": "18.2.58",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

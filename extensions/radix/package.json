@@ -5,13 +5,34 @@
   "description": "Search and open Radix content directly from Raycast.",
   "icon": "icon.png",
   "author": "peduarte",
+  "contributors": [
+    "emlez"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
+    {
+      "name": "colors",
+      "title": "Radix Colors",
+      "subtitle": "Documentation",
+      "description": "Search Radix Colors and open its documentation in the browser",
+      "mode": "view"
+    },
     {
       "name": "primitives",
       "title": "Radix Primitives",
       "subtitle": "Documentation",
       "description": "Search Radix Primitives and open its documentation in the browser",
+      "mode": "view"
+    },
+    {
+      "name": "themes",
+      "title": "Radix Themes",
+      "subtitle": "Documentation",
+      "description": "Search Radix Themes and open its documentation in the browser",
       "mode": "view"
     }
   ],
@@ -25,6 +46,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.5.3",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },

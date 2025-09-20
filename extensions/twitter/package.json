@@ -3,7 +3,7 @@
   "name": "twitter",
   "title": "Twitter",
   "description": "Send and search Tweets",
-  "icon": "twitter.png",
+  "icon": "logo.png",
   "author": "tonka3000",
   "contributors": [
     "peduarte"
@@ -41,36 +41,12 @@
   ],
   "preferences": [
     {
-      "name": "appkey",
+      "name": "clientid",
       "type": "password",
-      "title": "API-key",
+      "title": "OAuth Client ID",
       "required": false,
       "default": "",
-      "description": "Twitter API API-key"
-    },
-    {
-      "name": "appsecret",
-      "type": "password",
-      "title": "App secret",
-      "required": false,
-      "default": "",
-      "description": "Twitter API App secret"
-    },
-    {
-      "name": "accesstoken",
-      "type": "password",
-      "title": "Access token",
-      "required": false,
-      "default": "",
-      "description": "Twitter API access token"
-    },
-    {
-      "name": "accesssecret",
-      "type": "password",
-      "title": "Access secret",
-      "required": false,
-      "default": "",
-      "description": "Twitter API access secret"
+      "description": "X OAuth Client ID From Your X Application"
     },
     {
       "name": "listwithdetail",
@@ -83,17 +59,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1",
     "node-fetch": "^3.0.0",
-    "twitter-api-v2": "^1.12.2"
+    "twitter-api-v2": "^1.16.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.2.4",
+    "react": "^18.2.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
@@ -102,5 +80,9 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,40 +1,45 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { Preferences } from "../types/preferences";
-import { localStorageKey } from "./costants";
-import { Timezone } from "../types/types";
+import { Image, LocalStorage } from "@raycast/api";
+import { dateFormat, hour24 } from "../types/preferences";
+import { API_TIMEZONE_BY_ZONE, localStorageKey } from "./costants";
+import { Timezone, TimezoneInfo } from "../types/types";
+import { format } from "date-fns";
+import axios from "axios";
+import Mask = Image.Mask;
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-const { dateFormat } = getPreferenceValues<Preferences>();
+export function formatMenubarDate(date: Date) {
+  let dateFormatStr: string;
+  switch (dateFormat) {
+    case "en": {
+      dateFormatStr = "MM/dd/yyyy";
+      break;
+    }
+    case "en-GB": {
+      dateFormatStr = "dd/MM/yyyy";
+      break;
+    }
+    default: {
+      dateFormatStr = "yyyy-MM-dd";
+    }
+  }
+  let sanitizedFormat = dateFormatStr.replace(/y+\/?|\/?y+/gi, "").trim();
+  sanitizedFormat = sanitizedFormat
+    .replace(/^\/|\/$/g, "")
+    .replace(/^\.|\.$/g, "")
+    .replace(/^-|-$/g, "");
 
-export const getStarredTimezones = async () => {
-  const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
-  const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
-  _starTimezones.forEach((value) => {
-    value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
-    value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
+  const time = date.toLocaleTimeString("en-US", {
+    hour12: !hour24,
+    hour: "2-digit",
+    minute: "2-digit",
   });
-  return _starTimezones;
-};
 
-export const hour24 = getPreferenceValues<Preferences>().hour24;
-
-const build2DigitTime = (num: string | number) => {
-  const numStr = num + "";
-  return numStr.length <= 1 ? "0" + numStr : numStr;
-};
-
-const buildHour24Time = (date: Date) => {
-  return (
-    build2DigitTime(date.getHours()) +
-    ":" +
-    build2DigitTime(date.getMinutes()) +
-    ":" +
-    build2DigitTime(date.getSeconds())
-  );
-};
+  const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
+  return weekDayShort + " " + format(date, sanitizedFormat) + " " + time;
+}
 
 export const buildDayAndNightIcon = (dateTime: string | number, light: boolean) => {
   const date = new Date(dateTime);
@@ -66,37 +71,35 @@ export const buildIntervalTime = (dateTime: string | number) => {
 };
 
 export const buildFullDateTime = (dateTime: Date) => {
-  if (hour24) {
-    const time = buildHour24Time(dateTime);
-    return dateTime.toLocaleDateString(dateFormat) + " " + time;
-  } else {
-    return (
-      dateTime.toLocaleDateString(dateFormat) +
-      " " +
-      dateTime.toLocaleTimeString("en-US", {
-        hour12: true,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-    );
-  }
+  return (
+    dateTime.toLocaleDateString(dateFormat) +
+    " " +
+    dateTime.toLocaleTimeString("en-US", {
+      hour12: !hour24,
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  );
 };
 
 export const calculateDateTimeByOffset = (offset: string) => {
-  const dateTime = new Date();
-  dateTime.setDate(dateTime.getUTCDate());
-  dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
+  const offsetFloat = parseFloat(offset);
+  const offsetMinutes = Math.round(offsetFloat * 60);
+
+  const now = new Date();
+  const utcMillis = now.getTime() + now.getTimezoneOffset() * 60_000;
+  const targetMillis = utcMillis + offsetMinutes * 60_000;
+  const targetDate = new Date(targetMillis);
+
+  const date_time = targetDate.toLocaleTimeString("en-US", {
+    hour12: !hour24,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return {
-    date_time: hour24
-      ? buildHour24Time(dateTime)
-      : dateTime.toLocaleTimeString("en-US", {
-          hour12: true,
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
-    unixtime: dateTime.getTime(),
+    date_time: date_time,
+    unixtime: targetDate.getTime(),
   };
 };
 
@@ -107,36 +110,79 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
   const dateTime = new Date(parseInt(unixtimeStr));
   dateTime.setDate(dateTime.getUTCDate());
   dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
+  dateTime.setMinutes(dateTime.getUTCMinutes());
   //utc time
   const utc = new Date(parseInt(unixtimeStr));
   utc.setDate(utc.getDate());
   utc.setHours(utc.getUTCHours());
 
-  let time = dateTime.toLocaleTimeString("en-US", {
-    hour12: true,
+  const time = dateTime.toLocaleTimeString("en-US", {
+    hour12: !hour24,
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
   });
-  let _datetime = dateTime.toLocaleDateString(dateFormat) + " " + time;
-  let _utcDatetime =
-    utc.toLocaleDateString(dateFormat) +
-    " " +
-    utc.toLocaleTimeString("en-US", {
-      hour12: true,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
 
-  if (hour24) {
-    time = buildHour24Time(dateTime);
-    _datetime = dateTime.toLocaleDateString(dateFormat) + " " + time;
-    _utcDatetime = utc.toLocaleDateString(dateFormat) + " " + buildHour24Time(utc);
-  }
   return {
     time: time,
-    dateTime: _datetime,
-    utc_datetime: _utcDatetime,
+    dateTime: buildFullDateTime(dateTime),
+    utc_datetime: buildFullDateTime(utc),
+    dateRaw: dateTime,
   };
+};
+
+export const getGridAvatar = (timezone: Timezone) => {
+  if (timezone.avatar && timezone.avatar.length > 0) {
+    return {
+      source: timezone.avatar[0],
+      mask: Mask.RoundedRectangle,
+    };
+  } else {
+    return timezone.memoIcon;
+  }
+};
+
+export const getMenubarAvatar = (timezone: Timezone) => {
+  if (timezone.avatar && timezone.avatar.length > 0) {
+    return {
+      source: timezone.avatar[0],
+      mask: Mask.RoundedRectangle,
+    };
+  } else {
+    return {
+      source: {
+        light: buildDayAndNightIcon(timezone.unixtime, true),
+        dark: buildDayAndNightIcon(timezone.unixtime, false),
+      },
+    };
+  }
+};
+
+export const getTimeZoneInfo = async (timezone: string) => {
+  try {
+    const axiosResponse = await axios({
+      method: "GET",
+      url: API_TIMEZONE_BY_ZONE,
+      params: {
+        timeZone: timezone,
+      },
+    });
+    return axiosResponse.data as TimezoneInfo;
+  } catch (error) {
+    console.error("Error while fetching timezone info", error);
+    return undefined;
+  }
+};
+
+export const addTimeZones = async (starTimezones: Timezone[], timezone: Timezone, index: number = -1) => {
+  const _starTimezones = [...starTimezones];
+  if (index == -1) {
+    _starTimezones.push(timezone);
+  } else {
+    _starTimezones.splice(index, 0, timezone);
+  }
+  _starTimezones.forEach((value) => {
+    value.date_time = "";
+    value.unixtime = 0;
+  });
+  await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones));
 };

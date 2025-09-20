@@ -1,48 +1,43 @@
 import { ActionPanel, List, Action, useNavigation } from "@raycast/api";
-import axios from "axios";
+import { useCachedPromise } from "@raycast/utils";
 import * as cheerio from "cheerio";
-import { useEffect, useState } from "react";
-import { LoadingStatus } from ".";
+
+import { headers } from "./util";
 
 type Torrent = { idx: number; date: string; category: string; title: string; size: string; url: string | undefined };
 
-export default function Torrent(param: { ip: string }) {
-  const [status, setStatus] = useState<LoadingStatus>("loading");
-  const [data, setData] = useState<Torrent[]>([]);
+export default function Torrent({ ip }: { ip: string }) {
   const { pop } = useNavigation();
 
-  useEffect(() => {
-    async function getTorrent() {
-      try {
-        const { data } = await axios.get(`https://iknowwhatyoudownload.com/en/peer/?ip=${param.ip}`);
-        const $ = cheerio.load(data);
+  const { isLoading, data } = useCachedPromise(
+    async (ip_addr: string): Promise<Torrent[]> => {
+      const res = await fetch(`https://iknowwhatyoudownload.com/en/peer/?ip=${ip_addr}`, {
+        headers: headers as Record<string, string>,
+      });
+      const html = await res.text();
+      const $ = cheerio.load(html);
 
-        const temp: Torrent[] = [];
-
-        $("tbody tr").each(function (index, item) {
-          const tempArr = $("td", item).toArray();
-          temp.push({
-            idx: index,
-            date: $(tempArr[0]).text().trim(),
-            category: $(tempArr[2]).text().trim(),
-            title: $(tempArr[3]).text().trim(),
-            size: $(tempArr[4]).text().trim(),
-            url: $("a", tempArr[3]).attr("href"),
-          });
+      const temp: Torrent[] = [];
+      $("tbody tr").each(function (index, item) {
+        const tempArr = $("td", item).toArray();
+        temp.push({
+          idx: index,
+          date: $(tempArr[0]).text().trim(),
+          category: $(tempArr[2]).text().trim(),
+          title: $(tempArr[3]).text().trim(),
+          size: $(tempArr[4]).text().trim(),
+          url: $("a", tempArr[3]).attr("href"),
         });
+      });
 
-        setData(temp);
-        setStatus("success");
-      } catch (error) {
-        setStatus("failure");
-      }
-    }
-    getTorrent();
-  }, []);
-
+      return temp;
+    },
+    [ip],
+    { keepPreviousData: true, initialData: [] as Torrent[] },
+  );
   return (
     <List
-      isLoading={status === "loading"}
+      isLoading={isLoading}
       navigationTitle="Torrent History"
       actions={
         <ActionPanel>

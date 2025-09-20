@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pexels",
   "title": "Pexels",
-  "description": "Search photos or collections on Pexels, download or set them as wallpaper.",
+  "description": "Search photos, videos or collections on Pexels.",
   "icon": "pexels-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -16,7 +16,7 @@
       "name": "search-photos",
       "title": "Search Photos",
       "subtitle": "Pexels",
-      "description": "Search photos on Pexels. Download or set them as wallpaper.",
+      "description": "Search photos on Pexels.",
       "mode": "view",
       "preferences": [
         {
@@ -24,7 +24,7 @@
           "type": "dropdown",
           "description": "Set the number of columns of the photo items. (Only works with Grid layout)",
           "required": false,
-          "title": "Photo Item Coloums",
+          "title": "Photo Item Columns",
           "default": "5",
           "data": [
             {
@@ -67,7 +67,7 @@
       "name": "search-curated-photos",
       "title": "Search Curated Photos",
       "subtitle": "Pexels",
-      "description": "Search curated photos on Pexels. Download or set them as wallpaper.",
+      "description": "Search curated photos on Pexels.",
       "mode": "view",
       "preferences": [
         {
@@ -75,7 +75,7 @@
           "type": "dropdown",
           "description": "Set the number of columns of the photo items. (Only works with Grid layout)",
           "required": false,
-          "title": "Photo Item Coloums",
+          "title": "Photo Item Columns",
           "default": "5",
           "data": [
             {
@@ -126,7 +126,7 @@
           "type": "dropdown",
           "description": "Set the number of columns of the video items. (Only works with Grid layout)",
           "required": false,
-          "title": "Video Item Coloums",
+          "title": "Video Item Columns",
           "default": "5",
           "data": [
             {
@@ -175,9 +175,51 @@
         {
           "name": "columns",
           "type": "dropdown",
-          "description": "Set the number of columns of the photo items. (Only works with Grid layout)",
+          "description": "Set the number of columns of the collection items. (Only works with Grid layout)",
           "required": false,
-          "title": "Photo Item Coloums",
+          "title": "Collection Item Columns",
+          "default": "5",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            }
+          ]
+        },
+        {
+          "name": "mediaColumns",
+          "type": "dropdown",
+          "description": "Set the number of columns of the media items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Media Item Columns",
           "default": "5",
           "data": [
             {
@@ -316,31 +358,28 @@
     {
       "name": "downloadDirectory",
       "title": "Download Directory",
-      "description": "The directory of photos to download. Path format: /Users/Username/Downloads or ~/Downloads.",
-      "type": "textfield",
+      "description": "The directory of photos to download.",
+      "type": "directory",
       "required": false,
-      "placeholder": "~/Downloads",
       "default": "~/Downloads"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.0",
-    "fs-extra": "^10.1.0",
-    "node-fetch": "^3.3.0",
-    "pexels": "^1.4.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.3",
+    "fs-extra": "^11.2.0",
+    "node-fetch": "^3.3.2",
+    "pexels": "^1.4.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.20.0",
-    "@typescript-eslint/parser": "^5.20.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-react": "^7.29.4",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/calendar": "^0.1.4",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "20.14.9",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "ray build -e dist",

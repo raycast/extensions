@@ -1,55 +1,63 @@
-import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, popToRoot, getPreferenceValues, LaunchProps, open, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
-import { handleError, todoist } from "./api";
-import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
+import { addLabel, quickAddTask } from "./api";
+import { extractLabels } from "./helpers/labels";
+import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
+import { withTodoistApi } from "./helpers/withTodoistApi";
+import { isTodoistInstalled } from "./hooks/useIsTodoistInstalled";
 
-type Arguments = {
-  text: string;
-  description?: string;
-};
+type QuickAddTaskProps = { arguments: Arguments.QuickAddTask } & LaunchProps;
 
-type Preferences = {
-  shouldCloseMainWindow: boolean;
-};
-
-const command = async (props: { arguments: Arguments }) => {
+async function QuickAddTask(props: QuickAddTaskProps) {
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
   await toast.show();
 
   try {
-    const preferences: Preferences = getPreferenceValues();
+    const preferences = getPreferenceValues<Preferences.QuickAddTask>();
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
+      popToRoot({ clearSearchBar: true });
     }
 
-    const { url, id } = await todoist.quickAddTask({
-      text: props.arguments.text,
-    });
+    if (preferences.autoCreateLabels && props.arguments.text) {
+      const labelsToCreate = extractLabels(props.arguments.text);
+      if (labelsToCreate.length > 0) {
+        await Promise.all(
+          labelsToCreate.map(async (label) => addLabel({ name: label }, { data: undefined, setData: () => {} })),
+        );
+      }
+    }
 
-    await todoist.updateTask(id, { description: props.arguments.description });
+    let text = props.arguments.text ?? props.fallbackText;
+    if (props.arguments.description) {
+      text = `${text} // ${props.arguments.description}`;
+    }
+
+    const { id } = await quickAddTask({ text });
 
     toast.style = Toast.Style.Success;
     toast.title = "Task created";
 
-    await checkTodoistApp();
+    const isInstalled = await isTodoistInstalled();
 
     toast.primaryAction = {
-      title: `Open Task ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
+      title: `Open Task`,
       shortcut: { modifiers: ["cmd", "shift"], key: "o" },
       onAction: async () => {
-        open(isTodoistInstalled ? `todoist://task?id=${id}` : url);
+        open(isInstalled ? getTaskAppUrl(id) : getTaskUrl(id));
       },
     };
 
     toast.secondaryAction = {
       title: "Copy Task URL",
       shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-      onAction: () => Clipboard.copy(url),
+      onAction: () => Clipboard.copy(getTaskUrl(id)),
     };
   } catch (error) {
-    handleError({ error, title: "Unable to create task" });
+    await showFailureToast(error, { title: "Unable to create task" });
   }
-};
+}
 
-export default command;
+export default withTodoistApi(QuickAddTask);

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "translate-send-webpage-to-reader",
+  "title": "Translate and Send Webpage to Reader",
+  "description": "Fetch the content of the active webpage, translate using Raycast AI, and save to Reader Later. visite https://readwise.io/access_token to get readwise token",
+  "icon": "extension-icon.png",
+  "author": "jasonjiong",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate-send-webpage-to-Reader",
+      "title": "Translate and Send Webpage to Reader",
+      "description": "Fetch the content of the active webpage, translate using Raycast AI, and save to Reader Later. visite https://readwise.io/access_token to get readwise token",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "readwiseToken",
+      "type": "password",
+      "required": true,
+      "title": "Readwise Token",
+      "description": "Your Readwise API token"
+    },
+    {
+      "name": "autoTranslate",
+      "type": "checkbox",
+      "required": false,
+      "title": "Translate Webpage",
+      "label": "Auto translate to target language",
+      "default": true,
+      "description": "Whether to automatically translate webpage content"
+    },
+    {
+      "name": "targetLanguage",
+      "type": "textfield",
+      "required": false,
+      "title": "Target Language",
+      "default": "Chinese",
+      "description": "The target language to translate to (e.g., Chinese, French)",
+      "placeholder": "Chinese"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.3",
+    "@raycast/utils": "^1.17.0",
+    "marked": "^15.0.4",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

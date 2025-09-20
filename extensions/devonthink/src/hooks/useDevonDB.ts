@@ -13,7 +13,7 @@ type DevonDB = {
   name: string;
 };
 
-const useDevonDB = ({ appExists }: UseAppExists) => {
+const useDevonDB = ({ appExists, appName }: UseAppExists) => {
   const [state, setState] = useState<DevonDBs>({ databasesAreLoading: true, databases: [] });
 
   useEffect(() => {
@@ -23,11 +23,11 @@ const useDevonDB = ({ appExists }: UseAppExists) => {
       return;
     }
 
-    getDevonDBs()
+    getDevonDBs(appName)
       .then((list) => setState((prev) => ({ ...prev, databases: list })))
       .catch(handleError)
       .finally(() => setState((prev) => ({ ...prev, databasesAreLoading: false })));
-  }, [appExists]);
+  }, [appExists, appName]);
 
   return state;
 };
@@ -36,9 +36,9 @@ export default useDevonDB;
 
 const getDevonDBs =
   // language=JavaScript
-  async () =>
+  async (appName: string) =>
     (await jxa({ parse: true })`
-        const DT = Application("DEVONthink 3");
+        const DT = Application("${appName}");
 
         const databases = DT.databases();
 

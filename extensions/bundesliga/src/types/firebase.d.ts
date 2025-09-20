@@ -53,6 +53,7 @@ export interface Qualification {
 }
 
 export interface Matchday {
+  dateQuality: string;
   dflDatalibraryCompetitionId: string;
   dflDatalibraryMatchId: string;
   dflDatalibraryMatchdayId: string;
@@ -69,7 +70,7 @@ export interface Matchday {
   matchdayLabel: string;
   matchdayRange: MatchdayRange;
   minuteOfPlay: MinuteOfPlay;
-  plannedKickOff: string;
+  plannedKickOff?: string;
   referee: Referee;
   score: Score;
   seasonOrder: number;
@@ -232,4 +233,17 @@ export interface TentacledAway {
   primaryValue: number;
   secondaryLabel: string;
   secondaryValue: number;
+}
+
+export interface SeasonConfig {
+  lastUpdateDateTime: Date;
+  matchday: Matchday;
+  pre?: string[];
+  seasonState: string;
+  season: {
+    dflDatalibrarySeasonId: string;
+    seasonId: string;
+    name: string;
+    firstMatchdayStart: string;
+  };
 }

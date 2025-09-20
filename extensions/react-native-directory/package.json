@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "react-native-directory",
+  "title": "React Native Directory",
+  "description": "A searchable and filterable directory of React Native libraries.",
+  "icon": "extension-icon.png",
+  "author": "shubh_porwal",
+  "categories": [
+    "Developer Tools",
+    "Documentation",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "libraries_sort_order",
+      "title": "Libraries Sort Order",
+      "type": "dropdown",
+      "description": "Sort order of libraries",
+      "required": false,
+      "default": "descending",
+      "data": [
+        {
+          "title": "Descending",
+          "value": "descending"
+        },
+        {
+          "title": "Ascending",
+          "value": "ascending"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-libraries",
+      "title": "Search Libraries",
+      "description": "A searchable and filterable directory of libraries built specifically for React Native.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.0",
+    "@raycast/utils": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

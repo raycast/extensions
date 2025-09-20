@@ -3,10 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { HowLongToBeatService, HowLongToBeatEntry } from "howlongtobeat";
 import { Details } from "./details";
 import { pluralize } from "./helpers";
-
-const hltbService = new HowLongToBeatService();
-
-export const baseUrl = "https://howlongtobeat.com/game?id=";
+import { HltbSearch } from "./hltbsearch";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -23,7 +20,7 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) {
-  const url = `${baseUrl}${searchResult.id}`;
+  const url = `${HltbSearch.DETAIL_URL}${searchResult.id}`;
   const { push } = useNavigation();
 
   const mainStoryHours = searchResult.gameplayMain || 0;
@@ -61,11 +58,38 @@ function useSearch() {
       }));
 
       try {
-        const results = await hltbService.search(searchText);
+        const searchTerms = searchText.split(" ");
+
+        const hltb = new HltbSearch();
+        const searchResult = await hltb.search(searchTerms);
+
+        const hltbEntries = new Array<HowLongToBeatEntry>();
+
+        for (const resultEntry of searchResult.data) {
+          hltbEntries.push(
+            new HowLongToBeatEntry(
+              "" + resultEntry.game_id, // game id is now a number, but I want to keep the model stable
+              resultEntry.game_name,
+              "", // no description
+              resultEntry.profile_platform ? resultEntry.profile_platform.split(", ") : [],
+              HltbSearch.IMAGE_URL + resultEntry.game_image,
+              [
+                ["Main", "Main"],
+                ["Main + Extra", "Main + Extra"],
+                ["Completionist", "Completionist"],
+              ],
+              Math.round(resultEntry.comp_main / 3600),
+              Math.round(resultEntry.comp_plus / 3600),
+              Math.round(resultEntry.comp_100 / 3600),
+              HowLongToBeatService.calcDistancePercentage(resultEntry.game_name, searchText),
+              searchText,
+            ),
+          );
+        }
 
         setState((oldState) => ({
           ...oldState,
-          results: results,
+          results: hltbEntries,
           isLoading: false,
         }));
       } catch (error) {
@@ -78,7 +102,7 @@ function useSearch() {
         showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
       }
     },
-    [setState]
+    [setState],
   );
 
   useEffect(() => {

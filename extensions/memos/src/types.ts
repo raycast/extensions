@@ -1,7 +1,9 @@
 import { VISIBILITY } from "./constant";
 
 export interface Preferences {
-  openApi: string;
+  openApi?: string;
+  host?: string;
+  token?: string;
 }
 
 export enum ROLE {
@@ -26,72 +28,60 @@ export interface PostMemoParams {
   resourceIdList: number[];
 }
 
-interface ResourceObj {
-  id: number;
-  creatorId: number;
-  createdTs: number;
-  updatedTs: number;
+export interface AttachmentObj {
+  name: string;
+  createTime: string;
   filename: string;
   externalLink: string;
   type: string;
-  size: number;
-  linkedMemoAmount: number;
+  size: string;
+  content?: string;
+  memo?: string;
 }
 
 export interface MemoInfoResponse {
-  id: number;
-  rowStatus: string;
-  creatorId: number;
-  createdTs: number;
-  updatedTs: number;
+  name: string;
+  state: string;
+  creator: string;
+  createTime: string;
+  updateTime: string;
+  displayTime: string;
   content: string;
+  markdown?: string;
   visibility: string;
   pinned: boolean;
   displayTs: number;
-  creator: {
-    id: number;
-    rowStatus: string;
-    createdTs: number;
-    updatedTs: number;
-    username: string;
-    role: string;
-    email: string;
-    nickname: string;
-    openId: string;
-    userSettingList: null;
+  attachments: AttachmentObj[];
+  tags: string[];
+  property: {
+    hasLink: boolean;
+    hasTaskList: boolean;
+    hasCode: boolean;
+    hasIncompleteTasks: boolean;
   };
-  resourceList: ResourceObj[];
 }
 
-export type TagResponse = string[];
-
 export interface MeResponse {
-  id: number;
-  rowStatus: "NORMAL";
-  createdTs: number;
-  updatedTs: number;
-  username: string;
-  role: ROLE;
-  email: string;
-  nickname: string;
-  openId: string;
-  userSettingList: [
-    {
-      UserID: number;
-      key: string;
-      value: string;
-    }
-  ];
+  user: {
+    name: string;
+    rowStatus: "ACTIVE";
+    createdTime: number;
+    updatedTime: number;
+    username: string;
+    role: ROLE;
+    email: string;
+    displayName: string;
+  };
 }
 
 export interface PostFileResponse {
   id: number;
   creatorId: number;
-  createdTs: number;
+  createdTs: string;
   updatedTs: number;
   filename: string;
   externalLink: string;
   type: string;
-  size: number;
+  size: string;
   linkedMemoAmount: number;
 }

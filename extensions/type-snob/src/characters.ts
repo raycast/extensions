@@ -230,9 +230,16 @@ const mathAndNumberChars: Character[] = [
     example: "The screen is 24″ wide",
     html: "&Prime;",
   },
+  {
+    label: "Basis Point",
+    value: "‱",
+    keywords: ["bps", "bip", "bp"],
+    example: "Conversion increased by 8‱",
+    html: "&#8241;",
+  },
 ];
 
-const superscriptChars: Character[] = [
+const superscriptAndOrdinalChars: Character[] = [
   {
     label: "Superscript 1",
     value: "¹",
@@ -292,6 +299,18 @@ const superscriptChars: Character[] = [
     value: "⁰",
     example: "x⁰",
     html: "&#8304;",
+  },
+  {
+    label: "Feminine ordinal indicator",
+    value: "ª",
+    keywords: ["a"],
+    html: "&ordf;",
+  },
+  {
+    label: "Masculine ordinal indicator",
+    value: "º",
+    keywords: ["o", "neutral"],
+    html: "&ordm;",
   },
 ];
 
@@ -366,12 +385,99 @@ const miscChars: Character[] = [
     html: "&darr;",
   },
   {
+    label: "Upper left arrow",
+    value: "↖",
+    example: "Swipe ↖ to access menu",
+    html: "&nwarr;",
+  },
+  {
+    label: "Upper right arrow",
+    value: "↗",
+    example: "Swipe ↗ to expand options",
+    html: "&nearr;",
+  },
+  {
+    label: "Lower left arrow",
+    value: "↙",
+    example: "Swipe ↙ to minimize options",
+    html: "&swarr;",
+  },
+  {
+    label: "Lower right arrow",
+    value: "↘",
+    example: "Swipe ↘ to access settings",
+    html: "&searr;",
+  },
+  {
+    label: "Bullet",
+    value: "•",
+    keywords: ["dot", "list", "point"],
+    example: "• List item",
+    html: "&bull;",
+  },
+  {
+    label: "Triangluar bullet",
+    value: "▸",
+    keywords: ["arrow", "point", "list"],
+    example: "▸ List item",
+    html: "&#8227;",
+  },
+  {
+    label: "Middle dot",
+    value: "·",
+    example: "First · Second",
+    html: "&middot;",
+  },
+  {
     label: "Wavy dash",
     value: "〰",
     keywords: ["wave", "squiggle"],
     html: "&#x3030;",
   },
+  {
+    label: "Zero-width space",
+    value: "​",
+    html: "&#x200B;",
+  },
 ];
+
+const currencyChars: Character[] = [
+  {
+    label: "Dollar",
+    value: "$",
+    html: "&dollar;",
+  },
+  {
+    label: "Euro",
+    value: "€",
+    html: "&euro;",
+  },
+  {
+    label: "Pound",
+    value: "£",
+    html: "&pound;",
+  },
+  {
+    label: "Yen",
+    value: "¥",
+    html: "&yen;",
+  },
+  {
+    label: "Yuan",
+    value: "元",
+    html: "&#20803;",
+  },
+  {
+    label: "Bitcoin",
+    value: "₿",
+    html: "&#x20BF;",
+  },
+  {
+    label: "Cent",
+    value: "¢",
+    html: "&cent;",
+  },
+].map((char) => ({ ...char, keywords: ["money", "currency"] }));
 
 export const characterSections: Array<{
   title: string;
@@ -390,12 +496,16 @@ export const characterSections: Array<{
     characters: mathAndNumberChars,
   },
   {
-    title: "Superscript",
-    characters: superscriptChars,
+    title: "Superscript & Ordinal",
+    characters: superscriptAndOrdinalChars,
   },
   {
     title: "Symbols",
     characters: symbolChars,
+  },
+  {
+    title: "Currency",
+    characters: currencyChars,
   },
   {
     title: "Miscellaneous",

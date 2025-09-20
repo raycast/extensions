@@ -6,10 +6,27 @@
   "icon": "command-icon.png",
   "author": "michaelschultz",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "GLaDO8"
   ],
-  "version": "1.2.0",
+  "version": "1.6.1",
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "PERSONAL_ACCESS_TOKEN",
+      "type": "password",
+      "required": false,
+      "title": "Personal Access Token",
+      "description": "You can optionally use a personal access token to login, otherwise you will be prompted to login via the browser."
+    },
+    {
+      "name": "TEAM_ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Team ID/s",
+      "description": "Find this in the url after navigating to your team page. Add multiple Team IDs separated by a comma."
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -27,39 +44,28 @@
       "interval": "2h"
     }
   ],
-  "preferences": [
-    {
-      "name": "PERSONAL_ACCESS_TOKEN",
-      "type": "password",
-      "required": true,
-      "title": "Personal Access Token",
-      "description": "Log in to Figma and click settings to setup a token"
-    },
-    {
-      "name": "TEAM_ID",
-      "type": "password",
-      "required": true,
-      "title": "Team ID",
-      "description": "Find this in the url after navigating to your team page"
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
+    "@raycast/api": "^1.91.1",
+    "@raycast/utils": "^1.18.1",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "eslint src --fix"
-  }
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

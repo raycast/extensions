@@ -24,7 +24,7 @@ Extensions are **not further sandboxed** as far as policies for file I/O, networ
 
 ## Data Storage
 
-While extensions can access the file system and use their own methods of storing and accessing data, Raycast provides **APIs for securely storing data**: _password_ preferences can be used to ask users for values such as access tokens, and the local storage APIs provide methods for reading and writing data payloads. In both cases, the data is stored in the local encrypted database and can only accessed by the corresponding extension.
+While extensions can access the file system and use their own methods of storing and accessing data, Raycast provides **APIs for securely storing data**: _password_ preferences can be used to ask users for values such as access tokens, and the local storage APIs provide methods for reading and writing data payloads. In both cases, the data is stored in the local encrypted database and can only be accessed by the corresponding extension.
 
 ## Automatic Updates
 

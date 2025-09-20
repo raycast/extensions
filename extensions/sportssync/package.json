@@ -1,0 +1,1120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sportssync",
+  "title": "Sportssync",
+  "description": "View scores, games, standings, news, injuries, and transactions across your favorite sports leagues",
+  "icon": "Sportssync.png",
+  "author": "daniyal_master",
+  "categories": [
+    "Media",
+    "Fun",
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "nhl-scores-and-schedule",
+      "title": "NHL Scores and Schedule",
+      "description": "View scores and upcoming games across the NHL",
+      "mode": "view"
+    },
+    {
+      "name": "nhl-standings",
+      "title": "NHL Standings",
+      "description": "View the standings across the NHL",
+      "mode": "view"
+    },
+    {
+      "name": "nhl-tracker",
+      "title": "NHL Tracker",
+      "description": "View articles, injuries, and transactions across the NHL",
+      "mode": "view"
+    },
+    {
+      "name": "basketball-scores-and-schedule",
+      "title": "Basketball Scores and Schedule",
+      "subtitle": "NBA & WNBA",
+      "description": "View scores and upcoming games across the NBA and WNBA",
+      "mode": "view"
+    },
+    {
+      "name": "basketball-standings",
+      "title": "Basketball Standings",
+      "subtitle": "NBA & WNBA",
+      "description": "View the standings across the NBA and WNBA",
+      "mode": "view"
+    },
+    {
+      "name": "basketball-tracker",
+      "title": "Basketball Tracker",
+      "subtitle": "NBA & WNBA & NCAA",
+      "description": "View articles, injuries, and transactions across the NBA, WNBA, and NCAA Men's and Women's Leagues",
+      "mode": "view"
+    },
+    {
+      "name": "football-scores-and-schedule",
+      "title": "Football Scores and Schedule",
+      "subtitle": "NFL & NCAA",
+      "description": "View scores and upcoming games across the NFL and NCAA",
+      "mode": "view"
+    },
+    {
+      "name": "football-standings",
+      "title": "Football Standings",
+      "subtitle": "NFL",
+      "description": "View the standings across the NFL",
+      "mode": "view"
+    },
+    {
+      "name": "football-tracker",
+      "title": "Football Tracker",
+      "subtitle": "NFL & NCAA",
+      "description": "View articles, injuries, and transactions across the NFL and NCAA",
+      "mode": "view"
+    },
+    {
+      "name": "mlb-scores-and-schedule",
+      "title": "MLB Scores and Schedule",
+      "description": "View scores and upcoming games across the MLB",
+      "mode": "view"
+    },
+    {
+      "name": "mlb-standings",
+      "title": "MLB Standings",
+      "description": "View the standings across the MLB",
+      "mode": "view"
+    },
+    {
+      "name": "mlb-tracker",
+      "title": "MLB Tracker",
+      "description": "View articles, injuries, and transactions across the MLB",
+      "mode": "view"
+    },
+    {
+      "name": "soccer-scores-and-schedule",
+      "title": "Soccer Scores and Schedule",
+      "description": "View scores and upcoming games across the EPL, SLL, GER, and ITA leagues",
+      "mode": "view"
+    },
+    {
+      "name": "soccer-standings",
+      "title": "Soccer Standings",
+      "description": "View the standings across the EPL, SLL, GER, and ITA Leagues",
+      "mode": "view"
+    },
+    {
+      "name": "soccer-news",
+      "title": "Soccer News",
+      "description": "View news articles across the EPL, UEFA, SLL, GER, and ITA Leagues",
+      "mode": "view"
+    },
+    {
+      "name": "f1-results-and-schedule",
+      "title": "F1 Results and Schedule",
+      "description": "View race results and upcoming races across F1",
+      "mode": "view"
+    },
+    {
+      "name": "f1-standings",
+      "title": "F1 Standings",
+      "subtitle": "Driver & Constructor",
+      "description": "View the driver and constructor standings across the F1",
+      "mode": "view"
+    },
+    {
+      "name": "f1-news",
+      "title": "F1 News",
+      "description": "View news articles across the F1",
+      "mode": "view"
+    },
+    {
+      "name": "favorite-team-dashboard",
+      "title": "Favorite Team Dashboard",
+      "description": "Follow your favorite team using one command to track scheduled games, completed games, articles, standings, injuries, and transactions",
+      "mode": "view"
+    },
+    {
+      "name": "live-scores-menubar",
+      "title": "Live Scores Menubar",
+      "description": "View live scores and games for your favorite league directly from your menu bar. You must set a favorite league and sport before in order to use the command!",
+      "mode": "menu-bar",
+      "interval": "15s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sport",
+      "title": "Favorite Sport",
+      "description": "Choose your favorite sport, league, and team (the team selected must be in the correct sport and league)",
+      "type": "dropdown",
+      "required": true,
+      "default": "hockey",
+      "data": [
+        {
+          "title": "Hockey",
+          "value": "hockey"
+        },
+        {
+          "title": "Basketball",
+          "value": "basketball"
+        },
+        {
+          "title": "Football",
+          "value": "football"
+        },
+        {
+          "title": "Baseball",
+          "value": "baseball"
+        },
+        {
+          "title": "Racing",
+          "value": "racing"
+        },
+        {
+          "title": "Soccer",
+          "value": "soccer"
+        }
+      ]
+    },
+    {
+      "name": "league",
+      "title": "Favorite League",
+      "description": "Choose a league (must be the same as the team and league you select)",
+      "type": "dropdown",
+      "required": true,
+      "default": "nhl",
+      "data": [
+        {
+          "title": "NHL",
+          "value": "nhl"
+        },
+        {
+          "title": "NBA",
+          "value": "nba"
+        },
+        {
+          "title": "WNBA",
+          "value": "wnba"
+        },
+        {
+          "title": "NFL",
+          "value": "nfl"
+        },
+        {
+          "title": "MLB",
+          "value": "mlb"
+        },
+        {
+          "title": "F1",
+          "value": "f1"
+        },
+        {
+          "title": "English Premier League",
+          "value": "ENG.1"
+        },
+        {
+          "title": "LALIGA",
+          "value": "ESP.1"
+        },
+        {
+          "title": "German Bundesliga",
+          "value": "GER.1"
+        },
+        {
+          "title": "Italian Serie A",
+          "value": "ITA.1"
+        }
+      ]
+    },
+    {
+      "name": "team",
+      "title": "Favorite Team",
+      "description": "Choose your favorite team (must be the same as the league and sport your select)",
+      "type": "dropdown",
+      "required": true,
+      "default": "25",
+      "data": [
+        {
+          "title": "Anaheim Ducks",
+          "value": "25"
+        },
+        {
+          "title": "Boston Bruins",
+          "value": "1"
+        },
+        {
+          "title": "Buffalo Sabres",
+          "value": "2"
+        },
+        {
+          "title": "Calgary Flames",
+          "value": "3"
+        },
+        {
+          "title": "Carolina Hurricanes",
+          "value": "7"
+        },
+        {
+          "title": "Chicago Blackhawks",
+          "value": "4"
+        },
+        {
+          "title": "Colorado Avalanche",
+          "value": "17"
+        },
+        {
+          "title": "Columbus Blue Jackets",
+          "value": "29"
+        },
+        {
+          "title": "Dallas Stars",
+          "value": "9"
+        },
+        {
+          "title": "Detroit Red Wings",
+          "value": "5"
+        },
+        {
+          "title": "Edmonton Oilers",
+          "value": "6"
+        },
+        {
+          "title": "Florida Panthers",
+          "value": "26"
+        },
+        {
+          "title": "Los Angeles Kings",
+          "value": "8"
+        },
+        {
+          "title": "Minnesota Wild",
+          "value": "30"
+        },
+        {
+          "title": "Montreal Canadiens",
+          "value": "10"
+        },
+        {
+          "title": "Nashville Predators",
+          "value": "27"
+        },
+        {
+          "title": "New Jersey Devils",
+          "value": "11"
+        },
+        {
+          "title": "New York Islanders",
+          "value": "12"
+        },
+        {
+          "title": "New York Rangers",
+          "value": "13"
+        },
+        {
+          "title": "Ottawa Senators",
+          "value": "14"
+        },
+        {
+          "title": "Philadelphia Flyers",
+          "value": "15"
+        },
+        {
+          "title": "Pittsburgh Penguins",
+          "value": "16"
+        },
+        {
+          "title": "San Jose Sharks",
+          "value": "18"
+        },
+        {
+          "title": "Seattle Kraken",
+          "value": "124292"
+        },
+        {
+          "title": "St. Louis Blues",
+          "value": "19"
+        },
+        {
+          "title": "Tampa Bay Lightning",
+          "value": "20"
+        },
+        {
+          "title": "Toronto Maple Leafs",
+          "value": "21"
+        },
+        {
+          "title": "Utah Hockey Club",
+          "value": "129764"
+        },
+        {
+          "title": "Vancouver Canucks",
+          "value": "22"
+        },
+        {
+          "title": "Vegas Golden Knights",
+          "value": "37"
+        },
+        {
+          "title": "Washington Capitals",
+          "value": "23"
+        },
+        {
+          "title": "Winnipeg Jets",
+          "value": "28"
+        },
+        {
+          "title": "Atlanta Hawks",
+          "value": "1"
+        },
+        {
+          "title": "Boston Celtics",
+          "value": "2"
+        },
+        {
+          "title": "Brooklyn Nets",
+          "value": "17"
+        },
+        {
+          "title": "Charlotte Hornets",
+          "value": "30"
+        },
+        {
+          "title": "Chicago Bulls",
+          "value": "4"
+        },
+        {
+          "title": "Cleveland Cavaliers",
+          "value": "5"
+        },
+        {
+          "title": "Dallas Mavericks",
+          "value": "6"
+        },
+        {
+          "title": "Denver Nuggets",
+          "value": "7"
+        },
+        {
+          "title": "Detroit Pistons",
+          "value": "8"
+        },
+        {
+          "title": "Golden State Warriors",
+          "value": "9"
+        },
+        {
+          "title": "Houston Rockets",
+          "value": "10"
+        },
+        {
+          "title": "Indiana Pacers",
+          "value": "11"
+        },
+        {
+          "title": "Los Angeles Clippers",
+          "value": "12"
+        },
+        {
+          "title": "Los Angeles Lakers",
+          "value": "13"
+        },
+        {
+          "title": "Memphis Grizzlies",
+          "value": "29"
+        },
+        {
+          "title": "Miami Heat",
+          "value": "14"
+        },
+        {
+          "title": "Milwaukee Bucks",
+          "value": "15"
+        },
+        {
+          "title": "Minnesota Timberwolves",
+          "value": "16"
+        },
+        {
+          "title": "New Orleans Pelicans",
+          "value": "3"
+        },
+        {
+          "title": "New York Knicks",
+          "value": "18"
+        },
+        {
+          "title": "Oklahoma City Thunder",
+          "value": "25"
+        },
+        {
+          "title": "Orlando Magic",
+          "value": "19"
+        },
+        {
+          "title": "Philadelphia 76ers",
+          "value": "20"
+        },
+        {
+          "title": "Phoenix Suns",
+          "value": "21"
+        },
+        {
+          "title": "Portland Trail Blazers",
+          "value": "22"
+        },
+        {
+          "title": "Sacramento Kings",
+          "value": "23"
+        },
+        {
+          "title": "San Antonio Spurs",
+          "value": "24"
+        },
+        {
+          "title": "Toronto Raptors",
+          "value": "28"
+        },
+        {
+          "title": "Utah Jazz",
+          "value": "26"
+        },
+        {
+          "title": "Washington Wizards",
+          "value": "27"
+        },
+        {
+          "title": "Atlanta Dream",
+          "value": "20"
+        },
+        {
+          "title": "Chicago Sky",
+          "value": "19"
+        },
+        {
+          "title": "Connecticut Sun",
+          "value": "18"
+        },
+        {
+          "title": "Dallas Wings",
+          "value": "3"
+        },
+        {
+          "title": "Golden State Valkyries",
+          "value": "129689"
+        },
+        {
+          "title": "Indiana Fever",
+          "value": "5"
+        },
+        {
+          "title": "Las Vegas Aces",
+          "value": "17"
+        },
+        {
+          "title": "Los Angeles Sparks",
+          "value": "6"
+        },
+        {
+          "title": "Minnesota Lynx",
+          "value": "8"
+        },
+        {
+          "title": "New York Liberty",
+          "value": "9"
+        },
+        {
+          "title": "Phoenix Mercury",
+          "value": "11"
+        },
+        {
+          "title": "Seattle Storm",
+          "value": "14"
+        },
+        {
+          "title": "Washington Mystics",
+          "value": "16"
+        },
+        {
+          "title": "Arizona Cardinals",
+          "value": "22"
+        },
+        {
+          "title": "Atlanta Falcons",
+          "value": "1"
+        },
+        {
+          "title": "Baltimore Ravens",
+          "value": "33"
+        },
+        {
+          "title": "Buffalo Bills",
+          "value": "2"
+        },
+        {
+          "title": "Carolina Panthers",
+          "value": "29"
+        },
+        {
+          "title": "Chicago Bears",
+          "value": "3"
+        },
+        {
+          "title": "Cincinnati Bengals",
+          "value": "4"
+        },
+        {
+          "title": "Cleveland Browns",
+          "value": "5"
+        },
+        {
+          "title": "Dallas Cowboys",
+          "value": "6"
+        },
+        {
+          "title": "Denver Broncos",
+          "value": "7"
+        },
+        {
+          "title": "Detroit Lions",
+          "value": "8"
+        },
+        {
+          "title": "Green Bay Packers",
+          "value": "9"
+        },
+        {
+          "title": "Houston Texans",
+          "value": "34"
+        },
+        {
+          "title": "Indianapolis Colts",
+          "value": "11"
+        },
+        {
+          "title": "Jacksonville Jaguars",
+          "value": "30"
+        },
+        {
+          "title": "Kansas City Chiefs",
+          "value": "12"
+        },
+        {
+          "title": "Las Vegas Raiders",
+          "value": "13"
+        },
+        {
+          "title": "Los Angeles Chargers",
+          "value": "24"
+        },
+        {
+          "title": "Los Angeles Rams",
+          "value": "14"
+        },
+        {
+          "title": "Miami Dolphins",
+          "value": "15"
+        },
+        {
+          "title": "Minnesota Vikings",
+          "value": "16"
+        },
+        {
+          "title": "New England Patriots",
+          "value": "17"
+        },
+        {
+          "title": "New Orleans Saints",
+          "value": "18"
+        },
+        {
+          "title": "New York Giants",
+          "value": "19"
+        },
+        {
+          "title": "New York Jets",
+          "value": "20"
+        },
+        {
+          "title": "Philadelphia Eagles",
+          "value": "21"
+        },
+        {
+          "title": "Pittsburgh Steelers",
+          "value": "23"
+        },
+        {
+          "title": "San Francisco 49ers",
+          "value": "25"
+        },
+        {
+          "title": "Seattle Seahawks",
+          "value": "26"
+        },
+        {
+          "title": "Tampa Bay Buccaneers",
+          "value": "27"
+        },
+        {
+          "title": "Tennessee Titans",
+          "value": "10"
+        },
+        {
+          "title": "Washington Commanders",
+          "value": "28"
+        },
+        {
+          "title": "Arizona Diamondbacks",
+          "value": "29"
+        },
+        {
+          "title": "Athletics",
+          "value": "11"
+        },
+        {
+          "title": "Atlanta Braves",
+          "value": "15"
+        },
+        {
+          "title": "Baltimore Orioles",
+          "value": "1"
+        },
+        {
+          "title": "Boston Red Sox",
+          "value": "2"
+        },
+        {
+          "title": "Chicago Cubs",
+          "value": "16"
+        },
+        {
+          "title": "Chicago White Sox",
+          "value": "4"
+        },
+        {
+          "title": "Cincinnati Reds",
+          "value": "17"
+        },
+        {
+          "title": "Cleveland Guardians",
+          "value": "5"
+        },
+        {
+          "title": "Colorado Rockies",
+          "value": "27"
+        },
+        {
+          "title": "Detroit Tigers",
+          "value": "6"
+        },
+        {
+          "title": "Houston Astros",
+          "value": "18"
+        },
+        {
+          "title": "Kansas City Royals",
+          "value": "7"
+        },
+        {
+          "title": "Los Angeles Angels",
+          "value": "3"
+        },
+        {
+          "title": "Los Angeles Dodgers",
+          "value": "19"
+        },
+        {
+          "title": "Miami Marlins",
+          "value": "28"
+        },
+        {
+          "title": "Milwaukee Brewers",
+          "value": "8"
+        },
+        {
+          "title": "Minnesota Twins",
+          "value": "9"
+        },
+        {
+          "title": "New York Mets",
+          "value": "21"
+        },
+        {
+          "title": "New York Yankees",
+          "value": "10"
+        },
+        {
+          "title": "Philadelphia Phillies",
+          "value": "22"
+        },
+        {
+          "title": "Pittsburgh Pirates",
+          "value": "23"
+        },
+        {
+          "title": "San Diego Padres",
+          "value": "25"
+        },
+        {
+          "title": "San Francisco Giants",
+          "value": "26"
+        },
+        {
+          "title": "Seattle Mariners",
+          "value": "12"
+        },
+        {
+          "title": "St. Louis Cardinals",
+          "value": "24"
+        },
+        {
+          "title": "Tampa Bay Rays",
+          "value": "30"
+        },
+        {
+          "title": "Texas Rangers",
+          "value": "13"
+        },
+        {
+          "title": "Toronto Blue Jays",
+          "value": "14"
+        },
+        {
+          "title": "Washington Nationals",
+          "value": "20"
+        },
+        {
+          "title": "AFC Bournemouth",
+          "value": "349"
+        },
+        {
+          "title": "Arsenal",
+          "value": "359"
+        },
+        {
+          "title": "Aston Villa",
+          "value": "362"
+        },
+        {
+          "title": "Brentford",
+          "value": "337"
+        },
+        {
+          "title": "Brighton & Hove Albion",
+          "value": "331"
+        },
+        {
+          "title": "Chelsea",
+          "value": "363"
+        },
+        {
+          "title": "Crystal Palace",
+          "value": "384"
+        },
+        {
+          "title": "Everton",
+          "value": "368"
+        },
+        {
+          "title": "Fulham",
+          "value": "370"
+        },
+        {
+          "title": "Ipswich Town",
+          "value": "373"
+        },
+        {
+          "title": "Leicester City",
+          "value": "375"
+        },
+        {
+          "title": "Liverpool",
+          "value": "364"
+        },
+        {
+          "title": "Manchester City",
+          "value": "382"
+        },
+        {
+          "title": "Manchester United",
+          "value": "360"
+        },
+        {
+          "title": "Newcastle United",
+          "value": "361"
+        },
+        {
+          "title": "Nottingham Forest",
+          "value": "393"
+        },
+        {
+          "title": "Southampton",
+          "value": "376"
+        },
+        {
+          "title": "Tottenham Hotspur",
+          "value": "367"
+        },
+        {
+          "title": "West Ham United",
+          "value": "371"
+        },
+        {
+          "title": "Wolverhampton Wanderers",
+          "value": "380"
+        },
+        {
+          "title": "Alavés",
+          "value": "96"
+        },
+        {
+          "title": "Athletic Club",
+          "value": "93"
+        },
+        {
+          "title": "Atlético Madrid",
+          "value": "1068"
+        },
+        {
+          "title": "Barcelona",
+          "value": "83"
+        },
+        {
+          "title": "Celta Vigo",
+          "value": "85"
+        },
+        {
+          "title": "Espanyol",
+          "value": "88"
+        },
+        {
+          "title": "Getafe",
+          "value": "2922"
+        },
+        {
+          "title": "Girona",
+          "value": "9812"
+        },
+        {
+          "title": "Las Palmas",
+          "value": "98"
+        },
+        {
+          "title": "Leganés",
+          "value": "17534"
+        },
+        {
+          "title": "Mallorca",
+          "value": "84"
+        },
+        {
+          "title": "Osasuna",
+          "value": "97"
+        },
+        {
+          "title": "Rayo Vallecano",
+          "value": "101"
+        },
+        {
+          "title": "Real Betis",
+          "value": "244"
+        },
+        {
+          "title": "Real Madrid",
+          "value": "86"
+        },
+        {
+          "title": "Real Sociedad",
+          "value": "89"
+        },
+        {
+          "title": "Real Valladolid",
+          "value": "95"
+        },
+        {
+          "title": "Sevilla",
+          "value": "243"
+        },
+        {
+          "title": "Valencia",
+          "value": "94"
+        },
+        {
+          "title": "Villarreal",
+          "value": "102"
+        },
+        {
+          "title": "1. FC Heidenheim 1846",
+          "value": "6418"
+        },
+        {
+          "title": "1. FC Union Berlin",
+          "value": "598"
+        },
+        {
+          "title": "Bayer Leverkusen",
+          "value": "131"
+        },
+        {
+          "title": "Bayern Munich",
+          "value": "132"
+        },
+        {
+          "title": "Borussia Dortmund",
+          "value": "124"
+        },
+        {
+          "title": "Borussia Monchengladbach",
+          "value": "268"
+        },
+        {
+          "title": "Eintracht Frankfurt",
+          "value": "125"
+        },
+        {
+          "title": "FC Augsburg",
+          "value": "3841"
+        },
+        {
+          "title": "Holstein Kiel",
+          "value": "7884"
+        },
+        {
+          "title": "Mainz",
+          "value": "2950"
+        },
+        {
+          "title": "RB Leipzig",
+          "value": "11420"
+        },
+        {
+          "title": "SC Freiburg",
+          "value": "126"
+        },
+        {
+          "title": "St. Pauli",
+          "value": "270"
+        },
+        {
+          "title": "TSG Hoffenheim",
+          "value": "7911"
+        },
+        {
+          "title": "VfB Stuttgart",
+          "value": "134"
+        },
+        {
+          "title": "VfL Bochum",
+          "value": "121"
+        },
+        {
+          "title": "VfL Wolfsburg",
+          "value": "138"
+        },
+        {
+          "title": "Werder Bremen",
+          "value": "137"
+        },
+        {
+          "title": "AC Milan",
+          "value": "103"
+        },
+        {
+          "title": "AS Roma",
+          "value": "104"
+        },
+        {
+          "title": "Atalanta",
+          "value": "105"
+        },
+        {
+          "title": "Bologna",
+          "value": "107"
+        },
+        {
+          "title": "Cagliari",
+          "value": "2925"
+        },
+        {
+          "title": "Como",
+          "value": "2572"
+        },
+        {
+          "title": "Empoli",
+          "value": "2574"
+        },
+        {
+          "title": "Fiorentina",
+          "value": "109"
+        },
+        {
+          "title": "Genoa",
+          "value": "3263"
+        },
+        {
+          "title": "Hellas Verona",
+          "value": "119"
+        },
+        {
+          "title": "Internazionale",
+          "value": "110"
+        },
+        {
+          "title": "Juventus",
+          "value": "111"
+        },
+        {
+          "title": "Lazio",
+          "value": "112"
+        },
+        {
+          "title": "Lecce",
+          "value": "113"
+        },
+        {
+          "title": "Monza",
+          "value": "4007"
+        },
+        {
+          "title": "Napoli",
+          "value": "114"
+        },
+        {
+          "title": "Parma",
+          "value": "115"
+        },
+        {
+          "title": "Torino",
+          "value": "239"
+        },
+        {
+          "title": "Udinese",
+          "value": "118"
+        },
+        {
+          "title": "Venezia",
+          "value": "17530"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

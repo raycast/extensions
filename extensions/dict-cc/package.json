@@ -5,6 +5,9 @@
   "description": "Simple translation using dict.cc",
   "icon": "icon.png",
   "author": "natterstefan",
+  "contributors": [
+    "YourMCGeek"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -22,6 +25,13 @@
       "title": "Translate from Clipboard",
       "subtitle": "Dict.cc",
       "description": "Translates a given term (from clipboard) from one into another language.",
+      "mode": "view"
+    },
+    {
+      "name": "translate-from-selection",
+      "title": "Translate from Selection",
+      "subtitle": "Dict.cc",
+      "description": "Translates a given term (from selection) from one into another language.",
       "mode": "view"
     }
   ],
@@ -264,23 +274,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.94.4",
+    "@raycast/eslint-config": "^2.0.4",
     "dictcc": "^1.3.0",
     "sound-play": "^1.1.0",
-    "tempy": "^3.0.0"
+    "tmp": "^0.2.3",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@types/debounce-promise": "^3.1.4",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sound-play": "^1.1.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/debounce-promise": "^3.1.9",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
+    "@types/sound-play": "^1.1.3",
+    "@types/tmp": "^0.2.6",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

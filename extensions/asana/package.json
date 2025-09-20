@@ -5,6 +5,11 @@
   "description": "Create, access, and modify tasks.",
   "icon": "asana.png",
   "author": "thomaslombart",
+  "contributors": [
+    "Spacedolphin",
+    "tuzemec",
+    "xmok"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": [
@@ -19,13 +24,20 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "signature",
+          "name": "showStartDate",
           "type": "checkbox",
-          "title": "Signature",
-          "label": "Add Raycast signature to new tasks",
-          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
+          "label": "Show the \"Start Date\" field",
+          "description": "When enabled, the \"Start Date\" field will be shown in the \"Create Task\" command.",
           "required": false,
           "default": true
+        },
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "required": false,
+          "default": false
         }
       ]
     },
@@ -47,26 +59,32 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.9",
-    "axios": "^0.27.2",
-    "date-fns": "^2.29.1",
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
-    "node-html-markdown": "^1.2.0"
+    "node-html-markdown": "^1.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/lodash": "^4.14.182",
-    "@types/node": "^18.8.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

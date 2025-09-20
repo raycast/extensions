@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pia-controls",
+  "title": "Private Internet Access Controls",
+  "description": "Private Internet Access VPN Controls",
+  "icon": "icon.png",
+  "author": "yakitrak",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "connect",
+      "title": "Connect",
+      "subtitle": "PIA Controls",
+      "description": "Connects to PIA",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "PIA Controls",
+      "description": "Disconnects from PIA",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Status",
+      "subtitle": "PIA Controls",
+      "description": "Displays connection and region status",
+      "mode": "no-view"
+    },
+    {
+      "name": "connectToRegion",
+      "title": "Connect to Region",
+      "subtitle": "PIA Controls",
+      "description": "Connects to PIA Region",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.1",
+    "@raycast/utils": "^1.10.1",
+    "child_process": "^1.0.2",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -11,6 +11,12 @@
     "Media",
     "Productivity"
   ],
+  "contributors": [
+    "danpalmer",
+    "j3lte",
+    "zhangjiepro",
+    "moonkyu_song"
+  ],
   "commands": [
     {
       "name": "listTorrents",
@@ -73,7 +79,7 @@
       "title": "Password",
       "required": false,
       "description": "The password to use for authentication",
-      "type": "textfield",
+      "type": "password",
       "default": ""
     },
     {
@@ -129,6 +135,14 @@
       "default": "~/Downloads"
     },
     {
+      "name": "defaultDownloadDir",
+      "title": "Default Download Directory",
+      "required": false,
+      "description": "The default download directory",
+      "type": "textfield",
+      "default": ""
+    },
+    {
       "name": "rememberStatusFilter",
       "title": "Status Filter",
       "required": false,
@@ -136,43 +150,63 @@
       "label": "Remember",
       "type": "checkbox",
       "default": true
+    },
+    {
+      "name": "showFilesAboveTorrentInfo",
+      "title": "Show files before torrent info",
+      "required": false,
+      "description": "Show torrent files before torrent information in the torrent details panel",
+      "label": "Show files first",
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "maxFilesShown",
+      "title": "Max Files Shown",
+      "required": true,
+      "description": "The maximum number of files to show in the torrent details panel",
+      "type": "textfield",
+      "default": "20",
+      "placeholder": "Number"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "@types/ramda": "^0.28.1",
-    "bitfield": "^4.0.0",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.14.0",
+    "bitfield": "^4.2.0",
     "bytes": "^3.1.2",
-    "date-fns": "^2.28.0",
+    "date-fns": "^2.30.0",
     "dedent-js": "^1.0.1",
-    "execa": "^6.1.0",
     "expand-tilde": "^2.0.2",
-    "node-fetch": "^3.2.2",
-    "polished": "^4.1.4",
-    "pretty-bytes": "^6.0.0",
-    "ramda": "^0.28.0",
-    "raycast-toolkit": "^1.0.2",
-    "react-dom": "^17.0.2",
-    "react-use": "^17.3.2",
-    "run-applescript": "^6.0.0",
-    "swr": "^1.2.2",
-    "transmission-promise": "^1.1.5",
-    "ts-enum-util": "^4.0.2"
+    "node-fetch": "^3.3.2",
+    "polished": "^4.3.1",
+    "pretty-bytes": "^6.1.1",
+    "ramda": "^0.29.1",
+    "raycast-toolkit": "^1.0.6",
+    "react-use": "^17.5.0",
+    "swr": "^2.3.3",
+    "transmission-promise": "^1.1.7",
+    "ts-enum-util": "^4.1.0"
   },
   "devDependencies": {
-    "@types/expand-tilde": "^2.0.0",
-    "@types/node": "~17.0.21",
-    "@types/react": "^17.0.40",
-    "@types/react-dom": "^17.0.13",
-    "@typescript-eslint/eslint-plugin": "^5.14.0",
-    "@typescript-eslint/parser": "^5.14.0",
-    "eslint": "^8.10.0",
-    "eslint-config-prettier": "^8.5.0",
-    "react-devtools": "^4.23.0",
-    "typescript": "^4.6.2"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/expand-tilde": "^2.0.2",
+    "@types/node": "^22.13.10",
+    "@types/ramda": "^0.29.12",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "react": "^19.0.0",
+    "react-devtools": "^6.1.1",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.4.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

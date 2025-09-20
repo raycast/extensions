@@ -4,29 +4,6 @@ export enum PlayerState {
   STOPPED = "stopped",
 }
 
-export enum SFSymbols {
-  WARNING = "􀁟",
-  ADD_TO_LIBRARY = "􀈄",
-  DISLIKE = "􀊂",
-  LOVE = "􀊵",
-  TRACK_NEXT = "􀊌",
-  TRACK_PREVIOUS = "􀊊",
-  PLAY = "􀊃",
-  PLAY_FILL = "􀊄",
-  PAUSE = "􀊆",
-  PLAYPAUSE = "􀊈",
-  SHUFFLE = "􀊝",
-  ARTIST = "􀑫",
-  PLAYLIST = "􀑬",
-  MUSIC_NOTE = "􀑪",
-  STAR = "􀋂",
-  STAR_FILL = "􀋃",
-  TIME = "􀐫",
-  SPEAKER_FILL = "􀊡",
-  SPEAKER_FILL_PLUS = "􁜋",
-  SPEAKER_FILL_MINUS = "􁜍",
-}
-
 export interface Track {
   id?: string;
   name: string;
@@ -66,4 +43,5 @@ export const ScriptError = {
 
 export interface Preferences {
   volumeSteps: string;
+  disableHUD: boolean;
 }

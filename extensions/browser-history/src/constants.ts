@@ -10,6 +10,7 @@ export const defaultProfilePathArc = ["Application Support", "Arc", "User Data",
 export const defaultProfilePathOpera = ["Application Support", "com.operasoftware.Opera", "History"];
 export const defaultProfilePathIridium = ["Application Support", "Iridium", "Default", "History"];
 export const defaultProfilePathOrion = ["Application Support", "Orion", "Defaults", "history"];
+export const defaultProfilePathSidekick = ["Application Support", "Sidekick", "Default", "History"];
 
 const DownloadTextChrome = `
   # 🚨Error: Google Chrome browser is not installed
@@ -104,6 +105,15 @@ const DownloadTextOrion = `
   [![Orion](https://browser.kagi.com/public/images/orion-circle.png)]()
 `;
 
+const DownloadTextSidekick = `
+  # 🚨Error: Sidekick browser is not installed
+  ## This extension depends on Sidekick browser. You must install it to continue.
+  
+  [Click here](https://www.meetsidekick.com/download/) if you want to download manually.
+  
+  [![Sidekick](https://www.meetsidekick.com/wp-content/themes/sidekick-ppl/assets/img/logo-with-title.svg)]()
+`;
+
 export const DOWNLOAD_TEXT = {
   [SupportedBrowsers.Chrome]: DownloadTextChrome,
   [SupportedBrowsers.Firefox]: DownloadTextFirefox,
@@ -115,6 +125,7 @@ export const DOWNLOAD_TEXT = {
   [SupportedBrowsers.Opera]: DownloadTextOpera,
   [SupportedBrowsers.Iridium]: DownloadTextIridium,
   [SupportedBrowsers.Orion]: DownloadTextOrion,
+  [SupportedBrowsers.Sidekick]: DownloadTextSidekick,
 };
 
 export const INSTALL_COMMAND = {
@@ -128,6 +139,7 @@ export const INSTALL_COMMAND = {
   [SupportedBrowsers.Opera]: "brew cask install opera",
   [SupportedBrowsers.Iridium]: undefined,
   [SupportedBrowsers.Orion]: "brew cask install opera",
+  [SupportedBrowsers.Sidekick]: "brew install --cask pushplaylabs-sidekick",
 };
 
 export const UnknownErrorText = `

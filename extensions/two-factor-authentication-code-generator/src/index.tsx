@@ -1,3 +1,4 @@
+import type { App } from "./util/hooks";
 import {
   Action,
   ActionPanel,
@@ -9,44 +10,23 @@ import {
   getPreferenceValues,
   LocalStorage,
   Toast,
+  confirmAlert,
+  Alert,
+  Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
-import { Algorithm, Digits, generateTOTP, isValidAlgorithm, isValidDigit, Options } from "./util/totp";
-import { URL } from "url";
-
-const DEFAULT_OPTIONS: Options = {
-  digits: 6,
-  algorithm: "SHA1",
-  period: 30,
-};
+import { Algorithm, Digits, Options, parse, parseOtpUrl } from "./util/totp";
+import { useApps } from "./util/hooks";
 
 export default function AppsView() {
-  const [apps, setApps] = useState<
-    {
-      name: string;
-      key: string;
-      code: string;
-    }[]
-  >([]);
-  const { defaultAction } = getPreferenceValues();
+  const { apps, updateApps } = useApps();
+  const { defaultAction } = getPreferenceValues<Preferences>();
 
-  useEffect(() => {
-    LocalStorage.allItems().then((_apps) => {
-      setApps(
-        Object.keys(_apps)
-          .sort((a, b) => a.localeCompare(b))
-          .map((name) => {
-            const token: { secret: string; options: Options } = parse(_apps[name]);
-            return {
-              name,
-              key: _apps[name].toString(),
-              code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
-            };
-          })
-      );
-    });
-  }, []);
+  const updateLastTimeUsed = async (a: App) => {
+    const item = await LocalStorage.getItem(a.name);
+    const updated = { ...parse(item as string), lastTimeUsed: new Date().getTime() };
+    await LocalStorage.setItem(a.name, JSON.stringify(updated));
+  };
 
   return (
     <List
@@ -56,11 +36,11 @@ export default function AppsView() {
             icon={Icon.Plus}
             title="Add App"
             target={<AddForm />}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["cmd"], key: "g" }}
           />
           <Action.Push
             icon={Icon.Link}
-            title="Add App By URL"
+            title="Add App by URL"
             target={<AddAppByUrlForm />}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
           />
@@ -72,18 +52,35 @@ export default function AppsView() {
           title={a.name}
           subtitle={a.code}
           key={a.name}
+          accessories={[
+            {
+              icon: {
+                source:
+                  +a.percent > 75
+                    ? Icon.CircleProgress100
+                    : +a.percent > 50
+                      ? Icon.CircleProgress75
+                      : +a.percent > 25
+                        ? Icon.CircleProgress50
+                        : +a.time > 0
+                          ? Icon.CircleProgress25
+                          : Icon.Circle,
+              },
+              tooltip: a.time,
+            },
+          ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
                 {defaultAction == "copy" ? (
                   <>
-                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
-                    <Action.Paste content={a.code} title="Paste Code" />
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
+                    <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
                   </>
                 ) : (
                   <>
-                    <Action.Paste content={a.code} title="Paste Code" />
-                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
+                    <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
                   </>
                 )}
               </ActionPanel.Section>
@@ -92,11 +89,11 @@ export default function AppsView() {
                   icon={Icon.Plus}
                   title="Add App"
                   target={<AddForm />}
-                  shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  shortcut={{ modifiers: ["cmd"], key: "g" }}
                 />
                 <Action.Push
                   icon={Icon.Link}
-                  title="Add App By URL"
+                  title="Add App by URL"
                   target={<AddAppByUrlForm />}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                 />
@@ -106,29 +103,27 @@ export default function AppsView() {
                   icon={Icon.Trash}
                   title="Remove App"
                   onAction={async () => {
-                    await LocalStorage.removeItem(a.name);
-
-                    LocalStorage.allItems().then((_apps) => {
-                      setApps(
-                        Object.keys(_apps)
-                          .sort((a, b) => a.localeCompare(b))
-                          .map((name) => {
-                            const token = parse(_apps[name]);
-                            return {
-                              name,
-                              key: _apps[name].toString(),
-                              code: generateTOTP(token.secret, token.options)
-                                .toString()
-                                .padStart(token.options.digits, "0"),
-                            };
-                          })
-                      );
-                    });
+                    if (
+                      await confirmAlert({
+                        title: "Remove App?",
+                        message: "Your key will be lost forever, unless you've performed a backup.",
+                        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                      })
+                    ) {
+                      await LocalStorage.removeItem(a.name);
+                      await updateApps();
+                    }
                   }}
                   shortcut={{
                     modifiers: ["ctrl"],
                     key: "return",
                   }}
+                />
+                <Action.Push
+                  icon={Icon.Pencil}
+                  title="Edit App"
+                  target={<EditForm app={a} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -176,7 +171,10 @@ function AddForm() {
 
     const options: Options = { digits: values.digits, period: values.period, algorithm: values.algorithm };
 
-    await LocalStorage.setItem(values.name, JSON.stringify({ secret: values.secret, options: options }));
+    await LocalStorage.setItem(
+      values.name,
+      JSON.stringify({ secret: values.secret, options: options, lastTimeUsed: new Date().getTime() }),
+    );
 
     push(<AppsView />);
   };
@@ -222,71 +220,15 @@ function AddAppByUrlForm() {
       return;
     }
 
-    try {
-      const parse = new URL(url);
-      if (parse.protocol != "otpauth:") {
-        showToast(Toast.Style.Failure, "Unsupported protocol " + parse.protocol);
-        return;
-      }
-      if (parse.host != "totp") {
-        showToast(Toast.Style.Failure, "Unsupported type " + parse.host + " only TOTP supported");
-        return;
-      }
+    const parse = parseOtpUrl(url);
 
-      if (!parse.pathname) {
-        showToast(Toast.Style.Failure, "Label is missing");
-        return;
-      }
-
-      const name = decodeURIComponent(parse.pathname.slice(1));
-      const searchParams = parse.searchParams;
-      const secret = searchParams.get("secret");
-      const algorithm = searchParams.get("algorithm") ? searchParams.get("algorithm") : DEFAULT_OPTIONS.algorithm;
-      const maybePeriod = searchParams.get("period");
-      const period = maybePeriod ? parseInt(maybePeriod) : DEFAULT_OPTIONS.period;
-      const digits = searchParams.get("digits") ? searchParams.get("digits") : DEFAULT_OPTIONS.digits;
-
-      if (!secret) {
-        showToast(Toast.Style.Failure, "Secret is mandatory");
-        return;
-      }
-
-      try {
-        decode.asBytes(secret);
-      } catch {
-        showToast(Toast.Style.Failure, "Invalid 2FA secret");
-        return;
-      }
-
-      if (!isValidAlgorithm(algorithm)) {
-        showToast(Toast.Style.Failure, "Unsupported hashing algorithm " + algorithm);
-        return;
-      }
-
-      if (isNaN(period)) {
-        showToast(Toast.Style.Failure, "Period should be a number");
-        return;
-      }
-
-      if (+period <= 0) {
-        showToast(Toast.Style.Failure, "Period should be positive number");
-        return;
-      }
-
-      if (!isValidDigit(digits)) {
-        showToast(Toast.Style.Failure, "Unsupported digits " + digits);
-        return;
-      }
-
-      const options: Options = { digits: digits, period: period, algorithm: algorithm };
-
-      await LocalStorage.setItem(name, JSON.stringify({ secret: secret, options: options }));
-
-      push(<AppsView />);
-    } catch (e) {
-      showToast(Toast.Style.Failure, "Unable to parse URL");
+    if (!parse.success) {
+      showToast(Toast.Style.Failure, parse.data);
       return;
     }
+
+    await LocalStorage.setItem(parse.data.name, JSON.stringify(parse.data.data));
+
     push(<AppsView />);
   };
 
@@ -294,7 +236,7 @@ function AddAppByUrlForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={onSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Submit" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
@@ -307,10 +249,37 @@ function AddAppByUrlForm() {
   );
 }
 
-function parse(value: string): { secret: string; options: Options } {
-  try {
-    return JSON.parse(value);
-  } catch (e) {
-    return { secret: value, options: DEFAULT_OPTIONS };
-  }
+function EditForm({ app }: { app: App }) {
+  const { pop } = useNavigation();
+  const onSubmit = async (e: { name?: string }) => {
+    const { name } = e;
+
+    if (!name) {
+      showToast(Toast.Style.Failure, "Please provide name");
+      return;
+    }
+
+    if (await LocalStorage.getItem(name)) {
+      showToast(Toast.Style.Failure, "This app name is already taken");
+      return;
+    }
+
+    const _app = await LocalStorage.getItem(app.name);
+    await LocalStorage.removeItem(app.name);
+    await LocalStorage.setItem(name, _app as LocalStorage.Value);
+    pop();
+  };
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Pencil} title="Submit" onSubmit={onSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="App Name" placeholder={app.name} defaultValue={app.name} />
+      <Form.Description title="⚠️" text="To prevent loss of data, please Backup your codes first" />
+    </Form>
+  );
 }

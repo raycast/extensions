@@ -1,0 +1,1 @@
+export { useAllRegionsIpsQuery } from './useAllRegionsIpsQuery'

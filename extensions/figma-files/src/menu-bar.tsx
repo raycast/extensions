@@ -1,10 +1,34 @@
-import { Application, getApplications, MenuBarExtra, open } from "@raycast/api";
-import { useProjectFiles } from "./hooks/useProjectFiles";
-import { useVisitedFiles } from "./hooks/useVisitedFiles";
+import { type Application, Icon, MenuBarExtra, getApplications, open } from "@raycast/api";
+import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { resolveAllFiles } from "./api";
+import { useVisitedFiles } from "./hooks/useVisitedFiles";
+import { figma } from "./oauth";
+import { loadStarredFiles } from "./starFiles";
 
-export default function Command() {
-  const { projectFiles, isLoading: isLoadingProjectFiles, hasError } = useProjectFiles();
+function Command() {
+  const { data, isLoading, error } = useCachedPromise(
+    async () => {
+      const results = await resolveAllFiles();
+      return results;
+    },
+    [],
+    {
+      keepPreviousData: true,
+    },
+  );
+
+  const { data: starredFiles, isLoading: isLoadingStarredFiles } = useCachedPromise(
+    async () => {
+      const results = await loadStarredFiles();
+      return results;
+    },
+    [],
+    {
+      keepPreviousData: true,
+    },
+  );
+
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
   const [desktopApp, setDesktopApp] = useState<Application>();
   let url = "figma://file/";
@@ -23,51 +47,68 @@ export default function Command() {
     <MenuBarExtra
       icon={{
         source: {
-          light: "figma-menubar-icon-dark.png",
-          dark: "figma-menubar-icon-light.png",
+          light: "figma-menubar-icon-light.svg",
+          dark: "figma-menubar-icon-dark.svg",
         },
       }}
       tooltip="Figma files"
-      isLoading={isLoadingVisitedFiles || isLoadingProjectFiles}
+      isLoading={isLoadingVisitedFiles || isLoading || isLoadingStarredFiles}
     >
-      {hasError && <MenuBarExtra.Item title="Error" />}
-      {visitedFiles && (
-        <>
-          <MenuBarExtra.Submenu key="recent-files" title="Recent">
-            {visitedFiles?.map((file) => (
-              <MenuBarExtra.Item
-                key={file.key + "-recent-file"}
-                title={file.name}
-                onAction={async () => {
-                  open(url + file.key);
-                  await visitFile(file);
-                }}
-              />
-            ))}
-          </MenuBarExtra.Submenu>
-          <MenuBarExtra.Separator />
-        </>
+      {error && <MenuBarExtra.Item title="Error" key="ErrorState" />}
+      {starredFiles && (
+        <MenuBarExtra.Submenu key="starred-files" title="Starred" icon={Icon.StarCircle}>
+          {starredFiles?.map((file) => (
+            <MenuBarExtra.Item
+              key={file.key + "-starred-file"}
+              title={file.name ?? "Untitled"}
+              onAction={async () => {
+                open(url + file.key);
+                await visitFile(file);
+              }}
+            />
+          ))}
+        </MenuBarExtra.Submenu>
       )}
-      {!isLoadingVisitedFiles &&
-        projectFiles &&
-        projectFiles?.map((project) => (
-          <MenuBarExtra.Submenu
-            key={project.name}
-            title={project.name}
-            children={project.files?.map((file) => (
-              <MenuBarExtra.Item
-                key={file.key}
-                title={file.name}
-                onAction={async () => {
-                  open(url + file.key);
-                  await visitFile(file);
-                }}
-              />
-            ))}
-          />
-        ))}
-      {(isLoadingProjectFiles || isLoadingVisitedFiles) && !projectFiles && <MenuBarExtra.Item title="Loading..." />}
-      {!isLoadingProjectFiles && !projectFiles && <MenuBarExtra.Item title="No projects found" />}
+      {visitedFiles && (
+        <MenuBarExtra.Submenu key="recent-files" title="Recent" icon={Icon.Hourglass}>
+          {visitedFiles?.map((file) => (
+            <MenuBarExtra.Item
+              key={file.key + "-recent-file"}
+              title={file.name ?? "Untitled"}
+              onAction={async () => {
+                open(url + file.key);
+                await visitFile(file);
+              }}
+            />
+          ))}
+        </MenuBarExtra.Submenu>
+      )}
+      {data?.map((team) => (
+        <MenuBarExtra.Section title={team.name ?? "Untitled"} key={team.name + "-team"}>
+          {team.files.map((project) => (
+            <MenuBarExtra.Submenu key={team.name + project.name + "-project"} title={project.name ?? "Untitled"}>
+              {project.files?.length != 0 ? (
+                project.files?.map((file) => (
+                  <MenuBarExtra.Item
+                    key={team.name + project.name + file.key + "-file"}
+                    title={file.name ?? "Untitled"}
+                    onAction={async () => {
+                      open(url + file.key);
+                      await visitFile(file);
+                    }}
+                  />
+                ))
+              ) : (
+                <MenuBarExtra.Item key={team.name + project.name + "-nofile"} title="Empty project" />
+              )}
+            </MenuBarExtra.Submenu>
+          ))}
+        </MenuBarExtra.Section>
+      ))}
+      {(isLoading || isLoadingVisitedFiles) && !data && <MenuBarExtra.Item title="Loading..." key="loadingState" />}
+      {!isLoading && !data && <MenuBarExtra.Item title="No projects found" key="noProjectsFoundState" />}
     </MenuBarExtra>
   );
 }
+
+export default withAccessToken(figma)(Command);

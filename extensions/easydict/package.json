@@ -2,10 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support OpenAI ChatGPT, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
+  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support OpenAI, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
+  "contributors": [
+    "ViGeng",
+    "maxchang3",
+    "litomore"
+  ],
   "commands": [
     {
       "name": "easydict",
@@ -21,6 +26,14 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "ocr",
+      "title": "OCR Translate",
+      "icon": "ocr.png",
+      "subtitle": "Query text from image",
+      "description": "Screenshot OCR, and query text from image.",
+      "mode": "no-view"
     }
   ],
   "categories": [
@@ -40,56 +53,60 @@
     "youdao",
     "baidu",
     "tencent",
-    "eudic",
-    "chatgpt"
+    "openai",
+    "gemini"
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.0",
-    "@vitalets/google-translate-api": "^9.1.0",
-    "axios": "^1.3.4",
-    "cheerio": "^1.0.0-rc.12",
-    "crypto-js": "^4.1.1",
-    "eventsource": "^2.0.2",
-    "node-fetch": "^3.3.0",
-    "eventsource-parser": "^0.1.0",
+    "@deeplx/core": "^0.1.3",
+    "@raycast/api": "^1.100.3",
+    "@vitalets/google-translate-api": "^9.2.1",
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
+    "crypto-js": "^4.2.0",
+    "eventsource": "^4.0.0",
+    "eventsource-parser": "^3.0.2",
     "execa": "^7.1.0",
-    "file-type": "^18.2.0",
-    "franc": "^6.1.0",
+    "file-type": "^21.0.0",
+    "franc": "^6.2.0",
     "hpagent": "^1.2.0",
     "mac-system-proxy": "^1.0.4",
-    "node-html-parser": "^6.1.5",
-    "play-sound": "^1.1.5",
-    "qs": "^6.11.0",
-    "run-applescript": "^6.1.0",
-    "tencentcloud-sdk-nodejs-tmt": "^4.0.559"
+    "node-fetch": "^3.3.2",
+    "node-html-parser": "^7.0.1",
+    "play-sound": "^1.1.6",
+    "qs": "^6.14.0",
+    "run-applescript": "^7.0.0",
+    "tencentcloud-sdk-nodejs-tmt": "^4.1.39"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.4.4",
-    "@commitlint/config-conventional": "^17.4.4",
-    "@types/crypto-js": "^4.1.1",
-    "@types/eventsource": "^1.1.11",
-    "@types/node": "18.8.3",
-    "@types/play-sound": "^1.1.0",
-    "@types/qs": "^6.9.7",
-    "@types/react": "18.0.25",
-    "@typescript-eslint/eslint-plugin": "^5.55.0",
-    "@typescript-eslint/parser": "^5.55.0",
-    "eslint": "^8.36.0",
-    "eslint-config-prettier": "^8.7.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.0",
-    "prettier": "^2.8.4",
-    "typescript": "^4.9.5"
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "22.13.10",
+    "@types/play-sound": "^1.1.2",
+    "@types/qs": "^6.14.0",
+    "@types/react": "19.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "eslint": "^9.29.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.1",
+    "react": "^19.1.0",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/recognizeText assets",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "lint-staged": "lint-staged",
-    "prepare": "cd .. && cd .. && husky install extensions/easydict/.huskyrc",
+    "prepare": "husky",
     "eslint": "eslint src/** --fix --ext .ts,.tsx,.js,.jsx"
+  },
+  "overrides": {
+    "whatlang-node": "file:overrides/whatlang-node"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": "npm run eslint",
@@ -503,6 +520,29 @@
       ]
     },
     {
+      "title": "Bing Host",
+      "name": "bingHost",
+      "type": "dropdown",
+      "label": "Bing Host",
+      "required": false,
+      "description": "Bing Host Type",
+      "default": "",
+      "data": [
+        {
+          "title": "Auto",
+          "value": ""
+        },
+        {
+          "title": "cn.bing.com",
+          "value": "cn.bing.com"
+        },
+        {
+          "title": "www.bing.com",
+          "value": "www.bing.com"
+        }
+      ]
+    },
+    {
       "title": "Switch Boxes",
       "name": "enableAutomaticQuerySelectedText",
       "type": "checkbox",
@@ -552,6 +592,15 @@
       "default": false
     },
     {
+      "title": "Language Detection",
+      "name": "enableBaiduLanguageDetect",
+      "type": "checkbox",
+      "label": "Enable Baidu Language Detect",
+      "required": false,
+      "description": "Turn on/off Baidu Language Detect.",
+      "default": true
+    },
+    {
       "title": "Apple System Features",
       "name": "enableAppleTranslate",
       "type": "checkbox",
@@ -561,20 +610,12 @@
       "default": false
     },
     {
-      "name": "enableAppleLanguageDetect",
-      "type": "checkbox",
-      "label": "Apple Language Detect",
-      "required": false,
-      "description": "⚠️ An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
-      "default": false
-    },
-    {
       "title": "Dictionary Services",
       "type": "checkbox",
       "name": "enableYoudaoDictionary",
       "label": "Youdao Dictionary",
       "required": false,
-      "description": "Support 5 langauges: (Chinese), English, French, Japanese, Korean.",
+      "description": "Support 5 languages: (Chinese), English, French, Japanese, Korean.",
       "default": true
     },
     {
@@ -582,7 +623,7 @@
       "name": "enableLingueeDictionary",
       "label": "Linguee Dictionary",
       "required": false,
-      "description": "Support 19 langauges: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
+      "description": "Support 19 languages: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
       "default": true
     },
     {
@@ -596,11 +637,27 @@
     },
     {
       "type": "checkbox",
+      "name": "enableGeminiTranslate",
+      "label": "Gemini Translate",
+      "required": false,
+      "description": "Turn on/off Gemini Translate. Use system proxy by default. App Key is required.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
       "name": "enableDeepLTranslate",
       "label": "DeepL Translate",
       "required": false,
       "description": "Turn on/off DeepL Translate. Use system proxy by default. App Key is required.",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "name": "enableDeepLXTranslate",
+      "label": "DeepLX Translate",
+      "required": false,
+      "description": "Turn on/off DeepLX Translate. Free DeepL translation service without API key required.",
+      "default": true
     },
     {
       "name": "enableGoogleTranslate",
@@ -640,7 +697,7 @@
       "label": "Volcano Translate",
       "required": false,
       "description": "Turn on/off Volcano Translate. App Key is required.",
-      "default": true
+      "default": false
     },
     {
       "name": "enableYoudaoTranslate",
@@ -659,28 +716,78 @@
       "default": false
     },
     {
-      "title": "Display Order",
+      "title": "Service List Order",
       "name": "servicesOrder",
       "type": "textfield",
       "required": false,
-      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, OpenAI, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun",
+      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, OpenAI, Gemini, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun",
       "default": "",
-      "placeholder": "youdao dictionary, linguee dictionary, openai, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun"
+      "placeholder": "youdao dictionary, linguee dictionary, openai, gemini, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun"
     },
     {
       "title": "OpenAI API Key",
       "name": "openAIAPIKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your OpenAI API Key",
       "default": ""
     },
     {
-      "title": "DeepL Auth Key",
-      "name": "deepLAuthKey",
+      "title": "OpenAI Endpoint",
+      "name": "openAIAPIURL",
       "type": "textfield",
       "required": false,
+      "description": "Custom OpenAI API URL",
+      "default": "https://api.openai.com/v1/chat/completions",
+      "placeholder": "https://api.openai.com/v1/chat/completions"
+    },
+    {
+      "title": "OpenAI Model",
+      "name": "openAIModel",
+      "type": "textfield",
+      "required": false,
+      "description": "OpenAI Model",
+      "default": "gpt-4o-mini"
+    },
+    {
+      "title": "Gemini API Key",
+      "name": "geminiAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your Gemini API Key",
+      "default": ""
+    },
+    {
+      "title": "Gemini Endpoint",
+      "name": "geminiAPIURL",
+      "type": "textfield",
+      "required": false,
+      "description": "Custom Gemini API URL",
+      "default": "https://generativelanguage.googleapis.com"
+    },
+    {
+      "title": "Gemini Model",
+      "name": "geminiModel",
+      "type": "textfield",
+      "required": false,
+      "description": "Gemini Model",
+      "default": "gemini-2.0-flash"
+    },
+    {
+      "title": "DeepL Auth Key",
+      "name": "deepLAuthKey",
+      "type": "password",
+      "required": false,
       "description": "Your DeepL Auth Key",
+      "default": ""
+    },
+    {
+      "title": "DeepL API URL",
+      "name": "deepLEndpoint",
+      "type": "textfield",
+      "required": false,
+      "description": "Custom DeepL API URL",
+      "placeholder": "https://api-free.deepl.com/v2/translate",
       "default": ""
     },
     {
@@ -694,7 +801,7 @@
     {
       "title": "Baidu App Secret",
       "name": "baiduAppSecret",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Baidu App Secret",
       "default": ""
@@ -710,7 +817,7 @@
     {
       "title": "Tencent SecretKey",
       "name": "tencentSecretKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Tencent SecretKey",
       "default": ""
@@ -726,31 +833,15 @@
     {
       "title": "Volcano Access Key Secret",
       "name": "volcanoAccessKeySecret",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Volcano Access Key Secret",
       "default": ""
     },
     {
-      "title": "Youdao App ID",
-      "name": "youdaoAppId",
-      "type": "textfield",
-      "required": false,
-      "description": "Your Youdao App ID",
-      "default": ""
-    },
-    {
-      "title": "Youdao App Secret",
-      "name": "youdaoAppSecret",
-      "type": "textfield",
-      "required": false,
-      "description": "Your Youdao App Secret",
-      "default": ""
-    },
-    {
       "title": "Caiyun Token",
       "name": "caiyunToken",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Caiyun Token",
       "default": ""

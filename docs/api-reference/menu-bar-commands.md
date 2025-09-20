@@ -1,10 +1,12 @@
 # Menu Bar Commands
 
-{% hint style="info" %}
-As of version 1.38.1, you can create Raycast commands that place glanceable information in your menu bar!
-{% endhint %}
-
 The `MenuBarExtra` component can be used to create commands which populate the [extras](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar#menu-bar-commands) section of macOS' menu bar.
+
+{% hint style="info" %}
+
+Menubar commands aren't available on Windows.
+
+{% endhint %}
 
 ## Getting Started
 
@@ -75,11 +77,11 @@ Of course, our pull request command wouldn't be of that much use if we had to te
 
 Your root search should look similar to:
 
-![Menu Bar Command - Activate Background Refresh](../.gitbook/assets/menu-bar-activate-command.png)
+![Menu Bar Command - Activate Background Refresh](../.gitbook/assets/menu-bar-activate-command.webp)
 
 Running it once should activate it to:
 
-![Menu Bar Command - Refresh](../.gitbook/assets/menu-bar-refresh.png)
+![Menu Bar Command - Refresh](../.gitbook/assets/menu-bar-refresh.webp)
 
 ## Lifecycle
 
@@ -99,8 +101,8 @@ If your command returns a `MenuBarExtra`, it _must_ either not set `isLoading` -
 If your `menu-bar` command also makes use of [background refresh](../information/lifecycle/background-refresh.md) _and_ it has background refresh activated, Raycast will run the command at set intervals. In your command, you can use `environment.launchType` to check whether it is launched in the background or by the user.
 
 {% hint style="info" %}
-To ease testing, commands configured to run in the background have an extra action in development mode:
-![Menu Bar Command - Run in Background](../.gitbook/assets/menu-bar-run-in-background.png)
+To ease testing, commands configured to run in the background have an extra action in development mode:\
+![Menu Bar Command - Run in Background](../.gitbook/assets/menu-bar-run-in-background.webp)
 {% endhint %}
 
 ### When the user clicks the command's icon / title in the menu bar
@@ -219,6 +221,40 @@ export default function Command() {
   return (
     <MenuBarExtra icon={Icon.Bookmark}>
       <MenuBarExtra.Item icon="raycast.png" title="Raycast.com" onAction={() => open("https://raycast.com")} />
+    </MenuBarExtra>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="ItemWithAlternate.tsx" %}
+
+If an item provides another `MenuBarEtra.Item` via its `alternate`, prop, the second item will be shown then the user presses the ⌥ (opt) key. There are a few limitation:
+
+1. The `alternate` item may not have a custom shortcut. Instead, it will inherit its parent's shortcut, with the addition of ⌥ (opt) as a modifier.
+2. The `alternate` item may not also specify an alternate.
+3. A parent item that provides an `alternate` may not use ⌥ (opt) as a modifier.
+
+```typescript
+import { Icon, MenuBarExtra, open } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <MenuBarExtra icon={Icon.Bookmark}>
+      <MenuBarExtra.Item
+        icon="raycast.png"
+        title="Open Raycast Homepage"
+        shortcut={{ key: "r", modifiers: ["cmd"] }}
+        onAction={() => open("https://raycast.com")}
+        alternate={
+          <MenuBarExtra.Item
+            icon="raycast.png"
+            title="Open Raycast Store"
+            onAction={() => open("https://raycast.com/store")}
+          />
+        }
+      />
     </MenuBarExtra>
   );
 }

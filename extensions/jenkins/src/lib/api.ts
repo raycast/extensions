@@ -1,4 +1,6 @@
 import fetch, { Headers, RequestInfo, RequestInit } from "node-fetch";
+import http from "http";
+import https from "https";
 
 export interface Jenkins {
   id: string;
@@ -10,6 +12,7 @@ export interface Jenkins {
   url: string;
   username: string;
   token?: string;
+  unsafeHttps: boolean;
 }
 
 export interface Job {
@@ -86,8 +89,13 @@ export class JenkinsAPI {
     const api = `${this.jenkins.url}/search/suggest?query=${q}`;
     const resp = await this.request(api);
     const result = (await resp.json()) as SearchResponse;
+
     return result.suggestions.map((s) => {
-      s.url = `${this.jenkins.url}/search/?q=${encodeURIComponent(s.name)}`;
+      // use the suggestion URL if Jenkins provided one, construct our own if not
+      const suggestionUrl = s.url || `/search/?q=${encodeURIComponent(s.name)}`;
+
+      s.url = `${this.jenkins.url}${suggestionUrl}`;
+
       return s;
     });
   }
@@ -103,6 +111,15 @@ export class JenkinsAPI {
   }
 
   async request(url: RequestInfo, init?: RequestInit) {
+    let urlAgent;
+    if (url.toString().startsWith("http://")) {
+      urlAgent = new http.Agent({});
+    } else if (url.toString().startsWith("https://")) {
+      urlAgent = new https.Agent({ rejectUnauthorized: !this.jenkins.unsafeHttps });
+    } else {
+      return Promise.reject(new Error("Wrong scheme in URL"));
+    }
+
     let headers: Headers | undefined = undefined;
     if (this.jenkins.token) {
       headers = new Headers();
@@ -114,6 +131,7 @@ export class JenkinsAPI {
     const resp = await fetch(url, {
       headers,
       method: "GET",
+      agent: urlAgent,
       ...init,
     });
     if (!resp.ok) {

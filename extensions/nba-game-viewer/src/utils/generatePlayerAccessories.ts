@@ -1,5 +1,5 @@
-import type { Player, Injury } from "../types/roster.types";
-import { Color, List } from "@raycast/api";
+import type { Injury, Player } from "../types/roster.types";
+import { Color, Icon, List } from "@raycast/api";
 
 const generatePlayerAccessories = (player: Player): List.Item.Accessory[] => {
   if (player.injuries.length > 0) {
@@ -8,7 +8,7 @@ const generatePlayerAccessories = (player: Player): List.Item.Accessory[] => {
     player.injuries.map((injury: Injury) => {
       if (injury.status === "Out") {
         foundInjury = [
-          { icon: { source: "heart.png", tintColor: Color.Red }, tooltip: `Status: Out — ${injury.details}` },
+          { icon: { source: Icon.Heart, tintColor: Color.Red }, tooltip: `Status: Out — ${injury.details}` },
         ];
       }
     });
@@ -17,10 +17,10 @@ const generatePlayerAccessories = (player: Player): List.Item.Accessory[] => {
       return foundInjury;
     }
 
-    return [{ icon: { source: "heart.png", tintColor: Color.Orange }, tooltip: "Status: Day to Day" }];
+    return [{ icon: { source: Icon.Heart, tintColor: Color.Orange }, tooltip: "Status: Day to Day" }];
   }
 
-  return [{ icon: { source: "heart.png", tintColor: Color.Green }, tooltip: "Status: Healthy" }];
+  return [{ icon: { source: Icon.Heart, tintColor: Color.Green }, tooltip: "Status: Healthy" }];
 };
 
 export default generatePlayerAccessories;

@@ -34,10 +34,11 @@ const mapMonitor = ({ id, name, query, tags, status }: MonitorSearchResult) => (
     key={id}
     title={name || query || ""}
     subtitle={tags?.join(", ")}
-    accessories={[{ text: status, icon: { source: statusIcon(status) } }]}
+    accessories={[{ text: status as string, icon: { source: statusIcon(status) } }]}
     actions={
       <ActionPanel>
         <Action.OpenInBrowser url={`https://${linkDomain()}/monitors/${id}`} />
+        <Action.CopyToClipboard content={`https://${linkDomain()}/monitors/${id}`} />
       </ActionPanel>
     }
   />

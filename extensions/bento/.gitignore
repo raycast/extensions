@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+
+# Raycast specific
+.raycast-dev/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

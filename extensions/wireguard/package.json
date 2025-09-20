@@ -5,6 +5,9 @@
   "description": "Control Wireguard connections.",
   "icon": "wireguard.png",
   "author": "sbugzhu",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Applications",
     "Security"
@@ -15,29 +18,39 @@
       "name": "index",
       "title": "Wireguard",
       "subtitle": "Control Wireguard",
-      "description": "Control wireguard connections.",
+      "description": "Control Wireguard connections.",
       "mode": "view"
     },
     {
       "name": "disconnectAllWireguardConnections",
       "title": "Disconnect All Connections",
       "subtitle": "Wireguard",
-      "description": "Disconnect all wireguard connections.",
+      "description": "Disconnect all Wireguard connections.",
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "showFlag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Options",
+      "label": "Show national flag.",
+      "description": "If checked, raycast will show the national flag. The country code needs to be included at the beginning of the Wireguard configuration name, eg: us-xxx, gb09-xxx, etc. Ignore the number after the country code.",
+      "default": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.48.5",
-    "@raycast/utils": "^1.5.0"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
-    "@types/node": "^18.14.2",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -45,6 +58,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

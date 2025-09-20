@@ -1,5 +1,35 @@
 # Easy New File Changelog
 
+## [Default Directory] - 2025-07-16
+
+- Support setting Default Directory for new file command when Finder has no window
+- Optimize extension icons for macOS Tahoe
+
+## [Form Layout] - 2025-06-23
+
+- New File with Template command now supports Form layout
+
+## [Create Dot Files] - 2025-05-23
+
+- New File Now command support Dot file type
+- New File with Template command now supports Dot file template
+
+## [Any File Type] - 2024-06-26
+
+- Now you can create any file type with the New File Now command.
+
+## [New File Now] - 2024-05-21
+
+- You can now quickly create new files directly with the New File Now (previously New File With Text) command in the main window.
+- Update the name of the New File Here command to New File With Template to make it clearer
+- Other detail optimisation and bug fixes
+
+## [Optimize file operations] - 2023-11-13
+
+- Optimize the selection of files and directories
+- List layout add Detail show file icon
+- Some minor view interface updates
+
 ## [Fix text error] - 2023-02-07
 
 - Fix text error in preferences

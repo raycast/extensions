@@ -1,12 +1,20 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imessage-2fa",
-  "title": "iMessage 2FA",
-  "description": "View messages and two factor authentication codes",
+  "title": "2FA Code Finder",
+  "description": "View 2FA codes from iMessage and Email",
   "icon": "iMessage-icon.png",
   "author": "yuercl",
   "contributors": [
-    "thomas"
+    "thomas",
+    "arronhunt",
+    "ronaldheft",
+    "hitolaus",
+    "taschaub",
+    "omaerkhan"
+  ],
+  "pastContributors": [
+    "navtoj"
   ],
   "categories": [
     "Productivity"
@@ -16,24 +24,149 @@
     {
       "name": "index",
       "title": "View 2FA Codes",
-      "subtitle": "Messages",
-      "description": "View messages and two factor authentication codes",
+      "subtitle": "Messages & Email",
+      "description": "View two factor authentication codes from iMessage and Email",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "enabledSources",
+      "type": "dropdown",
+      "required": false,
+      "title": "Enabled Sources",
+      "description": "Choose which sources to enable for 2FA codes",
+      "default": "imessage",
+      "data": [
+        {
+          "title": "Both iMessage and Email",
+          "value": "both"
+        },
+        {
+          "title": "iMessage Only",
+          "value": "imessage"
+        },
+        {
+          "title": "Email Only",
+          "value": "email"
+        }
+      ]
+    },
+    {
+      "name": "emailSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "Email Source",
+      "description": "Choose between Apple Mail or Gmail for email source",
+      "default": "applemail",
+      "data": [
+        {
+          "title": "Apple Mail",
+          "value": "applemail"
+        },
+        {
+          "title": "Gmail",
+          "value": "gmail"
+        }
+      ]
+    },
+    {
+      "name": "gmailClientId",
+      "type": "textfield",
+      "required": false,
+      "title": "Gmail OAuth Client ID",
+      "description": "OAuth Client ID for Gmail API access (only needed if using Gmail as email source)",
+      "placeholder": "your-client-id.apps.googleusercontent.com"
+    },
+    {
+      "name": "defaultSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View",
+      "description": "Default source to show in the list (only applies when both sources are enabled)",
+      "default": "all",
+      "data": [
+        {
+          "title": "All Sources",
+          "value": "all"
+        },
+        {
+          "title": "iMessage Only",
+          "value": "imessage"
+        },
+        {
+          "title": "Email Only",
+          "value": "email"
+        }
+      ]
+    },
+    {
+      "name": "enableVerificationLinks",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Enable Verification Links",
+      "description": "Show verification and sign-in links from messages",
+      "label": "Show verification/sign-in links"
+    },
+    {
+      "data": [
+        {
+          "title": "Days",
+          "value": "DAYS"
+        },
+        {
+          "title": "Hours",
+          "value": "HOURS"
+        },
+        {
+          "title": "Minutes",
+          "value": "MINUTES"
+        }
+      ],
+      "default": "MINUTES",
+      "description": "Temporal unit type for searching messages",
+      "name": "lookBackUnit",
+      "required": false,
+      "title": "Search unit for 2FA",
+      "type": "dropdown"
+    },
+    {
+      "default": "10",
+      "description": "For searching messages from N units ago and now",
+      "name": "lookBackAmount",
+      "required": false,
+      "title": "Search amount for 2FA",
+      "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "For ignoring messages that have been seen",
+      "name": "ignoreRead",
+      "required": false,
+      "label": "Ignore already read messages",
+      "type": "checkbox"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.40.3",
-    "@raycast/utils": "^1.4.9",
-    "@use-it/interval": "^1.0.0"
+    "@googleapis/gmail": "^1.2.0",
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.19.1",
+    "@use-it/interval": "^1.0.0",
+    "googleapis-common": "^7.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "jest": "^29.7.0",
     "prettier": "^2.5.1",
+    "ts-jest": "^29.1.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -41,16 +174,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "jest"
   },
-  "preferences": [
-    {
-      "title": "Search last days for 2FA",
-      "name": "lookBackDays",
-      "type": "textfield",
-      "required": false,
-      "description": "For searching iMessage from N days ago and now",
-      "default": "1"
-    }
+  "platforms": [
+    "macOS"
   ]
 }

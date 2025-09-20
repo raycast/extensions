@@ -1,8 +1,18 @@
 import { Form, Detail, ActionPanel, Action, showToast, Toast, open, popToRoot } from "@raycast/api";
-import { useState } from "react";
-import { MemoInfoResponse, PostFileResponse, PostMemoParams, ResponseData } from "./types";
-import { getOriginUrl, getRequestUrl, getTags, postFile, sendMemo } from "./api";
+import { useEffect, useState } from "react";
+import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types";
+import {
+  getMemoByName,
+  getOriginUrl,
+  getRecentTags,
+  getRequestUrl,
+  getAttachmentBinToBase64,
+  postFile,
+  postMemoAttachments,
+  sendMemo,
+} from "./api";
 import { VISIBILITY } from "./constant";
+import { showFailureToast } from "@raycast/utils";
 
 interface FormData {
   content: string;
@@ -12,12 +22,23 @@ interface FormData {
 }
 
 export default function SendMemoFormCommand(): JSX.Element {
-  const { isLoading, data: existTags } = getTags();
-
-  const [nameError, setNameError] = useState<string | undefined>();
+  const [nameError, setNameError] = useState<string>();
   const [files, setFiles] = useState<string[]>([]);
   const [createdMarkdown, setCreatedMarkdown] = useState<string>();
   const [createdUrl, setCreatedUrl] = useState<string>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [recentTags, setRecentTags] = useState<string[]>([]);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
+  useEffect(() => {
+    getRecentTags()
+      .then((tags) => {
+        setRecentTags(tags);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   function dropNameErrorIfNeeded() {
     if (nameError && nameError.length > 0) {
@@ -26,27 +47,37 @@ export default function SendMemoFormCommand(): JSX.Element {
   }
 
   function computedCreatedUrl(data: MemoInfoResponse) {
-    const { id } = data;
-    const url = getRequestUrl(`/m/${id}`);
+    const { name } = data;
+    const url = getRequestUrl(`/${name}`);
 
     setCreatedUrl(url);
   }
 
-  function computedCreatedMarkdown(data: MemoInfoResponse) {
-    const { content, resourceList } = data;
-    let markdown = content;
+  async function computedCreatedMarkdown(data: MemoInfoResponse) {
+    setCreatedMarkdown(data.content);
+    setLoadingDetail(true);
 
-    resourceList.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/o/r/${resource.id}/${resource.filename}`);
+    try {
+      const memoData = await getMemoByName(data.name);
 
-      if (index === 0) {
-        markdown += "\n\n";
+      const { content, attachments } = memoData;
+      let markdown = content;
+
+      for (const resource of attachments) {
+        const resourceUrl = await getAttachmentBinToBase64(resource.name, resource.filename);
+        console.log("resourceUrl", resourceUrl);
+        markdown += `\n\n ![${resource.filename}](${resourceUrl})`;
       }
 
-      markdown += ` ![${resource.filename}](${resourceUrl})`;
-    });
+      setCreatedMarkdown(markdown);
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to fetch memo details" });
+    }
 
-    setCreatedMarkdown(markdown);
+    setLoadingDetail(false);
+    setTimeout(() => {
+      popToRoot({ clearSearchBar: true });
+    }, 5000);
   }
 
   const onSubmit = async (values: FormData) => {
@@ -61,27 +92,6 @@ export default function SendMemoFormCommand(): JSX.Element {
       params.content += ` #${tags.join(" #")}`;
     }
 
-    if (files.length) {
-      showToast({
-        style: Toast.Style.Animated,
-        title: "Upload Files",
-      });
-
-      const postFilesPromiseArr: Promise<ResponseData<PostFileResponse>>[] = [];
-
-      files.forEach((file) => {
-        postFilesPromiseArr.push(postFile(file));
-      });
-
-      const uploadedFiles = await Promise.all(postFilesPromiseArr).catch(() => {
-        showToast(Toast.Style.Failure, "Upload Files Failed");
-      });
-
-      if (uploadedFiles) {
-        params.resourceIdList = uploadedFiles.map((file) => file.data.id);
-      }
-    }
-
     showToast({
       style: Toast.Style.Animated,
       title: "Sending Memo",
@@ -91,14 +101,42 @@ export default function SendMemoFormCommand(): JSX.Element {
       showToast(Toast.Style.Failure, "Send Memo Failed");
     });
 
-    if (res) {
-      showToast(Toast.Style.Success, "Send Memo Success");
-      computedCreatedMarkdown(res.data);
-      computedCreatedUrl(res.data);
+    console.log("res", res);
 
-      setTimeout(() => {
-        popToRoot({ clearSearchBar: true });
-      }, 5000);
+    if (res?.name) {
+      if (files.length) {
+        await setMemoResource(res, files);
+      }
+
+      showToast(Toast.Style.Success, "Send Memo Success");
+      computedCreatedUrl(res);
+      computedCreatedMarkdown(res);
+    }
+  };
+
+  const setMemoResource = async (memos: MemoInfoResponse, files: string[]) => {
+    if (files.length) {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Upload Files",
+      });
+      const postFilesPromiseArr: Promise<PostFileResponse>[] = [];
+
+      files.forEach((file) => {
+        const filename = file.split("/").pop() || "";
+        postFilesPromiseArr.push(postFile(file, filename));
+      });
+
+      const uploadedFiles = await Promise.all(postFilesPromiseArr).catch(() => {
+        showToast(Toast.Style.Failure, "Upload Files Failed");
+      });
+
+      if (uploadedFiles) {
+        await postMemoAttachments(memos.name, uploadedFiles).catch((err) => {
+          showToast(Toast.Style.Failure, `Upload Files Failed. ${err?.message}`);
+          throw new Error(err);
+        });
+      }
     }
   };
 
@@ -110,6 +148,7 @@ export default function SendMemoFormCommand(): JSX.Element {
   return createdMarkdown ? (
     <Detail
       markdown={createdMarkdown}
+      isLoading={loadingDetail}
       actions={
         createdUrl && (
           <ActionPanel>
@@ -144,8 +183,8 @@ export default function SendMemoFormCommand(): JSX.Element {
 
       <Form.FilePicker id="files" value={files} onChange={setFiles} />
 
-      <Form.TagPicker id="tags" title="Exist Tags">
-        {existTags?.data?.map((tag) => {
+      <Form.TagPicker id="tags" title="Recent Tags">
+        {recentTags.map((tag) => {
           return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
         })}
       </Form.TagPicker>

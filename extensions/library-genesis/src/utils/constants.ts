@@ -187,3 +187,8 @@ export const languages = [
   { code: "yo", name: "Yoruba", nativeName: "Yorùbá" },
   { code: "za", name: "Zhuang, Chuang", nativeName: "Saɯ cueŋƅ, Saw cuengh" },
 ];
+
+export const DEFAULT_MIRROR = {
+  name: "libgen.bz",
+  url: "https://libgen.bz",
+};

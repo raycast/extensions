@@ -1,23 +1,24 @@
 import React, { useReducer } from "react";
 
-import { useNotes } from "../../utils/hooks";
-import { Note, Vault, SearchArguments } from "../../utils/interfaces";
+import { NotesContext, NotesDispatchContext, useNotes } from "../../utils/hooks";
+import { SearchArguments } from "../../utils/interfaces";
 import { NoteList } from "./NoteList";
 import { NoteActions, OpenNoteActions } from "../../utils/actions";
-import { NoteReducer } from "../../utils/data/reducers";
-import { NotesContext, NotesDispatchContext } from "../../utils/utils";
+import { NoteReducer } from "../../utils/reducers";
 import { Action, Icon } from "@raycast/api";
-import { renewCache } from "../../utils/data/cache";
+import { Vault } from "../../api/vault/vault.types";
+import { Note } from "../../api/vault/notes/notes.types";
+import { renewCache } from "../../api/cache/cache.service";
 
 export function NoteListObsidian(props: {
   vault: Vault;
   showTitle: boolean;
-  starred: boolean;
+  bookmarked: boolean;
   searchArguments: SearchArguments;
 }) {
   const { showTitle, vault, searchArguments } = props;
 
-  const [allNotes] = useNotes(vault, props.starred);
+  const [allNotes] = useNotes(vault, props.bookmarked);
   const [currentViewNoteList, dispatch] = useReducer(NoteReducer, allNotes);
 
   return (

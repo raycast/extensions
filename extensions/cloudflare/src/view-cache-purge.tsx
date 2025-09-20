@@ -85,12 +85,12 @@ function CachePurgeHistory(props: SiteProps) {
               <Action
                 icon={Icon.Hammer}
                 title="Purge URL"
-                shortcut={{ modifiers: ['cmd'], key: 'p' }}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
                 onAction={() => clearUrlsFromCache(id, entry.url)}
               />
               <Action
                 icon={Icon.Trash}
-                title="Remove from history"
+                title="Remove from History"
                 shortcut={{ modifiers: ['cmd'], key: 'd' }}
                 onAction={() => {
                   const items = state.items.filter(

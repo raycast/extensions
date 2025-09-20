@@ -40,10 +40,28 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "summaryOfAMonth",
+      "title": "Summary Of A Month",
+      "description": "Summary of what you did in a given month",
+      "mode": "view"
+    },
+    {
+      "name": "daySummaryView",
+      "title": "Day Summary",
+      "description": "Summary of a given day",
+      "mode": "view"
+    },
+    {
+      "name": "dailyStandupSpeechView",
+      "title": "Day Standup Speech",
+      "description": "Creates a speech that you can use for your daily standup meeting",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.2",
+    "@raycast/api": "^1.51.1",
     "@raycast/utils": "^1.4.10",
     "fs": "0.0.1-security",
     "uuid": "^9.0.0"

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "metronome",
+  "title": "Metronome",
+  "description": "Based on an input (integer argument) BPM, you can get a metronome that plays a sound after a certain amount of time.",
+  "icon": "command-icon.png",
+  "author": "Visual-Studio-Coder",
+  "categories": [
+    "Other",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Start Metronome",
+      "subtitle": "Input the desired BPM",
+      "description": "Input the desired BPM for a metronome to start ticking.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "bpm",
+          "placeholder": "BPM",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "group",
+          "placeholder": "Accents",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "play-metronome",
+      "title": "Play Metronome",
+      "description": "Start a metronome"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@metronome play metronome at 120 BPM",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "play-metronome",
+              "arguments": {
+                "bpm": 120
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play-metronome": "ok"
+        }
+      },
+      {
+        "input": "@metronome start metronome at 60 BPM and accent every 4 beats",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "play-metronome",
+              "arguments": {
+                "bpm": 60,
+                "accents": 4
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play-metronome": "ok"
+        }
+      },
+      {
+        "input": "@metronome start metronome at 120 BPM and 3 beats per bar",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "play-metronome",
+              "arguments": {
+                "bpm": 120,
+                "accents": 3
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play-metronome": "ok"
+        }
+      },
+      {
+        "input": "@metronome 120 BPM 3 accent",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "play-metronome",
+              "arguments": {
+                "bpm": 120,
+                "accents": 3
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play-metronome": "ok"
+        }
+      }
+    ]
+  },
+  "dependencies": {
+    "@gibme/timer": "^1.0.4",
+    "@raycast/api": "^1.86.1",
+    "sound-play": "^1.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "@types/sound-play": "^1.1.0",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

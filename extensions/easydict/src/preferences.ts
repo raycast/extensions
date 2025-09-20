@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 23:36
+ * @lastEditTime: 2023-03-31 16:04
  * @fileName: preferences.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -28,17 +28,18 @@ export interface MyPreferences {
   showOpenInEudicFirst: boolean;
   enableSystemProxy: boolean;
   enableDetectLanguageSpeedFirst: boolean;
+  enableBaiduLanguageDetect: boolean;
 
   enableYoudaoDictionary: boolean;
   enableYoudaoTranslate: boolean;
 
   enableLingueeDictionary: boolean;
 
-  youdaoAppId: string;
-  youdaoAppSecret: string;
-
   enableDeepLTranslate: boolean;
   deepLAuthKey: string;
+  deepLEndpoint: string;
+
+  enableDeepLXTranslate: boolean;
 
   enableGoogleTranslate: boolean;
 
@@ -52,7 +53,6 @@ export interface MyPreferences {
   tencentSecretId: string;
   tencentSecretKey: string;
 
-  enableAppleLanguageDetect: boolean;
   enableAppleTranslate: boolean;
 
   enableCaiyunTranslate: boolean;
@@ -64,6 +64,15 @@ export interface MyPreferences {
 
   enableOpenAITranslate: boolean;
   openAIAPIKey: string;
+  openAIAPIURL: string;
+  openAIModel: string;
+
+  enableGeminiTranslate: boolean;
+  geminiAPIKey: string;
+  geminiAPIURL: string;
+  geminiModel: string;
+
+  bingHost: string;
 }
 
 /**
@@ -72,69 +81,35 @@ export interface MyPreferences {
  * * NOTE: Please apply for your own keys as much as possible. Please do not abuse them, otherwise I have to revoke them 😑。
  */
 export class AppKeyStore {
-  private static defaultEncryptedBaiduAppId = "U2FsdGVkX1/QHkSw+8qxr99vLkSasBfBRmA6Kb5nMyjP8IJazM9DcOpd3cOY6/il";
-  private static defaultEncryptedBaiduAppSecret = "U2FsdGVkX1+a2LbZ0+jntJTQjpPKUNWGrlr4NSBOwmlah7iP+w2gefq1UpCan39J";
-  private static defaultBaiduAppId = myDecrypt(this.defaultEncryptedBaiduAppId);
-  private static defaultBaiduAppSecret = myDecrypt(this.defaultEncryptedBaiduAppSecret);
+  static deepLAuthKey = myPreferences.deepLAuthKey.trim();
+  static deepLEndpoint = myPreferences.deepLEndpoint.trim();
 
-  private static defaultEncryptedTencentSecretId =
-    "U2FsdGVkX19lHBVXE+CEZI9cENSToLIGzHDsUIE+RyvIC66rgxumDmpYPDY4MdaTSbrq7MIyDvtgXaLvzijYSg==";
-  private static defaultEncryptedTencentSecretKey =
-    "U2FsdGVkX1+N6wDYXNiUISwKOM97cY03RjXmC+0+iodFo3b4NTNC1J8RR6xqcbdyF7z3Z2yQRMHHxn4m02aUvA==";
-  private static defaultTencentSecretId = myDecrypt(this.defaultEncryptedTencentSecretId);
-  private static defaultTencentSecretKey = myDecrypt(this.defaultEncryptedTencentSecretKey);
-
-  static defaultEncryptedDeepLAuthKey =
-    "U2FsdGVkX190UMu/gorJ/qgwhayFJilCPE5kSfOutkELsUnylfAZEtJGVPin3njGRwC2odphwTigbCzEcJ4kAw==";
-  private static defaultDeepLAuthKey = myDecrypt(this.defaultEncryptedDeepLAuthKey);
-
-  private static defaultEncryptedCaiyunToken = "U2FsdGVkX1+ihWvHkAfPMrWHju5Kg4EXAm1AVbXazEeHaXE1jdeUzZZrhjdKmS6u";
+  // This is a official test token from https://open.caiyunapp.com/%E4%BA%94%E5%88%86%E9%92%9F%E5%AD%A6%E4%BC%9A%E5%BD%A9%E4%BA%91%E5%B0%8F%E8%AF%91_API
+  private static defaultEncryptedCaiyunToken = "U2FsdGVkX1+RTgfMmgZgkD1Phn4FyvzMiMed5BvxnjoqS8QIJ/AFjUJdfC7OqjU3";
   private static defaultCaiyunToken = myDecrypt(this.defaultEncryptedCaiyunToken);
-
-  private static defaultEncryptedVolcanoAccessKeyId =
-    "U2FsdGVkX1/hnsLekyaJC6ZRHhl2zF+DY3qIpKakBl+VzCNJmfTf7gWlzBDM/XRv4lREJR6cXNup5/27M3CxcQ==";
-  private static defaultEncryptedVolcanoSecrectAccessKey =
-    "U2FsdGVkX18WjU7IuyZYfezclJHCuufVQR0tWprs/kFI51/Hm2aPLSrYRVOGdNGtrleSGyaixypEKiku8vYejn9GbQxlHmbwN+Pj34Kxup4=";
-  private static defaultVolcanoAccessId = myDecrypt(this.defaultEncryptedVolcanoAccessKeyId);
-  private static defaultVolcanoAccessKey = myDecrypt(this.defaultEncryptedVolcanoSecrectAccessKey);
-
-  // youdao app id and appsecret
-  static youdaoAppId = myPreferences.youdaoAppId.trim().length > 0 ? myPreferences.youdaoAppId.trim() : undefined;
-  static youdaoAppSecret =
-    myPreferences.youdaoAppSecret.trim().length > 0 ? myPreferences.youdaoAppSecret.trim() : undefined;
+  static caiyunToken = myPreferences.caiyunToken.trim() || this.defaultCaiyunToken;
 
   // baidu app id and secret
-  static baiduAppId =
-    myPreferences.baiduAppId.trim().length > 0 ? myPreferences.baiduAppId.trim() : this.defaultBaiduAppId;
-  static baiduAppSecret =
-    myPreferences.baiduAppSecret.trim().length > 0 ? myPreferences.baiduAppSecret.trim() : this.defaultBaiduAppSecret;
+  static baiduAppId = myPreferences.baiduAppId.trim();
+  static baiduAppSecret = myPreferences.baiduAppSecret.trim();
 
   // tencent secret id and key
-  static tencentSecretId =
-    myPreferences.tencentSecretId.trim().length > 0
-      ? myPreferences.tencentSecretId.trim()
-      : this.defaultTencentSecretId;
-  static tencentSecretKey =
-    myPreferences.tencentSecretKey.trim().length > 0
-      ? myPreferences.tencentSecretKey.trim()
-      : this.defaultTencentSecretKey;
+  static tencentSecretId = myPreferences.tencentSecretId.trim();
+  static tencentSecretKey = myPreferences.tencentSecretKey.trim();
 
-  static userDeepLAuthKey = myPreferences.deepLAuthKey.trim();
-
-  static caiyunToken = myPreferences.caiyunToken.trim();
-
-  static volcanoSecretId =
-    myPreferences.volcanoAccessKeyId.trim().length > 0
-      ? myPreferences.volcanoAccessKeyId.trim()
-      : this.defaultVolcanoAccessId;
-  static volcanoSecretKey =
-    myPreferences.volcanoAccessKeySecret.trim().length > 0
-      ? myPreferences.volcanoAccessKeySecret.trim()
-      : this.defaultVolcanoAccessKey;
+  static volcanoSecretId = myPreferences.volcanoAccessKeyId.trim();
+  static volcanoSecretKey = myPreferences.volcanoAccessKeySecret.trim();
 
   static openAIAPIKey = myPreferences.openAIAPIKey.trim();
+  static openAIEndpoint = myPreferences.openAIAPIURL.trim() || "https://api.openai.com/v1/chat/completions";
+  static openAIModel = myPreferences.openAIModel.trim() || "gpt-3.5-turbo";
+
+  static geminiAPIKey = myPreferences.geminiAPIKey.trim();
+  static geminiEndpoint = myPreferences.geminiAPIURL.trim() || "https://generativelanguage.googleapis.com";
+  static geminiModel = myPreferences.geminiModel.trim() || "gemini-2.0-flash";
 }
 
+// Test AES online: https://www.sojson.com/encrypt_aes.html
 export function myDecrypt(ciphertext: string) {
   // console.warn("decrypt:", ciphertext);
   const bytes = CryptoJS.AES.decrypt(ciphertext, environment.extensionName);

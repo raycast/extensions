@@ -6,10 +6,18 @@ import { MavenEmptyView } from "./utils/ui-component";
 
 export default function ShowGoogleMavenRepository() {
   const { allPackages, loading } = getGoogleMavenRepositories();
-
+  const emptyViewTitle = () => {
+    if (loading) {
+      return "Loading...";
+    }
+    if (allPackages.length === 0) {
+      return "No Artifacts";
+    }
+    return "Google Maven Repository";
+  };
   return (
-    <List isLoading={loading} searchBarPlaceholder={"Search groups"}>
-      <MavenEmptyView title={"No Groups"} description={""} />
+    <List isLoading={loading} searchBarPlaceholder={"Search groups"} throttle={true}>
+      <MavenEmptyView title={emptyViewTitle()} description={""} />
       {allPackages.map((value, index) => {
         return (
           <List.Item

@@ -7,13 +7,13 @@ import { getErrorMessage, showErrorToast } from "../utils";
 import { ProjectCommitList } from "./commits/list";
 import { LabelList } from "./label";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 async function createNote(mr: MergeRequest, body: string): Promise<any> {
   return await gitlab.post(`projects/${mr.project_id}/merge_requests/${mr.iid}/notes`, { body: body });
 }
 
-export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }): JSX.Element {
+export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }) {
   const mr = props.mr;
   async function handleAction() {
     try {
@@ -26,10 +26,10 @@ export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }
       showErrorToast(getErrorMessage(error), "Failed to close Merge Request");
     }
   }
-  return <Action title="Close MR" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handleAction} />;
+  return <Action title="Close Mr" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handleAction} />;
 }
 
-export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void }): JSX.Element {
+export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void }) {
   const mr = props.mr;
   async function handleAction() {
     try {
@@ -42,10 +42,10 @@ export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void 
       showErrorToast(getErrorMessage(error), "Failed to reopen Merge Request");
     }
   }
-  return <Action title="Reopen MR" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
+  return <Action title="Reopen Mr" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
 }
 
-export function RebaseMRAction(props: { mr: MergeRequest; shortcut?: Keyboard.Shortcut }): JSX.Element {
+export function RebaseMRAction(props: { mr: MergeRequest; shortcut?: Keyboard.Shortcut }) {
   const mr = props.mr;
   async function handleAction() {
     try {
@@ -64,7 +64,7 @@ export function MergeMRAction(props: {
   mr: MergeRequest;
   shortcut?: Keyboard.Shortcut;
   finished?: () => void;
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const mr = props.mr;
   async function handleAction() {
     try {
@@ -91,7 +91,10 @@ export function MergeMRAction(props: {
   }
 }
 
-export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: Keyboard.Shortcut }): JSX.Element | null {
+export function CreateTodoMRAction(props: {
+  mr: MergeRequest;
+  shortcut?: Keyboard.Shortcut;
+}): React.ReactElement | null {
   const mr = props.mr;
   async function handleAction() {
     try {
@@ -104,7 +107,7 @@ export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: Keyboar
   if (mr.state === "opened") {
     return (
       <Action
-        title="Add a to do"
+        title="Add a to Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}
@@ -129,7 +132,7 @@ function ShowMRLabelsAction(props: { labels: Label[] }) {
   );
 }
 
-export function MRItemActions(props: { mr: MergeRequest; onDataChange?: () => void }): JSX.Element {
+export function MRItemActions(props: { mr: MergeRequest; onDataChange?: () => void }) {
   const mr = props.mr;
   return (
     <React.Fragment>
@@ -147,7 +150,7 @@ export function MRItemActions(props: { mr: MergeRequest; onDataChange?: () => vo
   );
 }
 
-export function ShowMRCommitsAction(props: { mr: MergeRequest }): JSX.Element {
+export function ShowMRCommitsAction(props: { mr: MergeRequest }) {
   const mr = props.mr;
   return (
     <Action.Push

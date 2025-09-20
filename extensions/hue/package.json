@@ -42,37 +42,79 @@
       "mode": "view"
     },
     {
-      "name": "turnOffAllLights",
-      "title": "Turn Off All Lights",
+      "name": "toggleAllLights",
+      "title": "Toggle All Lights",
       "subtitle": "Hue",
-      "description": "Turn off all the lights",
-      "mode": "no-view"
+      "description": "Toggle all the lights",
+      "mode": "no-view",
+      "interval": "5m"
     }
   ],
   "preferences": [
     {
       "name": "transitionTime",
       "title": "Transition Time",
-      "description": "The time in milliseconds that the transition will take, rounded to 100ms.",
+      "description": "The time in milliseconds that transitions will take, rounded to the nearest 100ms.",
       "placeholder": "400",
       "type": "textfield",
       "default": "400",
       "required": false
+    },
+    {
+      "name": "toggleAllLights",
+      "title": "“Toggle All Lights” when some lights are on",
+      "description": "When some—but not all—lights are on, the command should",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Turn all lights off",
+          "value": "off"
+        },
+        {
+          "title": "Turn all lights on",
+          "value": "on"
+        }
+      ],
+      "default": "off",
+      "required": false
+    },
+    {
+      "name": "bridgeIpAddress",
+      "title": "Bridge IP address (manual)",
+      "description": "The IP address of your Hue bridge. Use this if automatic discovery doesn't work.",
+      "placeholder": "x.x.x.x",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "bridgeUsername",
+      "title": "Bridge Username (manual, optional)",
+      "description": "The username for your Hue bridge. Use this if you have already created a username you want to use. Leave this empty to automatically request a new username.",
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "type": "textfield",
+      "default": "",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.0",
-    "@raycast/utils": "^1.5.2",
-    "@types/node-localstorage": "^1.3.0",
-    "@xstate/react": "^3.2.1",
-    "node-hue-api": "^5.0.0-beta.15",
-    "xstate": "^4.37.1"
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
+    "@types/node-localstorage": "^1.3.3",
+    "@types/stream-json": "^1.7.7",
+    "@xstate/react": "^3.2.2",
+    "bonjour-service": "^1.2.1",
+    "chroma-js": "^2.4.2",
+    "jimp": "^0.22.10",
+    "stream-json": "^1.8.0",
+    "xstate": "^4.38.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "eslint": "^8.37.0",
-    "prettier": "^2.8.7",
-    "typescript": "^5.0.2"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/chroma-js": "^2.4.3",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.2",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

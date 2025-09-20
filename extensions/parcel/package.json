@@ -1,0 +1,316 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "parcel",
+  "title": "Parcel",
+  "description": "Allow Parcel users to see upcoming and active deliveries",
+  "icon": "extension-icon.png",
+  "author": "marcmagn1",
+  "contributors": [
+    "omarshahine",
+    "bendrucker",
+    "damian_duchnowski",
+    "xilopaint"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-deliveries",
+      "title": "My Deliveries",
+      "description": "Display active deliveries",
+      "mode": "view"
+    },
+    {
+      "name": "add-delivery",
+      "title": "Add Delivery",
+      "description": "Add a new delivery to track",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-deliveries",
+      "title": "Get Deliveries",
+      "description": "Get a list of your active or recent deliveries."
+    },
+    {
+      "name": "get-delivery-details",
+      "title": "Get Delivery Details",
+      "description": "Get detailed information about a specific delivery by tracking number."
+    }
+  ],
+  "ai": {
+    "instructions": "When showing deliveries, format the information clearly and concisely. For delivery dates, include both the date and any time information if available. For tracking status, use human-readable descriptions rather than status codes.",
+    "evals": [
+      {
+        "input": "@parcel What packages am I expecting?",
+        "mocks": {
+          "get-deliveries": [
+            {
+              "carrier_code": "amzn",
+              "date_expected": "2025-03-15 00:00:00",
+              "description": "Desk Organizer Set (5-Piece)",
+              "events": [
+                {
+                  "date": "Wednesday, 14 March 10:30 AM",
+                  "event": "Out for delivery",
+                  "location": "Seattle, WA"
+                },
+                {
+                  "date": "Wednesday, 14 March 5:45 AM",
+                  "event": "Package arrived at delivery facility",
+                  "location": "Seattle, WA"
+                }
+              ],
+              "extra_information": "ABCD1234",
+              "formatted_date_expected": "Mar 15, 2025",
+              "status_code": 4,
+              "status_description": "Out for Delivery",
+              "tracking_number": "TRK-123456789-US"
+            },
+            {
+              "carrier_code": "fedex",
+              "date_expected": "2025-03-18 00:00:00",
+              "description": "Wireless Headphones - Noise Cancelling",
+              "events": [
+                {
+                  "date": "Tuesday, 13 March 8:22 PM",
+                  "event": "Picked up",
+                  "location": "Memphis, TN"
+                }
+              ],
+              "formatted_date_expected": "Mar 18, 2025",
+              "status_code": 2,
+              "status_description": "In Transit",
+              "tracking_number": "FDX-987654321-US"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-deliveries",
+              "arguments": {
+                "filter": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@parcel Show me my recent deliveries",
+        "mocks": {
+          "get-deliveries": [
+            {
+              "carrier_code": "ups",
+              "date_expected": "2025-03-10 00:00:00",
+              "description": "Coffee Maker with Grinder",
+              "events": [
+                {
+                  "date": "Monday, 10 March 2:15 PM",
+                  "event": "Delivered to front door",
+                  "location": "Portland, OR"
+                },
+                {
+                  "date": "Monday, 10 March 9:30 AM",
+                  "event": "Out for delivery",
+                  "location": "Portland, OR"
+                }
+              ],
+              "formatted_date_expected": "Mar 10, 2025",
+              "status_code": 0,
+              "status_description": "Delivered",
+              "tracking_number": "UPS-1A2B3C4D5E-US"
+            },
+            {
+              "carrier_code": "dhl",
+              "date_expected": "2025-03-08 00:00:00",
+              "description": "Portable Bluetooth Speaker",
+              "events": [
+                {
+                  "date": "Friday, 8 March 4:45 PM",
+                  "event": "Delivered to neighbor",
+                  "location": "San Francisco, CA"
+                }
+              ],
+              "formatted_date_expected": "Mar 8, 2025",
+              "status_code": 0,
+              "status_description": "Delivered",
+              "tracking_number": "DHL-XYZ7890123-US"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-deliveries",
+              "arguments": {
+                "filter": "recent"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@parcel Track my delivery with tracking number TRK-123456789-US",
+        "mocks": {
+          "get-delivery-details": {
+            "found": true,
+            "delivery": {
+              "carrier_code": "amzn",
+              "date_expected": "2025-03-15 00:00:00",
+              "description": "Desk Organizer Set (5-Piece)",
+              "events": [
+                {
+                  "date": "Wednesday, 14 March 10:30 AM",
+                  "event": "Out for delivery",
+                  "location": "Seattle, WA"
+                },
+                {
+                  "date": "Wednesday, 14 March 5:45 AM",
+                  "event": "Package arrived at delivery facility",
+                  "location": "Seattle, WA"
+                },
+                {
+                  "date": "Tuesday, 13 March 8:30 PM",
+                  "event": "Package departed shipping facility",
+                  "location": "Kent, WA"
+                }
+              ],
+              "extra_information": "ABCD1234",
+              "formatted_date_expected": "Mar 15, 2025",
+              "delivery_timeframe": "In 1 day",
+              "status_code": 4,
+              "status_description": "Out for Delivery",
+              "tracking_number": "TRK-123456789-US",
+              "formatted_events": [
+                {
+                  "date": "Wednesday, 14 March 10:30 AM",
+                  "event": "Out for delivery",
+                  "location": "Seattle, WA",
+                  "formatted_date": "Mar 14, 2025",
+                  "time": "10:30 AM"
+                },
+                {
+                  "date": "Wednesday, 14 March 5:45 AM",
+                  "event": "Package arrived at delivery facility",
+                  "location": "Seattle, WA",
+                  "formatted_date": "Mar 14, 2025",
+                  "time": "05:45 AM"
+                },
+                {
+                  "date": "Tuesday, 13 March 8:30 PM",
+                  "event": "Package departed shipping facility",
+                  "location": "Kent, WA",
+                  "formatted_date": "Mar 13, 2025",
+                  "time": "08:30 PM"
+                }
+              ]
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-delivery-details",
+              "arguments": {
+                "tracking_number": "TRK-123456789-US"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@parcel when will my desk organizer arrive?",
+        "mocks": {
+          "get-deliveries": [
+            {
+              "carrier_code": "amzn",
+              "date_expected": "2025-03-15 00:00:00",
+              "description": "Desk Organizer Set (5-Piece)",
+              "events": [
+                {
+                  "date": "Wednesday, 14 March 10:30 AM",
+                  "event": "Out for delivery",
+                  "location": "Seattle, WA"
+                },
+                {
+                  "date": "Wednesday, 14 March 5:45 AM",
+                  "event": "Package arrived at delivery facility",
+                  "location": "Seattle, WA"
+                }
+              ],
+              "extra_information": "ABCD1234",
+              "formatted_date_expected": "Mar 15, 2025",
+              "status_code": 4,
+              "status_description": "Out for Delivery",
+              "tracking_number": "TRK-123456789-US"
+            },
+            {
+              "carrier_code": "fedex",
+              "date_expected": "2025-03-18 00:00:00",
+              "description": "Wireless Headphones - Noise Cancelling",
+              "events": [
+                {
+                  "date": "Tuesday, 13 March 8:22 PM",
+                  "event": "Picked up",
+                  "location": "Memphis, TN"
+                }
+              ],
+              "formatted_date_expected": "Mar 18, 2025",
+              "status_code": 2,
+              "status_description": "In Transit",
+              "tracking_number": "FDX-987654321-US"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-deliveries",
+              "arguments": {
+                "filter": "active"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Parcel API key generated from web.parcelapp.net",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.14.0",
+    "@types/react": "19.1.12",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

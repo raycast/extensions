@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "real-debrid-manager",
+  "title": "Real-Debrid Manager",
+  "description": "Real-Debrid client for Raycast\n\nNOT AN OFFICIAL CLIENT",
+  "icon": "command-icon.png",
+  "author": "Yamen",
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-download",
+      "title": "New Download",
+      "subtitle": "Add New Torrent or Link to RD",
+      "description": "Add New Torrent or Link to Real-Debrid",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "new-download-from-clipboard",
+      "title": "New Download From Clipboard",
+      "subtitle": "Add New Torrent or Link to RD",
+      "description": "Add New Torrent or Link to Real-Debrid from clipboard",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "downloads",
+      "title": "Downloads",
+      "subtitle": "View RD Downloads",
+      "description": "View Real-Debrid downloads",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "torrents",
+      "title": "Torrents",
+      "subtitle": "View RD Torrents",
+      "description": "View Real-Debrid torrents",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "account-info",
+      "title": "Account & Traffic Info",
+      "subtitle": "View RD Account & Traffic Info",
+      "description": "View logged-in user and traffic info",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api_token",
+      "type": "password",
+      "required": true,
+      "title": "Real-Debrid Token",
+      "description": "Provide API token found in your account",
+      "placeholder": "Enter your secure token"
+    },
+    {
+      "name": "item_limit",
+      "type": "dropdown",
+      "required": false,
+      "title": "Items Fetch Limit",
+      "description": "Specify how many torrents/downloads to attempt fetching",
+      "default": "100",
+      "data": [
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        },
+        {
+          "title": "150",
+          "value": "150"
+        },
+        {
+          "title": "200",
+          "value": "200"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.0",
+    "@raycast/utils": "^1.8.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

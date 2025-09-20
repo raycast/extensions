@@ -1,10 +1,9 @@
-import { Action, Icon, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Preferences } from "../lib/types";
 import { getErrorMessage } from "../lib/utils";
 import { getPopularVideos, useRefresher, Video } from "../lib/youtubeapi";
-import { VideoItem } from "./video";
 import { ListOrGrid } from "./listgrid";
-import { Preferences } from "../lib/types";
-import { addPinnedVideo } from "./recent_videos";
+import { VideoItem } from "./video";
 
 export function PopularVideoList() {
   const { griditemsize } = getPreferenceValues<Preferences>();
@@ -16,23 +15,7 @@ export function PopularVideoList() {
   }
   return (
     <ListOrGrid isLoading={isLoading} columns={griditemsize} aspectRatio={"4/3"}>
-      {data?.map((v) => (
-        <VideoItem
-          key={v.id}
-          video={v}
-          actions={
-            <Action
-              title="Pin Video"
-              icon={{ source: Icon.Pin, tintColor: Color.PrimaryText }}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-              onAction={() => {
-                addPinnedVideo(v);
-                showToast(Toast.Style.Success, "Pinned Video");
-              }}
-            />
-          }
-        />
-      ))}
+      {data?.map((v) => <VideoItem key={v.id} video={v} />)}
     </ListOrGrid>
   );
 }

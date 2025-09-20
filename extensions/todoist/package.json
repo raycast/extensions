@@ -5,34 +5,87 @@
   "description": "Check your Todoist tasks and quickly create new ones",
   "icon": "todoist.png",
   "author": "thomaslombart",
+  "owner": "doist",
+  "access": "public",
   "license": "MIT",
   "categories": [
     "Productivity"
   ],
   "contributors": [
     "AnishDe12020",
-    "kud"
+    "kud",
+    "gerardcs",
+    "prince_yadav",
+    "stelo",
+    "ridemountainpig",
+    "kcole93",
+    "Rob",
+    "jagadeesh_k",
+    "scottlovegrove",
+    "henningmu",
+    "FlohGro",
+    "dedalusj",
+    "william_sault",
+    "aditya_pethkar",
+    "alanwill",
+    "erayack",
+    "chialiyun"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
-      "name": "today",
-      "title": "Today Tasks",
+      "name": "home",
+      "title": "My Tasks",
       "subtitle": "Todoist",
-      "description": "See your Todoist tasks due today.",
-      "mode": "view"
-    },
-    {
-      "name": "upcoming",
-      "title": "Upcoming Tasks",
-      "subtitle": "Todoist",
-      "description": "See your upcoming Todoist tasks grouped by due date.",
-      "mode": "view"
+      "description": "Show your Todoist tasks and views (inbox, today, upcoming, completed, projects, labels).",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "Completed",
+              "value": "completed"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "View",
+          "description": "Indicates which view you want to see in the command."
+        }
+      ],
+      "keywords": [
+        "home",
+        "inbox",
+        "today",
+        "today tasks",
+        "upcoming",
+        "upcoming tasks",
+        "completed",
+        "completed tasks"
+      ]
     },
     {
       "name": "search",
-      "title": "Search Tasks",
+      "title": "Search",
       "subtitle": "Todoist",
-      "description": "Search across all your Todoist tasks.",
+      "description": "Search your Todoist tasks, projects, labels, and comments.",
       "mode": "view"
     },
     {
@@ -40,20 +93,38 @@
       "title": "Create Task",
       "subtitle": "Todoist",
       "description": "Create a Todoist task.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "quick-add-task",
       "title": "Quick Add Task",
+      "subtitle": "Todoist",
       "description": "Quickly add a new task in Todoist.",
       "mode": "no-view",
       "preferences": [
         {
           "name": "shouldCloseMainWindow",
           "type": "checkbox",
-          "title": "Advanced",
           "label": "Close window immediately",
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "autoCreateLabels",
+          "type": "checkbox",
+          "label": "Create labels automatically",
+          "description": "When enabled Raycast will parse labels and create them automatically.",
           "default": false,
           "required": false
         }
@@ -61,7 +132,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "Title/info (today 5pm p2)",
+          "placeholder": "Text (today 5pm p2)",
           "type": "text",
           "required": true
         },
@@ -73,40 +144,51 @@
       ]
     },
     {
-      "name": "projects",
-      "title": "Search Projects",
-      "subtitle": "Todoist",
-      "description": "See your Todoist projects and tasks by project.",
-      "mode": "view"
-    },
-    {
       "name": "create-project",
       "title": "Create Project",
       "subtitle": "Todoist",
       "description": "Create a Todoist project.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
-      "name": "completed-tasks",
-      "title": "Completed Tasks",
-      "subtitle": "Todoist",
-      "description": "See all your completed tasks",
-      "mode": "view"
-    },
-    {
-      "name": "menubar",
+      "name": "menu-bar",
       "title": "Menu Bar Tasks",
       "subtitle": "Todoist",
-      "description": "See your upcoming Todoist tasks in your menubar",
+      "description": "Show your Todoist tasks and views in your menu bar.",
       "mode": "menu-bar",
       "preferences": [
+        {
+          "name": "hideMenuBarCount",
+          "type": "checkbox",
+          "label": "Hide menu bar count",
+          "description": "When enabled, the number of tasks in the menu bar won't be shown.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showNextTask",
+          "type": "checkbox",
+          "label": "Show next task as title",
+          "description": "When enabled and no task is focused, displays your next upcoming task in the menu bar title",
+          "default": false,
+          "required": false
+        },
         {
           "name": "view",
           "type": "dropdown",
           "data": [
             {
+              "title": "Inbox",
+              "value": "inbox"
+            },
+            {
               "title": "Today",
               "value": "today"
+            },
+            {
+              "title": "Filter",
+              "value": "filter"
             },
             {
               "title": "Upcoming",
@@ -116,66 +198,497 @@
           "default": "upcoming",
           "required": false,
           "title": "View",
-          "description": "Indicates which view you want to see in your menubar."
+          "description": "Indicates which view you want to see in your menu bar."
         },
         {
           "name": "upcomingDays",
           "type": "textfield",
           "default": "7",
           "required": false,
-          "title": "Number of days for Upcoming",
-          "description": "Indicates the number of days you want in the upcoming view of the menubar."
+          "title": "Number of Days for Upcoming View",
+          "description": "Indicates the number of days you want in the upcoming view."
         },
         {
-          "name": "focusFeatureWidth",
+          "default": "",
+          "description": "Task filter for the filter view. Use Todoist filter syntax, e.g. today & (#Work | @next).",
+          "name": "filter",
+          "required": false,
+          "title": "Filter Query",
+          "type": "textfield"
+        },
+        {
+          "name": "taskWidth",
           "type": "textfield",
           "required": false,
           "default": "40",
-          "title": "Max width of Focused Task",
-          "description": "Maximum width of the focused task' text."
+          "title": "Maximum Width of Menu Bar's Tasks",
+          "description": "Maximum width of all menu bar task's text."
         }
       ],
       "interval": "10m"
     },
     {
+      "name": "show-projects",
+      "title": "Show Projects",
+      "subtitle": "Todoist",
+      "description": "Show your Todoist projects.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showTaskCount",
+          "type": "checkbox",
+          "label": "Show the task count besides the project",
+          "description": "When enabled, you can see the task count besides your project.",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "show-labels",
+      "title": "Show Labels",
+      "subtitle": "Todoist",
+      "description": "Show your Todoist labels.",
+      "mode": "view"
+    },
+    {
+      "name": "show-filters",
+      "title": "Show Filters",
+      "description": "Show your Todoist filters.",
+      "mode": "view"
+    },
+    {
       "name": "unfocus-current-task",
       "title": "Unfocus Current Task",
       "subtitle": "Todoist",
-      "description": "Unfocus the current Todoist task.",
-      "mode": "no-view"
+      "description": "Unfocus the current task in the menu bar.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-focused-task",
+      "title": "Open Focus Task",
+      "subtitle": "Todoist",
+      "description": "When a task is chosen as the focused one, you can open it directly using this command.",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
+  "tools": [
+    {
+      "name": "get-other-data",
+      "title": "Get Other Data",
+      "description": "Retrieves other data from Todoist (e.g. filter, labels, reminders, locations, user, etc.)"
+    },
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Retrieves tasks from Todoist"
+    },
+    {
+      "name": "get-completed-tasks",
+      "title": "Get Completed Tasks",
+      "description": "Retrieves completed tasks from Todoist's activity log"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Creates a new task in Todoist"
+    },
+    {
+      "name": "update-task",
+      "title": "Update Task",
+      "description": "Updates an existing task in Todoist"
+    },
+    {
+      "name": "move-task",
+      "title": "Move Task",
+      "description": "Moves a task to a different project, section, or parent task"
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Task",
+      "description": "Completes an existing task in Todoist"
+    },
+    {
+      "name": "uncomplete-task",
+      "title": "Uncomplete Task",
+      "description": "Reopens a completed task in Todoist"
+    },
+    {
+      "name": "delete-task",
+      "title": "Delete Task",
+      "description": "Deletes an existing task in Todoist"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Retrieves all projects from Todoist using REST API"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Creates a new project in Todoist"
+    },
+    {
+      "name": "update-project",
+      "title": "Update Project",
+      "description": "Updates an existing project in Todoist"
+    },
+    {
+      "name": "move-project",
+      "title": "Move Project",
+      "description": "Moves a project to a different parent project in Todoist"
+    },
+    {
+      "name": "archive-project",
+      "title": "Archive Project",
+      "description": "Archives an existing project in Todoist"
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "description": "Delete a Todoist project"
+    },
+    {
+      "name": "create-section",
+      "title": "Create Section",
+      "description": "Creates a new section in a Todoist project"
+    },
+    {
+      "name": "update-section",
+      "title": "Update Section",
+      "description": "Updates an existing section in Todoist"
+    },
+    {
+      "name": "move-section",
+      "title": "Move Section",
+      "description": "Moves a section to a different project in Todoist"
+    },
+    {
+      "name": "delete-section",
+      "title": "Delete Section",
+      "description": "Delete a Todoist section"
+    },
+    {
+      "name": "create-label",
+      "title": "Create Label",
+      "description": "Creates a new label in Todoist"
+    },
+    {
+      "name": "update-label",
+      "title": "Update Label",
+      "description": "Updates an existing label in Todoist"
+    },
+    {
+      "name": "delete-label",
+      "title": "Delete Label",
+      "description": "Delete a Todoist label"
+    },
+    {
+      "name": "create-filter",
+      "title": "Create Filter",
+      "description": "Creates a new filter in Todoist"
+    },
+    {
+      "name": "update-filter",
+      "title": "Update Filter",
+      "description": "Updates an existing filter in Todoist"
+    },
+    {
+      "name": "delete-filter",
+      "title": "Delete Filter",
+      "description": "Delete a Todoist filter"
+    },
+    {
+      "name": "get-comments",
+      "title": "Get Comments",
+      "description": "Retrieves comments for a task or project from Todoist"
+    },
+    {
+      "name": "add-comment",
+      "title": "Add Comment",
+      "description": "Adds a comment to a Todoist task"
+    },
+    {
+      "name": "update-comment",
+      "title": "Update Comment",
+      "description": "Updates an existing comment in Todoist"
+    },
+    {
+      "name": "delete-comment",
+      "title": "Delete Comment",
+      "description": "Deletes a comment from a Todoist task"
+    }
+  ],
+  "ai": {
+    "instructions": "\\n- When getting tasks, use filters only if you can't find the tasks with the project_id, section_id, or label first.\\n- When asked about the tasks scheduled for a specific day, only return the tasks scheduled for that day.\\n- Users can use shortcuts to create a task, they can include in the text: a project name starting with the # character (without spaces), a label starting with the @ character, an assignee starting with the + character, a priority (e.g., p1), or a description starting from // until the end of the text.\\n- Make sure the title doesn't contain the date.\\n- Before creating something, check if it already exists first.",
+    "evals": [
+      {
+        "input": "@todoist Buy groceries today at 10 in home project",
+        "mocks": {
+          "get-projects": [
+            {
+              "id": "fitness",
+              "color": "red",
+              "name": "Fitness"
+            },
+            {
+              "id": "home",
+              "name": "Home",
+              "color": "green"
+            }
+          ],
+          "create-task": "Successfully called \"create-task\""
+        },
+        "expected": [
+          {
+            "callsTool": "get-projects"
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "content": "Buy groceries",
+                "project_id": "home"
+              },
+              "name": "create-task"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@todoist what's scheduled for today",
+        "mocks": {
+          "get-tasks": [
+            {
+              "id": "1",
+              "content": "Buy groceries",
+              "due": {
+                "date": "2025-01-22"
+              }
+            },
+            {
+              "id": "2",
+              "content": "Finish the report",
+              "due": {
+                "date": "2025-01-23"
+              }
+            },
+            {
+              "id": "3",
+              "content": "Schedule a meeting with the team",
+              "due": {
+                "date": "2025-01-24"
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-tasks"
+          },
+          {
+            "meetsCriteria": "The answer includes the tasks scheduled for today."
+          }
+        ]
+      },
+      {
+        "input": "@todoist Create a filter for my high-priority tasks in work",
+        "mocks": {
+          "create-filter": "Successfully called \"create-filter\"",
+          "get-other-data": {
+            "filters": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-filter"
+          },
+          {
+            "meetsCriteria": "The answer includes a filter."
+          }
+        ]
+      },
+      {
+        "input": "@todoist What have I done last week",
+        "mocks": {
+          "get-completed-tasks": [
+            {
+              "id": 1,
+              "event_type": "completed",
+              "extra_data": {
+                "content": "Planifier le budget pour la rénovation"
+              }
+            },
+            {
+              "id": 2,
+              "event_type": "completed",
+              "extra_data": {
+                "content": "Eat vitamins"
+              }
+            },
+            {
+              "id": 3,
+              "event_type": "completed",
+              "extra_data": {
+                "content": "Wire theming settings"
+              }
+            },
+            {
+              "id": 4,
+              "event_type": "completed",
+              "extra_data": {
+                "content": "Write a blog post"
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-completed-tasks"
+          },
+          {
+            "meetsCriteria": "The answer includes a list of completed tasks."
+          }
+        ]
+      },
+      {
+        "input": "@todoist Add urgent label to my website bugs tasks",
+        "mocks": {
+          "get-projects": [
+            {
+              "id": "fitness",
+              "color": "red",
+              "name": "Fitness"
+            },
+            {
+              "id": "home",
+              "name": "Home",
+              "color": "green"
+            }
+          ],
+          "get-other-data": {
+            "labels": [
+              {
+                "name": "urgent",
+                "id": "1",
+                "color": "red"
+              }
+            ]
+          },
+          "get-tasks": [
+            {
+              "id": "2",
+              "content": "Strange Safari bug on website"
+            }
+          ],
+          "update-task": "Successfully called \"update-task\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "resource_types": {
+                  "includes": "labels"
+                }
+              },
+              "name": "get-other-data"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "id": "2",
+                "labels": [
+                  "urgent"
+                ]
+              },
+              "name": "update-task"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@todoist Update the priority of task Task 1 to priority 1",
+        "mocks": {
+          "get-tasks": [
+            {
+              "id": "Task 1",
+              "priority": 4
+            }
+          ],
+          "update-task": "Successfully called \"update-task\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "id": "Task 1",
+                "priority": 1
+              },
+              "name": "update-task"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "token",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
+    },
+    {
+      "name": "focusLabelName",
+      "type": "textfield",
+      "required": false,
+      "title": "Focus Label",
+      "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
+      "placeholder": "raycast-focus"
+    },
+    {
+      "name": "useConfetti",
+      "type": "checkbox",
+      "label": "Use confetti to celebrate task completion",
+      "description": "When enabled, completing a task will trigger a confetti celebration.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@doist/todoist-api-typescript": "^2.1.2",
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.16",
-    "date-fns": "^2.29.3",
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.8.4",
+    "chrono-node": "^2.7.9",
+    "date-fns": "^4.1.0",
+    "form-data": "^4.0.2",
     "lodash": "^4.17.21",
-    "remove-markdown": "0.5.0"
+    "mime": "^4.0.7",
+    "node-fetch": "^3.3.2",
+    "remove-markdown": "^0.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/lodash": "^4.14.185",
-    "@types/node": "^18.7.18",
-    "@types/react": "^18.0.20",
-    "@types/remove-markdown": "^0.3.1",
-    "eslint": "^8.23.1",
-    "eslint-plugin-import": "^2.27.5",
-    "typescript": "^4.8.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
+    "@types/mime": "^4.0.0",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^9.24.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

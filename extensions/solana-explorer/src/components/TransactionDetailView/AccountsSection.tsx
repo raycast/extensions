@@ -57,14 +57,14 @@ export const AccountsSection: FC<IAccountsSectionProps> = ({ accounts, connectio
                           accountKey.balanceChange === 0
                             ? Icon.CircleFilled
                             : accountKey.balanceChange > 0
-                            ? Icon.ArrowUpCircleFilled
-                            : Icon.ArrowDownCircleFilled,
+                              ? Icon.ArrowUpCircleFilled
+                              : Icon.ArrowDownCircleFilled,
                         tintColor:
                           accountKey.balanceChange === 0
                             ? Color.Blue
                             : accountKey.balanceChange > 0
-                            ? Color.Green
-                            : Color.Red,
+                              ? Color.Green
+                              : Color.Red,
                       }}
                     />
                     <List.Item.Detail.Metadata.Label

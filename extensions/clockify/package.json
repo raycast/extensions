@@ -6,7 +6,13 @@
   "icon": "command-icon.png",
   "author": "isma",
   "contributors": [
-    "sxn"
+    "sxn",
+    "kuddl",
+    "azlekov",
+    "sebboer",
+    "shkm",
+    "constantins2001",
+    "xmok"
   ],
   "license": "MIT",
   "preferences": [
@@ -16,7 +22,38 @@
       "required": true,
       "title": "API Key",
       "description": "Clockify API Key",
-      "link": "https://clockify.me/user/settings"
+      "placeholder": "XXX...xxxx",
+      "link": "https://app.clockify.me/user/preferences#advanced"
+    },
+    {
+      "name": "region",
+      "title": "Region",
+      "description": "Clockify Region",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Global",
+          "value": "GLOBAL"
+        },
+        {
+          "title": "USA",
+          "value": "USA"
+        },
+        {
+          "title": "AU",
+          "value": "AU"
+        },
+        {
+          "title": "EU",
+          "value": "EU"
+        },
+        {
+          "title": "UK",
+          "value": "UK"
+        }
+      ],
+      "default": "GLOBAL"
     }
   ],
   "commands": [
@@ -29,25 +66,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.27.0",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
     "lodash.isempty": "^4.4.0",
-    "lodash.uniqwith": "^4.5.0",
-    "node-fetch": "^3.0.0"
+    "lodash.uniqwith": "^4.5.0"
   },
   "devDependencies": {
-    "@types/lodash.isempty": "^4.4.6",
-    "@types/lodash.uniqwith": "^4.5.6",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash.isempty": "^4.4.9",
+    "@types/lodash.uniqwith": "^4.5.9",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   }
 }

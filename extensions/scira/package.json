@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scira",
+  "title": "Scira",
+  "description": "AI-powered search engine",
+  "icon": "icon.png",
+  "author": "zaidmukaddam",
+  "contributors": [
+    "thomas"
+  ],
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-scira",
+      "title": "Search Scira",
+      "subtitle": "send a search query to scira",
+      "description": "This will send a search query to scira.app",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.2.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.1.9",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "tools": [
+    {
+      "name": "search-scira",
+      "title": "Search Scira",
+      "description": "Makes use of scira.app to search the web and X"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@scira what's the latest bitcoin price",
+        "mocks": {
+          "search-scira": "The current price of Bitcoin is approximately USD 97,305.19 [Bitcoin USD (BTC-USD) Stock Price, News, Quote & History - Yahoo Finance](https://finance.yahoo.com/quote/BTC-USD/). \n\n### Additional Information:\n- **Live Price**: The live price of Bitcoin is USD 96,668.23 [Bitcoin Price | BTC to USD Converter, Chart and News - Binance](https://www.binance.com/en/price/bitcoin).\n- **Market Cap**: Bitcoin's current market cap is USD 1,916.08 billion [Bitcoin Price | BTC to USD Converter, Chart and News - Binance](https://www.binance.com/en/price/bitcoin).\n- **24-Hour Trading Volume**: The trading volume over the last 24 hours is USD 52,319,785,911.85 [Bitcoin Price: BTC Live Price Chart, Market Cap & News Today - CoinGecko](https://www.coingecko.com/en/coins/bitcoin).\n\n### Price Predictions for 2025:\n- **Average Price**: Analysts predict an average price of USD 160,000 for Bitcoin in 2025, with a high of USD 200,000 and a low of USD 87,000 [Bitcoin (BTC) Price Prediction 2025 - 2030 - How Will It Perform?](https://cryptonews.com/price-predictions/bitcoin-price-prediction/).\n\nPlease note that cryptocurrency prices are highly volatile and these predictions are speculative."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "group": "web",
+                "query": [
+                  {
+                    "includes": "bitcoin price"
+                  }
+                ]
+              },
+              "name": "search-scira"
+            }
+          },
+          {
+            "input": "@scira what was the last post of raycastapp on x",
+            "mocks": {
+              "search-scira": "Raycast has recently introduced a new feature called AI Extensions (Beta), which marks a significant advancement in how users can interact with their extensions within the Raycast platform. This feature was announced on February 26, 2025, and it promises to enhance the user experience by allowing more dynamic and intelligent interactions with the software. The announcement has garnered considerable attention, with 452 likes, 61 quotes, 73 replies, and 51 retweets, indicating a strong interest from the Raycast community in this new development [Raycast on X: \"Introducing: AI Extensions (Beta) A new way to ...](https://x.com/raycastapp/status/1894739715716174019).\n\nEarlier in the year, on January 16, 2025, Raycast introduced another feature called Raycast Focus, designed to help users manage their productivity by setting goals, choosing durations, and blocking distracting apps and websites. This feature has been well-received, evidenced by 1677 likes, 123 quotes, 147 replies, and 94 retweets. It reflects Raycast's ongoing commitment to enhancing user productivity and focus, which is a core aspect of their product philosophy [Raycast - X](https://x.com/raycastapp/status/1879880881579675858).\n\nAdditionally, Raycast has been active in engaging with its community through various updates and announcements. On February 25, 2025, they shared a post with a heart emoji, which received 60 likes and 1 retweet, showcasing their lighter side and community engagement [Raycast on X](https://x.com/raycastapp/status/1894492738852106435). These posts, along with the introduction of new features, demonstrate Raycast's dedication to both innovation and community interaction, making it a dynamic platform for productivity enthusiasts."
+            },
+            "expected": [
+              {
+                "callsTool": {
+                  "arguments": {
+                    "group": "x",
+                    "query": {
+                      "includes": "raycast"
+                    }
+                  },
+                  "name": "search-scira"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

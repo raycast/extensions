@@ -1,67 +1,66 @@
 {
-    "$schema": "https://www.raycast.com/schemas/extension.json",
-    "name": "anonaddy",
-    "title": "AnonAddy",
-    "description": "Generate and manage your AnonAddy aliases from your keyboard.",
-    "icon": "command-icon.png",
-    "author": "http.james",
-    "contributors": [
-      "pernielsentikaer"
-    ],
-    "categories": [
-      "Productivity"
-    ],
-    "license": "MIT",
-    "commands": [
-      {
-        "name": "generate-alias",
-        "title": "Generate Alias",
-        "subtitle": "AnonAddy",
-        "description": "Generate a random AnonAddy alias",
-        "mode": "no-view"
-      },
-      {
-        "name": "list-aliases",
-        "title": "List Aliases",
-        "subtitle": "AnonAddy",
-        "description": "List and search AnonAddy aliases",
-        "mode": "view"
-      },
-      {
-        "name": "edit-alias",
-        "title": "Edit Alias",
-        "subtitle": "AnonAddy",
-        "description": "Edit an AnonAddy alias",
-        "mode": "view"
-      }
-    ],
-    "dependencies": {
-      "@raycast/api": "^1.39.3",
-      "node-fetch": "^3.2.10"
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anonaddy",
+  "title": "Addy",
+  "description": "Easily generate and manage your Addy email aliases directly from your keyboard.",
+  "icon": "icon.png",
+  "author": "http.james",
+  "contributors": [
+    "pernielsentikaer",
+    "mormubis"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-alias",
+      "title": "Create Alias",
+      "description": "Create a new Addy email alias with customizable options.",
+      "mode": "view"
     },
-    "devDependencies": {
-      "@typescript-eslint/eslint-plugin": "^5.0.0",
-      "@typescript-eslint/parser": "^5.0.0",
-      "eslint": "^7.32.0",
-      "eslint-config-prettier": "^8.3.0",
-      "prettier": "^2.5.1",
-      "typescript": "^4.4.3"
+    {
+      "name": "generate-alias",
+      "title": "Generate Alias",
+      "description": "Quickly generate an Addy email alias using your default settings.",
+      "mode": "no-view"
     },
-    "scripts": {
-      "build": "ray build -e dist",
-      "dev": "ray develop",
-      "fix-lint": "ray lint --fix",
-      "lint": "ray lint",
-      "publish": "ray publish"
-    },
-    "preferences": [
-      {
-        "name": "apiKey",
-        "description": "The API key used to interact with AnonAddy's API.",
-        "type": "password",
-        "required": true,
-        "title": "AnonAddy API Key"
-      }
-    ]
-  }
-  
+    {
+      "name": "list-aliases",
+      "title": "My Aliases",
+      "description": "View, search, and manage your existing Addy email aliases.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "utility-types": "^3.11.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "The API key used to interact with Addy's API.",
+      "type": "password",
+      "required": true,
+      "title": "Addy API Key"
+    }
+  ]
+}

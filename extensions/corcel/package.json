@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "corcel",
+  "title": "Corcel AI",
+  "description": "Use AI Chat and Image Generation",
+  "icon": "icon.png",
+  "author": "corcel.io",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Fun",
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "AI Chat",
+      "subtitle": "Corcel",
+      "description": "Have a conversation with AI assistants powered by different models.",
+      "mode": "view"
+    },
+    {
+      "name": "chats",
+      "title": "AI Chat History",
+      "subtitle": "Corcel",
+      "description": "View your chat history and start a new conversation!",
+      "mode": "view"
+    },
+    {
+      "name": "images",
+      "title": "Saved AI Images",
+      "subtitle": "Corcel",
+      "description": "View your all your saved images generated with corcel!",
+      "mode": "view"
+    },
+    {
+      "name": "image",
+      "title": "Generate AI Images",
+      "subtitle": "Corcel",
+      "description": "Generate images with a variety of models with Corcel",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "model",
+          "label": "Default Model used for generating images",
+          "description": "Choose between Proteus, Playground and Dramshaper",
+          "type": "dropdown",
+          "title": "Model",
+          "required": false,
+          "default": "proteus",
+          "data": [
+            {
+              "title": "Proteus",
+              "value": "proteus"
+            },
+            {
+              "title": "Dreamshaper",
+              "value": "dreamshaper"
+            },
+            {
+              "title": "Playground",
+              "value": "playground"
+            }
+          ]
+        },
+        {
+          "name": "numberOfImages",
+          "description": "The dfault number of images generated at once. Note: value is clamped at 3",
+          "type": "textfield",
+          "title": "Number of Images",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "width",
+          "description": "The width of generated images",
+          "type": "textfield",
+          "title": "Width",
+          "required": false,
+          "default": "1024"
+        },
+        {
+          "name": "height",
+          "description": "The height of generated images",
+          "type": "textfield",
+          "title": "Height",
+          "required": false,
+          "default": "1024"
+        },
+        {
+          "name": "cfgScale",
+          "description": "How similar the image will be to your prompt. Higher values make the image closer to your prompt, with slightly lower quality. Note: value is clamped at 3",
+          "type": "textfield",
+          "title": "Guidance Scale",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "steps",
+          "description": "0-1 (inclusive). The closer this value is to 1, the more steps the model will take in the image generation process. Note: This value is converted and rounded to the actual engine value: Proteus/Dreamshaper: 6-12, Playground: 25-51",
+          "type": "textfield",
+          "title": "Steps (0-1 inclusive)",
+          "required": false,
+          "default": "0.3"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "Your API Key from Corcel",
+      "type": "password",
+      "title": "API Key",
+      "required": true
+    },
+    {
+      "name": "chatModel",
+      "description": "The model that will be used for generating chat responses",
+      "type": "dropdown",
+      "title": "Chat Model",
+      "data": [
+        {
+          "title": "Cortext Ultra",
+          "value": "cortext-ultra"
+        },
+        {
+          "title": "Mixtral",
+          "value": "mixtral-8x7b"
+        }
+      ],
+      "required": false,
+      "default": "mixtral-8x7b"
+    },
+    {
+      "name": "imageDownloadFolder",
+      "description": "All images you download, will go into this folder",
+      "type": "directory",
+      "title": "Image Download Destination",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.14.0",
+    "dayjs": "^1.11.10",
+    "eventsource-parser": "^1.1.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

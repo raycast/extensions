@@ -1,0 +1,78 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "control-d",
+    "title": "Control D",
+    "description": "Quickly view and make changes to your Control D profiles, devices, and more from Raycast.",
+    "icon": "command-icon.png",
+    "author": "http.james",
+    "categories": [
+        "Productivity"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "list-profiles",
+            "title": "List Profiles",
+            "subtitle": "Control D",
+            "description": "Shows your Control D profiles and their metadata, like name, current status, device count, etc.",
+            "mode": "view"
+        },
+        {
+            "name": "modify-profile",
+            "title": "Modify Profile",
+            "subtitle": "Control D",
+            "description": "Rename Control D profile.",
+            "mode": "view"
+        },
+        {
+            "name": "change-filters",
+            "title": "Change Filters",
+            "subtitle": "Control D",
+            "description": "View and change active filters for a Control D profile.",
+            "mode": "view"
+        },
+        {
+            "name": "learn-my-ip",
+            "title": "Learn My IP",
+            "subtitle": "Control D",
+            "description": "Log IP address into Control D device.",
+            "mode": "view"
+        },
+        {
+            "name": "status",
+            "title": "Check DNS Status",
+            "subtitle": "Control D",
+            "description": "Check if you are connected to Control D.",
+            "mode": "view"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "api-key",
+            "title": "API Key",
+            "description": "Your Control D API key.",
+            "type": "password",
+            "required": true
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.49.0",
+        "axios": "^1.8.4",
+        "form-data": "^4.0.0"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "1.0.5",
+        "@types/node": "18.8.3",
+        "@types/react": "18.0.9",
+        "eslint": "^7.32.0",
+        "prettier": "^2.5.1",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

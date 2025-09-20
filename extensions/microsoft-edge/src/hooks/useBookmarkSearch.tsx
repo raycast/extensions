@@ -1,9 +1,10 @@
 import { promises, existsSync } from "fs";
-import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../interfaces";
-import { getBookmarksFilePath } from "../util";
+import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../types/interfaces";
+import { getBookmarksFilePath } from "../utils/pathUtils";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
 import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
+import { geNotInstalledMessage, getNoBookmarksMessage } from "../utils/messageUtils";
+import { validateAppIsInstalled } from "../actions";
 
 function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];
@@ -34,9 +35,12 @@ const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
 };
 
 const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
+  // First check if the app is installed
+  await validateAppIsInstalled();
+
   const bookmarksFilePath = getBookmarksFilePath(profile);
   if (!existsSync(bookmarksFilePath)) {
-    throw new Error(NO_BOOKMARKS_MESSAGE);
+    throw new Error(getNoBookmarksMessage());
   }
 
   const fileBuffer = await promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
@@ -53,7 +57,7 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
     (profileId: string) => {
       setProfile(profileId);
     },
-    [profile]
+    [profile],
   );
 
   useEffect(() => {
@@ -63,9 +67,9 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
         setIsLoading(false);
       })
       .catch((e) => {
-        if (e.message === NOT_INSTALLED_MESSAGE) {
+        if (e.message === geNotInstalledMessage()) {
           setErrorView(<NotInstalledError />);
-        } else if (e.message === NO_BOOKMARKS_MESSAGE) {
+        } else if (e.message === getNoBookmarksMessage()) {
           setErrorView(<NoBookmarksError />);
         } else {
           setErrorView(<UnknownError />);

@@ -1,17 +1,10 @@
 import { LinearClient } from "@linear/sdk";
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, showHUD } from "@raycast/api";
-import { authorize, oauthClient } from "./api/oauth";
+import { getAccessToken, withAccessToken } from "@raycast/utils";
 
-type Arguments = {
-  comment: string;
-  issueId: string;
-};
+import { linear } from "./api/linearClient";
 
-type Preferences = {
-  shouldCloseMainWindow: boolean;
-};
-
-const command = async (props: { arguments: Arguments }) => {
+const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) => {
   const { issueId, comment } = props.arguments;
 
   const toast = await showToast({
@@ -19,12 +12,11 @@ const command = async (props: { arguments: Arguments }) => {
     title: `Adding comment to ${issueId}`,
   });
 
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.QuickAddCommentToIssue>();
 
   try {
-    const tokens = await oauthClient.getTokens();
-    const accessToken = tokens?.accessToken || (await authorize());
-    const linearClient = new LinearClient({ accessToken });
+    const { token } = getAccessToken();
+    const linearClient = new LinearClient({ accessToken: token });
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
@@ -70,10 +62,10 @@ const command = async (props: { arguments: Arguments }) => {
       toast.primaryAction = {
         title: "Copy Error Log",
         shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-        onAction: () => Clipboard.copy(e instanceof Error ? e.stack ?? e.message : String(e)),
+        onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
       };
     }
   }
 };
 
-export default command;
+export default withAccessToken(linear)(command);

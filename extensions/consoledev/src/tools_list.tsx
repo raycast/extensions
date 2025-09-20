@@ -1,45 +1,32 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
-import { isLeft } from "fp-ts/lib/Either";
-import { useEffect, useState } from "react";
+import { Icon, List } from "@raycast/api";
 import FeedItem from "./components/FeedItem";
-import { Feed, Tool } from "./responseTypes";
+import { Tool } from "./responseTypes";
 import { getToolsFeed } from "./util";
-
-interface State {
-  feed: Feed<Tool> | null;
-  error?: Error;
-}
+import { convertToMarkdown } from "./lib/string";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function ToolsList() {
-  const [state, setState] = useState<State>({
-    feed: null,
+  const { isLoading, data: feed } = useCachedPromise(getToolsFeed, [], {
+    failureToastOptions: {
+      title: "Failed to fetch Tools.",
+    },
   });
-
-  useEffect(() => {
-    async function fetchTools() {
-      const feedEither = await getToolsFeed();
-
-      if (isLeft(feedEither)) {
-        console.error(feedEither.left);
-        showToast(ToastStyle.Failure, "Failed to fetch Tools.");
-        return;
-      }
-
-      setState({ feed: feedEither.right });
-    }
-
-    fetchTools();
-  }, []);
 
   return (
     <List
-      isLoading={state.feed === null}
-      navigationTitle={state.feed?.title}
-      searchBarPlaceholder="Filter tools by name..."
+      isLoading={isLoading}
+      navigationTitle={feed?.title}
+      searchBarPlaceholder="Filter tools by name"
+      isShowingDetail
     >
-      {state.feed?.items.map((tool) => (
-        <FeedItem item={tool} key={tool.link} />
+      {feed?.items.map((tool) => (
+        <FeedItem item={formatTool(tool)} key={tool.link} icon={Icon.Hammer} />
       ))}
     </List>
   );
 }
+
+const formatTool = (tool: Tool): Tool => ({
+  ...tool,
+  description: convertToMarkdown(tool.description),
+});

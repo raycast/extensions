@@ -2,11 +2,30 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sips",
   "title": "Image Modification",
-  "description": "Rotate, flip, resize, and convert images using SIPS",
+  "description": "Apply filters and transformations to various image formats, and convert between them.",
+  "keywords": [
+    "convert",
+    "edit",
+    "file",
+    "filter",
+    "flip",
+    "image",
+    "optimize",
+    "pad",
+    "placeholder",
+    "resize",
+    "rotate",
+    "sips"
+  ],
+  "version": "1.11.1",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
-    "arronhunt"
+    "arronhunt",
+    "nakaakist",
+    "JUSTIVE",
+    "patomos",
+    "prince_gupta"
   ],
   "categories": [
     "Media",
@@ -16,22 +35,85 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "preferredFileManager",
-      "description": "The preferred file manager to obtain selected images from. Finder will always be used as a fallback.",
+      "title": "Image Input",
+      "name": "inputMethod",
+      "description": "Where to obtain the image to modify.",
       "type": "dropdown",
       "data": [
         {
-          "title": "Finder",
+          "title": "Selection In Finder",
           "value": "Finder"
         },
         {
-          "title": "Path Finder",
+          "title": "Selection In Path Finder",
           "value": "Path Finder"
+        },
+        {
+          "title": "Selection in NeoFinder",
+          "value": "NeoFinder"
+        },
+        {
+          "title": "Selection in HoudahSpot",
+          "value": "HoudahSpot"
+        },
+        {
+          "title": "Selection in QSpace Pro",
+          "value": "QSpace Pro"
+        },
+        {
+          "title": "Clipboard",
+          "value": "Clipboard"
+        },
+         {
+          "title": "Selection in ForkLift (Experimental)",
+          "value": "ForkLift"
         }
       ],
       "default": "Finder",
-      "required": false,
-      "title": "Preferred File Manager"
+      "required": false
+    },
+    {
+      "title": "Image Output",
+      "name": "imageResultHandling",
+      "description": "How to handle the result of the image modification, i.e. where to save the modified image, or whether to copy it to the clipboard.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Replace Original",
+          "value": "replaceOriginal"
+        },
+        {
+          "title": "Save In Containing Folder",
+          "value": "saveInContainingFolder"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copyToClipboard"
+        },
+        {
+          "title": "Open in Preview",
+          "value": "openInPreview"
+        },
+        {
+          "title": "Save To Downloads",
+          "value": "saveToDownloads"
+        },
+        {
+          "title": "Save to Desktop",
+          "value": "saveToDesktop"
+        }
+      ],
+      "default": "replaceOriginal",
+      "required": false
+    },
+    {
+      "title": "Image Operation Settings",
+      "name": "useLosslessConversion",
+      "description": "Whether to use lossless conversion when performing operations on WebP and AVIF images.",
+      "label": "Lossless Conversions",
+      "type": "checkbox",
+      "default": false,
+      "required": false
     }
   ],
   "commands": [
@@ -39,38 +121,277 @@
       "name": "flip-horizontally",
       "title": "Flip Images Horizontally",
       "description": "Flip the selected images horizontally",
-      "mode": "no-view"
+      "icon": "flip-icon.png",
+      "mode": "no-view",
+      "keywords": [
+        "reverse",
+        "mirror"
+      ]
     },
     {
       "name": "flip-vertically",
       "title": "Flip Images Vertically",
       "description": "Flip the selected images vertically",
-      "mode": "no-view"
+      "icon": "flip-icon.png",
+      "mode": "no-view",
+      "keywords": [
+        "mirror"
+      ]
     },
     {
       "name": "rotate",
       "title": "Rotate Images",
       "description": "Rotate the selected images by the specified amount of degrees",
+      "icon": "rotate-icon.png",
       "mode": "no-view",
       "arguments": [
         {
-          "name": "degrees",
-          "placeholder": "Degrees",
+          "name": "angle",
+          "placeholder": "Angle",
           "type": "text",
           "required": true
         }
+      ],
+      "preferences": [
+        {
+          "name": "rotationUnit",
+          "title": "Rotation Unit",
+          "description": "The unit of the angle to rotate selected images by",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Degrees",
+              "value": "degrees"
+            },
+            {
+              "title": "Radians",
+              "value": "radians"
+            }
+          ],
+          "default": "degrees",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "turn",
+        "revolve",
+        "pivot",
+        "spin"
       ]
     },
     {
       "name": "convert",
       "title": "Convert Images",
       "description": "Convert the selected images to the specified format",
-      "mode": "view"
+      "icon": "convert-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Enabled Formats",
+          "label": "ASTC",
+          "name": "showASTC",
+          "description": "Whether to show ASTC as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "AVIF",
+          "name": "showAVIF",
+          "description": "Whether to show AVIF as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "BMP",
+          "name": "showBMP",
+          "description": "Whether to show BMP as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "DDS",
+          "name": "showDDS",
+          "description": "Whether to show DDS as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "EXR",
+          "name": "showEXR",
+          "description": "Whether to show EXR as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "GIF",
+          "name": "showGIF",
+          "description": "Whether to show GIF as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "HEIC",
+          "name": "showHEIC",
+          "description": "Whether to show HEIC as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "HEICS",
+          "name": "showHEICS",
+          "description": "Whether to show HEICS as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "ICNS",
+          "name": "showICNS",
+          "description": "Whether to show ICNS as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "ICO",
+          "name": "showICO",
+          "description": "Whether to show ICO as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "JPEG",
+          "name": "showJPEG",
+          "description": "Whether to show JPEG as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "JP2",
+          "name": "showJP2",
+          "description": "Whether to show JP2 as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "KTX",
+          "name": "showKTX",
+          "description": "Whether to show KTX as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PBM",
+          "name": "showPBM",
+          "description": "Whether to show PBM as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PDF",
+          "name": "showPDF",
+          "description": "Whether to show PDF as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PNG",
+          "name": "showPNG",
+          "description": "Whether to show PNG as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PSD",
+          "name": "showPSD",
+          "description": "Whether to show PSD as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PVR",
+          "name": "showPVR",
+          "description": "Whether to show PVR as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "TGA",
+          "name": "showTGA",
+          "description": "Whether to show TGA as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "TIFF",
+          "name": "showTIFF",
+          "description": "Whether to show TIFF as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "WEBP",
+          "name": "showWEBP",
+          "description": "Whether to show WEBP as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "SVG",
+          "name": "showSVG",
+          "description": "Whether to show SVG as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "title": "JPEG Extension",
+          "name": "jpegExtension",
+          "description": "The extension to use when converting to JPEG",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "jpg",
+              "value": "jpg"
+            },
+            {
+              "title": "jpeg",
+              "value": "jpeg"
+            }
+          ],
+          "default": "jpeg",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "change",
+        "transform"
+      ]
     },
     {
       "name": "resize",
       "title": "Resize Images",
       "description": "Resize the selected images to the specified width and/or height",
+      "icon": "resize-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -91,6 +412,7 @@
       "name": "scale",
       "title": "Scale Images",
       "description": "Scale the selected images by the provided factor",
+      "icon": "scale-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -99,12 +421,19 @@
           "type": "text",
           "required": true
         }
+      ],
+      "keywords": [
+        "rescale",
+        "enlarge",
+        "shrink",
+        "size"
       ]
     },
     {
       "name": "pad",
       "title": "Pad Images",
       "description": "Pad images to the specified size using the provided color",
+      "icon": "pad-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -119,50 +448,644 @@
           "type": "text",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "name": "defaultPadColor",
+          "title": "Default Pad Color",
+          "description": "The default color to use when padding images",
+          "type": "textfield",
+          "default": "#FFFFFF",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "border",
+        "outline"
       ]
     },
     {
       "name": "apply-filter",
       "title": "Apply Image Filter",
       "description": "Apply filters to images using Apple's CIFilters",
-      "mode": "view"
+      "icon": "filter-icon.png",
+      "mode": "view",
+      "keywords": [
+        "effect",
+        "style"
+      ],
+      "preferences": [
+        {
+          "name": "showPreviews",
+          "label": "Generate Filter Previews",
+          "description": "Whether to show live previews of filters for selected files. Disabling this option might improve performance.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hiddenFilters",
+          "title": "Hidden Filters",
+          "description": "Filters and filter categories to hide from the filter list. Use this to declutter the filter list as desired. Separate multiple filters with commas. For example: 'Bloom, Distortion, Tonal'",
+          "type": "textfield",
+          "default": "",
+          "required": false,
+          "placeholder": "e.g. Bloom, Distortion, Tonal"
+        }
+      ]
     },
     {
       "name": "optimize",
       "title": "Optimize Images",
       "description": "Optimize images by compressing them",
+      "icon": "tool-icon.png",
       "mode": "no-view",
       "arguments": [
         {
           "name": "optimizationFactor",
-          "placeholder": "Amount (0 to 100)",
+          "placeholder": "Power (0 to 100)",
           "required": false,
           "type": "text"
+        }
+      ],
+      "keywords": [
+        "compress",
+        "improve",
+        "reduce",
+        "shrink"
+      ]
+    },
+    {
+      "name": "create-image",
+      "title": "Create New Image",
+      "description": "Create a new image by specifying its dimensions, color, and pattern.",
+      "mode": "view",
+      "preferences": [
+        {
+          "label": "Generate Image Previews",
+          "name": "generatePreviews",
+          "description": "Whether to generate previews of images upon every use of the command. If disable, the command will run faster, but you'll only see static previews that won't match the color of the generated image.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ],
+      "keywords": [
+        "generate",
+        "make",
+        "build",
+        "construct"
+      ]
+    },
+    {
+      "name": "strip-exif",
+      "title": "Strip Exif Data",
+      "description": "Remove EXIF data from images",
+      "icon": "tool-icon.png",
+      "keywords": [
+        "exif",
+        "metadata",
+        "remove"
+      ],
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "remove-bg",
+      "title": "Remove Background",
+      "description": "Remove the background from images using on-device processing",
+      "icon": "remove-bg-icon.png",
+      "mode": "no-view",
+      "keywords": [
+        "erase",
+        "delete",
+        "cutout",
+        "mask",
+        "isolate"
+      ],
+      "arguments": [
+        {
+          "name": "bgcolor",
+          "placeholder": "Replacement Color",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "crop",
+          "placeholder": "Crop To Subject",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Yes",
+              "value": "yes"
+            },
+            {
+              "title": "No",
+              "value": "no"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultBgColor",
+          "title": "Default Replacement Color",
+          "description": "The default color to replace backgrounds with. Specify colors in hex format with (optional) alpha (e.g. #FF0000 or FF0000FF) or by HTML name (e.g. red). Leave blank to remove the background entirely (i.e. make it transparent). This color is only used when the 'Replacement Color' argument is not provided.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "cropByDefault",
+          "label": "Crop By Default",
+          "description": "Whether to crop images to the subject by default. If disabled, the dimensions of the original image will be preserved, and the subject will remain at its original position. Otherwise, the image will be cropped to the smallest possible size that contains the subject. This option is only used when the 'Crop To Subject' argument is not provided.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "preserveFormat",
+          "label": "Preserve Image Format",
+          "description": "Whether to preserve the original image format when saving the result. When disabled, the result will be saved as a PNG image.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
         }
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "apply-filters",
+      "title": "Apply Image Filters",
+      "description": "Apply one or more filters to selected images",
+      "icon": "filter-icon.png"
+    },
+    {
+      "name": "convert-images",
+      "title": "Convert Images",
+      "description": "Convert selected images to a specified format",
+      "icon": "convert-icon.png"
+    },
+    {
+      "name": "create-image",
+      "title": "Create Image",
+      "description": "Generate a new image with specified dimensions, color, and pattern",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "flip-images",
+      "title": "Flip Images",
+      "description": "Flip selected images vertically or horizontally",
+      "icon": "flip-icon.png"
+    },
+    {
+      "name": "optimize-images",
+      "title": "Optimize Images",
+      "description": "Optimize selected images by compressing them",
+      "icon": "tool-icon.png"
+    },
+    {
+      "name": "pad-images",
+      "title": "Pad Images",
+      "description": "Add a border to selected images",
+      "icon": "pad-icon.png"
+    },
+    {
+      "name": "remove-bg",
+      "title": "Remove Backgrounds",
+      "description": "Remove the background from selected images",
+      "icon": "remove-bg-icon.png"
+    },
+    {
+      "name": "resize-images",
+      "title": "Resize Images",
+      "description": "Resize selected images to a specified width and/or height",
+      "icon": "resize-icon.png"
+    },
+    {
+      "name": "rotate-images",
+      "title": "Rotate Images",
+      "description": "Rotate selected images by a specified amount",
+      "icon": "rotate-icon.png"
+    },
+    {
+      "name": "scale-images",
+      "title": "Scale Images",
+      "description": "Scale selected images bv a specified factor",
+      "icon": "scale-icon.png"
+    },
+    {
+      "name": "strip-exif",
+      "title": "Strip Exif Data",
+      "description": "Remove EXIF data from selected images",
+      "icon": "tool-icon.png"
+    }
+  ],
+  "ai": {
+    "instructions": "The user's currently selected image will be detected; you just need to coordinate the request. Image Modification tools can operate on multiple paths at once, so try to fulfill the user's request with as few tool calls as necessary. You can present images by using this markdown image syntax: `![Preview](imagePath)`. Images for you to display will be provided as an array of paths. You must always use full paths to display images. Tildes (~) cannot be used in markdown. Only show images if they are particularly relevant to the user's query, as they can be quite large and slow to load. Make sure to provide all requested input data. You MUST run image modification tools sequentially (when user says 'then', call the second command AFTER the first one finishes, and pass the result of the first tool to the next). Pass any arguments you have as the previousResults argument.",
+    "evals": [
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "apply-filters",
+              "arguments": {
+                "filters": {
+                  "and": [
+                    {
+                      "includes": "Comic"
+                    },
+                    {
+                      "or": [
+                        {
+                          "includes": "Circular Screen"
+                        },
+                        {
+                          "includes": "Dot Screen"
+                        },
+                        {
+                          "includes": "Edges"
+                        },
+                        {
+                          "includes": "Edge Work"
+                        },
+                        {
+                          "includes": "Hatched Screen"
+                        },
+                        {
+                          "includes": "Line Overlay"
+                        },
+                        {
+                          "includes": "Line Screen"
+                        },
+                        {
+                          "includes": "Maximum Component"
+                        },
+                        {
+                          "includes": "Median"
+                        },
+                        {
+                          "includes": "Minimum Component"
+                        },
+                        {
+                          "includes": "Mono"
+                        },
+                        {
+                          "includes": "Noir"
+                        },
+                        {
+                          "includes": "Tonal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "apply-filters": [
+            "/Users/exampleUser/Desktop/firstItem-2.png",
+            "/Users/exampleUser/Desktop/secondImage-2.png"
+          ]
+        },
+        "input": "@sips Make this look like a black and white comic"
+      },
+      {
+        "input": "@sips Turns these into WebP",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "convert-images",
+              "arguments": {
+                "format": "WEBP"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "convert-images": [
+            "/Users/exampleUser/Downloads/firstImage-1.webp",
+            "/Users/exampleUser/Downloads/secondImage-2.webp"
+          ]
+        }
+      },
+      {
+        "mocks": {
+          "create-image": [
+            "/Users/exampleUser/Downloads/stripes.png"
+          ]
+        },
+        "input": "@sips Create a 800x200 blue and cyan stripe pattern",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "height": 200,
+                "colors": [
+                  {
+                    "includes": "0000FF"
+                  },
+                  {
+                    "includes": "00FFFF"
+                  }
+                ],
+                "style": "Stripes",
+                "width": 800
+              },
+              "name": "create-image"
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "flip-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "input": "@sips Mirror the image",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "flip-images",
+              "arguments": {
+                "direction": "horizontal"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "power": 80
+              },
+              "name": "optimize-images"
+            }
+          }
+        ],
+        "input": "@sips Compress with a power of 80",
+        "mocks": {
+          "optimize-images": [
+            "/Users/exampleUser/Desktop/example-optimized-2.png"
+          ]
+        }
+      },
+      {
+        "mocks": {
+          "optimize-images": [
+            "/Users/exampleUser/Desktop/example-optimized.png"
+          ]
+        },
+        "input": "@sips Compress this as much as possible",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "power": 100
+              }
+            }
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "mocks": {
+          "pad-images": [
+            "/Users/exampleUser/Desktop/example-2.jpeg"
+          ]
+        },
+        "input": "@sips Add a 50px white border",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "pad-images",
+              "arguments": {
+                "borderSize": 50,
+                "color": "FFFFFF"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "resize-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "input": "@sips Resize with a 500px width",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "resize-images",
+              "arguments": {
+                "width": 500,
+                "height": -1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "resize-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "height": 1600,
+                "width": 2560
+              },
+              "name": "resize-images"
+            }
+          }
+        ],
+        "input": "@sips Adjust size to 2560x1600"
+      },
+      {
+        "input": "@sips Rotate 90 degrees",
+        "mocks": {
+          "rotate-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rotate-images",
+              "arguments": {
+                "angle": 90
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "rotate-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rotate-images",
+              "arguments": {
+                "angle": {
+                  "includes": "-1.57"
+                },
+                "isRadians": true
+              }
+            }
+          }
+        ],
+        "input": "@sips Rotate by -PI/2 rad"
+      },
+      {
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 3
+              }
+            }
+          }
+        ],
+        "input": "@sips Scale up 3x"
+      },
+      {
+        "input": "@sips Shrink by 50%",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 0.5
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        }
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "strip-exif",
+              "arguments": {}
+            }
+          }
+        ],
+        "input": "@sips Strip the metadata from these images",
+        "mocks": {
+          "strip-exif": [
+            "/Users/exampleUser/Downloads/firstImage-2.png",
+            "/Users/exampleUser/Downloads/secondImage-2.png"
+          ]
+        }
+      },
+      {
+        "mocks": {
+          "remove-bg": [
+            "/Users/exampleUser/Desktop/example.pdf"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "bgReplacementColor": "000000"
+              },
+              "name": "remove-bg"
+            }
+          }
+        ],
+        "input": "@sips remove the background, replace with black"
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "or": [
+                {
+                  "arguments": {
+                    "shouldCrop": true
+                  }
+                },
+                {
+                  "arguments": {}
+                }
+              ],
+              "name": "remove-bg"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 3,
+                "imagePaths": [
+                  "/Users/exampleUser/Desktop/example-2.jpg"
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Desktop/example-2-2.jpg"
+          ],
+          "remove-bg": [
+            "/Users/exampleUser/Desktop/example-2.jpg"
+          ]
+        },
+        "input": "@sips remove the background, then scale up 3x"
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.18",
-    "run-applescript": "^6.1.0",
-    "svgo": "^3.0.2"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
+    "mathjs": "^14.5.2",
+    "svgo": "^3.3.2",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/tar": "^6.1.13",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "evals": "ray evals"
   }
 }

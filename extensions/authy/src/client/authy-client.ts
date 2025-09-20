@@ -2,7 +2,7 @@ import { URLSearchParams } from "url";
 import crypto from "crypto";
 import os from "os";
 import fetch from "node-fetch";
-import { ApiError, AuthyApp, Device, Registration, RegistrationStatus, Services } from "./dto";
+import { ApiError, AppsResponse, Device, Registration, RegistrationStatus, ServicesResponse } from "./dto";
 
 const baseUrl = "https://api.authy.com/json";
 // extracted from chrome plugin
@@ -62,7 +62,7 @@ export async function completeRegistration(authyId: number, pin: string): Promis
   }
 }
 
-export async function getAuthyApps(authyId: number, deviceId: number, otps: string[]): Promise<AuthyApp> {
+export async function getAuthyApps(authyId: number, deviceId: number, otps: string[]): Promise<AppsResponse> {
   const formData = new URLSearchParams();
   formData.set("api_key", API_KEY);
   formData.set("signature", SIGNATURE);
@@ -76,13 +76,13 @@ export async function getAuthyApps(authyId: number, deviceId: number, otps: stri
     body: formData,
   });
   if (resp.ok) {
-    return (await resp.json()) as AuthyApp;
+    return (await resp.json()) as AppsResponse;
   } else {
     throw new Error(((await resp.json()) as ApiError).message);
   }
 }
 
-export async function getServices(authyId: number, deviceId: number, otps: string[]): Promise<Services> {
+export async function getServices(authyId: number, deviceId: number, otps: string[]): Promise<ServicesResponse> {
   const formData = new URLSearchParams();
   formData.set("api_key", API_KEY);
   formData.set("signature", SIGNATURE);
@@ -93,7 +93,7 @@ export async function getServices(authyId: number, deviceId: number, otps: strin
   formData.set("otp3", `${otps[2]}`);
   const resp = await fetch(`${baseUrl}/users/${authyId}/authenticator_tokens?` + formData);
   if (resp.ok) {
-    return (await resp.json()) as Services;
+    return (await resp.json()) as ServicesResponse;
   } else {
     throw new Error(((await resp.json()) as ApiError).message);
   }

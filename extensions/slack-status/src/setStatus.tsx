@@ -1,59 +1,124 @@
-import { ActionPanel, environment, Icon, List, preferences, showToast, ToastStyle, useNavigation } from "@raycast/api";
+import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { OAuthService, withAccessToken, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { slackEmojiCodeMap } from "./emojiCodes";
 import {
-  CurrentStatusState,
-  SlackStatusPreset,
-  SlackStatusPresetsListState,
-  SlackStatusResponse,
-  SlackStatusResponseState,
-} from "./interfaces";
-import { defaultStatuses } from "./defaultStatuses";
-import { durationToString, keyForStatusPreset, statusExpirationText } from "./utils";
-import { SlackClient } from "./slackClient";
-import { CreateStatusPresetForm, EditStatusPresetForm, SetCustomStatusForm } from "./setStatusForm";
-import { mkdirSync, readFileSync, writeFileSync } from "fs";
-("./setStatusForm");
+  ClearStatusAction,
+  CopyDeeplinkPresetAction,
+  CreateQuicklinkPresetAction,
+  CreateStatusPresetAction,
+  DeleteStatusPresetAction,
+  EditStatusPresetAction,
+  SetCustomStatusAction,
+  SetStatusAction,
+  SetStatusWithAIAction,
+  SetStatusWithDuration,
+} from "./actions";
+import { getTitleForDuration } from "./durations";
+import { getEmojiForCode } from "./emojis";
+import { usePresets } from "./presets";
+import { CommandLinkParams } from "./types";
+import { useSlack, useSlackProfileAndDndInfo } from "./slack";
+import {
+  getStatusIcon,
+  getStatusSubtitle,
+  getStatusTitle,
+  getStatusPausedNotifications,
+  setStatusToPreset,
+} from "./utils";
 
-// Consts
+const preferences: Preferences = getPreferenceValues();
 
-const noStatusState: CurrentStatusState = {
-  icon: Icon.Message,
-  title: "No status",
-  isError: false,
-};
+const slackAuth = OAuthService.slack({
+  scope: "emoji:read users.profile:write users.profile:read dnd:write dnd:read",
+  personalAccessToken: preferences.accessToken,
+});
 
-// Main
-
-export default function Command() {
-  const accessToken = preferences.accessToken?.value as string;
-  const slackClient = new SlackClient(accessToken);
-  return <StatusesList slackClient={slackClient} />;
+function accessories(isPaused: boolean) {
+  return isPaused ? [{ icon: Icon.BellDisabled, tooltip: "Notifications Paused" }] : [];
 }
 
-function StatusesList(props: { slackClient: SlackClient }) {
-  const currentStatusResponseState = useState<SlackStatusResponse>();
-  const statusPresetsListState = useStoredPresets();
-  const statusPresets = statusPresetsListState[0];
+function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
+  const [searchText, setSearchText] = useState<string>();
+  const { isLoading, data, mutate } = useSlackProfileAndDndInfo(slackAuth);
+  const { profile, dnd } = data || {};
+  const [presets, setPresets] = usePresets();
+  const slack = useSlack();
+
+  useEffect(() => {
+    (async () => {
+      if (props.launchContext?.presetId) {
+        const presetId = props.launchContext.presetId;
+        const presetToLaunch = presets.find((p) => p.id === presetId);
+
+        if (!presetToLaunch) {
+          console.error("No preset found with id: ", presetId);
+          showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
+        } else {
+          await setStatusToPreset({ preset: presetToLaunch, slack, mutate });
+          popToRoot();
+          closeMainWindow();
+        }
+      }
+    })();
+  }, [slack]);
 
   return (
-    <List>
-      <List.Section id="currentStatusSection" key="currentStatusSection" title="Current Status">
-        <CurrentStatusItem
-          slackClient={props.slackClient}
-          currentStatusResponseState={currentStatusResponseState}
-          statusPresetsListState={statusPresetsListState}
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} filtering>
+      <List.EmptyView
+        icon={Icon.Stars}
+        title={searchText ? `Set status to '${searchText}'` : undefined}
+        description="Raycast AI picks the best emoji, text and duration for your status"
+        actions={
+          <ActionPanel>{searchText && <SetStatusWithAIAction statusText={searchText} mutate={mutate} />}</ActionPanel>
+        }
+      />
+      <List.Section title="Current Status">
+        <List.Item
+          key="current-status"
+          icon={getStatusIcon(profile)}
+          title={getStatusTitle(profile)}
+          subtitle={getStatusSubtitle(profile)}
+          accessories={accessories(!!getStatusPausedNotifications(dnd))}
+          actions={
+            <ActionPanel>
+              {profile?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}
+              <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
+            </ActionPanel>
+          }
         />
       </List.Section>
-      <List.Section id="presets" key="presets" title="Presets">
-        {statusPresets.map((status, index) => (
-          <SetStatusPresetListItem
-            key={keyForStatusPreset(status)}
-            slackClient={props.slackClient}
-            statusPreset={status}
-            currentStatusResponseState={currentStatusResponseState}
-            statusPresetsListState={statusPresetsListState}
-            presetIndex={index}
+      <List.Section title="Presets">
+        {presets.map((preset) => (
+          <List.Item
+            key={JSON.stringify(preset)}
+            icon={getEmojiForCode(preset.emojiCode)}
+            title={preset.title}
+            subtitle={getTitleForDuration(preset.defaultDuration)}
+            accessories={accessories(preset.pauseNotifications)}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <SetStatusAction preset={preset} mutate={mutate} />
+                  <SetStatusWithDuration preset={preset} mutate={mutate} />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <EditStatusPresetAction
+                    preset={preset}
+                    onEdit={(editedPreset) => {
+                      setPresets(presets.map((p) => (p === preset ? editedPreset : p)));
+                    }}
+                  />
+                  <CreateQuicklinkPresetAction preset={preset} />
+                  <CopyDeeplinkPresetAction preset={preset} />
+                  <DeleteStatusPresetAction onDelete={() => setPresets(presets.filter((p) => p !== preset))} />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
+                  <SetCustomStatusAction mutate={mutate} />
+                  <ClearStatusAction mutate={mutate} />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
           />
         ))}
       </List.Section>
@@ -61,334 +126,4 @@ function StatusesList(props: { slackClient: SlackClient }) {
   );
 }
 
-// Components
-
-function CurrentStatusItem(props: {
-  slackClient: SlackClient;
-  currentStatusResponseState: SlackStatusResponseState;
-  statusPresetsListState: SlackStatusPresetsListState;
-}) {
-  const [listItemState, setListItemState] = useState<CurrentStatusState>({
-    title: "",
-    isError: false,
-  });
-
-  const currentStatusResponse = props.currentStatusResponseState[0];
-
-  useEffect(() => {
-    if (!currentStatusResponse) {
-      return;
-    }
-    if (currentStatusResponse?.error) {
-      setListItemState({
-        title: "Failed to fetch status",
-        subtitle: currentStatusResponse?.error.message,
-        icon: "⚠️",
-        isError: true,
-      });
-    } else if (currentStatusResponse?.status) {
-      const status = currentStatusResponse?.status;
-      const subtitle = status.expiration ? statusExpirationText(status.expiration) : "";
-      setListItemState({
-        status: status,
-        title: status.title,
-        subtitle: subtitle,
-        icon: slackEmojiCodeMap[status.emojiCode] ?? "💬",
-        isError: false,
-      });
-    } else {
-      setListItemState(noStatusState);
-    }
-  }, [currentStatusResponse]);
-
-  useEffect(() => {
-    props.slackClient.getCurrentStatus(props.currentStatusResponseState);
-  }, []);
-
-  return (
-    <List.Item
-      id="currentStatus"
-      icon={listItemState.icon}
-      title={listItemState.title}
-      subtitle={listItemState.subtitle}
-      actions={
-        currentStatusResponse &&
-        (listItemState.status ? (
-          <ActionPanel>
-            <ActionPanel.Section key="main">
-              <ClearStatusAction
-                slackClient={props.slackClient}
-                currentStatusResponseState={props.currentStatusResponseState}
-              />
-              <SetCustomStatusAction
-                slackClient={props.slackClient}
-                currentStatusResponseState={props.currentStatusResponseState}
-              />
-            </ActionPanel.Section>
-            <ActionPanel.Section key="presets">
-              <CreatePresetAction statusPresetsListState={props.statusPresetsListState} />
-            </ActionPanel.Section>
-          </ActionPanel>
-        ) : (
-          <ActionPanel>
-            <ActionPanel.Section key="main">
-              <SetCustomStatusAction
-                slackClient={props.slackClient}
-                currentStatusResponseState={props.currentStatusResponseState}
-              />
-            </ActionPanel.Section>
-            <ActionPanel.Section key="presets">
-              <CreatePresetAction statusPresetsListState={props.statusPresetsListState} />
-            </ActionPanel.Section>
-          </ActionPanel>
-        ))
-      }
-    />
-  );
-}
-
-function SetStatusPresetListItem(props: {
-  slackClient: SlackClient;
-  statusPreset: SlackStatusPreset;
-  currentStatusResponseState: SlackStatusResponseState;
-  statusPresetsListState: SlackStatusPresetsListState;
-  presetIndex: number;
-}) {
-  const status = props.statusPreset;
-  return (
-    <List.Item
-      id={keyForStatusPreset(status)}
-      icon={slackEmojiCodeMap[status.emojiCode] ?? "💬"}
-      title={status.title}
-      subtitle={durationToString(status.defaultDuration)}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section key="main">
-            <SetStatusAction
-              slackClient={props.slackClient}
-              statusPreset={status}
-              currentStatusResponseState={props.currentStatusResponseState}
-            />
-            <SetStatusWithDuration
-              slackClient={props.slackClient}
-              statusPreset={status}
-              currentStatusResponseState={props.currentStatusResponseState}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section key="modifications">
-            <EditPresetAction statusPresetsListState={props.statusPresetsListState} index={props.presetIndex} />
-            <DeletePresetAction statusPresetsListState={props.statusPresetsListState} index={props.presetIndex} />
-          </ActionPanel.Section>
-          <ActionPanel.Section key="global">
-            <CreatePresetAction statusPresetsListState={props.statusPresetsListState} />
-            <SetCustomStatusAction
-              slackClient={props.slackClient}
-              currentStatusResponseState={props.currentStatusResponseState}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-// Actions
-
-function SetCustomStatusAction(props: {
-  slackClient: SlackClient;
-  currentStatusResponseState: SlackStatusResponseState;
-}) {
-  const { push } = useNavigation();
-  return (
-    <ActionPanel.Item
-      id="setCustomStatus"
-      title="Set Custom Status"
-      icon={Icon.Message}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
-      onAction={() => {
-        push(
-          <SetCustomStatusForm
-            slackClient={props.slackClient}
-            currentStatusResponseState={props.currentStatusResponseState}
-          />
-        );
-      }}
-    />
-  );
-}
-
-function ClearStatusAction(props: { slackClient: SlackClient; currentStatusResponseState: SlackStatusResponseState }) {
-  return (
-    <ActionPanel.Item
-      id="clearStatus"
-      title="Clear Status"
-      icon={Icon.XmarkCircle}
-      onAction={() => props.slackClient.clearStatus(props.currentStatusResponseState)}
-    />
-  );
-}
-
-function SetStatusAction(props: {
-  slackClient: SlackClient;
-  statusPreset: SlackStatusPreset;
-  currentStatusResponseState: SlackStatusResponseState;
-}) {
-  return (
-    <ActionPanel.Item
-      id="setStatus"
-      title="Set Status"
-      icon={Icon.Pencil}
-      onAction={() => props.slackClient.setStatusFromPreset(props.statusPreset, props.currentStatusResponseState)}
-    />
-  );
-}
-
-function SetStatusWithDuration(props: {
-  slackClient: SlackClient;
-  statusPreset: SlackStatusPreset;
-  currentStatusResponseState: SlackStatusResponseState;
-}) {
-  const titleDurationPairs: [string, number][] = [
-    ["Don't clear", 0],
-    ["15 minutes", 15],
-    ["30 minutes", 30],
-    ["45 minutes", 45],
-    ["1 hour", 60],
-    ["1.5 hour", 90],
-    ["2 hours", 120],
-    ["3 hours", 180],
-  ];
-  return (
-    <ActionPanel.Submenu icon={Icon.Clock} title="Set Status with Duration...">
-      {titleDurationPairs.map((titleDurationPair) => {
-        const title = titleDurationPair[0];
-        const duration = titleDurationPair[1];
-        return (
-          <ActionPanel.Item
-            key={title}
-            id={title}
-            title={title}
-            icon={Icon.Clock}
-            onAction={() =>
-              props.slackClient.setStatusFromPreset(props.statusPreset, props.currentStatusResponseState, duration)
-            }
-          />
-        );
-      })}
-    </ActionPanel.Submenu>
-  );
-}
-
-function DeletePresetAction(props: { statusPresetsListState: SlackStatusPresetsListState; index: number }) {
-  return (
-    <ActionPanel.Item
-      id="deletePreset"
-      title="Delete Preset"
-      icon={Icon.Trash}
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
-      onAction={() => {
-        const [presets, setPresets] = props.statusPresetsListState;
-        const newPresets = [...presets];
-        newPresets.splice(props.index, 1);
-        setPresets(newPresets);
-      }}
-    />
-  );
-}
-
-function CreatePresetAction(props: { statusPresetsListState: SlackStatusPresetsListState }) {
-  const { push, pop } = useNavigation();
-  return (
-    <ActionPanel.Item
-      id="createPreset"
-      title="Create Status Preset"
-      icon={Icon.Document}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-      onAction={() => {
-        push(
-          <CreateStatusPresetForm
-            onCompletion={(preset) => {
-              const [presets, setPresets] = props.statusPresetsListState;
-              const newPresets = [...presets, preset];
-              setPresets(newPresets);
-              const emoji = slackEmojiCodeMap[preset.emojiCode] ?? "💬";
-              const message = `${emoji} ${preset.title}`;
-              showToast(ToastStyle.Success, "Preset created", message);
-              pop();
-            }}
-          />
-        );
-      }}
-    />
-  );
-}
-
-function EditPresetAction(props: { statusPresetsListState: SlackStatusPresetsListState; index: number }) {
-  const { push, pop } = useNavigation();
-  const [presets, setPresets] = props.statusPresetsListState;
-  return (
-    <ActionPanel.Item
-      id="editPreset"
-      title="Edit Preset"
-      icon={Icon.Pencil}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
-      onAction={() => {
-        push(
-          <EditStatusPresetForm
-            preset={presets[props.index]}
-            onCompletion={(preset) => {
-              const newPresets = [...presets];
-              newPresets[props.index] = preset;
-              setPresets(newPresets);
-              const emoji = slackEmojiCodeMap[preset.emojiCode] ?? "💬";
-              const message = `${emoji} ${preset.title}`;
-              showToast(ToastStyle.Success, "Preset updated", message);
-              pop();
-            }}
-          />
-        );
-      }}
-    />
-  );
-}
-
-// Presets Storage
-
-function useStoredPresets(): SlackStatusPresetsListState {
-  const [presets, setPresets] = useState(() => {
-    const stored = readStoredPresets();
-    if (stored) {
-      return stored;
-    } else {
-      return defaultStatuses;
-    }
-  });
-
-  const updatePresets = (newPresets: SlackStatusPreset[]) => {
-    setPresets(newPresets);
-    storePresets(newPresets);
-  };
-
-  return [presets, updatePresets];
-}
-
-function storePresets(presets: SlackStatusPreset[]) {
-  try {
-    mkdirSync(`${environment.supportPath}`, { recursive: true });
-    const path = `${environment.supportPath}/presets.json`;
-    writeFileSync(path, JSON.stringify(presets));
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-function readStoredPresets(): SlackStatusPreset[] | undefined {
-  try {
-    const path = `${environment.supportPath}/presets.json`;
-    const contents = readFileSync(path);
-    const serializedValue = contents.toString();
-    return JSON.parse(serializedValue) as SlackStatusPreset[];
-  } catch (e) {
-    return undefined;
-  }
-}
+export default withAccessToken(slackAuth)(StatusList);

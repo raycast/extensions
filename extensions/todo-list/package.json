@@ -1,32 +1,35 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "todo-list",
-  "title": "Todo List",
   "description": "Manage your todo list quickly by adding items and marking items as completed.",
-  "icon": "command-icon.png",
-  "author": "maggie",
-  "license": "MIT",
-  "commands": [
-    {
-      "name": "index",
-      "title": "Manage Todo List",
-      "description": "Create and delete items, mark them as completed and pin important tasks.",
-      "mode": "view"
-    },
-    {
-      "name": "menu_bar",
-      "title": "Todo List",
-      "description": "See your Todos at a glance",
-      "mode": "menu-bar"
-    }
-  ],
   "categories": [
     "Applications",
     "Productivity"
   ],
+  "license": "MIT",
+  "author": "maggie",
+  "contributors": [
+    "jkorol3",
+    "madza",
+    "pernielsentikaer",
+    "ridemountainpig",
+    "dedalusj"
+  ],
+  "pastContributors": [
+    "bkeys818",
+    "telmen"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.1.0",
+    "chrono-node": "^2.7.8",
     "dayjs": "^1.10.7",
     "jotai": "^1.4.0",
     "lodash": "^4.17.21",
@@ -41,13 +44,89 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "2.8.8",
+    "react-devtools": "^4.27.8",
     "typescript": "^4.4.3"
   },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+  "icon": "command-icon.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Todo List",
+      "description": "Create and delete items, mark them as completed and pin important tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "menu_bar",
+      "title": "Todo List",
+      "description": "See your Todos at a glance",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "completed",
+      "type": "dropdown",
+      "required": false,
+      "title": "Completed tasks in Menu Bar",
+      "description": "Show only 3 latest completed tasks, or show/hide all.",
+      "default": "hide_all",
+      "data": [
+        {
+          "title": "Show Latest",
+          "value": "latest"
+        },
+        {
+          "title": "Show All",
+          "value": "show_all"
+        },
+        {
+          "title": "Hide All",
+          "value": "hide_all"
+        }
+      ]
+    },
+    {
+      "name": "sortOrder",
+      "type": "dropdown",
+      "required": false,
+      "title": "Task sorting",
+      "description": "The order in which task are sorted.",
+      "default": "creation_date_ascending",
+      "data": [
+        {
+          "title": "Creation Date (ascending)",
+          "value": "creation_date_ascending"
+        },
+        {
+          "title": "Creation Date (descending)",
+          "value": "creation_date_descending"
+        },
+        {
+          "title": "Title (ascending)",
+          "value": "title_ascending"
+        },
+        {
+          "title": "Title (descending)",
+          "value": "title_descending"
+        }
+      ]
+    },
+    {
+      "name": "nlpParsing",
+      "type": "checkbox",
+      "required": false,
+      "title": "Natural language parsing",
+      "description": "Automatically parse dates and tags",
+      "default": false,
+      "label": "Automatically parse dates and tags"
+    }
+  ],
+  "title": "Todo List",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smart-calendars-ai-create-events-using-ai",
+  "title": "Smart Calendars AI: Create Events Using AI",
+  "description": "Transform scheduling with AI-powered calendar management: Create events instantly by pasting text/emails/websites.",
+  "icon": "SM_A.png",
+  "author": "johannes_lohmeier",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-calendar-event-from-url",
+      "title": "Create Calendar Event from URL",
+      "subtitle": "Paste URL to receive a calendar event",
+      "description": "Seamlessly convert URLs into calendar events. When you paste a URL containing event information, this feature extracts the relevant details and generates a calendar event. It's perfect for quickly adding webinars, online meetings, or any event linked online to your calendar, ensuring you never miss out on important events.",
+      "mode": "no-view",
+      "icon": "SM_A.png"
+    },
+    {
+      "name": "create-calendar-event-from-text",
+      "title": "Create Calendar Event from Text",
+      "subtitle": "Paste text to receive a calendar event",
+      "description": "Transform any text into a calendar event with ease. Simply paste text containing event details, such as date, time, and location, and this feature will automatically create a calendar event for you. It's an efficient way to organize meetings and appointments directly from your clipboard, saving you time and ensuring you stay on top of your schedule.",
+      "mode": "no-view",
+      "icon": "SM_A.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

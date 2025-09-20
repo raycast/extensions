@@ -3,15 +3,22 @@
   "name": "linear",
   "title": "Linear",
   "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
-  "icon": "linear.png",
+  "icon": "linear-app-icon.png",
   "owner": "linear",
   "access": "public",
   "author": "thomaslombart",
   "contributors": [
-    "mathieudutour",
     "thomas",
     "peduarte",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "clemb8",
+    "stelo",
+    "fil",
+    "joeb"
+  ],
+  "pastContributors": [
+    "mathieudutour",
+    "mil3na"
   ],
   "categories": [
     "Productivity"
@@ -25,21 +32,12 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "signature",
-          "type": "checkbox",
-          "title": "Signature",
-          "label": "Add Raycast signature to new issues",
-          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
-          "required": false,
-          "default": true
-        },
-        {
           "name": "autofocusField",
           "title": "Autofocus Field",
           "type": "dropdown",
           "required": false,
           "description": "Select the field to focus automatically once the form is rendered",
-          "default": "team",
+          "default": "title",
           "data": [
             {
               "title": "Team",
@@ -64,12 +62,20 @@
               "value": "id"
             },
             {
+              "title": "Copy Issue ID as Link",
+              "value": "id-as-link"
+            },
+            {
               "title": "Copy Issue URL",
               "value": "url"
             },
             {
               "title": "Copy Issue Title",
               "value": "title"
+            },
+            {
+              "title": "Copy Issue Title as Link",
+              "value": "title-as-link"
             }
           ]
         }
@@ -83,9 +89,12 @@
     },
     {
       "name": "assigned-issues",
-      "title": "Assigned Issues",
+      "title": "My Issues",
       "description": "View and modify issues that are assigned to you.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "assigned"
+      ]
     },
     {
       "name": "created-issues",
@@ -106,6 +115,12 @@
       "mode": "view"
     },
     {
+      "name": "search-documents",
+      "title": "Search Documents",
+      "description": "Explore documents for your Linear team.",
+      "mode": "view"
+    },
+    {
       "name": "create-project",
       "title": "Create Project",
       "description": "Create projects for your Linear team.",
@@ -123,7 +138,6 @@
       "description": "Show unread notifications in the Menu Bar.",
       "mode": "menu-bar",
       "subtitle": "Linear",
-      "icon": "linear.png",
       "interval": "15m",
       "preferences": [
         {
@@ -204,8 +218,1339 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "favorites",
+      "title": "Favorites",
+      "description": "Browse through your Linear favorites.",
+      "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-current-user",
+      "title": "Get Current User",
+      "description": "Get the Linear information of the current user."
+    },
+    {
+      "name": "create-comment",
+      "title": "Create Comment",
+      "description": "Creates a comment in Linear"
+    },
+    {
+      "name": "update-comment",
+      "title": "Update Comment",
+      "description": "Updates an existing comment in Linear"
+    },
+    {
+      "name": "get-documents",
+      "title": "Get Documents",
+      "description": "Fetches all documents/PRDs from Linear"
+    },
+    {
+      "name": "get-document-content",
+      "title": "Get Document Content",
+      "description": "Get the content of a document/PRD from Linear"
+    },
+    {
+      "name": "create-document",
+      "title": "Create Document",
+      "description": "Creates a new document/PRD in Linear"
+    },
+    {
+      "name": "update-document",
+      "title": "Update Document",
+      "description": "Updates an existing PRD in Linear"
+    },
+    {
+      "name": "full-text-search-issues",
+      "title": "Full Text Search Issues",
+      "description": "Search opened Linear issues for a specific term in their title. Returns at most 25 issues. Use this tool when you need to search for a specific term"
+    },
+    {
+      "name": "filter-issues",
+      "title": "Filter Issues",
+      "description": "Get opened Linear issues that match the provided filters. Returns at most 25 issues. Use this tool when you need to get issues matching specific criterias, like assignees, priority, etc"
+    },
+    {
+      "name": "update-issue",
+      "title": "Update Issue",
+      "description": "Updates an existing issue in Linear"
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Creates a new issue in Linear with a title, description, dueDate and priority"
+    },
+    {
+      "name": "get-teams",
+      "title": "Get Teams",
+      "description": "Returns all Linear teams that the current user is part of"
+    },
+    {
+      "name": "get-issue-states",
+      "title": "Get Issue States",
+      "description": "Fetches all available issue states. Issue status could be a synonym of issue state"
+    },
+    {
+      "name": "get-members",
+      "title": "Get Members",
+      "description": "Retrieves all members of the Linear organization"
+    },
+    {
+      "name": "get-notifications",
+      "title": "Get Notifications",
+      "description": "Retrieves all notifications for current user"
+    },
+    {
+      "name": "get-labels",
+      "title": "Get Issue Labels",
+      "description": "Retrieves all labels that can be assigned to a Linear issue"
+    },
+    {
+      "name": "add-label",
+      "title": "Add Label to Issue",
+      "description": "Add a Label to an existing Linear issue"
+    },
+    {
+      "name": "remove-label",
+      "title": "Remove Label from Issue",
+      "description": "Remove a Label from an existing Linear issue"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Fetches all projects from Linear"
+    },
+    {
+      "name": "get-project-updates",
+      "title": "Get Project Updates",
+      "description": "Retrieves all project updates for a given project ID from Linear"
+    },
+    {
+      "name": "get-project-statuses",
+      "title": "Get Project Statuses",
+      "description": "Fetches all project statuses from Linear"
+    },
+    {
+      "name": "update-project-milestone",
+      "title": "Update an Existing Project Milestone",
+      "description": "Updates an existing project milestone in Linear"
+    }
+  ],
+  "ai": {
+    "instructions": "- Always format object titles and names as markdown links using the object's URL. Example: Instead of saying \"Issue **Implement user profile page** has been created', say \"Issue [Implement user profile page](https://linear.app/company/issue/ISS-2) has been created\"\\n- Do not use names or titles as IDs in the system. Use the actual ID of the object\\n- When there is no exact match of issue / label titles with the provided name, analyze the input and titles of existing objects and use such objects only if the meaning is the same. Do not use objects that are not related to the input\\n- If user asks for his issues, it means issues assigned to him. Use `get-current-user` tool to get the user id and use it to filter\\n- \\n- If user ask to close the issue, it means to move it to done status\\n- When user asks about inbox they mean notifications",
+    "evals": [
+      {
+        "input": "@linear what's in my inbox",
+        "mocks": {
+          "get-notifications": []
+        },
+        "expected": [
+          {
+            "callsTool": "get-notifications"
+          }
+        ]
+      },
+      {
+        "input": "@linear do I have any open notifications",
+        "usedAsExample": false,
+        "mocks": {
+          "get-notifications": []
+        },
+        "expected": [
+          {
+            "callsTool": "get-notifications"
+          }
+        ]
+      },
+      {
+        "input": "@linear Create issue 'Implement user profile page'",
+        "mocks": {
+          "create-issue": {
+            "id": "ISS-2",
+            "identifier": "PROJ-2",
+            "title": "Implement user profile page",
+            "url": "https://example.com/issue/ISS-2",
+            "description": "Create a user profile page with editable fields and avatar upload functionality",
+            "priority": 2,
+            "priorityLabel": "High",
+            "state": {
+              "id": "STATE-1",
+              "type": "backlog",
+              "name": "Backlog",
+              "color": "#FFFF00"
+            },
+            "assignee": {
+              "id": "USER-1",
+              "displayName": "John Doe",
+              "avatarUrl": "https://example.com/avatar.jpg",
+              "email": "john@example.com"
+            }
+          },
+          "get-teams": [
+            {
+              "id": "TEAM-1",
+              "name": "Raycast",
+              "key": "ENG",
+              "icon": "💻",
+              "color": "#0000FF"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Tells that issue was added"
+          },
+          {
+            "meetsCriteria": "Includes markdown link to created issue"
+          },
+          {
+            "meetsCriteria": "Doesn't include any superfluous wording, for example statements like 'let me know if you have any questions'"
+          },
+          {
+            "callsTool": "create-issue"
+          }
+        ]
+      },
+      {
+        "input": "@linear what are my tasks?",
+        "mocks": {
+          "filter-issues": {
+            "issues": [
+              {
+                "id": "ISS-1",
+                "title": "Implement new feature",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "started",
+                  "name": "In Progress",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "get-members": [
+            {
+              "id": "usr_01ABCDEFGHIJKLMNOPQRSTUV",
+              "name": "John Doe",
+              "email": "john.doe@example.com",
+              "displayName": "John Doe",
+              "avatarUrl": "https://avatars.linear.app/user/01ABCDEFGHIJKLMNOPQRSTUV",
+              "active": true,
+              "createdAt": "2023-01-01T00:00:00.000Z",
+              "updatedAt": "2023-10-15T14:24:04.000Z",
+              "admin": true,
+              "lastSeen": "2023-10-15T14:24:04.000Z",
+              "inviteHash": "abcdef123456",
+              "url": "https://linear.app/team/u/john-doe",
+              "description": "Product Manager",
+              "isMe": true,
+              "statusEmoji": "🚀",
+              "statusLabel": "Launching new features",
+              "statusUntilAt": "2023-10-16T23:59:59.000Z"
+            }
+          ],
+          "get-current-user": {
+            "id": "usr_01ABCDEFGHIJKLMNOPQRSTUV",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "displayName": "John Doe",
+            "avatarUrl": "https://avatars.linear.app/user/01ABCDEFGHIJKLMNOPQRSTUV",
+            "active": true,
+            "createdAt": "2023-01-01T00:00:00.000Z",
+            "updatedAt": "2023-10-15T14:24:04.000Z",
+            "admin": true,
+            "lastSeen": "2023-10-15T14:24:04.000Z",
+            "inviteHash": "abcdef123456",
+            "url": "https://linear.app/team/u/john-doe",
+            "description": "Product Manager",
+            "isMe": true,
+            "statusEmoji": "🚀",
+            "statusLabel": "Launching new features",
+            "statusUntilAt": "2023-10-16T23:59:59.000Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-current-user"
+          },
+          {
+            "callsTool": {
+              "name": "filter-issues",
+              "arguments": {
+                "filter": [
+                  {
+                    "includes": "usr_01ABCDEFGHIJKLMNOPQRSTUV"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Implement new feature"
+          }
+        ]
+      },
+      {
+        "input": "@linear what are my current high priority issues?",
+        "mocks": {
+          "filter-issues": {
+            "issues": [
+              {
+                "id": "ISS-1",
+                "title": "Implement new feature",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "started",
+                  "name": "In Progress",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "get-current-user": {
+            "id": "usr_01ABCDEFGHIJKLMNOPQRSTUV",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "displayName": "John Doe",
+            "avatarUrl": "https://avatars.linear.app/user/01ABCDEFGHIJKLMNOPQRSTUV",
+            "active": true,
+            "createdAt": "2023-01-01T00:00:00.000Z",
+            "updatedAt": "2023-10-15T14:24:04.000Z",
+            "admin": true,
+            "lastSeen": "2023-10-15T14:24:04.000Z",
+            "inviteHash": "abcdef123456",
+            "url": "https://linear.app/team/u/john-doe",
+            "description": "Product Manager",
+            "isMe": true,
+            "statusEmoji": "🚀",
+            "statusLabel": "Launching new features",
+            "statusUntilAt": "2023-10-16T23:59:59.000Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-current-user"
+          },
+          {
+            "callsTool": "filter-issues"
+          },
+          {
+            "includes": "Implement new feature"
+          }
+        ]
+      },
+      {
+        "input": "@linear add label 'yo-ho-ho-ho-ho' to Implement new feature",
+        "usedAsExample": false,
+        "mocks": {
+          "add-label": {
+            "id": "ISS-1",
+            "title": "Bug: Login not working",
+            "labels": {
+              "nodes": [
+                {
+                  "id": "LABEL-1",
+                  "name": "Bug",
+                  "color": "#FF0000"
+                },
+                {
+                  "id": "LABEL-2",
+                  "name": "High Priority",
+                  "color": "#FF00FF"
+                }
+              ]
+            }
+          },
+          "full-text-search-issues": {
+            "issues": [
+              {
+                "id": "ISS-1",
+                "title": "Implement new feature",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "started",
+                  "name": "In Progress",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "get-current-user": {
+            "id": "usr_01ABCDEFGHIJKLMNOPQRSTUV",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "displayName": "John Doe",
+            "avatarUrl": "https://avatars.linear.app/user/01ABCDEFGHIJKLMNOPQRSTUV",
+            "active": true,
+            "createdAt": "2023-01-01T00:00:00.000Z",
+            "updatedAt": "2023-10-15T14:24:04.000Z",
+            "admin": true,
+            "lastSeen": "2023-10-15T14:24:04.000Z",
+            "inviteHash": "abcdef123456",
+            "url": "https://linear.app/team/u/john-doe",
+            "description": "Product Manager",
+            "isMe": true,
+            "statusEmoji": "🚀",
+            "statusLabel": "Launching new features",
+            "statusUntilAt": "2023-10-16T23:59:59.000Z"
+          },
+          "get-labels": [
+            {
+              "id": "LABEL-1",
+              "name": "Bug",
+              "description": "Something isn't working",
+              "color": "#FF0000"
+            },
+            {
+              "id": "LABEL-2",
+              "name": "Feature",
+              "description": "New feature or request",
+              "color": "#00FF00"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Tells that label with this name doesn't exist"
+          },
+          {
+            "not": {
+              "callsTool": "create-issue"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linear create label completely-new-label",
+        "usedAsExample": false,
+        "mocks": {
+          "get-labels": [
+            {
+              "id": "LABEL-1",
+              "name": "Bug",
+              "description": "Something isn't working",
+              "color": "#FF0000"
+            },
+            {
+              "id": "LABEL-2",
+              "name": "Feature",
+              "description": "New feature or request",
+              "color": "#00FF00"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Tells that it can't find the label or it can't create labels"
+          },
+          {
+            "not": {
+              "callsTool": "create-issue"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linear add feature label to AI Evals CLI",
+        "mocks": {
+          "full-text-search-issues": {
+            "issues": [
+              {
+                "id": "ISS-1",
+                "title": "AI Evals CLI",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "started",
+                  "name": "In Progress",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "add-label": {
+            "id": "ISS-1",
+            "title": "Bug: Login not working",
+            "labels": {
+              "nodes": [
+                {
+                  "id": "LABEL-1",
+                  "name": "Bug",
+                  "color": "#FF0000"
+                },
+                {
+                  "id": "LABEL-2",
+                  "name": "High Priority",
+                  "color": "#FF00FF"
+                }
+              ]
+            }
+          },
+          "get-labels": [
+            {
+              "id": "LABEL-1",
+              "name": "Bug",
+              "description": "Something isn't working",
+              "color": "#FF0000"
+            },
+            {
+              "id": "LABEL-2",
+              "name": "Feature",
+              "description": "New feature or request",
+              "color": "#00FF00"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Tells that label was added to the issue"
+          },
+          {
+            "callsTool": {
+              "name": "add-label",
+              "arguments": {
+                "issueId": "ISS-1",
+                "labelId": "LABEL-2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linear remove Bug label from AI tools",
+        "mocks": {
+          "remove-label": {
+            "id": "RAY-15",
+            "title": "AI tools",
+            "labels": {
+              "nodes": [
+                {
+                  "id": "LABEL-1",
+                  "name": "Bug",
+                  "color": "#FF0000"
+                },
+                {
+                  "id": "LABEL-2",
+                  "name": "High Priority",
+                  "color": "#FF00FF"
+                }
+              ]
+            }
+          },
+          "full-text-search-issues": {
+            "issues": [
+              {
+                "id": "RAY-15",
+                "title": "AI tools",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "started",
+                  "name": "In Progress",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "description": "Something isn't working",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "filter-issues": {
+            "issues": [
+              {
+                "id": "RAY-15",
+                "title": "AI tools",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "started",
+                  "name": "In Progress",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "description": "Something isn't working",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "get-labels": [
+            {
+              "id": "LABEL-1",
+              "name": "Bug",
+              "description": "Something isn't working",
+              "color": "#FF0000"
+            },
+            {
+              "id": "LABEL-2",
+              "name": "Feature",
+              "description": "New feature or request",
+              "color": "#00FF00"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Tells that label was removed from the issue"
+          },
+          {
+            "callsTool": "full-text-search-issues"
+          },
+          {
+            "callsTool": {
+              "name": "remove-label",
+              "arguments": {
+                "issueId": "RAY-15",
+                "labelId": "LABEL-1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linear assign label 'High Priority' to Implement new feature",
+        "mocks": {
+          "add-label": {
+            "id": "ISS-1",
+            "title": "Implement new feature",
+            "labels": {
+              "nodes": [
+                {
+                  "id": "LABEL-1",
+                  "name": "Bug",
+                  "color": "#FF0000"
+                },
+                {
+                  "id": "LABEL-2",
+                  "name": "High Priority",
+                  "color": "#FF00FF"
+                }
+              ]
+            }
+          },
+          "full-text-search-issues": {
+            "issues": [
+              {
+                "id": "ISS-1",
+                "title": "Implement new feature",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "started",
+                  "name": "In Progress",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "get-labels": [
+            {
+              "id": "LABEL-1",
+              "name": "Bug",
+              "description": "Something isn't working",
+              "color": "#FF0000"
+            },
+            {
+              "id": "LABEL-2",
+              "name": "Feature",
+              "description": "New feature or request",
+              "color": "#00FF00"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Tells that label 'High Priority' doesn't exist"
+          },
+          {
+            "not": {
+              "callsTool": "add-label"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linear add comment to Implement landing page: Blocker: waiting for design",
+        "mocks": {
+          "create-comment": {
+            "id": "COMMENT-1",
+            "body": "Blocker: waiting for design",
+            "createdAt": "2024-09-18T16:00:00Z",
+            "user": {
+              "id": "USER-1",
+              "displayName": "John Doe",
+              "avatarUrl": "https://example.com/avatar.jpg"
+            }
+          },
+          "full-text-search-issues": {
+            "issues": [
+              {
+                "id": "ISS-1",
+                "title": "Implement landing page",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "started",
+                  "name": "In Progress",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Tells that comment was added to the issue"
+          },
+          {
+            "matches": "\\[([^\\]]+)\\]\\(([^\\s\\)]+)(?:\\s+\"([^\"]+)\")?\\)"
+          },
+          {
+            "callsTool": "full-text-search-issues"
+          },
+          {
+            "callsTool": {
+              "name": "create-comment",
+              "arguments": {
+                "issueId": "ISS-1",
+                "body": {
+                  "includes": "waiting for design"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linear add document titled Meeting Notes with content 'TBD' in Project Alpha",
+        "mocks": {
+          "get-documents": [
+            {
+              "id": "DOC-1",
+              "title": "API Documentation",
+              "icon": "📄",
+              "color": "#00FFFF",
+              "createdAt": "2024-09-01T10:00:00Z",
+              "updatedAt": "2024-09-18T15:00:00Z",
+              "url": "https://linear.app/company/doc/doc-1"
+            },
+            {
+              "id": "DOC-2",
+              "title": "Product Roadmap",
+              "icon": "🗺️",
+              "color": "#FF00FF",
+              "createdAt": "2024-09-05T09:00:00Z",
+              "updatedAt": "2024-09-17T11:30:00Z",
+              "url": "https://linear.app/company/doc/doc-2"
+            }
+          ],
+          "create-document": {
+            "id": "DOC-3",
+            "title": "Release Process",
+            "content": "# Release Process\n\nThis document outlines our release process and checklist...",
+            "icon": "📅",
+            "color": "#FF00FF",
+            "createdAt": "2024-09-18T18:00:00Z",
+            "updatedAt": "2024-09-18T18:00:00Z",
+            "url": "https://linear.app/company/doc/doc-3"
+          },
+          "get-projects": [
+            {
+              "id": "PROJ-1",
+              "name": "Project Alpha",
+              "description": "Our flagship project",
+              "icon": "🚀",
+              "color": "#00FF00",
+              "progress": 75,
+              "targetDate": "2024-12-31T00:00:00Z",
+              "startDate": "2024-01-01T00:00:00Z"
+            },
+            {
+              "id": "PROJ-2",
+              "name": "Project Beta",
+              "description": "Experimental project",
+              "icon": "🧪",
+              "color": "#0000FF",
+              "progress": 25,
+              "targetDate": "2025-06-30T00:00:00Z",
+              "startDate": "2024-07-01T00:00:00Z"
+            }
+          ],
+          "get-document-content": {
+            "id": "DOC-1",
+            "title": "API Documentation",
+            "content": "# API Documentation\n\nThis document describes our API endpoints and how to use them.\n\n## Authentication\n\nAll API requests require authentication using a bearer token...",
+            "icon": "📄",
+            "color": "#00FFFF",
+            "createdAt": "2024-09-01T10:00:00Z",
+            "updatedAt": "2024-09-18T15:00:00Z",
+            "url": "https://linear.app/company/doc/doc-1"
+          }
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Tells that document has been created successfully"
+          },
+          {
+            "includes": "Meeting Notes"
+          },
+          {
+            "meetsCriteria": "Includes markdown link to created document"
+          },
+          {
+            "callsTool": {
+              "name": "create-document",
+              "arguments": {
+                "projectId": "PROJ-1",
+                "title": [
+                  {
+                    "includes": "meeting notes"
+                  }
+                ],
+                "content": [
+                  {
+                    "includes": "tbd"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linear what is the status of project Alpha",
+        "mocks": {
+          "get-project-statuses": [
+            {
+              "id": "STATUS-1",
+              "name": "Planned",
+              "color": "#FFFF00"
+            },
+            {
+              "id": "STATUS-2",
+              "name": "In Progress",
+              "color": "#0000FF"
+            },
+            {
+              "id": "STATUS-3",
+              "name": "Completed",
+              "color": "#00FF00"
+            }
+          ],
+          "get-project-updates": [
+            {
+              "id": "UPDATE-1",
+              "health": "onTrack",
+              "body": "Project is progressing well",
+              "updatedAt": "2024-09-18T10:00:00Z",
+              "url": "https://linear.app/company/project/update-1"
+            },
+            {
+              "id": "UPDATE-2",
+              "health": "atRisk",
+              "body": "We've encountered some challenges",
+              "updatedAt": "2024-09-17T15:30:00Z",
+              "url": "https://linear.app/company/project/update-2"
+            }
+          ],
+          "get-projects": [
+            {
+              "id": "PROJ-1",
+              "name": "Project Alpha",
+              "description": "Our flagship project",
+              "icon": "🚀",
+              "color": "#00FF00",
+              "progress": 75,
+              "targetDate": "2024-12-31T00:00:00Z",
+              "startDate": "2024-01-01T00:00:00Z"
+            },
+            {
+              "id": "PROJ-2",
+              "name": "Project Beta",
+              "description": "Experimental project",
+              "icon": "🧪",
+              "color": "#0000FF",
+              "progress": 25,
+              "targetDate": "2025-06-30T00:00:00Z",
+              "startDate": "2024-07-01T00:00:00Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "meetsCriteria": "Explains current project status"
+          }
+        ]
+      },
+      {
+        "input": "@linear Move Windows client to in-progress",
+        "usedAsExample": true,
+        "mocks": {
+          "full-text-search-issues": {
+            "issues": [
+              {
+                "id": "RAY-100",
+                "title": "Windows client",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "backlog",
+                  "name": "Backlog",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "get-issue-states": [
+            {
+              "id": "STATE-1",
+              "name": "Backlog",
+              "description": "Issues that are not yet scheduled",
+              "position": 0,
+              "type": "backlog"
+            },
+            {
+              "id": "STATE-2",
+              "name": "In Progress",
+              "description": "Issues currently being worked on",
+              "position": 1,
+              "type": "started"
+            },
+            {
+              "id": "STATE-3",
+              "name": "Done",
+              "description": "Completed issues",
+              "position": 2,
+              "type": "completed"
+            }
+          ],
+          "update-issue": {
+            "id": "RAY-100",
+            "title": "Windows client",
+            "description": "",
+            "state": {
+              "id": "STATE-2",
+              "type": "started",
+              "name": "In Progress",
+              "color": "#0000FF"
+            },
+            "priority": 1,
+            "priorityLabel": "Urgent"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-issue-states"
+          },
+          {
+            "callsTool": {
+              "name": "update-issue",
+              "arguments": {
+                "stateId": "STATE-2",
+                "issueId": "RAY-100"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that issue status was changed"
+          },
+          {
+            "matches": "\\[([^\\]]+)\\]\\(([^\\s\\)]+)(?:\\s+\"([^\"]+)\")?\\)"
+          }
+        ]
+      },
+      {
+        "input": "@linear close my issue for the location tool",
+        "usedAsExample": true,
+        "mocks": {
+          "get-current-user": {
+            "id": "usr_01ABCDEFGHIJKLMNOPQRSTUV",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "displayName": "John Doe",
+            "avatarUrl": "https://avatars.linear.app/user/01ABCDEFGHIJKLMNOPQRSTUV",
+            "active": true,
+            "createdAt": "2023-01-01T00:00:00.000Z",
+            "updatedAt": "2023-10-15T14:24:04.000Z",
+            "admin": true,
+            "lastSeen": "2023-10-15T14:24:04.000Z",
+            "inviteHash": "abcdef123456",
+            "url": "https://linear.app/team/u/john-doe",
+            "description": "Product Manager",
+            "isMe": true,
+            "statusEmoji": "🚀",
+            "statusLabel": "Launching new features",
+            "statusUntilAt": "2023-10-16T23:59:59.000Z"
+          },
+          "filter-issues": {
+            "issues": [
+              {
+                "id": "RAY-500",
+                "title": "Turn `@location` into a permission instead of a tool",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "backlog",
+                  "name": "Backlog",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "full-text-search-issues": {
+            "issues": [
+              {
+                "id": "RAY-500",
+                "title": "Turn `@location` into a permission instead of a tool",
+                "priority": 2,
+                "priorityLabel": "High",
+                "state": {
+                  "id": "STATE-1",
+                  "type": "backlog",
+                  "name": "Backlog",
+                  "color": "#0000FF"
+                },
+                "assignee": {
+                  "id": "USER-1",
+                  "displayName": "John Doe",
+                  "avatarUrl": "https://example.com/avatar.jpg",
+                  "email": "john@example.com"
+                },
+                "labels": {
+                  "nodes": [
+                    {
+                      "id": "LABEL-1",
+                      "name": "Bug",
+                      "color": "#FF0000"
+                    }
+                  ]
+                },
+                "team": {
+                  "id": "TEAM-1",
+                  "issueEstimationType": "fibonacci",
+                  "issueEstimationAllowZero": true,
+                  "issueEstimationExtended": false
+                }
+              }
+            ]
+          },
+          "get-issue-states": [
+            {
+              "id": "STATE-1",
+              "name": "Backlog",
+              "description": "Issues that are not yet scheduled",
+              "position": 0,
+              "type": "backlog"
+            },
+            {
+              "id": "STATE-2",
+              "name": "In Progress",
+              "description": "Issues currently being worked on",
+              "position": 1,
+              "type": "started"
+            },
+            {
+              "id": "STATE-3",
+              "name": "Done",
+              "description": "Completed issues",
+              "position": 2,
+              "type": "completed"
+            }
+          ],
+          "update-issue": {
+            "id": "RAY-100",
+            "title": "Turn `@location` into a permission instead of a tool",
+            "description": "",
+            "state": {
+              "id": "STATE-2",
+              "type": "started",
+              "name": "In Progress",
+              "color": "#0000FF"
+            },
+            "priority": 1,
+            "priorityLabel": "Urgent"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-issue-states"
+          },
+          {
+            "callsTool": {
+              "name": "update-issue",
+              "arguments": {
+                "stateId": "STATE-3",
+                "issueId": "RAY-500"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that issue status was changed"
+          },
+          {
+            "matches": "\\[([^\\]]+)\\]\\(([^\\s\\)]+)(?:\\s+\"([^\"]+)\")?\\)"
+          }
+        ]
+      },
+      {
+        "input": "@linear add sub-issue `Public release` to AI Extensions API",
+        "mocks": {
+          "full-text-search-issues": {
+            "issues": [
+              {
+                "id": "d11c2ea6-2533-4bab-9a6e-ed6499fbfc6a",
+                "identifier": "RAY-1234567",
+                "title": "AI Extensions API",
+                "branchName": "ray-1234567-ai-extensions-api"
+              }
+            ]
+          },
+          "get-teams": [
+            {
+              "id": "TEAM-1",
+              "name": "Raycast",
+              "key": "ENG",
+              "icon": "💻",
+              "color": "#0000FF"
+            }
+          ],
+          "create-issue": {
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-issue",
+              "arguments": {
+                "parentId": "d11c2ea6-2533-4bab-9a6e-ed6499fbfc6a"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "issueCustomCopyAction",
@@ -215,39 +1560,54 @@
       "required": false
     },
     {
-        "name": "limit",
-        "title": "API Issue Limit",
-        "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
-        "type": "textfield",
-        "default": "50",
-        "required": false
+      "name": "limit",
+      "title": "API Issue Limit",
+      "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
+      "type": "textfield",
+      "default": "50",
+      "required": false
+    },
+    {
+      "name": "shouldHideRedundantIssues",
+      "type": "checkbox",
+      "title": "Advanced",
+      "label": "Hide Redundant Issues",
+      "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^2.3.0",
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.16",
-    "date-fns": "^2.28.0",
-    "file-type": "^18.2.0",
+    "@linear/sdk": "^39.0.0",
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.0.0",
+    "date-fns": "^4.1.0",
+    "file-type": "^20.4.1",
     "lodash": "^4.17.21",
-    "node-emoji": "^1.11.0",
-    "remove-markdown": "^0.5.0"
+    "nanoid": "^5.1.5",
+    "node-emoji": "^2.2.0",
+    "remove-markdown": "^0.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/lodash": "^4.14.182",
-    "@types/node-emoji": "^1.8.1",
-    "@types/object-hash": "^2.2.1",
-    "@types/remove-markdown": "^0.3.1",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.21.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.1.2",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^9.24.0",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

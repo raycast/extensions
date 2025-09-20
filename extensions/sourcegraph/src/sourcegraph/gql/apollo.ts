@@ -1,15 +1,25 @@
 import { createHttpLink, ApolloClient, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
-import fetch from "cross-fetch";
 import operations from "./operations";
+import { getProxiedFetch } from "./fetchProxy";
 
-export function newApolloClient(connect: { instance: string; token?: string }) {
+export function newApolloClient(connect: {
+  instance: string;
+  token?: string;
+  proxy?: string;
+  anonymousUserID?: string;
+}) {
+  const headers: Record<string, string> = {
+    "X-Requested-With": "Raycast-Sourcegraph",
+  };
+  if (connect.anonymousUserID) {
+    headers["X-Sourcegraph-Actor-Anonymous-UID"] = connect.anonymousUserID;
+  }
+
   const httpLink = createHttpLink({
     uri: `${connect.instance}/.api/graphql`,
-    headers: {
-      "X-Requested-With": "Raycast-Sourcegraph",
-    },
-    fetch,
+    headers,
+    fetch: getProxiedFetch(connect.proxy) as unknown as WindowOrWorkerGlobalScope["fetch"],
   });
 
   const authLink = setContext((_, { headers }) => {

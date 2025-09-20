@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
-    "better-sqlite3": "7.5.3",
+    "better-sqlite3": "12.1.1",
     "fuse.js": "6.6.2",
     "node-fetch": "^3.0.0",
     "sql.js": "1.7.0"
@@ -37,6 +37,9 @@
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
+  },
+  "overrides": {
+    "tar-fs": ">=3.0.9"
   },
   "scripts": {
     "build": "ray build -e dist",

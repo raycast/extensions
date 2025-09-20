@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oura",
+  "title": "Oura",
+  "description": "Get data from your Oura ring experience to keep track of your readiness, sleep, activity, and more.",
+  "icon": "command-icon.png",
+  "author": "Rob",
+  "categories": [
+    "Fun",
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Get Oura Personal Info",
+      "description": "Get your latest personal info from Oura like your age, weight, and height.",
+      "mode": "view"
+    },
+    {
+      "name": "summary",
+      "title": "Oura Summary",
+      "description": "Get your Sleep, Readiness, and Activity scores",
+      "mode": "no-view",
+      "interval": "10m"
+    },
+    {
+      "name": "workouts",
+      "title": "Latest Oura Workouts",
+      "description": "Get your latest workouts from Oura like your activity type, start time, and duration.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "days",
+          "placeholder": "Days ago",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "readiness",
+      "title": "Oura Readiness",
+      "description": "Get today's readiness data: activity balance, temperature, HRV, resting heart rate, and sleep balance.",
+      "mode": "view"
+    },
+    {
+      "name": "sleep",
+      "title": "Oura Sleep",
+      "description": "Get your sleep data: score, total sleep, REM sleep, deep sleep, and latency.",
+      "mode": "view"
+    },
+    {
+      "name": "activity",
+      "title": "Oura Activity",
+      "description": "Get your today's activity data: like steps, calories, and distance.",
+      "mode": "view"
+    },
+    {
+      "name": "resilience",
+      "title": "Oura Resilience",
+      "description": "Get the last two week's resilience and contributing factors.",
+      "mode": "view"
+    },
+    {
+      "name": "stress",
+      "title": "Oura Stress",
+      "description": "Get today's stress data: stress high, recovery high, and day summary.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "key": "token",
+      "title": "Oura Personal Access Token",
+      "name": "oura_token",
+      "description": "Your personal access token from the Oura API.",
+      "required": true,
+      "type": "password",
+      "defaultValue": ""
+    },
+    {
+      "key": "unit_measurement",
+      "title": "Unit of Measurement",
+      "name": "unit_measurement",
+      "description": "The unit of measurement to use for the data.",
+      "required": false,
+      "type": "dropdown",
+      "defaultValue": "metric",
+      "data": [
+        {
+          "title": "Metric",
+          "value": "metric"
+        },
+        {
+          "title": "Imperial",
+          "value": "imperial"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "axios": "^1.8.4",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

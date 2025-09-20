@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { NewTabPreferences, SearchArcPreferences } from "./types";
 
-export const newTabPreferences = getPreferenceValues<NewTabPreferences>();
-export const searchArcPreferences = getPreferenceValues<SearchArcPreferences>();
+export const newTabPreferences = getPreferenceValues<Preferences.NewTab>();
+export const searchArcPreferences = getPreferenceValues<Preferences.Search>();
+export const newLittleArcPreferences = getPreferenceValues<Preferences.NewLittleArc>();
+export const NewIncognitoWindowPreferences = getPreferenceValues<Preferences.NewIncognitoWindow>();

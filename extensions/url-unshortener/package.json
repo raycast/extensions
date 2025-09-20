@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "url-unshortener",
+  "title": "URL Unshortener",
+  "description": "Unshorten/expand those pesky short links in your clipboard or text selection, enhancing your privacy and security.",
+  "icon": "icon.png",
+  "author": "sebdanielsson",
+  "contributors": [
+    "pernielsentikaer",
+    "omarshahine"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "unshorten-url-quick",
+      "title": "Paste Unshortened URL",
+      "description": "Paste unshortened URL to your current app from selection or clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "unshorten-url-interactive",
+      "title": "Unshorten URL",
+      "description": "Unshorten URL from current selection or clipboard and choose an action.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "~1.100.3",
+    "@raycast/utils": "^2.2.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.34",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "react-devtools": "^6.1.1",
+    "typescript": "~5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

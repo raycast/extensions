@@ -1,13 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "authy",
-  "title": "Authy",
-  "description": "Search, sync and use your Authy 2fa tokens with Raycast",
+  "title": "Authy - Twilio App",
+  "description": "Search, sync and use your Twilio’s Authy 2fa tokens with Raycast",
   "icon": "command-icon.png",
   "author": "guga4ka",
   "contributors": [
     "gdsmith",
-    "lukekarrys"
+    "pernielsentikaer",
+    "litomore"
   ],
   "categories": [
     "Security"
@@ -17,8 +18,8 @@
     {
       "name": "search-otp",
       "title": "Search Token",
-      "subtitle": "Authy",
-      "description": "Search OTP for synced Authy Apps and 3rd party services",
+      "subtitle": "Authy - Twilio app",
+      "description": "Search OTP for synced Twilio’s Authy Apps and 3rd party services",
       "mode": "view"
     }
   ],
@@ -60,7 +61,7 @@
       "name": "primaryActionIsCopy",
       "label": "Copy as primary action, Output as secondary",
       "type": "checkbox",
-      "description": "Primary action copies pin to clipboard instead of outputing to front application",
+      "description": "Primary action copies pin to clipboard instead of outp utting to front application",
       "default": true
     },
     {
@@ -73,21 +74,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.0",
+    "@raycast/api": "^1.77.1",
+    "@raycast/utils": "^1.16.1",
     "hi-base32": "^0.5.1",
-    "node-fetch": "^3.3.0",
-    "node-forge": "^1.3.1"
+    "node-fetch": "^3.3.2",
+    "node-forge": "^1.3.1",
+    "protobufjs": "^7.3.2",
+    "qrcode": "^1.5.3"
   },
   "devDependencies": {
     "@primer/octicons": "^17.0.0",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^18.8.3",
     "@types/node-forge": "^1.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.15.0",
-    "@typescript-eslint/parser": "^5.15.0",
+    "@types/qrcode": "^1.5.5",
     "eslint": "^8.11.0",
-    "eslint-config-prettier": "^8.5.0",
     "fast-glob": "^3.2.11",
-    "sharp": "^0.30.3",
+    "sharp": "^0.33.4",
     "simple-icons": "^6.14.0",
     "typescript": "^4.6.2"
   },

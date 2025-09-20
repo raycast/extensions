@@ -6,7 +6,10 @@
   "icon": "stripe.png",
   "author": "pradeepb28",
   "contributors": [
-    "farisaziz12"
+    "farisaziz12",
+    "bradgarropy",
+    "xmorse",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "categories": [
@@ -15,6 +18,13 @@
     "Finance"
   ],
   "commands": [
+    {
+      "name": "fill-checkout",
+      "title": "Fill Checkout",
+      "subtitle": "Stripe",
+      "description": "Fills a checkout form with a Stripe test card.",
+      "mode": "view"
+    },
     {
       "name": "balance-transactions",
       "title": "View Balance Transactions",
@@ -84,6 +94,13 @@
       "subtitle": "Stripe",
       "description": "Create new subscription accounts for your customers",
       "mode": "no-view"
+    },
+    {
+      "name": "manage-customers",
+      "title": "Manage Customers & Subscriptions",
+      "subtitle": "Stripe",
+      "description": "Search and manage your Stripe customers and their active subscriptions",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -105,26 +122,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.0.7",
-    "lodash": "^4.17.21"
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "lodash": "^4.17.21",
+    "stripe": "^17.3.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
     "lint": "ray lint"
   }
 }

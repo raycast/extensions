@@ -1,6 +1,9 @@
-import { SearchType } from "./types";
-import SearchResults from "./search-results";
+import type { LaunchProps } from "@raycast/api";
 
-export default function SearchRhyme() {
-  return SearchResults(SearchType.RHYME, "Search for rhymes");
+import { SearchType } from "@/types";
+
+import SearchResults from "@/components/SearchResults";
+
+export default function SearchRhyme(props: LaunchProps) {
+  return SearchResults(SearchType.RHYME, "Search for rhymes", props);
 }

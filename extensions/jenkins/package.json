@@ -5,6 +5,10 @@
   "description": "Manage your Jenkins directly from Raycast.",
   "icon": "icon.png",
   "author": "k8scat",
+  "contributors": [
+    "vkhitrin",
+    "evo"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -42,6 +46,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

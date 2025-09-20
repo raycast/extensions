@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ligue-1",
   "title": "Ligue 1",
-  "description": "View all the latest news about Ligue 1 Uber Eats (calendar, results, ranking, video...) and all live games.",
+  "description": "View all the latest news about Ligue 1 McDonald's (calendar, results, ranking, video...) and all live games.",
   "icon": "icon.png",
   "author": "anhthang",
+  "contributors": [
+    "loris"
+  ],
   "license": "MIT",
   "categories": [
     "Fun"
@@ -14,42 +17,45 @@
       "name": "table",
       "title": "Tables",
       "subtitle": "Ligue 1",
-      "description": "View the latest table of Ligue 1 Uber Eats and season archives.",
+      "description": "View the latest table of Ligue 1 McDonald's and season archives.",
       "mode": "view"
     },
     {
       "name": "result",
       "title": "Fixtures & Results",
       "subtitle": "Ligue 1",
-      "description": "View the latest calendar and results of Ligue 1 Uber Eats and season archives.",
+      "description": "View the latest calendar and results of Ligue 1 McDonald's and season archives.",
       "mode": "view"
     },
     {
       "name": "club",
       "title": "Clubs",
       "subtitle": "Ligue 1",
-      "description": "View all the clubs engaged in Ligue 1 Uber Eats.",
+      "description": "View all the clubs engaged in Ligue 1 McDonald's.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@types/lodash.groupby": "^4.6.7",
-    "axios": "^1.3.3",
-    "json2md": "^2.0.0",
+    "@raycast/api": "^1.79.1",
+    "axios": "^1.8.4",
+    "date-fns": "^3.6.0",
+    "json2md": "^2.0.1",
     "lodash.groupby": "^4.6.0",
-    "xpath-html": "^1.0.3"
+    "lodash.sortby": "^4.7.0"
   },
   "devDependencies": {
-    "@types/json2md": "^1.5.1",
-    "@types/node": "~18.13.0",
-    "@types/react": "^18.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.52.0",
-    "@typescript-eslint/parser": "^5.52.0",
-    "eslint": "^8.34.0",
-    "eslint-config-prettier": "^8.6.0",
-    "react-devtools": "^4.27.2",
-    "typescript": "^4.9.5"
+    "@types/json2md": "^1.5.4",
+    "@types/lodash.groupby": "^4.6.9",
+    "@types/lodash.sortby": "^4.7.9",
+    "@types/node": "~20.14.12",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.5.3",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

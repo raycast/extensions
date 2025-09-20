@@ -1,0 +1,7 @@
+mutation RecordEvents($events: [TelemetryEventInput!]!) {
+  telemetry {
+    recordEvents(events: $events) {
+      alwaysNil
+    }
+  }
+}

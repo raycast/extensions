@@ -1,7 +1,8 @@
-import { showHUD, Clipboard } from "@raycast/api";
+import { showHUD, Clipboard, LaunchProps } from "@raycast/api";
 import slugify from "slugify";
 
-export default async () => {
+export default async (props: LaunchProps<{ arguments: Arguments.Slugify }>) => {
+  const strict = props.arguments.strict !== "0";
   const textToSlugify = await Clipboard.readText();
 
   if (textToSlugify) {
@@ -9,6 +10,7 @@ export default async () => {
       lower: true,
       replacement: "-",
       trim: true,
+      strict,
     });
 
     const successMessage = `Copied slug: ${slug}`;

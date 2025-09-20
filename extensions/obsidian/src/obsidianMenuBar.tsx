@@ -1,19 +1,20 @@
 import { MenuBarExtra, open } from "@raycast/api";
-import { ObsidianIconDynamicBold } from "./utils/constants";
-import { useNotes } from "./utils/hooks";
-import { Vault } from "./utils/interfaces";
-import { getObsidianTarget, ObsidianTargetType, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
+import { vaultPluginCheck } from "./api/vault/plugins/plugins.service";
+import { Vault } from "./api/vault/vault.types";
+import { ObsidianIcon } from "./utils/constants";
+import { useNotes, useObsidianVaults } from "./utils/hooks";
+import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
 
-function StarredNotesList(props: { vault: Vault }) {
+function BookmarkedNotesList(props: { vault: Vault }) {
   const [notes] = useNotes(props.vault, true);
   return (
-    <MenuBarExtra.Submenu title={props.vault.name} key={props.vault.path + "Starred Notes"}>
+    <MenuBarExtra.Submenu title={props.vault.name} key={props.vault.path + "Bookmarked Notes"}>
       {notes.map((note) => (
         <MenuBarExtra.Item
           title={note.title}
           key={note.path}
           tooltip="Open Note"
-          icon={ObsidianIconDynamicBold}
+          icon={ObsidianIcon}
           onAction={() => open(getObsidianTarget({ type: ObsidianTargetType.OpenPath, path: note.path }))}
         />
       ))}
@@ -21,11 +22,11 @@ function StarredNotesList(props: { vault: Vault }) {
   );
 }
 
-function StarredNotesVaultSelection(props: { vaults: Vault[] }) {
+function BookmarkedNotesVaultSelection(props: { vaults: Vault[] }) {
   return (
-    <MenuBarExtra.Submenu title="Starred Notes" key={"Starred Notes"}>
+    <MenuBarExtra.Submenu title="Bookmarked Notes" key={"Bookmarked Notes"}>
       {props.vaults.map((vault) => (
-        <StarredNotesList vault={vault} key={vault.path + "Starred Notes"} />
+        <BookmarkedNotesList vault={vault} key={vault.path + "Bookmarked Notes"} />
       ))}
     </MenuBarExtra.Submenu>
   );
@@ -64,10 +65,10 @@ function OpenVaultSelection(props: { vaults: Vault[] }) {
 
 function ObsidianMenuBar(props: { vaults: Vault[] }) {
   return (
-    <MenuBarExtra icon={ObsidianIconDynamicBold} tooltip="Obsidian">
-      <DailyNoteVaultSelection vaults={props.vaults}></DailyNoteVaultSelection>
-      <OpenVaultSelection vaults={props.vaults}></OpenVaultSelection>
-      <StarredNotesVaultSelection vaults={props.vaults}></StarredNotesVaultSelection>
+    <MenuBarExtra icon={ObsidianIcon} tooltip="Obsidian">
+      <DailyNoteVaultSelection vaults={props.vaults} />
+      <OpenVaultSelection vaults={props.vaults} />
+      <BookmarkedNotesVaultSelection vaults={props.vaults} />
     </MenuBarExtra>
   );
 }

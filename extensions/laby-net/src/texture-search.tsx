@@ -15,13 +15,13 @@ const textureTypes = [
   {
     name: "Skins",
     type: "SKIN",
-    imageUrl: `https://skin.laby.net/api/render/texture/%s.png?shadow=true&height=150`,
+    imageUrl: `https://skin.laby.net/api/render/skin/%s.png?shadow=true&height=300&width=250`,
     url: `https://laby.net/skin/%s`,
   },
   {
     name: "Capes",
     type: "CAPE",
-    imageUrl: `https://skin.laby.net/api/render/texture/%s.png?shadow=true&height=150`,
+    imageUrl: `https://skin.laby.net/api/render/cape/%s.png?shadow=true&height=300&width=250`,
     url: `https://laby.net/cape/%s`,
   },
 ];
@@ -79,7 +79,7 @@ export default function Command() {
           <Grid.Item
             content={{
               source: type.imageUrl.replace("%s", entry.imageHash),
-              mask: Image.Mask.Circle,
+              mask: Image.Mask.RoundedRectangle,
             }}
             key={entry.imageHash}
             title={entry.name === undefined ? entry.useCount.toLocaleString() + " Users" : entry.name}

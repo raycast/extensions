@@ -1,0 +1,62 @@
+# Node.js / Raycast project .gitignore
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.raycast-swift-build/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Editor configuration
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Log files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temporary files
+tmp/
+temp/
+
+# TypeScript cache
+.tsbuildinfo
+*.tsbuildinfo
+
+# Coverage reports
+coverage/
+
+# Test snapshots
+__snapshots__/
+
+# Debug files
+.inspect
+
+# Lock files (uncomment if you want to share with team)
+# yarn.lock
+# pnpm-lock.yaml 

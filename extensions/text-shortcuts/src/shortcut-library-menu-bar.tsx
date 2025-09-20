@@ -1,13 +1,15 @@
 import { Clipboard, getPreferenceValues, Icon, MenuBarExtra, openCommandPreferences, showHUD } from "@raycast/api";
-import { Preferences } from "./types/preferences";
+import { useFrecencySorting } from "@raycast/utils";
 import { getShortcuts } from "./hooks/hooks";
-import { handleLiveTemplate, runShortcut, Shortcut, Tags } from "./util/shortcut";
+import { Preferences } from "./types/preferences";
 import { fetchItemInput } from "./util/input";
+import { handleLiveTemplate, runShortcut, Shortcut, Tags } from "./util/shortcut";
 
 export default function ShortcutLibrary() {
   const preferences = getPreferenceValues<Preferences>();
 
   const { allShortcuts, loading } = getShortcuts(0, preferences);
+  const { data: sortedData, visitItem: visitItem } = useFrecencySorting(allShortcuts);
   return (
     <MenuBarExtra
       isLoading={loading}
@@ -19,22 +21,27 @@ export default function ShortcutLibrary() {
         },
       }}
     >
-      <MenuBarShortcuts allShortcuts={allShortcuts} preferences={preferences} />
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        title={"Preferences"}
-        icon={Icon.Gear}
-        onAction={() => {
-          openCommandPreferences().then();
-        }}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
-      />
+      <MenuBarShortcuts allShortcuts={sortedData} visitItem={visitItem} preferences={preferences} />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={"Preferences"}
+          icon={Icon.Gear}
+          onAction={() => {
+            openCommandPreferences().then();
+          }}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
 
-function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Preferences }) {
-  const { allShortcuts, preferences } = props;
+function MenuBarShortcuts(props: {
+  allShortcuts: Shortcut[];
+  visitItem: (item: Shortcut) => void;
+  preferences: Preferences;
+}) {
+  const { allShortcuts, visitItem, preferences } = props;
   return (
     <>
       {preferences.annotation && (
@@ -42,8 +49,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.ANNOTATION) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -52,8 +64,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.CASE) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -62,8 +79,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.CODER) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -72,8 +94,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.DELETION) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -82,8 +109,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.FORMAT) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -92,8 +124,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.MARKDOWN) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -102,8 +139,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.REPLACEMENT) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -112,8 +154,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.TIME) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -122,8 +169,13 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
           {allShortcuts.map(
             (value) =>
               value.info.tag.includes(Tags.OTHER) && (
-                <MenuBarShortcutItem key={value.info.id} shortcut={value} preferences={preferences} />
-              )
+                <MenuBarShortcutItem
+                  key={value.info.id}
+                  shortcut={value}
+                  visitItem={visitItem}
+                  preferences={preferences}
+                />
+              ),
           )}
         </MenuBarExtra.Submenu>
       )}
@@ -131,14 +183,19 @@ function MenuBarShortcuts(props: { allShortcuts: Shortcut[]; preferences: Prefer
   );
 }
 
-function MenuBarShortcutItem(props: { shortcut: Shortcut; preferences: Preferences }) {
-  const { shortcut, preferences } = props;
+function MenuBarShortcutItem(props: {
+  shortcut: Shortcut;
+  visitItem: (item: Shortcut) => void;
+  preferences: Preferences;
+}) {
+  const { shortcut, visitItem, preferences } = props;
   return (
     <MenuBarExtra.Item
       key={shortcut.info.id}
       icon={shortcut.info.icon}
       title={shortcut.info.name}
       onAction={async (event) => {
+        visitItem(shortcut);
         const _runShortcut = runShortcut(await fetchItemInput(), handleLiveTemplate(shortcut.tactions));
         if (preferences.primaryAction === "Paste") {
           if (event.type == "left-click") {

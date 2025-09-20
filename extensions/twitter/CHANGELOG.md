@@ -1,5 +1,9 @@
 # Twitter Changelog
 
+## [X compatible] - 2023-01-21
+
+- Restore Twitter features in X
+
 ## [Add v2 support] - 2022-06-28
 
 - Add OAuth support

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shakespearify",
+  "title": "Shakespearify",
+  "description": "Convert plain boring English text to something like Shakespeare would write!",
+  "icon": "icon.png",
+  "author": "Binary-Bytes",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Shakespearify",
+      "description": "Convert plain boring English text to something like Shakespeare would write!",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyConvertedText",
+          "description": "Automatically copy the converted text to the clipboard",
+          "type": "dropdown",
+          "required": true,
+          "title": "Automatically Copy Converted Text",
+          "default": "yes",
+          "data": [
+            {
+                "title": "Copy",
+                "value": "yes"
+            },
+            {
+                "title": "Don't Copy",
+                "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "pasteConvertedText",
+          "description": "Immediately paste the converted text into the frontmost application",
+          "type": "dropdown",
+          "required": true,
+          "title": "Immediately Paste Converted Text",
+          "default": "yes",
+          "data": [
+            {
+                "title": "Paste",
+                "value": "yes"
+            },
+            {
+                "title": "Don't Paste",
+                "value": "no"
+            }
+          ]
+        },
+        {
+            "name": "apiKey",
+            "description": "Gemini API key used for Shakespearifying text!",
+            "type": "password",
+            "required": true,
+            "title": "Gemini API Key",
+            "placeholder": "AIzaSyBeAgynah......"
+        }
+      ]
+    },
+    {
+        "name": "history",
+        "title": "Wise History",
+        "description": "Take a look at your history of previously Shakespearified texts",
+        "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@google/generative-ai": "^0.13.0",
+    "@raycast/api": "^1.77.1",
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

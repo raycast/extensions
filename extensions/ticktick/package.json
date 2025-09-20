@@ -4,23 +4,90 @@
   "description": "Check and search tasks in TickTick via Raycast",
   "icon": "tick-logo.png",
   "author": "appest",
+  "contributors": [
+    "viduycheung",
+    "Alireza",
+    "yakitrak",
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity"
   ],
+  "preferences": [
+    {
+      "name": "defaultTitle",
+      "description": "Default title for new task.",
+      "defaultValue": "none",
+      "title": "Default Title",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "Selection",
+          "value": "selection"
+        }
+      ]
+    },
+    {
+      "name": "defaultDate",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Today",
+          "value": "today"
+        },
+        {
+          "title": "Tomorrow",
+          "value": "tomorrow"
+        },
+        {
+          "title": "Day after Tomorrow",
+          "value": "dayAfterTomorrow"
+        },
+        {
+          "title": "Next Week",
+          "value": "nextWeek"
+        }
+      ],
+      "default": "none",
+      "required": false,
+      "title": "Default Date",
+      "description": "Default date for new task."
+    }
+  ],
   "commands": [
     {
       "name": "index",
-      "title": "Today Tasks",
+      "title": "Today",
       "subtitle": "TickTick",
       "description": "Show today to-do tasks.",
       "mode": "view"
     },
     {
       "name": "next7Days",
-      "title": "Next 7 Days Tasks",
+      "title": "Next 7 Days",
       "subtitle": "TickTick",
       "description": "Show next 7 days to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "TickTick",
+      "description": "Show Inbox to-do tasks.",
       "mode": "view"
     },
     {
@@ -34,18 +101,143 @@
       "name": "create",
       "title": "Add Task",
       "subtitle": "TickTick",
-      "description": "Convenient way to easily add new task.",
-      "mode": "view"
+      "description": "Add task in TickTick.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoFillEnabled",
+          "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
+          "type": "checkbox",
+          "defaultValue": false,
+          "label": "Auto Fill with AI",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quickAdd",
+      "title": "Quick Add Task",
+      "subtitle": "TickTick",
+      "description": "Quick way to add task in TickTick.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Get tasks in smart list"
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add task to TickTick"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Lists",
+      "description": "Get Lists in TickTick"
+    }
+  ],
+  "ai": {
+    "instructions": "",
+    "evals": [
+      {
+        "input": "@ticktick get tasks in today",
+        "mocks": {
+          "get-tasks": [
+            {
+              "id": "6821491f8e31d12726fb9992",
+              "title": "Buy oat milk",
+              "content": "",
+              "desc": "",
+              "priority": 3,
+              "projectId": "6821491f8e31d12726fb9993",
+              "kind": "TEXT",
+              "startDate": "2025-05-11T16:00:00+0000",
+              "dueDate": "",
+              "isAllDay": true,
+              "isFloating": false,
+              "timeZone": "Asia/Shanghai",
+              "items": [],
+              "tags": []
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tasks",
+              "arguments": {
+                "smartProjectId": "today"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ticktick get tasks in next 7 days",
+        "mocks": {
+          "get-tasks": [
+            {
+              "id": "6821491f8e31d12726fb9992",
+              "title": "Buy oat milk",
+              "content": "",
+              "desc": "",
+              "priority": 3,
+              "projectId": "6821491f8e31d12726fb9993",
+              "kind": "TEXT",
+              "startDate": "2025-05-11T16:00:00+0000",
+              "dueDate": "",
+              "isAllDay": true,
+              "isFloating": false,
+              "timeZone": "Asia/Shanghai",
+              "items": [],
+              "tags": []
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tasks",
+              "arguments": {
+                "smartProjectId": "next7Days"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.0",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
-    "run-applescript": "^6.0.0"
+    "moment-timezone": "^0.5.44",
+    "run-applescript": "^6.0.0",
+    "similarity": "^1.2.1"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.14.194",
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.2.46",
+    "@types/similarity": "^1.2.1",
     "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -53,11 +245,14 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "prettier": "^2.8.7",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

@@ -30,7 +30,7 @@ type StatusErrors = { [key: number]: ErrorText };
 export async function jiraFetchObject<Result>(
   path: string,
   params: QueryParams = {},
-  statusErrors?: StatusErrors
+  statusErrors?: StatusErrors,
 ): Promise<Result> {
   const response = await jiraFetch(path, params, statusErrors);
   return (await response.json()) as unknown as Result;
@@ -47,7 +47,7 @@ export async function jiraFetchObject<Result>(
 export async function jiraFetch(
   path: string,
   params: QueryParams = {},
-  statusErrors?: StatusErrors
+  statusErrors?: StatusErrors,
 ): Promise<Response> {
   const paramKeys = Object.keys(params);
   const query = paramKeys.map((key) => `${key}=${encodeURI(params[key])}`).join("&");

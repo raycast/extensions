@@ -5,6 +5,9 @@
   "description": "Simple extension to search for NuGet packages and copy command to install them to clipboard",
   "icon": "icon.png",
   "author": "lbergantin",
+  "contributors": [
+    "MoienTajik"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -41,6 +44,24 @@
         {
           "title": "Packet CLI",
           "value": "packet-cli"
+        }
+      ]
+    },
+    {
+      "title": "Nuget channel",
+      "description": "The nuget release channel to use, 'Stable' or 'Prerelease'",
+      "name": "nuget-channel",
+      "type": "dropdown",
+      "required": true,
+      "default": "stable",
+      "data": [
+        {
+          "title": "Stable",
+          "value": "stable"
+        },
+        {
+          "title": "Preview",
+          "value": "preview"
         }
       ]
     }

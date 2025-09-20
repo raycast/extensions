@@ -1,6 +1,10 @@
 # `useExec`
 
-Hook that executes a command and returns the [AsyncState](#asyncstate) corresponding to the execution of the command. The last value will be kept between command runs.
+Hook that executes a command and returns the [AsyncState](#asyncstate) corresponding to the execution of the command.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useExec` first returns the data from cache (stale), then executes the command (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
 
 ## Signature
 
@@ -26,7 +30,8 @@ function useExec<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: string[]) -> void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   }
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -57,7 +62,8 @@ function useExec<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: string[]) -> void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   }
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -89,12 +95,12 @@ With a few options:
 - `options.env` is a key-value pairs to set as the environment of the child process. It will extend automatically from `process.env`.
 - `options.encoding` is a string to specify the character encoding used to decode the `stdout` and `stderr` output. If set to `"buffer"`, then `stdout` and `stderr` will be a `Buffer` instead of a string.
 - `options.input` is a string or a Buffer to write to the `stdin` of the file.
-- `options.timeout` is a number. If greater than `0`, the parent will send the signal `SIGTERM` if the child runs longer than timeout milliseconds.
+- `options.timeout` is a number. If greater than `0`, the parent will send the signal `SIGTERM` if the child runs longer than timeout milliseconds. By default, the execution will timeout after 10000ms (eg. 10s).
 - `options.parseOutput` is a function that accepts the output of the child process as an argument and returns the data the hooks will return - see [ParseExecOutputHandler](#parseexecoutputhandler). By default, the hook will return `stdout`.
 
 Including the [useCachedPromise](./useCachedPromise.md)'s options:
 
-- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See [Argument dependent on user input](#argument-dependent-on-user-input) for more information.
 
 Including the [useCachedState](./useCachedState.md)'s options:
 
@@ -106,6 +112,7 @@ Including the [usePromise](./usePromise.md)'s options:
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
 - `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
 
 ### Return
 
@@ -118,21 +125,25 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useExec } from "@raycast/utils";
+import { cpus } from "os";
+import { useMemo } from "react";
 
-const Demo = () => {
-  const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
-  const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
+const brewPath = cpus()[0].model.includes("Apple") ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew";
+
+export default function Command() {
+  const { isLoading, data } = useExec(brewPath, ["info", "--json=v2", "--installed"]);
+  const results = useMemo<{ id: string; name: string }[]>(() => JSON.parse(data || "{}").formulae || [], [data]);
 
   return (
     <List isLoading={isLoading}>
-      {(data || []).map((item) => (
+      {results.map((item) => (
         <List.Item key={item.id} title={item.name} />
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Argument dependent on user input
@@ -146,12 +157,12 @@ import { useState } from "react";
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useExec("brew", ["info", searchText]);
 
   return <Detail isLoading={isLoading} markdown={data} />;
-};
+}
 ```
 
 {% hint style="info" %}
@@ -170,7 +181,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
   const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
 
@@ -186,7 +197,7 @@ const Demo = () => {
           optimisticUpdate(data) {
             return data?.concat({ name: "foo", id: "foo" });
           },
-        }
+        },
       );
       // yay, the API call worked!
       toast.style = Toast.Style.Success;
@@ -215,7 +226,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Types
@@ -265,7 +276,7 @@ export type MutatePromise<T> = (
     optimisticUpdate?: (data: T) => T;
     rollbackOnError?: boolean | ((data: T) => T);
     shouldRevalidateAfter?: boolean;
-  }
+  },
 ) => Promise<any>;
 ```
 

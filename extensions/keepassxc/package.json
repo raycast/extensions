@@ -2,75 +2,117 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keepassxc",
   "title": "KeePassXC",
-  "description": "Access the KeePass database with the KeepassXC-cli. Please make sure KeePassXC is installed.",
+  "description": "Access a KeePass database through KeePassXC.",
   "icon": "keepassxc.png",
-  "author": "zkytech",
+  "author": "pabroux",
+  "contributors": [
+    "zkytech",
+    "CT-7567"
+  ],
+  "categories": [
+    "Security"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Passwords",
-      "subtitle": "KeepassXC",
-      "description": "Search Password in KeepassXC",
+      "name": "search",
+      "title": "Search",
+      "subtitle": "KeePassXC",
+      "description": "Search in KeePassXC",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "database",
-      "type": "textfield",
+      "type": "file",
       "required": true,
-      "title": "Path of Keepass Database File",
-      "description": "Set the Path of Keepass Database File",
-      "placeholder": "Set the Path of KeePass Database File"
+      "title": "KeePass Database",
+      "description": "KeePass database to access"
     },
     {
-      "name": "dbPassword",
-      "type": "password",
-      "required": true,
-      "title": "Password",
-      "description": "Password of Keepass database. For more information about security, please visit README on GitHub",
-      "placeholder": "Please input password of Keepass database"
-    },
-    {
-      "name": "keyFile",
-      "type": "textfield",
+      "name": "lockAfterInactivity",
+      "type": "dropdown",
       "required": false,
-      "title": "Path of Key File",
-      "description": "Set the Path of Key File",
-      "placeholder": "Set the Path of Key File"
+      "title": "Database Locking after Inactivity",
+      "description": "Time after which the database will be locked",
+      "data": [
+        {
+          "title": "Never",
+          "value": "-1"
+        },
+        {
+          "title": "2 minutes",
+          "value": "2"
+        },
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "20 minutes",
+          "value": "20"
+        },
+        {
+          "title": "25 minutes",
+          "value": "25"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "45 minutes",
+          "value": "45"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        }
+      ],
+      "default": "-1"
     },
     {
-      "name": "keepassxcRootPath",
-      "type": "appPicker",
-      "required": true,
-      "title": "KeepassXC.app",
-      "description": "KeepassXC.app",
-      "placeholder": "Select KeepassXC.app",
-      "default": "/Applications/KeePassXC.app"
+      "name": "userInterfaceFavicon",
+      "type": "checkbox",
+      "required": false,
+      "title": "User Interface",
+      "description": "Whether to display favicons in the user interface",
+      "label": "Favicon",
+      "default": false
     }
   ],
+  "platforms": ["macOS", "Windows"],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
-    "@types/crypto-js": "^4.1.0",
-    "run-applescript": "^6.0.0",
-    "crypto-js": "^4.1.1"
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.19.1",
+    "@types/crypto-js": "^4.2.2",
+    "crypto-js": "^4.2.0",
+    "csv-parse": "^5.6.0",
+    "otpauth": "^9.4.1",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.1",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ton-address",
+  "title": "TON Address",
+  "description": "Convert TON blockchain addresses between different formats and resolve .ton domain names",
+  "icon": "extension-icon.png",
+  "author": "drankou",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-ton-address",
+      "title": "Convert Address",
+      "description": "Convert TON blockchain addresses between different formats and resolve .ton domain names",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@orbs-network/ton-access": "^2.3.3",
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.19.1",
+    "tonweb": "^0.0.66"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.1.2",
+    "react": "^19.1.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

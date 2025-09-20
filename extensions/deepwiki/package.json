@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deepwiki",
+  "version": "0.2.2",
+  "title": "DeepWiki",
+  "description": "Search, open, and crawl DeepWiki pages for GitHub repositories.",
+  "icon": "deep-wiki.png",
+  "author": "vivek",
+  "contributors": [
+    "tofrankie"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "open-deepwiki",
+      "title": "Open DeepWiki Page",
+      "description": "Open DeepWiki for a specific GitHub repo URL or org/repo identifier.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "repoIdentifier",
+          "type": "text",
+          "required": true,
+          "placeholder": "GitHub URL or org/repo (e.g., microsoft/monaco-editor)"
+        }
+      ]
+    },
+    {
+      "name": "search-deepwiki",
+      "title": "Search DeepWiki Repos",
+      "description": "Search repositories indexed by DeepWiki.",
+      "mode": "view"
+    },
+    {
+      "name": "crawl-deepwiki-docs",
+      "title": "Crawl DeepWiki Docs",
+      "description": "Crawl all documentation pages for a DeepWiki repository and copy content to clipboard.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "repoIdentifier",
+          "type": "text",
+          "required": true,
+          "placeholder": "GitHub URL or org/repo (e.g., microsoft/monaco-editor)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.2",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.11.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/node-fetch": "^2.6.11",
+    "@types/cheerio": "^0.22.35",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

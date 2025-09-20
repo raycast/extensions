@@ -7,7 +7,16 @@
   "author": "jmaeso",
   "contributors": [
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "LunaticMuch",
+    "hmarr",
+    "harsh_khandelwal",
+    "lukas-runge",
+    "ridemountainpig"
+  ],
+  "keywords": [
+    "guid",
+    "GUID"
   ],
   "license": "MIT",
   "commands": [
@@ -23,35 +32,186 @@
           "placeholder": "1",
           "required": false
         }
+      ]
+    },
+    {
+      "name": "generateV5",
+      "title": "Generate V5 UUIDs",
+      "description": "Copy generated UUIDs V5 to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "text",
+          "placeholder": "UUID Name",
+          "required": true
+        },
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
       ],
       "preferences": [
         {
-          "name": "upperCaseLetters",
+          "name": "uuidNamespace",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "title": "UUID v5 Namespace",
+          "label": "Namespace",
+          "description": "The namespace for UUID v5"
+        }
+      ]
+    },
+    {
+      "name": "generateV7",
+      "title": "Generate V7 UUIDs",
+      "description": "Copy generated UUIDs V7 to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "base32Encoding",
           "type": "checkbox",
           "required": false,
           "default": false,
           "title": "Options",
-          "label": "Uppercase Letters",
-          "description": "Should letters be uppercased?"
+          "label": "Base32 Encoding",
+          "description": "Should letters be Base32 encoded?"
+        }
+      ]
+    },
+    {
+      "name": "generateUlid",
+      "title": "Generate ULIDs",
+      "description": "Copy generated ULIDs to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfULIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generateTypeID",
+      "title": "Generate TypeIDs",
+      "description": "Copy generated TypeIDs to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prefix",
+          "placeholder": "Prefix",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "parseTypeID",
+      "title": "Parse TypeIDs",
+      "description": "Parse TypeID and copy resulting UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "typeID",
+          "type": "text",
+          "placeholder": "prefix_1234567890",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "formatUuid",
+      "title": "Format UUID",
+      "description": "Format UUID without dashes into standard UUID format and copy to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "uuid",
+          "type": "text",
+          "placeholder": "550e8400e29b41d4a716446655440000",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "viewHistory",
+      "title": "View History",
+      "description": "View the UUID history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "upperCaseLetters",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Options",
+      "label": "Uppercase Letters",
+      "description": "Should letters be uppercased?"
+    },
+    {
+      "name": "defaultAction",
+      "description": "Set the default action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.2",
-    "uuid": "^9.0.0"
+    "@raycast/api": "^1.90.0",
+    "typeid-js": "^1.2.0",
+    "ulidx": "^2.4.1",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
-    "eslint": "^8.38.0",
-    "eslint-config-prettier": "^8.8.0",
-    "react-devtools": "^4.27.4",
-    "typescript": "^5.0.4"
+    "@types/uuid": "^10.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

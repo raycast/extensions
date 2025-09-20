@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "forgejo",
+  "title": "Forgejo",
+  "description": "Using on websites built through Forgejo. Work with search repositories and get notifications.",
+  "icon": "forgejo-icon.png",
+  "author": "shichen437",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "repo-search",
+      "title": "Search Repository",
+      "subtitle": "Forgejo",
+      "description": "Search repositories by name",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Unread Notifications",
+      "subtitle": "Forgejo",
+      "description": "List notifications from all repositories",
+      "mode": "view"
+    },
+    {
+      "name": "user-repo-search",
+      "title": "My Repository",
+      "subtitle": "Forgejo",
+      "description": "Search repositories in your public or private repositories by name",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "axios": "^1.8.4",
+    "npm-check": "^6.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Forgejo URL",
+      "description": "Your Forgejo Domain",
+      "type": "textfield",
+      "placeholder": "https://codeberg.org",
+      "required": true
+    },
+    {
+      "name": "accessToken",
+      "title": "Forgejo Access Token",
+      "description": "Your Forgejo Access Token",
+      "type": "password",
+      "placeholder": "Access Token",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

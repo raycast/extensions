@@ -1,16 +1,19 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { useState } from "react";
-import { getIpTime } from "./hooks/hooks";
+import { useMemo, useState } from "react";
 import { buildDayAndNightIcon, isEmpty } from "./utils/common-utils";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import { ListEmptyView } from "./components/list-empty-view";
+import { useIpTime } from "./hooks/useIpTime";
 
 export default function QueryIpTime() {
   const [searchContent, setSearchContent] = useState<string>("");
-  const { timeInfo, loading } = getIpTime(searchContent);
+  const { data, isLoading } = useIpTime(searchContent);
+  const timeInfo = useMemo(() => {
+    return data || [];
+  }, [data]);
 
   const emptyViewTitle = () => {
-    if (loading) {
+    if (isLoading) {
       return "Loading...";
     }
     if (timeInfo.length === 0 && !isEmpty(searchContent)) {
@@ -21,7 +24,7 @@ export default function QueryIpTime() {
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       searchBarPlaceholder={"Query current time via IP or domain"}
       onSearchTextChange={(text) => {
         if (typeof text !== "undefined") setSearchContent(text.replaceAll(" ", ""));

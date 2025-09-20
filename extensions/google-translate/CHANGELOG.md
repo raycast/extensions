@@ -1,12 +1,131 @@
 # Google Translate Changelog
 
+## [Feature] - 2025-07-01
+
+- Added instant translate commands for selected text translation
+- Added "Instant Translate View" command to display translation in HUD
+- Added "Instant Translate Copy" command to copy translation to clipboard
+- Added "Instant Translate Paste" command to paste translation directly
+- Implemented smart HUD duration that adjusts based on text length for better readability
+- Added reusable base instant translate function for consistent translation logic
+
+## [Feature] - 2025-06-25
+
+- Show Auto-Detected language in Quick Translate
+
+## [Feature] - 2025-06-24
+
+- Auto-focus on Text input after changing source or target language
+- Add shortcuts for quick focus on Source(`CMD + SHIFT + F`) and Target(`CMD + SHIFT + T`) language fields
+- Use auto-detected language when switching languages
+- Fix quick translate with Chinese auto detected language
+- Fix translate compatibility with old Country Codes format for people who had Chinese saved for example and some more languages
+- Fixed proxy for doubleWayTranslate
+- Add proxy for TTS
+
+## [Fix] - 2025-06-23
+
+- Fix uppercase ISO language codes (fix Chinese and some other languages)
+
+## [Maintenance] - 2025-06-19
+
+- Remove country flags from languages
+- Add all the languages from Google Translate website
+
+## [Feature] - 2025-03-31
+
+- Add ability to set proxy
+
+## [Feature] - 2025-01-09
+
+- Add ability to set multiple target languages to translate
+
+## [Fix] - 2024-12-25
+
+- Fixed a typo for Traditional Chinese
+
+## [Fix] - 2024-07-05
+
+- Keep language names consistent with `translate.google.com`
+
+## [Feature] - 2024-05-09
+
+- Added new shortcut for `Toggle Full Text` action - `CMD+F`
+
+## [Default Action preference for translations] - 2024-04-29
+
+- Add a preference to set the default action for the translations
+
+## [Re-added previously removed contributor] - 2024-04-26
+
+## [Fix] - 2024-03-08
+
+- Return back `CMD+Enter` shortcut for `Toggle Full Text` action
+- Moved text-to-speech action, to execute it only with `CMD+T` keyboard shortcut
+
+## [Fix] - 2024-02-26
+
+- Fixed issue when trying play text-to-speech continuously
+
+## [Feature] - 2024-02-23
+
+- Added new "Play Text-To-Speed" command
+
+## [Enhancement] - 2024-01-26
+
+- Added "Autofill Input" preference to allow users to disable the autofill selected text feature
+
+## [Feature] - 2024-01-20
+
+- Added new "Quick Translate" command
+
+## [Enhancement] - 2023-11-15
+
+- Added Copy Pronunciation keyboard shortcut
+
+## [Enhancement] - 2023-08-31
+
+- Added pronunciation for Translate and Translate Form
+
+## [Fix] - 2023-08-16
+
+- Fixed case when autodetect language name is not found in our supported languages list
+
+## [Fix] - 2023-08-09
+
+- Fixed auto language detect when detected language is not in the available list
+- Added Latin
+
+## [Fix] - 2023-06-21
+
+- Supplementary change for zh-TW info to match Google Translate
+
+## [Fix] - 2023-06-21
+
+- Changed zh-TW info to match Google Translate
+
+## [Fix] - 2023-06-15
+
+- Fixed language code for Hebrew
+
+## [Enhancement] - 2023-05-30
+
+- Added ability to translate selected text
+
+## [Enhancement] - 2023-05-22
+
+- Added error handling
+- Updated the Raycast libraries to the latest version.
+- Translations are now identical to translate.google.com 🎉
+- Ideally, there should be no more TooManyRequests errors now! 🚀
+
 ## [Enhancement] - 2023-02-10
 
 - Add Languages Set manager to be able to configure multiple language presets and easy switch between them
 
 ## [Enhancements] - 2023-02-09
 
-- Retuned back LangTo -> LangFrom translation
+- Returned back LangTo -> LangFrom translation
 - Improved auto-detect translation in Translate Form
 
 ## [Add auto-detect option] - 2023-02-07

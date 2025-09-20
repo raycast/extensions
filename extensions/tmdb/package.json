@@ -6,7 +6,11 @@
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [
-    "andreaselia"
+    "andreaselia",
+    "thomaslombart",
+    "j3lte",
+    "joeynotjoe",
+    "VBenny42"
   ],
   "categories": [
     "Media",
@@ -15,39 +19,55 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "searchMovie",
-      "title": "Search Movies",
+      "name": "search",
+      "title": "Search",
       "subtitle": "The Movie Database",
-      "description": "Search for movies by name",
+      "description": "Search for movies or TV shows.",
       "mode": "view"
     },
     {
-      "name": "searchTV",
-      "title": "Search TV Shows",
+      "name": "now-playing",
+      "title": "Now Playing",
       "subtitle": "The Movie Database",
-      "description": "Search for TV shows by name",
+      "description": "View movies or TV shows that are playing right now.",
       "mode": "view"
     },
     {
-      "name": "nowPlayingMovies",
-      "title": "Now Playing Movies",
+      "name": "top-rated",
+      "title": "Top Rated",
       "subtitle": "The Movie Database",
-      "description": "View details, ratings, etc. for movies that are playing on the theaters!",
+      "description": "View the best movies or TV shows of all time.",
       "mode": "view"
     },
     {
-      "name": "nowPlayingTv",
-      "title": "Now Playing TV Shows",
-      "subtitle": "The Movie Database",
-      "description": "View details, ratings, etc. for TV shows that are on air!",
-      "mode": "view"
-    },
-    {
-      "name": "upcomingMovies",
+      "name": "upcoming-movies",
       "title": "Upcoming Movies",
       "subtitle": "The Movie Database",
-      "description": "View details, ratings, etc. for upcoming movies!",
+      "description": "View the upcoming movies.",
       "mode": "view"
+    },
+    {
+      "name": "get-episode-info",
+      "title": "Get Episode Info",
+      "subtitle": "The Movie Database",
+      "description": "Search for TV show episodes.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "currShow",
+          "title": "Current Show",
+          "description": "The current show you are watching",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "currShowSeason",
+          "title": "Current Show Season",
+          "description": "The current show season you are watching",
+          "type": "textfield",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -56,23 +76,24 @@
       "title": "TMDB API Key",
       "description": "Your TMDB API Key",
       "type": "password",
-      "default": "",
       "required": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "moviedb-promise": "^3.1.15"
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.15.0",
+    "date-fns": "^2.30.0",
+    "moviedb-promise": "^4.0.3",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.9.1",
+    "@types/react": "^18.2.37",
+    "eslint": "^8.53.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -5,8 +5,14 @@ import { DashResult } from "../components";
 import { Docset } from "../types";
 import { useDocsetSearch } from "../hooks";
 
-export default function SingleDocsetSearch({ docset }: { docset: Docset }) {
-  const [searchText, setSearchText] = useState("");
+export default function SingleDocsetSearch({
+  docset,
+  initialSearchString,
+}: {
+  docset: Docset;
+  initialSearchString?: string;
+}) {
+  const [searchText, setSearchText] = useState(initialSearchString || "");
   const [results, isLoading] = useDocsetSearch(searchText, docset.docsetKeyword);
 
   return (
@@ -14,6 +20,7 @@ export default function SingleDocsetSearch({ docset }: { docset: Docset }) {
       isLoading={isLoading}
       searchBarPlaceholder={`Search in ${docset.docsetName}`}
       onSearchTextChange={setSearchText}
+      searchText={searchText}
       navigationTitle={`Search in ${docset.docsetName}`}
     >
       {results.map((result, index) => (

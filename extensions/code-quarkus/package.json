@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "code-quarkus",
+  "title": "Code Quarkus",
+  "description": "Create new Quarkus project",
+  "icon": "quarkus.png",
+  "author": "loic_magnette",
+  "version": "0.3.1",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "code-quarkus",
+      "title": "Create Quarkus Project",
+      "description": "create a new quarkus project",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "directory",
+          "description": "The directory were the generated project should be downloaded",
+          "type": "directory",
+          "required": false,
+          "title": "Download directory"
+        },
+        {
+          "name": "unzip",
+          "description": "Do you want to automatically unzip the downloaded archive. If set to false the option to open in IDE will not work",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Unzip automatically the archive"
+        },
+        {
+          "name": "showInFinder",
+          "description": "Do you want the finder to open once the download is done",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show downloaded file in the finder"
+        },
+        {
+          "name": "openInIDE",
+          "description": "Do you want the extension to automatically open your project in your IDE. To use it you need to configure the IDE the extension needs to use",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Open the project in my IDE"
+        },
+        {
+          "name": "ide",
+          "description": "The IDE you want to use to open your project",
+          "type": "appPicker",
+          "required": false,
+          "title": "Selected IDE"
+        }
+      ]
+    },
+    {
+      "name": "find-quarkus-extension",
+      "title": "Find Quarkus Extension",
+      "description": "find a quarkus extension",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1",
+    "adm-zip": "^0.5.16"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contribution": "npx @raycast/api@latest pull-contributions"
+  }
+}

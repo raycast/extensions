@@ -4,7 +4,7 @@ import { Epic } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getErrorMessage, showErrorToast } from "../utils";
 
-export function CreateEpicTodoAction(props: { epic: Epic; shortcut?: Keyboard.Shortcut }): JSX.Element | null {
+export function CreateEpicTodoAction(props: { epic: Epic; shortcut?: Keyboard.Shortcut }) {
   const epic = props.epic;
   async function handleAction() {
     try {
@@ -17,7 +17,7 @@ export function CreateEpicTodoAction(props: { epic: Epic; shortcut?: Keyboard.Sh
   if (epic.state === "opened") {
     return (
       <Action
-        title="Add a to do"
+        title="Add a to Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}

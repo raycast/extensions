@@ -1,5 +1,6 @@
+import { OpenInClickUpAction } from "../components/OpenInClickUpAction";
 import { TaskItem } from "../types/tasks.dt";
-import { Detail, OpenInBrowserAction, ActionPanel } from "@raycast/api";
+import { Detail, ActionPanel } from "@raycast/api";
 
 function TaskDetail({ task }: { task: TaskItem }) {
   return task ? (
@@ -8,7 +9,7 @@ function TaskDetail({ task }: { task: TaskItem }) {
       markdown={task.description}
       actions={
         <ActionPanel title="Task Actions">
-          <OpenInBrowserAction url={task.url} />
+          <OpenInClickUpAction route={task.url} override />
         </ActionPanel>
       }
     />

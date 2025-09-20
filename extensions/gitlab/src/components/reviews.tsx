@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 import { MergeRequest, Project } from "../gitlabapi";
 import { getListDetailsPreference, gitlab } from "../common";
 import { daysInSeconds, showErrorToast } from "../utils";
@@ -7,8 +7,13 @@ import { useEffect, useState } from "react";
 import { MyProjectsDropdown } from "./project";
 import { MRListItem } from "./mr";
 import { useCachedState } from "@raycast/utils";
+import { GitLabIcons } from "../icons";
 
-export function ReviewList(): JSX.Element {
+function ReviewListEmptyView() {
+  return <List.EmptyView title="No Reviews" icon={{ source: GitLabIcons.review, tintColor: Color.PrimaryText }} />;
+}
+
+export function ReviewList() {
   const [project, setProject] = useState<Project>();
   const { mrs, error, isLoading, performRefetch } = useMyReviews(project);
 
@@ -38,34 +43,38 @@ export function ReviewList(): JSX.Element {
           onToggleDetails={() => setExpandDetails(!expandDetails)}
         />
       ))}
+      <ReviewListEmptyView />
     </List>
   );
 }
 
-function useMyReviews(project?: Project | undefined): {
+export function useMyReviews(
+  project?: Project | undefined,
+  labels: string[] | undefined = undefined,
+): {
   mrs: MergeRequest[] | undefined;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
 } {
   const [mrs, setMrs] = useState<MergeRequest[]>();
   const { data, isLoading, error, performRefetch } = useCache<MergeRequest[] | undefined>(
-    `myreviews`,
+    `myreviews_${labels ? labels.join(",") : "[]"}`,
     async (): Promise<MergeRequest[] | undefined> => {
       const user = await gitlab.getMyself();
-      const glMRs = await gitlab.getMergeRequests({
+      return await gitlab.getMergeRequests({
         state: "opened",
         reviewer_id: user.id,
         in: "title",
         scope: "all",
+        ...(labels && { labels }),
       });
-      return glMRs;
     },
     {
-      deps: [],
-      secondsToRefetch: 1,
+      deps: [labels],
+      secondsToRefetch: 5,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   useEffect(() => {
     const filtered = project ? data?.filter((m) => m.project_id === project?.id) : data;

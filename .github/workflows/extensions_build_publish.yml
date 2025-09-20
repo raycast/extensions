@@ -11,6 +11,10 @@ on:
         description: "Ray CLI command to run (build | publish)"
         default: "build"
         required: true
+        type: choice
+        options:
+          - build
+          - publish
       cli_version:
         description: 'CLI Version (optional, eg. "1.0.0")'
         required: false
@@ -27,25 +31,35 @@ jobs:
   extensions_build_publish:
     if: github.repository == 'raycast/extensions'
     name: "${{ github.event_name == 'push' && 'Publish' || (github.event_name == 'pull_request' && 'Check' || github.event_name == 'workflow_dispatch' && inputs.command || github.event_name ) }}"
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     steps:
-      - name: Checkout
-        uses: raycast/github-actions/git-checkout@v1.13.0
+      - name: Setup Xcode
+        uses: raycast/github-actions/setup-xcode@xcode-15.4.x
+      - uses: actions/checkout@v4
+        with:
+          path: github_utils
+          sparse-checkout: |
+            .github
       # This makes sure that the problems found while validating the extensions are shown in the PR diff
       - name: Register Problem Matcher for Ray CLI
-        run: echo "##[add-matcher].github/ray.matcher.json"
+        run: echo "##[add-matcher]github_utils/.github/ray.matcher.json"
       - name: Generate 'allow_owners_only_for_extensions'
         id: allow_owners_only_for_extensions
         run: |
-          file_path="${{ github.workspace }}/.github/public_raycast_extensions.txt"
+          file_path="${{ github.workspace }}/github_utils/.github/public_raycast_extensions.txt"
           if [[ -f "$file_path" ]]; then
-            echo "value<<EOF" >> $GITHUB_OUTPUT
-            cat "$file_path"; echo >> $GITHUB_OUTPUT
-            echo 'EOF' >> $GITHUB_OUTPUT
+            echo "value<<EOF" >> "$GITHUB_OUTPUT"
+            while IFS= read -r line; do
+              echo "$line" >> "$GITHUB_OUTPUT"
+            done < "$file_path"
+            echo "EOF" >> "$GITHUB_OUTPUT"
           fi
+      - name: Cleanup github_utils
+        run: |
+          rm -rf ${{ github.workspace }}/github_utils
       - name: Run Ray CLI
         id: ray_cli
-        uses: raycast/github-actions/ray@v1.13.0
+        uses: raycast/github-actions/ray@v1.17.0
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
           command: "${{ github.event.inputs.command }}"
@@ -53,10 +67,36 @@ jobs:
           cli_version: "${{ github.event.inputs.cli_version }}"
           allow_owners_only_for_extensions: "${{ steps.allow_owners_only_for_extensions.outputs.value }}"
       - name: Post Store URLs
-        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.13.0
+        if: github.event_name == 'push'
+        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.17.0
         with:
           store_urls: ${{ steps.ray_cli.outputs.store_urls }}
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Reward Contributor
+        uses: actions/github-script@v7
+        if: github.event_name == 'push'
+        env:
+          PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}
+        with:
+          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          script: |
+            const result = await github.rest.repos.getContent({
+              mediaType: {
+                format: "raw",
+              },
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: "scripts/reward.js",
+            });
+
+            require('fs').writeFileSync('./reward.js', result.data);
+
+            const script = require('./reward')
+            await script({
+              github,
+              context,
+              fetch,
+            })
       - name: Notify Failure to Slack
         if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: raycast/github-actions/slack-send@master

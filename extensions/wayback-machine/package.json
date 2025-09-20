@@ -6,7 +6,8 @@
   "icon": "518x0w.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "andreaselia"
+    "andreaselia",
+    "j3lte"
   ],
   "categories": [
     "Web",
@@ -29,6 +30,12 @@
       ]
     },
     {
+      "name": "browser",
+      "title": "Open in Wayback Machine (Browser Extension)",
+      "description": "Open a webpage in Wayback Machine using the browser extension",
+      "mode": "no-view"
+    },
+    {
       "name": "save",
       "title": "Save to Wayback Machine",
       "description": "Save a webpage to Wayback Machine",
@@ -41,19 +48,37 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "saveMultiple",
+      "title": "Save Multiple to Wayback Machine",
+      "description": "Save multiple webpages to Wayback Machine",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Open in Wayback Machine",
+      "description": "Whether to open the overview page instead of the latest snapshot, when opening a page in Wayback Machine",
+      "type": "checkbox",
+      "default": false,
+      "label": "Open Overview instead of the latest snapshot",
+      "name": "openOverview",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.1",
-    "cross-fetch": "^3.1.5"
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "cross-fetch": "^4.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,10 +1,12 @@
 # AirPods Noise Control
 
-This is a simple extension that toggles between Noise Cancellation and Transparency on AirPods.
+This is a simple extension that toggles between Noise Cancellation, Transparency
+or Adaptive and toggles Conversation Awareness on AirPods.
+> Adaptive and Conversation Awareness will only work with supported AirPods
 
-⚠️ **This extension has only been tested on macOS Ventura `13.2` and `13.3`.**
+⚠️ **This extension has only been tested on macOS Ventura `13.2`, `13.3` and Sonoma `14.1.1`.**
 
-Unfortunately, due to limitations in AppleScript, some extra configuration is necessary.    
+Unfortunately, due to limitations in AppleScript, some extra configuration is necessary.
 Please ensure all fo the configuration properties are set correctly.
 
 ## Configuration

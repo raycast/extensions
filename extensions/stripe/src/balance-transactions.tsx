@@ -1,23 +1,10 @@
-import React from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { convertAmount, convertTimestampToDate, titleCase } from "./utils";
+import type Stripe from "stripe";
+import { convertAmount, convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
 import { useStripeApi } from "./hooks";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
 import { theme } from "./theme";
-
-type BalanceTransactionResp = {
-  id: string;
-  amount: number;
-  available_on: number;
-  created: number;
-  currency: string;
-  description: string | null;
-  fee: number;
-  net: number;
-  type: string;
-  status: string;
-};
 
 type BalanceTransaction = {
   id: string;
@@ -32,45 +19,24 @@ type BalanceTransaction = {
   status: string;
 };
 
-const resolveBalanceTransaction = ({
-  amount = 0,
-  currency = "",
-  description = "",
-  available_on,
-  created,
-  fee = 0,
-  net = 0,
-  ...rest
-}: BalanceTransactionResp): BalanceTransaction => {
-  const uppercaseCurrency = currency.toUpperCase();
-
-  return {
-    ...rest,
-    available_on: convertTimestampToDate(available_on),
-    created_at: convertTimestampToDate(created),
-    amount: convertAmount(amount),
-    currency: uppercaseCurrency,
-    description,
-    fee: convertAmount(fee),
-    net: convertAmount(net),
+const resolveBalanceTransaction = (balanceTransaction: Stripe.BalanceTransaction): BalanceTransaction => {
+  const resolvedBalanceTransaction: BalanceTransaction = {
+    ...balanceTransaction,
+    available_on: convertTimestampToDate(balanceTransaction.available_on),
+    created_at: convertTimestampToDate(balanceTransaction.created),
+    amount: convertAmount(balanceTransaction.amount),
+    currency: balanceTransaction.currency.toUpperCase(),
+    description: balanceTransaction.description ?? "",
+    fee: convertAmount(balanceTransaction.fee),
+    net: convertAmount(balanceTransaction.net),
   };
-};
 
-const resolveMetadataValue = (value: any) => {
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (typeof value === "number") {
-    return `${value}`;
-  }
-
-  return "";
+  return resolvedBalanceTransaction;
 };
 
 const BalanceTransactions = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.BALANCE_TRANSACTIONS, true);
-  const formattedBalanceTransactions = data.map(resolveBalanceTransaction);
+  const formattedBalanceTransactions = (data as Stripe.BalanceTransaction[]).map(resolveBalanceTransaction);
 
   const renderBalanceTransactions = (transaction: BalanceTransaction) => {
     const { amount, currency, id } = transaction;

@@ -19,7 +19,7 @@ export default async function Command(props: LaunchProps<{ arguments: TodoArgume
     resourceIdList: [],
   });
 
-  if (response?.data?.id) {
+  if (response?.name) {
     showToast({
       style: Toast.Style.Success,
       title: "Sent",

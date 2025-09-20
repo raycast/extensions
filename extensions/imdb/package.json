@@ -5,14 +5,87 @@
   "description": "Easily open your favorite film or TV series on IMDb.",
   "icon": "icon.png",
   "author": "ryan",
+  "contributors": [
+    "kgrhartlage",
+    "bibixx",
+    "dnsv",
+    "AndersDigital"
+  ],
+  "keywords": [
+    "imdb",
+    "film",
+    "movie",
+    "tv",
+    "series"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Film and TV Series",
+      "name": "combined",
+      "title": "Search IMDb",
       "subtitle": "IMDb",
-      "description": "Easily open your favorite film or TV series on IMDb.",
-      "mode": "view"
+      "description": "Search IMDb database.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search query",
+          "placeholder": "Search by title..."
+        }
+      ]
+    },
+    {
+      "name": "movies",
+      "title": "Search Movies",
+      "subtitle": "IMDb",
+      "description": "Search movies by title.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search query",
+          "placeholder": "Search by title..."
+        }
+      ]
+    },
+    {
+      "name": "series",
+      "title": "Search TV Series",
+      "subtitle": "IMDb",
+      "description": "Search TV series by title.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search query",
+          "placeholder": "Search by title..."
+        }
+      ]
+    },
+    {
+      "name": "games",
+      "title": "Search Games",
+      "subtitle": "IMDb",
+      "description": "Search video games by title.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search query",
+          "placeholder": "Search by title..."
+        }
+      ]
     }
   ],
   "preferences": [
@@ -20,28 +93,61 @@
       "name": "token",
       "type": "password",
       "required": true,
-      "title": "API Token",
-      "link": "https://www.omdbapi.com/apikey.aspx",
-      "description": "Register for a free token at https://www.omdbapi.com/",
-      "placeholder": "Enter your Open Movie Database (OMDb) API token"
+      "title": "OMDb API Token",
+      "description": "Register for a free token at www.omdbapi.com",
+      "placeholder": "Enter your API token here"
+    },
+    {
+      "name": "includeGames",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Include Games",
+      "title": "Search Results",
+      "description": "Include video games in search results"
+    },
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Where to open the IMDB page by default",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        },
+        {
+          "title": "Browser",
+          "value": "browser"
+        }
+      ],
+      "default": "raycast",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.4",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.51.3",
+    "@raycast/utils": "^1.6.1",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.6.2",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

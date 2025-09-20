@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "surfed",
+  "title": "Surfed",
+  "description": "Search Collections, Tags, URLs and Browsing History",
+  "icon": "command-icon.png",
+  "author": "HOsy",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Collections, Tags, URLs and Browsing History",
+      "subtitle": "Surfed",
+      "description": "Search Collections, Tags, URLs and Browsing History in Surfed",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apikey",
+          "type": "password",
+          "required": false,
+          "title": "API Key",
+          "description": "Enter your API key if Surfed is password protected. Surfed › Preferences › Permissions",
+          "placeholder": "Enter Surfed API Key"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

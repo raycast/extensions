@@ -5,6 +5,7 @@ import { getFavicon } from "@raycast/utils";
 export interface Preferences {
   readonly useOriginalFavicon: boolean;
   readonly openTabInProfile: SettingsProfileOpenBehaviour;
+  readonly profilePath: string;
 }
 
 export enum SettingsProfileOpenBehaviour {
@@ -37,13 +38,14 @@ export class Tab {
     public readonly url: string,
     public readonly favicon: string,
     public readonly windowsId: number,
-    public readonly tabIndex: number
+    public readonly tabIndex: number,
+    public readonly sourceLine: string,
   ) {}
 
   static parse(line: string): Tab {
     const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
 
-    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4]);
+    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4], line);
   }
 
   key(): string {
@@ -52,6 +54,10 @@ export class Tab {
 
   urlWithoutScheme(): string {
     return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
+  }
+
+  realFavicon(): string {
+    return new URL(this.favicon || "/favicon.ico", this.url).href;
   }
 
   googleFavicon(): Image.ImageLike {

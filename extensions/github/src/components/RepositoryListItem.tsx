@@ -1,41 +1,59 @@
 import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getGitHubUser } from "../helpers/users";
 
 import RepositoryActions from "./RepositoryActions";
+import { SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryListItemProps = {
   repository: ExtendedRepositoryFieldsFragment;
   onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
-};
+} & SortActionProps &
+  SortTypesDataProps;
 
-type SearchRepositoriesPrefs = {
-  includeForks: boolean;
-  includeArchived: boolean;
-  displayOwnerName: boolean;
-};
-
-export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
-  const preferences = getPreferenceValues<SearchRepositoriesPrefs>();
+export default function RepositoryListItem({
+  repository,
+  mutateList,
+  onVisit,
+  sortQuery,
+  setSortQuery,
+  sortTypesData,
+}: RepositoryListItemProps) {
+  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const owner = getGitHubUser(repository.owner);
   const numberOfStars = repository.stargazerCount;
-  const updatedAt = new Date(repository.updatedAt);
+  const updatedAt = repository.pushedAt ? new Date(repository.pushedAt) : new Date(repository.updatedAt);
 
   const accessories: List.Item.Accessory[] = [
     {
       date: updatedAt,
-      tooltip: `Updated: ${format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
+      tooltip: `Updated ${formatDistanceToNow(updatedAt, { addSuffix: true })}`,
     },
   ];
 
+  if (repository.isArchived) {
+    accessories.unshift({
+      tag: { value: "Archived", color: Color.Orange },
+      tooltip: "This repository is archived",
+    });
+  }
+
+  if (repository.isFork) {
+    accessories.unshift({
+      tag: { value: "Fork", color: Color.Purple },
+      tooltip: "This repository is a fork",
+    });
+  }
+
   if (repository.primaryLanguage) {
     accessories.unshift({
-      tag: repository.primaryLanguage.name,
+      tag: { value: repository.primaryLanguage.name, color: repository.primaryLanguage.color ?? Color.SecondaryText },
+      icon: Icon.Code,
       tooltip: `Language: ${repository.primaryLanguage.name}`,
     });
   }
@@ -54,13 +72,13 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
       {...(numberOfStars > 0
         ? {
             subtitle: {
-              value: `${numberOfStars}`,
+              value: `★ ${numberOfStars}`,
               tooltip: `Number of Stars: ${numberOfStars}`,
             },
           }
         : {})}
       accessories={accessories}
-      actions={<RepositoryActions repository={repository} mutateList={mutateList} onVisit={onVisit} />}
+      actions={<RepositoryActions {...{ repository, onVisit, mutateList, sortQuery, setSortQuery, sortTypesData }} />}
     />
   );
 }

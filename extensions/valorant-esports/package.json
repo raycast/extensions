@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "valorant-esports",
+  "title": "Valorant Esports",
+  "description": "Search Valorant esports schedules and standings.",
+  "icon": "extension-icon.png",
+  "author": "vimtor",
+  "categories": [
+    "Data",
+    "Media",
+    "News",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-schedule",
+      "title": "Show Schedule",
+      "subtitle": "Valorant Esports",
+      "description": "Show Valorant esports schedule",
+      "mode": "view",
+      "keywords": [
+        "esports",
+        "league",
+        "matches"
+      ]
+    },
+    {
+      "name": "show-standings",
+      "title": "Show Standings",
+      "subtitle": "Valorant Esports",
+      "description": "Show Valorant esports standings",
+      "mode": "view",
+      "keywords": [
+        "esports",
+        "league",
+        "ranking"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.12.0",
+    "date-fns": "^3.3.1",
+    "p-min-delay": "^4.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "lodash": "^4.17.21",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

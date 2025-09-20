@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "superwhisper",
+  "title": "Superwhisper - Offline Voice to Text",
+  "description": "Start a recording, change Modes and open settings. Requires installing superwhisper.",
+  "icon": "superwhisper-light-icon.png",
+  "author": "nchudleigh",
+  "contributors": [
+    "stelo",
+    "nagauta"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-record",
+      "title": "Start Recording",
+      "subtitle": "superwhisper",
+      "description": "Start Recording",
+      "mode": "no-view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "superwhisper",
+      "description": "Search through your recording history",
+      "mode": "view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
+      "name": "select-mode",
+      "title": "Select Mode",
+      "subtitle": "superwhisper",
+      "description": "Change the mode you are using",
+      "mode": "view",
+      "icon": "superwhisper-light-icon.png",
+      "preferences": [
+        {
+          "name": "modeDir",
+          "title": "Mode Directory",
+          "description": "Directory configured to store mode files",
+          "type": "directory",
+          "required": false,
+          "default": "~/Documents/superwhisper/modes"
+        }
+      ]
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "superwhisper",
+      "description": "Open the superwhisper settings page",
+      "mode": "no-view",
+      "icon": "superwhisper-light-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.16.1",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@raycast"
+    ]
+  }
+}

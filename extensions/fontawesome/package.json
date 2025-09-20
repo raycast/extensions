@@ -6,7 +6,10 @@
   "icon": "command-icon.png",
   "author": "dutzi",
   "contributors": [
-    "danielferguson"
+    "GLaDO8",
+    "danielferguson",
+    "ridemountainpig",
+    "yusifaliyevpro"
   ],
   "categories": [
     "Design Tools",
@@ -23,52 +26,105 @@
   ],
   "preferences": [
     {
-      "name": "iconStyle",
-      "title": "Icon Style",
-      "description": "Which icon style to copy when running \"Copy SVG\"",
-      "default": "regular",
+      "name": "API_TOKEN",
+      "type": "password",
+      "required": false,
+      "title": "API Token (For Font Awesome Pro Accounts)",
+      "description": "Optionally Use Font Awesome Pro icons by providing an API Token, not necessary to access free icons."
+    },
+    {
+      "name": "STYLE_PREFERENCE",
+      "type": "dropdown",
+      "default": "fas",
       "required": false,
       "data": [
         {
-          "title": "Duotone",
-          "value": "duotone"
+          "title": "Classic, Solid",
+          "value": "fas"
         },
         {
-          "title": "Light",
-          "value": "light"
+          "title": "Classic, Regular (Pro only)",
+          "value": "far"
         },
         {
-          "title": "Regular",
-          "value": "regular"
+          "title": "Classic, Light (Pro only)",
+          "value": "fal"
         },
         {
-          "title": "Solid",
-          "value": "solid"
+          "title": "Classic, Thin (Pro only)",
+          "value": "fat"
         },
         {
-          "title": "Thin",
-          "value": "thin"
+          "title": "Classic, Brands",
+          "value": "fab"
+        },
+        {
+          "title": "Duotone, Solid (Pro only)",
+          "value": "fad"
+        },
+        {
+          "title": "Sharp, Solid (Pro only)",
+          "value": "fass"
+        },
+        {
+          "title": "Sharp, Regular (Pro only)",
+          "value": "fasr"
+        },
+        {
+          "title": "Sharp, Light (Pro only)",
+          "value": "fasl"
+        },
+        {
+          "title": "Sharp, Thin (Pro only)",
+          "value": "fast"
         }
       ],
-      "type": "dropdown"
+      "title": "Icon family and style preference",
+      "description": "Choose which icon family and style you prefer."
+    },
+    {
+      "name": "PRIMARY_ACTION",
+      "type": "dropdown",
+      "default": "copyIconName",
+      "required": false,
+      "data": [
+        {
+          "title": "Copy Icon Name",
+          "value": "copyIconName"
+        },
+        {
+          "title": "Copy Icon Classes",
+          "value": "copyIconClasses"
+        },
+        {
+          "title": "Copy as Svg",
+          "value": "copyAsSvg"
+        },
+        {
+          "title": "Copy Icon Glyph",
+          "value": "copyIconGlyph"
+        },
+        {
+          "title": "Copy Icon Unicode",
+          "value": "copyIconUnicode"
+        }
+      ],
+      "title": "Icon primary action",
+      "description": "Choose which action to perform when selecting an icon."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.0",
-    "@raycast/utils": "^1.4.8",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "change-case": "^4.1.2",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "svg-to-png": "^4.0.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.3",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -76,5 +132,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,0 +1,602 @@
+[
+  {
+    "title": "开发指南",
+    "items": [
+      {
+        "title": "介绍",
+        "component": "home",
+        "describe": "Vant 是一个轻量、可靠的移动端组件库，于 2017 年开源。",
+        "version": "v2",
+        "filePath": "/docs/markdown/home.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "快速上手",
+        "component": "quickstart",
+        "describe": "通过本章节你可以了解到 Vant 的安装方法和基本使用姿势。",
+        "version": "v2",
+        "filePath": "/docs/markdown/quickstart.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "进阶用法",
+        "component": "advanced-usage",
+        "describe": "通过本章节你可以了解到 Vant 的一些进阶用法，比如组件插槽用法、多种浏览器适配方式。",
+        "version": "v2",
+        "filePath": "/docs/markdown/advanced-usage.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "更新日志",
+        "component": "changelog",
+        "describe": "Vant 遵循 Semver 语义化版本规范。",
+        "version": "v2",
+        "filePath": "/docs/markdown/changelog.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "定制主题",
+        "component": "theme",
+        "describe": "Vant 提供了一套默认主题，CSS 命名采用 BEM 的风格，方便使用者覆盖样式。如果你想完全替换主题色或者其他样式，可以按照本文档进行主题定制。",
+        "version": "v2",
+        "filePath": "/src/theme/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "开发指南",
+        "component": "contribution",
+        "describe": "感谢你使用 Vant。",
+        "version": "v2",
+        "filePath": "/docs/markdown/contribution.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "设计资源",
+        "component": "design",
+        "describe": "本页面提供 Vant 的设计资源下载。",
+        "version": "v2",
+        "filePath": "/docs/markdown/design.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "风格指南",
+        "component": "style-guide",
+        "describe": "在参与 Vant 开发时，请遵守约定的单文件组件风格指南，指南内容节选自 Vue 官方风格指南。",
+        "version": "v2",
+        "filePath": "/src/style-guide/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "国际化",
+        "component": "locale",
+        "describe": "Vant 采用中文作为默认语言，同时支持多语言切换，请按照下方教程进行国际化设置。",
+        "version": "v2",
+        "filePath": "/docs/markdown/locale.zh-CN.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "基础组件",
+    "items": [
+      {
+        "title": "Button 按钮",
+        "component": "button",
+        "describe": "按钮用于触发一个操作，如提交表单。",
+        "version": "v2",
+        "filePath": "/src/button/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Cell 单元格",
+        "component": "cell",
+        "describe": "单元格为列表中的单个展示项。",
+        "version": "v2",
+        "filePath": "/src/cell/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Icon 图标",
+        "component": "icon",
+        "describe": "基于字体的图标集，可以通过 Icon 组件使用，也可以在其他组件中通过 icon 属性引用。",
+        "version": "v2",
+        "filePath": "/src/icon/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Image 图片",
+        "component": "image",
+        "describe": "增强版的 img 标签，提供多种图片填充模式，支持图片懒加载、加载中提示、加载失败提示。",
+        "version": "v2",
+        "filePath": "/src/image/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Layout 布局",
+        "component": "col",
+        "describe": "Layout 提供了 van-row 和 van-col 两个组件来进行行列布局。",
+        "version": "v2",
+        "filePath": "/src/col/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Popup 弹出层",
+        "component": "popup",
+        "describe": "弹出层容器，用于展示弹窗、信息提示等内容，支持多个弹出层叠加展示。",
+        "version": "v2",
+        "filePath": "/src/popup/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Style 内置样式",
+        "component": "style",
+        "describe": "Vant 中默认包含了一些常用样式，可以直接通过 className 的方式使用。",
+        "version": "v2",
+        "filePath": "/src/style/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Toast 轻提示",
+        "component": "toast",
+        "describe": "在页面中间弹出黑色半透明提示，用于消息通知、加载提示、操作结果提示等场景。",
+        "version": "v2",
+        "filePath": "/src/toast/README.zh-CN.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "表单组件",
+    "items": [
+      {
+        "title": "Calendar 日历",
+        "component": "calendar",
+        "describe": "日历组件用于选择日期或日期区间，2.4 版本开始支持此组件。",
+        "version": "v2",
+        "filePath": "/src/calendar/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Cascader 级联选择",
+        "component": "cascader",
+        "describe": "级联选择框，用于多层级数据的选择，典型场景为省市区选择，2.12 版本开始支持此组件。",
+        "version": "v2",
+        "filePath": "/src/cascader/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Checkbox 复选框",
+        "component": "checkbox",
+        "describe": "用于在选中和非选中状态之间进行切换。",
+        "version": "v2",
+        "filePath": "/src/checkbox/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "DatetimePicker 时间选择",
+        "component": "datetime-picker",
+        "describe": "时间选择器，支持日期、年月、时分等维度，通常与弹出层组件配合使用。",
+        "version": "v2",
+        "filePath": "/src/datetime-picker/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Field 输入框",
+        "component": "field",
+        "describe": "表单中的输入框组件。",
+        "version": "v2",
+        "filePath": "/src/field/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Form 表单",
+        "component": "form",
+        "describe": "用于数据录入、校验，支持输入框、单选框、复选框、文件上传等类型，需要与 Field 输入框 组件搭配使用。2.5 版本开始支持此组件。",
+        "version": "v2",
+        "filePath": "/src/form/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "NumberKeyboard 数字键盘",
+        "component": "number-keyboard",
+        "describe": "虚拟数字键盘，可以配合密码输入框组件或自定义的输入框组件使用。",
+        "version": "v2",
+        "filePath": "/src/number-keyboard/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "PasswordInput 密码输入框",
+        "component": "password-input",
+        "describe": "带网格的输入框组件，可以用于输入密码、短信验证码等场景，通常与数字键盘组件配合使用。",
+        "version": "v2",
+        "filePath": "/src/password-input/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Picker 选择器",
+        "component": "picker",
+        "describe": "提供多个选项集合供用户选择，支持单列选择和多列级联，通常与弹出层组件配合使用。",
+        "version": "v2",
+        "filePath": "/src/picker/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Radio 单选框",
+        "component": "radio",
+        "describe": "用于在多个选项中选择单个结果。",
+        "version": "v2",
+        "filePath": "/src/radio/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Rate 评分",
+        "component": "rate",
+        "describe": "用于对事物进行评级操作。",
+        "version": "v2",
+        "filePath": "/src/rate/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Search 搜索",
+        "component": "search",
+        "describe": "用于搜索场景的输入框组件。",
+        "version": "v2",
+        "filePath": "/src/search/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Slider 滑块",
+        "component": "slider",
+        "describe": "滑动输入条，用于在给定的范围内选择一个值。",
+        "version": "v2",
+        "filePath": "/src/slider/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Stepper 步进器",
+        "component": "stepper",
+        "describe": "步进器由增加按钮、减少按钮和输入框组成，用于在一定范围内输入、调整数字。",
+        "version": "v2",
+        "filePath": "/src/stepper/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Switch 开关",
+        "component": "switch",
+        "describe": "用于在打开和关闭状态之间进行切换。",
+        "version": "v2",
+        "filePath": "/src/switch/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Uploader 文件上传",
+        "component": "uploader",
+        "describe": "用于将本地的图片或文件上传至服务器，并在上传过程中展示预览图和上传进度。目前 Uploader 组件不包含将文件上传至服务器的接口逻辑，该步骤需要自行实现。",
+        "version": "v2",
+        "filePath": "/src/uploader/README.zh-CN.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "反馈组件",
+    "items": [
+      {
+        "title": "ActionSheet 动作面板",
+        "component": "action-sheet",
+        "describe": "底部弹起的模态面板，包含与当前情境相关的多个选项。",
+        "version": "v2",
+        "filePath": "/src/action-sheet/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Dialog 弹出框",
+        "component": "dialog",
+        "describe": "弹出模态框，常用于消息提示、消息确认，或在当前页面内完成特定的交互操作。",
+        "version": "v2",
+        "filePath": "/src/dialog/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "DropdownMenu 下拉菜单",
+        "component": "dropdown-menu",
+        "describe": "向下弹出的菜单列表。",
+        "version": "v2",
+        "filePath": "/src/dropdown-menu/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Loading 加载",
+        "component": "loading",
+        "describe": "加载图标，用于表示加载中的过渡状态。",
+        "version": "v2",
+        "filePath": "/src/loading/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Notify 消息通知",
+        "component": "notify",
+        "describe": "在页面顶部展示消息提示，支持函数调用和组件调用两种方式。",
+        "version": "v2",
+        "filePath": "/src/notify/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Overlay 遮罩层",
+        "component": "overlay",
+        "describe": "创建一个遮罩层，用于强调特定的页面元素，并阻止用户进行其他操作。",
+        "version": "v2",
+        "filePath": "/src/overlay/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "PullRefresh 下拉刷新",
+        "component": "pull-refresh",
+        "describe": "用于提供下拉刷新的交互操作。",
+        "version": "v2",
+        "filePath": "/src/pull-refresh/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "ShareSheet 分享面板",
+        "component": "share-sheet",
+        "describe": "底部弹起的分享面板，用于展示各分享渠道对应的操作按钮，不含具体的分享逻辑。2.6 版本开始支持此组件。",
+        "version": "v2",
+        "filePath": "/src/share-sheet/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "SwipeCell 滑动单元格",
+        "component": "swipe-cell",
+        "describe": "可以左右滑动来展示操作按钮的单元格组件。",
+        "version": "v2",
+        "filePath": "/src/swipe-cell/README.zh-CN.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "展示组件",
+    "items": [
+      {
+        "title": "Badge 徽标",
+        "component": "badge",
+        "describe": "在右上角展示徽标数字或小红点。",
+        "version": "v2",
+        "filePath": "/src/badge/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Circle 环形进度条",
+        "component": "circle",
+        "describe": "圆环形的进度条组件，支持进度渐变动画。",
+        "version": "v2",
+        "filePath": "/src/circle/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Collapse 折叠面板",
+        "component": "collapse",
+        "describe": "将一组内容放置在多个折叠面板中，点击面板的标题可以展开或收缩其内容。",
+        "version": "v2",
+        "filePath": "/src/collapse/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "CountDown 倒计时",
+        "component": "count-down",
+        "describe": "用于实时展示倒计时数值，支持毫秒精度。",
+        "version": "v2",
+        "filePath": "/src/count-down/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Divider 分割线",
+        "component": "divider",
+        "describe": "用于将内容分隔为多个区域。",
+        "version": "v2",
+        "filePath": "/src/divider/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Empty 空状态",
+        "component": "empty",
+        "describe": "空状态时的占位提示，2.6 版本开始支持此组件。",
+        "version": "v2",
+        "filePath": "/src/empty/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "ImagePreview 图片预览",
+        "component": "image-preview",
+        "describe": "图片放大预览，支持函数调用和组件调用两种方式。",
+        "version": "v2",
+        "filePath": "/src/image-preview/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Lazyload 懒加载",
+        "component": "lazyload",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/lazyload/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "List 列表",
+        "component": "list",
+        "describe": "瀑布流滚动加载，用于展示长列表，当列表即将滚动到底部时，会触发事件并加载更多列表项。",
+        "version": "v2",
+        "filePath": "/src/list/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "NoticeBar 通知栏",
+        "component": "notice-bar",
+        "describe": "用于循环播放展示一组消息通知。",
+        "version": "v2",
+        "filePath": "/src/notice-bar/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Popover 气泡弹出框",
+        "component": "popover",
+        "describe": "弹出式的气泡菜单，2.11 版本开始支持此组件。",
+        "version": "v2",
+        "filePath": "/src/popover/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Progress 进度条",
+        "component": "progress",
+        "describe": "用于展示操作的当前进度。",
+        "version": "v2",
+        "filePath": "/src/progress/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Skeleton 骨架屏",
+        "component": "skeleton",
+        "describe": "用于在内容加载过程中展示一组占位图形。",
+        "version": "v2",
+        "filePath": "/src/skeleton/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Steps 步骤条",
+        "component": "steps",
+        "describe": "用于展示操作流程的各个环节，让用户了解当前的操作在整体流程中的位置。",
+        "version": "v2",
+        "filePath": "/src/steps/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Sticky 粘性布局",
+        "component": "sticky",
+        "describe": "Sticky 组件与 CSS 中position: sticky属性实现的效果一致，当组件在屏幕范围内时，会按照正常的布局排列，当组件滚出屏幕范围时，始终会固定在屏幕顶部。",
+        "version": "v2",
+        "filePath": "/src/sticky/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Swipe 轮播",
+        "component": "swipe",
+        "describe": "用于循环播放一组图片或内容。",
+        "version": "v2",
+        "filePath": "/src/swipe/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Tag 标签",
+        "component": "tag",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/tag/README.zh-CN.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "导航组件",
+    "items": [
+      {
+        "title": "Grid 宫格",
+        "component": "grid",
+        "describe": "宫格可以在水平方向上把页面分隔成等宽度的区块，用于展示内容或进行页面导航。",
+        "version": "v2",
+        "filePath": "/src/grid/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "IndexBar 索引栏",
+        "component": "index-bar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/index-bar/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "NavBar 导航栏",
+        "component": "nav-bar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/nav-bar/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Pagination 分页",
+        "component": "pagination",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/pagination/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Sidebar 侧边导航",
+        "component": "sidebar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/sidebar/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Tab 标签页",
+        "component": "tab",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/tab/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Tabbar 标签栏",
+        "component": "tabbar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/tabbar/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "TreeSelect 分类选择",
+        "component": "tree-select",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/tree-select/README.zh-CN.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "业务组件",
+    "items": [
+      {
+        "title": "AddressEdit 地址编辑",
+        "component": "address-edit",
+        "describe": "收货地址编辑组件，用于新建、更新、删除收货地址。",
+        "version": "v2",
+        "filePath": "/src/address-edit/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "AddressList 地址列表",
+        "component": "address-list",
+        "describe": "展示收货地址列表。",
+        "version": "v2",
+        "filePath": "/src/address-list/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Area 省市区选择",
+        "component": "area",
+        "describe": "省市区三级联动选择，通常与弹出层组件配合使用。",
+        "version": "v2",
+        "filePath": "/src/area/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Card 商品卡片",
+        "component": "card",
+        "describe": "商品卡片，用于展示商品的图片、价格等信息。",
+        "version": "v2",
+        "filePath": "/src/card/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "ContactCard 联系人卡片",
+        "component": "contact-card",
+        "describe": "以卡片的形式展示联系人信息。",
+        "version": "v2",
+        "filePath": "/src/contact-card/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "ContactEdit 联系人编辑",
+        "component": "contact-edit",
+        "describe": "编辑并保存联系人信息。",
+        "version": "v2",
+        "filePath": "/src/contact-edit/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "ContactList 联系人列表",
+        "component": "contact-list",
+        "describe": "展示联系人列表。",
+        "version": "v2",
+        "filePath": "/src/contact-list/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Coupon 优惠券",
+        "component": "coupon-list",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/coupon-list/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "GoodsAction 商品导航",
+        "component": "goods-action",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/goods-action/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "SubmitBar 提交订单栏",
+        "component": "submit-bar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/submit-bar/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "Sku 商品规格",
+        "component": "sku",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/sku/README.zh-CN.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "废弃",
+    "items": [
+      {
+        "title": "Panel 面板",
+        "component": "panel",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/panel/README.zh-CN.md?ref=2.x"
+      },
+      {
+        "title": "SwitchCell 开关单元格",
+        "component": "switch-cell",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/switch-cell/README.zh-CN.md?ref=2.x"
+      }
+    ]
+  }
+]

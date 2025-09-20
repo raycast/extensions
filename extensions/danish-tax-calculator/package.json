@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "danish-tax-calculator",
+  "title": "Danish Tax Calculator",
+  "description": "Calculate your payment after taxes",
+  "icon": "icon.png",
+  "author": "pernielsentikaer",
+  "keywords": [
+    "skat"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate-payment",
+      "title": "Calculate Payment",
+      "subtitle": "Danish Tax Calculator",
+      "description": "Calculate your payment after taxes",
+      "mode": "view",
+      "keywords": [
+        "skat"
+      ],
+      "arguments": [
+        {
+          "name": "income",
+          "placeholder": "Income",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "drawPercentage",
+          "placeholder": "Percentage",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "deduction",
+          "placeholder": "Deduction",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "view-history",
+      "title": "View Calculation History",
+      "subtitle": "Danish Tax Calculator",
+      "description": "View history of tax calculations",
+      "disabledByDefault": true,
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultPercentage",
+      "description": "Percentage",
+      "type": "textfield",
+      "required": true,
+      "title": "Percentage",
+      "placeholder": "Percentage"
+    },
+    {
+      "name": "defaultAction",
+      "description": "Default Action",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Action",
+      "default": "copy",
+      "placeholder": "Default Action",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

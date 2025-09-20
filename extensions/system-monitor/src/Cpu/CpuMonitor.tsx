@@ -1,98 +1,100 @@
-import { useState, useEffect } from "react";
 import { cpuUsage, sysUptime } from "os-utils";
-import { List, showToast, Toast } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { loadavg } from "os";
-import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
-import { CpuMonitorState, ExecError } from "../Interfaces";
+import { usePromise } from "@raycast/utils";
+
+import { Actions } from "../components/Actions";
+import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 
 export default function CpuMonitor() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<ExecError>();
-  const [state, setState] = useState<CpuMonitorState>({
-    cpu: "Loading...",
-    uptime: "Loading...",
-    avgLoad: ["Loading...", "Loading...", "Loading..."],
-    topProcess: [],
+  const { revalidate, data: cpu } = usePromise(() => {
+    return new Promise((resolve) => {
+      cpuUsage((v) => {
+        resolve(Math.round(v * 100).toString());
+      });
+    });
   });
 
-  useInterval(() => {
-    cpuUsage(async (v) => {
-      try {
-        const newLoadAvg = loadavg();
-        const newTopProcess = await getTopCpuProcess(5);
-        setState((prevState) => {
-          return {
-            ...prevState,
-            cpu: Math.round(v * 100).toString(),
-            avgLoad: [
-              newLoadAvg[0].toFixed(2).toString(),
-              newLoadAvg[1].toFixed(2).toString(),
-              newLoadAvg[2].toFixed(2).toString(),
-            ],
-            topProcess: newTopProcess,
-          };
-        });
-        setIsLoading(false);
-      } catch (err: any) {
-        setError(err);
-      }
-    });
-
-    setState((prevState) => {
-      const uptime = sysUptime();
-
-      return {
-        ...prevState,
-        uptime: getRelativeTime(uptime),
-      };
-    });
-  }, 1000);
-
-  useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Fetch CPU info [Error Code: " + error.code + "]",
-        message: error.stderr,
-      });
-    }
-  }, [error]);
+  useInterval(revalidate, 1000);
 
   return (
-    <>
-      <List.Item
-        title={`🖥️  CPU`}
-        accessoryTitle={isLoading ? "Loading..." : `${state.cpu}%`}
-        detail={
-          <List.Item.Detail
-            metadata={
-              <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Usage" text={state.cpu + " %"} />
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Average Load" />
-                <List.Item.Detail.Metadata.Label title="1 min" text={state.avgLoad[0]} />
-                <List.Item.Detail.Metadata.Label title="5 min" text={state.avgLoad[1]} />
-                <List.Item.Detail.Metadata.Label title="15 min" text={state.avgLoad[2]} />
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Uptime" text={state.uptime} />
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Process Name" />
-                {state.topProcess !== [] &&
-                  state.topProcess.map((element, index) => {
-                    return (
-                      <List.Item.Detail.Metadata.Label
-                        key={index}
-                        title={index + 1 + ".    " + element[1]}
-                        text={element[0] + "%"}
-                      />
-                    );
-                  })}
-              </List.Item.Detail.Metadata>
-            }
-          />
-        }
-      />
-    </>
+    <List.Item
+      id="cpu"
+      title="CPU"
+      icon={Icon.Monitor}
+      accessories={[{ text: !cpu ? "Loading…" : `${cpu} %` }]}
+      detail={<CpuMonitorDetail cpu={(cpu as string) || ""} />}
+      actions={<Actions radioButtonNumber={1} />}
+    />
+  );
+}
+
+function CpuMonitorDetail({ cpu }: { cpu: string }) {
+  const {
+    data: avgLoad,
+    revalidate: revalidateAvgLoad,
+    isLoading: isLoadingAvgLoad,
+  } = usePromise(async () => {
+    const newLoadAvg = loadavg();
+
+    return [
+      newLoadAvg[0].toFixed(2).toString(),
+      newLoadAvg[1].toFixed(2).toString(),
+      newLoadAvg[2].toFixed(2).toString(),
+    ];
+  });
+
+  useInterval(revalidateAvgLoad, 1000 * 10);
+
+  const {
+    data: topProcess,
+    revalidate: revalidateTopProcess,
+    isLoading: isLoadingTopProcess,
+  } = usePromise(() => getTopCpuProcess(5));
+
+  useInterval(revalidateTopProcess, 1000 * 5);
+
+  const {
+    data: uptime,
+    revalidate: revalidateUptime,
+    isLoading: isLoadingUptimes,
+  } = usePromise(async () => {
+    const uptime = sysUptime();
+
+    return getRelativeTime(uptime);
+  });
+
+  useInterval(revalidateUptime, 1000);
+
+  return (
+    <List.Item.Detail
+      isLoading={isLoadingAvgLoad || isLoadingTopProcess || isLoadingUptimes}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Usage" text={`${cpu} %`} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Average Load" />
+          <List.Item.Detail.Metadata.Label title="1 min" text={avgLoad?.[0]} />
+          <List.Item.Detail.Metadata.Label title="5 min" text={avgLoad?.[1]} />
+          <List.Item.Detail.Metadata.Label title="15 min" text={avgLoad?.[2]} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Uptime" text={uptime} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Process Name" />
+          {topProcess
+            ? topProcess.map((element, index: number) => {
+                return (
+                  <List.Item.Detail.Metadata.Label
+                    key={index}
+                    title={`${index + 1} -> ${element[1]}`}
+                    text={`${element[0]} %`}
+                  />
+                );
+              })
+            : undefined}
+        </List.Item.Detail.Metadata>
+      }
+    />
   );
 }

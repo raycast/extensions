@@ -8,6 +8,7 @@ import { Repository } from "./interface";
 import { icon } from "../../helpers/icon";
 import { cacheConfig } from "../../helpers/cache";
 import { ShowPipelinesActions, ShowPullRequestsActions } from "./actions";
+import { getFavoriteRepositories, toggleFavoriteRepository } from "../../helpers/favorites";
 
 export function SearchRepositories() {
   return (
@@ -19,10 +20,27 @@ export function SearchRepositories() {
 
 const SearchListLazy: React.FC = () => {
   const [query, setQuery] = useState("");
+  const [favoriteRepos, setFavoriteRepos] = useState<string[]>([]);
   const { data, error, isLoading, isValidating } = useSWR<Schema.Repository[]>(
     `/repositories?query=${query}`,
-    getRepositoriesLazy
+    getRepositoriesLazy,
   );
+
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const favorites = await getFavoriteRepositories();
+        setFavoriteRepos(favorites.map((repo) => repo.uuid));
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load favorites",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    };
+    loadFavorites();
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -34,6 +52,37 @@ const SearchListLazy: React.FC = () => {
     }
   }, [error]);
 
+  const sortedData = data
+    ? [...data].sort((a, b) => {
+        const aIsFavorite = favoriteRepos.includes(a.uuid as string);
+        const bIsFavorite = favoriteRepos.includes(b.uuid as string);
+
+        if (aIsFavorite && !bIsFavorite) return -1;
+        if (!aIsFavorite && bIsFavorite) return 1;
+        return 0;
+      })
+    : [];
+
+  const handleToggleFavorite = async (repo: Repository) => {
+    const newIsFavorite = await toggleFavoriteRepository(repo);
+
+    if (newIsFavorite) {
+      setFavoriteRepos((prev) => [...prev, repo.uuid]);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Added to favorites",
+        message: `${repo.name} has been added to favorites`,
+      });
+    } else {
+      setFavoriteRepos((prev) => prev.filter((id) => id !== repo.uuid));
+      showToast({
+        style: Toast.Style.Success,
+        title: "Removed from favorites",
+        message: `${repo.name} has been removed from favorites`,
+      });
+    }
+  };
+
   return (
     <List
       isLoading={isLoading || isValidating}
@@ -41,10 +90,19 @@ const SearchListLazy: React.FC = () => {
       onSearchTextChange={setQuery}
       throttle
     >
-      <List.Section title="Repositories" subtitle={data?.length.toString()}>
-        {data?.map(toRepository).map((repo: Repository) => (
-          <SearchListItem key={repo.uuid} repo={repo} />
-        ))}
+      <List.Section title="Repositories" subtitle={sortedData.length.toString()}>
+        {sortedData.map((repoData) => {
+          const repo = toRepository(repoData);
+          const isFavorite = favoriteRepos.includes(repo.uuid);
+          return (
+            <SearchListItem
+              key={repo.uuid}
+              repo={repo}
+              isFavorite={isFavorite}
+              onToggleFavorite={() => handleToggleFavorite(repo)}
+            />
+          );
+        })}
       </List.Section>
     </List>
   );
@@ -66,12 +124,19 @@ function toRepository(repo: Schema.Repository): Repository {
   };
 }
 
-function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
+interface SearchListItemProps {
+  repo: Repository;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+}
+
+function SearchListItem({ repo, isFavorite, onToggleFavorite }: SearchListItemProps) {
   return (
     <List.Item
       title={repo.name}
       subtitle={repo.description}
       icon={{ source: repo.avatarUrl, mask: Image.Mask.RoundedRectangle }}
+      accessories={isFavorite ? [{ tag: { value: "Favorite", color: Color.Yellow }, icon: Icon.Star }] : []}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Browser actions">
@@ -98,6 +163,14 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
                 source: icon.pipeline.self,
                 tintColor: Color.PrimaryText,
               }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Repository Actions">
+            <Action
+              title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+              icon={isFavorite ? { source: Icon.Star } : Icon.Star}
+              onAction={onToggleFavorite}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy Links">

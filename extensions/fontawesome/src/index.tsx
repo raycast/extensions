@@ -1,161 +1,186 @@
-import { useEffect, useState } from 'react';
-import { Action, ActionPanel, Clipboard, Color, getPreferenceValues, Grid, showHUD } from '@raycast/api';
-import { useFetch } from '@raycast/utils';
-import fetch from 'node-fetch';
-import { ApiResponse, Icon, IconStyle, Preferences } from './types';
+import { useState, useEffect } from 'react';
+import { Grid, Color, LocalStorage, getPreferenceValues } from '@raycast/api';
+import { useCachedState, useFetch } from '@raycast/utils';
+import { SearchResult, TokenData } from './types';
+import { familyStylesByPrefix, iconForStyle, iconActions } from './utils';
 
-const iconQuery = `
-query {
-  release(version: "6.2.0") {
-    icons {
+//GraphQL Query to fetch icons for a specific style
+const iconQuery = (squery: string, stype: string) => `query Search {
+  search(query:"${squery}", version: "6.7.2", first: 48) {
       id
       unicode
-      label
-      unicode
-      familyStylesByLicense {
-        free {
-          style
-        }
+      svgs(filter: { familyStyles: [
+        { family: ${
+          stype.split(' ').length === 3
+            ? stype.split(', ')[0].replace(' ', '_').toUpperCase()
+            : stype.split(', ')[0].toUpperCase()
+        }, style: ${stype.split(', ')[1].toUpperCase()} }
+        { family: CLASSIC, style: BRANDS }
+      ] }) {
+          html
+          familyStyle{
+            prefix
+          }
       }
-    }
-  },
+  }
 }
 `;
 
-const getLibraryType = (icon: Icon, iconStyle: IconStyle): string => {
-  if (icon.familyStylesByLicense.free.length === 0) {
-    return iconStyle;
-  }
-
-  if (icon.familyStylesByLicense.free[0].style === 'brands') {
-    return 'brands';
-  }
-
-  return iconStyle;
-};
-
-function prettyPrintIconStyle(iconStyle: IconStyle) {
-  return {
-    brands: 'Brands',
-    duotone: 'Duotone',
-    light: 'Light',
-    regular: 'Regular',
-    'sharp-solid': 'Sharp Solid',
-    solid: 'Solid',
-    thin: 'Thin',
-  }[iconStyle];
-}
-
 export default function Command() {
-  const { iconStyle } = getPreferenceValues<Preferences>();
+  let { API_TOKEN, STYLE_PREFERENCE } = getPreferenceValues();
+  let account = 'pro';
 
-  const getSvgUrl = (icon: Icon, iconStyle: IconStyle): string => {
-    return `https://site-assets.fontawesome.com/releases/v6.2.0/svgs/${getLibraryType(icon, iconStyle)}/${icon.id}.svg`;
-  };
+  //if pro API Token not provided, use free API Token
+  if (!API_TOKEN) {
+    API_TOKEN = 'D7A31EA9-20D8-434E-A6C6-8ADC890ADCB8';
+    account = 'free';
+    STYLE_PREFERENCE = 'fas';
+  }
 
-  const { isLoading, data } = useFetch<ApiResponse>('https://api.fontawesome.com', {
+  const [type, setType] = useState<string>(STYLE_PREFERENCE);
+  const [query, setQuery] = useState<string>('');
+  const [accessToken, setAccessToken] = useState<string>('');
+  const [tokenTimeStart, setTokenTimeStart] = useState<number>();
+  const [iconData, setIconData] = useCachedState<SearchResult>('iconData');
+
+  useEffect(() => {
+    const tokenTimerCheck = async () => {
+      const timeStart = await LocalStorage.getItem<number>('token-expiry-start');
+      setTokenTimeStart(timeStart);
+    };
+
+    tokenTimerCheck();
+  }, []);
+
+  // Fetch access token, store expiry info in local storage and state and store access token
+  useFetch<TokenData>('https://api.fontawesome.com/token', {
+    execute: !tokenTimeStart || Date.now() - (tokenTimeStart || 0) >= 3600000 ? true : false,
+    onData: (data) => {
+      LocalStorage.setItem('token-expiry-start', Date.now());
+      setAccessToken(data.access_token);
+    },
     method: 'POST',
-    body: iconQuery,
+    headers: {
+      Authorization: `Bearer ${API_TOKEN}`,
+    },
   });
 
-  const [icons, setIcons] = useState<Icon[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-
-  useEffect(() => {
-    // Once the icons have been fetched,
-    // set them to the icons array.
-    if (data !== undefined) {
-      setIcons(data.data.release.icons);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (data === undefined || isLoading) {
-      return;
-    }
-
-    const originalIconSet = data.data.release.icons;
-
-    // If the query is empty, reset the icons
-    if (searchQuery === '') {
-      setIcons(originalIconSet);
-      return;
-    }
-
-    // Filter icons based on the searchQuery
-    const filteredIcons = originalIconSet.filter((icon) =>
-      icon.label.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setIcons(filteredIcons);
-  }, [searchQuery]);
-
-  const copySvgToClipboard = async (icon: Icon, iconStyle: IconStyle) => {
-    // Fetch SVG from FontAwesome site
-    const response = await fetch(getSvgUrl(icon, iconStyle));
-    const svg = await response.text();
-
-    // Since v6, Font Awesome stopped setting the SVGs fill color to
-    // currentColor, this restores that behavior.
-    const svgWithCurrentColor = svg.toString().replace(/<path/g, '<path fill="currentColor"');
-
-    // Copy SVG to clipboard
-    await Clipboard.copy(svgWithCurrentColor);
-
-    // Notify the user
-    await showHUD('Copied SVG to clipboard!');
-  };
-
-  const copyFASlugToClipboard = async (icon: Icon) => {
-    // Copy icon name to clipboard
-    await Clipboard.copy(icon.id);
-
-    // Notify the user
-    await showHUD('Copied Slug to clipboard!');
-  };
-
-  const copyFAGlyphToClipboard = async (icon: Icon) => {
-    // Convert the unicode to a string and copy it to the clipboard
-    await Clipboard.copy(String.fromCharCode(parseInt(icon.unicode, 16)));
-
-    // Notify the user
-    await showHUD('Copied Glyph to clipboard!');
-  };
+  // Fetch icons for a specific family and style based on query
+  const { isLoading, data } = useFetch<SearchResult>('https://api.fontawesome.com', {
+    execute: accessToken ? true : false,
+    keepPreviousData: true,
+    method: 'POST',
+    body: iconQuery(query, familyStylesByPrefix[type]),
+    onData: (data) => {
+      setIconData(data);
+    },
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return (
     <Grid
-      columns={8}
-      inset={Grid.Inset.Large}
-      enableFiltering={false}
       isLoading={isLoading}
-      onSearchTextChange={setSearchQuery}
-      navigationTitle="Search Font Awesome"
-      searchBarPlaceholder="Search icons"
+      searchText={query}
+      onSearchTextChange={setQuery}
+      inset={Grid.Inset.Large}
+      columns={8}
+      throttle={true}
+      searchBarPlaceholder="Search icons..."
+      searchBarAccessory={
+        <Grid.Dropdown
+          tooltip="Select Family & Style"
+          onChange={(newValue) => setType(newValue)}
+          defaultValue={STYLE_PREFERENCE}
+        >
+          {account === 'pro' ? (
+            <>
+              <Grid.Dropdown.Section title="Classic Icons">
+                {Object.entries(familyStylesByPrefix)
+                  .slice(8, 13)
+                  .map(([key, value]) => (
+                    <Grid.Dropdown.Item
+                      key={key}
+                      title={value}
+                      value={key}
+                      icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                    />
+                  ))}
+              </Grid.Dropdown.Section>
+              <Grid.Dropdown.Section title="Sharp Icons">
+                {Object.entries(familyStylesByPrefix)
+                  .slice(0, 4)
+                  .map(([key, value]) => (
+                    <Grid.Dropdown.Item
+                      key={key}
+                      title={value}
+                      value={key}
+                      icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                    />
+                  ))}
+              </Grid.Dropdown.Section>
+              <Grid.Dropdown.Section title="Duotone Icons">
+                {Object.entries(familyStylesByPrefix)
+                  .slice(4, 8)
+                  .map(([key, value]) => (
+                    <Grid.Dropdown.Item
+                      key={key}
+                      title={value}
+                      value={key}
+                      icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                    />
+                  ))}
+              </Grid.Dropdown.Section>
+              <Grid.Dropdown.Section title="Sharp Duotone Icons">
+                {Object.entries(familyStylesByPrefix)
+                  .slice(13, 17)
+                  .map(([key, value]) => (
+                    <Grid.Dropdown.Item
+                      key={key}
+                      title={value}
+                      value={key}
+                      icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                    />
+                  ))}
+              </Grid.Dropdown.Section>
+            </>
+          ) : (
+            <>
+              <Grid.Dropdown.Item
+                key="fas"
+                title="Classic, Solid"
+                value="fas"
+                icon={{ source: iconForStyle('fas'), tintColor: Color.SecondaryText }}
+              />
+              <Grid.Dropdown.Item
+                key="fab"
+                title="Classic, Brands"
+                value="fab"
+                icon={{ source: iconForStyle('fab'), tintColor: Color.SecondaryText }}
+              />
+            </>
+          )}
+        </Grid.Dropdown>
+      }
     >
-      {icons.map((icon) => (
-        <Grid.Item
-          key={icon.id}
-          title={icon.label}
-          content={{
-            source: getSvgUrl(icon, 'regular'),
-            tintColor: Color.PrimaryText,
-          }}
-          actions={
-            <ActionPanel>
-              <Action
-                title={`Copy SVG (${prettyPrintIconStyle(iconStyle)})`}
-                icon="copy-clipboard-16"
-                onAction={() => copySvgToClipboard(icon, iconStyle)}
-              />
-              <Action title={`Copy FA Slug`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(icon)} />
-              <Action title={`Copy FA Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(icon)} />
-              <Action.OpenInBrowser
-                title="Open In Browser"
-                url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {(iconData || data)?.data.search
+        .filter((searchItem) => searchItem.svgs.length != 0)
+        .map((searchItem) => (
+          <Grid.Item
+            title={searchItem.id}
+            key={searchItem.id}
+            actions={iconActions(searchItem)}
+            content={{
+              value: {
+                source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString('base64')}`,
+                tintColor: Color.PrimaryText,
+              },
+              tooltip: searchItem.id,
+            }}
+          />
+        ))}
     </Grid>
   );
 }

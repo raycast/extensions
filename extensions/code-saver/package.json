@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "code-saver",
+  "title": "Code Saver",
+  "description": "store your code snippets and export them freely when you need it.",
+  "icon": "command-icon.png",
+  "author": "Gnosnay",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "Store Folder",
+      "name": "dbFolder",
+      "description": "Choose the folder you wanna create store in. If you already have one store, plesae make sure it is named as `code-saver.db` and is under this folder.",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "title": "Backup Dates",
+      "name": "backupDates",
+      "description": "How many days do you want to backup your data?",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Past 3 Days",
+          "value": "3Days"
+        },
+        {
+          "title": "Past One Week",
+          "value": "1Week"
+        },
+        {
+          "title": "Past One Month",
+          "value": "1Month"
+        },
+        {
+          "title": "Always Keep",
+          "value": "always"
+        }
+      ],
+      "default": "1Week",
+      "required": true
+    },
+    {
+      "title": "Encrypt Key",
+      "name": "encryptedKey",
+      "description": "We will encrypt your datastore with the key you give. Please keep it in mind.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-snippets",
+      "title": "Search Code Snippets",
+      "subtitle": "Code Saver",
+      "description": "Search your snippets.",
+      "mode": "view"
+    },
+    {
+      "name": "create-snippet",
+      "title": "Create Code Snippet",
+      "subtitle": "Code Saver",
+      "description": "Create new personal/team snippet.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.19.1",
+    "better-sqlite3-multiple-ciphers": "^11.9.1",
+    "date-fns": "^2.29.3",
+    "dayjs": "^1.11.10",
+    "drizzle-orm": "^0.28.6",
+    "node-fetch": "^3.3.1",
+    "tar-stream": "^3.1.6",
+    "ts-results-es": "^3.6.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/better-sqlite3": "^7.6.5",
+    "@types/node": "^18.18.6",
+    "@types/react": "^18.2.28",
+    "@types/tar-stream": "^3.1.3",
+    "@types/uuid": "^9.0.6",
+    "drizzle-kit": "^0.19.13",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "migration-gen": "drizzle-kit generate:sqlite --config=drizzle.config.ts",
+    "migration-push": "drizzle-kit push:sqlite --config=drizzle.config.ts"
+  }
+}

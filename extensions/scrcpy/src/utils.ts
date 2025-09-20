@@ -1,8 +1,13 @@
-import { getPreferenceValues, PreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+
+type Preferences = {
+  adbDir: string;
+  scrcpyDir: string;
+};
 
 export function getAdbDir(): string {
-  const preferences = getPreferenceValues<PreferenceValues>();
-  const adbDir = preferences["adbDir"];
+  const { adbDir } = getPreferenceValues<Preferences>();
+
   if (adbDir) {
     return adbDir;
   }
@@ -12,11 +17,7 @@ export function getAdbDir(): string {
 }
 
 export function getScrcpyDir(): string {
-  const preferences = getPreferenceValues<PreferenceValues>();
-  const scrcpyDir = preferences["scrcpyDir"];
-  if (scrcpyDir) {
-    return scrcpyDir;
-  }
+  const { scrcpyDir } = getPreferenceValues<Preferences>();
 
-  return `/usr/local/bin`;
+  return scrcpyDir || (process.arch == "arm64" ? `/opt/homebrew/bin` : `/usr/local/bin`);
 }

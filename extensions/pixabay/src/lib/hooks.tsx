@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { Pixabay } from "./api";
-import { getCacheFilepath } from "./cache";
-import { fileToBase64Image, getErrorMessage } from "./utils";
+
+import { Pixabay } from "@/lib/api";
+import { getCacheFilepath } from "@/lib/cache";
+import { fileToBase64Image, getErrorMessage } from "@/lib/utils";
 
 export function useImage(
   url: string,
   id: string,
-  defaultIcon?: string
+  defaultIcon?: string,
 ): {
   base64?: string;
   localFilepath?: string;

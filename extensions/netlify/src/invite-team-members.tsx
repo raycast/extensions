@@ -40,7 +40,7 @@ export default function Command() {
   });
 
   const { data: sites = [], isLoading: isLoadingSites } = usePromise(
-    async (team: string) => await api.getSites('', team),
+    async (team: string) => (await api.getSites('', team)).data,
     [teamSlug],
   );
 

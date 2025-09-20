@@ -5,6 +5,9 @@
   "description": "Simple Currency Exchange, uses Exchange Rate API as the data source",
   "icon": "currency.png",
   "author": "xeric",
+  "contributors": [
+    "daudln"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,18 +28,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.49.2",
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
-    "@types/react": "^17.0.30",
-    "@types/node-fetch": "^2.5.12",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node-fetch": "^2.6.3",
+    "@types/react": "^18.0.33",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.0.4"
   },
   "scripts": {
     "build": "ray build -e dist",

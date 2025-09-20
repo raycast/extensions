@@ -1,5 +1,4 @@
 import { OAuth } from "@raycast/api";
-import fetch from "node-fetch";
 
 // Register a new OAuth app via https://developer.twitter.com/en/portal/dashboard
 // Select OAuth 2.0
@@ -38,7 +37,7 @@ export async function authorize(): Promise<void> {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);

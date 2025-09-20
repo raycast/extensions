@@ -1,16 +1,14 @@
 # Pexels
 
-Search photos or collections on Pexels, download or set them as wallpaper.
-
-**🌟Tips**: When you select the last item in the list, more photos will be loaded automatically.
+Search photos, videos or collections on Pexels, download or set them as wallpaper.
 
 **Pexels API key**: Authorization is required for the Pexels extension. Anyone with a Pexels account can request an API key, which you will receive instantly.
 
-**How to get API key**:
+**Get API key from [Pexels API Page](https://www.pexels.com/api/key/)**:
 
 1. Go to [Pexels](https://www.pexels.com). Login if you have an account.
 2. Click on right top corner of the page and select **Image & Video API**. Then you will go to [Pexels API](https://www.pexels.com/api/).
-3. ClICK **Your API KEY**. Then you will see your API key, like this: `16349xac6fxxxxxxxxxxxxxx1ce4fasw33dgh673ccb5229b211nd6we35`
+3. CliCK **Your API KEY**. Then you will see your API key, like this: `16349xac6fxxxxxxxxxxxxxx1ce4fasw33dgh673ccb5229b211nd6we35`
 4. Copy it and paste it into **Pexels** extension settings.
 
 **⚠️⚠️⚠️ API key Guidelines:** The following is from the [Pexels API documentation](https://www.pexels.com/api/documentation/#guidelines)

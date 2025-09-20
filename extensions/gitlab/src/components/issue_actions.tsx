@@ -1,5 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import React from "react";
+import { Action, Color, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { gitlab } from "../common";
 import { Issue, Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
@@ -7,7 +6,7 @@ import { getErrorMessage, showErrorToast } from "../utils";
 import { LabelList } from "./label";
 import { IssueMRCreateForm } from "./mr_create";
 
-export function CloseIssueAction(props: { issue: Issue; finished?: () => void }): JSX.Element {
+export function CloseIssueAction(props: { issue: Issue; finished?: () => void }) {
   const issue = props.issue;
   async function handleAction() {
     try {
@@ -20,15 +19,11 @@ export function CloseIssueAction(props: { issue: Issue; finished?: () => void })
     }
   }
   return (
-    <ActionPanel.Item
-      title="Close Issue"
-      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-      onAction={handleAction}
-    />
+    <Action title="Close Issue" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handleAction} />
   );
 }
 
-export function CreateMRAction({ issue }: { issue: Issue }): JSX.Element {
+export function CreateMRAction({ issue }: { issue: Issue }) {
   return (
     <Action.Push
       icon={Icon.Pencil}
@@ -39,7 +34,7 @@ export function CreateMRAction({ issue }: { issue: Issue }): JSX.Element {
   );
 }
 
-export function ReopenIssueAction(props: { issue: Issue; finished?: () => void }): JSX.Element {
+export function ReopenIssueAction(props: { issue: Issue; finished?: () => void }) {
   const issue = props.issue;
   async function handleAction() {
     try {
@@ -60,7 +55,7 @@ function ShowIssueLabelsAction(props: { labels: Label[] }) {
   }
   return (
     <Action.Push
-      title="Show attached Labels"
+      title="Show Attached Labels"
       target={<LabelList labels={props.labels} />}
       shortcut={{ modifiers: ["cmd"], key: "l" }}
       icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
@@ -68,7 +63,7 @@ function ShowIssueLabelsAction(props: { labels: Label[] }) {
   );
 }
 
-export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard.Shortcut }): JSX.Element | null {
+export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard.Shortcut }) {
   const issue = props.issue;
   async function handleAction() {
     try {
@@ -81,7 +76,7 @@ export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard
   if (issue.state === "opened") {
     return (
       <Action
-        title="Add a to do"
+        title="Add a to Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}
@@ -92,10 +87,10 @@ export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard
   }
 }
 
-export function IssueItemActions(props: { issue: Issue; onDataChange?: () => void }): JSX.Element {
+export function IssueItemActions(props: { issue: Issue; onDataChange?: () => void }) {
   const issue = props.issue;
   return (
-    <React.Fragment>
+    <>
       <CreateIssueTodoAction issue={issue} shortcut={{ modifiers: ["cmd"], key: "t" }} />
       <ShowIssueLabelsAction labels={issue.labels} />
       {issue.state == "opened" && <CreateMRAction issue={issue} />}
@@ -104,6 +99,6 @@ export function IssueItemActions(props: { issue: Issue; onDataChange?: () => voi
       <Action.CopyToClipboard title="Copy Issue Number" content={issue.iid} />
       <Action.CopyToClipboard title="Copy Issue URL" content={issue.web_url} />
       <Action.CopyToClipboard title="Copy Issue Title" content={issue.title} />
-    </React.Fragment>
+    </>
   );
 }

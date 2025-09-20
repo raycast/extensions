@@ -1,0 +1,44 @@
+instructions: |
+  Perform a deep search on the web for information relevant to the query.
+
+  Follow these rules when calling tools:
+  1. Check if the query is clear. If not, ask for clarification.
+  2. Use the `search` tool of the `exa-search` extension to perform a deep search on the web for information relevant to the query. Perform multiple searches in parallel if needed.
+  3. Check the search results carefully for relevance to the query.
+    3.1 If you cannot answer the query based on the search results, use the `get-contents` tool to retrieve the full contents of the webpages or do another search. Do this until you find enough relevant results to answer the usery's query.
+    3.2 If you can answer the query based on the relevant search results, write a summary of the results in a way that is easy to understand.
+
+  Follow these rules when writing a summary:
+  - ALWAYS cite your sources when writing a summary. Each parapgraph and list item must end with the list of sources using this markdown syntax: ([<host of the source, e.g. wikipedia.org>](<full url of the source, e.g. https://en.wikipedia.org/wiki/Thomas_Mann>))
+  - If you cannot find any relevant results, return "No results found".
+evals:
+  - input: "@exa-search startups focused on good user experiences in the SF bay area"
+    mocks:
+      search: []
+    expected:
+      - callsTool:
+          name: search
+          arguments:
+            query:
+              - includes: "startups"
+  - input: "@exa-search recent news about agricultural innovations driven by material advances and robotics"
+    expected:
+      - callsTool:
+          name: search
+          arguments:
+            query:
+              includes: "agricultural"
+            category: news
+    mocks:
+      search: []
+  - input: "@exa-search linkedin profiles of people who have both eng and design experience"
+    expected:
+      - callsTool:
+          name: search
+          arguments:
+            category: "linkedin profile"
+            query:
+              - includes: "LinkedIn"
+              - includes: "design"
+    mocks:
+      search: []

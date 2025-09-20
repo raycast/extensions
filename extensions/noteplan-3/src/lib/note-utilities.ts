@@ -18,6 +18,7 @@ function getNotePlan3URI() {
   return appstorePath;
 }
 const NOTE_PLAN_URI = getNotePlan3URI();
+const X_CALLBACK = "noteplan://x-callback-url";
 
 export enum NoteType {
   Calendar = "calendar",
@@ -28,6 +29,7 @@ export interface NoteEntry {
   relativePath: string;
   fileName: string;
   type: NoteType;
+  callbackPath: string;
 }
 
 export interface Note {
@@ -35,22 +37,29 @@ export interface Note {
   content: string;
 }
 
+export const xCallbackToOpenNoteByPath = (noteEntry: NoteEntry) =>
+  `${X_CALLBACK}/openNote?filename=${encodeURIComponent(noteEntry.callbackPath)}`;
+
+const getNoteEntry = (path: string): NoteEntry => {
+  const relativePath = path.replace(NOTE_PLAN_URI, "");
+  const parsedRelativePath = parsePath(relativePath);
+  const fileName = parsedRelativePath.name;
+
+  const type = parsedRelativePath.dir.startsWith("/Notes") ? NoteType.Project : NoteType.Calendar;
+  const typePrefix = type == NoteType.Project ? "/Notes/" : "/Calendar/";
+  const callbackPath = relativePath.replace(typePrefix, "");
+
+  return {
+    relativePath,
+    callbackPath,
+    fileName,
+    type,
+  };
+};
+
 export const listNotes = (): NoteEntry[] => {
   const paths = find(`${NOTE_PLAN_URI}/{Calendar,Notes}/**/*.${getPreferences().fileExtension}`, { absolute: true });
-
-  return paths.map((path) => {
-    const relativePath = path.replace(NOTE_PLAN_URI, "");
-    const parsedRelativePath = parsePath(relativePath);
-    const fileName = parsedRelativePath.name;
-
-    const type = parsedRelativePath.dir.startsWith("/Notes") ? NoteType.Project : NoteType.Calendar;
-
-    return {
-      relativePath,
-      fileName,
-      type,
-    };
-  });
+  return paths.map(getNoteEntry);
 };
 
 export const readNote = ({ entry }: { entry: NoteEntry }): Note => {

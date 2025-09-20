@@ -1,4 +1,4 @@
-import { openInBrowser } from "./preferences";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { WikiNode } from "./api";
 
 export function toTitleCase(str: string) {
@@ -14,7 +14,7 @@ export function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export function replaceLinks(text: string, language: string, links: string[] = []) {
+export function replaceLinks(text: string, language: string, links: string[] = [], openInBrowser = true) {
   const regex = new RegExp(`\\b(${links.map(escapeRegExp).join("|")})\\b`, "g");
   return text.replaceAll(regex, (link) => {
     const url = openInBrowser
@@ -24,13 +24,20 @@ export function replaceLinks(text: string, language: string, links: string[] = [
   });
 }
 
-export function renderContent(nodes: WikiNode[], level: number, links: string[] = [], language = "en"): string {
+export function renderContent(
+  nodes: WikiNode[],
+  level: number,
+  links: string[] = [],
+  language = "en",
+  openLinksInBrowser = true,
+): string {
+  if (!nodes) return "";
   return nodes
     .filter((node) => node.content || node.content.length > 0)
     .filter((node) => !excludedSections.includes(node.title))
     .map((node) => {
       const title = `${"#".repeat(level)} ${node.title}`;
-      const content = replaceLinks(node.content, language, links);
+      const content = replaceLinks(node.content, language, links, openLinksInBrowser);
       const items = node.items ? renderContent(node.items, level + 1, links, language) : "";
       return `${title}\n\n${content}\n\n${items}`;
     })
@@ -143,3 +150,18 @@ export const excludedMetatadataLabels = [
 ];
 
 export const excludedMetatadataValues = ["true", "false", "si", "no", "altura"];
+
+export function formatMetadataValue(label: string, value?: Date | null | string) {
+  if (value instanceof Date) {
+    return value.toLocaleDateString();
+  }
+  if (!value) {
+    return "N/A";
+  }
+
+  if (label === "coordinates") {
+    return value.toString().split("|").slice(0, 2).join(", ");
+  }
+
+  return value.toString();
+}

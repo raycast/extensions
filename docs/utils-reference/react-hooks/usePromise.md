@@ -15,12 +15,13 @@ function usePromise<T>(
   fn: T,
   args?: Parameters<T>,
   options?: {
-    abortable?: MutableRefObject<AbortController | null | undefined>;
+    abortable?: RefObject<AbortController | null | undefined>;
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: Result<T>) => void;
-    onWillExecute?: (args: Parameters<T>) -> void;
-  }
+    onWillExecute?: (args: Parameters<T>) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  },
 ): AsyncState<Result<T>> & {
   revalidate: () => void;
   mutate: MutatePromise<Result<T> | undefined>;
@@ -39,6 +40,7 @@ With a few options:
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
 - `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
 
 ### Returns
 
@@ -54,7 +56,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = usePromise(
     async (url: string) => {
@@ -65,7 +67,7 @@ const Demo = () => {
     ["https://api.example"],
     {
       abortable,
-    }
+    },
   );
 
   return (
@@ -79,7 +81,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -94,14 +96,14 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate } = usePromise(
     async (url: string) => {
       const response = await fetch(url);
       const result = await response.text();
       return result;
     },
-    ["https://api.example"]
+    ["https://api.example"],
   );
 
   const appendFoo = async () => {
@@ -116,7 +118,7 @@ const Demo = () => {
           optimisticUpdate(data) {
             return data + "foo";
           },
-        }
+        },
       );
       // yay, the API call worked!
       toast.style = Toast.Style.Success;
@@ -141,7 +143,110 @@ const Demo = () => {
       }
     />
   );
-};
+}
+```
+
+## Pagination
+
+The hook has built-in support for pagination. In order to enable pagination, `fn`'s type needs to change from
+
+> an asynchronous function or a function that returns a Promise
+
+to
+
+> a function that returns an asynchronous function or a function that returns a Promise
+
+In practice, this means going from
+
+```ts
+const { isLoading, data } = usePromise(
+  async (searchText: string) => {
+    const data = await getUser(); // or any asynchronous logic you need to perform
+    return data;
+  },
+  [searchText],
+);
+```
+
+to
+
+```ts
+const { isLoading, data, pagination } = usePromise(
+  (searchText: string) =>
+    async ({ page, lastItem, cursor }) => {
+      const { data } = await getUsers(page); // or any other asynchronous logic you need to perform
+      const hasMore = page < 50;
+      return { data, hasMore };
+    },
+  [searchText],
+);
+```
+
+or, if your data source uses cursor-based pagination, you can return a `cursor` alongside `data` and `hasMore`, and the cursor will be passed as an argument the next time the function gets called:
+
+```ts
+const { isLoading, data, pagination } = usePromise(
+  (searchText: string) =>
+    async ({ page, lastItem, cursor }) => {
+      const { data, nextCursor } = await getUsers(cursor); // or any other asynchronous logic you need to perform
+      const hasMore = nextCursor !== undefined;
+      return { data, hasMore, cursor: nextCursor };
+    },
+  [searchText],
+);
+```
+
+You'll notice that, in the second case, the hook returns an additional item: `pagination`. This can be passed to Raycast's `List` or `Grid` components in order to enable pagination.
+Another thing to notice is that the async function receives a [PaginationOptions](#paginationoptions) argument, and returns a specific data format:
+
+```ts
+{
+  data: any[];
+  hasMore: boolean;
+  cursor?: any;
+}
+```
+
+Every time the promise resolves, the hook needs to figure out if it should paginate further, or if it should stop, and it uses `hasMore` for this.
+In addition to this, the hook also needs `data`, and needs it to be an array, because internally it appends it to a list, thus making sure the `data` that the hook _returns_ always contains the data for all of the pages that have been loaded so far.
+Additionally, you can also pass a `cursor` property, which will be included along with `page` and `lastItem` in the next pagination call.
+
+### Full Example
+
+```tsx
+import { setTimeout } from "node:timers/promises";
+import { useState } from "react";
+import { List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+
+  const { isLoading, data, pagination } = usePromise(
+    (searchText: string) => async (options: { page: number }) => {
+      await setTimeout(200);
+      const newData = Array.from({ length: 25 }, (_v, index) => ({
+        index,
+        page: options.page,
+        text: searchText,
+      }));
+      return { data: newData, hasMore: options.page < 10 };
+    },
+    [searchText],
+  );
+
+  return (
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} pagination={pagination}>
+      {data?.map((item) => (
+        <List.Item
+          key={`${item.page} ${item.index} ${item.text}`}
+          title={`Page ${item.page} Item ${item.index}`}
+          subtitle={item.text}
+        />
+      ))}
+    </List>
+  );
+}
 ```
 
 ## Types
@@ -191,6 +296,22 @@ export type MutatePromise<T> = (
     optimisticUpdate?: (data: T) => T;
     rollbackOnError?: boolean | ((data: T) => T);
     shouldRevalidateAfter?: boolean;
-  }
+  },
 ) => Promise<any>;
+```
+
+### PaginationOptions
+
+An object passed to a `PaginatedPromise`, it has two properties:
+
+- `page`: 0-indexed, this it's incremented every time the promise resolves, and is reset whenever `revalidate()` is called.
+- `lastItem`: this is a copy of the last item in the `data` array from the last time the promise was executed. Provided for APIs that implement cursor-based pagination.
+- `cursor`: this is the `cursor` property returned after the previous execution of `PaginatedPromise`. Useful when working with APIs that provide the next cursor explicitly.
+
+```ts
+export type PaginationOptions<T = any> = {
+  page: number;
+  lastItem?: T;
+  cursor?: any;
+};
 ```

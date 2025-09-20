@@ -2,10 +2,12 @@ export class LoggedDay {
   constructor(public date: Date) {}
 
   get title(): string {
-    if (this.date.getDate() === new Date().getDate()) {
+    const comparisonDate = new Date();
+    if (this.date.toDateString() === comparisonDate.toDateString()) {
       return "Today";
     }
-    if (this.date.getDate() === new Date().getDate() - 1) {
+    comparisonDate.setDate(comparisonDate.getDate() - 1);
+    if (this.date.toDateString() === comparisonDate.toDateString()) {
       return "Yesterday";
     }
     return `${this.date.getDate()} of ${this.date.toLocaleDateString("en-US", {

@@ -1,164 +1,243 @@
-import { ActionPanel, Form, Detail, showToast, Icon, useNavigation, Action, Toast } from '@raycast/api';
-import _ from 'lodash';
-import { exec } from 'child_process';
-import { useEffect, useState } from 'react';
-import { promisify } from 'util';
-import { ListName, executeJxa, thingsNotRunningError, preferences } from './shared';
-import ShowList from './show-list';
+import {
+  ActionPanel,
+  Form,
+  showToast,
+  Icon,
+  useNavigation,
+  Action,
+  Toast,
+  LaunchProps,
+  Color,
+  environment,
+  AI,
+} from '@raycast/api';
+import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-const asyncExec = promisify(exec);
+import { addTodo, getLists, getTags } from './api';
+import TodoList from './components/TodoList';
+import ErrorView from './components/ErrorView';
+import { getChecklistItemsWithAI, listItems } from './helpers';
+import { getDateString } from './utils';
+import { CommandListName } from './types';
 
-const getTags = () =>
-  executeJxa(`
-  const things = Application('${preferences.thingsAppIdentifier}');
-  return things.tags().map(tag => tag.name());
-`);
-
-const buildJSON = (values: Form.Values) => [
-  {
-    type: 'to-do',
-    operation: 'create',
-    attributes: {
-      title: values.title,
-      notes: values.notes,
-      // 'list-id': values['list-id'],
-      when: values.list === 'upcoming' && values.when ? values.when : values.list,
-      deadline: values.deadline,
-      tags: values.tags,
-      'checklist-items': _(values['checklist-items'])
-        .split('\n')
-        .compact()
-        .map((title: string) => ({
-          type: 'checklist-item',
-          attributes: {
-            title,
-          },
-        }))
-        .value(),
-    },
-  },
-];
-
-const getTargetListName = (list: Form.Values['list']): ListName => {
-  if (list === 'today' || list === 'evening') {
-    return ListName.Today;
-  } else if (list === 'tomorrow' || list === 'upcoming') {
-    return ListName.Upcoming;
-  } else if (list === 'anytime') {
-    return ListName.Anytime;
-  } else if (list === 'someday') {
-    return ListName.Someday;
-  } else {
-    return ListName.Inbox;
-  }
+type FormValues = {
+  title: string;
+  notes: string;
+  tags: string[];
+  listId: string;
+  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday' | 'logbook' | 'trash';
+  when: string;
+  date: Date | null;
+  'checklist-items': string;
+  deadline: Date | null;
 };
 
-export default function AddNewTodo(props: { title?: string; listName?: string }) {
-  const defaultValues: Form.Values = {
-    title: props.title || '',
-    notes: '',
-    tags: [],
-    list: props.listName?.toLowerCase(),
-    when: undefined,
-    'checklist-items': '',
-    deadline: undefined,
-  };
+type AddNewTodoProps = {
+  title?: string;
+  commandListName?: string;
+  draftValues?: LaunchProps['draftValues'];
+};
 
-  const [values, setValues] = useState<Form.Values>(defaultValues);
-  // const [projects, setProjects] = useState();
-  const [tags, setTags] = useState([]);
-  const [thingsNotRunning, setThingsNotRunning] = useState(false);
+export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoProps) {
   const { push } = useNavigation();
+  const { data: tags, isLoading: isLoadingTags, error: tagsError } = useCachedPromise(getTags);
+  const { data: lists, isLoading: isLoadingLists, error: listsError } = useCachedPromise(getLists);
+  const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
+    async onSubmit() {
+      const json = {
+        title: values.title,
+        notes: values.notes,
+        when: values.when === 'upcoming' && values.date ? getDateString(values.date) : values.when,
+        'list-id': values.listId,
+        deadline: values.deadline ? getDateString(values.deadline) : '',
+        ...(values.tags.length > 0 && { tags: values.tags.join(',') }),
+        'checklist-items': values['checklist-items'],
+      };
 
-  useEffect(() => {
-    const fetchTags = async () => {
-      const results = await getTags();
-      if (!results) {
-        return setThingsNotRunning(true);
+      await addTodo(json);
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: 'Added new to-do',
+
+        primaryAction: {
+          title: 'Go to list',
+          shortcut: { modifiers: ['cmd'], key: 'g' },
+          onAction() {
+            let name: CommandListName;
+            if (values.when === 'today' || values.when === 'evening') {
+              name = 'today';
+            } else if (values.when === 'tomorrow' || values.when === 'upcoming') {
+              name = 'upcoming';
+            } else if (values.when === 'anytime') {
+              name = 'anytime';
+            } else if (values.when === 'someday') {
+              name = 'someday';
+            } else if (values.when === 'logbook') {
+              name = 'logbook';
+            } else if (values.when === 'trash') {
+              name = 'trash';
+            } else {
+              name = 'inbox';
+            }
+
+            push(<TodoList commandListName={name} />);
+          },
+        },
+      });
+
+      reset({
+        title: '',
+        notes: '',
+        tags: [],
+        when: '',
+        listId: '',
+        'checklist-items': '',
+        deadline: null,
+      });
+
+      focus('title');
+    },
+    initialValues: {
+      title: title ?? draftValues?.title ?? '',
+      notes: draftValues?.notes ?? '',
+      tags: draftValues?.tags ?? [],
+      when: commandListName ?? draftValues?.when ?? null,
+      'checklist-items': draftValues?.['checklist-items'] ?? '',
+      deadline: draftValues?.deadline ?? null,
+    },
+    validation: { title: FormValidation.Required },
+  });
+
+  async function generateChecklist() {
+    try {
+      if (!values.title) {
+        await showToast({ style: Toast.Style.Failure, title: 'The to-do should have a title' });
+        return;
       }
 
-      setTags(results);
-    };
+      const toast = await showToast({ style: Toast.Style.Animated, title: 'Generating checklist' });
 
-    fetchTags();
-  }, []);
-
-  const setValue = (key: string) => (value: string | string[] | Date) => {
-    setValues({ ...values, [key]: value });
-  };
-
-  const addNewTodo = async () => {
-    if (!values.title) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Title is required',
-      });
-      return;
+      const items = await getChecklistItemsWithAI(values.title, values.notes);
+      setValue('checklist-items', items.trim());
+      focus('checklist-items');
+      await toast.hide();
+    } catch (error) {
+      const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error);
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list', message: errorMessage });
     }
-
-    const json = buildJSON(values);
-    const url = `open -g things:///json?data=${encodeURIComponent(JSON.stringify(json)).replace(/'/g, '%27')}`;
-    await asyncExec(url);
-
-    showToast({
-      style: Toast.Style.Success,
-      title: 'Added New To-Do',
-    });
-    setValues({ ...defaultValues, title: '' });
-  };
-
-  const addNewTodoAndGoToList = async () => {
-    await addNewTodo();
-    const listName = getTargetListName(values.list);
-    push(<ShowList listName={listName} />);
-  };
-
-  if (thingsNotRunning) {
-    return <Detail markdown={thingsNotRunningError} />;
   }
+
+  const isLoading = isLoadingTags || isLoadingLists;
+  const error = tagsError || listsError;
+
+  if (error) {
+    return <ErrorView error={error} />;
+  }
+
+  const now = new Date();
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action title="Add New To-Do" onAction={addNewTodo} icon={Icon.Plus} />
-          <Action title="Add New To-Do and Go To List" onAction={addNewTodoAndGoToList} icon={Icon.ArrowRight} />
+          <Action.SubmitForm title="Add New To-Do" onSubmit={handleSubmit} icon={Icon.Plus} />
+          {environment.canAccess(AI) && (
+            <Action title="Generate Checklist with AI" icon={Icon.BulletPoints} onAction={generateChecklist} />
+          )}
+          <ActionPanel.Section>
+            <Action
+              title="Focus Title"
+              icon={Icon.TextInput}
+              onAction={() => focus('title')}
+              shortcut={{ modifiers: ['cmd'], key: '1' }}
+            />
+            <Action
+              title="Focus Notes"
+              icon={Icon.TextInput}
+              onAction={() => focus('notes')}
+              shortcut={{ modifiers: ['cmd'], key: '2' }}
+            />
+            <Action
+              title="Focus When"
+              icon={Icon.TextInput}
+              onAction={() => focus('when')}
+              shortcut={{ modifiers: ['cmd'], key: 's' }}
+            />
+            <Action
+              title="Focus List"
+              icon={Icon.TextInput}
+              onAction={() => focus('listId')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
+            />
+            <Action
+              title="Focus Tags"
+              icon={Icon.TextInput}
+              onAction={() => focus('tags')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 't' }}
+            />
+            <Action
+              title="Focus Checklist"
+              icon={Icon.TextInput}
+              onAction={() => focus('checklist-items')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            />
+            <Action
+              title="Focus Deadline"
+              icon={Icon.TextInput}
+              onAction={() => focus('deadline')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
+      // Don't enable drafts if coming from another list or an empty view
+      enableDrafts={!title && !commandListName}
     >
-      <Form.TextField id="title" title="Title" value={values.title} onChange={setValue('title')} />
-      <Form.TextArea id="notes" title="Notes" value={values.notes} onChange={setValue('notes')} />
-      {/*<Form.Dropdown id="project" title="Project" value={values.project} onChange={setValue('project')}>
-        {projects.map(({ id, name }) => (
-          <Form.Dropdown.Item value={id} title={name} key={id} />
-        ))}
-      </Form.Dropdown>*/}
-      <Form.Separator />
-      <Form.Dropdown id="list" title="List" value={values.list} onChange={setValue('list')}>
-        <Form.Dropdown.Item value="inbox" title="Inbox" />
-        <Form.Dropdown.Item value="today" title="Today" />
-        <Form.Dropdown.Item value="evening" title="This Evening" />
-        <Form.Dropdown.Item value="tomorrow" title="Tomorrow" />
-        <Form.Dropdown.Item value="upcoming" title="Upcoming" />
-        <Form.Dropdown.Item value="anytime" title="Anytime" />
-        <Form.Dropdown.Item value="someday" title="Someday" />
-      </Form.Dropdown>
-      {values.list === 'upcoming' && (
-        <Form.DatePicker id="when" title="When" value={values.when} onChange={setValue('when')} />
-      )}
-      <Form.TagPicker id="tags" title="Tags" value={values.tags} onChange={setValue('tags')}>
-        {_.map(tags, (tag) => (
-          <Form.TagPicker.Item value={tag} title={tag} key={tag} />
-        ))}
-      </Form.TagPicker>
+      <Form.TextField {...itemProps.title} title="Title" placeholder="New to-do" />
       <Form.TextArea
-        id="checklist-items"
-        title="Checklist Items"
-        placeholder="separated by new lines"
-        value={values['checklist-items']}
-        onChange={setValue('checklist-items')}
+        {...itemProps.notes}
+        title="Notes"
+        placeholder="Write some notes (Markdown enabled)"
+        enableMarkdown
       />
-      <Form.DatePicker id="deadline" title="Deadline" value={values.deadline} onChange={setValue('deadline')} />
+      <Form.Separator />
+      <Form.Dropdown {...itemProps.when} title="When">
+        <Form.Dropdown.Item value="" title="No date" />
+        <Form.Dropdown.Item value="today" {...listItems.today} />
+        <Form.Dropdown.Item value="evening" {...listItems.evening} />
+        <Form.Dropdown.Item value="tomorrow" {...listItems.tomorrow} />
+        <Form.Dropdown.Item value="upcoming" {...listItems.upcoming} />
+        <Form.Dropdown.Item value="anytime" {...listItems.anytime} />
+        <Form.Dropdown.Item value="someday" {...listItems.someday} />
+      </Form.Dropdown>
+      {values.when === 'upcoming' && <Form.DatePicker {...itemProps.date} title="Start Date" min={now} />}
+      {lists && lists.length > 0 ? (
+        <Form.Dropdown {...itemProps.listId} title="List">
+          <Form.Dropdown.Item value="" title="Inbox" icon={{ source: Icon.Tray, tintColor: Color.Blue }} />
+          {lists.map((list) => {
+            return <Form.Dropdown.Item key={list.id} value={list.id} {...listItems.list(list)} />;
+          })}
+        </Form.Dropdown>
+      ) : null}
+      {tags && tags.length > 0 ? (
+        <Form.TagPicker {...itemProps.tags} title="Tags">
+          {tags.map((tag) => (
+            <Form.TagPicker.Item value={tag} title={tag} key={tag} />
+          ))}
+        </Form.TagPicker>
+      ) : null}
+      <Form.TextArea
+        {...itemProps['checklist-items']}
+        title="Checklist Items"
+        placeholder="Items separated by new lines"
+      />
+      <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} min={now} />
     </Form>
   );
+}
+
+export default function Command({ draftValues, launchContext }: LaunchProps) {
+  return <AddNewTodo draftValues={draftValues} commandListName={launchContext?.list} />;
 }

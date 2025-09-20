@@ -1,6 +1,6 @@
 import YAML from "yaml";
+import { Note } from "../api/vault/notes/notes.types";
 
-import { Note } from "./interfaces";
 import { CODE_BLOCK_REGEX, INLINE_TAGS_REGEX, YAML_FRONTMATTER_REGEX } from "./constants";
 import { sortByAlphabet } from "./utils";
 
@@ -103,13 +103,13 @@ export function yamlTagsForString(str: string) {
     if (yamlHas(parsedYAML, "tag")) {
       if (Array.isArray(parsedYAML.tag)) {
         foundTags = [...parsedYAML.tag];
-      } else {
+      } else if (typeof parsedYAML.tag === "string") {
         foundTags = [...parsedYAML.tag.split(",").map((tag: string) => tag.trim())];
       }
     } else if (yamlHas(parsedYAML, "tags")) {
       if (Array.isArray(parsedYAML.tags)) {
         foundTags = [...parsedYAML.tags];
-      } else {
+      } else if (typeof parsedYAML.tags === "string") {
         foundTags = [...parsedYAML.tags.split(",").map((tag: string) => tag.trim())];
       }
     }

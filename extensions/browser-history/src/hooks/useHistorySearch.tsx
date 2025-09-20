@@ -5,7 +5,14 @@ import { getHistoryDateColumn, getHistoryDbPath, getHistoryTable } from "../util
 import { NotInstalledError } from "../components";
 
 const whereClauses = (tableTitle: string, terms: string[], tableUrl?: string) => {
-  return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
+  const urlTable = tableUrl || tableTitle;
+  return (
+    "(" +
+    terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ") +
+    ") OR (" +
+    terms.map((t) => `${urlTable}.url LIKE '%${t}%'`).join(" AND ") +
+    ")"
+  );
 };
 
 const getWebKitHistoryQuery = (table: string, date_field: string, terms: string[]) =>
@@ -50,7 +57,7 @@ const searchHistory = (
   table: string,
   date_field: string,
   queryBuilder: (table: string, date_field: string, terms: string[]) => string,
-  query?: string
+  query?: string,
 ): SearchResult => {
   const terms = query ? query.trim().split(" ") : [""];
   const queries = queryBuilder(table, date_field, terms);
@@ -68,7 +75,7 @@ const searchHistory = (
   const { data, isLoading, permissionView } = useSQL<HistoryEntry>(dbPath, queries);
   return {
     browser,
-    data: data?.map((d) => ({ ...d, id: `${browser}-${d.id}` })),
+    data: data?.map((d) => ({ ...d, id: `${browser}-${d.id}`, browser: browser })),
     isLoading,
     permissionView,
   };
@@ -80,6 +87,6 @@ export function useHistorySearch(browser: SupportedBrowsers, query: string | und
     getHistoryTable(browser),
     getHistoryDateColumn(browser),
     getHistoryQuery(browser),
-    query
+    query,
   );
 }

@@ -3,8 +3,16 @@
   "name": "world-clock",
   "title": "World Clock",
   "description": "Query the current time of a region, ip or domain.",
-  "icon": "world-clock.png",
+  "icon": "command-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig",
+    "litomore"
+  ],
+  "keywords": [
+    "time",
+    "timezone"
+  ],
   "categories": [
     "Data",
     "Other"
@@ -14,7 +22,6 @@
     {
       "name": "query-world-time",
       "title": "Query World Time",
-      "icon": "query-world-time.png",
       "description": "Query the current time for a timezone with region.",
       "mode": "view",
       "preferences": [
@@ -22,9 +29,9 @@
           "name": "itemLayout",
           "type": "dropdown",
           "description": "Set the layout of the timezone items.",
-          "required": true,
+          "required": false,
           "title": "Timezone Layout",
-          "default": "Grid",
+          "default": "List",
           "data": [
             {
               "title": "Grid",
@@ -41,8 +48,8 @@
           "type": "dropdown",
           "description": "Set the number of columns of the timezone items. (Only works with Grid layout)",
           "required": false,
-          "title": "Timezone Item Coloums",
-          "default": "5",
+          "title": "Timezone Item Columns",
+          "default": "6",
           "data": [
             {
               "title": "1",
@@ -99,15 +106,25 @@
     },
     {
       "name": "query-world-time-menu-bar",
-      "title": "Query World Time",
-      "icon": "query-world-time-menu-bar.png",
-      "description": "Query the current time of starred timezones.",
-      "mode": "menu-bar"
+      "title": "Menubar World Time",
+      "description": "Query the current time of starred timezones from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "title": "Advanced",
+          "name": "showFirstTimezone",
+          "type": "checkbox",
+          "label": "Show First Timezone",
+          "description": "Show the first timezone in the menu bar.",
+          "required": false,
+          "default": true
+        }
+      ]
     },
     {
       "name": "query-ip-time",
       "title": "Query IP Time",
-      "icon": "query-ip-time.png",
       "description": "Query the current time based on IP or domain.",
       "mode": "view"
     }
@@ -117,15 +134,15 @@
       "title": "Time Format",
       "name": "hour24",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "label": "Hour 24",
       "description": "24 hour clock",
-      "default": false
+      "default": true
     },
     {
       "name": "dateFormat",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Date Format",
       "description": "Date format",
       "default": "zh",
@@ -146,20 +163,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
-    "@raycast/utils": "^1.4.14",
-    "axios": "^0.27.2",
-    "file-url": "^4.0.0"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
+    "axios": "^1.10.0",
+    "file-url": "^4.0.0",
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^18.0.14",
-    "@typescript-eslint/eslint-plugin": "^5.29.0",
-    "@typescript-eslint/parser": "^5.29.0",
-    "eslint": "^8.18.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.7.1",
-    "typescript": "^4.7.4"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.14",
+    "@types/react": "19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

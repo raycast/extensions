@@ -4,27 +4,28 @@ import { BandwidthPriority, Torrent } from "../types";
 
 export const TorrentConfiguration = ({ id }: { id: Torrent["id"] }) => {
   const { data: torrent } = useTorrent({ id });
-  const mutateTorrent = useMutateTorrent();
-
   const { pop } = useNavigation();
+
+  const mutateTorrent = useMutateTorrent();
 
   return (
     <Form
       isLoading={torrent == null}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Back to torrents list" onSubmit={pop} />
+          <Action.SubmitForm title="Back to Torrents List" onSubmit={pop} />
         </ActionPanel>
       }
     >
-      {torrent != null && (
+      {torrent ? (
         <>
           <Form.Description title="" text="Priority" />
           <Form.Dropdown
             id="bandwidthPriority"
             title="Transfer Priority"
-            value={String(torrent.bandwidthPriority)}
+            value={torrent.bandwidthPriority.toString()}
             onChange={async (priority) => {
+              if (priority === torrent.bandwidthPriority.toString()) return;
               await mutateTorrent.update(torrent.id, {
                 bandwidthPriority: Number(priority),
               });
@@ -41,10 +42,9 @@ export const TorrentConfiguration = ({ id }: { id: Torrent["id"] }) => {
             title="Limit Download"
             label="Enabled"
             value={torrent.downloadLimited}
-            onChange={async (downloadLimited) => {
+            onChange={(downloadLimited) => {
               if (downloadLimited === torrent.downloadLimited) return;
-
-              await mutateTorrent.update(torrent.id, {
+              mutateTorrent.update(torrent.id, {
                 downloadLimited,
               });
             }}
@@ -52,9 +52,10 @@ export const TorrentConfiguration = ({ id }: { id: Torrent["id"] }) => {
           <Form.TextField
             id="downloadLimit"
             title="kB/s"
-            value={String(torrent.downloadLimit)}
-            onChange={async (downloadLimit) => {
-              await mutateTorrent.update(torrent.id, {
+            value={torrent.downloadLimit.toString()}
+            onChange={(downloadLimit) => {
+              if (downloadLimit === torrent.downloadLimit.toString()) return;
+              mutateTorrent.update(torrent.id, {
                 downloadLimit: Number(downloadLimit),
               });
             }}
@@ -64,8 +65,9 @@ export const TorrentConfiguration = ({ id }: { id: Torrent["id"] }) => {
             title="Limit Upload"
             label="Enabled"
             value={torrent.uploadLimited}
-            onChange={async (uploadLimited) => {
-              await mutateTorrent.update(torrent.id, {
+            onChange={(uploadLimited) => {
+              if (uploadLimited === torrent.uploadLimited) return;
+              mutateTorrent.update(torrent.id, {
                 uploadLimited,
               });
             }}
@@ -73,15 +75,16 @@ export const TorrentConfiguration = ({ id }: { id: Torrent["id"] }) => {
           <Form.TextField
             id="limitUpload"
             title="kB/s"
-            value={String(torrent.uploadLimit)}
+            value={torrent.uploadLimit.toString()}
             onChange={async (uploadLimit) => {
-              await mutateTorrent.update(torrent.id, {
+              if (uploadLimit === torrent.uploadLimit.toString()) return;
+              mutateTorrent.update(torrent.id, {
                 uploadLimit: Number(uploadLimit),
               });
             }}
           />
         </>
-      )}
+      ) : null}
     </Form>
   );
 };

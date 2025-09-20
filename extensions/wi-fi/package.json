@@ -2,12 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wi-fi",
   "title": "Wi-Fi",
-  "description": "Connect and toggle Wi-Fi via Raycast.",
+  "description": "Check and toggle Wi-Fi via Raycast.",
   "icon": "extension-icon.png",
-  "author": "koinzhang",
   "keywords": [
     "wifi",
     "network"
+  ],
+  "author": "koinzhang",
+  "contributors": [
+    "louishuyng"
   ],
   "categories": [
     "System"
@@ -15,33 +18,51 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "scan-wifi",
-      "title": "Scan Wi-Fi",
-      "subtitle": "Wi-Fi",
-      "description": "Scan and connect Wi-Fi.",
-      "mode": "view"
-    },
-    {
       "name": "toggle-wi-fi",
       "title": "Toggle Wi-Fi",
       "subtitle": "Wi-Fi",
       "description": "Toggle Wi-Fi on and off.",
       "mode": "no-view"
+    },
+    {
+      "name": "wi-fi-signal",
+      "title": "Menubar Wi-Fi",
+      "subtitle": "Wi-Fi",
+      "description": "Show wifi info in menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showWifiName",
+          "type": "checkbox",
+          "label": "Show Wi-Fi Name",
+          "required": false,
+          "default": true,
+          "description": "Show wifi name in menu bar"
+        },
+        {
+          "name": "showIpAddress",
+          "type": "checkbox",
+          "label": "Show IP Address",
+          "required": false,
+          "default": true,
+          "description": "Show IP address in menu bar"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.0",
-    "node-wifi": "^2.0.16",
-    "shell-env": "^4.0.1"
+    "@raycast/api": "^1.79.1",
+    "shell-env": "^4.0.1",
+    "@raycast/utils": "^1.16.2"
   },
   "devDependencies": {
-    "@types/node-wifi": "^2.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

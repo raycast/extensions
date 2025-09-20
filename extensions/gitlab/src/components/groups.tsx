@@ -1,10 +1,10 @@
-import { ActionPanel, Color, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, Action, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useCache } from "../cache";
 import { getGitLabGQL, gitlab } from "../common";
-import { dataToProject, Group, Project } from "../gitlabapi";
+import { dataToProject, Group, Milestone, Project } from "../gitlabapi";
 import { getTextIcon, GitLabIcons, useImage } from "../icons";
-import { hashRecord, showErrorToast } from "../utils";
+import { getFirstChar, hashRecord, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { CacheActionPanelSection } from "./cache_actions";
 import { EpicList } from "./epics";
@@ -13,7 +13,7 @@ import { MilestoneList } from "./milestones";
 import { MRList, MRScope, MRState } from "./mr";
 import { ProjectListItem } from "./project";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 function groupIconUrl(group: any): string | undefined {
   let result: string | undefined;
@@ -30,14 +30,14 @@ function webUrl(group: Group, partial: string) {
   return getGitLabGQL().urlJoin(`groups/${group.full_path}/${partial}`);
 }
 
-export function GroupListItem(props: { group: any }): JSX.Element {
+export function GroupListItem(props: { group: any; nameOnly?: boolean }) {
   const group = props.group;
   const { localFilepath: localImageFilepath } = useImage(groupIconUrl(group));
   return (
     <List.Item
       id={`${group.id}`}
-      title={group.full_name}
-      icon={localImageFilepath || getTextIcon((group.name ? group.name[0] : "?").toUpperCase())}
+      title={props.nameOnly === true ? group.name : group.full_name}
+      icon={localImageFilepath || getTextIcon((group.name ? getFirstChar(group.name) : "?").toUpperCase())}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -51,6 +51,7 @@ export function GroupListItem(props: { group: any }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Group ID" content={group.id} />
+            <Action.CopyToClipboard title="Copy Group URL" content={group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push
@@ -105,10 +106,20 @@ export function GroupListItem(props: { group: any }): JSX.Element {
   );
 }
 
-export function GroupList(props: { parentGroup?: Group }): JSX.Element {
+export function GroupListEmptyView() {
+  return <List.EmptyView title="No Groups or Projects" icon={{ source: "group.svg", tintColor: Color.PrimaryText }} />;
+}
+
+function flatListViewPreferences(): boolean {
+  const prefs = getPreferenceValues();
+  return (prefs.flatlist as boolean) || false;
+}
+
+export function GroupList(props: { parentGroup?: Group }) {
   const parentGroup = props.parentGroup;
   const parentGroupID = parentGroup ? parentGroup.id : 0;
-  const { groupsinfo, error, isLoading } = useMyGroups(undefined, parentGroupID);
+  const topLevelOnly = !flatListViewPreferences();
+  const { groupsinfo, error, isLoading } = useMyGroups({ parentGroupID: parentGroupID, top_level_only: topLevelOnly });
 
   if (error) {
     showErrorToast(error, "Cannot search Groups");
@@ -120,33 +131,42 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
 
   const navtitle = parentGroup ? `Group ${parentGroup.full_path}` : undefined;
   return (
-    <List searchBarPlaceholder="Filter Groups by name..." isLoading={isLoading} navigationTitle={navtitle}>
-      {groupsinfo?.groups?.map((group) => (
-        <GroupListItem key={group.id} group={group} />
-      ))}
-      {groupsinfo?.projects?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+    <List searchBarPlaceholder="Filter Groups by Name..." isLoading={isLoading} navigationTitle={navtitle}>
+      <List.Section title="Groups">
+        {groupsinfo?.groups?.map((group) => (
+          <GroupListItem key={group.id} group={group} nameOnly={topLevelOnly} />
+        ))}
+      </List.Section>
+      <List.Section title="Projects">
+        {groupsinfo?.projects?.map((project) => (
+          <ProjectListItem key={project.id} project={project} nameOnly={topLevelOnly} />
+        ))}
+      </List.Section>
+      <GroupListEmptyView />
     </List>
   );
 }
 
-function useMyGroups(
-  query: string | undefined,
-  parentGroupID?: number
-): {
+export function useMyGroups(args?: { query?: string; parentGroupID?: number; top_level_only?: boolean }): {
   groupsinfo?: GroupInfo;
   error?: string;
   isLoading: boolean | undefined;
 } {
-  const params: Record<string, any> = { min_access_level: "30" };
+  const query = args?.query;
+  const parentGroupID = args?.parentGroupID;
+  const params: Record<string, any> = { min_access_level: "10" };
+  if ((parentGroupID === undefined || parentGroupID <= 0) && args?.top_level_only === true) {
+    params.top_level_only = true;
+  }
   const paramsHash = hashRecord(params);
   const [groupsinfo, setGroupsInfo] = useState<GroupInfo | undefined>();
   const { data, isLoading, error } = useCache<GroupInfo | undefined>(
-    parentGroupID && parentGroupID > 0 ? `mygroups_${parentGroupID}_${paramsHash}` : `mygroups_${paramsHash}`,
+    parentGroupID && parentGroupID > 0
+      ? `mygroups_${parentGroupID}_${paramsHash}`
+      : `mygroups_${paramsHash}_${args?.top_level_only}`,
     async () => {
       const subgroupFilter = parentGroupID && parentGroupID > 0 ? `/${parentGroupID}/subgroups` : "";
-      const gldata = ((await gitlab.fetch(`groups${subgroupFilter}`, params)) as Group[]) || [];
+      const gldata = ((await gitlab.fetch(`groups${subgroupFilter}`, params, true)) as Group[]) || [];
 
       let projectsdata: Project[] = [];
       if (parentGroupID && parentGroupID > 0) {
@@ -164,15 +184,16 @@ function useMyGroups(
     {
       secondsToInvalid: 900,
       deps: [parentGroupID],
-    }
+    },
   );
   useEffect(() => {
     setGroupsInfo(data);
-  }, [query, data]);
+  }, [query, data, args?.top_level_only]);
   return { groupsinfo, isLoading, error };
 }
 
-interface GroupInfo {
+export interface GroupInfo {
+  milestones?: Milestone[];
   groups: Group[];
   projects: Project[];
 }

@@ -42,24 +42,6 @@ fragment IssueFields on Issue {
   }
 }
 
-query searchCreatedIssues(
-  $createdOpenQuery: String!
-  $createdClosedQuery: String!
-  $numberOfOpenItems: Int!
-  $numberOfClosedItems: Int!
-) {
-  createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    nodes {
-      ...IssueFields
-    }
-  }
-  createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    nodes {
-      ...IssueFields
-    }
-  }
-}
-
 query repositoryCollaboratorsForIssues($owner: String!, $name: String!, $issueNumber: Int!) {
   repository(owner: $owner, name: $name) {
     collaborators(first: 25) {
@@ -102,19 +84,6 @@ query repositoryProjectsForIssues($owner: String!, $name: String!, $issueNumber:
   }
 }
 
-query searchOpenIssues($assignedOpenQuery: String!, $mentionedOpenQuery: String!, $numberOfOpenItems: Int!) {
-  assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    nodes {
-      ...IssueFields
-    }
-  }
-  mentionedOpen: search(query: $mentionedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    nodes {
-      ...IssueFields
-    }
-  }
-}
-
 fragment IssueDetailFields on Issue {
   id
   url
@@ -141,6 +110,7 @@ fragment IssueDetailFields on Issue {
     totalCount
     nodes {
       ... on LinkedBranch {
+        id
         ref {
           name
         }
@@ -226,6 +196,7 @@ mutation createIssue(
   $assigneeIds: [ID!]!
   $labelIds: [ID!]!
   $milestoneId: ID
+  $issueTypeId: ID
 ) {
   createIssue(
     input: {
@@ -235,6 +206,7 @@ mutation createIssue(
       assigneeIds: $assigneeIds
       labelIds: $labelIds
       milestoneId: $milestoneId
+      issueTypeId: $issueTypeId
     }
   ) {
     issue {

@@ -2,16 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lucide-icons",
   "title": "Lucide Icons Search",
-  "description": "View the Lucide icon set.",
+  "description": "Search the Lucide icon set",
   "icon": "command-icon.png",
-  "author": "basil",
+  "author": "Sn0wye",
   "categories": [
     "Design Tools",
     "Developer Tools"
   ],
   "license": "MIT",
   "contributors": [
-    "lin"
+    "lin",
+    "xilopaint",
+    "ridemountainpig"
   ],
   "commands": [
     {
@@ -19,27 +21,69 @@
       "title": "Search Icons",
       "subtitle": "Lucide",
       "description": "Grid view of Lucide icons",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "required": false,
+          "title": "Primary Action",
+          "description": "Primary action to use",
+          "default": "copy-name",
+          "data": [
+            {
+              "title": "Copy Name",
+              "value": "copy-name"
+            },
+            {
+              "title": "Copy SVG",
+              "value": "copy-svg"
+            },
+            {
+              "title": "Paste SVG",
+              "value": "paste-svg"
+            },
+            {
+              "title": "Copy Component",
+              "value": "copy-component"
+            },
+            {
+              "title": "Open In Browser",
+              "value": "open-in-browser"
+            }
+          ]
+        },
+        {
+          "name": "pascalCaseName",
+          "title": "Copy Icon Name",
+          "label": "Copy name in Pascal Case",
+          "description": "Copy the icon name using Pascal case (e.g., 'LucideIconName').",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.55.0",
-    "@typescript-eslint/parser": "^5.55.0",
-    "eslint": "^8.36.0",
-    "eslint-config-prettier": "^8.7.0",
-    "lucide-static": "^0.126.0",
-    "prettier": "^2.8.4",
-    "typescript": "^5.0.2"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.6.2"
   },
   "scripts": {
-    "prebuild": "node prebuild.js",
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

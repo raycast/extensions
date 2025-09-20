@@ -12,11 +12,10 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure you use your **Raycast** account username in the `author` field
   - Ensure you use `MIT` in the `license` field
   - Ensure you are using the latest Raycast API version
+  - Ensure the `platforms` field matching the requirement of your extension, eg. if you use platform-specific APIs, restrict the `platforms` field to the corresponding platform
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
-- Please check the terms of service of third-party services that your extension uses. If your extension doesn't comply with their terms, include a warning in your extension's README. The warning should be similar to:
-
-  > Warning: This extension is not compliant with the Terms of Service of \[service name]. Use at your own risk.
-
+- Please check the terms of service of third-party services that your extension uses.
+- Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ## Extensions and Commands Naming
@@ -59,7 +58,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
     - There is no need for a subtitle for the `Search Emoji` command since it's self-explanatory
     - **Rule of thumb:** If your subtitle is almost a duplication of your command title, you probably don't need it
 
-![Example of a good subtitle](../.gitbook/assets/good-subtitle.png)
+![Example of a good subtitle](../.gitbook/assets/good-subtitle.webp)
 
 ## Extension Icon
 
@@ -80,11 +79,11 @@ We made a new icon generator tool to ease the process of creating icons for your
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
 - Supporting README media: Put all linked media files in a top-level `media` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
 
-![Onboarding button linking to the README file](../.gitbook/assets/required-preference.png)
+![Onboarding button linking to the README file](../.gitbook/assets/required-preference.webp)
 
 ## Categories
 
-![Categories shown on an extension details screen](../.gitbook/assets/categories-focus.png)
+![Categories shown on an extension details screen](../.gitbook/assets/categories-focus.webp)
 
 - All extensions should be published with at least one category
 - Categories are case-sensitive and should follow the [Title Case](https://titlecaseconverter.com/rules/) convention
@@ -112,7 +111,7 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 ## Screenshots
 
-![An example of an extension with screenshot metadata](../.gitbook/assets/hn-store.png)
+![An example of an extension with screenshot metadata](../.gitbook/assets/hn-store.webp)
 
 - Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 - You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
@@ -124,11 +123,12 @@ In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect scree
 #### How to use it?
 
 1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2. Open the command
-3. Press the hotkey, remember to tick `Save to Metadata`
+2. Ensure your extension is opened in development mode (Window Capture eliminates dev-related menus/icons).
+3. Open the command
+4. Press the hotkey, remember to tick `Save to Metadata`
 
 {% hint style="info" %}
-This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you’ve made.
+This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you've made.
 
 You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
 {% endhint %}
@@ -145,16 +145,17 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 - ✅ Select the most informative commands to showcase what your extension does – focus on giving the user as much detail as possible
 - ❌ Do not use multiple backgrounds for different screenshots – be consistent and use the same across all screenshots
 - ❌ Do not share sensitive data in your screenshots – these will be visible in the Store, as well as the Extension repository on GitHub
+- ❌ Do not include screenshots of other applications - keep the focus entirely on your extension within Raycast
 - ❌ Avoid using screenshots in different themes (light and dark), unless it is to demonstrate what your extension does
 
 ## Version History
 
-![A CHANGELOG.md file displayed in the app](../.gitbook/assets/version-history.png)
+![A CHANGELOG.md file displayed in the app](../.gitbook/assets/version-history.webp)
 
 - Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
   - To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
 - See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)
-- With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD
+- With each modification, provide clear and descriptive details regarding the latest update, accompanied by a title formatted as an h2 header followed by `{PR_MERGE_DATE}`. This placeholder will be automatically replaced when the pull request is merged. While you may still use the date timestamp format YYYY-MM-DD, it is often more practical to use `{PR_MERGE_DATE}` since merging of a pull request can take several days (depending on the review comments, etc.).
   - Make sure your change title is within square brackets
   - Separate your title and date with a hyphen `-` and spaces either side of the hyphen
 - Below is an example of a changelog that follows the correct format
@@ -162,7 +163,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 ```markdown
 # Brew Changelog
 
-## [Added a bunch of new feedback] - 2022-01-17
+## [Added a bunch of new feedback] - {PR_MERGE_DATE}
 
 - Improve reliability of `outdated` command
 - Add action to copy formula/cask name
@@ -230,7 +231,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 ### Preferences
 
-![Required preferences will be shown when opening the command](../.gitbook/assets/required-preferences-2.png)
+![Required preferences will be shown when opening the command](../.gitbook/assets/required-preferences-2.webp)
 
 - Use the [preferences API](https://developers.raycast.com/api-reference/preferences) to let your users configure your extension or for providing credentials like API tokens
   - When using `required: true`, Raycast will ask the user to set preferences before continuing with an extension. See the example [here](https://github.com/raycast/extensions/blob/main/extensions/gitlab/package.json#L150).
@@ -238,14 +239,14 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 ### Action Panel
 
-![Raycast Action Panel component](../.gitbook/assets/action-panel.png)
+![Raycast Action Panel component](../.gitbook/assets/action-panel.webp)
 
 - Actions in the action panel should also follow the **Title Case** naming convention
   - ✅ `Open in Browser`, `Copy to Clipboard`
   - ❌ `Copy url`, `set project`, `Set priority`
 - Provide icons for actions if there are other actions with icons in the list
   - Avoid having a list of actions where some have icons and some don't
-- Add ellipses `…` for actions that will have a submenu. Don't repeat parent the action name in the submenu
+- Add ellipses `…` for actions that will have a submenu. Don't repeat the parent action name in the submenu
   - ✅ `Set Priority…` and submenu would have `Low`, `Medium`, `High`
   - ❌ `Set Priority` and submenu would have `Set Priority Low`, `Set Priority Medium`, etc
 
@@ -256,9 +257,8 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 ### Empty States
 
-- When you update lists with an empty array of elements, the "No results" view will be shown. Avoid introducing your own UI to achieve a similar effect (e.g. showing list item).
-  - **Known issue:** Sometimes, there is nothing you can show when the search query is empty, and an extension shows "No results" when you open it (often in search commands). We have plans to provide an API that would improve that experience. In the meantime, you might want to consider introducing some sections that could be helpful in an empty state – e.g. suggestions or recently visited items.
-- **Common mistake** – "flickering empty state view" on start
+- When you update lists with an empty array of elements, the "No results" view will be shown. You can customize this view by using the [List.EmptyView](../api-reference/user-interface/list.md#list.emptyview) or [Grid.EmptyView](../api-reference/user-interface/grid.md#grid.emptyview) components.
+- **Common mistake** - "flickering empty state view" on start
   - If you try rendering an empty list before real data arrives (e.g. from the network or disk), you might see a flickering "No results" view when opening the extension. To prevent this, make sure not to return an empty list of items before you get the data you want to display. In the meantime, you can show the loading indicator. See [this example](https://developers.raycast.com/information/best-practices#show-loading-indicator).
 
 ### Navigation Title

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudflare-email-routing",
+  "title": "Cloudflare Email Routing",
+  "description": "Create, list, edit, and delete Cloudflare email aliases directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "erayack",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-aliases",
+      "title": "List Email Aliases",
+      "subtitle": "Cloudflare Email Routing",
+      "description": "List all your Cloudflare email aliases with search and management actions.",
+      "mode": "view"
+    },
+    {
+      "name": "create-alias",
+      "title": "Create Email Alias",
+      "subtitle": "Cloudflare Email Routing",
+      "description": "Create a new random email alias that forwards to your real inbox.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.3",
+    "@raycast/utils": "^1.17.0",
+    "cloudflare": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "cloudflareApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Cloudflare API Key",
+      "description": "Your Cloudflare API token with Email Routing:Edit permissions",
+      "placeholder": "Enter your Cloudflare API token"
+    },
+    {
+      "name": "cloudflareZoneId",
+      "type": "textfield",
+      "required": true,
+      "title": "Zone ID",
+      "description": "The Zone ID for your domain where email routing is configured",
+      "placeholder": "Enter your Cloudflare Zone ID"
+    },
+    {
+      "name": "destinationEmail",
+      "type": "textfield",
+      "required": true,
+      "title": "Destination Email Address",
+      "description": "Your real email address where aliases will forward to",
+      "placeholder": "your-real-email@example.com"
+    },
+    {
+      "name": "preAllocatePool",
+      "type": "checkbox",
+      "required": false,
+      "title": "Pre-allocate Alias Pool",
+      "description": "Pre-create unused aliases for faster alias generation (uses more rules)",
+      "default": false,
+      "label": "Enable Pre-allocation"
+    }
+  ]
+}

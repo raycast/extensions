@@ -5,7 +5,7 @@ import { useCache } from "../cache";
 import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest, Project } from "../gitlabapi";
 import { daysInSeconds, showErrorToast } from "../utils";
-import { MRListItem, MRScope, MRState } from "./mr";
+import { MRListEmptyView, MRListItem, MRScope, MRState } from "./mr";
 import { MyProjectsDropdown } from "./project";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -21,7 +21,7 @@ function MyMRList(props: {
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
-}): JSX.Element {
+}) {
   const mrs = props.mrs;
 
   const refresh = () => {
@@ -32,12 +32,13 @@ function MyMRList(props: {
 
   return (
     <List
-      searchBarPlaceholder="Filter Merge Requests by name..."
+      searchBarPlaceholder="Filter Merge Requests by Name..."
       isLoading={props.isLoading}
       searchText={props.searchText}
       onSearchTextChange={props.onSearchTextChange}
       searchBarAccessory={props.searchBarAccessory}
       isShowingDetail={getListDetailsPreference()}
+      throttle
     >
       <List.Section title={props.title} subtitle={mrs?.length.toString() || ""}>
         {mrs?.map((mr) => (
@@ -51,6 +52,7 @@ function MyMRList(props: {
           />
         ))}
       </List.Section>
+      <MRListEmptyView />
     </List>
   );
 }
@@ -60,7 +62,7 @@ export function MyMergeRequests(props: {
   state: MRState;
   searchText?: string | undefined;
   onSearchTextChange?: (text: string) => void;
-}): JSX.Element {
+}) {
   const scope = props.scope;
   const state = props.state;
   const [project, setProject] = useState<Project>();
@@ -87,7 +89,8 @@ export function MyMergeRequests(props: {
 export function useMyMergeRequests(
   scope: MRScope,
   state: MRState,
-  project: Project | undefined
+  project: Project | undefined,
+  labels: string[] | undefined = undefined,
 ): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean;
@@ -100,15 +103,15 @@ export function useMyMergeRequests(
     error,
     performRefetch,
   } = useCache<MergeRequest[] | undefined>(
-    `mymrs_${scope}_${state}`,
+    `mymrs_${scope}_${state}_${labels ? labels.join(",") : "[]"}`,
     async (): Promise<MergeRequest[] | undefined> => {
-      return await gitlab.getMergeRequests({ state, scope });
+      return await gitlab.getMergeRequests({ state, scope, ...(labels && { labels }) });
     },
     {
-      deps: [project, scope, state],
+      deps: [project, scope, state, labels],
       secondsToRefetch: 10,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { mrs, isLoading, error, performRefetch };
 }

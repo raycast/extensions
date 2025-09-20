@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { XcodeProjectListItem } from "./xcode-project-list-item.component";
 import { useCachedPromise } from "@raycast/utils";
 import { XcodeProjectService } from "../../services/xcode-project.service";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { XcodeProjectType } from "../../models/xcode-project/xcode-project-type.model";
 import { XcodeProjectListSearchBarAccessory } from "./xcode-project-list-search-bar-accessory.component";
 import { XcodeProjectFavoriteService } from "../../services/xcode-project-favorite.service";
@@ -14,9 +14,10 @@ import { XcodeProject } from "../../models/xcode-project/xcode-project.model";
 export function XcodeProjectList(props: {
   navigationTitle?: string;
   searchBarPlaceholder?: string;
+  storeDropdownFilterValue?: boolean;
   projectTypeFilter?: (xcodeProjectType: XcodeProjectType) => boolean;
   actions?: (xcodeProject: XcodeProject) => [JSX.Element];
-}): JSX.Element {
+}) {
   // Use cached promise of XcodeProjectService XcodeProjects
   const xcodeProjectsState = useCachedPromise(XcodeProjectService.xcodeProjects);
   // Use cached promise of XcodeProjectFavoriteService Favorites
@@ -49,9 +50,11 @@ export function XcodeProjectList(props: {
         <XcodeProjectListSearchBarAccessory
           key="search-bar-accessory"
           projectTypeFilter={props.projectTypeFilter}
+          storeDropdownFilterValue={props.storeDropdownFilterValue}
           onChange={setProjectTypeFilter}
         />
       }
+      filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Favorites">
         {favoriteXcodeProjects?.map((xcodeProject) => (
@@ -87,7 +90,7 @@ function XcodeProjectListItemContainer(props: {
   isFavorite: boolean;
   actions?: (xcodeProject: XcodeProject) => [JSX.Element];
   revalidate: () => void;
-}): JSX.Element {
+}) {
   return (
     <XcodeProjectListItem
       project={props.xcodeProject}

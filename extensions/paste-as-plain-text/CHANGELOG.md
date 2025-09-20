@@ -1,5 +1,35 @@
 # Paste as Plain text Changelog
 
+## [Function Optimisation] - 2025-04-15
+
+- Update Paste as JSON, support flexible JSON-like inputs.
+
+## [Fix Paste as Number] - 2024-12-03
+
+-  Fix Paste as Number
+
+## [Optional No Prompt] - 2024-06-17
+
+-  Optional No Prompt after pasting
+-  Update metadata screenshot
+
+## [Paste as File] - 2024-06-17
+
+-  Paste as File, extract file path from the clipboard and paste it as file
+-  Auto fetch title from URL when pasting as Markdown Link and Markdown Image
+
+## [Function Optimisation] - 2024-06-06
+
+-  Update Paste as Number: Now all the numbers will be extracted and stitched together for display
+
+## [Fix Hotkey Error] - 2024-05-27
+
+-  Fix the problem of using hotkeys to invoke commands
+
+## [Advanced Paste] - 2024-05-27
+
+- Advanced Paste to paste your clipboard content into any format you want
+
 ## [Update Raycast API] - 2022-11-30
 
 - Update Raycast API version to 1.44.0

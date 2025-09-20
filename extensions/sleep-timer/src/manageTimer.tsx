@@ -89,7 +89,7 @@ export default function Command() {
                     title="Rename Sleep Timer"
                     onAction={() =>
                       push(
-                        <RenameView currentName={customTimers[ctID].name} originalFile={"customTimer"} ctID={ctID} />
+                        <RenameView currentName={customTimers[ctID].name} originalFile={"customTimer"} ctID={ctID} />,
                       )
                     }
                   />

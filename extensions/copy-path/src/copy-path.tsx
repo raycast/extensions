@@ -1,32 +1,31 @@
-import { getFocusFinderPath } from "./utils/applescript-utils";
-import { Clipboard, closeMainWindow, getPreferenceValues, getSelectedFinderItems, showHUD } from "@raycast/api";
-import { Preferences } from "./types/preferences";
+import { closeMainWindow, getFrontmostApplication } from "@raycast/api";
+import { finderBundleId } from "./utils/constants";
+import {
+  copyFinderPath,
+  copyBrowserTabUrl,
+  showLoadingHUD,
+  isEmpty,
+  copyUnSupportedAppContent,
+  copyWindowPath,
+} from "./utils/common-utils";
 
 export default async () => {
-  try {
-    const { multiPathSeparator } = getPreferenceValues<Preferences>();
-    await closeMainWindow();
-    const fileSystemItems = await getSelectedFinderItems();
-    if (fileSystemItems.length === 0) {
-      await copyFinderPath();
-    } else {
-      const filePaths = fileSystemItems.map((item) =>
-        item.path.endsWith("/") && item.path.length !== 1 ? item.path.slice(0, -1) : item.path
-      );
-
-      const output = filePaths.join(multiPathSeparator);
-      await Clipboard.copy(output);
-      await showHUD("Copy: " + (filePaths.length > 1 ? filePaths[0] + "..." : filePaths[0]));
-    }
-  } catch (e) {
+  await closeMainWindow();
+  await showLoadingHUD("Copying...");
+  const frontmostApp = await getFrontmostApplication();
+  if (frontmostApp.bundleId === finderBundleId) {
+    // get finder path
     await copyFinderPath();
-    console.error(String(e));
-  }
-};
+  } else {
+    const windowPath = await copyWindowPath(frontmostApp);
+    if (!isEmpty(windowPath)) {
+      return;
+    }
 
-const copyFinderPath = async () => {
-  const finderPath = await getFocusFinderPath();
-  const finalPath = finderPath.endsWith("/") && finderPath.length !== 1 ? finderPath.slice(0, -1) : finderPath;
-  await Clipboard.copy(finalPath);
-  await showHUD("Copy: " + finalPath);
+    // get browser web page url
+    const url = await copyBrowserTabUrl(frontmostApp);
+    if (isEmpty(url)) {
+      await copyUnSupportedAppContent(frontmostApp);
+    }
+  }
 };

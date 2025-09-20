@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "maverickdotdev",
   "contributors": [
-    "ivart"
+    "ivart",
+    "christy_mcgrory",
+    "xmok"
   ],
   "categories": [
     "Developer Tools",
@@ -19,7 +21,71 @@
       "name": "index",
       "title": "Open in JSON Hero",
       "description": "Opens JSON in your pasteboard in JSON Hero",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Untitled",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "ttl",
+          "placeholder": "TTL",
+          "required": false,
+          "type": "dropdown",
+          "data": [
+            {
+          "title": "1 minute",
+          "value": "60"
+        },
+        {
+          "title": "5 minutes",
+          "value": "300"
+        },
+        {
+          "title": "15 minutes",
+          "value": "900"
+        },
+        {
+          "title": "30 minutes",
+          "value": "1800"
+        },
+        {
+          "title": "1 hour",
+          "value": "3600"
+        },
+        {
+          "title": "6 hour",
+          "value": "21600"
+        },
+        {
+          "title": "12 hour",
+          "value": "43200"
+        },
+        {
+          "title": "1 day",
+          "value": "86400"
+        },
+        {
+          "title": "3 days",
+          "value": "259200"
+        },
+        {
+          "title": "1 week",
+          "value": "604800"
+        },
+        {
+          "title": "1 month",
+          "value": "2592000"
+        },
+        {
+          "title": "Eternity",
+          "value": "0"
+        }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -34,11 +100,11 @@
           "value": "60"
         },
         {
-          "title": "5 minute",
+          "title": "5 minutes",
           "value": "300"
         },
         {
-          "title": "15 minute",
+          "title": "15 minutes",
           "value": "900"
         },
         {
@@ -80,27 +146,34 @@
       ],
       "default": "86400",
       "title": "Keep the file for:"
+    },
+    {
+      "name": "domain",
+      "description": "domain without path of the JSON Hero API to use. Defaults to the JSON Hero API",
+      "type": "textfield",
+      "required": false,
+      "default": "https://jsonhero.io",
+      "title": "Domain to use:",
+      "placeholder": "https://jsonhero.io or http://localhost:8787"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.1",
-    "node-fetch": "^3.2.3",
-    "tiny-invariant": "^1.2.0"
+    "@raycast/api": "^1.101.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

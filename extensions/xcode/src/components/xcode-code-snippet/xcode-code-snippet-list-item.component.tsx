@@ -1,5 +1,5 @@
 import { XcodeCodeSnippet } from "../../models/xcode-code-snippet/xcode-code-snippet.model";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { XcodeCodeSnippetListItemDetail } from "./xcode-code-snippet-list-item-detail.component";
 import { XcodeCodeSnippetService } from "../../services/xcode-code-snippet.service";
 import { XcodeCodeSnippetForm } from "./xcode-code-snippet-form.component";
@@ -12,7 +12,7 @@ export function XcodeCodeSnippetListItem(props: {
   codeSnippet: XcodeCodeSnippet;
   onSave: () => void;
   onDelete: () => void;
-}): JSX.Element {
+}) {
   const codeSnippetFilePath = XcodeCodeSnippetService.codeSnippetFilePath(props.codeSnippet);
   return (
     <List.Item
@@ -31,14 +31,14 @@ export function XcodeCodeSnippetListItem(props: {
             title="Open with Xcode"
             target={codeSnippetFilePath}
             application={XcodeService.bundleIdentifier}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
-          <Action.ShowInFinder path={codeSnippetFilePath} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
+          <Action.ShowInFinder path={codeSnippetFilePath} shortcut={Keyboard.Shortcut.Common.OpenWith} />
           <Action.Trash
             title="Delete"
             paths={codeSnippetFilePath}
             onTrash={props.onDelete}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
           />
         </ActionPanel>
       }

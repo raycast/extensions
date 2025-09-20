@@ -1,0 +1,1080 @@
+{
+  "evals": [
+    {
+      "input" : "@setlist-fm Show me the newest Setlist from Ghost",
+      "mocks" : {
+        "search-artist" : [
+          {
+            "disambiguation" : "Swedish metal band",
+            "mbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+            "name" : "Ghost",
+            "sortName" : "Ghost",
+            "url" : "https://www.setlist.fm/setlists/ghost-3bd2a4a8.html"
+          },
+          {
+            "disambiguation" : "",
+            "mbid" : "6fbd58c3-e9b3-4419-a197-0a0f22baed94",
+            "name" : "The Ghost Inside",
+            "sortName" : "Ghost Inside, The",
+            "url" : "https://www.setlist.fm/setlists/the-ghost-inside-bd7e5da.html"
+          }
+        ],
+        "search-setlists" : [
+          {
+            "artist" : {
+              "disambiguation" : "Swedish metal band",
+              "mbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+              "name" : "Ghost",
+              "sortName" : "Ghost",
+              "url" : "https://www.setlist.fm/setlists/ghost-3bd2a4a8.html"
+            },
+            "eventDate" : "11-05-2025",
+            "id" : "351d9bb",
+            "lastUpdated" : "2025-05-12T05:52:57.924+0000",
+            "sets" : {
+              "set" : [
+                {
+                  "song" : [
+                    {
+                      "name" : "Peacefield"
+                    },
+                    {
+                      "name" : "Lachryma"
+                    },
+                    {
+                      "name" : "Spirit"
+                    },
+                    {
+                      "name" : "From the Pinnacle to the Pit"
+                    },
+                    {
+                      "name" : "Majesty"
+                    },
+                    {
+                      "name" : "The Future Is a Foreign Land"
+                    },
+                    {
+                      "name" : "Devil Church"
+                    },
+                    {
+                      "name" : "Cirice"
+                    },
+                    {
+                      "name" : "Darkness at the Heart of My Love"
+                    },
+                    {
+                      "name" : "Satanized"
+                    },
+                    {
+                      "name" : "Ritual"
+                    },
+                    {
+                      "name" : "Umbra"
+                    },
+                    {
+                      "name" : "Year Zero"
+                    },
+                    {
+                      "name" : "He Is"
+                    },
+                    {
+                      "name" : "Rats"
+                    },
+                    {
+                      "name" : "Kiss the Go-Goat"
+                    },
+                    {
+                      "name" : "Mummy Dust"
+                    },
+                    {
+                      "name" : "Monstrance Clock"
+                    }
+                  ]
+                },
+                {
+                  "encore" : 1,
+                  "song" : [
+                    {
+                      "name" : "Mary on a Cross"
+                    },
+                    {
+                      "name" : "Dance Macabre"
+                    },
+                    {
+                      "name" : "Square Hammer"
+                    }
+                  ]
+                }
+              ]
+            },
+            "tour" : {
+              "name" : "Skeletour World Tour 2025"
+            },
+            "url" : "https://www.setlist.fm/setlist/ghost/2025/o2-arena-prague-czechia-351d9bb.html",
+            "venue" : {
+              "city" : {
+                "coords" : {
+                  "lat" : 50.087836793210798,
+                  "long" : 14.424132200124101
+                },
+                "country" : {
+                  "code" : "CZ",
+                  "name" : "Czechia"
+                },
+                "id" : "3067696",
+                "name" : "Prague",
+                "state" : "Hlavní Mesto Praha",
+                "stateCode" : "52"
+              },
+              "id" : "6bd0765e",
+              "name" : "O2 arena",
+              "url" : "https://www.setlist.fm/venue/o2-arena-prague-czechia-6bd0765e.html"
+            },
+            "versionId" : "g2b4d708e"
+          },
+          {
+            "artist" : {
+              "disambiguation" : "Swedish metal band",
+              "mbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+              "name" : "Ghost",
+              "sortName" : "Ghost",
+              "url" : "https://www.setlist.fm/setlists/ghost-3bd2a4a8.html"
+            },
+            "eventDate" : "10-05-2025",
+            "id" : "2b51d8f6",
+            "lastUpdated" : "2025-05-10T20:39:11.525+0000",
+            "sets" : {
+              "set" : [
+                {
+                  "song" : [
+                    {
+                      "cover" : {
+                        "disambiguation" : "Swedish jazz pianist, composer of Pippi Longstocking song",
+                        "mbid" : "7d623f63-56d0-4c44-915f-7aefc30301f9",
+                        "name" : "Jan Johansson",
+                        "sortName" : "Johansson, Jan",
+                        "url" : "https://www.setlist.fm/setlists/jan-johansson-13d6d98d.html"
+                      },
+                      "name" : "Klara stjärnor",
+                      "tape" : true
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "composer",
+                        "mbid" : "720f3f3f-49a2-47ae-a9ba-0d150ba4ee7a",
+                        "name" : "Gregorio Allegri",
+                        "sortName" : "Allegri, Gregorio",
+                        "url" : "https://www.setlist.fm/setlists/gregorio-allegri-bd7d502.html"
+                      },
+                      "name" : "Miserere Mei, Deus",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "Peacefield"
+                    },
+                    {
+                      "name" : "Lachryma"
+                    },
+                    {
+                      "name" : "Spirit"
+                    },
+                    {
+                      "name" : "Faith"
+                    },
+                    {
+                      "name" : "Majesty"
+                    },
+                    {
+                      "name" : "The Future Is a Foreign Land"
+                    },
+                    {
+                      "name" : "Devil Church"
+                    },
+                    {
+                      "name" : "Cirice"
+                    },
+                    {
+                      "name" : "Darkness at the Heart of My Love"
+                    },
+                    {
+                      "name" : "Satanized"
+                    },
+                    {
+                      "name" : "Ritual"
+                    },
+                    {
+                      "name" : "Umbra"
+                    },
+                    {
+                      "name" : "Year Zero"
+                    },
+                    {
+                      "name" : "He Is"
+                    },
+                    {
+                      "name" : "Rats"
+                    },
+                    {
+                      "name" : "Kiss the Go-Goat"
+                    },
+                    {
+                      "name" : "Mummy Dust"
+                    },
+                    {
+                      "name" : "Monstrance Clock"
+                    }
+                  ]
+                },
+                {
+                  "encore" : 1,
+                  "song" : [
+                    {
+                      "name" : "Mary on a Cross"
+                    },
+                    {
+                      "name" : "Dance Macabre"
+                    },
+                    {
+                      "name" : "Square Hammer"
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "35ef61ca-43db-4772-ba27-0489e9ebcb69",
+                        "name" : "Emmylou Harris",
+                        "sortName" : "Harris, Emmylou",
+                        "url" : "https://www.setlist.fm/setlists/emmylou-harris-13d6b159.html"
+                      },
+                      "name" : "Sorrow in the Wind",
+                      "tape" : true
+                    }
+                  ]
+                }
+              ]
+            },
+            "tour" : {
+              "name" : "Skeletour World Tour 2025"
+            },
+            "url" : "https://www.setlist.fm/setlist/ghost/2025/atlas-arena-od-poland-2b51d8f6.html",
+            "venue" : {
+              "city" : {
+                "coords" : {
+                  "lat" : 51.75,
+                  "long" : 19.466999999999999
+                },
+                "country" : {
+                  "code" : "PL",
+                  "name" : "Poland"
+                },
+                "id" : "3093133",
+                "name" : "Łódź",
+                "state" : "Łódź Voivodeship",
+                "stateCode" : "74"
+              },
+              "id" : "bd675e6",
+              "name" : "Atlas Arena",
+              "url" : "https://www.setlist.fm/venue/atlas-arena-od-poland-bd675e6.html"
+            },
+            "versionId" : "g4b4d2372"
+          },
+          {
+            "artist" : {
+              "disambiguation" : "Swedish metal band",
+              "mbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+              "name" : "Ghost",
+              "sortName" : "Ghost",
+              "url" : "https://www.setlist.fm/setlists/ghost-3bd2a4a8.html"
+            },
+            "eventDate" : "08-05-2025",
+            "id" : "2b51d83e",
+            "info" : "",
+            "lastUpdated" : "2025-05-11T04:01:43.990+0000",
+            "sets" : {
+              "set" : [
+                {
+                  "song" : [
+                    {
+                      "cover" : {
+                        "disambiguation" : "Swedish jazz pianist, composer of Pippi Longstocking song",
+                        "mbid" : "7d623f63-56d0-4c44-915f-7aefc30301f9",
+                        "name" : "Jan Johansson",
+                        "sortName" : "Johansson, Jan",
+                        "url" : "https://www.setlist.fm/setlists/jan-johansson-13d6d98d.html"
+                      },
+                      "name" : "Klara stjärnor",
+                      "tape" : true
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "composer",
+                        "mbid" : "720f3f3f-49a2-47ae-a9ba-0d150ba4ee7a",
+                        "name" : "Gregorio Allegri",
+                        "sortName" : "Allegri, Gregorio",
+                        "url" : "https://www.setlist.fm/setlists/gregorio-allegri-bd7d502.html"
+                      },
+                      "name" : "Miserere Mei, Deus",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "Peacefield"
+                    },
+                    {
+                      "name" : "Lachryma"
+                    },
+                    {
+                      "name" : "Spirit"
+                    },
+                    {
+                      "name" : "Faith"
+                    },
+                    {
+                      "name" : "Call Me Little Sunshine"
+                    },
+                    {
+                      "name" : "The Future Is a Foreign Land"
+                    },
+                    {
+                      "name" : "Devil Church"
+                    },
+                    {
+                      "name" : "Cirice"
+                    },
+                    {
+                      "name" : "Darkness at the Heart of My Love"
+                    },
+                    {
+                      "name" : "Satanized"
+                    },
+                    {
+                      "name" : "Ritual"
+                    },
+                    {
+                      "name" : "Umbra"
+                    },
+                    {
+                      "name" : "Year Zero"
+                    },
+                    {
+                      "name" : "He Is"
+                    },
+                    {
+                      "name" : "Rats"
+                    },
+                    {
+                      "name" : "Kiss the Go-Goat"
+                    },
+                    {
+                      "name" : "Mummy Dust"
+                    },
+                    {
+                      "name" : "Monstrance Clock"
+                    }
+                  ]
+                },
+                {
+                  "encore" : 1,
+                  "song" : [
+                    {
+                      "name" : "Mary on a Cross"
+                    },
+                    {
+                      "name" : "Dance Macabre"
+                    },
+                    {
+                      "name" : "Square Hammer"
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "35ef61ca-43db-4772-ba27-0489e9ebcb69",
+                        "name" : "Emmylou Harris",
+                        "sortName" : "Harris, Emmylou",
+                        "url" : "https://www.setlist.fm/setlists/emmylou-harris-13d6b159.html"
+                      },
+                      "name" : "Sorrow in the Wind",
+                      "tape" : true
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "4c26a3f2-2952-4cb2-bcf2-c64e79cb8901",
+                        "name" : "Per Myrberg",
+                        "sortName" : "Myrberg, Per",
+                        "url" : "https://www.setlist.fm/setlists/per-myrberg-6bd6563a.html"
+                      },
+                      "name" : "Så länge skutan kan gå",
+                      "tape" : true
+                    }
+                  ]
+                }
+              ]
+            },
+            "tour" : {
+              "name" : "Skeletour World Tour 2025"
+            },
+            "url" : "https://www.setlist.fm/setlist/ghost/2025/ziggo-dome-amsterdam-netherlands-2b51d83e.html",
+            "venue" : {
+              "city" : {
+                "coords" : {
+                  "lat" : 52.372999999999998,
+                  "long" : 4.9000000000000004
+                },
+                "country" : {
+                  "code" : "NL",
+                  "name" : "Netherlands"
+                },
+                "id" : "2759794",
+                "name" : "Amsterdam",
+                "state" : "North Holland",
+                "stateCode" : "07"
+              },
+              "id" : "53d7378d",
+              "name" : "Ziggo Dome",
+              "url" : "https://www.setlist.fm/venue/ziggo-dome-amsterdam-netherlands-53d7378d.html"
+            },
+            "versionId" : "g5b4d1728"
+          }
+        ]
+      },
+      "expected" : [
+        {
+          "callsTool" : {
+            "arguments" : {
+              "artistName" : "Ghost"
+            },
+            "name" : "search-artist"
+          }
+        },
+        {
+          "callsTool" : {
+            "arguments" : {
+              "artistMbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444"
+            },
+            "name" : "search-setlists"
+          }
+        },
+        {
+          "includes": "Peacefield"
+        }
+      ]
+    },
+    {
+      "input" : "@setlist-fm Show me the Ghost Setlist from 2018",
+      "mocks" : {
+        "search-artist" : [
+          {
+            "disambiguation" : "Swedish metal band",
+            "mbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+            "name" : "Ghost",
+            "sortName" : "Ghost",
+            "url" : "https://www.setlist.fm/setlists/ghost-3bd2a4a8.html"
+          },
+          {
+            "disambiguation" : "",
+            "mbid" : "6fbd58c3-e9b3-4419-a197-0a0f22baed94",
+            "name" : "The Ghost Inside",
+            "sortName" : "Ghost Inside, The",
+            "url" : "https://www.setlist.fm/setlists/the-ghost-inside-bd7e5da.html"
+          }
+        ],
+        "search-setlists" : [
+          {
+            "artist" : {
+              "disambiguation" : "Swedish metal band",
+              "mbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+              "name" : "Ghost",
+              "sortName" : "Ghost",
+              "url" : "https://www.setlist.fm/setlists/ghost-3bd2a4a8.html"
+            },
+            "eventDate" : "15-12-2018",
+            "id" : "13949529",
+            "lastUpdated" : "2022-04-11T18:11:00.383+0000",
+            "sets" : {
+              "set" : [
+                {
+                  "name" : "Act 1:",
+                  "song" : [
+                    {
+                      "cover" : {
+                        "disambiguation" : "Swedish jazz pianist, composer of Pippi Longstocking song",
+                        "mbid" : "7d623f63-56d0-4c44-915f-7aefc30301f9",
+                        "name" : "Jan Johansson",
+                        "sortName" : "Johansson, Jan",
+                        "url" : "https://www.setlist.fm/setlists/jan-johansson-13d6d98d.html"
+                      },
+                      "name" : "Klara stjärnor",
+                      "tape" : true
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "composer",
+                        "mbid" : "720f3f3f-49a2-47ae-a9ba-0d150ba4ee7a",
+                        "name" : "Gregorio Allegri",
+                        "sortName" : "Allegri, Gregorio",
+                        "url" : "https://www.setlist.fm/setlists/gregorio-allegri-bd7d502.html"
+                      },
+                      "name" : "Miserere Mei, Deus",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "Ashes"
+                    },
+                    {
+                      "name" : "Rats"
+                    },
+                    {
+                      "name" : "Absolution"
+                    },
+                    {
+                      "name" : "Idolatrine"
+                    },
+                    {
+                      "name" : "Ritual"
+                    },
+                    {
+                      "name" : "Con Clavi Con Dio"
+                    },
+                    {
+                      "name" : "Per Aspera ad Inferi"
+                    },
+                    {
+                      "name" : "Devil Church"
+                    },
+                    {
+                      "name" : "Cirice"
+                    },
+                    {
+                      "info" : "with Papa Nihil saxophone solo",
+                      "name" : "Miasma"
+                    },
+                    {
+                      "info" : "acoustic",
+                      "name" : "Jigolo Har Megiddo"
+                    },
+                    {
+                      "name" : "Pro Memoria"
+                    },
+                    {
+                      "name" : "Witch Image"
+                    },
+                    {
+                      "name" : "Life Eternal"
+                    }
+                  ]
+                },
+                {
+                  "name" : "Act 2:",
+                  "song" : [
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "7018122c-11ee-4687-b711-48bab2e6a490",
+                        "name" : "Jocelyn Pook",
+                        "sortName" : "Pook, Jocelyn",
+                        "url" : "https://www.setlist.fm/setlists/jocelyn-pook-5bd4b7c8.html"
+                      },
+                      "name" : "Masked Ball",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "Spirit"
+                    },
+                    {
+                      "name" : "From the Pinnacle to the Pit"
+                    },
+                    {
+                      "name" : "Majesty"
+                    },
+                    {
+                      "name" : "Satan Prayer"
+                    },
+                    {
+                      "name" : "Faith"
+                    },
+                    {
+                      "name" : "Year Zero"
+                    },
+                    {
+                      "name" : "Spöksonat",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "He Is"
+                    },
+                    {
+                      "name" : "Mummy Dust"
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "c52efcf0-1867-4b18-ad21-b37a373c14c0",
+                        "name" : "Roky Erickson and the Aliens",
+                        "sortName" : "Erickson, Roky and the Aliens",
+                        "url" : "https://www.setlist.fm/setlists/roky-erickson-and-the-aliens-73d6a239.html"
+                      },
+                      "info" : "with band introductions",
+                      "name" : "If You Have Ghosts"
+                    },
+                    {
+                      "name" : "Dance Macabre"
+                    },
+                    {
+                      "name" : "Square Hammer"
+                    }
+                  ]
+                },
+                {
+                  "encore" : 1,
+                  "song" : [
+                    {
+                      "name" : "Monstrance Clock"
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "Australian musical project",
+                        "mbid" : "ccda046a-2674-4f7d-97e6-f23d6c156432",
+                        "name" : "Dead Can Dance",
+                        "sortName" : "Dead Can Dance",
+                        "url" : "https://www.setlist.fm/setlists/dead-can-dance-23d68cbf.html"
+                      },
+                      "name" : "The Host of Seraphim",
+                      "tape" : true
+                    }
+                  ]
+                }
+              ]
+            },
+            "tour" : {
+              "name" : "A Pale Tour Named Death North America 2018"
+            },
+            "url" : "https://www.setlist.fm/setlist/ghost/2018/barclays-center-brooklyn-ny-13949529.html",
+            "venue" : {
+              "city" : {
+                "coords" : {
+                  "lat" : 40.649999999999999,
+                  "long" : -73.950000000000003
+                },
+                "country" : {
+                  "code" : "US",
+                  "name" : "United States"
+                },
+                "id" : "5110302",
+                "name" : "Brooklyn",
+                "state" : "New York",
+                "stateCode" : "NY"
+              },
+              "id" : "2bd77066",
+              "name" : "Barclays Center",
+              "url" : "https://www.setlist.fm/venue/barclays-center-brooklyn-ny-usa-2bd77066.html"
+            },
+            "versionId" : "g53cddbdd"
+          },
+          {
+            "artist" : {
+              "disambiguation" : "Swedish metal band",
+              "mbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+              "name" : "Ghost",
+              "sortName" : "Ghost",
+              "url" : "https://www.setlist.fm/setlists/ghost-3bd2a4a8.html"
+            },
+            "eventDate" : "14-12-2018",
+            "id" : "33949c1d",
+            "lastUpdated" : "2022-04-11T18:10:58.505+0000",
+            "sets" : {
+              "set" : [
+                {
+                  "name" : "Act 1:",
+                  "song" : [
+                    {
+                      "cover" : {
+                        "disambiguation" : "Swedish jazz pianist, composer of Pippi Longstocking song",
+                        "mbid" : "7d623f63-56d0-4c44-915f-7aefc30301f9",
+                        "name" : "Jan Johansson",
+                        "sortName" : "Johansson, Jan",
+                        "url" : "https://www.setlist.fm/setlists/jan-johansson-13d6d98d.html"
+                      },
+                      "name" : "Klara stjärnor",
+                      "tape" : true
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "composer",
+                        "mbid" : "720f3f3f-49a2-47ae-a9ba-0d150ba4ee7a",
+                        "name" : "Gregorio Allegri",
+                        "sortName" : "Allegri, Gregorio",
+                        "url" : "https://www.setlist.fm/setlists/gregorio-allegri-bd7d502.html"
+                      },
+                      "name" : "Miserere Mei, Deus",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "Ashes"
+                    },
+                    {
+                      "name" : "Rats"
+                    },
+                    {
+                      "name" : "Absolution"
+                    },
+                    {
+                      "name" : "Idolatrine"
+                    },
+                    {
+                      "name" : "Ritual"
+                    },
+                    {
+                      "name" : "Con Clavi Con Dio"
+                    },
+                    {
+                      "name" : "Per Aspera ad Inferi"
+                    },
+                    {
+                      "name" : "Devil Church"
+                    },
+                    {
+                      "name" : "Cirice"
+                    },
+                    {
+                      "info" : "with Papa Nihil saxophone solo",
+                      "name" : "Miasma"
+                    },
+                    {
+                      "info" : "acoustic",
+                      "name" : "Jigolo Har Megiddo"
+                    },
+                    {
+                      "name" : "Pro Memoria"
+                    },
+                    {
+                      "name" : "Witch Image"
+                    },
+                    {
+                      "name" : "Life Eternal"
+                    }
+                  ]
+                },
+                {
+                  "name" : "Act 2:",
+                  "song" : [
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "7018122c-11ee-4687-b711-48bab2e6a490",
+                        "name" : "Jocelyn Pook",
+                        "sortName" : "Pook, Jocelyn",
+                        "url" : "https://www.setlist.fm/setlists/jocelyn-pook-5bd4b7c8.html"
+                      },
+                      "name" : "Masked Ball",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "Spirit"
+                    },
+                    {
+                      "name" : "From the Pinnacle to the Pit"
+                    },
+                    {
+                      "name" : "Majesty"
+                    },
+                    {
+                      "name" : "Satan Prayer"
+                    },
+                    {
+                      "name" : "Faith"
+                    },
+                    {
+                      "name" : "Year Zero"
+                    },
+                    {
+                      "name" : "Spöksonat",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "He Is"
+                    },
+                    {
+                      "name" : "Mummy Dust"
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "c52efcf0-1867-4b18-ad21-b37a373c14c0",
+                        "name" : "Roky Erickson and the Aliens",
+                        "sortName" : "Erickson, Roky and the Aliens",
+                        "url" : "https://www.setlist.fm/setlists/roky-erickson-and-the-aliens-73d6a239.html"
+                      },
+                      "info" : "with band introductions",
+                      "name" : "If You Have Ghosts"
+                    },
+                    {
+                      "name" : "Dance Macabre"
+                    },
+                    {
+                      "name" : "Square Hammer"
+                    }
+                  ]
+                },
+                {
+                  "encore" : 1,
+                  "song" : [
+                    {
+                      "name" : "Monstrance Clock"
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "Australian musical project",
+                        "mbid" : "ccda046a-2674-4f7d-97e6-f23d6c156432",
+                        "name" : "Dead Can Dance",
+                        "sortName" : "Dead Can Dance",
+                        "url" : "https://www.setlist.fm/setlists/dead-can-dance-23d68cbf.html"
+                      },
+                      "name" : "The Host of Seraphim",
+                      "tape" : true
+                    }
+                  ]
+                }
+              ]
+            },
+            "tour" : {
+              "name" : "A Pale Tour Named Death North America 2018"
+            },
+            "url" : "https://www.setlist.fm/setlist/ghost/2018/wang-theatre-boston-ma-33949c1d.html",
+            "venue" : {
+              "city" : {
+                "coords" : {
+                  "lat" : 42.358430800000001,
+                  "long" : -71.059773199999995
+                },
+                "country" : {
+                  "code" : "US",
+                  "name" : "United States"
+                },
+                "id" : "4930956",
+                "name" : "Boston",
+                "state" : "Massachusetts",
+                "stateCode" : "MA"
+              },
+              "id" : "63d62267",
+              "name" : "Wang Theatre",
+              "url" : "https://www.setlist.fm/venue/wang-theatre-boston-ma-usa-63d62267.html"
+            },
+            "versionId" : "g4bcddbde"
+          },
+          {
+            "artist" : {
+              "disambiguation" : "Swedish metal band",
+              "mbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+              "name" : "Ghost",
+              "sortName" : "Ghost",
+              "url" : "https://www.setlist.fm/setlists/ghost-3bd2a4a8.html"
+            },
+            "eventDate" : "13-12-2018",
+            "id" : "b94a176",
+            "lastUpdated" : "2022-04-11T18:10:40.396+0000",
+            "sets" : {
+              "set" : [
+                {
+                  "name" : "Act 1:",
+                  "song" : [
+                    {
+                      "cover" : {
+                        "disambiguation" : "Swedish jazz pianist, composer of Pippi Longstocking song",
+                        "mbid" : "7d623f63-56d0-4c44-915f-7aefc30301f9",
+                        "name" : "Jan Johansson",
+                        "sortName" : "Johansson, Jan",
+                        "url" : "https://www.setlist.fm/setlists/jan-johansson-13d6d98d.html"
+                      },
+                      "name" : "Klara stjärnor",
+                      "tape" : true
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "composer",
+                        "mbid" : "720f3f3f-49a2-47ae-a9ba-0d150ba4ee7a",
+                        "name" : "Gregorio Allegri",
+                        "sortName" : "Allegri, Gregorio",
+                        "url" : "https://www.setlist.fm/setlists/gregorio-allegri-bd7d502.html"
+                      },
+                      "name" : "Miserere Mei, Deus",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "Ashes"
+                    },
+                    {
+                      "name" : "Rats"
+                    },
+                    {
+                      "name" : "Absolution"
+                    },
+                    {
+                      "name" : "Idolatrine"
+                    },
+                    {
+                      "name" : "Ritual"
+                    },
+                    {
+                      "name" : "Con Clavi Con Dio"
+                    },
+                    {
+                      "name" : "Per Aspera ad Inferi"
+                    },
+                    {
+                      "name" : "Devil Church"
+                    },
+                    {
+                      "name" : "Cirice"
+                    },
+                    {
+                      "info" : "with Papa Nihil saxophone solo",
+                      "name" : "Miasma"
+                    },
+                    {
+                      "info" : "acoustic",
+                      "name" : "Jigolo Har Megiddo"
+                    },
+                    {
+                      "name" : "Pro Memoria"
+                    },
+                    {
+                      "name" : "Witch Image"
+                    },
+                    {
+                      "name" : "Life Eternal"
+                    }
+                  ]
+                },
+                {
+                  "name" : "Act 2:",
+                  "song" : [
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "7018122c-11ee-4687-b711-48bab2e6a490",
+                        "name" : "Jocelyn Pook",
+                        "sortName" : "Pook, Jocelyn",
+                        "url" : "https://www.setlist.fm/setlists/jocelyn-pook-5bd4b7c8.html"
+                      },
+                      "name" : "Masked Ball",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "Spirit"
+                    },
+                    {
+                      "name" : "From the Pinnacle to the Pit"
+                    },
+                    {
+                      "name" : "Majesty"
+                    },
+                    {
+                      "name" : "Satan Prayer"
+                    },
+                    {
+                      "name" : "Faith"
+                    },
+                    {
+                      "name" : "Year Zero"
+                    },
+                    {
+                      "name" : "Spöksonat",
+                      "tape" : true
+                    },
+                    {
+                      "name" : "He Is"
+                    },
+                    {
+                      "name" : "Mummy Dust"
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "",
+                        "mbid" : "c52efcf0-1867-4b18-ad21-b37a373c14c0",
+                        "name" : "Roky Erickson and the Aliens",
+                        "sortName" : "Erickson, Roky and the Aliens",
+                        "url" : "https://www.setlist.fm/setlists/roky-erickson-and-the-aliens-73d6a239.html"
+                      },
+                      "info" : "with band introductions",
+                      "name" : "If You Have Ghosts"
+                    },
+                    {
+                      "name" : "Dance Macabre"
+                    },
+                    {
+                      "name" : "Square Hammer"
+                    }
+                  ]
+                },
+                {
+                  "encore" : 1,
+                  "song" : [
+                    {
+                      "name" : "Monstrance Clock"
+                    },
+                    {
+                      "cover" : {
+                        "disambiguation" : "Australian musical project",
+                        "mbid" : "ccda046a-2674-4f7d-97e6-f23d6c156432",
+                        "name" : "Dead Can Dance",
+                        "sortName" : "Dead Can Dance",
+                        "url" : "https://www.setlist.fm/setlists/dead-can-dance-23d68cbf.html"
+                      },
+                      "name" : "The Host of Seraphim",
+                      "tape" : true
+                    }
+                  ]
+                }
+              ]
+            },
+            "tour" : {
+              "name" : "A Pale Tour Named Death North America 2018"
+            },
+            "url" : "https://www.setlist.fm/setlist/ghost/2018/palace-theatre-albany-ny-b94a176.html",
+            "venue" : {
+              "city" : {
+                "coords" : {
+                  "lat" : 42.652579299999999,
+                  "long" : -73.756231700000001
+                },
+                "country" : {
+                  "code" : "US",
+                  "name" : "United States"
+                },
+                "id" : "5106834",
+                "name" : "Albany",
+                "state" : "New York",
+                "stateCode" : "NY"
+              },
+              "id" : "2bd63872",
+              "name" : "Palace Theatre",
+              "url" : "https://www.setlist.fm/venue/palace-theatre-albany-ny-usa-2bd63872.html"
+            },
+            "versionId" : "g53cddbd9"
+          }
+        ]
+      },
+      "expected" : [
+        {
+          "callsTool" : {
+            "arguments" : {
+              "artistName" : "Ghost"
+            },
+            "name" : "search-artist"
+          }
+        },
+        {
+          "callsTool" : {
+            "arguments" : {
+              "artistMbid" : "2bcf2e02-5bc3-4c76-bf76-41126cb11444",
+              "year" : "2018"
+            },
+            "name" : "search-setlists"
+          }
+        },
+        {
+          "includes": "Miserere Mei, Deus"
+        }
+      ]
+    }
+  ]
+}

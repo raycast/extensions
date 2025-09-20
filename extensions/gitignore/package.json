@@ -5,6 +5,9 @@
   "description": "Quickly create a gitignore file for your project.",
   "icon": "command-icon.png",
   "author": "daniel-stoneuk",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
@@ -39,8 +42,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {

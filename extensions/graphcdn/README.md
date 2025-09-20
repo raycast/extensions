@@ -1,11 +1,9 @@
-# GraphCDN
+# Stellate (formerly GraphCDN)
 
-_List your [GraphCDN](https://graphcdn.io) services and inspect their configuration_
+_List your [Stellate](https://stellate.co) organizations and their services_
 
-## Create an access token
+## Create an "Access Token"
 
-- Go to your [GraphCDN settings](https://graphcdn.io/dashboard/settings)
+- Go to your [Access Tokens](https://stellate.co/app/settings/access-tokens)
 - Generate a new token called `Raycast`
-- Copy the generated token into the Raycast preferences
-
-![Screenshot](./Screenshot.png)
+- Copy the generated token into the Raycast `Preferences`

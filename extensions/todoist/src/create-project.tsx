@@ -1,5 +1,4 @@
 import ProjectForm from "./components/ProjectForm";
+import { withTodoistApi } from "./helpers/withTodoistApi";
 
-export default function CreateProject() {
-  return <ProjectForm />;
-}
+export default withTodoistApi(ProjectForm);

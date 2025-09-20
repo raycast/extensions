@@ -95,7 +95,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   const params = new URLSearchParams();
   params.append("q", searchText);
 
-  const response = await fetch("http://ac.ecosia.org/" + "?" + params.toString(), {
+  const response = await fetch("http://ac.ecosia.org/" + "?" + encodeURIComponent(params.toString()), {
     method: "get",
   });
 
@@ -112,9 +112,12 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
   return searchText
     ? [
-        { name: searchText, url: "https://www.ecosia.org/search?q=" + searchText },
+        { name: searchText, url: "https://www.ecosia.org/search?q=" + encodeURIComponent(searchText) },
         ...json.suggestions
-          .map((suggestion) => ({ name: suggestion, url: "https://www.ecosia.org/search?q=" + suggestion }))
+          .map((suggestion) => ({
+            name: suggestion,
+            url: "https://www.ecosia.org/search?q=" + encodeURIComponent(suggestion),
+          }))
           .filter((suggestion) => suggestion.name !== searchText),
       ]
     : [];

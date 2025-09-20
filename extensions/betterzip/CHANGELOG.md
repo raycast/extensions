@@ -1,5 +1,9 @@
 # BetterZip Changelog
 
+## [Update API] - 2024-07-10
+
+- Update Raycast API and simplify the code
+
 ## [Support for Setapp BetterZip] - 2022-11-09
 
 - Added support for Setapp version of BetterZip

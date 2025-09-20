@@ -1,16 +1,37 @@
+/**
+ * iMessage handling module for 2FA code detection
+ * Provides functionality to fetch and process 2FA codes from iMessage database
+ */
+
 import { homedir } from "os";
 import { resolve } from "path";
 import { useSQL } from "@raycast/utils";
 import { Message, Preferences, SearchType } from "./types";
 import { getPreferenceValues } from "@raycast/api";
+import { calculateLookBackMinutes } from "./utils";
 
+// Path to the iMessage database
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
+/**
+ * Options for message hook configuration
+ */
+interface UseMessagesOptions {
+  searchText?: string; // Optional text to filter messages
+  searchType: SearchType; // Type of search (all or code-only)
+  enabled?: boolean; // Whether iMessage source is enabled
+}
+
+/**
+ * Generates the base SQL query for fetching messages
+ * Applies time-based filtering based on user preferences
+ */
 function getBaseQuery() {
   const preferences = getPreferenceValues<Preferences>();
-  const lookBackDays = parseInt(preferences?.lookBackDays || "1") || 1;
-  const lookBackMinutes = lookBackDays * 24 * 60;
-  return `
+  const lookBackUnit = preferences.lookBackUnit;
+  const lookBackAmount = parseInt(preferences?.lookBackAmount || "1");
+  const lookBackMinutes = calculateLookBackMinutes(lookBackUnit, lookBackAmount);
+  let baseQuery = `
     select
       message.guid,
       message.rowid,
@@ -26,21 +47,34 @@ function getBaseQuery() {
       and message.text is not null
       and length(message.text) > 0
       and datetime(message.date / 1000000000 + strftime('%s', '2001-01-01'), 'unixepoch', 'localtime') >= datetime('now', '-${lookBackMinutes} minutes', 'localtime')
-  `;
+	`;
+  if (preferences.ignoreRead) baseQuery += " and message.is_read = 0";
+  return baseQuery;
 }
 
+/**
+ * Builds the complete SQL query with search and filtering options
+ * @param options Search and filtering parameters
+ */
 function getQuery(options: { searchText?: string; searchType: SearchType }) {
   let baseQuery = getBaseQuery();
 
   if (options.searchType === "code") {
     baseQuery = `${baseQuery} \nand (
-      message.text glob '*[0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9]*'
+      -- Matches 3 alphanumeric (e.g., 'ABC')
+      message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z]*'
+      -- Matches 4 alphanumeric (e.g., 'ABCD')
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      -- Matches 5 alphanumeric (e.g., 'ABCDE')
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      -- Matches 6 alphanumeric (e.g., 'ABCDEF')
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      -- Matches format '123-456'
       or message.text glob '*[0-9][0-9][0-9]-[0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*'
+      -- Matches 7 alphanumeric (e.g., 'ABCDEFG')
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      -- Matches 8 alphanumeric (e.g., 'ABCDEFGH')
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
     )`;
   }
 
@@ -51,8 +85,21 @@ function getQuery(options: { searchText?: string; searchType: SearchType }) {
   return `${baseQuery} \norder by message.date desc limit 100`.trim();
 }
 
-export function useMessages(options: { searchText?: string; searchType: SearchType }) {
+/**
+ * React hook for managing iMessage data and 2FA code detection
+ * Provides real-time message monitoring using SQLite database
+ */
+export function useMessages(options: UseMessagesOptions) {
   const query = getQuery(options);
-  // console.log(query.substring(200));
+  const enabled = options.enabled ?? true;
+
+  if (!enabled) {
+    return {
+      data: [],
+      permissionView: null,
+      revalidate: async () => Promise.resolve(),
+    };
+  }
+
   return useSQL<Message>(DB_PATH, query);
 }

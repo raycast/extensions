@@ -5,8 +5,8 @@ import { NOT_INSTALLED_MESSAGE } from "../constants";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
-    ? `execute of tab _tab_index of window _window_index javascript ¬
-                    "document.head.querySelector('link[rel~=icon]').href;"`
+    ? `execute t javascript ¬
+        "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
     : '""';
 
   await checkAppInstalled();
@@ -16,7 +16,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       set _output to ""
       tell application "Google Chrome"
         repeat with w in windows
-          set _w_id to get id of w  
+          set _w_id to get id of w as inches as string
           set _tab_index to 1
           repeat with t in tabs of w
             set _title to get title of t
@@ -74,26 +74,39 @@ export async function openNewTab({
     case SettingsProfileOpenBehaviour.Default:
       script =
         `
-    tell application "Google Chrome"
-      activate
-      tell window 1
-          set newTab to make new tab ` +
+        set winExists to false
+        tell application "Google Chrome"
+            repeat with win in every window
+                if index of win is 1 then
+                    set winExists to true
+                    exit repeat
+                end if
+            end repeat
+
+            if not winExists then
+                make new window
+            else
+                activate
+            end if
+
+            tell window 1
+                set newTab to make new tab ` +
         (url
           ? `with properties {URL:"${url}"}`
           : query
-          ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
-          : "") +
-        ` 
-      end tell
-    end tell
-    return true
+            ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
+            : "") +
+        `
+            end tell
+        end tell
+        return true
+
   `;
       break;
     case SettingsProfileOpenBehaviour.ProfileCurrent:
       script = getOpenInProfileCommand(profileCurrent);
       break;
     case SettingsProfileOpenBehaviour.ProfileOriginal:
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       script = getOpenInProfileCommand(profileOriginal!);
       break;
   }
@@ -126,6 +139,19 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
+export async function reloadTab(tab: Tab): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      activate
+      set _wnd to first window where id is ${tab.windowsId}
+      set index of _wnd to 1
+      set active tab index of _wnd to ${tab.tabIndex}
+      tell active tab of _wnd to reload
+    end tell
+    return true
+  `);
+}
+
 const checkAppInstalled = async () => {
   const installed = await LocalStorage.getItem("is-installed");
   if (installed) return;
@@ -148,6 +174,47 @@ export async function createNewWindow(): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       make new window
+      activate
+    end tell
+    return true
+  `);
+}
+
+export async function createNewWindowToWebsie(website: string): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window
+      open location "${website}"
+      activate
+    end tell
+    return true
+  `);
+}
+
+export async function createNewTab(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new tab at end of tabs of window 1
+      activate
+    end tell
+    return true
+  `);
+}
+
+export async function createNewTabToWebsite(website: string): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      activate
+      open location "${website}"
+    end tell
+    return true
+  `);
+}
+
+export async function createNewIncognitoWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window with properties {mode:"incognito"}
       activate
     end tell
     return true

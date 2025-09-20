@@ -1,5 +1,75 @@
 # `Easydict` Changelog
 
+## [Bugfix] - 2025-07-09
+
+- Remove the unused file Icon file
+
+## [v2.11.0] - 2025-07-09
+
+### ✨ New Features
+
+- Add DeepLX support
+- Add support for Gemini translation
+
+### 💎 Improvement
+
+- Update dependencies and improve stability
+
+## [v2.10.2] - 2025-02-28
+
+### ✨ New Features
+
+- Replace api key control `textfield` with `password` type. https://github.com/raycast/extensions/pull/17214
+
+## [v2.10.1] - 2025-01-12
+
+### 🐞 Fixed
+
+- Update Youdao translation API, fixed the problem that the translation failed.
+- Limit Bing retry count to 3, avoid too many retries.
+
+## [v2.9.3] - 2024-09-13
+
+### 🐞 Fixed
+
+- Fixed Bing language detection API failed, which caused the query process to hang. https://github.com/raycast/extensions/issues/14357
+
+## [v2.9.2] - 2024-08-25
+
+### 💎 Improvement
+
+- Support HTTP OpenAI API endpoint, thanks to [rookiezn](https://github.com/rookiezn)'s PR.
+- Support changing OpenAI model, default to use `gpt-4o-mini`.
+- DeepL translation supports Arabic language.
+- Removed the deprecated built-in DeepL API key.
+- Removed support for the official Youdao translation API, now only use the web API by default.
+
+### 🐞 Fixes
+
+- Fixed the issue that the argument parameter may be lost. https://github.com/tisfeng/Raycast-Easydict/pull/63
+
+## [v2.9.1] - 2024-01-08
+
+### 💎 Improvement
+
+- Support custom OpenAI API URL, thanks to [liyaodong](https://github.com/liyaodong)'s PR.
+- Optimized the language detection function, added Baidu language detection as the default option.
+
+## [v2.9.0] - 2023-05-17
+
+### ✨ New Features
+
+- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/25194972/238993145-9dbe2fbb-8407-49bc-8909-adb0515e850e.png)
+
+## [v2.8.2] - 2023-04-25
+
+### 🐞 Fixes
+
+- Fixed the issue that OpenAI translation may lose the first character.
+- Fixed the issue that OpenAI does not enable proxy by default.
+
 ## [v2.8.1] - 2023-03-28
 
 ### 🐞 Fixes
@@ -10,7 +80,7 @@
 
 ### ✨ Features
 
-- Support OpenAI ChatGPT translation.
+- Support OpenAI translation.
 
 ![OpenAI](https://user-images.githubusercontent.com/25194972/225886686-b99e5a97-6269-489d-b0bb-40be6d7d1d32.png)
 
@@ -197,7 +267,7 @@
 - New Chinese-English Youdao Dictionary, supporting displaying richer explanation.
 - Supported free sorting, you can adjust the dictionary or translation results display order arbitrarily.
 
-![优雅-1662172376](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/优雅-1662172376.png)
+![优雅 -1662172376](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/优雅-1662172376.png)
 
 ## [v2.0.0] - 2022-08-20
 

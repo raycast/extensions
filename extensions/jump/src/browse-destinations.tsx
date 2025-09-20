@@ -16,6 +16,7 @@ import {
 import { installDefaultWeights } from "./defaults";
 import { useEffect, useState } from "react";
 import { getFavicon } from "@raycast/utils";
+import { LocalStorageValue } from "./types";
 
 const EditDestinationForm = (props: {
   destination: string;
@@ -98,27 +99,24 @@ const EditDestinationForm = (props: {
 };
 
 export default function Main() {
-  const [destinations, setDestinations] = useState<LocalStorage.Values>({});
+  const [destinations, setDestinations] = useState<LocalStorageValue>({});
   const { push, pop } = useNavigation();
 
   // Install initial data if first time running
   useEffect(() => {
-    Promise.resolve(LocalStorage.getItem("https://google.com")).then((weight) => {
-      if (!weight) {
-        Promise.resolve(installDefaultWeights()).then(() =>
-          Promise.resolve(LocalStorage.allItems()).then((destinationsList) => {
-            setDestinations(destinationsList);
-          })
-        );
-      } else {
-        Promise.resolve(LocalStorage.allItems()).then((destinationsList) => {
-          setDestinations(destinationsList);
-        });
+    const initInitial = async () => {
+      let allItems = await LocalStorage.allItems<LocalStorageValue>();
+      if (Object.keys(allItems).length == 0) {
+        console.log("Installing default weights");
+        await installDefaultWeights();
+        allItems = await LocalStorage.allItems<LocalStorageValue>();
       }
-    });
+      setDestinations(allItems);
+    };
+    initInitial();
   }, []);
 
-  const listItems = Object.entries(destinations).map(([target, weight], index) => {
+  const listItems = Object.entries(destinations).map(([target, weight]) => {
     let itemIcon: Image.ImageLike | Icon | { fileIcon: string } = Icon.Link;
     if (target.startsWith("/")) {
       itemIcon = { fileIcon: target };
@@ -130,10 +128,13 @@ export default function Main() {
       }
     }
 
+    // Round weight to 5 decimal places and remove trailing zeros
+    const weightStr = Number.isNaN(weight) ? "" : parseFloat(weight.toFixed(5));
+
     return (
       <List.Item
         title={target}
-        subtitle={`Weight: ${weight}`}
+        subtitle={`Weight: ${weightStr}`}
         key={target}
         icon={itemIcon}
         actions={
@@ -166,7 +167,7 @@ export default function Main() {
                         setDestinations(await LocalStorage.allItems());
                         pop();
                       }}
-                    />
+                    />,
                   )
                 }
               />
@@ -207,7 +208,7 @@ export default function Main() {
                         setDestinations(await LocalStorage.allItems());
                         pop();
                       }}
-                    />
+                    />,
                   )
                 }
               />

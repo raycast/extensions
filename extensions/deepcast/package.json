@@ -3,17 +3,26 @@
   "name": "deepcast",
   "title": "Deepcast",
   "description": "Translate words, or entire sentences, into 27 different languages using DeepL.",
+  "type": "module",
   "icon": "icon.png",
-  "author": "mooxl",
-  "contributors": [
-    "peter-gy",
-    "popalay"
-  ],
-  "license": "MIT",
   "keywords": [
     "deepl",
     "translate"
   ],
+  "author": "mooxl",
+  "contributors": [
+    "peter-gy",
+    "popalay",
+    "MonsterDeveloper",
+    "Yamen",
+    "EvanZhouDev",
+    "erics118",
+    "riadhrebei",
+    "islam_hassan",
+    "shashank_rm",
+    "heyflorentin"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
@@ -23,229 +32,760 @@
       "mode": "view"
     },
     {
-      "name": "bulgarian",
-      "title": "Translate Into Bulgarian",
+      "name": "arabic",
+      "title": "Translate into Arabic",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Bulgarian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Arabic using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
+    },
+    {
+      "name": "bulgarian",
+      "title": "Translate into Bulgarian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Bulgarian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
+    },
+    {
+      "name": "norwegian",
+      "title": "Translate into Norwegian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Norwegian (Bokmål) using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
+    },
+    {
+      "name": "indonesian",
+      "title": "Translate into Indonesian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Indonesian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
+    },
+    {
+      "name": "korean",
+      "title": "Translate into Korean",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Korean using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
+    },
+    {
+      "name": "turkish",
+      "title": "Translate into Turkish",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Turkish using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "chinese",
-      "title": "Translate Into Chinese",
+      "title": "Translate into Chinese",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Chinese using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Chinese using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "czech",
-      "title": "Translate Into Czech",
+      "title": "Translate into Czech",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Czech using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Czech using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "danish",
-      "title": "Translate Into Danish",
+      "title": "Translate into Danish",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Danish using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Danish using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "dutch",
-      "title": "Translate Into Dutch",
+      "title": "Translate into Dutch",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Dutch using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Dutch using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "englishUK",
-      "title": "Translate Into English (UK)",
+      "title": "Translate into English (UK)",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into English (UK) using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into English (UK) using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "englishUS",
-      "title": "Translate Into English (US)",
+      "title": "Translate into English (US)",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into English (US) using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into English (US) using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "estonian",
-      "title": "Translate Into Estonian",
+      "title": "Translate into Estonian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Estonian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Estonian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "finnish",
-      "title": "Translate Into Finnish",
+      "title": "Translate into Finnish",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Finnish using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Finnish using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "french",
-      "title": "Translate Into French",
+      "title": "Translate into French",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into French using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into French using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "german",
-      "title": "Translate Into German",
+      "title": "Translate into German",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into German using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into German using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "greek",
-      "title": "Translate Into Greek",
+      "title": "Translate into Greek",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Greek using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Greek using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "hungarian",
-      "title": "Translate Into Hungarian",
+      "title": "Translate into Hungarian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Hungarian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Hungarian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "italian",
-      "title": "Translate Into Italian",
+      "title": "Translate into Italian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Italian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Italian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "japanese",
-      "title": "Translate Into Japanese",
+      "title": "Translate into Japanese",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Japanese using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Japanese using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "latvian",
-      "title": "Translate Into Latvian",
+      "title": "Translate into Latvian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Latvian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Latvian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "lithuanian",
-      "title": "Translate Into Lithuanian",
+      "title": "Translate into Lithuanian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Lithuanian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Lithuanian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "polish",
-      "title": "Translate Into Polish",
+      "title": "Translate into Polish",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Polish using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Polish using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "portuguese",
-      "title": "Translate Into Portuguese",
+      "title": "Translate into Portuguese",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Portuguese using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Portuguese using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "portugueseBrazil",
-      "title": "Translate Into Portuguese (Brazil)",
+      "title": "Translate into Portuguese (Brazil)",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Portuguese (Brazil) using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Portuguese (Brazil) using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "romanian",
-      "title": "Translate Into Romanian",
+      "title": "Translate into Romanian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Romanian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Romanian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "russian",
-      "title": "Translate Into Russian",
+      "title": "Translate into Russian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Russian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Russian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "slovak",
-      "title": "Translate Into Slovak",
+      "title": "Translate into Slovak",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Slovak using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Slovak using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "slovenian",
-      "title": "Translate Into Slovenian",
+      "title": "Translate into Slovenian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Slovenian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Slovenian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "spanish",
-      "title": "Translate Into Spanish",
+      "title": "Translate into Spanish",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Spanish using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Spanish using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "swedish",
-      "title": "Translate Into Swedish",
+      "title": "Translate into Swedish",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Swedish using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Swedish using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "ukrainian",
-      "title": "Translate Into Ukrainian",
+      "title": "Translate into Ukrainian",
       "subtitle": "Deepcast",
-      "description": "Translate selected text into Ukrainian using DeepL",
-      "mode": "no-view"
+      "description": "Translate text into Ukrainian using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     }
   ],
   "preferences": [
     {
+      "description": "Your DeepL API key",
       "name": "key",
-      "type": "password",
+      "placeholder": "Enter your DeepL API key",
       "required": true,
       "title": "API key",
-      "description": "Your DeepL API key",
-      "placeholder": "Enter your free DeepL API key"
+      "type": "password"
     },
     {
-      "name": "pro",
-      "type": "checkbox",
-      "label": "Check if you have DeepL API Pro",
+      "name": "defaultTargetLanguage",
+      "type": "dropdown",
+      "title": "Default Target Language",
+      "description": "Choose a default target language.",
       "required": true,
+      "data": [
+        {
+          "title": "Arabic",
+          "value": "AR"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "BG"
+        },
+        {
+          "title": "Chinese",
+          "value": "ZH"
+        },
+        {
+          "title": "Czech",
+          "value": "CS"
+        },
+        {
+          "title": "Danish",
+          "value": "DA"
+        },
+        {
+          "title": "Dutch",
+          "value": "NL"
+        },
+        {
+          "title": "English (UK)",
+          "value": "EN-GB"
+        },
+        {
+          "title": "English (US)",
+          "value": "EN-US"
+        },
+        {
+          "title": "Estonian",
+          "value": "ET"
+        },
+        {
+          "title": "Finnish",
+          "value": "FI"
+        },
+        {
+          "title": "French",
+          "value": "FR"
+        },
+        {
+          "title": "German",
+          "value": "DE"
+        },
+        {
+          "title": "Greek",
+          "value": "EL"
+        },
+        {
+          "title": "Hungarian",
+          "value": "HU"
+        },
+        {
+          "title": "Italian",
+          "value": "IT"
+        },
+        {
+          "title": "Japanese",
+          "value": "JA"
+        },
+        {
+          "title": "Latvian",
+          "value": "LV"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "LT"
+        },
+        {
+          "title": "Polish",
+          "value": "PL"
+        },
+        {
+          "title": "Portuguese",
+          "value": "PT-PT"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "PT-BR"
+        },
+        {
+          "title": "Romanian",
+          "value": "RO"
+        },
+        {
+          "title": "Russian",
+          "value": "RU"
+        },
+        {
+          "title": "Slovak",
+          "value": "SK"
+        },
+        {
+          "title": "Slovenian",
+          "value": "SL"
+        },
+        {
+          "title": "Spanish",
+          "value": "ES"
+        },
+        {
+          "title": "Swedish",
+          "value": "SV"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "UK"
+        },
+        {
+          "title": "Indonesian",
+          "value": "ID"
+        },
+        {
+          "title": "Korean",
+          "value": "KO"
+        },
+        {
+          "title": "Norwegian (Bokmål)",
+          "value": "NB"
+        },
+        {
+          "title": "Turkish",
+          "value": "TR"
+        }
+      ],
+      "default": "EN-US"
+    },
+    {
+      "name": "source",
+      "type": "dropdown",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
+      "data": [
+        {
+          "title": "Selected",
+          "value": "selected"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        }
+      ],
+      "default": "selected",
+      "required": false
+    },
+    {
+      "description": "Action on translation",
+      "name": "onTranslateAction",
+      "required": false,
+      "title": "On Translation Action",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "View in Raycast",
+          "value": "view"
+        },
+        {
+          "title": "Paste in Frontmost App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "description": "Show transliteration",
+      "name": "showTransliteration",
+      "required": false,
+      "title": "Show Transliteration",
+      "default": "whenProvided",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Always",
+          "value": "always"
+        },
+        {
+          "title": "When Provided",
+          "value": "whenProvided"
+        },
+        {
+          "title": "Never",
+          "value": "never"
+        }
+      ]
+    },
+    {
+      "label": "Show Formality Configuration",
+      "name": "showFormalityConfig",
+      "required": false,
+      "description": "Show options to configure formality in the translation form",
       "default": false,
-      "title": "DeepL API Pro",
-      "description": "Check if you have DeepL API Pro"
+      "type": "checkbox"
+    },
+    {
+      "label": "Close Raycast After Translation",
+      "name": "closeRaycastAfterTranslation",
+      "required": false,
+      "description": "Automatically close Raycast after getting translation result",
+      "default": false,
+      "type": "checkbox"
+    },
+    {
+      "label": "Return to Root State",
+      "name": "returnToRootState",
+      "required": false,
+      "description": "Reset Raycast to root state after copying translated result",
+      "default": false,
+      "type": "checkbox"
+    },
+    {
+      "name": "defaultFormality",
+      "type": "dropdown",
+      "title": "Default Formality",
+      "description": "Choose a default formality level for supported languages",
+      "required": false,
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "More Formal",
+          "value": "prefer_more"
+        },
+        {
+          "title": "Less Formal",
+          "value": "prefer_less"
+        }
+      ],
+      "default": "default"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "got": "^11.8.2"
+    "@raycast/api": "^1.75.2",
+    "@sindresorhus/transliterate": "^1.6.0",
+    "got": "^14.3.0",
+    "http-status-codes": "^2.3.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.13",
+    "@types/react": "18.3.3",
+    "eslint": "^8.53.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

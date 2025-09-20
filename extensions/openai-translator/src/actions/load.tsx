@@ -1,7 +1,7 @@
 import { Action, ActionPanel, getSelectedText, Icon, showToast, Toast } from "@raycast/api";
 import { Record } from "../hooks/useHistory";
 
-export const getLoadActionSection = (record: Record, callback: (arg0: string) => void) => (
+export const getLoadActionSection = (record: Record, callback: (_arg0: string) => void) => (
   <ActionPanel.Section title="Load">
     <Action
       title="Load Original"

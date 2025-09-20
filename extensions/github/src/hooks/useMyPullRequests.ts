@@ -1,55 +1,147 @@
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { subDays, format, compareDesc } from "date-fns";
+import { format, subDays } from "date-fns";
 import { uniqBy } from "lodash";
 
+import { getGitHubClient } from "../api/githubClient";
 import { PullRequestFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { getRepositoryFilter } from "../helpers/repository";
 
-export function useMyPullRequests(repository: string | null) {
+enum SectionType {
+  Open = "Open",
+  Assigned = "Assigned",
+  Mentioned = "Mentioned",
+  ReviewRequests = "Review Requests",
+  Reviewed = "Reviewed",
+  RecentlyClosed = "Recently Closed",
+}
+
+export function useMyPullRequests({
+  repository,
+  sortQuery,
+  includeMentioned,
+  includeAssigned,
+  includeRecentlyClosed,
+  includeReviewRequests,
+  includeReviewed,
+  filterMode,
+  repositoryList,
+}: {
+  repository: string | null;
+  sortQuery: string;
+  includeAssigned: boolean;
+  includeMentioned: boolean;
+  includeRecentlyClosed: boolean;
+  includeReviewRequests: boolean;
+  includeReviewed: boolean;
+  filterMode: Preferences.MyPullRequests["repositoryFilterMode"];
+  repositoryList: string[];
+}) {
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
-    (repository) => {
+    async (
+      repo,
+      sortTxt,
+      enableAssigned,
+      enableMentioned,
+      enableClosed,
+      enableReviewRequests,
+      enableReviewed,
+      filterMode,
+      repositoryList,
+    ) => {
       const numberOfDays = 14;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
 
-      const repositoryFilter = repository ? `repo:${repository}` : "";
+      const repositoryFilter = getRepositoryFilter(filterMode, repositoryList, repo);
 
-      return github.myPullRequests({
-        createdOpenQuery: `is:pr author:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-        createdClosedQuery: `is:pr author:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-        assignedOpenQuery: `is:pr assignee:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-        assignedClosedQuery: `is:pr assignee:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-        mentionedOpenQuery: `is:pr mentions:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-        mentionedClosedQuery: `is:pr mentions:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-        reviewRequestsOpenQuery: `is:pr review-requested:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-        reviewRequestsClosedQuery: `is:pr review-requested:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-        reviewedByOpenQuery: `is:pr reviewed-by:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
-        reviewedByClosedQuery: `is:pr reviewed-by:@me archived:false is:closed ${updatedFilter} ${repositoryFilter}`,
-        numberOfOpenItems: 20,
-        numberOfClosedItems: 20,
-      });
+      const { includeTeamReviewRequests } = getPreferenceValues<Preferences>();
+      const reviewRequestedQuery = includeTeamReviewRequests ? "review-requested" : "user-review-requested";
+
+      const results = await Promise.all(
+        [
+          `is:pr author:@me archived:false is:open`,
+          ...(enableClosed ? [`is:pr author:@me archived:false is:closed ${updatedFilter}`] : []),
+          ...(enableAssigned ? [`is:pr assignee:@me archived:false is:open`] : []),
+          ...(enableAssigned && enableClosed ? [`is:pr assignee:@me archived:false is:closed ${updatedFilter}`] : []),
+          ...(enableMentioned ? [`is:pr mentions:@me archived:false is:open`] : []),
+          ...(enableMentioned && enableClosed ? [`is:pr mentions:@me archived:false is:closed ${updatedFilter}`] : []),
+          ...(enableReviewRequests ? [`is:pr ${reviewRequestedQuery}:@me archived:false is:open`] : []),
+          ...(enableReviewRequests && enableClosed
+            ? [`is:pr ${reviewRequestedQuery}:@me archived:false is:closed ${updatedFilter}`]
+            : []),
+          ...(enableReviewed ? [`is:pr reviewed-by:@me archived:false is:open`] : []),
+          ...(enableReviewed && enableClosed
+            ? [`is:pr reviewed-by:@me archived:false is:closed ${updatedFilter}`]
+            : []),
+        ].map((query) =>
+          github.searchPullRequests({
+            query: `${query} ${sortTxt} ${repositoryFilter}`,
+            numberOfItems: 20,
+          }),
+        ),
+      );
+
+      return results.map((result) => result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment));
     },
-    [repository]
+    [
+      repository,
+      sortQuery,
+      includeAssigned,
+      includeMentioned,
+      includeRecentlyClosed,
+      includeReviewRequests,
+      includeReviewed,
+      filterMode,
+      repositoryList,
+    ],
   );
 
-  const created = data?.createdOpen.pullRequests;
-  const assigned = data?.assignedOpen.pullRequests;
-  const mentioned = data?.mentionedOpen.pullRequests;
-  const reviewRequests = data?.reviewRequestsOpen.pullRequests;
-  const reviewedBy = data?.reviewedByOpen.pullRequests;
+  let created,
+    createdClosed,
+    assigned,
+    assignedClosed,
+    mentioned,
+    mentionedClosed,
+    reviewRequests,
+    reviewRequestsClosed,
+    reviewedBy,
+    reviewedByClosed;
+
+  if (data) {
+    let count = 0;
+    created = data[count++];
+    if (includeRecentlyClosed) createdClosed = data[count++];
+    if (includeAssigned) {
+      assigned = data[count++];
+      if (includeRecentlyClosed) assignedClosed = data[count++];
+    }
+    if (includeMentioned) {
+      mentioned = data[count++];
+      if (includeRecentlyClosed) mentionedClosed = data[count++];
+    }
+    if (includeReviewRequests) {
+      reviewRequests = data[count++];
+      if (includeRecentlyClosed) reviewRequestsClosed = data[count++];
+    }
+    if (includeReviewed) {
+      reviewedBy = data[count++];
+      if (includeRecentlyClosed) reviewedByClosed = data[count++];
+    }
+  }
 
   const recentlyClosed = uniqBy(
     [
-      ...(data?.createdClosed.pullRequests || []),
-      ...(data?.assignedClosed.pullRequests || []),
-      ...(data?.mentionedClosed.pullRequests || []),
-      ...(data?.reviewRequestsClosed.pullRequests || []),
-      ...(data?.reviewedByClosed.pullRequests || []),
+      ...(createdClosed || []),
+      ...(assignedClosed || []),
+      ...(mentionedClosed || []),
+      ...(reviewRequestsClosed || []),
+      ...(reviewedByClosed || []),
     ],
-    "pullRequest.id"
+    "id",
   );
 
   const prIds: string[] = [];
@@ -60,21 +152,18 @@ export function useMyPullRequests(repository: string | null) {
   }
 
   const sections = [
-    { title: "Open", pullRequests: created },
-    { title: "Assigned", pullRequests: assigned },
-    { title: "Mentioned", pullRequests: mentioned },
-    { title: "Review Requests", pullRequests: reviewRequests },
-    { title: "Reviewed", pullRequests: reviewedBy },
-    { title: "Recently Closed", pullRequests: recentlyClosed },
+    { type: SectionType.Open, pullRequests: created },
+    { type: SectionType.Assigned, pullRequests: assigned },
+    { type: SectionType.Mentioned, pullRequests: mentioned },
+    { type: SectionType.ReviewRequests, pullRequests: reviewRequests },
+    { type: SectionType.Reviewed, pullRequests: reviewedBy },
+    { type: SectionType.RecentlyClosed, pullRequests: recentlyClosed },
   ]
     .filter((section) => section.pullRequests && section.pullRequests.length > 0)
     .map((section) => {
-      const pullRequests = getPullRequestsWithoutDuplicates(
-        section.pullRequests?.map((pr) => pr?.pullRequest as PullRequestFieldsFragment)
-      );
-      pullRequests?.sort((a, b) => compareDesc(new Date(a.updatedAt), new Date(b.updatedAt)));
+      const pullRequests = getPullRequestsWithoutDuplicates(section.pullRequests);
 
-      const subtitle = pluralize(pullRequests?.length ?? 0, "Pull Request", { withNumber: true });
+      const subtitle = pluralize(pullRequests?.length ?? 0, "pull request", { withNumber: true });
 
       return { ...section, subtitle, pullRequests };
     });

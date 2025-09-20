@@ -1,45 +1,6 @@
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "../types/file-type";
 import { useCallback, useEffect, useState } from "react";
-import fse from "fs-extra";
-import path from "path";
 import { Alert, confirmAlert, Icon } from "@raycast/api";
-import { templateFolderPath } from "../utils/constants";
-
-//new file here
-export const getTemplateFile = (refresh: number) => {
-  const [templateFiles, setTemplateFiles] = useState<TemplateType[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const fetchData = useCallback(async () => {
-    const _templateFiles: TemplateType[] = [];
-    try {
-      fse.ensureDirSync(templateFolderPath);
-      fse.readdirSync(templateFolderPath).forEach((file) => {
-        if (!file.startsWith(".")) {
-          const filePath = templateFolderPath + "/" + file;
-          const parsedPath = path.parse(filePath);
-          _templateFiles.push({
-            path: filePath,
-            name: parsedPath.name,
-            extension: parsedPath.ext.substring(1),
-            inputContent: false,
-          });
-        }
-      });
-      setTemplateFiles(_templateFiles);
-      setIsLoading(false);
-    } catch (e) {
-      setIsLoading(false);
-      console.error(String(e));
-    }
-  }, [refresh]);
-
-  useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
-
-  return { templateFiles: templateFiles, isLoading: isLoading };
-};
 
 //new file with name
 export const getFileType = (newFileType: { section: string; index: number }, templateFiles: TemplateType[]) => {
@@ -89,7 +50,7 @@ export const alertDialog = async (
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction?: () => void
+  cancelAction?: () => void,
 ) => {
   const options: Alert.Options = {
     icon: icon,
@@ -97,10 +58,12 @@ export const alertDialog = async (
     message: message,
     primaryAction: {
       title: confirmTitle,
+      style: Alert.ActionStyle.Destructive,
       onAction: confirmAction,
     },
     dismissAction: {
       title: "Cancel",
+      style: Alert.ActionStyle.Cancel,
       onAction: () => cancelAction,
     },
   };

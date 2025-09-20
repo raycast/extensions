@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon } from '@raycast/api'
 import type { Instance } from '@scaleway/sdk'
-import { useAPI } from 'providers'
+import { useAPI } from 'helpers/useAPI'
 import { powerOffInstance, powerOnInstance, rebootInstance } from './actions'
 import { getServerUrl } from './urls'
 

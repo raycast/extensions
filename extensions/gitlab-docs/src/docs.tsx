@@ -3,8 +3,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { LocalStorage } from "@raycast/api";
 
-const apiUrl =
-  "https://3pncfou757-dsn.algolia.net/1/indexes/*/queries?x-algolia-api-key=89b85ffae982a7f1adeeed4a90bb0ab1&x-algolia-application-id=3PNCFOU757";
+const baseUrl = "https://docs.gitlab.com/";
+const apiUrl = "https://seggenberger.gitlab.io/raycast-gitlab-docs/lunr-map.json";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -26,7 +26,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       icon="docs-icon.png"
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessoryTitle={searchResult.category}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={searchResult.url} />
@@ -87,64 +86,45 @@ function useSearch() {
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const lastSearchText: string = (await LocalStorage.getItem("GitLabDocs.lastSearch")) || "";
+  const urlSearchText = searchText.length > 0 ? searchText : lastSearchText;
 
-  const data = {
-    requests: [
-      {
-        query: searchText.length > 0 ? searchText : lastSearchText,
-        indexName: "gitlab",
-        params: "attributesToRetrieve=content,type,url,hierarchy.lvl0,hierarchy.lvl1,hierarchy.lvl2",
-        hitsPerPage: 99,
-        facetFilters: ["version:main"],
-      },
-    ],
-  };
   const response = await fetch(apiUrl, {
-    method: "post",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
-    body: JSON.stringify(data),
     signal: signal,
   });
 
-  const json = (await response.json()) as
-    | {
-        results: {
-          hits: Array<Parameters>;
-        }[];
-      }
-    | { code: string; message: string };
+  const json = (await response.json()) as Array<APIResults>;
 
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText);
+  if (!response.ok) {
+    throw new Error(response.statusText);
   }
 
   if (searchText.length > 0 && searchText !== lastSearchText) {
     await LocalStorage.setItem("GitLabDocs.lastSearch", searchText);
   }
 
-  return json.results[0].hits.map((result) => {
-    return {
-      name: result.hierarchy.lvl2 ? result.hierarchy.lvl2 : result.hierarchy.lvl0,
-      description: result._snippetResult ? result._snippetResult.content.value : "",
-      category: result.hierarchy.lvl2 ? result.hierarchy.lvl0 : "",
-      url: result.url,
-    };
+  const entries: Array<SearchResult> = [];
+  const data: Array<APIResults> = Object.values(json);
+
+  data.forEach((item) => {
+    if (item.h1.toLowerCase().includes(urlSearchText.toLowerCase())) {
+      entries.push({
+        name: item.h1,
+        description: `${baseUrl}/${item.id}`,
+        url: baseUrl + item.id,
+      });
+    }
   });
+
+  return entries;
 }
 
-interface Parameters {
-  hierarchy: {
-    lvl0: string;
-    lvl2: string;
-  };
-  _snippetResult: {
-    content: {
-      value: string;
-    };
-  };
-  url: string;
+interface APIResults {
+  id: string;
+  h1: string;
 }
 
 interface SearchState {
@@ -155,6 +135,5 @@ interface SearchState {
 interface SearchResult {
   name: string;
   description?: string;
-  category?: string;
   url: string;
 }

@@ -2,11 +2,11 @@ import { ActionPanel, Detail, LocalStorage, showToast, Toast } from "@raycast/ap
 import { useEffect, useRef } from "react";
 import { useGameData } from "../lib/fetcher";
 import { useIsLoggedIn } from "../lib/hooks";
-import { GameDataSimple, GameSimple } from "../types";
+import { GameData, GameDataSimple, GameSimple } from "../types";
 import { LaunchActions } from "./Actions";
 
 export const GameDetails = ({ game }: { game: GameSimple | GameDataSimple }) => {
-  const { data: gameData, isError: error } = useGameData({ appid: game.appid });
+  const { data: gameData, isError: error } = useGameData<GameData>({ appid: game.appid });
   const once = useRef(false);
   const isLoggedIn = useIsLoggedIn();
 
@@ -51,7 +51,7 @@ ${gameData.short_description}
       actions={
         error ? null : (
           <ActionPanel>
-            <LaunchActions appid={game?.appid} />
+            <LaunchActions name={game.name} appid={game?.appid} />
           </ActionPanel>
         )
       }

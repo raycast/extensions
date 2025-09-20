@@ -5,6 +5,9 @@
   "description": "integrate Raycast with Drafts app",
   "icon": "drafts-icon.png",
   "author": "FlohGro",
+  "contributors": [
+    "william_morgano"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -13,9 +16,16 @@
   "commands": [
     {
       "name": "create-draft-and-open",
-      "title": "Create Draft",
+      "title": "Create and Open Draft",
       "subtitle": "Drafts",
-      "description": "creates a new draft in Drafts with the provided content",
+      "description": "creates and opens a new draft in Drafts with the provided content",
+      "mode": "view"
+    },
+    {
+      "name": "create-draft-background",
+      "title": "Create Draft in Background",
+      "subtitle": "Drafts",
+      "description": "creates a new draft in Drafts with the provided content in the background",
       "mode": "view"
     },
     {
@@ -26,10 +36,31 @@
       "mode": "no-view"
     },
     {
-      "name": "create-draft-from-clipboard",
-      "title": "Create Draft From Clipboard",
+      "name": "create-draft-from-clipboard-and-open",
+      "title": "Create and Open Draft from Clipboard",
       "subtitle": "Drafts",
-      "description": "creates a new draft with the clipboard as content",
+      "description": "creates and opens a new draft with the clipboard as content",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-draft-from-clipboard-background",
+      "title": "Create Draft from Clipboard in Background",
+      "subtitle": "Drafts",
+      "description": "creates a new draft with the clipboard as content in the background",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-draft-from-selection-and-open",
+      "title": "Create and Open Draft from Selection",
+      "subtitle": "Drafts",
+      "description": "creates and opens a new draft with the selected text as content",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-draft-from-selection-background",
+      "title": "Create Draft from Selection in Background",
+      "subtitle": "Drafts",
+      "description": "creates a new draft with the selected text as content in the background",
       "mode": "no-view"
     },
     {
@@ -66,27 +97,196 @@
       "subtitle": "Drafts",
       "description": "easily create Raycast Quicklinks for Drafts",
       "mode": "view"
+    },
+    {
+      "name": "quicklink-open-draft-creator",
+      "title": "Create Open Draft Quicklink",
+      "subtitle": "Drafts",
+      "description": "create a Raycast Quicklinks to open a Draft",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Open Draft Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "uuid",
+          "placeholder": "UUID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "capture",
+      "title": "Capture Draft",
+      "subtitle": "Drafts",
+      "description": "create a new draft quickly in the background using the command argument",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Draft Content",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "find-drafts",
+      "title": "Find Draft",
+      "subtitle": "Drafts",
+      "description": "search for drafts",
+      "mode": "view"
+    },
+    {
+      "name": "find-actions",
+      "title": "Find Action",
+      "subtitle": "Drafts",
+      "description": "search for actions",
+      "mode": "view"
+    },
+    {
+      "name": "find-latest-actions",
+      "title": "Find Latest Action",
+      "subtitle": "Drafts",
+      "description": "search for actions in last used",
+      "mode": "view"
+    },
+    {
+      "name": "find-workspace",
+      "title": "Find Workspace",
+      "subtitle": "Drafts",
+      "description": "find and open workspace in Drafts",
+      "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "create-draft",
+      "title": "Create Draft",
+      "description": "Create a new note in Drafts."
+    },
+    {
+      "name": "find-drafts",
+      "title": "Find Drafts",
+      "description": "Find Drafts in the library."
+    },
+    {
+      "name": "open-draft",
+      "title": "Open Draft",
+      "description": "Open the given Draft by its uuid."
+    },
+    {
+      "name": "get-last-modified-draft",
+      "title": "Find Last Modified Draft",
+      "description": "Find the last modified Draft."
+    },
+    {
+      "name": "add-to-draft",
+      "title": "Append/Prepend to Draft",
+      "description": "Append or Prepend text to a Draft."
+    },
+    {
+      "name": "find-action",
+      "title": "Find Action",
+      "description": "Find Action in Drafts."
+    },
+    {
+      "name": "run-action",
+      "title": "Run Drafts Action",
+      "description": "Run Action in Drafts with optional input text."
+    },
+    {
+      "name": "find-workspace",
+      "title": "Find Workspace",
+      "description": "Find Workspace in the library."
+    },
+    {
+      "name": "open-workspace",
+      "title": "Open Workspace",
+      "description": "Open the given Workspace by its name."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@drafts create a new weekly planning note listing all dates of this week as heading",
+        "mocks": {
+          "create-draft": "Successfully called \"create-draft\""
+        },
+        "expected": [
+          {
+            "callsTool": "create-draft"
+          }
+        ]
+      },
+      {
+        "input": "@drafts open my workspace INBOX",
+        "mocks": {
+          "open-workspace": "Successfully called \"open-workspace\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "INBOX"
+              },
+              "name": "open-workspace"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@drafts run process INBOX action",
+        "mocks": {
+          "run-action": "Successfully called \"run-action\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "actionName": "process INBOX"
+              },
+              "name": "run-action"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "open": "^8.4.0"
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1",
+    "better-sqlite3": "12.1.1",
+    "bindings": "^1.5.0",
+    "dayjs": "^1.11.13",
+    "open": "^8.4.0",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^20.17.22",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "prettier": "^2.6.2",
+    "react": "^18.2.0",
+    "typescript": "^4.9.5"
+  },
+  "overrides": {
+    "tar-fs": ">=3.0.9"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
-

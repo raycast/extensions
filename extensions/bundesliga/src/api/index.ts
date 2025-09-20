@@ -1,48 +1,89 @@
+import { Cache, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { showToast, Toast } from "@raycast/api";
 import * as cheerio from "cheerio";
-import { ClubPerson, CompetitionClub, Player, Players } from "../types";
-import { Entry, LiveBlogEntries, Matchday } from "../types/firebase";
+import {
+  Broadcast,
+  Broadcasts,
+  ClubPerson,
+  CompetitionClub,
+  Player,
+  Players,
+} from "../types";
+import {
+  Entry,
+  LiveBlogEntries,
+  Matchday,
+  SeasonConfig,
+} from "../types/firebase";
 
-function showFailureToast() {
-  showToast(
-    Toast.Style.Failure,
-    "Something went wrong",
-    "Please try again later"
-  );
-}
+const { apikey } = getPreferenceValues();
+const cache = new Cache();
 
 const headers = {
-  "x-api-key": "60ETUJ4j5YagIHdu-PROD",
+  "x-api-key": apikey,
 };
 
-function load(html: string) {
+function load(html: string, keyContains: string) {
   const $ = cheerio.load(html);
   const state = $("#serverApp-state").html();
 
-  let data: any = {};
+  let data;
   if (state) {
     try {
       data = JSON.parse(state.replace(/&q;/g, '"').replace(/&s;/g, "'"));
-    } catch (error) {
-      // nothing to do
+    } catch (e) {
+      showFailureToast(e);
+      data = {};
     }
   }
 
-  const key = Object.keys(data).find((k) =>
-    k.startsWith("_getDataFromFirebase")
-  );
+  const keys = Object.keys(data).filter((k) => k.includes(keyContains));
 
-  return key ? data[key] : {};
+  return keys.length ? data[keys[keys.length - 1]] : {};
 }
 
+// const cfgKey = "bundesliga_config";
+const getSeason = async (): Promise<SeasonConfig | undefined> => {
+  try {
+    // const has = cache.has(cfgKey);
+
+    // let data;
+    // if (has) {
+    //   data = cache.get(cfgKey);
+    // } else {
+    const resp = await axios({
+      method: "get",
+      url: "https://wapp.bapi.bundesliga.com/config/configNode.json",
+    });
+
+    const data = resp.data;
+    cache.set(
+      "bundesliga_config",
+      typeof data === "string" ? data : JSON.stringify(resp.data),
+    );
+    // }
+
+    const cfg: { [com: string]: SeasonConfig } =
+      typeof data === "string" ? JSON.parse(data) : data;
+
+    return Object.values(cfg)[0];
+  } catch (e) {
+    showFailureToast(e);
+
+    return undefined;
+  }
+};
+
 export const getClubs = async (): Promise<CompetitionClub> => {
+  const season = await getSeason();
+
   const config: AxiosRequestConfig = {
     method: "get",
     url: "https://wapp.bapi.bundesliga.com/club",
     params: {
       // sort: "editorialorder",
-      seasonId: "DFL-SEA-0001K5",
+      seasonId: season?.season.dflDatalibrarySeasonId,
     },
     headers,
   };
@@ -52,7 +93,7 @@ export const getClubs = async (): Promise<CompetitionClub> => {
 
     return data;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return {};
   }
@@ -70,7 +111,7 @@ export const getPersons = async (club: string): Promise<Players> => {
 
     return data.players;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return {};
   }
@@ -88,7 +129,7 @@ export const getPerson = async (slug: string): Promise<Player | undefined> => {
 
     return data;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return undefined;
   }
@@ -102,36 +143,45 @@ export const getTable = async (competition: string): Promise<Entry[]> => {
 
   try {
     const resp = await axios(config);
-    const data = load(resp.data);
+    const data = load(resp.data, "liveTable");
 
     return data.entries || [];
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
 };
 
-export const getResults = async (competition: string): Promise<Matchday[]> => {
+export const getFixtures = async (
+  competition: string,
+  matchday?: number,
+): Promise<Matchday[]> => {
+  const season = await getSeason();
+
+  const url = matchday
+    ? `https://www.bundesliga.com/en/${competition}/matchday/${season?.season.name}/${matchday}`
+    : `https://www.bundesliga.com/en/${competition}/matchday`;
+
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://www.bundesliga.com/en/${competition}/matchday`,
+    url,
   };
 
   try {
     const resp = await axios(config);
-    const data = load(resp.data);
+    const data = load(resp.data, "matchesmatchday");
 
     return data || [];
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
 };
 
-export const getMatchday = async (
-  url: string
+export const getMatch = async (
+  url: string,
 ): Promise<LiveBlogEntries | undefined> => {
   const config: AxiosRequestConfig = {
     method: "get",
@@ -140,12 +190,34 @@ export const getMatchday = async (
 
   try {
     const resp = await axios(config);
-    const data: Matchday = load(resp.data);
+    const data: Matchday = load(resp.data, "matchdays");
 
     return data.liveBlogEntries;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return undefined;
+  }
+};
+
+export const getBroadcasters = async (
+  competition: string,
+  season: string,
+  matchday: string,
+): Promise<Broadcast[]> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `https://wapp.bapi.bundesliga.com/broadcasts/${competition}/${matchday}`,
+    headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<Broadcasts> = await axios(config);
+
+    return data.broadcasts;
+  } catch (e) {
+    showFailureToast(e);
+
+    return [];
   }
 };

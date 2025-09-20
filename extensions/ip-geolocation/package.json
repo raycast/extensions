@@ -5,11 +5,23 @@
   "description": "Show local and public IPv4/IPv6 address.\nQuery geolocation for any IP address or domain.",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "foof"
+  ],
   "categories": [
     "Developer Tools",
     "Web"
   ],
+  "keywords": [
+    "myip",
+    "ip",
+    "my ip"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "query-ip-geolocation",
@@ -38,17 +50,44 @@
           "type": "checkbox",
           "required": false,
           "label": "Show IPv6 Address",
-          "description": "Query and display my IPv6 address. Can cause information loading speed to drop.",
+          "description": "Query and display IPv6 address. Can cause information loading speed to drop.",
           "default": false
         }
       ]
     },
     {
-      "name": "copy-local-ip-address",
-      "title": "Copy Local IP Address",
-      "icon": "copy-local-ip-address.png",
-      "description": "Copy local IPv4 address.",
-      "mode": "no-view"
+      "name": "copy-ip",
+      "title": "Copy IP",
+      "icon": "copy-ip.png",
+      "description": "Copy local/public IPv4/IPv6 address.",
+      "mode": "no-view",
+      "interval": "1h",
+      "arguments": [
+        {
+          "name": "ipType",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Local",
+          "data": [
+            {
+              "title": "Public",
+              "value": "Public"
+            }
+          ]
+        },
+        {
+          "name": "ipVersion",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "IPv4",
+          "data": [
+            {
+              "title": "IPv6",
+              "value": "IPv6"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -59,7 +98,7 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "English (default)",
+          "title": "English",
           "value": "en"
         },
         {
@@ -93,22 +132,39 @@
       ],
       "required": false,
       "default": "en"
+    },
+    {
+      "name": "coordinatesFormat",
+      "title": "Coordinates Format",
+      "description": "Coordinate format of location information display.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Latitude, Longitude",
+          "value": "latLon"
+        },
+        {
+          "title": "Longitude, Latitude",
+          "value": "lonLat"
+        }
+      ],
+      "required": false,
+      "default": "latLon"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "axios": "^0.27.2",
-    "public-ip": "^6.0.1"
+    "@raycast/api": "^1.100.3",
+    "axios": "^1.8.4",
+    "public-ip": "^7.0.1",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.14",
+    "@types/react": "19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

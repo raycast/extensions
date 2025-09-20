@@ -6,23 +6,34 @@ import { getAdbDir, getScrcpyDir } from "./utils";
 type Values = {
   device: string;
   size: string;
+  disableAudio: boolean;
   turnScreenOff: boolean;
   stayAwake: boolean;
   hidKeyboard: boolean;
   hidMouse: boolean;
+  alwaysOnTop: boolean;
+  audioCodec: string;
+  moreOptions: string;
 };
 
 export default function Command() {
-  const devices = useDevices();
+  const [devices, handleDeviceChange] = useDevices();
 
   function handleSubmit(values: Values) {
+    const serial = values["device"];
+    handleDeviceChange({ serial });
     exec(
       `${getScrcpyDir()}/scrcpy \
         ${values["turnScreenOff"] ? "--turn-screen-off" : ""} \
         ${values["stayAwake"] ? "--stay-awake" : ""} \
-        ${values["hidKeyboard"] ? "--hid-keyboard" : ""} \
-        ${values["hidMouse"] ? "--hid-mouse" : ""} \
-        -m ${values["size"]} -s ${values["device"]}`,
+        ${values["hidKeyboard"] ? "--keyboard=uhid" : ""} \
+        ${values["hidMouse"] ? "--mouse=uhid" : ""} \
+        ${values["disableAudio"] ? "--no-audio" : ""} \
+        ${values["alwaysOnTop"] ? "--always-on-top" : ""} \
+        --audio-codec=${values["audioCodec"]} \
+        -m ${values["size"]} \
+        -s ${serial} \
+        ${values["moreOptions"]}`,
       {
         env: {
           ...process.env,
@@ -37,7 +48,7 @@ export default function Command() {
             message: err.message,
           });
         }
-      }
+      },
     );
   }
 
@@ -49,11 +60,19 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="device" title="Device Serial" storeValue>
-        {devices.map((device) => (
-          <Form.Dropdown.Item key={device} value={device} title={device} />
-        ))}
+      <Form.Dropdown id="device" title="Device Serial">
+        {devices.map((device) => {
+          if (device.default) {
+            return (
+              <Form.Dropdown.Section key={device.serial} title="Previous Device">
+                <Form.Dropdown.Item value={device.serial} title={device.serial} />
+              </Form.Dropdown.Section>
+            );
+          }
+          return <Form.Dropdown.Item key={device.serial} value={device.serial} title={device.serial} />;
+        })}
       </Form.Dropdown>
+
       <Form.Dropdown id="size" title="Screen Size" storeValue>
         <Form.Dropdown.Item value="1024" title="1024" />
         <Form.Dropdown.Item value="0" title="Device size" />
@@ -62,10 +81,28 @@ export default function Command() {
       <Form.Separator />
 
       <Form.Description text="Advanced Options" />
+      <Form.Checkbox id="disableAudio" defaultValue={true} label="Disable audio" storeValue />
       <Form.Checkbox id="turnScreenOff" defaultValue={true} label="Turn screen off" storeValue />
       <Form.Checkbox id="stayAwake" defaultValue={true} label="Stay awake" storeValue />
-      <Form.Checkbox id="hidKeyboard" defaultValue={true} label="HID keyboard (USB only)" storeValue />
-      <Form.Checkbox id="hidMouse" defaultValue={false} label="HID mouse (USB only)" storeValue />
+      <Form.Checkbox id="hidKeyboard" defaultValue={true} label="HID keyboard" storeValue />
+      <Form.Checkbox id="hidMouse" defaultValue={false} label="HID mouse" storeValue />
+      <Form.Checkbox id="alwaysOnTop" defaultValue={false} label="Always on top" storeValue />
+      <Form.Dropdown id="audioCodec" title="Audio Codec" storeValue>
+        <Form.Dropdown.Item value="opus" title="opus" />
+        <Form.Dropdown.Item value="aac" title="aac" />
+        <Form.Dropdown.Item value="flac" title="flac" />
+        <Form.Dropdown.Item value="raw" title="raw" />
+      </Form.Dropdown>
+
+      <Form.Separator />
+
+      <Form.TextField
+        id="moreOptions"
+        defaultValue=""
+        title="More options"
+        info="For example: `--audio-bit-rate=64K --audio-buffer=40`"
+        storeValue
+      />
     </Form>
   );
 }

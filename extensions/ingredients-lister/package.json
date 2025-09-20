@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ingredients-lister",
+  "title": "Ingredients Lister",
+  "description": "After getting the contents of an entire website using selected text, you will receive a list of every single ingredient necessary in your recipe from online followed by it's quantities. You will also be able to add this ingredients list to a new notes document to be used as a shopping list.",
+  "icon": "command-icon.png",
+  "author": "Visual-Studio-Coder",
+  "categories": [
+    "Fun",
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "ingredients",
+    "list",
+    "cooking",
+    "recipe",
+    "shopping",
+    "food",
+    "AI",
+    "note",
+    "website",
+    "video",
+    "baking",
+    "lister"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Ingredients",
+      "description": "Use selected text to receive ingredients list.",
+      "mode": "view"
+    },
+    {
+      "name": "youtubeVideoIngridients",
+      "title": "List Ingredients From YouTube Video",
+      "description": "Using the transcript from the youtube video, you will be able to receive ingredients list from YouTube video.",
+      "subtitle": "Enter a valid youtube video url.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "Video URL or ID",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.2",
+    "@raycast/utils": "1.9.1",
+    "youtube-transcript": "^1.0.6",
+    "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

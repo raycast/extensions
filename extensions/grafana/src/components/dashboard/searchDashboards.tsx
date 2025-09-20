@@ -1,21 +1,29 @@
-import {
-  ActionPanel,
-  Action,
-  Detail,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  Icon,
-  Color,
-} from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
-import fetch, { AbortError } from "node-fetch";
+import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
+import { useState } from "react";
+import { z } from "zod";
 
 import { preferences } from "../../helpers/preferences";
-import { SearchState, SearchResult } from "./interface";
-import { useFetch, Response } from "@raycast/utils";
+import { useFetch, useFrecencySorting } from "@raycast/utils";
 import { URLSearchParams } from "url";
+
+const dashboardschema = z.object({
+  id: z.string({ coerce: true }),
+  uid: z.string({ coerce: true }),
+  title: z.string(),
+  uri: z.string(),
+  url: z.string(),
+  slug: z.string(),
+  type: z.string(),
+  tags: z.array(z.string()),
+  isStarred: z.boolean(),
+  folderId: z.number().optional(),
+  folderUid: z.string().optional(),
+  folderTitle: z.string().optional(),
+  folderUrl: z.string().optional(),
+  // sortMeta: z.number(),
+});
+
+const dashboardsSchema = z.array(dashboardschema);
 
 export function SearchDashboards() {
   const [searchText, setSearchText] = useState("");
@@ -25,10 +33,9 @@ export function SearchDashboards() {
   params.append("type", "dash-db");
   params.append("query", !searchText ? "" : searchText);
 
-  const { isLoading, data, revalidate } = useFetch(`${preferences.rootApiUrl}/api/search?${params.toString()}`, {
+  const { isLoading, data } = useFetch(`${preferences.rootApiUrl}/api/search?${params.toString()}`, {
     parseResponse,
     keepPreviousData: true,
-    initialData: [],
     method: "get",
     headers: {
       "Content-Type": "application/json",
@@ -37,6 +44,9 @@ export function SearchDashboards() {
     },
   });
 
+  // https://developers.raycast.com/utilities/react-hooks/usefrecencysorting
+  const { data: sortedData, visitItem } = useFrecencySorting(data);
+
   return (
     <List
       isLoading={isLoading}
@@ -44,37 +54,38 @@ export function SearchDashboards() {
       searchBarPlaceholder="Search grafana dashboards..."
       throttle
     >
-      <List.Section title="Results" subtitle={data.length + ""}>
-        {data.map((searchResult) => (
-          <SearchListItem key={searchResult.uid} searchResult={searchResult} />
+      <List.Section title="Results" subtitle={sortedData.length + ""}>
+        {sortedData.map((dashboard) => (
+          <List.Item
+            key={dashboard.id}
+            title={dashboard.title}
+            subtitle={dashboard.folderTitle}
+            accessories={dashboard.tags.map((tag) => ({
+              tag,
+            }))}
+            icon={{
+              source: Icon.AppWindow,
+              tintColor: Color.Orange,
+            }}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser
+                    title="Open in Browser"
+                    url={preferences.rootApiUrl + dashboard.url}
+                    onOpen={() => visitItem(dashboard)}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  return (
-    <List.Item
-      title={searchResult.name}
-      subtitle={searchResult.folderTitle}
-      accessoryTitle={searchResult.tags.join(" - ")}
-      icon={{
-        source: Icon.AppWindow,
-        tintColor: Color.Orange,
-      }}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={preferences.rootApiUrl + searchResult.url} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-async function parseResponse(response: Response): Promise<SearchResult[]> {
+async function parseResponse(response: Response) {
   type Json = Record<string, unknown>;
   const json = (await response.json()) as Json[] | { code: string; message: string };
 
@@ -82,22 +93,9 @@ async function parseResponse(response: Response): Promise<SearchResult[]> {
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  return json.map((dashboard) => {
-    return {
-      id: dashboard.id as number,
-      uid: dashboard.uid as string,
-      name: dashboard.title as string,
-      uri: dashboard.uri as string,
-      url: dashboard.url as string,
-      slug: dashboard.slug as string,
-      type: dashboard.type as string,
-      tags: dashboard.tags as string[],
-      isStarred: dashboard.isStarred as boolean,
-      folderId: dashboard.folderId as number,
-      folderUid: dashboard.folderUid as string,
-      folderTitle: dashboard.folderTitle as string,
-      folderUrl: dashboard.folderUrl as string,
-      sortMeta: dashboard.sortMeta as number,
-    };
-  });
+  // json.map((dashboard) => console.log(dashboard));
+
+  const dashboards = dashboardsSchema.parse(json);
+  // dashboards.map((dashboard) => console.log(dashboard));
+  return dashboards;
 }

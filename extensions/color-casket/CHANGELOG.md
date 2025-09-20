@@ -1,5 +1,9 @@
 # Color Casket Changelog
 
+## [New feature] - 2023-05-11
+
+Automatically read the selected text when executing render color.
+
 ## [Bug fix] - 2022-11-21
 
 - Resolve an issue when launchCommand was called earlier than color is saved to history.

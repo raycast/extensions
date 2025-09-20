@@ -1,7 +1,8 @@
-import { ActionPanel, Icon, useNavigation, Action } from "@raycast/api";
+import { ActionPanel, Icon, Action } from "@raycast/api";
 
 // Components
 import Details from "@/views/DetailsCollections";
+import { CollectionResult } from "@/types";
 
 // Types
 interface BaseProps {
@@ -16,7 +17,6 @@ export const Actions: React.FC<BaseProps> = ({ details = false, item }) => (
 );
 
 export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
-  const { push } = useNavigation();
   const imageUrl =
     item.cover_photo?.urls?.raw ||
     item.cover_photo?.urls?.full ||
@@ -26,7 +26,7 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
   return (
     <>
       <ActionPanel.Section>
-        {details && <Action title="Show Details" icon={Icon.List} onAction={() => push(<Details result={item} />)} />}
+        {details && <Action.Push title="Show Details" icon={Icon.List} target={<Details result={item} />} />}
 
         {item.links?.html && <Action.OpenInBrowser url={item.links.html} title="Open Collection" />}
 

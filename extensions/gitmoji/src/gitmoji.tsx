@@ -1,7 +1,7 @@
-import { Action, ActionPanel, List, getPreferenceValues, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { useFetch, useFrecencySorting } from "@raycast/utils";
 import { gitmojis as defaultGitmojis } from "gitmojis";
-import fetch from "node-fetch";
-import { useEffect, useState } from "react";
+import Style = Toast.Style;
 
 interface PreferenceValues {
   copy: "emoji" | "code" | "description-emoji" | "description-code";
@@ -17,90 +17,120 @@ type Gitmoji = {
 };
 
 const GitmojiList = () => {
-  const [gitmojis, setGitmojis] = useState<Gitmoji[]>(defaultGitmojis);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { copy, action } = getPreferenceValues<PreferenceValues>();
+  const { isLoading, data, error } = useFetch<{ gitmojis: Gitmoji[] }>("https://gitmoji.dev/api/gitmojis");
+  const gitmojis = data?.gitmojis.length ? data.gitmojis : [...defaultGitmojis];
 
-  useEffect(() => {
-    async function fetchGitmojis() {
-      setIsLoading(true);
-      try {
-        const response = await fetch("https://gitmoji.dev/api/gitmojis");
-        if (response.status == 200) {
-          const json = await response.json();
-          setGitmojis((json as Record<string, Gitmoji[]>).gitmojis);
-        } else {
-          setGitmojis(defaultGitmojis);
-        }
-        setIsLoading(false);
-      } catch {
-        setGitmojis(defaultGitmojis);
-        setIsLoading(false);
-      }
-    }
+  const {
+    data: sortedGitmojis,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting<Gitmoji>(gitmojis, {
+    key: ({ code }) => code,
+  });
 
-    fetchGitmojis();
-  }, []);
+  if (error) {
+    showToast({
+      title: "Failed to fetch latest gitmojis",
+      message: "Using saved gitmojis as fallback",
+      style: Style.Failure,
+    });
+  }
 
   return (
     <List searchBarPlaceholder="Search your gitmoji..." isLoading={isLoading}>
-      {gitmojis.map((gitmoji) => (
-        <GitmojiListItem key={gitmoji.name} gitmoji={gitmoji} />
-      ))}
+      {sortedGitmojis.map((gitmoji) => {
+        const { name, description, emoji, code } = gitmoji;
+        let content;
+        switch (copy) {
+          case "code":
+            content = code;
+            break;
+          case "description-emoji":
+            content = `${emoji} ${description}`;
+            break;
+          case "description-code":
+            content = `${code} ${description}`;
+            break;
+          case "emoji":
+          default:
+            content = emoji;
+            break;
+        }
+
+        return (
+          <List.Item
+            id={name}
+            key={name}
+            title={description}
+            icon={emoji}
+            accessories={[{ tag: { value: code, color: Color.Yellow } }]}
+            keywords={[code.replace(":", ""), name]}
+            actions={
+              <ActionPanel>
+                {action === "copy" ? (
+                  <Action.CopyToClipboard onCopy={() => visitItem(gitmoji)} content={content} />
+                ) : (
+                  <Action.Paste onPaste={() => visitItem(gitmoji)} content={content} />
+                )}
+
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard
+                    content={emoji}
+                    title="Copy Emoji"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onCopy={() => visitItem(gitmoji)}
+                  />
+                  <Action.CopyToClipboard
+                    content={code}
+                    title="Copy Code"
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                    onCopy={() => visitItem(gitmoji)}
+                  />
+                  <Action.CopyToClipboard
+                    content={`${emoji} ${description}`}
+                    title="Copy Emoji + Description"
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "c" }}
+                    onCopy={() => visitItem(gitmoji)}
+                  />
+                  <Action.CopyToClipboard
+                    content={`${code} ${description}`}
+                    title="Copy Code + Description"
+                    shortcut={{ modifiers: ["ctrl", "opt"], key: "c" }}
+                    onCopy={() => visitItem(gitmoji)}
+                  />
+                  <Action
+                    title="Reset Ranking"
+                    icon={Icon.ArrowCounterClockwise}
+                    onAction={() => resetRanking(gitmoji)}
+                  />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section>
+                  <Action.Paste
+                    content={emoji}
+                    title="Paste Emoji"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                  />
+                  <Action.Paste content={code} title="Paste Code" shortcut={{ modifiers: ["cmd", "opt"], key: "p" }} />
+                  <Action.Paste
+                    content={`${emoji} ${description}`}
+                    title="Paste Emoji + Description"
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+                  />
+                  <Action.Paste
+                    content={`${code} ${description}`}
+                    title="Paste Code + Description"
+                    shortcut={{ modifiers: ["ctrl", "opt"], key: "p" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 };
-
-const GitmojiListItem = (props: { gitmoji: Gitmoji }) => {
-  const gitmoji = props.gitmoji;
-  const { copy } = getPreferenceValues<PreferenceValues>();
-
-  return (
-    <List.Item
-      id={gitmoji.name}
-      key={gitmoji.name}
-      title={gitmoji.description}
-      icon={gitmoji.emoji}
-      accessories={[{ tag: { value: gitmoji.code, color: Color.Yellow } }]}
-      keywords={[gitmoji.code.replace(":", ""), gitmoji.name]}
-      actions={
-        <ActionPanel>
-          {copy === "emoji" && <PrimaryAction content={gitmoji.emoji} />}
-          {copy === "code" && <PrimaryAction content={gitmoji.code} />}
-          {copy === "description-emoji" && <PrimaryAction content={`${gitmoji.emoji} ${gitmoji.description}`} />}
-          {copy === "description-code" && <PrimaryAction content={`${gitmoji.code} ${gitmoji.description}`} />}
-
-          <ActionPanel.Section>
-            <Action.CopyToClipboard content={gitmoji.emoji} title="Copy Emoji" />
-            <Action.CopyToClipboard content={gitmoji.code} title="Copy Code" />
-            <Action.CopyToClipboard
-              content={`${gitmoji.emoji} ${gitmoji.description}`}
-              title="Copy Emoji + Description"
-            />
-            <Action.CopyToClipboard
-              content={`${gitmoji.code} ${gitmoji.description}`}
-              title="Copy Code + Description"
-            />
-          </ActionPanel.Section>
-
-          <ActionPanel.Section>
-            <Action.Paste content={gitmoji.emoji} title="Paste Emoji" />
-            <Action.Paste content={gitmoji.code} title="Paste Code" />
-            <Action.Paste content={`${gitmoji.emoji} ${gitmoji.description}`} title="Paste Emoji + Description" />
-            <Action.Paste content={`${gitmoji.code} ${gitmoji.description}`} title="Paste Code + Description" />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
-};
-
-function PrimaryAction(props: { content: string }) {
-  const { action } = getPreferenceValues<PreferenceValues>();
-  if (action === "copy") {
-    return <Action.CopyToClipboard content={props.content} shortcut={{ modifiers: ["cmd"], key: "c" }} />;
-  } else {
-    return <Action.Paste content={props.content} shortcut={{ modifiers: ["cmd"], key: "p" }} />;
-  }
-}
 
 export default GitmojiList;

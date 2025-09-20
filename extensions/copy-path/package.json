@@ -2,29 +2,71 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-path",
   "title": "Copy Path",
-  "description": "Copy path of the selected files or the current Finder window.",
+  "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
   "icon": "copy-path.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig",
+    "INCHMAN1900"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
     "System"
   ],
+  "keywords": [
+    "tab",
+    "web",
+    "link"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "copy-path",
-      "title": "Copy Path",
-      "description": "Copy path of the selected files or the current Finder window.",
+      "title": "Copy Path or URL",
+      "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
       "mode": "no-view"
     }
   ],
   "preferences": [
     {
+      "title": "Advanced",
+      "name": "showCopyTip",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Copy Tip",
+      "description": "Display a prompt when copying is successful.",
+      "default": true
+    },
+    {
+      "name": "showLastCopy",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Last Copy",
+      "description": "Show the path or URL of the most recent copy in the subtitle of the command.",
+      "default": true
+    },
+    {
+      "name": "showTabTitle",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Tab Title",
+      "description": "Show the tab title of the browser when copying the URL of the current browser tab.",
+      "default": false
+    },
+    {
+      "name": "useTildeForHome",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Tilde for Home Directory",
+      "description": "Replace the home directory in copied paths with '~' for a cleaner look.",
+      "default": false
+    },
+    {
       "name": "multiPathSeparator",
       "type": "dropdown",
       "required": false,
-      "title": "Multi-path separator",
+      "title": "Multi-path Separator",
       "description": "The separator between paths when copying multiple file paths.",
       "default": "\n",
       "data": [
@@ -49,27 +91,84 @@
           "value": ":"
         }
       ]
+    },
+    {
+      "name": "copyUrlContent",
+      "type": "dropdown",
+      "required": false,
+      "title": "URL Format",
+      "description": "When copying URLs, select what to copy.",
+      "default": "Original",
+      "data": [
+        {
+          "title": "Original",
+          "value": "Original"
+        },
+        {
+          "title": "Protocol://host/pathname",
+          "value": "Protocol://host/pathname"
+        },
+        {
+          "title": "Protocol://host",
+          "value": "Protocol://host"
+        },
+        {
+          "title": "Host",
+          "value": "Host"
+        }
+      ]
+    },
+    {
+      "name": "copyWhenUnSupported",
+      "type": "dropdown",
+      "required": false,
+      "title": "Unsupported App Action",
+      "description": "When copying, select what to copy when the app is not supported.",
+      "default": "windowTitle",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Window Title",
+          "value": "windowTitle"
+        },
+        {
+          "title": "App Name",
+          "value": "appName"
+        },
+        {
+          "title": "App Path",
+          "value": "appPath"
+        },
+        {
+          "title": "Bundle ID",
+          "value": "bundleId"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.84.6",
+    "@raycast/utils": "^1.18.0",
+    "parse-url": "^9.2.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.8.2",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

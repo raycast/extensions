@@ -8,7 +8,10 @@
   "contributors": [
     "sven",
     "koseduhemak",
-    "ryanp"
+    "ryanp",
+    "LunaticMuch",
+    "nick318",
+    "marinsokol"
   ],
   "license": "MIT",
   "commands": [
@@ -17,6 +20,13 @@
       "title": "Search Issues",
       "subtitle": "Jira Search (Self-Hosted)",
       "description": "Search Jira issues by text, type and project",
+      "mode": "view"
+    },
+    {
+      "name": "open-issues",
+      "title": "Open Issues",
+      "subtitle": "Jira Search (Self-Hosted)",
+      "description": "Search Jira issues assinged to current user by text, type and project",
       "mode": "view"
     },
     {
@@ -61,19 +71,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.1",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^1.57.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.8.0",
-    "prettier": "^2.8.7",
-    "react-devtools": "^4.27.4",
-    "typescript": "^4.4.3"
+    "@types/node": "^20.5.7",
+    "@types/react": "^18.2.21",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.28.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

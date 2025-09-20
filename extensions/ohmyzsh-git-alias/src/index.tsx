@@ -10,7 +10,7 @@ export default function Command() {
             key={a.alias}
             title={a.alias}
             subtitle={a.command}
-            keywords={[a.alias, a.command]}
+            keywords={[a.alias, a.command, ...a.command.split(" ")]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Paste">

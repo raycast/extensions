@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "solana-wallets-generation",
+  "title": "Solana Wallets Generation",
+  "description": "Introducing the Solana Wallet Generator, a powerful Raycast extension designed for developers and cryptocurrency enthusiasts seeking to efficiently create multiple Solana wallets. This tool streamlines the wallet generation process, allowing users to produce thousands of wallets swiftly and securely.",
+  "icon": "extension_icon.png",
+  "author": "uladkaminski",
+  "categories": [
+    "Finance",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "solana",
+    "wallet",
+    "crypto",
+    "blockchain",
+    "web3",
+    "generator"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "swg",
+      "title": "Generate Solana Wallets",
+      "subtitle": "Create Multiple Solana Wallets",
+      "description": "Generate multiple Solana wallets with options for public keys and CSV export",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0",
+    "@solana/web3.js": "^1.98.0",
+    "bs58": "^6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

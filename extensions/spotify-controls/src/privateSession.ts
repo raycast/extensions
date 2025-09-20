@@ -17,7 +17,7 @@ export default async () => {
     await showToast({
       title: result === "✓" ? "Private session turned off" : "Private session turned on",
     });
-  } catch (_) {
+  } catch {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed toggling private session",

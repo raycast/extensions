@@ -6,6 +6,7 @@ import { getErrorMessage } from "../../utils";
 import { TweetSendForm } from "./send";
 import { TweetDetail } from "./tweet";
 import { UserTweetList } from "./usertweets";
+import { XIcon } from "../../icon";
 
 export function ShowTweetAction(props: { tweet: TweetV1 }) {
   return (
@@ -56,7 +57,7 @@ export function DeleteTweetAction(props: { tweet: TweetV1 }) {
   };
   if (user === t.user.screen_name) {
     return (
-      <Action title="Delete Tweet" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={deleteTweet} />
+      <Action title="Delete Tweet" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={deleteTweet} />
     );
   } else {
     return null;
@@ -153,7 +154,7 @@ export function ShowUserTweetsAction(props: { username: string; title?: string }
     <Action.Push
       title={props.title || `Tweets from @${props.username}`}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-      icon={{ source: "twitter.png", tintColor: Color.PrimaryText }}
+      icon={XIcon()}
       target={<UserTweetList username={props.username} />}
     />
   );

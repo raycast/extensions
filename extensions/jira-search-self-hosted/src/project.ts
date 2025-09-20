@@ -1,4 +1,4 @@
-import { ResultItem, SearchCommand } from "./command";
+import { ResultItem as GeneralResultItem, SearchCommand } from "./command";
 import { jiraFetchObject, jiraUrl } from "./jira";
 import { jiraImage } from "./image";
 
@@ -11,6 +11,11 @@ interface Project {
   };
 }
 
+type ResultItem = GeneralResultItem & {
+  title: string;
+  subtitle: string;
+};
+
 export async function searchProjects(query: string): Promise<ResultItem[]> {
   const result = await jiraFetchObject<Array<Project>>("/rest/api/2/project");
   const mapResult = async (project: Project): Promise<ResultItem> => ({
@@ -21,8 +26,18 @@ export async function searchProjects(query: string): Promise<ResultItem[]> {
     url: `${jiraUrl}/browse/${project.key}`,
   });
   return result && result.length > 0
-    ? (await Promise.all(result.map(mapResult))).filter((result) => result.title.toString().includes(query))
+    ? (await Promise.all(result.map(mapResult))).filter((result) => {
+        const filterBy = filterUsing(query);
+        return filterBy(result.title) || filterBy(result.subtitle);
+      })
     : [];
+}
+
+function includesCaseInsensitive(projectProp: string, query: string): boolean {
+  return projectProp.toLowerCase().includes(query.toLowerCase());
+}
+function filterUsing(query: string): (projectProp: string) => boolean {
+  return (projectProp) => includesCaseInsensitive(projectProp, query);
 }
 
 export default function SearchProjectCommand() {

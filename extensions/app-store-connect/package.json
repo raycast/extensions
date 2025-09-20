@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-store-connect",
+  "title": "App Store Connect",
+  "description": "Perform tasks from App Store Connect",
+  "icon": "icon.png",
+  "author": "johanthorell",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "testFlightBuilds",
+      "title": "Manage Builds",
+      "subtitle": "App Store Connect",
+      "description": "Show and manage builds",
+      "mode": "view"
+    },
+    {
+      "name": "testInformation",
+      "title": "Edit Test Information",
+      "subtitle": "App Store Connect",
+      "description": "Edit Test information",
+      "mode": "view"
+    },
+    {
+      "name": "showGroups",
+      "title": "Manage Beta Groups",
+      "subtitle": "App Store Connect",
+      "description": "Show and manage beta groups",
+      "mode": "view"
+    },
+    {
+      "name": "teamMembers",
+      "title": "Manage Team Members",
+      "subtitle": "App Store Connect",
+      "description": "Show and manage team members",
+      "mode": "view"
+    },
+    {
+      "name": "manageTeams",
+      "title": "Manage Teams",
+      "subtitle": "App Store Connect",
+      "description": "Show and manage teams",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.16.4",
+    "node-app-store-connect-api": "^5.0.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

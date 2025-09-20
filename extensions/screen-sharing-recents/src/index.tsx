@@ -3,10 +3,15 @@ import { useState, useEffect, useCallback } from "react";
 import os from "os";
 import fs from "fs";
 import path from "path";
+import plist from "plist";
 
 const RECENTS_LIST_PATH = path.join(
   os.homedir(),
   "/Library/Containers/com.apple.ScreenSharing/Data/Library/Application Support/Screen Sharing"
+);
+const RECENTS_LIST_PATH_SONOMA = path.join(
+  os.homedir(),
+  "/Library/Containers/com.apple.ScreenSharing/Data/Library/Application Support/Screen Sharing Hosts"
 );
 
 export default function Command() {
@@ -92,25 +97,64 @@ function useSearch() {
   };
 }
 
-let filesCache: string[];
+let locationsCache: SearchResult[];
 
-async function performSearch(searchText: string): Promise<SearchResult[]> {
-  if (!filesCache) {
+async function getLocations() {
+  if (locationsCache) {
+    return locationsCache;
+  }
+  const hosts: SearchResult[] = [];
+
+  try {
     const files = await fs.promises.readdir(RECENTS_LIST_PATH);
 
-    filesCache = files.filter((file) => file.endsWith(".vncloc"));
+    files
+      .filter((file) => file.endsWith(".vncloc"))
+      .forEach((file) => {
+        hosts.push({
+          name: file.slice(0, file.lastIndexOf(".")),
+          path: path.join(RECENTS_LIST_PATH, file),
+        });
+      });
+  } catch (error) {
+    console.warn("No pre-sonoma locations found");
   }
 
+  try {
+    const files = await fs.promises.readdir(RECENTS_LIST_PATH_SONOMA);
+    const plistFiles = files.filter((file) => file.endsWith(".plist"));
+
+    for (const file of plistFiles) {
+      try {
+        const plistPath = path.join(RECENTS_LIST_PATH_SONOMA, file);
+        const plistContent = await fs.promises.readFile(plistPath, "utf-8");
+        const data = plist.parse(plistContent);
+        if (data) {
+          Object.keys(data).forEach((key) => hosts.push({ name: key, path: key }));
+        }
+      } catch (error) {
+        console.error("error parsing plist", error);
+      }
+    }
+  } catch (error) {
+    console.warn("No sonoma locations found");
+  }
+
+  if (hosts.length === 0) {
+    console.error("no hosts found");
+    return [];
+  }
+
+  locationsCache = Array.from(hosts);
+
+  return locationsCache;
+}
+
+async function performSearch(searchText: string): Promise<SearchResult[]> {
+  const locations = await getLocations();
   const searchLower = searchText.toLocaleLowerCase();
 
-  return filesCache
-    .filter((file) => file.toLocaleLowerCase().includes(searchLower))
-    .map((file) => {
-      return {
-        name: file.slice(0, file.lastIndexOf(".")),
-        path: path.join(RECENTS_LIST_PATH, file),
-      };
-    });
+  return locations.filter((location) => location.name.toLocaleLowerCase().includes(searchLower));
 }
 
 interface SearchState {

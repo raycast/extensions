@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "transfer-sh_upload",
+  "title": "Transfer.sh Uploader",
+  "description": "Upload a file directly to a transfer.sh instance",
+  "icon": "upload-dark.png",
+  "author": "PandaDEV",
+  "version": "1.0.3",
+  "categories": [
+    "Data",
+    "Productivity",
+    "Developer Tools",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Upload File",
+      "subtitle": "Upload to transfer.sh instance",
+      "description": "Uploads the selcted file from a finder window to a transfer.sh instance",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "type": "textfield",
+      "required": true,
+      "default": "https://transfer.sh",
+      "title": "Transfer.sh instance url",
+      "description": "Url to the Transfer.sh instance",
+      "placeholder": "https://transfer.sh"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "@types/got": "^9.6.12",
+    "axios": "^1.8.4",
+    "colors": "^1.4.0",
+    "events": "^3.3.0",
+    "form-data": "^4.0.0",
+    "fs": "^0.0.1-security",
+    "got": "^14.1.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "eslint": "^8.56.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yoink",
+  "title": "Yoink",
+  "description": "Add selected or clipboard files to Yoink.",
+  "icon": "yoink-icon.png",
+  "author": "koinzhang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-to-yoink",
+      "title": "Add to Yoink",
+      "description": "Add selected or clipboard files to Yoink.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Notification",
+      "name": "showNotification",
+      "label": "Show Notification",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show notification when files are added to Yoink",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.7",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

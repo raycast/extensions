@@ -1,5 +1,9 @@
 # Orion Changelog
 
+## [Profile Support] - 2023-09-07
+
+- Support filtering by profile when searching for bookmarks, history, and reading list. Tabs are not supported.
+
 ## [Tab search] - 2023-03-16
 
 * Adds ability to search your open tabs

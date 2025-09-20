@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
-import type { CharacterEntity } from "crossbell.js";
+import type { CharacterEntity } from "crossbell";
 import { extractCharacterInfo } from "../utils/character";
 import { composeCharacterUrl } from "../utils/url";
 import CharacterDetail from "./CharacterDetail";

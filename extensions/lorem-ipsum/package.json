@@ -8,6 +8,7 @@
   "license": "MIT",
   "contributors": [
     "GastroGeek",
+    "stelo",
     "enkia"
   ],
   "categories": [
@@ -25,6 +26,10 @@
     "lorem",
     "ipsum"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "paragraphs",
@@ -34,10 +39,10 @@
       "mode": "no-view",
       "arguments": [
         {
-          "name": "numberOfLoremIpsumsToGenerate",
+          "name": "numberOfParagraphs",
           "type": "text",
           "required": false,
-          "placeholder": "1"
+          "placeholder": "No. of paragraphs"
         }
       ]
     },
@@ -49,10 +54,10 @@
       "mode": "no-view",
       "arguments": [
         {
-          "name": "numberOfLoremIpsumsToGenerate",
+          "name": "numberOfSentences",
           "type": "text",
           "required": false,
-          "placeholder": "1"
+          "placeholder": "No. of sentences"
         }
       ]
     },
@@ -64,10 +69,25 @@
       "mode": "no-view",
       "arguments": [
         {
-          "name": "numberOfLoremIpsumsToGenerate",
+          "name": "numberOfWords",
           "type": "text",
           "required": false,
-          "placeholder": "1"
+          "placeholder": "No. of words"
+        }
+      ]
+    },
+    {
+      "name": "ai-generate",
+      "title": "Generate with AI",
+      "subtitle": "Lorem Ipsum",
+      "description": "Use AI to generate some placeholder text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "topic",
+          "type": "text",
+          "required": false,
+          "placeholder": "any topic"
         }
       ]
     }
@@ -86,28 +106,33 @@
         {
           "value": "paste",
           "title": "Paste to Active App"
+        },
+        {
+          "value": "pasteAndCopy",
+          "title": "Paste and Copy to Clipboard"
         }
       ],
+      "default": "clipboard",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
+    "@raycast/api": "^1.78.1",
     "lorem-ipsum": "^2.0.8",
-    "node-fetch": "^3.2.10"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^18.7.21",
-    "@types/react": "^18.0.21",
-    "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "@typescript-eslint/parser": "^5.38.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.5.0",
-    "react-devtools": "^4.26.0",
-    "typescript": "^4.8.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.1.0",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

@@ -1,42 +1,53 @@
-export enum SpotifyMetadataType {
-  Song = "music.song",
-  Album = "music.album",
-  Playlist = "music.playlist",
-  Artist = "profile",
-  Podcast = "music.episode",
-  Show = "website",
-}
-
-export enum SpotifyContentLinkType {
-  Youtube = "youtube",
+export enum Adapter {
+  Spotify = "spotify",
+  YouTube = "youTube",
   AppleMusic = "appleMusic",
-  Tidal = "tidal",
   SoundCloud = "soundCloud",
   Deezer = "deezer",
+  Tidal = "tidal",
 }
 
-export interface SpotifyContentLink {
-  type: SpotifyContentLinkType;
+export enum MetadataType {
+  Song = "song",
+  Album = "album",
+  Playlist = "playlist",
+  Artist = "artist",
+  Podcast = "podcast",
+  Show = "show",
+}
+
+export type SearchMetadata = {
+  title: string;
+  description: string;
+  type: MetadataType;
+  image: string;
+  audio?: string;
+};
+
+export type SearchResultLink = {
+  type: Adapter;
   url: string;
   isVerified?: boolean;
-}
+};
 
-export interface SpotifyContent {
+export type SearchResult = {
   id: string;
-  type: SpotifyMetadataType;
+  type: MetadataType;
   title: string;
   description: string;
   image: string;
   audio?: string;
   source: string;
-  links: SpotifyContentLink[];
-}
+  universalLink: string;
+  links: SearchResultLink[];
+};
 
-export interface CacheData {
-  spotifyLink: string;
-  spotifyContent: SpotifyContent;
-}
+export type CacheData = {
+  link: string;
+  searchResult: SearchResult;
+};
 
 export interface ApiError {
-  error: string;
+  code: string;
+  message: string;
 }

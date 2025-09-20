@@ -1,9 +1,9 @@
-import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { State } from "../haapi";
-import { useHAStates } from "../hooks";
+import { State } from "@lib/haapi";
+import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { useHAStates } from "./hooks";
 
-export function StatesAttributesList(): JSX.Element {
+export function StatesAttributesList() {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useSearch(searchText, allStates);
@@ -68,7 +68,7 @@ export function StatesAttributesList(): JSX.Element {
 
 function useSearch(
   query: string | undefined,
-  allStates?: State[]
+  allStates?: State[],
 ): {
   states?: State[] | undefined;
 } {

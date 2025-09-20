@@ -1,24 +1,11 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import omit from "lodash/omit";
 import snakeCase from "lodash/snakeCase";
+import type Stripe from "stripe";
 import { useStripeApi, useStripeDashboard } from "./hooks";
 import { convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
-
-type EventResp = {
-  id: string;
-  created: number;
-  type: string;
-  data: {
-    object: {
-      id: string;
-      created: number;
-      metadata: any;
-    };
-  };
-};
 
 type Event = {
   id: string;
@@ -28,27 +15,27 @@ type Event = {
 
 const omittedFields = ["data_client_secret", "data_receipt_url"];
 
-const resolvedMetadata = (metadata: any) =>
+const resolvedMetadata = (metadata: Stripe.Metadata) =>
   Object.keys(metadata).reduce((acc, key) => {
     const value = metadata[key];
     return { ...acc, [`metadata_${snakeCase(key)}`]: value };
   }, {});
 
-const resolvedData = (data: any) =>
+const resolvedData = (data: Record<string, unknown>) =>
   Object.keys(data).reduce((acc, key) => {
     const value = data[key];
 
     if (key === "metadata") {
-      return { ...acc, ...resolvedMetadata(value) };
+      return { ...acc, ...resolvedMetadata(value as Stripe.Metadata) };
     }
 
     return { ...acc, [`data_${snakeCase(key)}`]: value };
   }, {});
 
-const resolveEvent = ({ created, data, ...rest }: EventResp): Event => {
+const resolveEvent = ({ created, data, ...rest }: Stripe.Event): Event => {
   return {
     ...rest,
-    ...(resolvedData(data.object) as any),
+    ...resolvedData(data.object as unknown as Record<string, unknown>),
     created_at: convertTimestampToDate(created),
   };
 };
@@ -56,7 +43,7 @@ const resolveEvent = ({ created, data, ...rest }: EventResp): Event => {
 const Events = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.EVENTS, true);
   const { dashboardUrl } = useStripeDashboard();
-  const formattedEvents = data.map(resolveEvent);
+  const formattedEvents = (data as Stripe.Event[]).map(resolveEvent);
 
   const renderEvents = (event: Event) => {
     const { type, id } = event;

@@ -13,8 +13,10 @@
     "Productivity"
   ],
   "contributors": [
-      "peduarte",
-      "pernielsentikaer"
+    "peduarte",
+    "pernielsentikaer",
+    "alexs",
+    "stelo"
   ],
   "commands": [
     {
@@ -22,6 +24,13 @@
       "title": "Share Meeting Link",
       "subtitle": "Cal.com",
       "description": "Copy Meeting URL",
+      "mode": "view"
+    },
+    {
+      "name": "view-bookings",
+      "title": "View Bookings",
+      "subtitle": "Cal.com",
+      "description": "View your upcoming Cal.com bookings",
       "mode": "view"
     }
   ],
@@ -37,20 +46,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
-    "@raycast/utils": "^1.3.1",
-    "axios": "^0.27.2",
-    "dayjs": "^1.11.3"
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.1",
+    "axios": "^1.8.4",
+    "dayjs": "^1.11.11",
+    "moment": "^2.30.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.14.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "ray build -e dist",

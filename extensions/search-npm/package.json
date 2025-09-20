@@ -9,11 +9,21 @@
   "contributors": [
     "reloadedhead",
     "Timon",
-    "luisFilipePT"
+    "luisFilipePT",
+    "LunaticMuch",
+    "jomifepe",
+    "j3lte",
+    "litomore",
+    "ridemountainpig",
+    "dbrooks"
   ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
@@ -113,33 +123,41 @@
       "required": false,
       "default": "30",
       "value": "30"
+    },
+    {
+      "name": "showLinkToSearchResultsInListView",
+      "type": "checkbox",
+      "label": "Show link in list view",
+      "title": "Show link to npmjs.com results in list view",
+      "description": "Show link to npmjs.com search results in list view",
+      "required": false,
+      "value": true,
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2",
-    "dedupe": "^4.0.2",
-    "fetch-readme": "^1.0.0",
-    "gitlab-url-parse": "^1.0.0",
-    "parse-github-url": "^1.0.2",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "dedupe": "^4.0.3",
+    "git-url-parse": "^16.0.0",
     "tiny-relative-date": "^1.3.0",
-    "use-debounce": "^9.0.3"
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.15.6",
-    "@types/parse-github-url": "^1.0.0",
-    "@types/react": "^18.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.56.0",
-    "@typescript-eslint/parser": "^5.56.0",
-    "eslint": "^8.36.0",
-    "eslint-config-prettier": "^8.8.0",
-    "react-devtools": "^4.27.3",
-    "typescript": "^5.0.2"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/git-url-parse": "^9.0.3",
+    "@types/node": "^22.10.5",
+    "@types/parse-github-url": "^1.0.3",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

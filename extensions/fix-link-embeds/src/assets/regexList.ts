@@ -1,12 +1,12 @@
 export const regexList = [
   {
-    test: /https?:\/\/twitter\.com(?=\/\w+?\/status\/)/g,
+    test: /https?:\/\/(?:twitter|x)\.com(?=\/\w+?\/status\/)/g,
     replace: "https://fxtwitter.com",
     settingsKey: "replaceTwitter",
   },
   {
     test: /https?:\/\/(?:www\.|vm\.)?tiktok\.com/g,
-    replace: "https://tiktxk.com",
+    replace: "https://vxtiktok.com",
     settingsKey: "replaceTiktok",
   },
   {

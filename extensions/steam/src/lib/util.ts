@@ -1,5 +1,5 @@
 import { formatDuration, addMinutes, intervalToDuration } from "date-fns";
-import { GameDataSimple } from "../types";
+import { GameDataSimple, GameSimple } from "../types";
 
 export const humanTime = (time: number) => {
   const now = new Date();
@@ -15,4 +15,22 @@ export const reverse = (array: GameDataSimple[]) => {
     output.push(array[i]);
   }
   return output;
+};
+
+export const tryJsonGameFromAi = (input: string): GameSimple[] | undefined => {
+  try {
+    const response = JSON.parse(input);
+    // make sure it's an array, and has { name: string }
+    if (!Array.isArray(response)) return undefined;
+    const games = response.filter((game) => game?.name);
+    // If empty, then return undefined
+    return games.length ? games : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+export const randomFromArray = <T>(array: T[] | undefined) => {
+  if (!array) return undefined;
+  return array[Math.floor(Math.random() * array.length)] as T;
 };

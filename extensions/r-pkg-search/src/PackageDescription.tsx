@@ -1,4 +1,4 @@
-import { Detail } from '@raycast/api'
+import { Action, ActionPanel, Detail, useNavigation } from '@raycast/api'
 import { PackageActions } from './PackageActions'
 import { Package } from './RpkgResponse.model'
 
@@ -49,11 +49,22 @@ ${
 export const PackageDescription = ({
   pkg,
 }: PackageDescriptionProps): JSX.Element => {
+  const { pop: navReturn } = useNavigation()
+
   return (
     <Detail
       markdown={descMarkdown(pkg)}
       navigationTitle={`rpkg > ${pkg.name}`}
-      actions={<PackageActions.Panel pkg={pkg} linkToDescription={false} />}
+      actions={
+        <ActionPanel>
+          <PackageActions.Panel pkg={pkg} linkToDescription={false} />
+          <Action
+            title="Back to package search results"
+            onAction={navReturn}
+            shortcut={{ modifiers: [], key: 'arrowLeft' }}
+          />
+        </ActionPanel>
+      }
     />
   )
 }

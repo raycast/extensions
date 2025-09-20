@@ -2,9 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "menubar-weather",
   "title": "Menubar Weather",
-  "description": "Show current weather on the menu bar",
+  "description": "Show current weather on the menu bar.",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "r22",
+    "fuksman",
+    "xilopaint"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,21 +22,30 @@
   ],
   "preferences": [
     {
-      "name": "cityName",
-      "type": "textfield",
-      "title": "City",
-      "description": "City name. If you need more precise weather data, you can fill in the latitude and longitude in the Preferences Page of the command",
-      "required": true,
-      "placeholder": "City name. For example, New York"
+      "name": "iconStyle",
+      "type": "dropdown",
+      "title": "Icon Style",
+      "description": "Choose the style of the menu bar weather icon",
+      "required": false,
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        },
+        {
+          "title": "SF Symbols",
+          "value": "sf-symbols"
+        }
+      ]
     },
     {
-      "name": "longitude",
+      "name": "cityName",
       "type": "textfield",
-      "title": "Longitude",
-      "description": "Longitude. If you need more precise weather data, please fill in the latitude and longitude",
-      "required": false,
-      "default": "",
-      "placeholder": "0.00"
+      "title": "Address",
+      "description": "Address. If you need more precise weather data, you can fill in the latitude and longitude in the Preferences Page of the command",
+      "required": true,
+      "placeholder": "Pennsylvania Avenue NW, Washington, DC"
     },
     {
       "name": "latitude",
@@ -43,11 +57,20 @@
       "placeholder": "0.00"
     },
     {
+      "name": "longitude",
+      "type": "textfield",
+      "title": "Longitude",
+      "description": "Longitude. If you need more precise weather data, please fill in the latitude and longitude",
+      "required": false,
+      "default": "",
+      "placeholder": "0.00"
+    },
+    {
       "name": "tempUnits",
       "type": "dropdown",
       "title": "Temperature Unit",
       "description": "Units of temperature",
-      "required": true,
+      "required": false,
       "default": "celsius",
       "data": [
         {
@@ -65,8 +88,8 @@
       "type": "dropdown",
       "title": "Wind Speed Unit",
       "description": "Units of wind speed",
-      "required": true,
-      "default": "",
+      "required": false,
+      "default": "ms",
       "data": [
         {
           "title": "Km/h",
@@ -91,7 +114,7 @@
       "type": "dropdown",
       "title": "Precipitation Unit",
       "description": "Units of precipitation",
-      "required": true,
+      "required": false,
       "default": "mm",
       "data": [
         {
@@ -105,11 +128,69 @@
       ]
     },
     {
+      "name": "tempType",
+      "type": "dropdown",
+      "title": "Show in Menubar",
+      "description": "Temperature type",
+      "required": false,
+      "default": "temperature",
+      "data": [
+        {
+          "title": "Forecast",
+          "value": "temperature"
+        },
+        {
+          "title": "Feels Like",
+          "value": "apparent_temperature"
+        }
+      ]
+    },
+    {
+      "name": "menuUVI",
+      "type": "checkbox",
+      "label": "UV Index",
+      "description": "Show UV index in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuPressure",
+      "type": "checkbox",
+      "label": "Pressure",
+      "description": "Show pressure in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuHumidity",
+      "type": "checkbox",
+      "label": "Humidity",
+      "description": "Show humidity in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuWind",
+      "type": "checkbox",
+      "label": "Wind",
+      "description": "Show wind in menu",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "showSun",
       "type": "checkbox",
-      "label": "Sunrise and sunset",
-      "title": "Additional Info",
-      "description": "Show sunrise and sunset",
+      "label": "Sunrise and Sunset",
+      "title": "Show in Details",
+      "description": "Show sunrise and sunset in details",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showUVI",
+      "type": "checkbox",
+      "label": "UV Index",
+      "description": "Show UV Index in details",
       "required": false,
       "default": true
     },
@@ -117,38 +198,37 @@
       "name": "showLocation",
       "type": "checkbox",
       "label": "Geolocation Information",
-      "description": "Show geolocation information",
+      "description": "Show geolocation information in details",
       "required": false,
       "default": true
     },
     {
       "name": "showForecast",
       "type": "checkbox",
-      "label": "7-day weather forecast",
-      "description": "Show 7-day weather forecast",
+      "label": "7-day Weather Forecast",
+      "description": "Show 7-day weather forecast in details",
       "required": false,
       "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "axios": "^1.1.3"
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.14.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

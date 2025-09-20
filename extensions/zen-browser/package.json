@@ -1,0 +1,251 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zen-browser",
+  "title": "Zen Browser",
+  "description": "Search and open tabs from bookmarks and history in Zen Browser.",
+  "icon": "zen-logo.png",
+  "author": "Keyruu",
+  "contributors": [
+    "theherk",
+    "walker-tx",
+    "jimmy-b36",
+    "sdaza",
+    "ellioth",
+    "ridemountainpig",
+    "sjasct"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser tab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Zen Browser",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Zen Browser",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchEngine",
+      "type": "dropdown",
+      "required": false,
+      "title": "Search Engine",
+      "description": "Search Engine for query (default: Google).",
+      "default": "Google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "Google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "DuckDuckGo"
+        },
+        {
+          "title": "Bing",
+          "value": "Bing"
+        },
+        {
+          "title": "Baidu",
+          "value": "Baidu"
+        },
+        {
+          "title": "Brave",
+          "value": "Brave"
+        },
+        {
+          "title": "Qwant",
+          "value": "Qwant"
+        }
+      ]
+    },
+    {
+      "name": "profileDirectorySuffix",
+      "title": "Profile Directory Suffix",
+      "default": "Default (alpha)",
+      "description": "The Zen profile directory suffix, check it with `ls ~/Library/Application Support/zen/Profiles`",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "profilesDirectory",
+      "title": "Profiles Directory",
+      "description": "The directory where your Zen profiles live",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "newTabShortcut",
+      "title": "New Tab Shortcut",
+      "default": "command t",
+      "type": "textfield",
+      "description": "The shortcut to use for opening a new tab. e.g command option t",
+      "required": false
+    },
+    {
+      "name": "limitResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Limit Results",
+      "description": "The amount of results that are queried from the browser database.",
+      "default": "50"
+    },
+    {
+      "name": "aiSearchHistoryLimitResults",
+      "type": "textfield",
+      "required": false,
+      "title": "AI Search History Limit Results",
+      "description": "The amount of results that are queried from the browser database for AI search.",
+      "default": "50"
+    }
+  ],
+  "tools": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a new Zen Browser tab"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search the browsing history"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@zen-browser Open a new tab",
+        "mocks": {
+          "new-tab": [
+            {}
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "new-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zen-browser Open a new tab search Zen Browser",
+        "mocks": {
+          "new-tab": [
+            {
+              "searchText": "Zen Browser"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchText": "Zen Browser"
+              },
+              "name": "new-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zen-browser Open a new tab search Raycast",
+        "mocks": {
+          "new-tab": [
+            {
+              "searchText": "Raycast"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchText": "Raycast"
+              },
+              "name": "new-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zen-browser Search history",
+        "mocks": {
+          "search-history": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zen-browser Search history about Raycast",
+        "mocks": {
+          "search-history": {
+            "searchText": "Raycast"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {
+                "searchText": "Raycast"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@types/sql.js": "1.4.4",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

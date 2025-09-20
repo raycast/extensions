@@ -2,51 +2,75 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fastmail-masked-email",
   "title": "Fastmail Masked Email",
-  "description": "Create a masked email address with Fastmail.",
+  "description": "Manage masked emails with Fastmail",
   "icon": "mask.png",
   "author": "LightQuantum",
+  "contributors": [
+    "kpa",
+    "mike182uk",
+    "lucacome"
+  ],
   "categories": [
     "Productivity",
     "Web"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "api_token",
-      "title": "Fastmail API Token",
-      "description": "Enter your Fastmail API Token.",
-      "type": "password",
-      "required": true
-    }
-  ],
   "commands": [
     {
-      "name": "index",
+      "name": "create",
       "title": "Create Masked Email",
       "subtitle": "Fastmail",
-      "description": "Generate a new masked email address",
+      "description": "Create a new masked email",
       "mode": "view"
+    },
+    {
+      "name": "list",
+      "title": "Show Masked Emails",
+      "subtitle": "Fastmail",
+      "description": "Show all of your masked emails",
+      "mode": "view"
+    },
+    {
+      "name": "create-quick",
+      "title": "Quick Create Masked Email",
+      "subtitle": "Fastmail",
+      "description": "Quickly create a new masked email",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Enter your Fastmail API token",
+      "name": "api_token",
+      "required": true,
+      "title": "Fastmail API Token",
+      "type": "password"
+    },
+    {
+      "description": "Prefix to use for a newly created masked email. Must be <= 64 characters in length and only contain characters a-z, 0-9 and _ (underscore)",
+      "name": "create_prefix",
+      "required": false,
+      "title": "Default Prefix",
+      "type": "textfield"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.3",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.67.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.57",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

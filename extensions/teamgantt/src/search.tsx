@@ -68,8 +68,7 @@ export default function Command() {
                 title={task.name}
                 subtitle={task.parent_group_name}
                 keywords={keywords}
-                accessoryTitle={keywords.join(', ')}
-                accessoryIcon={task.is_starred ? Icon.Star : undefined}
+                accessories={[{ text: keywords.join(', '), icon: task.is_starred ? Icon.Star : null }]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Selected Task">

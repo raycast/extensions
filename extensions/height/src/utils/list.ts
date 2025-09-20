@@ -1,5 +1,6 @@
 import { Color } from "@raycast/api";
-import { ListColor, ListHue, ListObject } from "../types/list";
+
+import { ListColor, ListHue, ListObject } from "@/types/list";
 
 export const ListIcons = [
   {
@@ -216,7 +217,7 @@ export function getListById(listId: string, lists: ListObject[] | undefined, sma
   return lists?.find((list) => list.id === listId) ?? smartLists?.find((list) => list.id === listId);
 }
 
-export function getTintColorFromHue(hue: ListHue | number | null | undefined, colors: ListColor) {
+export function getTintColorFromHue(hue: ListHue | string | number | null | undefined, colors: ListColor) {
   const parsedHue = typeof hue === "number" ? String(hue) : typeof hue === "string" ? hue : "";
   return colors?.find((color) => color.value === parsedHue)?.tintColor;
 }

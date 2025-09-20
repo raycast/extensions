@@ -31,7 +31,7 @@ import { openInEudic } from "./scripts";
 import { getVolcanoWebTranslateURL } from "./translation/volcano/volcanoAPI";
 import {
   ActionListPanelProps,
-  DicionaryType,
+  DictionaryType,
   ListDisplayItem,
   QueryType,
   TranslationType,
@@ -40,10 +40,11 @@ import {
 import { checkIsLingueeListItem, checkIsTranslationType, checkIsYoudaoDictionaryListItem } from "./utils";
 
 const queryWebItemTypes = [
-  DicionaryType.Youdao,
-  DicionaryType.Linguee,
-  DicionaryType.Eudic,
+  DictionaryType.Youdao,
+  DictionaryType.Linguee,
+  DictionaryType.Eudic,
   TranslationType.DeepL,
+  TranslationType.DeepLX,
   TranslationType.Google,
   TranslationType.Baidu,
   TranslationType.Volcano,
@@ -445,6 +446,11 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
       webUrl = getDeepLWebTranslateURL(wordInfo);
       break;
     }
+    case TranslationType.DeepLX: {
+      // DeepLX uses the same web interface as DeepL
+      webUrl = getDeepLWebTranslateURL(wordInfo);
+      break;
+    }
     case TranslationType.Baidu: {
       webUrl = getBaiduWebTranslateURL(wordInfo);
       break;
@@ -453,15 +459,15 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
       webUrl = getVolcanoWebTranslateURL(wordInfo);
       break;
     }
-    case DicionaryType.Linguee: {
+    case DictionaryType.Linguee: {
       webUrl = getLingueeWebDictionaryURL(wordInfo);
       break;
     }
-    case DicionaryType.Youdao: {
+    case DictionaryType.Youdao: {
       webUrl = getYoudaoWebDictionaryURL(wordInfo);
       break;
     }
-    case DicionaryType.Eudic: {
+    case DictionaryType.Eudic: {
       webUrl = getEudicWebDictionaryURL(wordInfo);
       break;
     }

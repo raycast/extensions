@@ -1,7 +1,7 @@
 import { VPCGW } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
 import { fetchAllZones } from 'helpers/fetchLocalities'
-import { useAPI } from 'providers'
+import { useAPI } from 'helpers/useAPI'
 
 type DataLoaderOptions<T> = Parameters<typeof useDataLoader<T>>[2]
 

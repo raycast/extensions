@@ -7,7 +7,14 @@
   "author": "fedevitaledev",
   "contributors": [
     "peterdev22",
-    "danpalmer"
+    "danpalmer",
+    "itsjustxan",
+    "Shpigford",
+    "urwrstkn8mare",
+    "michalzuch",
+    "validate",
+    "hrishabhn",
+    "bogdan_bucur"
   ],
   "license": "MIT",
   "keywords": [
@@ -16,6 +23,7 @@
     "media"
   ],
   "scripts": {
+    "publish": "npx @raycast/api@latest publish",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
@@ -43,14 +51,30 @@
           "value": "25"
         }
       ]
+    },
+    {
+      "type": "checkbox",
+      "required": false,
+      "name": "disableHUD",
+      "description": "Disable HUD notifications",
+      "label": "Disable HUD"
     }
   ],
   "commands": [
+    {
+      "name": "toggle-repeat",
+      "title": "Toggle Repeat",
+      "subtitle": "Apple Music",
+      "description": "Toggle Repeat",
+      "disabledByDefault": false,
+      "mode": "no-view"
+    },
     {
       "name": "toggle-shuffle",
       "title": "Toggle Shuffle",
       "subtitle": "Apple Music",
       "description": "Toggle Shuffle",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -58,11 +82,12 @@
       "title": "Reveal Track",
       "subtitle": "Apple Music",
       "description": "Reveal current track inside the Music app",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
       "name": "toggle-play-pause",
-      "title": "Toggle Play/Pause",
+      "title": "Toggle Play or Pause",
       "subtitle": "Apple Music",
       "description": "Toggle play or pause of current track in Music.",
       "mode": "no-view"
@@ -72,6 +97,7 @@
       "title": "Play",
       "subtitle": "Apple Music",
       "description": "Play current track in Music.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -79,6 +105,7 @@
       "title": "Pause",
       "subtitle": "Apple Music",
       "description": "Pause current track in Music.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -100,13 +127,32 @@
       "title": "Currently Playing Track",
       "subtitle": "Apple Music",
       "description": "Get info about currently playing track.",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "interval": "30s"
+    },
+    {
+      "name": "remove-current-playing-from-current-playlist",
+      "title": "Remove Current Track from Current Playlist",
+      "subtitle": "Apple Music",
+      "description": "Remove the currently playing track from the current playlist and skip to the next track.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
-      "name": "love",
-      "title": "Love Track",
+      "name": "remove-current-playing-from-library",
+      "title": "Remove Current Track from Library",
       "subtitle": "Apple Music",
-      "description": "Love currently playing track.",
+      "description": "Remove the currently playing track from the Library and skip to the next track.",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite",
+      "title": "Favorite Track",
+      "subtitle": "Apple Music",
+      "description": "Favorite currently playing track.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -114,6 +160,15 @@
       "title": "Dislike Track",
       "subtitle": "Apple Music",
       "description": "Dislike currently playing track.",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike-skip",
+      "title": "Dislike and Skip Track",
+      "subtitle": "Apple Music",
+      "description": "Dislike and skip currently playing track.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -124,10 +179,11 @@
       "mode": "no-view"
     },
     {
-      "name": "love-and-add-to-library",
-      "title": "Love and Add to Library",
+      "name": "favorite-and-add-to-library",
+      "title": "Favorite and Add to Library",
       "subtitle": "Apple Music",
-      "description": "Love and add currently playing track to your library.",
+      "description": "Favorite and add currently playing track to your library.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -135,6 +191,7 @@
       "title": "Add to Playlist",
       "subtitle": "Apple Music",
       "description": "Add currently playing track to a playlist",
+      "disabledByDefault": true,
       "keywords": [
         "playlist"
       ],
@@ -145,6 +202,7 @@
       "title": "Start Playlist",
       "subtitle": "Apple Music",
       "description": "Start any of your playlists.",
+      "disabledByDefault": true,
       "keywords": [
         "playlist"
       ],
@@ -155,6 +213,7 @@
       "title": "Play Library Track",
       "subtitle": "Apple Music",
       "description": "Search and start a track from your library.",
+      "disabledByDefault": true,
       "keywords": [
         "track"
       ],
@@ -165,6 +224,7 @@
       "title": "Play Library Album",
       "subtitle": "Apple Music",
       "description": "Search and start an album from your library.",
+      "disabledByDefault": true,
       "keywords": [
         "album"
       ],
@@ -175,6 +235,7 @@
       "title": "Rate Track",
       "subtitle": "Apple Music",
       "description": "Rate currently playing track.",
+      "disabledByDefault": true,
       "mode": "view",
       "keywords": [
         "track",
@@ -186,6 +247,7 @@
       "title": "Set Volume",
       "subtitle": "Apple Music",
       "description": "Set Music volume",
+      "disabledByDefault": true,
       "mode": "view",
       "keywords": [
         "volume",
@@ -205,6 +267,7 @@
       "title": "Volume Up",
       "subtitle": "Apple Music",
       "description": "Increase Music volume",
+      "disabledByDefault": true,
       "mode": "no-view",
       "keywords": [
         "volume",
@@ -217,6 +280,7 @@
       "title": "Volume Down",
       "subtitle": "Apple Music",
       "description": "Decrease Music volume",
+      "disabledByDefault": true,
       "mode": "no-view",
       "keywords": [
         "volume",
@@ -225,22 +289,1014 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-volume",
+      "title": "Get Volume",
+      "description": "Get the current volume of Apple Music."
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "description": "Set the volume of Apple Music."
+    },
+    {
+      "name": "add-to-library",
+      "title": "Add to Library",
+      "description": "Add the currently playing track to your library."
+    },
+    {
+      "name": "add-to-playlist",
+      "title": "Add to Playlist",
+      "description": "Add the currently playing track to a playlist."
+    },
+    {
+      "name": "get-playlists",
+      "title": "Get Playlists",
+      "description": "Retrieve your available playlists grouped by type."
+    },
+    {
+      "name": "get-currently-playing",
+      "title": "Get Currently Playing",
+      "description": "Get details of the currently playing track in Apple Music."
+    },
+    {
+      "name": "get-favorite-status",
+      "title": "Get Favorite Status",
+      "description": "Get the favorite status of currently playing track in Apple Music."
+    },
+    {
+      "name": "toggle-favorite",
+      "title": "Toggle Favorite",
+      "description": "Toggle favorite status of currently playing track in Apple Music."
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "description": "Skips to the next track in Apple Music."
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "description": "Rewinds to the previous track in Apple Music."
+    },
+    {
+      "name": "get-dislike-status",
+      "title": "Get Dislike Status",
+      "description": "Get the dislike status of currently playing track in Apple Music."
+    },
+    {
+      "name": "toggle-dislike",
+      "title": "Toggle Dislike",
+      "description": "Toggle dislike status of currently playing track in Apple Music."
+    },
+    {
+      "name": "pause",
+      "title": "Pause Playback",
+      "description": "Pauses the playback in Apple Music."
+    },
+    {
+      "name": "play",
+      "title": "Play",
+      "description": "Plays the currently playing track in Apple Music."
+    },
+    {
+      "name": "play-library-album",
+      "title": "Play Library Album",
+      "description": "Play a library album by name. Supports shuffle mode."
+    },
+    {
+      "name": "play-library-track",
+      "title": "Play Library Track",
+      "description": "Play a specific track from your library by track ID."
+    },
+    {
+      "name": "get-library-albums",
+      "title": "Get Library Albums",
+      "description": "Retrieve albums from your music library, with optional search."
+    },
+    {
+      "name": "get-library-tracks",
+      "title": "Get Library Tracks",
+      "description": "Retrieve tracks from your music library, with optional search."
+    },
+    {
+      "name": "start-playlist",
+      "title": "Start Playlist",
+      "description": "Start a playlist by name. Supports shuffle mode."
+    },
+    {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "description": "Toggle shuffle mode in Apple Music."
+    },
+    {
+      "name": "get-current-shuffle",
+      "title": "Get Current Shuffle",
+      "description": "Get the current shuffle mode in Apple Music."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "set-volume",
+              "arguments": {
+                "volume": 75
+              }
+            }
+          }
+        ],
+        "input": "@music Set volume to 75%",
+        "mocks": {
+          "set-volume": {
+            "_tag": "Right",
+            "right": {
+              "message": "Volume set to 75"
+            }
+          }
+        }
+      },
+      {
+        "input": "@music What is the volume at the moment",
+        "mocks": {
+          "get-volume": {
+            "volume": {
+              "_tag": "Right",
+              "right": 100
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-volume"
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-shuffle",
+              "arguments": {}
+            }
+          }
+        ],
+        "input": "@music Get current shuffle status",
+        "mocks": {
+          "get-current-shuffle": "Current shuffle is Off"
+        }
+      },
+      {
+        "mocks": {
+          "toggle-shuffle": "Shuffle On"
+        },
+        "input": "@music Toggle shuffle",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "toggle-shuffle",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "get-current-shuffle": "Current shuffle is On"
+        },
+        "input": "@music Toggle shuffle on",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-shuffle",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "get-current-shuffle": "Current shuffle is On",
+          "toggle-shuffle": "Shuffle Off"
+        },
+        "input": "@music Toggle shuffle off",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-shuffle",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "toggle-shuffle"
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-playlists",
+              "arguments": {
+                "kind": "all"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "start-playlist",
+              "arguments": {
+                "playlistId": "13264"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-playlists": {
+            "_tag": "Right",
+            "right": {
+              "library": [],
+              "user": [
+                {
+                  "id": "14281",
+                  "kind": "user playlist",
+                  "count": "64",
+                  "name": "My Shazam Tracks",
+                  "time": "5:14:28",
+                  "duration": "18868"
+                },
+                {
+                  "id": "29940",
+                  "kind": "user playlist",
+                  "count": "10",
+                  "name": "Raycast DJ",
+                  "time": "34:20",
+                  "duration": "2060"
+                }
+              ],
+              "subscription": [
+                {
+                  "id": "12838",
+                  "kind": "subscription playlist",
+                  "count": "300",
+                  "name": "BEATstrumentals",
+                  "time": "11:43:07",
+                  "duration": "42187"
+                },
+                {
+                  "id": "13139",
+                  "kind": "subscription playlist",
+                  "count": "25",
+                  "name": "Chill Mix",
+                  "time": "1:29:50",
+                  "duration": "5390"
+                },
+                {
+                  "id": "13165",
+                  "kind": "subscription playlist",
+                  "count": "98",
+                  "name": "Dance in Spatial Audio",
+                  "time": "5:07:51",
+                  "duration": "18471"
+                },
+                {
+                  "id": "13264",
+                  "kind": "subscription playlist",
+                  "count": "22",
+                  "name": "deadmau5 Essentials",
+                  "time": "2:11:28",
+                  "duration": "7888"
+                },
+                {
+                  "id": "13287",
+                  "kind": "subscription playlist",
+                  "count": "250",
+                  "name": "Electronic in Spatial Audio",
+                  "time": "17:16:25",
+                  "duration": "62185"
+                },
+                {
+                  "id": "13616",
+                  "kind": "subscription playlist",
+                  "count": "96",
+                  "name": "Hip-Hop in Spatial Audio",
+                  "time": "4:26:05",
+                  "duration": "15965"
+                },
+                {
+                  "id": "13713",
+                  "kind": "subscription playlist",
+                  "count": "495",
+                  "name": "Made for Spatial Audio",
+                  "time": "1:05:42:24",
+                  "duration": "106944"
+                },
+                {
+                  "id": "14209",
+                  "kind": "subscription playlist",
+                  "count": "20",
+                  "name": "Metro Boomin Essentials",
+                  "time": "1:08:49",
+                  "duration": "4129"
+                },
+                {
+                  "id": "14230",
+                  "kind": "subscription playlist",
+                  "count": "50",
+                  "name": "Metro Boomin: The Producers",
+                  "time": "3:16:21",
+                  "duration": "11781"
+                },
+                {
+                  "id": "14344",
+                  "kind": "subscription playlist",
+                  "count": "25",
+                  "name": "New Music Mix",
+                  "time": "1:34:28",
+                  "duration": "5668"
+                },
+                {
+                  "id": "14875",
+                  "kind": "subscription playlist",
+                  "count": "31",
+                  "name": "Selects: salute",
+                  "time": "1:54:20",
+                  "duration": "6860"
+                },
+                {
+                  "id": "14907",
+                  "kind": "subscription playlist",
+                  "count": "51",
+                  "name": "Timbaland: The Producers",
+                  "time": "3:44:26",
+                  "duration": "13466"
+                }
+              ]
+            }
+          },
+          "start-playlist": "Playlist started successfully"
+        },
+        "input": "@music play deadmau5 Essentials playlist"
+      },
+      {
+        "mocks": {
+          "start-playlist": "Playlist started successfully",
+          "get-playlists": {
+            "_tag": "Right",
+            "right": {
+              "library": [],
+              "user": [
+                {
+                  "id": "14281",
+                  "kind": "user playlist",
+                  "count": "64",
+                  "name": "My Shazam Tracks",
+                  "time": "5:14:28",
+                  "duration": "18868"
+                },
+                {
+                  "id": "29940",
+                  "kind": "user playlist",
+                  "count": "10",
+                  "name": "Raycast DJ",
+                  "time": "34:20",
+                  "duration": "2060"
+                }
+              ],
+              "subscription": [
+                {
+                  "id": "12838",
+                  "kind": "subscription playlist",
+                  "count": "300",
+                  "name": "BEATstrumentals",
+                  "time": "11:43:07",
+                  "duration": "42187"
+                },
+                {
+                  "id": "13139",
+                  "kind": "subscription playlist",
+                  "count": "25",
+                  "name": "Chill Mix",
+                  "time": "1:29:50",
+                  "duration": "5390"
+                },
+                {
+                  "id": "13264",
+                  "kind": "subscription playlist",
+                  "count": "22",
+                  "name": "deadmau5 Essentials",
+                  "time": "2:11:28",
+                  "duration": "7888"
+                },
+                {
+                  "id": "13564",
+                  "kind": "subscription playlist",
+                  "count": "25",
+                  "name": "Get Up! Mix",
+                  "time": "1:56:57",
+                  "duration": "7017"
+                },
+                {
+                  "id": "13590",
+                  "kind": "subscription playlist",
+                  "count": "25",
+                  "name": "Heavy Rotation Mix",
+                  "time": "1:38:15",
+                  "duration": "5895"
+                },
+                {
+                  "id": "13616",
+                  "kind": "subscription playlist",
+                  "count": "96",
+                  "name": "Hip-Hop in Spatial Audio",
+                  "time": "4:26:05",
+                  "duration": "15965"
+                },
+                {
+                  "id": "13713",
+                  "kind": "subscription playlist",
+                  "count": "495",
+                  "name": "Made for Spatial Audio",
+                  "time": "1:05:42:24",
+                  "duration": "106944"
+                },
+                {
+                  "id": "14209",
+                  "kind": "subscription playlist",
+                  "count": "20",
+                  "name": "Metro Boomin Essentials",
+                  "time": "1:08:49",
+                  "duration": "4129"
+                },
+                {
+                  "id": "14230",
+                  "kind": "subscription playlist",
+                  "count": "50",
+                  "name": "Metro Boomin: The Producers",
+                  "time": "3:16:21",
+                  "duration": "11781"
+                },
+                {
+                  "id": "14875",
+                  "kind": "subscription playlist",
+                  "count": "31",
+                  "name": "Selects: salute",
+                  "time": "1:54:20",
+                  "duration": "6860"
+                },
+                {
+                  "id": "14907",
+                  "kind": "subscription playlist",
+                  "count": "51",
+                  "name": "Timbaland: The Producers",
+                  "time": "3:44:26",
+                  "duration": "13466"
+                }
+              ]
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-playlists",
+              "arguments": {
+                "kind": "all"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "start-playlist",
+              "arguments": {
+                "playlistId": "14281"
+              }
+            }
+          }
+        ],
+        "input": "@music Start playlist Shazam"
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-playlists",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "playlistId": "14907"
+              },
+              "name": "start-playlist"
+            }
+          }
+        ],
+        "mocks": {
+          "get-playlists": {
+            "_tag": "Right",
+            "right": {
+              "library": [],
+              "user": [
+                {
+                  "id": "14281",
+                  "kind": "user playlist",
+                  "count": "62",
+                  "name": "My Shazam Tracks",
+                  "time": "5:01:04",
+                  "duration": "18064"
+                }
+              ],
+              "subscription": [
+                {
+                  "id": "13139",
+                  "kind": "subscription playlist",
+                  "count": "25",
+                  "name": "Chill Mix",
+                  "time": "1:29:50",
+                  "duration": "5390"
+                },
+                {
+                  "id": "13165",
+                  "kind": "subscription playlist",
+                  "count": "98",
+                  "name": "Dance in Spatial Audio",
+                  "time": "5:07:51",
+                  "duration": "18471"
+                },
+                {
+                  "id": "13264",
+                  "kind": "subscription playlist",
+                  "count": "22",
+                  "name": "deadmau5 Essentials",
+                  "time": "2:11:28",
+                  "duration": "7888"
+                },
+                {
+                  "id": "14875",
+                  "kind": "subscription playlist",
+                  "count": "31",
+                  "name": "Selects: salute",
+                  "time": "1:54:20",
+                  "duration": "6860"
+                },
+                {
+                  "id": "14907",
+                  "kind": "subscription playlist",
+                  "count": "51",
+                  "name": "Timbaland: The Producers",
+                  "time": "3:44:26",
+                  "duration": "13466"
+                }
+              ]
+            }
+          },
+          "start-playlist": "Playlist started successfully"
+        },
+        "input": "@music Play Timbaland playlist"
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-library-albums",
+              "arguments": {
+                "search": "ORMAN KANUNLARI"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "play-library-album",
+              "arguments": {
+                "album": "ORMAN KANUNLARI"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-library-albums": {
+            "_tag": "Right",
+            "right": [
+              {
+                "id": "9832",
+                "count": "10",
+                "name": "ORMAN KANUNLARI",
+                "artist": "Ben Fero"
+              }
+            ]
+          },
+          "play-library-album": {
+            "_tag": "Right",
+            "right": ""
+          }
+        },
+        "input": "@music Play the album ORMAN KANUNLARI"
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-currently-playing",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-dislike-status",
+              "arguments": {
+                "track": "Jenny from the Block (Track Masters Remix featuring Styles & Jadakiss)"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "toggle-dislike",
+              "arguments": {
+                "track": "Jenny from the Block (Track Masters Remix featuring Styles & Jadakiss)"
+              }
+            }
+          }
+        ],
+        "input": "@music Dislike currently playing",
+        "mocks": {
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Jenny from the Block (Track Masters Remix featuring Styles & Jadakiss)",
+              "artist": "Jennifer Lopez"
+            }
+          },
+          "toggle-dislike": {
+            "_tag": "Right",
+            "right": ""
+          },
+          "get-dislike-status": {
+            "_tag": "Right",
+            "right": "false"
+          }
+        }
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-currently-playing"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "track": "Jenny from the Block (Track Masters Remix featuring Styles & Jadakiss)"
+              },
+              "name": "get-dislike-status"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "dislike": false,
+                "track": "Jenny from the Block (Track Masters Remix featuring Styles & Jadakiss)"
+              },
+              "name": "toggle-dislike"
+            }
+          }
+        ],
+        "mocks": {
+          "toggle-dislike": {
+            "_tag": "Right",
+            "right": ""
+          },
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Jenny from the Block (Track Masters Remix featuring Styles & Jadakiss)",
+              "artist": "Jennifer Lopez"
+            }
+          },
+          "get-dislike-status": {
+            "_tag": "Right",
+            "right": "true"
+          }
+        },
+        "input": "@music Undislike currently playing"
+      },
+      {
+        "input": "@music Undislike the current track",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-currently-playing",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "track": "ALL RED"
+              },
+              "name": "get-dislike-status"
+            }
+          }
+        ],
+        "mocks": {
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "ALL RED",
+              "artist": "Playboi Carti"
+            }
+          },
+          "get-dislike-status": {
+            "_tag": "Right",
+            "right": "false"
+          }
+        }
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-currently-playing",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "track": "Mertel Kasetçilik (Enstrümantal)"
+              },
+              "name": "get-favorite-status"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "toggle-favorite",
+              "arguments": {
+                "track": "Mertel Kasetçilik (Enstrümantal)"
+              }
+            }
+          }
+        ],
+        "input": "@music Favorite currently playing track",
+        "mocks": {
+          "get-favorite-status": {
+            "_tag": "Right",
+            "right": "false"
+          },
+          "toggle-favorite": {
+            "_tag": "Right",
+            "right": ""
+          },
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Mertel Kasetçilik (Enstrümantal)",
+              "artist": "Farazi"
+            }
+          }
+        }
+      },
+      {
+        "input": "@music Unfavorite the current track",
+        "mocks": {
+          "get-favorite-status": {
+            "_tag": "Right",
+            "right": "false"
+          },
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Mertel Kasetçilik (Enstrümantal)",
+              "artist": "Farazi"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-currently-playing",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-favorite-status",
+              "arguments": {
+                "track": "Mertel Kasetçilik (Enstrümantal)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@music Pause",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-currently-playing"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "pause",
+              "arguments": {
+                "track": "Mertel Kasetçilik (Enstrümantal)"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Mertel Kasetçilik (Enstrümantal)",
+              "artist": "Farazi"
+            }
+          },
+          "pause": {
+            "_tag": "Right",
+            "right": ""
+          }
+        }
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-currently-playing",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "play",
+              "arguments": {
+                "track": "Mertel Kasetçilik (Enstrümantal)"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play": {
+            "_tag": "Right",
+            "right": ""
+          },
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Mertel Kasetçilik (Enstrümantal)",
+              "artist": "Farazi"
+            }
+          }
+        },
+        "input": "@music Unpause"
+      },
+      {
+        "mocks": {
+          "next-track": {
+            "_tag": "Right",
+            "right": ""
+          },
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Mercedes",
+              "artist": "deadmau5"
+            }
+          }
+        },
+        "input": "@music Next track please",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-currently-playing",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "next-track",
+              "arguments": {
+                "track": "Mercedes"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@music Add currently playing track into Library",
+        "mocks": {
+          "add-to-library": {
+            "_tag": "Right",
+            "right": ""
+          },
+          "get-library-tracks": {
+            "_tag": "Right",
+            "right": [
+              {}
+            ]
+          },
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Volver",
+              "artist": "Thylacine"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-currently-playing",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-library-tracks",
+              "arguments": {
+                "search": "Volver"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "track": "Volver"
+              },
+              "name": "add-to-library"
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-currently-playing",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "add-to-library",
+              "arguments": {
+                "track": "Ain't Nobody (Loves Me Better) [feat. Jasmine Thompson]"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "add-to-library": {
+            "_tag": "Right",
+            "right": ""
+          },
+          "get-currently-playing": {
+            "_tag": "Right",
+            "right": {
+              "name": "Ain't Nobody (Loves Me Better) [feat. Jasmine Thompson]",
+              "artist": "Felix Jaehn"
+            }
+          }
+        },
+        "input": "@music Add currently playing track into Library, without checking existence in Library"
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.47.2",
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.0",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
     "run-applescript": "^6.0.0",
     "ts-pattern": "^4.2.1"
   },
   "devDependencies": {
-    "@rawnly/eslint-config-ts": "^0.0.2",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.3.0",
+    "@types/react": "^18.2.11",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^8.14.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
-  }
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "react-devtools": "^5.2.0"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

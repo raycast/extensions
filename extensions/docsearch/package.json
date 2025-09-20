@@ -14,19 +14,43 @@
   "license": "MIT",
   "contributors": [
     "AnishDe12020",
-    "pomdtr"
+    "pomdtr",
+    "janosorcsik"
   ],
   "commands": [
     {
-      "name": "docsearch",
-      "title": "Search Documentation",
+      "name": "antd",
+      "icon": "/logo/antd.png",
+      "title": "Antd",
       "subtitle": "DocSearch",
-      "description": "Search documentation",
+      "description": "Search Antd documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "antdv",
+      "icon": "/logo/antdv.png",
+      "title": "Antdv",
+      "subtitle": "DocSearch",
+      "description": "Search Antdv documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
       "mode": "view"
     },
     {
       "name": "apollo",
-      "icon": "logo/apollo.png",
+      "icon": "/logo/apollo.png",
       "title": "Apollo",
       "subtitle": "DocSearch",
       "description": "Search Apollo documentation",
@@ -41,7 +65,7 @@
     },
     {
       "name": "arthas",
-      "icon": "logo/arthas.ico",
+      "icon": "/logo/arthas.png",
       "title": "Arthas",
       "subtitle": "DocSearch",
       "description": "Search Arthas documentation",
@@ -55,8 +79,23 @@
       "mode": "view"
     },
     {
+      "name": "astro",
+      "icon": "/logo/astro.png",
+      "title": "Astro",
+      "subtitle": "DocSearch",
+      "description": "Search Astro documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
       "name": "bootstrap",
-      "icon": "logo/bootstrap.ico",
+      "icon": "/logo/bootstrap.png",
       "title": "Bootstrap",
       "subtitle": "DocSearch",
       "description": "Search Bootstrap documentation",
@@ -71,7 +110,7 @@
     },
     {
       "name": "clerk",
-      "icon": "logo/clerk.png",
+      "icon": "/logo/clerk.png",
       "title": "Clerk",
       "subtitle": "DocSearch",
       "description": "Search Clerk documentation",
@@ -85,8 +124,23 @@
       "mode": "view"
     },
     {
+      "name": "dubbo",
+      "icon": "/logo/dubbo.png",
+      "title": "Dubbo",
+      "subtitle": "DocSearch",
+      "description": "Search Dubbo documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
       "name": "echarts",
-      "icon": "logo/echarts.png",
+      "icon": "/logo/echarts.png",
       "title": "Echarts",
       "subtitle": "DocSearch",
       "description": "Search Echarts documentation",
@@ -100,11 +154,26 @@
       "mode": "view"
     },
     {
-      "name": "echarts_zh-Hans",
-      "icon": "logo/echarts.png",
-      "title": "Echarts(zh-Hans)",
+      "name": "flet",
+      "icon": "/logo/flet.png",
+      "title": "Flet",
       "subtitle": "DocSearch",
-      "description": "Search Echarts(zh-Hans) documentation",
+      "description": "Search Flet documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "gitbook",
+      "icon": "/logo/gitbook.png",
+      "title": "GitBook",
+      "subtitle": "DocSearch",
+      "description": "Search GitBook documentation",
       "arguments": [
         {
           "name": "search",
@@ -116,7 +185,7 @@
     },
     {
       "name": "homebrew",
-      "icon": "logo/homebrew.png",
+      "icon": "/logo/homebrew.png",
       "title": "Homebrew",
       "subtitle": "DocSearch",
       "description": "Search Homebrew documentation",
@@ -130,11 +199,71 @@
       "mode": "view"
     },
     {
-      "name": "laravel9",
-      "icon": "logo/laravel.png",
-      "title": "Laravel 9.x",
+      "name": "ipfs",
+      "icon": "/logo/ipfs.png",
+      "title": "IPFS",
       "subtitle": "DocSearch",
-      "description": "Search Laravel 9.x documentation",
+      "description": "Search IPFS documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "laravel",
+      "icon": "/logo/laravel.png",
+      "title": "Laravel",
+      "subtitle": "DocSearch",
+      "description": "Search Laravel documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "nuxt",
+      "icon": "/logo/nuxt.png",
+      "title": "Nuxt",
+      "subtitle": "DocSearch",
+      "description": "Search Nuxt documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "nvchad",
+      "icon": "/logo/nvchad.png",
+      "title": "NvChad",
+      "subtitle": "DocSearch",
+      "description": "Search NvChad documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "pnpm",
+      "icon": "/logo/pnpm.png",
+      "title": "Pnpm",
+      "subtitle": "DocSearch",
+      "description": "Search Pnpm documentation",
       "arguments": [
         {
           "name": "search",
@@ -146,7 +275,7 @@
     },
     {
       "name": "prettier",
-      "icon": "logo/prettier.png",
+      "icon": "/logo/prettier.png",
       "title": "Prettier",
       "subtitle": "DocSearch",
       "description": "Search Prettier documentation",
@@ -160,53 +289,8 @@
       "mode": "view"
     },
     {
-      "name": "react",
-      "icon": "logo/react.ico",
-      "title": "React",
-      "subtitle": "DocSearch",
-      "description": "Search React documentation",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Search...",
-          "type": "text"
-        }
-      ],
-      "mode": "view"
-    },
-    {
-      "name": "react_zh-Hans",
-      "icon": "logo/react.ico",
-      "title": "React(zh-Hans)",
-      "subtitle": "DocSearch",
-      "description": "Search React(zh-Hans) documentation",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Search...",
-          "type": "text"
-        }
-      ],
-      "mode": "view"
-    },
-    {
-      "name": "reactnative",
-      "icon": "logo/react.ico",
-      "title": "React Native",
-      "subtitle": "DocSearch",
-      "description": "Search React Native documentation",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Search...",
-          "type": "text"
-        }
-      ],
-      "mode": "view"
-    },
-    {
       "name": "rsshub",
-      "icon": "logo/rsshub.png",
+      "icon": "/logo/rsshub.png",
       "title": "RSSHub",
       "subtitle": "DocSearch",
       "description": "Search RSSHub documentation",
@@ -220,11 +304,71 @@
       "mode": "view"
     },
     {
-      "name": "supabase",
-      "icon": "logo/supabase.png",
-      "title": "Supabase",
+      "name": "raycast",
+      "icon": "/logo/raycast.png",
+      "title": "Raycast",
       "subtitle": "DocSearch",
-      "description": "Search Supabase documentation",
+      "description": "Search Raycast documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "react",
+      "icon": "/logo/react.png",
+      "title": "React",
+      "subtitle": "DocSearch",
+      "description": "Search React documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "react_bootstrap",
+      "icon": "/logo/react_bootstrap.png",
+      "title": "React Bootstrap",
+      "subtitle": "DocSearch",
+      "description": "Search React Bootstrap documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "react_native",
+      "icon": "/logo/react.png",
+      "title": "React Native",
+      "subtitle": "DocSearch",
+      "description": "Search React Native documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "remix",
+      "icon": "/logo/remix.png",
+      "title": "Remix",
+      "subtitle": "DocSearch",
+      "description": "Search Remix documentation",
       "arguments": [
         {
           "name": "search",
@@ -236,7 +380,7 @@
     },
     {
       "name": "slidev",
-      "icon": "logo/slidev.png",
+      "icon": "/logo/slidev.png",
       "title": "Slidev",
       "subtitle": "DocSearch",
       "description": "Search Slidev documentation",
@@ -250,11 +394,11 @@
       "mode": "view"
     },
     {
-      "name": "slidev_zh-Hans",
-      "icon": "logo/slidev.png",
-      "title": "Slidev(zh-Hans)",
+      "name": "taro",
+      "icon": "/logo/taro.png",
+      "title": "Taro",
       "subtitle": "DocSearch",
-      "description": "Search Slidev(zh-Hans) documentation",
+      "description": "Search Taro documentation",
       "arguments": [
         {
           "name": "search",
@@ -265,11 +409,41 @@
       "mode": "view"
     },
     {
-      "name": "tailwindcss3",
-      "icon": "logo/tailwindcss.png",
-      "title": "TailwindCSS v3",
+      "name": "supabase",
+      "icon": "/logo/supabase.png",
+      "title": "Supabase",
       "subtitle": "DocSearch",
-      "description": "Search TailwindCss documentation",
+      "description": "Search Supabase documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "tailwindcss",
+      "icon": "/logo/tailwindcss.png",
+      "title": "TailwindCSS",
+      "subtitle": "DocSearch",
+      "description": "Search TailwindCSS documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "tauri",
+      "icon": "/logo/tauri.png",
+      "title": "Tauri",
+      "subtitle": "DocSearch",
+      "description": "Search Tauri documentation",
       "arguments": [
         {
           "name": "search",
@@ -281,7 +455,7 @@
     },
     {
       "name": "unidata",
-      "icon": "logo/unidata.png",
+      "icon": "/logo/unidata.png",
       "title": "Unidata",
       "subtitle": "DocSearch",
       "description": "Search Unidata documentation",
@@ -296,7 +470,7 @@
     },
     {
       "name": "vite",
-      "icon": "logo/vite.png",
+      "icon": "/logo/vite.png",
       "title": "Vite",
       "subtitle": "DocSearch",
       "description": "Search Vite documentation",
@@ -310,23 +484,8 @@
       "mode": "view"
     },
     {
-      "name": "vite_zh-Hans",
-      "icon": "logo/vite.png",
-      "title": "Vite(zh-Hans)",
-      "subtitle": "DocSearch",
-      "description": "Search Vite(zh-Hans) documentation",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Search...",
-          "type": "text"
-        }
-      ],
-      "mode": "view"
-    },
-    {
       "name": "vitest",
-      "icon": "logo/vitest.png",
+      "icon": "/logo/vitest.png",
       "title": "Vitest",
       "subtitle": "DocSearch",
       "description": "Search Vitest documentation",
@@ -340,11 +499,11 @@
       "mode": "view"
     },
     {
-      "name": "vue3",
-      "icon": "logo/vue.png",
-      "title": "Vue3",
+      "name": "vue_router",
+      "icon": "/logo/vue.png",
+      "title": "Vue Router",
       "subtitle": "DocSearch",
-      "description": "Search Vue3 documentation",
+      "description": "Search Vue Router documentation",
       "arguments": [
         {
           "name": "search",
@@ -355,26 +514,11 @@
       "mode": "view"
     },
     {
-      "name": "vue3_zh-Hans",
-      "icon": "logo/vue.png",
-      "title": "Vue3(zh-Hans)",
+      "name": "vue",
+      "icon": "/logo/vue.png",
+      "title": "Vue",
       "subtitle": "DocSearch",
-      "description": "Search Vue3(zh-Hans) documentation",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Search...",
-          "type": "text"
-        }
-      ],
-      "mode": "view"
-    },
-    {
-      "name": "vueRouter4",
-      "icon": "logo/vue.png",
-      "title": "Vue Router4",
-      "subtitle": "DocSearch",
-      "description": "Search Vue Router4 documentation",
+      "description": "Search Vue documentation",
       "arguments": [
         {
           "name": "search",
@@ -386,7 +530,7 @@
     },
     {
       "name": "vueuse",
-      "icon": "logo/vueuse.png",
+      "icon": "/logo/vueuse.png",
       "title": "VueUse",
       "subtitle": "DocSearch",
       "description": "Search VueUse documentation",
@@ -400,11 +544,11 @@
       "mode": "view"
     },
     {
-      "name": "vuepress1",
-      "icon": "logo/vuepress.png",
-      "title": "Vuepress v1",
+      "name": "vuepress",
+      "icon": "/logo/vuepress.png",
+      "title": "Vuepress",
       "subtitle": "DocSearch",
-      "description": "Search Vuepress v1 documentation",
+      "description": "Search Vuepress documentation",
       "arguments": [
         {
           "name": "search",
@@ -415,11 +559,11 @@
       "mode": "view"
     },
     {
-      "name": "vuepress2",
-      "icon": "logo/vuepress.png",
-      "title": "Vuepress v2",
+      "name": "elementplus",
+      "icon": "/logo/element.png",
+      "title": "ElementPlus",
       "subtitle": "DocSearch",
-      "description": "Search Vuepress v2 documentation",
+      "description": "Search ElementPlus documentation",
       "arguments": [
         {
           "name": "search",
@@ -430,11 +574,11 @@
       "mode": "view"
     },
     {
-      "name": "ipfs",
-      "icon": "logo/ipfs.png",
-      "title": "IPFS",
+      "name": "neovim",
+      "icon": "/logo/nvim.png",
+      "title": "Neovim",
       "subtitle": "DocSearch",
-      "description": "Search IPFS documentation",
+      "description": "Search Neovim documentation",
       "arguments": [
         {
           "name": "search",
@@ -445,11 +589,11 @@
       "mode": "view"
     },
     {
-      "name": "dubbo",
-      "icon": "logo/dubbo.png",
-      "title": "Dubbo",
+      "name": "less",
+      "icon": "/logo/less.png",
+      "title": "Less",
       "subtitle": "DocSearch",
-      "description": "Search Dubbo documentation",
+      "description": "Search Less documentation",
       "arguments": [
         {
           "name": "search",
@@ -460,11 +604,11 @@
       "mode": "view"
     },
     {
-      "name": "pnpm",
-      "icon": "logo/pnpm.png",
-      "title": "pnpm",
+      "name": "sass",
+      "icon": "/logo/sass.png",
+      "title": "Sass",
       "subtitle": "DocSearch",
-      "description": "Search pnpm documentation",
+      "description": "Search Sass documentation",
       "arguments": [
         {
           "name": "search",
@@ -475,11 +619,11 @@
       "mode": "view"
     },
     {
-      "name": "pnpm_zh-Hans",
-      "icon": "logo/pnpm.png",
-      "title": "pnpm(zh-Hans)",
+      "name": "deno",
+      "icon": "/logo/deno.png",
+      "title": "Deno",
       "subtitle": "DocSearch",
-      "description": "Search pnpm documentation",
+      "description": "Search Deno documentation",
       "arguments": [
         {
           "name": "search",
@@ -490,11 +634,11 @@
       "mode": "view"
     },
     {
-      "name": "nuxt",
-      "icon": "logo/nuxt.png",
-      "title": "Nuxt",
+      "name": "typescript",
+      "icon": "/logo/typescript.png",
+      "title": "TypeScript",
       "subtitle": "DocSearch",
-      "description": "Search Nuxt documentation",
+      "description": "Search TypeScript documentation",
       "arguments": [
         {
           "name": "search",
@@ -505,11 +649,11 @@
       "mode": "view"
     },
     {
-      "name": "nuxt3",
-      "icon": "logo/nuxt.png",
-      "title": "Nuxt3",
+      "name": "nextjs",
+      "icon": "/logo/nextjs.png",
+      "title": "NextJS",
       "subtitle": "DocSearch",
-      "description": "Search Nuxt3 documentation",
+      "description": "Search NextJS documentation",
       "arguments": [
         {
           "name": "search",
@@ -520,11 +664,11 @@
       "mode": "view"
     },
     {
-      "name": "react_bootstrap",
-      "icon": "logo/react_bootstrap.png",
-      "title": "React Bootstrap",
+      "name": "masstransit",
+      "icon": "/logo/masstransit.png",
+      "title": "MassTransit",
       "subtitle": "DocSearch",
-      "description": "Search React Bootstrap documentation",
+      "description": "Search MassTransit documentation",
       "arguments": [
         {
           "name": "search",
@@ -535,41 +679,11 @@
       "mode": "view"
     },
     {
-      "name": "gitbook",
-      "icon": "logo/gitbook.png",
-      "title": "GitBook",
+      "name": "pinia",
+      "icon": "/logo/pinia.png",
+      "title": "Pinia",
       "subtitle": "DocSearch",
-      "description": "Search gitbook documentation",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Search...",
-          "type": "text"
-        }
-      ],
-      "mode": "view"
-    },
-    {
-      "name": "raycast",
-      "icon": "logo/raycast.png",
-      "title": "Raycast",
-      "subtitle": "DocSearch",
-      "description": "Search Raycast documentation",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Search...",
-          "type": "text"
-        }
-      ],
-      "mode": "view"
-    },
-    {
-      "name": "remix",
-      "icon": "logo/remix.png",
-      "title": "Remix",
-      "subtitle": "DocSearch",
-      "description": "Search Remix documentation",
+      "description": "Search Pinia documentation",
       "arguments": [
         {
           "name": "search",
@@ -581,23 +695,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "algoliasearch": "^4.14.1"
+    "@raycast/api": "^1.100.3",
+    "algoliasearch": "^4.14.1",
+    "meilisearch": "^0.32.4"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "fix-lint": "ts-node .format/format.ts && prettier -w README.md && ray lint --fix",
+    "generate": "ts-node .factory/generate.ts && ts-node .format/format.ts && prettier -w README.md package.json && ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

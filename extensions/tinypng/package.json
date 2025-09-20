@@ -5,6 +5,9 @@
   "description": "Compress the selected images in Finder with TinyPNG.",
   "icon": "tinypng-icon.png",
   "author": "kawamataryo",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -27,9 +30,27 @@
         {
           "name": "method",
           "placeholder": "fit",
-          "type": "text",
-          "description": "Resize method. Available values are values are 'fit', 'scale', 'cover', 'thumb'",
-          "required": true
+          "type": "dropdown",
+          "description": "Resize method",
+          "required": true,
+          "data": [
+            {
+              "value": "fit",
+              "title": "fit"
+            },
+            {
+              "value": "scale",
+              "title": "scale"
+            },
+            {
+              "value": "cover",
+              "title": "cover"
+            },
+            {
+              "value": "thumb",
+              "title": "thumb"
+            }
+          ]
         },
         {
           "name": "width",
@@ -57,6 +78,14 @@
       "required": true
     },
     {
+      "title": "Destination Folder Path",
+      "name": "destinationFolderPath",
+      "description": "Set Destination Folder path. Specify an absolute path or a relative path from the target file.",
+      "type": "textfield",
+      "required": true,
+      "default": "./compressed-images"
+    },
+    {
       "title": "Options",
       "name": "overwrite",
       "description": "Whether to overwrite the original image file.",
@@ -67,23 +96,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "node-fetch": "^3.2.10",
-    "zod": "^3.20.6"
+    "@raycast/api": "^1.83.1",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.9"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish",
+    "test": "vitest"
   }
 }

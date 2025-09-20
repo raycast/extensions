@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shell-history",
+  "title": "Shell History",
+  "description": "Search shell command history from zsh, bash, and fish.",
+  "icon": "shell-history-icon.png",
+  "author": "koinzhang",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "shell",
+    "history",
+    "zsh",
+    "bash",
+    "command",
+    "terminal",
+    "iterm",
+    "warp"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Shell History",
+      "description": "Search shell command history.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "maxLines",
+          "title": "Max Lines",
+          "description": "The maximum number of lines to display",
+          "type": "dropdown",
+          "default": "500",
+          "required": false,
+          "data": [
+            {
+              "title": "100",
+              "value": "100"
+            },
+            {
+              "title": "300",
+              "value": "300"
+            },
+            {
+              "title": "500",
+              "value": "500"
+            },
+            {
+              "title": "1000",
+              "value": "1000"
+            },
+            {
+              "title": "3000",
+              "value": "3000"
+            },
+            {
+              "title": "5000",
+              "value": "5000"
+            }
+          ]
+        },
+        {
+          "title": "Shell History",
+          "name": "historyTimestamp",
+          "label": "History Timestamp",
+          "description": "Uncheck this option if zsh history isn't displayed correctly and when zsh history doesn't set the HIST_STAMPS flag.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "removeDuplicates",
+          "label": "Remove Duplicates",
+          "description": "Remove duplicate commands",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rememberShellTag",
+          "label": "Remember Shell Tag",
+          "description": "Remember the shell tag",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Set the primary action.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "Paste",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "Paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "Copy"
+            }
+          ]
+        },
+        {
+          "title": "Tips",
+          "name": "showTips",
+          "label": "Show Tips",
+          "description": "Show tips when performing actions",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "displayOrder",
+          "title": "Display Order",
+          "description": "The order in which to display the shell history.",
+          "type": "dropdown",
+          "default": "newest-first",
+          "required": false,
+          "data": [
+            {
+              "title": "Newest First",
+              "value": "newest-first"
+            },
+            {
+              "title": "Oldest First",
+              "value": "oldest-first"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.3",
+    "@raycast/utils": "^1.19.1",
+    "read-last-lines": "^1.8.0",
+    "shell-quote": "^1.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.3",
+    "@types/react": "19.1.2",
+    "@types/shell-quote": "^1.7.5",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

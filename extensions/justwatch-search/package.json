@@ -5,6 +5,10 @@
   "description": "Quickly find where a movie or tv show is streaming.",
   "icon": "command-icon.png",
   "author": "rishabswift",
+  "contributors": [
+    "j3lte",
+    "xmok"
+  ],
   "license": "MIT",
   "categories": [
     "Media"
@@ -13,39 +17,41 @@
     {
       "name": "search-justwatch",
       "title": "Search JustWatch",
+      "subtitle": "Search where a movie or show is available to watch",
       "description": "Search where a movie or show is streaming using JustWatch",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
-    "node-fetch": "^3.2.0"
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3",
-    "prettier": "^2.6.0"
+    "@raycast/eslint-config": "^1.0.11",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "22.5.5",
+    "@types/react": "18.3.8",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint:fix": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   },
   "preferences": [
     {
-      "title": "Show Results",
+      "title": "Show Available Media For:",
       "name": "flatrate",
       "description": "Show streaming services when you use JustWatch Search",
       "required": true,
       "default": true,
       "type": "checkbox",
-      "label": "Available for Streaming (like Netflix)"
+      "label": "Streaming (like Netflix, Disney+, etc.)"
     },
     {
       "name": "free",
@@ -53,21 +59,21 @@
       "required": true,
       "default": true,
       "type": "checkbox",
-      "label": "Available for Free"
+      "label": "Free"
     },
     {
       "name": "buy",
       "description": "Show available buying options when you use JustWatch Search",
       "required": true,
       "type": "checkbox",
-      "label": "Available for Purchase"
+      "label": "Purchase"
     },
     {
       "name": "rent",
       "description": "Show available rental options when you use JustWatch Search",
       "required": true,
       "type": "checkbox",
-      "label": "Available for Rental"
+      "label": "Rent"
     }
   ]
 }

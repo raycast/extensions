@@ -1,51 +1,31 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { statusMap } from "./constants";
-import { MonitorItem, Preferences, MonitorsState } from "./interface";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import { baseUrl, statusMap } from "./constants";
+import { MonitorsState, Preferences } from "./interface";
 import { ucfirst } from "./utils";
 import { ActionCopyUrl, ActionDeleteMonitor } from "./actions";
+import { useFetch } from "@raycast/utils";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<MonitorsState>({ items: [], isLoading: true });
+  const {
+    isLoading,
+    data: monitors,
+    revalidate,
+  } = useFetch<MonitorsState>(`${baseUrl}/monitors`, {
+    headers: { Authorization: `Bearer ${preferences.apiKey}` },
+  });
 
-  useEffect(() => {
-    async function fetchMonitors() {
-      setState((previous) => ({ ...previous, isLoading: true }));
-
-      try {
-        const { data } = await axios.get("https://betteruptime.com/api/v2/monitors", {
-          headers: { Authorization: `Bearer ${preferences.apiKey}` },
-        });
-
-        setState((previous) => ({ ...previous, items: data.data, isLoading: false }));
-      } catch (error) {
-        setState((previous) => ({
-          ...previous,
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-          isLoading: false,
-          items: [],
-        }));
-      }
-    }
-
-    fetchMonitors();
-  }, []);
-
-  useEffect(() => {
-    if (state.error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed loading monitors",
-        message: state.error.response.data.errors,
-      });
-    }
-  }, [state.error]);
+  if (!monitors?.data?.length) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView title="No Monitors" description="You can add a monitor using the 'Add Monitor' command." />
+      </List>
+    );
+  }
 
   return (
-    <List isShowingDetail isLoading={state.isLoading}>
-      {state.items?.map((item: MonitorItem, index: number) => (
+    <List isShowingDetail isLoading={isLoading}>
+      {monitors.data.map((item, index) => (
         <List.Item
           key={index}
           icon={statusMap[item.attributes.status] ?? "🔍"}
@@ -89,15 +69,7 @@ export default function Command() {
             <ActionPanel>
               <Action.OpenInBrowser title="Open URL in Browser" url={item.attributes.url} />
               <ActionCopyUrl url={item.attributes.url} />
-              <ActionDeleteMonitor
-                item={item}
-                onDeleted={() => {
-                  setState((previous) => ({
-                    ...previous,
-                    items: previous.items.filter((_item) => _item.id !== item.id),
-                  }));
-                }}
-              />
+              <ActionDeleteMonitor item={item} onDeleted={() => revalidate()} />
             </ActionPanel>
           }
         />

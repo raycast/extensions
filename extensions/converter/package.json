@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "converter",
   "title": "Converter",
-  "description": "Arbitrary input, direct output. Includes Base converter, Code converter, etc.",
-  "icon": "converter-icon.png",
+  "description": "Arbitrary input, direct output. Includes Base converter, Byte converter, Code converter, etc.",
+  "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "Saafo",
+    "fmkra"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools",
@@ -15,7 +19,7 @@
     {
       "name": "base-converter",
       "title": "Base Converter",
-      "icon": "base-converter-icon.png",
+      "icon": "extension-icon.png",
       "description": "Convert number from any base to any base: decimal, binary, octal, hexadecimal, etc.",
       "mode": "view",
       "preferences": [
@@ -50,51 +54,48 @@
     {
       "name": "code-converter",
       "title": "Code Converter",
-      "icon": "code-converter-icon.png",
+      "icon": "extension-icon.png",
       "description": "Convert between different character encodings: Unicode, Base64, UTF-8, ASCII, &#xXXXX, URL.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "asciiCommaSeparated",
+          "type": "checkbox",
+          "required": false,
+          "label": "Comma separated ASCII",
+          "description": "If disabled, only ASCII characters with code <13 is supported",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "byte-converter",
+      "title": "Byte Converter",
+      "icon": "extension-icon.png",
+      "description": "Convert among different byte unit: b, B, KB, MB, GB, etc.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "autoDetect",
+      "name": "autoPaste",
       "type": "checkbox",
       "required": false,
-      "label": "Auto Detect",
-      "description": "Automatically detects selected text or clipboard when opening commands.",
+      "label": "Auto Paste",
+      "description": "Automatically pastes text from clipboard when opening a command.",
       "default": true
-    },
-    {
-      "name": "priorityDetection",
-      "type": "dropdown",
-      "required": false,
-      "title": "Priority detection",
-      "description": "Priority detection of selected text or clipboard.",
-      "default": "selected",
-      "data": [
-        {
-          "title": "Selected Text",
-          "value": "selected"
-        },
-        {
-          "title": "Clipboard Text",
-          "value": "clipboard"
-        }
-      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0"
+    "@raycast/api": "^1.80.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.9",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "ray build -e dist",

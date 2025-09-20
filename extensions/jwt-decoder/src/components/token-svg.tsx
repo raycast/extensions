@@ -43,13 +43,15 @@ export function TokenSvg({ clipboard, showToken, showLogo, showDetail, section, 
   return (
     <svg viewBox="0 0 700 1000" xmlns="http://www.w3.org/2000/svg">
       <style>
-        {".mono  { font-family: Menlo; font-size: 8px; }"}
-        {`.title { font-family: Helvetica; font-size: 7px }`}
-        {`.main  { fill: ${titleColor}; }`}
-        {`.sub   { fill: ${subColor}; }`}
-        {`.head  { fill: ${headColor}; ${section === "head" ? "font-weight: bold; " : ""}}`}
-        {`.data  { fill: ${dataColor}; ${section === "data" ? "font-weight: bold; " : ""}}`}
-        {`.foot  { fill: ${footColor}; }`}
+        {[
+          ".mono  { font-family: Menlo; font-size: 8px; }",
+          `.title { font-family: Helvetica; font-size: 7px }`,
+          `.main  { fill: ${titleColor}; }`,
+          `.sub   { fill: ${subColor}; }`,
+          `.head  { fill: ${headColor}; ${section === "head" ? "font-weight: bold; " : ""}}`,
+          `.data  { fill: ${dataColor}; ${section === "data" ? "font-weight: bold; " : ""}}`,
+          `.foot  { fill: ${footColor}; }`,
+        ].join("\n")}
       </style>
       <g>
         {showToken && showDetail && <path d="M286,-10 L286,230 Z" stroke="rgb(151,151,151)" strokeWidth={0.25} />}

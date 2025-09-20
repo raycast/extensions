@@ -2,7 +2,6 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { getDateForPageWithoutBrackets } from "logseq-dateutils";
 import { parseEDNString } from "edn-data";
 import path from "path";
-import * as R from "ramda";
 import dayjs from "dayjs";
 import fs from "fs";
 import untildify from "untildify";
@@ -13,8 +12,20 @@ export const prependStr = (leading: string) => (val: string) => leading + val;
 export const appendStr = (toAppend: string) => (val: string) => val + toAppend;
 
 export const generateContentToAppend = (content: string, isOrgMode: boolean) => {
-  const leadingStr = isOrgMode ? "\n* " : "\n- ";
-  return R.compose(prependStr(leadingStr), R.replace(/\n/g, leadingStr))(content);
+  const newContent = content
+    .split("\n")
+    .map((line) => {
+      const leadingSpacesCount = line.match(/^( *)/)?.[0].length || 0;
+
+      if (isOrgMode) {
+        return `${"*".repeat(leadingSpacesCount + 1)} ${line.trimStart()}`;
+      } else {
+        return `${" ".repeat(leadingSpacesCount)}- ${line.trimStart()}`;
+      }
+    })
+    .join("\n");
+
+  return `\n${newContent}`;
 };
 
 const validateFolderPath = (folder: string) => {
@@ -71,6 +82,12 @@ const buildJournalPath = (graphPath: string) => {
   );
 };
 
+export const getWorkflowStyle = async (): Promise<string> => {
+  return await parseLogseqConfig()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then((v: any) => v["preferred-workflow"]);
+};
+
 export const getTodayJournalPath = () => {
   return buildJournalPath(getUserConfiguredGraphPath());
 };
@@ -111,7 +128,8 @@ export const formatResult = (result: string) => {
 
 export const formatFilePath = (pageName: string) => {
   const dbName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length - 1];
-  const finalURL = encodeURI(`logseq://graph/${dbName}?file=${pageName}`);
+  const title = pageName.split("/")[pageName.split("/").length - 1];
+  const finalURL = encodeURI(`logseq://graph/${dbName}?page=${title}`);
   return finalURL;
 };
 

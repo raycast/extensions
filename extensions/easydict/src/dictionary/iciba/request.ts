@@ -11,7 +11,7 @@ import { RequestErrorInfo } from "../../types";
 
 import axios from "axios";
 import { downloadAudio, getWordAudioPath } from "../../audio";
-import { DicionaryType, QueryTypeResult } from "../../types";
+import { DictionaryType, QueryTypeResult } from "../../types";
 import { QueryWordInfo } from "../youdao/types";
 import { IcibaDictionaryResult } from "./interface";
 
@@ -31,7 +31,7 @@ export function icibaDictionary(queryWordInfo: QueryWordInfo): Promise<QueryType
       .get(url, { params })
       .then((response) => {
         const result: QueryTypeResult = {
-          type: DicionaryType.Iciba,
+          type: DictionaryType.Iciba,
           result: response.data,
           translations: [],
           queryWordInfo: queryWordInfo,
@@ -40,7 +40,7 @@ export function icibaDictionary(queryWordInfo: QueryWordInfo): Promise<QueryType
       })
       .catch((error) => {
         const errorInfo: RequestErrorInfo = {
-          type: DicionaryType.Iciba,
+          type: DictionaryType.Iciba,
           code: error.response?.status,
           message: error.response?.statusText,
         };
@@ -60,8 +60,8 @@ export async function downloadIcibaWordAudio(queryWordInfo: QueryWordInfo, callb
     const phoneticUrl = symbol.ph_am_mp3.length
       ? symbol.ph_am_mp3
       : symbol.ph_tts_mp3.length
-      ? symbol.ph_tts_mp3
-      : symbol.ph_en_mp3;
+        ? symbol.ph_tts_mp3
+        : symbol.ph_en_mp3;
     if (phoneticUrl.length) {
       const audioPath = getWordAudioPath(queryWordInfo.word);
       downloadAudio(phoneticUrl, audioPath, callback);

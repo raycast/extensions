@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "social-network-trends",
   "title": "Social Network Trends",
-  "description": "Show trends on WeiBo, ZhiHu, and DouYin.",
-  "icon": "extension-icon/trend-social-networks.png",
+  "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili.",
+  "icon": "social-trends-icon.png",
   "author": "koinzhang",
   "categories": [
     "Fun",
@@ -15,43 +15,182 @@
       "name": "search-trends-of-social-network",
       "title": "Search Trends",
       "subtitle": "Social Network Trends",
-      "description": "Show trends on WeiBo, ZhiHu, and DouYin.",
-      "mode": "view"
+      "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberTag",
+          "type": "checkbox",
+          "required": false,
+          "title": "Advanced",
+          "label": "Remember Filter Tag",
+          "description": "Remember social filter tag.",
+          "default": false
+        },
+        {
+          "title": "Trends Number",
+          "name": "trendsNumber",
+          "type": "dropdown",
+          "required": false,
+          "description": "Number of Trends Displayed.",
+          "default": "20",
+          "data": [
+            {
+              "title": "10",
+              "value": "10"
+            },
+            {
+              "title": "20",
+              "value": "20"
+            },
+            {
+              "title": "30",
+              "value": "30"
+            },
+            {
+              "title": "40",
+              "value": "40"
+            },
+            {
+              "title": "50",
+              "value": "50"
+            }
+          ]
+        },
+        {
+          "name": "showWeibo",
+          "type": "checkbox",
+          "required": false,
+          "title": "Social Trends",
+          "label": "Show Weibo",
+          "description": "Show Weibo trends.",
+          "default": true
+        },
+        {
+          "name": "showZhiHu",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show ZhiHu",
+          "description": "Show ZhiHu trends.",
+          "default": true
+        },
+        {
+          "name": "showBaiDu",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show BaiDu",
+          "description": "Show BaiDu trends.",
+          "default": false
+        },
+        {
+          "name": "showDouYin",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show DouYin",
+          "description": "Show DouYin trends.",
+          "default": false
+        },
+        {
+          "name": "showTouTiao",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show TouTiao",
+          "description": "Show TouTiao trends.",
+          "default": false
+        },
+        {
+          "name": "showBiliBili",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show BiliBili",
+          "description": "Show BiliBili trends.",
+          "default": false
+        }
+      ]
     },
     {
       "name": "search-trends-of-social-network-menu-bar",
-      "title": "Search Trends",
-      "icon": "extension-icon/extension-icon-menu-bar.png",
+      "title": "Menubar Trends",
       "subtitle": "Social Network Trends",
-      "description": "Show trends on WeiBo, ZhiHu, and DouYin.",
-      "mode": "menu-bar"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "rememberTag",
-      "type": "checkbox",
-      "required": false,
-      "title": "Preferences",
-      "label": "Remember Filter Tag",
-      "description": "Remember Gist Filter Tag.",
-      "default": false
+      "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili on the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showTrendsTitle",
+          "type": "checkbox",
+          "required": false,
+          "title": "Menubar Title",
+          "label": "Show Trend",
+          "description": "Show first trend title on menu bar.",
+          "default": true
+        },
+        {
+          "name": "showWeibo",
+          "type": "checkbox",
+          "required": false,
+          "title": "Social Trends",
+          "label": "Show Weibo",
+          "description": "Show Weibo trends.",
+          "default": true
+        },
+        {
+          "name": "showZhiHu",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show ZhiHu",
+          "description": "Show ZhiHu trends.",
+          "default": true
+        },
+        {
+          "name": "showBaiDu",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show BaiDu",
+          "description": "Show BaiDu trends.",
+          "default": false
+        },
+        {
+          "name": "showDouYin",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show DouYin",
+          "description": "Show DouYin trends.",
+          "default": false
+        },
+        {
+          "name": "showTouTiao",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show TouTiao",
+          "description": "Show TouTiao trends.",
+          "default": false
+        },
+        {
+          "name": "showBiliBili",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show BiliBili",
+          "description": "Show BiliBili trends.",
+          "default": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.77.2",
+    "node-fetch": "^3.3.2",
+    "@raycast/utils": "^1.16.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "~20.14.9",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.14.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "ray build -e dist",

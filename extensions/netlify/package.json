@@ -10,7 +10,8 @@
   "contributors": [
     "jonohewitt",
     "jasonbarry",
-    "peduarte"
+    "peduarte",
+    "xmok"
   ],
   "categories": [
     "Developer Tools",
@@ -44,9 +45,9 @@
     },
     {
       "name": "search-domains",
-      "title": "Search Domains",
+      "title": "Search Domains and Manage DNS Records",
       "subtitle": "Netlify",
-      "description": "Search your team's domain names, and register new domains.",
+      "description": "Search your team's domain names, register new domains and manage DNS records.",
       "mode": "view"
     },
     {
@@ -97,28 +98,336 @@
       "placeholder": "Your token"
     }
   ],
+  "tools": [
+    {
+      "name": "get-teams",
+      "title": "Get Teams",
+      "description": "Get all Netlify teams user is a member of"
+    },
+    {
+      "name": "get-domains",
+      "title": "Get Domains",
+      "description": "Get all domains for a Netlify team"
+    },
+    {
+      "name": "get-sites",
+      "title": "Get Sites",
+      "description": "Get all sites for a Netlify team"
+    },
+    {
+      "name": "search-docs",
+      "title": "Search Docs",
+      "description": "Search in Netlify Documentation"
+    },
+    {
+      "name": "get-deployments",
+      "title": "Get Deployments",
+      "description": "Get all the Netlify deployments for a team"
+    },
+    {
+      "name": "get-environment-variables",
+      "title": "Get Environment Variables",
+      "description": "Get all the environment variables for a Netlify site"
+    },
+    {
+      "name": "get-dns-records",
+      "title": "Get DNS Records",
+      "description": "Get all the DNS records for a Netlify site"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@netlify What's the status for my 2nd latest deployment in raycast-frontend?",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ],
+          "get-sites": [
+            {
+              "id": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx",
+              "name": "raycast-frontend"
+            }
+          ],
+          "get-deployments": [
+            {
+              "id": "XXxxxxxxxxxxxXX",
+              "state": "ready"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-sites",
+              "arguments": {
+                "query": "raycast-frontend",
+                "teamSlug": "raycast"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-deployments",
+              "arguments": {
+                "siteId": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@netlify which teams am I in?",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@netlify get the domains for team raycast",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ],
+          "get-domains": [
+            {
+              "name": "raycast.com"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-domains",
+              "arguments": {
+                "teamSlug": "raycast"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@netlify get all design sites",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ],
+          "get-sites": [
+            {
+              "id": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx",
+              "url": "https://designsubscriptions.com",
+              "name": "designsubscriptions"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-sites",
+              "arguments": {
+                "teamSlug": "raycast",
+                "query": "design"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@netlify how do I add a domain?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-docs",
+              "arguments": {
+                "query": "add a domain"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-docs": [
+            {
+              "anchor": "add-a-domain",
+              "hierarchy": {
+                "lvl2": "Add a domain"
+              },
+              "url": "https://docs.netlify.com/domains-https/netlify-dns/#add-a-domain"
+            },
+            {
+              "anchor": "add-a-domain-you-own",
+              "hierarchy": {
+                "lvl3": "Add a domain you own",
+                "lvl2": "Add a domain"
+              },
+              "url": "https://docs.netlify.com/domains-https/netlify-dns/#add-a-domain-you-own"
+            }
+          ]
+        }
+      },
+      {
+        "input": "@netlify Show me KEY env in raycast-frontend",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ],
+          "get-sites": [
+            {
+              "id": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx",
+              "name": "raycast-frontend"
+            }
+          ],
+          "get-environment-variables": [
+            {
+              "is_secret" : false,
+              "key" : "KEY",
+              "values" : [
+                {
+                  "context" : "all",
+                  "id" : "xxxxxx-xxxx-xxxx-xxxx-xxxxxx",
+                  "role" : "",
+                  "value" : "VALUE"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-sites",
+              "arguments": {
+                "query": "raycast-frontend",
+                "teamSlug": "raycast"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-environment-variables",
+              "arguments": {
+                "siteId": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@netlify Show me all records associated with raycast.com",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ],
+          "get-domains": [
+            {
+              "id": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx",
+              "name": "raycast.com"
+            }
+          ],
+          "get-dns-records": [
+            {
+              "type": "A",
+              "ttl": 3600,
+              "value": "xx.xxx.xxx.xx"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-domains",
+              "arguments": {
+                "teamSlug": "raycast"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-dns-records",
+              "arguments": {
+                "zoneId": "xxxxxx"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "@raycast/utils": "^1.4.14",
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1",
+    "@web3-storage/parse-link-header": "^3.1.0",
     "axios": "^0.24.0",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
     "@types/parse-git-config": "^3.0.1",
     "@types/parse-github-url": "^1.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

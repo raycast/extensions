@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, ActionPanel, Icon, openCommandPreferences } from "@raycast/api";
 
 export function ActionOpenPreferences() {
@@ -7,7 +6,7 @@ export function ActionOpenPreferences() {
       <Action
         icon={Icon.Gear}
         title="Open Command Preferences"
-        shortcut={{ modifiers: ["cmd"], key: "," }}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
         onAction={openCommandPreferences}
       />
     </ActionPanel.Section>

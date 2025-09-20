@@ -3,9 +3,14 @@
   "name": "tableplus",
   "title": "TablePlus",
   "description": "Search and open database connections in TablePlus",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "icon": "icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "nagauta",
+    "xmok",
+    "MatteoGauthier"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -14,6 +19,13 @@
       "subtitle": "TablePlus",
       "description": "List all databases",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Menubar",
+      "subtitle": "TablePlus",
+      "description": "TablePlus Menubar",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
@@ -21,9 +33,17 @@
       "name": "path",
       "type": "textfield",
       "required": false,
-      "title": "TablePlus data directory",
+      "title": "TablePlus Data Directory",
       "placeholder": "Leave blank for default location",
       "description": "If you moved the data directory\r\n(must be full-paths or tidle-prefixed ones)"
+    },
+    {
+      "name": "applicationPath",
+      "type": "textfield",
+      "required": false,
+      "title": "TablePlus Application Path",
+      "placeholder": "Leave blank for default location",
+      "description": "If you moved TablePlus\r\n(must be full-paths or tidle-prefixed ones)"
     },
     {
       "name": "showConnectionDriver",
@@ -33,29 +53,150 @@
       "title": "Show Connection Driver",
       "description": "Show Connection Driver",
       "label": "Show Connection Driver in List"
+    },
+    {
+      "name": "searchByGroupName",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Search by Group Name",
+      "description": "Toggle the Ability to Search by Group Name.",
+      "label": "Search by Group Name"
+    },
+    {
+      "name": "showPathInMenubar",
+      "description": "Show Subtitle in Menu Bar",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Show Subtitle in Menu Bar",
+      "placeholder": "Show Subtitle in Menu Bar",
+      "label": "Show Subtitle in Menu Bar"
+    },
+    {
+      "name": "subtitleMenubar",
+      "description": "Subtitle Menu Bar",
+      "label": "Subtitle Menu Bar",
+      "title": "Subtitle Menu Bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "path",
+      "data": [
+        {
+          "title": "Show Environment",
+          "value": "environment"
+        },
+        {
+          "title": "Show Path",
+          "value": "path"
+        }
+      ]
+    },
+    {
+      "name": "showMonochromeIcon",
+      "description": "Show monochrome icon in Menubar",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Show Monochrome Icon in Menu Bar",
+      "placeholder": "Show monochrome icon in Menubar",
+      "label": "Show Monochrome Icon in Menu Bar"
+    },
+    {
+      "name": "defaultAction",
+      "description": "Select the default action",
+      "type": "dropdown",
+      "required": false,
+      "default": "new",
+      "title": "Default Action",
+      "placeholder": "placeholder",
+      "data": [
+        {
+          "title": "Open new Window",
+          "value": "new"
+        },
+        {
+          "title": "Open in Tab",
+          "value": "tab"
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "connect-database",
+      "title": "Connect to Database",
+      "description": "Connect to TablePlus database"
+    },
+    {
+      "name": "get-databases",
+      "title": "Get Databases",
+      "description": "Get TablePlus databases"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@tableplus connect to test database 1",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-databases"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "connect-database",
+              "arguments": {
+                "id": "3823CB84-BB87-457E-8930-6DB35E210228"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "connect-database": "Opening connection to test database 1",
+          "get-databases": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "test database 1",
+              "groupName": "test group 1",
+              "environment": "test environment 1",
+              "driver": "test driver 1"
+            },
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E218873",
+              "name": "test database 2",
+              "groupName": "test group 2",
+              "environment": "test environment 2",
+              "driver": "test driver 2"
+            }
+          ]
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.45.0",
-    "plist": "^3.0.4"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
+    "plist": "^3.0.4",
+    "string-similarity": "^4.0.4"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
     "@types/expand-tilde": "^2.0.0",
-    "@types/node": "^18.8.3",
     "@types/plist": "^3.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
     "expand-tilde": "^2.0.2",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.21.0",
-    "typescript": "^4.4.3"
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

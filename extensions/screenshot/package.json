@@ -5,6 +5,9 @@
   "description": "Capture your screen with macOS native tools",
   "icon": "command-icon.png",
   "author": "Aayush9029",
+  "contributors": [
+    "nirtamir2"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -29,6 +32,14 @@
       "subtitle": "Screenshot",
       "description": "Capture App Window",
       "icon": "capture-window.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window-to-clipboard",
+      "title": "Capture Window to Clipboard",
+      "subtitle": "Screenshot",
+      "description": "Capture App Window To Clipboard",
+      "icon": "capture-window-to-clipboard.png",
       "mode": "no-view"
     },
     {
@@ -59,7 +70,7 @@
       "name": "capture-to-clipboard",
       "title": "Capture to Clipboard",
       "subtitle": "Screenshot",
-      "description": "Capture Screen to Clipboard",
+      "description": "Capture Area of Screen to Clipboard",
       "icon": "clipboard.png",
       "mode": "no-view"
     },
@@ -85,6 +96,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },

@@ -1,26 +1,12 @@
-import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { apiRequest } from "@/functions/apiRequest";
-import { useState } from "react";
-import useSWR from "swr";
+import { useCachedPromise } from "@raycast/utils";
+import { LikesResult, User } from "@/types";
 
 export const useLikes = () => {
-  const [loading, setLoading] = useState(true);
-  const [likes, setLikes] = useState<LikesResult[]>([]);
-
-  useSWR<LikesResult[]>(`get-user-likes`, getUserLikes, {
-    onSuccess: (data) => {
-      if ((data as Errors).errors) {
-        setLoading(false);
-        showToast(Toast.Style.Failure, "Failed to fetch likes.", (data as Errors).errors?.join("\n"));
-      } else {
-        setLikes(data);
-      }
-
-      setLoading(false);
-    },
-    onError: (error) => {
-      showToast(Toast.Style.Failure, "Something went wrong.", String(error));
-      setLoading(false);
+  const { isLoading: loading, data: likes } = useCachedPromise(getUserLikes, [], {
+    failureToastOptions: {
+      title: "Failed to fetch likes.",
     },
   });
 

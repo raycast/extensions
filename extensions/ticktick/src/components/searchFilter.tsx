@@ -14,12 +14,13 @@ type Filter = {
 interface Props {
   onFilterChange: (filterId: string) => void;
   filterSections: FilterSection[];
+  value: string;
 }
 
 const SearchFilter: React.FC<Props> = (props) => {
-  const { filterSections, onFilterChange } = props;
+  const { filterSections, onFilterChange, value } = props;
   return (
-    <List.Dropdown tooltip="Select Project" storeValue={true} onChange={onFilterChange}>
+    <List.Dropdown tooltip="Select Project" value={value} onChange={onFilterChange}>
       {filterSections.map((section) => {
         const renderFilters = section.filters.map((filter) => (
           <List.Dropdown.Item key={filter.id} title={filter.name} value={filter.id} />

@@ -7,11 +7,18 @@
   "author": "vimtor",
   "contributors": [
     "shubzkothekar",
-    "JonathanWbn",
     "nikos",
     "menahishayan",
     "pernielsentikaer",
-    "igor9silva"
+    "Ek217",
+    "sergiivelykodnyi",
+    "j3lte",
+    "peterbrinck",
+    "r22"
+  ],
+  "pastContributors": [
+    "igor9silva",
+    "JonathanWbn"
   ],
   "license": "MIT",
   "preferences": [
@@ -100,30 +107,144 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-article",
+      "title": "Search Article",
+      "description": "Searches a Wikipedia article"
+    }
+  ],
+  "ai": {
+    "instructions": "If your article search doesn't give you the answer or if you need more details, try the search tool again. When you search again, look at the list of results from before.\nIf you can't find the answer in the articles, explicitly state that you couldn't find the answer in the cited articles.",
+    "evals": [
+      {
+        "input": "@wikipedia what is the population of Earth?",
+        "mocks": {
+          "search-article": {
+            "metadata": {},
+            "results": [],
+            "title": "World population",
+            "content": "8 billion people"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-article",
+              "arguments": {
+                "query": {
+                  "includes": "population"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Mentions 8 billing people"
+          }
+        ]
+      },
+      {
+        "input": "@wikipedia who invented the internet?",
+        "expected": [
+          {
+            "callsTool": "search-article"
+          },
+          {
+            "includes": "Tim"
+          }
+        ],
+        "mocks": {
+          "search-article": {
+            "metadata": {},
+            "results": [],
+            "title": "History of the World Wide Web",
+            "content": "Tim Berners-Lee invented the World Wide Web while working at CERN in 1989"
+          }
+        }
+      },
+      {
+        "input": "@wikipedia how many countries are there in the world?",
+        "mocks": {
+          "search-article": {
+            "metadata": {},
+            "results": [],
+            "title": "Country",
+            "content": "The ISO 3166-1 standard currently comprises 249 countries, 193 of which are sovereign states that are members of the United Nations"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-article"
+          },
+          {
+            "includes": "249"
+          }
+        ]
+      },
+      {
+        "input": "@wikipedia what is consciousness?",
+        "expected": [
+          {
+            "callsTool": "search-article"
+          }
+        ],
+        "mocks": {
+          "search-article": {
+            "metadata": {},
+            "results": [],
+            "title": "Country",
+            "content": "The ISO 3166-1 standard currently comprises 249 countries, 193 of which are sovereign states that are members of the United Nations"
+          }
+        }
+      },
+      {
+        "input": "@wikipedia what caused the extinction of dinosaurs?",
+        "expected": [
+          {
+            "callsTool": "search-article"
+          }
+        ],
+        "mocks": {
+          "search-article": {
+            "metadata": {},
+            "results": [],
+            "title": "Country",
+            "content": "The ISO 3166-1 standard currently comprises 249 countries, 193 of which are sovereign states that are members of the United Nations"
+          }
+        }
+      }
+    ]
+  },
   "categories": [
     "Web",
     "News"
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.18",
-    "got": "^12.5.3",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.14.0",
+    "dedent": "^1.5.3",
+    "node-fetch": "^3.3.2",
     "wikijs": "^6.4.1"
   },
   "devDependencies": {
-    "@types/node": "^18.13.0",
-    "@types/react": "^18.0.28",
-    "@types/jsdom": "^21.1.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/debug": "^4.1.12",
+    "@types/node": "20.11.17",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

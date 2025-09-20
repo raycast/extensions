@@ -2,27 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pocket",
   "title": "Pocket",
-  "description": "Search and edit Pocket bookmarks",
+  "description": "Manage Pocket bookmarks from Raycast",
   "icon": "pocket-logo.png",
   "author": "vimtor",
+  "contributors": [
+    "hrishabhn",
+    "xmok"
+  ],
   "license": "MIT",
   "preferences": [
-    {
-      "name": "consumerKey",
-      "title": "Consumer Key",
-      "type": "password",
-      "required": true,
-      "description": "Token you created in Apps",
-      "placeholder": "1234-abcd1234abcd1234abcd1234"
-    },
-    {
-      "name": "accessToken",
-      "title": "Access Token",
-      "type": "password",
-      "required": true,
-      "description": "Token from the OAuth flow",
-      "placeholder": "5678defg-5678-defg-5678-defg56"
-    },
     {
       "name": "defaultOpen",
       "title": "Default App",
@@ -40,28 +28,6 @@
           "value": "pocket-website"
         }
       ]
-    },
-    {
-      "name": "defaultFilter",
-      "title": "Default Filter",
-      "type": "dropdown",
-      "required": false,
-      "default": "all",
-      "description": "Default filter for the list of bookmarks",
-      "data": [
-        {
-          "title": "All Bookmarks",
-          "value": "all"
-        },
-        {
-          "title": "Unread",
-          "value": "unread"
-        },
-        {
-          "title": "Archived",
-          "value": "archive"
-        }
-      ]
     }
   ],
   "categories": [
@@ -74,7 +40,15 @@
       "title": "Search Bookmarks",
       "subtitle": "Pocket",
       "description": "Search Pocket unread bookmarks",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "title",
+          "placeholder": "Title",
+          "required": false
+        }
+      ]
     },
     {
       "name": "random",
@@ -91,33 +65,59 @@
       "mode": "no-view"
     },
     {
+      "name": "create",
+      "title": "Create Bookmark",
+      "subtitle": "Pocket",
+      "description": "Create bookmark manually",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bookmarks",
+      "title": "Menu Bar Bookmarks",
+      "subtitle": "Pocket",
+      "description": "See your latest bookmarks at a glance",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
       "name": "clipboard",
-      "title": "Create Bookmark from Clipboard",
+      "title": "Save Clipboard",
       "subtitle": "Pocket",
       "description": "Create bookmark from clipboard contents",
+      "mode": "no-view"
+    },
+    {
+      "name": "browser-tab",
+      "title": "Save Current Tab",
+      "subtitle": "Pocket",
+      "description": "Create bookmark from active browser tab",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
+    "got": "^12.0.1",
+    "is-url": "^1.2.4",
+    "lodash": "^4.17.21",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3",
-    "swr": "^1.2.0",
-    "got": "^12.0.1"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/is-url": "^1.2.32",
+    "@types/lodash": "^4.14.200",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

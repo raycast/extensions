@@ -1,5 +1,12 @@
 # Reverso Context Changelog
 
+## [bugfixing and add examples] - 2025-06-03
+
+- Fixed [#17164](https://github.com/raycast/extensions/issues/17164)
+- Added examples to the translation results
+- Included IPA pronunciation in results when available (e.g., `home /hoʊm`)
+- Supported multiple language pairs (e.g., `en>it home`)
+
 ## [Added 2nd command for 2nd langs pair] - 2023-01-24
 
 - Added 2nd command so you can now configure 2 independent pairs of languages and set different shortcuts for each of them

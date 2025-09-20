@@ -1,21 +1,22 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
+import { useState } from "react";
 
 import { ProjectResult } from "../api/getProjects";
-
+import { getLinearClient } from "../api/linearClient";
+import { getErrorMessage } from "../helpers/errors";
+import { projectStatusIcon } from "../helpers/projects";
+import { getTeamIcon } from "../helpers/teams";
+import { getUserIcon } from "../helpers/users";
+import useProjectStatuses from "../hooks/useProjectStatuses";
 import useTeams from "../hooks/useTeams";
 import useUsers from "../hooks/useUsers";
 
-import { getLinearClient } from "../helpers/withLinearClient";
-import { getTeamIcon } from "../helpers/teams";
-import { getUserIcon } from "../helpers/users";
-import { projectStatuses, projectStatusIcon, projectStatusText } from "../helpers/projects";
-import { getErrorMessage } from "../helpers/errors";
 import { CreateProjectValues } from "./CreateProjectForm";
 
 type EditProjectProps = {
   project: ProjectResult;
-  mutateProjects: MutatePromise<ProjectResult[] | undefined>;
+  mutateProjects: MutatePromise<ProjectResult[], ProjectResult[]>;
 };
 
 export default function EditProjectForm({ project, mutateProjects }: EditProjectProps) {
@@ -23,8 +24,12 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   const { pop } = useNavigation();
 
-  const { teams, isLoadingTeams } = useTeams();
+  const { teams, org, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
+  const { states, isLoadingStates } = useProjectStatuses();
+
+  const [leadQuery, setLeadQuery] = useState<string>("");
+  const { users: leads, supportsUserTypeahead, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
 
   const { handleSubmit, itemProps } = useForm<CreateProjectValues>({
     async onSubmit(values) {
@@ -35,7 +40,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
           teamIds: values.teamIds,
           name: values.name,
           description: values.description,
-          state: values.state,
+          statusId: values.statusId,
           memberIds: values.memberIds,
           ...(values.leadId ? { leadId: values.leadId } : {}),
           ...(values.startDate ? { startDate: values.startDate } : {}),
@@ -64,7 +69,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
       teamIds: project.teams.nodes.map((p) => p.id) || [],
       name: project.name,
       description: project.description,
-      state: project.state,
+      statusId: project.status.id,
       leadId: project.lead?.id,
       memberIds: project.members.nodes.map((p) => p.id) || [],
       startDate: project.startDate ? new Date(project.startDate) : null,
@@ -74,7 +79,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   return (
     <Form
-      isLoading={isLoadingTeams || isLoadingUsers}
+      isLoading={isLoadingTeams || isLoadingUsers || isLoadingLeads || isLoadingStates}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit} />
@@ -83,7 +88,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
     >
       <Form.TagPicker title="Team(s)" placeholder="Add team" {...itemProps.teamIds}>
         {teams?.map((team) => (
-          <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
+          <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team, org)} />
         ))}
       </Form.TagPicker>
 
@@ -99,26 +104,28 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
       <Form.Separator />
 
-      <Form.Dropdown title="Status" {...itemProps.state}>
-        {projectStatuses.map((status) => (
+      <Form.Dropdown title="Status" {...itemProps.statusId}>
+        {states?.map((status) => (
           <Form.Dropdown.Item
-            key={status}
-            value={status}
-            title={projectStatusText[status]}
-            icon={{ source: projectStatusIcon[status] }}
+            key={status.id}
+            value={status.id}
+            title={status.name}
+            icon={{ source: projectStatusIcon[status.type], tintColor: status.color }}
           />
         ))}
       </Form.Dropdown>
 
-      {users && users.length > 0 ? (
-        <Form.Dropdown title="Lead" {...itemProps.leadId}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown
+        title="Lead"
+        {...itemProps.leadId}
+        {...(supportsUserTypeahead && { onSearchTextChange: setLeadQuery, isLoading: isLoadingLeads, throttle: true })}
+      >
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {users?.map((user) => {
-            return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
-          })}
-        </Form.Dropdown>
-      ) : null}
+        {leads?.map((user) => {
+          return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
+        })}
+      </Form.Dropdown>
 
       {users && users.length > 0 ? (
         <Form.TagPicker title="Members" placeholder="Add members" {...itemProps.memberIds}>

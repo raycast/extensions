@@ -1,121 +1,67 @@
-import { Color, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import {
-  getBatteryCondition,
-  getBatteryLevel,
-  getBatteryTime,
-  getCycleCount,
-  getIsCharging,
-  getMaxBatteryCapacity,
-  isValidTime,
-} from "./PowerUtils";
+import { Icon, List } from "@raycast/api";
 import { useInterval } from "usehooks-ts";
-import { ExecError, PowerMonitorState } from "../Interfaces";
+import { usePromise } from "@raycast/utils";
 
-const PowerMonitor = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<ExecError>();
-  const [state, setState] = useState<PowerMonitorState>({
-    batteryLevel: "Loading...",
-    isCharging: false,
-    cycleCount: "Loading...",
-    batteryCondition: "Loading...",
-    maxBatteryCapacity: "Loading...",
-    batteryTime: "Calculating...",
+import { Actions } from "../components/Actions";
+import { BatteryDataInterface } from "../Interfaces";
+import { convertMinutesToHours } from "../utils";
+import { getBatteryData, getTimeOnBattery } from "./PowerUtils";
+
+export default function PowerMonitor() {
+  const { revalidate, data } = usePromise(async () => {
+    const batteryData = await getBatteryData();
+    const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
+
+    return {
+      batteryData,
+      isOnAC,
+    };
   });
 
-  useInterval(async () => {
-    getBatteryLevel()
-      .then((newBatteryLevel) => {
-        getIsCharging()
-          .then((newIsCharging) => {
-            getBatteryTime()
-              .then((newBatteryTime) => {
-                setState((prevState) => {
-                  return {
-                    ...prevState,
-                    batteryLevel: newBatteryLevel,
-                    isCharging: newIsCharging,
-                    batteryTime: newBatteryTime,
-                  };
-                });
-                setIsLoading(false);
-              })
-              .catch((error: ExecError) => {
-                setError(error);
-              });
-          })
-          .catch((error: ExecError) => {
-            setError(error);
-          });
-      })
-      .catch((error: ExecError) => {
-        setError(error);
-      });
-  }, 1000);
-
-  useEffect(() => {
-    getCycleCount()
-      .then((newCycleCount) => {
-        getBatteryCondition()
-          .then((newBatteryCondition) => {
-            getMaxBatteryCapacity()
-              .then((newMaxBatteryCapacity) => {
-                setState((prevState) => {
-                  return {
-                    ...prevState,
-                    cycleCount: newCycleCount,
-                    batteryCondition: newBatteryCondition,
-                    maxBatteryCapacity: newMaxBatteryCapacity,
-                  };
-                });
-              })
-              .catch((error: ExecError) => {
-                setError(error);
-              });
-          })
-          .catch((error: ExecError) => {
-            setError(error);
-          });
-      })
-      .catch((error: ExecError) => {
-        setError(error);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't fetch Power Info [Error Code: " + error.code + "]",
-        message: error.stderr,
-      });
-    }
-  }, [error]);
+  useInterval(revalidate, 1000);
 
   return (
     <List.Item
-      title={`Power`}
-      icon={{ source: "lightning.png", tintColor: Color.Yellow }}
-      accessoryTitle={isLoading ? "Loading..." : `${state.batteryLevel}%`}
-      detail={
-        <List.Item.Detail
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="Battery Level" text={state.batteryLevel + "%"} />
-              <List.Item.Detail.Metadata.Label title="Charging" text={state.isCharging ? "Yes" : "No"} />
-              <List.Item.Detail.Metadata.Label title="Cycle Count" text={state.cycleCount} />
-              <List.Item.Detail.Metadata.Label title="Condition" text={state.batteryCondition} />
-              <List.Item.Detail.Metadata.Label title="Maximum Battery Capacity" text={state.maxBatteryCapacity} />
+      id="power"
+      title="Power"
+      icon={Icon.Plug}
+      accessories={[{ text: data?.batteryData ? `${data?.batteryData?.batteryLevel} %` : "Loading…" }]}
+      detail={<PowerMonitorDetail batteryData={data?.batteryData} isOnAC={data?.isOnAC} />}
+      actions={<Actions radioButtonNumber={3} />}
+    />
+  );
+}
+
+function PowerMonitorDetail({ batteryData, isOnAC }: { batteryData?: BatteryDataInterface; isOnAC?: boolean }) {
+  const { revalidate, data: timeOnBattery, isLoading: isLoadingTimeOnBattery } = usePromise(getTimeOnBattery);
+
+  useInterval(revalidate, 1000 * 60);
+
+  return (
+    <List.Item.Detail
+      isLoading={!!batteryData || isLoadingTimeOnBattery}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Battery Level" text={`${batteryData?.batteryLevel}%`} />
+          <List.Item.Detail.Metadata.Label title="Charging" text={batteryData?.isCharging ? "Yes" : "No"} />
+          <List.Item.Detail.Metadata.Label title="Cycle Count" text={batteryData?.cycleCount || "Loading…"} />
+          <List.Item.Detail.Metadata.Label title="Battery Condition" text={batteryData?.condition || "Loading…"} />
+          <List.Item.Detail.Metadata.Label title="Battery Temperature" text={batteryData?.temperature || "Loading…"} />
+          <List.Item.Detail.Metadata.Label
+            title="Maximum Battery Capacity"
+            text={batteryData?.maximumCapacity || "Loading…"}
+          />
+          {!isOnAC ? (
+            <>
               <List.Item.Detail.Metadata.Label
-                title={state.isCharging ? "Time to charge" : "Time to discharge"}
-                text={isValidTime(state.batteryTime) ? state.batteryTime : "Calculating..."}
+                title={batteryData?.isCharging ? "Time to charge" : "Time to discharge"}
+                text={batteryData ? convertMinutesToHours(batteryData?.timeRemaining) : "Loading…"}
               />
-            </List.Item.Detail.Metadata>
-          }
-        />
+              <List.Item.Detail.Metadata.Label title="Time on battery" text={timeOnBattery || "Loading…"} />
+            </>
+          ) : null}
+        </List.Item.Detail.Metadata>
       }
     />
   );
-};
-export default PowerMonitor;
+}

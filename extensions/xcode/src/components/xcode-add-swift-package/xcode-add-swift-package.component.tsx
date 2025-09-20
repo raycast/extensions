@@ -8,7 +8,7 @@ import { XcodeService } from "../../services/xcode.service";
 /**
  * Xcode Add Swift Package
  */
-export function XcodeAddSwiftPackage(props: { url: string }): JSX.Element {
+export function XcodeAddSwiftPackage(props: { url: string }) {
   const navigation = useNavigation();
   return (
     <XcodeProjectList
@@ -48,7 +48,7 @@ async function addSwiftPackage(swiftPackageUrl: string, xcodeProject: XcodeProje
     // that the main focus is on the Raycast window
     await closeMainWindow();
     // Add Swift Package from Url to XcodeProject
-    await XcodeSwiftPackageService.addSwiftPackage(swiftPackageUrl, xcodeProject);
+    await XcodeSwiftPackageService.addSwiftPackage(swiftPackageUrl, xcodeProject.filePath);
     // Pop back
     navigation.pop();
   } catch (error) {

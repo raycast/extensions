@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "datahub",
+  "title": "Datahub Utility",
+  "description": "Search and explore datasets in your DataHub data catalog",
+  "icon": "extension_icon.png",
+  "author": "nickrotondo",
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "datahubFrontendUrl",
+      "title": "DataHub Frontend URL",
+      "description": "URL of your DataHub frontend (e.g., https://datahub.yourdomain.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://datahub.yourdomain.com"
+    },
+    {
+      "name": "datahubGraphqlEndpoint",
+      "title": "DataHub GraphQL API Endpoint",
+      "description": "URL of your DataHub GraphQL API endpoint (e.g., https://datahub-gms.yourdomain.com/api/graphql)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://datahub-gms.yourdomain.com/api/graphql"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Datahub",
+      "subtitle": "DataHub Utility",
+      "description": "Quickly search Datahub by keywords and open results in browser",
+      "mode": "no-view",
+      "aliases": [
+        "dh"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Enter search query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "search-datasets",
+      "title": "Search Datasets",
+      "subtitle": "DataHub Utility",
+      "description": "Find specific datasets in Datahub with interactive results",
+      "mode": "view",
+      "aliases": [
+        "dhdataset"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -16,14 +16,16 @@ export default function Command() {
       isLoading={isLoadingSpaces || isLoadingTabs}
     >
       <MenuBarExtra.Section title="Spaces">
-        {spaces?.slice(0, LIMIT).map((space, index) => (
-          <MenuBarExtra.Item
-            key={space.id}
-            title={truncate(getSpaceTitle(space))}
-            shortcut={getShortcut(["ctrl"], index)}
-            onAction={async () => await selectSpace(space)}
-          />
-        ))}
+        {spaces
+          ?.slice(0, LIMIT)
+          .map((space, index) => (
+            <MenuBarExtra.Item
+              key={space.id}
+              title={truncate(getSpaceTitle(space))}
+              shortcut={getShortcut(["ctrl"], index)}
+              onAction={async () => await selectSpace(space)}
+            />
+          ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Favorite Tabs">
         {tabs

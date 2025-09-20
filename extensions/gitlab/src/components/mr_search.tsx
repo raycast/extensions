@@ -5,18 +5,19 @@ import { useCache } from "../cache";
 import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest } from "../gitlabapi";
 import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
-import { MRScope, MRState, MRListItem } from "./mr";
+import { MRScope, MRState, MRListItem, getMRQuery, injectMRQueryNamedParameters, MRListEmptyView } from "./mr";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function SearchMyMergeRequests(): JSX.Element {
-  const scope = MRScope.created_by_me;
+export function SearchMyMergeRequests() {
+  const [scope, setScope] = useState<string>(MRScope.created_by_me);
   const state = MRState.all;
   const [search, setSearch] = useState<string>();
   const params: Record<string, any> = { state, scope };
-  if (search) {
-    params.search = search;
-  }
+  const qd = getMRQuery(search);
+  params.search = qd.query || "";
+  injectMRQueryNamedParameters(params, qd, scope as MRScope, false);
+  injectMRQueryNamedParameters(params, qd, scope as MRScope, true);
   const paramsHash = hashRecord(params);
   const { data, isLoading, error, performRefetch } = useCache<MergeRequest[] | undefined>(
     `mymrssearch_${paramsHash}`,
@@ -27,7 +28,7 @@ export function SearchMyMergeRequests(): JSX.Element {
       deps: [scope, state, search],
       secondsToRefetch: 1,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   if (error) {
     showErrorToast(getErrorMessage(error), "Could not fetch Merge Requests");
@@ -46,6 +47,13 @@ export function SearchMyMergeRequests(): JSX.Element {
       onSearchTextChange={setSearch}
       isShowingDetail={getListDetailsPreference()}
       throttle
+      searchBarAccessory={
+        <List.Dropdown tooltip="Scope" onChange={setScope}>
+          <List.Dropdown.Item title="Created by Me" value={MRScope.created_by_me} />
+          <List.Dropdown.Item title="Assigned to Me" value={MRScope.assigned_to_me} />
+          <List.Dropdown.Item title="All" value={MRScope.all} />
+        </List.Dropdown>
+      }
     >
       <List.Section title={title} subtitle={data ? `${data.length}` : undefined}>
         {data?.map((m) => (
@@ -59,6 +67,7 @@ export function SearchMyMergeRequests(): JSX.Element {
           />
         ))}
       </List.Section>
+      <MRListEmptyView />
     </List>
   );
 }

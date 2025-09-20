@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { Bookmark } from "../types";
 import { extractDomainName } from "../utils";
@@ -31,7 +31,7 @@ const BookmarkListItem = (props: { bookmark: Bookmark }) => (
     title={props.bookmark.title}
     subtitle={extractDomainName(props.bookmark.url)}
     keywords={props.bookmark.folders.concat([extractDomainName(props.bookmark.url)])}
-    accessories={props.bookmark.folders.map((folder) => ({ text: folder }))}
+    accessories={props.bookmark.folders.map((folder) => ({ text: folder, icon: Icon.Folder }))}
     actions={<Actions bookmark={props.bookmark} />}
   />
 );

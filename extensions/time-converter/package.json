@@ -1,0 +1,72 @@
+{
+  "name": "time-converter",
+  "title": "Time Zone Converter",
+  "description": "Convert times between different time zones and paste the results",
+  "icon": "icon.png",
+  "author": "alex_jones",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Time",
+      "description": "Convert time between time zones",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultLocations",
+      "title": "Default Locations",
+      "description": "Comma-separated list of default locations (e.g., 'NYC, London, Tokyo')",
+      "type": "textfield",
+      "required": false,
+      "default": "Austin, London, Tokyo"
+    },
+    {
+      "name": "defaultFormat",
+      "title": "Default Format",
+      "description": "Default output format for time conversions",
+      "type": "dropdown",
+      "required": false,
+      "default": "inline",
+      "data": [
+        {
+          "title": "Inline",
+          "value": "inline"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "chrono-node": "^2.6.2",
+    "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/utils": "^1.10.1",
+    "@types/node": "^22.9.3",
+    "eslint": "^8.57.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.19.0",
+    "@raycast/eslint-config": "^1.0.11"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

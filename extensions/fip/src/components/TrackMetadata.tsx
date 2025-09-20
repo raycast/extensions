@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { fetchMetadata, TrackMetadata } from "../utils/utils";
-import { Action, ActionPanel, Detail, showHUD } from "@raycast/api";
+import { fetchMetadata, getRadioById, TrackMetadata } from "../utils/utils";
+import { Action, ActionPanel, Detail, LocalStorage, showHUD } from "@raycast/api";
 
 export type TrackObject = {
   metadataKey: "now" | "prev" | "next";
@@ -9,24 +9,28 @@ export type TrackObject = {
 export default function TrackMetadata({ metadataKey }: TrackObject) {
   const [metadata, setMetadata] = useState<TrackMetadata | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [radioTitle, setRadioTitle] = useState<string | undefined>();
 
   useEffect(() => {
-    setLoading(true);
-    fetchMetadata().then((d) => {
-      if (!d) {
+    (async () => {
+      const radioId = (await LocalStorage.getItem<string>("currently-playing-radio")) || "7";
+      const _radioTitle = getRadioById(radioId);
+      setRadioTitle(_radioTitle?.title);
+      const rootObject = await fetchMetadata(radioId);
+      if (!rootObject) {
         showHUD("❌ could not load FIP metadata");
       } else {
         if (["prev", "next"].includes(metadataKey)) {
-          const m = d[metadataKey] as TrackMetadata[];
+          const m = rootObject[metadataKey] as TrackMetadata[];
           setMetadata(m[0]);
         } else {
-          const m = d[metadataKey] as TrackMetadata;
+          const m = rootObject[metadataKey] as TrackMetadata;
           setMetadata(m);
         }
       }
       setLoading(false);
-    });
-    fetchMetadata();
+    })();
+    setLoading(true);
   }, []);
   if (loading || !metadata) {
     return <Detail isLoading={loading} />;
@@ -45,6 +49,7 @@ export default function TrackMetadata({ metadataKey }: TrackObject) {
       }
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.Label title="Radio" text={radioTitle} />
           <Detail.Metadata.Label title="Title" text={metadata.firstLine} />
           <Detail.Metadata.Label title="Artist" text={metadata.secondLine} />
         </Detail.Metadata>

@@ -1,8 +1,7 @@
-import { environment } from "@raycast/api";
 import { getLiftProgressCanvas } from "./common-utils";
-import { CountdownDate, LifeProgress } from "../types/types";
-import { allTheme, numberPathList, SectionTitle, SYMBOL_NUM } from "./constants";
-import { birthday, birthdayEveryDay, iconTheme, weekStart } from "../types/preferences";
+import { CountdownDate, LifeProgressType } from "../types/types";
+import { SectionTitle, SYMBOL_NUM } from "./constants";
+import { birthday, weekStart } from "../types/preferences";
 
 export const getBirthDay = () => {
   const nowDate = new Date();
@@ -11,10 +10,6 @@ export const getBirthDay = () => {
   }
   if (new Date(birthday).getTime() < new Date(`${nowDate.getFullYear() - 110}-01-01`).getTime()) {
     return { isValid: false, birthTime: new Date("1995-01-01") };
-  }
-  if (birthdayEveryDay) {
-    nowDate.setFullYear(new Date(birthday).getFullYear());
-    return { isValid: true, birthTime: nowDate };
   }
   return { isValid: true, birthTime: new Date(birthday) };
 };
@@ -136,18 +131,10 @@ export const getDaysLeftThisYear = () => {
 };
 
 export const getLifeProgress = (countdownDates: CountdownDate[]) => {
-  const raycastTheme = environment.theme;
-  const lifeProgresses: LifeProgress[] = [];
+  const lifeProgresses: LifeProgressType[] = [];
 
   const timeIcon12 = ["🕚", "🕙", "🕘", "🕗", "🕖", "🕕", "🕔", "🕓", "🕒", "🕑", "🕐", "🕛"];
   const timeIcon24 = [...timeIcon12, ...timeIcon12];
-  let _iconTheme = iconTheme;
-  if (iconTheme == "random") {
-    _iconTheme = allTheme[Math.floor(Math.random() * allTheme.length)];
-  }
-  if (_iconTheme == "simple" && raycastTheme == "dark") {
-    _iconTheme = _iconTheme + "-dark";
-  }
 
   //you have
   const spentDays = getSpendDays();
@@ -162,7 +149,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: spentDays,
-    accessUnit: getNumberCanvas(_iconTheme, spentDays),
+    accessUnit: undefined,
   });
 
   const spentYears = getSpendYears();
@@ -177,7 +164,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: getSpendYears(),
-    accessUnit: getNumberCanvas(_iconTheme, spentYears),
+    accessUnit: undefined,
   });
 
   const spentCentury = getSpendCentury();
@@ -192,7 +179,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: spentCentury,
-    accessUnit: getNumberCanvas(_iconTheme, spentCentury),
+    accessUnit: undefined,
   });
 
   //you may be able to
@@ -207,7 +194,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: spentPaychecks,
-    accessUnit: getNumberCanvas(_iconTheme, spentPaychecks),
+    accessUnit: undefined,
   });
 
   const { spentWeeks, leftWeeks } = getLeftWeeks();
@@ -221,7 +208,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: spentWeeks,
-    accessUnit: getNumberCanvas(_iconTheme, spentWeeks),
+    accessUnit: undefined,
   });
 
   lifeProgresses.push({
@@ -234,7 +221,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: leftDays,
-    accessUnit: getNumberCanvas(_iconTheme, leftDays),
+    accessUnit: undefined,
   });
 
   //time left
@@ -249,7 +236,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: leftHour,
-    accessUnit: getNumberCanvas(_iconTheme, leftHour),
+    accessUnit: undefined,
   });
 
   const leftWeek = getDaysLeftThisWeek();
@@ -263,7 +250,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: leftWeek,
-    accessUnit: getNumberCanvas(_iconTheme, leftWeek),
+    accessUnit: undefined,
   });
 
   const { spentMonth, leftMonth, allMonth } = getDaysLeftThisMonth();
@@ -277,7 +264,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: leftMonth,
-    accessUnit: getNumberCanvas(_iconTheme, leftMonth),
+    accessUnit: undefined,
   });
 
   const { spentDayThisYear, leftDayThisYear, allDayThisYear } = getDaysLeftThisYear();
@@ -291,7 +278,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     },
     subTitle: "",
     number: leftDayThisYear,
-    accessUnit: getNumberCanvas(_iconTheme, leftDayThisYear),
+    accessUnit: undefined,
   });
 
   //countdown date
@@ -316,46 +303,11 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
       },
       subTitle: value.description,
       number: leftDayThisYear,
-      accessUnit: getNumberCanvas(_iconTheme, days),
+      accessUnit: undefined,
     });
   });
 
-  if (isBirthDay()) {
-    lifeProgresses.forEach((value, index) => {
-      lifeProgresses[index].icon = "🎉";
-      lifeProgresses[index].accessUnit.map((v, i) => {
-        lifeProgresses[index].accessUnit[i] = { icon: "🎉" };
-      });
-    });
-
-    //Hide Cake
-    const random10 = Math.floor(Math.random() * lifeProgresses.length);
-    const random2 = Math.floor(Math.random() * 2);
-    if (random2 == 0) {
-      lifeProgresses[random10].icon = "🎂";
-    } else {
-      const randomAccessUnit = Math.floor(Math.random() * lifeProgresses[random10].accessUnit.length);
-      lifeProgresses[random10].accessUnit[randomAccessUnit].icon = "🎂";
-    }
-    return { lifeProgresses: lifeProgresses, cakeIndex: random10 };
-  }
-  return { lifeProgresses: lifeProgresses, cakeIndex: 0 };
-};
-
-export const getNumberCanvas = (iconTheme: string, number: number) => {
-  const _numberPathList = numberPathList(iconTheme);
-
-  const _numberList = (number + "").split("");
-  const numberPaths: { icon: string }[] = [];
-  for (const _number of _numberList) {
-    _numberPathList.forEach((numberPathValue) => {
-      if (numberPathValue.value === _number) {
-        numberPaths.push({ icon: numberPathValue.path });
-        return;
-      }
-    });
-  }
-  return numberPaths;
+  return { lifeProgresses: lifeProgresses };
 };
 
 const buildMeaningfulDaysIcon = (num: string) => {
@@ -364,7 +316,7 @@ const buildMeaningfulDaysIcon = (num: string) => {
   if (num.endsWith("2")) return "⛅️";
   if (num.endsWith("3")) return "🌦";
   if (num.endsWith("4")) return "🌧";
-  if (num.endsWith("5")) return "⛈";
+  if (num.endsWith("5")) return "⛈️";
   if (num.endsWith("6")) return "🌨";
   if (num.endsWith("7")) return "🌥";
   if (num.endsWith("8")) return "☀️";

@@ -1,23 +1,13 @@
 {
   "root": true,
-  "env": {
-    "es2020": true,
-    "node": true
-  },
-  "parser": "@typescript-eslint/parser",
   "plugins": [
-    "@typescript-eslint",
     "react-hooks"
   ],
   "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
+    "@raycast"
   ],
   "rules": {
     "react-hooks/rules-of-hooks": "error",
-    // Vérifie les règles des Hooks
     "react-hooks/exhaustive-deps": "warn"
-    // Vérifie les tableaux de dépendances
   }
 }

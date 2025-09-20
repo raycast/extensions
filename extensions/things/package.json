@@ -3,11 +3,20 @@
   "name": "things",
   "title": "Things",
   "version": "1.0.0",
-  "description": "Search and manage your Things To-Dos from Raycast",
+  "description": "Search and manage your Things to-dos from Raycast",
   "icon": "things-icon.png",
   "author": "loris",
   "contributors": [
-    "andreaselia"
+    "andreaselia",
+    "stelo",
+    "thomaslombart",
+    "srikirank",
+    "vimtor",
+    "samuelkraft",
+    "bendrucker",
+    "vmrjnvc",
+    "dinocosta",
+    "janosorcsik"
   ],
   "license": "MIT",
   "commands": [
@@ -15,42 +24,49 @@
       "name": "show-today-list",
       "title": "Show Today List",
       "subtitle": "Things",
-      "description": "Search and manage your Today To-Dos",
+      "description": "Search and manage your today to-dos",
       "mode": "view"
     },
     {
       "name": "show-inbox-list",
       "title": "Show Inbox List",
       "subtitle": "Things",
-      "description": "Search and manage your Inbox To-Dos",
+      "description": "Search and manage your inbox to-dos",
       "mode": "view"
     },
     {
       "name": "show-anytime-list",
       "title": "Show Anytime List",
       "subtitle": "Things",
-      "description": "Search and manage your Anytime To-Dos",
+      "description": "Search and manage your anytime to-dos",
       "mode": "view"
     },
     {
       "name": "show-upcoming-list",
       "title": "Show Upcoming List",
       "subtitle": "Things",
-      "description": "Search and manage your Upcoming To-Dos",
+      "description": "Search and manage your upcoming to-dos",
       "mode": "view"
     },
     {
       "name": "show-someday-list",
       "title": "Show Someday List",
       "subtitle": "Things",
-      "description": "Search and manage your Someday To-Dos",
+      "description": "Search and manage your someday to-dos",
       "mode": "view"
     },
     {
       "name": "add-new-todo",
       "title": "Add New To-Do",
       "subtitle": "Things",
-      "description": "Create To-Dos in any list",
+      "description": "Create to-dos in any list",
+      "mode": "view"
+    },
+    {
+      "name": "add-new-project",
+      "title": "Add New Project",
+      "subtitle": "Things",
+      "description": "Create a new project",
       "mode": "view"
     },
     {
@@ -59,10 +75,335 @@
       "subtitle": "Things",
       "description": "See your Today list in MacOS menu-bar",
       "mode": "menu-bar",
-      "interval": "5m"
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "displayTodo",
+          "type": "checkbox",
+          "title": "Count",
+          "label": "Display To-Do",
+          "description": "When enabled, the first incomplete Things to-do will be displayed in the menu bar.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "shouldShowShortcuts",
+          "type": "checkbox",
+          "label": "Show Lists Shortcuts",
+          "description": "When enabled, lists shortcuts (e.g today, upcoming, projects, areas, etc.) will be included in the menu bar.",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-add-todo",
+      "title": "Quick Add To-Do",
+      "subtitle": "Things",
+      "description": "Quickly add a new to-do in Things.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "dontUseAI",
+          "type": "checkbox",
+          "label": "Don't use AI",
+          "description": "When enabled, the to-do is simply added to your inbox with the input as the title.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "To-do",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "notes",
+          "placeholder": "Notes",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "checklist",
+          "placeholder": "Checklist items",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-list-todos",
+      "title": "Get List To-Dos",
+      "description": "Get all the to-dos from a list in Things"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Get all the projects in Things"
+    },
+    {
+      "name": "get-areas",
+      "title": "Get Areas",
+      "description": "Get all the areas in Things"
+    },
+    {
+      "name": "get-tags",
+      "title": "Get Tags",
+      "description": "Get all the tags in Things"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Lists",
+      "description": "Get all the lists in Things"
+    },
+    {
+      "name": "delete-todo",
+      "title": "Delete To-Do",
+      "description": "Delete a to-do in Things"
+    },
+    {
+      "name": "update-todo",
+      "title": "Update To-Do",
+      "description": "Update a to-do in Things"
+    },
+    {
+      "name": "set-todo-property",
+      "title": "Set To-Do Property",
+      "description": "Set a property of a to-do in Things"
+    },
+    {
+      "name": "add-todo",
+      "title": "Add To-Do",
+      "description": "Add a to-do in Things"
+    },
+    {
+      "name": "add-project",
+      "title": "Add Project",
+      "description": "Add a project in Things"
+    },
+    {
+      "name": "update-project",
+      "title": "Update Project",
+      "description": "Update a project in Things"
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "description": "Delete a project in Things"
+    }
+  ],
+  "ai": {
+    "instructions": "Moving a to-do means changing its list. For example, moving \"buy milk\" from inbox to today means changing its list to today. Only update the when property of the to-do when referring to a date.",
+    "evals": [
+      {
+        "input": "@things what are my to-dos for today?",
+        "mocks": {
+          "get-list-todos": [
+            {
+              "status": "open",
+              "dueDate": null,
+              "activationDate": "2025-01-20T23:00:00.000Z",
+              "id": "HMm6mQGFoV9SrE3rMkGuCY",
+              "notes": "",
+              "area": null,
+              "project": null,
+              "name": "Buy milk",
+              "tags": ""
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-list-todos",
+              "arguments": {
+                "commandListName": "today"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@things add \"buy milk\" to my inbox",
+        "mocks": {
+          "add-todo": "Successfully called \"add-todo\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-todo",
+              "arguments": {
+                "todoParams.title": "buy milk",
+                "todoParams.when": "inbox"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@things mark \"buy milk\" in inbox as done",
+        "mocks": {
+          "update-todo": "Successfully called \"update-todo\"",
+          "get-list-todos": [
+            {
+              "status": "open",
+              "id": "VBAWWiuRj3yx4KuMp45XBm",
+              "name": "buy milk",
+              "completed": false
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-list-todos",
+              "arguments": {
+                "commandListName": "inbox"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "update-todo",
+              "arguments": {
+                "todoParams.completed": true,
+                "todoId": "VBAWWiuRj3yx4KuMp45XBm"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@things set the deadline for \"buy milk\" in inbox to saturday",
+        "mocks": {
+          "get-list-todos": [
+            {
+              "status": "open",
+              "dueDate": null,
+              "activationDate": "2025-01-20T23:00:00.000Z",
+              "id": "7sGLDpW4qZepHsCcXinGg9",
+              "notes": "",
+              "area": null,
+              "project": null,
+              "name": "buy milk",
+              "tags": ""
+            }
+          ],
+          "update-todo": "Successfully called \"update-todo\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "commandListName": "inbox"
+              },
+              "name": "get-list-todos"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "update-todo",
+              "arguments": {
+                "todoParams.deadline": "2025-02-15",
+                "todoId": "7sGLDpW4qZepHsCcXinGg9"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@things move all to-dos from my inbox to today",
+        "mocks": {
+          "update-todo": "Successfully called \"update-todo\"",
+          "get-list-todos": [
+            {
+              "status": "open",
+              "dueDate": null,
+              "activationDate": null,
+              "id": "VBAWWiuRj3yx4KuMp45XBm",
+              "notes": "",
+              "area": null,
+              "project": null,
+              "name": "buy milk",
+              "tags": ""
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-list-todos",
+              "arguments": {
+                "commandListName": "inbox"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "update-todo",
+              "arguments": {
+                "todoParams.list": "today",
+                "todoId": "VBAWWiuRj3yx4KuMp45XBm"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@things delete \"buy milk\" from inbox",
+        "mocks": {
+          "get-list-todos": [
+            {
+              "status": "open",
+              "id": "W74ShepRoZxh4cySkBzsJh",
+              "name": "Buy milk"
+            }
+          ],
+          "delete-todo": "Successfully called \"delete-todo\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "commandListName": "inbox"
+              },
+              "name": "get-list-todos"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "delete-todo",
+              "arguments": {
+                "todoId": "W74ShepRoZxh4cySkBzsJh"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
+    {
+      "name": "authToken",
+      "type": "password",
+      "title": "Authentication Token",
+      "required": false,
+      "description": "You can find your unique token in Things’ settings. go to Things → Settings → General → Enable Things URLs → Manage",
+      "placeholder": "k2Zxf5M9R_lXJeP3BvOmYA"
+    },
     {
       "name": "thingsAppIdentifier",
       "type": "dropdown",
@@ -83,25 +424,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
-    "dayjs": "^1.10.7",
-    "lodash": "^4.17.21",
-    "osascript-tag": "^0.1.2"
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "dayjs": "^1.11.18",
+    "qs": "^6.14.0"
   },
   "devDependencies": {
-    "@types/lodash.groupby": "^4.6.6",
-    "@types/lodash.map": "^4.6.13",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.20.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.1",
+    "@types/qs": "^6.14.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

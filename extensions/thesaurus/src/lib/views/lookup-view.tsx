@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { shallow } from "zustand/shallow";
+import { useShallow } from "zustand/shallow";
 import wordCacheHandler from "../cache";
 import scraper from "../scraper";
 import useStore from "../store";
@@ -23,16 +23,9 @@ const tagColor = (word: { strength: number }) => {
 };
 
 const LookUpContent = ({ word }: { word: string }) => {
-  const { results, setWord } = useStore(
-    (state) => ({
-      results: state.results,
-      setWord: state.setWord,
-    }),
-    shallow
-  );
+  const { results, setWord } = useStore(useShallow((state) => ({ results: state.results, setWord: state.setWord })));
   const renderables = useMemo(() => {
     if (!results) return <List.EmptyView title="Type to begin searching!" icon={{ source: "icon.png" }} />;
-
     if (results.status === "ERROR")
       return (
         <List.EmptyView
@@ -151,20 +144,36 @@ const LookUpContent = ({ word }: { word: string }) => {
 
 const { has, get, set } = wordCacheHandler();
 
-const LookUpView = () => {
+interface LookupViewProps {
+  selectedWord?: string;
+}
+
+const LookUpView = ({ selectedWord }: LookupViewProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { word, setWord, setResults, isOK } = useStore(
-    (state) => ({
+    useShallow((state) => ({
       word: state.word,
       setWord: state.setWord,
       setResults: state.setResults,
       isOK: state.results?.status === "OK",
-    }),
-    shallow
+    })),
   );
 
-  const handleChange = useCallback((e: string) => setWord(e), []);
+  useEffect(() => {
+    if (selectedWord && selectedWord !== word) {
+      setWord(selectedWord);
+    }
+  }, [selectedWord, setWord]);
+
+  const handleChange = useCallback(
+    (e: string) => {
+      if (e !== word) {
+        setWord(e);
+      }
+    },
+    [setWord, word],
+  );
 
   useEffect(() => {
     if (!word) {

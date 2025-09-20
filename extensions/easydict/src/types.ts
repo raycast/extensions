@@ -12,9 +12,10 @@ import { Image } from "@raycast/api";
 import { RawResponse } from "@vitalets/google-translate-api/dist/cjs/types";
 import { ChildProcess } from "child_process";
 import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
-import { LanguageDetectType } from "./detectLanauge/types";
+import { LanguageDetectType } from "./detectLanguage/types";
 import { IcibaDictionaryResult } from "./dictionary/iciba/interface";
 import { LingueeDictionaryResult, LingueeListItemType } from "./dictionary/linguee/types";
+import { YoudaoTranslateResponse } from "./dictionary/youdao/translate.type";
 import {
   QueryWordInfo,
   YoudaoDictionaryFormatResult,
@@ -39,21 +40,23 @@ export enum TranslationType {
   Caiyun = "Caiyun Translate",
   Apple = "Apple Translate",
   DeepL = "DeepL Translate",
+  DeepLX = "DeepLX Translate",
   Google = "Google Translate",
   Bing = "Bing Translate",
   Volcano = "Volcano Translate",
   OpenAI = "OpenAI Translate",
+  Gemini = "Gemini Translate",
 }
 
-export enum DicionaryType {
+export enum DictionaryType {
   Youdao = "Youdao Dictionary",
   Iciba = "Iciba Dictionary",
   Eudic = "Eudic Dictionary",
   Linguee = "Linguee Dictionary",
 }
 
-export type QueryType = TranslationType | DicionaryType;
-export type RequestType = TranslationType | DicionaryType | LanguageDetectType;
+export type QueryType = TranslationType | DictionaryType;
+export type RequestType = TranslationType | DictionaryType | LanguageDetectType;
 
 export interface QueryTypeResult {
   type: QueryType;
@@ -83,7 +86,9 @@ export type QueryResponse =
   | VolcanoTranslateResult
   | VolcanoDetectResult
   | GoogleTranslateResult
-  | OpenAITranslateResult;
+  | OpenAITranslateResult
+  | GeminiTranslateResult
+  | YoudaoTranslateResponse;
 
 export interface RequestErrorInfo {
   type: RequestType;
@@ -146,6 +151,10 @@ export interface OpenAITranslateResult {
   translatedText: string;
 }
 
+export interface GeminiTranslateResult {
+  translatedText: string;
+}
+
 export interface TranslationItem {
   type: TranslationType;
   text: string;
@@ -189,12 +198,12 @@ export interface ListAccessoryItem {
 
 export type ListItemDisplayType = LingueeListItemType | YoudaoDictionaryListItemType | QueryType;
 
-export interface ClipboardRecoredItem {
+export interface ClipboardRecordedItem {
   key: string;
   value: string;
 }
 
-export interface QueryRecoredItem {
+export interface QueryRecordedItem {
   timestamp: number;
   queryText: string;
   result?: string;
@@ -211,3 +220,4 @@ export interface AbortObject {
   abortController?: AbortController;
   childProcess?: ChildProcess;
 }
+export type { QueryWordInfo };

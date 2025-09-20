@@ -8,26 +8,27 @@ import { Image } from "@raycast/api";
 
 export enum GitLabIcons {
   merge_request = "mropen.png",
-  todo = "todo.png",
-  review = "list-icon.png",
+  todo = "todo-done.svg",
+  review = "review-list.svg",
   issue = "exclamation.png",
-  project = "credit-card-16",
+  project = "project.svg",
   merged = "merged.png",
-  mropen = "mropen.png",
+  mropen = "mropen.png", // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
   mraccepted = "todo.png",
-  branches = "merged.png",
+  branches = "merged.png", // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
   ci = "rocket.png",
   milestone = "board_circuit.png",
   explorer = "list.png",
   settings = "gear.png",
   security = "lock.png",
   labels = "dash.png",
-  epic = "epic.png",
+  epic = "epic.svg",
   comment = "book.png",
-  wiki = "list.png",
+  wiki = "list.png", // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
   show_details = "app-window-sidebar-right-16",
   tag = "tag.png",
-  commit = "commit.png",
+  commit = "commit.svg",
+  activity = "history.svg",
   status_success = "status_success.png",
   status_failed = "status_failed.png",
   status_running = "status_running.png",
@@ -51,7 +52,7 @@ async function getImageCacheDirectory(ensureDirectory = false): Promise<string> 
 
 export function useImage(
   url?: string,
-  defaultIcon?: string
+  defaultIcon?: string,
 ): {
   localFilepath?: string;
   error?: string;
@@ -70,7 +71,7 @@ export function useImage(
       const imgFilepath = path.join(imgDir, hashString(url)) + ".png"; // TODO get the extension correctly
       return await gitlab.downloadFile(url, { localFilepath: imgFilepath });
     },
-    { deps: [url], secondsToRefetch: 600, secondsToInvalid: daysInSeconds(7) }
+    { deps: [url], secondsToRefetch: 600, secondsToInvalid: daysInSeconds(7) },
   );
 
   useEffect(() => {

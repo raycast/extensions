@@ -1,14 +1,17 @@
-import { getVPNStatusByName } from "./getVPN";
-import { CMD_PATH, runScriptSilently, SHELL_PATH } from "./utils";
+import { showHUD, showToast, Toast } from "@raycast/api";
+import { VPN } from "./type";
+import { CMD_PATH, runScript } from "./utils";
 
-export default async (VPNName: string) => {
-  const isConnected = await getVPNStatusByName(VPNName);
-  if (isConnected) {
-    await disconnectVPNByName(VPNName);
+export default async (VPN: VPN) => {
+  await showToast(Toast.Style.Animated, VPN.isConnected ? "Disconnecting" : "Connecting");
+  const sn = VPN.sn;
+  if (VPN.isConnected) {
+    await disconnectVPNBySN(sn, true);
   } else {
-    await connectVPNByName(VPNName);
+    await connectVPNBySN(sn, true);
   }
 
+  await showHUD(`${VPN.name} is ${VPN.isConnected ? "DISCONNECTED" : "CONNECTED"}`);
   /*
     setTimeout(async ()=> {
         console.log("trigger notification");
@@ -22,12 +25,14 @@ export default async (VPNName: string) => {
     */
 };
 
-export async function disconnectVPNByName(VPNName: string) {
-  const DISCONNECT_VPN = `${CMD_PATH} --nc stop "${VPNName}"`;
-  await runScriptSilently(DISCONNECT_VPN);
+export async function disconnectVPNBySN(sn: string, isSilently = false) {
+  // const ConvertedName = VPNName?.replace(/"/g, '\\"')?.replace(/`/g, "\\`");
+  const DISCONNECT_VPN = `${CMD_PATH} --nc stop "${sn}"`;
+  await runScript(DISCONNECT_VPN, isSilently);
 }
 
-export async function connectVPNByName(VPNName: string) {
-  const CONNECT_VPN = `${CMD_PATH} --nc start "${VPNName}"`;
-  await runScriptSilently(CONNECT_VPN);
+export async function connectVPNBySN(sn: string, isSilently = false) {
+  // const ConvertedName = VPNName?.replace(/"/g, '\\"')?.replace(/`/g, "\\`");
+  const CONNECT_VPN = `${CMD_PATH} --nc start "${sn}"`;
+  await runScript(CONNECT_VPN, isSilently);
 }

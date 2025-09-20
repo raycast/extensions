@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hardcover",
+  "title": "Hardcover",
+  "description": "Search and manage books and lists.",
+  "icon": "hardcover-icon.png",
+  "author": "hazelhedmine",
+  "categories": [
+    "Media",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-books",
+      "title": "Search Books",
+      "subtitle": "Hardcover",
+      "description": "Search and manage books",
+      "mode": "view"
+    },
+    {
+      "name": "want-to-read-books",
+      "title": "Want to Read Books",
+      "subtitle": "Hardcover",
+      "description": "View your books with want to read status",
+      "mode": "view"
+    },
+    {
+      "name": "currently-reading-books",
+      "title": "Currently Reading Books",
+      "subtitle": "Hardcover",
+      "description": "View your books with currently reading status",
+      "mode": "view"
+    },
+    {
+      "name": "read-books",
+      "title": "Read Books",
+      "subtitle": "Hardcover",
+      "description": "View your books with read status",
+      "mode": "view"
+    },
+    {
+      "name": "did-not-finish-books",
+      "title": "Did Not Finish Books",
+      "subtitle": "Hardcover",
+      "description": "View your books with did not finish status",
+      "mode": "view"
+    },
+    {
+      "name": "manage-lists",
+      "title": "Manage Lists",
+      "subtitle": "Hardcover",
+      "description": "Manage your lists",
+      "mode": "view"
+    },
+    {
+      "name": "create-list",
+      "title": "Create List",
+      "subtitle": "Hardcover",
+      "description": "Create a new list",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "api_key",
+      "description": "Hardcover API key. You can get it from https://hardcover.app/account/api",
+      "type": "password",
+      "required": true,
+      "title": "API Key"
+    }
+  ]
+}

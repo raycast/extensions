@@ -3,13 +3,19 @@ import { useGetProjects } from "./hooks/useGetProjects";
 import { useVisitedProjects } from "./hooks/useVisitedProjects";
 
 import ProjectListItem from "./components/ProjectListItem";
+import { useCachedState } from "@raycast/utils";
 
 export default function Command() {
+  const [isShowingDetail] = useCachedState("show-project-details", false);
   const { projects, isLoading: isLoadingProjects, leaveProject } = useGetProjects();
   const { projects: visitedProjects, visitProject, removeProjectFromVisit } = useVisitedProjects();
 
   return (
-    <List isLoading={isLoadingProjects} searchBarPlaceholder="Filter projects by name...">
+    <List
+      isLoading={isLoadingProjects}
+      searchBarPlaceholder="Filter projects by name..."
+      isShowingDetail={isShowingDetail}
+    >
       <List.Section key="recent-projects" title="Recently Visited Projects">
         {
           /**

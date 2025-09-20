@@ -15,71 +15,17 @@
     "dancannon"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "closeWindowOnAction",
-      "title": "Close window on action",
-      "description": "Close the Raycast window after performing an action",
-      "type": "checkbox",
-      "label": "Enabled",
-      "default": false,
-      "required": false
-    }
-  ],
   "commands": [
     {
-      "name": "search",
-      "title": "Search",
-      "subtitle": "Spotify",
-      "description": "A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.",
-      "mode": "view"
-    },
-    {
-      "name": "yourLibrary",
-      "title": "Your Library",
-      "subtitle": "Spotify",
-      "description": "Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the \"Search\" command, it includes a category dropdown and contextual actions.",
-      "mode": "view"
-    },
-    {
-      "name": "nowPlaying",
-      "title": "Now Playing",
-      "subtitle": "Spotify",
-      "description": "See what's currently playing. Use the actions (⌘ K) for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more.",
-      "mode": "view"
-    },
-    {
-      "name": "nowPlayingMenuBar",
-      "title": "Menu Bar Player",
-      "subtitle": "Spotify",
-      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more. Refreshes every 10 seconds.",
-      "mode": "menu-bar",
-      "interval": "10s",
-      "preferences": [
-        {
-          "name": "maxTextLength",
-          "title": "Maximum text length",
-          "description": "Maximum number of characters to show. If left empty, it defaults to 30",
-          "type": "textfield",
-          "default": "20",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "quickActions",
-      "title": "Quick Actions",
-      "subtitle": "Spotify",
-      "description": "This is a list of lots of Spotify actions. For example: Play/Pause, Like/Dislike current song, Change Volume, and more. If you'd like to have any of these available as a Root Command, you can create Quicklinks via the actions menu (⌘ K).",
+      "name": "update",
+      "title": "Update",
+      "description": "Update to the production version of the Spotify extension.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2",
-    "node-fetch": "^3.3.1",
-    "oazapfts": "^4.6.0",
-    "run-applescript": "^6.1.0"
+    "@raycast/utils": "^1.5.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
@@ -97,7 +43,6 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "generate-spotify-client": "oazapfts --optimistic ./fixed-spotify-open-api.yml ./src/helpers/spotify.api.ts"
+    "lint": "ray lint"
   }
 }

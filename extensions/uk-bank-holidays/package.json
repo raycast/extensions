@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uk-bank-holidays",
+  "title": "UK Bank Holidays",
+  "description": "Display the upcoming bank holiday information for England and Wales.",
+  "icon": "holidays-icon.png",
+  "author": "kud",
+  "categories": [
+    "Other",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Upcoming Bank Holidays in England and Wales",
+      "description": "Show Upcoming Bank Holidays in England and Wales",
+      "mode": "view"
+    },
+    {
+      "name": "next-holiday",
+      "title": "Next UK Bank Holiday",
+      "description": "Next UK Bank Holiday",
+      "mode": "no-view",
+      "interval": "12h"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "node-fetch": "3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

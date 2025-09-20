@@ -15,36 +15,24 @@ interface IDictionary {
 
 const spotlight = (
   query: string,
-  exact = false,
   dir: string | null = null,
   filter: string[] | null = null,
-  attrs = [],
-  abortable: React.MutableRefObject<AbortController | null | undefined> | undefined
+  attrs: string[] = [],
+  abortable: React.MutableRefObject<AbortController | null | undefined> | undefined,
 ) => {
   if (process.platform !== "darwin") throw new Error(process.platform + " is not supported.");
   if ("string" !== typeof query) throw new Error("query must be a string.");
   if (query.length === 0) throw new Error("query must not be empty.");
   if (dir && "string" !== typeof dir) throw new Error("dir must be a string.");
 
-  let processedQuery: string | undefined = query;
-
-  if (exact) {
-    processedQuery = undefined;
-  }
-
-  const args = processedQuery ? [processedQuery, "-0"] : ["-0"];
+  const args = ["-0"];
 
   if (dir) {
     args.push("-onlyin", dir);
   }
 
   if (filter && filter.length) {
-    let filterParts = filter;
-
-    if (exact) {
-      filterParts = ["-literal", filter.join(" && ")];
-    }
-
+    const filterParts = ["-literal", filter.join(" && ")];
     args.push(...filterParts);
   }
 
@@ -84,8 +72,9 @@ const spotlight = (
         if (value === "(null)") {
           value = null;
         } else if (attributes[attr] && typeof attributes[attr] === "function") {
-          const f: (s: string) => string = attributes[attr];
-          value = f(value);
+          const parser = attributes[attr];
+          const parsedValue = parser(value);
+          value = parsedValue !== null ? String(parsedValue) : null;
         }
 
         if (value) {
@@ -94,7 +83,7 @@ const spotlight = (
       }
 
       return result;
-    })
+    }),
   );
 
   search.on("error", (e) => {

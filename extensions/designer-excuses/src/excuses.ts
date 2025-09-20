@@ -1,0 +1,28 @@
+const excuses = [
+  "Actually, that's a feature",
+  "It's not a bug, it's a feature",
+  "Are you sure you don't have a problem with your internet connection?",
+  "Are you sure you want it to work that way?",
+  "But we're a small team so what do you expect?",
+  "Everyone was sick",
+  "Everything looks fine on my end",
+  "Have you seen the figma yet?",
+  "I thought that was signed off?",
+  "I didn't anticipate that I would make any errors",
+  "It's a placeholder for now",
+  "It's a design trend",
+  "It's a performance optimization",
+  "It's a design system constraint",
+  "It's a work in progress",
+  "The PM wanted it that way",
+  "It's a creative choice, trust me",
+  "It's a design trend from 2050",
+  "The users will figure it out eventually",
+  "The stakeholders loved it in the meeting",
+  "I need a two-week break to reflect on my past design decisions",
+  "What can you expect from someone whose artistic range is limited to drawing rectangles?",
+  "No data just vibezz, users love it",
+  "The prototype worked perfectly in my head",
+];
+
+export default excuses;

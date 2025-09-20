@@ -3,7 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { apiUrl } from "./constants/constants";
 import NewDocForm from "./modules/NewDoc/NewDocForm";
-import { Document } from "./types/types";
+import { Document, Template } from "./types/types";
 
 interface Preferences {
   AccessToken: string;
@@ -13,7 +13,7 @@ export default function newDoc() {
   const [showingDetail, setShowingDetail] = useState(false);
   const preferences = getPreferenceValues<Preferences>();
 
-  const { isLoading, data } = useFetch<{ data: Document[] }>(
+  const { isLoading, data } = useFetch<{ data: Template[] }>(
     `${apiUrl}/templates`,
     {
       headers: {
@@ -26,9 +26,9 @@ export default function newDoc() {
   return (
     <List isLoading={isLoading} isShowingDetail={showingDetail}>
       {data &&
-        data.data?.map((doc: Document) => (
+        data.data?.map((doc: Template) => (
           <List.Item
-            key={doc.id}
+            key={doc.uuid}
             title={`${doc.name || ""}`}
             actions={
               <ActionPanel>
@@ -47,7 +47,7 @@ export default function newDoc() {
                 isLoading={isLoading}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    {doc.checklist_items.map((item) => (
+                    {doc.inputs.map((item) => (
                       <List.Item.Detail.Metadata.Label
                         title={item.identifier}
                         key={item.identifier}

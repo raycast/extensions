@@ -1,5 +1,66 @@
 # Apple Music Changelog
 
+## [New Command] - 2025-08-04
+
+- Added a new command that removes the currently playing track from the Library.
+
+## [New Config] - 2025-06-30
+
+- Added a new configuration option to disable HUDs
+
+## [Update Rate Track] - 2025-03-10
+
+- Added the track name to the `Rate Track` command.
+
+## [New Command] - 2025-03-04
+
+- Added new "Toggle Repeat" command.
+
+## [AI Enhancements] - 2025-02-21
+
+- Added AI extensions to the Music extension.
+
+## [Update Currently Playing] - 2024-12-13
+
+- Fixed a bug where `Currently Playing` command would open the Music app if it was not running.
+
+## [Update Currently Playing] - 2024-12-06
+
+- Update `Currently Playing` command to show the currently playing track in the subtitle instead of the toast.
+
+## [New Command] - 2024-02-10
+
+- Added a new command that removes the currently playing track from the current playlist and skips to the next track.
+
+## [Update] - 2023-10-12
+
+- Added macos version check in the "favorite" command in order to make it compatible with version older than Sonoma.
+
+## [Update] - 2023-10-11
+
+- Apple recently updated Music and renamed the "love" functionality to "favorite". This updates the necessary commands for that.
+
+## [Fix `start-playlist`] - 2023-08-31
+
+- Fixed a bug in `start-playlist` where item title could be empty or undefined.
+
+## [Dislike & Skip] - 2023-08-10
+
+- Add command to dislike and then skip a track
+
+## [Fix] - 2023-08-05
+
+- Fixed HUD confirmations from showing an unknown character
+- Swapped deprecated 'accessoryTitle' to 'accessories' in lists
+
+## [Fix] - 2023-06-12
+
+- Fixed a few bugs that caused some commands not to open correct
+
+## [Update] - 2023-05-03
+
+- This adds the currently playing track in Play Library Track
+
 ## [Update] - 2023-04-10
 
 - Improved search to match Apple Music behaviour

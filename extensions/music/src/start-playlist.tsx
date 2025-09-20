@@ -5,7 +5,6 @@ import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
 import { Playlist } from "./util/models";
-import { SFSymbols } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 
@@ -45,9 +44,9 @@ export default function PlaySelected() {
         flow(
           parseResult<Playlist>(),
           (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
-          setPlaylists
-        )
-      )
+          setPlaylists,
+        ),
+      ),
     )();
   }, [playlistKind]);
 
@@ -75,13 +74,10 @@ export default function PlaySelected() {
             {data.map((playlist) => (
               <List.Item
                 key={playlist.id}
-                title={playlist.name}
-                accessoryTitle={
-                  SFSymbols.PLAYLIST +
-                  ` ${playlist.count}   ` +
-                  SFSymbols.TIME +
-                  ` ${Math.floor(Number(playlist.duration) / 60)} min`
-                }
+                title={playlist.name ?? "Unknown Playlist"}
+                accessories={[
+                  { text: `${playlist.count} songs ·` + ` ${Math.floor(Number(playlist.duration) / 60)} min` },
+                ]}
                 icon={{ source: "../assets/icon.png" }}
                 actions={<Actions playlist={playlist} pop={pop} />}
               />
@@ -106,7 +102,7 @@ function Actions({ playlist: { name, id }, pop }: ActionsProps) {
       id,
       music.playlists.playById(shuffle),
       TE.map(() => closeMainWindow()),
-      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this playlist"))
+      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this playlist")),
     )();
 
     pop();

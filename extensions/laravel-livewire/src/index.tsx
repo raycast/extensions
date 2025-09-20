@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, getPreferenceValues, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, Action } from "@raycast/api";
 
 export default function SearchDocumentation() {
   const getPreference = getPreferenceValues();
@@ -13,6 +13,7 @@ export default function SearchDocumentation() {
   const documentation: { [key: string]: docList } = {
     "1.x": require("./documentation/1.x.json"),
     "2.x": require("./documentation/2.x.json"),
+    "3.x": require("./documentation/3.x.json"),
   };
 
   return (
@@ -27,8 +28,8 @@ export default function SearchDocumentation() {
               keywords={[item.title, section]}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={item.url} />
-                  <CopyToClipboardAction title="Copy URL" content={item.url} />
+                  <Action.OpenInBrowser url={item.url} />
+                  <Action.CopyToClipboard title="Copy URL" content={item.url} />
                 </ActionPanel>
               }
             />

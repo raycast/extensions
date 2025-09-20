@@ -11,17 +11,18 @@ import {
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
-import { ApiTask } from "../api/task";
-import useFieldTemplates from "../hooks/useFieldTemplates";
-import useLists from "../hooks/useLists";
-import useTasks from "../hooks/useTasks";
-import useUsers from "../hooks/useUsers";
-import { CreateTaskFormValues, CreateTaskPayload } from "../types/task";
-import { getTintColorFromHue, ListColors } from "../utils/list";
-import { getIconByStatusState } from "../utils/task";
+
+import { createTask } from "@/api/task";
+import useFieldTemplates from "@/hooks/useFieldTemplates";
+import useLists from "@/hooks/useLists";
+import useTasks from "@/hooks/useTasks";
+import useUsers from "@/hooks/useUsers";
+import { CreateTaskFormValues, CreateTaskPayload } from "@/types/task";
+import { getTintColorFromHue, ListColors } from "@/utils/list";
+import { getIconByStatusState } from "@/utils/task";
 
 export default function CreateList({ draftValues }: { draftValues?: CreateTaskFormValues }) {
-  const { theme } = environment;
+  const { appearance } = environment;
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { lists, listsIsLoading } = useLists();
@@ -51,7 +52,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
       }
 
       try {
-        const [data, error] = await ApiTask.create(payload);
+        const [data, error] = await createTask(payload);
 
         if (data) {
           toast.style = Toast.Style.Success;
@@ -145,7 +146,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
             icon={{
               source: getIconByStatusState(status.id, fieldTemplatesStatuses),
               tintColor: `hsl(${status?.hue ?? "0"}, 80%, ${
-                typeof status?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                typeof status?.hue === "number" ? "60%" : appearance === "dark" ? "100%" : "0"
               })`,
             }}
           />
@@ -163,7 +164,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
               tintColor: user?.pictureUrl
                 ? undefined
                 : `hsl(${user?.hue ?? "0"}, 80%, ${
-                    typeof user?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                    typeof user?.hue === "number" ? "60%" : appearance === "dark" ? "100%" : "0"
                   })`,
             }}
           />

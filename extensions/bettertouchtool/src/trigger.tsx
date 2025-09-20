@@ -1,29 +1,81 @@
-import { ActionPanel, Action, List, open, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  open,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Keyboard,
+  closeMainWindow,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
-import { useExec } from "@raycast/utils";
-import { exec } from "child_process";
+import { runAppleScript, useExec } from "@raycast/utils";
 
 export default function Command() {
   const [commands, setCommands] = useState<BTTTrigger[]>([]);
   const [showDisabledTriggers, setShowDisabledTriggers] = useState(false);
+  const preferences: Preferences.Trigger = getPreferenceValues();
+  const shared_secret = preferences.bttSharedSecret;
+  const sharedSecretString = shared_secret ? `{ shared_secret: "${shared_secret}"}` : "";
   const namedTriggerId = 643;
+  const applicationName = "BetterTouchTool";
   const getTriggersJXA = `function run(argv) {
-    let BetterTouchTool = Application('BetterTouchTool');
-    return BetterTouchTool.get_triggers(${namedTriggerId ? `{trigger_id: ${namedTriggerId} }` : ""});
+    let btt = Application('${applicationName}');
+    if (!Application('${applicationName}').running()) {
+      return "error: ${applicationName} is not running. Please launch BTT to use this extension!";
+    }
+    try {
+      return btt.get_triggers(${
+        namedTriggerId
+          ? `{trigger_id: ${namedTriggerId}${shared_secret ? ", ..." + sharedSecretString : ""} }`
+          : sharedSecretString
+      });
+    } catch (e) {
+      return "error: Could not run JXA script. Is BTT running?";
+    }
+
   } run();`;
-  const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA]);
+
+  const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA], {
+    onError: console.error,
+  });
+
+  const checkError = (data: string) => {
+    if (!data || data === "null" || data.includes("error:")) {
+      const errorMessage =
+        data === "null"
+          ? "No data returned from BTT. Have you configured a shared secret?"
+          : data.replace("error:", "").trim() || "Unknown error";
+      const [part1, part2] = errorMessage.split(". ");
+      showToast({
+        title: part1 || "Error",
+        message: (part1 && part2) || "",
+        style: Toast.Style.Failure,
+      });
+      return true;
+    }
+    return null;
+  };
 
   useEffect(() => {
-    if (data) {
-      const jsonData = JSON.parse(data);
-      const filteredTriggers = jsonData.filter(
-        (trigger: BTTTrigger) =>
-          !!trigger.BTTTriggerName && (showDisabledTriggers || (trigger.BTTEnabled === 1 && trigger.BTTEnabled2 === 1))
-      );
+    if (!isLoading && data && !checkError(data || "")) {
+      try {
+        const jsonData = JSON.parse(data);
 
-      setCommands(filteredTriggers);
+        const filteredTriggers = jsonData.filter(
+          (trigger: BTTTrigger) =>
+            !!trigger.BTTTriggerName &&
+            (showDisabledTriggers || (trigger.BTTEnabled === 1 && trigger.BTTEnabled2 === 1))
+        );
+
+        setCommands(filteredTriggers);
+      } catch (error) {
+        checkError("error: Failed to parse triggers. Have you created a named trigger?");
+      }
     }
-  }, [data, showDisabledTriggers]);
+  }, [isLoading, data, showDisabledTriggers]);
 
   const TriggerDropdown = ({ onTriggerTypeChange }: { onTriggerTypeChange: (value: string) => void }) => {
     return (
@@ -62,48 +114,67 @@ export default function Command() {
 }
 
 function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
-  const { BTTTriggerName: triggerName } = triggerResult;
-  const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}`;
+  const preferences: Preferences.Trigger = getPreferenceValues();
+  const shared_secret = preferences.bttSharedSecret;
+  const sharedSecretString = shared_secret ? `shared_secret "${shared_secret}"` : "";
+
+  const triggerName = triggerResult.BTTTriggerName || triggerResult.BTTPredefinedActionName;
+  const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}${
+    shared_secret ? "&shared_secret=" + shared_secret : ""
+  }`;
   const handleTrigger = async () => {
     await open(url);
   };
 
-  const handleRun = async () => {
-    const osaCommand = `tell application "BetterTouchTool" to trigger_named "${triggerName}"`;
-    await exec(`osascript -e '${osaCommand}'`, (error, stdout, stderr) => {
-      if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-      }
-    });
+  const handleRun = async (closeWindow = false) => {
+    if (closeWindow) {
+      await closeMainWindow();
+    }
+    const osaCommand = `tell application "BetterTouchTool" to trigger_named "${triggerName}" ${sharedSecretString}`;
+    try {
+      await runAppleScript(osaCommand);
+    } catch (error) {
+      showToast({
+        title: "Failed to run trigger",
+        message: error && String(error) !== "null" ? String(error) : "",
+        style: Toast.Style.Failure,
+      });
+    }
   };
+
+  const accessories = [];
+  if (triggerResult.BTTGestureNotes && triggerResult.BTTGestureNotes !== "Named Trigger: " + triggerName) {
+    accessories.push({ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes });
+  }
+  if (triggerResult.BTTPredefinedActionName) {
+    accessories.push({
+      text: triggerResult.BTTPredefinedActionName,
+      icon: Icon.ArrowRight,
+      tooltip: triggerResult.BTTGenericActionConfig || triggerResult.BTTPredefinedActionName,
+    });
+  }
 
   return (
     <List.Item
-      title={triggerName || triggerResult.BTTPredefinedActionName}
-      accessories={[
-        ...(triggerResult.BTTGestureNotes
-          ? [{ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes }]
-          : []),
-        {
-          text: triggerResult.BTTPredefinedActionName,
-          icon: Icon.ArrowRight,
-          tooltip: triggerResult.BTTGenericActionConfig || triggerResult.BTTPredefinedActionName,
-        },
-      ]}
+      title={triggerName}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.Play} />
-            <Action title="Run Trigger with BTT via URL" onAction={handleTrigger} icon={Icon.Link} />
+            <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.PlayFilled} />
+            <Action title="Run Trigger in Background" onAction={() => handleRun(true)} icon={Icon.Play} />
+            <Action
+              title="Run Trigger with BTT via URL"
+              onAction={handleTrigger}
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Trigger URL"
               content={url}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
               onCopy={() => console.log(triggerResult)}
             />
           </ActionPanel.Section>

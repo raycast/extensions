@@ -11,7 +11,18 @@
     "andreaselia",
     "rtyke",
     "KarolRe",
-    "Aiee"
+    "Aiee",
+    "nagauta",
+    "a-laughlin",
+    "tleo19",
+    "Tarocch1",
+    "santiago_perez",
+    "drewbabel",
+    "hayden_barnes",
+    "pernielsentikaer"
+  ],
+  "pastContributors": [
+    "jonasengelmann"
   ],
   "license": "MIT",
   "commands": [
@@ -44,14 +55,216 @@
       "mode": "view"
     },
     {
+      "name": "search-all",
+      "title": "Search All",
+      "subtitle": "Google Chrome",
+      "description": "Search browser all tabs and history,bookmarks.",
+      "mode": "view"
+    },
+    {
       "name": "new-window",
       "title": "Create New Window",
       "subtitle": "Google Chrome",
       "description": "Create New Window.",
       "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Create New Incognito Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Incognito Window.",
+      "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a blank new tab or a tab to a given website."
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a blank new window or a window to a given website."
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search bookmarks for a given query."
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search history for a given query."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@google-chrome open a new tab",
+        "mocks": {
+          "new-tab": "New tab opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opens a new tab"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new tab to raycast.com",
+        "mocks": {
+          "new-tab": "New tab opened to https://raycast.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "website": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new tab to https://raycast.com"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new window",
+        "mocks": {
+          "new-window": "New window opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-window",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new window"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new window to raycast.com",
+        "mocks": {
+          "new-window": "New window opened to https://raycast.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-window",
+              "arguments": {
+                "website": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new window to https://raycast.com"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome search bookmarks for raycast",
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "id": "1",
+              "title": "Raycast",
+              "lastVisited": {},
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": "2",
+              "title": "Hacker News",
+              "lastVisited": {},
+              "url": "https://news.ycombinator.com/"
+            },
+            {
+              "id": "3",
+              "title": "Google",
+              "lastVisited": {},
+              "url": "https://www.google.com/"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": "raycast"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the bookmark for Raycast"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome search history for raycast",
+        "mocks": {
+          "search-history": [
+            {
+              "id": 1,
+              "title": "Raycast",
+              "lastVisited": 13383162423527348,
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": 2,
+              "title": "Google",
+              "lastVisited": 13383164857392104,
+              "url": "https://www.google.com/"
+            },
+            {
+              "id": 3,
+              "title": "Reddit",
+              "lastVisited": 13383159901834568,
+              "url": "https://www.reddit.com/"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {
+                "query": "raycast"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the history for Raycast"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
+    {
+      "description": "Find the full path to the Google Chrome Profile path via chrome://version/. If empty, the default profile will be used.",
+      "label": "Profile",
+      "default": "",
+      "name": "profilePath",
+      "required": false,
+      "title": "Profile Path",
+      "type": "textfield",
+      "placeholder": "/Users/username/Library/Application Support/Google/Chrome/Profile 1"
+    },
     {
       "default": false,
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Chrome profile.",
@@ -85,19 +298,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.13",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.18.1",
+    "run-applescript": "^7.1.0",
+    "sql.js": "^1.12.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.9.4"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/sql.js": "^1.4.9",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react": "^18.2.0",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

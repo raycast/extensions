@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cacher",
+  "title": "Cacher - Code Snippet Organizer",
+  "description": "Create and insert personal and team code snippets from anywhere.",
+  "icon": "cacher.png",
+  "author": "cacherapp",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "Find this in Cacher: User Dropdown > Personal Settings > API Credentials",
+      "type": "password",
+      "required": true
+    },
+    {
+      "title": "API Token",
+      "name": "apiToken",
+      "description": "Find this in Cacher: User Dropdown > Personal Settings > API Credentials",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-snippets",
+      "title": "Search Code Snippets",
+      "subtitle": "Cacher",
+      "description": "Search your Cacher snippets.",
+      "mode": "view"
+    },
+    {
+      "name": "create-snippet",
+      "title": "Create Code Snippet",
+      "subtitle": "Cacher",
+      "description": "Create new personal/team snippet.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "date-fns": "^2.29.3",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -57,91 +57,12 @@ fragment PullRequestFields on PullRequest {
       }
     }
   }
-}
 
-query myPullRequests(
-  $createdOpenQuery: String!
-  $createdClosedQuery: String!
-  $assignedOpenQuery: String!
-  $assignedClosedQuery: String!
-  $mentionedOpenQuery: String!
-  $mentionedClosedQuery: String!
-  $reviewRequestsOpenQuery: String!
-  $reviewRequestsClosedQuery: String!
-  $reviewedByOpenQuery: String!
-  $reviewedByClosedQuery: String!
-  $numberOfOpenItems: Int!
-  $numberOfClosedItems: Int!
-) {
-  createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  assignedClosed: search(query: $assignedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  mentionedOpen: search(query: $mentionedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  mentionedClosed: search(query: $mentionedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  reviewRequestsOpen: search(query: $reviewRequestsOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  reviewRequestsClosed: search(query: $reviewRequestsClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  reviewedByOpen: search(query: $reviewedByOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
-  }
-  reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-    pullRequests: edges {
-      pullRequest: node {
-        ...PullRequestFields
-      }
-    }
+  isMergeQueueEnabled
+  isInMergeQueue
+  mergeStateStatus
+  autoMergeRequest {
+    enabledAt
   }
 }
 
@@ -169,6 +90,12 @@ fragment PullRequestDetailsFields on PullRequest {
   additions
   deletions
   mergeable
+  isMergeQueueEnabled
+  isInMergeQueue
+  mergeStateStatus
+  autoMergeRequest {
+    enabledAt
+  }
   milestone {
     id
     title
@@ -253,9 +180,14 @@ query pullRequestDetails($nodeId: ID!) {
   }
 }
 
-query repositoryCollaboratorsForPullRequests($owner: String!, $name: String!, $pullRequestNumber: Int!) {
+query repositoryCollaboratorsForPullRequests(
+  $owner: String!
+  $name: String!
+  $pullRequestNumber: Int!
+  $searchQuery: String
+) {
   repository(owner: $owner, name: $name) {
-    collaborators(first: 25) {
+    collaborators(first: 25, query: $searchQuery) {
       totalCount
       nodes {
         ... on User {
@@ -383,6 +315,34 @@ mutation mergePullRequest($nodeId: ID!, $method: PullRequestMergeMethod!) {
   mergePullRequest(input: { pullRequestId: $nodeId, mergeMethod: $method }) {
     pullRequest {
       nodeId: id
+    }
+  }
+}
+
+mutation addPullRequestToMergeQueue($nodeId: ID!) {
+  enqueuePullRequest(input: { pullRequestId: $nodeId }) {
+    __typename
+  }
+}
+
+mutation removePullRequestFromMergeQueue($nodeId: ID!) {
+  dequeuePullRequest(input: { id: $nodeId }) {
+    __typename
+  }
+}
+
+mutation enablePullRequestAutoMerge($nodeId: ID!) {
+  enablePullRequestAutoMerge(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
+mutation disablePullRequestAutoMerge($nodeId: ID!) {
+  disablePullRequestAutoMerge(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
     }
   }
 }

@@ -1,4 +1,4 @@
-import { JsonFragment } from '@ethersproject/abi';
+import { JsonFragment } from 'ethers';
 import {
   ActionPanel,
   Form,
@@ -7,7 +7,7 @@ import {
   Clipboard,
   Toast,
 } from '@raycast/api';
-import Coder from 'abi-coder';
+import { Coder, ValueMap } from 'abi-coder';
 import { useMemo, useState } from 'react';
 
 import { isAbi } from './utils';
@@ -89,10 +89,12 @@ export default function Command() {
     if (!inputs) {
       return null;
     }
-    const values = inputs.map((_, index) => formValues[index.toString()]);
-    if (!values.every((value) => !!value)) {
-      return null;
-    }
+    const values = Object.fromEntries(
+      inputs.map((_, index) => [
+        inputs[index].name,
+        formValues[index.toString()],
+      ]),
+    ) as ValueMap;
     try {
       const type = selectedItem.type;
       if (!type) {

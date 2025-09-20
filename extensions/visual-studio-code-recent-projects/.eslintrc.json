@@ -1,21 +1,13 @@
 {
   "root": true,
-  "env": {
-    "es2020": true,
-    "node": true
-  },
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
   "settings": {
     "react": {
       "version": "detect"
     }
   },
   "extends": [
-    "eslint:recommended",
     "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended",
     "plugin:react/jsx-runtime",
-    "prettier"
+    "@raycast"
   ]
 }

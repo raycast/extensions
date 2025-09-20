@@ -4,78 +4,111 @@
   "title": "Folder Search",
   "description": "Search for folders on your Mac",
   "icon": "folder-search.png",
-  "author": "GastroGeek",
-  "contributors": [
-    "omarshahine"
-  ],
-  "license": "MIT",
-  "categories": [
-    "Productivity",
-    "System"
-  ],
   "keywords": [
     "folders",
     "search"
   ],
+  "author": "GastroGeek",
+  "contributors": [
+    "omarshahine",
+    "fengtianze",
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "search",
-      "title": "Folder Search",
+      "title": "Search Folders",
       "description": "Search for folders on your Mac",
+      "mode": "view"
+    },
+    {
+      "name": "move",
+      "title": "Move to a Folder",
+      "subtitle": "Folder Search",
+      "description": "Move selected files to a folder",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "maxResults",
-      "title": "Maximum Results",
-      "description": "The maximum number of search results that Folder Search should return",
-      "type": "textfield",
+      "default": true,
+      "description": "Filter out non-user visible folders in ~/Library. This does not affect cloud storage folders (iCloud Drive, Dropbox, OneDrive, Google Drive) which will always be shown.",
+      "label": "Filter Library Folders",
+      "name": "filterLibraryFolders",
       "required": false,
-      "default": "250"
+      "title": "Search Behavior",
+      "type": "checkbox"
     },
     {
-      "name": "pluginsEnabled",
-      "title": "Plugins Enabled",
+      "default": "250",
+      "description": "The maximum number of search results that Folder Search should return",
+      "label": "Maximum Results",
+      "name": "maxResults",
+      "required": false,
+      "title": "Maximum Results",
+      "type": "textfield"
+    },
+    {
+      "default": true,
+      "description": "Open the destination folder after moving files. Disable this to keep your workflow uninterrupted.",
+      "label": "Open folder after move",
+      "name": "openFolderAfterMove",
+      "required": false,
+      "title": "Move Behavior",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
       "description": "Enables support for custom 'AppleScript' plugins in Folder Search. See README",
       "label": "Enabled",
-      "type": "checkbox",
+      "name": "pluginsEnabled",
       "required": false,
-      "default": false
+      "title": "Plugins Enabled",
+      "type": "checkbox"
     },
     {
-      "name": "pluginsFolder",
-      "title": "Plugins Folder (Absolute Path)",
+      "default": "",
       "description": "The Folder in which your plugins, for Folder Search, are stored",
-      "type": "textfield",
+      "name": "pluginsFolder",
       "required": false,
-      "default": ""
+      "title": "Plugins Folder (Absolute Path)",
+      "type": "textfield"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.2",
-    "@raycast/utils": "^1.3.3",
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1",
     "binary-split": "^1.0.5",
-    "fs-extra": "^11.1.0",
-    "run-applescript": "^6.0.0",
-    "through2-map": "^3.0.0",
-    "yup": "^0.32.11"
+    "fs-extra": "^11.3.0",
+    "run-applescript": "^7.0.0",
+    "through2-map": "^4.0.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@types/node": "^18.11.10",
-    "@typescript-eslint/eslint-plugin": "^5.45.1",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.15.23",
+    "@types/react": "^19.1.6",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "publish": "ray publish",
+    "update-npm": "npm install -g npm-check-updates",
+    "update-package.json": "ncu -u"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -2,7 +2,6 @@ export interface Table {
   position: number;
   team: Team;
   playedGames: number;
-  form: string;
   won: number;
   draw: number;
   lost: number;
@@ -33,9 +32,8 @@ export interface Newspaper {
 
 export interface Player {
   name: string;
-  dateOfBirth: string;
+  dateOfBirth: string | undefined;
   nationality: string | undefined;
-  position: string | undefined;
 }
 
 export interface TopScorer {

@@ -1,18 +1,30 @@
-import fetch from "node-fetch";
 import {
   AirtableBaseMetadata,
+  AirtableBaseRecordsResponse,
   AirtableMetadataApiBaseDetails,
   AirtableMetadataApiBaseListResponse,
   AirtableMetadataApiBaseSchemaResponse,
-  RaycastExtensionPreferences,
+  AirtableRecord,
+  ErrorResponse,
 } from "./types";
-import { client } from "./oauth-client";
 import { getPreferenceValues, Cache } from "@raycast/api";
+import { getAccessToken } from "@raycast/utils";
 
-const { airtableUiBaseUrl, airtableApiBaseUrl } = getPreferenceValues<RaycastExtensionPreferences>();
+const { airtableUiBaseUrl, airtableApiBaseUrl } = getPreferenceValues<Preferences>();
 const cache = new Cache();
 
 const FETCHED_BASES_CACHE_KEY = "fetchedBases";
+
+async function throwIfError(response: Response) {
+  if (!response.ok) {
+    if (response.headers.get("Content-Type")?.includes("application/json")) {
+      const err = (await response.json()) as ErrorResponse;
+      throw new Error(err.error.message);
+    } else {
+      throw new Error(response.statusText);
+    }
+  }
+}
 
 export function getCachedBaseList(): Array<AirtableBaseMetadata> {
   const cachedBaseListString = cache.get(FETCHED_BASES_CACHE_KEY);
@@ -20,19 +32,17 @@ export function getCachedBaseList(): Array<AirtableBaseMetadata> {
 }
 
 export async function fetchBaseListPage(offset?: string): Promise<AirtableMetadataApiBaseListResponse> {
+  const { token } = getAccessToken();
   const offsetParam = offset ? `?offset=${offset}` : "";
   const response = await fetch(`${airtableApiBaseUrl}/v0/meta/bases${offsetParam}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
-  if (!response.ok) {
-    console.error("fetch base list error:", await response.text());
-    throw new Error(response.statusText);
-  }
+  await throwIfError(response);
 
   const baseListResponse = (await response.json()) as AirtableMetadataApiBaseListResponse;
 
@@ -78,20 +88,56 @@ export function getCachedBaseSchemaIfExists(baseId: string): AirtableMetadataApi
 }
 
 export async function fetchBaseSchema(baseId: string): Promise<AirtableMetadataApiBaseSchemaResponse> {
+  const { token } = getAccessToken();
   const response = await fetch(`${airtableApiBaseUrl}/v0/meta/bases/${baseId}/tables`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
-  if (!response.ok) {
-    console.error("fetch base schema error:", await response.text());
-    throw new Error(response.statusText);
-  }
+  await throwIfError(response);
 
   const baseSchema = (await response.json()) as AirtableMetadataApiBaseSchemaResponse;
   cache.set(getBaseSchemaCacheKey(baseId), JSON.stringify(baseSchema));
   return baseSchema;
+}
+
+export async function fetchBaseRecords(baseId: string, tableId: string) {
+  const { token } = getAccessToken();
+  const response = await fetch(`${airtableApiBaseUrl}/v0/${baseId}/${tableId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  await throwIfError(response);
+
+  const result = (await response.json()) as AirtableBaseRecordsResponse;
+  return result.records;
+}
+
+export async function updateBaseRecord(
+  baseId: string,
+  tableId: string,
+  recordId: string,
+  fields: Record<string, string>,
+) {
+  const { token } = getAccessToken();
+  const response = await fetch(`${airtableApiBaseUrl}/v0/${baseId}/${tableId}/${recordId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ fields }),
+  });
+
+  await throwIfError(response);
+
+  const result = (await response.json()) as AirtableRecord;
+  return result;
 }

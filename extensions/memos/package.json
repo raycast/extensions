@@ -5,6 +5,9 @@
   "description": "Manage Your Memos",
   "icon": "logo.png",
   "author": "JakeYu",
+  "contributors": [
+    "littlequartz"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -23,18 +26,18 @@
       ]
     },
     {
-      "name": "openMemoWebsite",
-      "title": "Open Website",
-      "description": "Open Memos Website",
-      "mode": "no-view",
-      "subtitle": "Memos",
-      "icon": "logo.png"
-    },
-    {
       "name": "sendMemoForm",
       "title": "Send Memo Form",
       "description": "Edit memo Detail",
       "mode": "view",
+      "subtitle": "Memos",
+      "icon": "logo.png"
+    },
+    {
+      "name": "openMemoWebsite",
+      "title": "Open Website",
+      "description": "Open Memos Website",
+      "mode": "no-view",
       "subtitle": "Memos",
       "icon": "logo.png"
     },
@@ -47,26 +50,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.16",
-    "axios": "^1.3.2",
+    "@raycast/api": "^1.75.2",
+    "@raycast/utils": "^1.15.0",
+    "axios": "^1.8.4",
     "form-data": "^4.0.0",
     "mime": "^3.0.0",
     "qs": "^6.11.0",
     "url-parse": "^1.5.10"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/mime": "^3.0.1",
-    "@types/node": "18.8.3",
+    "@types/node": "20.8.10",
     "@types/qs": "^6.9.7",
-    "@types/react": "18.0.9",
+    "@types/react": "18.2.27",
     "@types/url-parse": "^1.4.8",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.24.6",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -77,12 +79,20 @@
   },
   "preferences": [
     {
-      "name": "openApi",
-      "description": "Your Open API URL can be found in memo settings.",
-      "placeholder": "https://demo.usememos.com/api/memo?openId=",
+      "name": "host",
+      "description": "Your memo website domain.",
+      "placeholder": "https://demo.usememos.com",
       "type": "textfield",
-      "required": true,
-      "title": "Open Api"
+      "required": false,
+      "title": "Host (memo >= 0.22.0)"
+    },
+    {
+      "name": "token",
+      "description": "Your token can be found in memo settings.",
+      "placeholder": "eyJh*******ZNTU",
+      "type": "textfield",
+      "required": false,
+      "title": "Token (memo >= 0.22.0)"
     }
   ]
 }

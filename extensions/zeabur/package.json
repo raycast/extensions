@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zeabur",
+  "title": "Zeabur",
+  "description": "The Raycast extension for Zeabur.",
+  "icon": "extension-icon.png",
+  "author": "ridemountainpig",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Documentation",
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "subtitle": "Zeabur",
+      "description": "Search Zeabur Docs",
+      "mode": "view"
+    },
+    {
+      "name": "search-templates",
+      "title": "Search Templates",
+      "subtitle": "Zeabur",
+      "description": "Search Zeabur Templates",
+      "mode": "view"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "subtitle": "Zeabur",
+      "description": "Manage Zeabur Projects",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "zeaburToken",
+          "title": "Zeabur Token",
+          "description": "Zeabur Token",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "deploy-project",
+      "title": "Deploy Project",
+      "subtitle": "Zeabur",
+      "description": "Deploy a project to Zeabur",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "archiver": "^7.0.1",
+    "date-fns": "^4.1.0",
+    "ignore": "^7.0.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/archiver": "^6.0.3",
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

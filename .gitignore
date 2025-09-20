@@ -149,7 +149,32 @@ dist
 ## Extension archives
 examples/**/*.zip
 extensions/**/*.zip
+examples/**/.github
+extensions/**/.github
 
 # IntelliJ / WebStorm
 .idea/
 *.iml
+
+# Raycast
+raycast-env.d.ts
+.build
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# VSCode
+.vscode
+
+# Root unused files
+/package.json
+/package-lock.json
+
+# Non-npm lockfiles
+pnpm-lock.yaml
+yarn.lock
+deno.lock
+bun.lockb
+bun.lock
+
+scripts/internal/**

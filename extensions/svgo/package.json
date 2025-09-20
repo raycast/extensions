@@ -2,9 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-svgo",
   "title": "SVGO",
-  "description": "Optimize SVG from the clipboard",
+  "description": "Optimize SVG vector graphics files.",
   "icon": "svgo.png",
   "author": "kaichi",
+  "contributors": [
+    "kgrhartlage",
+    "dangkhoipro"
+  ],
+  "keywords": [
+    "optimize",
+    "svg",
+    "vector"
+  ],
   "categories": [
     "Developer Tools",
     "Design Tools"
@@ -12,25 +21,47 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "optimize",
-      "title": "Optimize SVG",
+      "name": "index",
+      "title": "Configure SVGO",
+      "description": "Configure SVGO for all commands",
+      "mode": "view"
+    },
+    {
+      "name": "optimize-string",
+      "title": "Optimize SVG String",
       "subtitle": "SVGO",
-      "description": "optimize svg",
+      "description": "Reads the clipboard content as plain text and copies the optimized SVG string to the clipboard.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "paste",
+          "description": "If checked, the command will automatically paste the optimized SVG string to the frontmost application.",
+          "label": "Paste to frontmost application",
+          "default": false,
+          "type": "checkbox",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "optimize-files",
+      "title": "Optimize SVG Files",
+      "subtitle": "SVGO",
+      "description": "Creates one or multiple optimized SVG files based on the current Finder selection.",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.38.2",
-    "is-svg": "4.3.2",
-    "svgo": "2.8.0"
+    "@raycast/api": "^1.94.3",
+    "is-svg": "^5.0.0",
+    "svgo": "^3.3.2"
   },
   "devDependencies": {
-    "@types/svgo": "2.6.3",
-    "@typescript-eslint/eslint-plugin": "5.32.0",
-    "@typescript-eslint/parser": "5.32.0",
-    "eslint": "8.21.0",
-    "eslint-config-prettier": "8.5.0",
-    "prettier": "2.7.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
+    "eslint": "^8.40.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.8",
     "typescript": "4.7.4"
   },
   "scripts": {

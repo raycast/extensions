@@ -5,6 +5,11 @@
   "description": "Google search with autosuggestions",
   "icon": "command-icon.png",
   "author": "mblode",
+  "contributors": [
+    "VBenny42",
+    "ridemountainpig",
+    "jlokos"
+  ],
   "license": "MIT",
   "categories": [
     "Web"
@@ -15,6 +20,12 @@
       "title": "Google Search",
       "description": "Google search with autosuggestions",
       "mode": "view"
+    },
+    {
+      "name": "searchSelectText",
+      "title": "Google Search Selected Text",
+      "description": "Google search with selected text",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -25,6 +36,14 @@
       "default": true,
       "label": "Remember Search History",
       "description": "Enable this checkbox to locally store Google search history."
+    },
+    {
+      "name": "useClipboardFallback",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use Clipboard Fallback",
+      "description": "When no text is selected, fall back to using clipboard content for search."
     }
   ],
   "dependencies": {

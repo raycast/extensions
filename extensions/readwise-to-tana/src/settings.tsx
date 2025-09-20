@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form } from '@raycast/api'
 import Handlebars from 'handlebars'
-import { Book, Highlight } from './useApi'
+import { ifeq } from './helpers'
 
 export type SettingsValues = {
   author: string
@@ -11,13 +11,19 @@ export type SettingsValues = {
   highlightHighlightedAt: string
   highlightLocation: string
   highlightNote: string
+  highlightNoteSupertag: string
   highlightSupertag: string
+  highlightTags: string
   highlightUpdatedAt: string
   highlightUrl: string
   id: string
   readwiseUrl: string
   source: string
-  supertag: string
+  articleSupertag: string
+  bookSupertag: string
+  podcastSupertag: string
+  supplementalSupertag: string
+  tweetSupertag: string
   template: string
   title: string
   url: string
@@ -30,9 +36,9 @@ type SettingsProps = {
 
 export default function Settings({ handleSave, template }: SettingsProps) {
   const h = Handlebars.compile(template)
-  const output = h({
+  const exampleBook = {
     author: 'Sönke Ahrens',
-    category: 'book',
+    category: 'books',
     cover_image_url: 'https://example.com/image.png',
     id: '1',
     num_highlights: 2,
@@ -51,8 +57,28 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         note: 'This is a note',
         id: 2,
       },
-    ],
-  } as Book & { highlights: Highlight[] })
+      {
+        text: 'Highlight with a multiline note',
+        note: 'This is a note\n\nwith multiple lines',
+        id: 3,
+      },
+      {
+        text: 'Highlight with a note and tags',
+        note: 'This is a note',
+        tags: [{ name: 'tag1' }, { name: 'tag2' }],
+        id: 4,
+      },
+    ].map((highlight) => ({
+      ...highlight,
+      note: highlight.note?.split('\n').filter((line) => line) ?? [],
+      tags: highlight.tags?.map((tag) => tag.name).join(', ') ?? [],
+    })),
+  }
+  const output = h(exampleBook, {
+    helpers: {
+      ifeq,
+    },
+  })
 
   return (
     <Form
@@ -67,8 +93,32 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         text="Readwise fields -> Tana fields (leave blank to omit from output). The name of the node will always be the source's title."
       />
       <Form.TextField
-        id="supertag"
-        title="Supertag"
+        id="articleSupertag"
+        title="Article Supertag"
+        info="# can be omitted"
+        storeValue
+      />
+      <Form.TextField
+        id="bookSupertag"
+        title="Book Supertag"
+        info="# can be omitted"
+        storeValue
+      />
+      <Form.TextField
+        id="podcastSupertag"
+        title="Podcast Supertag"
+        info="# can be omitted"
+        storeValue
+      />
+      <Form.TextField
+        id="supplementalSupertag"
+        title="Supplemental Supertag"
+        info="# can be omitted"
+        storeValue
+      />
+      <Form.TextField
+        id="tweetSupertag"
+        title="Tweet Supertag"
         info="# can be omitted"
         storeValue
       />
@@ -111,10 +161,17 @@ export default function Settings({ handleSave, template }: SettingsProps) {
       <Form.TextField
         id="highlightNote"
         title="Note"
-        info="A child node with '**Note:** {{note}}' will be added if this is omitted"
+        info="If this is omitted the note will be added as a child node of the highlight."
+        storeValue
+      />
+      <Form.TextField
+        id="highlightNoteSupertag"
+        title="Note Supertag"
+        info="Tag notes with a supertag. # can be omitted"
         storeValue
       />
       <Form.TextField id="highlightColor" title="Color" storeValue />
+      <Form.TextField id="highlightTags" title="Tags" storeValue />
       <Form.TextField id="highlightUrl" title="URL" storeValue />
       <Form.TextField
         id="highlightHighlightedAt"

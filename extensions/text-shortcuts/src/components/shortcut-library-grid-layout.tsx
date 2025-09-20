@@ -1,11 +1,13 @@
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
 import React, { useState } from "react";
-import { Shortcut, ShortcutSource, tags } from "../util/shortcut";
-import { ActionPanel, Grid } from "@raycast/api";
+import { getShortcuts } from "../hooks/hooks";
+import { Preferences } from "../types/preferences";
+import { Shortcut, tags } from "../util/shortcut";
 import { ActionEditShortcut } from "./action-edit-shortcut";
 import { ActionOpenPreferences } from "./action-open-preferences";
-import { Preferences } from "../types/preferences";
 import { ActionRunShortcut } from "./action-run-shortcut";
-import { getShortcuts } from "../hooks/hooks";
+import { ShortcutsEmptyView } from "./shortcuts-empty-view";
 
 export function ShortcutLibraryGridLayout(props: { preferences: Preferences }) {
   const { preferences } = props;
@@ -13,7 +15,18 @@ export function ShortcutLibraryGridLayout(props: { preferences: Preferences }) {
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
 
-  const { allShortcuts, userShortcuts, loading } = getShortcuts(refresh, preferences);
+  const { userShortcuts, buildInShortcuts, loading } = getShortcuts(refresh, preferences);
+  const {
+    data: sortedCustomData,
+    visitItem: visitCustomItem,
+    resetRanking: resetCustomRanking,
+  } = useFrecencySorting(userShortcuts);
+  const {
+    data: sortedBuildInData,
+    visitItem: visitBuildInItem,
+    resetRanking: resetBuildInRanking,
+  } = useFrecencySorting(buildInShortcuts);
+
   return (
     <Grid
       columns={parseInt(preferences.columns)}
@@ -30,38 +43,39 @@ export function ShortcutLibraryGridLayout(props: { preferences: Preferences }) {
         </Grid.Dropdown>
       }
     >
+      <ShortcutsEmptyView setRefresh={setRefresh} />
       <Grid.Section title={"Custom"}>
-        {allShortcuts.map((value, index) => {
+        {sortedCustomData.map((value, index) => {
           if (value.info.tag.includes(tag) || tag === "All") {
             return (
-              value.info.source === ShortcutSource.USER && (
-                <GridItem
-                  key={value.info.id}
-                  index={index}
-                  userShortcuts={userShortcuts}
-                  shortcut={value}
-                  preferences={preferences}
-                  setRefresh={setRefresh}
-                />
-              )
+              <GridItem
+                key={value.id}
+                index={index}
+                shortcuts={sortedCustomData}
+                shortcut={value}
+                preferences={preferences}
+                setRefresh={setRefresh}
+                visitItem={visitCustomItem}
+                resetRanking={resetCustomRanking}
+              />
             );
           }
         })}
       </Grid.Section>
       <Grid.Section title={"Build-in"}>
-        {allShortcuts.map((value, index) => {
+        {buildInShortcuts.map((value, index) => {
           if (value.info.tag.includes(tag) || tag === "All") {
             return (
-              value.info.source === ShortcutSource.BUILD_IN && (
-                <GridItem
-                  key={value.info.id}
-                  index={index}
-                  userShortcuts={userShortcuts}
-                  shortcut={value}
-                  preferences={preferences}
-                  setRefresh={setRefresh}
-                />
-              )
+              <GridItem
+                key={value.id}
+                index={index}
+                shortcuts={sortedBuildInData}
+                shortcut={value}
+                preferences={preferences}
+                setRefresh={setRefresh}
+                visitItem={visitBuildInItem}
+                resetRanking={resetBuildInRanking}
+              />
             );
           }
         })}
@@ -70,25 +84,28 @@ export function ShortcutLibraryGridLayout(props: { preferences: Preferences }) {
   );
 }
 
-export function GridItem(props: {
+function GridItem(props: {
   index: number;
-  userShortcuts: Shortcut[];
+  shortcuts: Shortcut[];
   shortcut: Shortcut;
   preferences: Preferences;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  visitItem: (item: Shortcut) => void;
+  resetRanking: (item: Shortcut) => void;
 }) {
-  const { index, userShortcuts, shortcut, preferences, setRefresh } = props;
+  const { index, shortcuts, shortcut, preferences, setRefresh, visitItem, resetRanking } = props;
   return (
     <Grid.Item
+      id={shortcut.id}
       keywords={shortcut.info.tag}
+      key={shortcut.id}
+      accessory={{
+        icon: { source: Icon.Hashtag, tintColor: shortcut.info.iconColor },
+        tooltip: shortcut.info.tag.join(", "),
+      }}
       content={{
         value: { source: shortcut.info.icon, tintColor: shortcut.info.iconColor },
-        tooltip:
-          shortcut.info.name +
-          "\n" +
-          "_".repeat(shortcut.info.name.length) +
-          "\n\nTag: " +
-          shortcut.info.tag.join(", "),
+        tooltip: shortcut.info.name,
       }}
       title={shortcut.info.name}
       actions={(() => {
@@ -98,14 +115,18 @@ export function GridItem(props: {
               <ActionRunShortcut
                 primaryAction={preferences.primaryAction}
                 closeMainWindow={preferences.closeMainWindow}
-                tactions={shortcut.tactions}
-              />
-              <ActionEditShortcut
                 shortcut={shortcut}
-                index={index}
-                userShortcuts={userShortcuts}
-                setRefresh={setRefresh}
+                visitItem={visitItem}
               />
+              <ActionEditShortcut shortcut={shortcut} index={index} userShortcuts={shortcuts} setRefresh={setRefresh} />
+              <ActionPanel.Section>
+                <Action
+                  icon={Icon.ArrowCounterClockwise}
+                  title="Reset Ranking"
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+                  onAction={() => resetRanking(shortcut)}
+                />
+              </ActionPanel.Section>
               <ActionOpenPreferences />
             </ActionPanel>
           </>

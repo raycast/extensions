@@ -24,7 +24,7 @@ function showFailureToast() {
   showToast(
     Toast.Style.Failure,
     "Something went wrong",
-    "Please try again later"
+    "Please try again later",
   );
 }
 
@@ -85,7 +85,7 @@ export const getStandings = async (season: string): Promise<Standing[]> => {
         out[cur.Nome] = cur.CODSQUADRA;
         return out;
       },
-      {}
+      {},
     );
 
     cache.set(season, JSON.stringify(squadCodes));
@@ -100,7 +100,7 @@ export const getStandings = async (season: string): Promise<Standing[]> => {
 
 export const getMatches = async (
   season: string,
-  params: object
+  params: object,
 ): Promise<Match[]> => {
   const [title, season_id] = season.split("_");
 
@@ -129,7 +129,7 @@ export const getMatches = async (
 
 export const getSquad = async (
   team_name: string,
-  season: string
+  season: string,
 ): Promise<SquadGroup | undefined> => {
   try {
     const [title, seasonId] = season.split("_");
@@ -159,7 +159,7 @@ export const getSquad = async (
 };
 
 export const getPlayer = async (
-  player_id: string
+  player_id: string,
 ): Promise<Player | undefined> => {
   const config: AxiosRequestConfig = {
     method: "GET",
@@ -214,7 +214,7 @@ export const getCoppaRounds = async (season: string): Promise<Round[]> => {
 };
 
 export const getChampionships = async (
-  season: string
+  season: string,
 ): Promise<Championship[]> => {
   const [title, seasonId] = season.split("_");
 

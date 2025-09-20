@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anycoffee",
+  "title": "Any Coffee",
+  "description": "Explore all the specialty coffee roasters.",
+  "icon": "icon.png",
+  "author": "aymericio",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "roasters",
+      "title": "Coffee Roasters",
+      "description": "Coffee Roaster directory",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "coffeeRoasterSort",
+      "description": "Sort preference for Coffee Roaster",
+      "type": "dropdown",
+      "required": false,
+      "title": "Sort",
+      "default": "created",
+      "data": [
+        {"title": "Recently added", "value": "created"},
+        {"title": "Name", "value": "name"}
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.1",
+    "@raycast/utils": "^1.9.1",
+    "axios": "^1.8.4",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

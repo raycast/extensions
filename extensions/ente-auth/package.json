@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
+  "name": "ente-auth",
+  "title": "Ente Auth",
+  "description": "Get TOTP Codes from Ente Auth",
+  "icon": "icon.png",
+  "author": "chkpwd",
+  "contributors": [
+    "albarin",
+    "wires5210"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "keywords": [
+    "ente",
+    "totp",
+    "2fa",
+    "security",
+    "authentication",
+    "otp",
+    "mfa",
+    "authenticator"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Get Totp",
+      "description": "Search for an Ente Auth account and copy the TOTP code to the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "export",
+      "title": "Export Secrets",
+      "description": "Export Ente Auth secrets to a JSON file",
+      "disabledByDefault": true,
+      "mode": "view"
+    },
+    {
+      "name": "import",
+      "title": "Import Secrets",
+      "description": "Import Ente Auth secrets from a JSON file",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete",
+      "title": "Delete Export",
+      "description": "Delete Ente Auth Exported file",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": true,
+      "title": "Ente CLI Path",
+      "description": "If you wish to use your own CLI, type here the location of your local installation.",
+      "placeholder": "CLI Path"
+    },
+    {
+      "name": "exportPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Ente CLI Export Location",
+      "description": "If you wish to change the default export path, type here the location of your local installation.",
+      "placeholder": "Export Path"
+    },
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Choose whether the primary action should copy or paste the output.",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "default": "paste",
+      "required": false
+    },
+    {
+      "name": "deleteExport",
+      "type": "checkbox",
+      "title": "Privacy",
+      "label": "Delete Export File After Import",
+      "description": "Choose whether the export should be deleted after import.",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
+    "axios": "^1.7.8",
+    "commander": "^9.0.0",
+    "figlet": "^1.7.0",
+    "fs-extra": "^11.2.0",
+    "otpauth": "^9.3.2",
+    "simple-icons": "^13.18.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.0.0",
+    "url-parse": "^1.5.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/figlet": "^1.5.8",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/url-parse": "^1.4.11",
+    "globals": "^15.10.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.8.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "echo 'No tests configured'"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

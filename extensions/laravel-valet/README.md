@@ -7,6 +7,7 @@ _Effortless management of your local Valet sites_
 - Open Raycast and search for "Laravel Valet"
 - Search for a site you've parked with Valet
 - Press enter on the selected site to open it in your browser
+- Press `cmd + k` to see available Valet actions
 
 ## Features
 - Search through all your parked sites
@@ -14,12 +15,10 @@ _Effortless management of your local Valet sites_
 - Show selected site in Finder
 - Open selected site in other apps
 - Copy selected site path to clipboard
+- Start/Stop/Restart Valet
+- View log files
 
 ... and more to come! 🚀
 
-## Showcases
-**Open a site in your browser**
-![Open a site in your browser](media/showcase-1.png)
-
-**Multiple actions for a site**
-![Open a site in your editor](media/showcase-2.png)
+## Note
+- Many of the features require sudo privileges, so you will need to have run `valet trust` in your terminal before using them.

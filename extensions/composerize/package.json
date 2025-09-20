@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "composerize",
+  "title": "Composerize",
+  "description": "Convert docker commands to docker-compose and vice versa",
+  "icon": "command-icon.png",
+  "author": "j3lte",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "docker-to-compose",
+      "title": "Convert Docker to Docker Compose",
+      "subtitle": "Composerize",
+      "description": "Convert a Docker run command to a Docker Compose format",
+      "mode": "view"
+    },
+    {
+      "name": "compose-to-docker",
+      "title": "Convert Docker Compose to Docker",
+      "subtitle": "Composerize",
+      "description": "Convert a Docker Compose format to a Docker run command",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.1",
+    "composerize": "^1.6.10",
+    "decomposerize": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,16 +1,13 @@
-import { closeMainWindow, open } from "@raycast/api";
-import formatDistance from "date-fns/formatDistance";
+import { open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { CodedError, ErrorCode } from "@slack/web-api";
+import { formatDistance } from "date-fns";
+import { slack } from "./client/WebClient";
+import * as emoji from "node-emoji";
 
-// https://api.slack.com/reference/deep-linking
-const openChat = (workspaceId: string, userId: string) => {
-  open(`slack://user?team=${workspaceId}&id=${userId}`);
-  closeMainWindow();
-};
-
-const openChannel = (workspaceId: string, channelId: string) => {
-  open(`slack://channel?team=${workspaceId}&id=${channelId}`);
-  closeMainWindow();
-};
+function convertSlackEmojiToUnicode(text: string): string {
+  return emoji.emojify(text);
+}
 
 const timeDifference = (date: Date): string => {
   const now = new Date();
@@ -21,6 +18,12 @@ const timeDifference = (date: Date): string => {
   const distance = formatDistance(nowMs, dateMs, { includeSeconds: true });
 
   return dateMs <= nowMs ? `${distance} ago` : `in ${distance}`;
+};
+
+const convertTimestampToDate = (ts: string) => {
+  const [seconds, microseconds] = ts.split(".").map(Number);
+  const milliseconds = seconds * 1000 + Math.floor(microseconds / 1000);
+  return new Date(milliseconds);
 };
 
 const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: string): string => {
@@ -49,4 +52,59 @@ const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: str
     end tell`;
 };
 
-export { openChat, openChannel, timeDifference, buildScriptEnsuringSlackIsRunning };
+const isCodedError = (error: unknown): error is CodedError => {
+  return typeof error === "object" && error !== null && "code" in error && "message" in error;
+};
+
+const handleError = async (error: CodedError | Error | unknown, title?: string) => {
+  if (isCodedError(error)) {
+    if (error.code === ErrorCode.RateLimitedError) {
+      return showFailureToast(error, {
+        title: "You've been rate-limited.",
+        message: "Please try again in a few seconds/minutes.",
+      });
+    }
+
+    if (error.message.includes("missing_scope")) {
+      const isUsingOAuth = !!(await slack.client.getTokens());
+
+      return showFailureToast(error, {
+        title: "Missing Scopes",
+        message: "Please make sure your Slack app has all of the required scopes.",
+        primaryAction: isUsingOAuth
+          ? {
+              title: "Re-authorize Slack",
+              onAction: async () => {
+                await slack.client.removeTokens();
+                await slack.authorize();
+              },
+            }
+          : {
+              title: "Open Slack Apps",
+              onAction: () => {
+                open("https://api.slack.com/apps");
+              },
+            },
+      });
+    }
+  }
+
+  return showFailureToast(error, { title: title ?? "Something unexpected happened" });
+};
+
+const isValidChannelId = (channelId?: string) => {
+  if (channelId == null) return false;
+
+  const channelIdRegex = /^C[A-Z0-9]{8,}$/;
+
+  return channelIdRegex.test(channelId.trim());
+};
+
+export {
+  timeDifference,
+  convertTimestampToDate,
+  buildScriptEnsuringSlackIsRunning,
+  handleError,
+  convertSlackEmojiToUnicode,
+  isValidChannelId,
+};

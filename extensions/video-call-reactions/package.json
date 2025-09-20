@@ -1,0 +1,158 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "video-call-reactions",
+  "title": "Video Call Reactions",
+  "description": "This extension triggers video call reactions such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers on macOS.",
+  "icon": "video-call-reactions-icon.png",
+  "author": "yazanzaid00",
+  "categories": [
+    "Communication",
+    "Applications",
+    "Fun",
+    "Media",
+    "Other",
+    "Productivity",
+    "System",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "trigger-reaction",
+      "title": "Trigger Reaction",
+      "subtitle": "Use your favorite or a custom reaction.",
+      "description": "Triggers a reaction in video calls.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "reaction",
+          "type": "dropdown",
+          "placeholder": "Default Reaction",
+          "data": [
+            {
+              "title": "Hearts ❤️",
+              "value": "Hearts ❤️"
+            },
+            {
+              "title": "Thumbs Up 👍",
+              "value": "Thumbs Up 👍"
+            },
+            {
+              "title": "Thumbs Down 👎",
+              "value": "Thumbs Down 👎"
+            },
+            {
+              "title": "Balloons 🎈",
+              "value": "Balloons 🎈"
+            },
+            {
+              "title": "Rain 🌧️",
+              "value": "Rain 🌧️"
+            },
+            {
+              "title": "Confetti 🎉",
+              "value": "Confetti 🎉"
+            },
+            {
+              "title": "Lasers 🔆",
+              "value": "Lasers 🔆"
+            },
+            {
+              "title": "Fireworks 🎆",
+              "value": "Fireworks 🎆"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultReaction",
+      "type": "dropdown",
+      "title": "Default Reaction",
+      "description": "Choose the default reaction for video calls.",
+      "required": true,
+      "data": [
+        {
+          "title": "Hearts ❤️",
+          "value": "Hearts ❤️"
+        },
+        {
+          "title": "Thumbs Up 👍",
+          "value": "Thumbs Up 👍"
+        },
+        {
+          "title": "Thumbs Down 👎",
+          "value": "Thumbs Down 👎"
+        },
+        {
+          "title": "Balloons 🎈",
+          "value": "Balloons 🎈"
+        },
+        {
+          "title": "Rain 🌧️",
+          "value": "Rain 🌧️"
+        },
+        {
+          "title": "Confetti 🎉",
+          "value": "Confetti 🎉"
+        },
+        {
+          "title": "Lasers 🔆",
+          "value": "Lasers 🔆"
+        },
+        {
+          "title": "Fireworks 🎆",
+          "value": "Fireworks 🎆"
+        }
+      ],
+      "default": "Confetti 🎉"
+    },
+    {
+      "name": "showConfetti",
+      "type": "checkbox",
+      "title": "Show Confetti 🎉",
+      "description": "Confetti in Raycast to celebrate after you choose the Confetti 🎉 reaction, regardless of whether it activates during the video call.",
+      "default": false,
+      "required": false,
+      "label": "Show Confetti"
+    },
+    {
+      "name": "playSound",
+      "type": "checkbox",
+      "title": "Play Sound on Confetti",
+      "description": "Play a sound effect when confetti is shown.",
+      "default": false,
+      "required": false,
+      "label": "Play Sound"
+    }
+  ],
+  "dependencies": {
+    "@eslint/config-array": "^0.15.1",
+    "@eslint/object-schema": "^2.1.3",
+    "@raycast/api": "^1.75.2",
+    "@raycast/utils": "^1.15.0",
+    "lru-cache": "^10.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "glob": "^10.4.1",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.7",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

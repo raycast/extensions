@@ -7,7 +7,8 @@
   "author": "KartikKumarSahoo",
   "contributors": [
     "bromanko",
-    "crisboarna"
+    "crisboarna",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -22,14 +23,14 @@
       "name": "search-tab",
       "title": "Search Tabs",
       "subtitle": "Microsoft Edge",
-      "description": "List all tabs and go to the selected.",
+      "description": "Search in all tabs and go to the selected.",
       "mode": "view"
     },
     {
       "name": "search-history",
       "title": "Search History",
       "subtitle": "Microsoft Edge",
-      "description": "Search browser history.",
+      "description": "Search Microsoft Edge browser history.",
       "mode": "view"
     },
     {
@@ -43,39 +44,54 @@
       "name": "new-tab",
       "title": "New Tab",
       "subtitle": "Microsoft Edge",
-      "description": "Open a new Microsoft Edge tab.",
+      "description": "Open a new Microsoft Edge tab and also see existing open tabs to choose from.",
       "mode": "view"
+    },
+    {
+      "name": "copy-active-tab-url",
+      "title": "Copy Active Tab URL",
+      "subtitle": "Microsoft Edge",
+      "description": "Copy active tab URL in Microsoft Edge to Clipboard.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
     {
-      "name": "useDev",
-      "title": "Use Dev",
-      "label": "use Microsoft Edge Dev",
-      "description": "use Microsoft Edge Dev",
+      "name": "buildChoice",
+      "title": "Choose the build you want to use",
+      "type": "dropdown",
       "required": false,
-      "type": "checkbox",
-      "default": false
-    },
-    {
-      "name": "useOriginalFavicon",
-      "title": "Fav icon",
-      "label": "Extract the favicon from every open tab",
-      "description": "Before enable this, you should enable 'Tools > Developer > Allow JavaScript from Apple Events' in every Microsoft Edge profile.",
-      "required": false,
-      "type": "checkbox",
-      "default": false
+      "description": "Choose which build to use",
+      "default": "stable",
+      "data": [
+        {
+          "title": "Stable (default)",
+          "value": "stable"
+        },
+        {
+          "title": "Dev",
+          "value": "dev"
+        },
+        {
+          "title": "Beta",
+          "value": "beta"
+        },
+        {
+          "title": "Canary",
+          "value": "canary"
+        }
+      ]
     },
     {
       "name": "openTabInProfile",
-      "title": "Open Tab In Profile",
+      "title": "Open tab in profile",
       "type": "dropdown",
       "required": false,
       "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
       "default": "default",
       "data": [
         {
-          "title": "Default(classic)",
+          "title": "Default (classic)",
           "value": "default"
         },
         {
@@ -89,27 +105,28 @@
       ]
     }
   ],
+  "platforms": [
+    "macOS"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.13",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.9.4"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "repository": "git@github.com:raycast/extensions.git"
 }

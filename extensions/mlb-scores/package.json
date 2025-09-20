@@ -5,6 +5,9 @@
   "description": "Shows current MLB game scores.",
   "icon": "logo.png",
   "author": "jso8910",
+  "contributors": [
+    "Rob"
+  ],
   "categories": [
     "Other"
   ],
@@ -12,24 +15,64 @@
   "commands": [
     {
       "name": "index",
-      "title": "View MLB scores",
+      "title": "View MLB Scores",
       "description": "Get scores of today's MLB games.",
       "mode": "view"
+    },
+    {
+      "name": "searchPlayers",
+      "title": "Search MLB Players",
+      "description": "Search for MLB players by name",
+      "mode": "view"
+    },
+    {
+      "name": "standings",
+      "title": "View MLB Standings",
+      "description": "View MLB standings by league and division",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "firstLeague",
+          "type": "dropdown",
+          "placeholder": "Choose league",
+          "required": false,
+          "data": [
+            { "title": "American League (AL)", "value": "AL" },
+            { "title": "National League (NL)", "value": "NL" }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "firstLeague",
+          "type": "dropdown",
+          "title": "Show League First",
+          "description": "Which league to show first",
+          "data": [
+            { "title": "American League (AL)", "value": "AL" },
+            { "title": "National League (NL)", "value": "NL" }
+          ],
+          "default": "AL",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
-    "node-fetch": "^3.2.3"
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.2.3",
+    "zustand": "^5.0.0-rc.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.2.25",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react-devtools": "^5.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

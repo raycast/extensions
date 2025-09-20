@@ -1,15 +1,23 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "1loc",
-  "title": "1 LOC - JavaScript Utilities in single line of code",
+  "title": "1 LOC - JavaScript Utilities in Single Line of Code",
   "description": "Browse JavaScript Utilities from 1loc.dev",
   "icon": "command-icon.png",
   "author": "kud",
   "categories": [
     "Developer Tools"
   ],
+  "keywords": [
+    "1loc",
+    "code",
+    "JavaScript",
+    "utilities"
+  ],
   "contributors": [
-    "sxn"
+    "kgrhartlage",
+    "sxn",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -17,7 +25,7 @@
       "name": "index",
       "title": "Search JavaScript Utilities",
       "subtitle": "1 LOC",
-      "description": "Browse JavaScript Utilities from 1loc.dev",
+      "description": "Browse JavaScript utilities from 1loc.dev",
       "mode": "view"
     }
   ],
@@ -25,31 +33,31 @@
     {
       "name": "personalAccessToken",
       "type": "password",
-      "required": false,
-      "title": "Personal Access Token",
-      "description": "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
+      "required": true,
+      "title": "GitHub Personal Access Token",
+      "description": "Required to authenticate with GitHub. See the official documentation for more information.",
+      "placeholder": "github_pat_XXX...XXX"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "axios": "0.25.0",
-    "change-case": "4.1.2",
-    "gray-matter": "4.0.3",
-    "raycast-toolkit": "^1.0.3"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
+    "change-case": "^4.1.2",
+    "gray-matter": "^4.0.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,54 +1,27 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  showToast,
-  Toast,
-  Icon,
-  Cache,
-} from '@raycast/api'
-import { useState, useEffect, useRef, useCallback } from 'react'
-import fetch, { AbortError } from 'node-fetch'
-import { URLSearchParams } from 'url'
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
 
-const cache = new Cache()
-
-type Arguments = {
-  query: string
-}
-
-export default function Command(props: { arguments: Arguments }) {
-  const [searchText, setSearchText] = useState(props.arguments.query ?? '')
-  const { state, search } = useSearch('autocomplete-extra', searchText)
+export default function Command(props: { arguments: Arguments.Index }) {
+  const [searchText, setSearchText] = useState(props.arguments.query ?? "");
+  const { isLoading, data } = useSearch("autocomplete-extra", searchText);
 
   return (
     <List
-      isLoading={state.isLoading}
-      onSearchTextChange={(text) => {
-        setSearchText(text)
-        search(text)
-      }}
-      searchBarPlaceholder="Search Urban Dictionary..."
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Urban Dictionary"
       throttle
       searchText={searchText}
     >
-      <List.Section title="Suggestions" subtitle={state.results.length + ''}>
-        {state.results.map((searchResult) => (
-          <SearchListItem
-            key={searchResult.preview}
-            searchResult={searchResult}
-          />
-        ))}
+      <List.Section title="Suggestions" subtitle={`${data?.length ?? 0}`}>
+        {data?.map((searchResult) => <SearchListItem key={searchResult.preview} searchResult={searchResult} />)}
       </List.Section>
     </List>
-  )
+  );
 }
 
-function SearchListItem({
-  searchResult,
-}: {
-  searchResult: UrbanAutocompleteResponseItem
-}) {
+function SearchListItem({ searchResult }: { searchResult: UrbanAutocompleteResponseItem }) {
   return (
     <List.Item
       title={searchResult.term}
@@ -56,39 +29,32 @@ function SearchListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push
-              title="See results"
-              icon={Icon.Sidebar}
-              target={<ItemDetails term={searchResult.term} />}
-            />
-            <Action.OpenInBrowser
-              title="Open in Browser"
-              url={`https://www.urbandictionary.com/define.php?term=${searchResult.term}`}
-            />
+            <Action.Push title="See Results" icon={Icon.Sidebar} target={<ItemDetails term={searchResult.term} />} />
+            <Action.OpenInBrowser url={`https://www.urbandictionary.com/define.php?term=${searchResult.term}`} />
             <Action.CopyToClipboard
-              title={`Copy "${searchResult.term}" to clipboard`}
+              title={`Copy "${searchResult.term}" to Clipboard`}
               content={searchResult.term}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           </ActionPanel.Section>
         </ActionPanel>
       }
     />
-  )
+  );
 }
 
 function ItemDetails({ term }: { term: string }) {
-  const { state } = useSearch('define', term)
+  const { isLoading, data } = useSearch("define", term);
   return (
     <List
-      isLoading={state.isLoading}
+      isLoading={isLoading}
       searchBarPlaceholder={`Definitions for "${term}"`}
       isShowingDetail
-      enableFiltering
+      filtering={true}
       navigationTitle="Show Definitions"
     >
-      <List.Section title="Results" subtitle={state.results.length + ''}>
-        {state.results.map((result) => (
+      <List.Section title="Results" subtitle={`${data?.length ?? 0}`}>
+        {data?.map((result) => (
           <List.Item
             key={result.defid}
             title={result.definition}
@@ -97,21 +63,10 @@ function ItemDetails({ term }: { term: string }) {
                 markdown={getMarkdown(result)}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Thumbs up"
-                      text={result.thumbs_up.toString()}
-                      icon={Icon.Heart}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Thumbs down"
-                      text={result.thumbs_down.toString()}
-                      icon={Icon.HeartDisabled}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Thumbs Up" text={result.thumbs_up.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Thumbs Down" text={result.thumbs_down.toString()} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Author"
-                      text={result.author}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Author" text={result.author} />
                     <List.Item.Detail.Metadata.Label
                       title="Date"
                       text={new Date(result.written_on).toLocaleDateString()}
@@ -123,14 +78,11 @@ function ItemDetails({ term }: { term: string }) {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    title="Open in Browser"
-                    url={`https://www.urbandictionary.com/define.php?term=${term}`}
-                  />
+                  <Action.OpenInBrowser url={`https://www.urbandictionary.com/define.php?term=${term}`} />
                   <Action.CopyToClipboard
-                    title={`Copy "${term}" to clipboard`}
+                    title={`Copy "${term}" to Clipboard`}
                     content={term}
-                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
@@ -139,156 +91,69 @@ function ItemDetails({ term }: { term: string }) {
         ))}
       </List.Section>
     </List>
-  )
+  );
 }
 
 function makeLinks(string: string) {
   return string.replace(
     /\[(.*?)\]/gm,
-    (match, term) =>
-      `[${term}](https://www.urbandictionary.com/define.php?term=${term.replace(
-        /\s/g,
-        '+'
-      )})`
-  )
+    (match, term) => `[${term}](https://www.urbandictionary.com/define.php?term=${term.replace(/\s/g, "+")})`,
+  );
 }
 
 function getMarkdown(result: UrbanDefineResponseItem) {
   return `
 ${makeLinks(result.definition)}
-> ${makeLinks(result.example.replace(/\r?\n/gm, '\n> '))}
-`
+> ${makeLinks(result.example.replace(/\r?\n/gm, "\n> "))}
+`;
 }
 
-type Endpoint = 'define' | 'autocomplete-extra'
+type Endpoint = "define" | "autocomplete-extra";
 
-function useSearch<T extends Endpoint>(endpoint: T, initial = '') {
-  const [state, setState] = useState<SearchState<T>>({
-    results: [],
-    isLoading: true,
-  })
-  const cancelRef = useRef<AbortController | null>(null)
-
-  const search = useCallback(
-    async function search(searchText: string) {
-      cancelRef.current?.abort()
-
-      const cacheKey = `${endpoint}.${searchText}`
-      if (cache.has(cacheKey)) {
-        setState({
-          results: JSON.parse(cache.get(cacheKey)!),
-          isLoading: false,
-        })
-        return
+function useSearch<T extends Endpoint>(endpoint: T, initial = "") {
+  const params = new URLSearchParams({ term: initial });
+  return useFetch(`https://api.urbandictionary.com/v0/${endpoint}?${params.toString()}`, {
+    method: "GET",
+    parseResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
       }
 
-      cancelRef.current = new AbortController()
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }))
-      try {
-        const results = await performSearch(
-          endpoint,
-          searchText,
-          cancelRef.current.signal
-        )
-        setState({
-          results: results,
-          isLoading: false,
-        })
-        cache.set(cacheKey, JSON.stringify(results))
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }))
+      const json = (await response.json()) as UrbanResponseList<typeof endpoint>;
 
-        if (error instanceof AbortError) {
-          return
-        }
-
-        console.error('search error', error)
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Could not perform search',
-          message: String(error),
-        })
+      if ("list" in json) {
+        return json.list as UrbanResponseItem<typeof endpoint>[];
       }
+
+      return json.results as UrbanResponseItem<typeof endpoint>[];
     },
-    [cancelRef, setState, endpoint]
-  )
-
-  useEffect(() => {
-    search(initial)
-    return () => {
-      cancelRef.current?.abort()
-    }
-  }, [initial])
-
-  return {
-    state: state,
-    search: search,
-  }
+    keepPreviousData: true,
+    execute: initial !== "",
+  });
 }
 
 type UrbanAutocompleteResponseItem = {
-  preview: string
-  term: string
-}
+  preview: string;
+  term: string;
+};
 
 type UrbanDefineResponseItem = {
-  definition: string
-  permalink: string
-  thumbs_up: number
-  author: string
-  word: string
-  defid: number
-  current_vote: string
-  written_on: string
-  example: string
-  thumbs_down: number
-}
+  definition: string;
+  permalink: string;
+  thumbs_up: number;
+  author: string;
+  word: string;
+  defid: number;
+  current_vote: string;
+  written_on: string;
+  example: string;
+  thumbs_down: number;
+};
 
-type UrbanResponseItem<T extends Endpoint> = T extends 'define'
+type UrbanResponseItem<T extends Endpoint> = T extends "define"
   ? UrbanDefineResponseItem
-  : UrbanAutocompleteResponseItem
+  : UrbanAutocompleteResponseItem;
 
-type UrbanResponseList<T extends Endpoint> = T extends 'define'
+type UrbanResponseList<T extends Endpoint> = T extends "define"
   ? { list: UrbanDefineResponseItem[] }
-  : { results: UrbanAutocompleteResponseItem[] }
-
-async function performSearch<T extends Endpoint>(
-  endpoint: T,
-  searchText: string,
-  signal: AbortSignal
-): Promise<UrbanResponseItem<T>[]> {
-  const params = new URLSearchParams()
-  params.append('term', searchText)
-
-  const response = await fetch(
-    `https://api.urbandictionary.com/v0/${endpoint}?${params.toString()}`,
-    {
-      method: 'get',
-      // @ts-expect-error -- not me
-      signal: signal,
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(response.statusText)
-  }
-
-  const json = (await response.json()) as UrbanResponseList<typeof endpoint>
-
-  if ('list' in json) {
-    return json.list as UrbanResponseItem<typeof endpoint>[]
-  }
-
-  return json.results as UrbanResponseItem<typeof endpoint>[]
-}
-
-interface SearchState<T extends Endpoint> {
-  results: UrbanResponseItem<T>[]
-  isLoading: boolean
-}
+  : { results: UrbanAutocompleteResponseItem[] };

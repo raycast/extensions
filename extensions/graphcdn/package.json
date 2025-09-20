@@ -1,17 +1,23 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "graphcdn",
-  "title": "GraphCDN",
-  "description": "List your GraphCDN services and inspect their configuration",
+  "title": "Stellate (formerly GraphCDN)",
+  "description": "List your Stellate organizations and their services",
   "icon": "command-icon.png",
   "author": "mathieudutour",
+  "categories": [
+    "Applications"
+  ],
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "search",
       "title": "Search Services",
-      "subtitle": "GraphCDN",
-      "description": "List your GraphCDN services and inspect their configuration",
+      "subtitle": "Stellate (formerly GraphCDN)",
+      "description": "List your Stellate organizations and their services",
       "mode": "view"
     }
   ],
@@ -21,29 +27,31 @@
       "type": "password",
       "required": true,
       "title": "Personal access token",
+      "placeholder": "XX...XXX",
       "description": "See the extension's README for instructions about how to create an access token",
-      "link": "https://graphcdn.io/dashboard/settings"
+      "link": "https://stellate.co/app/settings/access-tokens"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3",
     "node-fetch": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,91 +1,146 @@
-import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
-import { setScene } from "./lib/hue";
-import { MutatePromise } from "@raycast/utils";
-import { Group, Scene, SendHueMessage } from "./lib/types";
+import { Action, ActionPanel, Grid, Icon, Toast, useNavigation } from "@raycast/api";
+import type { Group, Id, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
-import { useHue } from "./lib/useHue";
-import { Api } from "node-hue-api/dist/esm/api/Api";
+import { SendHueMessage, useHue } from "./hooks/useHue";
+import HueClient from "./lib/HueClient";
+import useGradients from "./hooks/useGradientUris";
+import React, { useMemo, useState } from "react";
+import "./helpers/arrayExtensions";
+import { getColorsFromScene } from "./helpers/hueResources";
+
+import { getTransitionTimeInMs } from "./helpers/raycast";
 import Style = Toast.Style;
 
-export default function SetScene() {
-  const { hueBridgeState, sendHueMessage, apiPromise, isLoading, groups, mutateGroups, scenes } = useHue();
+// Exact dimensions of a 16:9 Raycast 5 column grid item.
+const GRID_ITEM_WIDTH = 271;
+const GRID_ITEM_HEIGHT = 153;
 
-  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+export default function SetScene(props: { group?: Group; useHue?: ReturnType<typeof useHue> }) {
+  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = props.useHue ?? useHue();
+  const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
+  const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
+  const groupTypes = [rooms, zones];
+  const { pop } = useNavigation();
+  const isSubView = props.group !== undefined;
+
+  useMemo(() => {
+    setPalettes(new Map<Id, Palette>(scenes.map((scene) => [scene.id, getColorsFromScene(scene)])));
+  }, [scenes]);
+
+  const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
-  const rooms = groups.filter((group) => group.type === "Room") as Group[];
-  const entertainmentAreas = groups.filter((group) => group.type === "Entertainment") as Group[];
-  const zones = groups.filter((group) => group.type === "Zone") as Group[];
-  const groupTypes = Array.of(rooms, entertainmentAreas, zones);
+  if (props.group !== undefined) {
+    const group = props.group;
+    const groupScenes =
+      scenes
+        .filter((scene: Scene) => scene.group.rid === group.id)
+        .sort((sceneA, sceneB) => sceneA.metadata.name.localeCompare(sceneB.metadata.name)) ?? [];
 
-  return (
-    <List isLoading={isLoading}>
-      {groupTypes.map((groupType: Group[]): JSX.Element[] => {
-        return groupType.map((group: Group): JSX.Element => {
-          const groupScenes =
-            scenes.filter((scene: Scene) => {
-              return scene.group == group.id;
-            }) ?? [];
-
-          return (
-            <Group
-              apiPromise={apiPromise}
-              key={group.id}
+    return (
+      <Grid
+        navigationTitle={`Set Scene for ${props.group.metadata.name}`}
+        isLoading={isLoading}
+        aspectRatio="16/9"
+        filtering={{ keepSectionOrder: true }}
+      >
+        <Grid.Section title={group.metadata.name}>
+          {groupScenes.map((groupScene) => (
+            <Scene
+              key={groupScene.id}
+              scene={groupScene}
               group={group}
-              scenes={groupScenes}
-              mutateGroups={mutateGroups}
+              gradientUri={gradientUris.get(groupScene.id)}
+              onSetScene={() => {
+                if (isSubView) {
+                  pop();
+                }
+              }}
+              hueClient={hueBridgeState.context.hueClient}
               sendHueMessage={sendHueMessage}
             />
-          );
-        });
-      })}
-    </List>
-  );
+          ))}
+        </Grid.Section>
+      </Grid>
+    );
+  } else {
+    return (
+      <Grid isLoading={isLoading} aspectRatio="16/9" filtering={{ keepSectionOrder: true }}>
+        {groupTypes.map((groupType: Group[]): React.JSX.Element[] => {
+          return groupType.map((group: Group): React.JSX.Element => {
+            const groupScenes =
+              scenes
+                .filter((scene: Scene) => scene.group.rid === group.id)
+                .sort((sceneA, sceneB) => sceneA.metadata.name.localeCompare(sceneB.metadata.name)) ?? [];
+
+            return (
+              <Group
+                key={group.id}
+                group={group}
+                scenes={groupScenes}
+                gradientUris={gradientUris}
+                hueClient={hueBridgeState.context.hueClient}
+                sendHueMessage={sendHueMessage}
+              />
+            );
+          });
+        })}
+      </Grid>
+    );
+  }
 }
 
 function Group(props: {
-  apiPromise: Promise<Api>;
   group: Group;
   scenes: Scene[];
-  mutateGroups: MutatePromise<Group[]>;
+  gradientUris: PngUriCache;
+  onSetScene?: () => void;
+  hueClient?: HueClient;
   sendHueMessage: SendHueMessage;
 }) {
   return (
-    <List.Section key={props.group.id} title={props.group.name} subtitle={props.group.type}>
+    <Grid.Section key={props.group.id} title={props.group.metadata.name}>
       {props.scenes.map(
-        (scene: Scene): JSX.Element => (
+        (scene: Scene): React.JSX.Element => (
           <Scene
-            apiPromise={props.apiPromise}
             key={scene.id}
             group={props.group}
             scene={scene}
-            mutateGroups={props.mutateGroups}
+            gradientUri={props.gradientUris.get(scene.id)}
+            onSetScene={props.onSetScene}
+            hueClient={props.hueClient}
             sendHueMessage={props.sendHueMessage}
           />
-        )
+        ),
       )}
-    </List.Section>
+    </Grid.Section>
   );
 }
 
 function Scene(props: {
-  apiPromise: Promise<Api>;
-  group: Group;
   scene: Scene;
-  mutateGroups: MutatePromise<Group[]>;
+  group: Group;
+  gradientUri: PngUri | undefined;
+  onSetScene?: () => void;
   sendHueMessage: SendHueMessage;
+  hueClient?: HueClient;
 }) {
+  const activeEmoji = !(props.scene.status?.active === "inactive") ? "💡 " : "";
   return (
-    <List.Item
-      title={props.scene.name}
-      keywords={[props.group.name]}
+    <Grid.Item
+      title={activeEmoji + props.scene.metadata.name}
+      keywords={[props.group.metadata.name]}
+      content={props.gradientUri ?? ""}
       actions={
         <ActionPanel>
           <SetSceneAction
             group={props.group}
             scene={props.scene}
-            onSet={() => handleSetScene(props.apiPromise, props.group, props.scene, props.mutateGroups)}
+            onSet={() => {
+              handleSetScene(props.hueClient, props.group, props.scene).then();
+              props.onSetScene?.();
+            }}
           />
           <ActionPanel.Section>
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
@@ -100,24 +155,26 @@ function SetSceneAction(props: { group: Group; scene: Scene; onSet: () => void }
   return <Action title="Set Scene" icon={Icon.Image} onAction={() => props.onSet()} />;
 }
 
-async function handleSetScene(
-  apiPromise: Promise<Api>,
-  group: Group,
-  scene: Scene,
-  mutateGroups: MutatePromise<Group[]>
-) {
+async function handleSetScene(hueClient: HueClient | undefined, group: Group, scene: Scene) {
   const toast = new Toast({ title: "" });
 
   try {
-    await mutateGroups(setScene(apiPromise, scene));
+    if (hueClient === undefined) throw new Error("Hue client not initialized.");
+
+    await hueClient.updateScene(scene, {
+      recall: {
+        action: "active",
+        duration: getTransitionTimeInMs(),
+      },
+    });
 
     toast.style = Style.Success;
-    toast.title = `Scene ${scene.name} set`;
+    toast.title = `Scene ${scene.metadata.name} set for ${group.metadata.name}.`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
-    toast.title = "Failed setting scene";
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.title = `Failed setting scene ${scene.metadata.name} for ${group.metadata.name}.`;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }

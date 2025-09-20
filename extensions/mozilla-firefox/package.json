@@ -5,6 +5,11 @@
   "description": "Search and open tabs from bookmarks and history in Mozilla Firefox.",
   "icon": "firefox-logo.png",
   "author": "crisboarna",
+  "contributors": [
+    "serhii_kravchenko",
+    "Laptop765",
+    "kud"
+  ],
   "categories": [
     "Applications",
     "Developer Tools",
@@ -66,19 +71,52 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "browserApp",
+      "title": "Firefox Application",
+      "default": "Firefox",
+      "description": "Which Firefox application to use",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "Firefox",
+          "value": "Firefox"
+        },
+        {
+          "title": "Firefox Nightly",
+          "value": "Firefox Nightly"
+        },
+        {
+          "title": "Firefox ESR",
+          "value": "Firefox ESR"
+        },
+        {
+          "title": "Firefox Developer Edition",
+          "value": "Firefox Developer Edition"
+        }
+      ]
+    },
+    {
+      "name": "profileDirectorySuffix",
+      "title": "Profile Directory Suffix",
+      "default": "default-release",
+      "description": "The Firefox profile directory suffix, the portion after the . in about://profiles",
+      "type": "textfield",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.13",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.4.13"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "@types/sql.js": "1.4.4",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

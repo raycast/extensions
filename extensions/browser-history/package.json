@@ -2,9 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-history",
   "title": "Browser History",
-  "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge, Brave, Vivaldi, Arc, Opera, Iridium and Orion.",
+  "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge, Brave, Vivaldi, Arc, Opera, Iridium, Orion and Sidekick.",
   "icon": "icon.png",
   "author": "crisboarna",
+  "contributors": [
+    "tkdkid1000",
+    "mikugeek",
+    "ridemountainpig"
+  ],
   "categories": [
     "Applications",
     "Developer Tools",
@@ -66,6 +71,10 @@
             {
               "title": "Orion",
               "value": "Orion"
+            },
+            {
+              "title": "Sidekick",
+              "value": "Sidekick"
             }
           ]
         },
@@ -79,6 +88,10 @@
             {
               "title": "Default",
               "value": "Default"
+            },
+            {
+              "title": "Originating Browser",
+              "value": "Originator"
             },
             {
               "title": "Google Chrome",
@@ -119,8 +132,22 @@
             {
               "title": "Orion",
               "value": "Orion"
+            },
+            {
+              "title": "Sidekick",
+              "value": "Sidekick"
             }
           ]
+        },
+        {
+          "name": "searchEngine",
+          "type": "textfield",
+          "required": false,
+          "title": "Search Engine",
+          "description": "Use a search engine for queries when no history is found. Custom search engines utilize {{query}} to insert the search term into the search engine URL.",
+          "placeholder": "https://www.google.com/search?q={{query}}",
+          "default": "https://www.google.com/search?q={{query}}",
+          "label": "Search Engine URL"
         },
         {
           "name": "enableChrome",
@@ -204,6 +231,14 @@
           "label": "Orion"
         },
         {
+          "name": "enableSidekick",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Sidekick history to show up in results",
+          "default": false,
+          "label": "Sidekick"
+        },
+        {
           "name": "profilePathChrome",
           "type": "textfield",
           "required": false,
@@ -282,23 +317,31 @@
           "title": "Orion Profile Path",
           "description": "Path to Orion profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Orion/Defaults",
           "placeholder": "/Users/username/Library/Application Support/Orion/Defaults"
+        },
+        {
+          "name": "profilePathSidekick",
+          "type": "textfield",
+          "required": false,
+          "title": "Sidekick Profile Path",
+          "description": "Path to Sidekick profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Sidekick/Default",
+          "placeholder": "/Users/username/Library/Application Support/Sidekick/Default"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.4.13",
     "run-applescript": "6.0.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
     "typescript": "^4.4.3"
   },
   "scripts": {

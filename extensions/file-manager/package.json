@@ -4,17 +4,20 @@
   "title": "File Manager",
   "description": "Manage files from Raycast",
   "icon": "command-icon.png",
-  "author": "es183923",
+  "author": "erics118",
   "contributors": [
     "BalliAsghar",
-    "urwrstkn8mare"
+    "urwrstkn8mare",
+    "fengtianze",
+    "pernielsentikaer",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "manage-files",
       "title": "Manage Files",
-      "subtitle": "Files",
+      "subtitle": "File Manager",
       "description": "Traverse the file system and create files in Raycast",
       "mode": "view"
     }
@@ -43,7 +46,6 @@
       "label": "Directories First",
       "name": "directoriesFirst",
       "required": true,
-      "title": "",
       "type": "checkbox"
     },
     {
@@ -52,7 +54,14 @@
       "label": "Show Dotfiles",
       "name": "showDots",
       "required": true,
-      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show hidden files",
+      "label": "Show Hidden Files",
+      "name": "showHiddenFiles",
+      "required": false,
       "type": "checkbox"
     },
     {
@@ -61,7 +70,6 @@
       "label": "Show File Permissions",
       "name": "showFilePermissions",
       "required": true,
-      "title": "",
       "type": "checkbox"
     },
     {
@@ -70,7 +78,6 @@
       "label": "Show File Size",
       "name": "showFileSize",
       "required": true,
-      "title": "",
       "type": "checkbox"
     },
     {
@@ -79,26 +86,73 @@
       "label": "Show Delete Actions",
       "name": "showDeleteActions",
       "required": true,
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Use ctrl + x to Move to Trash, ctrl + shift + x to Delete",
+      "label": "Standard Action Shortcuts",
+      "name": "standardShortcuts",
+      "required": true,
       "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show iCloud Folder on Top of Start Directory",
+      "label": "Show iCloud Drive",
+      "name": "showiCloudDrive",
+      "required": true,
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Ignore files and directories that match the patterns in a .gitignore file",
+      "label": "Respect .gitignore",
+      "name": "respectGitignore",
+      "required": true,
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Ignore files and directories that match the patterns in a .rayignore file",
+      "label": "Respect .rayignore",
+      "name": "respectRayignore",
+      "required": true,
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Enable searching by file permissions",
+      "label": "Search by File Permissions",
+      "name": "searchByPermissions",
+      "required": true,
       "type": "checkbox"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.0",
-    "filesize": "^10.0.7"
+    "@gerhobbelt/gitignore-parser": "^0.2.0-9",
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
+    "filesize": "^10.1.4"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

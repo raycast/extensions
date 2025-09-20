@@ -1,0 +1,209 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "video-downloader",
+  "title": "Video Downloader",
+  "description": "Download videos from YouTube, Twitter, Twitch, Instagram, Bilibili and more using yt-dlp CLI",
+  "type": "module",
+  "icon": "youtube.png",
+  "author": "vimtor",
+  "contributors": [
+    "pernielsentikaer",
+    "d2a",
+    "ridemountainpig",
+    "xmorse",
+    "litomore",
+    "anwarulislam",
+    "yusifaliyevpro"
+  ],
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "keywords": [
+    "video",
+    "downloader",
+    "youtube",
+    "bilibili",
+    "yt-dlp"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download Video",
+      "subtitle": "Video Downloader",
+      "description": "Download video with parameters",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "download-video",
+      "title": "Download Video",
+      "description": "Downloads a video from a given URL"
+    },
+    {
+      "name": "extract-transcript",
+      "title": "Extract Video Transcript",
+      "description": "Extracts the transcript/subtitles from a video URL as Markdown"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to download video",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "name": "homebrewPath",
+      "title": "Homebrew Path",
+      "description": "Path to the Homebrew executable. You can enter `which brew` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ytdlPath",
+      "title": "yt-dlp Path",
+      "description": "Path to the yt-dlp executable. You can enter `which yt-dlp` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Path",
+      "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ffprobePath",
+      "title": "ffprobe Path",
+      "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "Automatically load the URL from the clipboard when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromSelectedText",
+      "title": "Auto Load URL from Selected Text",
+      "description": "Automatically load the URL from the selected text when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBrowserExtensionSupport",
+      "title": "Enable Browser Extension Support",
+      "description": "Enable browser extension support for reading video URLs from the browser",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "forceIpv4",
+      "title": "Force IPv4 (Experimental)",
+      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    }
+  ],
+  "ai": {
+    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it.",
+    "evals": [
+      {
+        "input": "@video-downloader download the video from https://www.youtube.com/watch?v=ykaj0pS4A1A",
+        "mocks": {
+          "download-video": {
+            "downloadedPath": "/Users/path/to/video.mp4",
+            "duration": 51,
+            "fileName": "video.mp4",
+            "title": "Raycast Focus: Enter Flow State"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=ykaj0pS4A1A"
+              },
+              "name": "download-video"
+            }
+          },
+          {
+            "includes": "/Users/path/to/video.mp4"
+          },
+          {
+            "includes": "Raycast Focus: Enter Flow State"
+          }
+        ]
+      },
+      {
+        "input": "@video-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
+        "mocks": {
+          "extract-transcript": {
+            "language": "en",
+            "title": "Nvidia Earnings are the Super Bowl of Business | Prof G Markets",
+            "transcript": "...",
+            "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+              },
+              "name": "extract-transcript"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "date-fns": "^4.1.0",
+    "execa": "^9.6.0",
+    "is-url-superb": "^6.1.0",
+    "pretty-bytes": "^6.1.1",
+    "srt-parser-2": "^1.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.9",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "pull": "ray pull-contributions",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copilot-workspace",
+  "title": "Copilot Workspace",
+  "description": "Take an idea from anywhere and turn it into code with Copilot Workspace",
+  "icon": "icon.png",
+  "author": "cole",
+  "owner": "github-next",
+  "access": "public",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-task-with-selected-text",
+      "title": "Start Task with Selected Text",
+      "subtitle": "Copilot Workspace",
+      "description": "Open selected text as a task in Copilot Workspace",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "text",
+          "placeholder": "Repository"
+        }
+      ]
+    },
+    {
+      "name": "start-task",
+      "title": "Start Task",
+      "subtitle": "Copilot Workspace",
+      "description": "Start a new task in Copilot Workspace",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.14.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.1.1",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^7.7.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

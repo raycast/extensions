@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "0.2.0",
+  "private": true,
+  "name": "lingo-rep-raycast",
+  "title": "Lingorep - Translate, Repeat, Memorize",
+  "description": "Translate, save and repeat translations to increase your vocabulary",
+  "icon": "command-icon.png",
+  "author": "oleksandr_oliynyk",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Lingorep Translate",
+      "description": "Translate, save and repeat text later to remember it with the best spaced repetition system",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1",
+    "axios": "1.7.9",
+    "hono": "^4.4.2",
+    "lodash": "^4.17.21",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "chokidar-cli": "^3.0.0",
+    "eslint": "^8.51.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  }
+}

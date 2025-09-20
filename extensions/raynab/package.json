@@ -6,6 +6,14 @@
   "icon": "command-icon.png",
   "author": "CodetaroMiura",
   "license": "MIT",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "contributors": [
+    "omarshahine",
+    "damian_duchnowski"
+  ],
   "commands": [
     {
       "name": "activeBudget",
@@ -29,6 +37,13 @@
       "mode": "view"
     },
     {
+      "name": "scheduleTransaction",
+      "title": "Schedule Transaction",
+      "subtitle": "YNAB",
+      "description": "Schedules a future transaction in the selected budget.",
+      "mode": "view"
+    },
+    {
       "name": "accounts",
       "title": "List Accounts",
       "subtitle": "YNAB",
@@ -41,6 +56,46 @@
       "subtitle": "YNAB",
       "description": "View and Edit Active Budget Information for the current month.",
       "mode": "view"
+    },
+    {
+      "name": "unreviewed",
+      "title": "Unreviewed Transactions",
+      "subtitle": "YNAB",
+      "description": "Easily track unapproved or uncategorized transactions.",
+      "mode": "menu-bar",
+      "interval": "2h"
+    }
+  ],
+  "tools": [
+    {
+      "name": "add-transaction",
+      "title": "Add Transaction",
+      "description": "Add a new YNAB transaction"
+    },
+    {
+      "name": "get-transactions",
+      "title": "Get Transactions",
+      "description": "Get YNAB transactions"
+    },
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Get all YNAB accounts"
+    },
+    {
+      "name": "get-account-details",
+      "title": "Get Account Details",
+      "description": "Get details of a specific account such as the balance, type, and on_budget status"
+    },
+    {
+      "name": "get-big-numbers",
+      "title": "Big Numbers",
+      "description": "Get spending statistics for today, this week, and this month from budget accounts"
+    },
+    {
+      "name": "get-budget",
+      "title": "Get Budget",
+      "description": "Get current budget information including age of money and monthly budget details"
     }
   ],
   "keywords": [
@@ -48,25 +103,27 @@
     "budget"
   ],
   "dependencies": {
-    "@raycast/api": "^1.29.1",
-    "dayjs": "^1.10.7",
+    "@raycast/api": "^1.98.5",
+    "@raycast/utils": "^1.18.1",
+    "dayjs": "^1.11.13",
     "fuse.js": "^6.5.3",
     "nanoid": "^3.2.0",
     "node-fetch": "^3.0.0",
     "node-localstorage": "^2.2.1",
-    "swr": "^1.1.2-beta.0",
-    "ynab": "^1.32.0"
+    "random-hex-color-generator": "^1.0.12",
+    "swr": "^2.2.5",
+    "ynab": "^2.6.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/node-localstorage": "^1.3.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.15.18",
+    "@types/react": "^19.1.4",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.5.4"
+    "prettier": "^3.4.2",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.9"
   },
   "preferences": [
     {
@@ -76,13 +133,32 @@
       "title": "Token",
       "description": "Your YNAB Personal Access Token",
       "placeholder": "Enter your Personal access token"
+    },
+    {
+      "name": "quickRevalidate",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Quick Revalidate",
+      "label": "Enable Quick Revalidate",
+      "description": "Revalidate the transaction list immediately after editing, approving, or deleting a transaction. Turning this off might help if you're reaching the API rate limit often."
+    },
+    {
+      "name": "liveDistribute",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Live Distribute",
+      "label": "Enable Live Distribute",
+      "description": "Automatically distribute 2-way split transaction amounts according to the total"
     }
   ],
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  },
-  "volta": {
-    "node": "17.1.0"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest"
   }
 }

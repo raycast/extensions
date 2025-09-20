@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mui-documentation",
+  "title": "MUI Documentation",
+  "description": "Search the online MUI documentation.",
+  "author": "kgrhartlage",
+  "license": "MIT",
+  "icon": "command.png",
+  "keywords": [
+    "mui",
+    "material-ui"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Documentation",
+    "Web"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write 'src/**/*.{ts,tsx}'",
+    "lint": "ray lint && eslint --fix 'src/**/*.{ts,tsx}'",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
+    "algoliasearch": "^4.19.1"
+  },
+  "devDependencies": {
+    "@labforward/eslint-config-react": "^0.1.4",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.4.2",
+    "@types/react": "^18.2.15",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
+  },
+  "commands": [
+    {
+      "description": "Search MUI documentation.",
+      "mode": "view",
+      "name": "index",
+      "subtitle": "MUI",
+      "title": "Search Documentation"
+    }
+  ],
+  "preferences": [
+    {
+      "default": true,
+      "description": "Material UI is based on Google's Material Design.",
+      "label": "Material UI",
+      "name": "material-ui",
+      "required": false,
+      "title": "Include in search results",
+      "type": "checkbox"
+    },
+    {
+      "default": true,
+      "description": "Joy UI is based on MUI's own in-house design principles.",
+      "label": "Joy UI",
+      "name": "joy-ui",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
+      "default": true,
+      "description": "Base UI is a library of unstyled UI components.",
+      "label": "Base UI",
+      "name": "base",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
+      "default": true,
+      "description": "Advanced and powerful components for complex use cases.",
+      "label": "MUI X",
+      "name": "mui-x",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
+      "default": true,
+      "description": "MUI System is a collection of CSS utilities.",
+      "label": "MUI System",
+      "name": "system",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
+      "default": "5",
+      "description": "A lower setting increases distinctness of results.",
+      "name": "limit",
+      "required": false,
+      "title": "Maximum search results per section",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        }
+      ]
+    }
+  ]
+}

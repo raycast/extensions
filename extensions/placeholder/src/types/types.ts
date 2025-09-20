@@ -9,25 +9,6 @@ export interface PicsumConfig {
   staticRandom?: boolean; // Image grayscale or normal, (false)
 }
 
-export interface RandomImageConfig {
-  width: string;
-  height: string;
-  blur: string;
-  jpg: boolean;
-  cache: boolean;
-  grayscale: boolean;
-  staticRandom: boolean;
-}
-export const randomImageConfigInit = {
-  width: "300",
-  height: "300",
-  blur: "0",
-  jpg: false,
-  cache: false,
-  grayscale: false,
-  staticRandom: true,
-};
-
 export interface PicsumImage {
   id: string;
   author: string;
@@ -46,12 +27,3 @@ export interface SpecifyIdImageConfig {
   cache: boolean;
   grayscale: boolean;
 }
-export const specifyIdImageConfigInit = {
-  id: "0",
-  width: "300",
-  height: "300",
-  blur: "0",
-  jpg: false,
-  cache: false,
-  grayscale: false,
-};

@@ -7,11 +7,11 @@ export class BrowserHistoryActions {
   public static OpenPreferences = ActionOpenPreferences;
 }
 
-function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
+function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry }) {
   const { defaultBrowser } = getPreferenceValues<Preferences>();
   const actions = {
     [SupportedBrowsers.Chrome]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Chrome"}
         icon={"chrome-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
@@ -19,7 +19,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
       />
     ),
     [SupportedBrowsers.Firefox]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Firefox"}
         icon={"firefox-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "f" }}
@@ -27,7 +27,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
       />
     ),
     [SupportedBrowsers.Safari]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Safari"}
         icon={"safari-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "s" }}
@@ -35,7 +35,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
       />
     ),
     [SupportedBrowsers.Edge]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Edge"}
         icon={"edge-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "e" }}
@@ -43,7 +43,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
       />
     ),
     [SupportedBrowsers.Brave]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Brave"}
         icon={"brave-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "b" }}
@@ -51,7 +51,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
       />
     ),
     [SupportedBrowsers.Vivaldi]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Vivaldi"}
         icon={"vivaldi-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "v" }}
@@ -59,15 +59,15 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
       />
     ),
     [SupportedBrowsers.Arc]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Arc"}
         icon={"arc-logo.svg"}
-        shortcut={{ modifiers: ["cmd"], key: "a" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
         onAction={() => openNewArcTab(url)}
       />
     ),
     [SupportedBrowsers.Opera]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Opera"}
         icon={"opera-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
@@ -75,7 +75,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
       />
     ),
     [SupportedBrowsers.Iridium]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Iridium"}
         icon={"iridium-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "i" }}
@@ -83,18 +83,30 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
       />
     ),
     [SupportedBrowsers.Orion]: (
-      <ActionPanel.Item
+      <Action
         title={"Open in Orion"}
         icon={"orion-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={() => openNewTab(SupportedBrowsers.Orion, url)}
       />
     ),
+    [SupportedBrowsers.Sidekick]: (
+      <Action
+        title={"Open in Sidekick"}
+        icon={"sidekick-logo.png"}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        onAction={() => openNewTab(SupportedBrowsers.Sidekick, url)}
+      />
+    ),
   };
   return (
     <ActionPanel>
       {defaultBrowser && defaultBrowser !== "Default" ? (
-        actions[defaultBrowser]
+        defaultBrowser == "Originator" ? (
+          actions[browser]
+        ) : (
+          actions[defaultBrowser]
+        )
       ) : (
         <Action.OpenInBrowser title="Open in Default Browser" url={url} />
       )}
@@ -113,6 +125,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
         {actions[SupportedBrowsers.Opera]}
         {actions[SupportedBrowsers.Iridium]}
         {actions[SupportedBrowsers.Orion]}
+        {actions[SupportedBrowsers.Sidekick]}
       </ActionPanel.Section>
     </ActionPanel>
   );

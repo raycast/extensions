@@ -1,8 +1,8 @@
 import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
-import fetch, { type RequestInit } from "node-fetch";
 import { client, doAuth } from "@/oauth";
+import { Errors } from "@/types";
 
-const { accessKey } = getPreferenceValues<UnsplashPreferences>();
+const { accessKey } = getPreferenceValues<Preferences>();
 
 export const apiRequest = async <T>(path: string, options?: RequestInit) => {
   const tokens = await client.getTokens();
@@ -25,15 +25,18 @@ export const apiRequest = async <T>(path: string, options?: RequestInit) => {
       Authorization: `Bearer ${accessToken}`,
       ...options?.headers,
     },
-  }).then(async (res) => res.json() as Promise<T>);
-  return response;
+  });
+  if (!response.headers.get("Content-Type")?.includes("json")) throw new Error(await response.text());
+  const result = await response.json();
+  if (!response.ok) throw new Error((result as Errors).errors[0]);
+  return result as T;
 };
 
 async function refreshTokens(refreshToken: string) {
   const params = new URLSearchParams();
 
-  params.append("client_id", accessKey);
-  params.append("refresh_token", refreshToken);
+  params.append("client_id", accessKey.trim());
+  params.append("refresh_token", refreshToken.trim());
   params.append("grant_type", "refresh_token");
 
   const response = await fetch("https://unsplash.com/oauth/token", { method: "POST", body: params });

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "polar",
+  "title": "Polar",
+  "description": "Manage all your Polar products, sales & analytics",
+  "icon": "command-icon.png",
+  "author": "emilwidlund",
+  "contributors": ["xmok"],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "access_token",
+      "title": "Access Token",
+      "placeholder": "polar_oat_xxx...xxx",
+      "type": "password",
+      "required": false,
+      "description": "Access Token from Polar Settings"
+    }
+  ],
+  "commands": [
+    {
+      "name": "orders",
+      "title": "View Recent Orders",
+      "subtitle": "Polar",
+      "description": "View your last incoming orders",
+      "mode": "view"
+    },
+    {
+      "name": "products",
+      "title": "View Products",
+      "subtitle": "Polar",
+      "description": "View your products",
+      "mode": "view"
+    },
+    {
+      "name": "subscriptions",
+      "title": "View Subscriptions",
+      "subtitle": "Polar",
+      "description": "View your active subscriptions",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@polar-sh/sdk": "^0.32.5",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.18.1",
+    "@tanstack/react-query": "^5.62.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "eslint-plugin-react": "^7.37.2",
+    "prettier": "^3.0.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.18.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

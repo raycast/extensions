@@ -7,7 +7,7 @@ import { XcodeAddSwiftPackage } from "./xcode-add-swift-package.component";
 /**
  * Xcode add Swift Package Form
  */
-export function XcodeAddSwiftPackageForm(): JSX.Element {
+export function XcodeAddSwiftPackageForm() {
   // Use navigation
   const navigation = useNavigation();
   // Use Swift Package Url State

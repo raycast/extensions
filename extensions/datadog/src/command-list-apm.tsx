@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { useAPM } from "./useAPM";
-import { linkDomain } from "./util";
+import { linkDomain, notEmpty } from "./util";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListAPM() {
@@ -15,7 +15,7 @@ export default function CommandListAPM() {
           title={name}
           subtitle={calls?.length > 0 ? `Calls ${calls.join(", ")}` : undefined}
           accessories={[{ text: env }]}
-          keywords={[env].concat(calls)}
+          keywords={[env].concat(calls).filter(notEmpty)}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://${linkDomain()}/apm/service/${name}?env=${env}`} />

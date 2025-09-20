@@ -24,7 +24,7 @@ export function formatBearAttachments(text: string | null, forPreview = true): s
       const fileLink = encodeURI(
         `file://${BEAR_LOCAL_FILES_PATH}/${match.groups.type === "file" ? "Note Files" : "Note Images"}/${
           match.groups.path
-        }`
+        }`,
       );
       matchReplacement = `[Show attached ${match.groups.type}](${fileLink})`;
     }

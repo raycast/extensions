@@ -1,9 +1,10 @@
 import { showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel, Action } from "@raycast/api";
-import { Project, User, Label, Milestone, Branch, Issue } from "../gitlabapi";
+import { Project, Branch, Issue, TemplateDetail } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
 import { getErrorMessage, projectIcon, showErrorToast, stringToSlug, toFormValues } from "../utils";
 import { useCache } from "../cache";
+import { useProjectMR, useMilestones, ProjectInfoMR } from "../hooks";
 
 interface MRFormValues {
   project_id: number;
@@ -15,7 +16,10 @@ interface MRFormValues {
   reviewer_ids: number[];
   labels: string[];
   milestone_id: number;
+  remove_source_branch: boolean;
 }
+
+const NO_TEMPLATE = "no_template";
 
 async function submit(values: MRFormValues) {
   try {
@@ -25,7 +29,7 @@ async function submit(values: MRFormValues) {
     if (values.source_branch === "") {
       throw Error("Please select a source branch");
     }
-    const val = toFormValues(values);
+    const val = toFormValues(values as unknown as Record<string, unknown>);
     console.log(val);
     await gitlab.createMR(values.project_id, val);
     await showToast(Toast.Style.Success, "Merge Request created", "Merge Request creation successful");
@@ -41,21 +45,13 @@ async function getProjectBranches(projectID: number) {
   return { branches, project };
 }
 
-export function IssueMRCreateForm({
-  issue,
-  projectID,
-  title,
-}: {
-  issue: Issue;
-  projectID: number;
-  title: string;
-}): JSX.Element {
+export function IssueMRCreateForm({ issue, projectID, title }: { issue: Issue; projectID: number; title: string }) {
   const branchName = `${issue.iid}-${stringToSlug(issue.title)}`;
   const [branches, setBranches] = useState<Branch[]>();
   const [project, setProject] = useState<Project>();
 
   useEffect(() => {
-    projectID && getProjectBranches(projectID).then((data) => (setProject(data?.project), setBranches(data?.branches)));
+    projectID && getProjectBranches(projectID).then((data) => (setProject(data?.project), setBranches(data?.branches))); // eslint-disable-line @typescript-eslint/no-unused-expressions
   }, [projectID]);
 
   async function submit(values: { source_branch: string; target_branch: string }) {
@@ -97,9 +93,9 @@ export function IssueMRCreateForm({
   );
 }
 
-export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }): JSX.Element {
+export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }) {
   const [selectedProject, setSelectedProject] = useState<string | undefined>(
-    props.project ? props.project.id.toString() : undefined
+    props.project ? props.project.id.toString() : undefined,
   );
   const {
     data: projects,
@@ -113,22 +109,48 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
     },
     {
       deps: [],
-    }
+    },
   );
-  const { projectinfo, errorProjectInfo, isLoadingProjectInfo } = useProject(selectedProject);
+  const { projectinfo, errorProjectInfo, isLoadingProjectInfo } = useProjectMR(selectedProject);
   const members = projectinfo?.members || [];
   const labels = projectinfo?.labels || [];
-  const isLoading = isLoadingProjects || isLoadingProjectInfo;
-  const error = errorProjects || errorProjectInfo;
-
-  if (error) {
-    showErrorToast(error, "Cannot create Merge Request");
-  }
+  const mergeRequestTemplates = projectinfo?.mergeRequestTemplates || [];
 
   let project: Project | undefined;
   if (selectedProject) {
     project = projects?.find((pro) => pro.id.toString() === selectedProject);
   }
+  const { milestoneInfo, errorMilestoneInfo, isLoadingMilestoneInfo } = useMilestones(project?.group_id);
+
+  const isLoading = isLoadingProjects || isLoadingProjectInfo || isLoadingMilestoneInfo;
+  const error = errorProjects || errorProjectInfo || errorMilestoneInfo;
+  if (error) {
+    showErrorToast(error, "Cannot create Merge Request");
+  }
+
+  const removeBranchFlagOrDefault = (val?: boolean) => {
+    if (val !== undefined) {
+      return val;
+    }
+    return project?.remove_source_branch_after_merge ?? true;
+  };
+
+  const [removeBranch, setRemoveBranch] = useState<boolean | undefined>(undefined);
+  const [selectedTemplateName, setSelectedTemplateName] = useState<string>(NO_TEMPLATE);
+  const [description, setDescription] = useState<string | undefined>(undefined);
+
+  const { data: selectedTemplateDetail } = useCache<TemplateDetail | undefined>(
+    `project_${project?.id}_selected_template_${selectedTemplateName}`,
+    async () => {
+      if (selectedTemplateName === NO_TEMPLATE) return undefined;
+      return await gitlab.getProjectMergeRequestTemplate(project?.id || 0, selectedTemplateName);
+    },
+    { deps: [selectedTemplateName] },
+  );
+
+  useEffect(() => {
+    setDescription(selectedTemplateDetail?.content ?? "");
+  }, [selectedTemplateDetail]);
 
   return (
     <Form
@@ -139,11 +161,30 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
         </ActionPanel>
       }
     >
-      <ProjectDropdown projects={projects || []} setSelectedProject={setSelectedProject} value={selectedProject} />
+      <ProjectDropdown
+        projects={projects || []}
+        setSelectedProject={(newValue) => {
+          setRemoveBranch(undefined);
+          setSelectedProject(newValue);
+        }}
+        value={selectedProject}
+      />
       <SourceBranchDropdown project={project} info={projectinfo} value={props.branch} />
       <TargetBranchDropdown project={project} info={projectinfo} />
       <Form.TextField id="title" title="Title" placeholder="Enter title" />
-      <Form.TextArea id="description" title="Description" placeholder="Enter description" />
+      <Form.Dropdown id="template_id" title="Template" value={selectedTemplateName} onChange={setSelectedTemplateName}>
+        <Form.Dropdown.Item key={NO_TEMPLATE} value={NO_TEMPLATE} title={"None"} />
+        {mergeRequestTemplates.map((template) => (
+          <Form.Dropdown.Item key={template.id} value={template.id} title={template.name} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextArea
+        id="description"
+        title="Description"
+        placeholder="Enter description"
+        value={description}
+        onChange={setDescription}
+      />
       <Form.TagPicker id="assignee_ids" title="Assignees" placeholder="Type or choose an assignee">
         {members.map((member) => (
           <Form.TagPicker.Item
@@ -175,10 +216,20 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
         ))}
       </Form.TagPicker>
       <Form.Dropdown id="milestone_id" title="Milestone">
+        <Form.Dropdown.Item key={"no_milestone"} value={""} title={"-"} />
         {projectinfo?.milestones?.map((m) => (
           <Form.Dropdown.Item key={m.id} value={m.id.toString()} title={m.title} />
         ))}
+        {milestoneInfo?.map((m) => (
+          <Form.Dropdown.Item key={m.id} value={m.id.toString()} title={m.title} />
+        ))}
       </Form.Dropdown>
+      <Form.Checkbox
+        id="remove_source_branch"
+        label="Delete source branch when merge request is accepted"
+        value={removeBranchFlagOrDefault(removeBranch)}
+        onChange={setRemoveBranch}
+      />
     </Form>
   );
 }
@@ -258,75 +309,4 @@ function TargetBranchDropdown(props: {
 function ProjectDropdownItem(props: { project: Project }) {
   const pro = props.project;
   return <Form.Dropdown.Item value={pro.id.toString()} title={pro.name_with_namespace} icon={projectIcon(pro)} />;
-}
-
-export function useProject(query?: string): {
-  projectinfo?: ProjectInfoMR;
-  errorProjectInfo?: string;
-  isLoadingProjectInfo: boolean;
-} {
-  const [projectinfo, setProjectInfo] = useState<ProjectInfoMR>();
-  const [errorProjectInfo, setError] = useState<string>();
-  const [isLoadingProjectInfo, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const proid = parseInt(query || "0");
-        if (proid > 0) {
-          console.log(`get projectinfo for project id '${proid}'`);
-          const members = await gitlab.getProjectMember(proid);
-          const labels = await gitlab.getProjectLabels(proid);
-          const milestones = await gitlab.getProjectMilestones(proid);
-          const branches = ((await gitlab.fetch(`projects/${proid}/repository/branches`, {}, true)) as Branch[]) || [];
-
-          if (!didUnmount) {
-            setProjectInfo({
-              ...projectinfo,
-              members: members,
-              labels: labels,
-              milestones: milestones,
-              branches: branches,
-            });
-          }
-        } else {
-          console.log("no project selected");
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query]);
-
-  return { projectinfo, errorProjectInfo, isLoadingProjectInfo };
-}
-
-interface ProjectInfoMR {
-  members: User[];
-  labels: Label[];
-  milestones: Milestone[];
-  branches: Branch[];
 }

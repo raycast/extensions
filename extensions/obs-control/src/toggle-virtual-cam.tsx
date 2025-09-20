@@ -1,7 +1,7 @@
-import { getObs } from "./lib/obs";
+import type OBSWebSocket from "obs-websocket-js";
 import { showHUD } from "@raycast/api";
-import { appInstalled, appNotInstallAlertDialog, showWebsocketConnectionErrorToast } from "./lib/utils";
-import OBSWebSocket from "obs-websocket-js";
+import { getObs } from "@/lib/obs";
+import { appInstalled, appNotInstallAlertDialog, showWebsocketConnectionErrorToast } from "@/lib/utils";
 
 export default async function main() {
   if (!(await appInstalled())) {

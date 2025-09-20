@@ -4,35 +4,93 @@
   "title": "Connect to VPN",
   "description": "Connect to/disconnect from VPN",
   "icon": "command-icon.png",
-  "author": "sato11",
+  "author": "rasmusbe",
+  "contributors": [
+    "sato11",
+    "stonerl",
+    "vyacheslav",
+    "yshmeel",
+    "borzov",
+    "andrei_hudalla"
+  ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Last Used",
+      "subtitle": "VPN",
+      "description": "Toggle your Last Used VPN",
+      "mode": "no-view"
+    },
     {
       "name": "index",
       "title": "Show Network Services",
       "subtitle": "VPN",
       "description": "Shortcut to your Network Preferences",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Network Services",
+      "subtitle": "VPN",
+      "description": "View your Network Services at a glance",
+      "mode": "menu-bar",
+      "interval": "30s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hideInvalidDevices",
+      "title": "Filter Non-VPN Services",
+      "description": "Tick this to hide non-VPN services from the list.",
+      "label": "Hide non-VPN services",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "sortBy",
+      "title": "Sort By",
+      "description": "Choose how to sort the services",
+      "type": "dropdown",
+      "required": false,
+      "default": "ascService",
+      "data": [
+        {
+          "title": "Ascending by Name",
+          "value": "ascService"
+        },
+        {
+          "title": "Descending by Name",
+          "value": "descService"
+        },
+        {
+          "title": "Ascending by Type",
+          "value": "ascType"
+        },
+        {
+          "title": "Descending by Type",
+          "value": "descType"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0"
+    "@raycast/api": "^1.94.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

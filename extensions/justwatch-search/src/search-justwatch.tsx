@@ -1,84 +1,76 @@
-import { Action, ActionPanel, Icon, Image, List, LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { searchMedias } from "./api";
-import { Country, JustWatchMedia, JustWatchMediaOffers, MediaType } from "./types";
+/* eslint-disable @raycast/prefer-title-case */
+import { useState } from "react";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { MediaType } from "@/types";
+import { useSearchMedias } from "@/hooks/useApi";
+import { useCountries } from "@/hooks/useCountries";
+import { Actions } from "@/components/Actions";
+import { Detail } from "@/components/Detail";
+import { DetailNoOffers } from "@/components/DetailNoOffers";
+import { getColor, getParsedCurrency } from "@/utils";
 
 export default function SearchJustwatch() {
-  const [medias, setMedias] = useState<JustWatchMedia[]>([]);
-  const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [countryCode, setCountryCode] = useState("");
-  const [countries, setCountries] = useState([]);
-
-  useEffect(() => {
-    LocalStorage.getItem<string>("country_code").then((countryCode) => {
-      setCountryCode(countryCode || "en_CA");
-    });
-  }, [countryCode]);
-
-  useEffect(() => {
-    const _countries: any = Object.entries(Country);
-    setCountries(_countries);
-  }, []);
-
-  const onSearch = async (search: string) => {
-    setLoading(true);
-    setSearchText(search);
-    if (!search) {
-      setLoading(false);
-      setMedias([]);
-      return;
-    }
-
-    searchMedias(search).then((medias) => {
-      setMedias(medias);
-      setLoading(false);
-    });
-  };
-
-  const onCountryChange = async (locale: string) => {
-    // first one is empty because otherwise it always instantly sets it to the first country
-    // so that we can check and remove it
-    if (countries[0][0] === "") {
-      countries.shift();
-      setCountries(countries);
-    }
-
-    LocalStorage.setItem("country_code", locale);
-
-    onSearch(searchText);
-  };
+  const { countries, countryCode, onCountryChange } = useCountries();
+  const { data: medias, isLoading } = useSearchMedias(searchText, countryCode, countryCode !== null);
 
   return (
-    <>
-      <List
-        isLoading={loading}
-        throttle={true}
-        onSearchTextChange={onSearch}
-        isShowingDetail={true}
-        searchBarPlaceholder={"Search for a show or movie..."}
-        searchBarAccessory={
-          <List.Dropdown
-            tooltip="Show availability in a different country"
-            onChange={onCountryChange}
-            defaultValue={countryCode}
-          >
-            {countries.map((object, id) => (
-              <List.Dropdown.Item key={id} title={object[1]} value={object[0]} />
-            ))}
-          </List.Dropdown>
-        }
-      >
-        {medias.map((media) => (
-          <List.Section key={media.id} title={`${media.name} (${media.year})`} subtitle={`${media.type}`}>
+    <List
+      isLoading={isLoading}
+      throttle={true}
+      onSearchTextChange={setSearchText}
+      isShowingDetail={medias.length > 0 && searchText.length > 0}
+      searchBarPlaceholder={"Search for a show or movie..."}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Show availability in a different country"
+          onChange={onCountryChange}
+          defaultValue={countryCode || ""}
+        >
+          {countries.map((object, id) => (
+            <List.Dropdown.Item key={id} title={object[1]} value={object[0]} />
+          ))}
+        </List.Dropdown>
+      }
+    >
+      {medias.length > 0 && searchText.length > 0 ? (
+        medias.map((media) => (
+          <List.Section key={media.id} title={`${media.name} (${media.year})`} subtitle={`${media.type.toLowerCase()}`}>
             {media.offers.length > 0 ? (
               media.offers.map((offer) => (
                 <List.Item
                   title={offer.name || "-"}
-                  key={offer.url}
+                  key={offer.url + offer.presentationType + offer.priceAmount + media.id}
                   icon={{ source: offer.icon, mask: Image.Mask.RoundedRectangle }}
-                  accessoryTitle={`${offer.price_amount ? "($$)" : ""} ${offer.seasons}`}
-                  detail={<Detail media={media} offer={offer} />}
+                  accessories={[
+                    offer.type == MediaType.free
+                      ? {
+                          tag: {
+                            value: offer.type_parsed,
+                            color: getColor(offer.type),
+                          },
+                        }
+                      : {},
+
+                    media.isMovie && (offer.type == MediaType.buy || offer.type == MediaType.rent)
+                      ? {
+                          tag: {
+                            value:
+                              getParsedCurrency(offer.priceAmount, offer.currency, countryCode) +
+                              ` (${offer.presentationType})`,
+                            color: getColor(offer.type),
+                          },
+                        }
+                      : !media.isMovie
+                        ? {
+                            tag: {
+                              value: `${offer.seasons}`,
+                              color: getColor(offer.type),
+                            },
+                          }
+                        : {},
+                  ]}
+                  detail={<Detail media={media} offer={offer} countryCode={countryCode} />}
                   actions={<Actions media={media} offer={offer} />}
                 />
               ))
@@ -87,82 +79,44 @@ export default function SearchJustwatch() {
                 title={``}
                 subtitle={"No available options"}
                 key={`${media.id}-no-options`}
-                icon={{ source: Icon.ExclamationMark, mask: Image.Mask.RoundedRectangle }}
+                icon={{ source: Icon.Monitor, mask: Image.Mask.RoundedRectangle, tintColor: Color.SecondaryText }}
                 detail={<DetailNoOffers media={media} />}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={media.jw_url} title={`Open in JustWatch.com`} />
+                    <Action.OpenInBrowser icon="command-icon.png" url={media.jwUrl} title={`Open in JustWatch.com`} />
+                    <Action.OpenInBrowser icon="imdb.png" url={media.imdbUrl} title={`Open in IMDB`} />
                   </ActionPanel>
                 }
               />
             )}
           </List.Section>
-        ))}
-      </List>
-    </>
-  );
-
-  function Detail(props: { media: JustWatchMedia; offer: JustWatchMediaOffers }) {
-    return (
-      <List.Item.Detail
-        markdown={`
-# ${props.media.name} (${props.media.year})
-
-<img src="${props.media.thumbnail}" height="280"/>
-
-Available for **${getMediaType(props.offer.price_amount, props.offer.price, props.offer.type)}** on [${
-          props.offer.name
-        }](${props.offer.url})
-`}
-      />
-    );
-  }
-
-  function DetailNoOffers(props: { media: JustWatchMedia }) {
-    return (
-      <List.Item.Detail
-        markdown={`
-# ${props.media.name} (${props.media.year})
-
-<img src="${props.media.thumbnail}" height="220"/>
-
-This is not available to watch at any of the services you selected. 
-
-Try changing the country or updating your selection of services in preferences.
-`}
-      />
-    );
-  }
-
-  function Actions(props: { media: JustWatchMedia; offer: JustWatchMediaOffers }) {
-    return (
-      <ActionPanel>
-        <Action.OpenInBrowser url={props.offer.url} title={`Open in Browser`} />
-        <Action.OpenInBrowser url={props.media.jw_url} title={`Open in JustWatch.com`} />
-        <Action.CopyToClipboard
-          shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-          content={props.offer.url}
-          title={"Copy URL to Clipboard"}
+        ))
+      ) : (
+        <List.EmptyView
+          icon={{
+            source:
+              countryCode === null
+                ? Icon.Warning
+                : searchText && !isLoading
+                  ? Icon.MagnifyingGlass
+                  : "command-icon.png",
+          }}
+          title={
+            countryCode === null
+              ? "First select a country"
+              : searchText && !isLoading
+                ? "No Results Found"
+                : "Enter a Movie or Show Name"
+          }
+          description={
+            countryCode === null
+              ? "If you want to search for a movie or show, first select a country from the dropdown above"
+              : searchText && !isLoading
+                ? "We couldn't find that movie or show"
+                : "Search for a movie or show to see where it's available to watch"
+          }
         />
-      </ActionPanel>
-    );
-  }
-
-  function getMediaType(amount: number, price: string, type: string) {
-    if (amount) {
-      if (type === MediaType.buy) {
-        return `Purchase (${price})`;
-      } else if (type === MediaType.rent) {
-        return `Rent (${price})`;
-      }
-    }
-
-    if (type == MediaType.stream) {
-      return "Streaming";
-    }
-
-    if (type == MediaType.free) {
-      return "Free";
-    }
-  }
+      )}
+    </List>
+  );
 }

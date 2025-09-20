@@ -17,6 +17,7 @@ export type Group = {
 export interface Preferences {
   path?: string;
   showConnectionDriver?: boolean;
+  searchByGroupName?: boolean;
 }
 
 type Environment = string | "local" | "development" | "testing" | "staging" | "production";

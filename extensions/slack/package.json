@@ -3,19 +3,57 @@
   "name": "slack",
   "title": "Slack",
   "description": "Search for chats, see unread messages, snooze notifications, and set your presence status.",
+  "icon": "slack-icon-rounded.png",
+  "author": "mommertf",
+  "contributors": [
+    "stelo",
+    "thomaslombart",
+    "Rob",
+    "syh",
+    "erayack"
+  ],
+  "pastContributors": [
+    "Elliot67"
+  ],
   "categories": [
     "Communication",
     "Productivity"
   ],
-  "icon": "slack-icon-rounded.png",
-  "author": "mommertf",
   "license": "MIT",
   "commands": [
     {
       "name": "search",
-      "title": "Search",
+      "title": "Open Channel",
       "subtitle": "Slack",
+      "keywords": [
+        "search"
+      ],
       "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Channel Metadata",
+          "label": "Display extra metadata in results",
+          "description": "Show team member's titles, time zone, and current time in Open Channel results",
+          "name": "displayExtraMetadata",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "subtitle": "Slack",
+      "description": "Search for Slack messages.",
+      "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "subtitle": "Slack",
+      "description": "Send a message to a channel or user in Slack.",
       "mode": "view"
     },
     {
@@ -45,42 +83,152 @@
       "subtitle": "Slack",
       "description": "Let Slack decide automatically how to show your presence status or force it to be shown as offline.",
       "mode": "view"
+    },
+    {
+      "name": "search-emojis",
+      "title": "Search Emojis",
+      "subtitle": "Slack",
+      "description": "Search custom emojis in your Slack team.",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "accessToken",
-      "type": "password",
-      "required": true,
-      "title": "Slack Access Token",
       "description": "View extension's README for instructions.",
-      "placeholder": "xoxp-..."
+      "name": "accessToken",
+      "placeholder": "xoxp-...",
+      "required": false,
+      "title": "Slack Access Token",
+      "type": "password"
+    },
+    {
+      "title": "Navigation",
+      "label": "Close Slack right sidebar",
+      "description": "Automatically close Slack right sidebar after navigating to a user chat",
+      "name": "closeRightSidebar",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
+  "tools": [
+    {
+      "title": "Get Channels",
+      "name": "get-channels",
+      "description": "Lists all channels in the Slack team"
+    },
+    {
+      "title": "Get Channel History",
+      "name": "get-channel-history",
+      "description": "Fetches a channel's history of messages and events."
+    },
+    {
+      "title": "Get Users",
+      "name": "get-users",
+      "description": "List all users in the Slack team"
+    },
+    {
+      "title": "Set Status",
+      "name": "set-status",
+      "description": "Set or unset the status of the current user"
+    },
+    {
+      "title": "Get Emojis",
+      "name": "get-emojis",
+      "description": "List all custom emojis in the Slack team"
+    },
+    {
+      "title": "Search Messages",
+      "name": "search-messages",
+      "description": "Search all Messages in the Slack team"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@slack set my status to away",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "set-status",
+              "arguments": {
+                "text": {
+                  "includes": "away"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "set-status": "success"
+        }
+      },
+      {
+        "input": "@slack summarize what happened in #general yesterday",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-channels"
+            }
+          }
+        ],
+        "mocks": {
+          "get-channels": []
+        }
+      },
+      {
+        "input": "@ask summary the #product-team-issue-notification channel yesterday",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-channels"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-channel-history",
+              "arguments": {
+                "text": "C12345678",
+                "after": "2025-05-19T15:00:00Z"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.34.0",
-    "@slack/web-api": "^6.7.0",
-    "date-fns": "^2.28.0",
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^2.0.0",
+    "@slack/web-api": "^7.0.4",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.1.3",
     "lodash": "^4.17.21",
-    "run-applescript": "^6.0.0",
-    "swr": "^1.2.2"
+    "node-emoji": "^2.1.3"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.181",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "^22.13.10",
+    "@types/node-emoji": "^2.1.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "volta": {
+    "node": "18.16.0",
+    "npm": "9.6.4"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

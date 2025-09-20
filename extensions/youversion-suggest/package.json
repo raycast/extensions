@@ -3,7 +3,7 @@
   "name": "youversion-suggest",
   "title": "YouVersion Bible Suggest",
   "description": "Allows you to search the YouVersion Bible quickly and easily",
-  "version": "2.1.0",
+  "version": "3.7.0",
   "icon": "command-icon.png",
   "author": "caleb531",
   "categories": [
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "lookup-reference",
-      "title": "Look Up Bible Reference by Name",
+      "title": "Look up Bible Reference by Name",
       "description": "Allows you to quickly jump to a particular Bible chapter, verse, or range of verses just by typing the name of that Bible reference",
       "mode": "view"
     },
@@ -31,22 +31,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.2",
-    "cheerio": "^1.0.0-rc.12",
-    "lodash-es": "^4.17.21",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "youversion-suggest": "^3.0.0"
   },
   "devDependencies": {
-    "@types/cheerio": "^0.22.31",
-    "@types/lodash-es": "^4.17.6",
-    "@types/react": "^18.0.9",
-    "@types/react-dom": "^18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/react": "19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",

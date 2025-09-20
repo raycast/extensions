@@ -4,6 +4,8 @@ import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
+import InvokeLambdaFunction from "./components/lambda/InvokeLambdaFunction";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -26,14 +28,12 @@ export default function Lambda() {
 function LambdaFunction({ func }: { func: FunctionConfiguration }) {
   return (
     <List.Item
+      key={func.FunctionArn}
       icon={"aws-icons/lam.png"}
       title={func.FunctionName || ""}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={resourceToConsoleLink(func.FunctionName, "AWS::Lambda::Function")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(func.FunctionName, "AWS::Lambda::Function")} />
           <Action.OpenInBrowser
             icon={Icon.Document}
             title="Open CloudWatch Log Group"
@@ -45,6 +45,12 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
             icon={Icon.Eye}
             shortcut={{ modifiers: ["opt"], key: "l" }}
             target={<CloudwatchLogStreams logGroupName={`/aws/lambda/${func.FunctionName}`}></CloudwatchLogStreams>}
+          />
+          <Action.Push
+            title="Invoke Function"
+            icon={Icon.Bolt}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            target={<InvokeLambdaFunction functionName={func.FunctionName || ""} />}
           />
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
@@ -59,7 +65,7 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
 
 async function fetchFunctions(
   nextMarker?: string,
-  functions?: FunctionConfiguration[]
+  functions?: FunctionConfiguration[],
 ): Promise<FunctionConfiguration[]> {
   if (!isReadyToFetch()) return [];
   const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));

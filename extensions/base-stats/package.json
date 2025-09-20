@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "base-stats",
+  "title": "Base Stats",
+  "description": "View current gas price and stats for Base",
+  "icon": "base.png",
+  "author": "Osprey",
+  "categories": [
+    "Finance",
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "BaseScan API Key",
+      "description": "A BaseScan API key from https://basescan.org/apis",
+      "placeholder": "Enter your BaseScan API key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "stats",
+      "title": "Stats",
+      "description": "Displays various stats for Base (via L2Beat.com)",
+      "mode": "view"
+    },
+    {
+      "name": "gas-price",
+      "title": "Gas Price",
+      "description": "View the current Base Gas Price (MWei) in your menu bar - updates every minute",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "gas-price-no-unit",
+      "title": "Gas Price (No Units)",
+      "description": "View the current Base Gas Price (MWei) in your menu bar without units - updates every minute",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.6",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

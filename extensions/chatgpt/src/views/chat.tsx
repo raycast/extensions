@@ -5,7 +5,6 @@ import { CopyActionSection } from "../actions/copy";
 import { FormInputActionSection } from "../actions/form-input";
 import { PreferencesActionSection } from "../actions/preferences";
 import { SaveActionSection } from "../actions/save";
-import { DEFAULT_MODEL } from "../hooks/useModel";
 import { Chat, ChatViewProps } from "../type";
 import { AnswerDetailView } from "./answer-detail";
 import { EmptyView } from "./empty";
@@ -26,8 +25,8 @@ export const ChatView = ({
   const getActionPanel = (selectedChat: Chat) => (
     <ActionPanel>
       {question.length > 0 ? (
-        <PrimaryAction title="Get Answer" onAction={() => use.chats.ask(question, conversation.model)} />
-      ) : selectedChat.answer && use.chats.selectedChatId === selectedChat.id ? (
+        <PrimaryAction title="Get Answer" onAction={() => use.chats.ask(question, [], conversation.model)} />
+      ) : selectedChat.answer ? (
         <>
           <CopyActionSection answer={selectedChat.answer} question={selectedChat.question} />
           <SaveActionSection
@@ -36,8 +35,8 @@ export const ChatView = ({
               isAutoSaveConversation
                 ? undefined
                 : use.conversations.data.find((x) => x.id === conversation.id)
-                ? undefined
-                : () => use.conversations.add(conversation)
+                  ? undefined
+                  : () => use.conversations.add(conversation)
             }
           />
           <ActionPanel.Section title="Output">
@@ -47,7 +46,7 @@ export const ChatView = ({
       ) : null}
       <FormInputActionSection
         initialQuestion={question}
-        onSubmit={(question) => use.chats.ask(question, conversation.model)}
+        onSubmit={(question, files) => use.chats.ask(question, files, conversation.model)}
         models={models}
         selectedModel={selectedModel}
         onModelChange={onModelChange}
@@ -65,7 +64,7 @@ export const ChatView = ({
               setConversation({
                 id: uuidv4(),
                 chats: [],
-                model: DEFAULT_MODEL,
+                model: conversation.model,
                 pinned: false,
                 updated_at: "",
                 created_at: new Date().toISOString(),
@@ -87,14 +86,13 @@ export const ChatView = ({
   ) : (
     <List.Section title="Results" subtitle={data.length.toLocaleString()}>
       {sortedChats.map((sortedChat, i) => {
-        const markdown = `**${sortedChat.question}**\n\n${sortedChat.answer}`;
         return (
           <List.Item
             id={sortedChat.id}
             key={sortedChat.id}
             accessories={[{ text: `#${use.chats.data.length - i}` }]}
             title={sortedChat.question}
-            detail={sortedChat && <AnswerDetailView chat={sortedChat} markdown={markdown} />}
+            detail={sortedChat && <AnswerDetailView chat={sortedChat} streamData={use.chats.streamData} />}
             actions={use.chats.isLoading ? undefined : getActionPanel(sortedChat)}
           />
         );

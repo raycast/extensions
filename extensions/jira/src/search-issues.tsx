@@ -1,50 +1,80 @@
-import { LaunchProps, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Icon, List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
-import { getIssues } from "./api/issues";
+import { Project, getProjects } from "./api/projects";
 import { IssueListEmptyView } from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
+import { getProjectAvatar } from "./helpers/avatars";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import useIssues from "./hooks/useIssues";
 
 type SearchIssuesProps = {
   query?: string;
 };
 
 export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
+  const [cachedProject, setCachedProject] = useCachedState<Project>("search-issues-project");
+  const [projectQuery, setProjectQuery] = useState("");
+  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+    (query) => getProjects(query),
+    [projectQuery],
+    { keepPreviousData: true },
+  );
+
+  const isSearching = projectQuery !== "";
+
   const [query, setQuery] = useState(() => {
     return initialQuery ?? "";
   });
 
   const jql = useMemo(() => {
+    let jql = "";
+    if (cachedProject) {
+      jql += `project = '${cachedProject.key}' ${query !== "" ? "AND" : ""} `;
+    }
+
     if (query === "") {
-      return "ORDER BY created DESC";
+      if (cachedProject) {
+        // Safe because project filter acts as restriction
+        jql += "ORDER BY created DESC";
+      } else {
+        // Add time-based restriction to avoid unbounded JQL error from Jira API
+        // Fetch issues created in the last 30 days by default
+        jql += "created >= -30d ORDER BY created DESC";
+      }
+    } else if (query.startsWith("jql:")) {
+      jql += query.split("jql:")[1];
+    } else {
+      let issueKeyQuery = "";
+      const issueKeyRegex = /\w+-\d+/;
+      const matches = query.match(issueKeyRegex);
+      if (matches) {
+        issueKeyQuery = `OR issuekey = ${matches[0]}`;
+      }
+
+      const singleNumberRegex = /^[0-9]+$/;
+      const singleNumberMatches = query.match(singleNumberRegex);
+      if (singleNumberMatches) {
+        if (cachedProject) {
+          issueKeyQuery = `OR issuekey = ${cachedProject.key}-${singleNumberMatches[0]}`;
+        } else {
+          const allPossibleIssueKeys = projects?.map((project) => `${project.key}-${singleNumberMatches[0]}`);
+          issueKeyQuery = `OR issuekey IN (${allPossibleIssueKeys?.join(",")})`;
+        }
+      }
+
+      const escapedQuery = query.replace(/[\\"]/g, "\\$&");
+
+      // "text" by default searches in fields summary, description, environment, comments and all text custom fields.
+      // Search "project" so that an issuekey prefix will be found (e.g. "APP").
+      jql += `(text ~ "${escapedQuery}" OR project = "${escapedQuery}" ${issueKeyQuery}) ORDER BY updated DESC`;
     }
 
-    if (query.startsWith("jql:")) {
-      return query.split("jql:")[1];
-    }
+    return jql;
+  }, [query, cachedProject]);
 
-    let issueKeyQuery = "";
-    const issueKeyRegex = /\w+-\d+/;
-    const matches = query.match(issueKeyRegex);
-
-    if (matches) {
-      issueKeyQuery = `OR issuekey = ${matches[0]}`;
-    }
-
-    const escapedQuery = query.replace(/[\\"]/g, "\\$&");
-
-    // "text" by default searches in fields summary, description, environment, comments and all text custom fields.
-    // Search "project" so that an issuekey prefix will be found (e.g. "APP").
-    return `(text ~ "${escapedQuery}" OR project = "${escapedQuery}" ${issueKeyQuery}) ORDER BY updated DESC`;
-  }, [query]);
-
-  const {
-    data: issues,
-    isLoading,
-    mutate,
-  } = useCachedPromise((jql) => getIssues({ jql }), [jql], { keepPreviousData: true });
+  const { issues, isLoading, mutate } = useIssues(jql, { keepPreviousData: true });
 
   return (
     <List
@@ -53,6 +83,46 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
       onSearchTextChange={setQuery}
       searchText={query}
       throttle
+      {...(projects
+        ? {
+            searchBarAccessory: (
+              <List.Dropdown
+                tooltip="Filter issues by project"
+                onChange={(key) => {
+                  setProjectQuery("");
+                  setCachedProject(projects?.find((p) => p.key === key));
+                }}
+                value={cachedProject?.key ?? ""}
+                throttle
+                isLoading={isLoadingProjects}
+                onSearchTextChange={setProjectQuery}
+              >
+                <List.Dropdown.Item title="All Projects" icon={Icon.List} value="" />
+
+                {cachedProject && !isSearching ? (
+                  <List.Dropdown.Item
+                    key={cachedProject.key}
+                    title={`${cachedProject.name} (${cachedProject.key})`}
+                    value={cachedProject.key}
+                    icon={getProjectAvatar(cachedProject)}
+                  />
+                ) : null}
+                {projects
+                  .filter((project) => (cachedProject && !isSearching ? project.id !== cachedProject?.id : true))
+                  .map((project) => {
+                    return (
+                      <List.Dropdown.Item
+                        key={project.id}
+                        title={`${project.name} (${project.key})`}
+                        value={project.key}
+                        icon={getProjectAvatar(project)}
+                      />
+                    );
+                  })}
+              </List.Dropdown>
+            ),
+          }
+        : {})}
     >
       <List.Section
         title={query.length > 0 ? "Search Results" : "Created Recently"}
@@ -67,13 +137,4 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
     </List>
   );
 }
-
-type CommandProps = LaunchProps<{
-  launchContext: {
-    query: string;
-  };
-}>;
-
-export default function Command({ launchContext }: CommandProps) {
-  return withJiraCredentials(<SearchIssues query={launchContext?.query} />);
-}
+export default withJiraCredentials(SearchIssues);

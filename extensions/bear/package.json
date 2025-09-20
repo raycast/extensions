@@ -8,7 +8,12 @@
   "contributors": [
     "lucaschultz",
     "diokhan",
-    "ron-myers"
+    "ron-myers",
+    "JuanBanchero",
+    "ramsay",
+    "stelo",
+    "thomaslombart",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -17,76 +22,202 @@
       "title": "Search Notes",
       "subtitle": "Bear",
       "description": "Search and open Bear notes",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "searchQuery",
-          "placeholder": "Search Query",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "new-note",
       "title": "Create Note",
       "subtitle": "Bear",
-      "description": "Create a new bear note",
-      "mode": "view"
+      "description": "Create a new Bear note",
+      "mode": "view",
+      "preferences": [
+        {
+          "default": "main",
+          "description": "Choose default opening mode when creating a new note",
+          "label": "Open new notes in",
+          "name": "newNoteOpenMode",
+          "required": false,
+          "title": "Opening Notes",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Don't Open Note",
+              "value": "no"
+            },
+            {
+              "title": "In Main Window",
+              "value": "main"
+            },
+            {
+              "title": "In New Window",
+              "value": "new"
+            }
+          ]
+        },
+        {
+          "default": false,
+          "description": "When creating a new note, prepend time and date",
+          "label": "Prepend time and date",
+          "name": "prependTimeAndDate",
+          "required": false,
+          "type": "checkbox"
+        },
+        {
+          "default": false,
+          "description": "When creating a new note, pin the note",
+          "label": "Pin note in notes list",
+          "name": "pinNote",
+          "required": false,
+          "type": "checkbox"
+        }
+      ]
     },
     {
       "name": "grab-url",
       "title": "Web Capture",
       "subtitle": "Bear",
-      "description": "Create a new bear note from a web capture",
+      "description": "Create a new Bear note from a web capture",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Notes",
+      "subtitle": "Bear",
+      "description": "View your recent Bear notes in the menu bar.",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
     {
-      "name": "focusCursorAtEnd",
-      "title": "Opening Notes",
-      "description": "Opens the note in edit mode, placing the cursor at the end of the note",
-      "type": "checkbox",
       "default": false,
+      "description": "Opens the note in edit mode, placing the cursor at the end of the note",
       "label": "Focus cursor at end of the note",
-      "required": false
+      "name": "focusCursorAtEnd",
+      "required": false,
+      "title": "Opening Notes",
+      "type": "checkbox"
     },
     {
-      "name": "showPreviewInListView",
-      "title": "Notes List",
-      "description": "Shows a preview of the note to the right of the note list",
-      "type": "checkbox",
       "default": true,
+      "description": "Shows a preview of the note to the right of the note list",
       "label": "Show preview in list view",
-      "required": false
+      "name": "showPreviewInListView",
+      "required": false,
+      "title": "Notes List",
+      "type": "checkbox"
     }
   ],
+  "tools": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search Bear notes"
+    },
+    {
+      "name": "new-note",
+      "title": "New Note",
+      "description": "Create Note in Bear"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@bear search for note with tag bear/welcome",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "SFNote2Intro3",
+              "title": "Welcome to Bear 👋",
+              "text": "# Welcome to Bear 👋\n...",
+              "pinned": true,
+              "tags": [
+                "bear/welcome",
+                "bear"
+              ],
+              "formattedTags": "#bear/welcome"
+            },
+            {
+              "id": "78471A46-55B3-417F-AC3F-7D60F581F0F9",
+              "title": "Get started with Bear",
+              "text": "# Get started with Bear \n\n![]...",
+              "pinned": false,
+              "tags": [
+                "bear/welcome",
+                "bear"
+              ],
+              "formattedTags": "#bear/welcome"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "tag": "bear/welcome"
+              },
+              "name": "search-notes"
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "title": {
+                  "includes": "Shopping"
+                },
+                "text": {
+                  "includes": "milk"
+                },
+                "tags": [
+                  {
+                    "includes": "reminder"
+                  },
+                  {
+                    "includes": "shopping"
+                  }
+                ]
+              },
+              "name": "new-note"
+            }
+          },
+          {
+            "meetsCriteria": "milk"
+          }
+        ],
+        "input": "@bear create note about needing to buy milk",
+        "mocks": {
+          "new-note": "Successfully called \"new-note\""
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "@types/commonmark": "^0.27.5",
-    "commonmark": "^0.30.0",
-    "date-fns": "^2.29.3",
-    "open": "^8.4.0",
-    "sql.js": "^1.8.0"
+    "@raycast/api": "^1.90.0",
+    "commonmark": "^0.31.0",
+    "date-fns": "^3.6.0",
+    "open": "^8.4.2",
+    "sql.js": "^1.10.3"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@types/react": "^18.0.21",
-    "@types/sql.js": "^1.4.4",
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
-    "@typescript-eslint/parser": "^5.38.1",
-    "eslint": "^8.24.0",
-    "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.7.1",
-    "react-devtools": "^4.26.0",
-    "typescript": "^4.8.4"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/commonmark": "^0.27.9",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "@types/sql.js": "^1.4.9",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "prettier": "prettier --write . && prettier --check .",
-    "update-sqlite-wasm": "cp node_modules/sql.js/dist/sql-wasm.wasm assets/sql-wasm.wasm"
-  }
+    "fix-lint": "ray lint --fix"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,0 +1,181 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dust-tt",
+  "title": "Ask Dust",
+  "description": "Query dust.tt AI agents",
+  "icon": "dust.png",
+  "author": "albandum",
+  "contributors": [
+    "vineus",
+    "henry_fontanier",
+    "stang",
+    "sebastien_flory",
+    "adrien_simon"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "connexionFlow",
+      "description": "Specify how to connect to Dust",
+      "type": "dropdown",
+      "required": true,
+      "title": "How to connect to Dust ?",
+      "data": [
+        {
+          "value": "oauth",
+          "title": "Sign in with your Dust account"
+        },
+        {
+          "value": "apiKey",
+          "title": "Use workspace API key (legacy)"
+        }
+      ]
+    },
+    {
+      "name": "apiUrl",
+      "description": "Dust Api URL (advanced)",
+      "type": "textfield",
+      "required": false,
+      "title": "API URL (advanced)",
+      "placeholder": "https://dust.tt",
+      "default": "https://dust.tt"
+    },
+    {
+      "name": "oauthClientID",
+      "description": "Dust oauth client ID (advanced)",
+      "type": "textfield",
+      "required": false,
+      "title": "OAuth client ID (advanced)",
+      "placeholder": "client_01JGCT55T7FVDG9XF74925R1KT",
+      "default": "client_01JGCT55T7FVDG9XF74925R1KT"
+    },
+    {
+      "name": "oauthDomain",
+      "description": "Dust oauth domain (advanced)",
+      "type": "textfield",
+      "required": false,
+      "title": "OAuth domain (advanced)",
+      "placeholder": "https://api.workos.com",
+      "default": "https://api.workos.com"
+    },
+    {
+      "name": "apiKey",
+      "description": "Your workspace API key (legacy)",
+      "type": "password",
+      "required": false,
+      "title": "API key (legacy)",
+      "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "userEmail",
+      "description": "The email address of your Dust user account (legacy)",
+      "type": "textfield",
+      "required": false,
+      "title": "Email (legacy)",
+      "placeholder": "john.doe@example.com"
+    },
+    {
+      "name": "workspaceId",
+      "description": "Your workspace ID (legacy)",
+      "type": "textfield",
+      "required": false,
+      "title": "Workspace ID (legacy)",
+      "placeholder": "xxxxxxxx"
+    }
+  ],
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Dust",
+      "subtitle": "Ask @dust",
+      "description": "Query @Dust on dust.tt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ask a question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "askClaude",
+      "title": "Ask Claude",
+      "subtitle": "Ask @claude-3",
+      "description": "Query @claude-3 on Dust.tt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ask a question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "askGpt",
+      "title": "Ask GPT",
+      "subtitle": "Ask @gpt-4",
+      "description": "Query @gpt-4 on Dust.tt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ask a question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Questions History",
+      "subtitle": "Show the questions and answers of the last 30 days",
+      "description": "Show the questions and answers of the last 30 days",
+      "mode": "view"
+    },
+    {
+      "name": "askAgent",
+      "title": "Ask ...",
+      "subtitle": "Select one of your assistants to ask a question",
+      "description": "Select one of your assistants to ask a question",
+      "mode": "view"
+    },
+    {
+      "name": "pickWorkspace",
+      "title": "Select Workspace",
+      "subtitle": "Select a workspace to use",
+      "description": "Select a workspace to use",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@dust-tt/client": "^1.0.15",
+    "@emoji-mart/data": "^1.1.2",
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.18.0",
+    "date-fns": "^3.0.0-alpha.2",
+    "eventsource-parser": "^1.1.1",
+    "undici": "^6.20.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

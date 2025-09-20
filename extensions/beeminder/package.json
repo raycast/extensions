@@ -9,6 +9,9 @@
     "Web"
   ],
   "author": "vivgui",
+  "contributors": [
+    "hnsn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -19,20 +22,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.2",
-    "@raycast/utils": "^1.4.16",
-    "moment": "^2.29.4",
-    "node-fetch": "^3.3.0"
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.15.0",
+    "moment": "^2.30.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "20.14.2",
+    "@types/react": "18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.12.0",
+    "@typescript-eslint/parser": "^7.12.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
   },
   "preferences": [
     {
@@ -51,6 +54,42 @@
       "type": "textfield",
       "default": "",
       "required": true
+    },
+    {
+      "name": "colorProgression",
+      "title": "Color Progression",
+      "description": "The color progression to use for your goals.",
+      "type": "dropdown",
+      "required": false,
+      "default": "beeminder",
+      "data": [
+        {
+          "title": "Beeminder (🔴 🟠 🔵 🟢)",
+          "value": "beeminder"
+        },
+        {
+          "title": "Rainbow (🔴 🟠 🟡 🟢 🔵 🟣)",
+          "value": "rainbow"
+        }
+      ]
+    },
+    {
+      "name": "showDaysAboveLine",
+      "title": "Days Above Line",
+      "description": "Show how many days the goal is above the red line.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show days above the red line",
+      "default": false
+    },
+    {
+      "name": "sortByDaysAboveLine",
+      "title": "Sort by Days Above the Line",
+      "description": "Sort goals by how many days they are above the red line.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Sort goals by # of days above the red line",
+      "default": false
     }
   ],
   "scripts": {

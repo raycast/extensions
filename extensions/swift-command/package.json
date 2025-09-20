@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "swift-command",
+  "title": "Swift Command",
+  "description": "Efficiently manage and access Linux command snippets for faster execution",
+  "icon": "extension-icon-512.png",
+  "author": "aaron_lin",
+  "contributors": [
+    "felix_wortmann"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-commands",
+      "title": "Manage Swift Command",
+      "description": "Manage command snippets",
+      "mode": "view"
+    },
+    {
+      "name": "import-alias-command",
+      "subtitle": "Swift Command",
+      "title": "Import Alias Commands from ~/.bashrc or ~/.zshrc",
+      "description": "Import your existing shell aliases from bash or zsh configuration files into Swift Command",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "datasourcePath",
+      "type": "file",
+      "required": false,
+      "default": "swift-command.json",
+      "title": "Data Source File",
+      "description": "If no file is assigned, one will be automatically created in the support directory"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.4",
+    "@raycast/utils": "^1.16.3",
+    "tiny-pinyin": "^1.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^3.1.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "npx vitest"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shottr",
+  "title": "Shottr",
+  "description": "Capture and record your screen using shottr!",
+  "icon": "main-icon.png",
+  "author": "fernando_barrios",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sstr",
+      "title": "Open Shottr",
+      "description": "Open Shottr App",
+      "mode": "no-view",
+      "icon": "shottr.png"
+    },
+    {
+      "name": "ssst",
+      "title": "Open Shottr Settings",
+      "description": "Open Shottr Settings App",
+      "mode": "no-view",
+      "icon": "settings.png"
+    },
+    {
+      "name": "ssfs",
+      "title": "Capture Fullscreen",
+      "description": "Fullscreen Screenshot",
+      "mode": "no-view",
+      "icon": "grab-fullscreen.png"
+    },
+    {
+      "name": "ssa",
+      "title": "Capture Area",
+      "description": "Area Screenshot",
+      "mode": "no-view",
+      "icon": "grab-area.png"
+    },
+    {
+      "name": "ssw",
+      "title": "Capture Repeat",
+      "description": "Repeat Screenshot",
+      "mode": "no-view",
+      "icon": "grab-append.png"
+    },
+    {
+      "name": "ssrg",
+      "title": "Capture Window",
+      "description": "Window Screenshot",
+      "mode": "no-view",
+      "icon": "grab-window.png"
+    },
+    {
+      "name": "sss",
+      "title": "Capture Scrolling",
+      "description": "Scrolling Screenshot",
+      "mode": "no-view",
+      "icon": "grab-scrolling.png"
+    },
+    {
+      "name": "sssr",
+      "title": "Capture Scrolling Reverse",
+      "description": "Scrolling Reverse Screenshot",
+      "mode": "no-view",
+      "icon": "grab-scrolling-reverse.png"
+    },
+    {
+      "name": "ssds",
+      "title": "Capture Delayed",
+      "description": "Delayed Screenshot",
+      "mode": "no-view",
+      "icon": "grab-delayed.png",
+      "arguments": [
+        {
+          "name": "delay",
+          "placeholder": "Delay (secs)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ssap",
+      "title": "Capture Append",
+      "description": "Append Screenshot",
+      "mode": "no-view",
+      "icon": "grab-append.png"
+    },
+    {
+      "name": "sso",
+      "title": "OCR",
+      "description": "Optical Character Recognition",
+      "mode": "no-view",
+      "icon": "grab-ocr.png"
+    },
+    {
+      "name": "ssc",
+      "title": "Load Clipboard",
+      "description": "Load from Clipboard",
+      "mode": "no-view",
+      "icon": "load-clipboard.png"
+    },
+    {
+      "name": "ssf",
+      "title": "Load File",
+      "description": "Load from File",
+      "mode": "no-view",
+      "icon": "load-file.png"
+    },
+    {
+      "name": "ssu",
+      "title": "Uploads",
+      "description": "Open Uploads",
+      "mode": "no-view",
+      "icon": "uploads.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
