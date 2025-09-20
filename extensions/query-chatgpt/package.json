@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "query-chatgpt",
+  "title": "Query ChatGPT",
+  "description": "Opens ChatGPT in your browser and executes your query in it",
+  "icon": "command-icon.png",
+  "author": "cyxn",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "query-chatgpt-custom-create",
+      "title": "Create Custom Command",
+      "subtitle": "Query ChatGPT",
+      "description": "Create a custom command using a quicklinks",
+      "mode": "view"
+    },
+    {
+      "name": "query-chatgpt-execute-custom-command",
+      "title": "Execute Custom Command",
+      "subtitle": "Query ChatGPT",
+      "description": "Execute a custom command using a quicklinks",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "gptUrl",
+          "placeholder": "GPT URL",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Your Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browser",
+      "type": "appPicker",
+      "title": "Browser where ChatGPT will be opened.",
+      "placeholder": "Enter your browser",
+      "default": "Safari",
+      "description": "Script will open and control the ChatGPT tab in this browser.",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.11.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mattermost",
+  "title": "Mattermost",
+  "description": "Search for chats, see unread messages, and set your presence status.",
+  "icon": "mattermost-icon-rounded.png",
+  "author": "ernest0n",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "keywords": [
+    "chat"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "channels",
+      "title": "Search Channel",
+      "subtitle": "Mattermost",
+      "description": "Search for all team directs, and channels and open them directly in your Mattermost app.",
+      "mode": "view",
+      "keywords": [
+        "chat"
+      ]
+    },
+    {
+      "name": "set-custom-status",
+      "title": "Set Custom Status",
+      "subtitle": "Mattermost",
+      "description": "Set custom user status.",
+      "mode": "view"
+    },
+    {
+      "name": "set-precense-status",
+      "title": "Set Presence Status",
+      "subtitle": "Mattermost",
+      "description": "Set user presence status.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "description": "Mattermost host server.",
+      "placeholder": "https://www.your-mattermost-url.com",
+      "required": true,
+      "title": "URL",
+      "type": "textfield"
+    },
+    {
+      "name": "authorizationType",
+      "description": "Way to authorize user to mattermost.",
+      "required": true,
+      "title": "Authorization Type",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "username:password",
+          "value": "logpass"
+        },
+        {
+          "title": "access token",
+          "value": "token"
+        }
+      ]
+    },
+    {
+      "name": "credentials",
+      "description": "Username with password or personal access token of mattermost user.",
+      "placeholder": "username:password or access token",
+      "required": true,
+      "title": "Authorization Credentials",
+      "type": "textfield"
+    },
+    {
+      "name": "teamName",
+      "description": "Mattermost team name that should open by default if you are on multiple teams",
+      "placeholder": "MySuperCompany",
+      "required": false,
+      "title": "Default team name",
+      "type": "textfield"
+    },
+    {
+      "name": "deepLinkType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Open In",
+      "data": [
+        {
+          "title": "Mattermost Application",
+          "value": "application"
+        },
+        {
+          "title": "Browser",
+          "value": "browser"
+        }
+      ],
+      "description": "How to open a deep link",
+      "default": "mattermost"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0",
+    "axios": "^0.26.1",
+    "luxon": "^3.1.1",
+    "mattermost-redux": "5.31.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/luxon": "^3.1.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

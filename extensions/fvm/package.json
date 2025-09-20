@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fvm",
+  "title": "FVM",
+  "description": "Easily manage Flutter SDK versions with FVM.",
+  "icon": "flutter_logo.png",
+  "author": "leoafarias",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-command",
+      "title": "List Cached Versions",
+      "subtitle": "FVM",
+      "description": "Displays the local versions of Flutter installed in your machine.",
+      "mode": "view"
+    },
+    {
+      "name": "releases-command",
+      "title": "List Releases",
+      "subtitle": "FVM",
+      "description": "Displays the latest Flutter releases.",
+      "mode": "view"
+    },
+    {
+      "name": "open-cache-dir-command",
+      "title": "Open Cache Directory",
+      "subtitle": "FVM",
+      "description": "Opens the directory where FVM stores the Flutter SDK versions.",
+      "mode": "no-view"
+    },
+    {
+      "name": "install-command",
+      "title": "Install Version",
+      "subtitle": "FVM",
+      "description": "Installs a specific version of Flutter.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "version",
+          "placeholder": "version",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
+    "axios": "^1.8.4",
+    "install": "^0.13.0",
+    "shell-env": "^4.0.1",
+    "tar": "^6.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/tar": "^6.1.11",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

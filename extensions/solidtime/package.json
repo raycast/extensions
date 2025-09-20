@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "solidtime",
+  "title": "Solidtime",
+  "description": "Manage your clients, projects and time entries for Solidtime",
+  "icon": "solidtime.png",
+  "author": "cupcakearmy",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-time",
+      "title": "Manage Time Entries",
+      "description": "Manage your time entries",
+      "mode": "view"
+    },
+    {
+      "name": "manage-clients",
+      "title": "Manage Clients",
+      "description": "Manage your clients",
+      "mode": "view"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "description": "Manage your projects",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "url",
+      "title": "Solidtime URL",
+      "description": "Your Solidtime URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://app.solidtime.io/",
+      "default": "https://app.solidtime.io/"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Solidtime API Key",
+      "type": "password",
+      "required": true,
+      "placeholder": "eY...xx"
+    },
+    {
+      "name": "onTimeEntryAction",
+      "description": "What should happen after a time entry is started or stopped",
+      "type": "dropdown",
+      "title": "Window behaviour on Time Entry action",
+      "default": "close",
+      "required": false,
+      "data": [
+        {
+          "title": "Close",
+          "value": "close"
+        },
+        {
+          "title": "Stay",
+          "value": "stay"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0",
+    "@tanstack/react-query": "^5.66.9",
+    "@zodios/core": "^10.9.6",
+    "dayjs": "^1.11.13",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

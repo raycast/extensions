@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "json-editor",
+  "title": "JSON Editor",
+  "description": "All JSON operations in one editor.",
+  "icon": "command-icon.png",
+  "author": "HerbertLu",
+  "contributors": [
+    "jvrbnjak89"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "edit-json",
+      "title": "Edit JSON",
+      "description": "Edit JSON object like filtering fields",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "flow",
+      "description": "Output types in Flow format",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Typescript Definition - Flow",
+      "label": "Flow format"
+    },
+    {
+      "name": "namespace",
+      "description": "If provided, interfaces will be wrapped in a namespace",
+      "type": "textfield",
+      "required": false,
+      "title": "Typescript Definition - Namespace"
+    },
+    {
+      "name": "prefix",
+      "description": "Override the I prefix on interface names",
+      "type": "textfield",
+      "required": false,
+      "default": "I",
+      "title": "Typescript Definition - Prefix"
+    },
+    {
+      "name": "rootName",
+      "description": "Override the RootObject name of the top-level interface",
+      "type": "textfield",
+      "required": false,
+      "default": "RootObject",
+      "title": "Typescript Definition - Root name"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2",
+    "json-ts": "^1.6.4"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

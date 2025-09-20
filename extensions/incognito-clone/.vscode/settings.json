@@ -1,0 +1,22 @@
+{
+  "[json][javascript][typescript][typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "cSpell.userWords": [
+    "esbenp",
+    "Raycast",
+    "raycast",
+    "applescript",
+    "kgrhartlage",
+    "labforward"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "editor.wordWrap": "wordWrapColumn",
+  "files.insertFinalNewline": true
+}

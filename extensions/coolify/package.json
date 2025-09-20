@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "coolify",
+  "title": "Coolify",
+  "description": "View Servers, Resources, Teams and more",
+  "icon": "coolify.png",
+  "author": "xmok",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "Coolify URL",
+      "name": "coolify_url",
+      "required": true,
+      "type": "textfield",
+      "description": "URL of Coolify Instance",
+      "default": "https://app.coolify.io/",
+      "placeholder": "https://app.coolify.io/"
+    },
+    {
+      "title": "API Token",
+      "name": "api_token",
+      "required": true,
+      "type": "password",
+      "description": "API Token from Coolify Dashboard",
+      "placeholder": "x|xxxx...xxxxx"
+    }
+  ],
+  "commands": [
+    {
+      "name": "servers",
+      "title": "View Servers",
+      "description": "View Servers and Server Details",
+      "mode": "view"
+    },
+    {
+      "name": "resources",
+      "title": "View Resources",
+      "description": "View Resources and start,stop,redeploy",
+      "mode": "view"
+    },
+    {
+      "name": "teams",
+      "title": "View Teams",
+      "description": "View Teams and Members",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "View Projects",
+      "description": "View Projects, Environments and Resources",
+      "mode": "view"
+    },
+    {
+      "name": "private-keys",
+      "title": "View Private Keys",
+      "description": "View Private Keys",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.3.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,17 @@
+fail_fast: true
+repos:
+  - repo: local
+    hooks:
+      - id: lint
+        name: lint
+        description: Lint Raycast extension code
+        entry: just lint
+        language: system
+        files: \.ts.?$
+        pass_filenames: false
+        args: []
+        stages: [commit]
+  - repo: https://github.com/crate-ci/committed
+    rev: v1.0.5
+    hooks:
+      - id: committed

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "viacep",
+  "title": "ViaCEP",
+  "description": "Find Brazilian addresses and postal codes",
+  "icon": "viacep-icon.png",
+  "author": "xilopaint",
+  "keywords": [
+    "cep",
+    "brazil"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find-address",
+      "title": "Find Address",
+      "subtitle": "ViaCEP",
+      "description": "Search address by CEP",
+      "mode": "view",
+      "keywords": ["cep"],
+      "arguments": [
+        {
+          "name": "cep",
+          "type": "text",
+          "required": false,
+          "placeholder": "CEP"
+        }
+      ]
+    },
+    {
+      "name": "find-cep",
+      "title": "Find CEP",
+      "subtitle": "ViaCEP",
+      "description": "Search CEP by address",
+      "mode": "view",
+      "keywords": ["address"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

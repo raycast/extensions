@@ -1,0 +1,307 @@
+[
+  {
+    "language": "Spanish",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Spanish",
+        "key": "enes"
+      },
+      {
+        "from": "Spanish",
+        "to": "English",
+        "key": "esen"
+      },
+      {
+        "from": "Spanish",
+        "to": "French",
+        "key": "esfr"
+      },
+      {
+        "from": "Spanish",
+        "to": "Portuguese",
+        "key": "espt"
+      },
+      {
+        "from": "Spanish",
+        "to": "Italian",
+        "key": "esit"
+      },
+      {
+        "from": "Spanish",
+        "to": "German",
+        "key": "esde"
+      }
+    ]
+  },
+  {
+    "language": "French",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "French",
+        "key": "enfr"
+      },
+      {
+        "from": "French",
+        "to": "English",
+        "key": "fren"
+      },
+      {
+        "from": "French",
+        "to": "Spanish",
+        "key": "fres"
+      }
+    ]
+  },
+  {
+    "language": "Italian",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Italian",
+        "key": "enit"
+      },
+      {
+        "from": "Italian",
+        "to": "English",
+        "key": "iten"
+      },
+      {
+        "from": "Italian",
+        "to": "Spanish",
+        "key": "ites"
+      }
+    ]
+  },
+  {
+    "language": "German",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "German",
+        "key": "ende"
+      },
+      {
+        "from": "German",
+        "to": "English",
+        "key": "deen"
+      },
+      {
+        "from": "German",
+        "to": "Spanish",
+        "key": "dees"
+      }
+    ]
+  },
+  {
+    "language": "Dutch",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Dutch",
+        "key": "ennl"
+      },
+      {
+        "from": "Dutch",
+        "to": "English",
+        "key": "nlen"
+      }
+    ]
+  },
+  {
+    "language": "Swedish",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Swedish",
+        "key": "ensv"
+      },
+      {
+        "from": "Swedish",
+        "to": "English",
+        "key": "sven"
+      }
+    ]
+  },
+  {
+    "language": "Icelandic",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Icelandic",
+        "key": "enis"
+      }
+    ]
+  },
+  {
+    "language": "Russian",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Russian",
+        "key": "enru"
+      },
+      {
+        "from": "Russian",
+        "to": "English",
+        "key": "ruen"
+      }
+    ]
+  },
+  {
+    "language": "Portuguese",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Portuguese",
+        "key": "enpt"
+      },
+      {
+        "from": "Portuguese",
+        "to": "English",
+        "key": "pten"
+      },
+      {
+        "from": "Portuguese",
+        "to": "Spanish",
+        "key": "ptes"
+      }
+    ]
+  },
+  {
+    "language": "Polish",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Polish",
+        "key": "enpl"
+      },
+      {
+        "from": "Polish",
+        "to": "English",
+        "key": "plen"
+      }
+    ]
+  },
+  {
+    "language": "Romanian",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Romanian",
+        "key": "enro"
+      },
+      {
+        "from": "Romanian",
+        "to": "English",
+        "key": "roen"
+      }
+    ]
+  },
+  {
+    "language": "Czech",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Czech",
+        "key": "encz"
+      },
+      {
+        "from": "Czech",
+        "to": "English",
+        "key": "czen"
+      }
+    ]
+  },
+  {
+    "language": "Greek",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Greek",
+        "key": "engr"
+      },
+      {
+        "from": "Greek",
+        "to": "English",
+        "key": "gren"
+      }
+    ]
+  },
+  {
+    "language": "Turkish",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Turkish",
+        "key": "entr"
+      },
+      {
+        "from": "Turkish",
+        "to": "English",
+        "key": "tren"
+      }
+    ]
+  },
+  {
+    "language": "Chinese",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Chinese",
+        "key": "enzh"
+      },
+      {
+        "from": "Chinese",
+        "to": "English",
+        "key": "zhen"
+      }
+    ]
+  },
+  {
+    "language": "Japanese",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Japanese",
+        "key": "enja"
+      },
+      {
+        "from": "Japanese",
+        "to": "English",
+        "key": "jaen"
+      }
+    ]
+  },
+  {
+    "language": "Korean",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Korean",
+        "key": "enko"
+      },
+      {
+        "from": "Korean",
+        "to": "English",
+        "key": "koen"
+      }
+    ]
+  },
+  {
+    "language": "Arabic",
+    "dictionaries": [
+      {
+        "from": "English",
+        "to": "Arabic",
+        "key": "enar"
+      },
+      {
+        "from": "Arabic",
+        "to": "English",
+        "key": "aren"
+      }
+    ]
+  }
+]

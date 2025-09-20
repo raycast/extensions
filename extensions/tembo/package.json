@@ -1,0 +1,270 @@
+{
+  "name": "tembo",
+  "title": "Tembo",
+  "description": "Tembo Raycast Extension for task management and creation",
+  "icon": "extension-icon.png",
+  "author": "vinicius_miguel",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Tembo",
+      "description": "Create a new task in Tembo",
+      "mode": "view"
+    },
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "subtitle": "Tembo",
+      "description": "View all tasks in your organization",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-tasks",
+      "title": "Tembo in Menubar",
+      "subtitle": "Tembo",
+      "description": "Show your tasks in the menubar for quick access",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "npx @raycast/api@latest build -e dist",
+    "dev": "npx @raycast/api@latest develop",
+    "fix-lint": "npx @raycast/api@latest lint --fix",
+    "lint": "npx @raycast/api@latest lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Tembo API Key",
+      "description": "Find your API key in your Tembo dashboard under Settings → API Keys.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your Tembo API key"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-task",
+      "title": "Create Tembo Task",
+      "description": "Creates a task in Tembo with the given prompt and optional repository/branch information. The task will be queued for processing by Tembo's AI agents."
+    },
+    {
+      "name": "view-tasks",
+      "title": "View Tembo Tasks",
+      "description": "Retrieves and displays tasks from Tembo, with optional filtering by repository and other criteria."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@tembo create a task to fix the login bug in the authentication service",
+        "mocks": {
+          "create-task": {
+            "success": true,
+            "taskId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "title": "Task: Fix the login bug in the authentication service",
+            "message": "Task \"Task: Fix the login bug in the authentication service\" created successfully and queued for processing."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-task"
+          }
+        ]
+      },
+      {
+        "input": "@tembo I need to create a task for implementing user registration with email validation for the main repo",
+        "mocks": {
+          "create-task": {
+            "success": true,
+            "taskId": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+            "title": "Task: implementing user registration with email validation",
+            "message": "Task \"Task: implementing user registration with email validation\" created successfully and queued for processing."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-task"
+          }
+        ]
+      },
+      {
+        "input": "@tembo what are my current tasks?",
+        "mocks": {
+          "view-tasks": {
+            "success": true,
+            "tasks": [
+              {
+                "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "title": "Fix login bug in authentication service",
+                "summary": "Authentication service has a critical bug affecting user login",
+                "kind": "user-supplied",
+                "level": 3,
+                "status": "Success",
+                "repository": "auth-service",
+                "createdAt": "2024-01-15T10:30:00Z",
+                "tags": [
+                  "bug",
+                  "authentication"
+                ]
+              },
+              {
+                "id": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+                "title": "Implement user registration with email validation",
+                "summary": "Add new user registration flow with proper email validation",
+                "kind": "user-supplied",
+                "level": 2,
+                "status": "Pending",
+                "repository": "main-repo",
+                "createdAt": "2024-01-15T11:00:00Z",
+                "tags": [
+                  "feature",
+                  "registration"
+                ]
+              }
+            ],
+            "totalCount": 2
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "view-tasks"
+          }
+        ]
+      },
+      {
+        "input": "@tembo show me all tasks in the auth-service repository",
+        "mocks": {
+          "view-tasks": {
+            "success": true,
+            "tasks": [
+              {
+                "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "title": "Fix login bug in authentication service",
+                "summary": "Authentication service has a critical bug affecting user login",
+                "kind": "user-supplied",
+                "level": 3,
+                "status": "Success",
+                "repository": "auth-service",
+                "createdAt": "2024-01-15T10:30:00Z",
+                "tags": [
+                  "bug",
+                  "authentication"
+                ]
+              }
+            ],
+            "totalCount": 1,
+            "repository": "auth-service"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "view-tasks"
+          }
+        ]
+      },
+      {
+        "input": "@tembo show me tasks in the docs-repo repository",
+        "mocks": {
+          "view-tasks": {
+            "success": true,
+            "tasks": [
+              {
+                "id": "c3d4e5f6-g7h8-9012-cdef-g34567890123",
+                "title": "Update API documentation",
+                "summary": "Documentation needs to be updated for the new API endpoints",
+                "kind": "user-supplied",
+                "level": 1,
+                "status": "Failed",
+                "repository": "docs-repo",
+                "createdAt": "2024-01-15T09:00:00Z",
+                "tags": [
+                  "documentation"
+                ]
+              }
+            ],
+            "totalCount": 1,
+            "repository": "docs-repo"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "view-tasks"
+          }
+        ]
+      },
+      {
+        "input": "@tembo create a task to optimize database queries and then show me all my current tasks",
+        "mocks": {
+          "create-task": {
+            "success": true,
+            "taskId": "d4e5f6g7-h8i9-0123-defg-h45678901234",
+            "title": "Task: optimize database queries",
+            "message": "Task \"Task: optimize database queries\" created successfully and queued for processing."
+          },
+          "view-tasks": {
+            "success": true,
+            "tasks": [
+              {
+                "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "title": "Fix login bug in authentication service",
+                "summary": "Authentication service has a critical bug affecting user login",
+                "kind": "user-supplied",
+                "level": 3,
+                "status": "Success",
+                "repository": "auth-service",
+                "createdAt": "2024-01-15T10:30:00Z",
+                "tags": [
+                  "bug",
+                  "authentication"
+                ]
+              },
+              {
+                "id": "d4e5f6g7-h8i9-0123-defg-h45678901234",
+                "title": "Optimize database queries",
+                "summary": "Improve database query performance across the application",
+                "kind": "user-supplied",
+                "level": 2,
+                "status": "Pending",
+                "repository": "backend",
+                "createdAt": "2024-01-15T12:00:00Z",
+                "tags": [
+                  "performance",
+                  "database"
+                ]
+              }
+            ],
+            "totalCount": 2
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-task"
+          },
+          {
+            "callsTool": "view-tasks"
+          }
+        ]
+      }
+    ]
+  }
+}

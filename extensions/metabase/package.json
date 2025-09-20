@@ -1,0 +1,251 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "metabase",
+  "title": "Metabase",
+  "description": "Search Metabase questions faster",
+  "icon": "extension.png",
+  "author": "vimtor",
+  "categories": [
+    "Data",
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-questions",
+      "title": "Search Questions",
+      "subtitle": "Metabase",
+      "description": "Search Metabase questions",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-databases",
+      "title": "Get Databases",
+      "description": "Search the saved databases in Metabase"
+    },
+    {
+      "name": "get-questions",
+      "title": "Get Questions",
+      "description": "Get the saved Metabase questions"
+    },
+    {
+      "name": "run-query",
+      "title": "Run Query",
+      "description": "Run a native SQL query against a database"
+    },
+    {
+      "name": "run-question",
+      "title": "Run Question",
+      "description": "Get latest saved question results"
+    }
+  ],
+  "ai": {
+    "instructions": "When fetching data from Metabase, always retrieve the saved questions and execute them if they match the requested information. If they do not match, get the databases and run a native SQL query based on their metadata. You can retrieve both the saved questions and the databases in parallel so you can make the best decision.\n\nDon't use variables like 'YOUR_USER_ID' when running queries manually.",
+    "evals": [
+      {
+        "input": "@metabase How many registered users do I have?",
+        "mocks": {
+          "get-databases": {
+            "databases": [
+              {
+                "engine": "postgres",
+                "id": 2,
+                "name": "PostgreSQL",
+                "schema": {
+                  "enums": [],
+                  "tables": [
+                    {
+                      "columns": {
+                        "created_at": "timestamp with time zone",
+                        "id": "bigint",
+                        "referred_id": "bigint",
+                        "referrer_id": "bigint",
+                        "updated_at": "timestamp with time zone"
+                      },
+                      "name": "referrals"
+                    },
+                    {
+                      "columns": {
+                        "created_at": "timestamp with time zone",
+                        "id": "bigint",
+                        "internal": "boolean",
+                        "referral_code": "text",
+                        "updated_at": "timestamp with time zone",
+                        "username": "text"
+                      },
+                      "name": "users"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "get-questions": {
+            "questions": [
+              {
+                "id": 72,
+                "name": "Registered Users",
+                "description": null,
+                "databaseId": 2,
+                "databaseQuery": "SELECT count(*) FROM users WHERE username is not null"
+              }
+            ]
+          },
+          "run-question": {
+            "result": [
+              [
+                382194
+              ]
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-questions"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-databases"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "questionId": 72,
+                "requiresConfirmation": true
+              },
+              "name": "run-question"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@metabase When did the user named \"vimtor\" sign up?",
+        "mocks": {
+          "get-databases": {
+            "databases": [
+              {
+                "engine": "postgres",
+                "id": 2,
+                "name": "PostgreSQL",
+                "schema": {
+                  "enums": [],
+                  "tables": [
+                    {
+                      "columns": {
+                        "created_at": "timestamp with time zone",
+                        "id": "bigint",
+                        "referred_id": "bigint",
+                        "referrer_id": "bigint",
+                        "updated_at": "timestamp with time zone"
+                      },
+                      "name": "referrals"
+                    },
+                    {
+                      "columns": {
+                        "created_at": "timestamp with time zone",
+                        "id": "bigint",
+                        "internal": "boolean",
+                        "referral_code": "text",
+                        "updated_at": "timestamp with time zone",
+                        "username": "text"
+                      },
+                      "name": "users"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "get-questions": {
+            "questions": [
+              {
+                "id": 72,
+                "name": "Registered Users",
+                "description": null,
+                "databaseId": 2,
+                "databaseQuery": "SELECT count(*) FROM users WHERE username is not null"
+              }
+            ]
+          },
+          "run-query": {
+            "result": [
+              [
+                "2024-12-13T21:01:06.329864Z"
+              ]
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-questions"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-databases"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "databaseId": 2,
+                "query": "SELECT created_at FROM users WHERE username = 'vimtor' LIMIT 1;"
+              },
+              "name": "run-query"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "instanceUrl",
+      "type": "textfield",
+      "title": "Metabase URL",
+      "description": "The URL of your Metabase instance",
+      "required": true,
+      "placeholder": "https://metabase.raycast.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "The API token of your Metabase instance",
+      "required": true,
+      "placeholder": "API Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

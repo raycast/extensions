@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "putio",
+  "title": "put.io",
+  "description": "Raycast extension for managing files, transfers, and history events in your put.io account.",
+  "icon": "putio.png",
+  "owner": "putio",
+  "access": "public",
+  "author": "altaywtf",
+  "categories": [
+    "Applications",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "files",
+      "title": "View Your Files",
+      "description": "View your files in put.io",
+      "mode": "view",
+      "keywords": [
+        "putio",
+        "files"
+      ]
+    },
+    {
+      "name": "search-files",
+      "title": "Search in put.io",
+      "description": "Search among your files in put.io",
+      "mode": "view",
+      "keywords": [
+        "putio",
+        "files",
+        "search"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "required": false,
+          "type": "text",
+          "placeholder": "big buck bunny"
+        }
+      ]
+    },
+    {
+      "name": "new-transfer",
+      "title": "New Transfer",
+      "description": "Add new transfer to put.io",
+      "mode": "view",
+      "keywords": [
+        "putio",
+        "transfer",
+        "new"
+      ],
+      "arguments": [
+        {
+          "name": "links",
+          "required": false,
+          "type": "text",
+          "placeholder": "magnet:?xt=urn:btih..."
+        }
+      ]
+    },
+    {
+      "name": "transfers",
+      "title": "View Transfers",
+      "description": "View your transfers in put.io",
+      "mode": "view",
+      "keywords": [
+        "putio",
+        "files"
+      ]
+    },
+    {
+      "name": "history",
+      "title": "View History",
+      "description": "View your history in put.io",
+      "mode": "view",
+      "keywords": [
+        "putio",
+        "history"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "App-specific password",
+      "type": "password",
+      "placeholder": "Get this from put.io/raycast",
+      "description": "App-specific password used for authenticating with put.io API.",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@putdotio/api-client": "^8.49.0",
+    "@putdotio/utilities": "^1.17.0",
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0"
+}

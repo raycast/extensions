@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "random-email",
+  "title": "Random Email",
+  "description": "A quick way to create and copy a random email address",
+  "icon": "command-icon.png",
+  "author": "rkjaer",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-copy",
+      "title": "Copy Random Email",
+      "subtitle": "Random Email",
+      "description": "Copies a random email to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-paste",
+      "title": "Paste Random Email",
+      "subtitle": "Random Email",
+      "description": "Pastes a random email to the current selection of the frontmost application",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.6"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/uuid": "^8.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  },
+  "preferences": [
+    {
+      "name": "domain",
+      "title": "Email domain",
+      "description": "Specifices the domain name for the generated email address",
+      "default": "mailinator.com",
+      "value": "mailinator.com",
+      "placeholder": "example.com",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "prefix",
+      "title": "Email prefix",
+      "description": "Specifices the prefix for the generated email address",
+      "placeholder": "myprefix+",
+      "type": "textfield",
+      "required": false
+    }
+  ]
+}

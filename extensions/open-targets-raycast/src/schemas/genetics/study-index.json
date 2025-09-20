@@ -1,0 +1,72 @@
+{
+  "fields": [
+    { "metadata": {}, "name": "study_id", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "ancestry_initial",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "ancestry_replication",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    { "metadata": {}, "name": "n_cases", "nullable": true, "type": "long" },
+    { "metadata": {}, "name": "n_initial", "nullable": true, "type": "long" },
+    {
+      "metadata": {},
+      "name": "n_replication",
+      "nullable": true,
+      "type": "long"
+    },
+    { "metadata": {}, "name": "pmid", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "pub_author",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "pub_date", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "pub_journal",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "pub_title", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "trait_reported",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "has_sumstats",
+      "nullable": true,
+      "type": "boolean"
+    },
+    {
+      "metadata": {},
+      "name": "num_assoc_loci",
+      "nullable": true,
+      "type": "long"
+    },
+    { "metadata": {}, "name": "source", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "trait_efos",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "trait_category",
+      "nullable": true,
+      "type": "string"
+    }
+  ],
+  "type": "struct"
+}

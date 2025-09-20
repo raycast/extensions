@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sncftraintimes",
+  "title": "SncfTrainTimes",
+  "description": "Fetch train times for SNCF train lines",
+  "icon": "command-icon.png",
+  "author": "Pierrad",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "List Train Journeys",
+      "description": "List all the journeys added",
+      "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Add Train Journey",
+      "description": "Add a train journey to the list",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sncfApiKey",
+      "title": "SNCF API Key",
+      "description": "API Key is used to authenticate with SNCF API",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^1.6.1",
+    "moment-timezone": "^0.5.43",
+    "sncf-api-wrapper": "^0.0.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

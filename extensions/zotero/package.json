@@ -1,0 +1,200 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zotero",
+  "title": "Search Zotero",
+  "description": "Search Zotero Database from Raycast",
+  "icon": "command-icon.png",
+  "author": "reckoning-dev",
+  "categories": [
+    "Productivity"
+  ],
+  "contributors": [
+    "lazarjov",
+    "joshuahhh"
+  ],
+  "version": "1.0.0",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "commandSearchZotero",
+      "title": "Search Database",
+      "subtitle": "Zotero",
+      "description": "Search Zotero",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "zotero_path",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Zotero/zotero.sqlite",
+      "title": "Zotero Path",
+      "description": "Path to locate zotero sqlite file",
+      "placeholder": "~/Zotero/zotero.sqlite"
+    },
+    {
+      "name": "cache_period",
+      "type": "textfield",
+      "title": "Cache Period (in minutes)",
+      "required": false,
+      "default": "10",
+      "label": "Number of Minutes to Cache",
+      "description": "Minutes after which cache must be updated"
+    },
+    {
+      "name": "use_bibtex",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use BibTex?",
+      "description": "Whether to use BibTex or not?"
+    },
+    {
+      "name": "bibtex_path",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Zotero/lib.json",
+      "title": "Better Bibtex CSL JSON File",
+      "description": "Path to Better Bibtex CSL JSON File",
+      "placeholder": "~/Zotero/lib.json"
+    },
+    {
+      "name": "csl_style",
+      "type": "dropdown",
+      "required": false,
+      "default": "ieee",
+      "title": "CSL Format",
+      "description": "CSL format for generating references",
+      "data": [
+        {
+          "title": "ACS Applied Materials and Interfaces",
+          "value": "acs-applied-materials-and-interfaces"
+        },
+        {
+          "title": "Acta Botanica Croatica",
+          "value": "acta-botanica-croatica"
+        },
+        {
+          "title": "ACS: American Chemical Society",
+          "value": "american-chemical-society"
+        },
+        {
+          "title": "American Journal of Sociology",
+          "value": "american-journal-of-sociology"
+        },
+        {
+          "title": "AMA: American Medical Association",
+          "value": "american-medical-association"
+        },
+        {
+          "title": "American Meteorological Society",
+          "value": "american-meteorological-society"
+        },
+        {
+          "title": "APS: American Physical Society",
+          "value": "american-physics-society"
+        },
+        {
+          "title": "American Political Science Association",
+          "value": "american-political-science-association"
+        },
+        {
+          "title": "APA: American Psychological Association",
+          "value": "apa"
+        },
+        {
+          "title": "American Sociological Association",
+          "value": "american-sociological-association"
+        },
+        {
+          "title": "Annual Reviews (author-date)",
+          "value": "annual-reviews-author-date"
+        },
+        {
+          "title": "Annual Reviews (alphabetical)",
+          "value": "annual-reviews-alphabetical"
+        },
+        {
+          "title": "Biostatistics",
+          "value": "biostatistics"
+        },
+        {
+          "title": "Chicago (author-date) Manual",
+          "value": "chicago-author-date"
+        },
+        {
+          "title": "Chicago (full note) Manual",
+          "value": "chicago-fullnote-bibliography"
+        },
+        {
+          "title": "Chicago (note) Manual",
+          "value": "chicago-note-bibliography"
+        },
+        {
+          "title": "Cite Them Right - Harvard",
+          "value": "harvard-cite-them-right"
+        },
+        {
+          "title": "Copernicus Publications",
+          "value": "copernicus-publications"
+        },
+        {
+          "title": "Elsevier - Harvard",
+          "value": "elsevier-harvard"
+        },
+        {
+          "title": "IEEE",
+          "value": "ieee"
+        },
+        {
+          "title": "Institute of Mathematical Statistics journals",
+          "value": "institute-of-mathematical-statistics"
+        },
+        {
+          "title": "Modern Humanities Research Association (note with bibliography)",
+          "value": "modern-humanities-research-association"
+        },
+        {
+          "title": "MLA: Modern Language Association",
+          "value": "modern-language-association"
+        },
+        {
+          "title": "Nature",
+          "value": "nature"
+        },
+        {
+          "title": "Radiology",
+          "value": "radiology"
+        },
+        {
+          "title": "Vancouver",
+          "value": "vancouver"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.1",
+    "citation-js": "^0.6.8",
+    "fuse.js": "^6.6.2",
+    "sql.js": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/he": "^1.2.0",
+    "@types/node": "^20.4.5",
+    "@types/react": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.2.0",
+    "@typescript-eslint/parser": "^6.2.0",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "eslint-config-prettier": "^8.9.0",
+    "react-devtools": "^4.28.0",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint --fix"
+  }
+}

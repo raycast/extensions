@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bible",
+  "title": "Bible",
+  "description": "Search the bible",
+  "icon": "extension-icon.png",
+  "author": "josmithua",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultBibleVersion",
+      "title": "Default Bible Version",
+      "description": "The default bible version to use when searching. Defaults to \"NLT\".",
+      "type": "textfield",
+      "required": false,
+      "default": "NLT",
+      "placeholder": "Version"
+    }
+  ],
+  "commands": [
+    {
+      "name": "bibleSearch",
+      "title": "Bible Search",
+      "description": "Search for, display, copy and paste bible passages. Configure whether to include verse numbers or show one verse per line.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ref",
+          "placeholder": "Reference(s)",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "version",
+          "placeholder": "Version",
+          "required": false,
+          "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "enterToSearch",
+          "label": "Press Enter to search",
+          "description": "Press Enter key to perform search, as opposed to searching while typing. Saves network calls.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "includeVerseNumbers",
+          "label": "Include verse numbers",
+          "description": "Include individual verse numbers in the results.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "includeCopyright",
+          "label": "Include copyright",
+          "description": "Add copyright to the results.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "includeReferences",
+          "label": "Include references",
+          "description": "Add passage references to the results.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "oneVersePerLine",
+          "label": "Show one verse per line",
+          "description": "Display each verse on a separate line. Might separate verses into multiple lines, for ex. see Psalm 1 (ESV)",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.0",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0-rc.10",
+    "node-html-parser": "^6.1.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.29.0",
+    "eslint-plugin-react-hooks": "^4.4.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "npm run update-bible-versions && ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "update-bible-versions": "node ./scripts/updateBibleVersions.js"
+  }
+}

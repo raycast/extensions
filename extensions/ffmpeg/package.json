@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ffmpeg",
+  "title": "FFmpeg - View, Analyze and Manipulate",
+  "description": "Use FFmpeg to view media file info",
+  "icon": "command-icon.png",
+  "author": "RenderCoder",
+  "contributors": [
+    "blekmus",
+    "truls_aagedal",
+    "EvanZhouDev"
+  ],
+  "version": "1.1.0",
+  "categories": [
+    "Media",
+    "Developer Tools",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "FFmpeg",
+      "description": "Use FFmpeg for view media file info",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-file-metadata",
+      "title": "Get File Metadata",
+      "description": "Use FFmpeg to get the metadata for a given file."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@finder What's the duration and resolution of my latest download?",
+        "expected": []
+      },
+      {
+        "input": "@ffmpeg Get metadata of the file /Users/bob/Downloads/test.mov",
+        "mocks": {
+          "get-file-metadata": {
+            "size": "1.2 GB"
+          }
+        },
+        "usedAsExample": false,
+        "expected": [
+          {
+            "callsTool": "get-file-metadata"
+          },
+          {
+            "callsTool": {
+              "name": "get-file-metadata",
+              "arguments": {
+                "filePath": "/Users/bob/Downloads/test.mov"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Successfully poll metadata of file"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.9.1",
+    "cachedir": "^2.4.0",
+    "filesize": "^10.0.12",
+    "mp4box": "^0.5.2",
+    "rct-state": "^0.2.2",
+    "strip-ansi": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "2.8.8",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

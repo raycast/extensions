@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "installed-extensions",
+  "title": "Installed Extensions",
+  "description": "List your current installed Raycast extensions",
+  "icon": "extension-icon.png",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "erics118",
+    "tonka3000",
+    "litomore"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Installed Extensions",
+      "description": "List your current installed Raycast extensions",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "separator",
+          "description": "Select output format",
+          "type": "dropdown",
+          "required": false,
+          "default": "newline",
+          "title": "Select Output Format",
+          "data": [
+            {
+              "title": "Comma-separated list",
+              "value": "comma"
+            },
+            {
+              "title": "New line separated list",
+              "value": "newline"
+            }
+          ]
+        },
+        {
+          "name": "format",
+          "description": "Item format, supports {title} {link} {author}",
+          "type": "textfield",
+          "required": false,
+          "title": "Item Format",
+          "placeholder": "{title} ({link})",
+          "default": "{title} ({link})"
+        },
+        {
+          "name": "prepend",
+          "description": "The prepended text, supports {count}",
+          "type": "textfield",
+          "required": false,
+          "title": "The Prepended Text When Copying All Items",
+          "default": "{count} installed extensions"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "19.1.11",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dock",
+  "title": "Dock",
+  "description": "Change the dock's position to the left, right, or bottom edge of the screen.",
+  "icon": "dock.png",
+  "author": "pradeepb28",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "move-dock-to-the-left",
+      "title": "Move Dock To The Left",
+      "subtitle": "Dock",
+      "icon": "dock-left.png",
+      "description": "Change the dock's position to the left",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-dock-to-the-right",
+      "title": "Move Dock To The Right",
+      "subtitle": "Dock",
+      "icon": "dock-right.png",
+      "description": "Change the dock's position to the right",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-dock-to-the-bottom",
+      "title": "Move Dock To The Bottom",
+      "subtitle": "Dock",
+      "icon": "dock-bottom.png",
+      "description": "Change the dock's position to the bottom",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-dock",
+      "title": "Move Dock",
+      "subtitle": "Dock",
+      "description": "Change the dock's position to the left, bottom or right",
+      "mode": "menu-bar",
+      "disabledByDefault": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

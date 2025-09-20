@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-bard-ai",
+  "title": "Google Bard",
+  "description": "Perform Actions with Google Bard",
+  "icon": "bard.png",
+  "author": "EvanZhouDev",
+  "contributors": [
+    "Visual-Studio-Coder"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EvanZhouDev/raycast-bard-ai.git"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "subtitle": "Google Bard",
+      "description": "Chat with Google Bard",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "subtitle": "Google Bard",
+      "description": "Summarize selected text",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "subtitle": "Google Bard",
+      "description": "Explain selected text",
+      "mode": "view"
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "subtitle": "Google Bard",
+      "description": "Add comments to code",
+      "mode": "view"
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "subtitle": "Google Bard",
+      "description": "Change tone of selected text to friendly",
+      "mode": "view"
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "subtitle": "Google Bard",
+      "description": "Change tone of selected text to professional",
+      "mode": "view"
+    },
+    {
+      "name": "synonym",
+      "title": "Find Synonym",
+      "subtitle": "Google Bard",
+      "description": "Find synonym of selected word",
+      "mode": "view"
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "subtitle": "Google Bard",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view"
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "subtitle": "Google Bard",
+      "description": "Make selected text longer",
+      "mode": "view"
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "subtitle": "Google Bard",
+      "description": "Make selected text shorter",
+      "mode": "view"
+    },
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "description": "Ask AI about anything",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Google __Secure-1PSID Session Cookie Key",
+      "name": "__Secure-1PSID",
+      "required": true,
+      "title": "Google Bard Key",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.5",
+    "bard-ai": "^1.5.2",
+    "node-fetch": "^3.3.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "format": "prettier --write 'src/**/*.jsx'"
+  }
+}

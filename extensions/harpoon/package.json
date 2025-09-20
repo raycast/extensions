@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "harpoon",
+  "title": "Harpoon",
+  "description": "Tag frequently used applications and quickly switch between them. Inspired by The Primeagen's Harpoon plugin.",
+  "icon": "harpoon-icon.png",
+  "author": "brian_wang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "arguments": [
+        {
+          "name": "position",
+          "placeholder": "1",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "description": "Add current application at the specified position in the list. Overwrites any existing application at that position.",
+      "keywords": [
+        "add"
+      ],
+      "mode": "no-view",
+      "name": "addApplicationByPosition",
+      "title": "Add Application at Position"
+    },
+    {
+      "description": "Add current application to the start of the list. Stickied applications will retain their existing positions.",
+      "icon": "up-icon.png",
+      "keywords": [
+        "add"
+      ],
+      "mode": "no-view",
+      "name": "addApplicationToStart",
+      "subtitle": "Start of List",
+      "title": "Prepend Application to List"
+    },
+    {
+      "description": "Add current application to the end of the list. Stickied applications will retain their existing positions.",
+      "icon": "down-icon.png",
+      "keywords": [
+        "add"
+      ],
+      "mode": "no-view",
+      "name": "addApplicationToEnd",
+      "subtitle": "End of List",
+      "title": "Append Application to List"
+    },
+    {
+      "description": "List all marked applications.",
+      "icon": "list-icon.png",
+      "mode": "view",
+      "name": "showApplicationsList",
+      "title": "Show Applications List"
+    },
+    {
+      "description": "Clear all marked applications.",
+      "icon": "trash-icon.png",
+      "mode": "no-view",
+      "name": "clearApplicationsList",
+      "title": "Clear Applications List"
+    },
+    {
+      "arguments": [
+        {
+          "name": "position",
+          "placeholder": "1",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "description": "Opens the application at the specified position in the list.",
+      "icon": "number-icon.png",
+      "mode": "no-view",
+      "name": "openApplicationByPosition",
+      "title": "Open Application at Position"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

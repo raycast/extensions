@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alpaca-trading",
+  "title": "Alpaca Trading",
+  "description": "Interact with your Alpaca trading account",
+  "icon": "command-icon.png",
+  "author": "stelo",
+  "contributors": [
+    "srikirank"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "accountType",
+      "title": "Account Type",
+      "description": "Choose your Alpaca account type",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Paper",
+          "value": "paper"
+        },
+        {
+          "title": "Live",
+          "value": "live"
+        }
+      ],
+      "default": "paper",
+      "required": true
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "API Key for Alpaca Trading API",
+      "type": "password",
+      "placeholder": "Enter your API Key",
+      "required": true
+    },
+    {
+      "name": "apiSecret",
+      "title": "API Secret",
+      "description": "API Secret for Alpaca Trading API",
+      "type": "password",
+      "placeholder": "Enter your API Secret",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "manage-orders",
+      "title": "Manage Orders",
+      "description": "Manage orders in Alpaca account",
+      "mode": "view"
+    },
+    {
+      "name": "manage-positions",
+      "title": "Manage Positions",
+      "description": "Manage positions in Alpaca account",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-simple-import-sort": "^12.1.0",
+    "eslint-plugin-unused-imports": "^3.2.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "name": "bento",
+  "title": "Bento Email",
+  "description": "Interact with Bento (bentonow.com) to add subscribers, view broadcasts, reports, and other utility features.",
+  "icon": "icon.png",
+  "author": "zeromana",
+  "categories": ["Developer Tools", "Productivity", "Communication"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-subscriber",
+      "title": "Create Subscriber",
+      "description": "Create a new Bento subscriber",
+      "mode": "view"
+    },
+    {
+      "name": "view-broadcasts",
+      "title": "View Broadcasts",
+      "description": "View Bento broadcasts",
+      "mode": "view"
+    },
+    {
+      "name": "view-tags",
+      "title": "View Tags",
+      "description": "View Bento tags",
+      "mode": "view"
+    },
+    {
+      "name": "view-fields",
+      "title": "View Fields",
+      "description": "View Bento custom fields",
+      "mode": "view"
+    },
+    {
+      "name": "view-stats",
+      "title": "View Stats",
+      "description": "View Bento site stats",
+      "mode": "view"
+    },
+    {
+      "name": "view-report",
+      "title": "View Report",
+      "description": "View a Bento report as a line chart",
+      "mode": "view"
+    },
+    {
+      "name": "configure-dashboard",
+      "title": "Configure Dashboard",
+      "description": "Set up to 4 report IDs for the dashboard",
+      "mode": "view"
+    },
+    {
+      "name": "view-dashboard",
+      "title": "View Dashboard",
+      "description": "View charts for the configured reports",
+      "mode": "view"
+    },
+    {
+      "name": "check-blacklist",
+      "title": "Check Blacklist",
+      "description": "Check if a domain or IP is blacklisted",
+      "mode": "view"
+    },
+    {
+      "name": "validate-email",
+      "title": "Validate Email",
+      "description": "Validate an email address",
+      "mode": "view"
+    },
+    {
+      "name": "moderate-content",
+      "title": "Moderate Content",
+      "description": "Moderate text content",
+      "mode": "view"
+    },
+    {
+      "name": "guess-gender",
+      "title": "Guess Gender",
+      "description": "Guess gender based on a name",
+      "mode": "view"
+    },
+    {
+      "name": "geolocate-ip",
+      "title": "Geolocate IP",
+      "description": "Get geolocation information for an IP address",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "siteUuid",
+      "type": "textfield",
+      "required": true,
+      "title": "Site UUID",
+      "description": "Your Bento site UUID"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Publishable Key",
+      "description": "Your Bento Publishable Key"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Secret Key",
+      "description": "Your Bento Secret Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/eslint-config": "^1.0.11",
+    "@visx/axis": "^3.10.1",
+    "@visx/curve": "^2.17.0",
+    "@visx/gradient": "^2.1.0",
+    "@visx/grid": "^2.12.2",
+    "@visx/group": "^2.17.0",
+    "@visx/mock-data": "^2.17.0",
+    "@visx/scale": "^2.18.0",
+    "@visx/shape": "^2.18.0",
+    "@visx/text": "^2.3.0",
+    "@visx/tooltip": "^2.17.0",
+    "axios": "^1.8.4",
+    "d3-time-format": "^4.1.0",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "~18.16.20",
+    "@types/react": "^18.3.11",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

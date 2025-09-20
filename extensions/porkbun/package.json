@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "porkbun",
+  "title": "Porkbun",
+  "description": "Interact with Porkbun with the help of Raycast",
+  "icon": "porkbun.png",
+  "author": "xmok",
+  "contributors": [
+    "djpowers"
+  ],
+  "categories": [
+    "Communication",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "Porkbun API Key",
+      "description": "API Key from your Porkbun API Panel",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "secret_api_key",
+      "title": "Porkbun Secret API Key",
+      "description": "Secret API Key from your Porkbun API Panel",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "force_ipv4",
+      "label": "Force IPv4",
+      "description": "Force API to use IPv4",
+      "type": "checkbox",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "domain-pricing",
+      "title": "Domain Pricing",
+      "subtitle": "Porkbun",
+      "description": "Check default domain pricing information for all supported TLDs. This command does not require authentication.",
+      "mode": "view"
+    },
+    {
+      "name": "ping",
+      "title": "Ping",
+      "subtitle": "Porkbun",
+      "description": "The ping endpoint will return your IP address",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-dns-record",
+      "title": "Create DNS Record",
+      "subtitle": "Porkbun",
+      "description": "Create a DNS record",
+      "mode": "view"
+    },
+    {
+      "name": "edit-dns-record",
+      "title": "Edit DNS Record",
+      "subtitle": "Porkbun",
+      "description": "Edit a DNS record",
+      "mode": "view"
+    },
+    {
+      "name": "delete-dns-record",
+      "title": "Delete DNS Record",
+      "subtitle": "Porkbun",
+      "description": "Delete a DNS record",
+      "mode": "view"
+    },
+    {
+      "name": "retrieve-dns-records",
+      "title": "Retrieve DNS Records",
+      "subtitle": "Porkbun",
+      "description": "Retrieve all editable DNS records meeting criteria",
+      "mode": "view"
+    },
+    {
+      "name": "retrieve-ssl-bundle",
+      "title": "Retrieve SSL Bundle",
+      "subtitle": "Porkbun",
+      "description": "Retrieve the SSL certificate bundle for the domain",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "retrieve-all-domains",
+      "title": "Retrieve All Domains",
+      "subtitle": "Porkbun",
+      "description": "Get all domain names in account. Domains are returned in chunks of 1000",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react": "^18.2.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

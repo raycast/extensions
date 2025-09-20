@@ -1,0 +1,243 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raindrop-io",
+  "title": "Raindrop.io",
+  "version": "1.0.0",
+  "description": "Search your Raindrop.io bookmarks",
+  "icon": "raindrop-icon-big.png",
+  "author": "lardissone",
+  "contributors": [
+    "shubham",
+    "pernielsentikaer",
+    "tdkn",
+    "j3lte",
+    "rien7",
+    "teziovsky",
+    "pewpeo",
+    "joaopesce",
+    "ridemountainpig",
+    "GLaDO8"
+  ],
+  "pastContributors": [
+    "sh-cho"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "latest_bookmarks",
+      "title": "Latest Bookmarks",
+      "subtitle": "Raindrop.io",
+      "description": "Display your latest bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Bookmarks",
+      "subtitle": "Raindrop.io",
+      "description": "Search bookmarks using operators",
+      "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Add Bookmarks",
+      "subtitle": "Raindrop.io",
+      "description": "Add bookmarks to Raindrop",
+      "mode": "view"
+    },
+    {
+      "name": "save_browser_tab",
+      "title": "Save Browser Tab",
+      "subtitle": "Raindrop.io",
+      "description": "Save the current browser tab to Raindrop",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Your Raindrop.io Test Access Token.",
+      "link": "https://developer.raindrop.io/v1/authentication/token",
+      "placeholder": "Enter your Raindrop.io Test Access token."
+    },
+    {
+      "name": "titleOnly",
+      "type": "checkbox",
+      "required": false,
+      "title": "Search",
+      "description": "Search on title only.",
+      "default": false,
+      "label": "Search on title only"
+    },
+    {
+      "name": "fetchAllResults",
+      "type": "checkbox",
+      "required": false,
+      "description": "Fetch all results. Perform multiple API requests for each result page. Disable to retrieve only the first page.",
+      "default": false,
+      "label": "Fetch all results"
+    },
+    {
+      "name": "sortBy",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "",
+          "title": "Default"
+        },
+        {
+          "value": "-sort",
+          "title": "Manual"
+        },
+        {
+          "value": "created",
+          "title": "Date ↑"
+        },
+        {
+          "value": "-created",
+          "title": "Date ↓"
+        },
+        {
+          "value": "title",
+          "title": "Name ↑"
+        },
+        {
+          "value": "-title",
+          "title": "Name ↓"
+        },
+        {
+          "value": "domain",
+          "title": "Sites ↑"
+        },
+        {
+          "value": "-domain",
+          "title": "Sites ↓"
+        },
+        {
+          "value": "score",
+          "title": "Relevance"
+        }
+      ],
+      "title": "Sort by",
+      "description": "Select the sort order for the search results.",
+      "default": ""
+    },
+    {
+      "name": "useLastCollection",
+      "type": "checkbox",
+      "required": false,
+      "title": "Collections",
+      "description": "Always use the last selected collection instead of All Bookmarks.",
+      "default": false,
+      "label": "Use always the last selected collection"
+    },
+    {
+      "name": "additionalItemToDisplayInList",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "link",
+          "title": "Link"
+        },
+        {
+          "value": "domain",
+          "title": "Domain"
+        },
+        {
+          "value": "excerpt",
+          "title": "Excerpt"
+        },
+        {
+          "value": "note",
+          "title": "Note"
+        },
+        {
+          "value": "none",
+          "title": "None"
+        }
+      ],
+      "title": "Additional Item to Display in List",
+      "description": "Select additional item to display as an subtitle in list.",
+      "default": "link"
+    },
+    {
+      "name": "displayDate",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "lastUpdated",
+          "title": "Last Updated"
+        },
+        {
+          "value": "created",
+          "title": "Created"
+        },
+        {
+          "value": "none",
+          "title": "None"
+        }
+      ],
+      "title": "Display Date",
+      "description": "Select date to display in list.",
+      "default": "lastUpdated"
+    },
+    {
+      "name": "tagsDisplay",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "none",
+          "title": "None"
+        },
+        {
+          "value": "0",
+          "title": "0"
+        },
+        {
+          "value": "1",
+          "title": "1"
+        },
+        {
+          "value": "2",
+          "title": "2"
+        },
+        {
+          "value": "all",
+          "title": "All"
+        }
+      ],
+      "title": "Tags Display",
+      "description": "Select number of tags to display in list.",
+      "default": "1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.2",
+    "react": "19.0.0",
+    "typescript": "5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
+  }
+}

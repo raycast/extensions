@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "duckduckgo-image-search",
+  "title": "Duckduckgo Image Search",
+  "description": "Search Images inside Raycast by DuckDuckGo Image!",
+  "icon": "extension-icon.png",
+  "author": "jag-k",
+  "categories": [
+    "Data",
+    "Media",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "Retry Count",
+      "name": "retries",
+      "description": "The number of times to retry a failed search (default: 4)",
+      "type": "textfield",
+      "default": "4",
+      "placeholder": "4",
+      "required": false
+    },
+    {
+      "title": "Sleep Time",
+      "name": "sleep",
+      "description": "The time (in milliseconds) to sleep between retries (default: 2000)",
+      "type": "textfield",
+      "default": "2000",
+      "placeholder": "2000",
+      "required": false
+    },
+    {
+      "title": "Locale",
+      "name": "locale",
+      "description": "The locale of the search (default: en-us)",
+      "type": "textfield",
+      "default": "en-us",
+      "placeholder": "en-us",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-image",
+      "title": "Search Image",
+      "subtitle": "DuckDuckGo Image",
+      "description": "Find any image using DuckDuckGo Image Search",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Moderate Search",
+          "name": "moderate",
+          "description": "Moderate the search results (may cause some results to be removed)",
+          "type": "checkbox",
+          "default": false,
+          "required": false,
+          "label": "Moderate Search"
+        },
+        {
+          "title": "License",
+          "name": "license",
+          "description": "The license of the images to search",
+          "type": "dropdown",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "All Licenses",
+              "value": ""
+            },
+            {
+              "title": "All Creative Commons",
+              "value": "Any"
+            },
+            {
+              "title": "Public Domain",
+              "value": "Public"
+            },
+            {
+              "title": "Free to Share and Use",
+              "value": "Share"
+            },
+            {
+              "title": "Free to Share and Use Commercially",
+              "value": "ShareCommercially"
+            },
+            {
+              "title": "Free to Modify, Share, and Use",
+              "value": "Modify"
+            },
+            {
+              "title": "Free to Modify, Share, and Use Commercially",
+              "value": "ModifyCommercially"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.18.0",
+    "axios": "^1.7.7",
+    "html-entities": "^2.5.2",
+    "mime-types": "^2.1.35"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "@types/duckduckgo-images-api": "^1.0.3",
+    "@types/mime-types": "^2.1.4",
+    "eslint-plugin-react": "^7.37.2",
+    "globals": "^15.12.0",
+    "react-devtools": "^6.1.1",
+    "typescript-eslint": "^8.14.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

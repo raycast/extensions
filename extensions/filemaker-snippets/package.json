@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "filemaker-snippets",
+  "title": "FileMaker Snippets",
+  "description": "Create and use snippets for FileMaker Pro",
+  "icon": "command-icon.png",
+  "author": "eluce2",
+  "keywords": [
+    "FileMaker",
+    "filemaker",
+    "filemaker pro",
+    "fm",
+    "Claris"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-snippets",
+      "title": "View Snippets",
+      "subtitle": "FileMaker Snippets",
+      "description": "View and use your saved snippets",
+      "mode": "view"
+    },
+    {
+      "name": "create-snippet",
+      "title": "Create Snippet",
+      "subtitle": "FileMaker Snippets",
+      "description": "Create a new snippet",
+      "mode": "view"
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Snippet Locations",
+      "subtitle": "FileMaker Snippets",
+      "description": "Manage where your snippets are stored",
+      "mode": "view"
+    },
+    {
+      "name": "recents",
+      "title": "Search Recent Files",
+      "subtitle": "FileMaker Pro",
+      "icon": "FM12App512.png",
+      "description": "View recent files from FileMaker Pro",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Search Favorite Files",
+      "subtitle": "FileMaker Pro",
+      "icon": "FM12App512.png",
+      "description": "View favorited files from FileMaker Pro",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.11.1",
+    "@total-typescript/ts-reset": "^0.4.2",
+    "bplist-parser": "^0.3.2",
+    "cross-fetch": "^4.0.0",
+    "lodash": "^4.17.21",
+    "plist": "^3.1.0",
+    "run-applescript": "^6.0.0",
+    "uuid": "^8.3.2",
+    "xml2js": "^0.5.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/lodash": "^4.14.185",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "@types/uuid": "^8.3.4",
+    "@types/xml2js": "^0.4.11",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

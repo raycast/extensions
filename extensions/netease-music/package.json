@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "netease-music",
+  "title": "NeteaseMusic",
+  "description": "Control the NeteaseMusic app with your keyboard",
+  "icon": "netease-music.png",
+  "author": "chyroc",
+  "license": "MIT",
+  "keywords": [
+    "music",
+    "NeteaseMusic",
+    "netease-music",
+    "player",
+    "media"
+  ],
+  "commands": [
+    {
+      "name": "play",
+      "title": "Play",
+      "subtitle": "NeteaseMusic",
+      "description": "Play current track in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "subtitle": "NeteaseMusic",
+      "description": "Pause current track in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "NeteaseMusic",
+      "description": "Skip to the next track in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "NeteaseMusic",
+      "description": "Skip to the previous track in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "like",
+      "title": "Like Track",
+      "subtitle": "NeteaseMusic",
+      "description": "Love currently playing track in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike",
+      "title": "Dislike Track",
+      "subtitle": "NeteaseMusic",
+      "description": "Dislike currently playing track in NeteaseMusic.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@chyroc/netease-music-controller": "^0.6.0",
+    "@raycast/api": "^1.32.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

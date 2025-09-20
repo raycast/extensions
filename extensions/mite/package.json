@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mite",
+  "title": "Mite",
+  "description": "Interact with your mite account via Raycast",
+  "icon": "mite.png",
+  "author": "paolo_ricciuti",
+  "contributors": [
+    "ramsay"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "mite_domain",
+      "description": "Your mite domain, it should be something like https://[company].mite.de",
+      "type": "textfield",
+      "required": true,
+      "title": "Mite Domain",
+      "placeholder": "https://[company].mite.de"
+    },
+    {
+      "name": "mite_api_key",
+      "description": "Your mite API Key, you can find it on My User > mite.api > Allow API Access > Display API key (you need to save after to actually apply)",
+      "type": "textfield",
+      "required": true,
+      "title": "Mite API key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "time-entry",
+      "title": "Add Today Entry",
+      "description": "Create a new time entry for mite",
+      "mode": "view",
+      "subtitle": "Mite"
+    },
+    {
+      "name": "setup-fast-time-entry",
+      "title": "Setup Fast Entry",
+      "description": "Specify what your Fast time entry will be",
+      "mode": "view",
+      "subtitle": "Mite"
+    },
+    {
+      "name": "fast-time-entry",
+      "title": "Create Fast Entry",
+      "description": "Create a new time entry for mite with the project and service you setup",
+      "mode": "no-view",
+      "subtitle": "Mite",
+      "interval": "1m"
+    },
+    {
+      "name": "secondary-fast-time-entry",
+      "title": "Create Secondary Fast Entry",
+      "description": "Create a new time entry for mite with the project and service you setup as secondary",
+      "mode": "no-view",
+      "subtitle": "Mite",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1",
+    "cross-fetch": "^4.0.0",
+    "valibot": "^0.26.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

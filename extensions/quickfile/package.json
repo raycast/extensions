@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quickfile",
+  "title": "QuickFile",
+  "description": "Access your QuickFile account balances.",
+  "icon": "icon.png",
+  "author": "danielroe",
+  "license": "MIT",
+  "keywords": [
+    "accounting",
+    "money",
+    "banking",
+    "finance",
+    "quickfile"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "balances",
+      "title": "View Account Balances",
+      "description": "Access your QuickFile account balances.",
+      "subtitle": "QuickFile",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accountNumber",
+      "type": "textfield",
+      "description": "Each QuickFile account has a unique acount number, which you can find in the top right of your account dashboard.",
+      "title": "Account Number",
+      "placeholder": "1234567890",
+      "required": true
+    },
+    {
+      "name": "appId",
+      "type": "textfield",
+      "description": "The App ID you generated following the steps at https://api.quickfile.co.uk.",
+      "title": "App ID",
+      "placeholder": "f2296b77-e743-5071-8d77-c1006dfa7d4e",
+      "required": true
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "description": "The API key you generated following the steps at https://api.quickfile.co.uk.",
+      "title": "API Key",
+      "placeholder": "A756DEC1-28F2-53D9-B",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "nanoid": "^3.3.4",
+    "ohmyfetch": "^0.4.17"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^6.3.1",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

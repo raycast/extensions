@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wu-bi-bian-ma",
+  "title": "Wubi Code",
+  "description": "Look up Chinese characters in Wubi 86, 98, and New Century encoding",
+  "icon": "extension-icon.png",
+  "author": "hunter27",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "query-code",
+      "title": "Wubi Code",
+      "subtitle": "Wubi Encoding",
+      "description": "Enter Chinese characters to look up Wubi encoding",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "word",
+          "description": "Chinese Character",
+          "type": "text",
+          "required": true,
+          "placeholder": "Enter character to look up"
+        }
+      ]
+    },
+    {
+      "name": "show-radical-table",
+      "title": "Wubi Table",
+      "subtitle": "Wubi Radical Table",
+      "description": "Display the complete Wubi radical table image",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "version",
+          "description": "Wubi Version",
+          "type": "dropdown",
+          "required": true,
+          "placeholder": "Select Wubi version",
+          "data": [
+            {
+              "title": "86 Version",
+              "value": "86"
+            },
+            {
+              "title": "98 Version",
+              "value": "98"
+            },
+            {
+              "title": "New-century Version",
+              "value": "xsj"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

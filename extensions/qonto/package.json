@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qonto",
+  "title": "Qonto",
+  "description": "Search, download and open your Qonto from Raycast",
+  "icon": "qonto.png",
+  "author": "christoribeiro",
+  "categories": [
+    "Finance"
+  ],
+  "contributors": [],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "login",
+      "type": "textfield",
+      "title": "Login",
+      "description": "app.qonto.com > settings > Integrations > API Key",
+      "required": true
+    },
+    {
+      "name": "secretKey",
+      "type": "password",
+      "title": "Secret Key",
+      "description": "app.qonto.com > settings > Integrations > API Key",
+      "required": true
+    },
+    {
+      "name": "datetimeFormat",
+      "type": "dropdown",
+      "description": "Set the date time format",
+      "required": false,
+      "title": "Datetime format",
+      "default": "fr-FR",
+      "data": [
+        {
+          "title": "20/07/2023 20:07",
+          "value": "fr-FR"
+        },
+        {
+          "title": "07/20/2023 20:07",
+          "value": "en-US"
+        }
+      ]
+    },
+    {
+      "name": "currencyFormat",
+      "type": "dropdown",
+      "description": "Set the currency format",
+      "required": false,
+      "title": "Currency format",
+      "default": "fr-FR",
+      "data": [
+        {
+          "title": "€100,000,000.00",
+          "value": "en-US"
+        },
+        {
+          "title": "100 000 000,00 €",
+          "value": "fr-FR"
+        },
+        {
+          "title": "100.000.000,00 €",
+          "value": "de-DE"
+        }
+      ]
+    },
+    {
+      "name": "demo",
+      "type": "checkbox",
+      "title": "Demo",
+      "label": "Use demo data",
+      "description": "Use Qonto with generated fake data",
+      "default": false,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-bank-accounts",
+      "title": "Search Bank Accounts",
+      "description": "Search your bank accounts",
+      "mode": "view"
+    },
+    {
+      "name": "search-transactions",
+      "title": "Search Transactions",
+      "description": "Search your transactions",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "@ts-rest/core": "^3.18.1",
+    "csv-writer": "^1.6.0",
+    "date-fns": "^2.29.3",
+    "node-fetch": "^3.3.1",
+    "ts-pattern": "^4.2.1",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}

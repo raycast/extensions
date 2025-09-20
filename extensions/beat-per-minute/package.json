@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "beat-per-minute",
+  "title": "BPM Calculator",
+  "description": "Calculate BPM for a song by using the enter button on the keyboard",
+  "icon": "metronome.png",
+  "author": "pernielsentikaer",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate-bpm",
+      "title": "BPM Calculator",
+      "description": "Calculate BPM for a song by using enter button on the keyboard",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "seconds",
+      "title": "Reset In Seconds",
+      "default": "8",
+      "required": false,
+      "description": "Beat is calculated by a average of x seconds",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "2 seconds",
+          "value": "2"
+        },
+        {
+          "title": "4 seconds",
+          "value": "4"
+        },
+        {
+          "title": "8 seconds",
+          "value": "8"
+        },
+        {
+          "title": "Until manual reset",
+          "value": "9999999"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

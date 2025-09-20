@@ -1,0 +1,23 @@
+# Node
+node_modules
+npm-debug.log
+.DS_Store
+
+# Raycast
+.raycast/
+
+# Build
+dist/
+*.tsbuildinfo
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.idea
+.vscode 
+ 

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lyne",
+  "title": "Lyne",
+  "description": "Lyne empowers designers and developers to achieve pixel perfection. Create and organize on-screen Guides for precise design and coding.",
+  "icon": "app-icon.png",
+  "author": "ruiaureliano",
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-horizontal-lines",
+      "title": "Create Horizontal Lines",
+      "subtitle": "Lyne",
+      "description": "Create Horizontal Lines",
+      "mode": "view"
+    },
+    {
+      "name": "create-vertical-lines",
+      "title": "Create Vertical Lines",
+      "subtitle": "Lyne",
+      "description": "Create Vertical Lines",
+      "mode": "view"
+    },
+    {
+      "name": "create-rectangle",
+      "title": "Create Rectangle",
+      "subtitle": "Lyne",
+      "description": "Create Rectangle",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.2",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

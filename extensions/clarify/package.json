@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clarify",
+  "title": "Clarify",
+  "description": "Interact with Clarify CRM directly from your command bar",
+  "icon": "icon.png",
+  "owner": "getclarify",
+  "author": "clarifyhq",
+  "access": "public",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-new-company",
+      "title": "Add a new Company",
+      "description": "Add new company to the default list",
+      "mode": "view"
+    },
+    {
+      "name": "add-new-person",
+      "title": "Add a new Person",
+      "description": "Add new person to the default list",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-people",
+      "title": "Go to People",
+      "description": "Open a People list",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-companies",
+      "title": "Go to Company",
+      "description": "Open a Company list",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Everywhere",
+      "description": "Lookup company or person",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "environment",
+      "type": "dropdown",
+      "title": "Environment",
+      "required": false,
+      "default": "prod",
+      "data": [
+        {
+          "title": "Local",
+          "value": "local"
+        },
+        {
+          "title": "Dev",
+          "value": "dev"
+        },
+        {
+          "title": "Prod",
+          "value": "prod"
+        }
+      ],
+      "description": "Select the environment you want to use"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.2",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

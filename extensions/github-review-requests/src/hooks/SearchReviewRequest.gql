@@ -1,0 +1,31 @@
+query SearchReviewRequest($query: String!) {
+  search(query: $query, type: ISSUE, first: 30) {
+    edges {
+      node {
+        __typename
+        ... on PullRequest {
+          title
+          url
+          updatedAt
+          repository {
+            nameWithOwner
+          }
+          author {
+            avatarUrl
+          }
+          commits(last: 1) {
+            edges {
+              node {
+                commit {
+                  statusCheckRollup {
+                    state
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

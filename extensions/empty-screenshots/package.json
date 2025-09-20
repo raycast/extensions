@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "empty-screenshots",
+  "title": "Empty Screenshot Folder",
+  "description": "Empties your screenshot folder within a configurable time period.",
+  "icon": "empty-screenshot-folder.png",
+  "author": "chanceaclark",
+  "license": "MIT",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Empty Screenshots",
+      "description": "Empties your screenshot folder older than the configured days.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "screenshotFolder",
+          "description": "Location where you save your screenshots",
+          "type": "textfield",
+          "required": true,
+          "title": "Screenshot folder",
+          "default": "~/Desktop"
+        },
+        {
+          "name": "daysToKeep",
+          "description": "Number of days to keep screenshots for",
+          "type": "dropdown",
+          "required": true,
+          "title": "Keep history for",
+          "default": "30",
+          "data": [
+            {
+              "title": "24 hours",
+              "value": "1"
+            },
+            {
+              "title": "7 days",
+              "value": "7"
+            },
+            {
+              "title": "30 days",
+              "value": "30"
+            },
+            {
+              "title": "3 Month",
+              "value": "90"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3"
+  },
+  "devDependencies": {
+    "@types/node": "^16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^5.3.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "image-wallet",
+  "title": "Image Wallet",
+  "description": "Store and retrieve images quickly from Raycast!",
+  "icon": "extension-icon.png",
+  "author": "ibll",
+  "contributors": [
+    "heytommy"
+  ],
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "keywords": [
+    "gif"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "image-wallet",
+      "title": "Image Wallet",
+      "description": "Browse and view your saved images.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "walletDirectory",
+      "title": "Wallet Directory",
+      "description": "Path to load Wallet from. Leave blank for default.",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "videoPreviews",
+      "label": "Generate Video Previews",
+      "description": "Should video Cards generate preview images?\n\nCan slow down Wallet when adding videos.\nManually reset previews with ⌘⇧R.",
+      "type": "checkbox",
+      "required": true,
+      "default": true
+    },
+    {
+      "name": "rememberPocketFilter",
+      "label": "Remember Pocket Filter",
+      "description": "Should the filtered Pocket be recalled when the Wallet is re-launched?",
+      "type": "checkbox",
+      "required": true,
+      "default": true
+    },
+    {
+      "name": "suppressReadErrors",
+      "label": "Suppress Read Errors",
+      "description": "Hide the warning when a file or directory could not be read.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.5.2",
+    "run-jxa": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

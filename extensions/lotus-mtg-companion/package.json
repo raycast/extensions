@@ -1,0 +1,52 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "lotus-mtg-companion",
+    "title": "Lotus - MTG Companion",
+    "description": "A non-official tool to easily search for Magic The Gathering cards, sets, and rules - powered by Scryfall search.",
+    "icon": "lotus-mtg-companion-extension-icon.png",
+    "author": "madmaxmckinney",
+    "categories": [
+        "Fun",
+        "Documentation"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "searchCards",
+            "title": "Search Cards",
+            "description": "Search for MTG cards, supports Scryfall syntax.",
+            "mode": "view"
+        },
+        {
+            "name": "viewRandomCard",
+            "title": "View Random Card",
+            "description": "View a random MTG card.",
+            "mode": "view"
+        },
+        {
+            "name": "searchSets",
+            "title": "Search Sets",
+            "description": "Search and view all MTG sets, and view all the cards in a set.",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.67.1",
+        "@raycast/utils": "^1.12.5"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.6",
+        "@types/node": "20.8.10",
+        "@types/react": "18.2.27",
+        "eslint": "^8.51.0",
+        "prettier": "^3.0.3",
+        "typescript": "^5.2.2"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

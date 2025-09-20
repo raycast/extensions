@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "savvycal",
+  "title": "SavvyCal",
+  "description": "Interact with your SavvyCal links",
+  "icon": "savvycal-icon.png",
+  "author": "laurynas",
+  "contributors": [
+    "pernielsentikaer",
+    "derrickreimer",
+    "vimtor",
+    "stephendolan"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "listSchedulingLinks",
+      "title": "List Scheduling Links",
+      "subtitle": "SavvyCal",
+      "description": "List all your SavvyCal links",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "SavvycalToken",
+      "title": "Personal Access Token",
+      "description": "Add your SavvyCal Personal Access Token",
+      "type": "password",
+      "default": "",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.2",
+    "@raycast/utils": "^1.4.8",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

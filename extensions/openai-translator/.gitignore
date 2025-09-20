@@ -1,0 +1,13 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# misc
+.DS_Store
+
+# swiftc
+.build
+
+# https://developers.raycast.com/migration/v1.50.0
+raycast-env.d.ts

@@ -1,0 +1,229 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "threads",
+  "title": "Threads",
+  "description": "Quickly post to Threads and see recent updates.",
+  "icon": "threads-icon.png",
+  "author": "chrismessina",
+  "contributors": [
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "threads",
+    "social",
+    "posting",
+    "messaging",
+    "communication"
+  ],
+  "commands": [
+    {
+      "name": "feed",
+      "title": "My Feeds",
+      "subtitle": "Threads",
+      "description": "Go To Threads Feed",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "feed",
+          "placeholder": "-",
+          "description": "Show feed",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "For You",
+              "value": "for_you"
+            },
+            {
+              "title": "Following",
+              "value": "following"
+            },
+            {
+              "title": "Liked",
+              "value": "liked"
+            },
+            {
+              "title": "Saved",
+              "value": "saved"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "activity",
+      "title": "Activity",
+      "subtitle": "Threads",
+      "description": "View Threads Activity",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "page",
+          "placeholder": "-",
+          "description": "Open Page",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "All",
+              "value": "all"
+            },
+            {
+              "title": "Follows",
+              "value": "follows"
+            },
+            {
+              "title": "Replies",
+              "value": "replies"
+            },
+            {
+              "title": "Mentions",
+              "value": "mentions"
+            },
+            {
+              "title": "Quotes",
+              "value": "quotes"
+            },
+            {
+              "title": "Reposts",
+              "value": "reposts"
+            },
+            {
+              "title": "Verified",
+              "value": "verified"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quick-thread",
+      "title": "Quick Post",
+      "subtitle": "Threads",
+      "description": "Quickly create a new post on Threads.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "description": "The text of the post.",
+          "type": "text",
+          "placeholder": "Start a thread...",
+          "required": true
+        },
+        {
+          "name": "attachment",
+          "description": "An attachment to the post.",
+          "type": "text",
+          "placeholder": "Add a link",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Threads",
+      "description": "Search Threads",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "description": "The text to search for.",
+          "type": "text",
+          "placeholder": "Keywords or hashtags",
+          "required": true
+        },
+        {
+          "name": "sort",
+          "description": "How to sort the results.",
+          "placeholder": "Sort by...",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Top",
+              "value": "top"
+            },
+            {
+              "title": "Recent",
+              "value": "recent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "new-thread",
+      "title": "Start a New Thread",
+      "subtitle": "Threads",
+      "description": "Create a new post on Threads.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-follow",
+      "title": "Quick Follow",
+      "subtitle": "Threads",
+      "description": "Quickly follow an account on Threads",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "username",
+          "description": "The account to be followed.",
+          "type": "text",
+          "placeholder": "@username",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "download-thread-media",
+      "title": "Download Threads Media",
+      "description": "Download threads media with URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "threadsUrl",
+          "description": "Threads URL",
+          "type": "text",
+          "placeholder": "Threads URL",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "mediaDownloadPath",
+          "title": "Video Download Path",
+          "description": "Path to save downloaded media",
+          "type": "directory",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^9.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "globals": "^15.9.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

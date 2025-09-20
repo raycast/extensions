@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "get-favicon",
+  "title": "Get Favicon",
+  "description": "Get favicon from website URL",
+  "icon": "icon.png",
+  "author": "vimtor",
+  "contributors": [
+    "charlie_deets",
+    "PaperCloud",
+    "ViGeng"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy",
+      "icon": "copy.png",
+      "title": "Copy Favicon",
+      "description": "Copy favicon from URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "copy-url",
+      "icon": "copy.png",
+      "title": "Copy Favicon URL",
+      "description": "Copy URL of Favicon",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "download",
+      "icon": "download.png",
+      "title": "Download Favicon",
+      "description": "Download favicon from URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "type": "directory",
+      "required": true,
+      "default": "~/Downloads",
+      "description": "Directory to download favicon"
+    },
+    {
+      "name": "defaultIconSize",
+      "title": "Default Icon Size",
+      "type": "dropdown",
+      "description": "Default size of favicon",
+      "required": false,
+      "default": "128",
+      "data": [
+        {
+          "value": "16",
+          "title": "16x16"
+        },
+        {
+          "value": "32",
+          "title": "32x32"
+        },
+        {
+          "value": "64",
+          "title": "64x64"
+        },
+        {
+          "value": "128",
+          "title": "128x128"
+        },
+        {
+          "value": "256",
+          "title": "256x256"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.4.11",
+    "image-downloader": "^4.3.0",
+    "is-url": "^1.2.4",
+    "nanoid": "^5.1.2",
+    "tempfile": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/is-url": "^1.2.30",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "eslint": "^8.57.1",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pixabay",
+  "title": "Pixabay",
+  "description": "Search Images and Videos on pixabay.com",
+  "icon": "pixabay.png",
+  "author": "tonka3000",
+  "contributors": [
+    "mjherich",
+    "j3lte"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchimages",
+      "title": "Search Images",
+      "description": "Search Images",
+      "mode": "view",
+      "subtitle": "Pixabay"
+    },
+    {
+      "name": "searchvideos",
+      "title": "Search Videos",
+      "description": "Search Videos",
+      "mode": "view",
+      "subtitle": "Pixabay"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4",
+    "@raycast/utils": "^1.14.0",
+    "cross-fetch": "^4.0.0",
+    "node-fetch": "^3.3.2",
+    "url-join": "^5.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apikey",
+      "description": "API Key from pixabay.com",
+      "type": "password",
+      "required": true,
+      "title": "API key",
+      "placeholder": "API key from pixabay.com"
+    },
+    {
+      "name": "downloadFolder",
+      "title": "Download Folder",
+      "description": "Folder to download images/videos to",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads",
+      "label": "Download Folder"
+    },
+    {
+      "name": "showinfinder",
+      "description": "Show In Finder after Download",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show In Finder after Download"
+    },
+    {
+      "name": "safeSearch",
+      "description": "Enable this so only images/videos suitable for all ages should be returned",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Safe Search"
+    },
+    {
+      "name": "resultsPerPage",
+      "title": "Results per Page",
+      "description": "Number of results per page (3 - 200)",
+      "type": "textfield",
+      "required": false,
+      "default": "50",
+      "label": "Results per Page"
+    }
+  ]
+}

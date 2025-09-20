@@ -1,0 +1,58 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "sun-moon-times",
+    "title": "Sun/Moon Times",
+    "description": "Show times for sun and moon for any city in the World.",
+    "icon": "extension_icon@512px.png",
+    "author": "danny_seidel",
+    "categories": [
+        "Data"
+    ],
+    "keywords": [
+        "sun",
+        "sunrise",
+        "sunset",
+        "moon",
+        "moonrise",
+        "moonset",
+        "dawn",
+        "dusk",
+        "time",
+        "world",
+        "astronomy"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "Show Sun/Moon Times",
+            "description": "Search for a city and show the sun and moon times for a selected day.",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.48.9",
+        "@raycast/utils": "^1.5.2",
+        "date-fns": "^2.29.3",
+        "suncalc": "^1.9.0",
+        "sunrise-sunset-js": "^2.2.1"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "1.0.5",
+        "@types/node": "18.8.3",
+        "@types/react": "18.0.9",
+        "@types/suncalc": "^1.9.0",
+        "@types/sunrise-sunset-js": "^2.0.0",
+        "eslint": "^7.32.0",
+        "prettier": "^2.5.1",
+        "prettier-plugin-organize-imports": "^3.2.2",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "ray publish"
+    }
+}

@@ -1,0 +1,240 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "duck-facts",
+  "title": "Duck Facts",
+  "description": "Displays interesting facts about ducks.",
+  "icon": "extension-icon.png",
+  "author": "validate",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Fact About Ducks",
+      "description": "Generates a fact about ducks using AI.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "generate-fact",
+      "title": "Generate Duck Fact",
+      "description": "Generates an interesting fact about ducks or a specific type of duck."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@duck-facts tell me a fact about white call ducks",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-fact",
+              "arguments": {
+                "duckType": [
+                  {
+                    "includes": "duck"
+                  },
+                  {
+                    "includes": "white call"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Mentions compact body"
+          }
+        ],
+        "mocks": {
+          "generate-fact": {
+            "fact": "The white call duck is a small breed known for its distinctive, compact body and charming quacking sounds. Originally bred in the 19th century for ornamental purposes and as pets, these ducks are also excellent foragers and can adapt well to backyard environments. Their friendly nature and vibrant personalities make them a favorite among duck enthusiasts!"
+          }
+        }
+      },
+      {
+        "input": "@duck-facts give some scientific facts about white call ducks. Make response more detailed and long",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "length": "long",
+                "includeScientific": true,
+                "duckType": [
+                  {
+                    "includes": "duck"
+                  },
+                  {
+                    "includes": "white call"
+                  }
+                ]
+              },
+              "name": "generate-fact"
+            }
+          }
+        ],
+        "mocks": {
+          "generate-fact": {
+            "fact": "The White Call Duck, scientifically known as *Anas platyrhynchos domesticus*, is a domesticated breed of duck that is particularly renowned for its small size and distinctive vocalizations. These ducks are characterized by their compact bodies and short necks, making them a popular choice for ornamental purposes in backyard settings and exhibitions. One fascinating aspect of the White Call Duck is its unique ability to produce a variety of sounds, which are often described as \"quacks\" but are actually a series of high-pitched calls. This vocalization is not only a means of communication but also plays a role in social bonding and territory establishment among ducks. Additionally, the breed's genetic makeup has been selectively enhanced over generations, leading to their vibrant plumage and sociable nature, making them a delightful addition to any avian collection."
+          }
+        }
+      },
+      {
+        "input": "@duck-facts tell me about the anatomy of diving ducks, keep it scientific",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-fact",
+              "arguments": {
+                "duckType": [
+                  {
+                    "includes": "duck"
+                  },
+                  {
+                    "includes": "diving"
+                  }
+                ],
+                "aspect": "anatomy",
+                "includeScientific": true
+              }
+            }
+          },
+          {
+            "includes": "Aythya americana"
+          }
+        ],
+        "mocks": {
+          "generate-fact": {
+            "fact": "Diving ducks, such as the Aythya americana (American Black Duck), possess a unique anatomical adaptation known as a \"hydrodynamic body shape,\" which allows them to efficiently navigate underwater. Their compact, streamlined bodies reduce drag, while specialized webbed feet act as powerful paddles, enabling them to dive to depths of up to 15 meters (50 feet) in search of aquatic vegetation and invertebrates. This adaptation not only enhances their foraging capabilities but also plays a crucial role in their survival in diverse aquatic habitats."
+          }
+        }
+      },
+      {
+        "input": "@duck-facts share a medium-length fact about mandarin ducks' breeding habits",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-fact",
+              "arguments": {
+                "aspect": "breeding",
+                "length": "medium",
+                "duckType": "mandarin duck"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "generate-fact": {
+            "fact": "Mandarin ducks are known for their elaborate courtship displays, which play a crucial role in their breeding season. Males showcase their vibrant plumage and perform intricate movements to attract females, often engaging in a series of head-bobbing and preening behaviors. After mating, the female typically chooses a nesting site in tree cavities or on the ground, where she lays a clutch of 9 to 12 eggs, demonstrating their adaptability to various habitats."
+          }
+        }
+      },
+      {
+        "input": "@duck-facts tell me a short fact about duck diet",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-fact",
+              "arguments": {
+                "length": "short",
+                "aspect": "diet"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "generate-fact": {
+            "fact": "Ducks are omnivorous and have a diverse diet that includes aquatic plants, insects, small fish, and even crustaceans; their unique filtering bills allow them to sift through mud and water to find food, showcasing their adaptability in various habitats."
+          }
+        }
+      },
+      {
+        "input": "@duck-facts give me a detailed scientific explanation of rubber ducks' history",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-fact",
+              "arguments": {
+                "includeScientific": true,
+                "length": "long",
+                "duckType": {
+                  "includes": "rubber"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "generate-fact": {
+            "fact": "Rubber ducks, while often associated with childhood play, have a fascinating connection to real ducks, particularly the family Anatidae, which includes species like the mallard (Anas platyrhynchos). One interesting fact is that rubber ducks have been used in scientific studies to track ocean currents and pollution. In 1992, a shipping container filled with thousands of plastic bath toys, including rubber ducks, was accidentally released into the Pacific Ocean. These toys began to wash up on shores around the world, providing researchers with valuable data on oceanic drift patterns and the movement of marine debris. This phenomenon highlights the impact of human-made materials on marine ecosystems and underscores the importance of understanding ocean currents, which are influenced by factors such as wind patterns and the Earth's rotation."
+          }
+        }
+      },
+      {
+        "input": "@duck-facts share a fact about how call ducks got their name",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-fact",
+              "arguments": {
+                "duckType": {
+                  "includes": "call"
+                },
+                "aspect": {
+                  "includes": "name"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "generate-fact": {
+            "fact": "The call duck, known for its distinctive and loud vocalizations, gets its name from its ability to \"call\" to its owners and other ducks. Originally bred in the Netherlands for use in hunting, these small ducks were prized for their ability to attract wild ducks with their calls. Interestingly, their vocalizations can vary significantly in pitch and tone, making them not only charming pets but also effective decoys in hunting scenarios."
+          }
+        }
+      },
+      {
+        "input": "@duck-facts tell me about the migration patterns of eider ducks, with scientific terms",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "duckType": {
+                  "includes": "eider"
+                },
+                "includeScientific": true
+              },
+              "name": "generate-fact"
+            }
+          }
+        ],
+        "mocks": {
+          "generate-fact": {
+            "fact": "The Common Eider (Somateria mollissima) is known for its remarkable migratory behavior, traveling thousands of kilometers from its breeding grounds in the Arctic to wintering areas along the coasts of Europe and North America. These ducks exhibit a strong fidelity to specific migratory routes, often utilizing the same pathways year after year, which are influenced by environmental cues such as temperature and food availability. Their migration is not only a testament to their adaptability but also highlights the importance of conserving critical stopover habitats along their journey."
+          }
+        }
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.87.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

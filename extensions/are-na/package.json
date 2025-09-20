@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "are-na",
+  "title": "Are.na",
+  "description": "Are.na is a platform for connecting ideas and building knowledge through visual blocks and channels. This Raycast extension allows users to search for channels, blocks, and users on Are.na, as well as create new channels directly from Raycast. Easily discover, explore, and organize content from your Are.na account without leaving your workflow.",
+  "icon": "extension-icon.png",
+  "author": "alvinkobe",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Web",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-channels",
+      "title": "Find Channels",
+      "subtitle": "Are.na",
+      "description": "Search and browse through public and private Are.na channels",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "channel",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "search-blocks",
+      "title": "Find Blocks",
+      "subtitle": "Are.na",
+      "description": "Search for text, images, links and other content blocks across Are.na",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "block",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "search-users",
+      "title": "Find Users",
+      "subtitle": "Are.na",
+      "description": "Search for people and organizations with Are.na profiles",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "user",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-channel",
+      "title": "Create Channel",
+      "subtitle": "Are.na",
+      "description": "Quickly create a new public or private channel on your Are.na account",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "label": "Are.na API Key",
+      "description": "Enter your personal Are.na API Key",
+      "type": "password",
+      "title": "API Key",
+      "placeholder": "XxX...xxx",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "pull": "ray pull-contributions"
+  }
+}

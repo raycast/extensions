@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prisma-docs-search",
+  "title": "Prisma Docs Search",
+  "description": "Quickly access Prisma's AI-powered docs search feature, powered by kapa.ai, right from Raycast.",
+  "icon": "prisma.png",
+  "author": "petra",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "contributors": [
+    "gniting"
+  ],
+  "access": "public",
+  "keywords": [
+    "Prisma",
+    "Search",
+    "AI Search"
+  ],
+  "commands": [
+    {
+      "name": "prisma-docs-search",
+      "title": "Search Prisma Docs",
+      "description": "Send search queries to Prisma's Docs AI and get results within Raycast",
+      "keywords": [
+        "Prisma",
+        "Search",
+        "Docs"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Ask Prisma Docs AI for?",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "showMetadata",
+          "title": "Result Information",
+          "label": "Show details about the search result by default.",
+          "description": "Useful information like time to search, word count, AI's confidence level, etc. about the search results.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "got": "^14.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@eslint/js": "^9.10.0",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.0.0",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "raycast": {
+    "permissions": [
+      "network"
+    ]
+  }
+}

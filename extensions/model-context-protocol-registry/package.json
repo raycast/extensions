@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "model-context-protocol-registry",
+  "title": "Model Context Protocol Registry",
+  "description": "Find and install MCP servers in Raycast and other MCP clients like Claude or Cursor.",
+  "icon": "extension.png",
+  "author": "thomas",
+  "contributors": [
+    "nagauta"
+  ],
+  "owner": "raycast",
+  "access": "public",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-servers",
+      "title": "Search Servers",
+      "subtitle": "MCP Registry",
+      "description": "Search for MCP servers",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "smitheryApiKey",
+          "title": "Smithery API Key",
+          "description": "The API key for the Smithery registry (see: https://smithery.ai/account/api-keys)",
+          "type": "password",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.0",
+    "@raycast/utils": "^1.19.1",
+    "@types/json-schema": "^7.0.15",
+    "numeral": "^2.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/numeral": "^2.0.5",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

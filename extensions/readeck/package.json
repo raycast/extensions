@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "readeck",
+  "title": "Readeck",
+  "description": "This extension allows you to manage your Readeck bookmarks directly from Raycast. You can add new bookmarks and search through your existing ones effortlessly.",
+  "icon": "command_icon.png",
+  "author": "shichen437",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Bookmarks",
+      "subtitle": "Readeck",
+      "description": "Search your Readeck Bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Add a Link",
+      "subtitle": "Readeck",
+      "description": "Add your favorite link to Readeck",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
+    "axios": "^1.8.4",
+    "npm-check": "^6.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Readeck URL",
+      "description": "Your Readeck URL",
+      "type": "textfield",
+      "placeholder": "https://readeck.com",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "title": "Readeck API Token",
+      "description": "Your Readeck API Token",
+      "type": "password",
+      "placeholder": "API Token",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

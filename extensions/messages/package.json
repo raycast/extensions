@@ -1,0 +1,374 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "messages",
+  "title": "Messages",
+  "description": "Quickly read your latest messages, open your chats, or send messages to your contacts.",
+  "icon": "apple-messages-icon.png",
+  "author": "thomaslombart",
+  "contributors": [
+    "timothy_gray",
+    "ramsay",
+    "thomas",
+    "aeorge",
+    "hayden_barnes",
+    "micha_van_eijk"
+  ],
+  "keywords": [
+    "2fa"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-chat",
+      "title": "Open Chat",
+      "description": "Quickly open a chat in the Messages app.",
+      "mode": "view"
+    },
+    {
+      "name": "my-messages",
+      "title": "My Latest Messages",
+      "description": "Search through your latest messages.",
+      "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "description": "Quickly send a message.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "unread-messages",
+      "title": "Unread Messages",
+      "description": "Check out your unread messages from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "2m"
+    },
+    {
+      "name": "paste-latest-otp-code",
+      "title": "Paste Latest OTP Code",
+      "description": "Paste the most recent OTP code from your messages.",
+      "mode": "no-view",
+      "keywords": [
+        "2fa"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-chats",
+      "title": "Search Chats",
+      "description": "Search for a chat in your chats list"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "description": "Send a message to a chat"
+    },
+    {
+      "name": "search-latest-messages",
+      "title": "Search Latest Messages",
+      "description": "Search your latest messages from the Apple Messages app"
+    }
+  ],
+  "ai": {
+    "instructions": "- Always use the search-chats tool first when sending messages.\\nIMPORTANT: Retrieve the last 5–10 messages using the \"search-latest-messages\" tool for context, then craft your response as a seamless continuation of the conversation, reflecting the user's style and discussion flow.\\n- The user can search for a chat by a group name, so don't actually search for the word \"group\".\\n- If you get an error when accessing the chat database, tell the user he needs to give Raycast the full disk access permission in the system settings in detailed steps. If no contacts were found, simply tell the user you haven't found the contact without mentioning the error.\\n- Use the chat_identifier property when searching for the latest messages in a group, not the guid.",
+    "evals": [
+      {
+        "input": "@messages Ask John to call me",
+        "mocks": {
+          "search-chats": [
+            {
+              "is_group": false,
+              "displayName": "John",
+              "phoneNumber": "(123) 456-7890",
+              "service_name": "iMessage",
+              "chat_identifier": "+1234567890"
+            },
+            {
+              "is_group": true,
+              "displayName": "Family",
+              "group_participants": "+1234567890,+19874569870,+16543210987",
+              "service_name": "iMessage",
+              "chat_identifier": "chat998661653911339007"
+            },
+            {
+              "is_group": false,
+              "displayName": "Mary",
+              "phoneNumber": "(469) 586-2345",
+              "service_name": "SMS",
+              "chat_identifier": "+14695862345"
+            }
+          ],
+          "send-message": "Message sent"
+        },
+        "expected": [
+          {
+            "callsTool": "search-chats"
+          },
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "service_name": "iMessage",
+                "chat_identifier": "+1234567890",
+                "displayName": "John"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The answer includes the word 'call'"
+          }
+        ]
+      },
+      {
+        "input": "@messages Tell family group I'm heading home",
+        "mocks": {
+          "search-chats": [
+            {
+              "is_group": false,
+              "displayName": "John",
+              "phoneNumber": "(123) 456-7890",
+              "service_name": "iMessage",
+              "chat_identifier": "+1234567890"
+            },
+            {
+              "is_group": true,
+              "displayName": "Family",
+              "group_participants": "(123) 456-7890,(987) 456-9870,(654) 321-0987",
+              "service_name": "iMessage",
+              "chat_identifier": "chat998661653911339007"
+            },
+            {
+              "is_group": false,
+              "displayName": "Mary",
+              "phoneNumber": "(469) 586-2345",
+              "service_name": "SMS",
+              "chat_identifier": "+14695862345"
+            }
+          ],
+          "send-message": "Message sent"
+        },
+        "expected": [
+          {
+            "callsTool": "search-chats"
+          },
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "service_name": "iMessage",
+                "chat_identifier": "chat998661653911339007",
+                "displayName": "Family"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The answer includes the word 'home'"
+          }
+        ]
+      },
+      {
+        "input": "@messages Summarize the last messages in the Friends group",
+        "mocks": {
+          "search-chats": [
+            {
+              "is_group": true,
+              "displayName": "Friends",
+              "group_participants": "+1234567890,+19874569870,+16543210987",
+              "service_name": "iMessage",
+              "last_message_date": "2025-01-23T09:25:10.000Z",
+              "chat_identifier": "chat778648822228943635",
+              "group_name": "Friends"
+            }
+          ],
+          "search-latest-messages": [
+            {
+              "body": "Are you serious? This is crazy!",
+              "senderName": "Thomas",
+              "is_sent": false,
+              "is_audio_message": false,
+              "is_from_me": false,
+              "group_name": "Friends",
+              "date_read": "2025-01-23T09:31:41.000Z",
+              "date": "2025-01-23T09:25:10.000Z",
+              "display_name": "Thomas",
+              "service": "iMessage",
+              "is_group": 1,
+              "guid": "38989E42-A75D-4013-B067-1405290AC54D",
+              "is_read": true
+            },
+            {
+              "body": "You've got to do something about this.",
+              "senderName": "Emily",
+              "is_sent": true,
+              "is_audio_message": false,
+              "is_from_me": false,
+              "group_name": "Friends",
+              "date_read": "2001-01-01T00:00:00.000Z",
+              "date": "2025-01-23T09:22:49.000Z",
+              "display_name": "Emily",
+              "service": "iMessage",
+              "is_group": 1,
+              "guid": "915D6A56-B47C-4CD6-8021-B5421605FCC4",
+              "is_read": true
+            },
+            {
+              "body": "I can't believe it.",
+              "senderName": "Emily",
+              "attachment_filename": null,
+              "is_sent": true,
+              "is_audio_message": false,
+              "is_from_me": false,
+              "attachment_name": null,
+              "group_name": "Friends",
+              "date_read": "2001-01-01T00:00:00.000Z",
+              "date": "2025-01-23T09:21:50.000Z",
+              "display_name": "Mary",
+              "service": "iMessage",
+              "is_group": 1,
+              "guid": "0251910D-3777-4673-8DE8-6C1EF293F239",
+              "is_read": true
+            },
+            {
+              "body": "I didn't see the first season",
+              "senderName": "John",
+              "is_sent": true,
+              "is_audio_message": false,
+              "is_from_me": false,
+              "group_name": "Friends",
+              "date_read": "2001-01-01T00:00:00.000Z",
+              "date": "2025-01-23T09:21:49.000Z",
+              "display_name": "John",
+              "service": "iMessage",
+              "is_group": 1,
+              "guid": "45929EDF-BEC3-4B5D-8F4B-6EB449C1AE1F",
+              "is_read": true
+            },
+            {
+              "body": "Can't wait for next episode of Severance season 2!",
+              "senderName": "Thomas",
+              "is_sent": true,
+              "is_audio_message": false,
+              "is_from_me": false,
+              "group_name": "Friends",
+              "date_read": "2001-01-01T00:00:00.000Z",
+              "date": "2025-01-23T09:21:22.000Z",
+              "display_name": "John",
+              "service": "iMessage",
+              "is_group": 1,
+              "guid": "A03A0263-D677-4684-9885-B44292BD6F64",
+              "is_read": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "search-chats"
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "searchText": "",
+                "chatIdentifier": "chat778648822228943635"
+              },
+              "name": "search-latest-messages"
+            }
+          },
+          {
+            "meetsCriteria": "The answer is a summary of the last messages in the Friends group"
+          }
+        ]
+      },
+      {
+        "input": "@messages Politely decline Emily's invitation",
+        "mocks": {
+          "search-chats": [
+            {
+              "is_group": false,
+              "displayName": "Emily",
+              "phoneNumber": "(123) 456-7890",
+              "service_name": "SMS",
+              "chat_identifier": "+1234567890"
+            },
+            {
+              "is_group": true,
+              "displayName": "Family",
+              "group_participants": "+1234567890,+19874569870,+16543210987",
+              "service_name": "iMessage",
+              "chat_identifier": "chat998661653911339007"
+            },
+            {
+              "is_group": false,
+              "displayName": "Mary",
+              "phoneNumber": "(469) 586-2345",
+              "service_name": "SMS",
+              "chat_identifier": "+14695862345"
+            }
+          ],
+          "search-latest-messages": [
+            {
+              "sender": "Emili",
+              "senderName": "Emily",
+              "body": "Hey, would you like to join me for dinner tonight?"
+            }
+          ],
+          "send-message": "Message sent"
+        },
+        "expected": [
+          {
+            "callsTool": "search-chats"
+          },
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "service_name": "SMS",
+                "chat_identifier": "+1234567890",
+                "displayName": "Emily"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The answer declines the invitation politely"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.0",
+    "date-fns": "^4.1.0",
+    "libphonenumber-js": "^1.11.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.7.4",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.1",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
