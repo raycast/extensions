@@ -84,11 +84,6 @@ function CreateLoginComponent() {
       name: FormValidation.Required,
       visiblePassword: showPassword ? FormValidation.Required : undefined,
       hiddenPassword: showPassword ? undefined : FormValidation.Required,
-      uri: (value) => {
-        if (value && !value.match(/^https?:\/\//)) {
-          return "Please enter a valid URI";
-        }
-      },
     },
   });
 
@@ -156,8 +151,8 @@ function CreateLoginComponent() {
           />
         ))}
       </Form.Dropdown>
-      <Form.TextField {...itemProps.username} title="Username" placeholder="john.doe@example.com" storeValue={false} />
-      <Form.TextField {...itemProps.uri} title="Website URI" placeholder="https://example.com" storeValue={false} />
+      <Form.TextField {...itemProps.username} title="Username" placeholder="john.doe@mail.com" storeValue={false} />
+      <Form.TextField {...itemProps.uri} title="Website URI" placeholder="example.com" storeValue={false} />
       {showPassword ? (
         <Form.TextField
           {...itemProps.visiblePassword}
