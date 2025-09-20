@@ -11,6 +11,10 @@
     "jonatan_petursson",
     "talk2dc"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "preferences": [
     {

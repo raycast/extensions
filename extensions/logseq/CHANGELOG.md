@@ -1,5 +1,9 @@
 # Logseq Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- Added Windows support
+
 ## [Add command for adding tasks] 2024-06-03
 
 - Add tasks using the new "Add task" command
