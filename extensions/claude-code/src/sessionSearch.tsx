@@ -531,6 +531,11 @@ export default function SessionSearch() {
           actions={
             <ActionPanel>
               <ResumeSessionAction session={session} />
+              <Action.CopyToClipboard
+                title="Copy Claude Command"
+                content={`cd "${session.directory}" && claude -r "${session.id}"`}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+              />
               <Action.Push
                 title="View Project Sessions"
                 target={
@@ -542,11 +547,6 @@ export default function SessionSearch() {
                 }
                 icon={Icon.List}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
-              />
-              <Action.CopyToClipboard
-                title="Copy Claude Command"
-                content={`cd "${session.directory}" && claude -r "${session.id}"`}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
               />
               <Action.CopyToClipboard
                 title="Copy Session ID"

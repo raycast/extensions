@@ -7,6 +7,10 @@ const execAsync = promisify(exec);
 
 let isExecuting = false;
 
+interface Preferences {
+  terminalApp: TerminalApp;
+}
+
 export type TerminalApp = "terminal" | "iterm2";
 
 /**
