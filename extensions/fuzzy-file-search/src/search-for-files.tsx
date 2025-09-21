@@ -47,10 +47,10 @@ export default function Command() {
     }
   });
 
-  // cleanup old .temp files (older than 1h)
+  // cleanup old .temp files (older than 10min)
   useEffect(() => {
     let canceled = false;
-    const CutoffMs = 1 * 60 * 60 * 1000;
+    const CutoffMs = 10 * 60 * 1000;
     const now = Date.now();
 
     (async () => {
@@ -82,7 +82,7 @@ export default function Command() {
       assert(fdPath !== undefined);
 
       let optionalArgs: string[] = [];
-      if (prefs.includeDirectories) {
+      if (!prefs.includeDirectories) {
         optionalArgs = [...optionalArgs, "--type", "file"];
       }
       if (prefs.includeHidden) {
