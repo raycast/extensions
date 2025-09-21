@@ -2,7 +2,7 @@
 
 ## [New Command] - {PR_MERGE_DATE}
 
-- Add Create Login command to create new login items with name, username, password, and folder-id
+- Add Create Login command to create new login items
 
 ## [Improvements] - 2025-09-02
 
