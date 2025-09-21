@@ -84,6 +84,22 @@ export default function Command() {
       assert(searchRoot !== undefined);
       assert(fdPath !== undefined);
 
+      const ignoreFile = path.join(os.homedir(), ".config", "fd", "ignore");
+      if (!fs.existsSync(ignoreFile)) {
+        console.log(`creating default .fdignore file in: ${ignoreFile}`);
+        const ignorePaths = [
+          "/nix/",
+          "/System/",
+          "/Library/",
+          "/private/",
+          "/usr/",
+          path.join(os.homedir(), "Library/*"),
+          path.join(os.homedir(), "!/Library/CloudStorage/"),
+          path.join(os.homedir(), "**", "*.photoslibrary/"),
+        ];
+        await afs.writeFile(ignoreFile, ignorePaths.join("\n"));
+      }
+
       let optionalArgs: string[] = [];
       if (!prefs.includeDirectories) {
         optionalArgs = [...optionalArgs, "--type", "file"];
@@ -126,7 +142,6 @@ export default function Command() {
 
         fd.on("error", () => {
           console.log("aborting fd");
-          console.log(`${basename(fdOutputTemp)} abort status: ${abortableFd.current?.signal.aborted}`);
           fs.rmSync(fdOutputTemp, { force: true });
           reject("'fd' aborted");
         });
@@ -136,7 +151,7 @@ export default function Command() {
           if (code === 0) {
             resolve();
           } else {
-            console.log("closing with code", code);
+            console.log("closing fd with code", code);
             fs.rmSync(fdOutputTemp, { force: true });
             reject(`Exit code of 'fd' = ${code}:\n${stderr}`);
           }
@@ -144,8 +159,6 @@ export default function Command() {
       });
 
       toast.hide();
-
-      console.log(`${basename(fdOutputTemp)} abort status: ${abortableFd.current?.signal.aborted}`);
 
       console.log(`renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
       await afs.rename(fdOutputTemp, fdOutput);
@@ -223,11 +236,10 @@ export default function Command() {
       searchBarPlaceholder={"Search for your files"}
       onSearchTextChange={setSearchText}
       filtering={false} // disable builtin filtering as we use a custom one
-      // throttle // don't re-render on every key-press, adds delay
       searchBarAccessory={
-        <List.Dropdown tooltip="Search in directory" value={searchRoot} onChange={setSearchRoot}>
+        <List.Dropdown tooltip="Search" value={searchRoot} onChange={setSearchRoot}>
           <List.Dropdown.Item title="Home (~)" value={os.homedir()} />
-          <List.Dropdown.Item title="This Computer (/)" value={"/"} />
+          <List.Dropdown.Item title="Everything (/)" value={"/"} />
           <List.Dropdown.Item title={`Custom Directories`} value={prefs.customSearchDirs} />
         </List.Dropdown>
       }
