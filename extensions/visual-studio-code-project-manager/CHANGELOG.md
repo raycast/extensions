@@ -1,5 +1,9 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Update] - 2025-09-21
+
+- Add "Create New Project" functionality: When no search results are found, users can now create a new project directory and automatically add it to VS Code Project Manager. The feature appears when a "New Project Directory" is configured in preferences and allows users to quickly scaffold new projects or open existing folders that aren't yet managed by Project Manager.
+
 ## [Update] - 2025-07-15
 
 - Add preference to hide disabled projects (those with "enabled": false) in the project list.
