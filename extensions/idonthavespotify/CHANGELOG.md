@@ -1,5 +1,10 @@
 # I Don't Have Spotify Changelog
 
+## [Fix & Preferences] - {PR_MERGE_DATE}
+
+- Fix `HOSTNAME`
+- Add "Open in Application" preference to open links in native applications if available.
+
 ## [New Commands] - 2024-07-31
 
 - Convert link from clipboard and copy it back for each platform.
