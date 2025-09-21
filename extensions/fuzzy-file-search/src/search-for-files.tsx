@@ -63,7 +63,9 @@ export default function Command() {
         const filepath = path.join(environment.supportPath, filename);
         const stats = await afs.stat(filepath);
 
-        if (now - stats.birthtimeMs > CutoffMs) {
+        const birthtimeDiff = now - stats.birthtimeMs;
+        if (birthtimeDiff > CutoffMs) {
+          console.log(`birthtimeMsDiff: ${birthtimeDiff.toFixed(0)}, removing ${filepath}`);
           await afs.rm(filepath, {
             force: true,
           });
