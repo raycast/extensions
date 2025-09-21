@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - 2025-09-16
+
+- Fix broken pinned entries cache.
+
 ## [Refactor] - 2025-09-13
 
 - Internal refactoring and cleanup. Added tests.

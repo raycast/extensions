@@ -109,7 +109,7 @@ function ManageForkedExtensions() {
                 <Action.OpenWith path={x.folderPath} />
                 <Action.CopyToClipboard
                   title="Copy Extension Path to Clipboard"
-                  content={x.folderName}
+                  content={x.folderPath}
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action.Push
