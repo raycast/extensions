@@ -18,6 +18,7 @@ type Prefs = {
   includeDirectories: boolean;
   includeHidden: boolean;
   ignoreSpacesInSearch: boolean;
+  followSymlinks: boolean;
   customSearchDirs: string;
 };
 
@@ -88,6 +89,9 @@ export default function Command() {
       if (prefs.includeHidden) {
         optionalArgs = [...optionalArgs, "--hidden"];
       }
+      if (prefs.followSymlinks) {
+        optionalArgs = [...optionalArgs, "--follow"];
+      }
 
       const searchDirs = searchRoot.split(" ");
 
@@ -106,7 +110,7 @@ export default function Command() {
       }
 
       const outFD = fs.openSync(fdOutputTemp, "wx");
-      const fd = spawn(fdPath, [...optionalArgs, "--print0", "--follow", ".", ...searchDirs], {
+      const fd = spawn(fdPath, [...optionalArgs, "--print0", ".", ...searchDirs], {
         stdio: ["ignore", outFD, "pipe"],
         signal: abortableFd.current?.signal,
       });

@@ -36,6 +36,15 @@
           "required": false
         },
         {
+          "name": "followSymlinks",
+          "title": "Follow Symbolic Links",
+          "label": "Traverse symbolic links",
+          "description": "The search will descend into symlinked directories.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "ignoreSpacesInSearch",
           "title": "Ignore Spaces in Search",
           "label": "Treat spaces as empty characters",
