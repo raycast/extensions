@@ -23,8 +23,8 @@ type Prefs = {
 };
 
 export default function Command() {
-  const abortableFd = useRef<AbortController>(null);
-  const abortableFzf = useRef<AbortController>(null);
+  const abortableFd = useRef<AbortController>(new AbortController());
+  const abortableFzf = useRef<AbortController>(new AbortController());
   const prefs = getPreferenceValues<Prefs>();
 
   const [searchText, setSearchText] = useState("");
@@ -172,36 +172,37 @@ export default function Command() {
 
       const filteredResults: string[] = [];
       const fdOutputFD = fs.openSync(fdOutput, "r");
-      const fd = spawn(fzfPath, ["--read0", "--filter", searchTerm], {
+      const fzf = spawn(fzfPath, ["--read0", "--filter", searchTerm], {
         stdio: [fdOutputFD, "pipe", "pipe"],
         signal: abortableFzf.current?.signal,
       });
       await new Promise<void>((resolve, reject) => {
-        const rl = readline.createInterface({ input: fd.stdout as Stream.Readable });
+        const rl = readline.createInterface({ input: fzf.stdout as Stream.Readable });
         rl.on("line", (line) => {
           filteredResults.push(line);
-          if (filteredResults.length <= 1000) {
-            fd.kill();
+          if (filteredResults.length >= 100) {
+            fzf.kill();
           }
         });
         let stderr = "";
-        fd.stderr?.on("data", (chunk) => {
+        fzf.stderr?.on("data", (chunk) => {
           stderr += chunk;
         });
-        fd.on("error", () => {
+        fzf.on("error", () => {
           console.log("aborting fzf");
         });
-        fd.on("close", (code) => {
+        fzf.on("close", (code) => {
           rl.close();
           fs.closeSync(fdOutputFD);
           // Fzf returns error code 1 if output is empty
           if (code === 0 || code === null || (code === 1 && stderr.length === 0)) {
             resolve();
           } else {
-            reject(`Exit code of 'fd' = ${code}:\n${stderr}`);
+            reject(`Exit code of 'fzf' = ${code}:\n${stderr}`);
           }
         });
       });
+      console.log(`fzf returned ${filteredResults.length} results`);
       return filteredResults;
     },
     // randomUUID is used to trigger fzf on updated index list from fd
