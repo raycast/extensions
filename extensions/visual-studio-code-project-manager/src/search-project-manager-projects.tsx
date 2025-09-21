@@ -7,13 +7,15 @@ import {
   getPreferenceValues,
   Icon,
   List,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
 import { exec } from "child_process";
-import { existsSync, lstatSync, readFileSync } from "fs";
+import { existsSync, lstatSync, readFileSync, mkdirSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import config from "parse-git-config";
-import { dirname } from "path";
+import { dirname, join } from "path";
 import { useState, useEffect, ReactElement, Fragment } from "react";
 import tildify from "tildify";
 import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
@@ -219,6 +221,61 @@ export default function Command() {
     filterProjects(sortedProjectsSearch);
   }, [searchText]);
 
+  // Function to call when there are no results
+  function handleNoResults() {
+    return (
+      <>
+        {preferences.newProjectDirectory && searchText && (
+          <List.Item
+            title={`Create New Project or Open existing folder for ${searchText} in ${preferences.newProjectDirectory}`}
+            icon={{ fileIcon: preferences.newProjectDirectory }}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Create New Project"
+                  icon={{ fileIcon: preferences.newProjectDirectory }}
+                  onAction={() => {
+                    let newProjectEntry: ProjectEntry;
+                    try {
+                      newProjectEntry = createNewProject(searchText);
+                    } catch (e) {
+                      showToast({
+                        title: "Failed to create new project",
+                        style: Toast.Style.Failure,
+                      });
+                      return;
+                    }
+                    const projectsFilePath = getProjectsLocationPath().path + "/projects.json";
+                    let existingProjects: ProjectEntry[] = [];
+                    try {
+                      const fileContent = readFileSync(projectsFilePath, "utf-8");
+                      existingProjects = JSON.parse(fileContent);
+                      if (!Array.isArray(existingProjects)) {
+                        existingProjects = [existingProjects];
+                      }
+                    } catch (e) {
+                      showToast({
+                        title: "Error reading projects.json file",
+                        style: Toast.Style.Failure,
+                      });
+                      return;
+                    }
+                    existingProjects.push(newProjectEntry);
+                    const projectsForFile = existingProjects.map(({ id, ...project }) => project);
+                    writeFileSync(projectsFilePath, JSON.stringify(projectsForFile, null, 2));
+                    const newProjectPath = getNewProjectRootPath(searchText);
+                    exec(`"${vscodeAppCLI}" "${newProjectPath}"`);
+                    closeMainWindow();
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+      </>
+    );
+  }
+
   const elements: ReactElement[] = [];
   if (preferences.groupProjectsByTag && !selectedTag) {
     // don't group if filtering
@@ -254,7 +311,7 @@ export default function Command() {
         ) : null
       }
     >
-      <Fragment>{elements}</Fragment>
+      {elements.length === 0 ? handleNoResults() : <Fragment>{elements}</Fragment>}
     </List>
   );
 }
@@ -399,4 +456,38 @@ function parseRemoteURL(path: string): string {
 
 function escapeRegex(x: string): string {
   return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getNewProjectName(projectName: string): string {
+  if (projectName.includes("/")) {
+    return projectName.split("/").pop() ?? projectName;
+  }
+  return projectName;
+}
+
+function getNewProjectRootPath(searchText: string): string {
+  return join(preferences.newProjectDirectory, searchText);
+}
+
+function createNewProject(projectName: string): ProjectEntry {
+  const newProjectDir = getNewProjectRootPath(projectName);
+  try {
+    if (!existsSync(newProjectDir)) {
+      mkdirSync(newProjectDir, { recursive: true });
+    }
+  } catch (error) {
+    showToast({
+      title: "Failed to create new project directory",
+      message: `Could not create ${newProjectDir}`,
+      style: Toast.Style.Failure,
+    });
+    throw error;
+  }
+  return {
+    id: newProjectDir,
+    name: getNewProjectName(projectName),
+    rootPath: newProjectDir,
+    tags: [],
+    enabled: true,
+  };
 }

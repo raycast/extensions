@@ -15,6 +15,7 @@ export interface CachedProjectEntry {
 
 export interface Preferences {
   projectManagerDataPath: string;
+  newProjectDirectory: string;
   groupProjectsByTag: boolean;
   terminalApp: Application;
   gitClientApp: Application;

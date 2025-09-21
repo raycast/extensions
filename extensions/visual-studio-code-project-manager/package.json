@@ -14,7 +14,8 @@
     "eduwass",
     "grrrck",
     "hsm",
-    "azhsetiawan"
+    "azhsetiawan",
+    "vishnu_sethuraman"
   ],
   "license": "MIT",
   "commands": [
@@ -67,6 +68,13 @@
       "required": false,
       "title": "Projects Location",
       "description": "If you have changed the 'Projects Location' setting for the VSCode Project Manager extension, set this to the same directory. Otherwise, leave blank."
+    },
+    {
+      "name": "newProjectDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "New Project Directory",
+      "description": "Directory to create new project in"
     },
     {
       "name": "terminalApp",
