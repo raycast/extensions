@@ -75,7 +75,7 @@ export async function ensureFzfCLI() {
     const writer = fs.createWriteStream(fzfCliArchive());
     response.data.pipe(writer);
 
-    console.log("waiting for download to finish");
+    console.log("waiting for fzf download to finish");
     await new Promise<void>((resolve, reject) => {
       writer.on("finish", resolve);
       writer.on("error", reject);

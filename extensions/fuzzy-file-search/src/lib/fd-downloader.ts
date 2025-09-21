@@ -82,11 +82,11 @@ export async function ensureFdCLI() {
     });
     // Download the cli
     const binaryURL = `https://github.com/sharkdp/fd/releases/download/v${cliVersion}/${cliFileInfo.pkg}`;
-    console.log("downloading archive");
+    console.log("downloading fd archive:", binaryURL);
     const response = await axios.get(binaryURL, { responseType: "stream" });
     const writer = fs.createWriteStream(fdCliArchive());
     response.data.pipe(writer);
-    console.log("waiting for download finish");
+    console.log("waiting for fd download finish");
     await new Promise((resolve, reject) => {
       writer.on("finish", () => resolve("done"));
       writer.on("error", reject);
