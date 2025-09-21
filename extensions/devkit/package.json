@@ -10,7 +10,7 @@
       "name": "encode-uri",
       "title": "Encode URI",
       "mode": "view",
-      "description": "Prompt user with a form",
+      "description": "Encode a string to be safely included in a URL.",
       "source": "src/encode-uri.tsx"
     },
     {
