@@ -1,0 +1,213 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devkit",
+  "title": "DevKit",
+  "description": "A handy toolbox for developers: encode, decode, and more.",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "encode-uri",
+      "title": "Encode URI",
+      "mode": "view",
+      "description": "Prompt user with a form",
+      "source": "src/encode-uri.tsx"
+    },
+    {
+      "name": "decode-uri",
+      "title": "Decode URI",
+      "mode": "view",
+      "description": "Decode a URI-encoded string back to normal text.",
+      "source": "src/decode-uri.tsx"
+    },
+    {
+      "name": "base64-encode",
+      "title": "Base64 Encode",
+      "mode": "view",
+      "description": "Convert text to Base64.",
+      "source": "src/base64-encode.tsx"
+    },
+    {
+      "name": "base64-decode",
+      "title": "Base64 Decode",
+      "mode": "view",
+      "description": "Decode Base64 back to readable text.",
+      "source": "src/base64-decode.tsx"
+    },
+    {
+      "name": "uuid-generator",
+      "title": "UUID Generator",
+      "mode": "view",
+      "description": "Generate a random UUID (v4) for IDs.",
+      "source": "src/uuid-generator.tsx"
+    },
+    {
+      "name": "md5-hash",
+      "title": "MD5 Hash",
+      "mode": "view",
+      "description": "Generate an MD5 hash from a string.",
+      "source": "src/md5-hash.tsx"
+    },
+    {
+      "name": "hash-generator",
+      "title": "SHA Hash",
+      "mode": "view",
+      "description": "Generate SHA-1, SHA-256, or SHA-512 hash.",
+      "source": "src/hash-generator.tsx"
+    },
+    {
+      "name": "json-formatter",
+      "title": "JSON Formatter",
+      "mode": "view",
+      "description": "Take raw JSON and format it nicely.",
+      "source": "src/json-formatter.tsx"
+    },
+    {
+      "name": "json-minifier",
+      "title": "JSON Minifier",
+      "mode": "view",
+      "description": "Compact JSON into a single line for configs or API calls.",
+      "source": "src/json-minifier.tsx"
+    },
+    {
+      "name": "json-validator",
+      "title": "JSON Validator",
+      "mode": "view",
+      "description": "Check if JSON is valid and highlight errors.",
+      "source": "src/json-validator.tsx"
+    },
+    {
+      "name": "jwt-decoder",
+      "title": "JWT Decoder",
+      "mode": "view",
+      "description": "Decode JWT tokens to view header, payload, and signature.",
+      "source": "src/jwt-decoder.tsx"
+    },
+    {
+      "name": "regex-tester",
+      "title": "Regex Tester",
+      "mode": "view",
+      "description": "Test regular expressions against sample text.",
+      "source": "src/regex-tester.tsx"
+    },
+    {
+      "name": "timestamp-converter",
+      "title": "Timestamp Converter",
+      "mode": "view",
+      "description": "Epoch ↔ Human-readable date",
+      "source": "src/timestamp-converter.tsx"
+    },
+    {
+      "name": "lorem-ipsum-generator",
+      "title": "Lorem Ipsum Generator",
+      "mode": "view",
+      "description": "Generate placeholder text for designs or tests.",
+      "source": "src/lorem-ipsum-generator.tsx"
+    },
+    {
+      "name": "color-converter",
+      "title": "Color Converter",
+      "mode": "view",
+      "description": "Hex ↔ RGB ↔ HSL conversion for colors.",
+      "source": "src/color-converter.tsx"
+    },
+    {
+      "name": "random-password-generator",
+      "title": "Random Password Generator",
+      "mode": "view",
+      "description": "Generate secure passwords with customizable length and complexity.",
+      "source": "src/random-password-generator.tsx"
+    },
+    {
+      "name": "qr-code-generator",
+      "title": "QR Code Generator",
+      "mode": "view",
+      "description": "Generate a QR code for a URL or text.",
+      "source": "src/qr-code-generator.tsx"
+    },
+    {
+      "name": "html-escape-unescape",
+      "title": "HTML Escape / Unescape",
+      "mode": "view",
+      "description": "Convert <, >, & etc. to &lt;, &gt;, &amp; and vice versa.",
+      "source": "src/html-escape-unescape.tsx"
+    },
+    {
+      "name": "css-minifier",
+      "title": "CSS Minifier",
+      "mode": "view",
+      "description": "Compress CSS code for production.",
+      "source": "src/css-minifier.tsx"
+    },
+    {
+      "name": "json-to-typescript",
+      "title": "JSON to TypeScript Interface",
+      "mode": "view",
+      "description": "Automatically convert JSON to TypeScript types.",
+      "source": "src/json-to-typescript.tsx"
+    },
+    {
+      "name": "git-commands-helper",
+      "title": "Git Commands Helper",
+      "mode": "view",
+      "description": "Quickly copy common git commands.",
+      "source": "src/git-commands-helper.tsx"
+    },
+    {
+      "name": "http-status-lookup",
+      "title": "HTTP Status Code Lookup",
+      "mode": "view",
+      "description": "Input a code like 404 → output description.",
+      "source": "src/http-status-lookup.tsx"
+    },
+    {
+      "name": "json-string-escape",
+      "title": "JSON String Escape",
+      "mode": "view",
+      "description": "Escape a JSON string",
+      "source": "src/json-string-escape.tsx"
+    },
+    {
+      "name": "json-string-unescape",
+      "title": "JSON String Unescape",
+      "mode": "view",
+      "description": "Unescape a JSON string",
+      "source": "src/json-string-unescape.tsx"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@faker-js/faker": "^8.0.0",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "clean-css": "^5.3.0",
+    "json-to-ts": "^1.1.2",
+    "qrcode": "^1.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/clean-css": "^4.2.11",
+    "@types/node": "22.13.10",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "mufaddal1125",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}
