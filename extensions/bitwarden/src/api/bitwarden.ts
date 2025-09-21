@@ -77,7 +77,7 @@ type ReceiveSendOptions = {
 
 type CreateLoginItemOptions = {
   name: string;
-  username: string;
+  username?: string;
   password: string;
   folderId: string | null;
   uri?: string;
@@ -454,7 +454,7 @@ export class Bitwarden {
       itemTemplate.login = loginTemplate;
       itemTemplate.notes = null;
 
-      loginTemplate.username = options.username;
+      loginTemplate.username = options.username || null;
       loginTemplate.password = options.password;
       loginTemplate.totp = null;
       loginTemplate.fido2Credentials = undefined;

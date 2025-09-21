@@ -47,7 +47,7 @@ function CreateLoginComponent() {
       const effectiveFolderId = folderId === FOLDER_OPTIONS.NO_FOLDER ? null : folderId;
       const { error } = await bitwarden.createLoginItem({
         name,
-        username,
+        username: username || undefined,
         password,
         folderId: effectiveFolderId,
         uri: uri || undefined,
