@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast_cosense",
+  "title": "Cosense",
+  "description": "Extension for Cosense",
+  "icon": "cosense.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-pages",
+      "title": "Search Cosense Pages",
+      "description": "Search Cosense pages and open",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "mallow",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "sid",
+      "type": "password",
+      "title": "connect.sid",
+      "description": "Your Cosense connect.sid value for private projects access.",
+      "required": false
+    },
+    {
+      "name": "projects",
+      "type": "textfield",
+      "title": "Projects",
+      "description": "Your Cosense projects. Separate multiple projects with commas.",
+      "required": true
+    }
+  ]
+}
