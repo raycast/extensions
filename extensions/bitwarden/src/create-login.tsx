@@ -70,7 +70,7 @@ function CreateLoginComponent() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const { itemProps, handleSubmit, setValue, focus, reset } = useForm<CreateLoginFormValues>({
+  const { itemProps, handleSubmit, focus, reset } = useForm<CreateLoginFormValues>({
     onSubmit,
     initialValues: {
       name: "",
@@ -107,8 +107,8 @@ function CreateLoginComponent() {
     try {
       const options = await getPasswordGeneratorOptions();
       const generatedPassword = await bitwarden.generatePassword(options);
-      setValue("visiblePassword", generatedPassword);
-      setValue("hiddenPassword", generatedPassword);
+      itemProps.visiblePassword.onChange?.(generatedPassword);
+      itemProps.hiddenPassword.onChange?.(generatedPassword);
       await Clipboard.copy(generatedPassword);
       toast.title = "Password generated and copied";
       toast.style = Toast.Style.Success;
