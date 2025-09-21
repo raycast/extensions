@@ -102,13 +102,14 @@ export default function Command() {
       // File to write to during the indexing
       const fdOutputTemp = `${fdOutput}.${Date.now()}${randomInt(10000)}.temp`;
 
-      let toast: Toast | null = null;
-      if (!fs.existsSync(fdOutput)) {
-        toast = await showToast({
-          title: "Indexing",
-          message: "updating index of files using fd",
-          style: Toast.Style.Animated,
-        });
+      const toast = await showToast({
+        title: "Indexing",
+        style: Toast.Style.Animated,
+      });
+      if (fs.existsSync(fdOutput)) {
+        toast.message = "updating index of files using fd";
+      } else {
+        toast.message = "creating index of files using fd";
       }
 
       const outFD = fs.openSync(fdOutputTemp, "wx");
@@ -142,7 +143,7 @@ export default function Command() {
         });
       });
 
-      toast?.hide();
+      toast.hide();
 
       console.log(`${basename(fdOutputTemp)} abort status: ${abortableFd.current?.signal.aborted}`);
 
