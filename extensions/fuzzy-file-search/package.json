@@ -41,7 +41,7 @@
           "label": "Traverse symbolic links",
           "description": "The search will descend into symlinked directories.",
           "type": "checkbox",
-          "default": true,
+          "default": false,
           "required": false
         },
         {
