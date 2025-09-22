@@ -4,7 +4,7 @@
     "title": "CometAPI",
     "description": "AI-powered text processing tools using CometAPI. Summarize, translate, rephrase, proofread text with advanced language models.",
     "icon": "cometapi.png",
-    "author": "mutewinter",
+    "author": "CometAPI",
     "license": "MIT",
     "categories": [
         "Developer Tools"
