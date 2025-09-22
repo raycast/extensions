@@ -6,11 +6,11 @@
   "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/slides2pdf"
+    "url": "https://github.com/raycast/extensions"
   },
-  "homepage": "https://github.com/yourusername/slides2pdf",
+  "homepage": "https://github.com/raycast/extensions/tree/main/extensions/slides2pdf",
   "bugs": {
-    "url": "https://github.com/yourusername/slides2pdf/issues"
+    "url": "https://github.com/raycast/extensions/issues"
   },
   "keywords": [
     "raycast",
