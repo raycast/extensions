@@ -1,5 +1,11 @@
 # Json2TS Changelog
 
+## [Feature: Windows Support] - {PR_MERGE_DATE}
+
+- Updated dependencies
+- Migrated ESLint configuration file
+- Added Windows support
+
 ## [Update Dependencies] - 2022-11-17
 
 - Update npm dependencies
