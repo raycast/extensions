@@ -185,6 +185,7 @@ export default function Command() {
       if (prefs.ignoreSpacesInSearch) {
         searchTerm = searchTerm.replaceAll(" ", "");
       }
+      searchTerm = searchTerm.replaceAll("~", os.homedir());
 
       const filteredResults: string[] = [];
       const fdOutputFD = fs.openSync(fdOutput, "r");

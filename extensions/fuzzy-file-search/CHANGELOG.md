@@ -5,6 +5,7 @@
 - Use fzf CLI tool for fuzzy finding.
 - Add automatic installation of the fzf CLI tool.
 - Improve search performance.
+- Add caching of indexed files
 - Improve UI/UX with toast notifications.
 - Fix issue where the heap memory limit is reached.
 
