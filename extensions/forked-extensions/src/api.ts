@@ -1,4 +1,4 @@
-import { OAuthService, withAccessToken } from "@raycast/utils";
+import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
 import ky, { KyInstance, HTTPError } from "ky";
 import { githubOauthScope, upstreamRepository } from "./constants.js";
 import { githubPersonalAccessToken } from "./utils.js";
@@ -38,7 +38,14 @@ export const withGithubClient = withAccessToken(githubOauthService);
  */
 export const getAllExtensions = async () => {
   const url = `https://raw.githubusercontent.com/${upstreamRepository}/refs/heads/main/.github/extensionName2Folder.json`;
-  const json = await ky.get(url).json<Record<string, string>>();
+  const token = getAccessToken();
+  const json = await ky
+    .get(url, {
+      headers: {
+        Authorization: `${token.type === "personal" ? "Token" : "Bearer"} ${token.token}`,
+      },
+    })
+    .json<Record<string, string>>();
   const extensions = Object.entries(json)
     .map(([name, folder]) => ({ name, folder }))
     .sort((a, b) => a.folder.localeCompare(b.folder));

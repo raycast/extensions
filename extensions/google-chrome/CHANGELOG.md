@@ -1,5 +1,7 @@
 # Google Chrome Changelog
 
+## [Update the dependencies to fix search history and find tab] - 2025-09-03
+
 ## [Chore: Updated contributors] - 2025-09-03
 
 ## [Add Refresh Tab Command] - 2025-08-25

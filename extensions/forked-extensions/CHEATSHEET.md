@@ -45,10 +45,11 @@ git sparse-checkout list
 
 1. Open the `.git/info/sparse-checkout` file in your favorite text editor.
 2. Remove the line that corresponds to the directory you want to untrack.
-3. Save the file and run the following command to update the working directory:
-   ```shell
-   git sparse-checkout reapply
-   ```
+3. Save the file and run the following command to update the working directory
+
+```shell
+git sparse-checkout reapply
+```
 
 ### Disable sparse-checkout
 
@@ -59,4 +60,5 @@ git sparse-checkout disable
 ## References
 
 - [`git-clone` documentation](https://git-scm.com/docs/git-clone)
+- [`git-fetch` documentation](https://git-scm.com/docs/git-fetch)
 - [`git-sparse-checkout` documentation](https://git-scm.com/docs/git-sparse-checkout)

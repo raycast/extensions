@@ -121,7 +121,13 @@ function AutoInstall({ onRefresh }: { onRefresh: () => void }) {
             await installationToast.show();
 
             try {
-              await execa(wingetPath, ["install", "--id=yt-dlp.yt-dlp", "-e"]);
+              await execa(wingetPath, [
+                "install",
+                "--accept-source-agreements",
+                "--accept-package-agreements",
+                "--id=yt-dlp.yt-dlp",
+                "-e",
+              ]);
               await installationToast.hide();
               onRefresh();
             } catch (error) {

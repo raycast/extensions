@@ -14,13 +14,16 @@ If you run into any issues, please verify the following:
 ## Granola Commands
 - **Create Note** - Start a new note and recording immediately in Granola
 - **Search Notes** - View your notes in a list, see their details (including transcript), copy their links, or copy their contents as HTML or Markdown
-- **Browse Folders** - Navigate your folders and view notes within them with folder icons
+- **Search People** - Browse and search people from your Granola meetings, view their company affiliations and meeting history
+- **Search Companies** - Explore companies from your meetings, see associated people and meeting details
 - **Export Transcripts** - Select multiple notes and export their transcripts in bulk
 - **Export Notes** - Select multiple notes and export them in bulk
 - **Create Note from Transcript** - Create a new note from text transcripts or YouTube videos with AI-powered summaries
 
 ## AI Tools
 - **AI Notes** - Use Raycast AI on top of Granola and other AI extensions
+- **List Meetings** - Get meeting metadata (title, date, folders)
+- **Recipes** - Get recipes from Granola
 - **Get Transcript** - Retrieve the full transcript for any specific note
 - **Save to Notion** - Export one or more notes to Notion
 

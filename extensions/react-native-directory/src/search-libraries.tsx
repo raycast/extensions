@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { Library, QueryOrder } from "./types";
+import { LibraryType, QueryOrder } from "./types";
 import { useLibraries } from "./hooks/use-libraries";
 import { SortDropdown } from "./components/sort-dropdown";
 import { LibraryListItem } from "./components/library-list-item";
@@ -34,7 +34,7 @@ export default function SearchLibraries() {
       searchBarAccessory={<SortDropdown onSortChange={onSortChange} onFilterChange={onFilterChange} />}
       pagination={librariesPagination}
     >
-      {(libraries as Library[])?.map((library, index: number) => (
+      {(libraries as LibraryType[])?.map((library, index: number) => (
         <LibraryListItem
           key={`list-item-${index}-${library.github.name}`}
           library={library}

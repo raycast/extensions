@@ -50,3 +50,17 @@ export interface SearchPayload {
   size: number;
   searchOptions: SearchOptions;
 }
+
+export interface GameSearchResult {
+  game_id: number;
+  game_name: string;
+  game_image: string;
+  profile_platform?: string;
+  comp_main: number;
+  comp_plus: number;
+  comp_100: number;
+}
+
+export interface SearchResponse {
+  data: GameSearchResult[];
+}
