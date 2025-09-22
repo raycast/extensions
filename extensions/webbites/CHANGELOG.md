@@ -1,6 +1,6 @@
 # Webbites Raycast Extension Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-09-22
 
 ### Added
 - Search WebBites bookmarks functionality
