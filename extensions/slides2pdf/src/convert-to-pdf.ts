@@ -97,7 +97,7 @@ export default async function Command() {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      await showToast(Toast.Style.Failure, "Conversion failed", message);
+      const message = error instanceof Error ? error.message : String(error);
       try {
         await showToast(Toast.Style.Failure, "Conversion failed", message);
       } catch {
