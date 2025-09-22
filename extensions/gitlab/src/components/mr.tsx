@@ -422,6 +422,12 @@ export function MRListItem(props: {
         icon: mr.merge_when_pipeline_succeeds ? Icon.Rewind : undefined,
         tooltip: mr.merge_when_pipeline_succeeds ? "Auto Merge" : undefined,
       },
+      {
+        icon: mr.user_notes_count && mr.user_notes_count > 0 ? Icon.SpeechBubble : undefined,
+        text: mr.user_notes_count && mr.user_notes_count > 0 ? mr.user_notes_count.toString() : undefined,
+        tooltip:
+          mr.user_notes_count && mr.user_notes_count > 0 ? `Number of Comments ${mr.user_notes_count}` : undefined,
+      },
       { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
       { tag: mr.milestone?.title ?? "", tooltip: mr.milestone ? `Milestone: ${mr.milestone?.title}` : "" },
       { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` },

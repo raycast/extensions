@@ -4,6 +4,8 @@
 
 - Better milestones view
 - Add subtitles to `Recent Activities`
+- Add comments to Merge Requests
+- Add Comments to Issues
 
 ## [Added support for Windows] - 2025-08-07
 

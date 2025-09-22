@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Color, Detail, Image } from "@raycast/api";
+import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { getGitLabGQL, gitlab } from "../common";
@@ -210,6 +210,14 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }) 
         tooltip: `Status: ${capitalizeFirstLetter(issue.state)}`,
       }}
       accessories={[
+        {
+          icon: issue.user_notes_count && issue.user_notes_count > 0 ? Icon.SpeechBubble : undefined,
+          text: issue.user_notes_count && issue.user_notes_count > 0 ? issue.user_notes_count.toString() : undefined,
+          tooltip:
+            issue.user_notes_count && issue.user_notes_count > 0
+              ? `Number of Comments ${issue.user_notes_count}`
+              : undefined,
+        },
         {
           tag: issue.milestone ? issue.milestone.title : "",
           tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,

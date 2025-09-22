@@ -114,6 +114,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     force_remove_source_branch: mr.force_remove_source_branch,
     squash_on_merge: mr.squash_on_merge,
     merge_when_pipeline_succeeds: mr.merge_when_pipeline_succeeds,
+    user_notes_count: mr.user_notes_count,
   };
 }
 
@@ -142,6 +143,7 @@ export function jsonDataToIssue(issue: any): Issue {
     project_id: issue.project_id,
     milestone: dataToMilestone(issue.milestone),
     labels: issue.labels as Label[],
+    user_notes_count: issue.user_notes_count,
   };
 }
 
@@ -241,6 +243,7 @@ export class Issue {
   public project_id = 0;
   public milestone?: Milestone = undefined;
   public labels: Label[] = [];
+  public user_notes_count: number | undefined = undefined;
 }
 
 export class MergeRequest {
@@ -267,6 +270,7 @@ export class MergeRequest {
   public force_remove_source_branch: boolean | undefined = undefined;
   public squash_on_merge: boolean | undefined = undefined;
   public merge_when_pipeline_succeeds: boolean | undefined = undefined;
+  public user_notes_count: number | undefined = undefined;
 }
 
 export class Pipeline {
