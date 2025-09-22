@@ -387,7 +387,7 @@ ${buildAISection()}
             <Action.OpenInBrowser title="View Large Thumbnail" url={file.direct_links.url_tl} icon={Icon.Image} />
           )}
           <Action.CopyToClipboard title="Copy File Name" content={file.name} icon={Icon.Clipboard} />
-          <Action.CopyToClipboard title="Copy File Id" content={file._id} icon={Icon.Clipboard} />
+          <Action.CopyToClipboard title="Copy File ID" content={file._id} icon={Icon.Clipboard} />
           {file.direct_links?.url && (
             <Action.CopyToClipboard title="Copy File URL" content={file.direct_links.url} icon={Icon.Link} />
           )}
