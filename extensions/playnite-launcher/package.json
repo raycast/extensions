@@ -57,6 +57,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "customPlaynitePath",
+      "type": "directory",
+      "description": "The directory of your Playnite installation folder",
+      "title": "Custom Playnite Installation Folder",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^2.2.0"

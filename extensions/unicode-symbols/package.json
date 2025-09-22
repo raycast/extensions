@@ -107,21 +107,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.3",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.1",
+    "@raycast/utils": "^2.2.1",
     "fuse.js": "^6.6.2",
-    "js-base64": "^3.7.7"
+    "js-base64": "^3.7.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.0",
-    "@types/node": "22.10.2",
-    "@types/react": "18.3.8",
-    "eslint": "^8.57.1",
-    "prettier": "^3.4.2",
+    "@raycast/eslint-config": "^2.0.4",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2",
-    "unidata16": "^0.3.1"
+    "typescript": "^5.9.2",
+    "unidata16": "^1.0.0"
   },
   "scripts": {
     "build": "ray build -e dist",

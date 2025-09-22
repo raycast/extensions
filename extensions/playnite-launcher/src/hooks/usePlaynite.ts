@@ -1,104 +1,90 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { homedir } from "os";
-import { join } from "path";
-import { readFile, access } from "fs/promises";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { readFile, access } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import type { PlayniteGame } from "../types";
+import { execAsync, removeBOM } from "../utils";
+import { PlayniteError, PlayniteErrorCode } from "../errors";
 
-const removeBOM = (source: string) => source.replace(/^\uFEFF/, "");
-const execAsync = promisify(exec);
-
-interface PlayniteGameSource {
-  Id: string;
-  Name: string;
-}
-
-interface PlayniteGameReleaseDate {
-  Date: string;
-  Day: number;
-  Month: number;
-  Year: number;
-}
-
-export interface PlayniteGame {
-  Id: string;
-  Name: string;
-  Icon?: string | null;
-  InstallDirectory?: string | null;
-  IsInstalled: boolean;
-  Source: PlayniteGameSource;
-  ReleaseDate?: PlayniteGameReleaseDate;
-  Playtime: number;
-  Hidden: boolean;
-}
-
-function getPlayniteLibraryPath(): string {
+function getDefaultPlayniteDataPath(): string | null {
   const appDataPath = process.env.APPDATA || join(homedir(), "AppData", "Roaming");
-  return join(appDataPath, "Playnite", "ExtensionsData", "FlowLauncherExporter", "library.json");
+  const defaultPlayniteDataPath = join(appDataPath, "Playnite");
+  // If the user installs Playnite portable, they'll have to manually select the path
+  return existsSync(defaultPlayniteDataPath) ? defaultPlayniteDataPath : null;
 }
 
-function getPlayniteIconPath(iconPath: string): string {
-  const appDataPath = process.env.APPDATA || join(homedir(), "AppData", "Roaming");
-  const fullPath = join(appDataPath, "Playnite", "library", "files", iconPath);
+function getPlayniteLibraryPath(customPlayniteDataPath: string | null = null): string | null {
+  const playniteDataPath = customPlayniteDataPath ?? getDefaultPlayniteDataPath();
+  if (playniteDataPath === null) return null;
+  return join(playniteDataPath, "ExtensionsData", "FlowLauncherExporter", "library.json");
+}
+
+function getPlayniteIconPath(iconPath: string, customPlayniteDataPath: string | null = null): string | null {
+  const playniteDataPath = customPlayniteDataPath ?? getDefaultPlayniteDataPath();
+  if (playniteDataPath === null) return null;
+  const fullPath = join(playniteDataPath, "library", "files", iconPath);
   return `file://${fullPath.replace(/\\/g, "/")}`;
 }
 
-async function loadPlayniteGames(includeHidden: boolean): Promise<PlayniteGame[]> {
-  const libraryPath = getPlayniteLibraryPath();
+async function loadPlayniteGames(
+  includeHidden: boolean,
+  customPlayniteDataPath: string | null = null,
+): Promise<PlayniteGame[]> {
+  const libraryPath = getPlayniteLibraryPath(customPlayniteDataPath);
+
+  if (libraryPath === null) throw new PlayniteError(PlayniteErrorCode.PLAYNITE_PATH_INVALID);
 
   try {
     await access(libraryPath);
   } catch {
-    throw new Error(
-      "FlowLauncherExporter addon not found. Please install it from https://github.com/Garulf/FlowLauncherExporter/releases/latest",
-    );
+    throw new PlayniteError(PlayniteErrorCode.EXTENSION_MISSING);
   }
 
   try {
-    const libraryData = JSON.parse(removeBOM(await readFile(libraryPath, "utf-8"))) as PlayniteGame[];
+    let libraryData = JSON.parse(removeBOM(await readFile(libraryPath, "utf-8"))) as PlayniteGame[];
+
+    // If the user has only one game the file will only contain an object, not an array.
+    if (!Array.isArray(libraryData)) {
+      libraryData = [libraryData];
+    }
 
     return libraryData
       .filter((game) => includeHidden || !game.Hidden)
       .map((game) => ({
         ...game,
-        Icon: game.Icon ? getPlayniteIconPath(game.Icon) : null,
+        Icon: game.Icon ? getPlayniteIconPath(game.Icon, customPlayniteDataPath) : null,
       }));
   } catch (error) {
-    throw new Error(`Failed to load Playnite library: ${error instanceof Error ? error.message : "Unknown error"}`);
+    throw new PlayniteError(PlayniteErrorCode.UNKNOWN_ERROR, error instanceof Error ? error.message : undefined);
   }
 }
 
 export function usePlaynite() {
   const preferences = getPreferenceValues();
-  const {
-    data: games = [],
-    isLoading,
-    error: loadError,
-  } = useCachedPromise(
-    async (includeHidden: boolean) => {
-      return await loadPlayniteGames(includeHidden);
-    },
-    [preferences.includeHidden],
-    {
-      initialData: [],
-      onError: async (error) => {
-        if (error.message === "ADDON_NOT_FOUND") {
-          return;
+  const { data, error, isLoading } = useCachedPromise(
+    async (includeHidden: boolean, customPlaynitePath: string | null) => {
+      try {
+        return {
+          games: await loadPlayniteGames(includeHidden, customPlaynitePath),
+          error: null,
+        };
+      } catch (err) {
+        if (err instanceof Error) {
+          return {
+            games: [],
+            error: err,
+          };
         }
-        await showFailureToast(error, {
-          title: "Failed to load Playnite library",
-        });
-      },
+        throw err;
+      }
+    },
+    [preferences.includeHidden, preferences.customPlaynitePath],
+    {
+      initialData: { error: null, games: [] },
     },
   );
-
-  const error =
-    loadError?.message === "ADDON_NOT_FOUND"
-      ? "Please install the FlowLauncherExporter addon from:\nhttps://github.com/Garulf/FlowLauncherExporter/releases/latest"
-      : loadError
-        ? "Failed to load Playnite library"
-        : null;
 
   const launchGame = async (game: PlayniteGame) => {
     try {
@@ -176,7 +162,7 @@ export function usePlaynite() {
   };
 
   return {
-    games,
+    data,
     isLoading,
     error,
     launchGame,
