@@ -1,6 +1,26 @@
-import { Detail, getPreferenceValues } from "@raycast/api";
-import { useCachedPromise} from "@raycast/utils";
+import { Detail, getPreferenceValues, Icon, List } from "@raycast/api";
+import { getFavicon, useCachedPromise} from "@raycast/utils";
 import crypto from 'crypto';
+
+type DomainState = "autorenew_in_progress"
+|"autorenew_registry_in_progress"
+|"deleted"
+|"dispute"
+|"expired"
+|"ok"
+|"outgoing_transfer"
+|"pending_create"
+|"pending_delete"
+|"pending_incoming_transfer"
+|"pending_installation"
+|"registry_suspended"
+|"restorable"
+|"technical_suspended"
+type Domain = {
+  domain: string
+  serviceId: number;
+  state: DomainState;
+}
 
 const preferences = getPreferenceValues<Preferences>();
 async function callOvh<T>({method="GET", endpoint, body}: {method?: string, endpoint: string; body?: Record<string,string>}) {
@@ -33,14 +53,21 @@ async function callOvh<T>({method="GET", endpoint, body}: {method?: string, endp
       }
     });
     const result = await response.json();
+    // console.log(result);
     if (!response.ok) throw new Error((result as Error).message);
+    // console.log(result);
     return result as T;
 }
 
 export default function Command() {
-  const {isLoading, data}= useCachedPromise(async()=>{
-    const result = await callOvh({endpoint:"v1/domain"});
-    console.log(result);
+  const {isLoading, data:domains}= useCachedPromise(async()=>{
+    const resultDomainList = await callOvh<string[]>({endpoint:"v1/domain"});
+    const resultDomains = await Promise.all(resultDomainList.map(domain => callOvh<Domain>({endpoint: `v1/domain/${domain}`})));
+    return resultDomains;
+  }, [], {
+    initialData: []
   })
-  return <Detail isLoading={isLoading} markdown={JSON.stringify(data)} />;
+  return <List isLoading={isLoading}>
+    {domains.map(domain => <List.Item key={domain.domain} icon={getFavicon(`https://${domain.domain}`, {fallback: Icon.Globe})} title={domain.domain} />)}
+  </List>
 }
