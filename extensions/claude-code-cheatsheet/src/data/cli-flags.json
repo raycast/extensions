@@ -13,7 +13,7 @@
       "tags": ["non-interactive", "one-shot", "print"]
     },
     {
-      "id": "output-format",
+      "id": "output-format-flag",
       "name": "--output-format",
       "description": "Specifies the output format for responses. Options are 'text' (default), 'json', or 'stream-json'.",
       "usage": "claude --output-format <format>",
@@ -22,7 +22,7 @@
       "tags": ["format", "json", "output"]
     },
     {
-      "id": "verbose",
+      "id": "verbose-flag",
       "name": "--verbose",
       "description": "Enables verbose logging, showing detailed turn-by-turn output, which is useful for debugging conversations.",
       "usage": "claude --verbose",
@@ -31,7 +31,7 @@
       "tags": ["debug", "detailed", "verbose"]
     },
     {
-      "id": "debug",
+      "id": "debug-flag",
       "name": "--debug, -d",
       "description": "Enables debug mode, providing extensive logging for troubleshooting and development.",
       "usage": "claude --debug",
@@ -40,7 +40,7 @@
       "tags": ["debug", "troubleshooting", "verbose"]
     },
     {
-      "id": "input-format",
+      "id": "input-format-flag",
       "name": "--input-format",
       "description": "Specifies the input format for piped data. Only works with --print. Options: 'text' (default) or 'stream-json'.",
       "usage": "claude --input-format <format>",
@@ -49,7 +49,7 @@
       "tags": ["format", "input", "stream-json"]
     },
     {
-      "id": "mcp-debug",
+      "id": "mcp-debug-flag",
       "name": "--mcp-debug",
       "description": "Enables MCP debug mode. This flag is deprecated; please use the more general --debug flag instead.",
       "usage": "claude --mcp-debug",
@@ -60,7 +60,7 @@
       "tags": ["MCP", "debug", "deprecated"]
     },
     {
-      "id": "mcp-config",
+      "id": "mcp-config-flag",
       "name": "--mcp-config",
       "description": "Loads MCP server configurations from a specified JSON file or a raw JSON string.",
       "usage": "claude --mcp-config <file or string>",
@@ -87,7 +87,7 @@
       "tags": ["continue", "conversation", "latest"]
     },
     {
-      "id": "dangerously-skip-permissions",
+      "id": "dangerously-skip-permissions-flag",
       "name": "--dangerously-skip-permissions",
       "description": "Bypass all permission checks. Recommended only for sandboxes with no internet access.",
       "usage": "claude --dangerously-skip-permissions",
@@ -97,7 +97,7 @@
       "tags": ["bypass", "dangerous", "permissions", "skip"]
     },
     {
-      "id": "allowed-tools",
+      "id": "allowed-tools-flag",
       "name": "--allowedTools",
       "description": "Specifies a comma-separated list of tools that Claude is permitted to use during the session.",
       "usage": "claude --allowedTools <tools>",
@@ -106,7 +106,7 @@
       "tags": ["allowed", "permissions", "restriction", "tools"]
     },
     {
-      "id": "disallowed-tools",
+      "id": "disallowed-tools-flag",
       "name": "--disallowedTools",
       "description": "Specifies a comma-separated list of tools that Claude is blocked from using during the session.",
       "usage": "claude --disallowedTools <tools>",
@@ -115,7 +115,7 @@
       "tags": ["disallowed", "permissions", "restriction", "tools"]
     },
     {
-      "id": "add-dir",
+      "id": "add-dir-flag",
       "name": "--add-dir",
       "description": "Additional directories to allow tool access to (must be absolute paths).",
       "usage": "claude --add-dir <directories...>",
@@ -124,7 +124,7 @@
       "tags": ["absolute", "additional", "directory", "multiple", "working"]
     },
     {
-      "id": "model",
+      "id": "model-flag",
       "name": "--model",
       "description": "Model for the current session. Provide an alias for the latest model (e.g. 'sonnet' or 'opus') or a model's full name (e.g. 'claude-sonnet-4-20250514').",
       "usage": "claude --model <model>",
@@ -133,7 +133,7 @@
       "tags": ["AI", "model", "selection"]
     },
     {
-      "id": "version",
+      "id": "version-flag",
       "name": "--version, -v",
       "description": "Outputs the current version number of your installed Claude Code CLI.",
       "usage": "claude --version",
@@ -142,7 +142,7 @@
       "tags": ["info", "version"]
     },
     {
-      "id": "help",
+      "id": "help-flag",
       "name": "--help, -h",
       "description": "Displays comprehensive help information for a command or the CLI in general.",
       "usage": "claude --help",
@@ -151,7 +151,7 @@
       "tags": ["documentation", "help"]
     },
     {
-      "id": "max-turns",
+      "id": "max-turns-flag",
       "name": "--max-turns",
       "description": "Limits the number of agentic turns Claude can take in non-interactive mode to prevent infinite loops.",
       "usage": "claude -p --max-turns <number> \"<query>\"",
@@ -160,7 +160,7 @@
       "tags": ["agentic", "limit", "non-interactive", "turns"]
     },
     {
-      "id": "permission-prompt-tool",
+      "id": "permission-prompt-tool-flag",
       "name": "--permission-prompt-tool",
       "description": "Specifies an MCP tool to handle permission prompts in non-interactive mode, enabling automated workflows.",
       "usage": "claude -p --permission-prompt-tool <tool> \"<query>\"",
@@ -169,17 +169,16 @@
       "tags": ["mcp", "non-interactive", "permissions", "prompt", "tool"]
     },
     {
-      "id": "permission-mode",
+      "id": "permission-mode-flag",
       "name": "--permission-mode",
       "description": "Begin in a specified permission mode. Available modes: acceptEdits, bypassPermissions, default, plan.",
       "usage": "claude --permission-mode <mode>",
       "example": "claude --permission-mode plan",
-      "isNew": true,
       "category": "flag",
       "tags": ["mode", "permissions", "plan", "session"]
     },
     {
-      "id": "append-system-prompt",
+      "id": "append-system-prompt-flag",
       "name": "--append-system-prompt",
       "description": "Append a system prompt to the default system prompt.",
       "usage": "claude --append-system-prompt <prompt>",
@@ -189,12 +188,21 @@
       "tags": ["append", "prompt", "system"]
     },
     {
-      "id": "fallback-model",
+      "id": "system-prompt-file-flag",
+      "name": "--system-prompt-file",
+      "description": "Override the default system prompt with the contents of a specified file.",
+      "usage": "claude --system-prompt-file <file>",
+      "example": "claude --system-prompt-file ./custom-prompt.txt",
+      "isNew": true,
+      "category": "flag",
+      "tags": ["file", "override", "prompt", "system"]
+    },
+    {
+      "id": "fallback-model-flag",
       "name": "--fallback-model",
       "description": "Enable automatic fallback to specified model when default model is overloaded (only works with --print).",
       "usage": "claude --fallback-model <model>",
       "example": "claude --fallback-model haiku --print \"query\"",
-      "isNew": true,
       "category": "flag",
       "tags": ["fallback", "model", "overload", "print"]
     },
@@ -204,29 +212,36 @@
       "description": "Automatically connect to IDE on startup if exactly one valid IDE is available.",
       "usage": "claude --ide",
       "example": "claude --ide",
-      "isNew": true,
       "category": "flag",
       "tags": ["auto", "connect", "ide", "startup"]
     },
     {
-      "id": "strict-mcp-config",
+      "id": "strict-mcp-config-flag",
       "name": "--strict-mcp-config",
       "description": "Only use MCP servers from --mcp-config, ignoring all other MCP configurations.",
       "usage": "claude --strict-mcp-config --mcp-config servers.json",
       "example": "claude --strict-mcp-config --mcp-config ./mcp-servers.json",
-      "isNew": true,
       "category": "flag",
       "tags": ["config", "mcp", "servers", "strict"]
     },
     {
-      "id": "session-id",
+      "id": "session-id-flag",
       "name": "--session-id",
       "description": "Use a specific session ID for the conversation (must be a valid UUID).",
       "usage": "claude --session-id <uuid>",
       "example": "claude --session-id 12345678-1234-1234-1234-123456789abc",
-      "isNew": true,
       "category": "flag",
       "tags": ["id", "session", "uuid"]
+    },
+    {
+      "id": "settings-flag",
+      "name": "--settings",
+      "description": "Load additional settings from a JSON file or JSON string.",
+      "usage": "claude --settings <file-or-json>",
+      "example": "claude --settings ./my-settings.json",
+      "isNew": true,
+      "category": "flag",
+      "tags": ["config", "file", "json", "settings"]
     }
   ]
 }

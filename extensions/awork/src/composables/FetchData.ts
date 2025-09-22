@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 import { baseURI, refreshToken } from "./WebClient";
@@ -7,11 +8,21 @@ interface company {
   name: string;
 }
 
+interface projectStatus {
+  type: string;
+}
+
 export interface project {
   id: string;
   name: string;
   isBillableByDefault: boolean;
   company?: company;
+  projectStatus: projectStatus;
+}
+
+interface taskStatus {
+  type: string;
+  icon: string;
 }
 
 export interface task {
@@ -20,12 +31,15 @@ export interface task {
   projectId: string;
   project: project;
   typeOfWorkId?: string;
+  taskStatus: taskStatus;
 }
 
 export interface typeOfWork {
   id: string;
   name: string;
 }
+
+const preferences = getPreferenceValues<Preferences>();
 
 const getRequestOptions = (token: string) => ({
   method: "GET",
@@ -37,9 +51,17 @@ const getRequestOptions = (token: string) => ({
 
 export const getProjects =
   (token: string, searchText: string, pageSize: number) => async (options: { page: number }) => {
+    let filterBy = preferences.showDoneProjects ? "" : "projectStatus/type ne 'closed'";
+    if (searchText !== "") {
+      if (filterBy) {
+        filterBy = filterBy + " and ";
+      }
+      filterBy = filterBy + `substringof('${encodeURIComponent(searchText.replaceAll("'", ""))}',name)`;
+    }
+
     return fetch(
       new URL(
-        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${searchText ? `&filterby=substringof('${encodeURIComponent(searchText.replaceAll("'", ""))}',name)` : ""}`,
+        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${filterBy ? "&filterby=" + filterBy : ""}`,
       ),
       getRequestOptions(token),
     )
@@ -76,7 +98,7 @@ export const getTasks =
   (token: string, searchText: string, pageSize: number, projectId?: string) => async (options: { page: number }) => {
     const route = projectId ? `projects/${projectId}/projecttasks` : "me/projecttasks";
     const pagination = `page=${options.page + 1}&pageSize=${pageSize}`;
-    let filterBy = "filterby=taskstatus/type ne 'done'";
+    let filterBy = preferences.showDoneTasks ? "filterby=" : "filterby=taskstatus/type ne 'done'";
 
     if (searchText) {
       const searchTextIsUuid = searchText.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keygen",
   "title": "Keygen",
-  "description": "View Licenses and Policies",
+  "description": "Manage API Tokens, Licenses, Policies, Products and Users",
   "icon": "extension_icon.png",
   "author": "xmok",
   "license": "MIT",
@@ -26,15 +26,29 @@
   ],
   "commands": [
     {
+      "name": "api-tokens",
+      "title": "View API Tokens",
+      "subtitle": "Keygen",
+            "description": "List API Tokens and Create new ones",
+"mode": "view"
+    },
+    {
+      "name": "api-usage",
+      "title": "API Usage",
+      "subtitle": "Keygen",
+      "description": "Check current API usage statistics and limits",
+      "mode": "no-view"
+    },
+    {
       "name": "licenses",
-      "title": "Voew Licenses",
+      "title": "View Licenses",
       "subtitle": "Keygen",
       "description": "List Licenses and Create new ones",
       "mode": "view"
     },
     {
       "name": "policies",
-      "title": "List Policies",
+      "title": "View Policies",
       "subtitle": "Keygen",
       "description": "List Policies and Create new ones",
       "mode": "view"
@@ -45,11 +59,22 @@
       "subtitle": "Keygen",
       "description": "List Products and Create new ones",
       "mode": "view"
+    },
+    {
+      "name": "users",
+      "title": "View Users",
+      "subtitle": "Keygen",
+      "description": "List Users and Create new ones",
+      "mode": "view"
     }
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.0.1",
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
     "dayjs": "^1.11.13"
   },
   "devDependencies": {

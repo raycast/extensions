@@ -23,6 +23,8 @@ import { TimezoneBuddy } from "./interfaces/TimezoneBuddy";
 import { getColorForTz } from "./helpers/getColorForTz";
 import { getIconForTz } from "./helpers/getIconForTz";
 import { generateGuid } from "./helpers/guid";
+import { getCurrentTimeHeader } from "./helpers/getCurrentTimeHeader";
+import { getOffsetHrsDisplay } from "./helpers/getOffsetHrsDisplay";
 
 const ALL_TIMEZONES = Intl.supportedValuesOf("timeZone");
 
@@ -200,7 +202,7 @@ function DeleteBuddyAction(props: { onDelete: () => void }) {
 export default function Command() {
   const [buddies, setBuddies] = useState<TimezoneBuddy[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [currentHrOffset, setCurrentHrOffset] = useState(0);
   async function updateBuddies(newBuddies: TimezoneBuddy[]) {
     setBuddies(newBuddies);
     await LocalStorage.setItem("buddies", JSON.stringify(newBuddies));
@@ -329,12 +331,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <List.Section
-        title={`Current Time: ${new Date().toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "numeric",
-        })}`}
-      >
+      <List.Section title={getCurrentTimeHeader(currentHrOffset)}>
         {buddies &&
           buddies.map((buddy, index) => (
             <List.Item
@@ -348,18 +345,47 @@ export default function Command() {
                 },
                 {
                   tag: {
-                    value: getCurrentTimeForTz(buddy.tz),
-                    color: getColorForTz(buddy.tz),
+                    value: getCurrentTimeForTz(buddy.tz, currentHrOffset),
+                    color: getColorForTz(buddy.tz, currentHrOffset),
                   },
-                  tooltip: getTooltipForTz(buddy.tz),
-                  icon: getIconForTz(buddy.tz),
+                  tooltip: getTooltipForTz(buddy.tz, currentHrOffset),
+                  icon: getIconForTz(buddy.tz, currentHrOffset),
                 },
+
+                // Show the current hour offset if it's not 0
+                ...(currentHrOffset
+                  ? [
+                      {
+                        text: `(${getOffsetHrsDisplay(currentHrOffset)})`,
+                      },
+                    ]
+                  : []),
               ]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
                     <CreateBuddyAction onCreate={handleCreate} />
                     <EditBuddyAction index={index} buddy={buddy} onUpdate={handleUpdate} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.Plus}
+                      title="Add 1 Hour"
+                      shortcut={{
+                        modifiers: ["cmd"],
+                        key: "arrowRight",
+                      }}
+                      onAction={() => setCurrentHrOffset((o) => o + 1)}
+                    />
+                    <Action
+                      icon={Icon.Minus}
+                      title="Subtract 1 Hour"
+                      shortcut={{
+                        modifiers: ["cmd"],
+                        key: "arrowLeft",
+                      }}
+                      onAction={() => setCurrentHrOffset((o) => o - 1)}
+                    />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action

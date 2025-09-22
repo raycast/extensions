@@ -179,22 +179,9 @@ export default function Command() {
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={getFavicon(TRAKT_APP_URL)}
-              title="Open in Trakt"
-              url={getTraktUrl("shows", item.show.ids.slug)}
-            />
-            <Action.OpenInBrowser
-              icon={getFavicon(IMDB_APP_URL)}
-              title="Open in IMDb"
-              url={getIMDbUrl(item.show.ids.imdb)}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.Push
               icon={Icon.Switch}
               title="Browse Seasons"
-              shortcut={Keyboard.Shortcut.Common.Open}
               target={<SeasonGrid showId={item.show.ids.trakt} slug={item.show.ids.slug} imdbId={item.show.ids.imdb} />}
             />
             <Action
@@ -202,6 +189,18 @@ export default function Command() {
               icon={Icon.Checkmark}
               shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
               onAction={() => handleAction(item, checkInFirstEpisodeToHistory, "First episode checked-in")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={getFavicon(TRAKT_APP_URL)}
+              title="Open in Trakt"
+              url={getTraktUrl("shows", item.show.ids.slug)}
+            />
+            <Action.OpenInBrowser
+              icon={getFavicon(IMDB_APP_URL)}
+              title="Open in Imdb"
+              url={getIMDbUrl(item.show.ids.imdb)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

@@ -87,6 +87,7 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
   const { action } = getPreferenceValues<Preferences.RetrieveBrands>();
   const { search } = props.arguments;
   const [searched, setSearched] = useState(!search);
+  const [searchText, setSearchText] = useState("");
 
   const { isLoading, value: brands = [], setValue: setBrands } = useLocalStorage<BrandInStorage[]>("brands", []);
 
@@ -127,72 +128,69 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
   }, [brands]);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search brand">
-      {!isLoading && brands.length === 0 ? (
-        <List.EmptyView
-          title="No Brands"
-          description="Search for a brand to get started"
-          actions={
-            <ActionPanel>
-              <Action.Push
-                icon={Icon.MagnifyingGlass}
-                title="Search Brand"
-                target={<SearchBrand onSearched={updateBrands} />}
-              />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.Section title={`${brands.length} Brands`}>
-          {brands.map((brand) => (
-            <List.Item
-              key={brand.domain}
-              icon={brand.logos[0]?.url || Icon.Dot}
-              title={brand.domain}
-              subtitle={`${brand.title} - ${brand.slogan}`}
-              keywords={[`${brand.title}`, `${brand.slogan}`]}
-              accessories={[{ date: new Date(brand.updated_on) }]}
-              actions={
-                <ActionPanel>
-                  <Action.Push title="View Brand" icon={Icon.Eye} target={<ViewBrand brand={brand} />} />
+    <List isLoading={isLoading} searchBarPlaceholder="Search brand" onSearchTextChange={setSearchText} filtering={true}>
+      <List.EmptyView
+        title={!searchText ? "No Brands" : "No Results"}
+        description={!searchText ? "Search for a brand to get started" : `Search for "${searchText}"`}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              icon={Icon.MagnifyingGlass}
+              title={!searchText ? "Search Brand" : `Search "${searchText}"`}
+              target={<SearchBrand search={searchText} onSearched={updateBrands} />}
+            />
+          </ActionPanel>
+        }
+      />
+      <List.Section title={`${brands.length} Brands`}>
+        {brands.map((brand) => (
+          <List.Item
+            key={brand.domain}
+            icon={brand.logos[0]?.url || Icon.Dot}
+            title={brand.domain}
+            subtitle={`${brand.title} - ${brand.slogan}`}
+            keywords={[`${brand.title}`, `${brand.slogan}`]}
+            accessories={[{ date: new Date(brand.updated_on) }]}
+            actions={
+              <ActionPanel>
+                <Action.Push title="View Brand" icon={Icon.Eye} target={<ViewBrand brand={brand} />} />
+                {action === "del" ? (
+                  <Action
+                    icon={Icon.DeleteDocument}
+                    style={Action.Style.Destructive}
+                    title="Remove Brand"
+                    onAction={() => removeBrand(brand)}
+                  />
+                ) : (
+                  <Action.Push
+                    icon={Icon.MagnifyingGlass}
+                    title="Search Brand"
+                    target={<SearchBrand onSearched={updateBrands} />}
+                  />
+                )}
+                <ActionPanel.Section>
                   {action === "del" ? (
+                    <Action.Push
+                      shortcut={Keyboard.Shortcut.Common.New}
+                      icon={Icon.MagnifyingGlass}
+                      title="Search Brand"
+                      target={<SearchBrand onSearched={updateBrands} />}
+                    />
+                  ) : (
                     <Action
                       icon={Icon.DeleteDocument}
                       style={Action.Style.Destructive}
                       title="Remove Brand"
                       onAction={() => removeBrand(brand)}
-                    />
-                  ) : (
-                    <Action.Push
-                      icon={Icon.MagnifyingGlass}
-                      title="Search Brand"
-                      target={<SearchBrand onSearched={updateBrands} />}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                   )}
-                  <ActionPanel.Section>
-                    {action === "del" ? (
-                      <Action.Push
-                        shortcut={Keyboard.Shortcut.Common.New}
-                        icon={Icon.MagnifyingGlass}
-                        title="Search Brand"
-                        target={<SearchBrand onSearched={updateBrands} />}
-                      />
-                    ) : (
-                      <Action
-                        icon={Icon.DeleteDocument}
-                        style={Action.Style.Destructive}
-                        title="Remove Brand"
-                        onAction={() => removeBrand(brand)}
-                        shortcut={Keyboard.Shortcut.Common.Remove}
-                      />
-                    )}
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

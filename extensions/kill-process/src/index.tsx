@@ -18,6 +18,8 @@ import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
+import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp } from "./utils/platform";
+import { fetchRunningProcesses } from "./utils/process";
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
@@ -38,35 +40,18 @@ export default function ProcessList() {
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
   const fetchProcesses = () => {
-    exec(`ps -eo pid,ppid,pcpu,rss,comm`, (err, stdout) => {
-      if (err != null) {
-        return;
-      }
-
-      const processes = stdout
-        .split("\n")
-        .map((line) => {
-          const defaultValue = ["", "", "", "", "", ""];
-          const regex = /(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/;
-          const [, id, pid, cpu, mem, path] = line.match(regex) ?? defaultValue;
-          const processName = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
-          const isPrefPane = path.includes(".prefPane");
-          const isApp = path.includes(".app/");
-
-          return {
-            id: parseInt(id),
-            pid: parseInt(pid),
-            cpu: parseFloat(cpu),
-            mem: parseInt(mem),
-            type: isPrefPane ? "prefPane" : isApp ? "app" : "binary",
-            path,
-            processName,
-          } as Process;
-        })
-        .filter((process) => process.processName !== "");
-
-      setFetchResult(processes);
-    });
+    fetchRunningProcesses()
+      .then((processes) => {
+        setFetchResult(processes);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch processes:", err);
+        showToast({
+          title: "Failed to fetch processes",
+          style: Toast.Style.Failure,
+          message: err instanceof Error ? err.message : "Unknown error",
+        });
+      });
   };
 
   useInterval(fetchProcesses, refreshDuration);
@@ -86,17 +71,7 @@ export default function ProcessList() {
   }, [fetchResult, sortBy, aggregateApps]);
 
   const fileIcon = (process: Process) => {
-    if (process.type === "prefPane") {
-      return {
-        fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "",
-      };
-    }
-
-    if (process.type === "app" || process.type === "aggregatedApp") {
-      return { fileIcon: process.path?.replace(/(.+\.app)(.+)/, "$1") ?? "" };
-    }
-
-    return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
+    return getFileIcon(process);
   };
 
   const killProcess = async (process: Process, force: boolean = false) => {
@@ -113,32 +88,37 @@ export default function ProcessList() {
       });
       return;
     }
-    exec(`zsh -c '${force ? "sudo " : ""}kill -9 ${process.id}'`, (error) => {
+
+    const command = getKillCommand(process.id, force);
+    exec(command, (error) => {
       if (error) {
-        if (force) {
+        const errorHelp = getPlatformSpecificErrorHelp(force);
+
+        if (force && errorHelp.helpUrl) {
           confirmAlert({
-            title: `Failed Killing ${processName}`,
-            message:
-              "Please ensure that touch id/password prompt is enabled for sudo: https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28",
+            title: errorHelp.title,
+            message: errorHelp.message,
             primaryAction: {
-              title: "Open Link",
-              onAction: () =>
-                open("https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28"),
+              title: "Open Help",
+              onAction: () => open(errorHelp.helpUrl!),
             },
           });
         } else {
           showToast({
-            title: `Failed Killing ${processName}`,
+            title: errorHelp.title,
+            message: errorHelp.message,
             style: Toast.Style.Failure,
           });
         }
         return;
       }
+
       showToast({
         title: `Killed ${processName}`,
         style: Toast.Style.Success,
       });
     });
+
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
       closeMainWindow();

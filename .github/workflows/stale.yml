@@ -40,11 +40,11 @@ jobs:
           days-before-issue-close: 10
 
           # PRs
-          stale-pr-message: "This pull request has been automatically marked as stale because it did not have any recent activity.\n\nIt will be closed if no further activity occurs in the next 14 days to keep our backlog clean 😊"
+          stale-pr-message: "This pull request has been automatically marked as stale because it did not have any recent activity.\n\nIt will be closed if no further activity occurs in the next 7 days to keep our backlog clean 😊"
           close-pr-message: "This pull request has been automatically closed due to inactivity.\n\nFeel free to comment in the thread when you're ready to continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss this."
-          exempt-pr-labels: "api, documentation, dev tools, app, status: blocked by API, rename, Dont close, AI Extension"
+          exempt-pr-labels: "api, documentation, dev tools, app, status: blocked by API, rename, Dont close, AI Extension, Windows"
           stale-pr-label: "status: stalled"
-          days-before-pr-stale: 21
+          days-before-pr-stale: 14
           days-before-pr-close: 7
 
           # Limiting

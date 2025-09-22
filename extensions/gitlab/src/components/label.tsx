@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 
-export function LabelDetail(props: { label: Label }): JSX.Element {
+export function LabelDetail(props: { label: Label }) {
   const l = props.label;
   let md = `## Color\n${l.color}`;
   if (l.description) {
@@ -11,7 +11,7 @@ export function LabelDetail(props: { label: Label }): JSX.Element {
   return <Detail markdown={md} />;
 }
 
-export function LabelListItem(props: { label: Label }): JSX.Element {
+export function LabelListItem(props: { label: Label }) {
   const l = props.label;
   const accessoryTitle = Object.keys(l).includes("subscribed") && l.subscribed ? "subscribed" : undefined;
   return (
@@ -41,7 +41,7 @@ export function LabelList(props: {
   isLoading?: boolean | undefined;
   throttle?: boolean | undefined;
   navigationTitle?: string;
-}): JSX.Element {
+}) {
   const labels = props.labels.filter((l) => l && l.id);
   return (
     <List

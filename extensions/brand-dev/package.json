@@ -58,8 +58,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -70,7 +70,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

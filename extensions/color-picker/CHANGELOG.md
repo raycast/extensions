@@ -1,5 +1,10 @@
 # Color Picker Changelog
 
+## [Bugfix & Maintenance] - 2025-08-13
+
+- Fix the incorrect subtitle content in the `Convert Color` command
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2025-06-05
 
 - Add a new callback return value `formattedColor` to return the color in the user's preferred format

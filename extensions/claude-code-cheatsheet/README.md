@@ -9,7 +9,7 @@ A comprehensive, interactive cheatsheet for the Claude Code CLI. Instantly acces
 
 ## Compatibility
 
-**Targeted Claude Code Versions:** v1.0.51 - v1.0.54+
+**Targeted Claude Code Versions:** v1.0.55 - v1.0.81+
 
 This extension aims to provide comprehensive coverage of commands, flags, slash commands, settings, and environment variables from recent Claude Code releases. However, Claude Code is actively developed with frequent updates that may introduce changes, deprecations, or new features. While we strive to maintain accuracy and completeness, some features may be missing, outdated, or subject to change. Please refer to the official Claude Code documentation for the most current and authoritative information.
 

@@ -1,3 +1,23 @@
+enum TokenKind {
+  Activation = "activation-token",
+  Product = "product-token",
+  User = "user-token",
+  Support = "support-token",
+  Sales = "sales-token",
+  Developer = "developer-token",
+  Admin = "admin-token",
+}
+export interface APIToken {
+  id: string;
+  attributes: {
+    kind: TokenKind;
+    expiry: string | null;
+    permissions: string[];
+    name: string;
+    created: string;
+  };
+}
+
 export enum LicenseStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
@@ -109,6 +129,30 @@ export interface Product {
     permissions: string[];
     created: string;
     updated: string;
+  };
+}
+
+export enum UserStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  BANNED = "BANNED",
+}
+export enum UserRole {
+  User = "user",
+  "Support Agent" = "support-agent",
+  "Sales Agent" = "sales-agent",
+  Developer = "developer",
+  "Read Only" = "read-only",
+  Root = "admin",
+}
+export interface User {
+  id: string;
+  attributes: {
+    firstName: string | null;
+    lastName: string | null;
+    email: string;
+    status: UserStatus;
+    role: UserRole;
   };
 }
 

@@ -96,7 +96,7 @@
     }
   ],
   "ai": {
-    "evals":[
+    "evals": [
       {
         "input": "@svgl Get Raycast SVG Logo",
         "mocks": {

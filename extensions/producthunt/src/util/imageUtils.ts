@@ -23,7 +23,17 @@ export async function fetchSvgAsBase64(url: string): Promise<string> {
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      try {
+        const { getLogger } = await import("./logger");
+        const log = getLogger("imageUtils");
+        log.error("image:fetch_failed", new Error(`HTTP ${response.status}`), {
+          status: response.status,
+          statusText: response.statusText,
+          url,
+        });
+      } catch {
+        // ignore
+      }
       return url;
     }
 

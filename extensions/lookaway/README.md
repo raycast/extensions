@@ -1,6 +1,6 @@
 # LookAway Raycast Extension
 
-Control the [LookAway](https://lookaway.app) macOS app using Raycast.
+Control the [LookAway](https://lookaway.com) macOS app using Raycast.
 
 ## Features
 

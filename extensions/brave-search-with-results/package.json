@@ -16,6 +16,13 @@
       "subtitle": "Brave",
       "description": "Search web with Brave",
       "mode": "view"
+    },
+    {
+      "name": "imageSearch",
+      "title": "Search Images",
+      "subtitle": "Brave",
+      "description": "Search images with Brave",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -35,15 +42,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.3",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.14.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
+    "react-devtools": "^6.1.1",
     "typescript": "^5.2.2"
   },
   "scripts": {

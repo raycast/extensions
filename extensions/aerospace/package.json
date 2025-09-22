@@ -9,7 +9,8 @@
     "AmmarCodes",
     "thewinger",
     "LightQuantum",
-    "Mmehdi06"
+    "Mmehdi06",
+    "abhiy13"
   ],
   "categories": [
     "Productivity",
@@ -17,17 +18,6 @@
     "System"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "configPath",
-      "type": "textfield",
-      "placeholder": "path/to/config",
-      "default": "~/.aerospace.toml",
-      "title": "Config File",
-      "required": false,
-      "description": "Specify the config file path for aerospace"
-    }
-  ],
   "commands": [
     {
       "name": "showShortcuts",
@@ -112,5 +102,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

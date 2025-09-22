@@ -3,7 +3,7 @@ import FathomRequest from "./utils/api";
 import { LiveData } from "./types/LiveData";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   const { data, isLoading } = FathomRequest({
     endpoint: "/current_visitors",
@@ -20,10 +20,8 @@ export default function Command() {
   const totalReferrers = data.referrers.reduce((sum, referrer) => sum + referrer.total, 0);
 
   return (
-    <MenuBarExtra icon={Icon.TwoPeople} title={data.total.toLocaleString()} isLoading={isLoading}>
-      <MenuBarExtra.Section
-        title={"Visitors (" + data.total.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ")"}
-      >
+    <MenuBarExtra icon={Icon.BarChart} title={data.total.toLocaleString()} isLoading={isLoading}>
+      <MenuBarExtra.Section title={"Visitors: " + data.total.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}>
         {data.content.map((page, index) => (
           <MenuBarExtra.Item
             key={index}
@@ -31,7 +29,7 @@ export default function Command() {
           />
         ))}
       </MenuBarExtra.Section>
-      <MenuBarExtra.Section title={`Referrers (${totalReferrers.toLocaleString()})`}>
+      <MenuBarExtra.Section title={`Referrers: ${totalReferrers.toLocaleString()}`}>
         {data.referrers.map((page, index) => (
           <MenuBarExtra.Item
             key={index}
@@ -42,8 +40,9 @@ export default function Command() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Open in Fathom"
-          icon={Icon.BarChart}
+          icon={Icon.Link}
           onAction={() => open(`https://app.usefathom.com?range=today&site=${preferences.siteId}`)}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

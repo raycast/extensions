@@ -1,10 +1,11 @@
 import axios from "axios";
 import { URL_ENDPOINTS } from "../constants/endpoints";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { STORAGE_KEYS } from "./constants";
 import { PublicKey } from "@solana/web3.js";
 import { CacheAdapter } from "./cache";
 import fs from "fs";
+import { provider } from "./auth";
 
 export interface ApiResponse<T = unknown> {
   status: "success" | "error";
@@ -92,6 +93,14 @@ export async function executeAction<T>(
       const backendError = error.response?.data;
 
       if (backendError?.status === "error" && backendError.message) {
+        if (backendError.message === "Token expired") {
+          showToast({
+            title: "Token expired",
+            message: "Please sign in again.",
+            style: Toast.Style.Failure,
+          });
+          await provider.signOut();
+        }
         throw new Error(backendError.message);
       }
 

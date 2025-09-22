@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "1",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "2",
+        "upper": "@"
+    },
+    "Digit3": {
+        "lower": "3",
+        "upper": "#"
+    },
+    "Digit4": {
+        "lower": "4",
+        "upper": "$"
+    },
+    "Digit5": {
+        "lower": "5",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "6",
+        "upper": "^"
+    },
+    "Digit7": {
+        "lower": "7",
+        "upper": "&"
+    },
+    "Digit8": {
+        "lower": "8",
+        "upper": "*"
+    },
+    "Digit9": {
+        "lower": "9",
+        "upper": "("
+    },
+    "Digit0": {
+        "lower": "0",
+        "upper": ")"
+    },
+    "Minus": {
+        "lower": "-",
+        "upper": "_"
+    },
+    "Equal": {
+        "lower": "=",
+        "upper": "+"
+    },
+    "KeyQ": {
+        "lower": "ճ",
+        "upper": "Ճ"
+    },
+    "KeyW": {
+        "lower": "ւ",
+        "upper": "Ւ"
+    },
+    "KeyE": {
+        "lower": "ե",
+        "upper": "Ե"
+    },
+    "KeyR": {
+        "lower": "ր",
+        "upper": "Ր"
+    },
+    "KeyT": {
+        "lower": "տ",
+        "upper": "Տ"
+    },
+    "KeyY": {
+        "lower": "յ",
+        "upper": "Յ"
+    },
+    "KeyU": {
+        "lower": "ւ",
+        "upper": "Ւ"
+    },
+    "KeyI": {
+        "lower": "ի",
+        "upper": "Ի"
+    },
+    "KeyO": {
+        "lower": "ո",
+        "upper": "Ո"
+    },
+    "KeyP": {
+        "lower": "պ",
+        "upper": "Պ"
+    },
+    "BracketLeft": {
+        "lower": "[",
+        "upper": "{"
+    },
+    "BracketRight": {
+        "lower": "]",
+        "upper": "}"
+    },
+    "KeyA": {
+        "lower": "ա",
+        "upper": "Ա"
+    },
+    "KeyS": {
+        "lower": "ս",
+        "upper": "Ս"
+    },
+    "KeyD": {
+        "lower": "դ",
+        "upper": "Դ"
+    },
+    "KeyF": {
+        "lower": "ֆ",
+        "upper": "Ֆ"
+    },
+    "KeyG": {
+        "lower": "գ",
+        "upper": "Գ"
+    },
+    "KeyH": {
+        "lower": "հ",
+        "upper": "Հ"
+    },
+    "KeyJ": {
+        "lower": "ձ",
+        "upper": "Ձ"
+    },
+    "KeyK": {
+        "lower": "կ",
+        "upper": "Կ"
+    },
+    "KeyL": {
+        "lower": "լ",
+        "upper": "Լ"
+    },
+    "Semicolon": {
+        "lower": ";",
+        "upper": ":"
+    },
+    "Quote": {
+        "lower": "'",
+        "upper": "\""
+    },
+    "Backquote": {
+        "lower": "`",
+        "upper": "~"
+    },
+    "Backslash": {
+        "lower": "\\",
+        "upper": "|"
+    },
+    "KeyZ": {
+        "lower": "զ",
+        "upper": "Զ"
+    },
+    "KeyX": {
+        "lower": "խ",
+        "upper": "Խ"
+    },
+    "KeyC": {
+        "lower": "ծ",
+        "upper": "Ծ"
+    },
+    "KeyV": {
+        "lower": "վ",
+        "upper": "Վ"
+    },
+    "KeyB": {
+        "lower": "բ",
+        "upper": "Բ"
+    },
+    "KeyN": {
+        "lower": "ն",
+        "upper": "Ն"
+    },
+    "KeyM": {
+        "lower": "մ",
+        "upper": "Մ"
+    },
+    "Comma": {
+        "lower": ",",
+        "upper": "<"
+    },
+    "Period": {
+        "lower": ".",
+        "upper": ">"
+    },
+    "Slash": {
+        "lower": "/",
+        "upper": "?"
+    }
+}

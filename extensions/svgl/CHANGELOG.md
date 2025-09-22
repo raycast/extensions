@@ -1,5 +1,9 @@
 # svgl Changelog
 
+## [Update] - 2025-08-08
+
+- Add the script to prefix the SVG IDs to avoid conflicts with other SVGs.
+
 ## [✨ AI Enhancements] - 2025-04-02
 
 AI Tools to:

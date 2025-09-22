@@ -5,6 +5,9 @@
   "description": "Find and install MCP servers in Raycast and other MCP clients like Claude or Cursor.",
   "icon": "extension.png",
   "author": "thomas",
+  "contributors": [
+    "nagauta"
+  ],
   "owner": "raycast",
   "access": "public",
   "license": "MIT",

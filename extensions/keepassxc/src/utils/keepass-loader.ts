@@ -1,14 +1,9 @@
 import { getPreferenceValues, LocalStorage, Toast, showToast } from "@raycast/api";
 import { parse } from "csv-parse/sync";
-import path from "path";
 import child_process from "child_process";
+import process from "process";
 
 interface Preference {
-  keepassxcRootPath: {
-    name: string;
-    path: string;
-    bundleId: string;
-  };
   database: string;
 }
 
@@ -26,7 +21,7 @@ const showToastCliErrors = (e: { message: string }) => {
   if (e.message.includes("Invalid credentials") || e.message.includes("Failed to load key file")) {
     toastMessage = "Invalid Credentials";
   } else if (e.message.includes("keepassxc-cli: No such file or directory") || e.message.includes("ENOENT")) {
-    invalidPreference = "KeePassXC App";
+    toastMessage = "KeePassXC not found";
   } else if (
     e.message.includes("Failed to open database file") ||
     e.message.includes("Error while reading the database: Not a KeePass database")
@@ -48,9 +43,10 @@ class KeePassLoader {
   static {
     const preferences: Preference = getPreferenceValues();
     this.database = preferences.database;
-    this.keepassxcCli = preferences.keepassxcRootPath?.path
-      ? path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli")
-      : undefined;
+    this.keepassxcCli =
+      process.platform === "win32"
+        ? "C:\\Program Files\\KeePassXC\\keepassxc-cli.exe"
+        : "/Applications/KeePassXC.app/Contents/MacOS/keepassxc-cli";
   }
 
   /**
@@ -117,7 +113,14 @@ class KeePassLoader {
    * information of an entry.
    */
   private static parseCsvEntries = (entries: string) => {
-    let entriesArray = parse(entries, { delimiter: ",", from_line: 2 })
+    let entriesArray = parse(entries, {
+      delimiter: ",",
+      from_line: 2,
+      relax_column_count: true,
+      relax_quotes: true,
+      skip_empty_lines: true,
+      trim: true,
+    })
       .sort((a: string[], b: string[]) => {
         // sort first by the title
         const titleComparison = a[1].localeCompare(b[1]);

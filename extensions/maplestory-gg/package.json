@@ -37,17 +37,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
     "chartjs-to-image": "^1.2.2",
-    "got": "^14.3.0"
+    "got": "^14.4.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.12.5",
-    "@types/react": "^18.2.75",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.4"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   }
 }

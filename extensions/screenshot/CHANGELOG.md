@@ -1,5 +1,9 @@
 # Screenshot Changelog
 
+## [Fix documentation] - 2025-09-04
+
+- Fixed description for capture-to-clipboard command to be more accurate
+
 ## [Add Capture Window To Clipboard command] - 2023-09-14
 
 - Added Capture Window To Clipboard command

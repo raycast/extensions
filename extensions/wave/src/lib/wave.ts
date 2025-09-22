@@ -138,3 +138,36 @@ export const deleteCustomer = async (id: string) => {
   if ("errors" in result) throw new Error(result.errors[0].message);
   if (!result.data.customerDelete.didSucceed) throw new Error("Unknown Error");
 };
+
+export const useGetValidIncomeAccounts = (
+  businessId: string,
+  subtypes: Array<"INCOME" | "DISCOUNTS" | "OTHER_INCOME">,
+) =>
+  useFetch(API_URL, {
+    ...common(),
+    body: JSON.stringify({
+      query: QUERIES.getValidIncomeAccounts,
+      variables: {
+        businessId,
+        subtypes,
+      },
+    }),
+    mapResult(
+      result: Result<{
+        business: {
+          id: string;
+          accounts: Edges<{
+            id: string;
+            name: string;
+            subtype: { name: string; value: "INCOME" | "DISCOUNTS" | "OTHER_INCOME" };
+          }>;
+        };
+      }>,
+    ) {
+      if ("errors" in result) throw new Error(result.errors[0].message);
+      return {
+        data: result.data.business.accounts.edges.map((edge) => edge.node),
+      };
+    },
+    initialData: [],
+  });

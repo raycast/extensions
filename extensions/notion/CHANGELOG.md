@@ -1,5 +1,13 @@
 # Notion Changelog
 
+## [Fix opening a page in the App on Windows] - 2025-08-27
+
+- Fix opening a page in the App on Windows
+
+## [Use Bookmark Block for Quick Capture As Bookmark] - 2025-08-13
+
+- Refactor Quick Capture to create a bookmark block instead of a markdown link when "Capture As" is set to "bookmark"
+
 ## [Show page properties in page previews] - 2025-07-08
 
 - Page previews now display page properties

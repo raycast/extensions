@@ -59,7 +59,9 @@ export function StatesList(props: {
         ?.sort((a, b) =>
           (a.attributes.friendly_name || a.entity_id).localeCompare(b.attributes.friendly_name || b.entity_id),
         )
-        .map((state) => <StateListItem key={state.entity_id} state={state} />)}
+        .map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
     </List>
   );
 }

@@ -6,7 +6,7 @@ import { titlecase } from "./utils/titlecase";
 import { type Document } from "./utils/document";
 import { type Category } from "./utils/category";
 import { type PaginationOptions } from "@raycast/utils/dist/types";
-import { getOpenUrl } from "./utils";
+import { getOpenUrlFromFullUrl } from "./utils";
 
 function getProgressIcon(readingProgress: number) {
   const asPercentage = readingProgress * 100;
@@ -118,7 +118,7 @@ ${article.summary}
                 <ActionPanel title={article.title}>
                   <Action
                     title="Open Article in Readwise"
-                    onAction={() => open(getOpenUrl(article.url))}
+                    onAction={() => open(getOpenUrlFromFullUrl(article.url))}
                     icon={Icon.Globe}
                   />
                   <Action.OpenInBrowser url={article.source_url} title="Open Article in Source Website" />

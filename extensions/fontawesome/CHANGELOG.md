@@ -1,5 +1,15 @@
 # Font Awesome Changelog
 
+## [Fix: Unused Dependencies deleted] - 2025-09-15
+
+- Remove `svg-to-png` and `change-case` dependencies
+- Bump `@types/node`
+
+## [Feat: Add Support for Windows] - 2025-09-09
+
+- Add support for Raycast Windows
+- Bump dependencies to latest versions
+
 ## [Added AI icon search, Sharp Duotone and Duotone families] - 2025-06-22
 
 - The extension now supports v6.7.2.

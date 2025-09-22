@@ -5,7 +5,7 @@ import { Project } from "../gitlabapi";
 import { getErrorMessage, showErrorToast } from "../utils";
 import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
 
-export function ProjectSearchList(): JSX.Element {
+export function ProjectSearchList() {
   const [searchText, setSearchText] = useState<string>();
   const [scope, setScope] = useState<string>(ProjectScope.membership);
   const { projects, error, isLoading } = useSearch(searchText, scope);
@@ -39,7 +39,7 @@ export function ProjectSearchList(): JSX.Element {
 
 export function useSearch(
   query: string | undefined,
-  scope: string
+  scope: string,
 ): {
   projects?: Project[];
   error?: string;

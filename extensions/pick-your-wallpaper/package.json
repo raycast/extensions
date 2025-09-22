@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pick-your-wallpaper",
   "title": "Pick Your Wallpaper",
+  "subtitle": "Wallpaper Management",
   "description": "Lets you pick a wallpaper from a folder of finder.",
   "icon": "command-icon.png",
   "author": "hugomarfani",
+  "contributors": [
+    "heytommy"
+  ],
   "pastContributors": [
     "danulqua",
     "marcjulian"

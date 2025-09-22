@@ -14,7 +14,7 @@ export default async function Command(props: LaunchProps<{ arguments: OpenDeepwi
 
   try {
     if (repoIdentifier.startsWith(deepWikiBaseUrl)) {
-      // Already a Deepwiki URL
+      // Already a DeepWiki URL
       new URL(repoIdentifier) // Validate URL format
       targetUrl = repoIdentifier
     } else if (repoIdentifier.startsWith("https://github.com/")) {
@@ -35,7 +35,7 @@ export default async function Command(props: LaunchProps<{ arguments: OpenDeepwi
         throw new Error("Invalid org/repo format. Expected 'org/repo'.")
       }
     } else {
-      throw new Error("Invalid input. Provide a Deepwiki URL, GitHub URL, or 'org/repo'.")
+      throw new Error("Invalid input. Provide a DeepWiki URL, GitHub URL, or 'org/repo'.")
     }
 
     await open(targetUrl)

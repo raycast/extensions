@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { monitorSchema, WhoamiSchema } from "./api/schema";
-import fetch from "node-fetch";
 
 export default function ShowMonitors() {
   const preferences = getPreferenceValues<Preferences>();
@@ -94,7 +93,7 @@ export default function ShowMonitors() {
                       },
                       method: "POST",
                     });
-                  } catch (error) {
+                  } catch {
                     toast.style = Toast.Style.Failure;
                     toast.title = "Could not Trigger Run";
                   }

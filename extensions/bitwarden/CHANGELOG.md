@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2025-09-02
+
+- Sync vault on command launch
+- Reorganize preferences
+
 ## [Fix] - 2025-06-26
 
 - Catch any errors caused by `OTPAuth.TOTP` constructor

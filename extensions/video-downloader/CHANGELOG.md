@@ -1,5 +1,18 @@
 # Video Downloader Changelog
 
+## [Fix: Add install flags] - 2025-09-15
+
+- Added acceptance flags when installing packages with winget.
+
+## [Feat: Windows Support] - 2025-09-12
+
+- Added support for Windows OS, enabling video downloads and transcript extraction on Windows devices.
+- Ensured compatibility with Windows-specific file paths and dependencies.
+- Improved installation and setup instructions for Windows users.
+- Fixed platform-specific bugs to provide a seamless experience across Windows and macOS.
+
+## [Chore: Fixed a typo in the installation view] - 2025-08-22
+
 ## [Chore] - 2025-03-10
 
 - Rename extension folder and handle to `video-downloader`

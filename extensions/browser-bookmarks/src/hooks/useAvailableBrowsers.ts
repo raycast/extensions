@@ -21,7 +21,7 @@ export const BROWSERS_BUNDLE_ID = {
   edgeCanary: "com.microsoft.edgemac.canary",
   prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
-  zen: "org.mozilla.com.zen.browser",
+  zen: "app.zen-browser.zen",
   whale: "com.naver.whale",
 };
 

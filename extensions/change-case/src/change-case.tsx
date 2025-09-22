@@ -76,6 +76,7 @@ export default function Command(props: LaunchProps) {
   const preferences = getPreferenceValues<Preferences>();
   const preferredSource = preferences.source;
   const preferredAction = preferences.action;
+  const hideHUD = preferences.hideHUD;
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
@@ -89,7 +90,9 @@ export default function Command(props: LaunchProps) {
         Clipboard.copy(modified);
       }
 
-      showHUD(`Converted to ${immediatelyConvertToCase}`);
+      if (!hideHUD) {
+        showHUD(`Converted to ${immediatelyConvertToCase}`);
+      }
       popToRoot();
     })();
     return;
@@ -145,7 +148,9 @@ export default function Command(props: LaunchProps) {
         icon={Icon.Clipboard}
         onAction={() => {
           setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
-          showHUD("Copied to Clipboard");
+          if (!hideHUD) {
+            showHUD("Copied to Clipboard");
+          }
           Clipboard.copy(props.modified);
           if (preferences.popToRoot) {
             popToRoot();
@@ -169,7 +174,9 @@ export default function Command(props: LaunchProps) {
         icon={{ fileIcon: frontmostApp.path }}
         onAction={() => {
           setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
-          showHUD(`Pasted in ${frontmostApp.name}`);
+          if (!hideHUD) {
+            showHUD(`Pasted in ${frontmostApp.name}`);
+          }
           Clipboard.paste(props.modified);
           if (preferences.popToRoot) {
             popToRoot();

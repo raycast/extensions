@@ -393,6 +393,10 @@
   "categories": [
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "contributors": [
     "Loskir",
     "immint023",
@@ -408,12 +412,14 @@
     "jessedobbelaere",
     "heavyrisem",
     "constantins2001",
-    "tane_van_wifferen"
+    "pernielsentikaer",
+    "tane_van_wifferen",
+    "1weiho"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.60.0",
-    "@raycast/utils": "^1.0.6",
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^1.17.0",
     "apollo-link-context": "^1.0.20",
     "cross-fetch": "^4.0.0",
     "fuse.js": "^6.4.6",
@@ -425,23 +431,38 @@
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.8.4",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
     "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
-    "@types/react": "^18.2.27",
+    "@types/react": "19.0.10",
     "@types/url-join": "^4.0.1",
-    "eslint": "^7.31.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.3.5"
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "fix-prettier": "prettier --write src"
-  }
+    "fix-prettier": "prettier --write src",
+    "evals": "ray evals",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    { "name": "search-projects", "title": "Search Projects", "description": "Search gitlab projects" },
+    { "name": "search-issues", "title": "Search Issues", "description": "Search gitlab issues" },
+    { "name": "search-merge-requests", "title": "Search Merge Requests", "description": "Search gitlab merge requests" },
+    { "name": "get-todos", "title": "Get Todos", "description": "Get my gitlab todos" },
+    { "name": "close-issue", "title": "Close Issue", "description": "Close an issue by project and iid" },
+    { "name": "reopen-issue", "title": "Reopen Issue", "description": "Reopen an issue by project and iid" },
+    { "name": "close-merge-request", "title": "Close Merge Request", "description": "Close a merge request by project and iid" },
+    { "name": "reopen-merge-request", "title": "Reopen Merge Request", "description": "Reopen a merge request by project and iid" },
+    { "name": "merge-merge-request", "title": "Merge Merge Request", "description": "Merge a merge request with options" },
+    { "name": "get-activities", "title": "Get Activities", "description": "Get recent gitlab activities" },
+    { "name": "get-recent-commits", "title": "Get Recent Commits", "description": "Get my recent commits" },
+    { "name": "open-in-browser", "title": "Open in Browser", "description": "Open a URL in Browser" }
+  ]
 }

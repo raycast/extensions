@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tally",
+  "title": "Tally",
+  "description": "Tally is the simplest way to create forms, for free.",
+  "icon": "tally.png",
+  "author": "xmok",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "description": "API Token from Tally Settings",
+      "type": "password",
+      "required": true,
+      "placeholder": "tly-XXX...xxx"
+    }
+  ],
+  "commands": [
+    {
+      "name": "forms",
+      "title": "Forms",
+      "subtitle": "Tally",
+      "description": "View Forms and Submissions",
+      "mode": "view"
+    },
+    {
+      "name": "workspaces",
+      "title": "Workspaces",
+      "subtitle": "Tally",
+      "description": "View and Rename Workspaces",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

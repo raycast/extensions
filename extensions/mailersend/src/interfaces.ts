@@ -83,6 +83,36 @@ export interface Token {
   scopes: TokenScopeType[];
   domain: Pick<Domain, "id" | "name"> | null;
 }
+
+enum WebhookEventType {
+  SENT = "activity.sent",
+  DELIVERED = "activity.delivered",
+  SOFT_BOUNCED = "activity.soft_bounced",
+  HARD_BOUNCED = "activity.hard_bounced",
+  OPENED = "activity.opened",
+  OPENED_UNIQUE = "activity.opened_unique",
+  CLICKED = "activity.clicked",
+  CLICKED_UNIQUE = "activity.clicked_unique",
+  UNSUBSCRIBED = "activity.unsubscribed",
+  SPAM_COMPLIANT = "activity.spam_complaint",
+  SURVEY_OPENED = "activity.survey_opened",
+  SURVEY_SUBMITTED = "activity.survey_submitted",
+  IDENTITY_VERIFIED = "sender_identity.verified",
+  MAINTENANCE_START = "maintenance.start",
+  MAINTENANCE_END = "maintenance.end",
+}
+export interface Webhook {
+  id: string;
+  url: string;
+  events: WebhookEventType[];
+  name: string;
+  enabled: boolean;
+  editable: boolean;
+  created_at: string;
+  updated_at: string;
+  domain: Domain;
+}
+
 export interface ErrorResult {
   message: string;
   errors?: {

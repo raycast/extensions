@@ -1,5 +1,12 @@
 # Scira Changelog
 
+## [v1.0.1] - 2025-08-13
+
+### Changed
+- Fix the API URL to use the correct one
+- Fix the API request body to match the new API
+- Updated dependencies
+
 ## [v1.0.0] - 2024-06-15
 
 ### Added

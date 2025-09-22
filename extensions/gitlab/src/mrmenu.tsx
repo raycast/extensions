@@ -73,7 +73,7 @@ function getReviewLabelsPreference(): string[] {
   return getLabelFilterPreference("reviewLabels");
 }
 
-export default function MenuCommand(): JSX.Element {
+export default function MenuCommand() {
   const {
     mrsAssigned,
     mrsReview,

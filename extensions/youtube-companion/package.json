@@ -5,6 +5,9 @@
   "description": "Collection of scripts to improve YouTube browsing experience",
   "icon": "command-icon.png",
   "author": "sasivarnan",
+  "contributors": [
+    "yusifaliyevpro"
+  ],
   "categories": [
     "Web"
   ],
@@ -33,22 +36,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2"
+    "@raycast/api": "^1.102.7"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

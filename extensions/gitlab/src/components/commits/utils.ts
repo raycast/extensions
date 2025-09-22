@@ -33,7 +33,7 @@ export function useCommitStatus(projectID: number, sha?: string): { commitStatus
     {
       deps: [projectID, sha],
       secondsToRefetch: 30,
-    }
+    },
   );
   useEffect(() => {
     setCommitStatus(data);

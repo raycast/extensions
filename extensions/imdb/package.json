@@ -136,6 +136,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.6.2",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
@@ -144,5 +145,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

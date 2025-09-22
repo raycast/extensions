@@ -11,6 +11,7 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   environment,
+  open,
 } from "@raycast/api";
 import { File } from "./types/file";
 import { promisify } from "util";
@@ -60,8 +61,8 @@ async function createThumbnail(filePath: string, specificThumbDir: string): Prom
       await stat(thumbnailPath);
       return thumbnailPath;
     } catch {
-      await fs.promises.copyFile(filePath, thumbnailPath);
-      await execPromise(`sips -Z 300 "${thumbnailPath}"`);
+      // Use sips to create thumbnail directly from source file
+      await execPromise(`sips -Z 300 -s format jpeg --out "${thumbnailPath}" "${filePath}"`);
       return thumbnailPath;
     }
   } catch (error) {
@@ -140,6 +141,7 @@ export default function Command() {
             <ActionPanel>
               <Action title="Set as Wallpaper" icon={Icon.Desktop} onAction={() => applyWallpaperUpdate(file.path)} />
               <Action.ShowInFinder path={file.path} />
+              <Action title="Open Wallpaper Folder" icon={Icon.Folder} onAction={() => open(wallpaperDir)} />
               <Action
                 title="Open Preferences"
                 icon={Icon.Gear}
