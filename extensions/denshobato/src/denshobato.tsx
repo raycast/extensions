@@ -2,12 +2,7 @@ import { Form, ActionPanel, Action, showHUD, Clipboard } from "@raycast/api";
 import { execAppleScript } from "./utils/applescript";
 
 type Values = {
-  textfield: string;
   textarea: string;
-  datepicker: Date;
-  checkbox: boolean;
-  dropdown: string;
-  tokeneditor: string[];
 };
 
 export default function Command() {
