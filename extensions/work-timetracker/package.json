@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "work-timetracker",
+  "title": "Work Timetracker",
+  "description": "A simple yet effective way to log your daily work hours, track your progress, and compare your logged time against standard working hours for any given month. Allows for easy monthly data export.",
+  "categories": ["Productivity"],
+  "keywords": ["time", "tracking", "work hours", "projects", "monday.com"],
+  "icon": "time-tracker.png",
+  "author": "Bellander",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "log-work-hours",
+      "title": "Log Work Hours",
+      "subtitle": "Quickly add your worked hours for today or a specific date.",
+      "description": "Opens a form to log the number of hours worked. Automatically defaults to the current date but allows selection. Supports adding optional notes for each entry. Logged data is saved locally.",
+      "mode": "view",
+      "icon": "time-tracker.png"
+    },
+    {
+      "name": "view-monthly-work-report",
+      "title": "View Monthly Work Report",
+      "subtitle": "Check your logged hours, compare with standard hours, and export data.",
+      "description": "Displays a summary of your logged work hours for a selected month. Compares your total logged hours against the standard working hours for that period. Provides an option to export the detailed log for the month.",
+      "mode": "view",
+      "icon": "time-tracker.png"
+    },
+    {
+      "name": "add-new-project",
+      "title": "Add New Project",
+      "subtitle": "Register a new project.",
+      "description": "Opens a form to add a new project name. Projects are used to categorize time entries.",
+      "mode": "view",
+      "icon": "time-tracker.png"
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "subtitle": "View all registered projects.",
+      "description": "Displays a list of all projects currently stored in the application.",
+      "mode": "view",
+      "icon": "time-tracker.png"
+    },
+    {
+      "name": "project-report",
+      "title": "Project Report",
+      "subtitle": "Generate a report for a specific project.",
+      "description": "Select a project and a time period to see total hours logged.",
+      "mode": "view",
+      "icon": "time-tracker.png"
+    },
+    {
+      "name": "backup-data",
+      "title": "Backup Data",
+      "subtitle": "Export all projects and time entries to a file.",
+      "description": "Saves all your data (projects and time entries) to a JSON file in your Downloads folder.",
+      "mode": "no-view",
+      "icon": "time-tracker.png"
+    },
+    {
+      "name": "restore-data",
+      "title": "Restore Data",
+      "subtitle": "Import data from a backup file.",
+      "description": "Restores projects and time entries from a selected backup file, overwriting current data.",
+      "mode": "view",
+      "icon": "time-tracker.png"
+    },
+    {
+      "name": "dashboard",
+      "title": "View Dashboard",
+      "subtitle": "Get a quick overview of your work week.",
+      "description": "Shows hours for today, total for the week, and top projects.",
+      "mode": "view",
+      "icon": "time-tracker.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultStandardHoursPerDay",
+      "title": "Default Standard Hours per Day",
+      "description": "Set your standard number of working hours for a full day (e.g., 8). Used to calculate monthly standard hours.",
+      "type": "textfield",
+      "required": true,
+      "default": "8"
+    },
+    {
+      "name": "mondayEnabled",
+      "title": "Enable Monday.com Integration",
+      "label": "Enable integration",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Turn Monday.com sync on or off"
+    },
+    {
+      "name": "mondayApiKey",
+      "title": "Monday.com API Key",
+      "description": "Your personal Monday.com API token",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "mondayBoardId",
+      "title": "Board ID",
+      "description": "ID of the board where items are created",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "mondayGroupId",
+      "title": "Group ID",
+      "description": "Group ID within the board",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "mondayColumnDate",
+      "title": "Date Column ID",
+      "description": "Column ID for the date",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "mondayColumnHours",
+      "title": "Hours Column ID",
+      "description": "Column ID for the number of hours",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "mondayColumnNotes",
+      "title": "Notes Column ID",
+      "description": "Column ID for notes/comment",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "mondayColumnPerson",
+      "title": "Person Column ID",
+      "description": "Column ID for assigning the user/persona to the item",
+      "type": "textfield",
+      "required": false,
+      "default": "person"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "permissions": {
+    "network": {
+      "domains": ["api.monday.com"]
+    },
+    "filesystem": {
+      "access": "downloads"
+    }
+  }
+}
