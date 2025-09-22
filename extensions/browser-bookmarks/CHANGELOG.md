@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for libreWolf] - {PR_MERGE_DATE}
+
+- Added support for `libreWolf` browser.
+
 ## [Fix Zen Support] - 2025-08-19
 
 - Fix Bundle ID for Zen Browser.

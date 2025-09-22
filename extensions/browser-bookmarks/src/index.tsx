@@ -36,6 +36,7 @@ import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
 import useZenBookmarks from "./hooks/useZenBookmarks";
+import useLibreWolfBookmarks from "./hooks/useLibreWolfBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
@@ -126,6 +127,7 @@ export default function Command() {
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
   const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
   const hasWhale = browsers.includes(BROWSERS_BUNDLE_ID.whale) ?? false;
+  const hasLibreWolf = browsers.includes(BROWSERS_BUNDLE_ID.libreWolf) ?? false;
 
   const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
@@ -147,6 +149,7 @@ export default function Command() {
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
   const whale = useWhaleBookmarks(hasWhale);
   const zen = useZenBookmarks(hasZen);
+  const libreWolf = useLibreWolfBookmarks(hasLibreWolf);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
@@ -173,6 +176,7 @@ export default function Command() {
       ...vivaldi.bookmarks,
       ...whale.bookmarks,
       ...zen.bookmarks,
+      ...libreWolf.bookmarks,
     ]
       .map((item) => {
         let domain;
@@ -227,6 +231,7 @@ export default function Command() {
     vivaldi.bookmarks,
     whale.bookmarks,
     zen.bookmarks,
+    libreWolf.bookmarks,
     frecencies,
     setBookmarks,
   ]);
@@ -253,6 +258,7 @@ export default function Command() {
       ...vivaldi.folders,
       ...whale.folders,
       ...zen.folders,
+      ...libreWolf.folders,
     ];
 
     setFolders(folders);
@@ -277,6 +283,7 @@ export default function Command() {
     vivaldi.folders,
     whale.folders,
     zen.folders,
+    libreWolf.folders,
     setFolders,
   ]);
 
@@ -412,6 +419,9 @@ export default function Command() {
     if (hasZen) {
       zen.mutate();
     }
+    if (hasLibreWolf) {
+      libreWolf.mutate();
+    }
   }
 
   async function updateFrecency(item: { id: string; title: string; url: string; folder: string }) {
@@ -472,7 +482,8 @@ export default function Command() {
         sidekick.isLoading ||
         vivaldi.isLoading ||
         whale.isLoading ||
-        zen.isLoading
+        zen.isLoading ||
+        libreWolf.isLoading
       }
       searchBarPlaceholder="Search by title, domain name, or folder name"
       onSearchTextChange={setQuery}
@@ -687,6 +698,15 @@ export default function Command() {
                     profiles={zen.profiles}
                     currentProfile={zen.currentProfile}
                     setCurrentProfile={zen.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.libreWolf}
+                    name="LibreWolf"
+                    icon="LibreWolf.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    profiles={libreWolf.profiles}
+                    currentProfile={libreWolf.currentProfile}
+                    setCurrentProfile={libreWolf.setCurrentProfile}
                   />
                 </ActionPanel.Section>
 
