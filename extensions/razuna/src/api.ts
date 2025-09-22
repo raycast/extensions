@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import FormData from "form-data";
 import { readFileSync } from "fs";
 import { getPreferences, getApiUrl } from "./types";
