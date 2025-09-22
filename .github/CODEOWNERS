@@ -332,6 +332,7 @@
 /extensions/colorify                                                @EvanZhouDev
 /extensions/colorslurp                                              @Jordan-Ellis
 /extensions/comet                                                   @JohanDevl
+/extensions/cometapi                                                @mutewinter
 /extensions/commercequest                                           @skrollme
 /extensions/commit-issue-parser                                     @JulesJuul
 /extensions/commit-message-formatter                                @zrr1999
@@ -1262,6 +1263,7 @@
 /extensions/nhl                                                     @RobErskine
 /extensions/nif-fresquinho                                          @poor666
 /extensions/night-light                                             @devmoath @kgrhartlage @erics118
+/extensions/nightscout                                              @zachsea
 /extensions/nippon-colors                                           @nagauta
 /extensions/nix-flake-templates                                     @lex-unix
 /extensions/nixpkgs-search                                          @aiotter @xmok
