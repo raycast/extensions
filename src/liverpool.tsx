@@ -9,8 +9,10 @@ import {
   getPreferenceValues,
   showToast,
   useNavigation,
+  environment,
 } from "@raycast/api";
 import { withCache } from "@raycast/utils";
+import { existsSync } from "fs";
 import { useEffect, useState } from "react";
 
 type Preferences = {
@@ -44,7 +46,7 @@ type MatchesData = {
   next?: NextMatch | null;
   upcoming?: NextMatch[]; // include next as first item when available
   last?: LastMatch | null;
-  source: "football-data" | "thesportsdb";
+  source: "football-data" | "thesportsdb" | "combined";
 };
 
 type StandingRow = {
@@ -63,6 +65,15 @@ const LFC_NAME = "Liverpool";
 const LFC_DISPLAY_NAME = "Liverpool FC";
 const LFC_FOOTBALLDATA_TEAM_ID = 64;
 const LFC_THESPORTSDB_TEAM_ID = 133602;
+function assetPath(file: string): string | null {
+  const full = `${environment.assetsPath}/${file}`;
+  return existsSync(full) ? full : null;
+}
+const LFC_LOCAL_CREST_BASE = assetPath("liverpool-crest.png");
+const LFC_LOCAL_CREST_LIST = assetPath("liverpool-crest-32.png") || LFC_LOCAL_CREST_BASE;
+const LFC_LOCAL_CREST_HERO = assetPath("liverpool-crest-72.png") || LFC_LOCAL_CREST_BASE;
+const LFC_LOCAL_CREST_LIST_2X = assetPath("liverpool-crest-64.png") || LFC_LOCAL_CREST_LIST;
+const LFC_LOCAL_CREST_HERO_2X = assetPath("liverpool-crest-144.png") || LFC_LOCAL_CREST_HERO;
 
 const EPL_COLOR = Color.Purple;
 const UCL_COLOR: Color.ColorLike = {
@@ -219,6 +230,76 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
   const last = local?.last ?? null;
   const markdown = buildMarkdown(next, upcoming, last, local?.source ?? null);
   const prefs = getPreferenceValues<Preferences>();
+
+  // Ensure crests for hero (Next Match) similar to FixturesList fallbacks
+  useEffect(() => {
+    (async () => {
+      const m = local?.next;
+      if (!m) return;
+      if (m.homeBadge && m.awayBadge) return; // already present
+
+      const updates: Partial<NextMatch> = {};
+      try {
+        // 1) Try TheSportsDB badge lookup for both teams
+        if (!m.homeBadge) updates.homeBadge = await getTeamBadge(m.homeTeam, prefs.sportsDbKey);
+        if (!m.awayBadge) updates.awayBadge = await getTeamBadge(m.awayTeam, prefs.sportsDbKey);
+
+        // 2) Football-data fallbacks (PL + UCL group + ENG comps)
+        if (prefs.footballDataKey) {
+          const needByNorm: Record<string, "home" | "away"> = {};
+          if (!updates.homeBadge && !m.homeBadge) needByNorm[normalizeTeamName(m.homeTeam)] = "home";
+          if (!updates.awayBadge && !m.awayBadge) needByNorm[normalizeTeamName(m.awayTeam)] = "away";
+          if (Object.keys(needByNorm).length) {
+            try {
+              const rows = await fetchPLStandings(prefs);
+              for (const r of rows) {
+                const side = needByNorm[normalizeTeamName(r.team)];
+                if (side && r.crest) updates[side === "home" ? "homeBadge" : "awayBadge"] = r.crest;
+              }
+            } catch {}
+            try {
+              const g = await fetchUCLGroup(prefs);
+              for (const r of g.rows) {
+                const side = needByNorm[normalizeTeamName(r.team)];
+                if (side && r.crest) updates[side === "home" ? "homeBadge" : "awayBadge"] = r.crest;
+              }
+            } catch {}
+            try {
+              const compMap = await getFDCrestsForCompetitions(prefs.footballDataKey!, [
+                "ELC",
+                "FAC",
+                "EL1",
+                "EL2",
+              ]);
+              for (const [team, crest] of Object.entries(compMap)) {
+                const side = needByNorm[normalizeTeamName(team)];
+                if (side && crest) updates[side === "home" ? "homeBadge" : "awayBadge"] = crest;
+              }
+            } catch {}
+          }
+        }
+
+        // 3) Static emergency fallbacks
+        if (!updates.homeBadge && !m.homeBadge) {
+          const url = STATIC_CRESTS[normalizeTeamName(m.homeTeam)];
+          if (url) updates.homeBadge = url;
+        }
+        if (!updates.awayBadge && !m.awayBadge) {
+          const url = STATIC_CRESTS[normalizeTeamName(m.awayTeam)];
+          if (url) updates.awayBadge = url;
+        }
+
+        if (updates.homeBadge || updates.awayBadge) {
+          setLocal((prev) =>
+            prev ? { ...prev, next: { ...(prev.next as NextMatch), ...updates } } : prev,
+          );
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [local?.next?.homeBadge, local?.next?.awayBadge, prefs.footballDataKey, prefs.sportsDbKey]);
   return (
     <Detail
       markdown={markdown}
@@ -249,39 +330,7 @@ function FixturesDetail({ data }: { data?: MatchesData | null }) {
   const prefs = getPreferenceValues<Preferences>();
   const [local, setLocal] = useState<MatchesData | null | undefined>(data);
 
-  // debug removed
-
-  useEffect(() => {
-    (async () => {
-      const currentUpcoming = [local?.next, ...(local?.upcoming ?? [])].filter(
-        Boolean,
-      ) as NextMatch[];
-      if (currentUpcoming.length <= 1) {
-        try {
-          const alt = await fetchFromTheSportsDB(prefs.sportsDbKey);
-          const merged = mergeUpcoming(
-            local?.next ?? null,
-            local?.upcoming ?? [],
-            alt.next ?? null,
-            alt.upcoming ?? [],
-          );
-          setLocal({
-            ...(local || {}),
-            next: merged.next ?? local?.next,
-            upcoming: merged.upcoming,
-            source: local?.source || alt.source,
-          });
-        } catch (e) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Warning",
-            message: "Could not fetch additional fixtures",
-          });
-        }
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // All merging now happens in fetchMatches; no extra augmentation here.
 
   // Calculate upcoming AFTER potential state updates
   const upcoming = [local?.next, ...(local?.upcoming ?? [])].filter(Boolean) as NextMatch[];
@@ -309,6 +358,7 @@ function FixturesDetail({ data }: { data?: MatchesData | null }) {
   }
   return (
     <Detail
+      isLoading={!local}
       markdown={md.join("\n\n")}
       actions={
         <ActionPanel>
@@ -360,33 +410,7 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
     });
   }, [local]);
 
-  useEffect(() => {
-    (async () => {
-      if (fixtures.length <= 1) {
-        try {
-          setLoading(true);
-          const alt = await fetchFromTheSportsDB(prefs.sportsDbKey);
-          const merged = mergeUpcoming(
-            local?.next ?? null,
-            local?.upcoming ?? [],
-            alt.next ?? null,
-            alt.upcoming ?? [],
-          );
-          setLocal({
-            ...(local || {}),
-            next: merged.next ?? local?.next,
-            upcoming: merged.upcoming,
-            source: local?.source || alt.source,
-          });
-        } catch (e) {
-          // ignore
-        } finally {
-          setLoading(false);
-        }
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // All merging now happens in fetchMatches; no extra augmentation here.
 
   const items = [local?.next, ...(local?.upcoming ?? [])].filter(Boolean) as NextMatch[];
 
@@ -429,18 +453,45 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
       }
       if (need.length === 0) return;
       const results: Record<string, string | null> = {};
+      const needByNorm = need.reduce<Record<string, string>>((acc, n) => {
+        acc[normalizeTeamName(n)] = n;
+        return acc;
+      }, {});
       try {
         const rows = await fetchPLStandings(prefs);
         for (const r of rows) {
-          if (r.crest && need.includes(r.team)) results[r.team] = r.crest;
+          if (!r.crest) continue;
+          const key = needByNorm[normalizeTeamName(r.team)];
+          if (key) results[key] = r.crest;
         }
       } catch {}
       try {
         const g = await fetchUCLGroup(prefs);
         for (const r of g.rows) {
-          if (r.crest && need.includes(r.team)) results[r.team] = r.crest;
+          if (!r.crest) continue;
+          const key = needByNorm[normalizeTeamName(r.team)];
+          if (key) results[key] = r.crest;
         }
       } catch {}
+      try {
+        // Add English domestic comps that may include Championship/FA Cup/League One/Two clubs.
+        const compMap = await getFDCrestsForCompetitions(prefs.footballDataKey!, [
+          "ELC", // Championship
+          "FAC", // FA Cup
+          "EL1", // League One
+          "EL2", // League Two
+        ]);
+        for (const [team, crest] of Object.entries(compMap)) {
+          const key = needByNorm[normalizeTeamName(team)];
+          if (key && crest && !results[key]) results[key] = crest;
+        }
+      } catch {}
+      // Final static fallbacks by normalized name
+      for (const want of need) {
+        const norm = normalizeTeamName(want);
+        const url = STATIC_CRESTS[norm];
+        if (url && !results[want]) results[want] = url;
+      }
       if (Object.keys(results).length) setBadges((b) => ({ ...b, ...results }));
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -475,7 +526,7 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
 
   return (
     <List
-      isLoading={loading}
+      isLoading={loading || !local}
       searchBarPlaceholder="Search fixtures"
       searchBarAccessory={
         <>
@@ -860,21 +911,63 @@ function UCLTableDetail() {
 
 async function fetchMatches(prefs: Preferences, force = false): Promise<MatchesData> {
   const useFootballData = Boolean(prefs.footballDataKey);
+  // If we have football-data, fetch BOTH sources and merge so cups don’t get dropped.
   if (useFootballData) {
-    try {
-      const data = force
+    const fdLoader = async () =>
+      force
         ? await fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey)
-        : await withCache(() => fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey), {
+        : await withCache(
+            () => fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey),
+            { maxAge: 5 * 60 * 1000 },
+          )();
+    const sdbLoader = async () =>
+      force
+        ? await fetchFromTheSportsDB(prefs.sportsDbKey)
+        : await withCache(() => fetchFromTheSportsDB(prefs.sportsDbKey), {
             maxAge: 5 * 60 * 1000,
           })();
-      if (!("upcoming" in data)) {
-        return await fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey);
-      }
-      return data;
-    } catch (e) {
-      // fall through to sportsdb
+
+    const [fdRes, sdbRes] = await Promise.allSettled([fdLoader(), sdbLoader()]);
+
+    const fd = fdRes.status === "fulfilled" ? fdRes.value : null;
+    const sdb = sdbRes.status === "fulfilled" ? sdbRes.value : null;
+
+    // If only one succeeded, return it.
+    if (fd && !sdb) return fd;
+    if (!fd && sdb) {
+      // Try to merge with cached football-data (non-force) to avoid shrinking the list
+      try {
+        const fdCached = await withCache(
+          () => fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey),
+          { maxAge: 5 * 60 * 1000 },
+        )();
+        if (fdCached) {
+          const merged = mergeUpcoming(
+            fdCached.next ?? null,
+            fdCached.upcoming ?? [],
+            sdb.next ?? null,
+            sdb.upcoming ?? [],
+          );
+          const last = fdCached.last ?? sdb.last ?? null;
+          return { next: merged.next, upcoming: merged.upcoming, last, source: "combined" };
+        }
+      } catch {}
+      return sdb;
     }
+
+    // If neither succeeded, throw to be handled by caller.
+    if (!fd && !sdb) throw new Error("Failed to load fixtures from both sources");
+
+    // Merge upcoming fixtures from both sources; prefer football-data entries where duplicates exist.
+    const merged = mergeUpcoming(fd!.next ?? null, fd!.upcoming ?? [], sdb!.next ?? null, sdb!.upcoming ?? []);
+
+    // Choose last match preferring football-data, falling back to TheSportsDB.
+    const last = fd!.last ?? sdb!.last ?? null;
+
+    return { next: merged.next, upcoming: merged.upcoming, last, source: "combined" };
   }
+
+  // No football-data key → TheSportsDB only
   const data = force
     ? await fetchFromTheSportsDB(prefs.sportsDbKey)
     : await withCache(() => fetchFromTheSportsDB(prefs.sportsDbKey), { maxAge: 5 * 60 * 1000 })();
@@ -952,16 +1045,50 @@ async function fetchFromFootballData(apiKey: string, sportsDbKey?: string): Prom
     awayTeam: m.awayTeam?.name ?? "",
     venue: null,
     city: null,
-    homeBadge: m.homeTeam?.crest ?? null,
-    awayBadge: m.awayTeam?.crest ?? null,
+    homeBadge:
+      (m.homeTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) || m.homeTeam?.crest || null,
+    awayBadge:
+      (m.awayTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) || m.awayTeam?.crest || null,
     status: m.status ?? null,
   }));
+
+  // Fill missing crests via football-data team endpoint (covers non-PL opponents like EFL ties)
+  try {
+    const fixes: Promise<void>[] = [];
+    for (let i = 0; i < upcomingSorted.length; i++) {
+      const src = upcomingSorted[i];
+      const tgt = upcomingArr[i];
+      if (!tgt.homeBadge && src.homeTeam?.id) {
+        fixes.push(
+          (async () => {
+            const crest = await getFDCrest(src.homeTeam.id, apiKey);
+            if (crest) tgt.homeBadge = crest;
+          })(),
+        );
+      }
+      if (!tgt.awayBadge && src.awayTeam?.id) {
+        fixes.push(
+          (async () => {
+            const crest = await getFDCrest(src.awayTeam.id, apiKey);
+            if (crest) tgt.awayBadge = crest;
+          })(),
+        );
+      }
+    }
+    if (fixes.length) await Promise.all(fixes);
+  } catch {}
 
   let next: NextMatch | null = upcomingArr[0] ?? null;
   if (next) {
     // Fallback if crest missing from football-data (edge cases)
-    if (!next.homeBadge) next.homeBadge = await getTeamBadge(next.homeTeam);
-    if (!next.awayBadge) next.awayBadge = await getTeamBadge(next.awayTeam);
+    if (!next.homeBadge) {
+      next.homeBadge =
+        /liverpool/i.test(next.homeTeam) ? LFC_LOCAL_CREST_LIST : await getTeamBadge(next.homeTeam, sportsDbKey);
+    }
+    if (!next.awayBadge) {
+      next.awayBadge =
+        /liverpool/i.test(next.awayTeam) ? LFC_LOCAL_CREST_LIST : await getTeamBadge(next.awayTeam, sportsDbKey);
+    }
   }
   const listWithoutHero = next ? upcomingArr.slice(1) : upcomingArr;
 
@@ -989,20 +1116,8 @@ async function fetchFromFootballData(apiKey: string, sportsDbKey?: string): Prom
       }
     : null;
 
-  // If we still have too few fixtures (common early in a season draw), augment with TheSportsDB
-  let upcomingFinal = listWithoutHero;
-  if (upcomingFinal.length < 4) {
-    try {
-      const alt = await fetchFromTheSportsDB(sportsDbKey);
-      const merged = mergeUpcoming(next, upcomingFinal, alt.next ?? null, alt.upcoming ?? []);
-      next = merged.next;
-      upcomingFinal = merged.upcoming;
-    } catch (e) {
-      // ignore; keep football-data only
-    }
-  }
-
-  return { next, upcoming: upcomingFinal, last, source: "football-data" };
+  // Leave merging to fetchMatches; return football-data set as-is
+  return { next, upcoming: listWithoutHero, last, source: "football-data" };
 }
 
 async function fetchFromTheSportsDB(apiKey?: string): Promise<MatchesData> {
@@ -1035,11 +1150,15 @@ async function fetchFromTheSportsDB(apiKey?: string): Promise<MatchesData> {
   const listWithoutHero = next ? upcomingAll.slice(1, 6) : upcomingAll.slice(0, 5);
   if (next) {
     const [hb, ab] = await Promise.all([
-      getTeamBadge(next.homeTeam, apiKey),
-      getTeamBadge(next.awayTeam, apiKey),
+      /liverpool/i.test(next.homeTeam)
+        ? Promise.resolve(LFC_LOCAL_CREST_LIST)
+        : getTeamBadge(next.homeTeam, apiKey),
+      /liverpool/i.test(next.awayTeam)
+        ? Promise.resolve(LFC_LOCAL_CREST_LIST)
+        : getTeamBadge(next.awayTeam, apiKey),
     ]);
-    next.homeBadge = hb;
-    next.awayBadge = ab;
+    next.homeBadge = hb || next.homeBadge || null;
+    next.awayBadge = ab || next.awayBadge || null;
   }
 
   const lastEvent = (lastJson.results || []).filter(Boolean)[0];
@@ -1076,20 +1195,23 @@ function mergeUpcoming(
     const b = (m.awayTeam || "").toLowerCase();
     return `${iso}|${a}|${b}`;
   }
-  const push = (m?: NextMatch | null) => {
+  // Prefer the first source (A, football-data) when duplicates exist.
+  const pushPreferFirst = (m?: NextMatch | null) => {
     if (!m) return;
-    map.set(key(m), m);
+    const k = key(m);
+    if (!map.has(k)) map.set(k, m);
   };
-  push(nextA);
-  arrA.forEach(push);
-  push(nextB);
-  arrB.forEach(push);
+  pushPreferFirst(nextA);
+  arrA.forEach(pushPreferFirst);
+  pushPreferFirst(nextB);
+  arrB.forEach(pushPreferFirst);
   // Sort ascending by date
   const all = Array.from(map.values())
     .filter((m) => m.utcDate)
     .sort((x, y) => new Date(x.utcDate!).getTime() - new Date(y.utcDate!).getTime());
   const next = all[0] ?? null;
-  const upcoming = all.slice(1, 6);
+  // Return the full list (no 6-item cap). Keep a generous upper bound for safety.
+  const upcoming = all.slice(1, 200);
   return { next, upcoming };
 }
 
@@ -1097,12 +1219,25 @@ function collectOpponentBadges(matches: NextMatch[]): Record<string, string | nu
   const map: Record<string, string | null> = {};
   for (const match of matches) {
     const opponent = (match.isHome ? match.awayTeam : match.homeTeam) || "";
-    const crest = (match.isHome ? match.awayBadge : match.homeBadge) ?? null;
+    let crest = (match.isHome ? match.awayBadge : match.homeBadge) ?? null;
+    if (/^liverpool\b/i.test(opponent)) {
+      crest = LFC_LOCAL_CREST_LIST || crest;
+    }
     if (opponent && crest) {
       map[opponent] = crest;
     }
   }
   return map;
+}
+
+// Light normalization to match team names across sources
+function normalizeTeamName(name: string): string {
+  const s = (name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return s
+    .replace(/\b(football club|club|fc|cf|de)\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
 function formatNextTitle(m: NextMatch): string {
@@ -1138,8 +1273,18 @@ function buildMarkdown(
     const venueCity = displayVenueCity(next);
     const venueLine = venueCity ? `\n_${escapeMd(venueCity)}_` : "";
     // Hero with crests side-by-side (markdown inline images) + names below
-    const leftImg = next.homeBadge ? `![H](${next.homeBadge}?raycast-height=72)` : "🔴";
-    const rightImg = next.awayBadge ? `![A](${next.awayBadge}?raycast-height=72)` : "⚽️";
+    const leftCrest = /liverpool/i.test(next.homeTeam) ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO : null;
+    const leftImg = leftCrest
+      ? `![H](${leftCrest}?raycast-height=72)`
+      : next.homeBadge
+        ? `![H](${next.homeBadge}?raycast-height=72)`
+        : "🔴";
+    const rightCrest = /liverpool/i.test(next.awayTeam) ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO : null;
+    const rightImg = rightCrest
+      ? `![A](${rightCrest}?raycast-height=72)`
+      : next.awayBadge
+        ? `![A](${next.awayBadge}?raycast-height=72)`
+        : "⚽️";
     const logosLine = `${leftImg}   **vs**   ${rightImg}`;
     const namesTable = `| ${escapeMd(next.homeTeam)} | vs | ${escapeMd(next.awayTeam)} |\n|:--:|:--:|:--:|`;
     md.push(`# ${title}\n\n**${when}**${venueLine}${comp}\n\n${logosLine}\n\n${namesTable}`);
@@ -1284,6 +1429,30 @@ function toInt(v: any): number | null {
 
 // Simple in-memory badge cache per session
 const badgeCache = new Map<string, string | null>();
+const fdCrestCache = new Map<number, string | null>();
+async function getFDCrest(teamId: number, apiKey: string): Promise<string | null> {
+  if (!teamId || !Number.isFinite(teamId)) return null;
+  if (fdCrestCache.has(teamId)) return fdCrestCache.get(teamId) ?? null;
+  try {
+    const res = await fetch(`https://api.football-data.org/v4/teams/${teamId}`, {
+      headers: { "X-Auth-Token": apiKey },
+    });
+    if (!res.ok) throw new Error(String(res.status));
+    const json: any = await res.json();
+    const crest: string | null = json?.crest || null;
+    fdCrestCache.set(teamId, crest);
+    return crest;
+  } catch {
+    fdCrestCache.set(teamId, null);
+    return null;
+  }
+}
+
+// Minimal static emergency fallbacks for clubs that often miss from public APIs
+const STATIC_CRESTS: Record<string, string> = {
+  // Southampton FC
+  southampton: "https://crests.football-data.org/340.svg",
+};
 async function getTeamBadge(teamName: string, sportsDbKey?: string): Promise<string | null> {
   const apiKey = sportsDbKey?.trim() || "123";
   const norm = (s: string) =>
@@ -1342,6 +1511,40 @@ async function getTeamBadge(teamName: string, sportsDbKey?: string): Promise<str
   }
   // Final fallback: no URL
   return null;
+}
+
+// Cache football-data team lists (by competition)
+const fdTeamsByCompCache = new Map<string, Array<{ name: string; crest: string | null }>>();
+async function getFDCrestsForCompetitions(
+  apiKey: string,
+  codes: string[],
+): Promise<Record<string, string | null>> {
+  const headers = { "X-Auth-Token": apiKey };
+  const map: Record<string, string | null> = {};
+  for (const code of codes) {
+    try {
+      let teamsArr: Array<{ name: string; crest: string | null }> | null =
+        fdTeamsByCompCache.get(code) ?? null;
+      if (!teamsArr) {
+        const res = await fetch(`https://api.football-data.org/v4/competitions/${code}/teams`, {
+          headers,
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const json: any = await res.json();
+        teamsArr = (json?.teams || []).map((t: any) => ({ name: t?.name || "", crest: t?.crest || null }));
+        fdTeamsByCompCache.set(code, teamsArr!);
+      }
+      if (teamsArr) {
+        for (const t of teamsArr) {
+          if (!t?.name) continue;
+          map[t.name] = t.crest || null;
+        }
+      }
+    } catch {
+      // ignore missing competitions or rate limits
+    }
+  }
+  return map;
 }
 
 function buildMetadata(
@@ -1435,7 +1638,13 @@ function buildMetadata(
       {source ? (
         <Detail.Metadata.TagList title="Source">
           <Detail.Metadata.TagList.Item
-            text={source === "football-data" ? "football-data.org" : "TheSportsDB"}
+            text={
+              source === "football-data"
+                ? "football-data.org"
+                : source === "thesportsdb"
+                  ? "TheSportsDB"
+                  : "Combined"
+            }
             color={Color.SecondaryText}
           />
         </Detail.Metadata.TagList>
@@ -1552,7 +1761,10 @@ async function fetchPLStandingsFD(apiKey: string): Promise<StandingRow[]> {
   return table.map((r: any) => ({
     position: r.position,
     team: r.team?.name || "",
-    crest: r.team?.crest || null,
+    crest:
+      /liverpool/i.test(r.team?.name || "")
+        ? LFC_LOCAL_CREST_LIST_2X || LFC_LOCAL_CREST_LIST
+        : r.team?.crest || null,
     played: r.playedGames ?? r.played ?? 0,
     won: r.won ?? 0,
     draw: r.draw ?? 0,
@@ -1587,7 +1799,10 @@ async function fetchUCLGroupFD(apiKey: string): Promise<{ name: string; rows: St
   const rows: StandingRow[] = (sel?.table || []).map((r: any) => ({
     position: r.position,
     team: r.team?.name || "",
-    crest: r.team?.crest || null,
+    crest:
+      /liverpool/i.test(r.team?.name || "")
+        ? LFC_LOCAL_CREST_LIST_2X || LFC_LOCAL_CREST_LIST
+        : r.team?.crest || null,
     played: r.playedGames ?? r.played ?? 0,
     won: r.won ?? 0,
     draw: r.draw ?? 0,

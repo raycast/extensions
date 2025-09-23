@@ -39,3 +39,8 @@ Keep track of Liverpool FC directly from the Raycast launcher.
 - Liverpool FC identifiers: football-data.org team **64**, TheSportsDB team **133602**.
 - Timezone formatting relies on `Intl.DateTimeFormat` and supports any IANA timezone string.
 - Source code lives in `src/liverpool.tsx`.
+
+## Assets
+
+- Icon: `assets/icon.png`
+- Liverpool crest override: add your PNG at `assets/liverpool-crest.png` (used anywhere a Liverpool badge is shown). If the file is missing, the extension falls back to API-provided crests.
