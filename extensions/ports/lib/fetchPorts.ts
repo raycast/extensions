@@ -21,7 +21,7 @@ export const fetchPorts = (setPorts: (ports: PortInfo[]) => void, setLoading: (l
       const ports: PortInfo[] = [];
       const pids = new Set<string>();
 
-      // Extraer puertos y PIDs
+      // Extract ports and PIDs
       lines.forEach((line) => {
         const parts = line.trim().split(/\s+/);
         if (parts.length === 5 && parts[0] === "TCP") {
@@ -33,7 +33,7 @@ export const fetchPorts = (setPorts: (ports: PortInfo[]) => void, setLoading: (l
         }
       });
 
-      // Obtener nombres de procesos usando tasklist
+      // Get process names using tasklist
       if (pids.size > 0) {
         exec("tasklist /fo csv", (error, processStdout, stderr) => {
           if (error) {
