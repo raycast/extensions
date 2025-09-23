@@ -6,7 +6,20 @@
   "icon": "extension-icon.png",
   "author": "boradatti",
   "license": "MIT",
-  "commands": [],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search all sounds in Farrago",
+      "mode": "view"
+    },
+    {
+      "name": "fade-all",
+      "title": "Fade All",
+      "description": "Fade All Sounds Currently Playing in Farrago",
+      "mode": "no-view"
+    }
+  ],
   "preferences": [
     {
       "name": "farragoDataDir",
