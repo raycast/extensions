@@ -40,6 +40,7 @@ export async function exportImage(string: string, useAsciimath: boolean, inline:
     if (stderr) console.error(`ImageMagick stderr: ${stderr}`);
   } catch (error) {
     console.error("Failed to execute ImageMagick command:", error);
+    throw error;
   }
   return imageFilename;
 }
