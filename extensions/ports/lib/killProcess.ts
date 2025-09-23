@@ -6,7 +6,7 @@ export const killProcess = (pid: string, onSuccess?: () => void) => {
       if (error) {
         showToast({ style: Toast.Style.Failure, title: "No se pudo matar el proceso", message: String(error) });
       } else {
-        showToast({ style: Toast.Style.Success, title: "Proceso terminado", message: `PID ${pid} fue terminado.` });
+        showToast({ style: Toast.Style.Success, title: "Process terminated", message: `PID ${pid} was terminated.` });
         if (onSuccess) {
           onSuccess();
         }
