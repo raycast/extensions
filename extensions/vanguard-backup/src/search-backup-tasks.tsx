@@ -57,7 +57,7 @@ export default function SearchBackupTasks() {
                         task.paused_at ? "N/A" : `${task.schedule.frequency} at ${task.schedule.scheduled_utc_time}`
                       }
                     />
-                    <List.Item.Detail.Metadata.Label title="Last ran" text={task.last_run_local_time || "never "} />
+                    <List.Item.Detail.Metadata.Label title="Last ran" text={task.last_run_local_time || "never"} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -204,6 +204,7 @@ function AddBackupTask() {
         ))}
       </Form.Dropdown>
       <Form.Dropdown
+        title="Time to Backup"
         info={`The time is based on your timezone: ${user?.account_settings.timezone ?? "?"}`}
         {...itemProps.time_to_run_at}
       >

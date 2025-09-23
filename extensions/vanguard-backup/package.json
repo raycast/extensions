@@ -30,18 +30,21 @@
     {
       "name": "search-backup-destinations",
       "title": "Search Backup Destinations",
+      "subtitle": "Vanguard Backup",
       "description": "Manage Backup Destinations",
       "mode": "view"
     },
     {
       "name": "search-backup-tasks",
       "title": "Search Backup Tasks",
+      "subtitle": "Vanguard Backup",
       "description": "Manage Backup Tasks",
       "mode": "view"
     },
     {
       "name": "search-remote-servers",
       "title": "Search Remote Servers",
+      "subtitle": "Vanguard Backup",
       "description": "Manage Remote Servers",
       "mode": "view"
     }
