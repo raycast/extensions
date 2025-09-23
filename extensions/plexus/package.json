@@ -5,6 +5,9 @@
   "description": "Discover and manage all running Node.js development servers on your localhost with smart project detection, framework identification, and quick access.",
   "icon": "logo.png",
   "author": "RensHoogendam",
+  "contributors": [
+    "JaisyG"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=20.15.1"

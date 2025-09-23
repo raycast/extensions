@@ -11,3 +11,6 @@
 - Working directory detection for better project context
 - Clean, modern TypeScript codebase with async/await patterns
 - Comprehensive utility functions for process and project detection
+
+## [1.0.1] - 2025-09-24
+- Add option to open project with chosen application
