@@ -76,7 +76,7 @@ export default function Command() {
         title="Latex"
         subtitle="inline"
         detail={<List.Item.Detail markdown={getMarkdown(false, true)} />}
-        actions={getActions(true, false)}
+        actions={getActions(false, true)}
       />
     </List>
   );
