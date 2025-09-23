@@ -134,7 +134,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Changelog
 
-### [🎂 Added Port Manager] - (2025-09-21)
+### [🎂 Added Port Manager] - {PR_MERGE_DATE}
 
 - Add port monitoring functionality to view all open TCP ports
 - Add process identification with process names for each port
