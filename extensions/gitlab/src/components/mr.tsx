@@ -21,7 +21,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
 import { userIcon } from "./users";
-import { useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { CacheActionPanelSection } from "./cache_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -333,7 +333,7 @@ export function MRList({
 
   return (
     <List
-      searchBarPlaceholder="Filter Merge Requests by name..."
+      searchBarPlaceholder="Filter Merge Requests by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
@@ -374,6 +374,14 @@ export function MRListItem(props: {
   onToggleDetails: () => void;
 }) {
   const mr = props.mr;
+
+  const { data: approval } = useCachedPromise(
+    async (proID, mrIID) => {
+      const approval = await gitlab.getMergeRequestsApprovalsFromProjectMR({ projectID: proID, mrIID: mrIID });
+      return approval;
+    },
+    [mr.project_id, mr.iid],
+  );
 
   const getIcon = (): List.Item.Props["icon"] => {
     if (mr.state === "merged") {
@@ -419,8 +427,14 @@ export function MRListItem(props: {
   if (!getListDetailsPreference()) {
     accessories.push(
       {
-        icon: mr.merge_when_pipeline_succeeds ? Icon.Rewind : undefined,
-        tooltip: mr.merge_when_pipeline_succeeds ? "Auto Merge" : undefined,
+        icon: approval ? Icon.Eye : undefined,
+        text: approval
+          ? `${approval.approvals_required - approval.approvals_left}/${approval.approvals_required}`
+          : undefined,
+      },
+      {
+        icon: mr.merge_when_pipeline_succeeds && mr.state === "opened" ? Icon.Rewind : undefined,
+        tooltip: mr.merge_when_pipeline_succeeds && mr.state === "opened" ? "Auto Merge" : undefined,
       },
       {
         icon: mr.user_notes_count && mr.user_notes_count > 0 ? Icon.SpeechBubble : undefined,

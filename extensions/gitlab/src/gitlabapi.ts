@@ -365,6 +365,12 @@ export interface Status {
   clear_status_at?: Date | undefined;
 }
 
+export interface MergeRequestApprovals {
+  approved: boolean;
+  approvals_required: number;
+  approvals_left: number;
+}
+
 export function isValidStatus(status: Status): boolean {
   if (status.message || status.emoji) {
     return true;
@@ -763,6 +769,26 @@ export class GitLab {
       return issues.map((issue: any) => jsonDataToMergeRequest(issue));
     });
     return issueItems;
+  }
+
+  async getMergeRequestsApprovalsFromProjectMR({
+    params,
+    projectID,
+    mrIID,
+  }: {
+    projectID: number;
+    mrIID: number;
+    params?: Record<string, any>;
+  }): Promise<MergeRequestApprovals> {
+    if (!params) {
+      params = {};
+    }
+    if (!params?.with_labels_details) {
+      params.with_labels_details = "true";
+    }
+    const projectPrefix = `projects/${projectID}/merge_requests/${mrIID}/approvals`;
+    const result: MergeRequestApprovals = (await this.fetch(`${projectPrefix}/`, params)) as MergeRequestApprovals;
+    return result;
   }
 
   async getMergeRequest(projectID: number, mrID: number, params: Record<string, any>): Promise<MergeRequest> {

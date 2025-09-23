@@ -6,6 +6,7 @@
 - Add subtitles to `Recent Activities`
 - Add comments to Merge Requests
 - Add Comments to Issues
+- Add approvers count to Merge Requests
 
 ## [Added support for Windows] - 2025-08-07
 
