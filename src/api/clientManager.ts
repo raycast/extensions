@@ -89,6 +89,15 @@ export class ClientManager {
   getTileCoordinates(tile: DBSoundTile): TileCoordinates {
     const set = this._dataGetter.getSetByUuid(tile.setUuid);
 
-    return { setPosition: set.position, tilePosition: { x: tile.gridPositionX, y: tile.gridPositionY } };
+    let tilePosition = { x: 0, y: 0 };
+    if (set.mode === 0) {
+      // i.e. if it's a grid
+      tilePosition = { x: tile.gridPositionX, y: tile.gridPositionY };
+    } else {
+      // if it 's a list
+      tilePosition.y = tile.listPositionY;
+    }
+
+    return { setPosition: set.position, tilePosition };
   }
 }
