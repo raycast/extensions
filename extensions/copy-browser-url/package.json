@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copy-browser-url",
+  "title": "Copy Browser URL",
+  "version": "1.0.0",
+  "description": "Copy the current browser tab URL with tracking parameters removed. Removes UTM, Google Analytics, Facebook, and other tracking parameters from URLs.",
+  "icon": "extension-icon.png",
+  "author": "tommy",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-browser-url",
+      "title": "Copy Browser URL",
+      "subtitle": "Copy URL from browser tab",
+      "description": "Copy the current browser tab URL to clipboard. Optionally remove tracking parameters (UTM, Google Analytics, Facebook, etc.) based on your preferences.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableSanitization",
+      "type": "checkbox",
+      "required": false,
+      "title": "URL Sanitization",
+      "description": "Remove tracking parameters from URLs (UTM, Google Analytics, Facebook, etc.)",
+      "default": true,
+      "label": "Enable URL sanitization"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.2",
+    "react": "19.0.0",
+    "typescript": "5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
+  }
+}
