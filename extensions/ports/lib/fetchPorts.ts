@@ -55,7 +55,7 @@ export const fetchPorts = (setPorts: (ports: PortInfo[]) => void, setLoading: (l
             }
           });
 
-          // Asignar nombres de procesos a los puertos
+          // Assign process names to ports
           ports.forEach(port => {
             const processName = processMap.get(port.pid);
             if (processName) {
