@@ -1,4 +1,4 @@
-import { AaveClient, ChainId, ChainsFilter, EvmAddress, Market, TimeWindow } from "@aave/client";
+import { AaveClient, ChainId, ChainsFilter, EvmAddress, TimeWindow } from "@aave/client";
 import { borrowAPYHistory, chains, markets, supplyAPYHistory } from "@aave/client/actions";
 import { formatApy, formatUSD, formatMarketName, titleCase } from "./format";
 import { showFrozenOrPausedAssets } from "./preferences";
