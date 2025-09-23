@@ -144,6 +144,7 @@ export function jsonDataToIssue(issue: any): Issue {
     milestone: dataToMilestone(issue.milestone),
     labels: issue.labels as Label[],
     user_notes_count: issue.user_notes_count,
+    merge_requests_count: issue.merge_requests_count,
   };
 }
 
@@ -244,6 +245,7 @@ export class Issue {
   public milestone?: Milestone = undefined;
   public labels: Label[] = [];
   public user_notes_count: number | undefined = undefined;
+  public merge_requests_count: number = 0;
 }
 
 export class MergeRequest {

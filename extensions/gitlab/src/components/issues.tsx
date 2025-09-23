@@ -211,6 +211,10 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }) 
       }}
       accessories={[
         {
+          text: issue.merge_requests_count > 0 ? `${issue.merge_requests_count}` : undefined,
+          icon: issue.merge_requests_count > 0 ? { source: "branch.png", tintColor: Color.PrimaryText } : undefined,
+        },
+        {
           icon: issue.user_notes_count && issue.user_notes_count > 0 ? Icon.SpeechBubble : undefined,
           text: issue.user_notes_count && issue.user_notes_count > 0 ? issue.user_notes_count.toString() : undefined,
           tooltip:
