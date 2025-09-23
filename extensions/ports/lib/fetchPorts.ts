@@ -12,7 +12,7 @@ export const fetchPorts = (setPorts: (ports: PortInfo[]) => void, setLoading: (l
     
     exec("netstat -ano -p tcp", (error, stdout, stderr) => {
       if (error) {
-        showToast({ style: Toast.Style.Failure, title: "Error al ejecutar netstat", message: String(error) });
+        showToast({ style: Toast.Style.Failure, title: "Error executing netstat", message: String(error) });
         setLoading(false);
         return;
       }
