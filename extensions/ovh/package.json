@@ -3,7 +3,7 @@
   "name": "ovhcloud",
   "title": "OVHcloud",
   "description": "",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "xmok",
   "platforms": [
     "macOS",
