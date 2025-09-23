@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "asciimath",
+  "title": "Asciimath",
+  "description": "Renders an asciimath equation",
+  "icon": "command-icon.png",
+  "author": "saivan",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [{
+    "name": "imageExportWidth",
+    "title": "Image Export Width",
+    "description": "Width of the exported image in pixels, leave blank for auto",
+    "type": "textfield",
+    "required": false,
+    "default": ""
+  }, {
+    "name": "imageExportHeight",
+    "title": "Image Export height",
+    "description": "Height of the exported image in pixels, leave blank for auto",
+    "type": "textfield",
+    "required": false,
+    "default": "256"
+  }, {
+    "name": "homebrewPath",
+    "title": "Homebrew Path",
+    "description": "Path to homebrew, leave blank if installed in /opt/homebrew or /usr/local",
+    "type": "textfield",
+    "required": false,
+    "default": "/opt/homebrew/bin"
+  }, {
+    "name": "imageMagickPath",
+    "title": "ImageMagick Path",
+    "description": "Path to ImageMagick, leave blank if installed in /opt/homebrew or /usr/local",
+    "type": "textfield",
+    "required": false,
+    "default": "/opt/homebrew/bin/magick"
+  }],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Typeset Equation",
+      "subtitle": "Render and export an equation as an image",
+      "description": "Renders an equation to asciimath or latex",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "@raycast/utils": "^1.8.0",
+    "asciimath-to-latex": "^0.5.1",
+    "clipboardy": "^3.0.0",
+    "copy-paste": "^1.5.3",
+    "express": "^4.18.2",
+    "https": "^1.0.0",
+    "jsdom": "^20.0.0",
+    "katex": "^0.16.0",
+    "mathjax": "^3.2.2",
+    "mathjax-full": "^3.2.2",
+    "mathjax-node": "^2.1.1",
+    "node-fetch": "^3.3.0",
+    "rss-parser": "^3.12.0"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.14.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "ray publish",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

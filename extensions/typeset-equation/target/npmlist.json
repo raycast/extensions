@@ -1,0 +1,1 @@
+{"name":"asciimath","dependencies":{"@raycast/api":{"version":"1.37.1"},"asciimath-to-latex":{"version":"0.5.1"},"express":{"version":"4.18.2"},"jsdom":{"version":"20.0.0"},"katex":{"version":"0.16.0"},"mathjax-full":{"version":"3.2.2"},"mathjax-node":{"version":"2.1.1"},"mathjax":{"version":"3.2.2"},"node-fetch":{"version":"3.3.0"},"rss-parser":{"version":"3.12.0"}}}
