@@ -1,0 +1,91 @@
+{
+  "name": "count-lines",
+  "version": "1.0.2",
+  "description": "Show the number of lines in the currently selected text (falls back to clipboard).",
+  "author": "Joao",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "title": "Count Lines",
+  "icon": "icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "scripts": {
+    "dev": "npx ray develop",
+    "build": "npx ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "eslint 'src/**/*.{ts,tsx,js}'",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx,js}' --fix",
+    "format": "prettier 'src/**/*.{ts,tsx,js}' --write",
+    "format:check": "prettier 'src/**/*.{ts,tsx,js}' --check"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest"
+  },
+  "devDependencies": {
+    "eslint": "^9.9.1",
+    "prettier": "^3.3.3",
+    "@typescript-eslint/parser": "^8.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "typescript": "^5.6.2"
+  },
+  "commands": [
+    {
+      "name": "count-lines",
+      "title": "Count Lines",
+      "description": "Show the number of lines in your current selection; fallback to clipboard if needed.",
+      "mode": "no-view",
+      "keywords": [
+        "line",
+        "lines",
+        "count",
+        "selected",
+        "selection",
+        "clipboard"
+      ],
+      "preferences": [
+        {
+          "name": "ignoreTrailingBlank",
+          "title": "Counting Options",
+          "description": "Ignore trailing blank lines at the end of the selection (recommended).",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Ignore trailing blank lines"
+        },
+        {
+          "name": "alsoShowNonEmpty",
+          "title": "",
+          "description": "Also compute non-empty lines (excludes whitespace-only lines) and include in HUD.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Also show non-empty lines"
+        },
+        {
+          "name": "copyResultToClipboard",
+          "title": "",
+          "description": "Copy the numeric line count to your clipboard after running the command.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Copy result to clipboard"
+        },
+        {
+          "name": "fallbackToClipboard",
+          "title": "",
+          "description": "If selected text can't be read, fall back to reading text from the clipboard.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Fallback to clipboard if selection unavailable"
+        }
+      ]
+    }
+  ]
+}

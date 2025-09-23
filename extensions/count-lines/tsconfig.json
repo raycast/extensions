@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "types": [
+      "@raycast/api",
+      "@raycast/utils"
+    ]
+  },
+  "include": [
+    "src"
+  ]
+}
