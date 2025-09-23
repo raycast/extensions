@@ -5,7 +5,7 @@ import { CreateServer, Server, ServerStatusConnectivity } from "./types";
 
 const SERVER_ACCESSORY: Partial<Record<ServerStatusConnectivity, List.Item.Accessory>> = {
   checking: { tag: { value: "Checking", color: Color.Purple } },
-  connected: { tag: { value: "Connected", color: Color.Green } },
+  online: { tag: { value: "Online", color: Color.Green } },
   offline: { tag: { value: "Offline", color: Color.Red } },
 };
 

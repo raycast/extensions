@@ -1,6 +1,6 @@
 export enum ServerStatusConnectivity {
   checking = "checking",
-  connected = "connected",
+  online = "online",
   offline = "offline",
   unknown = "unknown",
 }
@@ -81,9 +81,16 @@ export type BackupTask = {
   remote_server_id: number;
   backup_destination_id: number;
   label: string;
-  description: string;
+  description: string | null;
+  schedule: {
+    frequency: BackupTaskFrequency;
+    scheduled_utc_time: string;
+    scheduled_local_time: string;
+  };
   status: string;
   has_encryption_password: boolean;
+  last_run_local_time: string | null;
+  paused_at: string | null;
   created_at: string;
   updated_at: string;
 };

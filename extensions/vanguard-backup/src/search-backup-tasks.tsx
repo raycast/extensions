@@ -35,12 +35,15 @@ export default function SearchBackupTasks() {
             icon="backup-task.svg"
             title={task.label}
             accessories={[
-              task.status === "ready"
-                ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Ready" }
-                : {},
+              task.paused_at
+                ? { icon: { source: Icon.Pause, tintColor: Color.Red }, tooltip: "Paused" }
+                : task.status === "ready"
+                  ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Ready" }
+                  : {},
             ]}
             detail={
               <List.Item.Detail
+                markdown={task.description}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Server ID" text={task.remote_server_id.toString()} />
@@ -48,7 +51,13 @@ export default function SearchBackupTasks() {
                       title="Destination ID"
                       text={task.backup_destination_id.toString()}
                     />
-                    {/* <List.Item.Detail.Metadata.Label title="Scheduled" text={task.backup_destination_id.toString()} /> */}
+                    <List.Item.Detail.Metadata.Label
+                      title="Scheduled"
+                      text={
+                        task.paused_at ? "N/A" : `${task.schedule.frequency} at ${task.schedule.scheduled_utc_time}`
+                      }
+                    />
+                    <List.Item.Detail.Metadata.Label title="Last ran" text={task.last_run_local_time || "never "} />
                   </List.Item.Detail.Metadata>
                 }
               />
