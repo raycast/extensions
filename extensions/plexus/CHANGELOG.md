@@ -1,5 +1,10 @@
 # Plexus Changelog
 
+## [1.0.1] - {PR_MERGE_DATE}
+
+### Added
+- Add option to open project with chosen application
+
 ## [1.0.0] - 2025-09-04
 
 ### Added
@@ -11,6 +16,3 @@
 - Working directory detection for better project context
 - Clean, modern TypeScript codebase with async/await patterns
 - Comprehensive utility functions for process and project detection
-
-## [1.0.1] - 2025-09-24
-- Add option to open project with chosen application

@@ -1,9 +1,12 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { LocalhostItem } from "./types/LocalhostItem";
 import { getLocalhostItems } from "./services/localhostService";
 import { useServiceIcon, usePageTitle } from "./utils/webHooks";
 import { createDisplayName, getProjectName } from "./utils/projectUtils";
+
+const preferences: Preferences = getPreferenceValues();
+const { openProjectsWithApp } = preferences;
 
 export default function Command() {
   const [items, setItems] = useState<LocalhostItem[]>([]);
@@ -59,7 +62,17 @@ function LocalhostListItem({ item }: { item: LocalhostItem }) {
           <Action.OpenInBrowser url={item.url} />
           <Action.CopyToClipboard content={item.url} title="Copy URL" />
           <Action.CopyToClipboard content={item.pid} title="Copy Process ID" />
-          <Action.OpenWith path={item.projectPath} title="Open with" />
+          {openProjectsWithApp ? (
+            <Action.Open
+              title={`Open in ${openProjectsWithApp.name}`}
+              icon={{ fileIcon: openProjectsWithApp.path }}
+              target={item.projectPath}
+              application={openProjectsWithApp.path}
+              shortcut={{ modifiers: ["opt"], key: "o" }}
+            />
+          ) : (
+            <Action.OpenWith path={item.projectPath} shortcut={{ modifiers: ["opt"], key: "o" }} title="Open with" />
+          )}
         </ActionPanel>
       }
     />
