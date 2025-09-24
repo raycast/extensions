@@ -9,10 +9,10 @@ export const BACKEND_API_URL = "https://api.webbites.io/";
  * API endpoints
  */
 export const API_ENDPOINTS = {
-  LOGIN: "/raycast-login",
-  LOGOUT: "/raycast-logout",
-  USER: "/raycast-user",
-  BOOKMARKS: "/raycast-bookmarks",
+  LOGIN: "raycast-login",
+  LOGOUT: "raycast-logout",
+  USER: "raycast-user",
+  BOOKMARKS: "raycast-bookmarks",
 } as const;
 
 /**
