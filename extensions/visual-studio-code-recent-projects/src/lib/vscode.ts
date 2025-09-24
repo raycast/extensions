@@ -128,14 +128,16 @@ export class VSCodeCLI {
     if (isMacOS) {
       child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
     } else if (isWindows) {
-      child_process.execFileSync('"'+this.cliFilename+'"', ["--install-extension", id, "--force"], { shell: true });
+      child_process.execFileSync('"' + this.cliFilename + '"', ["--install-extension", id, "--force"], { shell: true });
     }
   }
   uninstallExtensionByIDSync(id: string) {
     if (isMacOS) {
       child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
     } else if (isWindows) {
-      child_process.execFileSync('"'+this.cliFilename+'"', ["--uninstall-extension", id, "--force"], { shell: true });
+      child_process.execFileSync('"' + this.cliFilename + '"', ["--uninstall-extension", id, "--force"], {
+        shell: true,
+      });
     }
   }
 }

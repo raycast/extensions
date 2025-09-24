@@ -14,13 +14,9 @@ interface CommandMetadata {
 
 function transitFolder(): string {
   const build = getBuildNamePreference();
-  const ts = isMacOS ? path.join(
-    os.homedir(),
-    `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`
-  ) : path.join(
-    process.env.APPDATA || "",
-    `${build}/User/globalStorage/tonka3000.raycast/transit`
-  );
+  const ts = isMacOS
+    ? path.join(os.homedir(), `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`)
+    : path.join(process.env.APPDATA || "", `${build}/User/globalStorage/tonka3000.raycast/transit`);
   return ts;
 }
 

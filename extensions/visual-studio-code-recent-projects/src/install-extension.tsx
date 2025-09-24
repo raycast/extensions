@@ -17,7 +17,10 @@ function InstallExtensionAction(props: { extension: GalleryExtension; afterInsta
   );
 }
 
-function UninstallExtensionAction(props: { extension: GalleryExtension; afterUninstall?: () => void }): React.JSX.Element {
+function UninstallExtensionAction(props: {
+  extension: GalleryExtension;
+  afterUninstall?: () => void;
+}): React.JSX.Element {
   return (
     <UninstallExtensionByIDAction
       extensionID={getFullExtensionID(props.extension)}

@@ -4,7 +4,10 @@ import { getBuildNamePreference, getBuildScheme, getVSCodeCLI } from "./lib/vsco
 import { getErrorMessage } from "./utils";
 import { getEditorApplication } from "./utils/editor";
 
-export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }): React.JSX.Element {
+export function InstallExtensionByIDAction(props: {
+  extensionID: string;
+  afterInstall?: () => void;
+}): React.JSX.Element {
   const handle = async () => {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Install Extension" });
