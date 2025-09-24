@@ -87,6 +87,10 @@ export function isSameEntry(a: EntryLike, b: EntryLike) {
   return false;
 }
 
+export const isWindows = process.platform === "win32";
+
+export const isMacOS = process.platform === "darwin";
+
 // Filters
 
 export function filterEntriesByType(filter: EntryType | null) {

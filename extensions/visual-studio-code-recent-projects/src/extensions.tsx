@@ -8,15 +8,15 @@ import {
 import { Extension, getLocalExtensions } from "./lib/vscode";
 import { getErrorMessage } from "./utils";
 
-function OpenExtensionInVSCodeAction(props: { extension: Extension }): JSX.Element {
+function OpenExtensionInVSCodeAction(props: { extension: Extension }): React.JSX.Element {
   return <OpenExtensionByIDInVSCodeAction extensionID={props.extension.id} />;
 }
 
-function OpenExtensionInBrowserAction(props: { extension: Extension }): JSX.Element {
+function OpenExtensionInBrowserAction(props: { extension: Extension }): React.JSX.Element {
   return <OpenExtensionByIDInBrowserAction extensionID={props.extension.id} />;
 }
 
-function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }): JSX.Element {
+function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }): React.JSX.Element {
   const e = props.extension;
   return (
     <List.Item
@@ -69,7 +69,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
   );
 }
 
-export default function ExtensionsRootCommand(): JSX.Element {
+export default function ExtensionsRootCommand(): React.JSX.Element {
   const { extensions, isLoading, error, refresh } = useLocalExtensions();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

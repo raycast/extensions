@@ -325,7 +325,6 @@ function RemoteItem(
             title="Open Preferences"
             icon={Icon.Gear}
             onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
           />
         </ActionPanel>
       }

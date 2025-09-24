@@ -3,7 +3,8 @@ import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import { fileExists } from "../utils";
+import { fileExists, isMacOS, isWindows } from "../utils";
+import { homedir } from "os";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -65,7 +66,7 @@ function getNLSVariable(text: string | undefined): string | undefined {
     return m[1];
   }
 }
-const cliPaths: Record<string, string> = {
+const cliPathsMac: Record<string, string> = {
   Antigravity: "/Applications/Antigravity.app/Contents/Resources/app/bin/antigravity",
   Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
   "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
@@ -78,6 +79,37 @@ const cliPaths: Record<string, string> = {
   "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
   Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
 };
+
+const cliPathsWindows: Record<string, string> = {
+  Code: path.join(homedir(), "AppData", "Local", "Programs", "Microsoft VS Code", "bin", "code.cmd"),
+  "Code - Insiders": path.join(
+    homedir(),
+    "AppData",
+    "Local",
+    "Programs",
+    "Microsoft VS Code Insiders",
+    "bin",
+    "code-insiders.cmd"
+  ),
+  Cursor: path.join(homedir(), "AppData", "Local", "Programs", "Cursor", "bin", "cursor.cmd"),
+  Kiro: path.join(homedir(), "AppData", "Local", "Programs", "Kiro", "bin", "kiro.cmd"),
+  Positron: path.join(homedir(), "AppData", "Local", "Programs", "Positron", "bin", "code.cmd"),
+  Trae: path.join(homedir(), "AppData", "Local", "Programs", "Trae", "bin", "marscode.cmd"),
+  "Trae CN": path.join(homedir(), "AppData", "Local", "Programs", "Trae CN", "bin", "marscode.cmd"),
+  VSCodium: path.join(homedir(), "AppData", "Local", "Programs", "VSCodium", "bin", "codium.cmd"),
+  "VSCodium - Insiders": path.join(
+    homedir(),
+    "AppData",
+    "Local",
+    "Programs",
+    "VSCodium - Insiders",
+    "bin",
+    "codium-insiders.cmd"
+  ),
+  Windsurf: path.join(homedir(), "AppData", "Local", "Programs", "Windsurf", "bin", "windsurf.cmd"),
+};
+
+const cliPaths: Record<string, string> = isMacOS ? cliPathsMac : cliPathsWindows;
 
 export function getVSCodeCLIFilename(): string {
   const name = cliPaths[getBuildNamePreference()];
@@ -93,10 +125,18 @@ export class VSCodeCLI {
     this.cliFilename = cliFilename;
   }
   installExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
+    if (isMacOS) {
+      child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
+    } else if (isWindows) {
+      child_process.execFileSync('"'+this.cliFilename+'"', ["--install-extension", id, "--force"], { shell: true });
+    }
   }
   uninstallExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
+    if (isMacOS) {
+      child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
+    } else if (isWindows) {
+      child_process.execFileSync('"'+this.cliFilename+'"', ["--uninstall-extension", id, "--force"], { shell: true });
+    }
   }
 }
 
