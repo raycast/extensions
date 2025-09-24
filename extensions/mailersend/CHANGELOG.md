@@ -1,6 +1,6 @@
 # MailerSend Changelog
 
-## [Windows Support + View DNS Records] - {PR_MERGE_DATE}
+## [Windows Support + View DNS Records] - 2025-09-24
 
 - Add Windows Support
 - View Domain DNS Records
