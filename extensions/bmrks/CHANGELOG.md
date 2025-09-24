@@ -1,6 +1,6 @@
 # bmrks Changelog
 
-## [Change "Delete" Shortcut] - {PR_MERGE_DATE}
+## [Change "Delete" Shortcut] - 2025-09-24
 
 - Changed "Delete" Shortcut to `Keyboard.Shortcut.Common.Remove` (default: `ctrl`+`x`) (ref: [Issue #21681](https://github.com/raycast/extensions/issues/21681))
 - Modernized extension to use latest configuration
