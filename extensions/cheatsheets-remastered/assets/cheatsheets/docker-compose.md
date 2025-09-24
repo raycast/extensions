@@ -1,9 +1,14 @@
 ---
 title: docker-compose
 category: Devops
-prism_languages: [yaml]
+prism_languages:
+  - yaml
 weight: -1
-updated: 2024-04-03 
+updated: 2024-04-03T00:00:00.000Z
+tech: docker-compose
+status: active
+lastReviewed: '2025-09-05'
+version: '1'
 ---
 
 ### Basic example

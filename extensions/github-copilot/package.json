@@ -30,6 +30,14 @@
       "subtitle": "GitHub Copilot",
       "description": "Delegate a task to Copilot coding agent to work on in the background",
       "mode": "view"
+    },
+    {
+      "name": "github-copilot-tasks",
+      "title": "Menu Bar Tasks",
+      "subtitle": "GitHub Copilot",
+      "description": "Track Copilot coding agent tasks from the menu bar",
+      "mode": "menu-bar",
+      "interval": "30m"
     }
   ],
   "tools": [
@@ -45,17 +53,16 @@
     }
   ],
   "dependencies": {
-    "@msgpack/msgpack": "^3.1.2",
     "@octokit/core": "^7.0.2",
     "@octokit/rest": "^22.0.0",
-    "@raycast/api": "^1.102.5",
+    "@raycast/api": "^1.102.7",
     "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "24.3.0",
+    "@types/node": "24.3.1",
     "@types/react": "19.1.12",
-    "eslint": "^9.22.0",
+    "eslint": "^9.35.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },

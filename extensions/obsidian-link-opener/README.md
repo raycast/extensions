@@ -22,6 +22,8 @@ Use your Obsidian vault into a bookmark manager. This extension lets you quickly
 - ⚡ **Fast Search**: Quickly find notes by title or URL
 - 📊 **Smart Sorting**: Sort by frecency (frequency + recency) or alphabetically
 - ⌨️ **Keyboard Shortcuts**: Quick access to related URLs from the same note
+- 💾 **Smart Caching**: Intelligent caching system for instant results with large vaults
+- 🔄 **Incremental Updates**: Only re-scans changed files for better performance
 
 ## Prerequisites
 
@@ -42,6 +44,7 @@ Configure the extension in Raycast preferences:
 
 ### Settings
 - **Use Frecency Sorting**: Sort notes by frequency and recency of use (default: enabled). When disabled, sorts alphabetically by note title.
+- **Cache TTL (minutes)**: How long to cache vault data before refreshing (default: 5 minutes). Lower values mean more frequent updates but slower performance.
 
 
 ## Usage
@@ -56,6 +59,9 @@ The main command that displays a list of all notes with URLs in their frontmatte
 
 ### Select Vault
 Choose which Obsidian vault to scan for URLs. The extension remembers your selection for future use.
+
+### Refresh Index
+Manually clear the cache and rebuild the index of URLs from your vault. This is useful if you've made changes to your notes and want to see them immediately without waiting for the cache to expire.
 
 ### Quick Access to Other URLs
 When viewing any URL from a note that has multiple URLs, you can use keyboard shortcuts to quickly open other URLs from the same note:
@@ -107,15 +113,29 @@ All URLs above will be found and displayed, regardless of the property name used
 - Try running a manual refresh
 
 ### Performance issues
-- The extension scans your vault files each time it runs
-- For very large vaults (10,000+ files), scanning may take a moment. (See [ROADMAP](./ROADMAP.md).)
+- The extension uses intelligent caching to improve performance with large vaults
+- First scan of a large vault may take a moment, but subsequent loads will be instant
+- You can adjust the Cache TTL in preferences for your preferred balance of freshness vs speed
+- Use the "Refresh Index" command to manually update the cache when needed
 
-## Why a Separate Extension?
+## Related Projects
 
-This extension is intentionally separate from the main [Obsidian extension](https://www.raycast.com/marcjulian/obsidian) because it serves a fundamentally different use case:
+### Obsidian Extensions for Raycast
+- **[Obsidian](https://www.raycast.com/marcjulian/obsidian)**: The main Obsidian extension for note management, search, and creation
+- **[Obsidian Bookmarks](https://www.raycast.com/quorafind/obsidian-bookmarks)**: Manages bookmarks where each bookmark is a separate note with metadata
 
+## Why This Extension is Distinct
+
+### Different from Obsidian Bookmarks
+While both extensions work with URLs in Obsidian, they use **completely different organizational patterns**:
+
+- **Obsidian Bookmarks**: Each bookmark is a **single note** with metadata properties describing that one bookmark
+- **This Extension**: Each note is a **topic page** with multiple URL properties related to that single topic (e.g., a project note containing links to its homepage, documentation, GitHub repo, dashboard, etc.)
+
+These fundamentally different approaches would be confusing to merge into a single extension, as they represent opposite ways of organizing links in Obsidian.
+
+### Different from Main Obsidian Extension
 - **Different Purpose**: While the main Obsidian extension focuses on note management and creation, this extension treats Obsidian as a **structured bookmark manager** for URLs stored in frontmatter properties
-- **Direct File Access**: This extension bypasses Obsidian entirely, directly scanning markdown files to extract URLs. The main extension interacts with Obsidian through its URI protocol
 - **Specialized Workflow**: Designed for users who store project links, documentation URLs, and web resources in their notes' frontmatter and want quick access without opening Obsidian
 - **No Feature Overlap**: The commands provided (opening URLs from frontmatter) don't duplicate any functionality from the main extension's note search, creation, or daily note features
 

@@ -13,10 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { withGithubClient } from "./api.js";
-import Diagnostics from "./components/diagnostics.js";
-import Tags from "./components/tags.js";
-import SyncFork from "./components/sync-fork.js";
-import ValidExtensions from "./components/valid-extensions.js";
+import { CreateExtension, Diagnostics, SyncFork, Tags, ValidExtensions } from "./components/index.js";
 import { catchError, handleError } from "./errors.js";
 import * as git from "./git.js";
 import operation from "./operation.js";
@@ -26,7 +23,6 @@ import { extensionLink, getActualIconPath, userLink } from "./utils.js";
 function ManageForkedExtensions() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [forkedRepository, setForkedRepository] = useState<string>();
-  const [lastCommitHash, setLastCommitHash] = useState<string>();
   const { push } = useNavigation();
 
   const {
@@ -42,8 +38,6 @@ function ManageForkedExtensions() {
       setForkedRepository(forkedRepository);
       const extensions = await git.getExtensionList();
       const forkedExtensionFolders = extensions.map((x) => x.folderName);
-      const lastCommitHash = await git.getLastCommitHash();
-      setLastCommitHash(lastCommitHash);
       return { extensions, forkedExtensionFolders };
     },
     [],
@@ -75,12 +69,9 @@ function ManageForkedExtensions() {
                 icon={Icon.NewDocument}
                 target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
               />
+              <CreateExtension />
               <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
-              <SyncFork
-                forkedRepository={forkedRepository}
-                lastCommitHash={lastCommitHash}
-                onSyncFinished={revalidate}
-              />
+              <SyncFork forkedRepository={forkedRepository} onSyncFinished={revalidate} />
             </ActionPanel.Section>
             <ActionPanel.Section>
               <Action.Push icon={Icon.WrenchScrewdriver} title="Run Diagnostics" target={<Diagnostics />} />
@@ -118,7 +109,7 @@ function ManageForkedExtensions() {
                 <Action.OpenWith path={x.folderPath} />
                 <Action.CopyToClipboard
                   title="Copy Extension Path to Clipboard"
-                  content={x.folderName}
+                  content={x.folderPath}
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action.Push
@@ -127,11 +118,8 @@ function ManageForkedExtensions() {
                   shortcut={Keyboard.Shortcut.Common.New}
                   target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
                 />
-                <SyncFork
-                  forkedRepository={forkedRepository}
-                  lastCommitHash={lastCommitHash}
-                  onSyncFinished={revalidate}
-                />
+                <CreateExtension />
+                <SyncFork forkedRepository={forkedRepository} onSyncFinished={revalidate} />
                 <Action.ShowInFinder title="Show Extension in Finder" path={x.folderPath} />
                 <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
                 <Action.OpenInBrowser url={extensionLink(x.author, x.name)} shortcut={Keyboard.Shortcut.Common.Open} />

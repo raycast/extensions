@@ -1,6 +1,5 @@
 import { AI, Color, Icon, Image } from '@raycast/api';
-
-import { List } from './api';
+import { List } from './types';
 
 export const listItems = {
   inbox: { title: 'Inbox', icon: { source: Icon.Tray, tintColor: Color.Blue } },

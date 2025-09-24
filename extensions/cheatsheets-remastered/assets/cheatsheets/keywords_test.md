@@ -1,7 +1,7 @@
 ---
 title: Intro test
 category: Hidden
-updated: 2020-07-05
+updated: 2020-07-05T00:00:00.000Z
 keywords:
   - Variables
   - Functions
@@ -10,6 +10,9 @@ keywords:
   - Loops
   - Conditional execution
   - Command substitution
+tech: keywords_test
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Example test

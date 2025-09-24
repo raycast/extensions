@@ -1,8 +1,11 @@
 ---
 title: Jsdoc
 category: JavaScript
-updated: 2024-07-26
+updated: 2024-07-26T00:00:00.000Z
 weight: -1
+tech: jsdoc
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Functions

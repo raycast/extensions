@@ -1,20 +1,47 @@
-import { Icon, Color } from "@raycast/api";
+import { Color, Image, Keyboard } from "@raycast/api";
 import { PullRequestWithAgentSessions, AgentSessionState } from "./services/copilot";
 
-export function getIcon(pullRequestWithAgentSessions: PullRequestWithAgentSessions) {
+export function getIcon(pullRequestsWithAgentSessions: PullRequestWithAgentSessions): Image.ImageLike {
+  const source = getIconPath(pullRequestsWithAgentSessions);
+
+  return { source, tintColor: Color.PrimaryText };
+}
+
+export function getIconPath(pullRequestWithAgentSessions: PullRequestWithAgentSessions): string {
   if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.QUEUED) {
-    return { source: Icon.CircleEllipsis, tintColor: Color.Yellow };
+    return "clock.svg";
   } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.IN_PROGRESS) {
-    return { source: Icon.CircleProgress, tintColor: Color.Yellow };
+    return "sync.svg";
   } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.FAILED) {
-    return { source: Icon.XMarkCircle, tintColor: Color.Red };
+    return "stop.svg";
   } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.TIMED_OUT) {
-    return { source: Icon.XMarkCircleHalfDash, tintColor: Color.Red };
+    return "stop.svg";
   } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.CANCELLED) {
-    return { source: Icon.XMarkCircle, tintColor: Color.Green };
+    return "skip.svg";
   } else if (pullRequestWithAgentSessions.sessions[0].state === AgentSessionState.COMPLETED) {
-    return { source: Icon.CheckCircle, tintColor: Color.Green };
+    return "check-circle-fill.svg";
   } else {
-    return { source: Icon.Circle, tintColor: Color.Blue };
+    return "circle.svg";
   }
 }
+
+export function getMenuBarShortcut(index: number) {
+  const key = index + 1;
+
+  let shortcut: Keyboard.Shortcut | undefined;
+  if (key >= 1 && key <= 9) {
+    shortcut = {
+      modifiers: ["cmd"],
+      key: String(key) as Keyboard.KeyEquivalent,
+    };
+  }
+
+  return shortcut;
+}
+
+export const truncate = (text: string, maxLength: number): string => {
+  if (text.length > maxLength) {
+    return text.slice(0, maxLength) + "...";
+  }
+  return text;
+};

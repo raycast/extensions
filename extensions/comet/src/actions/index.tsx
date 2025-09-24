@@ -3,6 +3,11 @@ import { LocalStorage } from "@raycast/api";
 import { Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
+// AppleScript timing constants
+const WINDOW_INIT_RETRY_LIMIT = 20;
+const WINDOW_INIT_RETRY_DELAY = 0.1;
+const WINDOW_ACTIVATION_DELAY = 0.2;
+
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
     ? `execute t javascript ¬
@@ -70,6 +75,9 @@ export async function createNewWindow(): Promise<void> {
   await runAppleScript(`
     tell application "Comet"
       make new window
+      
+      -- Small delay to ensure window is fully initialized before activation
+      delay ${WINDOW_ACTIVATION_DELAY}
       activate
     end tell
     return true
@@ -79,8 +87,26 @@ export async function createNewWindow(): Promise<void> {
 export async function createNewTab(): Promise<void> {
   await runAppleScript(`
     tell application "Comet"
-      make new tab at end of tabs of window 1
-      activate
+      -- Check if at least one window exists
+      if (count of windows) > 0 then
+        make new tab at end of tabs of window 1
+        activate
+      else
+        -- No windows exist, create a new window with a tab
+        make new window
+        
+        -- Wait for window to be fully initialized
+        repeat with i from 1 to ${WINDOW_INIT_RETRY_LIMIT}
+            if (count of windows) > 0 then
+                exit repeat
+            end if
+            delay ${WINDOW_INIT_RETRY_DELAY}
+        end repeat
+        
+        -- Additional small delay to ensure window is ready
+        delay ${WINDOW_ACTIVATION_DELAY}
+        activate
+      end if
     end tell
     return true
   `);
@@ -111,13 +137,27 @@ export async function createNewTabWithProfile(website?: string): Promise<void> {
 
           if not winExists then
               make new window
+              
+              -- Wait for window to be fully initialized
+              repeat with i from 1 to ${WINDOW_INIT_RETRY_LIMIT}
+                  if (count of windows) > 0 then
+                      exit repeat
+                  end if
+                  delay ${WINDOW_INIT_RETRY_DELAY}
+              end repeat
+              
+              -- Additional small delay to ensure window is ready
+              delay ${WINDOW_ACTIVATION_DELAY}
           else
               activate
           end if
 
-          tell window 1
-              set newTab to make new tab ${website ? `with properties {URL:"${escapedWebsite}"}` : ""}
-          end tell
+          -- Verify window 1 exists before accessing it
+          if (count of windows) > 0 then
+              tell window 1
+                  set newTab to make new tab ${website ? `with properties {URL:"${escapedWebsite}"}` : ""}
+              end tell
+          end if
       end tell
       return true
     `);
@@ -135,6 +175,9 @@ export async function createNewIncognitoWindow(): Promise<void> {
   await runAppleScript(`
     tell application "Comet"
       make new window with properties {mode:"incognito"}
+      
+      -- Small delay to ensure window is fully initialized before activation
+      delay ${WINDOW_ACTIVATION_DELAY}
       activate
     end tell
     return true

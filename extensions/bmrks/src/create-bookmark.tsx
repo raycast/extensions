@@ -1,7 +1,6 @@
 import React from "react";
-import fetch from "node-fetch";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
+import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
 import colorString from "color-string";
 import { useGroups } from "../lib/use-groups";
 import * as db from "../lib/db";
@@ -36,7 +35,7 @@ function CreateBookmark({ user }: { user: User }) {
         });
 
         if (res.error) {
-          await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: res.error.message });
+          await showFailureToast(res.error.message);
           return;
         }
       } else if (valueIsUrl) {
@@ -63,7 +62,7 @@ function CreateBookmark({ user }: { user: User }) {
         });
 
         if (res.error) {
-          await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "res.error.message" });
+          await showFailureToast(res.error.message);
           return;
         }
       } else {
@@ -74,7 +73,7 @@ function CreateBookmark({ user }: { user: User }) {
         });
 
         if (res.error) {
-          await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "res.error.message" });
+          await showFailureToast(res.error.message);
           return;
         }
       }
@@ -115,6 +114,7 @@ function CreateBookmark({ user }: { user: User }) {
           <Action.SubmitForm title="Create Bookmark" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
           {activeGroup && user && (
             <Action.OpenInBrowser
+              // eslint-disable-next-line @raycast/prefer-title-case
               title={`Open ${activeGroup.name} in bmrks.com`}
               url={`https://bmrks.com/${user.user_metadata["username"]}/${activeGroup.name.toLowerCase()}`}
             />

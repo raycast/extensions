@@ -1,6 +1,9 @@
 ---
 title: JavaScript lazy shortcuts
 category: JavaScript
+tech: js-lazy
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Shortcuts

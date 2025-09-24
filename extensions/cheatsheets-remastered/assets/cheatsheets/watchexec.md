@@ -1,13 +1,17 @@
 ---
 title: Watchexec
-updated: 2017-10-18
+updated: 2017-10-18T00:00:00.000Z
 category: CLI
 weight: -1
 keywords:
-  - "watchexec --excts js,jsx -- npm test"
-  - "watchexec --help"
-intro: |
-  [mattgreen/watchexec](https://github.com/mattgreen/watchexec) runs commands whenever certain files change.
+  - 'watchexec --excts js,jsx -- npm test'
+  - watchexec --help
+intro: >
+  [mattgreen/watchexec](https://github.com/mattgreen/watchexec) runs commands
+  whenever certain files change.
+tech: watchexec
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Installation

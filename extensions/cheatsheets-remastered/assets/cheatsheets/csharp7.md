@@ -1,10 +1,14 @@
 ---
 title: C# 7
 category: C-like
-updated: 2018-12-06
-prism_languages: [csharp]
+updated: 2018-12-06T00:00:00.000Z
+prism_languages:
+  - csharp
 description: |
   A quick overview of C# 7
+tech: csharp7
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Out Variables

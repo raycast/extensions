@@ -1,8 +1,13 @@
 ---
 title: Packs (ruby)
 category: Ruby libraries
-updated: 2024-07-05
-intro: Packs are a specification for an extensible packaging system to help modularize Ruby applications.
+updated: 2024-07-05T00:00:00.000Z
+intro: >-
+  Packs are a specification for an extensible packaging system to help
+  modularize Ruby applications.
+tech: packs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Manage packs

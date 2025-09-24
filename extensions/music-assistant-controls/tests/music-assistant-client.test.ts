@@ -76,6 +76,94 @@ describe("MusicAssistantClient", () => {
     });
   });
 
+  describe("setVolume", () => {
+    it("should call playerCommandVolumeSet with correct playerId and volume", async () => {
+      const playerId = "test-player-789";
+      const volume = 75;
+      const mockApi = {
+        playerCommandVolumeSet: jest.fn().mockResolvedValue(undefined),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      await client.setVolume(playerId, volume);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.playerCommandVolumeSet).toHaveBeenCalledWith(playerId, volume);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-789";
+      const volume = 50;
+      const error = new Error("Volume control failed");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.setVolume(playerId, volume)).rejects.toThrow("Volume control failed");
+    });
+  });
+
+  describe("getPlayer", () => {
+    it("should call getPlayer with correct playerId", async () => {
+      const playerId = "test-player-123";
+      const mockPlayer = { player_id: playerId, volume_level: 50, volume_control: "internal" };
+      const mockApi = {
+        getPlayer: jest.fn().mockResolvedValue(mockPlayer),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      const result = await client.getPlayer(playerId);
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.getPlayer).toHaveBeenCalledWith(playerId);
+      expect(result).toEqual(mockPlayer);
+    });
+
+    it("should handle errors from API command", async () => {
+      const playerId = "test-player-123";
+      const error = new Error("Player not found");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.getPlayer(playerId)).rejects.toThrow("Player not found");
+    });
+  });
+
+  describe("getPlayers", () => {
+    it("should call getPlayers API", async () => {
+      const mockPlayers = [
+        { player_id: "player1", volume_level: 50, volume_control: "internal" },
+        { player_id: "player2", volume_level: 75, volume_control: "none" },
+      ];
+      const mockApi = {
+        getPlayers: jest.fn().mockResolvedValue(mockPlayers),
+      };
+
+      mockExecuteApiCommand.mockImplementation(async (command) => {
+        return command(mockApi as any);
+      });
+
+      const result = await client.getPlayers();
+
+      expect(mockExecuteApiCommand).toHaveBeenCalledTimes(1);
+      expect(mockApi.getPlayers).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockPlayers);
+    });
+
+    it("should handle errors from API command", async () => {
+      const error = new Error("Failed to fetch players");
+
+      mockExecuteApiCommand.mockRejectedValue(error);
+
+      await expect(client.getPlayers()).rejects.toThrow("Failed to fetch players");
+    });
+  });
+
   describe("getActiveQueues", () => {
     it("should return filtered active queues with current items", async () => {
       const mockQueues = [
@@ -323,6 +411,77 @@ describe("MusicAssistantClient", () => {
       it("should format message correctly", () => {
         const result = client.formatSelectionMessage("Bedroom");
         expect(result).toBe("Bedroom selected, allow 10 seconds for the menubar to update!");
+      });
+    });
+  });
+
+  describe("Volume Control Logic", () => {
+    describe("supportsVolumeControl", () => {
+      it("should return true when player has internal volume control", () => {
+        const player = { player_id: "test", volume_control: "internal" } as any;
+        const result = client.supportsVolumeControl(player);
+        expect(result).toBe(true);
+      });
+
+      it("should return false when player has no volume control", () => {
+        const player = { player_id: "test", volume_control: "none" } as any;
+        const result = client.supportsVolumeControl(player);
+        expect(result).toBe(false);
+      });
+
+      it("should return false when player is undefined", () => {
+        const result = client.supportsVolumeControl(undefined);
+        expect(result).toBe(false);
+      });
+
+      it("should return false when volume_control is undefined", () => {
+        const player = { player_id: "test" } as any;
+        const result = client.supportsVolumeControl(player);
+        expect(result).toBe(false);
+      });
+    });
+
+    describe("getVolumeDisplay", () => {
+      it("should return formatted volume with percentage", () => {
+        const player = { player_id: "test", volume_control: "internal", volume_level: 75, volume_muted: false } as any;
+        const result = client.getVolumeDisplay(player);
+        expect(result).toBe("Volume: 75%");
+      });
+
+      it("should return formatted volume with muted status", () => {
+        const player = { player_id: "test", volume_control: "internal", volume_level: 50, volume_muted: true } as any;
+        const result = client.getVolumeDisplay(player);
+        expect(result).toBe("Volume: 50% (Muted)");
+      });
+
+      it("should return N/A when player doesn't support volume control", () => {
+        const player = { player_id: "test", volume_control: "none" } as any;
+        const result = client.getVolumeDisplay(player);
+        expect(result).toBe("Volume: N/A");
+      });
+
+      it("should return N/A when player is undefined", () => {
+        const result = client.getVolumeDisplay(undefined);
+        expect(result).toBe("Volume: N/A");
+      });
+
+      it("should handle missing volume_level", () => {
+        const player = { player_id: "test", volume_control: "internal", volume_muted: false } as any;
+        const result = client.getVolumeDisplay(player);
+        expect(result).toBe("Volume: 0%");
+      });
+    });
+
+    describe("getVolumeOptions", () => {
+      it("should return correct volume options", () => {
+        const options = client.getVolumeOptions();
+        expect(options).toEqual([
+          { level: 0, display: "Mute" },
+          { level: 25, display: "25%" },
+          { level: 50, display: "50%" },
+          { level: 75, display: "75%" },
+          { level: 100, display: "100%" },
+        ]);
       });
     });
   });

@@ -25,13 +25,19 @@ Made with 💚 for the Nuxt community
 
 ## ⚡️ Powerful Features
 
-### 🔮 `@nuxt` Command
-The central command hub for all your Nuxt needs:
+### 🔮 `@nuxt` Command (Raycast AI)
+Use the `@nuxt` agent inside Raycast AI Chat:
 - Ask questions in natural language about any Nuxt topic
-- Generate component code with simple prompts
+- Generate minimal component snippets
 - Get instant documentation and usage examples
 - Explore modules and their capabilities
 - Solve common Nuxt development challenges
+
+### 📚 Nuxt Documentation Browser
+- Command: “Nuxt Documentation” (view)
+- Browse official docs by section (Get Started, Guide, API, Examples, Community)
+- Search titles and paths, including deep entries (e.g., WASM, JSX)
+- Opens pages using your versioned base (e.g., `https://nuxt.com/docs/4.x`)
 
 ### 🧩 Nuxt Modules Explorer
 Discover and learn about the vast Nuxt ecosystem:
@@ -42,15 +48,16 @@ Discover and learn about the vast Nuxt ecosystem:
 
 ### 🎨 Nuxt UI Integration
 Access Nuxt UI documentation and tools instantly:
-- `Search Component Theme`: Jump directly to any component's theme documentation
-- `Get Component Source Code`: View the source code of any Nuxt UI component
+- `Search Component Theme`: Jump directly to any component's theme section
+- `Search Components`: Browse all components and open their docs/theme
 - Preview components and their variations
 
 ### ⚙️ Smart Configuration
-Customize to match your workflow:
-- Configure component prefixes to match your project style
-- Set up shortcuts for your most-used commands
-- Seamless support for both Nuxt UI v2 and v3
+Customize to match your workflow (Preferences in Raycast):
+- `Prefix` for component names (default: `U`)
+- `Docs URL` for Nuxt UI (default: `https://ui.nuxt.com`)
+- `Nuxt Docs Url` for framework docs (default: `https://nuxt.com/docs/4.x`)
+- `UI Branch` for fetching themes from GitHub (default: `main`)
 
 ## 🎬 See It In Action
 
@@ -64,18 +71,7 @@ I recommend setting up a shortcut like `✦ + N` or `⌘ + N` for quick access.
 - **Module Discovery**: "Find the best SEO modules for my Nuxt project"
 - **Troubleshooting**: "Why isn't my Nuxt data fetching working?"
 - **Learning**: "Show me examples of using Nuxt composables"
-- **Theme Customization**: "How do I customize the UButton component theme?"
-
-## 🚀 Roadmap
-
-This is just the beginning. Here's what's coming:
-
-- 🔍 Lightning-fast component and module search with intelligent filtering
-- 📝 Code snippet library with copy-paste ready solutions
-- 💡 Project-aware suggestions based on your codebase
-- ⚙️ Interactive property explorer for components
-- 🧩 Integration with more Nuxt ecosystem tools and services
-- 📱 Mobile app preview capabilities
+- **Theme Customization**: "Open the theme for `button` and show variants"
 
 ## 👥 Contributing
 

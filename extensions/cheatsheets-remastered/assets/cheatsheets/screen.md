@@ -1,7 +1,7 @@
 ---
 title: Screen
 category: CLI
-updated: 2024-02-03
+updated: 2024-02-03T00:00:00.000Z
 keywords:
   - Screen
   - Linux
@@ -9,9 +9,17 @@ keywords:
   - CLI
   - Command
   - Line
-intro: |
-  Screen or GNU Screen is a terminal multiplexer. In other words, it means that you can start a screen session and then open any number of windows (virtual terminals).
-  This does not contain **all** of screen's commands and options, read [GNU's manual](https://www.gnu.org/software/screen/manual/screen.html#Commands) to see everything
+intro: >
+  Screen or GNU Screen is a terminal multiplexer. In other words, it means that
+  you can start a screen session and then open any number of windows (virtual
+  terminals).
+
+  This does not contain **all** of screen's commands and options, read [GNU's
+  manual](https://www.gnu.org/software/screen/manual/screen.html#Commands) to
+  see everything
+tech: screen
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Basics

@@ -1,6 +1,9 @@
 ---
 title: Chunky PNG
 category: Ruby libraries
+tech: chunky_png
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Loading

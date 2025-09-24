@@ -3,7 +3,7 @@ import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import { catchError } from "../errors.js";
 import * as git from "../git.js";
-import { getCommitDiffMessage, repositoryConfigurationPath } from "../utils.js";
+import { getCommitDiffMessage } from "../utils.js";
 
 export default function Diagnostics() {
   const [status, setStatus] = useState<string>("Running diagnostics...");
@@ -13,7 +13,7 @@ export default function Diagnostics() {
     catchError(async () => {
       const isGitInstalled = await git.checkIfGitIsValid();
       const isStatusClean = await git
-        .isStatusClean()
+        .checkIfStatusClean()
         .then(() => true)
         .catch(() => false);
       const localForkedRepository = await git.getForkedRepository();
@@ -21,38 +21,30 @@ export default function Diagnostics() {
         ? await api.repositoryExists(localForkedRepository)
         : "✅ Cannot determine (no local repository found)";
 
+      const commitDiffMessageOptions = { includeAhead: true, includeZeroAhead: true, alwaysShow: true };
+
       const githubCommitDiff = localForkedRepository ? await api.compareTwoCommits(localForkedRepository) : undefined;
       const githubCommitDiffPass = githubCommitDiff && !(githubCommitDiff.ahead > 0 || githubCommitDiff.behind > 0);
-      const githubCommitDiffMessage = getCommitDiffMessage(githubCommitDiff, {
-        includeAhead: true,
-        includeZeroAhead: true,
-        alwaysShow: true,
-      }).trim();
+      const githubCommitDiffMessage = getCommitDiffMessage(githubCommitDiff, commitDiffMessageOptions).trim();
       const githubCommitDiffGuide = githubCommitDiffPass ? "" : ' (You can use "Sync Remote" action to sync changes)';
 
       const localCommitDiff = await git.getAheadBehindCommits();
       const localCommitDiffPass = !(localCommitDiff.ahead > 0 || localCommitDiff.behind > 0);
-      const localCommitDiffMessage = getCommitDiffMessage(localCommitDiff, {
-        includeAhead: true,
-        includeZeroAhead: true,
-        alwaysShow: true,
-      }).trim();
+      const localCommitDiffMessage = getCommitDiffMessage(localCommitDiff, commitDiffMessageOptions).trim();
       const localCommitDiffGuide = localCommitDiffPass ? "" : ' (You can use "Pull Changes" action to sync changes)';
 
       const status = [
         "## Diagnostics",
-        "### Git installed",
+        "### Git status",
         isGitInstalled
-          ? "- ✅ Good"
+          ? isStatusClean
+            ? "- ✅ Good"
+            : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations."
           : "- ⚠️ Git is not installed or not found. Please set up your Git executable file path manually in the extension preferences.",
-        "### Git status clean",
-        isStatusClean
-          ? "- ✅ Good"
-          : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations.",
         "### Local forked repository",
         localForkedRepository
           ? [
-              `- ✅ [${localForkedRepository} 📁](file://$${repositoryConfigurationPath})`,
+              `- ✅ [${localForkedRepository} 📁](file://${git.repositoryPath})`,
               `- ${localCommitDiffPass ? "✅" : "⚠️"} ${localCommitDiffMessage}${localCommitDiffGuide}`,
             ]
               .filter(Boolean)

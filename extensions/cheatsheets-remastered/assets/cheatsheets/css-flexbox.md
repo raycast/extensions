@@ -1,9 +1,13 @@
 ---
 title: CSS flexbox
 category: CSS
-updated: 2020-06-13
-prism_languages: [css]
+updated: 2020-06-13T00:00:00.000Z
+prism_languages:
+  - css
 weight: -3
+tech: css-flexbox
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Simple example

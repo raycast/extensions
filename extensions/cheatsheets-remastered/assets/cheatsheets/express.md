@@ -1,6 +1,9 @@
 ---
 title: Express.js
 category: JavaScript libraries
+tech: express
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Settings

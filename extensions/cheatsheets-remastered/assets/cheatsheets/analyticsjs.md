@@ -1,9 +1,12 @@
 ---
 title: Google Analytics's analytics.js
 category: Analytics
-updated: 2017-10-29
+updated: 2017-10-29T00:00:00.000Z
 intro: |
   Google Analytics's analytics.js is deprecated.
+tech: analyticsjs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Page view

@@ -5,7 +5,7 @@ import { HltbSearch } from "./hltbsearch";
 import { pluralize } from "./helpers";
 import axios from "axios";
 import UserAgent from "user-agents";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 
 interface DetailsProps {
   id: string;
@@ -65,7 +65,7 @@ ${result.playableOn.join(", ")}
     getDetails();
   }, []);
 
-  const url = `${HltbSearch.BASE_URL}${id}`;
+  const url = `${HltbSearch.DETAIL_URL}${id}`;
 
   const mainStoryHours = state.result?.gameplayMain || 0;
   const mainStoryText =
@@ -176,7 +176,7 @@ function parseDetails(html: string, id: string): HowLongToBeatEntry {
     gameplayMainExtra,
     gameplayComplete,
     1,
-    gameName
+    gameName,
   );
 }
 

@@ -2,6 +2,9 @@
 title: Rsync
 category: CLI
 weight: -1
+tech: rsync
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Basic example

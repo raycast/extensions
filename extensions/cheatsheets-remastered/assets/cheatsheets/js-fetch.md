@@ -2,6 +2,9 @@
 title: fetch()
 category: JavaScript
 weight: -3
+tech: js-fetch
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Fetch

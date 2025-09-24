@@ -1,7 +1,7 @@
 import executeApiCommand from "./api-command";
 import { showHUD } from "@raycast/api";
 import { storeSelectedQueueID, StoredQueue } from "./use-selected-player-id";
-import { PlayerQueue, PlayerState } from "./external-code/interfaces";
+import { PlayerQueue, PlayerState, Player } from "./external-code/interfaces";
 
 /**
  * Client for interacting with Music Assistant API and handling UI logic
@@ -83,6 +83,52 @@ export default class MusicAssistantClient {
       const activeQueues = queues.filter((q) => q.active && q.current_item);
       return activeQueues;
     });
+  }
+
+  /**
+   * Set the volume for the specified player
+   *
+   * @param playerId - The unique identifier of the player to control
+   * @param volume - The volume level (0-100)
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * await client.setVolume("living-room-player", 50);
+   * ```
+   */
+  async setVolume(playerId: string, volume: number): Promise<void> {
+    await executeApiCommand(async (api) => await api.playerCommandVolumeSet(playerId, volume));
+  }
+
+  /**
+   * Get detailed player information including volume levels
+   *
+   * @param playerId - The unique identifier of the player
+   * @returns Promise that resolves to Player object with full details
+   * @throws {Error} When the API command fails or player is unavailable
+   * @example
+   * ```typescript
+   * const player = await client.getPlayer("living-room-player");
+   * console.log(`Volume: ${player.volume_level}%`);
+   * ```
+   */
+  async getPlayer(playerId: string): Promise<Player> {
+    return await executeApiCommand(async (api) => await api.getPlayer(playerId));
+  }
+
+  /**
+   * Get all available players with their details
+   *
+   * @returns Promise that resolves to an array of Player objects
+   * @throws {Error} When the API command fails or connection is lost
+   * @example
+   * ```typescript
+   * const players = await client.getPlayers();
+   * const volumeEnabledPlayers = players.filter(p => p.volume_control !== "none");
+   * ```
+   */
+  async getPlayers(): Promise<Player[]> {
+    return await executeApiCommand(async (api) => await api.getPlayers());
   }
 
   // Menu Bar Logic
@@ -247,5 +293,63 @@ export default class MusicAssistantClient {
    */
   formatSelectionMessage(displayName: string): string {
     return `${displayName} selected, allow 10 seconds for the menubar to update!`;
+  }
+
+  // Volume Control Helper Methods
+  /**
+   * Checks if a player supports volume control
+   *
+   * @param player - The player object to check
+   * @returns True if the player supports volume control, false otherwise
+   * @example
+   * ```typescript
+   * if (client.supportsVolumeControl(player)) {
+   *   // Show volume controls
+   * }
+   * ```
+   */
+  supportsVolumeControl(player?: Player): boolean {
+    return player?.volume_control !== "none" && player?.volume_control !== undefined;
+  }
+
+  /**
+   * Gets a formatted volume display string
+   *
+   * @param player - The player object with volume information
+   * @returns Formatted volume string with percentage and mute status
+   * @example
+   * ```typescript
+   * const volumeDisplay = client.getVolumeDisplay(player);
+   * // Returns: "Volume: 75%" or "Volume: 50% (Muted)"
+   * ```
+   */
+  getVolumeDisplay(player?: Player): string {
+    if (!player || !this.supportsVolumeControl(player)) {
+      return "Volume: N/A";
+    }
+
+    const level = player.volume_level ?? 0;
+    const muteStatus = player.volume_muted ? " (Muted)" : "";
+    return `Volume: ${level}%${muteStatus}`;
+  }
+
+  /**
+   * Creates volume control menu items for common volume levels
+   *
+   * @returns Array of volume level options for menu display
+   * @example
+   * ```typescript
+   * const volumeOptions = client.getVolumeOptions();
+   * // Returns: [{ level: 0, display: "Mute" }, { level: 25, display: "25%" }, ...]
+   * ```
+   */
+  getVolumeOptions(): Array<{ level: number; display: string }> {
+    return [
+      { level: 0, display: "Mute" },
+      { level: 25, display: "25%" },
+      { level: 50, display: "50%" },
+      { level: 75, display: "75%" },
+      { level: 100, display: "100%" },
+    ];
   }
 }

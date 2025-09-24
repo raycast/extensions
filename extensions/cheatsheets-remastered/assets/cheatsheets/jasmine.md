@@ -2,6 +2,9 @@
 title: Jasmine
 category: JavaScript libraries
 weight: -1
+tech: jasmine
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Tests

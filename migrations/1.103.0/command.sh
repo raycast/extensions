@@ -1,0 +1,1 @@
+node -e "const fs = require('fs'); const path = './package.json'; if (!fs.existsSync(path)) { process.exit(0); } const pkg = JSON.parse(fs.readFileSync(path, 'utf8')); if (pkg.platforms === undefined) { pkg.platforms = ['macOS']; fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n'); }"

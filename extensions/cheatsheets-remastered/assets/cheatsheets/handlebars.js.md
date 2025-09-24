@@ -2,6 +2,9 @@
 title: Handlebars.js
 category: JavaScript libraries
 weight: -1
+tech: handlebars.js
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 {% raw %}
