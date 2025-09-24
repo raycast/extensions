@@ -9,7 +9,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getRandomGreetingForName, getWorkspaceId } from "./utils";
+import { getRandomGreetingForName, getWorkspaceId, setUser } from "./utils";
 import { useCallback } from "react";
 import { MeResponseType } from "@dust-tt/client";
 import { withDustClient, getDustClient } from "./dust_api/oauth";
@@ -25,20 +25,22 @@ export default withDustClient(function PickWorkspaceCommand() {
 
   const { data: workspacesData, isLoading: isLoadingWorkspaces } = usePromise(async () => {
     const workspaces: WorkspaceWithRegion[] = [];
-    let user = null;
+    let user: MeResponseType["user"] | undefined = undefined;
 
     const dustAPI = getDustClient();
     const me = await dustAPI.me();
     if (me.isOk()) {
-      user = me.value as MeResponseType["user"];
-      if (user.selectedWorkspace) {
-        await LocalStorage.setItem("workspaceId", user.selectedWorkspace);
-      }
-      await LocalStorage.setItem("user", JSON.stringify(user));
+      user = me.value;
+      await setUser(user);
 
       user.organizations?.forEach((org) => {
         workspaces.push({ sId: org.externalId!, name: org.name, region: org.metadata.region });
       });
+
+      if (user.selectedWorkspace) {
+        const selectedOrg = workspaces.find((org) => org.sId === user?.selectedWorkspace);
+        await setWorkspaceId(selectedOrg || workspaces[0]);
+      }
     }
 
     return { user, workspaces };
@@ -51,7 +53,6 @@ export default withDustClient(function PickWorkspaceCommand() {
       updateCommandMetadata({ subtitle: `Currently using: "${workspace.name}" (${workspace.region})` });
       await LocalStorage.setItem("workspaceId", workspace.sId);
       await LocalStorage.setItem("selectedRegion", workspace.region);
-      navigation.pop();
     },
     [navigation],
   );
@@ -86,7 +87,10 @@ export default withDustClient(function PickWorkspaceCommand() {
                     title="Select"
                     icon={Icon.Check}
                     shortcut={{ key: "return", modifiers: [] }}
-                    onAction={() => setWorkspaceId(workspace)}
+                    onAction={() => {
+                      setWorkspaceId(workspace);
+                      navigation.pop();
+                    }}
                   />
                 </ActionPanel>
               }
