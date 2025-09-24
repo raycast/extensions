@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - 2025-12-15
+
+- Added support for Raycast on Windows.
+
 ## [Update] - 2025-11-25
 
 - Added support for Antigravity.
