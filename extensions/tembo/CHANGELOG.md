@@ -1,6 +1,6 @@
 # Tembo Changelog
 
-## [Improve task sorting and the menu bar revalidation] - 2025-09-23
+## [Improve task sorting and the menu bar revalidation] - {PR_MERGE_DATE}
 
 - Updates the Tembo menu bar to now use useCachedPromise
 - Changes the author to now be @tembo
