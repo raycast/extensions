@@ -1,4 +1,4 @@
-import { closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { TileCoordinates } from "../types";
 import { ClientManager } from "../api/clientManager";
 import { setTimeout } from "timers/promises";
@@ -39,7 +39,8 @@ export async function runPlayCommand(props: PlayCommandProps) {
     const tileUuid = matchingTiles.values().next().value!;
     const tile = cm.dataGetter.getTileByUuid(tileUuid);
     cm.playTile(tile);
-    showToast({ title: `Played "${tileTitle}"` });
+    closeMainWindow();
+    showHUD(`Playing "${tile.title}"`);
     await setTimeout(5); // just to ensure the message is sent before closing the port
     cm.oscClient.close();
     return;

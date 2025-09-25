@@ -104,7 +104,7 @@ const TileListItem = React.memo(
               quicklink={{
                 link: createDeeplink({
                   command: "play",
-                  arguments: { tileCoordinates: JSON.stringify(cm.getTileCoordinates(tile)) },
+                  context: { tileCoordinates: cm.getTileCoordinates(tile) },
                 }),
               }}
             />
