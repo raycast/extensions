@@ -1,5 +1,13 @@
 # Kimai Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+Add ability to log running timesheet
+
+## [Fix] - {PR_MERGE_DATE}
+
+Fix issue with Total logged hours for today not showing on Menubar
+
 ## [Update] - 2024-05-18
 
 Added support for API token in the extension preferences.
