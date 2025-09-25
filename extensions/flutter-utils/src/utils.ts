@@ -164,7 +164,7 @@ export async function runInWarp(command: string, cwd: string): Promise<void> {
     await runAppleScript(script);
   } catch (e) {
     const message = String(e instanceof Error ? e.message : e);
-    throw new Error(`Ouverture Warp échouée: ${message}`);
+    throw new Error(`Warp opening failed: ${message}`);
   }
 }
 
