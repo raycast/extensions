@@ -11,7 +11,6 @@ function useInterval(callback: () => void, delay: number | null) {
   // Set up the interval.
   useEffect(() => {
     if (delay !== null) {
-      console.log("setting interval...");
       const id = setInterval(() => savedCallback.current?.(), delay);
       return () => clearInterval(id);
     }

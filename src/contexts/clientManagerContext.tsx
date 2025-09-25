@@ -19,26 +19,22 @@ export const ClientManagerProvider: React.FC<ClientManagerProviderProps> = ({ ch
   const [latestDbUpdate, setLatestDbUpdate] = useState<number | null>(null);
 
   useEffect(() => {
-    console.log("🟥 running ClientManagerProvider effect");
     clientManagerRef.current = new ClientManager();
     const oldRef = clientManagerRef.current;
     clientManagerRef.current.readaptToPreferences();
     clientManagerRef.current.addEventListener("dbRefreshed", () => {
-      console.log("refreshed DB");
       setClientManager(clientManagerRef.current);
-      setLatestDbUpdate(clientManagerRef.current?._fileParser.lastParsedSets!);
+      setLatestDbUpdate(clientManagerRef.current?.fileParser.lastParsedSets!);
     });
     setClientManager(clientManagerRef.current);
-    setLatestDbUpdate(clientManagerRef.current?._fileParser.lastParsedSets!);
+    setLatestDbUpdate(clientManagerRef.current?.fileParser.lastParsedSets!);
 
     return () => {
-      console.log("cleanup...");
       oldRef?.closeOscClient();
     };
   }, []);
 
   useInterval(() => {
-    console.log("readapting...");
     clientManagerRef.current?.readaptToPreferences();
   }, 10000);
 

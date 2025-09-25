@@ -14,6 +14,20 @@
       "mode": "view"
     },
     {
+      "name": "play",
+      "title": "Play Tile",
+      "description": "Play tile by name",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "tileTitle",
+          "placeholder": "tile title",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "fade-all",
       "title": "Fade All",
       "description": "Fade All Sounds Currently Playing in Farrago",

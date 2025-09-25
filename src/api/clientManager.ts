@@ -13,23 +13,28 @@ type ListenerCallback = (cm: ClientManager) => void;
 type Listeners = { [K in EventKey]?: Set<ListenerCallback> };
 
 export class ClientManager {
-  _dataGetter: DataGetter;
-  _fileParser: FileParser;
-  _oscClient: OSCClient;
+  dataGetter: DataGetter;
+  fileParser: FileParser;
+  oscClient: OSCClient;
   _preferencesSnapshot: Preferences;
   _listeners: Listeners;
 
   constructor() {
     const preferences = getPreferenceValues<Preferences>();
-    this._dataGetter = new DataGetter();
-    this._fileParser = new FileParser(preferences);
-    this._oscClient = OSCClient.initFromPreferences(preferences);
+    this.dataGetter = new DataGetter();
+    this.fileParser = new FileParser(preferences);
+    this.oscClient = ClientManager.initializeOscClient(preferences);
     this._preferencesSnapshot = preferences;
     this._listeners = {};
   }
 
+  static initializeOscClient(preferences?: Preferences) {
+    preferences ??= getPreferenceValues<Preferences>();
+    return OSCClient.initFromPreferences(preferences);
+  }
+
   closeOscClient() {
-    this._oscClient._close();
+    this.oscClient.close();
   }
 
   readaptToPreferences() {
@@ -37,23 +42,23 @@ export class ClientManager {
     const curPrefs = getPreferenceValues<Preferences>();
 
     if (oldPrefs.farragoDataDir !== curPrefs.farragoDataDir) {
-      this._fileParser = new FileParser(curPrefs);
+      this.fileParser = new FileParser(curPrefs);
       this._preferencesSnapshot = curPrefs;
     }
 
     if (oldPrefs.oscHost !== curPrefs.oscHost || oldPrefs.oscPort !== curPrefs.oscPort) {
-      this._oscClient._close();
-      this._oscClient = OSCClient.initFromPreferences(curPrefs);
+      this.oscClient.close();
+      this.oscClient = OSCClient.initFromPreferences(curPrefs);
     }
 
-    if (!this._fileParser.hasFreshSets()) {
+    if (!this.fileParser.hasFreshSets()) {
       this.refreshData();
     }
   }
 
   refreshData() {
-    this._dataGetter.emptyDb();
-    this._dataGetter.populateDb(this._fileParser.getFreshSetsParsed());
+    this.dataGetter.emptyDb();
+    this.dataGetter.populateDb(this.fileParser.getFreshSetsParsed());
     this._listeners.dbRefreshed?.forEach((cb) => cb(this));
   }
 
@@ -65,29 +70,29 @@ export class ClientManager {
   // data actions
 
   getAllTiles() {
-    return [...this._dataGetter.db.tiles.values()];
+    return [...this.dataGetter.db.tiles.values()];
   }
 
   // osc actions
 
   playTile(tile: DBSoundTile) {
     // todo: check if tile is already playing
-    this._oscClient.togglePlayTile(this.getTileCoordinates(tile));
+    this.oscClient.togglePlayTile(this.getTileCoordinates(tile));
   }
 
   playTileByUuid(tileUuid: string) {
-    const tile = this._dataGetter.getTileByUuid(tileUuid);
-    this._oscClient.togglePlayTile(this.getTileCoordinates(tile));
+    const tile = this.dataGetter.getTileByUuid(tileUuid);
+    this.oscClient.togglePlayTile(this.getTileCoordinates(tile));
   }
 
   fadeAll() {
-    this._oscClient.fadeAll();
+    this.oscClient.fadeAll();
   }
 
   // utils
 
   getTileCoordinates(tile: DBSoundTile): TileCoordinates {
-    const set = this._dataGetter.getSetByUuid(tile.setUuid);
+    const set = this.dataGetter.getSetByUuid(tile.setUuid);
 
     let tilePosition = { x: 0, y: 0 };
     if (set.mode === 0) {

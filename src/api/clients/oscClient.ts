@@ -47,7 +47,7 @@ export class OSCClient {
     this._port.open();
   }
 
-  _close() {
+  close() {
     this._port.close();
   }
 

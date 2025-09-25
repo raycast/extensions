@@ -10,7 +10,6 @@ export function SearchCommand({ initialSearchText }: SearchCommandProps) {
   const { cm, latestDbUpdate } = useClientManager();
 
   const allTiles = useMemo(() => {
-    console.log("refetching tiles...");
     return cm?.getAllTiles();
   }, [latestDbUpdate]);
 
@@ -41,9 +40,9 @@ const TileListItem = React.memo(
     const accessories = useMemo(() => {
       const acc: List.Item.Accessory[] = [];
 
-      if (cm._dataGetter.checkTileForDupliateTitles(tile)) {
+      if (cm.dataGetter.checkTileForDupliateTitles(tile)) {
         acc.push(
-          { text: cm._dataGetter.getSetByUuid(tile.setUuid).title },
+          { text: cm.dataGetter.getSetByUuid(tile.setUuid).title },
           {
             tag: { color: Color.SecondaryText, value: `[${tile.gridPositionX}, ${tile.gridPositionY}]` },
             tooltip: "Duplicate tile title, specifying grid title & tile position.",
@@ -81,8 +80,7 @@ const TileListItem = React.memo(
               quicklink={{
                 link: createDeeplink({
                   command: "play",
-                  arguments: { tileTitle: tile.title },
-                  context: { tileCoordinates: cm.getTileCoordinates(tile) },
+                  arguments: { tileCoordinates: JSON.stringify(cm.getTileCoordinates(tile)) },
                 }),
               }}
             />
