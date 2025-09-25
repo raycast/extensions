@@ -1,5 +1,11 @@
 # Aave Search Changelog
 
+## [1.1.4] - {PR_MERGE_DATE}
+
+### Maintenance
+
+- Update toolbox to support new networks
+
 ## [1.1.3] - 2025-08-26
 
 ### Maintenance
