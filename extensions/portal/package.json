@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "portal",
+  "title": "Portal",
+  "description": "Easily access quick functions from Raycast.",
+  "icon": "extensions-icon.png",
+  "author": "min_jung",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open",
+      "description": "Open common F&F destinations",
+      "mode": "view"
+    },
+    {
+      "name": "bookmarklets",
+      "title": "Bookmarklets",
+      "description": "Run bookmarklets",
+      "mode": "view"
+    },
+    {
+      "name": "search-employee-directory",
+      "title": "Search Employee Directory",
+      "description": "Search the employees from F&F directory.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keyword",
+          "title": "Search",
+          "type": "text",
+          "required": true,
+          "placeholder": "Enter name, team, or email"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.44.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit"
+  }
+}
