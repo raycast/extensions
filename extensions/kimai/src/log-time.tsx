@@ -80,11 +80,11 @@ const LogTimeCommand = () => {
       },
       duration: (value) => {
         if (!value) {
-          return "Please enter duration!";
+          return undefined;
         }
         const numberValue = parseInt(value);
-        if (isNaN(numberValue)) {
-          return "Please enter duration!";
+        if (isNaN(numberValue) || numberValue < 0) {
+          return "Please enter a valid duration!";
         }
       },
     },
