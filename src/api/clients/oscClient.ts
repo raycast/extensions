@@ -100,4 +100,8 @@ export class OSCClient {
   fadeAll() {
     this._send("/master/fadeAll", [true]);
   }
+
+  stopAll() {
+    this._send("/transport/stopAll", [true]);
+  }
 }

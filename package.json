@@ -18,6 +18,12 @@
       "title": "Fade All",
       "description": "Fade All Sounds Currently Playing in Farrago",
       "mode": "no-view"
+    },
+    {
+      "name": "stop-all",
+      "title": "Stop All",
+      "description": "Stop All Sounds Currently Playing in Farrago",
+      "mode": "no-view"
     }
   ],
   "preferences": [
