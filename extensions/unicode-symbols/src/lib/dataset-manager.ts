@@ -100,7 +100,7 @@ export function getFilteredDataset(query: string | null, filter: string | null):
 
   const fuse = new Fuse(allCharacters, {
     // keys: ["name", "aliases", "old_name"],
-    keys: ["n", "s", "o"],
+    keys: ["n", "s", "o", "nn"],
     useExtendedSearch: true,
     includeScore: true,
   });

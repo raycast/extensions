@@ -80,6 +80,18 @@ const mapCodeToName = (char: Character): Character => {
   return { ...char, name: unicodeToNameMap[char.code] || char.name };
 };
 
+// This is a mapping to map some control codes to their proper character (We were missing Tab)
+const specialMappings: Record<number, JSONCharacter> = {
+  9: {
+    v: "\t",
+    c: 9,
+    n: "CHARACTER TABULATION",
+    o: "",
+    a: [],
+    u: "1.1",
+  },
+};
+
 function mapCharacterToDatasetItem(char: Character): JSONCharacter | undefined {
   const charCodeToAliases: CharAlias = {
     8313: ["superscript 9"],
@@ -91,13 +103,20 @@ function mapCharacterToDatasetItem(char: Character): JSONCharacter | undefined {
 
   const aliases = charCodeToAliases[char.code] ? charCodeToAliases[char.code] : [];
 
+  if (specialMappings[char.code]) {
+    return specialMappings[char.code];
+  }
+
   if (char.code)
     return {
       v: String.fromCodePoint(char.code), // value
       c: char.code, // code
       n: char.name, // name
       o: char.oldName || "", // old name
+      u: char.age, // unicode version
+      m: char.mirrorCode, // mirror code
       a: aliases,
+      nn: char.num, // number
     };
 }
 
@@ -123,7 +142,7 @@ function getCharactersByCodeRange(startCode: number, endCode: number): JSONChara
 }
 
 // Extra characters to add to the dataset.
-const extraCharacters: JSONCharacter[] = [{ v: "\t", c: 9, n: "CHARACTER TABULATION", o: "", a: [] }];
+const extraCharacters: JSONCharacter[] = [];
 
 // Run the dataset generation.
 const generateDataset = async (sets: CharacterSetType[], fileName: string) => {
