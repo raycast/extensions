@@ -47,23 +47,13 @@ function formatScore(score: number) {
 }
 
 export default function ConnectCommand() {
-  const [sessions, setSessions] = useState<{
-    tmux: Array<Session>;
-    tmuxinator: Array<Session>;
-    config: Array<Session>;
-    zoxide: Array<Session>;
-  }>({ tmux: [], tmuxinator: [], config: [], zoxide: [] });
+  const [sessions, setSessions] = useState<Array<Session>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   async function getAndSetSessions() {
     try {
       const sessions = await getSessions();
-      setSessions({
-        tmux: sessions.filter((s) => s.Src === "tmux"),
-        tmuxinator: sessions.filter((s) => s.Src === "tmuxinator"),
-        config: sessions.filter((s) => s.Src === "config"),
-        zoxide: sessions.filter((s) => s.Src === "zoxide"),
-      });
+      setSessions(sessions);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -110,75 +100,37 @@ export default function ConnectCommand() {
 
   return (
     <List isLoading={isLoading}>
-      <List.Section title="tmux">
-        {sessions.tmux.map((session, index) => (
-          <List.Item
-            key={index}
-            title={session.Name}
-            icon={getIcon(session)}
-            accessories={[
-              {
-                icon: Icon.AppWindow,
-                text: String(session.Windows),
-                tooltip: session.Windows === 1 ? "Window" : "Windows",
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      {sessions.map((session, index) => {
+        const accessories = [];
 
-      <List.Section title="tmuxinator">
-        {sessions.tmuxinator.map((session, index) => (
-          <List.Item
-            key={index}
-            title={session.Name}
-            icon={getIcon(session)}
-            accessories={[{ text: formatScore(session.Score), icon: Icon.Box }]}
-            actions={
-              <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+        if (session.Src === "tmux") {
+          accessories.push({
+            icon: Icon.AppWindow,
+            text: String(session.Windows),
+            tooltip: session.Windows === 1 ? "Window" : "Windows",
+          });
+        } else {
+          accessories.push({
+            text: formatScore(session.Score),
+            icon: session.Src === "tmuxinator" ? Icon.Box : Icon.Racket,
+            tooltip: "Score",
+          });
+        }
 
-      <List.Section title="config">
-        {sessions.config.map((session, index) => (
+        return (
           <List.Item
             key={index}
             title={session.Name}
             icon={getIcon(session)}
-            accessories={[{ text: formatScore(session.Score), icon: Icon.Racket, tooltip: "Score" }]}
+            accessories={accessories}
             actions={
               <ActionPanel>
                 <Action title="Connect to Session" onAction={() => connect(session.Name)} />
               </ActionPanel>
             }
           />
-        ))}
-      </List.Section>
-
-      <List.Section title="zoxide">
-        {sessions.zoxide.map((session, index) => (
-          <List.Item
-            key={index}
-            title={session.Name}
-            icon={getIcon(session)}
-            accessories={[{ text: formatScore(session.Score), icon: Icon.Racket, tooltip: "Score" }]}
-            actions={
-              <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+        );
+      })}
     </List>
   );
 }
