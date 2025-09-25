@@ -1,6 +1,6 @@
 # Onbo Changelog
 
-## [Enhanced User Experience & Configuration] - {PR_MERGE_DATE}
+## [1.1.0] - {PR_MERGE_DATE}
 ### New Features
 - **Default Category Selection**: Added preference to set a default category filter for job listings
 - **Command Aliases**: Added shorthands for the commands
