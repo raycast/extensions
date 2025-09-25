@@ -121,7 +121,7 @@
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
-    "unidata16": "^1.0.0"
+    "unidata16": "^1.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -132,5 +132,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
