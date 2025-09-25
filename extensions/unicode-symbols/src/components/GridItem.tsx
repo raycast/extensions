@@ -10,10 +10,11 @@ import { getSquareSVGString, numberToHex, upperCaseFirst } from "@/utils/string"
 
 type Props = {
   item: Character;
+  section?: string;
 };
 
-export const GridItem = memo(({ item }: Props) => {
-  const { findHtmlEntity } = useListContext();
+export const GridItem = memo(({ item, section }: Props) => {
+  const { findHtmlEntity, filter } = useListContext();
   const html = findHtmlEntity(item.c);
 
   const [light, dark] = [
@@ -25,8 +26,11 @@ export const GridItem = memo(({ item }: Props) => {
     `Name: ${upperCaseFirst(item.n)}`,
     `Dec: ${item.c}`,
     `Hex: ${numberToHex(item.c)}`,
+    filter === null && typeof section !== "undefined" ? `Section: ${section}` : "",
     html ? `HTML Entity: ${html}` : "",
     item.a?.length ? `Aliases: "${item.a.map(upperCaseFirst).join(", ")}"` : "",
+    item.u ? `Unicode Version: ${item.u}` : "",
+    item.m ? `Mirror Code: ${item.m}` : "",
     ...(item.isExtra ? [" ", "> Note: This character is actually in a different Character Set"] : [""]),
   ]
     .filter((s) => s.length > 0)
@@ -49,7 +53,7 @@ export const GridItem = memo(({ item }: Props) => {
           dark,
         },
       }}
-      actions={<CharacterActionPanel item={item} />}
+      actions={<CharacterActionPanel item={item} section={section} />}
     />
   );
 });

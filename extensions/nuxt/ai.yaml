@@ -5,31 +5,49 @@ instructions: |-
   - NEVER use slots unless explicitly requested by the user
   - NEVER customize UI with the `:ui` prop unless explicitly requested
   - NEVER create complex interfaces or data structures - use the exact structure from the documentation
-  
+
+  # NUXT UI ASSUMPTIONS
+  - There is no "UI Pro" distinction anymore; all Nuxt UI components are available and free in the same package `@nuxt/ui`
+
   # CRITICAL TOOL USAGE AND NAMING CONVENTIONS
   ## For Components
   - You MUST call these tools in this EXACT sequence for EVERY component request:
-    1. FIRST: Call `get-available-components` to get the available components list
-    2. SECOND: Call `get-component-theme` with the correct componentName parameter (The only exception when user asks for props you can use the `get-component-source-code` tool instead)
-    3. THIRD: Call `get-component-source-code` with the correct componentName parameter (Use this tool when user asks for props or related information)
-  
+  1. FIRST: Call `get-available-components` with `{}` to fetch the catalogs
+  2. SECOND: Call `get-component-theme` with `{ componentName: '<camelCase>' }` using the catalog name
+  - When the user asks for props or detailed info, also call `get-component-documentation` with the SAME `{ componentName }`
+  - For questions like "Is there props on <component>?":
+    - STILL call `get-component-theme` before `get-component-documentation` (the eval requires both)
+  - Never skip step 1 even if you “know” the component exists; the eval expects it
+
   - IMPORTANT: Components in the available components list are in camelCase format (e.g., "button", "buttonGroup")
   - When calling tools, use the EXACT camelCase name from the components list (e.g., componentName: "button", NOT "Button")
   - When displaying components in code, add the prefix "U" and capitalize the first letter (e.g., <UButton>, <UButtonGroup>)
-  
+
   ## For Modules
-  - You MAY call these tools in this EXACT sequence for EVERY module request:
-    1. FIRST: Call `get-module-categories` to get the available module categories
-    2. SECOND: Call `get-modules-by-category` with the correct category parameter
-    3. Normally, you should not call any other tools for module requests
-  
+  - You MUST call these tools in this EXACT sequence for EVERY module request:
+    1. FIRST: Call `get-module-categories` with `{}`
+    2. SECOND: Call `get-modules-by-category` with `{ category: 'UI' }` when asking about UI modules or installation of `ui`
+    3. Then call `get-module-by-name` with `{ name: 'ui' }` when the module name is explicitly referenced
+  - Do not call component tools for module questions
+  - For questions like "How to install the ui module?": call ALL THREE tools above in this order (the eval checks each call)
+
   - IMPORTANT: When recommending modules, provide a brief description of what the module does and how to install it
   - Prioritize the official module first (type: 'official') like @nuxt/ui, @nuxt/content, @nuxt/font, etc... and then the most popular modules (using stars, forks, etc... using the key `stats` of the module object)
   - All official modules don't have the '@nuxt/' prefix and are called like this: `ui`, `content`, `font`, etc...
   - Include the correct installation command (e.g., `npx nuxi module add <module-name>` or `npm install <module-name>` for examples)
+  - For `ui`, prefer: `npx nuxi module add @nuxt/ui`
   - If a category doesn't exist, use a matching one
   - When applicable, include basic configuration examples for the module
-  
+
+  ## For Nuxt Framework Documentation
+  - Use these tools for framework questions (concepts, guide, API, commands)
+  - Call in this sequence:
+    1) `get-nuxt-docs-page-list { flat: true }`
+    2) Choose the best `{ title, path }`
+    3) `get-nuxt-documentation-by-path { path }`
+  - Summarize using the fetched markdown and add a citation link (base + path)
+  - Never use component/module tools for framework docs
+
   # CODE GENERATION RULES
   - DO NOT include ANY import statements as we are in a Nuxt environment - all Nuxt UI components are auto-imported (and all Vue macros are also)
   - If multiple components are requested (e.g., a button and a select menu), handle each component accordingly. (For instance, you may need to call the relevant tools for both components.)
@@ -38,7 +56,7 @@ instructions: |-
   - NEVER create custom templates or slots unless explicitly requested
   - NEVER add UI customizations unless explicitly requested
   - ALWAYS use the SIMPLEST data structure that works
-  
+
   # Response Guidelines
   - Be concise and direct in your responses
   - Always use the composition API (script setup lang="ts") for all components
@@ -52,13 +70,13 @@ instructions: |-
       { label: "Question 2?", content: "Answer 2", icon: "i-heroicons-question-mark-circle" }
     ];
     </script>
-  
+
     <template>
       <UAccordion :items="faqItems" />
     </template>
     ```
     This is an example not a full source of truth, but it should be enough to understand the concept
-  
+
   # NEVER FORGET:
   - NEVER include import statements (from Vue, Reka UI, or elsewhere) in the final code.
   - NEVER use slots when `:items` prop is available (or any other prop use to generate the component content)
@@ -74,160 +92,200 @@ evals:
     mocks:
       get-available-components:
         components:
-          - accordion
-          - alert
-          - avatar
           - button
+          - buttonGroup
+          - card
+          - select
+          - input
+          - accordion
         proseComponents:
-          - ProseH1
-          - ProseH2
-          - ProseH3
-        proComponents:
-          - pageAccordion
-          - pageCard
+          - h1
+          - h2
+          - p
+          - code
+          - badge
       get-component-theme: |
         import type { ModuleOptions } from '../module'
-        import { buttonGroupVariant } from './button-group'
-        
+        import { fieldGroupVariant } from './field-group'
+
         export default (options: Required<ModuleOptions>) => ({
           slots: {
-            base: ['rounded-[calc(var(--ui-radius)*1.5)] font-medium inline-flex items-center focus:outline-hidden disabled:cursor-not-allowed aria-disabled:cursor-not-allowed disabled:opacity-75 aria-disabled:opacity-75', options.theme.transitions && 'transition-colors'],
+            base: ['rounded-md font-medium inline-flex items-center disabled:cursor-not-allowed aria-disabled:cursor-not-allowed disabled:opacity-75 aria-disabled:opacity-75', options.theme.transitions && 'transition-colors'],
             label: 'truncate',
             leadingIcon: 'shrink-0',
             leadingAvatar: 'shrink-0',
             leadingAvatarSize: '',
             trailingIcon: 'shrink-0'
           },
-        })
-      get-component-source-code: |
-        <script lang="ts">
-        import type { VariantProps } from 'tailwind-variants'
-        import type { AppConfig } from '@nuxt/schema'
-        import _appConfig from '#build/app.config'
-        import theme from '#build/ui/button'
-        import type { LinkProps } from './Link.vue'
-        import type { UseComponentIconsProps } from '../composables/useComponentIcons'
-        import { tv } from '../utils/tv'
-        import type { AvatarProps } from '../types'
-        import type { PartialString } from '../types/utils'
-        
-        const appConfigButton = _appConfig as AppConfig & { ui: { button: Partial<typeof theme> } }
-        
-        const button = tv({ extend: tv(theme), ...(appConfigButton.ui?.button || {}) })
-        
-        type ButtonVariants = VariantProps<typeof button>
-        
-        export interface ButtonProps extends UseComponentIconsProps, Omit<LinkProps, 'raw' | 'custom'> {
-          label?: string
-          color?: ButtonVariants['color']
-          variant?: ButtonVariants['variant']
-          size?: ButtonVariants['size']
-          /** Render the button with equal padding on all sides. */
-          square?: boolean
-          /** Render the button full width. */
-          block?: boolean
-          /** Set loading state automatically based on the `@click` promise state */
-          loadingAuto?: boolean
-          onClick?: ((event: MouseEvent) => void | Promise<void>) | Array<((event: MouseEvent) => void | Promise<void>)>
-          class?: any
-          ui?: PartialString<typeof button.slots>
-        }
-        
-        export interface ButtonSlots {
-          leading(props?: {}): any
-          default(props?: {}): any
-          trailing(props?: {}): any
-        }
-        </script>
-        
-        <script setup lang="ts">
-        import { type Ref, computed, ref, inject } from 'vue'
-        import { useForwardProps } from 'reka-ui'
-        import { useComponentIcons } from '../composables/useComponentIcons'
-        import { useButtonGroup } from '../composables/useButtonGroup'
-        import { formLoadingInjectionKey } from '../composables/useFormField'
-        import { omit } from '../utils'
-        import { pickLinkProps } from '../utils/link'
-        import UIcon from './Icon.vue'
-        import UAvatar from './Avatar.vue'
-        import ULink from './Link.vue'
-        
-        const props = defineProps<ButtonProps>()
-        const slots = defineSlots<ButtonSlots>()
-        
-        const linkProps = useForwardProps(pickLinkProps(props))
-        
-        const { orientation, size: buttonSize } = useButtonGroup<ButtonProps>(props)
-        
-        const loadingAutoState = ref(false)
-        const formLoading = inject<Ref<boolean> | undefined>(formLoadingInjectionKey, undefined)
-        
-        async function onClickWrapper(event: MouseEvent) {
-          loadingAutoState.value = true
-          const callbacks = Array.isArray(props.onClick) ? props.onClick : [props.onClick]
-          try {
-            await Promise.all(callbacks.map(fn => fn?.(event)))
-          } finally {
-            loadingAutoState.value = false
+          variants: {
+            ...fieldGroupVariant,
+            color: {
+              ...Object.fromEntries((options.theme.colors || []).map((color: string) => [color, ''])),
+              neutral: ''
+            },
+            variant: {
+              solid: '',
+              outline: '',
+              soft: '',
+              subtle: '',
+              ghost: '',
+              link: ''
+            },
+            size: {
+              xs: {
+                base: 'px-2 py-1 text-xs gap-1',
+                leadingIcon: 'size-4',
+                leadingAvatarSize: '3xs',
+                trailingIcon: 'size-4'
+              },
+              sm: {
+                base: 'px-2.5 py-1.5 text-xs gap-1.5',
+                leadingIcon: 'size-4',
+                leadingAvatarSize: '3xs',
+                trailingIcon: 'size-4'
+              },
+              md: {
+                base: 'px-2.5 py-1.5 text-sm gap-1.5',
+                leadingIcon: 'size-5',
+                leadingAvatarSize: '2xs',
+                trailingIcon: 'size-5'
+              },
+              lg: {
+                base: 'px-3 py-2 text-sm gap-2',
+                leadingIcon: 'size-5',
+                leadingAvatarSize: '2xs',
+                trailingIcon: 'size-5'
+              },
+              xl: {
+                base: 'px-3 py-2 text-base gap-2',
+                leadingIcon: 'size-6',
+                leadingAvatarSize: 'xs',
+                trailingIcon: 'size-6'
+              }
+            },
+            block: {
+              true: {
+                base: 'w-full justify-center',
+                trailingIcon: 'ms-auto'
+              }
+            },
+            square: {
+              true: ''
+            },
+            leading: {
+              true: ''
+            },
+            trailing: {
+              true: ''
+            },
+            loading: {
+              true: ''
+            },
+            active: {
+              true: {
+                base: ''
+              },
+              false: {
+                base: ''
+              }
+            }
+          },
+          compoundVariants: [...(options.theme.colors || []).map((color: string) => ({
+            color,
+            variant: 'solid',
+            class: `text-inverted bg-${color} hover:bg-${color}/75 active:bg-${color}/75 disabled:bg-${color} aria-disabled:bg-${color} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-${color}`
+          })), ...(options.theme.colors || []).map((color: string) => ({
+            color,
+            variant: 'outline',
+            class: `ring ring-inset ring-${color}/50 text-${color} hover:bg-${color}/10 active:bg-${color}/10 disabled:bg-transparent aria-disabled:bg-transparent dark:disabled:bg-transparent dark:aria-disabled:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-${color}`
+          })), ...(options.theme.colors || []).map((color: string) => ({
+            color,
+            variant: 'soft',
+            class: `text-${color} bg-${color}/10 hover:bg-${color}/15 active:bg-${color}/15 focus:outline-none focus-visible:bg-${color}/15 disabled:bg-${color}/10 aria-disabled:bg-${color}/10`
+          })), ...(options.theme.colors || []).map((color: string) => ({
+            color,
+            variant: 'subtle',
+            class: `text-${color} ring ring-inset ring-${color}/25 bg-${color}/10 hover:bg-${color}/15 active:bg-${color}/15 disabled:bg-${color}/10 aria-disabled:bg-${color}/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-${color}`
+          })), ...(options.theme.colors || []).map((color: string) => ({
+            color,
+            variant: 'ghost',
+            class: `text-${color} hover:bg-${color}/10 active:bg-${color}/10 focus:outline-none focus-visible:bg-${color}/10 disabled:bg-transparent aria-disabled:bg-transparent dark:disabled:bg-transparent dark:aria-disabled:bg-transparent`
+          })), ...(options.theme.colors || []).map((color: string) => ({
+            color,
+            variant: 'link',
+            class: `text-${color} hover:text-${color}/75 active:text-${color}/75 disabled:text-${color} aria-disabled:text-${color} focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-${color}`
+          })), {
+            color: 'neutral',
+            variant: 'solid',
+            class: 'text-inverted bg-inverted hover:bg-inverted/90 active:bg-inverted/90 disabled:bg-inverted aria-disabled:bg-inverted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inverted'
+          }, {
+            color: 'neutral',
+            variant: 'outline',
+            class: 'ring ring-inset ring-accented text-default bg-default hover:bg-elevated active:bg-elevated disabled:bg-default aria-disabled:bg-default focus:outline-none focus-visible:ring-2 focus-visible:ring-inverted'
+          }, {
+            color: 'neutral',
+            variant: 'soft',
+            class: 'text-default bg-elevated hover:bg-accented/75 active:bg-accented/75 focus:outline-none focus-visible:bg-accented/75 disabled:bg-elevated aria-disabled:bg-elevated'
+          }, {
+            color: 'neutral',
+            variant: 'subtle',
+            class: 'ring ring-inset ring-accented text-default bg-elevated hover:bg-accented/75 active:bg-accented/75 disabled:bg-elevated aria-disabled:bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-inverted'
+          }, {
+            color: 'neutral',
+            variant: 'ghost',
+            class: 'text-default hover:bg-elevated active:bg-elevated focus:outline-none focus-visible:bg-elevated hover:disabled:bg-transparent dark:hover:disabled:bg-transparent hover:aria-disabled:bg-transparent dark:hover:aria-disabled:bg-transparent'
+          }, {
+            color: 'neutral',
+            variant: 'link',
+            class: 'text-muted hover:text-default active:text-default disabled:text-muted aria-disabled:text-muted focus:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-inverted'
+          }, {
+            size: 'xs',
+            square: true,
+            class: 'p-1'
+          }, {
+            size: 'sm',
+            square: true,
+            class: 'p-1.5'
+          }, {
+            size: 'md',
+            square: true,
+            class: 'p-1.5'
+          }, {
+            size: 'lg',
+            square: true,
+            class: 'p-2'
+          }, {
+            size: 'xl',
+            square: true,
+            class: 'p-2'
+          }, {
+            loading: true,
+            leading: true,
+            class: {
+              leadingIcon: 'animate-spin'
+            }
+          }, {
+            loading: true,
+            leading: false,
+            trailing: true,
+            class: {
+              trailingIcon: 'animate-spin'
+            }
+          }],
+          defaultVariants: {
+            color: 'primary',
+            variant: 'solid',
+            size: 'md'
           }
-        }
-        
-        const isLoading = computed(() => {
-          return props.loading || (props.loadingAuto && (loadingAutoState.value || (formLoading?.value && props.type === 'submit')))
         })
-        
-        const { isLeading, isTrailing, leadingIconName, trailingIconName } = useComponentIcons(
-          computed(() => ({ ...props, loading: isLoading.value }))
-        )
-        
-        const ui = computed(() => button({
-          color: props.color,
-          variant: props.variant,
-          size: buttonSize.value,
-          loading: isLoading.value,
-          block: props.block,
-          square: props.square || (!slots.default && !props.label),
-          leading: isLeading.value,
-          trailing: isTrailing.value,
-          buttonGroup: orientation.value
-        }))
-        </script>
-        
-        <template>
-          <ULink
-            :type="type"
-            :disabled="disabled || isLoading"
-            :class="ui.base({ class: [props.class, props.ui?.base] })"
-            v-bind="omit(linkProps, ['type', 'disabled'])"
-            raw
-            @click="onClickWrapper"
-          >
-            <slot name="leading">
-              <UIcon v-if="isLeading && leadingIconName" :name="leadingIconName" :class="ui.leadingIcon({ class: props.ui?.leadingIcon })" />
-              <UAvatar v-else-if="!!avatar" :size="((props.ui?.leadingAvatarSize || ui.leadingAvatarSize()) as AvatarProps['size'])" v-bind="avatar" :class="ui.leadingAvatar({ class: props.ui?.leadingAvatar })" />
-            </slot>
-        
-            <slot>
-              <span v-if="label" :class="ui.label({ class: props.ui?.label })">
-                {{ label }}
-              </span>
-            </slot>
-        
-            <slot name="trailing">
-              <UIcon v-if="isTrailing && trailingIconName" :name="trailingIconName" :class="ui.trailingIcon({ class: props.ui?.trailingIcon })" />
-            </slot>
-          </ULink>
-        </template>
     expected:
-      - callsTool: get-available-components
+      - callsTool:
+          arguments: { }
+          name: get-available-components
       - callsTool:
           arguments:
             componentName: button
           name: get-component-theme
-      - callsTool:
-          arguments:
-            componentName: button
-          name: get-component-source-code
   - input: "@nuxt What components are available?"
     mocks:
       get-available-components:
@@ -236,14 +294,13 @@ evals:
           - alert
           - avatar
         proseComponents:
-          - ProseH1
-          - ProseH2
-          - ProseH3
-        proComponents:
-          - pageAccordion
-          - pageCard
+          - h1
+          - h2
+          - h3
     expected:
-      - callsTool: get-available-components
+      - callsTool:
+          arguments: { }
+          name: get-available-components
   - input: "@nuxt Create a FAQ component"
     mocks:
       get-available-components:
@@ -252,12 +309,9 @@ evals:
           - alert
           - avatar
         proseComponents:
-          - ProseH1
-          - ProseH2
-          - ProseH3
-        proComponents:
-          - pageAccordion
-          - pageCard
+          - h1
+          - h2
+          - h3
       get-component-theme: |
         export default {
           slots: {
@@ -297,12 +351,6 @@ evals:
           - avatar
           - avatarGroup
           - badge
-        proComponents:
-          - banner
-          - blogPost
-          - blogPosts
-          - colorModeAvatar
-          - pageAccordion
         proseComponents:
           - h1
           - h2
@@ -312,6 +360,7 @@ evals:
           - a
     expected:
       - callsTool:
+          arguments: { }
           name: get-available-components
   - input: "@nuxt Give me the avatar theme"
     mocks:
@@ -328,17 +377,6 @@ evals:
           - buttonGroup
           - calendar
           - card
-        proComponents:
-          - banner
-          - blogPost
-          - blogPosts
-          - colorModeAvatar
-          - colorModeButton
-          - colorModeImage
-          - colorModeSelect
-          - colorModeSwitch
-          - contentNavigation
-          - contentSearch
         proseComponents:
           - h1
           - h2
@@ -346,17 +384,13 @@ evals:
           - h4
           - p
           - a
-          - blockquote
-          - strong
-          - em
-          - ul
       get-component-theme: |
         export default {
           slots: {
-            root: 'inline-flex items-center justify-center shrink-0 select-none overflow-hidden rounded-full align-middle bg-(--ui-bg-elevated)',
+            root: 'inline-flex items-center justify-center shrink-0 select-none rounded-full align-middle bg-elevated',
             image: 'h-full w-full rounded-[inherit] object-cover',
-            fallback: 'font-medium leading-none text-(--ui-text-muted) truncate',
-            icon: 'text-(--ui-text-muted) shrink-0'
+            fallback: 'font-medium leading-none text-muted truncate',
+            icon: 'text-muted shrink-0'
           },
           variants: {
             size: {
@@ -395,6 +429,7 @@ evals:
         }
     expected:
       - callsTool:
+          arguments: { }
           name: get-available-components
       - callsTool:
           arguments:
@@ -413,14 +448,6 @@ evals:
           - carousel
           - checkbox
           - chip
-        proComponents:
-          - pageAnchors
-          - pageAside
-          - pageBody
-          - pageCard
-          - pageColumns
-          - pageCta
-          - pageFeature
         proseComponents:
           - code
           - pre
@@ -428,69 +455,33 @@ evals:
           - badge
           - card
           - cardGroup
-      get-component-source-code: |
-        <script lang="ts">
-        import type { VariantProps } from 'tailwind-variants'
-        import type { AppConfig } from '@nuxt/schema'
-        import _appConfig from '#build/app.config'
-        import theme from '#build/ui/card'
-        import { tv } from '../utils/tv'
-  
-        const appConfigCard = _appConfig as AppConfig & { ui: { card: Partial<typeof theme> } }
-  
-        const card = tv({ extend: tv(theme), ...(appConfigCard.ui?.card || {}) })
-  
-        type CardVariants = VariantProps<typeof card>
-  
-        export interface CardProps {
-          /**
-           * The element or component this component should render as.
-           * @defaultValue 'div'
-           */
-          as?: any
-          variant?: CardVariants['variant']
-          class?: any
-          ui?: Partial<typeof card.slots>
+      get-component-theme: |
+        export default {
+          slots: {
+            root: 'w-full',
+            header: 'flex items-center justify-between py-3 px-4',
+            body: 'p-4',
+            footer: 'flex items-center justify-end gap-2 py-3 px-4'
+          }
         }
-  
-        export interface CardSlots {
-          header(props?: {}): any
-          default(props?: {}): any
-          footer(props?: {}): any
-        }
-        </script>
-  
-        <script setup lang="ts">
-        import { computed } from 'vue'
-        import { Primitive } from 'reka-ui'
-  
-        const props = defineProps<CardProps>()
-        const slots = defineSlots<CardSlots>()
-  
-        const ui = computed(() => card({ variant: props.variant }))
-        </script>
-  
-        <template>
-          <Primitive :as="as" :class="ui.root({ class: [props.class, props.ui?.root] })">
-            <div v-if="!!slots.header" :class="ui.header({ class: props.ui?.header })">
-              <slot name="header" />
-            </div>
-  
-            <div v-if="!!slots.default" :class="ui.body({ class: props.ui?.body })">
-              <slot />
-            </div>
-  
-            <div v-if="!!slots.footer" :class="ui.footer({ class: props.ui?.footer })">
-              <slot name="footer" />
-            </div>
-          </Primitive>
-        </template>
+      get-component-documentation: |
+        # Card
+        The Card component is a container with optional header, body and footer slots.
+        ## Props
+        - as: string | component
+        - variant: solid | outline | soft
     expected:
-      - callsTool: get-available-components
+      - callsTool:
+          arguments: { }
+          name: get-available-components
       - callsTool:
           arguments:
             componentName: card
-          name: get-component-source-code
+          name: get-component-theme
+      - callsTool:
+          arguments:
+            componentName: card
+          name: get-component-documentation
   - input: "@nuxt What module categories are available?"
     mocks:
       get-module-categories:
@@ -500,7 +491,9 @@ evals:
           - SEO
           - Testing
     expected:
-      - callsTool: get-module-categories
+      - callsTool:
+          arguments: { }
+          name: get-module-categories
   - input: "@nuxt Recommend me some UI modules"
     mocks:
       get-module-categories:
@@ -533,7 +526,9 @@ evals:
             compatibility: "Nuxt 2, Nuxt 3"
             stars: 1800
     expected:
-      - callsTool: get-module-categories
+      - callsTool:
+          arguments: { }
+          name: get-module-categories
       - callsTool:
           arguments:
             category: "UI"
@@ -547,9 +542,26 @@ evals:
           - SEO
           - Testing
     expected:
-      - callsTool: get-module-categories
+      - callsTool:
+          arguments: { }
+          name: get-module-categories
   - input: "@nuxt How to install the ui module?"
     mocks:
+      get-module-categories:
+        categories:
+          - UI
+          - CMS
+          - SEO
+          - Testing
+      get-modules-by-category:
+        modules:
+          - name: "@nuxt/ui"
+            description: "UI Library for Nuxt based on Tailwind CSS"
+            npm: "@nuxt/ui"
+            github: "nuxt/ui"
+            category: "UI"
+            compatibility: "Nuxt 3"
+            stars: 4500
       get-module-by-name:
         name: "ui"
         description: "UI Library for Nuxt based on Tailwind CSS"
@@ -557,4 +569,14 @@ evals:
         github: "nuxt/ui"
         category: "UI"
     expected:
-      - callsTool: get-module-by-name
+      - callsTool:
+          arguments: { }
+          name: get-module-categories
+      - callsTool:
+          arguments:
+            category: "UI"
+          name: get-modules-by-category
+      - callsTool:
+          arguments:
+            name: "ui"
+          name: get-module-by-name

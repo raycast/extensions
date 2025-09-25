@@ -16,6 +16,7 @@ const html = JSON.parse(fs.readFileSync(`${environment.assetsPath}/html.json`, "
 interface IListContext {
   list: CharacterSection[];
   loading: boolean;
+  filter: string | null;
   addToRecentlyUsedItems: (item: Character) => void;
   onSearchTextChange: (text: string) => void;
   clearRecentlyUsedItems: () => void;
@@ -90,6 +91,7 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
       value={{
         list,
         loading,
+        filter: datasetFilter,
         addToRecentlyUsedItems,
         onSearchTextChange,
         clearRecentlyUsedItems,
