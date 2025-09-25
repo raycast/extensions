@@ -1,5 +1,5 @@
-import { Action, ActionPanel, closeMainWindow, Color, Detail, Icon, LaunchProps, List } from "@raycast/api";
-import React, { useMemo } from "react";
+import { Action, ActionPanel, closeMainWindow, Color, Detail, Icon, Image, LaunchProps, List } from "@raycast/api";
+import React, { useEffect, useMemo, useState } from "react";
 import { createDeeplink } from "@raycast/utils";
 import { useClientManager } from "../contexts/clientManagerContext";
 import { DBSoundTile } from "../types";
@@ -34,8 +34,19 @@ type TileListItemProps = { tile: DBSoundTile; latestDbUpdate: number | null };
 const TileListItem = React.memo(
   ({ tile, latestDbUpdate }: TileListItemProps) => {
     const { cm } = useClientManager();
-
     if (!cm) throw new Error(`Client manager instance always expected in TileListItem`);
+
+    const [playing, setPlaying] = useState(false);
+
+    useEffect(() => {
+      const baseOscAddress = cm.getTileBaseOscAddress(tile);
+      const handler = cm.oscClient.addMessageHandler(new RegExp(`^${baseOscAddress}/currentTime$`), (msg) => {
+        const currentTime = (msg.args as [number])[0];
+        setPlaying(currentTime > 0);
+      });
+
+      return () => cm.oscClient.removeMessageHandler(handler);
+    }, []);
 
     const accessories = useMemo(() => {
       const acc: List.Item.Accessory[] = [];
@@ -53,25 +64,37 @@ const TileListItem = React.memo(
       return acc;
     }, [latestDbUpdate]);
 
+    const playStopIcon = playing ? Icon.Stop : Icon.Play;
+
+    const playStopIconColored: Image.ImageLike = playing
+      ? {
+          source: playStopIcon,
+          tintColor: Color.Red,
+        }
+      : {
+          source: playStopIcon,
+          tintColor: Color.Purple,
+        };
+
     return (
       <List.Item
         title={tile.title}
         subtitle={tile.tileIcon.join(" ")}
-        icon={Icon.Play}
+        icon={playStopIconColored}
         accessories={accessories}
         actions={
           <ActionPanel>
             <Action
-              title="Play"
-              icon={Icon.Play}
+              title={playing ? "Stop" : "Play"}
+              icon={playStopIcon}
               onAction={() => {
                 cm.playTile(tile);
                 closeMainWindow();
               }}
             />
             <Action
-              title="Play and Keep Window Open"
-              icon={Icon.Play}
+              title={`${playing ? "Stop" : "Play"} and Keep Window Open`}
+              icon={playStopIcon}
               onAction={() => cm.playTile(tile)}
               shortcut={{ key: "enter", modifiers: ["opt"] }}
             />

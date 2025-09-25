@@ -105,4 +105,10 @@ export class ClientManager {
 
     return { setPosition: set.position, tilePosition };
   }
+
+  getTileBaseOscAddress(tile: DBSoundTile) {
+    const set = this.dataGetter.getSetByUuid(tile.setUuid);
+    const { setPosition, tilePosition } = this.getTileCoordinates(tile);
+    return `/set/${setPosition}/tile/${tilePosition.x}/${tilePosition.y}`;
+  }
 }

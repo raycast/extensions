@@ -57,19 +57,22 @@ export class OSCClient {
     console.log("OSC message sent:", message);
   }
 
-  _addMessageHandler(rgx: RegExp, handler: OscMessageHandler) {
+  addMessageHandler(rgx: RegExp, handler: OscMessageHandler) {
     if (!this._messageHandlers.has(rgx.source)) {
       this._messageHandlers.set(rgx.source, [rgx, new Set()]);
     }
-    this._messageHandlers.get(rgx.source)![1].add(handler);
+    const [, handlersSet] = this._messageHandlers.get(rgx.source)!;
+    handlersSet.add(handler);
 
     if (!this._messagehandlersRegexMap.has(handler)) {
       this._messagehandlersRegexMap.set(handler, new Set());
     }
     this._messagehandlersRegexMap.get(handler)!.add(rgx.source);
+
+    return handler;
   }
 
-  _removeMessageHandler(handler: OscMessageHandler) {
+  removeMessageHandler(handler: OscMessageHandler) {
     const rgxSources = this._messagehandlersRegexMap.get(handler);
     if (!rgxSources) return;
 
