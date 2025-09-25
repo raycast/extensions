@@ -22,6 +22,11 @@ function getIcon(session: Session) {
         tintColor: session.Attached >= 1 ? Color.Green : Color.Blue,
         tooltip: session.Attached >= 1 ? "Attached" : "Detached",
       };
+    case "tmuxinator":
+      return {
+        source: Icon.Box,
+        tintColor: Color.Magenta,
+      };
     case "config":
       return {
         source: Icon.Cog,
@@ -44,9 +49,10 @@ function formatScore(score: number) {
 export default function ConnectCommand() {
   const [sessions, setSessions] = useState<{
     tmux: Array<Session>;
+    tmuxinator: Array<Session>;
     config: Array<Session>;
     zoxide: Array<Session>;
-  }>({ tmux: [], config: [], zoxide: [] });
+  }>({ tmux: [], tmuxinator: [], config: [], zoxide: [] });
   const [isLoading, setIsLoading] = useState(true);
 
   async function getAndSetSessions() {
@@ -54,6 +60,7 @@ export default function ConnectCommand() {
       const sessions = await getSessions();
       setSessions({
         tmux: sessions.filter((s) => s.Src === "tmux"),
+        tmuxinator: sessions.filter((s) => s.Src === "tmuxinator"),
         config: sessions.filter((s) => s.Src === "config"),
         zoxide: sessions.filter((s) => s.Src === "zoxide"),
       });
@@ -116,6 +123,22 @@ export default function ConnectCommand() {
                 tooltip: session.Windows === 1 ? "Window" : "Windows",
               },
             ]}
+            actions={
+              <ActionPanel>
+                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+
+      <List.Section title="tmuxinator">
+        {sessions.tmuxinator.map((session, index) => (
+          <List.Item
+            key={index}
+            title={session.Name}
+            icon={getIcon(session)}
+            accessories={[{ text: formatScore(session.Score), icon: Icon.Box }]}
             actions={
               <ActionPanel>
                 <Action title="Connect to Session" onAction={() => connect(session.Name)} />
