@@ -1,5 +1,9 @@
 # Surge Outbound Mode Switcher Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Updated screenshots to macOS Tahoe
+
 ## [Update Extension Icons and Toast Indicators] - 2025-05-07
 
 - Update extension icons to prevent confusion with Surge app
