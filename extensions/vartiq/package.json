@@ -8,18 +8,44 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "api_key",
-      "title": "API Key",
+      "name": "api_key_dev",
+      "title": "API Key (Development)",
       "type": "password",
       "required": true,
       "placeholder": "sk_XXX...XX",
-      "description": ""
+      "description": "Development API Key"
+    },
+    {
+      "name": "api_key_prod",
+      "title": "API Key (Production)",
+      "type": "password",
+      "required": true,
+      "placeholder": "sk_XXX...XX",
+      "description": "Production API Key"
+    },
+    {
+      "name": "environment",
+      "title": "Environment",
+      "type": "dropdown",
+      "default": "dev",
+      "required": true,
+      "data": [
+        {
+          "title": "Development",
+          "value": "dev"
+        },
+        {
+          "title": "Production",
+          "value": "prod"
+        }
+      ],
+      "description": "Select Environment and API Key"
     }
   ],
   "commands": [
     {
-      "name": "search-projects",
-      "title": "Search Projects",
+      "name": "projects",
+      "title": "Manage Projects",
       "description": "",
       "mode": "view"
     }
