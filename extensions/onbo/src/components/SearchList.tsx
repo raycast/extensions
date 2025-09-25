@@ -245,7 +245,6 @@ export default function SearchList({ resource, normalizeCategoryTitle = defaultN
   /**
    * Active role listings derived from the fetched data.
    * Filters out inactive listings for display.
-   * Filters out inactive listings for display.
    */
   const jobs: RoleListing[] = (rawData ?? []).filter((job): job is RoleListing => (job as RoleListing).is_active);
 
