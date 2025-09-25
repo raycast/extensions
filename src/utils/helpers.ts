@@ -1,5 +1,6 @@
 import os from "os";
 import path from "path";
+import { TILE_COLORS_BY_INDEX } from "./constants";
 
 export function expandTilde(inputPath: string) {
   if (inputPath.startsWith("~")) {
@@ -9,4 +10,8 @@ export function expandTilde(inputPath: string) {
     return path.join(homeDir, inputPath.slice(1));
   }
   return inputPath;
+}
+
+export function getTileColorByIndex(index: number) {
+  return TILE_COLORS_BY_INDEX[index];
 }

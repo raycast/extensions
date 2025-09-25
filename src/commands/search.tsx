@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createDeeplink } from "@raycast/utils";
 import { useClientManager } from "../contexts/clientManagerContext";
 import { DBSoundTile } from "../types";
+import { getTileColorByIndex } from "../utils/helpers";
 
 type SearchCommandProps = { initialSearchText?: string };
 
@@ -73,7 +74,7 @@ const TileListItem = React.memo(
         }
       : {
           source: playStopIcon,
-          tintColor: Color.Purple,
+          tintColor: getTileColorByIndex(tile.colorIndex),
         };
 
     return (
