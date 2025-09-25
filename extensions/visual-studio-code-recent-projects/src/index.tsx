@@ -174,7 +174,9 @@ function LocalItem(
       }
     }
 
-    fetchGitBranch();
+    if (showGitBranch) {
+      fetchGitBranch();
+    }
     return () => {
       mounted = false;
     };
