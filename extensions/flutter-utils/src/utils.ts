@@ -7,12 +7,10 @@ import path from "node:path";
  * Global extension preferences.
  * projectPath: default Flutter project path.
  */
-// export type ExtensionPreferences = {
-//   /** Absolute path of a Flutter project to use by default. */
-//   projectPath?: string;
-//   /** Absolute path to the Flutter SDK (root, containing the bin folder). */
-//   flutterSdkPath?: string;
-// };
+/**
+ * Global extension preferences.
+ * projectPath: default Flutter project path.
+ */
 
 /**
  * Returns the Flutter project path to use.
