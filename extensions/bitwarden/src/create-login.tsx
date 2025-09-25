@@ -118,6 +118,15 @@ function CreateLoginComponent() {
     }
   };
 
+  const passwordFieldProps: Partial<Form.TextField.Props> = {
+    title: "Password",
+    placeholder: "Enter password",
+    onChange: (value: string) => {
+      itemProps.visiblePassword.onChange?.(value);
+      itemProps.hiddenPassword.onChange?.(value);
+    },
+  };
+
   return (
     <Form
       isLoading={isSubmitting}
@@ -154,27 +163,9 @@ function CreateLoginComponent() {
       <Form.TextField {...itemProps.username} title="Username" placeholder="john.doe@mail.com" storeValue={false} />
       <Form.TextField {...itemProps.uri} title="Website URI" placeholder="example.com" storeValue={false} />
       {showPassword ? (
-        <Form.TextField
-          {...itemProps.visiblePassword}
-          title="Password"
-          placeholder="Enter password"
-          storeValue={false}
-          onChange={(value) => {
-            itemProps.visiblePassword.onChange?.(value);
-            itemProps.hiddenPassword.onChange?.(value);
-          }}
-        />
+        <Form.TextField {...itemProps.visiblePassword} {...passwordFieldProps} />
       ) : (
-        <Form.PasswordField
-          {...itemProps.hiddenPassword}
-          onChange={(value) => {
-            itemProps.hiddenPassword.onChange?.(value);
-            itemProps.visiblePassword.onChange?.(value);
-          }}
-          title="Password"
-          placeholder="Enter password"
-          storeValue={false}
-        />
+        <Form.PasswordField {...itemProps.hiddenPassword} {...passwordFieldProps} />
       )}
       <Form.Description
         title=""
