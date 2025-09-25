@@ -1,6 +1,5 @@
-import { Action, ActionPanel, closeMainWindow, Color, Detail, Icon, Image, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Detail, Icon, Image, List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
-import { createDeeplink } from "@raycast/utils";
 import { useClientManager } from "../contexts/clientManagerContext";
 import { DBSoundTile } from "../types";
 import { getTileColorByIndex } from "../utils/helpers";
@@ -98,15 +97,6 @@ const TileListItem = React.memo(
               icon={playStopIcon}
               onAction={() => cm.playTile(tile)}
               shortcut={{ key: "enter", modifiers: ["opt"] }}
-            />
-            <Action.CreateQuicklink
-              title="Create Quicklink"
-              quicklink={{
-                link: createDeeplink({
-                  command: "play",
-                  context: { tileCoordinates: cm.getTileCoordinates(tile) },
-                }),
-              }}
             />
           </ActionPanel>
         }
