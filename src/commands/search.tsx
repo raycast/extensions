@@ -77,6 +77,8 @@ const TileListItem = React.memo(
           tintColor: getTileColorByIndex(tile.colorIndex),
         };
 
+    const filePath = cm.fileParser.getFilePathForTile(tile);
+
     return (
       <List.Item
         title={{ value: tile.title, tooltip: tile.notes }}
@@ -85,28 +87,44 @@ const TileListItem = React.memo(
         accessories={accessories}
         actions={
           <ActionPanel>
-            <Action
-              title={playing ? "Stop" : "Play"}
-              icon={playStopIcon}
-              onAction={() => {
-                cm.playStopTile(tile);
-                closeMainWindow();
-              }}
-            />
-            <Action
-              title={`${playing ? "Stop" : "Play"} and Keep Window Open`}
-              icon={playStopIcon}
-              onAction={() => cm.playStopTile(tile)}
-              shortcut={{ key: "enter", modifiers: ["opt"] }}
-            />
-            {playing ? (
+            <ActionPanel.Section>
               <Action
-                title={"Fade"}
-                icon={Icon.SpeakerDown}
-                onAction={() => cm.fadeTile(tile)}
-                shortcut={{ key: "f", modifiers: ["cmd", "shift"] }}
+                title={playing ? "Stop" : "Play"}
+                icon={playStopIcon}
+                onAction={() => {
+                  cm.playStopTile(tile);
+                  closeMainWindow();
+                }}
               />
-            ) : null}
+              <Action
+                title={`${playing ? "Stop" : "Play"} and Keep Window Open`}
+                icon={playStopIcon}
+                onAction={() => cm.playStopTile(tile)}
+                shortcut={{ key: "enter", modifiers: ["opt"] }}
+              />
+              {playing ? (
+                <Action
+                  title={"Fade"}
+                  icon={Icon.SpeakerDown}
+                  onAction={() => cm.fadeTile(tile)}
+                  shortcut={{ key: "f", modifiers: ["cmd", "shift"] }}
+                />
+              ) : null}
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action.CopyToClipboard
+                title="Copy Tile Title"
+                content={tile.title}
+                shortcut={{ key: "c", modifiers: ["cmd"] }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Tile UUID"
+                content={tile.tileUUID}
+                shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
+              />
+              <Action.CopyToClipboard title="Copy File Path" content={filePath} />
+              <Action.CopyToClipboard title="Copy File" content={{ file: filePath }} />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />

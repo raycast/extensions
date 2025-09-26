@@ -3,7 +3,7 @@ import path from "path";
 import { execSync } from "child_process";
 import plist from "plist";
 import xml2js from "xml2js";
-import { SoundSet } from "../../types";
+import { SoundSet, SoundSetTile } from "../../types";
 import { expandTilde } from "../../utils/helpers";
 import { Clipboard } from "@raycast/api";
 
@@ -81,5 +81,11 @@ export class FileParser {
     });
 
     return lastModifiedTime;
+  }
+
+  getFilePathForTile(tile: SoundSetTile) {
+    const fileExt = tile.fileName.split(".").at(-1);
+
+    return path.join(this.farragoDataDirpath, "Sound Files", `${tile.fileUUID}.${fileExt}`);
   }
 }
