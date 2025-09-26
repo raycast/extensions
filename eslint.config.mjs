@@ -1,9 +1,13 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default tseslint.config(
   {
-    ignores: ["node_modules/**", "dist/**"]
+    ignores: ["node_modules/**", "dist/**", "raycast-env.d.ts"],
   },
   {
     files: ["**/*.{ts,tsx}"],
@@ -11,17 +15,17 @@ export default tseslint.config(
       parser: tseslint.parser,
       parserOptions: {
         project: "./tsconfig.json",
-        tsconfigRootDir: import.meta.dirname ?? process.cwd(),
+        tsconfigRootDir: dirname,
         ecmaFeatures: {
-          jsx: true
-        }
-      }
+          jsx: true,
+        },
+      },
     },
     plugins: {
-      "react-hooks": reactHooks
+      "react-hooks": reactHooks,
     },
     linterOptions: {
-      reportUnusedDisableDirectives: "off"
+      reportUnusedDisableDirectives: "off",
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
@@ -29,7 +33,7 @@ export default tseslint.config(
       "no-empty": "off",
       "prefer-const": "off",
       "react-hooks/exhaustive-deps": "off",
-      "react-hooks/rules-of-hooks": "warn"
-    }
-  }
+      "react-hooks/rules-of-hooks": "warn",
+    },
+  },
 );
