@@ -1,5 +1,13 @@
 # Deepcast Changelog
 
+## [Download Location Options] - 2025-09-26
+
+- Added customizable download locations for translated documents
+- Five download location options: same folder as original, Downloads, Documents, Desktop, or custom folder
+- Custom folder picker with directory selection
+- Default download location preference in Raycast settings
+- Custom download path setting for advanced users
+
 ## [Finder Integration] - 2025-09-26
 
 - Added automatic file selection from Finder context
@@ -15,7 +23,8 @@
 - Document format conversion option (e.g., PDF to DOCX)
 - Formality control for document translation
 - Source language auto-detection or manual selection
-- Translated documents are saved to the system's temporary directory with easy access options
+- Real-time progress tracking during translation process
+- Comprehensive error handling and user feedback
 
 ## [Default Formality Configuration] - 2025-06-07
 
