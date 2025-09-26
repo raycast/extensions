@@ -83,6 +83,10 @@ export class ClientManager {
     this.oscClient.fadeTile(this.getTileBaseOscAddress(tile));
   }
 
+  toggleTileDuckVolume(tile: DBSoundTile) {
+    this.oscClient.send(this.getTileBaseOscAddress(tile) + "/toggleAB", [true]);
+  }
+
   // utils
 
   getTileCoordinates(tile: DBSoundTile): TileCoordinates {

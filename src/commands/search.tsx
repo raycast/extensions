@@ -104,12 +104,18 @@ const TileListItem = React.memo(
               />
               {playing ? (
                 <Action
-                  title={"Fade"}
+                  title="Fade"
                   icon={Icon.SpeakerDown}
                   onAction={() => cm.fadeTile(tile)}
                   shortcut={{ key: "f", modifiers: ["cmd", "shift"] }}
                 />
               ) : null}
+              <Action
+                title="Toggle AB Volume"
+                icon={Icon.Speaker}
+                onAction={() => cm.toggleTileDuckVolume(tile)}
+                shortcut={{ key: "v", modifiers: ["cmd", "shift"] }}
+              />
             </ActionPanel.Section>
             <ActionPanel.Section>
               <Action.CopyToClipboard
