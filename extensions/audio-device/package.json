@@ -15,7 +15,8 @@
     "taschaub",
     "cballenar",
     "joshmedeski",
-    "joshhayes747"
+    "joshhayes747",
+    "jenningsb2"
   ],
   "keywords": [
     "sound",
@@ -53,6 +54,21 @@
       "description": "Toggle the active audio output device between the favourites specified in the preferences",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "list-devices",
+      "title": "List Devices",
+      "subtitle": "Audio Device",
+      "description": "List all available input and output audio devices",
+      "mode": "view"
+    },
+    {
+      "name": "priority-monitor",
+      "title": "Priority Monitor",
+      "subtitle": "Audio Device",
+      "description": "Monitor audio devices and automatically switch to highest priority when enabled",
+      "mode": "no-view",
+      "interval": "15s"
     },
     {
       "name": "use-combo1",
@@ -182,6 +198,15 @@
       "description": "The name, as found in the output device list, of the output device to use as the second favourite",
       "type": "textfield",
       "default": ""
+    },
+    {
+      "name": "enableAutoSwitch",
+      "required": false,
+      "title": "Enable Automatic Priority Switching",
+      "description": "Automatically switch to the highest priority available device when audio devices connect or disconnect",
+      "label": "Enable automatic switching",
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
