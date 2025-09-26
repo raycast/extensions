@@ -2,12 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepcast",
   "title": "Deepcast",
-  "description": "Translate words, or entire sentences, into 27 different languages using DeepL.",
+  "description": "Translate words, sentences, and entire documents into 30+ different languages using DeepL.",
   "type": "module",
   "icon": "icon.png",
   "keywords": [
     "deepl",
-    "translate"
+    "translate",
+    "document",
+    "pdf",
+    "docx"
   ],
   "author": "mooxl",
   "contributors": [
@@ -29,6 +32,13 @@
       "title": "Translate",
       "subtitle": "Deepcast",
       "description": "Translate text using DeepL",
+      "mode": "view"
+    },
+    {
+      "name": "documentTranslate",
+      "title": "Translate Document",
+      "subtitle": "Deepcast",
+      "description": "Translate documents using DeepL (supports docx, pdf, pptx, xlsx, txt, html, srt and more)",
       "mode": "view"
     },
     {
@@ -765,11 +775,50 @@
         }
       ],
       "default": "default"
+    },
+    {
+      "name": "defaultDownloadLocation",
+      "type": "dropdown",
+      "title": "Default Download Location",
+      "description": "Choose where translated documents should be saved by default",
+      "required": false,
+      "data": [
+        {
+          "title": "Same Folder as Original",
+          "value": "same"
+        },
+        {
+          "title": "Downloads Folder",
+          "value": "downloads"
+        },
+        {
+          "title": "Documents Folder",
+          "value": "documents"
+        },
+        {
+          "title": "Desktop",
+          "value": "desktop"
+        },
+        {
+          "title": "Custom Folder",
+          "value": "custom"
+        }
+      ],
+      "default": "same"
+    },
+    {
+      "name": "customDownloadPath",
+      "type": "textfield",
+      "title": "Custom Download Path",
+      "description": "Custom folder path for translated documents (only used if 'Custom Folder' is selected above)",
+      "required": false,
+      "placeholder": "/Users/yourusername/TranslatedDocuments"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.75.2",
     "@sindresorhus/transliterate": "^1.6.0",
+    "form-data": "^4.0.0",
     "got": "^14.3.0",
     "http-status-codes": "^2.3.0"
   },

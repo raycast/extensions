@@ -1,5 +1,22 @@
 # Deepcast Changelog
 
+## [Finder Integration] - 2025-09-26
+
+- Added automatic file selection from Finder context
+- When you have a supported document selected in Finder and invoke "Translate Document", the file is automatically pre-selected
+- Supports fallback text with file paths for additional convenience
+- Visual indication when a file is auto-detected from Finder
+- Smart filtering to only auto-select supported file formats
+
+## [Document Translation] - 2025-09-26
+
+- Added new "Translate Document" command for translating complete documents
+- Support for multiple file formats: DOCX, PDF, PPTX, XLSX, HTML, TXT, SRT, and more
+- Document format conversion option (e.g., PDF to DOCX)
+- Formality control for document translation
+- Source language auto-detection or manual selection
+- Translated documents are saved to the system's temporary directory with easy access options
+
 ## [Default Formality Configuration] - 2025-06-07
 
 - Added new "Default Formality" preference option to set a global formality level for all supported languages

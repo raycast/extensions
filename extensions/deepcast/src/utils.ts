@@ -13,11 +13,12 @@ import got, { HTTPError, RequestError } from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
 
 const { returnToRootState } = getPreferenceValues<Preferences>();
-function isPro(key: string) {
+
+export function isPro(key: string) {
   return !key.endsWith(":fx");
 }
 
-const DEEPL_QUOTA_EXCEEDED = 456;
+export const DEEPL_QUOTA_EXCEEDED = 456;
 
 /**
  * Delays and closes Raycast window if the preference is enabled
@@ -48,7 +49,7 @@ export async function delayedCloseWindow(closeRaycastAfterTranslation: boolean, 
   });
 }
 
-function gotErrorToString(error: unknown) {
+export function gotErrorToString(error: unknown) {
   console.log(error);
   // response received
   if (error instanceof HTTPError) {
