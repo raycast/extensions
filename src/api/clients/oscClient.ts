@@ -93,6 +93,10 @@ export class OSCClient {
     this.send(`${tileBaseAddress}/play`, [true]);
   }
 
+  fadeTile(tileBaseAddress: string) {
+    this.send(`${tileBaseAddress}/fadeOut`, [true]);
+  }
+
   stopAll() {
     this.send("/transport/stopAll", [true]);
   }

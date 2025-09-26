@@ -79,6 +79,10 @@ export class ClientManager {
     this.oscClient.playStopTile(this.getTileBaseOscAddress(tile));
   }
 
+  fadeTile(tile: DBSoundTile) {
+    this.oscClient.fadeTile(this.getTileBaseOscAddress(tile));
+  }
+
   // utils
 
   getTileCoordinates(tile: DBSoundTile): TileCoordinates {

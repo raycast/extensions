@@ -40,6 +40,7 @@ const TileListItem = React.memo(
 
     useEffect(() => {
       const baseOscAddress = cm.getTileBaseOscAddress(tile);
+
       const handler = cm.oscClient.addMessageHandler(new RegExp(`^${baseOscAddress}/currentTime$`), (msg) => {
         const currentTime = (msg.args as [number])[0];
         setPlaying(currentTime > 0);
@@ -66,13 +67,13 @@ const TileListItem = React.memo(
 
     const playStopIcon = playing ? Icon.Stop : Icon.Play;
 
-    const playStopIconColored: Image.ImageLike = playing
+    const tileIcon: Image.ImageLike = playing
       ? {
-          source: playStopIcon,
+          source: Icon.Stop,
           tintColor: Color.Red,
         }
       : {
-          source: playStopIcon,
+          source: Icon.Play,
           tintColor: getTileColorByIndex(tile.colorIndex),
         };
 
@@ -80,7 +81,7 @@ const TileListItem = React.memo(
       <List.Item
         title={{ value: tile.title, tooltip: tile.notes }}
         subtitle={tile.tileIcon.join(" ")}
-        icon={playStopIconColored}
+        icon={tileIcon}
         accessories={accessories}
         actions={
           <ActionPanel>
@@ -98,6 +99,14 @@ const TileListItem = React.memo(
               onAction={() => cm.playStopTile(tile)}
               shortcut={{ key: "enter", modifiers: ["opt"] }}
             />
+            {playing ? (
+              <Action
+                title={"Fade"}
+                icon={Icon.SpeakerDown}
+                onAction={() => cm.fadeTile(tile)}
+                shortcut={{ key: "f", modifiers: ["cmd", "shift"] }}
+              />
+            ) : null}
           </ActionPanel>
         }
       />
