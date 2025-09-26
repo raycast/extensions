@@ -78,7 +78,7 @@ const TileListItem = React.memo(
 
     return (
       <List.Item
-        title={tile.title}
+        title={{ value: tile.title, tooltip: tile.notes }}
         subtitle={tile.tileIcon.join(" ")}
         icon={playStopIconColored}
         accessories={accessories}
