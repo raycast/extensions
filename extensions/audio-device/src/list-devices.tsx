@@ -53,10 +53,21 @@ export default function ListDevices() {
     ]);
 
     // Get existing priority lists (don't auto-add missing devices here)
-    const [outputPriorityList, inputPriorityList] = await Promise.all([
+    let [outputPriorityList, inputPriorityList] = await Promise.all([
       getOutputPriorityList(),
       getInputPriorityList(),
     ]);
+
+    // Auto-initialize priority lists if empty - set current active device as #1
+    if (outputPriorityList.length === 0 && currentOutputDevice) {
+      outputPriorityList = [currentOutputDevice.name];
+      await setOutputPriorityList(outputPriorityList);
+    }
+
+    if (inputPriorityList.length === 0 && currentInputDevice) {
+      inputPriorityList = [currentInputDevice.name];
+      await setInputPriorityList(inputPriorityList);
+    }
 
     // Get stored device info for transport types of disconnected devices
     const [outputDeviceInfo, inputDeviceInfo] = await Promise.all([getDeviceInfo(true), getDeviceInfo(false)]);
