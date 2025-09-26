@@ -78,9 +78,10 @@
   ],
   "commands": [
     {
-      "name": "search-domains",
-      "title": "Search Domains",
-      "description": "",
+      "name": "manage-domains",
+      "title": "Manage Domains",
+        "subtitle": "OVHcloud",
+"description": "",
       "mode": "view"
     }
   ],

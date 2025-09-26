@@ -1,6 +1,7 @@
 export type Domain = {
   domain: string
   dnssecState: "disabled"|"enabled"|"not_supported";
+  nameServerType: "anycast"|"dedicated"|"empty"|"external"|"hold"|"hosted"|"hosting"|"mixed"|"parking"
   nameServers: Array<{nameServer: string}>
   renewalDate: string;
   renewalState: "automatic_renew"|"cancellation_complete"|"cancellation_requested"|"manual_renew"|"unpaid"
