@@ -53,10 +53,7 @@ export default function ListDevices() {
     ]);
 
     // Get existing priority lists (don't auto-add missing devices here)
-    let [outputPriorityList, inputPriorityList] = await Promise.all([
-      getOutputPriorityList(),
-      getInputPriorityList(),
-    ]);
+    let [outputPriorityList, inputPriorityList] = await Promise.all([getOutputPriorityList(), getInputPriorityList()]);
 
     // Get stored device info for transport types of disconnected devices
     const [outputDeviceInfo, inputDeviceInfo] = await Promise.all([getDeviceInfo(true), getDeviceInfo(false)]);
@@ -86,7 +83,7 @@ export default function ListDevices() {
         prioritizedDevices.push(currentOutputDevice.name);
       }
       // Add remaining devices that aren't the current one
-      outputDevicesWithTransport.forEach(device => {
+      outputDevicesWithTransport.forEach((device) => {
         if (!prioritizedDevices.includes(device.name)) {
           prioritizedDevices.push(device.name);
         }
@@ -102,7 +99,7 @@ export default function ListDevices() {
         prioritizedDevices.push(currentInputDevice.name);
       }
       // Add remaining devices that aren't the current one
-      inputDevicesWithTransport.forEach(device => {
+      inputDevicesWithTransport.forEach((device) => {
         if (!prioritizedDevices.includes(device.name)) {
           prioritizedDevices.push(device.name);
         }
