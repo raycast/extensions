@@ -141,10 +141,7 @@ export default function LiverpoolCommand() {
         accessories={next?.utcDate ? [{ text: formatManila(next.utcDate) }] : []}
         actions={
           <ActionPanel>
-            <Action
-              title="Open Next Match"
-              onAction={() => push(<NextMatchDetail data={state.data ?? undefined} />)}
-            />
+            <Action title="Open Next Match" onAction={() => push(<NextMatchDetail data={state.data ?? undefined} />)} />
             <Action
               title="Refresh Data"
               icon={Icon.ArrowClockwise}
@@ -165,10 +162,7 @@ export default function LiverpoolCommand() {
         }
         actions={
           <ActionPanel>
-            <Action
-              title="Open Fixtures"
-              onAction={() => push(<FixturesList data={state.data} />)}
-            />
+            <Action title="Open Fixtures" onAction={() => push(<FixturesList data={state.data} />)} />
             <Action
               title="Refresh Data"
               icon={Icon.ArrowClockwise}
@@ -248,10 +242,8 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
         // 2) Football-data fallbacks (PL + UCL group + ENG comps)
         if (prefs.footballDataKey) {
           const needByNorm: Record<string, "home" | "away"> = {};
-          if (!updates.homeBadge && !m.homeBadge)
-            needByNorm[normalizeTeamName(m.homeTeam)] = "home";
-          if (!updates.awayBadge && !m.awayBadge)
-            needByNorm[normalizeTeamName(m.awayTeam)] = "away";
+          if (!updates.homeBadge && !m.homeBadge) needByNorm[normalizeTeamName(m.homeTeam)] = "home";
+          if (!updates.awayBadge && !m.awayBadge) needByNorm[normalizeTeamName(m.awayTeam)] = "away";
           if (Object.keys(needByNorm).length) {
             try {
               const rows = await fetchPLStandings(prefs);
@@ -268,12 +260,7 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
               }
             } catch {}
             try {
-              const compMap = await getFDCrestsForCompetitions(prefs.footballDataKey!, [
-                "ELC",
-                "FAC",
-                "EL1",
-                "EL2",
-              ]);
+              const compMap = await getFDCrestsForCompetitions(prefs.footballDataKey!, ["ELC", "FAC", "EL1", "EL2"]);
               for (const [team, crest] of Object.entries(compMap)) {
                 const side = needByNorm[normalizeTeamName(team)];
                 if (side && crest) updates[side === "home" ? "homeBadge" : "awayBadge"] = crest;
@@ -293,9 +280,7 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
         }
 
         if (updates.homeBadge || updates.awayBadge) {
-          setLocal((prev) =>
-            prev ? { ...prev, next: { ...(prev.next as NextMatch), ...updates } } : prev,
-          );
+          setLocal((prev) => (prev ? { ...prev, next: { ...(prev.next as NextMatch), ...updates } } : prev));
         }
       } catch {
         // ignore
@@ -501,9 +486,7 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
   }, [items.length, prefs.footballDataKey]);
 
   // Build filters & grouping
-  const uniqueComps = Array.from(
-    new Set(items.map((i) => i.competition).filter(Boolean)),
-  ) as string[];
+  const uniqueComps = Array.from(new Set(items.map((i) => i.competition).filter(Boolean))) as string[];
   const filtered = items.filter((m) => {
     if (compFilter !== "ALL" && (m.competition || "") !== compFilter) return false;
     if (haFilter !== "ALL" && (m.isHome ? "H" : "A") !== haFilter) return false;
@@ -517,12 +500,7 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
   const compKey = (m: NextMatch) => m.competition || "Other";
   const grouped = new Map<string, NextMatch[]>();
   for (const m of filtered) {
-    const k =
-      groupBy === "competition"
-        ? compKey(m)
-        : groupBy === "month"
-          ? monthKey(m.utcDate)
-          : "All Fixtures";
+    const k = groupBy === "competition" ? compKey(m) : groupBy === "month" ? monthKey(m.utcDate) : "All Fixtures";
     if (!grouped.has(k)) grouped.set(k, []);
     grouped.get(k)!.push(m);
   }
@@ -559,11 +537,7 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
             const directBadge = (m.isHome ? m.awayBadge : m.homeBadge) ?? null;
             const storedBadge = badges[opponent] || null;
             const badgeUrl = directBadge || storedBadge;
-            const iconSource = badgeUrl
-              ? { source: badgeUrl }
-              : m.isHome
-                ? Icon.House
-                : Icon.Airplane;
+            const iconSource = badgeUrl ? { source: badgeUrl } : m.isHome ? Icon.House : Icon.Airplane;
             return (
               <List.Item
                 key={`${title}-${idx}`}
@@ -615,9 +589,7 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
 
 function NewsList() {
   const [loading, setLoading] = useState(true);
-  const [items, setItems] = useState<
-    Array<{ title: string; link: string; date?: string; source?: string }>
-  >([]);
+  const [items, setItems] = useState<Array<{ title: string; link: string; date?: string; source?: string }>>([]);
   useEffect(() => {
     (async () => {
       try {
@@ -638,10 +610,9 @@ function NewsList() {
           icon={NEWS_ICON}
           title={n.title}
           accessories={
-            [
-              n.source ? { tag: n.source } : undefined,
-              n.date ? { date: new Date(n.date) } : undefined,
-            ].filter(Boolean) as any
+            [n.source ? { tag: n.source } : undefined, n.date ? { date: new Date(n.date) } : undefined].filter(
+              Boolean,
+            ) as any
           }
           actions={
             <ActionPanel>
@@ -767,18 +738,12 @@ function PLTableDetail() {
 
         return (
           <>
-            <List.Section title="Champions League (Top 4)">
-              {top4.map((r) => renderItem(r))}
-            </List.Section>
+            <List.Section title="Champions League (Top 4)">{top4.map((r) => renderItem(r))}</List.Section>
             {europa.length > 0 && (
-              <List.Section title="Europa League (5th)">
-                {europa.map((r) => renderItem(r))}
-              </List.Section>
+              <List.Section title="Europa League (5th)">{europa.map((r) => renderItem(r))}</List.Section>
             )}
             <List.Section title="Table">{middle.map((r) => renderItem(r))}</List.Section>
-            {bottom.length > 0 && (
-              <List.Section title="Bottom 3">{bottom.map((r) => renderItem(r))}</List.Section>
-            )}
+            {bottom.length > 0 && <List.Section title="Bottom 3">{bottom.map((r) => renderItem(r))}</List.Section>}
           </>
         );
       })()}
@@ -864,12 +829,7 @@ function UCLTableDetail() {
             {
               tag: {
                 value: `Pts ${r.pts}`,
-                color:
-                  r.position <= 8
-                    ? Color.Green
-                    : r.position >= 25
-                      ? Color.Red
-                      : Color.SecondaryText,
+                color: r.position <= 8 ? Color.Green : r.position >= 25 ? Color.Red : Color.SecondaryText,
               },
             },
           ];
@@ -902,9 +862,7 @@ function UCLTableDetail() {
           <>
             <List.Section title="Top 8">{top.map(renderItem)}</List.Section>
             {mid.length > 0 && <List.Section title="Playoff">{mid.map(renderItem)}</List.Section>}
-            {bottom.length > 0 && (
-              <List.Section title="Elimination Zone">{bottom.map(renderItem)}</List.Section>
-            )}
+            {bottom.length > 0 && <List.Section title="Elimination Zone">{bottom.map(renderItem)}</List.Section>}
           </>
         );
       })()}
@@ -939,10 +897,9 @@ async function fetchMatches(prefs: Preferences, force = false): Promise<MatchesD
     if (!fd && sdb) {
       // Try to merge with cached football-data (non-force) to avoid shrinking the list
       try {
-        const fdCached = await withCache(
-          () => fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey),
-          { maxAge: 5 * 60 * 1000 },
-        )();
+        const fdCached = await withCache(() => fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey), {
+          maxAge: 5 * 60 * 1000,
+        })();
         if (fdCached) {
           const merged = mergeUpcoming(
             fdCached.next ?? null,
@@ -961,12 +918,7 @@ async function fetchMatches(prefs: Preferences, force = false): Promise<MatchesD
     if (!fd && !sdb) throw new Error("Failed to load fixtures from both sources");
 
     // Merge upcoming fixtures from both sources; prefer football-data entries where duplicates exist.
-    const merged = mergeUpcoming(
-      fd!.next ?? null,
-      fd!.upcoming ?? [],
-      sdb!.next ?? null,
-      sdb!.upcoming ?? [],
-    );
+    const merged = mergeUpcoming(fd!.next ?? null, fd!.upcoming ?? [], sdb!.next ?? null, sdb!.upcoming ?? []);
 
     // Choose last match preferring football-data, falling back to TheSportsDB.
     const last = fd!.last ?? sdb!.last ?? null;
@@ -1052,14 +1004,8 @@ async function fetchFromFootballData(apiKey: string, sportsDbKey?: string): Prom
     awayTeam: m.awayTeam?.name ?? "",
     venue: null,
     city: null,
-    homeBadge:
-      (m.homeTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) ||
-      m.homeTeam?.crest ||
-      null,
-    awayBadge:
-      (m.awayTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) ||
-      m.awayTeam?.crest ||
-      null,
+    homeBadge: (m.homeTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) || m.homeTeam?.crest || null,
+    awayBadge: (m.awayTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) || m.awayTeam?.crest || null,
     status: m.status ?? null,
   }));
 
@@ -1163,12 +1109,8 @@ async function fetchFromTheSportsDB(apiKey?: string): Promise<MatchesData> {
   const listWithoutHero = next ? upcomingAll.slice(1, 6) : upcomingAll.slice(0, 5);
   if (next) {
     const [hb, ab] = await Promise.all([
-      /liverpool/i.test(next.homeTeam)
-        ? Promise.resolve(LFC_LOCAL_CREST_LIST)
-        : getTeamBadge(next.homeTeam, apiKey),
-      /liverpool/i.test(next.awayTeam)
-        ? Promise.resolve(LFC_LOCAL_CREST_LIST)
-        : getTeamBadge(next.awayTeam, apiKey),
+      /liverpool/i.test(next.homeTeam) ? Promise.resolve(LFC_LOCAL_CREST_LIST) : getTeamBadge(next.homeTeam, apiKey),
+      /liverpool/i.test(next.awayTeam) ? Promise.resolve(LFC_LOCAL_CREST_LIST) : getTeamBadge(next.awayTeam, apiKey),
     ]);
     next.homeBadge = hb || next.homeBadge || null;
     next.awayBadge = ab || next.awayBadge || null;
@@ -1177,9 +1119,7 @@ async function fetchFromTheSportsDB(apiKey?: string): Promise<MatchesData> {
   const lastEvent = (lastJson.results || []).filter(Boolean)[0];
   const last: LastMatch | null = lastEvent
     ? {
-        utcDate:
-          toISO(lastEvent.strTimestamp) ||
-          combineDateTimeToUTC(lastEvent.dateEvent, lastEvent.strTime),
+        utcDate: toISO(lastEvent.strTimestamp) || combineDateTimeToUTC(lastEvent.dateEvent, lastEvent.strTime),
         competition: lastEvent.strLeague || lastEvent.strLeagueShort || null,
         isHome: (lastEvent.strHomeTeam || "").toLowerCase() === LFC_NAME.toLowerCase(),
         homeTeam: lastEvent.strHomeTeam || "",
@@ -1286,17 +1226,13 @@ function buildMarkdown(
     const venueCity = displayVenueCity(next);
     const venueLine = venueCity ? `\n_${escapeMd(venueCity)}_` : "";
     // Hero with crests side-by-side (markdown inline images) + names below
-    const leftCrest = /liverpool/i.test(next.homeTeam)
-      ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO
-      : null;
+    const leftCrest = /liverpool/i.test(next.homeTeam) ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO : null;
     const leftImg = leftCrest
       ? `![H](${leftCrest}?raycast-height=72)`
       : next.homeBadge
         ? `![H](${next.homeBadge}?raycast-height=72)`
         : "🔴";
-    const rightCrest = /liverpool/i.test(next.awayTeam)
-      ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO
-      : null;
+    const rightCrest = /liverpool/i.test(next.awayTeam) ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO : null;
     const rightImg = rightCrest
       ? `![A](${rightCrest}?raycast-height=72)`
       : next.awayBadge
@@ -1350,14 +1286,9 @@ function formatTime(iso: string, timezone: string = "Asia/Manila"): string {
     const nowParts = getLocalDateParts(new Date(), timezone);
     let prefix: string | null = null;
     if (
-      [
-        eventParts.year,
-        eventParts.month,
-        eventParts.day,
-        nowParts.year,
-        nowParts.month,
-        nowParts.day,
-      ].every((n) => Number.isFinite(n))
+      [eventParts.year, eventParts.month, eventParts.day, nowParts.year, nowParts.month, nowParts.day].every((n) =>
+        Number.isFinite(n),
+      )
     ) {
       const millisPerDay = 24 * 60 * 60 * 1000;
       const eventDayValue = Date.UTC(eventParts.year, eventParts.month - 1, eventParts.day);
@@ -1383,8 +1314,7 @@ function formatTime(iso: string, timezone: string = "Asia/Manila"): string {
         .formatToParts(eventDate)
         .find((part) => part.type === "timeZoneName")?.value || "";
 
-    const dayLabel =
-      prefix ?? `${dayFormatter.format(eventDate)}, ${dateFormatter.format(eventDate)}`;
+    const dayLabel = prefix ?? `${dayFormatter.format(eventDate)}, ${dateFormatter.format(eventDate)}`;
     return `${dayLabel} · ${time} ${tzName}`;
   } catch {
     return "TBD";
@@ -1396,10 +1326,7 @@ function formatManila(iso: string): string {
   return formatTime(iso, "Asia/Manila");
 }
 
-function getLocalDateParts(
-  date: Date,
-  timezone: string,
-): { year: number; month: number; day: number } {
+function getLocalDateParts(date: Date, timezone: string): { year: number; month: number; day: number } {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
     year: "numeric",
@@ -1498,12 +1425,9 @@ async function getTeamBadge(teamName: string, sportsDbKey?: string): Promise<str
   const base = teamName || "";
   const candidates = Array.from(
     new Set(
-      [
-        base,
-        norm(base),
-        mapSyn[norm(base).toLowerCase()] || "",
-        norm(base).replace(/madrid$/i, "madrid"),
-      ].filter(Boolean),
+      [base, norm(base), mapSyn[norm(base).toLowerCase()] || "", norm(base).replace(/madrid$/i, "madrid")].filter(
+        Boolean,
+      ),
     ),
   );
   for (const cand of candidates) {
@@ -1532,16 +1456,12 @@ async function getTeamBadge(teamName: string, sportsDbKey?: string): Promise<str
 
 // Cache football-data team lists (by competition)
 const fdTeamsByCompCache = new Map<string, Array<{ name: string; crest: string | null }>>();
-async function getFDCrestsForCompetitions(
-  apiKey: string,
-  codes: string[],
-): Promise<Record<string, string | null>> {
+async function getFDCrestsForCompetitions(apiKey: string, codes: string[]): Promise<Record<string, string | null>> {
   const headers = { "X-Auth-Token": apiKey };
   const map: Record<string, string | null> = {};
   for (const code of codes) {
     try {
-      let teamsArr: Array<{ name: string; crest: string | null }> | null =
-        fdTeamsByCompCache.get(code) ?? null;
+      let teamsArr: Array<{ name: string; crest: string | null }> | null = fdTeamsByCompCache.get(code) ?? null;
       if (!teamsArr) {
         const res = await fetch(`https://api.football-data.org/v4/competitions/${code}/teams`, {
           headers,
@@ -1578,27 +1498,16 @@ function buildMetadata(
       {next ? (
         <>
           <Detail.Metadata.Label title="Next Match" text="" />
-          <Detail.Metadata.Label
-            title="Kickoff (Manila)"
-            text={next.utcDate ? formatManila(next.utcDate) : "TBD"}
-          />
-          {displayVenueCity(next) ? (
-            <Detail.Metadata.Label title="Venue" text={displayVenueCity(next)} />
-          ) : null}
+          <Detail.Metadata.Label title="Kickoff (Manila)" text={next.utcDate ? formatManila(next.utcDate) : "TBD"} />
+          {displayVenueCity(next) ? <Detail.Metadata.Label title="Venue" text={displayVenueCity(next)} /> : null}
           {next.utcDate ? (
             <Detail.Metadata.TagList title="Countdown">
-              <Detail.Metadata.TagList.Item
-                text={formatCountdown(next.utcDate)}
-                color={countdownColor(next.utcDate)}
-              />
+              <Detail.Metadata.TagList.Item text={formatCountdown(next.utcDate)} color={countdownColor(next.utcDate)} />
             </Detail.Metadata.TagList>
           ) : null}
           {next.competition ? (
             <Detail.Metadata.TagList title="Competition">
-              <Detail.Metadata.TagList.Item
-                text={next.competition}
-                color={competitionColor(next.competition)}
-              />
+              <Detail.Metadata.TagList.Item text={next.competition} color={competitionColor(next.competition)} />
             </Detail.Metadata.TagList>
           ) : null}
           <Detail.Metadata.TagList title="Home/Away">
@@ -1622,15 +1531,9 @@ function buildMetadata(
             />,
             <Detail.Metadata.TagList key={`u-${i}-tags`} title="Tags">
               {m.competition ? (
-                <Detail.Metadata.TagList.Item
-                  text={m.competition}
-                  color={competitionColor(m.competition)}
-                />
+                <Detail.Metadata.TagList.Item text={m.competition} color={competitionColor(m.competition)} />
               ) : null}
-              <Detail.Metadata.TagList.Item
-                text={m.isHome ? "H" : "A"}
-                color={m.isHome ? Color.Green : Color.Red}
-              />
+              <Detail.Metadata.TagList.Item text={m.isHome ? "H" : "A"} color={m.isHome ? Color.Green : Color.Red} />
             </Detail.Metadata.TagList>,
           ])}
           <Detail.Metadata.Separator />
@@ -1641,10 +1544,7 @@ function buildMetadata(
         <>
           <Detail.Metadata.Label title="Last Match" text="" />
           <Detail.Metadata.Label title="Result" text={formatLastTitle(last)} />
-          <Detail.Metadata.Label
-            title="Date (Manila)"
-            text={last.utcDate ? formatManila(last.utcDate) : ""}
-          />
+          <Detail.Metadata.Label title="Date (Manila)" text={last.utcDate ? formatManila(last.utcDate) : ""} />
           {last.competition ? (
             <Detail.Metadata.TagList title="Competition">
               <Detail.Metadata.TagList.Item text={last.competition} color={Color.Orange} />
@@ -1659,11 +1559,7 @@ function buildMetadata(
         <Detail.Metadata.TagList title="Source">
           <Detail.Metadata.TagList.Item
             text={
-              source === "football-data"
-                ? "football-data.org"
-                : source === "thesportsdb"
-                  ? "TheSportsDB"
-                  : "Combined"
+              source === "football-data" ? "football-data.org" : source === "thesportsdb" ? "TheSportsDB" : "Combined"
             }
             color={Color.SecondaryText}
           />
@@ -1681,8 +1577,7 @@ function resultTag(last: LastMatch | null) {
   const lfcScored = last.isHome ? hs : as;
   const oppScored = last.isHome ? as : hs;
   const outcome = lfcScored > oppScored ? "Win" : lfcScored < oppScored ? "Loss" : "Draw";
-  const color =
-    outcome === "Win" ? Color.Green : outcome === "Loss" ? Color.Red : Color.SecondaryText;
+  const color = outcome === "Win" ? Color.Green : outcome === "Loss" ? Color.Red : Color.SecondaryText;
   return (
     <Detail.Metadata.TagList title="Result">
       <Detail.Metadata.TagList.Item text={outcome} color={color} />
@@ -1793,10 +1688,7 @@ async function fetchPLStandingsFD(apiKey: string): Promise<StandingRow[]> {
   }));
 }
 
-async function fetchUCLGroup(
-  prefs: Preferences,
-  force = false,
-): Promise<{ name: string; rows: StandingRow[] }> {
+async function fetchUCLGroup(prefs: Preferences, force = false): Promise<{ name: string; rows: StandingRow[] }> {
   if (!prefs.footballDataKey) throw new Error("Set football-data.org API key in preferences");
   const loader = async () => fetchUCLGroupFD(prefs.footballDataKey!);
   return force ? await loader() : await withCache(loader, { maxAge: 5 * 60 * 1000 })();
@@ -1810,9 +1702,7 @@ async function fetchUCLGroupFD(apiKey: string): Promise<{ name: string; rows: St
   if (!res.ok) throw new Error(`UCL standings ${res.status}`);
   const json: any = await res.json();
   const groups: any[] = (json.standings || []).filter((s: any) => s.type === "TOTAL");
-  const groupWithLFC = groups.find((g) =>
-    (g.table || []).some((r: any) => /liverpool/i.test(r.team?.name || "")),
-  );
+  const groupWithLFC = groups.find((g) => (g.table || []).some((r: any) => /liverpool/i.test(r.team?.name || "")));
   const sel = groupWithLFC || groups[0];
   const name = niceGroup(sel?.group || "Group");
   const rows: StandingRow[] = (sel?.table || []).map((r: any) => ({
@@ -1860,8 +1750,7 @@ function buildStandingsMarkdown(
   const midLabel = (opts?.midLabel || "Playoff").trim();
   const bottomIcon = (opts?.bottomIcon || "⬇️").trim();
   const topIcon = (opts?.topIcon || "⭐").trim();
-  const highlightFrom =
-    highlightBottom > 0 ? Math.max(1, rows.length - highlightBottom + 1) : Infinity;
+  const highlightFrom = highlightBottom > 0 ? Math.max(1, rows.length - highlightBottom + 1) : Infinity;
   const playoffStart = highlightTop > 0 ? highlightTop + 1 : Infinity;
 
   // Optional top section divider
@@ -1885,20 +1774,14 @@ function buildStandingsMarkdown(
     if (r.position === highlightFrom && isFinite(highlightFrom)) {
       parts.push(`|   | — ${bottomLabel} — |  |  |  |  |  |  |`);
     }
-    parts.push(
-      `| ${r.position} | ${teamCell} | ${r.played} | ${r.won} | ${r.draw} | ${r.lost} | ${r.gd} | ${r.pts} |`,
-    );
+    parts.push(`| ${r.position} | ${teamCell} | ${r.played} | ${r.won} | ${r.draw} | ${r.lost} | ${r.gd} | ${r.pts} |`);
   }
   if (highlightBottom > 0 || highlightTop > 0) {
     const notes: string[] = [];
     if (highlightTop > 0)
-      notes.push(
-        `${topIcon} indicates ${topLabel}${highlightTop ? ` (top ${highlightTop})` : ""}.`,
-      );
+      notes.push(`${topIcon} indicates ${topLabel}${highlightTop ? ` (top ${highlightTop})` : ""}.`);
     if (highlightBottom > 0)
-      notes.push(
-        `${bottomIcon} indicates ${bottomLabel}${highlightBottom ? ` (bottom ${highlightBottom})` : ""}.`,
-      );
+      notes.push(`${bottomIcon} indicates ${bottomLabel}${highlightBottom ? ` (bottom ${highlightBottom})` : ""}.`);
     parts.push("\nNote: " + notes.join(" "));
   }
   return parts.join("\n");
