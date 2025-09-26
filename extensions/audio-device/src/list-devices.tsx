@@ -118,15 +118,13 @@ export default function ListDevices() {
       });
 
       // Add any new available devices that aren't in priority list yet
+      let nextRank = priorityList.length + 1;
       availableDevices.forEach((device) => {
         const alreadyIncluded = devices.some((d) => d.name.toLowerCase() === device.name.toLowerCase());
         if (!alreadyIncluded) {
           devices.push({
             ...device,
-            priorityRank:
-              priorityList.length +
-              devices.filter((d) => !priorityList.some((p) => p.toLowerCase() === d.name.toLowerCase())).length +
-              1,
+            priorityRank: nextRank++,
             isAvailable: true,
             isCurrent: device.uid === currentDevice.uid,
           });
