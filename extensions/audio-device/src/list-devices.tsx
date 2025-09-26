@@ -58,17 +58,6 @@ export default function ListDevices() {
       getInputPriorityList(),
     ]);
 
-    // Auto-initialize priority lists if empty - set current active device as #1
-    if (outputPriorityList.length === 0 && currentOutputDevice) {
-      outputPriorityList = [currentOutputDevice.name];
-      await setOutputPriorityList(outputPriorityList);
-    }
-
-    if (inputPriorityList.length === 0 && currentInputDevice) {
-      inputPriorityList = [currentInputDevice.name];
-      await setInputPriorityList(inputPriorityList);
-    }
-
     // Get stored device info for transport types of disconnected devices
     const [outputDeviceInfo, inputDeviceInfo] = await Promise.all([getDeviceInfo(true), getDeviceInfo(false)]);
 
@@ -88,6 +77,39 @@ export default function ListDevices() {
       saveDeviceInfo(outputDevicesWithTransport, true),
       saveDeviceInfo(inputDevicesWithTransport, false),
     ]);
+
+    // Auto-initialize priority lists if empty - rank all available devices with current active device as #1
+    if (outputPriorityList.length === 0 && outputDevicesWithTransport.length > 0) {
+      // Start with current active device, then add others
+      const prioritizedDevices: string[] = [];
+      if (currentOutputDevice) {
+        prioritizedDevices.push(currentOutputDevice.name);
+      }
+      // Add remaining devices that aren't the current one
+      outputDevicesWithTransport.forEach(device => {
+        if (!prioritizedDevices.includes(device.name)) {
+          prioritizedDevices.push(device.name);
+        }
+      });
+      outputPriorityList = prioritizedDevices;
+      await setOutputPriorityList(outputPriorityList);
+    }
+
+    if (inputPriorityList.length === 0 && inputDevicesWithTransport.length > 0) {
+      // Start with current active device, then add others
+      const prioritizedDevices: string[] = [];
+      if (currentInputDevice) {
+        prioritizedDevices.push(currentInputDevice.name);
+      }
+      // Add remaining devices that aren't the current one
+      inputDevicesWithTransport.forEach(device => {
+        if (!prioritizedDevices.includes(device.name)) {
+          prioritizedDevices.push(device.name);
+        }
+      });
+      inputPriorityList = prioritizedDevices;
+      await setInputPriorityList(inputPriorityList);
+    }
 
     // Create full device lists including unavailable devices from priority lists
     const createFullDeviceList = (
