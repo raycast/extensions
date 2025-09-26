@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [New commands] - 2025-09-26
+## [Update] - 2025-09-26
 
 - Added "List Devices" command to view all available input and output audio devices
 - Added "Priority Monitor" command for automatic device switching based on priority
