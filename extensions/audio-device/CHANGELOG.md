@@ -1,5 +1,11 @@
 # Audio Device Changelog
 
+## [New commands] - 2025-09-26
+
+- Added "List Devices" command to view all available input and output audio devices
+- Added "Priority Monitor" command for automatic device switching based on priority
+- Added "Enable Automatic Priority Switching" preference for priority-based switching
+
 ## [Fix] - 2025-09-11
 
 - Remove problematic "airplay support" toggle
