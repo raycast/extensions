@@ -74,6 +74,7 @@ const LFC_LOCAL_CREST_LIST = assetPath("liverpool-crest-32.png") || LFC_LOCAL_CR
 const LFC_LOCAL_CREST_HERO = assetPath("liverpool-crest-72.png") || LFC_LOCAL_CREST_BASE;
 const LFC_LOCAL_CREST_LIST_2X = assetPath("liverpool-crest-64.png") || LFC_LOCAL_CREST_LIST;
 const LFC_LOCAL_CREST_HERO_2X = assetPath("liverpool-crest-144.png") || LFC_LOCAL_CREST_HERO;
+const NEWS_ICON = Icon.Globe; // Icon.Newspaper is not defined in @raycast/api types
 
 const EPL_COLOR = Color.Purple;
 const UCL_COLOR: Color.ColorLike = {
@@ -632,7 +633,7 @@ function NewsList() {
       {items.map((n, idx) => (
         <List.Item
           key={idx}
-          icon={Icon.Globe}
+          icon={NEWS_ICON}
           title={n.title}
           accessories={
             [
