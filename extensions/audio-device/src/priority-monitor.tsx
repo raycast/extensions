@@ -49,7 +49,7 @@ export default async function PriorityMonitor() {
     ]);
 
     const resolvedResults = results.map((result) => (result.status === "fulfilled" ? result.value : null));
-    
+
     // Type-safe destructuring with explicit casting
     const outputDevices = resolvedResults[0] as any[] | null;
     const inputDevices = resolvedResults[1] as any[] | null;
