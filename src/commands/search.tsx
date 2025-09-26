@@ -4,26 +4,29 @@ import { useClientManager } from "../contexts/clientManagerContext";
 import { DBSoundTile } from "../types";
 import { getTileColorByIndex } from "../utils/helpers";
 
-type SearchCommandProps = { initialSearchText?: string };
-
-export function SearchCommand({ initialSearchText }: SearchCommandProps) {
+export function SearchCommand() {
   const { cm, latestDbUpdate } = useClientManager();
+  const [gridFilter, setGridFilter] = useState<string>("");
 
-  const allTiles = useMemo(() => {
-    return cm?.getAllTiles();
-  }, [latestDbUpdate]);
+  const tiles = useMemo(() => {
+    const allTiles = cm?.getAllTiles();
 
-  if (!cm || !allTiles) {
+    if (!gridFilter) return allTiles;
+
+    return allTiles?.filter((t) => t.setUuid === gridFilter);
+  }, [latestDbUpdate, gridFilter]);
+
+  if (!cm || !tiles) {
     return <List isLoading={true} />;
   }
 
-  if (!allTiles.length) {
+  if (!tiles.length) {
     return <Detail markdown="## No tiles found" />;
   }
 
   return (
-    <List searchText={initialSearchText} isLoading={!allTiles}>
-      {allTiles.map((tile) => (
+    <List isLoading={!tiles} searchBarAccessory={<FilterBySetDropdown value={gridFilter} onChange={setGridFilter} />}>
+      {tiles.map((tile) => (
         <TileListItem key={tile.tileUUID} tile={tile} latestDbUpdate={latestDbUpdate} />
       ))}
     </List>
@@ -138,3 +141,28 @@ const TileListItem = React.memo(
   },
   (a, b) => a.latestDbUpdate === b.latestDbUpdate,
 );
+
+type FilterBySetDropdownProps = Pick<List.Dropdown.Props, "value" | "onChange">;
+export function FilterBySetDropdown({ value, onChange }: FilterBySetDropdownProps) {
+  const { cm, latestDbUpdate } = useClientManager();
+  if (!cm) throw new Error(`Client manager instance always expected in FilterBySetDropdown`);
+
+  const sets = useMemo(() => {
+    const allSets = cm.getAllSets();
+
+    if (value && !allSets.find((s) => s.uuid === value)) {
+      onChange?.("");
+    }
+
+    return allSets;
+  }, [latestDbUpdate]);
+
+  return (
+    <List.Dropdown tooltip="Filter by Set" value={value} onChange={onChange}>
+      <List.Dropdown.Item title="All Sets" value="" icon={Icon.List} />
+      {sets.map((set) => (
+        <List.Dropdown.Item key={set.uuid} title={set.title} value={set.uuid} icon={Icon.Folder} />
+      ))}
+    </List.Dropdown>
+  );
+}

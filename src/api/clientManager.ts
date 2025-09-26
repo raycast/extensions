@@ -73,6 +73,10 @@ export class ClientManager {
     return [...this.dataGetter.db.tiles.values()];
   }
 
+  getAllSets() {
+    return [...this.dataGetter.db.sets.values()];
+  }
+
   // osc actions
 
   playStopTile(tile: DBSoundTile) {
