@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.1.1 - 2025-09-26
-- Fix Raycast type-check failure by replacing the unsupported `Icon.Newspaper` with a supported icon for news items.
-- Document the patch release to satisfy the Raycast changelog requirement.
+## [Fix Raycast publish failure] - {PR_MERGE_DATE}
+- v0.1.1
+- Replace the unsupported `Icon.Newspaper` usage to restore TypeScript validation and unblock Raycast publish.
+- Document the fix in the changelog so the Raycast validator finds the latest entry.
 
-## 0.1.0 - 2025-09-19
-- Initial release of the Liverpool FC Raycast extension.
+## [Initial release] - 2025-09-19
+- v0.1.0
 - Shows upcoming fixtures, relative kickoff labels (Today/Tonight/Tomorrow), and detailed standings.
 - Includes news feed integration and crest caching improvements.

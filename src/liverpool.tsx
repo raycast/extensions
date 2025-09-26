@@ -248,8 +248,10 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
         // 2) Football-data fallbacks (PL + UCL group + ENG comps)
         if (prefs.footballDataKey) {
           const needByNorm: Record<string, "home" | "away"> = {};
-          if (!updates.homeBadge && !m.homeBadge) needByNorm[normalizeTeamName(m.homeTeam)] = "home";
-          if (!updates.awayBadge && !m.awayBadge) needByNorm[normalizeTeamName(m.awayTeam)] = "away";
+          if (!updates.homeBadge && !m.homeBadge)
+            needByNorm[normalizeTeamName(m.homeTeam)] = "home";
+          if (!updates.awayBadge && !m.awayBadge)
+            needByNorm[normalizeTeamName(m.awayTeam)] = "away";
           if (Object.keys(needByNorm).length) {
             try {
               const rows = await fetchPLStandings(prefs);
@@ -917,10 +919,9 @@ async function fetchMatches(prefs: Preferences, force = false): Promise<MatchesD
     const fdLoader = async () =>
       force
         ? await fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey)
-        : await withCache(
-            () => fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey),
-            { maxAge: 5 * 60 * 1000 },
-          )();
+        : await withCache(() => fetchFromFootballData(prefs.footballDataKey!, prefs.sportsDbKey), {
+            maxAge: 5 * 60 * 1000,
+          })();
     const sdbLoader = async () =>
       force
         ? await fetchFromTheSportsDB(prefs.sportsDbKey)
@@ -960,7 +961,12 @@ async function fetchMatches(prefs: Preferences, force = false): Promise<MatchesD
     if (!fd && !sdb) throw new Error("Failed to load fixtures from both sources");
 
     // Merge upcoming fixtures from both sources; prefer football-data entries where duplicates exist.
-    const merged = mergeUpcoming(fd!.next ?? null, fd!.upcoming ?? [], sdb!.next ?? null, sdb!.upcoming ?? []);
+    const merged = mergeUpcoming(
+      fd!.next ?? null,
+      fd!.upcoming ?? [],
+      sdb!.next ?? null,
+      sdb!.upcoming ?? [],
+    );
 
     // Choose last match preferring football-data, falling back to TheSportsDB.
     const last = fd!.last ?? sdb!.last ?? null;
@@ -1047,9 +1053,13 @@ async function fetchFromFootballData(apiKey: string, sportsDbKey?: string): Prom
     venue: null,
     city: null,
     homeBadge:
-      (m.homeTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) || m.homeTeam?.crest || null,
+      (m.homeTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) ||
+      m.homeTeam?.crest ||
+      null,
     awayBadge:
-      (m.awayTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) || m.awayTeam?.crest || null,
+      (m.awayTeam?.id === LFC_FOOTBALLDATA_TEAM_ID ? LFC_LOCAL_CREST_LIST : null) ||
+      m.awayTeam?.crest ||
+      null,
     status: m.status ?? null,
   }));
 
@@ -1083,12 +1093,14 @@ async function fetchFromFootballData(apiKey: string, sportsDbKey?: string): Prom
   if (next) {
     // Fallback if crest missing from football-data (edge cases)
     if (!next.homeBadge) {
-      next.homeBadge =
-        /liverpool/i.test(next.homeTeam) ? LFC_LOCAL_CREST_LIST : await getTeamBadge(next.homeTeam, sportsDbKey);
+      next.homeBadge = /liverpool/i.test(next.homeTeam)
+        ? LFC_LOCAL_CREST_LIST
+        : await getTeamBadge(next.homeTeam, sportsDbKey);
     }
     if (!next.awayBadge) {
-      next.awayBadge =
-        /liverpool/i.test(next.awayTeam) ? LFC_LOCAL_CREST_LIST : await getTeamBadge(next.awayTeam, sportsDbKey);
+      next.awayBadge = /liverpool/i.test(next.awayTeam)
+        ? LFC_LOCAL_CREST_LIST
+        : await getTeamBadge(next.awayTeam, sportsDbKey);
     }
   }
   const listWithoutHero = next ? upcomingArr.slice(1) : upcomingArr;
@@ -1274,13 +1286,17 @@ function buildMarkdown(
     const venueCity = displayVenueCity(next);
     const venueLine = venueCity ? `\n_${escapeMd(venueCity)}_` : "";
     // Hero with crests side-by-side (markdown inline images) + names below
-    const leftCrest = /liverpool/i.test(next.homeTeam) ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO : null;
+    const leftCrest = /liverpool/i.test(next.homeTeam)
+      ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO
+      : null;
     const leftImg = leftCrest
       ? `![H](${leftCrest}?raycast-height=72)`
       : next.homeBadge
         ? `![H](${next.homeBadge}?raycast-height=72)`
         : "🔴";
-    const rightCrest = /liverpool/i.test(next.awayTeam) ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO : null;
+    const rightCrest = /liverpool/i.test(next.awayTeam)
+      ? LFC_LOCAL_CREST_HERO_2X || LFC_LOCAL_CREST_HERO
+      : null;
     const rightImg = rightCrest
       ? `![A](${rightCrest}?raycast-height=72)`
       : next.awayBadge
@@ -1532,7 +1548,10 @@ async function getFDCrestsForCompetitions(
         });
         if (!res.ok) throw new Error(String(res.status));
         const json: any = await res.json();
-        teamsArr = (json?.teams || []).map((t: any) => ({ name: t?.name || "", crest: t?.crest || null }));
+        teamsArr = (json?.teams || []).map((t: any) => ({
+          name: t?.name || "",
+          crest: t?.crest || null,
+        }));
         fdTeamsByCompCache.set(code, teamsArr!);
       }
       if (teamsArr) {
@@ -1762,10 +1781,9 @@ async function fetchPLStandingsFD(apiKey: string): Promise<StandingRow[]> {
   return table.map((r: any) => ({
     position: r.position,
     team: r.team?.name || "",
-    crest:
-      /liverpool/i.test(r.team?.name || "")
-        ? LFC_LOCAL_CREST_LIST_2X || LFC_LOCAL_CREST_LIST
-        : r.team?.crest || null,
+    crest: /liverpool/i.test(r.team?.name || "")
+      ? LFC_LOCAL_CREST_LIST_2X || LFC_LOCAL_CREST_LIST
+      : r.team?.crest || null,
     played: r.playedGames ?? r.played ?? 0,
     won: r.won ?? 0,
     draw: r.draw ?? 0,
@@ -1800,10 +1818,9 @@ async function fetchUCLGroupFD(apiKey: string): Promise<{ name: string; rows: St
   const rows: StandingRow[] = (sel?.table || []).map((r: any) => ({
     position: r.position,
     team: r.team?.name || "",
-    crest:
-      /liverpool/i.test(r.team?.name || "")
-        ? LFC_LOCAL_CREST_LIST_2X || LFC_LOCAL_CREST_LIST
-        : r.team?.crest || null,
+    crest: /liverpool/i.test(r.team?.name || "")
+      ? LFC_LOCAL_CREST_LIST_2X || LFC_LOCAL_CREST_LIST
+      : r.team?.crest || null,
     played: r.playedGames ?? r.played ?? 0,
     won: r.won ?? 0,
     draw: r.draw ?? 0,
