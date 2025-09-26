@@ -147,14 +147,16 @@ export default function ListDevices() {
         }
       });
 
-      // Add any new available devices that aren't in priority list yet
-      let nextRank = priorityList.length + 1;
+      // All available devices should already be in the priority list at this point
+      // Add any remaining available devices that might have been missed
       availableDevices.forEach((device) => {
         const alreadyIncluded = devices.some((d) => d.name.toLowerCase() === device.name.toLowerCase());
         if (!alreadyIncluded) {
+          // Find the rank from the priority list
+          const rankIndex = priorityList.findIndex((name) => name.toLowerCase() === device.name.toLowerCase());
           devices.push({
             ...device,
-            priorityRank: nextRank++,
+            priorityRank: rankIndex >= 0 ? rankIndex + 1 : priorityList.length + 1,
             isAvailable: true,
             isCurrent: device.uid === currentDevice.uid,
           });
@@ -163,6 +165,26 @@ export default function ListDevices() {
 
       return devices;
     };
+
+    // Add any new devices to priority lists before creating device lists
+    const newOutputDevices = outputDevicesWithTransport.filter(
+      (device) => !outputPriorityList.some((name) => name.toLowerCase() === device.name.toLowerCase()),
+    );
+    const newInputDevices = inputDevicesWithTransport.filter(
+      (device) => !inputPriorityList.some((name) => name.toLowerCase() === device.name.toLowerCase()),
+    );
+
+    if (newOutputDevices.length > 0) {
+      const updatedOutputPriorityList = [...outputPriorityList, ...newOutputDevices.map((d) => d.name)];
+      outputPriorityList = updatedOutputPriorityList;
+      await setOutputPriorityList(updatedOutputPriorityList);
+    }
+
+    if (newInputDevices.length > 0) {
+      const updatedInputPriorityList = [...inputPriorityList, ...newInputDevices.map((d) => d.name)];
+      inputPriorityList = updatedInputPriorityList;
+      await setInputPriorityList(updatedInputPriorityList);
+    }
 
     const processedOutputDevices = createFullDeviceList(
       outputDevicesWithTransport,
