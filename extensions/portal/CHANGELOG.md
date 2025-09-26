@@ -1,3 +1,3 @@
-# F&F Portal Changelog
+# Portal Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

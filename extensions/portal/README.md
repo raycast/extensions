@@ -1,3 +1,3 @@
-# F&F Portal
+# Portal
 
 Easily access quick functions from Raycast.

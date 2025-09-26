@@ -46,18 +46,12 @@ export default function Command() {
     const s = q.trim().toLowerCase();
     if (!s) return TARGETS;
     return TARGETS.filter((t) =>
-      [t.title, t.subtitle, t.url, ...t.keywords].some((v) =>
-        (v || "").toLowerCase().includes(s),
-      ),
+      [t.title, t.subtitle, t.url, ...t.keywords].some((v) => (v || "").toLowerCase().includes(s)),
     );
   }, [q]);
 
   return (
-    <List
-      searchBarPlaceholder="Search what to open…"
-      onSearchTextChange={setQ}
-      throttle
-    >
+    <List searchBarPlaceholder="Search what to open…" onSearchTextChange={setQ} throttle>
       {data.map((t) => (
         <List.Item
           key={t.id}
@@ -66,10 +60,7 @@ export default function Command() {
           accessories={[{ text: t.url }]}
           actions={
             <ActionPanel>
-              <Action
-                title="Open in Chrome"
-                onAction={() => open(t.url, "com.google.Chrome")}
-              />
+              <Action title="Open in Chrome" onAction={() => open(t.url, "com.google.Chrome")} />
             </ActionPanel>
           }
         />

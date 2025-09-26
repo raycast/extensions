@@ -202,12 +202,9 @@ function renderDetail(raw: PassportRow) {
 
   const headerLine = position ? `# ${name} ${position}` : `# ${name}`;
 
-  const header = [headerLine, dept ? `_${dept}_` : "", ""]
-    .filter(Boolean)
-    .join("\n");
+  const header = [headerLine, dept ? `_${dept}_` : "", ""].filter(Boolean).join("\n");
 
-  const row = (label: string, value?: string | null) =>
-    value ? `${label}: ${value}  \n` : "";
+  const row = (label: string, value?: string | null) => (value ? `${label}: ${value}  \n` : "");
   const section = (title: string, lines: string[]) => {
     const body = lines.filter(Boolean).join("");
     return body ? `##### ${title}\n\n${body}\n` : "";
@@ -334,11 +331,7 @@ export default function Command(props: { arguments: { keyword?: string } }) {
             actions={
               <ActionPanel>
                 {d.email && (
-                  <Action.OpenInBrowser
-                    title="Chat in Teams"
-                    url={tLink}
-                    shortcut={Keyboard.Shortcut.Common.Open}
-                  />
+                  <Action.OpenInBrowser title="Chat in Teams" url={tLink} shortcut={Keyboard.Shortcut.Common.Open} />
                 )}
                 {d.email && (
                   <Action
@@ -350,16 +343,8 @@ export default function Command(props: { arguments: { keyword?: string } }) {
                 )}
                 {d.email && (
                   <ActionPanel.Section title="Links">
-                    <Action
-                      title="Copy Slack Deeplink"
-                      icon={Icon.Link}
-                      onAction={() => copySlackLink(d.email)}
-                    />
-                    <Action
-                      title="Copy Teams Deeplink"
-                      icon={Icon.Link}
-                      onAction={() => copyTeamsLink(d.email)}
-                    />
+                    <Action title="Copy Slack Deeplink" icon={Icon.Link} onAction={() => copySlackLink(d.email)} />
+                    <Action title="Copy Teams Deeplink" icon={Icon.Link} onAction={() => copyTeamsLink(d.email)} />
                   </ActionPanel.Section>
                 )}
                 <ActionPanel.Section title="Data">

@@ -22,11 +22,7 @@ type Bookmark = {
   createdAt: string;
 };
 
-const STORAGE_PATH = path.join(
-  process.env.HOME ?? "~",
-  ".raycast",
-  "bookmarklets.json",
-);
+const STORAGE_PATH = path.join(process.env.HOME ?? "~", ".raycast", "bookmarklets.json");
 
 function ensureStorageDir() {
   const dir = path.dirname(STORAGE_PATH);
@@ -81,11 +77,7 @@ function sleep(ms: number) {
 
 function appRunning(app: string) {
   try {
-    const out = execFileSync(
-      "osascript",
-      ["-e", `application "${app}" is running`],
-      { encoding: "utf8" },
-    );
+    const out = execFileSync("osascript", ["-e", `application "${app}" is running`], { encoding: "utf8" });
     return out.toString().trim() === "true";
   } catch {
     return false;
@@ -131,9 +123,7 @@ async function runBookmarklet(jsSource: string) {
 }
 
 function sortByName(items: Bookmark[]) {
-  return [...items].sort((a, b) =>
-    a.name.localeCompare(b.name, "ko", { sensitivity: "base", numeric: true }),
-  );
+  return [...items].sort((a, b) => a.name.localeCompare(b.name, "ko", { sensitivity: "base", numeric: true }));
 }
 
 function makeId() {
@@ -187,11 +177,7 @@ export default function Command() {
           icon={Icon.Plus}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Add Bookmarklet"
-                icon={Icon.Plus}
-                target={<BookmarkForm onSave={addBookmark} />}
-              />
+              <Action.Push title="Add Bookmarklet" icon={Icon.Plus} target={<BookmarkForm onSave={addBookmark} />} />
             </ActionPanel>
           }
         />
@@ -214,24 +200,13 @@ export default function Command() {
                   title="Edit Bookmarklet"
                   icon={Icon.Pencil}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  target={
-                    <BookmarkForm
-                      bookmark={bm}
-                      onSave={updateBookmark}
-                      onDelete={() => deleteBookmark(bm.id)}
-                    />
-                  }
+                  target={<BookmarkForm bookmark={bm} onSave={updateBookmark} onDelete={() => deleteBookmark(bm.id)} />}
                 />
                 <Action.Push
                   title="Duplicate"
                   icon={Icon.CopyClipboard}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  target={
-                    <BookmarkForm
-                      bookmark={makeDuplicateDraft(bm)}
-                      onSave={addBookmark}
-                    />
-                  }
+                  target={<BookmarkForm bookmark={makeDuplicateDraft(bm)} onSave={addBookmark} />}
                 />
                 <Action
                   title="Delete"
@@ -246,10 +221,7 @@ export default function Command() {
                     if (ok) deleteBookmark(bm.id);
                   }}
                 />
-                <Action.CopyToClipboard
-                  title="Copy to Clipboard"
-                  content={bm.js}
-                />
+                <Action.CopyToClipboard title="Copy to Clipboard" content={bm.js} />
               </ActionPanel>
             }
           />
@@ -259,11 +231,7 @@ export default function Command() {
   );
 }
 
-function BookmarkForm(props: {
-  bookmark?: Bookmark;
-  onSave: (b: Bookmark) => void;
-  onDelete?: () => void;
-}) {
+function BookmarkForm(props: { bookmark?: Bookmark; onSave: (b: Bookmark) => void; onDelete?: () => void }) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { name?: string; js?: string }) {
@@ -275,10 +243,7 @@ function BookmarkForm(props: {
       createdAt: props.bookmark?.createdAt ?? now,
     };
     props.onSave(bm);
-    await showToast(
-      ToastStyle.Success,
-      props.bookmark ? "Bookmarklet saved" : "Bookmarklet created",
-    );
+    await showToast(ToastStyle.Success, props.bookmark ? "Bookmarklet saved" : "Bookmarklet created");
     pop();
   }
 
@@ -314,16 +279,8 @@ function BookmarkForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        defaultValue={props.bookmark?.name ?? ""}
-      />
-      <Form.TextArea
-        id="js"
-        title="Bookmarklet JS"
-        defaultValue={props.bookmark?.js ?? ""}
-      />
+      <Form.TextField id="name" title="Name" defaultValue={props.bookmark?.name ?? ""} />
+      <Form.TextArea id="js" title="Bookmarklet JS" defaultValue={props.bookmark?.js ?? ""} />
     </Form>
   );
 }
