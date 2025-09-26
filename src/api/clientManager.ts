@@ -75,18 +75,8 @@ export class ClientManager {
 
   // osc actions
 
-  playTile(tile: DBSoundTile) {
-    // todo: check if tile is already playing
-    this.oscClient.togglePlayTile(this.getTileCoordinates(tile));
-  }
-
-  playTileByUuid(tileUuid: string) {
-    const tile = this.dataGetter.getTileByUuid(tileUuid);
-    this.oscClient.togglePlayTile(this.getTileCoordinates(tile));
-  }
-
-  fadeAll() {
-    this.oscClient.fadeAll();
+  playStopTile(tile: DBSoundTile) {
+    this.oscClient.playStopTile(this.getTileBaseOscAddress(tile));
   }
 
   // utils
@@ -107,7 +97,6 @@ export class ClientManager {
   }
 
   getTileBaseOscAddress(tile: DBSoundTile) {
-    const set = this.dataGetter.getSetByUuid(tile.setUuid);
     const { setPosition, tilePosition } = this.getTileCoordinates(tile);
     return `/set/${setPosition}/tile/${tilePosition.x}/${tilePosition.y}`;
   }

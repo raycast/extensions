@@ -88,14 +88,14 @@ const TileListItem = React.memo(
               title={playing ? "Stop" : "Play"}
               icon={playStopIcon}
               onAction={() => {
-                cm.playTile(tile);
+                cm.playStopTile(tile);
                 closeMainWindow();
               }}
             />
             <Action
               title={`${playing ? "Stop" : "Play"} and Keep Window Open`}
               icon={playStopIcon}
-              onAction={() => cm.playTile(tile)}
+              onAction={() => cm.playStopTile(tile)}
               shortcut={{ key: "enter", modifiers: ["opt"] }}
             />
           </ActionPanel>

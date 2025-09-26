@@ -1,5 +1,4 @@
 import osc from "osc";
-import { TileCoordinates } from "../../types";
 
 type OscMessageHandler = (msg: osc.OscMessage, cl: OSCClient) => void;
 
@@ -51,7 +50,7 @@ export class OSCClient {
     this._port.close();
   }
 
-  _send(address: string, args: any[] = []) {
+  send(address: string, args: any[] = []) {
     const message = { address, args };
     this._port.send(message);
     console.log("OSC message sent:", message);
@@ -90,18 +89,15 @@ export class OSCClient {
 
   // farrago operations
 
-  togglePlayTile(options: TileCoordinates) {
-    this._open();
-    const { setPosition, tilePosition } = options;
-    const address = `/set/${setPosition}/tile/${tilePosition.x}/${tilePosition.y}/play`;
-    this._send(address, [true]);
-  }
-
-  fadeAll() {
-    this._send("/master/fadeAll", [true]);
+  playStopTile(tileBaseAddress: string) {
+    this.send(`${tileBaseAddress}/play`, [true]);
   }
 
   stopAll() {
-    this._send("/transport/stopAll", [true]);
+    this.send("/transport/stopAll", [true]);
+  }
+
+  fadeAll() {
+    this.send("/master/fadeAll", [true]);
   }
 }
