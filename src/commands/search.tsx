@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useClientManager } from "../contexts/clientManagerContext";
 import { DBSoundTile } from "../types";
 import { getTileColorByIndex } from "../utils/helpers";
+import { FARRAGO_FADE_DURATION_MS } from "../utils/constants";
 
 export function SearchCommand() {
   const { cm, latestDbUpdate } = useClientManager();
@@ -38,17 +39,32 @@ const TileListItem = React.memo(
     if (!cm) throw new Error(`Client manager instance always expected in TileListItem`);
 
     const [playing, setPlaying] = useState(false);
+    const [fading, setFading] = useState(false);
 
     useEffect(() => {
       const baseOscAddress = cm.getTileBaseOscAddress(tile);
 
-      const handler = cm.oscClient.addMessageHandler(new RegExp(`^${baseOscAddress}/currentTime$`), (msg) => {
+      const handlerPlaying = cm.oscClient.addMessageHandler(new RegExp(`^${baseOscAddress}/currentTime$`), (msg) => {
         const currentTime = (msg.args as [number])[0];
         setPlaying(currentTime > 0);
       });
 
-      return () => cm.oscClient.removeMessageHandler(handler);
+      const handlerFading = cm.oscClient.addMessageHandler(new RegExp(`^${baseOscAddress}/fadeOut$`), (msg) => {
+        const fading = (msg.args as unknown as [boolean])[0];
+        if (fading) setFading(true);
+      });
+
+      return () => {
+        cm.oscClient.removeMessageHandler(handlerPlaying);
+        cm.oscClient.removeMessageHandler(handlerFading);
+      };
     }, []);
+
+    useEffect(() => {
+      if (!fading) return;
+      const timeout = setTimeout(() => setFading(false), FARRAGO_FADE_DURATION_MS);
+      return () => clearTimeout(timeout);
+    }, [fading]);
 
     const accessories = useMemo(() => {
       const acc: List.Item.Accessory[] = [];
@@ -68,15 +84,17 @@ const TileListItem = React.memo(
 
     const playStopIcon = playing ? Icon.Stop : Icon.Play;
 
-    const tileIcon: Image.ImageLike = playing
-      ? {
-          source: Icon.Stop,
-          tintColor: Color.Red,
-        }
-      : {
-          source: Icon.Play,
-          tintColor: getTileColorByIndex(tile.colorIndex),
-        };
+    const tileIcon: Image.ImageLike = fading
+      ? { source: Icon.SpeakerDown, tintColor: Color.SecondaryText }
+      : playing
+        ? {
+            source: Icon.Stop,
+            tintColor: Color.Red,
+          }
+        : {
+            source: Icon.Play,
+            tintColor: getTileColorByIndex(tile.colorIndex),
+          };
 
     const filePath = cm.fileParser.getFilePathForTile(tile);
 
@@ -108,14 +126,14 @@ const TileListItem = React.memo(
                   title="Fade"
                   icon={Icon.SpeakerDown}
                   onAction={() => cm.fadeTile(tile)}
-                  shortcut={{ key: "f", modifiers: ["cmd", "shift"] }}
+                  shortcut={{ key: "f", modifiers: ["opt", "shift"] }}
                 />
               ) : null}
               <Action
                 title="Toggle AB Volume"
                 icon={Icon.Speaker}
                 onAction={() => cm.toggleTileDuckVolume(tile)}
-                shortcut={{ key: "v", modifiers: ["cmd", "shift"] }}
+                shortcut={{ key: "v", modifiers: ["opt", "shift"] }}
               />
             </ActionPanel.Section>
             <ActionPanel.Section>

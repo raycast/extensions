@@ -12,3 +12,7 @@ export const TILE_COLORS_BY_INDEX = [
   Color.Blue,
   Color.PrimaryText,
 ];
+
+// Farrago's default fade duration is 2 seconds
+// https://rogueamoeba.com/support/manuals/farrago/?page=inspector#:~:text=The%20Fade%20Out%20button%20will%20fade%20out%20playback%20over%202%20seconds.
+export const FARRAGO_FADE_DURATION_MS = 2000;
