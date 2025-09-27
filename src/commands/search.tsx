@@ -2,7 +2,7 @@ import { Action, ActionPanel, closeMainWindow, Color, Detail, Icon, Image, List 
 import React, { useEffect, useMemo, useState } from "react";
 import { useClientManager } from "../contexts/clientManagerContext";
 import { DBSoundTile } from "../types";
-import { getTileColorByIndex } from "../utils/helpers";
+import { formatDuration, getTileColorByIndex } from "../utils/helpers";
 import { FARRAGO_FADE_DURATION_MS } from "../utils/constants";
 
 export function SearchCommand() {
@@ -26,17 +26,28 @@ export function SearchCommand() {
           icon={{ source: "🤷🏻‍♂️" }}
         />
       ) : (
-        tiles?.map((tile) => <TileListItem key={tile.tileUUID} tile={tile} latestDbUpdate={latestDbUpdate} />)
+        tiles?.map((tile) => (
+          <TileListItem
+            key={tile.tileUUID}
+            tile={tile}
+            latestDbUpdate={latestDbUpdate}
+            gridFilterExists={!!gridFilter}
+          />
+        ))
       )}
     </List>
   );
 }
 
-type TileListItemProps = { tile: DBSoundTile; latestDbUpdate: number | null };
+type TileListItemProps = { tile: DBSoundTile; latestDbUpdate: number | null; gridFilterExists: boolean };
 const TileListItem = React.memo(
-  ({ tile, latestDbUpdate }: TileListItemProps) => {
+  ({ tile, latestDbUpdate, gridFilterExists }: TileListItemProps) => {
     const { cm } = useClientManager();
     if (!cm) throw new Error(`Client manager instance always expected in TileListItem`);
+
+    const tileSet = cm.dataGetter.getSetByUuid(tile.setUuid);
+    const tileHasDuplicateTitles = cm.dataGetter.checkTileForDupliateTitles(tile);
+    const tileFilePath = cm.fileParser.getFilePathForTile(tile);
 
     const [playing, setPlaying] = useState(false);
     const [fading, setFading] = useState(false);
@@ -67,19 +78,7 @@ const TileListItem = React.memo(
     }, [fading]);
 
     const accessories = useMemo(() => {
-      const acc: List.Item.Accessory[] = [];
-
-      if (cm.dataGetter.checkTileForDupliateTitles(tile)) {
-        acc.push(
-          { text: cm.dataGetter.getSetByUuid(tile.setUuid).title },
-          {
-            tag: { color: Color.SecondaryText, value: `[${tile.gridPositionX}, ${tile.gridPositionY}]` },
-            tooltip: "Duplicate tile title, specifying grid title & tile position.",
-          },
-        );
-      }
-
-      return acc;
+      return [{ text: formatDuration(tile.playerSettings.duration), tooltip: "Duration" }] as List.Item.Accessory[];
     }, [latestDbUpdate]);
 
     const playStopIcon = playing ? Icon.Stop : Icon.Play;
@@ -96,12 +95,16 @@ const TileListItem = React.memo(
             tintColor: getTileColorByIndex(tile.colorIndex),
           };
 
-    const filePath = cm.fileParser.getFilePathForTile(tile);
-
     return (
       <List.Item
-        title={{ value: tile.title, tooltip: tile.notes }}
-        subtitle={tile.tileIcon.join(" ")}
+        title={{ value: tile.title + "  " + tile.tileIcon.join(" "), tooltip: tile.notes }}
+        subtitle={{
+          value:
+            gridFilterExists || !tileHasDuplicateTitles
+              ? ""
+              : `${tileSet.title} • ${tile.gridPositionX},${tile.gridPositionY}`,
+          tooltip: "Duplicate title, specifying set and position.",
+        }}
         icon={tileIcon}
         accessories={accessories}
         actions={
@@ -147,15 +150,15 @@ const TileListItem = React.memo(
                 content={tile.tileUUID}
                 shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
               />
-              <Action.CopyToClipboard title="Copy File Path" content={filePath} />
-              <Action.CopyToClipboard title="Copy File" content={{ file: filePath }} />
+              <Action.CopyToClipboard title="Copy File Path" content={tileFilePath} />
+              <Action.CopyToClipboard title="Copy File" content={{ file: tileFilePath }} />
             </ActionPanel.Section>
           </ActionPanel>
         }
       />
     );
   },
-  (a, b) => a.latestDbUpdate === b.latestDbUpdate,
+  (a, b) => a.latestDbUpdate === b.latestDbUpdate && a.gridFilterExists === b.gridFilterExists,
 );
 
 type FilterBySetDropdownProps = Pick<List.Dropdown.Props, "value" | "onChange">;
