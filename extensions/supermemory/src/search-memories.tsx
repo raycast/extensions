@@ -12,6 +12,40 @@ import {
 import { useState, useEffect, useCallback } from "react";
 import { searchMemories, checkApiConnection, type SearchResult } from "./api";
 
+const extractContent = (memory: SearchResult) => {
+  if (memory.chunks && memory.chunks.length > 0) {
+    return memory.chunks
+      .map((chunk: unknown) => {
+        if (typeof chunk === "string") return chunk;
+        if (
+          chunk &&
+          typeof chunk === "object" &&
+          "content" in chunk &&
+          typeof chunk.content === "string"
+        )
+          return chunk.content;
+        if (
+          chunk &&
+          typeof chunk === "object" &&
+          "text" in chunk &&
+          typeof chunk.text === "string"
+        )
+          return chunk.text;
+        return "";
+      })
+      .filter(Boolean)
+      .join(" ");
+  }
+  return "No content available";
+};
+
+const extractUrl = (memory: SearchResult) => {
+  if (memory.metadata?.url && typeof memory.metadata.url === "string") {
+    return memory.metadata.url;
+  }
+  return null;
+};
+
 export default function Command() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,40 +124,6 @@ export default function Command() {
   const truncateContent = (content: string, maxLength = 100) => {
     if (content.length <= maxLength) return content;
     return `${content.substring(0, maxLength)}...`;
-  };
-
-  const extractContent = (memory: SearchResult) => {
-    if (memory.chunks && memory.chunks.length > 0) {
-      return memory.chunks
-        .map((chunk: unknown) => {
-          if (typeof chunk === "string") return chunk;
-          if (
-            chunk &&
-            typeof chunk === "object" &&
-            "content" in chunk &&
-            typeof chunk.content === "string"
-          )
-            return chunk.content;
-          if (
-            chunk &&
-            typeof chunk === "object" &&
-            "text" in chunk &&
-            typeof chunk.text === "string"
-          )
-            return chunk.text;
-          return "";
-        })
-        .filter(Boolean)
-        .join(" ");
-    }
-    return "No content available";
-  };
-
-  const extractUrl = (memory: SearchResult) => {
-    if (memory.metadata?.url && typeof memory.metadata.url === "string") {
-      return memory.metadata.url;
-    }
-    return null;
   };
 
   if (isConnected === false) {
@@ -213,40 +213,6 @@ export default function Command() {
 }
 
 function MemoryDetail({ memory }: { memory: SearchResult }) {
-  const extractContent = (memory: SearchResult) => {
-    if (memory.chunks && memory.chunks.length > 0) {
-      return memory.chunks
-        .map((chunk: unknown) => {
-          if (typeof chunk === "string") return chunk;
-          if (
-            chunk &&
-            typeof chunk === "object" &&
-            "content" in chunk &&
-            typeof chunk.content === "string"
-          )
-            return chunk.content;
-          if (
-            chunk &&
-            typeof chunk === "object" &&
-            "text" in chunk &&
-            typeof chunk.text === "string"
-          )
-            return chunk.text;
-          return "";
-        })
-        .filter(Boolean)
-        .join(" ");
-    }
-    return "No content available";
-  };
-
-  const extractUrl = (memory: SearchResult) => {
-    if (memory.metadata?.url && typeof memory.metadata.url === "string") {
-      return memory.metadata.url;
-    }
-    return null;
-  };
-
   const content = extractContent(memory);
   const url = extractUrl(memory);
 

@@ -1,9 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-}
-
 export interface Project {
   id: string;
   name: string;
@@ -72,7 +68,7 @@ class AuthenticationError extends Error {
 
 async function getApiKey(): Promise<string> {
   try {
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<{ apiKey: string }>();
     const apiKey = preferences.apiKey?.trim();
 
     if (!apiKey) {
