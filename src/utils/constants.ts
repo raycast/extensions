@@ -8,7 +8,7 @@ export const TILE_COLORS_BY_INDEX = [
   Color.Orange,
   Color.Yellow,
   Color.Green,
-  Color.PrimaryText, // teal not available
+  Color.SecondaryText, // teal not available
   Color.Blue,
   Color.PrimaryText,
 ];
