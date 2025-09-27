@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Fix Raycast publish failure] - 2025-09-26
+## [Fix Raycast publish failure] - {PR_MERGE_DATE}
 
 - v0.1.1
 - Replace the unsupported `Icon.Newspaper` usage to restore TypeScript validation and unblock Raycast publish.
