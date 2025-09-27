@@ -38,7 +38,7 @@ export const callInfisical = async<T>(endpoint: string) => {
     if (!response.ok) throw new Error((result as Error).message);
     return result as T;
 }
-export const useInfisicalApi = <T>(endpoint: string) => useFetch(new URL(`api/${endpoint}`, siteUrl).toString(), {
+export const useInfisical = <T>(endpoint: string) => useFetch(new URL(`api/${endpoint}`, siteUrl).toString(), {
   headers: {
     Authorization: `Bearer ${infisical.auth().getAccessToken()}`
   },
