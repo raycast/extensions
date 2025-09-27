@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added support for Zen Browser, Dia, and Perplexity Comet as browser options in the `Open in Other Browser` command.
+
 ## [Improvements] - 2025-08-04
 
 - Added preferences to order the tabs in the search results for the `Search Arc` command.
