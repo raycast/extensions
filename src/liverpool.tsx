@@ -286,7 +286,6 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
         // ignore
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [local?.next?.homeBadge, local?.next?.awayBadge, prefs.footballDataKey, prefs.sportsDbKey]);
   return (
     <Detail
@@ -295,7 +294,7 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
-            title="Copy Next Match Time (PHT)"
+            title="Copy Next Match Time"
             content={next?.utcDate ? formatManila(next.utcDate) : "TBD"}
           />
           <Action
@@ -427,7 +426,6 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
       );
       setBadges((b) => ({ ...b, ...results }));
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.length]);
 
   // Fallback: use football-data.org crests (PL + UCL group) when available
@@ -482,7 +480,6 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
       }
       if (Object.keys(results).length) setBadges((b) => ({ ...b, ...results }));
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.length, prefs.footballDataKey]);
 
   // Build filters & grouping
