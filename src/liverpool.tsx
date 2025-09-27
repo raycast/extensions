@@ -1144,8 +1144,8 @@ function mergeUpcoming(
   const map = new Map<string, NextMatch>();
   function key(m: NextMatch) {
     const iso = (m.utcDate || "").slice(0, 16); // minute precision
-    const a = (m.homeTeam || "").toLowerCase();
-    const b = (m.awayTeam || "").toLowerCase();
+    const a = normalizeTeamName(m.homeTeam || "");
+    const b = normalizeTeamName(m.awayTeam || "");
     return `${iso}|${a}|${b}`;
   }
   // Prefer the first source (A, football-data) when duplicates exist.
