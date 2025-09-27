@@ -33,6 +33,7 @@ Keep track of Liverpool FC directly from the Raycast launcher.
 ## Publishing
 
 - Ensure metadata in `package.json` is correct, then run `npm run publish` to submit the extension to the Raycast Store.
+- Update the screenshot in `metadata/screenshot-1.png` when UI changes so the store listing stays accurate.
 
 ## Notes
 
