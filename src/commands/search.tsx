@@ -16,19 +16,17 @@ export function SearchCommand() {
     return allTiles?.filter((t) => t.setUuid === gridFilter);
   }, [latestDbUpdate, gridFilter]);
 
-  if (!cm || !tiles) {
-    return <List isLoading={true} />;
-  }
-
-  if (!tiles.length) {
-    return <Detail markdown="## No tiles found" />;
-  }
-
   return (
     <List isLoading={!tiles} searchBarAccessory={<FilterBySetDropdown value={gridFilter} onChange={setGridFilter} />}>
-      {tiles.map((tile) => (
-        <TileListItem key={tile.tileUUID} tile={tile} latestDbUpdate={latestDbUpdate} />
-      ))}
+      {tiles && tiles.length == 0 ? (
+        <List.EmptyView
+          title="No Sounds Found"
+          description="Add some sets and tiles in Farrago, then call this command again."
+          icon={{ source: "🤷🏻‍♂️" }}
+        />
+      ) : (
+        tiles?.map((tile) => <TileListItem key={tile.tileUUID} tile={tile} latestDbUpdate={latestDbUpdate} />)
+      )}
     </List>
   );
 }
@@ -145,9 +143,10 @@ const TileListItem = React.memo(
 type FilterBySetDropdownProps = Pick<List.Dropdown.Props, "value" | "onChange">;
 export function FilterBySetDropdown({ value, onChange }: FilterBySetDropdownProps) {
   const { cm, latestDbUpdate } = useClientManager();
-  if (!cm) throw new Error(`Client manager instance always expected in FilterBySetDropdown`);
 
   const sets = useMemo(() => {
+    if (!cm) return [];
+
     const allSets = cm.getAllSets();
 
     if (value && !allSets.find((s) => s.uuid === value)) {
