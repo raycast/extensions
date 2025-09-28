@@ -62,8 +62,10 @@ export type Form = {
 };
 export type Submission = {
   id: number;
-  uid: string;
-  form_id: number;
+  data: {
+    [id: string]: string | number | null;
+  };
+  created_at: string;
 };
 type Result<T> = {
   data: T;

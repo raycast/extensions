@@ -1,16 +1,18 @@
-import { ActionPanel, List, Action, Icon, Image, Keyboard, Color } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Image, Keyboard } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
-import { PaginatedResult, Form, Submission, Block } from "./types";
+import { PaginatedResult, Form, Block } from "./types";
 import { API_URL, API_HEADERS, BLOCK_TYPE_ICONS } from "./config";
+import Submissions from "./submissions";
+import { getBlockTitle, getFormIcon } from "./utils";
 
-function getFormIcon(form: Form): Image.ImageLike {
-  if (form.deleted_at) return { source: Icon.Trash, tintColor: Color.Red };
-  if (form.closed) return { source: Icon.Xmark, tintColor: Color.Red };
-  if (!form.published_at) return { source: Icon.Dot, tintColor: Color.Blue };
-  if (form.close_by_date || form.close_by_submissions) return { source: Icon.Dot, tintColor: Color.Yellow };
-  return { source: Icon.Dot, tintColor: Color.Green };
+function ColorTag({ title, color }: { title: string; color: string }) {
+  return (
+    <List.Item.Detail.Metadata.TagList title={title}>
+      <List.Item.Detail.Metadata.TagList.Item text={color} color={color} />
+    </List.Item.Detail.Metadata.TagList>
+  );
 }
-export default function SearchForms() {
+export default function Forms() {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-form-details", false);
   const { isLoading, data: forms } = useFetch(API_URL + "forms", {
     headers: API_HEADERS,
@@ -67,45 +69,22 @@ export default function SearchForms() {
                     <List.Item.Detail.Metadata.Label title="Design" />
                     <List.Item.Detail.Metadata.Label title="Font" text={form.design.font} />
                     <List.Item.Detail.Metadata.Label title="Corner" text={form.design.corner} />
-                    <List.Item.Detail.Metadata.TagList title="Text Color">
-                      <List.Item.Detail.Metadata.TagList.Item
-                        text={form.design["text-color"]}
-                        color={form.design["text-color"]}
-                      />
-                    </List.Item.Detail.Metadata.TagList>
-                    <List.Item.Detail.Metadata.TagList title="Rating Color">
-                      <List.Item.Detail.Metadata.TagList.Item
-                        text={form.design["rating-color"]}
-                        color={form.design["rating-color"]}
-                      />
-                    </List.Item.Detail.Metadata.TagList>
-                    <List.Item.Detail.Metadata.TagList title="Background Color">
-                      <List.Item.Detail.Metadata.TagList.Item
-                        text={form.design["background-color"]}
-                        color={form.design["background-color"]}
-                      />
-                    </List.Item.Detail.Metadata.TagList>
-                    <List.Item.Detail.Metadata.TagList title="Button Text Color">
-                      <List.Item.Detail.Metadata.TagList.Item
-                        text={form.design["button-text-color"]}
-                        color={form.design["button-text-color"]}
-                      />
-                    </List.Item.Detail.Metadata.TagList>
-                    <List.Item.Detail.Metadata.TagList title="Button Text Color">
-                      <List.Item.Detail.Metadata.TagList.Item
-                        text={form.design["button-text-color"]}
-                        color={form.design["button-text-color"]}
-                      />
-                    </List.Item.Detail.Metadata.TagList>
+                    <ColorTag title="Text Color" color={form.design["text-color"]} />
+
+                    <ColorTag title="Rating Color" color={form.design["rating-color"]} />
+
+                    <ColorTag title="Background Color" color={form.design["background-color"]} />
+
+                    <ColorTag title="Button Text Color" color={form.design["button-text-color"]} />
+
+                    <ColorTag title="Button Text Color" color={form.design["button-text-color"]} />
+
                     <List.Item.Detail.Metadata.Link
                       title="Background Image URL"
                       text={form.design["background-image-url"]}
                       target={form.design["background-image-url"]}
                     />
-                    <List.Item.Detail.Metadata.Label
-                      title="Button Background Color"
-                      text={form.design["button-background-color"]}
-                    />
+                    <ColorTag title="Button Background Color" color={form.design["button-background-color"]} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -113,7 +92,7 @@ export default function SearchForms() {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Box} title="Blocks" target={<Blocks form={form} />} />
-                <Action.Push icon={Icon.Document} title="Submissions" target={<Submissions formSlug={form.slug} />} />
+                <Action.Push icon={Icon.Document} title="Submissions" target={<Submissions form={form} />} />
                 <Action
                   shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
                   icon={Icon.AppWindowSidebarLeft}
@@ -137,8 +116,8 @@ export default function SearchForms() {
 
 function BlockItem({ block }: { block: Block }) {
   const icon =
-    block.post_submission_action === "button" ? Icon.ArrowRight : BLOCK_TYPE_ICONS[block.type] || Icon.QuestionMark;
-  const title = `${block.position}. ${block.display_name || block.title || block.shadow_title || block.question || block.shadow_question || ""}`;
+    block.post_submission_action === "button" ? Icon.ArrowRight : (BLOCK_TYPE_ICONS[block.type] ?? Icon.QuestionMark);
+  const title = `${block.position}. ${getBlockTitle(block)}`;
   return (
     <List.Item
       icon={{ value: icon, tooltip: block.type }}
@@ -168,38 +147,6 @@ function Blocks({ form }: { form: Form }) {
           <BlockItem key={block.id} block={block} />
         ))}
       </List.Section>
-    </List>
-  );
-}
-
-function Submissions({ formSlug }: { formSlug: string }) {
-  const { isLoading, data: submissions } = useFetch(API_URL + `forms/${formSlug}/submissions`, {
-    headers: API_HEADERS,
-    mapResult(result: PaginatedResult<Submission>) {
-      return {
-        data: result.data.data,
-      };
-    },
-    initialData: [],
-  });
-  return (
-    <List navigationTitle={`Search Forms / ${formSlug} / Submissions`} isLoading={isLoading}>
-      {!isLoading && !submissions.length ? (
-        <List.EmptyView
-          title="No submissions yet."
-          description="Please share your form to the world to start collecting submissions."
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard
-                title="Copy Share URL"
-                content={`https://app.youform.com/form/${formSlug}/share`}
-              />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        submissions.map((submission) => <List.Item key={submission.id} title={submission.uid} />)
-      )}
     </List>
   );
 }
