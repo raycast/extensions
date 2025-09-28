@@ -2,7 +2,7 @@ import { InfisicalSDK } from "@infisical/sdk";
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const {siteUrl,clientId,clientSecret} = getPreferenceValues<Preferences>();
+const {siteUrl,clientId,clientSecret,organizationId} = getPreferenceValues<Preferences>();
 const client = new InfisicalSDK({
     siteUrl,
 });
@@ -18,13 +18,23 @@ export const authenticate = async () => {
     await client.auth().universalAuth.login({
         clientId,
         clientSecret
-    })
+    }) 
+  }
+  toast.title = "Verifying";
+  try {
+    // we call this endpoint to check if token is valid
+    await callInfisical(`v2/organizations/${organizationId}/workspaces`);
     const newToken = client.auth().getAccessToken() ?? "";
     await LocalStorage.setItem("token", newToken);
+    toast.style = Toast.Style.Success;
+    toast.title = "Authenticated";
+  } catch {
+    // if token is valid, we attempt to renew in case token is stale
+    toast.title = "Renewing";
+    // if this renew fails, details are invalid
+    await client.auth().universalAuth.renew();
   }
-//   toast.title = "Verifying";
-  toast.style = Toast.Style.Success;
-  toast.title = "Authenticated";
+    
 };
 
 export const callInfisical = async<T>(endpoint: string) => {
