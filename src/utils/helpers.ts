@@ -1,6 +1,7 @@
 import os from "os";
 import path from "path";
-import { TILE_COLORS_BY_INDEX } from "./constants";
+import { DEFAULT_SHORTCUT_TITLE_TEMPLATE, TILE_COLORS_BY_INDEX } from "./constants";
+import { DBSoundSet, DBSoundTile } from "../types";
 
 export function expandTilde(inputPath: string) {
   if (inputPath.startsWith("~")) {
@@ -37,4 +38,36 @@ export function formatDuration(seconds: number): string {
       .padStart(2, "0");
     return `${hrs}:${mins}:${secs}`;
   }
+}
+
+export function applyShortcutTitleTemplate({
+  tile,
+  set,
+  template,
+}: {
+  tile: DBSoundTile;
+  set: DBSoundSet;
+  template?: string;
+}) {
+  template ||= DEFAULT_SHORTCUT_TITLE_TEMPLATE;
+
+  const variableGetters: Record<string, (t: DBSoundTile, s: DBSoundSet) => string> = {
+    set: (_, s) => s.title,
+    title: (t) => t.title,
+    icons: (t) => t.tileIcon.join(" "),
+    firstIcon: (t) => t.tileIcon.at(0) ?? "",
+  };
+
+  const cached: Record<string, string> = {};
+
+  return template.replaceAll(/{{\s*(\w+)\s*}}/g, (_, varName) => {
+    const cachedValue = cached[varName];
+    if (cachedValue) return cachedValue;
+
+    const getter = variableGetters[varName];
+    const result = getter?.(tile, set) ?? `{{${varName}}}`;
+    cached[varName] = result;
+
+    return result;
+  });
 }

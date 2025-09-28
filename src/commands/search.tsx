@@ -1,9 +1,25 @@
-import { Action, ActionPanel, closeMainWindow, Color, Detail, Icon, Image, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  Color,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  Image,
+  List,
+  open,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import { useClientManager } from "../contexts/clientManagerContext";
 import { DBSoundTile } from "../types";
-import { formatDuration, getTileColorByIndex } from "../utils/helpers";
-import { FARRAGO_FADE_DURATION_MS } from "../utils/constants";
+import { applyShortcutTitleTemplate, formatDuration, getTileColorByIndex } from "../utils/helpers";
+import { FARRAGO_FADE_DURATION_MS, ICLOUD_SHORTCUT_LINK } from "../utils/constants";
+import { setTimeout as setTimeoutAsync } from "node:timers/promises";
+import { ClientManager } from "../api/clientManager";
 
 export function SearchCommand() {
   const { cm, latestDbUpdate } = useClientManager();
@@ -47,7 +63,6 @@ const TileListItem = React.memo(
 
     const tileSet = cm.dataGetter.getSetByUuid(tile.setUuid);
     const tileHasDuplicateTitles = cm.dataGetter.checkTileForDupliateTitles(tile);
-    const tileFilePath = cm.fileParser.getFilePathForTile(tile);
 
     const [playing, setPlaying] = useState(false);
     const [fading, setFading] = useState(false);
@@ -109,7 +124,7 @@ const TileListItem = React.memo(
         accessories={accessories}
         actions={
           <ActionPanel>
-            <ActionPanel.Section>
+            <ActionPanel.Section title="Playback">
               <Action
                 title={playing ? "Stop" : "Play"}
                 icon={playStopIcon}
@@ -139,19 +154,47 @@ const TileListItem = React.memo(
                 shortcut={{ key: "v", modifiers: ["opt", "shift"] }}
               />
             </ActionPanel.Section>
-            <ActionPanel.Section>
-              <Action.CopyToClipboard
-                title="Copy Tile Title"
-                content={tile.title}
+            <ActionPanel.Section title="Quickplay Shortcut">
+              <Action.OpenInBrowser
+                url={ICLOUD_SHORTCUT_LINK}
+                icon={Icon.Link}
+                title="Add Shortcut"
+                shortcut={{ key: "s", modifiers: ["ctrl"] }}
+              />
+              <Action
+                title="Copy Tile UUID"
+                icon={Icon.CopyClipboard}
+                onAction={() => {
+                  Clipboard.copy(tile.tileUUID);
+                  showToast({
+                    title: `Copied Tile UUID for "${tile.title}"`,
+                    primaryAction: {
+                      title: "Add Shortcut",
+                      onAction: () => open(ICLOUD_SHORTCUT_LINK),
+                    },
+                  });
+                  cm.oscClient.close();
+                }}
                 shortcut={{ key: "c", modifiers: ["cmd"] }}
               />
-              <Action.CopyToClipboard
-                title="Copy Tile UUID"
-                content={tile.tileUUID}
+              <Action
+                title="Copy Shortcut Title"
+                icon={Icon.CopyClipboard}
+                onAction={() => {
+                  const formatted = applyShortcutTitleTemplate({
+                    tile,
+                    set: tileSet,
+                    template: getPreferenceValues<Preferences>().shortcutTitleTemplate,
+                  });
+                  Clipboard.copy(formatted);
+                  showToast({
+                    title: `Copied Shortcut Title for "${tile.title}"`,
+                    message: `Current formatting is "${formatted}". You can change it in the extension settings.`,
+                    primaryAction: { title: "Open Extension Settings", onAction: openExtensionPreferences },
+                  });
+                }}
                 shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
               />
-              <Action.CopyToClipboard title="Copy File Path" content={tileFilePath} />
-              <Action.CopyToClipboard title="Copy File" content={{ file: tileFilePath }} />
             </ActionPanel.Section>
           </ActionPanel>
         }

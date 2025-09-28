@@ -6,33 +6,13 @@ export class OSCClient {
   _port: osc.UDPPort;
   _messageHandlers: Map<RegExp["source"], [RegExp, Set<OscMessageHandler>]>;
   _messagehandlersRegexMap: Map<OscMessageHandler, Set<RegExp["source"]>>;
+  _options: { remoteAddress: string; remotePort: number };
 
   constructor(options: { remoteAddress: string; remotePort: number }) {
-    this._port = new osc.UDPPort({
-      localAddress: "127.0.0.1",
-      localPort: 8091,
-      remoteAddress: options.remoteAddress,
-      remotePort: options.remotePort,
-    });
-
     this._messageHandlers = new Map();
     this._messagehandlersRegexMap = new Map();
-
-    this._port.on("ready", () => {
-      console.log("OSC Client is ready");
-    });
-
-    // Handle incoming messages
-    this._port.on("message", (message) => {
-      // console.log("Received OSC message:", message);
-      for (const [rgx, handlers] of this._messageHandlers.values()) {
-        if (rgx.exec(message.address)) {
-          handlers.forEach((handler) => handler(message, this));
-        }
-      }
-    });
-
-    this._port.open();
+    this._options = options;
+    this._port = this._createOpenedPort();
   }
 
   static initFromPreferences(preferences: Preferences) {
@@ -42,7 +22,36 @@ export class OSCClient {
     });
   }
 
-  _open() {
+  _createOpenedPort() {
+    const options = this._options;
+
+    const port = new osc.UDPPort({
+      localAddress: "127.0.0.1",
+      localPort: 8091,
+      remoteAddress: options.remoteAddress,
+      remotePort: options.remotePort,
+    });
+
+    port.on("ready", () => {
+      console.log("OSC Client is ready");
+    });
+
+    // Handle incoming messages
+    port.on("message", (message) => {
+      // console.log("Received OSC message:", message);
+      for (const [rgx, handlers] of this._messageHandlers.values()) {
+        if (rgx.exec(message.address)) {
+          handlers.forEach((handler) => handler(message, this));
+        }
+      }
+    });
+
+    port.open();
+
+    return port;
+  }
+
+  open() {
     this._port.open();
   }
 
@@ -50,10 +59,22 @@ export class OSCClient {
     this._port.close();
   }
 
-  send(address: string, args: any[] = []) {
+  send(address: string, args: any[] = [], errorCount = 0) {
     const message = { address, args };
-    this._port.send(message);
-    console.log("OSC message sent:", message);
+
+    try {
+      this._port.send(message);
+      console.log("OSC message sent:", message);
+    } catch (error: any) {
+      if (error.code === "ERR_SOCKET_DGRAM_NOT_RUNNING") {
+        if (errorCount < 1) {
+          this._port = this._createOpenedPort();
+          this.send(address, args, errorCount + 1);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 
   addMessageHandler(rgx: RegExp, handler: OscMessageHandler) {

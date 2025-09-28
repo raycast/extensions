@@ -53,6 +53,14 @@
       "placeholder": "53000",
       "description": "OSC port set up in Farrago",
       "required": true
+    },
+    {
+      "name": "shortcutTitleTemplate",
+      "type": "textfield",
+      "title": "Shortcut Title Template",
+      "placeholder": "{{title}} {{icons}}",
+      "description": "Template to be used when you copy a sound's shortcut title w/ ⇧⌘C.\nAvailable variables: {{title}}, {{icons}}, {{firstIcon}}, {{set}}.",
+      "required": false
     }
   ],
   "dependencies": {

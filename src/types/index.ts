@@ -2,6 +2,7 @@ export type Preferences = {
   dataDirectory: string;
   oscHost: string;
   oscPort: string;
+  shortcutTitleTemplate: string;
 };
 
 export type DBSoundSet = Omit<SoundSet, "tiles"> & { tiles: SoundSetTile["tileUUID"][] };
