@@ -14,9 +14,11 @@ export default function Submissions({ form }: { form: Form }) {
       // answers are in reverse order
       const submissions = result.data.data.toReversed();
       // map the questions to the id
-      const questions = Object.keys(submissions[0].data).map((id) =>
-        getBlockTitle(form.fields?.blocks.find((block) => block.id === id)),
-      );
+      const questions = !submissions.length
+        ? []
+        : Object.keys(submissions[0].data).map((id) =>
+            getBlockTitle(form.fields?.blocks.find((block) => block.id === id)),
+          );
       return {
         data: {
           questions,
