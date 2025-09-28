@@ -98,17 +98,18 @@ const TileListItem = React.memo(
 
     const playStopIcon = playing ? Icon.Stop : Icon.Play;
 
-    const tileIcon: Image.ImageLike = fading
-      ? { source: Icon.SpeakerDown, tintColor: Color.SecondaryText }
-      : playing
-        ? {
-            source: Icon.Stop,
-            tintColor: Color.Red,
-          }
-        : {
-            source: Icon.Play,
-            tintColor: getTileColorByIndex(tile.colorIndex),
-          };
+    const tileIcon: Image.ImageLike =
+      fading && playing
+        ? { source: Icon.SpeakerDown, tintColor: Color.SecondaryText }
+        : playing
+          ? {
+              source: Icon.Stop,
+              tintColor: Color.Red,
+            }
+          : {
+              source: Icon.Play,
+              tintColor: getTileColorByIndex(tile.colorIndex),
+            };
 
     return (
       <List.Item
