@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Grid, Color, LocalStorage, getPreferenceValues } from '@raycast/api';
-import { useCachedState, useFetch } from '@raycast/utils';
+import { useState } from 'react';
+import { Grid, Color, getPreferenceValues } from '@raycast/api';
+import { useCachedState, useFetch, useLocalStorage } from '@raycast/utils';
 import { SearchResult, TokenData } from './types';
 import { familyStylesByPrefix, iconForStyle, iconActions } from './utils';
 
@@ -27,7 +27,7 @@ const iconQuery = (squery: string, stype: string) => `query Search {
 `;
 
 export default function Command() {
-  let { API_TOKEN, STYLE_PREFERENCE } = getPreferenceValues();
+  let { API_TOKEN, STYLE_PREFERENCE } = getPreferenceValues<Preferences>();
   let account = 'pro';
 
   //if pro API Token not provided, use free API Token
@@ -39,24 +39,15 @@ export default function Command() {
 
   const [type, setType] = useState<string>(STYLE_PREFERENCE);
   const [query, setQuery] = useState<string>('');
-  const [accessToken, setAccessToken] = useState<string>('');
-  const [tokenTimeStart, setTokenTimeStart] = useState<number>();
+  const [accessToken, setAccessToken] = useCachedState<string>('accessToken', '');
+  const { value: tokenTimeStart, setValue: setTokenTimerStart } = useLocalStorage<number>('token-expiry-start');
   const [iconData, setIconData] = useCachedState<SearchResult>('iconData');
-
-  useEffect(() => {
-    const tokenTimerCheck = async () => {
-      const timeStart = await LocalStorage.getItem<number>('token-expiry-start');
-      setTokenTimeStart(timeStart);
-    };
-
-    tokenTimerCheck();
-  }, []);
 
   // Fetch access token, store expiry info in local storage and state and store access token
   useFetch<TokenData>('https://api.fontawesome.com/token', {
     execute: !tokenTimeStart || Date.now() - (tokenTimeStart || 0) >= 3600000 ? true : false,
     onData: (data) => {
-      LocalStorage.setItem('token-expiry-start', Date.now());
+      setTokenTimerStart(Date.now());
       setAccessToken(data.access_token);
     },
     method: 'POST',
