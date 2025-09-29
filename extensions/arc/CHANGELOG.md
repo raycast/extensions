@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-09-29
 
 - Added support for Zen Browser, Dia, and Perplexity Comet as browser options in the `Open in Other Browser` command.
 
