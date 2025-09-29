@@ -1,3 +1,3 @@
 # Alloy Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 29/09/2025
