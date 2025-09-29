@@ -192,13 +192,20 @@ export const getFormatTitle = (format: Format) =>
     .filter((x) => Boolean(x))
     .join(" | ");
 
-export function sanitizeVideoName(name: string): string {
-  // eslint-disable-next-line no-control-regex
-  const invalid = isWindows ? /[<>:"/\\|?*\x00-\x1F]/g : /:/g;
+export function sanitizeVideoTitle(name: string): string {
   const maxLen = 200;
+  const invalidChars = isWindows ? ["<", ">", ":", '"', "/", "\\", "|", "?", "*"] : [":"];
 
   // Trim and remove invalid characters
-  let safe = name.trim().replace(invalid, "");
+  let safe = name.trim();
+  for (const char of invalidChars) {
+    safe = safe.replaceAll(char, "");
+  }
+
+  // Remove control characters
+  safe = Array.from(safe)
+    .filter((char) => char.charCodeAt(0) >= 32)
+    .join("");
 
   // Remove trailing dots and spaces on Windows
   if (isWindows) safe = safe.replace(/[. ]+$/, "");
@@ -209,7 +216,7 @@ export function sanitizeVideoName(name: string): string {
   // Hard truncate to max length
   safe = safe.slice(0, maxLen);
 
-  // Truncate to max length at a sensible boundary (like a punctuation mark)
+  // Truncate to max length at a sensible boundary if possible (like a punctuation mark)
   const cutoffSymbols = /[.!?]/g;
   const match = [...safe.matchAll(cutoffSymbols)]
     .map((m) => m.index)

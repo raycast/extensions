@@ -29,7 +29,7 @@ import {
   isValidHHMM,
   isValidUrl,
   parseHHMM,
-  sanitizeVideoName,
+  sanitizeVideoTitle,
 } from "./utils.js";
 import { Video } from "./types.js";
 import Installer from "./views/installer.js";
@@ -181,7 +181,7 @@ export default function DownloadVideo() {
       );
       const data = JSON.parse(result.stdout) as Video;
 
-      return { ...data, title: sanitizeVideoName(data.title) };
+      return { ...data, title: sanitizeVideoTitle(data.title) };
     },
     [values.url],
     {
