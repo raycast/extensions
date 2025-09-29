@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "winget",
+    "title": "Winget",
+  "description": "Run WinGet commands from Raycast",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "winget-search",
+      "title": "Search Packages",
+      "description": "Search for packages in winget repositories",
+      "mode": "view"
+    },
+    {
+      "name": "winget-install",
+      "title": "Install Package",
+      "description": "Search and install packages using winget",
+      "mode": "view"
+    },
+    {
+      "name": "winget-list",
+      "title": "List Installed Packages",
+      "description": "Show installed packages with upgrade and uninstall options",
+      "mode": "view"
+    },
+    {
+      "name": "winget-upgrade",
+      "title": "Upgrade Packages",
+      "description": "Show and upgrade outdated packages",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "masteroftime",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ]
+}
