@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [Added Tooltip to Title] - {PR_MERGE_DATE}
+## [Added Tooltip to Title] - 2025-09-29
 
 - Added `tooltip` to to-do list items so longer titles easier to read (ref: [Issue #21807](https://github.com/raycast/extensions/issues/21807)).
 - Added `metadata` images.
