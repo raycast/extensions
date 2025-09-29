@@ -1,6 +1,6 @@
 # Pipedrive Changelog
 
-## [Fix "ccEmail" Copied "title"] - {PR_MERGE_DATE}
+## [Fix "ccEmail" Copied "title"] - 2025-09-29
 
 - Add `metadata` images
 - Fix `isLoading` would not stop on Error
