@@ -2,7 +2,7 @@
   "name": "string-formatter",
   "title": "String Formatter",
   "description": "Format strings with custom separators and decorators",
-  "icon": "command-icon.png",
+  "icon": "extension_icon.png",
   "author": "matrixwei",
   "categories": [
     "Developer Tools"
@@ -23,7 +23,7 @@
       "title": "Language / 语言",
       "description": "Choose your preferred language / 选择您的首选语言",
       "required": false,
-      "default": "zh",
+      "default": "en",
       "data": [
         {
           "title": "中文 (Chinese)",

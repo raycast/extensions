@@ -1,5 +1,7 @@
 # String Formatter - Raycast Extension
 
+![String Formatter Demo](assets/show.png)
+
 A powerful string formatting Raycast extension with intelligent separator detection, character removal, custom decorators, and output formatting. Supports both Chinese and English interfaces.
 
 ## 🚀 Features
