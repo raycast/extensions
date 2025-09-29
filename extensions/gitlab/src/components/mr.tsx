@@ -132,6 +132,9 @@ export function MRDetail(props: { mr: MergeRequest }) {
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="From" text={mr.source_branch} />
           <Detail.Metadata.Label title="Into" text={mr.target_branch} />
+          <Detail.Metadata.TagList title="Updated At">
+            <Detail.Metadata.TagList.Item text={`${new Date(mr.updated_at).toLocaleString()}`} />
+          </Detail.Metadata.TagList>
           {mr.author && (
             <Detail.Metadata.TagList title="Author">
               <Detail.Metadata.TagList.Item text={mr.author.name} icon={userIcon(mr.author)} />
