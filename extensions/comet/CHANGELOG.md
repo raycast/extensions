@@ -1,6 +1,6 @@
 # Comet Browser Changelog
 
-## [Change Bookmarks Sort Order] - {PR_MERGE_DATE}
+## [Change Bookmarks Sort Order] - 2025-09-29
 
 - Change bookmarks sort order by Date Added (ascending vs. descending) (ref: [Issue #21642](https://github.com/raycast/extensions/issues/21642))
 - Modernize extension: remove `Preferences` type + update deps
