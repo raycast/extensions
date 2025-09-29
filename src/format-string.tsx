@@ -1,14 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Clipboard,
-  showHUD,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
 
 interface FormValues {
   inputString: string;
@@ -36,7 +27,7 @@ const languages = {
     ],
     decoratorOptions: [
       { title: "单引号 (')", value: "'" },
-      { title: "双引号 (\")", value: '"' },
+      { title: '双引号 (")', value: '"' },
       { title: "反引号 (`)", value: "`" },
       { title: "方括号 []", value: "[]" },
       { title: "圆括号 ()", value: "()" },
@@ -77,7 +68,7 @@ const languages = {
       copyFailed: "复制失败",
       copyFailedMessage: "无法复制到剪贴板",
       formatError: "格式化过程中发生错误",
-    }
+    },
   },
   en: {
     separatorOptions: [
@@ -91,7 +82,7 @@ const languages = {
     ],
     decoratorOptions: [
       { title: "Single Quote (')", value: "'" },
-      { title: "Double Quote (\")", value: '"' },
+      { title: 'Double Quote (")', value: '"' },
       { title: "Backtick (`)", value: "`" },
       { title: "Square Brackets []", value: "[]" },
       { title: "Parentheses ()", value: "()" },
@@ -132,13 +123,13 @@ const languages = {
       copyFailed: "Copy failed",
       copyFailedMessage: "Unable to copy to clipboard",
       formatError: "Error occurred during formatting",
-    }
-  }
+    },
+  },
 };
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const lang = preferences.language || 'zh';
+  const lang = preferences.language || "zh";
   const t = languages[lang as keyof typeof languages] || languages.zh;
 
   const [inputString, setInputString] = useState<string>("");
@@ -154,48 +145,53 @@ export default function Command() {
   // 自动检测分隔符
   const detectSeparator = (input: string): string => {
     if (!input.trim()) return "";
-    
+
     const separators = [",", ";", "|", " ", "\t", "\n"];
-    
+
     for (const sep of separators) {
       if (input.includes(sep)) {
         return sep;
       }
     }
-    
+
     return "";
   };
 
   // 格式化字符串的核心逻辑
-  const formatString = (input: string, removeCh: string, sep: string, dec: string, outSep: string, dedup: boolean): string => {
+  const formatString = (
+    input: string,
+    removeCh: string,
+    sep: string,
+    dec: string,
+    outSep: string,
+    dedup: boolean,
+  ): string => {
     if (!input.trim()) {
       return "";
     }
 
     try {
       let processedInput = input;
-      
+
       // 移除指定字符
       if (removeCh.trim()) {
-        const charsToRemove = removeCh.split('').map(char => 
-          char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        );
-        const removeRegex = new RegExp(`[${charsToRemove.join('')}]`, 'g');
-        processedInput = processedInput.replace(removeRegex, '');
+        const charsToRemove = removeCh.split("").map((char) => char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+        const removeRegex = new RegExp(`[${charsToRemove.join("")}]`, "g");
+        processedInput = processedInput.replace(removeRegex, "");
       }
-      
+
       // 确定使用的分隔符
       let actualSeparator = sep;
       if (!actualSeparator) {
         actualSeparator = detectSeparator(processedInput);
         setDetectedSeparator(actualSeparator);
       }
-      
+
       if (!actualSeparator) {
         // 如果没有检测到分隔符，将整个字符串作为单个元素
         const trimmed = processedInput.trim();
         if (!trimmed) return "";
-        
+
         if (dec === "[]") {
           return `[${trimmed}]`;
         } else if (dec === "()") {
@@ -208,13 +204,16 @@ export default function Command() {
           return `${dec}${trimmed}${dec}`;
         }
       }
-      
+
       // 处理特殊分隔符
       const finalSeparator = actualSeparator === "\\t" ? "\t" : actualSeparator === "\\n" ? "\n" : actualSeparator;
-      
+
       // 分割字符串并去除空白
-      let parts = processedInput.split(finalSeparator).map(part => part.trim()).filter(part => part.length > 0);
-      
+      let parts = processedInput
+        .split(finalSeparator)
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0);
+
       if (parts.length === 0) {
         return "";
       }
@@ -226,17 +225,17 @@ export default function Command() {
 
       // 应用修饰符
       let decoratedParts: string[];
-      
+
       if (dec === "[]") {
-        decoratedParts = parts.map(part => `[${part}]`);
+        decoratedParts = parts.map((part) => `[${part}]`);
       } else if (dec === "()") {
-        decoratedParts = parts.map(part => `(${part})`);
+        decoratedParts = parts.map((part) => `(${part})`);
       } else if (dec === "{}") {
-        decoratedParts = parts.map(part => `{${part}}`);
+        decoratedParts = parts.map((part) => `{${part}}`);
       } else if (dec === "") {
         decoratedParts = parts;
       } else {
-        decoratedParts = parts.map(part => `${dec}${part}${dec}`);
+        decoratedParts = parts.map((part) => `${dec}${part}${dec}`);
       }
 
       // 使用指定的输出分隔符
@@ -299,16 +298,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action
-            title={t.labels.copyResult}
-            onAction={copyToClipboard}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-          <Action
-            title={t.labels.reset}
-            onAction={resetForm}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <Action title={t.labels.copyResult} onAction={copyToClipboard} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action title={t.labels.reset} onAction={resetForm} shortcut={{ modifiers: ["cmd"], key: "r" }} />
         </ActionPanel>
       }
     >
@@ -321,7 +312,7 @@ export default function Command() {
         onChange={setInputString}
         error={error}
       />
-      
+
       <Form.TextField
         id="removeChars"
         title={t.labels.removeChars}
@@ -330,7 +321,7 @@ export default function Command() {
         onChange={setRemoveChars}
         info={t.labels.removeCharsInfo}
       />
-      
+
       <Form.Dropdown
         id="separator"
         title={t.labels.inputSeparator}
@@ -339,11 +330,7 @@ export default function Command() {
         info={detectedSeparator ? `${t.labels.detectedSeparator}: ${detectedSeparator}` : t.labels.separatorInfo}
       >
         {t.separatorOptions.map((option) => (
-          <Form.Dropdown.Item
-            key={option.value}
-            value={option.value}
-            title={option.title}
-          />
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
 
@@ -359,11 +346,7 @@ export default function Command() {
         info={t.labels.decoratorInfo}
       >
         {t.decoratorOptions.map((option) => (
-          <Form.Dropdown.Item
-            key={option.value}
-            value={option.value}
-            title={option.title}
-          />
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
 
@@ -375,11 +358,7 @@ export default function Command() {
         info={t.labels.outputSeparatorInfo}
       >
         {t.outputSeparatorOptions.map((option) => (
-          <Form.Dropdown.Item
-            key={option.value}
-            value={option.value}
-            title={option.title}
-          />
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
 
@@ -392,10 +371,7 @@ export default function Command() {
         info={t.labels.removeDuplicatesInfo}
       />
 
-      <Form.Description
-        title={t.labels.previewResult}
-        text={formattedResult || t.labels.previewPlaceholder}
-      />
+      <Form.Description title={t.labels.previewResult} text={formattedResult || t.labels.previewPlaceholder} />
     </Form>
   );
 }

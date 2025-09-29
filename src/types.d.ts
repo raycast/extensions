@@ -1,21 +1,21 @@
-declare module '@raycast/api' {
-  import { ReactElement, ReactNode } from 'react';
-  
+declare module "@raycast/api" {
+  import { ReactElement, ReactNode } from "react";
+
   export interface FormProps {
     actions?: ReactNode;
     children?: ReactNode;
   }
-  
+
   export interface ActionPanelProps {
     children?: ReactNode;
   }
-  
+
   export interface ActionProps {
     title: string;
     onAction?: () => void;
     shortcut?: { modifiers: string[]; key: string };
   }
-  
+
   export interface TextAreaProps {
     id: string;
     title: string;
@@ -24,7 +24,7 @@ declare module '@raycast/api' {
     onChange?: (value: string) => void;
     error?: string;
   }
-  
+
   export interface TextFieldProps {
     id: string;
     title: string;
@@ -33,7 +33,7 @@ declare module '@raycast/api' {
     onChange?: (value: string) => void;
     info?: string;
   }
-  
+
   export interface DropdownProps {
     id: string;
     title: string;
@@ -42,12 +42,12 @@ declare module '@raycast/api' {
     children?: ReactNode;
     info?: string;
   }
-  
+
   export interface DropdownItemProps {
     value: string;
     title: string;
   }
-  
+
   export interface CheckboxProps {
     id: string;
     title: string;
@@ -56,20 +56,20 @@ declare module '@raycast/api' {
     onChange?: (value: boolean) => void;
     info?: string;
   }
-  
+
   export interface DescriptionProps {
     title: string;
     text: string;
   }
-  
+
   export namespace Toast {
     export enum Style {
-      Success = 'success',
-      Failure = 'failure',
-      Animated = 'animated'
+      Success = "success",
+      Failure = "failure",
+      Animated = "animated",
     }
   }
-  
+
   export const Form: {
     (props: FormProps): ReactElement;
     TextArea: (props: TextAreaProps) => ReactElement;
@@ -82,7 +82,7 @@ declare module '@raycast/api' {
     Description: (props: DescriptionProps) => ReactElement;
     Separator: () => ReactElement;
   };
-  
+
   export const ActionPanel: (props: ActionPanelProps) => ReactElement;
   export const Action: (props: ActionProps) => ReactElement;
   export const Clipboard: {
