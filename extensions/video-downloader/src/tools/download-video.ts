@@ -7,6 +7,7 @@ import {
   getytdlPath,
   getffmpegPath,
   getffprobePath,
+  sanitizeVideoTitle,
 } from "../utils.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -83,7 +84,7 @@ export default async function tool(input: Input) {
   return {
     downloadedPath: filePath,
     fileName: path.basename(filePath),
-    title: video.title,
+    title: sanitizeVideoTitle(video.title),
     duration: video.duration,
   };
 }

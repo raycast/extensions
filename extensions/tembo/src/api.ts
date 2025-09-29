@@ -81,9 +81,9 @@ export interface Issue {
   model?: string;
   createdAt: string;
   updatedAt: string;
-  issueSource: IssueSource;
-  solutions: Solution[];
-  tags: IssueTag[];
+  issueSource?: IssueSource;
+  solutions?: Solution[];
+  tags?: IssueTag[];
 }
 
 export interface IssueListResponse {

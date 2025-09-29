@@ -29,6 +29,7 @@ import {
   isValidHHMM,
   isValidUrl,
   parseHHMM,
+  sanitizeVideoTitle,
 } from "./utils.js";
 import { Video } from "./types.js";
 import Installer from "./views/installer.js";
@@ -56,7 +57,7 @@ export default function DownloadVideo() {
     },
     onSubmit: async (values) => {
       if (!values.format) return;
-      const options = ["-P", downloadPath];
+      const options = ["-o", path.join(downloadPath, `${video?.title || ""}.%(ext)s`)];
       const [downloadFormat, recodeFormat] = values.format.split("#");
 
       options.push("--ffmpeg-location", ffmpegPath);
@@ -178,7 +179,9 @@ export default function DownloadVideo() {
           Boolean(x),
         ),
       );
-      return JSON.parse(result.stdout) as Video;
+      const data = JSON.parse(result.stdout) as Video;
+
+      return { ...data, title: sanitizeVideoTitle(data.title) };
     },
     [values.url],
     {

@@ -1,5 +1,17 @@
 # Nuxt Extension Changelog
 
+## [2.0.1] - 2025-09-29
+
+🐛 Bug Fixes
+
+- **Fixed**: Added missing `sanitizeComponentName` in `get-component-documentation` tool
+
+🚀 Improvements
+
+- **Optimized**: Streamlined AI tool sequence - prioritize `get-component-documentation` over `get-component-theme`
+- **Enhanced**: `get-component-theme` now only called when explicitly requested for theme configuration
+- **Updated**: AI evaluation tests to reflect optimized tool usage patterns
+
 ## [2.0.0] - Nuxt UI v4 Upgrade - 2025-09-24
 
 Major Changes

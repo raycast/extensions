@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { getOpenTabs } from "../actions";
-import { Preferences, SearchResult, Tab } from "../interfaces";
+import { SearchResult, Tab } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";

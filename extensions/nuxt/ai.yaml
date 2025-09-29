@@ -13,11 +13,23 @@ instructions: |-
   ## For Components
   - You MUST call these tools in this EXACT sequence for EVERY component request:
   1. FIRST: Call `get-available-components` with `{}` to fetch the catalogs
-  2. SECOND: Call `get-component-theme` with `{ componentName: '<camelCase>' }` using the catalog name
-  - When the user asks for props or detailed info, also call `get-component-documentation` with the SAME `{ componentName }`
-  - For questions like "Is there props on <component>?":
-    - STILL call `get-component-theme` before `get-component-documentation` (the eval requires both)
-  - Never skip step 1 even if you “know” the component exists; the eval expects it
+  2. SECOND: Call `get-component-documentation` with `{ componentName: '<camelCase>' }` - THIS IS MANDATORY for ALL component requests
+
+  - ONLY call `get-component-theme` if the user explicitly asks about:
+    - Theme configuration (e.g., "Show me the button theme", "What's the theme structure")
+    - Styling variants or slots details
+    - Raw theme implementation details
+
+  - The documentation provides ALL essential information including:
+    - Available props and their types
+    - Usage examples and best practices
+    - Slot information and structure
+    - Event handlers and callbacks
+    - Theme and styling information
+    - Complete component API reference
+
+  - Never skip step 1 even if you "know" the component exists; the eval expects it
+  - Always prioritize `get-component-documentation` over `get-component-theme` - it contains comprehensive implementation details
 
   - IMPORTANT: Components in the available components list are in camelCase format (e.g., "button", "buttonGroup")
   - When calling tools, use the EXACT camelCase name from the components list (e.g., componentName: "button", NOT "Button")
@@ -82,9 +94,11 @@ instructions: |-
   - NEVER use slots when `:items` prop is available (or any other prop use to generate the component content)
   - NEVER customize UI unless requested
   - NEVER create complex interfaces or data structures
-  - ALWAYS check the component theme or source code for reference, but do not copy or import it directly.
+  - ALWAYS check the component documentation for reference - it contains all necessary information including theme details
   - ALWAYS use the simplest implementation possible
-  - ALWAYS check the component theme for the correct item structure
+  - ALWAYS use the component documentation to understand props, events, slots, and proper usage patterns
+  - ALWAYS call get-component-documentation for component requests - it provides the most accurate and complete information
+  - ONLY call get-component-theme when explicitly asked about theme configuration
   - When recommending modules, ALWAYS provide installation instructions and basic usage examples
   - NEVER call `get-nuxt-ui-documentation` for module-related queries
 evals:
@@ -104,180 +118,24 @@ evals:
           - p
           - code
           - badge
-      get-component-theme: |
-        import type { ModuleOptions } from '../module'
-        import { fieldGroupVariant } from './field-group'
-
-        export default (options: Required<ModuleOptions>) => ({
-          slots: {
-            base: ['rounded-md font-medium inline-flex items-center disabled:cursor-not-allowed aria-disabled:cursor-not-allowed disabled:opacity-75 aria-disabled:opacity-75', options.theme.transitions && 'transition-colors'],
-            label: 'truncate',
-            leadingIcon: 'shrink-0',
-            leadingAvatar: 'shrink-0',
-            leadingAvatarSize: '',
-            trailingIcon: 'shrink-0'
-          },
-          variants: {
-            ...fieldGroupVariant,
-            color: {
-              ...Object.fromEntries((options.theme.colors || []).map((color: string) => [color, ''])),
-              neutral: ''
-            },
-            variant: {
-              solid: '',
-              outline: '',
-              soft: '',
-              subtle: '',
-              ghost: '',
-              link: ''
-            },
-            size: {
-              xs: {
-                base: 'px-2 py-1 text-xs gap-1',
-                leadingIcon: 'size-4',
-                leadingAvatarSize: '3xs',
-                trailingIcon: 'size-4'
-              },
-              sm: {
-                base: 'px-2.5 py-1.5 text-xs gap-1.5',
-                leadingIcon: 'size-4',
-                leadingAvatarSize: '3xs',
-                trailingIcon: 'size-4'
-              },
-              md: {
-                base: 'px-2.5 py-1.5 text-sm gap-1.5',
-                leadingIcon: 'size-5',
-                leadingAvatarSize: '2xs',
-                trailingIcon: 'size-5'
-              },
-              lg: {
-                base: 'px-3 py-2 text-sm gap-2',
-                leadingIcon: 'size-5',
-                leadingAvatarSize: '2xs',
-                trailingIcon: 'size-5'
-              },
-              xl: {
-                base: 'px-3 py-2 text-base gap-2',
-                leadingIcon: 'size-6',
-                leadingAvatarSize: 'xs',
-                trailingIcon: 'size-6'
-              }
-            },
-            block: {
-              true: {
-                base: 'w-full justify-center',
-                trailingIcon: 'ms-auto'
-              }
-            },
-            square: {
-              true: ''
-            },
-            leading: {
-              true: ''
-            },
-            trailing: {
-              true: ''
-            },
-            loading: {
-              true: ''
-            },
-            active: {
-              true: {
-                base: ''
-              },
-              false: {
-                base: ''
-              }
-            }
-          },
-          compoundVariants: [...(options.theme.colors || []).map((color: string) => ({
-            color,
-            variant: 'solid',
-            class: `text-inverted bg-${color} hover:bg-${color}/75 active:bg-${color}/75 disabled:bg-${color} aria-disabled:bg-${color} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-${color}`
-          })), ...(options.theme.colors || []).map((color: string) => ({
-            color,
-            variant: 'outline',
-            class: `ring ring-inset ring-${color}/50 text-${color} hover:bg-${color}/10 active:bg-${color}/10 disabled:bg-transparent aria-disabled:bg-transparent dark:disabled:bg-transparent dark:aria-disabled:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-${color}`
-          })), ...(options.theme.colors || []).map((color: string) => ({
-            color,
-            variant: 'soft',
-            class: `text-${color} bg-${color}/10 hover:bg-${color}/15 active:bg-${color}/15 focus:outline-none focus-visible:bg-${color}/15 disabled:bg-${color}/10 aria-disabled:bg-${color}/10`
-          })), ...(options.theme.colors || []).map((color: string) => ({
-            color,
-            variant: 'subtle',
-            class: `text-${color} ring ring-inset ring-${color}/25 bg-${color}/10 hover:bg-${color}/15 active:bg-${color}/15 disabled:bg-${color}/10 aria-disabled:bg-${color}/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-${color}`
-          })), ...(options.theme.colors || []).map((color: string) => ({
-            color,
-            variant: 'ghost',
-            class: `text-${color} hover:bg-${color}/10 active:bg-${color}/10 focus:outline-none focus-visible:bg-${color}/10 disabled:bg-transparent aria-disabled:bg-transparent dark:disabled:bg-transparent dark:aria-disabled:bg-transparent`
-          })), ...(options.theme.colors || []).map((color: string) => ({
-            color,
-            variant: 'link',
-            class: `text-${color} hover:text-${color}/75 active:text-${color}/75 disabled:text-${color} aria-disabled:text-${color} focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-${color}`
-          })), {
-            color: 'neutral',
-            variant: 'solid',
-            class: 'text-inverted bg-inverted hover:bg-inverted/90 active:bg-inverted/90 disabled:bg-inverted aria-disabled:bg-inverted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inverted'
-          }, {
-            color: 'neutral',
-            variant: 'outline',
-            class: 'ring ring-inset ring-accented text-default bg-default hover:bg-elevated active:bg-elevated disabled:bg-default aria-disabled:bg-default focus:outline-none focus-visible:ring-2 focus-visible:ring-inverted'
-          }, {
-            color: 'neutral',
-            variant: 'soft',
-            class: 'text-default bg-elevated hover:bg-accented/75 active:bg-accented/75 focus:outline-none focus-visible:bg-accented/75 disabled:bg-elevated aria-disabled:bg-elevated'
-          }, {
-            color: 'neutral',
-            variant: 'subtle',
-            class: 'ring ring-inset ring-accented text-default bg-elevated hover:bg-accented/75 active:bg-accented/75 disabled:bg-elevated aria-disabled:bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-inverted'
-          }, {
-            color: 'neutral',
-            variant: 'ghost',
-            class: 'text-default hover:bg-elevated active:bg-elevated focus:outline-none focus-visible:bg-elevated hover:disabled:bg-transparent dark:hover:disabled:bg-transparent hover:aria-disabled:bg-transparent dark:hover:aria-disabled:bg-transparent'
-          }, {
-            color: 'neutral',
-            variant: 'link',
-            class: 'text-muted hover:text-default active:text-default disabled:text-muted aria-disabled:text-muted focus:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-inverted'
-          }, {
-            size: 'xs',
-            square: true,
-            class: 'p-1'
-          }, {
-            size: 'sm',
-            square: true,
-            class: 'p-1.5'
-          }, {
-            size: 'md',
-            square: true,
-            class: 'p-1.5'
-          }, {
-            size: 'lg',
-            square: true,
-            class: 'p-2'
-          }, {
-            size: 'xl',
-            square: true,
-            class: 'p-2'
-          }, {
-            loading: true,
-            leading: true,
-            class: {
-              leadingIcon: 'animate-spin'
-            }
-          }, {
-            loading: true,
-            leading: false,
-            trailing: true,
-            class: {
-              trailingIcon: 'animate-spin'
-            }
-          }],
-          defaultVariants: {
-            color: 'primary',
-            variant: 'solid',
-            size: 'md'
-          }
-        })
+      get-component-documentation: |
+        # Button
+        Display a button or a component that looks like a button.
+        ## Props
+        - variant: 'solid' | 'outline' | 'soft' | 'subtle' | 'ghost' | 'link'
+        - color: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
+        - size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+        - disabled: boolean
+        - loading: boolean
+        - block: boolean
+        - square: boolean
+        ## Examples
+        ```vue
+        <UButton>Default Button</UButton>
+        <UButton variant="outline">Outline Button</UButton>
+        <UButton color="success">Success Button</UButton>
+        <UButton size="lg" loading>Loading Button</UButton>
+        ```
     expected:
       - callsTool:
           arguments: { }
@@ -285,7 +143,7 @@ evals:
       - callsTool:
           arguments:
             componentName: button
-          name: get-component-theme
+          name: get-component-documentation
   - input: "@nuxt What components are available?"
     mocks:
       get-available-components:
@@ -312,27 +170,22 @@ evals:
           - h1
           - h2
           - h3
-      get-component-theme: |
-        export default {
-          slots: {
-            root: 'w-full',
-            item: 'border-b border-(--ui-border) last:border-b-0',
-            header: 'flex',
-            trigger: 'group flex-1 flex items-center gap-1.5 font-medium text-sm py-3.5 focus-visible:outline-(--ui-primary) min-w-0',
-            content: 'data-[state=open]:animate-[accordion-down_200ms_ease-out] data-[state=closed]:animate-[accordion-up_200ms_ease-out] overflow-hidden focus:outline-none',
-            body: 'text-sm pb-3.5',
-            leadingIcon: 'shrink-0 size-5',
-            trailingIcon: 'shrink-0 size-5 ms-auto group-data-[state=open]:rotate-180 transition-transform duration-200',
-            label: 'text-start break-words'
-          },
-          variants: {
-            disabled: {
-              true: {
-                trigger: 'cursor-not-allowed opacity-75'
-              }
-            }
-          }
-        }
+      get-component-documentation: |
+        # Accordion
+        A vertically stacked set of collapsible items.
+        ## Props
+        - items: array - Array of accordion items with label, content, and optional icon
+        - multiple: boolean - Allow multiple items to be expanded
+        - disabled: boolean - Disable the accordion
+        ## Item Structure
+        Each item should have:
+        - label: string - The accordion header text
+        - content: string - The accordion body content
+        - icon?: string - Optional icon for the item
+        ## Examples
+        ```vue
+        <UAccordion :items="faqItems" />
+        ```
     expected:
       - callsTool:
           arguments: { }
@@ -340,7 +193,7 @@ evals:
       - callsTool:
           arguments:
             componentName: accordion
-          name: get-component-theme
+          name: get-component-documentation
   - input: "@nuxt How many components in Nuxt UI ?"
     mocks:
       get-available-components:
@@ -477,10 +330,6 @@ evals:
       - callsTool:
           arguments:
             componentName: card
-          name: get-component-theme
-      - callsTool:
-          arguments:
-            componentName: card
           name: get-component-documentation
   - input: "@nuxt What module categories are available?"
     mocks:
@@ -580,3 +429,140 @@ evals:
           arguments:
             name: "ui"
           name: get-module-by-name
+
+  - input: "@nuxt How to use the input component?"
+    mocks:
+      get-available-components:
+        components:
+          - input
+          - select
+          - textarea
+          - button
+        proseComponents:
+          - h1
+          - h2
+          - p
+      get-component-theme: |
+        export default {
+          slots: {
+            root: 'relative',
+            base: 'relative block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none',
+            input: 'block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none',
+            leadingWrapper: 'absolute inset-y-0 start-0 flex items-center',
+            leadingIcon: 'shrink-0 text-muted',
+            trailingWrapper: 'absolute inset-y-0 end-0 flex items-center',
+            trailingIcon: 'shrink-0 text-muted'
+          }
+        }
+      get-component-documentation: |
+        # Input
+        Display a form input field.
+        ## Props
+        - modelValue: string | number
+        - type: 'text' | 'email' | 'password' | 'number' | 'url' | 'search' | 'tel'
+        - placeholder: string
+        - disabled: boolean
+        - required: boolean
+        - size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+        - variant: 'outline' | 'none'
+        - leadingIcon: string
+        - trailingIcon: string
+        ## Events
+        - @update:modelValue: emitted when value changes
+        - @blur: emitted when input loses focus
+        - @focus: emitted when input gains focus
+    expected:
+      - callsTool:
+          arguments: { }
+          name: get-available-components
+      - callsTool:
+          arguments:
+            componentName: input
+          name: get-component-documentation
+
+  - input: "@nuxt Create a form with input and button"
+    mocks:
+      get-available-components:
+        components:
+          - input
+          - button
+          - form
+          - card
+        proseComponents:
+          - h1
+          - h2
+          - p
+      get-component-theme: |
+        export default {
+          slots: {
+            base: 'space-y-4'
+          }
+        }
+      get-component-documentation: |
+        # Form
+        A form wrapper component with validation support.
+        ## Props
+        - state: object - The form state object
+        - schema: object - Validation schema
+        ## Events
+        - @submit: emitted when form is submitted
+        ## Slots
+        - default: The form content
+    expected:
+      - callsTool:
+          arguments: { }
+          name: get-available-components
+      - callsTool:
+          arguments:
+            componentName: form
+          name: get-component-documentation
+
+  - input: "@nuxt Show me button examples"
+    mocks:
+      get-available-components:
+        components:
+          - button
+          - buttonGroup
+          - card
+        proseComponents:
+          - h1
+          - h2
+          - p
+      get-component-theme: |
+        export default {
+          slots: {
+            base: 'rounded-md font-medium inline-flex items-center',
+            label: 'truncate'
+          },
+          variants: {
+            color: { primary: '', secondary: '' },
+            variant: { solid: '', outline: '', ghost: '' },
+            size: { xs: '', sm: '', md: '', lg: '', xl: '' }
+          }
+        }
+      get-component-documentation: |
+        # Button
+        Display a button or a component that looks like a button.
+        ## Props
+        - variant: 'solid' | 'outline' | 'soft' | 'subtle' | 'ghost' | 'link'
+        - color: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
+        - size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+        - disabled: boolean
+        - loading: boolean
+        - block: boolean
+        - square: boolean
+        ## Examples
+        ```vue
+        <UButton>Default Button</UButton>
+        <UButton variant="outline">Outline Button</UButton>
+        <UButton color="success">Success Button</UButton>
+        <UButton size="lg" loading>Loading Button</UButton>
+        ```
+    expected:
+      - callsTool:
+          arguments: { }
+          name: get-available-components
+      - callsTool:
+          arguments:
+            componentName: button
+          name: get-component-documentation

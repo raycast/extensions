@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "onbo",
+  "version": "1.1.0",
   "title": "Onbo: New Grad & Internship Tracker",
   "description": "Browse and save student and entry-level roles from leading tech companies.",
   "icon": "extension-icon.png",
@@ -25,6 +26,10 @@
     {
       "name": "search-jobs",
       "title": "Browse New Grad Roles",
+      "alias": [
+        "grad",
+        "ng"
+      ],
       "description": "Browse and track entry-level opportunities by company and role type.",
       "mode": "view"
     },
@@ -37,11 +42,57 @@
     {
       "name": "applied-roles",
       "title": "My Applications",
+      "alias": [
+        "applied",
+        "apps"
+      ],
       "description": "View and manage roles you've applied to.",
       "mode": "view"
     }
   ],
   "preferences": [
+    {
+      "name": "jobLinksBrowser",
+      "title": "Open Job Links In",
+      "type": "appPicker",
+      "description": "Choose the browser to open job listings. This can be different from your Mac's default browser.",
+      "default": "Safari",
+      "required": true
+    },
+    {
+      "name": "defaultCategory",
+      "title": "Default Category",
+      "type": "dropdown",
+      "description": "Select the default category to filter job listings.",
+      "default": "All",
+      "required": false,
+      "data": [
+        {
+          "title": "All",
+          "value": "All"
+        },
+        {
+          "title": "Software Engineering",
+          "value": "Software Engineering"
+        },
+        {
+          "title": "Data Science, AI & Machine Learning",
+          "value": "Data Science, AI & Machine Learning"
+        },
+        {
+          "title": "Hardware Engineering",
+          "value": "Hardware Engineering"
+        },
+        {
+          "title": "Quantitative Finance",
+          "value": "Quantitative Finance"
+        },
+        {
+          "title": "Product Management",
+          "value": "Product Management"
+        }
+      ]
+    },
     {
       "name": "autoSaveOnOpen",
       "type": "checkbox",
@@ -50,14 +101,6 @@
       "description": "Automatically save roles to My Applications when you open or copy a listing.",
       "label": "Enable Auto-Save",
       "required": false
-    },
-    {
-      "name": "jobLinksBrowser",
-      "title": "Open Job Links In",
-      "type": "appPicker",
-      "description": "Choose the browser to open job listings. This can be different from your Mac’s default browser.",
-      "default": "Safari",
-      "required": true
     }
   ],
   "dependencies": {
@@ -79,5 +122,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

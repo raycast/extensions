@@ -191,3 +191,40 @@ export const getFormatTitle = (format: Format) =>
   [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
     .filter((x) => Boolean(x))
     .join(" | ");
+
+export function sanitizeVideoTitle(name: string): string {
+  const maxLen = 200;
+  const invalidChars = isWindows ? ["<", ">", ":", '"', "/", "\\", "|", "?", "*"] : [":"];
+
+  // Trim and remove invalid characters
+  let safe = name.trim();
+  for (const char of invalidChars) {
+    safe = safe.replaceAll(char, "");
+  }
+
+  // Remove control characters
+  safe = Array.from(safe)
+    .filter((char) => char.charCodeAt(0) >= 32)
+    .join("");
+
+  // Remove trailing dots and spaces on Windows
+  if (isWindows) safe = safe.replace(/[. ]+$/, "");
+
+  // Replace double or more spaces with single space
+  safe = safe.replace(/\s+/g, " ");
+
+  // Hard truncate to max length
+  safe = safe.slice(0, maxLen);
+
+  // Truncate to max length at a sensible boundary if possible (like a punctuation mark)
+  const cutoffSymbols = /[.!?]/g;
+  const match = [...safe.matchAll(cutoffSymbols)]
+    .map((m) => m.index)
+    .filter((idx) => idx !== undefined && idx <= maxLen);
+
+  if (match.length > 0) {
+    safe = safe.slice(0, match[match.length - 1]);
+  }
+
+  return safe.trim() || "untitled";
+}

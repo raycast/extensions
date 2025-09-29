@@ -1,5 +1,10 @@
 # Font Awesome Changelog
 
+## [Fix: Search would get stuck] - 2025-09-29
+
+- Fixed issue where search would get stuck since token was not persisted (ref: [Issue #21781](https://github.com/raycast/extensions/issues/21781))
+- Simplified some code by replacing `useEffect` with `useLocalStorage`
+
 ## [Fix: Unused Dependencies deleted] - 2025-09-15
 
 - Remove `svg-to-png` and `change-case` dependencies
