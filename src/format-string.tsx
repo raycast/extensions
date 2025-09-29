@@ -52,6 +52,7 @@ export default function Command() {
   const [separator, setSeparator] = useState<string>("");
   const [decorator, setDecorator] = useState<string>("'");
   const [outputSeparator, setOutputSeparator] = useState<string>(",");
+  const [removeDuplicates, setRemoveDuplicates] = useState<boolean>(true);
   const [formattedResult, setFormattedResult] = useState<string>("");
   const [detectedSeparator, setDetectedSeparator] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -72,7 +73,7 @@ export default function Command() {
   };
 
   // 格式化字符串的核心逻辑
-  const formatString = (input: string, removeCh: string, sep: string, dec: string, outSep: string): string => {
+  const formatString = (input: string, removeCh: string, sep: string, dec: string, outSep: string, dedup: boolean): string => {
     if (!input.trim()) {
       return "";
     }
@@ -118,10 +119,15 @@ export default function Command() {
       const finalSeparator = actualSeparator === "\\t" ? "\t" : actualSeparator === "\\n" ? "\n" : actualSeparator;
       
       // 分割字符串并去除空白
-      const parts = processedInput.split(finalSeparator).map(part => part.trim()).filter(part => part.length > 0);
+      let parts = processedInput.split(finalSeparator).map(part => part.trim()).filter(part => part.length > 0);
       
       if (parts.length === 0) {
         return "";
+      }
+
+      // 去重处理
+      if (dedup) {
+        parts = Array.from(new Set(parts));
       }
 
       // 应用修饰符
@@ -151,13 +157,13 @@ export default function Command() {
   useEffect(() => {
     try {
       setError("");
-      const result = formatString(inputString, removeChars, separator, decorator, outputSeparator);
+      const result = formatString(inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates);
       setFormattedResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "未知错误");
       setFormattedResult("");
     }
-  }, [inputString, removeChars, separator, decorator, outputSeparator]);
+  }, [inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates]);
 
   // 复制到剪贴板
   const copyToClipboard = async () => {
@@ -189,6 +195,7 @@ export default function Command() {
     setSeparator("");
     setDecorator("'");
     setOutputSeparator(",");
+    setRemoveDuplicates(true);
     setFormattedResult("");
     setDetectedSeparator("");
     setError("");
@@ -281,6 +288,15 @@ export default function Command() {
           />
         ))}
       </Form.Dropdown>
+
+      <Form.Checkbox
+        id="removeDuplicates"
+        title="去重选项"
+        label="移除重复项"
+        value={removeDuplicates}
+        onChange={setRemoveDuplicates}
+        info="自动移除输出结果中的重复元素"
+      />
 
       <Form.Description
         title="预览结果"
