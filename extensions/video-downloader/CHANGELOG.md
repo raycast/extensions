@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Fix: Long Video Name Compatibility] - {PR_MERGE_DATE}
+## [Fix: Long Video Name Compatibility] - 2025-09-29
 
 - Resolved issues with long video names on Windows and macOS.
 - Automatically removes invalid characters from video file names to ensure compatibility.
