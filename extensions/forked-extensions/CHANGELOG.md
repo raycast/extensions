@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-29
 
 - Add support for checking if commits are ahead
 - Add support for checking if the current branch is not "main"
