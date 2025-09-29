@@ -1,6 +1,6 @@
 # duan Changelog
 
-## [Show Last Visited in Actions] - 2025-09-28
+## [Show Last Visited in Actions] - {PR_MERGE_DATE}
 
 ### Added
 - New "Last Visited" action in the Actions panel for each link
