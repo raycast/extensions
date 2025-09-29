@@ -11,11 +11,14 @@ import {
 
 interface FormValues {
   inputString: string;
+  removeChars: string;
   separator: string;
   decorator: string;
+  outputSeparator: string;
 }
 
 const separatorOptions = [
+  { title: "自动检测", value: "" },
   { title: "逗号 (,)", value: "," },
   { title: "分号 (;)", value: ";" },
   { title: "空格 ( )", value: " " },
@@ -34,25 +37,88 @@ const decoratorOptions = [
   { title: "无修饰符", value: "" },
 ];
 
+const outputSeparatorOptions = [
+  { title: "逗号 (,)", value: "," },
+  { title: "分号 (;)", value: ";" },
+  { title: "空格 ( )", value: " " },
+  { title: "竖线 (|)", value: "|" },
+  { title: "制表符 (\\t)", value: "\t" },
+  { title: "换行符 (\\n)", value: "\n" },
+];
+
 export default function Command() {
   const [inputString, setInputString] = useState<string>("");
-  const [separator, setSeparator] = useState<string>(",");
+  const [removeChars, setRemoveChars] = useState<string>("");
+  const [separator, setSeparator] = useState<string>("");
   const [decorator, setDecorator] = useState<string>("'");
+  const [outputSeparator, setOutputSeparator] = useState<string>(",");
   const [formattedResult, setFormattedResult] = useState<string>("");
+  const [detectedSeparator, setDetectedSeparator] = useState<string>("");
   const [error, setError] = useState<string>("");
 
+  // 自动检测分隔符
+  const detectSeparator = (input: string): string => {
+    if (!input.trim()) return "";
+    
+    const separators = [",", ";", "|", " ", "\t", "\n"];
+    
+    for (const sep of separators) {
+      if (input.includes(sep)) {
+        return sep;
+      }
+    }
+    
+    return "";
+  };
+
   // 格式化字符串的核心逻辑
-  const formatString = (input: string, sep: string, dec: string): string => {
+  const formatString = (input: string, removeCh: string, sep: string, dec: string, outSep: string): string => {
     if (!input.trim()) {
       return "";
     }
 
     try {
+      let processedInput = input;
+      
+      // 移除指定字符
+      if (removeCh.trim()) {
+        const charsToRemove = removeCh.split('').map(char => 
+          char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        );
+        const removeRegex = new RegExp(`[${charsToRemove.join('')}]`, 'g');
+        processedInput = processedInput.replace(removeRegex, '');
+      }
+      
+      // 确定使用的分隔符
+      let actualSeparator = sep;
+      if (!actualSeparator) {
+        actualSeparator = detectSeparator(processedInput);
+        setDetectedSeparator(actualSeparator);
+      }
+      
+      if (!actualSeparator) {
+        // 如果没有检测到分隔符，将整个字符串作为单个元素
+        const trimmed = processedInput.trim();
+        if (!trimmed) return "";
+        
+        if (dec === "[]") {
+          return `[${trimmed}]`;
+        } else if (dec === "()") {
+          return `(${trimmed})`;
+        } else if (dec === "{}") {
+          return `{${trimmed}}`;
+        } else if (dec === "") {
+          return trimmed;
+        } else {
+          return `${dec}${trimmed}${dec}`;
+        }
+      }
+      
       // 处理特殊分隔符
-      const actualSeparator = sep === "\\t" ? "\t" : sep === "\\n" ? "\n" : sep;
+      const finalSeparator = actualSeparator === "\\t" ? "\t" : actualSeparator === "\\n" ? "\n" : actualSeparator;
       
       // 分割字符串并去除空白
-      const parts = input.split(actualSeparator).map(part => part.trim()).filter(part => part.length > 0);
+      const parts = processedInput.split(finalSeparator).map(part => part.trim()).filter(part => part.length > 0);
       
       if (parts.length === 0) {
         return "";
@@ -73,7 +139,9 @@ export default function Command() {
         decoratedParts = parts.map(part => `${dec}${part}${dec}`);
       }
 
-      return decoratedParts.join(",");
+      // 使用指定的输出分隔符
+      const finalOutputSeparator = outSep === "\\t" ? "\t" : outSep === "\\n" ? "\n" : outSep;
+      return decoratedParts.join(finalOutputSeparator);
     } catch (err) {
       throw new Error("格式化过程中发生错误");
     }
@@ -83,13 +151,13 @@ export default function Command() {
   useEffect(() => {
     try {
       setError("");
-      const result = formatString(inputString, separator, decorator);
+      const result = formatString(inputString, removeChars, separator, decorator, outputSeparator);
       setFormattedResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "未知错误");
       setFormattedResult("");
     }
-  }, [inputString, separator, decorator]);
+  }, [inputString, removeChars, separator, decorator, outputSeparator]);
 
   // 复制到剪贴板
   const copyToClipboard = async () => {
@@ -117,9 +185,12 @@ export default function Command() {
   // 重置表单
   const resetForm = () => {
     setInputString("");
-    setSeparator(",");
+    setRemoveChars("");
+    setSeparator("");
     setDecorator("'");
+    setOutputSeparator(",");
     setFormattedResult("");
+    setDetectedSeparator("");
     setError("");
   };
 
@@ -140,6 +211,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
+      {/* 输入区域 */}
       <Form.TextArea
         id="inputString"
         title="输入字符串"
@@ -149,11 +221,21 @@ export default function Command() {
         error={error}
       />
       
+      <Form.TextField
+        id="removeChars"
+        title="移除字符"
+        placeholder="输入要移除的字符，例如：()[]"
+        value={removeChars}
+        onChange={setRemoveChars}
+        info="指定要从输入字符串中移除的字符"
+      />
+      
       <Form.Dropdown
         id="separator"
-        title="分隔符"
+        title="输入分隔符"
         value={separator}
         onChange={setSeparator}
+        info={detectedSeparator ? `检测到分隔符: ${detectedSeparator}` : "自动检测或手动选择分隔符"}
       >
         {separatorOptions.map((option) => (
           <Form.Dropdown.Item
@@ -164,13 +246,34 @@ export default function Command() {
         ))}
       </Form.Dropdown>
 
+      {/* 分隔线 */}
+      <Form.Separator />
+
+      {/* 输出区域 */}
       <Form.Dropdown
         id="decorator"
         title="修饰符"
         value={decorator}
         onChange={setDecorator}
+        info="为每个元素添加的包装符号"
       >
         {decoratorOptions.map((option) => (
+          <Form.Dropdown.Item
+            key={option.value}
+            value={option.value}
+            title={option.title}
+          />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown
+        id="outputSeparator"
+        title="输出分隔符"
+        value={outputSeparator}
+        onChange={setOutputSeparator}
+        info="格式化结果中元素之间的分隔符"
+      >
+        {outputSeparatorOptions.map((option) => (
           <Form.Dropdown.Item
             key={option.value}
             value={option.value}
