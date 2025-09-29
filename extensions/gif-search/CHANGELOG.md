@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-09-29
 
 - Add a new action to paste a GIF into the front-most application
 
