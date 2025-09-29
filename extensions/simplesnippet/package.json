@@ -6,6 +6,10 @@
   "icon": "simple-snippet-icon.png",
   "author": "adroa",
   "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
   "commands": [
     {
       "name": "simplesnippet",

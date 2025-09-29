@@ -1,21 +1,6 @@
-import {
-  Form,
-  Detail,
-  LocalStorage,
-  Action,
-  ActionPanel,
-  Clipboard,
-  Icon,
-  popToRoot,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Form, Detail, Action, ActionPanel, Clipboard, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-
-const DEFAULT_ACTION_KEY = "defaultAction";
-const PROMPT_KEY = "prompt";
-const PROMPT_SELECTED_KEY = "promptSelected";
-const PROMPTS_COUNT_KEY = "promptsCount";
+import { StorageUtil } from "./storage";
 
 export default function Command() {
   const [prompt, setPrompt] = useState<string | null>(null);
@@ -43,33 +28,21 @@ export default function Command() {
 
   useEffect(() => {
     async function load() {
-      let promptSelectedAux = await LocalStorage.getItem(PROMPT_SELECTED_KEY);
-      promptSelectedAux = typeof promptSelectedAux === "number" ? promptSelectedAux : 0;
+      // Load selected prompt index
+      const promptSelectedIndex = await StorageUtil.getSelectedPromptIndex();
+      setPromptSelected(promptSelectedIndex);
 
-      setPromptSelected(promptSelectedAux);
+      // Load prompts count
+      const count = await StorageUtil.getPromptsCount();
+      setPromptsCount(count);
 
-      let promptsCountAux = await LocalStorage.getItem(PROMPTS_COUNT_KEY);
-      promptsCountAux = typeof promptsCountAux === "number" ? promptsCountAux : 1;
-      setPromptsCount(promptsCountAux);
-
-      let savedPrompt = await LocalStorage.getItem(PROMPT_KEY + promptSelectedAux);
-      savedPrompt = typeof savedPrompt === "string" ? savedPrompt : "";
-
+      // Load current prompt
+      const savedPrompt = await StorageUtil.getPrompt(promptSelectedIndex);
       setPrompt(savedPrompt);
 
-      const savedCutAsDefault = await LocalStorage.getItem(DEFAULT_ACTION_KEY);
-
-      switch (savedCutAsDefault) {
-        case 1:
-          setCutAsDefault(true);
-          break;
-        case 0:
-          setCutAsDefault(false);
-          break;
-        default:
-          await LocalStorage.setItem(DEFAULT_ACTION_KEY, 1);
-          break;
-      }
+      // Load default action setting
+      const isCutDefault = await StorageUtil.getDefaultAction();
+      setCutAsDefault(isCutDefault);
     }
     load();
   }, []);
@@ -90,39 +63,39 @@ export default function Command() {
   }
 
   async function switchPrompt(index: number) {
-    await LocalStorage.setItem(PROMPT_SELECTED_KEY, index);
-    const promptAux = await LocalStorage.getItem(PROMPT_KEY + index);
-    setPrompt(typeof promptAux === "string" ? promptAux : "");
+    await StorageUtil.setSelectedPromptIndex(index);
+    const promptText = await StorageUtil.getPrompt(index);
+    setPrompt(promptText);
     setPromptSelected(index);
   }
 
   async function duplicatePrompt() {
-    await LocalStorage.setItem(PROMPT_SELECTED_KEY, promptsCount);
+    await StorageUtil.setSelectedPromptIndex(promptsCount);
     setPromptSelected(promptsCount);
 
-    await LocalStorage.setItem(PROMPTS_COUNT_KEY, promptsCount + 1);
+    await StorageUtil.setPromptsCount(promptsCount + 1);
     setPromptsCount(promptsCount + 1);
 
-    await LocalStorage.setItem(PROMPT_KEY + promptsCount, prompt as string);
+    await StorageUtil.setPrompt(promptsCount, prompt as string);
   }
 
   async function reloadPrompt() {
-    const aux = await LocalStorage.getItem(PROMPT_KEY + promptSelected);
-    setPrompt(aux as string);
+    const promptText = await StorageUtil.getPrompt(promptSelected);
+    setPrompt(promptText);
   }
 
   async function deletePrompt() {
-    await LocalStorage.removeItem(PROMPT_KEY + promptSelected);
+    await StorageUtil.removePrompt(promptSelected);
 
     if (promptSelected + 1 < promptsCount) {
       for (let i = promptSelected + 1; i < promptsCount; i++) {
-        const aux = await LocalStorage.getItem(PROMPT_KEY + i);
-        await LocalStorage.removeItem(PROMPT_KEY + i);
-        await LocalStorage.setItem(PROMPT_KEY + (i - 1), aux as string);
+        const nextPrompt = await StorageUtil.getPrompt(i);
+        await StorageUtil.removePrompt(i);
+        await StorageUtil.setPrompt(i - 1, nextPrompt);
       }
     }
 
-    await LocalStorage.setItem(PROMPTS_COUNT_KEY, promptsCount - 1);
+    await StorageUtil.setPromptsCount(promptsCount - 1);
     setPromptsCount(promptsCount - 1);
 
     if (promptSelected + 1 >= promptsCount) {
@@ -250,7 +223,7 @@ export default function Command() {
                     shortcut={{ modifiers: ["ctrl"], key: "." }}
                     onAction={async () => {
                       await switchPrompt(promptsCount);
-                      await LocalStorage.setItem(PROMPTS_COUNT_KEY, promptsCount + 1);
+                      await StorageUtil.setPromptsCount(promptsCount + 1);
                       setPromptsCount(promptsCount + 1);
                     }}
                   />
@@ -269,7 +242,7 @@ export default function Command() {
                     shortcut={{ modifiers: ["ctrl"], key: "=" }}
                     onAction={async () => {
                       await switchPrompt(promptsCount);
-                      await LocalStorage.setItem(PROMPTS_COUNT_KEY, promptsCount + 1);
+                      await StorageUtil.setPromptsCount(promptsCount + 1);
                       setPromptsCount(promptsCount + 1);
                     }}
                   />
@@ -295,8 +268,7 @@ export default function Command() {
               icon={Icon.Gear}
               onAction={async () => {
                 setCutAsDefault(!cutAsDefault);
-                await LocalStorage.setItem(DEFAULT_ACTION_KEY, !cutAsDefault);
-                await LocalStorage.setItem(DEFAULT_ACTION_KEY, !cutAsDefault);
+                await StorageUtil.setDefaultAction(!cutAsDefault);
               }}
             />
 
@@ -304,14 +276,14 @@ export default function Command() {
               title="Reset"
               icon={Icon.Warning}
               onAction={async () => {
-                await LocalStorage.clear();
+                await StorageUtil.clearAll();
                 setPrompt("");
                 setPromptSelected(0);
                 setPromptsCount(1);
 
                 await showToast({
                   style: Toast.Style.Success,
-                  title: "All PrompStore data has been reset",
+                  title: "All SimpleSnippet data has been reset",
                 });
               }}
             />
@@ -326,7 +298,7 @@ export default function Command() {
         value={prompt}
         onChange={async (value) => {
           setPrompt(value);
-          await LocalStorage.setItem(PROMPT_KEY + promptSelected, value);
+          await StorageUtil.setPrompt(promptSelected, value);
         }}
       />
       <Form.Description text={`characters: ${prompt?.length}`} />
