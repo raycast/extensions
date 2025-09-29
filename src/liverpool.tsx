@@ -74,8 +74,6 @@ const LFC_LOCAL_CREST_LIST = assetPath("liverpool-crest-32.png") || LFC_LOCAL_CR
 const LFC_LOCAL_CREST_HERO = assetPath("liverpool-crest-72.png") || LFC_LOCAL_CREST_BASE;
 const LFC_LOCAL_CREST_LIST_2X = assetPath("liverpool-crest-64.png") || LFC_LOCAL_CREST_LIST;
 const LFC_LOCAL_CREST_HERO_2X = assetPath("liverpool-crest-144.png") || LFC_LOCAL_CREST_HERO;
-const NEWS_ICON = Icon.Globe; // Icon.Newspaper is not defined in @raycast/api types
-
 const EPL_COLOR = Color.Purple;
 const UCL_COLOR: Color.ColorLike = {
   light: "#0B2F7A",
@@ -142,6 +140,33 @@ export default function LiverpoolCommand() {
         actions={
           <ActionPanel>
             <Action title="Open Next Match" onAction={() => push(<NextMatchDetail data={state.data ?? undefined} />)} />
+            <Action
+              title="Refresh Data"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={doRefresh}
+            />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        id="last"
+        icon={Icon.Clock}
+        title="Last Result"
+        subtitle={last ? formatLastTitle(last) : "No recent match"}
+        accessories={
+          last?.utcDate
+            ? [{ text: formatManila(last.utcDate) }, ...(last.competition ? [{ tag: last.competition }] : [])]
+            : last?.competition
+              ? [{ tag: last.competition }]
+              : []
+        }
+        actions={
+          <ActionPanel>
+            <Action
+              title="Open Match Summary"
+              onAction={() => push(<NextMatchDetail data={state.data ?? undefined} />)}
+            />
             <Action
               title="Refresh Data"
               icon={Icon.ArrowClockwise}
@@ -223,7 +248,7 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
   const next = local?.next ?? null;
   const upcoming = local?.upcoming ?? [];
   const last = local?.last ?? null;
-  const markdown = buildMarkdown(next, upcoming, last, local?.source ?? null);
+  const markdown = buildMarkdown(next);
   const prefs = getPreferenceValues<Preferences>();
 
   // Ensure crests for hero (Next Match) similar to FixturesList fallbacks
@@ -251,21 +276,27 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
                 const side = needByNorm[normalizeTeamName(r.team)];
                 if (side && r.crest) updates[side === "home" ? "homeBadge" : "awayBadge"] = r.crest;
               }
-            } catch {}
+            } catch (error) {
+              console.error("Failed to hydrate PL crests for next match", error);
+            }
             try {
               const g = await fetchUCLGroup(prefs);
               for (const r of g.rows) {
                 const side = needByNorm[normalizeTeamName(r.team)];
                 if (side && r.crest) updates[side === "home" ? "homeBadge" : "awayBadge"] = r.crest;
               }
-            } catch {}
+            } catch (error) {
+              console.error("Failed to hydrate UCL crests for next match", error);
+            }
             try {
               const compMap = await getFDCrestsForCompetitions(prefs.footballDataKey!, ["ELC", "FAC", "EL1", "EL2"]);
               for (const [team, crest] of Object.entries(compMap)) {
                 const side = needByNorm[normalizeTeamName(team)];
                 if (side && crest) updates[side === "home" ? "homeBadge" : "awayBadge"] = crest;
               }
-            } catch {}
+            } catch (error) {
+              console.error("Failed to hydrate domestic competition crests", error);
+            }
           }
         }
 
@@ -282,8 +313,8 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
         if (updates.homeBadge || updates.awayBadge) {
           setLocal((prev) => (prev ? { ...prev, next: { ...(prev.next as NextMatch), ...updates } } : prev));
         }
-      } catch {
-        // ignore
+      } catch (error) {
+        console.error("Failed to enrich next match crests", error);
       }
     })();
   }, [local?.next?.homeBadge, local?.next?.awayBadge, prefs.footballDataKey, prefs.sportsDbKey]);
@@ -313,58 +344,6 @@ function NextMatchDetail({ data }: { data?: MatchesData | null }) {
   );
 }
 
-function FixturesDetail({ data }: { data?: MatchesData | null }) {
-  const prefs = getPreferenceValues<Preferences>();
-  const [local, setLocal] = useState<MatchesData | null | undefined>(data);
-
-  // All merging now happens in fetchMatches; no extra augmentation here.
-
-  // Calculate upcoming AFTER potential state updates
-  const upcoming = [local?.next, ...(local?.upcoming ?? [])].filter(Boolean) as NextMatch[];
-
-  const md: string[] = [];
-  md.push(`# Upcoming Fixtures`);
-
-  // debug removed
-
-  if (upcoming.length) {
-    const tableLines: string[] = [];
-    tableLines.push(`| Date (PHT) | Fixture | Comp | H/A | Venue/City |`);
-    tableLines.push(`|:--|:--|:--|:--:|:--|`);
-    for (const m of upcoming) {
-      const date = escapeTableCell(m.utcDate ? formatManila(m.utcDate) : "TBD");
-      const fixture = escapeTableCell(formatNextTitle(m));
-      const comp = escapeTableCell(m.competition || "");
-      const ha = m.isHome ? "H" : "A";
-      const vc = escapeTableCell(displayVenueCity(m));
-      tableLines.push(`| ${date} | ${fixture} | ${comp} | ${ha} | ${vc} |`);
-    }
-    md.push(tableLines.join("\n"));
-  } else {
-    md.push("No upcoming fixtures found.");
-  }
-  return (
-    <Detail
-      isLoading={!local}
-      markdown={md.join("\n\n")}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Refresh Data"
-            icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={async () => {
-              const fresh = await fetchMatches(prefs, true);
-              setLocal(fresh);
-              showToast({ style: Toast.Style.Success, title: "Refreshed" });
-            }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
 function FixturesList({ data }: { data?: MatchesData | null }) {
   const prefs = getPreferenceValues<Preferences>();
   const [local, setLocal] = useState<MatchesData | null | undefined>(data);
@@ -376,8 +355,6 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
   const [groupBy, setGroupBy] = useState<"month" | "competition" | "none">("month");
   const [compFilter, setCompFilter] = useState<string>("ALL");
   const [haFilter, setHaFilter] = useState<"ALL" | "H" | "A">("ALL");
-
-  const fixtures = [local?.next, ...(local?.upcoming ?? [])].filter(Boolean) as NextMatch[];
 
   useEffect(() => {
     if (!local) return;
@@ -419,7 +396,8 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
         toFetch.map(async (t) => {
           try {
             results[t] = await getTeamBadge(t, prefs.sportsDbKey);
-          } catch {
+          } catch (error) {
+            console.error(`Failed to fetch badge for ${t}`, error);
             results[t] = null;
           }
         }),
@@ -450,7 +428,9 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
           const key = needByNorm[normalizeTeamName(r.team)];
           if (key) results[key] = r.crest;
         }
-      } catch {}
+      } catch (error) {
+        console.error("Failed to fetch PL crest fallbacks for fixtures", error);
+      }
       try {
         const g = await fetchUCLGroup(prefs);
         for (const r of g.rows) {
@@ -458,7 +438,9 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
           const key = needByNorm[normalizeTeamName(r.team)];
           if (key) results[key] = r.crest;
         }
-      } catch {}
+      } catch (error) {
+        console.error("Failed to fetch UCL crest fallbacks for fixtures", error);
+      }
       try {
         // Add English domestic comps that may include Championship/FA Cup/League One/Two clubs.
         const compMap = await getFDCrestsForCompetitions(prefs.footballDataKey!, [
@@ -471,7 +453,9 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
           const key = needByNorm[normalizeTeamName(team)];
           if (key && crest && !results[key]) results[key] = crest;
         }
-      } catch {}
+      } catch (error) {
+        console.error("Failed to fetch domestic crest fallbacks for fixtures", error);
+      }
       // Final static fallbacks by normalized name
       for (const want of need) {
         const norm = normalizeTeamName(want);
@@ -579,45 +563,6 @@ function FixturesList({ data }: { data?: MatchesData | null }) {
             );
           })}
         </List.Section>
-      ))}
-    </List>
-  );
-}
-
-function NewsList() {
-  const [loading, setLoading] = useState(true);
-  const [items, setItems] = useState<Array<{ title: string; link: string; date?: string; source?: string }>>([]);
-  useEffect(() => {
-    (async () => {
-      try {
-        const news = await fetchNews();
-        setItems(news);
-      } catch (e) {
-        showToast({ style: Toast.Style.Failure, title: "News Error", message: String(e) });
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-  return (
-    <List isLoading={loading} searchBarPlaceholder="Liverpool FC news">
-      {items.map((n, idx) => (
-        <List.Item
-          key={idx}
-          icon={NEWS_ICON}
-          title={n.title}
-          accessories={
-            [n.source ? { tag: n.source } : undefined, n.date ? { date: new Date(n.date) } : undefined].filter(
-              Boolean,
-            ) as any
-          }
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={n.link} />
-              <Action.CopyToClipboard content={n.link} />
-            </ActionPanel>
-          }
-        />
       ))}
     </List>
   );
@@ -907,7 +852,9 @@ async function fetchMatches(prefs: Preferences, force = false): Promise<MatchesD
           const last = fdCached.last ?? sdb.last ?? null;
           return { next: merged.next, upcoming: merged.upcoming, last, source: "combined" };
         }
-      } catch {}
+      } catch (error) {
+        console.error("Failed to reuse cached football-data response during merge", error);
+      }
       return sdb;
     }
 
@@ -931,27 +878,6 @@ async function fetchMatches(prefs: Preferences, force = false): Promise<MatchesD
     return await fetchFromTheSportsDB(prefs.sportsDbKey);
   }
   return data;
-}
-
-async function fetchNews() {
-  const url = "https://news.google.com/rss/search?q=Liverpool%20FC&hl=en-US&gl=US&ceid=US:en";
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`news ${res.status}`);
-  const xml = await res.text();
-  const items = Array.from(xml.matchAll(/<item>([\s\S]*?)<\/item>/g)).slice(0, 20);
-  function get(tag: string, s: string) {
-    const m = s.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "i"));
-    if (!m) return null;
-    return m[1].replace(/<!\[CDATA\[(.*?)\]\]>/gs, "$1").trim();
-  }
-  return items.map((m) => {
-    const chunk = m[1];
-    const title = get("title", chunk) || "Untitled";
-    const link = get("link", chunk) || "";
-    const date = get("pubDate", chunk) || undefined;
-    const src = get("source", chunk) || undefined;
-    return { title, link, date, source: src };
-  });
 }
 
 async function fetchFromFootballData(apiKey: string, sportsDbKey?: string): Promise<MatchesData> {
@@ -993,7 +919,7 @@ async function fetchFromFootballData(apiKey: string, sportsDbKey?: string): Prom
       .sort((a, b) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime());
   }
 
-  let upcomingArr: NextMatch[] = upcomingSorted.map((m) => ({
+  const upcomingArr: NextMatch[] = upcomingSorted.map((m) => ({
     utcDate: m.utcDate ?? null,
     competition: m.competition?.name ?? null,
     isHome: m.homeTeam?.id === LFC_FOOTBALLDATA_TEAM_ID,
@@ -1030,9 +956,11 @@ async function fetchFromFootballData(apiKey: string, sportsDbKey?: string): Prom
       }
     }
     if (fixes.length) await Promise.all(fixes);
-  } catch {}
+  } catch (error) {
+    console.error("Failed to hydrate crests for football-data fixtures", error);
+  }
 
-  let next: NextMatch | null = upcomingArr[0] ?? null;
+  const next: NextMatch | null = upcomingArr[0] ?? null;
   if (next) {
     // Fallback if crest missing from football-data (edge cases)
     if (!next.homeBadge) {
@@ -1208,12 +1136,7 @@ function scoreStringSafe(m: LastMatch): string {
   return `${hs}-${as}`;
 }
 
-function buildMarkdown(
-  next: NextMatch | null,
-  upcoming: NextMatch[],
-  last: LastMatch | null,
-  source: MatchesData["source"] | null,
-): string {
+function buildMarkdown(next: NextMatch | null): string {
   const md: string[] = [];
 
   if (next) {
@@ -1313,7 +1236,8 @@ function formatTime(iso: string, timezone: string = "Asia/Manila"): string {
 
     const dayLabel = prefix ?? `${dayFormatter.format(eventDate)}, ${dateFormatter.format(eventDate)}`;
     return `${dayLabel} · ${time} ${tzName}`;
-  } catch {
+  } catch (error) {
+    console.error("Failed to format kickoff time", error);
     return "TBD";
   }
 }
@@ -1383,7 +1307,8 @@ async function getFDCrest(teamId: number, apiKey: string): Promise<string | null
     const crest: string | null = json?.crest || null;
     fdCrestCache.set(teamId, crest);
     return crest;
-  } catch {
+  } catch (error) {
+    console.error(`Failed to fetch football-data crest for team ${teamId}`, error);
     fdCrestCache.set(teamId, null);
     return null;
   }
@@ -1443,7 +1368,8 @@ async function getTeamBadge(teamName: string, sportsDbKey?: string): Promise<str
       const badge: string | null = team?.strTeamBadge || team?.strTeamLogo || null;
       badgeCache.set(cacheKey, badge ?? null);
       if (badge) return badge;
-    } catch {
+    } catch (error) {
+      console.error(`Failed to fetch badge from TheSportsDB for ${cand}`, error);
       badgeCache.set(cacheKey, null);
     }
   }
@@ -1477,8 +1403,8 @@ async function getFDCrestsForCompetitions(apiKey: string, codes: string[]): Prom
           map[t.name] = t.crest || null;
         }
       }
-    } catch {
-      // ignore missing competitions or rate limits
+    } catch (error) {
+      console.error(`Failed to fetch team list for competition ${code}`, error);
     }
   }
   return map;
@@ -1601,21 +1527,6 @@ function compAbbrev(name: string): string {
   if (n.includes("fa cup")) return "FA Cup";
   if (n.includes("carabao") || n.includes("efl") || n.includes("league cup")) return "EFL Cup";
   return name.substring(0, Math.min(10, name.length));
-}
-
-function plBandTag(position: number, total: number) {
-  if (!Number.isFinite(position) || !Number.isFinite(total) || total <= 0) return undefined;
-  if (position <= 4) return { tag: { value: "UCL", color: UCL_COLOR } };
-  if (position === 5) return { tag: { value: "UEL", color: Color.Orange } };
-  if (position === 6) return { tag: { value: "UECL", color: Color.Blue } };
-  if (position >= total - 3 + 1) return { tag: { value: "REL", color: Color.Red } };
-  return undefined;
-}
-
-function uclBandTag(position: number) {
-  if (position <= 2) return { tag: { value: "Advance", color: Color.Green } };
-  if (position === 3) return { tag: { value: "UEL", color: Color.Orange } };
-  return { tag: { value: "Out", color: Color.SecondaryText } };
 }
 
 // (removed duplicate compAbbrev)
