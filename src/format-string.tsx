@@ -7,6 +7,7 @@ import {
   Toast,
   Clipboard,
   showHUD,
+  getPreferenceValues,
 } from "@raycast/api";
 
 interface FormValues {
@@ -17,36 +18,129 @@ interface FormValues {
   outputSeparator: string;
 }
 
-const separatorOptions = [
-  { title: "自动检测", value: "" },
-  { title: "逗号 (,)", value: "," },
-  { title: "分号 (;)", value: ";" },
-  { title: "空格 ( )", value: " " },
-  { title: "竖线 (|)", value: "|" },
-  { title: "制表符 (\\t)", value: "\t" },
-  { title: "换行符 (\\n)", value: "\n" },
-];
+interface Preferences {
+  language: string;
+}
 
-const decoratorOptions = [
-  { title: "单引号 (')", value: "'" },
-  { title: "双引号 (\")", value: '"' },
-  { title: "反引号 (`)", value: "`" },
-  { title: "方括号 []", value: "[]" },
-  { title: "圆括号 ()", value: "()" },
-  { title: "花括号 {}", value: "{}" },
-  { title: "无修饰符", value: "" },
-];
-
-const outputSeparatorOptions = [
-  { title: "逗号 (,)", value: "," },
-  { title: "分号 (;)", value: ";" },
-  { title: "空格 ( )", value: " " },
-  { title: "竖线 (|)", value: "|" },
-  { title: "制表符 (\\t)", value: "\t" },
-  { title: "换行符 (\\n)", value: "\n" },
-];
+// 语言配置
+const languages = {
+  zh: {
+    separatorOptions: [
+      { title: "自动检测", value: "" },
+      { title: "逗号 (,)", value: "," },
+      { title: "分号 (;)", value: ";" },
+      { title: "空格 ( )", value: " " },
+      { title: "竖线 (|)", value: "|" },
+      { title: "制表符 (\\t)", value: "\t" },
+      { title: "换行符 (\\n)", value: "\n" },
+    ],
+    decoratorOptions: [
+      { title: "单引号 (')", value: "'" },
+      { title: "双引号 (\")", value: '"' },
+      { title: "反引号 (`)", value: "`" },
+      { title: "方括号 []", value: "[]" },
+      { title: "圆括号 ()", value: "()" },
+      { title: "花括号 {}", value: "{}" },
+      { title: "无修饰符", value: "" },
+    ],
+    outputSeparatorOptions: [
+      { title: "逗号 (,)", value: "," },
+      { title: "分号 (;)", value: ";" },
+      { title: "空格 ( )", value: " " },
+      { title: "竖线 (|)", value: "|" },
+      { title: "制表符 (\\t)", value: "\t" },
+      { title: "换行符 (\\n)", value: "\n" },
+    ],
+    labels: {
+      inputString: "输入字符串",
+      inputPlaceholder: "请输入要格式化的字符串，例如：a,b,c",
+      removeChars: "移除字符",
+      removeCharsPlaceholder: "输入要移除的字符，例如：()[]",
+      removeCharsInfo: "指定要从输入字符串中移除的字符",
+      inputSeparator: "输入分隔符",
+      separatorInfo: "自动检测或手动选择分隔符",
+      decorator: "修饰符",
+      decoratorInfo: "为每个元素添加的包装符号",
+      outputSeparator: "输出分隔符",
+      outputSeparatorInfo: "格式化结果中元素之间的分隔符",
+      removeDuplicates: "去重选项",
+      removeDuplicatesLabel: "移除重复项",
+      removeDuplicatesInfo: "自动移除输出结果中的重复元素",
+      previewResult: "预览结果",
+      previewPlaceholder: "输入字符串后将显示格式化结果",
+      copyResult: "复制结果",
+      reset: "重置",
+      detectedSeparator: "检测到分隔符",
+      noContent: "没有可复制的内容",
+      noContentMessage: "请先输入要格式化的字符串",
+      copySuccess: "✅ 已复制到剪贴板",
+      copyFailed: "复制失败",
+      copyFailedMessage: "无法复制到剪贴板",
+      formatError: "格式化过程中发生错误",
+    }
+  },
+  en: {
+    separatorOptions: [
+      { title: "Auto Detect", value: "" },
+      { title: "Comma (,)", value: "," },
+      { title: "Semicolon (;)", value: ";" },
+      { title: "Space ( )", value: " " },
+      { title: "Pipe (|)", value: "|" },
+      { title: "Tab (\\t)", value: "\t" },
+      { title: "Newline (\\n)", value: "\n" },
+    ],
+    decoratorOptions: [
+      { title: "Single Quote (')", value: "'" },
+      { title: "Double Quote (\")", value: '"' },
+      { title: "Backtick (`)", value: "`" },
+      { title: "Square Brackets []", value: "[]" },
+      { title: "Parentheses ()", value: "()" },
+      { title: "Curly Braces {}", value: "{}" },
+      { title: "No Decorator", value: "" },
+    ],
+    outputSeparatorOptions: [
+      { title: "Comma (,)", value: "," },
+      { title: "Semicolon (;)", value: ";" },
+      { title: "Space ( )", value: " " },
+      { title: "Pipe (|)", value: "|" },
+      { title: "Tab (\\t)", value: "\t" },
+      { title: "Newline (\\n)", value: "\n" },
+    ],
+    labels: {
+      inputString: "Input String",
+      inputPlaceholder: "Enter the string to format, e.g.: a,b,c",
+      removeChars: "Remove Characters",
+      removeCharsPlaceholder: "Enter characters to remove, e.g.: ()[]",
+      removeCharsInfo: "Specify characters to remove from input string",
+      inputSeparator: "Input Separator",
+      separatorInfo: "Auto detect or manually select separator",
+      decorator: "Decorator",
+      decoratorInfo: "Wrapper symbols to add around each element",
+      outputSeparator: "Output Separator",
+      outputSeparatorInfo: "Separator between elements in formatted result",
+      removeDuplicates: "Deduplication",
+      removeDuplicatesLabel: "Remove Duplicates",
+      removeDuplicatesInfo: "Automatically remove duplicate elements from output",
+      previewResult: "Preview Result",
+      previewPlaceholder: "Formatted result will be displayed after input",
+      copyResult: "Copy Result",
+      reset: "Reset",
+      detectedSeparator: "Detected separator",
+      noContent: "No content to copy",
+      noContentMessage: "Please enter a string to format first",
+      copySuccess: "✅ Copied to clipboard",
+      copyFailed: "Copy failed",
+      copyFailedMessage: "Unable to copy to clipboard",
+      formatError: "Error occurred during formatting",
+    }
+  }
+};
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+  const lang = preferences.language || 'zh';
+  const t = languages[lang as keyof typeof languages] || languages.zh;
+
   const [inputString, setInputString] = useState<string>("");
   const [removeChars, setRemoveChars] = useState<string>("");
   const [separator, setSeparator] = useState<string>("");
@@ -149,7 +243,7 @@ export default function Command() {
       const finalOutputSeparator = outSep === "\\t" ? "\t" : outSep === "\\n" ? "\n" : outSep;
       return decoratedParts.join(finalOutputSeparator);
     } catch (err) {
-      throw new Error("格式化过程中发生错误");
+      throw new Error(t.labels.formatError);
     }
   };
 
@@ -160,7 +254,7 @@ export default function Command() {
       const result = formatString(inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates);
       setFormattedResult(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "未知错误");
+      setError(err instanceof Error ? err.message : t.labels.formatError);
       setFormattedResult("");
     }
   }, [inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates]);
@@ -170,20 +264,20 @@ export default function Command() {
     if (!formattedResult) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "没有可复制的内容",
-        message: "请先输入要格式化的字符串",
+        title: t.labels.noContent,
+        message: t.labels.noContentMessage,
       });
       return;
     }
 
     try {
       await Clipboard.copy(formattedResult);
-      await showHUD("✅ 已复制到剪贴板");
+      await showHUD(t.labels.copySuccess);
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "复制失败",
-        message: "无法复制到剪贴板",
+        title: t.labels.copyFailed,
+        message: t.labels.copyFailedMessage,
       });
     }
   };
@@ -206,12 +300,12 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action
-            title="复制结果"
+            title={t.labels.copyResult}
             onAction={copyToClipboard}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action
-            title="重置"
+            title={t.labels.reset}
             onAction={resetForm}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
@@ -221,8 +315,8 @@ export default function Command() {
       {/* 输入区域 */}
       <Form.TextArea
         id="inputString"
-        title="输入字符串"
-        placeholder="请输入要格式化的字符串，例如：a,b,c"
+        title={t.labels.inputString}
+        placeholder={t.labels.inputPlaceholder}
         value={inputString}
         onChange={setInputString}
         error={error}
@@ -230,21 +324,21 @@ export default function Command() {
       
       <Form.TextField
         id="removeChars"
-        title="移除字符"
-        placeholder="输入要移除的字符，例如：()[]"
+        title={t.labels.removeChars}
+        placeholder={t.labels.removeCharsPlaceholder}
         value={removeChars}
         onChange={setRemoveChars}
-        info="指定要从输入字符串中移除的字符"
+        info={t.labels.removeCharsInfo}
       />
       
       <Form.Dropdown
         id="separator"
-        title="输入分隔符"
+        title={t.labels.inputSeparator}
         value={separator}
         onChange={setSeparator}
-        info={detectedSeparator ? `检测到分隔符: ${detectedSeparator}` : "自动检测或手动选择分隔符"}
+        info={detectedSeparator ? `${t.labels.detectedSeparator}: ${detectedSeparator}` : t.labels.separatorInfo}
       >
-        {separatorOptions.map((option) => (
+        {t.separatorOptions.map((option) => (
           <Form.Dropdown.Item
             key={option.value}
             value={option.value}
@@ -259,12 +353,12 @@ export default function Command() {
       {/* 输出区域 */}
       <Form.Dropdown
         id="decorator"
-        title="修饰符"
+        title={t.labels.decorator}
         value={decorator}
         onChange={setDecorator}
-        info="为每个元素添加的包装符号"
+        info={t.labels.decoratorInfo}
       >
-        {decoratorOptions.map((option) => (
+        {t.decoratorOptions.map((option) => (
           <Form.Dropdown.Item
             key={option.value}
             value={option.value}
@@ -275,12 +369,12 @@ export default function Command() {
 
       <Form.Dropdown
         id="outputSeparator"
-        title="输出分隔符"
+        title={t.labels.outputSeparator}
         value={outputSeparator}
         onChange={setOutputSeparator}
-        info="格式化结果中元素之间的分隔符"
+        info={t.labels.outputSeparatorInfo}
       >
-        {outputSeparatorOptions.map((option) => (
+        {t.outputSeparatorOptions.map((option) => (
           <Form.Dropdown.Item
             key={option.value}
             value={option.value}
@@ -291,16 +385,16 @@ export default function Command() {
 
       <Form.Checkbox
         id="removeDuplicates"
-        title="去重选项"
-        label="移除重复项"
+        title={t.labels.removeDuplicates}
+        label={t.labels.removeDuplicatesLabel}
         value={removeDuplicates}
         onChange={setRemoveDuplicates}
-        info="自动移除输出结果中的重复元素"
+        info={t.labels.removeDuplicatesInfo}
       />
 
       <Form.Description
-        title="预览结果"
-        text={formattedResult || "输入字符串后将显示格式化结果"}
+        title={t.labels.previewResult}
+        text={formattedResult || t.labels.previewPlaceholder}
       />
     </Form>
   );

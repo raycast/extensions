@@ -16,6 +16,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "title": "Language / 语言",
+      "description": "Choose your preferred language / 选择您的首选语言",
+      "required": false,
+      "default": "zh",
+      "data": [
+        {
+          "title": "中文 (Chinese)",
+          "value": "zh"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.62.0",
     "@raycast/utils": "^1.10.0"
