@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { authenticate, callInfisical, useInfisical } from "./infisical";
+import { authenticate, callInfisical } from "./infisical";
 import { Project } from "@infisical/sdk";
 import { Workspace } from "./types";
 import Secrets from "./secrets";
@@ -73,10 +73,11 @@ interface DetailedProject extends Project {
   environments: Array<{ name: string; slug: string }>;
 }
 function ProjectDetails({ slug }: { slug: string }) {
-  const { isLoading, data: project } = useInfisical<DetailedProject>(`v2/workspace/${slug}`);
+  const { isLoading, data: project } = useCachedPromise(() => callInfisical<DetailedProject>(`v2/workspace/${slug}`));
 
   return (
     <Detail
+      navigationTitle={`Manage Projects / ${project?.name}`}
       isLoading={isLoading}
       markdown={project?.description}
       metadata={

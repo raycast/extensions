@@ -52,9 +52,9 @@
   ],
   "commands": [
     {
-      "name": "search-projects",
-      "title": "Search Projects",
-      "description": "",
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "description": "Manage Projects and Secrets",
       "mode": "view"
     }
   ],

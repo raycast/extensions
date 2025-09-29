@@ -1,8 +1,8 @@
 import { InfisicalSDK } from "@infisical/sdk";
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 
-const { siteUrl, clientId, clientSecret, organizationId, disableTokenVerification } = getPreferenceValues<Preferences>();
+const { siteUrl, clientId, clientSecret, organizationId, disableTokenVerification } =
+  getPreferenceValues<Preferences>();
 
 const client = new InfisicalSDK({
   siteUrl,
@@ -35,7 +35,7 @@ export const authenticate = async () => {
     toast.style = Toast.Style.Success;
     toast.title = "Authenticated";
   } catch {
-    // if token is valid, we attempt to renew in case token is stale
+    // if token is invalid, we attempt to renew in case token is stale
     toast.title = "Renewing";
     // if this renew fails, details are invalid
     await client.auth().universalAuth.renew();
@@ -53,14 +53,3 @@ export const callInfisical = async <T>(endpoint: string) => {
   if (!response.ok) throw new Error((result as Error).message);
   return result as T;
 };
-export const useInfisical = <T>(endpoint: string) =>
-  useFetch(new URL(`api/${endpoint}`, siteUrl).toString(), {
-    headers: {
-      Authorization: `Bearer ${infisical.auth().getAccessToken()}`,
-    },
-    async parseResponse(response) {
-      const result = await response.json();
-      if (!response.ok) throw new Error((result as Error).message);
-      return result as T;
-    },
-  });

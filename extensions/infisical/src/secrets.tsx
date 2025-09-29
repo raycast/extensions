@@ -17,6 +17,7 @@ import { useState } from "react";
 import { infisical } from "./infisical";
 import { Workspace } from "./types";
 import { Secret } from "@infisical/sdk";
+import { OpenInInfisical } from "./components";
 
 async function confirmAndDelete(
   secret: Secret,
@@ -79,6 +80,7 @@ export default function Secrets({ project }: { project: Workspace }) {
 
   return (
     <List
+      navigationTitle={`Manage Projects / ${project?.name} / Secrets`}
       isLoading={isLoading}
       isShowingDetail
       searchBarAccessory={
@@ -98,7 +100,7 @@ export default function Secrets({ project }: { project: Workspace }) {
               <Action.Push
                 icon={Icon.Plus}
                 title="Add Secret"
-                target={<AddorEditSecret projectId={project.id} environment={environment} />}
+                target={<AddorEditSecret projectId={project.id} projectName={project.name} environment={environment} />}
                 onPop={mutate}
               />
             </ActionPanel>
@@ -145,7 +147,14 @@ export default function Secrets({ project }: { project: Workspace }) {
                 <Action.Push
                   icon={Icon.Pencil}
                   title="Edit Secret"
-                  target={<AddorEditSecret projectId={project.id} environment={environment} initialSecret={secret} />}
+                  target={
+                    <AddorEditSecret
+                      projectId={project.id}
+                      projectName={project.name}
+                      environment={environment}
+                      initialSecret={secret}
+                    />
+                  }
                   onPop={mutate}
                   shortcut={Keyboard.Shortcut.Common.Edit}
                 />
@@ -159,10 +168,13 @@ export default function Secrets({ project }: { project: Workspace }) {
                 <Action.Push
                   icon={Icon.Plus}
                   title="Add Secret"
-                  target={<AddorEditSecret projectId={project.id} environment={environment} />}
+                  target={
+                    <AddorEditSecret projectId={project.id} projectName={project.name} environment={environment} />
+                  }
                   onPop={mutate}
                   shortcut={Keyboard.Shortcut.Common.New}
                 />
+                <OpenInInfisical route={`projects/secret-management/${project.id}/overview`} />
               </ActionPanel>
             }
           />
@@ -174,10 +186,12 @@ export default function Secrets({ project }: { project: Workspace }) {
 
 function AddorEditSecret({
   projectId,
+  projectName,
   environment,
   initialSecret,
 }: {
   projectId: string;
+  projectName: string;
   environment: string;
   initialSecret?: Secret;
 }) {
@@ -240,6 +254,7 @@ function AddorEditSecret({
   });
   return (
     <Form
+      navigationTitle={`Manage Projects / ${projectName} / Secrets / ${initialSecret ? "Edit" : "Add"}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm
