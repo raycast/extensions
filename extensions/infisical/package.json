@@ -3,7 +3,7 @@
   "name": "infisical",
   "title": "Infisical",
   "categories": ["Security"],
-  "description": "",
+  "description": "Secrets management on autopilot",
   "icon": "infisical.png",
   "author": "xmok",
   "license": "MIT",
@@ -15,15 +15,15 @@
       "default": "https://app.infisical.com",
       "type": "textfield",
       "required": true,
-      "description": ""
+      "description": "URL of Infisical instance"
     },
     {
       "name": "organizationId",
       "title": "Organization ID",
-      "placeholder": "",
+      "placeholder": "<organization-id>",
       "type": "textfield",
       "required": true,
-      "description": ""
+      "description": "Organization ID"
     },
     {
       "name": "clientId",
@@ -31,7 +31,7 @@
       "placeholder": "<machine-identity-client-id>",
       "type": "textfield",
       "required": true,
-      "description": ""
+      "description": "Client ID from Machine Identities"
     },
     {
       "name": "clientSecret",
@@ -39,7 +39,15 @@
       "placeholder": "<machine-identity-client-secret>",
       "type": "password",
       "required": true,
-      "description": ""
+      "description": "Client Secret from Machine Identities"
+    },
+    {
+      "name": "disableTokenVerification",
+      "label": "Disable Token Verification",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Disable token verification to make logging in faster"
     }
   ],
   "commands": [

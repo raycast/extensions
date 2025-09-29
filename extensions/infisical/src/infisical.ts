@@ -2,9 +2,10 @@ import { InfisicalSDK } from "@infisical/sdk";
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const {siteUrl,clientId,clientSecret,organizationId} = getPreferenceValues<Preferences>();
+const { siteUrl, clientId, clientSecret, organizationId, disableTokenVerification } = getPreferenceValues<Preferences>();
+
 const client = new InfisicalSDK({
-    siteUrl,
+  siteUrl,
 });
 export const infisical = client;
 
@@ -16,10 +17,15 @@ export const authenticate = async () => {
   } else {
     toast.title = "Authenticating";
     await client.auth().universalAuth.login({
-        clientId,
-        clientSecret
-    }) 
+      clientId,
+      clientSecret,
+    });
   }
+  if (disableTokenVerification) {
+    await toast.hide();
+    return;
+  }
+
   toast.title = "Verifying";
   try {
     // we call this endpoint to check if token is valid
@@ -34,27 +40,27 @@ export const authenticate = async () => {
     // if this renew fails, details are invalid
     await client.auth().universalAuth.renew();
   }
-    
 };
 
-export const callInfisical = async<T>(endpoint: string) => {
-    const token = infisical.auth().getAccessToken();
-    const response = await fetch(new URL(`api/${endpoint}`, siteUrl), {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error((result as Error).message);
-    return result as T;
-}
-export const useInfisical = <T>(endpoint: string) => useFetch(new URL(`api/${endpoint}`, siteUrl).toString(), {
-  headers: {
-    Authorization: `Bearer ${infisical.auth().getAccessToken()}`
-  },
-  async parseResponse(response) {
-    const result = await response.json();
-    if (!response.ok) throw new Error((result as Error).message);
-    return result as T;
-  },
-})
+export const callInfisical = async <T>(endpoint: string) => {
+  const token = infisical.auth().getAccessToken();
+  const response = await fetch(new URL(`api/${endpoint}`, siteUrl), {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error((result as Error).message);
+  return result as T;
+};
+export const useInfisical = <T>(endpoint: string) =>
+  useFetch(new URL(`api/${endpoint}`, siteUrl).toString(), {
+    headers: {
+      Authorization: `Bearer ${infisical.auth().getAccessToken()}`,
+    },
+    async parseResponse(response) {
+      const result = await response.json();
+      if (!response.ok) throw new Error((result as Error).message);
+      return result as T;
+    },
+  });
