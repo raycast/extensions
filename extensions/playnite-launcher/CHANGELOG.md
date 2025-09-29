@@ -1,6 +1,6 @@
 # Playnite Launcher Changelog
 
-## [Fix Cold Starting Playnite] - {PR_MERGE_DATE}
+## [Fix Cold Starting Playnite] - 2025-09-29
 * Fix: manually provided APPDATA to the process launching Playnite so that it can correctly load it's library
 
 ## [Enhancements] - 2025-09-17
