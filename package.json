@@ -28,7 +28,7 @@
     "dev": "ray develop",
     "publish": "npx @raycast/api@latest publish"
   },
-  "title": "Liverpool Fc",
+  "title": "Liverpool FC",
   "icon": "icon.png",
   "categories": [
     "Productivity",
@@ -38,7 +38,7 @@
   "commands": [
     {
       "name": "liverpool",
-      "title": "Liverpool Fc",
+      "title": "Liverpool FC",
       "icon": "icon.png",
       "subtitle": "Next & Last Match",
       "description": "Show Liverpool FC next match (Manila time) and last result",
