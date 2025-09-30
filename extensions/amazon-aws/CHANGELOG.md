@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Bug fix for Amplify] - {PR_MERGE_DATE}
+## [Bug fix for Amplify] - 2025-09-30
 
 - Replace '/' in branch name with '-' when building branch url 
 
