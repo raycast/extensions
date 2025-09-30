@@ -1,9 +1,9 @@
-import { List, Detail, showToast, Toast } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface ApiItem {
   title: string;
-  date: string; // In format "2015-02-20T19:25:00-02:00"
+  date: string;
   category: string;
   title_orig: string;
   hebrew: string;
@@ -11,7 +11,7 @@ interface ApiItem {
 }
 
 export default function Command() {
-  const { data, isLoading, error } = useFetch<ApiItem[]>(
+  const { data, isLoading } = useFetch<ApiItem[]>(
     "https://www.hebcal.com/shabbat?cfg=json&b=40&city=IL-Jerusalem&M=on",
     {
       parseResponse: async (response) => {
@@ -37,30 +37,24 @@ export default function Command() {
     },
   );
 
-  if (error) {
-    return <Detail markdown={`# Error\n\nFailed to fetch data from the API:\n\n\`${error.message}\``} />;
-  }
-
-  if (isLoading) {
-    return <List isLoading={true} searchBarPlaceholder="Loading data..." />;
-  }
-
-  if (!data || data.length === 0) {
-    return <Detail markdown="# No Data\n\nThe API returned no data or an empty response." />;
-  }
-
   return (
-    <List searchBarPlaceholder="Search items...">
-      {data.map((item, index) => {
-        return (
-          <List.Item
-            key={index}
-            title={item.title || ""}
-            subtitle={item.memo || ""}
-            accessories={[{ text: `${new Date(item.date).toLocaleDateString()}` }]}
-          />
-        );
-      })}
+    <List isLoading={isLoading} searchBarPlaceholder="Search items...">
+      <List.EmptyView
+        title="No Results"
+        description={
+          !isLoading && (!data || data.length === 0)
+            ? "The API returned no data or an empty response."
+            : "Search for something else"
+        }
+      />
+      {data?.map((item, index) => (
+        <List.Item
+          key={index}
+          title={item.title || ""}
+          subtitle={item.memo || ""}
+          accessories={[{ text: `${new Date(item.date).toLocaleDateString()}` }]}
+        />
+      ))}
     </List>
   );
 }

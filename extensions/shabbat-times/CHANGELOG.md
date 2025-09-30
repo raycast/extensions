@@ -1,3 +1,3 @@
 # Shabbat Times Changelog
 
-## [1.0.0] - Initial Version
+## [Initial Version] - {PR_MERGE_DATE}
