@@ -25,7 +25,6 @@ import { access, constants } from "fs/promises";
 const STORAGE_KEY = "claude-code-projects";
 const CURRENT_VERSION = 1;
 
-
 interface Project {
   id: string;
   path: string;
