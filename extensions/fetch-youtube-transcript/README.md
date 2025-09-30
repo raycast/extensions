@@ -10,9 +10,13 @@ Fetch YouTube Transcript is a Raycast extension that allows you to easily fetch 
 - Customizable download location
 - Simple and intuitive interface
 
-## Prerequisites
+## ⚠️ Important Prerequisite: `yt-dlp` Installation
 
-This extension requires `yt-dlp` to be installed on your system. You can install it using pip or homebrew:
+This extension has been updated to use `yt-dlp`, a powerful and reliable command-line tool for interacting with YouTube. This change was made because previous methods were becoming unreliable due to frequent changes by YouTube.
+
+**You must install `yt-dlp` on your system for this extension to work.**
+
+You can install it easily using one of the following commands in your terminal. You can install it using pip or homebrew:
 
 ```bash
 pip install yt-dlp
@@ -48,10 +52,6 @@ Apoorv Khandelwal
 ## License
 
 MIT
-
-## Dependencies
-
-- @raycast/api (v1.94.0)
 
 ## Categories
 

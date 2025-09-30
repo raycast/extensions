@@ -2,11 +2,19 @@
 
 ## [2.0.1] - {PR_MERGE_DATE}
 
-### Breaking Changes
+### 2.0.1 Breaking Changes
 
-- Removed `youtube-transcript-scraper` dependency.
-- Switched to `yt-dlp` for fetching transcripts. Users are now required to install `yt-dlp` separately.
-- `ytdl-core` is no longer a dependency.
+- Switched the core transcript fetching mechanism from JavaScript libraries to the external `yt-dlp` command-line tool. Users are now required to install `yt-dlp` for the extension to function.
+- Removed `youtube-transcript-scraper` and `ytdl-core` as dependencies.
+
+### 2.0.1 Added
+
+- Added `@raycast/utils` as a dependency for improved UI components.
+
+### 2.0.1 Fixed
+
+- Refactored `yt-dlp` path resolution to occur at runtime within the command, preventing the extension from crashing on load if `yt-dlp` is not installed.
+- Simplified error notifications by using the `showFailureToast` utility for a more consistent user experience.
 
 ## [1.1.5] - 2024-12-18
 

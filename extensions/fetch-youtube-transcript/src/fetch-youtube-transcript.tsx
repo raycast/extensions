@@ -3,11 +3,11 @@
 // retrieves the video's transcript, processes it, and saves it to a local file.
 // The script uses the YouTube Data API and handles user preferences for download locations.
 import { showToast, Toast, getPreferenceValues, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils"; // <-- CHANGED: Added new import
 import { promises as fs } from "fs";
 import * as fsSync from "fs";
 import path from "path";
 import os from "os";
-// import https from "https";
 import { execFile } from "child_process";
 import which from "which";
 
@@ -21,20 +21,6 @@ interface TranscriptResult {
   transcript: string;
   title: string;
 }
-
-// Function to fetch URL content using https
-// function fetchUrl(url: string): Promise<string> {
-//   return new Promise((resolve, reject) => {
-//     https
-//       .get(url, (res) => {
-//         let data = "";
-//         res.on("data", (chunk) => (data += chunk));
-//         res.on("end", () => resolve(data));
-//         res.on("error", reject);
-//       })
-//       .on("error", reject);
-//   });
-// }
 
 // Function to extract video ID from URL
 function extractVideoId(url: string): string | null {
@@ -83,8 +69,8 @@ function resolveYtDlpPath(): string {
   }
 }
 
-// Full path to yt-dlp executable (resolved at runtime)
-const ytDlpPath = resolveYtDlpPath();
+// <-- CHANGED: The global variable that was here has been removed.
+// const ytDlpPath = resolveYtDlpPath();
 
 // Remove old execCommand and execCommandSafe, and replace with a robust execFile-based implementation
 function execCommand(executable: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
@@ -101,8 +87,8 @@ function execCommand(executable: string, args: string[]): Promise<{ stdout: stri
   });
 }
 
-// Validate yt-dlp installation before using it
-async function validateYtDlpInstallation(): Promise<void> {
+// <-- CHANGED: This function now accepts the path as an argument
+async function validateYtDlpInstallation(ytDlpPath: string): Promise<void> {
   try {
     await execCommand(ytDlpPath, ["--version"]);
   } catch (error) {
@@ -116,8 +102,11 @@ async function getYouTubeTranscriptAsPlainText(
   videoUrl: string,
   language: string = "en",
 ): Promise<{ transcript: string | null; videoTitle: string | null }> {
+  // <-- CHANGED: The path is now resolved safely inside this function.
+  const ytDlpPath = resolveYtDlpPath();
+
   // Ensure yt-dlp is installed before proceeding
-  await validateYtDlpInstallation();
+  await validateYtDlpInstallation(ytDlpPath); // <-- CHANGED: Pass the path to the validation function
 
   // Generate a unique temporary filename and output template
   const timestamp = Date.now();
@@ -257,10 +246,8 @@ export default async function Command(props: { arguments: { videoUrl: string } }
   const { videoUrl } = props.arguments;
 
   if (!videoUrl) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "YouTube URL is required",
-    });
+    // <-- CHANGED: Using showFailureToast for a simpler error message.
+    await showFailureToast("YouTube URL is required");
     return;
   }
 
@@ -304,10 +291,7 @@ export default async function Command(props: { arguments: { videoUrl: string } }
       },
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: error instanceof Error ? error.message : "Transcript Not Available",
-    });
+    // <-- CHANGED: Using showFailureToast to handle the error object correctly.
+    await showFailureToast(error, { title: "Error" });
   }
 }

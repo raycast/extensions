@@ -114,7 +114,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.12.5",
     "@types/which": "^3.0.4",
     "which": "^5.0.0"
   },
