@@ -1,10 +1,10 @@
-import { ClientManagerProvider } from "./contexts/clientManagerContext";
 import { SearchCommand } from "./commands/search";
+import { ServicesProvider } from "./contexts/servicesContext";
 
 export default function Command() {
   return (
-    <ClientManagerProvider>
+    <ServicesProvider>
       <SearchCommand />
-    </ClientManagerProvider>
+    </ServicesProvider>
   );
 }

@@ -4,7 +4,6 @@ import {
   Clipboard,
   closeMainWindow,
   Color,
-  Detail,
   getPreferenceValues,
   Icon,
   Image,
@@ -13,28 +12,37 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import React, { useEffect, useMemo, useState } from "react";
-import { useClientManager } from "../contexts/clientManagerContext";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 import { DBSoundTile } from "../types";
 import { applyShortcutTitleTemplate, formatDuration, getTileColorByIndex } from "../utils/helpers";
 import { FARRAGO_FADE_DURATION_MS, ICLOUD_SHORTCUT_LINK } from "../utils/constants";
-import { setTimeout as setTimeoutAsync } from "node:timers/promises";
-import { ClientManager } from "../api/clientManager";
+import { useLatestDbUpdate, useServices } from "../contexts/servicesContext";
 
 export function SearchCommand() {
-  const { cm, latestDbUpdate } = useClientManager();
+  const { dataSource } = useServices();
+  const latestDbUpdate = useLatestDbUpdate();
   const [gridFilter, setGridFilter] = useState<string>("");
+  const [isLoading, finishLoading] = useReducer(() => false, true);
 
   const tiles = useMemo(() => {
-    const allTiles = cm?.getAllTiles();
+    const allTiles = dataSource.getAllTiles();
 
-    if (!gridFilter) return allTiles;
+    if (!gridFilter) {
+      return allTiles;
+    }
 
-    return allTiles?.filter((t) => t.setUuid === gridFilter);
+    return allTiles?.filter((t) => t.set.uuid === gridFilter);
   }, [latestDbUpdate, gridFilter]);
 
+  useEffect(() => {
+    if (!!tiles) finishLoading();
+  }, []);
+
   return (
-    <List isLoading={!tiles} searchBarAccessory={<FilterBySetDropdown value={gridFilter} onChange={setGridFilter} />}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={<FilterBySetDropdown value={gridFilter} onChange={setGridFilter} />}
+    >
       {tiles && tiles.length == 0 ? (
         <List.EmptyView
           title="No Sounds Found"
@@ -58,31 +66,34 @@ export function SearchCommand() {
 type TileListItemProps = { tile: DBSoundTile; latestDbUpdate: number | null; gridFilterExists: boolean };
 const TileListItem = React.memo(
   ({ tile, latestDbUpdate, gridFilterExists }: TileListItemProps) => {
-    const { cm } = useClientManager();
-    if (!cm) throw new Error(`Client manager instance always expected in TileListItem`);
+    const { dataSource, oscSender, oscReceiver } = useServices();
 
-    const tileSet = cm.dataGetter.getSetByUuid(tile.setUuid);
-    const tileHasDuplicateTitles = cm.dataGetter.checkTileForDupliateTitles(tile);
+    const tileSet = dataSource.getSetByUuid(tile.set.uuid);
+    const tileHasDuplicateTitles = dataSource.checkTileForDupliateTitles(tile);
 
     const [playing, setPlaying] = useState(false);
     const [fading, setFading] = useState(false);
 
     useEffect(() => {
-      const baseOscAddress = cm.getTileBaseOscAddress(tile);
+      if (oscReceiver.isClosed()) oscReceiver.open();
 
-      const handlerPlaying = cm.oscClient.addMessageHandler(new RegExp(`^${baseOscAddress}/currentTime$`), (msg) => {
-        const currentTime = (msg.args as [number])[0];
-        setPlaying(currentTime > 0);
+      const unsubscribePlaying = oscReceiver.subscribeToTileAction({
+        tile,
+        action: "currentTime",
+        handler: (currentTime: number) => setPlaying(currentTime > 0),
       });
 
-      const handlerFading = cm.oscClient.addMessageHandler(new RegExp(`^${baseOscAddress}/fadeOut$`), (msg) => {
-        const fading = (msg.args as unknown as [boolean])[0];
-        if (fading) setFading(true);
+      const unsubscribeFading = oscReceiver.subscribeToTileAction({
+        tile,
+        action: "fadeOut",
+        handler: (fading: boolean) => {
+          if (fading) setFading(true);
+        },
       });
 
       return () => {
-        cm.oscClient.removeMessageHandler(handlerPlaying);
-        cm.oscClient.removeMessageHandler(handlerFading);
+        unsubscribePlaying();
+        unsubscribeFading();
       };
     }, []);
 
@@ -130,28 +141,28 @@ const TileListItem = React.memo(
                 title={playing ? "Stop" : "Play"}
                 icon={playStopIcon}
                 onAction={() => {
-                  cm.playStopTile(tile);
+                  oscSender.runTileAction("play", tile);
                   closeMainWindow();
                 }}
               />
               <Action
                 title={`${playing ? "Stop" : "Play"} and Keep Window Open`}
                 icon={playStopIcon}
-                onAction={() => cm.playStopTile(tile)}
+                onAction={() => oscSender.runTileAction("play", tile)}
                 shortcut={{ key: "enter", modifiers: ["opt"] }}
               />
               {playing ? (
                 <Action
                   title="Fade"
                   icon={Icon.SpeakerDown}
-                  onAction={() => cm.fadeTile(tile)}
+                  onAction={() => oscSender.runTileAction("fadeOut", tile)}
                   shortcut={{ key: "f", modifiers: ["opt", "shift"] }}
                 />
               ) : null}
               <Action
                 title="Toggle AB Volume"
                 icon={Icon.Speaker}
-                onAction={() => cm.toggleTileDuckVolume(tile)}
+                onAction={() => oscSender.runTileAction("toggleAB", tile)}
                 shortcut={{ key: "v", modifiers: ["opt", "shift"] }}
               />
             </ActionPanel.Section>
@@ -174,7 +185,7 @@ const TileListItem = React.memo(
                       onAction: () => open(ICLOUD_SHORTCUT_LINK),
                     },
                   });
-                  cm.oscClient.close();
+                  oscReceiver.close(); // bad fix, but I can't think of another yet
                 }}
                 shortcut={{ key: "c", modifiers: ["cmd"] }}
               />
@@ -193,6 +204,7 @@ const TileListItem = React.memo(
                     message: `Current formatting is "${formatted}". You can change it in the extension settings.`,
                     primaryAction: { title: "Open Extension Settings", onAction: openExtensionPreferences },
                   });
+                  oscReceiver.close(); // bad fix, but I can't think of another yet
                 }}
                 shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
               />
@@ -207,12 +219,11 @@ const TileListItem = React.memo(
 
 type FilterBySetDropdownProps = Pick<List.Dropdown.Props, "value" | "onChange">;
 export function FilterBySetDropdown({ value, onChange }: FilterBySetDropdownProps) {
-  const { cm, latestDbUpdate } = useClientManager();
+  const { dataSource } = useServices();
+  const latestDbUpdate = useLatestDbUpdate();
 
   const sets = useMemo(() => {
-    if (!cm) return [];
-
-    const allSets = cm.getAllSets();
+    const allSets = dataSource.getAllSets();
 
     if (value && !allSets.find((s) => s.uuid === value)) {
       onChange?.("");
@@ -223,9 +234,14 @@ export function FilterBySetDropdown({ value, onChange }: FilterBySetDropdownProp
 
   return (
     <List.Dropdown tooltip="Filter by Set" value={value} onChange={onChange}>
-      <List.Dropdown.Item title="All Sets" value="" icon={Icon.List} />
+      <List.Dropdown.Item title="All Sets" value="" icon={Icon.Filter} />
       {sets.map((set) => (
-        <List.Dropdown.Item key={set.uuid} title={set.title} value={set.uuid} icon={Icon.Folder} />
+        <List.Dropdown.Item
+          key={set.uuid}
+          title={set.title}
+          value={set.uuid}
+          icon={[Icon.AppWindowGrid3x3, Icon.List][set.mode]}
+        />
       ))}
     </List.Dropdown>
   );

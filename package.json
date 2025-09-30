@@ -37,21 +37,39 @@
       "required": true
     },
     {
-      "name": "oscHost",
+      "name": "oscRemoteHost",
       "type": "textfield",
-      "title": "OSC Host",
+      "title": "OSC Remote Host",
       "default": "localhost",
       "placeholder": "localhost",
-      "description": "OSC host set up in Farrago",
+      "description": "OSC host defined in Farrago under \"OSC Input\"",
       "required": true
     },
     {
-      "name": "oscPort",
+      "name": "oscRemotePort",
       "type": "textfield",
-      "title": "OSC Port",
+      "title": "OSC Remote Port",
       "default": "8090",
-      "placeholder": "53000",
-      "description": "OSC port set up in Farrago",
+      "placeholder": "8090",
+      "description": "OSC port defined in Farrago under \"OSC Input\"",
+      "required": true
+    },
+    {
+      "name": "oscLocalHost",
+      "type": "textfield",
+      "title": "OSC Local Host",
+      "default": "localhost",
+      "placeholder": "localhost",
+      "description": "OSC host defined in Farrago under \"OSC Input\"",
+      "required": true
+    },
+    {
+      "name": "oscLocalPort",
+      "type": "textfield",
+      "title": "OSC Local Port",
+      "default": "8091",
+      "placeholder": "8091",
+      "description": "OSC port defined in Farrago under \"OSC Input\"",
       "required": true
     },
     {
@@ -66,7 +84,7 @@
   "dependencies": {
     "@raycast/api": "^1.102.7",
     "@raycast/utils": "^1.17.0",
-    "osc": "^2.4.5",
+    "osc-min": "^2.1.2",
     "plist": "^3.1.0",
     "xml2js": "^0.6.2"
   },

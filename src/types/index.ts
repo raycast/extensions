@@ -1,13 +1,17 @@
 export type Preferences = {
-  dataDirectory: string;
-  oscHost: string;
-  oscPort: string;
+  farragoDataDir: string;
+  oscRemoteHost: string;
+  oscRemotePort: string;
+  oscLocalHost: string;
+  oscLocalPort: string;
   shortcutTitleTemplate: string;
 };
 
 export type DBSoundSet = Omit<SoundSet, "tiles"> & { tiles: SoundSetTile["tileUUID"][] };
 
-export type DBSoundTile = SoundSetTile & { setUuid: SoundSet["uuid"] };
+export type DBSoundTile = SoundSetTile & {
+  set: Pick<SoundSet, "uuid" | "mode" | "position">;
+};
 
 export type TileCoordinates = { setPosition: number; tilePosition: { x: number; y: number } };
 

@@ -1,12 +1,9 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
-import { ClientManager } from "./api/clientManager";
-import { setTimeout } from "node:timers/promises";
+import { showHUD } from "@raycast/api";
+import { initializeFarragoOscSender } from "./services/initializers";
 
 export default async function Command() {
-  closeMainWindow();
   showHUD("Fading all sounds...");
-  const oscClient = ClientManager.initializeOscClient();
-  oscClient.fadeAll();
-  await setTimeout(5); // just to ensure the message is sent before closing the port
-  oscClient.close();
+
+  const oscSender = initializeFarragoOscSender();
+  await oscSender.runMasterAction("fadeAll");
 }

@@ -7,7 +7,7 @@ import { SoundSet, SoundSetTile } from "../../types";
 import { expandTilde } from "../../utils/helpers";
 import { Clipboard } from "@raycast/api";
 
-export class FileParser {
+export class FarragoDataParser {
   farragoDataDirpath: string;
   lastParsedSets: number | null;
 

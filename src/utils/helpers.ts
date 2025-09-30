@@ -1,7 +1,12 @@
 import os from "os";
 import path from "path";
 import { DEFAULT_SHORTCUT_TITLE_TEMPLATE, TILE_COLORS_BY_INDEX } from "./constants";
-import { DBSoundSet, DBSoundTile } from "../types";
+import { DBSoundSet, DBSoundTile, Preferences } from "../types";
+import { getPreferenceValues } from "@raycast/api";
+
+export function getPreferences() {
+  return getPreferenceValues<Preferences>();
+}
 
 export function expandTilde(inputPath: string) {
   if (inputPath.startsWith("~")) {

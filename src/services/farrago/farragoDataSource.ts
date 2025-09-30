@@ -1,6 +1,6 @@
 import { DBSoundSet, DBSoundTile, SoundSet, SoundSetTile } from "../../types";
 
-export class DataGetter {
+export class FarragoDataSource {
   db: {
     sets: Map<SoundSet["uuid"], DBSoundSet>;
     tiles: Map<SoundSetTile["tileUUID"], DBSoundTile>;
@@ -19,7 +19,10 @@ export class DataGetter {
     for (const set of soundSets) {
       const dbSet: DBSoundSet = { ...set, tiles: [] };
       for (let i = 0; i < set.tiles.length; i++) {
-        const tile = { ...set.tiles[i], setUuid: dbSet.uuid };
+        const tile: DBSoundTile = {
+          ...set.tiles[i],
+          set: { uuid: set.uuid, mode: set.mode, position: set.position }, // todo: decide
+        };
         this.db.tiles.set(tile.tileUUID, tile);
         dbSet.tiles[i] = tile.tileUUID;
         this.db.tileUuidsByTitle[tile.title] ??= new Set();
@@ -30,6 +33,14 @@ export class DataGetter {
   }
 
   // data operations
+
+  getAllTiles() {
+    return [...this.db.tiles.values()];
+  }
+
+  getAllSets() {
+    return [...this.db.sets.values()];
+  }
 
   getTileByUuid(tileUuid: string) {
     const tile = this.db.tiles.get(tileUuid);
@@ -52,8 +63,9 @@ export class DataGetter {
   }
 
   checkTileForDupliateTitles(tile: DBSoundTile) {
-    if (!(tile.title in this.db.tileUuidsByTitle))
-      throw new Error(`UUIDs for "${tile.title}" expected in ${this.db.tileUuidsByTitle}`);
+    // todo: fix?
+    if (!(tile.title in this.db.tileUuidsByTitle)) return false;
+    // throw new Error(`UUIDs for "${tile.title}" expected in ${this.db.tileUuidsByTitle}`);
 
     return this.db.tileUuidsByTitle[tile.title].size > 1;
   }
