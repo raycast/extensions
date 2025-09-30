@@ -9,19 +9,19 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
+      "title": "Search Sounds",
       "description": "Search all sounds in Farrago",
       "mode": "view"
     },
     {
       "name": "fade-all",
-      "title": "Fade All",
+      "title": "Fade All Sounds",
       "description": "Fade All Sounds Currently Playing in Farrago",
       "mode": "no-view"
     },
     {
       "name": "stop-all",
-      "title": "Stop All",
+      "title": "Stop All Sounds",
       "description": "Stop All Sounds Currently Playing in Farrago",
       "mode": "no-view"
     }
