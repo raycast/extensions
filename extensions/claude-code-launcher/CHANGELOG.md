@@ -1,6 +1,6 @@
 # Claude Code Launcher
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-09-30
 
 ### Features
 - Save and manage favorite project directories
