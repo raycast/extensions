@@ -294,7 +294,19 @@ async function openFileFound(fileInfo: FileInfo) {
 
 async function runAsAdministrator(path: string) {
   const command = `powershell -Command "Start-Process -FilePath '${path.replace(/'/g, "''")}' -Verb RunAs"`;
-  execAsync(command);
+  async function runAsAdministrator(path: string) {
+  const command = `powershell -Command "Start-Process -FilePath '${path.replace(/'/g, "''")}' -Verb RunAs"`;
+  try {
+    await execAsync(command);
+  } catch (error) {
+    console.log(error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error Running as Administrator",
+      message: error instanceof Error ? error.message : "Failed to run as administrator",
+    });
+  }
+}
 }
 
 async function showInExplorer(path: string, preferences: Preferences) {
