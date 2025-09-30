@@ -339,6 +339,12 @@ export default function Command() {
           onAction={() => launchCommand({ name: "create-reminder", type: LaunchType.UserInitiated })}
         />
 
+        <MenuBarExtra.Item
+          title="Create List"
+          icon={Icon.NewDocument}
+          onAction={() => launchCommand({ name: "create-list", type: LaunchType.UserInitiated })}
+        />
+
         <MenuBarExtra.Submenu
           title={`Select List (${list?.title ?? "All"})`}
           icon={list ? { source: Icon.Circle, tintColor: list.color } : Icon.Tray}
