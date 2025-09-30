@@ -1,5 +1,11 @@
 # Apple Reminders Changelog
 
+## [Add Create List command] - 2025-09-30
+
+- Add new "Create List" command to create custom reminder lists with names and colors
+- Add AI tool integration for creating lists via natural language
+- Support 9 color options matching Apple Reminders' color palette
+
 ## [Add Creation Date option for sorting] - 2025-06-13
 
 - Retrieve the Creation Date from the EventKit API
