@@ -1,6 +1,6 @@
 # Surge Outbound Mode Switcher Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2025-09-30
 
 - Fixed the screenshot in README
 
