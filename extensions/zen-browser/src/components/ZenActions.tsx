@@ -35,7 +35,7 @@ function WorkspaceItemAction(props: { workspace: WorkspaceEntry }) {
   return (
     <ActionPanel title={props.workspace.name}>
       {props.workspace.shortcut && <ZenGoToWorkspace workspace={props.workspace} />}
-      <Action.Open title="Change Shortcut" target={"about:preferences"} application={"Zen"} />
+      <Action.Open title="Change Shortcut in Keyboard Shortcuts" target={"about:preferences"} application={"Zen"} />
     </ActionPanel>
   );
 }

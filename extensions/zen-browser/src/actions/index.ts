@@ -1,7 +1,7 @@
 import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { SEARCH_ENGINE } from "../constants";
-import { Preferences, Shortcut, Tab } from "../interfaces";
+import { Preferences, Shortcut } from "../interfaces";
 import { getNewTabShortcut } from "../util";
 
 export async function runShortcut(shortcut: Shortcut) {

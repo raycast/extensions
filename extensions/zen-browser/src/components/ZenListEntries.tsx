@@ -1,6 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { ZenActions } from "./index";
-import { HistoryEntry, Tab, WorkspaceEntry } from "../interfaces";
+import { HistoryEntry, WorkspaceEntry } from "../interfaces";
 import { getFavicon } from "@raycast/utils";
 
 export class ZenListEntries {

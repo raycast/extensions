@@ -16,7 +16,9 @@ export const useRetrySQLError = ({ error, onRetry }: UseRetrySQLErrorProps) => {
       error?.message?.includes("database is locked") || error?.message?.includes("disk image is malformed");
 
     if (!isRetryable) {
-      retryCount !== 0 && setRetryCount(0);
+      if (retryCount !== 0) {
+        setRetryCount(0);
+      }
       return;
     }
     if (retryCount >= MAX_RETRIES) return;

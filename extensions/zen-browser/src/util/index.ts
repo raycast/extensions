@@ -130,7 +130,7 @@ export const getSessionManagerExtensionPath = (extensionId: string) => {
     "storage",
     "default",
     `moz-extension+++${extensionId}`,
-    "idb"
+    "idb",
   );
 };
 
@@ -145,7 +145,7 @@ export const getSessionActivePath = async () => {
     userDirectoryPath,
     await getProfileName(userDirectoryPath),
     "sessionstore-backups",
-    "recovery.jsonlz4"
+    "recovery.jsonlz4",
   );
 };
 
@@ -164,10 +164,10 @@ export function decodeLZ4(buffer: Buffer) {
   return JSON.parse(data.toString());
 }
 
-function decodeBlock(input: any, output: any, sIdx?: any, eIdx?: any) {
+function decodeBlock(input: Buffer, output: Buffer, sIdx?: number, eIdx?: number): number {
   sIdx = sIdx || 0;
   eIdx = eIdx || input.length - sIdx;
-  let a;
+  let a: number = 0;
   // Process each sequence in the incoming data
   for (let i = sIdx, n = eIdx, j = 0; i < n; ) {
     a = j;
