@@ -54,6 +54,7 @@
     {
       "name": "manage-projects",
       "title": "Manage Projects",
+      "subtitle": "Infisical",
       "description": "Manage Projects and Secrets",
       "mode": "view"
     }

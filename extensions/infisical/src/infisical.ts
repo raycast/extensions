@@ -39,6 +39,8 @@ export const authenticate = async () => {
     toast.title = "Renewing";
     // if this renew fails, details are invalid
     await client.auth().universalAuth.renew();
+    const renewToken = client.auth().getAccessToken() ?? "";
+    await LocalStorage.setItem("token", renewToken);
   }
 };
 
