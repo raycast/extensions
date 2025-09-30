@@ -14,7 +14,9 @@ type Input = {
 export default async function (input: Input) {
   // Validate that title is provided and not empty
   if (!input || !input.title || typeof input.title !== "string" || input.title.trim() === "") {
-    throw new Error("The 'title' parameter is required and must be a non-empty string. Please provide a name for the list.");
+    throw new Error(
+      "The 'title' parameter is required and must be a non-empty string. Please provide a name for the list.",
+    );
   }
 
   const list = await createList(input);

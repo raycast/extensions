@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  LaunchProps,
-  Color,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation, LaunchProps, Color } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { createList } from "swift:../swift/AppleReminders";
 
@@ -44,7 +34,7 @@ export function CreateListForm({ draftValues }: CreateListFormProps) {
   const { pop } = useNavigation();
   const { mutate } = useData();
 
-  const { itemProps, handleSubmit, focus, setValue } = useForm<CreateListValues>({
+  const { itemProps, handleSubmit } = useForm<CreateListValues>({
     initialValues: {
       title: draftValues?.title ?? "",
       color: draftValues?.color ?? colorOptions[0].value,
