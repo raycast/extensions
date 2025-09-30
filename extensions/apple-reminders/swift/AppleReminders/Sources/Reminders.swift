@@ -1,3 +1,4 @@
+import AppKit
 import CoreLocation
 import EventKit
 import Foundation
@@ -578,4 +579,63 @@ struct UpdateReminderPayload: Decodable {
   } catch {
     throw RemindersError.unableToSaveReminder
   }
+}
+
+struct NewList: Decodable {
+  let title: String
+  let color: String?
+}
+
+@raycast func createList(newList: NewList) async throws -> ReminderList {
+  let eventStore = EKEventStore()
+
+  let granted: Bool
+  if #available(macOS 14.0, *) {
+    granted = try await eventStore.requestFullAccessToReminders()
+  } else {
+    granted = try await eventStore.requestAccess(to: .reminder)
+  }
+  guard granted else {
+    throw RemindersError.accessDenied
+  }
+
+  let calendar = EKCalendar(for: .reminder, eventStore: eventStore)
+  calendar.title = newList.title
+
+  if let colorString = newList.color {
+    calendar.color = hexStringToUIColor(hex: colorString)
+  }
+
+  let source = eventStore.defaultCalendarForNewReminders()?.source
+  calendar.source = source
+
+  do {
+    try eventStore.saveCalendar(calendar, commit: true)
+    let defaultList = eventStore.defaultCalendarForNewReminders()
+    return calendar.toStruct(defaultCalendarId: defaultList?.calendarIdentifier)
+  } catch {
+    throw RemindersError.unableToSaveReminder
+  }
+}
+
+func hexStringToUIColor(hex: String) -> NSColor {
+  var cString: String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+
+  if cString.hasPrefix("#") {
+    cString.remove(at: cString.startIndex)
+  }
+
+  if cString.count != 6 {
+    return NSColor.gray
+  }
+
+  var rgbValue: UInt64 = 0
+  Scanner(string: cString).scanHexInt64(&rgbValue)
+
+  return NSColor(
+    red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+    green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+    blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+    alpha: CGFloat(1.0)
+  )
 }
