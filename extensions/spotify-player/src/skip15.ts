@@ -19,7 +19,7 @@ export default async function Command() {
     await seek(currentPositionSeconds + 15);
     await showHUD("Skipped ahead 15 seconds");
     await safeLaunchCommandInBackground("current-track");
-  } catch (error) {
+  } catch {
     await showHUD("Nothing is currently playing");
   }
 }

@@ -1,8 +1,9 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { OpdsBook, SearchStatus } from "./types";
 import { BookListItem } from "./components/BookListItem";
 import { searchBooks } from "./services/opdsService";
+import { getBaseSiteUrl } from "./services/configService";
 
 /* Custom hook to debounce a value with a specified delay
  *
@@ -31,10 +32,24 @@ export default function Command() {
   const [books, setBooks] = useState<OpdsBook[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
+  const [configError, setConfigError] = useState<string | null>(null);
 
   const debouncedSearchText = useDebounce(searchText, 500);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    try {
+      const baseUrl = getBaseSiteUrl();
+      if (!baseUrl || baseUrl.trim() === "") {
+        setConfigError("Base Site URL is not configured. Please set it in the extension preferences.");
+      } else {
+        setConfigError(null);
+      }
+    } catch {
+      setConfigError("Failed to load configuration. Please check your extension preferences.");
+    }
+  }, []);
 
   const isInitialRender = useRef(true);
 
@@ -46,6 +61,10 @@ export default function Command() {
   }, [searchText]);
 
   const performSearch = useCallback(async (query: string) => {
+    if (configError) {
+      return;
+    }
+
     if (!query || query.length === 0) {
       setBooks([]);
       setSearchStatus("idle");
@@ -116,13 +135,17 @@ export default function Command() {
       return;
     }
 
+    if (configError) {
+      return;
+    }
+
     if (debouncedSearchText) {
       performSearch(debouncedSearchText);
     } else {
       setBooks([]);
       setSearchStatus("idle");
     }
-  }, [debouncedSearchText, performSearch]);
+  }, [debouncedSearchText, performSearch, configError]);
 
   return (
     <List
@@ -131,8 +154,24 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search for books... (updates as you type)"
       throttle
+      actions={
+        <ActionPanel>
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        </ActionPanel>
+      }
     >
-      {searchStatus === "not_found" ? (
+      {configError ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Configuration Error"
+          description={configError}
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      ) : searchStatus === "not_found" ? (
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="No Results Found"

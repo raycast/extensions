@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fuzzy-file-search",
+  "title": "Fuzzy File Search",
+  "description": "Search files and directories using fuzzy finding. Type parts of the path of the file including directories to find the file you are looking for.",
+  "icon": "extension-icon.png",
+  "author": "erykksc",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-for-files",
+      "title": "Search Files",
+      "description": "Searches for files using fzf algorithm. Allows to fuzzy find the files based on their path. Uses fd under the hood to ignore the files ignored by git and hidden files.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeDirectories",
+          "title": "Include directories in results",
+          "label": "Look for both directories and files",
+          "description": "If enabled, the results will include files and directories. If disabled, the search will only look for files.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "ignoreSpacesInSearch",
+          "title": "Ignore Spaces in Search",
+          "label": "Treat spaces as empty characters",
+          "description": "If enabled, spaces in the search query will be ignored (useful for more flexible matching).",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "customSearchDirs",
+          "title": "Custom Search Directories",
+          "type": "textfield",
+          "description": "The list of directories to start in. The search will run in all of those directories. Separate each directory with a whitespace ' ' and quote paths e.g., \"$HOME/Downloads\" \"$HOME/Documents\"",
+          "placeholder": "\"$HOME/Downloads\" \"$HOME/Documents\"",
+          "default": "\"$HOME/Downloads\" \"$HOME/Documents\"",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "@types/proper-lockfile": "^4.1.4",
+    "axios": "^1.11.0",
+    "extract-zip": "^2.0.1",
+    "fzf": "^0.5.2",
+    "proper-lockfile": "^4.1.2",
+    "sha256-file": "^1.0.0",
+    "tar": "^6.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/extract-zip": "^2.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/sha256-file": "^1.0.3",
+    "@types/tar": "^6.1.13",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

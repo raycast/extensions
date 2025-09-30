@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useGetBusinesses, useGetBusinessInvoices, useGetBusinessProductsAndServices } from "./lib/wave";
+import { useGetBusinesses, useGetBusinessInvoices } from "./lib/wave";
 import { Business, InvoiceStatus } from "./lib/types";
 import { getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState, withAccessToken } from "@raycast/utils";
@@ -8,6 +8,7 @@ import { provider } from "./lib/oauth";
 import OpenInWave from "./lib/components/open-in-wave";
 import { useState } from "react";
 import BusinessCustomers from "./lib/components/business-customers";
+import BusinessProductsAndServices from "./lib/components/business-products-and-services";
 
 export default withAccessToken(provider)(ManageWave);
 
@@ -97,7 +98,14 @@ function BusinessInvoices({ business }: { business: Business }) {
               const markdown = `# ${title}
 | ${invoice.itemTitle} | ${invoice.unitTitle} | ${invoice.priceTitle} | ${invoice.amountTitle} |
 |----------------------|----------------------|-----------------------|------------------------|
-${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}`;
+${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}
+
+|  |  | Total | ${invoice.total.currency.symbol}${invoice.total.value} |
+|--|--|-------|--------------------------------------------------------|
+| | | Paid | ${invoice.amountPaid.currency.symbol}${invoice.amountPaid.value} |
+
+|  |  | Amount Due (${invoice.amountDue.currency.code}) | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value} |
+|--|--|-------|--------------------------------------------------------|`;
 
               return (
                 <List.Item
@@ -158,48 +166,6 @@ ${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${ite
                 />
               );
             })}
-        </List.Section>
-      )}
-    </List>
-  );
-}
-
-function BusinessProductsAndServices({ business }: { business: Business }) {
-  const [isShowingSubtitle, setIsShowingSubtitle] = useCachedState("show-products-subtitle", false);
-  const { isLoading, data: products } = useGetBusinessProductsAndServices(business.id);
-  const isEmpty = !isLoading && !products.length;
-
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search product">
-      {isEmpty ? (
-        <List.EmptyView
-          title="You haven't added any products yet."
-          actions={
-            <ActionPanel>
-              <OpenInWave title="Add a product or service" url={HELP_LINKS.AddProductOrService} />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.Section title={`Businesses / ${business.name} / Products & Services`}>
-          {products.map((product) => (
-            <List.Item
-              key={product.id}
-              icon={Icon.Box}
-              title={product.name}
-              subtitle={!isShowingSubtitle ? undefined : product.description}
-              accessories={[{ text: product.price }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    icon={Icon.Text}
-                    title="Toggle Subtitle"
-                    onAction={() => setIsShowingSubtitle((prev) => !prev)}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
         </List.Section>
       )}
     </List>

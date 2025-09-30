@@ -4,7 +4,8 @@ export default function OpenInMailerSend({ route }: { route: string }) {
   return (
     <Action.OpenInBrowser
       icon="symbol-512.png"
-      title="Open in Mailersend"
+      // eslint-disable-next-line @raycast/prefer-title-case
+      title="Open in MailerSend"
       url={`https://app.mailersend.com/${route}`}
     />
   );

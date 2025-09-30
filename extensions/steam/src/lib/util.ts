@@ -25,7 +25,7 @@ export const tryJsonGameFromAi = (input: string): GameSimple[] | undefined => {
     const games = response.filter((game) => game?.name);
     // If empty, then return undefined
     return games.length ? games : undefined;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };

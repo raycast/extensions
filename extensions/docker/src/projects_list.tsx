@@ -40,6 +40,7 @@ export default function ProjectsList() {
                 icon={{ source: 'icon-startall.png', tintColor: Color.PrimaryText }}
                 onAction={withToast({
                   action: () => startProject(project),
+                  onStart: () => `Starting ${project.name}`,
                   onSuccess: () => `Started ${project.name}`,
                   onFailure: ({ message }) => message,
                 })}
@@ -50,6 +51,7 @@ export default function ProjectsList() {
                 icon={{ source: 'icon-stopall.png', tintColor: Color.PrimaryText }}
                 onAction={withToast({
                   action: () => stopProject(project),
+                  onStart: () => `Stopping ${project.name}`,
                   onSuccess: () => `Stopped ${project.name}`,
                   onFailure: ({ message }) => message,
                 })}

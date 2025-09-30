@@ -8,7 +8,7 @@ export default async function Command() {
   try {
     await seek(0);
     await showHUD("Replaying");
-  } catch (error) {
+  } catch {
     await showHUD("No active device");
   }
 }

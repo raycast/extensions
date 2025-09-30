@@ -41,6 +41,10 @@
               "title": "Copy SVG Wordmark"
             },
             {
+              "value": "copyShadcnRegistry",
+              "title": "Copy shadcn/ui Registry"
+            },
+            {
               "value": "copyReactComponent",
               "title": "Copy React Component"
             },
@@ -73,6 +77,31 @@
               "title": "SVG Info"
             }
           ]
+        },
+        {
+          "name": "defaultPackageManager",
+          "title": "Default Package Manager",
+          "description": "Default package manager",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "value": "pnpm",
+              "title": "pnpm"
+            },
+            {
+              "value": "npm",
+              "title": "npm"
+            },
+            {
+              "value": "yarn",
+              "title": "yarn"
+            },
+            {
+              "value": "bun",
+              "title": "bun"
+            }
+          ]
         }
       ]
     },
@@ -80,6 +109,12 @@
       "name": "request",
       "title": "Request SVG Logo",
       "description": "Request SVG logo to the svgl repository",
+      "mode": "view"
+    },
+    {
+      "name": "setup-shadcn-registry",
+      "title": "Setup shadcn/ui Registry",
+      "description": "Copy svgl registry JSON to clipboard",
       "mode": "view"
     }
   ],

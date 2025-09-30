@@ -22,3 +22,13 @@ This is a Raycast extension for [MailerSend](https://www.mailersend.com/) - _Ema
 ## 🗒️ NOTE
 
 - In **Domains** > **Activities**, last _24 hours_ of Activity are shown.
+
+---
+
+## ➕ MORE
+
+Looking for more **email** extensions? Try these:
+
+<a title="Install migadu Raycast Extension" href="https://www.raycast.com/xmok/migadu"><img src="https://www.raycast.com/xmok/migadu/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install resend Raycast Extension" href="https://www.raycast.com/xmok/resend"><img src="https://www.raycast.com/xmok/resend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install shroud-email Raycast Extension" href="https://www.raycast.com/xmok/shroud-email"><img src="https://www.raycast.com/xmok/shroud-email/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

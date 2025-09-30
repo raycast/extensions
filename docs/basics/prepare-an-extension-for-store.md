@@ -12,6 +12,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure you use your **Raycast** account username in the `author` field
   - Ensure you use `MIT` in the `license` field
   - Ensure you are using the latest Raycast API version
+  - Ensure the `platforms` field matching the requirement of your extension, eg. if you use platform-specific APIs, restrict the `platforms` field to the corresponding platform
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
 - Please check the terms of service of third-party services that your extension uses.
 - Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.

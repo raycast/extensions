@@ -1,5 +1,11 @@
 # Vercast Changelog
 
+## [2.11] - 2025-08-27
+
+- Bump deps to latest
+- Upgrade eslint config to new flat format
+- Make available on Windows
+
 ## [2.11] - 2025-08-14
 
 - Avoid broken links by removing personal account from the team switcher following Vercel's [personal team change](https://vercel.com/changelog/2024-01-account-changes).

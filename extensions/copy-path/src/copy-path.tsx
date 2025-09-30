@@ -6,6 +6,7 @@ import {
   showLoadingHUD,
   isEmpty,
   copyUnSupportedAppContent,
+  copyWindowPath,
 } from "./utils/common-utils";
 
 export default async () => {
@@ -16,6 +17,11 @@ export default async () => {
     // get finder path
     await copyFinderPath();
   } else {
+    const windowPath = await copyWindowPath(frontmostApp);
+    if (!isEmpty(windowPath)) {
+      return;
+    }
+
     // get browser web page url
     const url = await copyBrowserTabUrl(frontmostApp);
     if (isEmpty(url)) {

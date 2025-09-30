@@ -1,5 +1,11 @@
 # Spaceship Changelog
 
+## [Domain + NS Enhancements + Windows Support] - 2025-09-29
+
+- View Lifecycle State of "Domain"
+- Change "Nameservers" of "Domain"
+- Add "Windows" Support
+
 ## [Enhancements] - 2025-07-07
 
 - In "Domains"

@@ -1,5 +1,14 @@
 # Splitwise Changelog
 
+## [New Features] - 2025-09-02
+
+- Added category selection dropdown to the Add Expense form
+- Categories are fetched from Splitwise API and include both parent categories and subcategories
+
+## [New Features] - 2025-08-22
+
+- Add "Recent" section to `Add Expense` showing the top 3 most recently updated friends/groups, which aligns with Splitwise's app UI
+
 ## [Improvements] - 2024-09-28
 
 - Added support for multiple currencies

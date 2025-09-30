@@ -102,7 +102,7 @@ declare global {
       modules: {
         module_author: DynamicModuleAuthor;
         module_dynamic: {
-          desc: {
+          desc?: {
             text: string;
           };
         };

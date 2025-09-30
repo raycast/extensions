@@ -28,28 +28,73 @@ jobs:
       - name: Checkout PR
         run: gh pr checkout ${{ github.event.inputs.pr_number }}
       - name: Update CHANGELOG.md
+        id: update_changelog
         run: |
+          changelog_updated=false
+          updated_count=0
           changelogs=$(gh pr view ${{ github.event.inputs.pr_number }} --json files --jq '.files.[].path' | grep -i CHANGELOG.md || true)
           for changelog in $changelogs
           do
-              echo "$changelog:"
-              if [[ -f "$changelog" ]]; then
-                  pattern="{PR_MERGE_DATE}"
-                  replacement=$(date '+%Y-%m-%d')
-                  if grep -q $pattern $changelog; then
-                      echo "  pattern found"
-                      sed -i "" "s/$pattern/$replacement/g" $changelog
-                      # ubuntu: sed -i "s/$pattern/$replacement/g" $changelog
-                      echo "  updated to $replacement"
-                  else
-                      echo "  pattern not found - skipping"
-                  fi
+            echo "$changelog:"
+            if [[ -f "$changelog" ]]; then
+              pattern="{PR_MERGE_DATE}"
+              replacement=$(date '+%Y-%m-%d')
+              if grep -q $pattern $changelog; then
+                echo "  pattern found"
+                sed -i "" "s/$pattern/$replacement/g" $changelog
+                # ubuntu: sed -i "s/$pattern/$replacement/g" $changelog
+                echo "  updated to $replacement"
+                updated_count=$((updated_count+1))
               else
-                  echo "  skipping (file not existing)"
+                echo "  pattern not found - skipping"
               fi
+            else
+              echo "  skipping (file not existing)"
+            fi
           done
-      - name: Optimise images
+          if [[ $updated_count -gt 0 ]]; then
+            changelog_updated=true
+          fi
+          echo "changelog_updated=$changelog_updated" >> $GITHUB_OUTPUT
+
+      - name: Add platforms field to package.json
+        id: add_platforms_field
         run: |
+          platforms_added=false
+          modified_count=0
+          changed_extensions="${{ steps.get_changed_extensions.outputs.paths }}"
+          if [[ -n "$changed_extensions" ]]; then
+            echo "Changed extensions: $changed_extensions"
+            IFS=',' read -ra extension_paths <<< "$changed_extensions"
+            for extension_path in "${extension_paths[@]}"; do
+              package_json="$extension_path/package.json"
+              echo "Checking: $package_json"
+              if [[ -f "$package_json" ]]; then
+                # Check if platforms field exists
+                if ! jq -e '.platforms' "$package_json" > /dev/null 2>&1; then
+                  echo "  Adding platforms field to $package_json"
+                  # Add platforms field with ["macOS"] as default
+                  jq '. + {"platforms": ["macOS"]}' "$package_json" > "${package_json}.tmp" && mv "${package_json}.tmp" "$package_json"
+                  modified_count=$((modified_count+1))
+                else
+                  echo "  platforms field already exists in $package_json"
+                fi
+              else
+                echo "  package.json not found in $extension_path"
+              fi
+            done
+          else
+            echo "No changed extensions found"
+          fi
+          if [[ $modified_count -gt 0 ]]; then
+            platforms_added=true
+          fi
+          echo "platforms_added=$platforms_added" >> $GITHUB_OUTPUT
+
+      - name: Optimise images
+        id: optimise_images
+        run: |
+          images_optimized=false
           images=$(gh pr view ${{ github.event.inputs.pr_number }} --json files | jq -r '.files[].path | select(endswith("png") or endswith("jpeg") or endswith("jpg"))')
           images_array=()
           if [[ -n "$images" ]]; then
@@ -75,7 +120,9 @@ jobs:
                 imageoptim "${batch[@]}"
                 ((batch_number++))
             done
+            images_optimized=true
           fi
+          echo "images_optimized=$images_optimized" >> $GITHUB_OUTPUT
       - name: Commit changes
         id: commit_changes
         run: |
@@ -91,12 +138,39 @@ jobs:
             if [[ "$can_modify" == "false" ]]; then
               error="Edits from maintainers are disabled."
               echo $error
+              echo "error=$error" >> $GITHUB_OUTPUT
               exit 1
+            fi
+
+            # Build a dynamic commit message based on previous steps
+            parts=()
+            if [[ "${{ steps.update_changelog.outputs.changelog_updated }}" == "true" ]]; then
+              parts+=("Update CHANGELOG.md")
+            fi
+            if [[ "${{ steps.add_platforms_field.outputs.platforms_added }}" == "true" ]]; then
+              parts+=("add platforms field")
+            fi
+            if [[ "${{ steps.optimise_images.outputs.images_optimized }}" == "true" ]]; then
+              parts+=("optimise images")
+            fi
+
+            # Join parts with commas and 'and' for the last item
+            if [[ ${#parts[@]} -eq 0 ]]; then
+              commit_msg="Automated maintenance updates"
+            else
+              commit_msg="${parts[0]}"
+              for (( i=1; i<${#parts[@]}; i++ )); do
+                if [[ $i -eq $((${#parts[@]}-1)) ]]; then
+                  commit_msg+=" and ${parts[$i]}"
+                else
+                  commit_msg+=", ${parts[$i]}"
+                fi
+              done
             fi
 
             git add .
             git status .
-            git commit --message "Update CHANGELOG.md and optimise images"
+            git commit --message "$commit_msg"
 
             git push https://${{ env.GITHUB_TOKEN }}@github.com/$pr_repo_owner/$pr_repo_name.git HEAD:$pr_branch
             echo "Pushed changes."
@@ -110,7 +184,7 @@ jobs:
         run: sleep 30 # sleep 30s for ubuntu
         shell: bash
       - name: Merge
-        run: gh pr merge ${{ github.event.inputs.pr_number }} --squash
+        run: gh pr merge ${{ github.event.inputs.pr_number }} --squash --delete-branch
       - name: Notify Failure to Slack
         if: failure()
         uses: raycast/github-actions/slack-send@master

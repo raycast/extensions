@@ -20,12 +20,16 @@ import { useForm, usePromise } from "@raycast/utils";
 import { execa } from "execa";
 import {
   DownloadOptions,
+  getffmpegPath,
+  getffprobePath,
   getFormats,
   getFormatTitle,
   getFormatValue,
+  getytdlPath,
   isValidHHMM,
   isValidUrl,
   parseHHMM,
+  sanitizeVideoTitle,
 } from "./utils.js";
 import { Video } from "./types.js";
 import Installer from "./views/installer.js";
@@ -33,9 +37,6 @@ import Updater from "./views/updater.js";
 
 const {
   downloadPath,
-  ytdlPath,
-  ffmpegPath,
-  ffprobePath,
   autoLoadUrlFromClipboard,
   autoLoadUrlFromSelectedText,
   enableBrowserExtensionSupport,
@@ -46,13 +47,17 @@ export default function DownloadVideo() {
   const [error, setError] = useState(0);
   const [warning, setWarning] = useState("");
 
+  const ytdlPath = useMemo(() => getytdlPath(), [error]);
+  const ffmpegPath = useMemo(() => getffmpegPath(), [error]);
+  const ffprobePath = useMemo(() => getffprobePath(), [error]);
+
   const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     initialValues: {
       url: "",
     },
     onSubmit: async (values) => {
       if (!values.format) return;
-      const options = ["-P", downloadPath];
+      const options = ["-o", path.join(downloadPath, `${video?.title || ""}.%(ext)s`)];
       const [downloadFormat, recodeFormat] = values.format.split("#");
 
       options.push("--ffmpeg-location", ffmpegPath);
@@ -174,7 +179,9 @@ export default function DownloadVideo() {
           Boolean(x),
         ),
       );
-      return JSON.parse(result.stdout) as Video;
+      const data = JSON.parse(result.stdout) as Video;
+
+      return { ...data, title: sanitizeVideoTitle(data.title) };
     },
     [values.url],
     {

@@ -30,7 +30,13 @@ export const ItemGrid = memo(() => {
             if (item.a?.length) {
               accessories.push({ icon: "⌨️", text: `${item.a.join(", ")}` });
             }
-            return <GridItem item={item} key={`${section.sectionTitle}-${item.c}-${item.n}`} />;
+            return (
+              <GridItem
+                item={item}
+                key={`${section.sectionTitle}-${item.c}-${item.n}`}
+                section={section.sectionTitle}
+              />
+            );
           })}
         </Grid.Section>
       ))}

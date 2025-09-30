@@ -64,25 +64,28 @@
       "subtitle": "QR Code Generator",
       "description": "Generate a QR code from clipboard content",
       "mode": "view"
+    },
+    {
+      "name": "selection",
+      "title": "Generate QR Code from Selection",
+      "subtitle": "QR Code Generator",
+      "description": "Generate a QR code from selection content",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.0",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/api": "^1.102.0",
+    "@raycast/utils": "^1.17.0",
     "qrcode": "^1.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^20.8.10",
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "22.13.10",
     "@types/qrcode": "^1.5.1",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

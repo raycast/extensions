@@ -1,45 +1,45 @@
 import {
+  Action,
   ActionPanel,
-  closeMainWindow,
   Color,
-  LocalStorage,
+  closeMainWindow,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
+  LocalStorage,
   popToRoot,
   showHUD,
   showToast,
   Toast,
-  Action,
-  Keyboard,
 } from "@raycast/api";
+import { useFrecencySorting, usePromise } from "@raycast/utils";
 import { useEffect } from "react";
 import {
-  AudioDevice,
-  getInputDevices,
-  getOutputDevices,
+  type AudioDevice,
   getDefaultInputDevice,
   getDefaultOutputDevice,
+  getInputDevices,
+  getOutputDevices,
   setDefaultInputDevice,
   setDefaultOutputDevice,
   setDefaultSystemDevice,
   TransportType,
 } from "./audio-device";
 import { createDeepLink } from "./utils";
-import { usePromise, useFrecencySorting } from "@raycast/utils";
+
+type IOType = "input" | "output";
 
 type DeviceListProps = {
-  type: "input" | "output";
+  ioType: IOType;
   deviceId?: string;
   deviceName?: string;
 };
 
-export function DeviceList({ type, deviceId, deviceName }: DeviceListProps) {
-  const { isLoading, data } = useAudioDevices(type);
-  const { data: hiddenDevices, revalidate: refetchHiddenDevices } = usePromise(getHiddenDevices, []);
-  const { data: showHidden, revalidate: refetchShowHidden } = usePromise(async () => {
-    return (await LocalStorage.getItem("showHiddenDevices")) === "true";
-  }, []);
+export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
+  const { isLoading, data } = useAudioDevices(ioType);
+  const { data: hiddenDevices } = usePromise(getHiddenDevices, []);
+  const { data: showHidden, revalidate: refetchShowHidden } = usePromise(isShowingHiddenDevices, []);
 
   const { data: sortedDevices, visitItem: recordDeviceSelection } = useFrecencySorting(
     data?.devices?.filter((d) => !hiddenDevices?.includes(d.uid)) || [],
@@ -59,44 +59,23 @@ export function DeviceList({ type, deviceId, deviceName }: DeviceListProps) {
       return;
     }
 
-    (async function () {
+    (async () => {
       try {
-        await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
+        await (ioType === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
         recordDeviceSelection(device);
         closeMainWindow({ clearRootSearch: true });
         popToRoot({ clearSearchBar: true });
-        showHUD(`Active ${type} audio device set to ${device.name}`);
+        showHUD(`Active ${ioType} audio device set to ${device.name}`);
       } catch (e) {
         console.log(e);
         showToast(
           Toast.Style.Failure,
           `Error!`,
-          `There was an error setting the active ${type} audio device to ${device.name}`,
+          `There was an error setting the active ${ioType} audio device to ${device.name}`,
         );
       }
     })();
-  }, [deviceId, deviceName, data, type]);
-
-  const DeviceActions = ({ device }: { device: AudioDevice }) => (
-    <>
-      <SetAudioDeviceAction device={device} type={type} onSelection={() => recordDeviceSelection(device)} />
-      <Action.CreateQuicklink
-        quicklink={{
-          name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
-          link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
-            deviceId: device.id,
-            deviceName: device.name,
-          }),
-        }}
-      />
-      <Action.CopyToClipboard title="Copy Device Name" content={device.name} shortcut={Keyboard.Shortcut.Common.Copy} />
-      <ToggleDeviceVisibilityAction deviceId={device.uid} onAction={refetchHiddenDevices} />
-
-      <ActionPanel.Section title="Options">
-        <ToggleShowHiddenDevicesAction onAction={refetchShowHidden} />
-      </ActionPanel.Section>
-    </>
-  );
+  }, [deviceId, deviceName, data, ioType, recordDeviceSelection]);
 
   return (
     <List isLoading={isLoading}>
@@ -122,7 +101,7 @@ export function DeviceList({ type, deviceId, deviceName }: DeviceListProps) {
               icon={getIcon(d, d.uid === data.current.uid)}
               actions={
                 <ActionPanel>
-                  <DeviceActions device={d} />
+                  <DeviceActions ioType={ioType} device={d} onSelection={() => recordDeviceSelection(d)} />
                 </ActionPanel>
               }
               accessories={getAccessories(isCurrent)}
@@ -141,7 +120,7 @@ export function DeviceList({ type, deviceId, deviceName }: DeviceListProps) {
                 icon={getIcon(d, false)}
                 actions={
                   <ActionPanel>
-                    <DeviceActions device={d} />
+                    <DeviceActions ioType={ioType} device={d} onSelection={() => recordDeviceSelection(d)} />
                   </ActionPanel>
                 }
               />
@@ -152,7 +131,41 @@ export function DeviceList({ type, deviceId, deviceName }: DeviceListProps) {
   );
 }
 
-function useAudioDevices(type: "input" | "output") {
+function DeviceActions({
+  ioType,
+  device,
+  onSelection,
+}: {
+  ioType: IOType;
+  device: AudioDevice;
+  onSelection: () => void;
+}) {
+  const { revalidate: refetchHiddenDevices } = usePromise(getHiddenDevices, []);
+  const { revalidate: refetchShowHidden } = usePromise(isShowingHiddenDevices, []);
+
+  return (
+    <>
+      <SetAudioDeviceAction device={device} type={ioType} onSelection={onSelection} />
+      <Action.CreateQuicklink
+        quicklink={{
+          name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
+          link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
+            deviceId: device.id,
+            deviceName: device.name,
+          }),
+        }}
+      />
+      <Action.CopyToClipboard title="Copy Device Name" content={device.name} shortcut={Keyboard.Shortcut.Common.Copy} />
+      <ToggleDeviceVisibilityAction deviceId={device.uid} onAction={refetchHiddenDevices} />
+
+      <ActionPanel.Section title="Options">
+        <ToggleShowHiddenDevicesAction onAction={refetchShowHidden} />
+      </ActionPanel.Section>
+    </>
+  );
+}
+
+function useAudioDevices(type: IOType) {
   return usePromise(
     async (type) => {
       const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
@@ -169,7 +182,7 @@ function useAudioDevices(type: "input" | "output") {
 
 type SetAudioDeviceActionProps = {
   device: AudioDevice;
-  type: "input" | "output";
+  type: IOType;
   onSelection?: () => void;
 };
 
@@ -177,7 +190,10 @@ function SetAudioDeviceAction({ device, type, onSelection }: SetAudioDeviceActio
   return (
     <Action
       title={`Set as ${type === "input" ? "Input" : "Output"} Device`}
-      icon={{ source: type === "input" ? "mic.png" : "speaker.png", tintColor: Color.PrimaryText }}
+      icon={{
+        source: type === "input" ? "mic.png" : "speaker.png",
+        tintColor: Color.PrimaryText,
+      }}
       onAction={async () => {
         try {
           await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
@@ -253,6 +269,10 @@ async function toggleDeviceVisibility(deviceId: string) {
 
 async function getHiddenDevices() {
   return JSON.parse((await LocalStorage.getItem("hiddenDevices")) || "[]");
+}
+
+async function isShowingHiddenDevices() {
+  return (await LocalStorage.getItem("showHiddenDevices")) === "true";
 }
 
 function getDeviceIcon(device: AudioDevice): string | null {

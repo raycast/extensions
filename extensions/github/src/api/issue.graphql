@@ -196,6 +196,7 @@ mutation createIssue(
   $assigneeIds: [ID!]!
   $labelIds: [ID!]!
   $milestoneId: ID
+  $issueTypeId: ID
 ) {
   createIssue(
     input: {
@@ -205,6 +206,7 @@ mutation createIssue(
       assigneeIds: $assigneeIds
       labelIds: $labelIds
       milestoneId: $milestoneId
+      issueTypeId: $issueTypeId
     }
   ) {
     issue {

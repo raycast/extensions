@@ -1,9 +1,10 @@
 import { App, Branch, CustomRule, JobStatus, JobSummary, Webhook } from "@aws-sdk/client-amplify";
 import { Action, ActionPanel, Color, Form, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import {
+  downloadAmplifyBuildLogs,
   startAmplifyBuild,
   stopAmplifyBuild,
   updateAmplifyCustomRules,
@@ -40,6 +41,17 @@ function AmplifyApp({ app }: { app: App }) {
   const hasEnvVars = app.environmentVariables && Object.keys(app.environmentVariables).length > 0;
   const AWS_REGION = process.env.AWS_REGION;
 
+  if (!app.appId) {
+    return (
+      <List.Item
+        title={app.name || "Unknown App"}
+        subtitle="Invalid app - missing App ID"
+        icon={{ source: "aws-icons/amplify.png", mask: Image.Mask.RoundedRectangle }}
+        accessories={[{ text: "Error", icon: Icon.Warning }]}
+      />
+    );
+  }
+
   // Monitoring console URLs
   const monitoringUrls = {
     accessLogs: `https://${AWS_REGION}.console.aws.amazon.com/amplify/apps/${app.appId}/access-logs`,
@@ -58,7 +70,7 @@ function AmplifyApp({ app }: { app: App }) {
         <ActionPanel>
           <Action.Push target={<AmplifyBranches app={app} />} title="View Branches" icon={Icon.List} />
           <Action.Push
-            target={<AmplifyEnvironmentVariables appId={app.appId!} />}
+            target={<AmplifyEnvironmentVariables appId={app.appId} />}
             title="View Environment Variables"
             icon={Icon.Code}
           />
@@ -69,7 +81,7 @@ function AmplifyApp({ app }: { app: App }) {
           />
           <Action.OpenInBrowser
             title="Manage Notifications"
-            url={`https://${process.env.AWS_REGION}.console.aws.amazon.com/amplify/apps/${app.appId}/notifications`}
+            url={`https://${AWS_REGION}.console.aws.amazon.com/amplify/apps/${app.appId}/notifications`}
             icon={Icon.Bell}
           />
           <Action.OpenInBrowser title="Open App" url={appUrl} icon={Icon.Globe} />
@@ -99,8 +111,16 @@ function AmplifyApp({ app }: { app: App }) {
 }
 
 function AmplifyBranches({ app }: { app: App }) {
-  const { branches, error, isLoading } = useAmplifyBranches(app.appId!);
-  const { webhooks } = useAmplifyWebhooks(app.appId!);
+  if (!app.appId) {
+    return (
+      <List isLoading={false} navigationTitle="Branches">
+        <List.EmptyView title="Invalid App" description="App ID is missing" icon={Icon.Warning} />
+      </List>
+    );
+  }
+
+  const { branches, error, isLoading } = useAmplifyBranches(app.appId);
+  const { webhooks } = useAmplifyWebhooks(app.appId);
 
   return (
     <List
@@ -130,7 +150,7 @@ function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; we
     accessLogs: `https://${AWS_REGION}.console.aws.amazon.com/amplify/apps/${app.appId}/branches/${branch.branchName}/access-logs`,
   };
 
-  async function triggerWebhook(webhookUrl: string, webhookDescription?: string) {
+  const triggerWebhook = useCallback(async (webhookUrl: string, webhookDescription?: string) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Triggering webhook${webhookDescription ? `: ${webhookDescription}` : ""}`,
@@ -156,7 +176,7 @@ function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; we
       toast.title = "❌ Failed to trigger webhook";
       toast.message = error instanceof Error ? error.message : "Unknown error occurred";
     }
-  }
+  }, []);
 
   return (
     <List.Item
@@ -176,7 +196,9 @@ function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; we
             title="Start New Build"
             icon={Icon.Play}
             onAction={async () => {
-              await startAmplifyBuild(app.appId!, branch.branchName!);
+              if (app.appId && branch.branchName) {
+                await startAmplifyBuild(app.appId, branch.branchName);
+              }
             }}
             shortcut={{ modifiers: ["cmd"], key: "b" }}
           />
@@ -200,7 +222,11 @@ function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; we
                   key={`trigger-${webhook.webhookId}`}
                   title={`Trigger: ${webhook.description || `Webhook ${webhook.webhookId}`}`}
                   icon={Icon.Play}
-                  onAction={() => triggerWebhook(webhook.webhookUrl!, webhook.description)}
+                  onAction={() => {
+                    if (webhook.webhookUrl) {
+                      triggerWebhook(webhook.webhookUrl, webhook.description);
+                    }
+                  }}
                 />,
                 <Action.CopyToClipboard
                   key={`copy-${webhook.webhookId}`}
@@ -343,36 +369,39 @@ function AddEnvironmentVariable({ appId, allVariables }: { appId: string; allVar
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(values: { key: string; value: string }) {
-    if (!values.key || !values.value) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Missing fields",
-        message: "Both key and value are required",
-      });
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (values: { key: string; value: string }) => {
+      if (!values.key || !values.value) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Missing fields",
+          message: "Both key and value are required",
+        });
+        return;
+      }
 
-    if (allVariables[values.key]) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Variable exists",
-        message: `Variable ${values.key} already exists. Use edit instead.`,
-      });
-      return;
-    }
+      if (allVariables[values.key]) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Variable exists",
+          message: `Variable ${values.key} already exists. Use edit instead.`,
+        });
+        return;
+      }
 
-    setIsSubmitting(true);
-    try {
-      const updatedVariables = { ...allVariables, [values.key]: values.value };
-      await updateAmplifyEnvironmentVariables(appId, updatedVariables);
-      pop();
-    } catch (error) {
-      // Error is already handled in updateAmplifyEnvironmentVariables
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+      setIsSubmitting(true);
+      try {
+        const updatedVariables = { ...allVariables, [values.key]: values.value };
+        await updateAmplifyEnvironmentVariables(appId, updatedVariables);
+        pop();
+      } catch (error) {
+        // Error is already handled in updateAmplifyEnvironmentVariables
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [allVariables, appId, pop],
+  );
 
   return (
     <Form
@@ -404,27 +433,30 @@ function EditEnvironmentVariable({
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(values: { value: string }) {
-    if (!values.value) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Missing value",
-        message: "Value is required",
-      });
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (values: { value: string }) => {
+      if (!values.value) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Missing value",
+          message: "Value is required",
+        });
+        return;
+      }
 
-    setIsSubmitting(true);
-    try {
-      const updatedVariables = { ...allVariables, [variableKey]: values.value };
-      await updateAmplifyEnvironmentVariables(appId, updatedVariables);
-      pop();
-    } catch (error) {
-      // Error is already handled in updateAmplifyEnvironmentVariables
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+      setIsSubmitting(true);
+      try {
+        const updatedVariables = { ...allVariables, [variableKey]: values.value };
+        await updateAmplifyEnvironmentVariables(appId, updatedVariables);
+        pop();
+      } catch (error) {
+        // Error is already handled in updateAmplifyEnvironmentVariables
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [allVariables, variableKey, appId, pop],
+  );
 
   return (
     <Form
@@ -443,7 +475,15 @@ function EditEnvironmentVariable({
 }
 
 function AmplifyBuildHistory({ app, branch }: { app: App; branch: Branch }) {
-  const { jobs, error, isLoading, revalidate } = useAmplifyJobs(app.appId!, branch.branchName!);
+  if (!app.appId || !branch.branchName) {
+    return (
+      <List isLoading={false} navigationTitle="Build History">
+        <List.EmptyView title="Invalid Parameters" description="App ID or branch name is missing" icon={Icon.Warning} />
+      </List>
+    );
+  }
+
+  const { jobs, error, isLoading, revalidate } = useAmplifyJobs(app.appId, branch.branchName);
 
   function getJobStatusIcon(status?: JobStatus): { source: Icon; tintColor: Color } {
     switch (status) {
@@ -481,15 +521,25 @@ function AmplifyBuildHistory({ app, branch }: { app: App; branch: Branch }) {
     return `${hours}h ${remainingMinutes}m`;
   }
 
-  async function handleRetryBuild(job: JobSummary) {
-    await startAmplifyBuild(app.appId!, branch.branchName!, undefined, job.commitId, job.commitMessage);
-    revalidate();
-  }
+  const handleRetryBuild = useCallback(
+    async (job: JobSummary) => {
+      if (app.appId && branch.branchName) {
+        await startAmplifyBuild(app.appId, branch.branchName, undefined, job.commitId, job.commitMessage);
+        revalidate();
+      }
+    },
+    [app.appId, branch.branchName, revalidate],
+  );
 
-  async function handleCancelBuild(job: JobSummary) {
-    await stopAmplifyBuild(app.appId!, branch.branchName!, job.jobId!);
-    revalidate();
-  }
+  const handleCancelBuild = useCallback(
+    async (job: JobSummary) => {
+      if (app.appId && branch.branchName && job.jobId) {
+        await stopAmplifyBuild(app.appId, branch.branchName, job.jobId);
+        revalidate();
+      }
+    },
+    [app.appId, branch.branchName, revalidate],
+  );
 
   return (
     <List
@@ -510,8 +560,10 @@ function AmplifyBuildHistory({ app, branch }: { app: App; branch: Branch }) {
                 title="Start New Build"
                 icon={Icon.Play}
                 onAction={async () => {
-                  await startAmplifyBuild(app.appId!, branch.branchName!);
-                  revalidate();
+                  if (app.appId && branch.branchName) {
+                    await startAmplifyBuild(app.appId, branch.branchName);
+                    revalidate();
+                  }
                 }}
               />
             </ActionPanel>
@@ -573,6 +625,26 @@ function AmplifyBuildJob({
             target={<AmplifyBuildDetails job={job} app={app} branch={branch} />}
           />
           <Action.OpenInBrowser title="View Build Logs" url={buildLogUrl} icon={Icon.Terminal} />
+          <Action
+            title="Download Build Logs"
+            icon={Icon.Download}
+            onAction={async () => {
+              if (!app.appId || !branch.branchName || !job.jobId) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Cannot download logs",
+                  message: "Missing required parameters",
+                });
+                return;
+              }
+              try {
+                await downloadAmplifyBuildLogs(app.appId, branch.branchName, job.jobId);
+              } catch (error) {
+                // Error is already handled in downloadAmplifyBuildLogs
+              }
+            }}
+            shortcut={{ modifiers: ["cmd"], key: "d" }}
+          />
           {isRunning && (
             <Action
               title="Cancel Build"
@@ -594,7 +666,9 @@ function AmplifyBuildJob({
             title="Start New Build"
             icon={Icon.Play}
             onAction={async () => {
-              await startAmplifyBuild(app.appId!, branch.branchName!);
+              if (app.appId && branch.branchName) {
+                await startAmplifyBuild(app.appId, branch.branchName);
+              }
             }}
             shortcut={{ modifiers: ["cmd"], key: "b" }}
           />
@@ -615,7 +689,15 @@ function AmplifyBuildJob({
 }
 
 function AmplifyBuildDetails({ job, app, branch }: { job: JobSummary; app: App; branch: Branch }) {
-  const { artifacts, isLoading } = useAmplifyArtifacts(app.appId!, branch.branchName!, job.jobId!);
+  if (!app.appId || !branch.branchName || !job.jobId) {
+    return (
+      <List isLoading={false} navigationTitle="Build Details">
+        <List.EmptyView title="Invalid Parameters" description="Missing required parameters" icon={Icon.Warning} />
+      </List>
+    );
+  }
+
+  const { artifacts, isLoading } = useAmplifyArtifacts(app.appId, branch.branchName, job.jobId);
   const AWS_REGION = process.env.AWS_REGION;
   const buildLogUrl = `https://${AWS_REGION}.console.aws.amazon.com/amplify/apps/${app.appId}/branches/${branch.branchName}/deployments/${job.jobId}`;
 
@@ -633,6 +715,26 @@ function AmplifyBuildDetails({ job, app, branch }: { job: JobSummary; app: App; 
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="View Build Logs" url={buildLogUrl} icon={Icon.Terminal} />
+              <Action
+                title="Download Build Logs"
+                icon={Icon.Download}
+                onAction={async () => {
+                  if (!app.appId || !branch.branchName || !job.jobId) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Cannot download logs",
+                      message: "Missing required parameters",
+                    });
+                    return;
+                  }
+                  try {
+                    await downloadAmplifyBuildLogs(app.appId, branch.branchName, job.jobId);
+                  } catch (error) {
+                    // Error is already handled in downloadAmplifyBuildLogs
+                  }
+                }}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+              />
             </ActionPanel>
           }
           accessories={[{ text: job.status }]}
@@ -690,7 +792,15 @@ function AmplifyBuildDetails({ job, app, branch }: { job: JobSummary; app: App; 
 }
 
 function AmplifyCustomHeaders({ app }: { app: App }) {
-  const { app: appDetails, error, isLoading } = useAmplifyAppDetails(app.appId!);
+  if (!app.appId) {
+    return (
+      <List isLoading={false} navigationTitle="Custom Rules & Redirects">
+        <List.EmptyView title="Invalid App" description="App ID is missing" icon={Icon.Warning} />
+      </List>
+    );
+  }
+
+  const { app: appDetails, error, isLoading } = useAmplifyAppDetails(app.appId);
 
   const customRules = appDetails?.customRules || [];
   const AWS_REGION = process.env.AWS_REGION;
@@ -714,7 +824,7 @@ function AmplifyCustomHeaders({ app }: { app: App }) {
               <Action.Push
                 title="Add Custom Rule"
                 icon={Icon.Plus}
-                target={<AddCustomRule appId={app.appId!} currentRules={customRules} />}
+                target={<AddCustomRule appId={app.appId} currentRules={customRules} />}
               />
               <Action.OpenInBrowser title="Open in AWS Console" url={headersConsoleUrl} icon={Icon.Globe} />
             </ActionPanel>
@@ -732,18 +842,28 @@ function AmplifyCustomHeaders({ app }: { app: App }) {
                 <Action.Push
                   title="Edit Rule"
                   icon={Icon.Pencil}
-                  target={<EditCustomRule appId={app.appId!} rule={rule} index={index} currentRules={customRules} />}
+                  target={
+                    app.appId ? (
+                      <EditCustomRule appId={app.appId} rule={rule} index={index} currentRules={customRules} />
+                    ) : (
+                      <></>
+                    )
+                  }
                 />
                 <Action
                   title="Delete Rule"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  onAction={() => deleteCustomRule(app.appId!, index, customRules)}
+                  onAction={() => {
+                    if (app.appId) {
+                      deleteCustomRule(app.appId, index, customRules);
+                    }
+                  }}
                 />
                 <Action.Push
                   title="Add Custom Rule"
                   icon={Icon.Plus}
-                  target={<AddCustomRule appId={app.appId!} currentRules={customRules} />}
+                  target={app.appId ? <AddCustomRule appId={app.appId} currentRules={customRules} /> : <></>}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
                 <Action.CopyToClipboard title="Copy Rule as JSON" content={JSON.stringify(rule, null, 2)} />
@@ -780,34 +900,37 @@ function AddCustomRule({ appId, currentRules }: { appId: string; currentRules: C
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(values: { source: string; target?: string; status: string; condition?: string }) {
-    if (!values.source) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Missing source",
-        message: "Source pattern is required",
-      });
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (values: { source: string; target?: string; status: string; condition?: string }) => {
+      if (!values.source) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Missing source",
+          message: "Source pattern is required",
+        });
+        return;
+      }
 
-    setIsSubmitting(true);
-    try {
-      const newRule: CustomRule = {
-        source: values.source,
-        target: values.target || undefined,
-        status: values.status || "200",
-        condition: values.condition || undefined,
-      };
+      setIsSubmitting(true);
+      try {
+        const newRule: CustomRule = {
+          source: values.source,
+          target: values.target || undefined,
+          status: values.status || "200",
+          condition: values.condition || undefined,
+        };
 
-      const updatedRules = [...currentRules, newRule];
-      await updateAmplifyCustomRules(appId, updatedRules);
-      pop();
-    } catch (error) {
-      // Error is already handled in updateAmplifyCustomRules
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+        const updatedRules = [...currentRules, newRule];
+        await updateAmplifyCustomRules(appId, updatedRules);
+        pop();
+      } catch (error) {
+        // Error is already handled in updateAmplifyCustomRules
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [currentRules, appId, pop],
+  );
 
   return (
     <Form
@@ -862,36 +985,39 @@ function EditCustomRule({
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(values: { source: string; target?: string; status: string; condition?: string }) {
-    if (!values.source) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Missing source",
-        message: "Source pattern is required",
-      });
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (values: { source: string; target?: string; status: string; condition?: string }) => {
+      if (!values.source) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Missing source",
+          message: "Source pattern is required",
+        });
+        return;
+      }
 
-    setIsSubmitting(true);
-    try {
-      const updatedRule: CustomRule = {
-        source: values.source,
-        target: values.target || undefined,
-        status: values.status || "200",
-        condition: values.condition || undefined,
-      };
+      setIsSubmitting(true);
+      try {
+        const updatedRule: CustomRule = {
+          source: values.source,
+          target: values.target || undefined,
+          status: values.status || "200",
+          condition: values.condition || undefined,
+        };
 
-      const updatedRules = [...currentRules];
-      updatedRules[index] = updatedRule;
+        const updatedRules = [...currentRules];
+        updatedRules[index] = updatedRule;
 
-      await updateAmplifyCustomRules(appId, updatedRules);
-      pop();
-    } catch (error) {
-      // Error is already handled in updateAmplifyCustomRules
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+        await updateAmplifyCustomRules(appId, updatedRules);
+        pop();
+      } catch (error) {
+        // Error is already handled in updateAmplifyCustomRules
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [currentRules, index, appId, pop],
+  );
 
   return (
     <Form

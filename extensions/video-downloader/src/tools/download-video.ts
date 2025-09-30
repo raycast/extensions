@@ -1,5 +1,14 @@
 import { execa } from "execa";
-import { getFormatValue, getFormats, ytdlPath, ffmpegPath, ffprobePath, downloadPath, forceIpv4 } from "../utils.js";
+import {
+  getFormatValue,
+  getFormats,
+  downloadPath,
+  forceIpv4,
+  getytdlPath,
+  getffmpegPath,
+  getffprobePath,
+  sanitizeVideoTitle,
+} from "../utils.js";
 import fs from "node:fs";
 import path from "node:path";
 import { Video } from "../types.js";
@@ -12,6 +21,10 @@ type Input = {
 };
 
 export default async function tool(input: Input) {
+  const ytdlPath = getytdlPath();
+  const ffmpegPath = getffmpegPath();
+  const ffprobePath = getffprobePath();
+
   // Validate executables exist
   if (!fs.existsSync(ytdlPath)) {
     throw new Error("yt-dlp is not installed");
@@ -71,7 +84,7 @@ export default async function tool(input: Input) {
   return {
     downloadedPath: filePath,
     fileName: path.basename(filePath),
-    title: video.title,
+    title: sanitizeVideoTitle(video.title),
     duration: video.duration,
   };
 }

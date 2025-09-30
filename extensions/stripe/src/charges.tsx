@@ -88,7 +88,7 @@ const resolveCharge = (charge: Stripe.Charge): Charge => {
 const Charges = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CHARGES, true);
   const { dashboardUrl } = useStripeDashboard();
-  const formattedCharges = data.map(resolveCharge);
+  const formattedCharges = (data as Stripe.Charge[]).map(resolveCharge);
 
   const renderCharges = (charge: Charge) => {
     const { amount, currency, id, receipt_url, payment_intent } = charge;

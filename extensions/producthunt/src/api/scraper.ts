@@ -1,9 +1,14 @@
 import * as cheerio from "cheerio";
+import { LocalStorage } from "@raycast/api";
 import { cleanText, sanitizeJsonString } from "../util/textUtils";
 import { Product, Topic, User, Shoutout } from "../types";
 import { processImageUrl, ImgixFit } from "./imgix";
 import { fetchSvgAsBase64 } from "../util/imageUtils";
 import { HOST_URL } from "../constants";
+import { configureFromRaycastPreferences, getLogger } from "../util/logger";
+
+configureFromRaycastPreferences();
+const log = getLogger("scraper");
 
 // Interface for Apollo event data
 interface ApolloEvent {
@@ -173,125 +178,323 @@ function normalizeThumbnailUrl(url: string): string {
   return url;
 }
 
-// Parse RSS feed from Product Hunt
-export async function getFrontpageProducts(): Promise<{ products: Product[]; error?: string }> {
-  try {
-    const response = await fetch(HOST_URL);
+// Helper: fetch a page with browser-like headers to avoid bot/minimal responses
+async function fetchPage(url: string): Promise<string> {
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/********* Safari/537.36",
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+    },
+  });
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+  return await res.text();
+}
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+// Types for Apollo push payload parsing (avoid `any`)
+type JsonObject = Record<string, unknown>;
+interface RehydrateValue {
+  data?: unknown;
+  result?: { data?: unknown };
+}
+interface PushPayload {
+  rehydrate?: Record<string, RehydrateValue>;
+}
+
+// Parse new ApolloSSRDataTransport push({ rehydrate: {...} }) blobs and extract Post-like items
+function extractApolloPushPayloads(html: string): PushPayload[] {
+  const $ = cheerio.load(html);
+  const scripts = $("script").toArray();
+  const pushPayloads: PushPayload[] = [];
+
+  function extractObjectFromPush(content: string, pushIndex: number): string | null {
+    const braceStart = content.indexOf("{", pushIndex);
+    if (braceStart === -1) return null;
+
+    let i = braceStart;
+    let depth = 0;
+    let inString: false | '"' | "'" | "`" = false;
+    let escaped = false;
+
+    for (; i < content.length; i++) {
+      const ch = content[i];
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (ch === "\\") {
+          escaped = true;
+        } else if (ch === inString) {
+          inString = false;
+        }
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === "`") {
+        inString = ch as '"' | "'" | "`";
+        continue;
+      }
+      if (ch === "{") depth++;
+      else if (ch === "}") {
+        depth--;
+        if (depth === 0) return content.slice(braceStart, i + 1);
+      }
     }
+    return null;
+  }
 
-    const html = await response.text();
-    const $ = cheerio.load(html);
+  for (const s of scripts) {
+    const content = $(s).html() || "";
+    if (!content.includes("ApolloSSRDataTransport") || !content.includes(".push(")) continue;
 
-    // Find the Apollo state data embedded in the script tag
-    const scriptContent = $('script:contains("ApolloSSRDataTransport")').text();
-    const apolloDataMatch = scriptContent.match(/"events":(\[.+\])\}\)/)?.[1];
-
-    if (!apolloDataMatch) {
-      throw new Error("Could not extract Apollo data from the page");
-    }
-
-    const sanitizedData = sanitizeJsonString(apolloDataMatch);
-
-    if (!sanitizedData) {
-      throw new Error("Failed to sanitize Apollo data");
-    }
-
-    let apolloData;
-    try {
-      apolloData = JSON.parse(sanitizedData) as ApolloEvent[];
-    } catch (parseError) {
-      console.error("JSON parse error:", parseError);
-      throw new Error(
-        `Failed to parse Apollo data: ${parseError instanceof Error ? parseError.message : "Unknown error"}`,
-      );
-    }
-
-    // Find the homefeed data
-    const homefeedEvent = apolloData.find((event) => event.type === "data" && event.result.data.homefeed);
-
-    if (!homefeedEvent) {
-      throw new Error("Could not find homefeed data");
-    }
-
-    // Get the featured products
-    const featuredEdge = homefeedEvent.result.data.homefeed?.edges.find((edge) => edge.node.id === "FEATURED-0");
-
-    if (!featuredEdge) {
-      throw new Error("Could not find featured products");
-    }
-
-    // Extract product data
-    const productItems = featuredEdge.node.items.filter((item) => item.__typename === "Post");
-
-    // Log the leaderboard data for debugging
-    console.log(`\n--- LEADERBOARD DATA (${new Date().toISOString()}) ---`);
-    console.log(`Found ${productItems.length} featured products in Apollo data`);
-
-    // Check if we need to attempt DOM-based extraction as a fallback
-    const needsDomFallback = productItems.some((item) => item.votesCount === undefined || item.votesCount === null);
-
-    // If we need DOM fallback, try to extract vote counts from the page
-    const domVoteCounts = new Map<string, number>();
-    if (needsDomFallback) {
-      console.log("Some products missing vote counts in Apollo data, attempting DOM extraction...");
+    let searchFrom = 0;
+    while (true) {
+      const idx = content.indexOf(".push(", searchFrom);
+      if (idx === -1) break;
+      searchFrom = idx + 6;
+      const objStr = extractObjectFromPush(content, idx);
+      if (!objStr) continue;
       try {
-        // Try various selector patterns that might contain vote counts
-        const selectorPatterns = [
-          '[data-test="vote-button"]',
-          'button[data-test="vote-button"] > div > div',
-          'button:contains("▲")',
-          'div[class*="pt-header"] div[class*="flex-col"] div:nth-child(1) section:nth-child(2) button div div',
-        ];
+        const sanitized = objStr.replace(/:undefined/g, ":null").replace(/\bundefined\b/g, "null");
+        const parsed = JSON.parse(sanitized) as unknown;
+        // Best-effort cast; structure validated at use sites
+        pushPayloads.push(parsed as PushPayload);
+      } catch {
+        void 0;
+      }
+    }
+  }
 
-        // For each product, try to find its vote count in the DOM
-        for (const item of productItems) {
-          if (item.votesCount === undefined || item.votesCount === null) {
-            const productSlug = item.slug;
-            const productSelectors = selectorPatterns.map(
-              (selector) =>
-                `a[href="/posts/${productSlug}"] ~ ${selector}, a[href^="/posts/${productSlug}"] ~ ${selector}`,
-            );
+  if (pushPayloads.length === 0) log.debug("apollo_push:count", "No push payloads found");
+  else log.debug("apollo_push:count", undefined, { count: pushPayloads.length });
+  return pushPayloads;
+}
 
-            // Try each selector
-            for (const selector of productSelectors) {
-              const voteElement = $(selector).first();
-              if (voteElement.length > 0) {
-                const voteText = voteElement.text().trim();
-                const voteCount = parseInt(voteText.replace(/[^0-9]/g, ""));
-                if (!isNaN(voteCount)) {
-                  domVoteCounts.set(item.id, voteCount);
-                  console.log(`Found DOM vote count for ${item.name}: ${voteCount}`);
-                  break;
-                }
+function collectPostItemsFromApolloPush(html: string): ApolloPostItem[] {
+  const results: ApolloPostItem[] = [];
+  const seen = new Set<string>();
+  const pushPayloads = extractApolloPushPayloads(html);
+
+  const visit = (val: unknown) => {
+    if (!val) return;
+    if (Array.isArray(val)) {
+      for (const item of val) visit(item);
+      return;
+    }
+    if (typeof val === "object") {
+      const obj = val as Record<string, unknown>;
+      const postLike = obj as Record<string, unknown>;
+      if (
+        typeof postLike.__typename === "string" &&
+        postLike.__typename === "Post" &&
+        typeof postLike.slug === "string" &&
+        typeof postLike.name === "string"
+      ) {
+        const id = typeof postLike.id === "string" ? (postLike.id as string) : (postLike.slug as string);
+        if (!seen.has(id)) {
+          seen.add(id);
+          results.push(postLike as unknown as ApolloPostItem);
+        }
+      }
+      for (const key of Object.keys(obj)) visit(obj[key]);
+    }
+  };
+
+  for (const payload of pushPayloads) {
+    const rehydrate = payload?.rehydrate;
+    if (rehydrate && typeof rehydrate === "object") {
+      for (const value of Object.values(rehydrate)) {
+        const data = value?.data ?? value?.result?.data;
+        if (data) visit(data);
+      }
+    }
+  }
+  return results;
+}
+
+function collectHomefeedByIdsFromApolloPush(html: string, ids: string[]): ApolloPostItem[] {
+  const pushPayloads = extractApolloPushPayloads(html);
+  const posts: ApolloPostItem[] = [];
+  const seen = new Set<string>();
+  for (const payload of pushPayloads) {
+    const rehydrate = payload?.rehydrate;
+    if (!rehydrate || typeof rehydrate !== "object") continue;
+
+    for (const value of Object.values(rehydrate)) {
+      const data = value?.data ?? value?.result?.data;
+      const homefeed =
+        typeof data === "object" && data ? ((data as JsonObject)["homefeed"] as JsonObject | undefined) : undefined;
+      const edges = typeof homefeed === "object" && homefeed ? (homefeed as JsonObject)["edges"] : undefined;
+      if (!Array.isArray(edges)) continue;
+
+      for (const edge of edges as unknown[]) {
+        const edgeObj = typeof edge === "object" && edge ? (edge as JsonObject) : undefined;
+        const node = edgeObj ? (edgeObj["node"] as JsonObject | undefined) : undefined;
+        if (!node) continue;
+        const nodeId = node["id"] as string | undefined;
+        const nodeTitle = node["title"] as string | undefined;
+        if (nodeId && (ids.includes(nodeId) || (ids.includes("FEATURED-0") && nodeTitle?.includes("Top Products")))) {
+          const items = (node["items"] as unknown[]) || [];
+          for (const it of items) {
+            const itObj = typeof it === "object" && it ? (it as JsonObject) : undefined;
+            if (itObj && itObj["__typename"] === "Post" && itObj["slug"] && itObj["name"]) {
+              const itId = typeof itObj["id"] === "string" ? (itObj["id"] as string) : (itObj["slug"] as string);
+              if (!seen.has(itId)) {
+                seen.add(itId);
+                posts.push(itObj as unknown as ApolloPostItem);
               }
             }
           }
         }
-      } catch (error) {
-        console.error("Error extracting DOM vote counts:", error);
       }
     }
+  }
+  return posts;
+}
 
-    // Log the product data, including any DOM-extracted vote counts
-    productItems.forEach((item, index) => {
-      const domVoteCount = domVoteCounts.get(item.id);
-      const effectiveVoteCount = item.votesCount ?? domVoteCount ?? 0;
-
-      console.log(`Product ${index + 1}: ${cleanText(item.name)}`);
-      console.log(`- URL: ${HOST_URL}posts/${item.slug}`);
-      console.log(`- Votes: ${effectiveVoteCount}${domVoteCount ? " (DOM extracted)" : ""}`);
-      console.log(`- Comments: ${item.commentsCount || 0}`);
-
-      // Update the item's vote count if we found it in the DOM
-      if (domVoteCount !== undefined && (item.votesCount === undefined || item.votesCount === null)) {
-        item.votesCount = domVoteCount;
-      }
+function extractPostsFromDom($: cheerio.Root): ApolloPostItem[] {
+  const posts: ApolloPostItem[] = [];
+  const seen = new Set<string>();
+  $('a[href^="/posts/"]').each((_, el) => {
+    const href = $(el).attr("href") || "";
+    const m = href.match(/^\/posts\/([^/?#]+)/);
+    if (!m) return;
+    const slug = m[1];
+    if (seen.has(slug)) return;
+    const nameRaw = $(el).text().trim();
+    const name = cleanText(nameRaw || slug);
+    const container = $(el).closest("article, li, div");
+    let tagline = "";
+    const taglineCandidate = container
+      .find('p, .text-gray-600, .text-dark-gray, [data-test="post-tagline"]')
+      .first()
+      .text()
+      .trim();
+    if (taglineCandidate) tagline = cleanText(taglineCandidate);
+    let thumbnailImageUuid: string | undefined;
+    const imgSrc = container.find("img").first().attr("src") || "";
+    const uuidMatch = imgSrc.match(/ph-files\.imgix\.net\/([^/?#]+)/);
+    if (uuidMatch) thumbnailImageUuid = uuidMatch[1];
+    let votesCount: number | undefined;
+    let commentsCount: number | undefined;
+    const voteText = container
+      .find('[data-test="vote-button"], button:contains("▲"), [data-test="post-votes"]')
+      .first()
+      .text();
+    const voteNum = parseInt((voteText || "").replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(voteNum)) votesCount = voteNum;
+    const commentsText = container
+      .find(':contains("comment")')
+      .filter((_, n) => /comment/i.test($(n).text()))
+      .first()
+      .text();
+    const commentsNum = parseInt((commentsText || "").replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(commentsNum)) commentsCount = commentsNum;
+    posts.push({
+      __typename: "Post",
+      id: slug,
+      name,
+      tagline,
+      slug,
+      thumbnailImageUuid,
+      votesCount: votesCount ?? 0,
+      commentsCount: commentsCount ?? 0,
+      createdAt: new Date().toISOString(),
     });
+    seen.add(slug);
+  });
+  return posts;
+}
 
-    // Transform to our Product type
+// Cache + Apollo push + DOM + RSS fallbacks
+export async function getFrontpageProducts(): Promise<{ products: Product[]; error?: string }> {
+  try {
+    const cacheKey = "frontpage_cache_v1";
+    const ttlMs = 60 * 1000;
+    const now = Date.now();
+    try {
+      const cachedRaw = await LocalStorage.getItem<string>(cacheKey);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw) as { ts: number; products: Product[] };
+        if (cached.ts && now - cached.ts < ttlMs && Array.isArray(cached.products) && cached.products.length > 0) {
+          return { products: cached.products };
+        }
+      }
+    } catch {
+      void 0;
+    }
+
+    const html = await fetchPage(HOST_URL);
+    const $ = cheerio.load(html);
+
+    const debugBlob: { ts: string; url: string; strategy: string; counts: Record<string, unknown> } = {
+      ts: new Date().toISOString(),
+      url: HOST_URL,
+      strategy: "",
+      counts: {},
+    };
+
+    let productItems: ApolloPostItem[] = collectHomefeedByIdsFromApolloPush(html, ["FEATURED-0"]);
+    log.debug("frontpage:featured_items", undefined, { count: productItems.length });
+    if (!productItems.length) {
+      productItems = collectPostItemsFromApolloPush(html);
+      log.debug("frontpage:generic_post_traversal", undefined, { count: productItems.length });
+    }
+
+    if (!productItems.length) {
+      log.warn("frontpage:fallback_dom_notice", "SSR data missing; using DOM fallback");
+      await log.toast("fallback-ssr-missing", "Using DOM fallback", "SSR data missing; parsing DOM");
+    }
+
+    if (!productItems.length) {
+      productItems = extractPostsFromDom($);
+      debugBlob.strategy = "dom";
+    } else {
+      debugBlob.strategy = debugBlob.strategy || (productItems.length ? "apollo" : "");
+    }
+
+    if (!productItems.length) {
+      const rssProducts = await (async () => {
+        try {
+          const rssUrl = `${HOST_URL}feed`;
+          const xml = await fetchPage(rssUrl);
+          const entries = Array.from(
+            xml.matchAll(
+              /<entry>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link rel="alternate" type="text\/html" href="([^"]+)"\/>/g,
+            ),
+          );
+          return entries.slice(0, 30).map((m) => {
+            const title = cleanText(m[1] || "");
+            const link = m[2] || "";
+            const slugMatch = link.match(/\/posts\/([^/?#]+)/);
+            const slug = slugMatch ? slugMatch[1] : title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            return {
+              id: slug,
+              name: title,
+              tagline: "",
+              description: "",
+              url: link,
+              thumbnail: "",
+              votesCount: 0,
+              commentsCount: 0,
+              createdAt: new Date().toISOString(),
+              topics: [],
+            } as Product;
+          });
+        } catch {
+          return [] as Product[];
+        }
+      })();
+      if (rssProducts.length) {
+        log.warn("frontpage:fallback_rss", "Falling back to RSS feed for frontpage products");
+        debugBlob.strategy = "rss";
+        await log.blobSet("debug:last_frontpage", { ...debugBlob, counts: { items: rssProducts.length } });
+        return { products: rssProducts };
+      }
+      throw new Error("Could not find any posts in Apollo data or DOM");
+    }
+
     const products = productItems.map((item) => ({
       id: item.id,
       name: cleanText(item.name),
@@ -299,9 +502,9 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
       description: cleanText(item.description || ""),
       url: `${HOST_URL}posts/${item.slug}`,
       thumbnail: item.thumbnailImageUuid ? `https://ph-files.imgix.net/${item.thumbnailImageUuid}` : "",
-      votesCount: item.votesCount || 0,
-      commentsCount: item.commentsCount || 0,
-      createdAt: item.createdAt,
+      votesCount: typeof item.votesCount === "number" ? item.votesCount : 0,
+      commentsCount: typeof item.commentsCount === "number" ? item.commentsCount : 0,
+      createdAt: item.createdAt || new Date().toISOString(),
       maker: item.user
         ? {
             id: item.user.id,
@@ -319,9 +522,21 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
         })) || [],
     }));
 
+    try {
+      await LocalStorage.setItem(cacheKey, JSON.stringify({ ts: now, products }));
+    } catch {
+      void 0;
+    }
+    try {
+      debugBlob.counts = { ...debugBlob.counts, items: products.length };
+      await log.blobSet("debug:last_frontpage", debugBlob);
+    } catch {
+      /* ignore */
+    }
+
     return { products };
   } catch (error) {
-    console.error("Error fetching frontpage products:", error);
+    log.error("frontpage:error", error);
     return { products: [], error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
