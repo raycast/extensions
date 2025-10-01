@@ -115,7 +115,6 @@ export default function Command() {
 
         return (
           <List.Item
-            key={app.package_name}
             icon={appIcon}
             title={app.name}
             detail={

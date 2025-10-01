@@ -146,7 +146,6 @@ export default function Command() {
 
         return (
           <List.Item
-            key={notification.id}
             icon={appIcon}
             title={`${notification.app} • ${notification.title || "No Title"}`}
             subtitle={notification.body}
@@ -168,7 +167,6 @@ export default function Command() {
                 )}
                 {buttonActions.map((action) => (
                   <Action
-                    key={action.name}
                     title={action.name}
                     icon={Icon.Checkmark}
                     onAction={() => handleButtonAction(notification, action.name)}
