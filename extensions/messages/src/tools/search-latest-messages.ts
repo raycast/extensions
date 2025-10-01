@@ -1,4 +1,11 @@
+import { getPreferenceValues } from "@raycast/api";
+
 import { getMessages } from "../api/get-messages";
+
+interface Preferences {
+  filterUnknownSenders?: boolean;
+  filterSpam?: boolean;
+}
 
 type Input = {
   /**
@@ -13,6 +20,12 @@ type Input = {
 };
 
 export default async function (input: Input) {
-  const messages = await getMessages(input.searchText, input.chatIdentifier);
+  const preferences = getPreferenceValues<Preferences>();
+  const messages = await getMessages(
+    input.searchText,
+    input.chatIdentifier,
+    preferences.filterSpam ?? false,
+    preferences.filterUnknownSenders ?? false,
+  );
   return messages;
 }

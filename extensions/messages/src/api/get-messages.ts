@@ -10,7 +10,47 @@ import { Message, SQLMessage } from "../hooks/useMessages";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
-export async function getMessages(searchText?: string, chatIdentifier?: string): Promise<Message[]> {
+// Cache for column existence check
+let hasIsFilteredColumn: boolean | null = null;
+
+async function checkIsFilteredColumnExists(): Promise<boolean> {
+  if (hasIsFilteredColumn !== null) {
+    return hasIsFilteredColumn;
+  }
+
+  try {
+    const columns = await executeSQL<{ name: string }>(DB_PATH, `PRAGMA table_info(chat);`);
+    const result = columns?.some((col: { name: string }) => col.name === "is_filtered") ?? false;
+    hasIsFilteredColumn = result;
+    return result;
+  } catch {
+    hasIsFilteredColumn = false;
+    return false;
+  }
+}
+
+export async function getMessages(
+  searchText?: string,
+  chatIdentifier?: string,
+  filterSpam = false,
+  filterUnknownSenders = false,
+): Promise<Message[]> {
+  const hasIsFiltered = await checkIsFilteredColumnExists();
+
+  let filters = "";
+  if (hasIsFiltered) {
+    const filterConditions: string[] = [];
+    if (filterUnknownSenders) {
+      filterConditions.push("chat.is_filtered != 1");
+    }
+    if (filterSpam) {
+      filterConditions.push("chat.is_filtered != 2");
+    }
+    if (filterConditions.length > 0) {
+      filters = `AND (chat.is_filtered IS NULL OR (${filterConditions.join(" AND ")}))`;
+    }
+  }
+
   const rawData = await executeSQL<SQLMessage>(
     DB_PATH,
     `
@@ -56,6 +96,7 @@ export async function getMessages(searchText?: string, chatIdentifier?: string):
     WHERE
       message.attributedBody IS NOT NULL
       ${chatIdentifier ? `AND chat.chat_identifier = '${chatIdentifier}'` : ""}
+      ${filters}
     GROUP BY
       message.guid
     ORDER BY
