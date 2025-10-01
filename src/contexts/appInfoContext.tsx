@@ -4,10 +4,10 @@ import { FC } from "react";
 import {
   Action,
   ActionPanel,
-  Detail,
   environment,
   Icon,
   LaunchProps,
+  List,
   open,
   popToRoot,
   showToast,
@@ -57,41 +57,48 @@ function FarragoChecker<P extends LaunchProps>(
 
   if (!appExists)
     return (
-      <Detail
-        markdown={"Farrago Not Installed"}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Get Farrago"
-              icon={Icon.Globe}
-              onAction={async () => {
-                await open(GET_FARRAGO_URL);
-                await popToRoot();
-              }}
-            />
-          </ActionPanel>
-        }
-      />
+      <List isLoading={false}>
+        <List.EmptyView
+          icon={{ source: "extension-icon.png" }}
+          title="Farrago Not Found"
+          description="Install Farrago to use this extension."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Get Farrago"
+                icon={Icon.Globe}
+                onAction={async () => {
+                  await open(GET_FARRAGO_URL);
+                  await popToRoot();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
     );
 
   if (!appIsRunning)
     return (
-      <Detail
-        markdown={"Farrago Not Running"}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Launch Farrago"
-              autoFocus={true}
-              icon={Icon.Rocket}
-              onAction={async () => {
-                await launchFarrago();
-                await popToRoot();
-              }}
-            />
-          </ActionPanel>
-        }
-      />
+      <List isLoading={false}>
+        <List.EmptyView
+          icon={{ source: "extension-icon.png" }}
+          title="Farrago Not Running"
+          description="Open Farrago to use this extension."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Launch Farrago"
+                icon={Icon.AppWindow}
+                onAction={async () => {
+                  await launchFarrago();
+                  await popToRoot();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
     );
 
   return <props.Command {...props} />;
