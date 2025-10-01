@@ -1,8 +1,9 @@
 import os from "os";
 import path from "path";
-import { DEFAULT_SHORTCUT_TITLE_TEMPLATE, TILE_COLORS_BY_INDEX } from "./constants";
+import { DEFAULT_SHORTCUT_TITLE_TEMPLATE, FARRAGO_BUNDLE_ID, TILE_COLORS_BY_INDEX } from "./constants";
 import { DBSoundSet, DBSoundTile, Preferences } from "../types";
-import { getPreferenceValues } from "@raycast/api";
+import { Application, getApplications, getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
 export function getPreferences() {
   return getPreferenceValues<Preferences>();
@@ -75,4 +76,41 @@ export function applyShortcutTitleTemplate({
 
     return result;
   });
+}
+
+export async function findApplication(bundleId: string): Promise<Application | undefined> {
+  const installedApplications = await getApplications();
+  return installedApplications.filter((application) => application.bundleId == bundleId)[0];
+}
+
+export async function isAppRunning(bundleId: string) {
+  const script = `
+    tell application "System Events"
+      return (exists (every process whose bundle identifier is "${bundleId}"))
+    end tell
+  `;
+  const res = await runAppleScript(script, { humanReadableOutput: true });
+  return res.trim() === "true";
+}
+
+export async function isFarragoRunning() {
+  return await isAppRunning(FARRAGO_BUNDLE_ID);
+}
+
+export async function findFarrago() {
+  return await findApplication(FARRAGO_BUNDLE_ID);
+}
+
+export async function checkFarragoExists() {
+  return !!(await findFarrago());
+}
+
+export async function launchApplication(bundleId: string) {
+  return await runAppleScript(`
+    do shell script "open -b ${bundleId}"
+  `);
+}
+
+export async function launchFarrago() {
+  return await launchApplication(FARRAGO_BUNDLE_ID);
 }

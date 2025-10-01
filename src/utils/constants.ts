@@ -20,3 +20,7 @@ export const FARRAGO_FADE_DURATION_MS = 2000;
 export const ICLOUD_SHORTCUT_LINK = "https://www.icloud.com/shortcuts/80a4497d60214970954a04d6b13051f8";
 
 export const DEFAULT_SHORTCUT_TITLE_TEMPLATE = "{{title}} {{icons}}";
+
+export const FARRAGO_BUNDLE_ID = "com.rogueamoeba.farrago";
+
+export const GET_FARRAGO_URL = "https://rogueamoeba.com/farrago/";
