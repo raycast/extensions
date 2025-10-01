@@ -14,10 +14,7 @@ export default function ManageLists() {
         await confirmAlert({
           title: "Delete List",
           message: `Are you sure you want to delete "${listTitle}"? All reminders in this list will also be deleted.`,
-          primaryAction: {
-            title: "Delete",
-            style: Action.Style.Destructive,
-          },
+          icon: { source: Icon.Trash, tintColor: Color.Red },
         })
       ) {
         await deleteList(listId);
