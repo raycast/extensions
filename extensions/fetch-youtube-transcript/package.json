@@ -138,5 +138,8 @@
     "cross-spawn": "^7.0.3",
     "got": "^13.0.0",
     "electron": "^32.0.0"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
