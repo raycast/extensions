@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Open in Secondary Browser] - {PR_MERGE_DATE}
+## [Open in Secondary Browser] - 2025-10-01
 
 - Specify a secondary browser for opening bookmarks (ref: [Issue #21699](https://github.com/raycast/extensions/issues/21699))
 - Modernize to use latest eslint configuration
