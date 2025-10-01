@@ -639,3 +639,63 @@ func hexStringToUIColor(hex: String) -> NSColor {
     alpha: CGFloat(1.0)
   )
 }
+
+struct UpdateListPayload: Decodable {
+  let listId: String
+  let title: String?
+  let color: String?
+}
+
+@raycast func updateList(payload: UpdateListPayload) async throws -> ReminderList {
+  let eventStore = EKEventStore()
+
+  let granted: Bool
+  if #available(macOS 14.0, *) {
+    granted = try await eventStore.requestFullAccessToReminders()
+  } else {
+    granted = try await eventStore.requestAccess(to: .reminder)
+  }
+  guard granted else {
+    throw RemindersError.accessDenied
+  }
+
+  guard let calendar = eventStore.calendar(withIdentifier: payload.listId) else {
+    throw RemindersError.noReminderFound
+  }
+
+  if let title = payload.title {
+    calendar.title = title
+  }
+
+  if let colorString = payload.color {
+    calendar.color = hexStringToUIColor(hex: colorString)
+  }
+
+  do {
+    try eventStore.saveCalendar(calendar, commit: true)
+    let defaultList = eventStore.defaultCalendarForNewReminders()
+    return calendar.toStruct(defaultCalendarId: defaultList?.calendarIdentifier)
+  } catch {
+    throw RemindersError.unableToSaveReminder
+  }
+}
+
+@raycast func deleteList(listId: String) async throws {
+  let eventStore = EKEventStore()
+
+  let granted: Bool
+  if #available(macOS 14.0, *) {
+    granted = try await eventStore.requestFullAccessToReminders()
+  } else {
+    granted = try await eventStore.requestAccess(to: .reminder)
+  }
+  guard granted else {
+    throw RemindersError.accessDenied
+  }
+
+  guard let calendar = eventStore.calendar(withIdentifier: listId) else {
+    throw RemindersError.noReminderFound
+  }
+
+  try eventStore.removeCalendar(calendar, commit: true)
+}

@@ -345,6 +345,12 @@ export default function Command() {
           onAction={() => launchCommand({ name: "create-list", type: LaunchType.UserInitiated })}
         />
 
+        <MenuBarExtra.Item
+          title="Manage Lists"
+          icon={Icon.List}
+          onAction={() => launchCommand({ name: "manage-lists", type: LaunchType.UserInitiated })}
+        />
+
         <MenuBarExtra.Submenu
           title={`Select List (${list?.title ?? "All"})`}
           icon={list ? { source: Icon.Circle, tintColor: list.color } : Icon.Tray}
