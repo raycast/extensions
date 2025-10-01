@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Color, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getMedia, mediaControl } from "./utils/applescript";
-import React from "react";
 
 export default function Command() {
   const { data: media, isLoading, error, revalidate } = usePromise(getMedia);

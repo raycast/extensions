@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getApps, mirrorApp, connectAdb, App } from "./utils/applescript";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 export default function Command() {
   const { data: appsData, isLoading, error, revalidate } = usePromise(getApps);
