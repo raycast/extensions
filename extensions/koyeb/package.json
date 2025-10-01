@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "koyeb",
   "title": "Koyeb",
-  "description": "",
+  "description": "High-performance Infrastructure",
   "icon": "koyeb.png",
   "author": "xmok",
   "license": "MIT",
@@ -20,25 +20,25 @@
     {
       "name": "list-activities",
       "title": "List Activities",
-      "description": "",
+      "description": "List Activities in Koyeb",
       "mode": "view"
     },
     {
       "name": "list-apps",
       "title": "List Apps",
-      "description": "",
+      "description": "List Apps in Koyeb",
       "mode": "view"
     },
     {
       "name": "manage-secrets",
       "title": "Manage Secrets",
-      "description": "",
+      "description": "Manage Secrets in Koyeb",
       "mode": "view"
     },
     {
       "name": "manage-domains",
       "title": "Manage Domains",
-      "description": "",
+      "description": "Manage Domains in Koyeb",
       "mode": "view"
     }
   ],
