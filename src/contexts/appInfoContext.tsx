@@ -1,20 +1,29 @@
-import { createContext, useContext, ReactNode } from "react";
-import { useFarragoAppInfo } from "../hooks/useFarragoAppInfo";
+import { createContext, useContext, ReactNode, useState, useEffect, useReducer } from "react";
 import { FC } from "react";
 import {
   Action,
   ActionPanel,
+  Application,
+  Color,
   environment,
   Icon,
   LaunchProps,
   List,
   open,
+  openExtensionPreferences,
   popToRoot,
   showToast,
   Toast,
 } from "@raycast/api";
 import { GET_FARRAGO_URL } from "../utils/constants";
-import { checkFarragoExists, isFarragoRunning, launchFarrago } from "../utils/helpers";
+import {
+  checkFarragoExists,
+  farragoDataDirExists,
+  findFarrago,
+  getPreferences,
+  isFarragoRunning,
+  launchFarrago,
+} from "../utils/helpers";
 
 // * CONTEXT
 
@@ -25,7 +34,47 @@ export function FarragoAppInfoProvider({ children }: { children: ReactNode }) {
   return <FarragoAppInfoContext.Provider value={value}>{children}</FarragoAppInfoContext.Provider>;
 }
 
-// * HOOK
+// * HOOKS
+
+export function useFarragoAppInfo() {
+  const [app, setApp] = useState<Application | undefined>();
+  const [appExists, setAppExists] = useState(false);
+  const [appChecked, setAppChecked] = useState(false);
+
+  const [appIsRunning, setAppIsRunning] = useState(false);
+  const [appIsRunningChecked, setAppIsRunningChecked] = useState(false);
+
+  const [appDataDirFound, setAppDataDirFound] = useState(false);
+  const [appDataDirChecked, setAppDataDirChecked] = useState(false);
+
+  const loading = !appChecked || !appIsRunningChecked || !appDataDirChecked;
+
+  useEffect(() => {
+    findFarrago().then((app) => {
+      setApp(app);
+      setAppExists(!!app);
+      setAppChecked(true);
+    });
+
+    isFarragoRunning().then((isRunning) => {
+      setAppIsRunning(isRunning);
+      setAppIsRunningChecked(true);
+    });
+
+    farragoDataDirExists().then((dirExists) => {
+      setAppDataDirFound(dirExists);
+      setAppDataDirChecked(true);
+    });
+  }, []);
+
+  return {
+    loading,
+    app,
+    appExists,
+    appIsRunning,
+    appDataDirFound,
+  };
+}
 
 export function useFarragoAppInfoContext() {
   const context = useContext(FarragoAppInfoContext);
@@ -51,7 +100,7 @@ export function withFarragoRunning<P extends LaunchProps>(
 function FarragoChecker<P extends LaunchProps>(
   props: P & { Command: FC<P>; LoadingComponent: FC<{ isLoading: boolean }> },
 ) {
-  const { loading, appExists, appIsRunning } = useFarragoAppInfoContext();
+  const { loading, appExists, appIsRunning, appDataDirFound } = useFarragoAppInfoContext();
 
   if (loading) return <props.LoadingComponent isLoading={true} />;
 
@@ -92,6 +141,29 @@ function FarragoChecker<P extends LaunchProps>(
                 icon={Icon.AppWindow}
                 onAction={async () => {
                   await launchFarrago();
+                  await popToRoot();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+
+  if (!appDataDirFound)
+    return (
+      <List isLoading={false}>
+        <List.EmptyView
+          icon={{ source: Icon.Folder, tintColor: Color.Red }}
+          title="Farrago Directory Not Found"
+          description={`No folder found at "${getPreferences().farragoDataDir}". Ensure correct path is specified.`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Settings"
+                icon={Icon.Cog}
+                onAction={async () => {
+                  await openExtensionPreferences();
                   await popToRoot();
                 }}
               />

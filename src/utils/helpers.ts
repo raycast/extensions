@@ -1,4 +1,5 @@
 import os from "os";
+import fs from "fs";
 import path from "path";
 import { DEFAULT_SHORTCUT_TITLE_TEMPLATE, FARRAGO_BUNDLE_ID, TILE_COLORS_BY_INDEX } from "./constants";
 import { DBSoundSet, DBSoundTile, Preferences } from "../types";
@@ -113,4 +114,21 @@ export async function launchApplication(bundleId: string) {
 
 export async function launchFarrago() {
   return await launchApplication(FARRAGO_BUNDLE_ID);
+}
+
+export async function farragoDataDirExists() {
+  const { farragoDataDir } = getPreferences();
+
+  return new Promise<boolean>((resolve, reject) => {
+    fs.stat(expandTilde(farragoDataDir), (err, stats) => {
+      if (err) {
+        if (err.code === "ENOENT") {
+          return resolve(false);
+        }
+        return reject(err);
+      }
+
+      return resolve(stats.isDirectory());
+    });
+  });
 }
