@@ -9,7 +9,8 @@ export default function Lyrics({ url, title }: { url: string; title: string }) {
 
   const $ = load(data || "");
   $("br").text("\n\n");
-  const text = $("[data-lyrics-container=true]").find("[data-exclude-from-selection=true]").remove().end().text();
+  let text = $("[data-lyrics-container=true]").find("[data-exclude-from-selection=true]").remove().end().text();
+  text = text.replaceAll("[", "### [");
 
   return (
     <Detail

@@ -1,7 +1,7 @@
-import { runAppleScript } from "run-applescript";
 import { LocalStorage } from "@raycast/api";
 import { Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { runAppleScript } from "@raycast/utils";
 
 // AppleScript timing constants
 const WINDOW_INIT_RETRY_LIMIT = 20;
@@ -161,7 +161,7 @@ export async function createNewTabWithProfile(website?: string): Promise<void> {
       end tell
       return true
     `);
-  } catch (error) {
+  } catch {
     // Fallback to default behavior
     if (website) {
       await createNewTabToWebsite(website);

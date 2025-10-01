@@ -8,9 +8,9 @@ import { primaryAction } from "@/lib/preferences";
 import type { Character } from "@/types";
 import { numberToHex } from "@/utils/string";
 
-export const CharacterActionPanel = ({ item }: { item: Character }) => {
+export const CharacterActionPanel = ({ item, section }: { item: Character; section?: string }) => {
   const { data: frontmostApp } = usePromise(getFrontmostApplication, []);
-  const { findHtmlEntity } = useListContext();
+  const { findHtmlEntity, setDatasetFilterAnd, filter } = useListContext();
   const html = findHtmlEntity(item.c);
 
   const { addToRecentlyUsedItems, isRecentlyUsed, clearRecentlyUsedItems, removeFromRecentlyUsedItems } =
@@ -83,6 +83,24 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
           shortcut={{ modifiers: ["cmd", "shift"], key: html !== null ? "t" : "h" }}
         />
       </ActionPanel.Section>
+      {section && (
+        <ActionPanel.Section title="Filter">
+          {filter !== section && (
+            <Action
+              title={`Set Filter to "${section}"`}
+              icon={Icon.Filter}
+              onAction={() => setDatasetFilterAnd(section)}
+            />
+          )}
+          {filter !== null && (
+            <Action
+              title={`Set Filter to "<All Characters>"`}
+              icon={Icon.Filter}
+              onAction={() => setDatasetFilterAnd(null)}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section title="Recently Used">
         {recentlyUsed ? (
           <>
@@ -99,6 +117,10 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
         <Action.OpenInBrowser
           title="Open Character on Compart"
           url={`https://www.compart.com/en/unicode/U+${numberToHex(item.c)}`}
+        />
+        <Action.OpenInBrowser
+          title="Open Character on Unicode Explorer"
+          url={`https://unicode-explorer.com/c/${numberToHex(item.c)}`}
         />
       </ActionPanel.Section>
     </ActionPanel>

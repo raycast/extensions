@@ -1,4 +1,4 @@
-import { Clipboard, Toast, confirmAlert, openExtensionPreferences } from "@raycast/api";
+import { Clipboard, Toast, confirmAlert, openExtensionPreferences, showToast } from "@raycast/api";
 import * as api from "./api.js";
 import { catchError } from "./errors.js";
 import * as git from "./git.js";
@@ -98,7 +98,17 @@ class Operation {
           throw new Error(
             "Forked repository not found. Please try to rerun the extension to initialize the repository.",
           );
-        const { behind } = await api.compareTwoCommits(forkedRepository);
+        const { ahead, behind } = await api.compareTwoCommits(forkedRepository);
+
+        if (ahead > 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Cannot Fork Extension",
+            message: "You have commits ahead of remote on GitHub, please reset them if necessary.",
+          });
+          return;
+        }
+
         if (behind > 0) {
           return new Promise<void>((resolve, reject) => {
             confirmAlert({

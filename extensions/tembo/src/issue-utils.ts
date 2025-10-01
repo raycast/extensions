@@ -5,7 +5,7 @@ export type IssueStatus = "queued" | "open" | "closed" | "merged" | "failed";
 export type IntegrationType = "github" | "postgres" | "sentry" | "linear" | "jira" | "supabase" | "other";
 
 export function getIssueStatus(issue: Issue): IssueStatus {
-  if (issue.solutions.length > 0) {
+  if (issue.solutions && issue.solutions.length > 0) {
     const latestSolution = issue.solutions[issue.solutions.length - 1];
     if (latestSolution.status === "Success") {
       if (latestSolution.pullRequest.length > 0) {
@@ -24,17 +24,20 @@ export function getIssueStatus(issue: Issue): IssueStatus {
 }
 
 export function getIssueIntegrationType(issue: Issue): IntegrationType {
+  if (!issue.issueSource) {
+    return "other";
+  }
   const integrationType =
     (issue.issueSource.integration?.type as IntegrationType) || (issue.issueSource.type as IntegrationType) || "other";
   return integrationType;
 }
 
 export function getIssueRepo(issue: Issue): string {
-  return issue.issueSource.name;
+  return issue.issueSource?.name || "Unknown";
 }
 
 export function getIssueSolutionsCount(issue: Issue): number {
-  return issue.solutions.length;
+  return issue.solutions?.length || 0;
 }
 
 export function getStatusIcon(status: IssueStatus) {

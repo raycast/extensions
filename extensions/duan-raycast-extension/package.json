@@ -82,5 +82,8 @@
       "placeholder": "Enter a number",
       "default": "4"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

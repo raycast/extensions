@@ -1,5 +1,10 @@
 # Video Downloader Changelog
 
+## [Fix: Long Video Name Compatibility] - 2025-09-29
+
+- Resolved issues with long video names on Windows and macOS.
+- Automatically removes invalid characters from video file names to ensure compatibility.
+
 ## [Fix: Add install flags] - 2025-09-15
 
 - Added acceptance flags when installing packages with winget.
