@@ -25,7 +25,7 @@ Open the Raycast extension preferences to tailor the results:
 - `Include Hidden`: surface dot-files and hidden folders.
 - `Follow Symbolic Links`: descend into symlinked directories.
 - `Ignore Spaces in Search`: strip spaces from the query so `src foo bar` behaves like `srcfoobar`.
-- `Custom Search Directories`: space-separated list of extra roots. Use the search bar dropdown inside the command to switch between `Home (~)`, `This Computer (/)`, or your custom set.
+- `Custom Search Directories`: space-separated list of extra roots. Use the search bar dropdown inside the command to switch between `Home (~)`, `Everything (/)`, or your custom set.
 
 ## Ignore Rules and `.fdignore`
 
@@ -33,7 +33,8 @@ Open the Raycast extension preferences to tailor the results:
 
 - `.gitignore`, `.git/info/exclude`, and `.ignore` files are obeyed automatically.
 - `.fdignore` files are also honored. You can place them in any directory to prune matches.
-- On first run the extension creates a global `~/.fdignore` (if missing) with a default exclusion of `Library/` and `**.photoslibrary` to keep the index snappy. Edit that file to fine-tune global ignores.
+- On first run the extension creates a global `$HOME/.config/fd/ignore` (if missing) with sensible defaults to keep the index snappy.
+  Edit that file to fine-tune global ignores.
 
 If you need different rules per project, add a `.fdignore` alongside the folders you index or rely on the project's `.gitignore`. The command will pick up the changes the next time the index is refreshed.
 

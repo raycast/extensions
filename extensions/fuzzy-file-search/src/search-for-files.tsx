@@ -28,7 +28,7 @@ export default function Command() {
   const prefs = getPreferenceValues<Prefs>();
 
   const [searchText, setSearchText] = useState("");
-  const [searchRoot, setSearchRoot] = useCachedState<string>("searchRootKey");
+  const [searchRoot, setSearchRoot] = useCachedState<string>("searchRootKey", os.homedir());
 
   // Get FD CLI path
   const { data: fdPath, isLoading: isFdLoading } = useCachedPromise(async () => {
@@ -49,6 +49,11 @@ export default function Command() {
   });
 
   // cleanup old .temp files (older than 10min)
+  // In this extension when user exits during indexing, it will leave
+  // temp files behind.
+  // The cleanup needs to be done on mount as raycast kills the
+  // extensions without calling unmount functions nor sending signals when user exits extension.
+  // Issue #2022
   useEffect(() => {
     let canceled = false;
     const CutoffMs = 10 * 60 * 1000;
@@ -87,6 +92,8 @@ export default function Command() {
       const ignoreFile = path.join(os.homedir(), ".config", "fd", "ignore");
       if (!fs.existsSync(ignoreFile)) {
         console.log(`creating default .fdignore file in: ${ignoreFile}`);
+        // Create directories
+        afs.mkdir(path.dirname(ignoreFile), { recursive: true });
         const ignorePaths = [
           "/nix/",
           "/System/",
@@ -129,34 +136,37 @@ export default function Command() {
       }
 
       const outFD = fs.openSync(fdOutputTemp, "wx");
-      const fd = spawn(fdPath, [...optionalArgs, "--print0", ".", ...searchDirs], {
-        stdio: ["ignore", outFD, "pipe"],
-        signal: abortableFd.current?.signal,
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        let stderr = "";
-        fd.stderr?.on("data", (chunk) => {
-          stderr += chunk;
+      try {
+        const fd = spawn(fdPath, [...optionalArgs, "--print0", ".", ...searchDirs], {
+          stdio: ["ignore", outFD, "pipe"],
+          signal: abortableFd.current?.signal,
         });
 
-        fd.on("error", () => {
-          console.log("aborting fd");
-          fs.rmSync(fdOutputTemp, { force: true });
-          reject("'fd' aborted");
-        });
+        await new Promise<void>((resolve, reject) => {
+          let stderr = "";
+          fd.stderr?.on("data", (chunk) => {
+            stderr += chunk;
+          });
 
-        fd.on("close", (code) => {
-          fs.closeSync(outFD);
-          if (code === 0) {
-            resolve();
-          } else {
-            console.log("closing fd with code", code);
+          fd.on("error", () => {
+            console.log("aborting fd");
             fs.rmSync(fdOutputTemp, { force: true });
-            reject(`Exit code of 'fd' = ${code}:\n${stderr}`);
-          }
+            reject("'fd' aborted");
+          });
+
+          fd.on("close", (code) => {
+            if (code === 0) {
+              resolve();
+            } else {
+              console.log("closing fd with code", code);
+              fs.rmSync(fdOutputTemp, { force: true });
+              reject(`Exit code of 'fd' = ${code}:\n${stderr}`);
+            }
+          });
         });
-      });
+      } finally {
+        fs.closeSync(outFD);
+      }
 
       toast.hide();
 
@@ -189,36 +199,43 @@ export default function Command() {
 
       const filteredResults: string[] = [];
       const fdOutputFD = fs.openSync(fdOutput, "r");
-      const fzf = spawn(fzfPath, ["--read0", "--filter", searchTerm], {
-        stdio: [fdOutputFD, "pipe", "pipe"],
-        signal: abortableFzf.current?.signal,
-      });
-      await new Promise<void>((resolve, reject) => {
-        const rl = readline.createInterface({ input: fzf.stdout as Stream.Readable });
-        rl.on("line", (line) => {
-          filteredResults.push(line);
-          if (filteredResults.length >= 100) {
-            fzf.kill();
-          }
+      try {
+        const fzf = spawn(fzfPath, ["--read0", "--filter", searchTerm], {
+          stdio: [fdOutputFD, "pipe", "pipe"],
+          signal: abortableFzf.current?.signal,
         });
-        let stderr = "";
-        fzf.stderr?.on("data", (chunk) => {
-          stderr += chunk;
+        await new Promise<void>((resolve, reject) => {
+          const rl = readline.createInterface({ input: fzf.stdout as Stream.Readable });
+          rl.on("line", (line) => {
+            filteredResults.push(line);
+            // Limit results, as otherwise they will exceed memory limits,
+            // raycast will terminate the extension. Issue #21580
+            if (filteredResults.length >= 500) {
+              // It sends the kill signal when reaching 500,
+              // so results will be larger than 500
+              fzf.kill();
+            }
+          });
+          let stderr = "";
+          fzf.stderr?.on("data", (chunk) => {
+            stderr += chunk;
+          });
+          fzf.on("error", () => {
+            console.log("aborting fzf");
+          });
+          fzf.on("close", (code) => {
+            rl.close();
+            // Fzf returns error code 1 if output is empty
+            if (code === 0 || code === null || (code === 1 && stderr.length === 0)) {
+              resolve();
+            } else {
+              reject(`Exit code of 'fzf' = ${code}:\n${stderr}`);
+            }
+          });
         });
-        fzf.on("error", () => {
-          console.log("aborting fzf");
-        });
-        fzf.on("close", (code) => {
-          rl.close();
-          fs.closeSync(fdOutputFD);
-          // Fzf returns error code 1 if output is empty
-          if (code === 0 || code === null || (code === 1 && stderr.length === 0)) {
-            resolve();
-          } else {
-            reject(`Exit code of 'fzf' = ${code}:\n${stderr}`);
-          }
-        });
-      });
+      } finally {
+        fs.closeSync(fdOutputFD);
+      }
       console.log(`fzf returned ${filteredResults.length} results`);
       return filteredResults;
     },
