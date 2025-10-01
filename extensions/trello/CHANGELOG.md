@@ -1,6 +1,6 @@
 # Trello Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-10-01
 
 Update dependencies and allow for multiple card assignees.
 
