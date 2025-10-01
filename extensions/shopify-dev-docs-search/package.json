@@ -10,7 +10,7 @@
     {
       "name": "shopify-graphql-search",
       "title": "Search Shopify Developer Docs",
-      "subtitle": "Shopify GraphQL API",
+      "subtitle": "Shopify Dev Documentation",
       "description": "Quickly search the Shopify developer and GraphQL documentation.",
       "mode": "view",
       "preferences": [
