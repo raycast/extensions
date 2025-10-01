@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-10-01
 
 - Added Paste actions for Login items: Paste Username, Paste Password, Paste One-time Password.
 - Paste actions now show the app's icon and name (e.g., "Paste Password to Safari").
