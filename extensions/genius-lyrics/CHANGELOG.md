@@ -1,6 +1,6 @@
 # Genius Lyrics Changelog
 
-## [Improve Lyric Formatting] - {PR_MERGE_DATE}
+## [Improve Lyric Formatting] - 2025-10-01
 
 - Use markdown headers to create separation between verses.
 
