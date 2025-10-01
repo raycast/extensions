@@ -1,0 +1,55 @@
+{
+  "name": "raycast-instant-app-switcher-extension",
+  "version": "1.0.0",
+  "title": "Instant App Switcher",
+  "description": "Lightning-fast macOS application switcher with customizable hotkeys, intelligent sorting, and instant switching",
+  "icon": "command-icon.png",
+  "author": "stasmarkin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stasmarkin/raycast-instant-app-switcher-extension.git"
+  },
+  "keywords": [
+    "raycast",
+    "raycast-extension",
+    "app-switcher",
+    "instant-app-switcher",
+    "application-switcher",
+    "hotkeys",
+    "macos",
+    "productivity",
+    "launcher"
+  ],
+  "commands": [
+    {
+      "name": "select-application",
+      "title": "Select Application",
+      "description": "Switch between applications quickly with hotkeys and smart search",
+      "mode": "view"
+    }
+  ],
+  "categories": [
+    "Other"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
