@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getNotifications, notificationAction, dismissNotification, Notification } from "./utils/applescript";
+import React from "react";
 import ReplyNotification from "./reply-notification";
 
 export default function Command() {

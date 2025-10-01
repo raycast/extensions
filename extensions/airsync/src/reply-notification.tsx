@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Toast, popToRoot } from "@raycast/api";
 import { notificationAction, Notification } from "./utils/applescript";
-import { useState } from "react";
+import React, { useState } from "react";
 
 interface ReplyNotificationProps {
   notification: Notification;

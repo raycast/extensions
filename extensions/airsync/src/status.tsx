@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getStatus } from "./utils/applescript";
+import React from "react";
 
 export default function Command() {
   const { data: status, isLoading, error, revalidate } = usePromise(getStatus);
