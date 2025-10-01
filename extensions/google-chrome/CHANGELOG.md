@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Fix Search Bookmarks] - {PR_MERGE_DATE}
+## [Fix Search Bookmarks] - 2025-10-01
 
 - Fix the "Search Bookmarks" command returning an error when the hard-coded default profile directory does not exist.
 
