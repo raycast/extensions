@@ -20,10 +20,8 @@ export default async function Command() {
       });
     }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Failed to launch mirroring",
-      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }
