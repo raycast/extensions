@@ -3,7 +3,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { type ASN, ASNRespones, ErrorResponse, IPResponse, SuccessResponse } from "./types";
 
 export default function LookupIPorASN(props: LaunchProps<{ arguments: Arguments.LookupIpOrAsn }>) {
-  const { ip } = props.arguments;
+  const { ip = "" } = props.arguments;
   const { isLoading, data, revalidate } = useFetch<SuccessResponse | ErrorResponse>(`https://api.ipapi.is?q=${ip}`, {
     async onData(data) {
       if ("error" in data) await showFailureToast(data.error);
@@ -115,7 +115,7 @@ function IpMetadata({ data }: { data: IPResponse }) {
       <Detail.Metadata.Label title="LOCATION" text="..." />
       {data.location && (
         <>
-          <Detail.Metadata.Label title="EU Member" icon={data.location.is_eu_member ? Icon.Check : Icon.Xmark} />;
+          <Detail.Metadata.Label title="EU Member" icon={data.location.is_eu_member ? Icon.Check : Icon.Xmark} />
           <Detail.Metadata.Label title="Continent" text={data.location.continent} />
           <Detail.Metadata.Label title="Country" text={data.location.country} />
           <Detail.Metadata.Label title="Country Code" text={data.location.country_code} />
