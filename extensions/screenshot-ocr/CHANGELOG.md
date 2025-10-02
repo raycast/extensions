@@ -1,3 +1,3 @@
-# Screenshot OCR - COPY/PASTE Changelog
+# Screenshot OCR Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
