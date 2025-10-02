@@ -423,7 +423,6 @@ type CustomFieldSubmenuProps = {
 };
 
 function SectionsSubmenu({ task, mutate }: SectionsSubmenuProps) {
-  const [load, setLoad] = useState(false);
   const selectedProjectId = task.projects && task.projects.length === 1 ? task.projects[0].gid : undefined;
   const { data: sections, isLoading } = useSections(selectedProjectId);
 
@@ -459,24 +458,14 @@ function SectionsSubmenu({ task, mutate }: SectionsSubmenuProps) {
   }
 
   return (
-    <ActionPanel.Submenu
-      title="Move to Section"
-      icon={Icon.Tag}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-      onOpen={() => setLoad(true)}
-    >
+    <ActionPanel.Submenu title="Move to Section" icon={Icon.Tag} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
       {isLoading ? (
         <Action title="Loading…" />
       ) : (
         <>
           {sections?.map((section) => {
             return (
-              <Action
-                key={section.gid}
-                title={section.name}
-                icon={Icon.List}
-                onAction={() => moveToSection(section)}
-              />
+              <Action key={section.gid} title={section.name} icon={Icon.List} onAction={() => moveToSection(section)} />
             );
           })}
         </>

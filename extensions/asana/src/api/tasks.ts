@@ -83,7 +83,7 @@ export async function getTask(taskId: string) {
   return data.data;
 }
 
-type TaskPayload = {
+export type TaskPayload = {
   workspace: string;
 } & Partial<{
   name: string;

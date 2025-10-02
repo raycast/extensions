@@ -22,7 +22,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { TaskFormValues } from "../create-task";
 import { getProjectIcon } from "../helpers/project";
 import TaskDetail from "./TaskDetail";
-import { createTask } from "../api/tasks";
+import { createTask, TaskPayload } from "../api/tasks";
 import { asanaToRaycastColor } from "../helpers/colors";
 
 export default function CreateTaskForm(props: {
@@ -51,7 +51,7 @@ export default function CreateTaskForm(props: {
           return { ...acc, [fieldId]: field[1] };
         }, {});
 
-        const taskPayload: any = {
+        const taskPayload: TaskPayload = {
           workspace: values.workspace,
           name: values.name,
           custom_fields: customFields,
