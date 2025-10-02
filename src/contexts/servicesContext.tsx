@@ -34,11 +34,12 @@ export const ServicesProvider = ({ children }: { children: ReactNode }) => {
               case "dataParser":
                 refs.current[prop] = initializeFarragoDataParser();
                 break;
-              case "dataSource":
+              case "dataSource": {
                 const ds = initializeFarragoDataSource();
                 ds.populateDb(services.dataParser.getFreshSetsParsed());
                 refs.current[prop] = ds;
                 break;
+              }
               case "oscSender":
                 refs.current[prop] = initializeFarragoOscSender();
                 break;

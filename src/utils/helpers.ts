@@ -140,7 +140,7 @@ export class AbortError extends Error {
   }
 }
 
-export function ignoreAbortError<E extends any>(err: E, elseCallback?: (e: E) => any) {
+export function ignoreAbortError<E>(err: E, elseCallback?: (e: E) => any) {
   elseCallback ??= (e) => {
     throw e;
   };

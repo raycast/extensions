@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useState, useEffect, useReducer } from "react";
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import { FC } from "react";
 import {
   Action,
@@ -17,7 +17,6 @@ import {
 } from "@raycast/api";
 import { GET_FARRAGO_URL, OSC_SETUP_INSTRUCTIONS_URL } from "../utils/constants";
 import {
-  AbortError,
   checkFarragoExists,
   farragoDataDirExists,
   findFarrago,
