@@ -68,8 +68,17 @@ export default function CreateTaskForm(props: {
         const task = await createTask(taskPayload);
 
         if (values.section && values.projects.length === 1) {
-          const { addTaskToSection } = await import("../api/projects");
-          await addTaskToSection(task.gid, values.section);
+          try {
+            const { addTaskToSection } = await import("../api/projects");
+            await addTaskToSection(task.gid, values.section);
+          } catch (error) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Task created but failed to assign section",
+              message: getErrorMessage(error),
+            });
+            return;
+          }
         }
 
         if (shouldCloseMainWindow) {
