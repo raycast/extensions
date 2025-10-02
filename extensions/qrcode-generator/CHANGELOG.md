@@ -1,5 +1,9 @@
 # QR Code Generator Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Added a new action to copy QR code to clipboard
+
 ## [Better Visibility in Raycast UI] - 2025-08-25
 
 - Added [Generate QR Code from Selection] Command

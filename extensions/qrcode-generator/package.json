@@ -11,7 +11,8 @@
     "pernielsentikaer",
     "heytommy",
     "MatteoGauthier",
-    "seewhy"
+    "seewhy",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -36,6 +37,10 @@
             {
               "title": "Show inline",
               "value": "inline"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
             }
           ]
         },
