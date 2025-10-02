@@ -6,7 +6,7 @@ export function useSections(projectId?: string) {
     async (projectId: string) => {
       return await getSections(projectId);
     },
-    [projectId as string],
+    [projectId],
     {
       execute: !!projectId,
     },
