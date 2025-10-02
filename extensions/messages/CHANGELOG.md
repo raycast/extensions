@@ -1,14 +1,18 @@
 # Messages Changelog
 
+<<<<<<< HEAD
 ## [Spam and Unknown Sender Filtering] - {PR_MERGE_DATE}
 
 - Added backward-compatible support for the `is_filtered` field (macOS 26+) to filter spam and unknown sender messages
-- Added "Filter spam messages" preference to hide messages marked as spam (is_filtered = 2)
-- Added "Filter Unknown Senders" preference to hide messages from unknown senders (is_filtered = 4)
+- Added "Filter spam messages" preference to hide messages marked as spam
+- Added "Filter Unknown Senders" preference to hide messages from unknown senders
 - Filters available in My Latest Messages and Unread Messages commands
 - Both filters can be enabled independently or together per command
 - Queries gracefully handle missing `is_filtered` column on older macOS versions
+- Filter status values documented as constants for maintainability
 
+=======
+>>>>>>> contributions/merge-1759445057133
 ## [Start New Chat on No Results] - 2025-07-09
 
 When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number. 

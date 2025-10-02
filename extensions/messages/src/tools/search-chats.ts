@@ -1,11 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
-
 import { getChats } from "../api/get-chats";
-
-interface Preferences {
-  filterSpam?: boolean;
-  filterUnknownSenders?: boolean;
-}
 
 type Input = {
   /**
@@ -16,12 +9,16 @@ type Input = {
 
 export default async function (input: Input) {
   try {
-    const preferences = getPreferenceValues<Preferences>();
+<<<<<<< HEAD
+    const preferences = getPreferenceValues();
     const contacts = await getChats(
       input.searchTerm,
       preferences.filterSpam ?? false,
       preferences.filterUnknownSenders ?? false,
     );
+=======
+    const contacts = await getChats(input.searchTerm);
+>>>>>>> contributions/merge-1759445057133
 
     if (contacts.length === 0) {
       return "No contacts were found.";

@@ -4,12 +4,14 @@ import { resolve } from "path";
 import { executeSQL } from "@raycast/utils";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
+import { MessageFilterStatus } from "../constants";
 import { decodeHexString, fuzzySearch } from "../helpers";
 import { createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
 import { Message, SQLMessage } from "../hooks/useMessages";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
+<<<<<<< HEAD
 // Cache for column existence check
 let hasIsFilteredColumn: boolean | null = null;
 
@@ -40,17 +42,20 @@ export async function getMessages(
   let filters = "";
   if (hasIsFiltered) {
     const filterConditions: string[] = [];
-    if (filterUnknownSenders) {
-      filterConditions.push("chat.is_filtered != 1");
-    }
     if (filterSpam) {
-      filterConditions.push("chat.is_filtered != 2");
+      filterConditions.push(`chat.is_filtered != ${MessageFilterStatus.SPAM}`);
+    }
+    if (filterUnknownSenders) {
+      filterConditions.push(`chat.is_filtered != ${MessageFilterStatus.UNKNOWN_SENDER}`);
     }
     if (filterConditions.length > 0) {
       filters = `AND (chat.is_filtered IS NULL OR (${filterConditions.join(" AND ")}))`;
     }
   }
 
+=======
+export async function getMessages(searchText?: string, chatIdentifier?: string): Promise<Message[]> {
+>>>>>>> contributions/merge-1759445057133
   const rawData = await executeSQL<SQLMessage>(
     DB_PATH,
     `
@@ -96,7 +101,6 @@ export async function getMessages(
     WHERE
       message.attributedBody IS NOT NULL
       ${chatIdentifier ? `AND chat.chat_identifier = '${chatIdentifier}'` : ""}
-      ${filters}
     GROUP BY
       message.guid
     ORDER BY

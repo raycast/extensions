@@ -11,8 +11,7 @@
     "thomas",
     "aeorge",
     "hayden_barnes",
-    "micha_van_eijk",
-    "parterburn"
+    "micha_van_eijk"
   ],
   "keywords": [
     "2fa"
@@ -29,12 +28,13 @@
       "name": "my-messages",
       "title": "My Latest Messages",
       "description": "Search through your latest messages.",
+<<<<<<< HEAD
       "mode": "view",
       "preferences": [
         {
           "name": "filterSpam",
           "type": "checkbox",
-          "label": "Filter out Spam",
+          "label": "Filter Out Spam",
           "description": "When enabled, messages labeled as spam will not be shown.",
           "default": false,
           "required": false
@@ -42,12 +42,15 @@
         {
           "name": "filterUnknownSenders",
           "type": "checkbox",
-          "label": "Filter out Unknown Senders",
+          "label": "Filter Out Unknown Senders",
           "description": "When enabled, messages from unknown senders will not be shown.",
           "default": false,
           "required": false
         }
       ]      
+=======
+      "mode": "view"
+>>>>>>> contributions/merge-1759445057133
     },
     {
       "name": "send-message",
@@ -70,12 +73,13 @@
       "title": "Unread Messages",
       "description": "Check out your unread messages from the menu bar.",
       "mode": "menu-bar",
+<<<<<<< HEAD
       "interval": "2m",
       "preferences": [
         {
           "name": "filterSpam",
           "type": "checkbox",
-          "label": "Filter out Spam",
+          "label": "Filter Out Spam",
           "description": "When enabled, messages labeled as spam will not be shown in the menu bar.",
           "default": false,
           "required": false
@@ -83,12 +87,15 @@
         {
           "name": "filterUnknownSenders",
           "type": "checkbox",
-          "label": "Filter out Unknown Senders",
+          "label": "Filter Out Unknown Senders",
           "description": "When enabled, messages from unknown senders will not be shown in the menu bar.",
           "default": false,
           "required": false
         }
       ]
+=======
+      "interval": "2m"
+>>>>>>> contributions/merge-1759445057133
     },
     {
       "name": "paste-latest-otp-code",

@@ -4,11 +4,13 @@ import { resolve } from "path";
 import { executeSQL } from "@raycast/utils";
 import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
 
+import { MessageFilterStatus } from "../constants";
 import { createContactMap, getContactOrGroupInfo, ChatOrMessageInfo, fuzzySearch } from "../helpers";
 import { Chat, SQLChat } from "../hooks/useChats";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
+<<<<<<< HEAD
 // Cache for column existence check
 let hasIsFilteredColumn: boolean | null = null;
 
@@ -39,17 +41,20 @@ export async function getChats(
   let filters = "";
   if (hasIsFiltered) {
     const filterConditions: string[] = [];
-    if (filterUnknownSenders) {
-      filterConditions.push("chat.is_filtered != 1");
-    }
     if (filterSpam) {
-      filterConditions.push("chat.is_filtered != 2");
+      filterConditions.push(`chat.is_filtered != ${MessageFilterStatus.SPAM}`);
+    }
+    if (filterUnknownSenders) {
+      filterConditions.push(`chat.is_filtered != ${MessageFilterStatus.UNKNOWN_SENDER}`);
     }
     if (filterConditions.length > 0) {
       filters = `AND (chat.is_filtered IS NULL OR (${filterConditions.join(" AND ")}))`;
     }
   }
 
+=======
+export async function getChats(searchText: string = ""): Promise<Chat[]> {
+>>>>>>> contributions/merge-1759445057133
   const rawData = await executeSQL<SQLChat>(
     DB_PATH,
     `
@@ -58,12 +63,11 @@ export async function getChats(
       chat.chat_identifier,
       chat.display_name,
       chat.service_name,
-      ${isFilteredSelect}
       CASE
         WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
         THEN chat.display_name
-        ELSE NULL
-        END as group_name,
+      ELSE NULL
+    END as group_name,
       CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
       strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
         MAX(message.date) / 1000000000 + strftime("%s", "2001-01-01"),
@@ -80,8 +84,7 @@ export async function getChats(
       LEFT JOIN chat_handle_join ON chat."ROWID" = chat_handle_join.chat_id
       LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
     WHERE
-      (chat.chat_identifier LIKE '%chat%' OR chat.chat_identifier LIKE '+%')
-      ${filters}
+      chat.chat_identifier LIKE '%chat%' OR chat.chat_identifier LIKE '+%'
     GROUP BY
       chat.chat_identifier
     ORDER BY
