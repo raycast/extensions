@@ -1,4 +1,4 @@
-// src/open-ocr-preferences.ts
+// src/openPreferences.ts
 
 import { openExtensionPreferences } from "@raycast/api"
 
