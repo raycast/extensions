@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+ - Added hotkey to switch between language sets quickly with `CMD+SHIFT+↑` and `CMD+SHIFT+↓`
+
 ## [Feature] - 2025-07-01
 
 - Added instant translate commands for selected text translation
