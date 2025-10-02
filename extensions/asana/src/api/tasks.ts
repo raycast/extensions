@@ -93,6 +93,7 @@ type TaskPayload = {
   start_on: string;
   assignee: string;
   custom_fields: Record<string, string>;
+  memberships: { project: string; section?: string }[];
 }>;
 
 export async function createTask(payload: TaskPayload) {
