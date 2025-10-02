@@ -18,7 +18,7 @@ function TranslationsListItem(props: { item: string; updateQuery: (term: string)
         <ActionPanel>
           <Action title="Search for This Entry" onAction={searchForTranslation} />
           <Action.CopyToClipboard title="Copy Translation" content={props.item} />
-          <Action.OpenInBrowser title="Open in Browser" url={URL + props.item} />
+          <Action.OpenInBrowser title="Open in Browser" url={URL + encodeURIComponent(props.item)} />
         </ActionPanel>
       }
     />
@@ -92,7 +92,7 @@ export default function Command(props: LaunchProps) {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
-                  url={`https://tureng.com/en/turkish-english/${searchTerm}`}
+                  url={`https://tureng.com/en/turkish-english/${encodeURIComponent(searchTerm)}`}
                 ></Action.OpenInBrowser>
               </ActionPanel>
             }
