@@ -22,7 +22,6 @@ export default async function Command(): Promise<void> {
     const snippet = snippetRaw.slice(0, 80) + (snippetRaw.length > 80 ? "…" : "")
     await showHUD(`Copied last OCR: ${snippet}`)
   } catch (e) {
-    const message = String((e as Error)?.message ?? e)
-    await showToast({ style: Toast.Style.Failure, title: "Failed to copy last result", message })
+    await showFailureToast(e as Error, { title: "Failed to copy last result" })
   }
 }
