@@ -155,7 +155,7 @@ export function getBuildStatusIcon(status: string): Icon {
   switch (normalizedStatus) {
     case "succeeded":
     case "success":
-      return Icon.CheckCircle;
+      return Icon.CheckRosette;
     case "failed":
     case "failure":
       return Icon.XMarkCircle;

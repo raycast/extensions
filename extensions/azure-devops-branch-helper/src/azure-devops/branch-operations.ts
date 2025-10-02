@@ -6,6 +6,76 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { runAz } from "../az-cli";
 import type { Preferences } from "./types";
 
+// Cache for default branch to avoid repeated API calls
+const defaultBranchCache: { [repoKey: string]: string } = {};
+
+/**
+ * Gets the default branch for a repository from Azure DevOps
+ */
+export async function getRepositoryDefaultBranch(): Promise<string> {
+  try {
+    const preferences = getPreferenceValues<Preferences>();
+
+    if (!preferences.azureOrganization || !preferences.azureProject) {
+      return "main"; // fallback if not configured
+    }
+
+    const repositoryName =
+      preferences.azureRepository || preferences.azureProject;
+    const cacheKey = `${preferences.azureOrganization}/${preferences.azureProject}/${repositoryName}`;
+
+    // Return cached value if available
+    if (defaultBranchCache[cacheKey]) {
+      return defaultBranchCache[cacheKey];
+    }
+
+    // Get repository information
+    const { stdout } = await runAz([
+      "repos",
+      "show",
+      "--repository",
+      repositoryName,
+      "--output",
+      "json",
+      "--organization",
+      preferences.azureOrganization,
+      "--project",
+      preferences.azureProject,
+    ]);
+
+    const repoData = JSON.parse(stdout);
+    const defaultBranch = repoData.defaultBranch
+      ? repoData.defaultBranch.replace("refs/heads/", "")
+      : "main";
+
+    // Cache the result
+    defaultBranchCache[cacheKey] = defaultBranch;
+    console.log(
+      `[getRepositoryDefaultBranch] Repository ${repositoryName} default branch: ${defaultBranch}`,
+    );
+
+    return defaultBranch;
+  } catch (error) {
+    console.error("Failed to get repository default branch:", error);
+    return "main"; // fallback to main on error
+  }
+}
+
+/**
+ * Gets the target branch for PR creation (user preference or repository default)
+ */
+export async function getTargetBranch(): Promise<string> {
+  const preferences = getPreferenceValues<Preferences>();
+
+  // If user has explicitly configured a source branch, use that
+  if (preferences.sourceBranch) {
+    return preferences.sourceBranch;
+  }
+
+  // Otherwise, get the repository's actual default branch
+  return await getRepositoryDefaultBranch();
+}
+
 /**
  * Converts work item ID and title to a standardized branch name
  */
@@ -95,7 +165,7 @@ export async function createBranch(branchName: string): Promise<boolean> {
     // Use repository from preferences or fall back to project name
     const repositoryName =
       preferences.azureRepository || preferences.azureProject;
-    const sourceBranch = preferences.sourceBranch || "main";
+    const sourceBranch = await getTargetBranch();
 
     // Step 1: Get the object ID of the source branch
     const { stdout: objectId } = await runAz([

@@ -266,7 +266,8 @@ export default function Command() {
 
   function renderBuildItem(build: Build, keyPrefix: string) {
     const buildUrl = getBuildUrl(build);
-    const statusIcon = getBuildStatusIcon(build.status);
+    // Use result for completed builds, status for active builds
+    const statusIcon = getBuildStatusIcon(build.result || build.status);
     const statusColor = build.result
       ? getBuildResultColor(build.result)
       : getBuildResultColor(build.status);
