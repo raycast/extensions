@@ -176,7 +176,7 @@ function FarragoChecker<P extends LaunchProps>(
   return <props.Command {...props} />;
 }
 
-// * "HOC" but for no-view commands
+// * like the HOC above, but for no-view commands
 
 export function withFarragoRunningNoView<P extends LaunchProps>(command: (props: P) => any | Promise<any>) {
   return async (props: P) => {
