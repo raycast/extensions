@@ -15,7 +15,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { GET_FARRAGO_URL } from "../utils/constants";
+import { GET_FARRAGO_URL, OSC_SETUP_INSTRUCTIONS_URL } from "../utils/constants";
 import {
   checkFarragoExists,
   farragoDataDirExists,
@@ -24,6 +24,7 @@ import {
   isFarragoRunning,
   launchFarrago,
 } from "../utils/helpers";
+import { FarragoOscPinger } from "../services/farrago-osc/farragoOscPinger";
 
 // * CONTEXT
 
@@ -36,6 +37,34 @@ export function FarragoAppInfoProvider({ children }: { children: ReactNode }) {
 
 // * HOOKS
 
+function useOscPing() {
+  const [pinging, setPinging] = useState(true);
+  const [oscIsAlive, setOscIsAlive] = useState(false);
+
+  useEffect(() => {
+    console.log("... running effect ...");
+    const pinger = new FarragoOscPinger();
+    pinger.rcv.open();
+    pinger.ping().then((res) => {
+      console.log({ res });
+      setOscIsAlive(res);
+      setPinging(false);
+      try {
+        pinger.rcv.close();
+      } catch (_) {
+        // ignoring error if already closed
+      }
+    });
+
+    return () => {
+      pinger.rcv.close();
+      // todo: abort the ping()
+    };
+  }, []);
+
+  return { pinging, oscIsAlive };
+}
+
 export function useFarragoAppInfo() {
   const [app, setApp] = useState<Application | undefined>();
   const [appExists, setAppExists] = useState(false);
@@ -47,7 +76,9 @@ export function useFarragoAppInfo() {
   const [appDataDirFound, setAppDataDirFound] = useState(false);
   const [appDataDirChecked, setAppDataDirChecked] = useState(false);
 
-  const loading = !appChecked || !appIsRunningChecked || !appDataDirChecked;
+  const { pinging, oscIsAlive } = useOscPing();
+
+  const loading = !appChecked || !appIsRunningChecked || !appDataDirChecked || pinging;
 
   useEffect(() => {
     findFarrago().then((app) => {
@@ -73,6 +104,7 @@ export function useFarragoAppInfo() {
     appExists,
     appIsRunning,
     appDataDirFound,
+    oscIsAlive,
   };
 }
 
@@ -100,7 +132,7 @@ export function withFarragoRunning<P extends LaunchProps>(
 function FarragoChecker<P extends LaunchProps>(
   props: P & { Command: FC<P>; LoadingComponent: FC<{ isLoading: boolean }> },
 ) {
-  const { loading, appExists, appIsRunning, appDataDirFound } = useFarragoAppInfoContext();
+  const { loading, appExists, appIsRunning, appDataDirFound, oscIsAlive } = useFarragoAppInfoContext();
 
   if (loading) return <props.LoadingComponent isLoading={true} />;
 
@@ -141,6 +173,29 @@ function FarragoChecker<P extends LaunchProps>(
                 icon={Icon.AppWindow}
                 onAction={async () => {
                   await launchFarrago();
+                  await popToRoot();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+
+  if (!oscIsAlive)
+    return (
+      <List isLoading={false}>
+        <List.EmptyView
+          icon={{ source: Icon.Plug, tintColor: Color.Red }}
+          title="OSC Connection Not Established"
+          description="Set up OSC in Farrago to use this extension."
+          actions={
+            <ActionPanel>
+              <Action
+                title="See Instructions"
+                icon={Icon.Book}
+                onAction={async () => {
+                  await open(OSC_SETUP_INSTRUCTIONS_URL);
                   await popToRoot();
                 }}
               />

@@ -16,6 +16,10 @@ export class FarragoOscSender extends OscSender {
     await super.send(endpoint, args);
   }
 
+  async ping() {
+    await this.sendToFarrago("/ping", [true]);
+  }
+
   async runTileAction(action: TileAction, tile: DBSoundTile, args?: Array<any>) {
     await this.sendToFarrago(`${getTileBaseAddress(tile)}/${action}`, args ?? [true]);
   }

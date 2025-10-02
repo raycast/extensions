@@ -1,4 +1,5 @@
 export type Endpoint =
+  | "/ping"
   | TileEndpoint
   | SetEndpoint
   | TransportEndpoint

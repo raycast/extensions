@@ -16,6 +16,17 @@ export class FarragoOscReceiver extends OscReceiver {
       this.removeMessageHandler(_handler);
     };
   }
+
+  subscribeToPing<T>(handler: (...values: T[]) => void) {
+    const _handler = this.addMessageHandler(/.*/, (msg) => {
+      const values = msg.args.map((arg) => arg.value) as T[];
+      handler(...values);
+    });
+
+    return () => {
+      this.removeMessageHandler(_handler);
+    };
+  }
 }
 
 function makeStrictRegExp(endpoint: Endpoint) {

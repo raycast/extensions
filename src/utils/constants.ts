@@ -24,3 +24,6 @@ export const DEFAULT_SHORTCUT_TITLE_TEMPLATE = "{{title}} {{icons}}";
 export const FARRAGO_BUNDLE_ID = "com.rogueamoeba.farrago";
 
 export const GET_FARRAGO_URL = "https://rogueamoeba.com/farrago/";
+
+// todo: replace w/ github readme link
+export const OSC_SETUP_INSTRUCTIONS_URL = "https://rogueamoeba.com/support/manuals/farrago/?page=osc";
