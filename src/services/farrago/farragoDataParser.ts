@@ -1,11 +1,12 @@
+import { Clipboard } from "@raycast/api";
+import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
-import { execSync } from "child_process";
 import plist from "plist";
 import xml2js from "xml2js";
-import { SoundSet, SoundSetTile } from "../../types";
-import { expandTilde } from "../../utils/helpers";
-import { Clipboard } from "@raycast/api";
+
+import { SoundSet, SoundSetTile } from "@/types";
+import { expandTilde } from "@/utils/helpers";
 
 export class FarragoDataParser {
   farragoDataDirpath: string;
@@ -38,7 +39,7 @@ export class FarragoDataParser {
 
       // Parse the XML string
       const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true });
-      parser.parseString(xmlString, (err, _result) => {
+      parser.parseString(xmlString, (err) => {
         if (err) {
           throw new Error("Error parsing XML: " + err);
         }

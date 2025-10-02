@@ -1,4 +1,4 @@
-import { DBSoundSet, DBSoundTile, SoundSet, SoundSetTile } from "../../types";
+import { DBSoundSet, DBSoundTile, SoundSet, SoundSetTile } from "@/types";
 
 export class FarragoDataSource {
   db: {

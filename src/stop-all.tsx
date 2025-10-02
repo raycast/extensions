@@ -1,6 +1,7 @@
 import { showHUD } from "@raycast/api";
-import { initializeFarragoOscSender } from "./services/initializers";
+
 import { withFarragoRunningNoView } from "./contexts/appInfoContext";
+import { initializeFarragoOscSender } from "./services/initializers";
 
 export default withFarragoRunningNoView(async () => {
   showHUD("Stopped all sounds");

@@ -1,10 +1,12 @@
-import os from "os";
-import fs from "fs";
-import path from "path";
-import { DEFAULT_SHORTCUT_TITLE_TEMPLATE, FARRAGO_BUNDLE_ID, TILE_COLORS_BY_INDEX } from "./constants";
-import { DBSoundSet, DBSoundTile, Preferences } from "../types";
 import { Application, getApplications, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import fs from "fs";
+import os from "os";
+import path from "path";
+
+import { DBSoundSet, DBSoundTile, Preferences } from "@/types";
+
+import { DEFAULT_SHORTCUT_TITLE_TEMPLATE, FARRAGO_BUNDLE_ID, TILE_COLORS_BY_INDEX } from "./constants";
 
 export function getPreferences() {
   return getPreferenceValues<Preferences>();

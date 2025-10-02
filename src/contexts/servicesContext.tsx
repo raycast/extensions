@@ -1,15 +1,16 @@
 import { createContext, useContext, useRef, useMemo, ReactNode, useState } from "react";
-import { FarragoOscReceiver } from "../services/farrago-osc/farragoOscReceiver";
-import { FarragoOscSender } from "../services/farrago-osc/farragoOscSender";
-import { FarragoDataSource } from "../services/farrago/farragoDataSource";
-import { FarragoDataParser } from "../services/farrago/farragoDataParser";
+
+import useInterval from "@/hooks/useInterval";
+import { FarragoOscReceiver } from "@/services/farrago-osc/farragoOscReceiver";
+import { FarragoOscSender } from "@/services/farrago-osc/farragoOscSender";
+import { FarragoDataParser } from "@/services/farrago/farragoDataParser";
+import { FarragoDataSource } from "@/services/farrago/farragoDataSource";
 import {
   initializeFarragoDataParser,
   initializeFarragoDataSource,
   initializeFarragoOscReceiver,
   initializeFarragoOscSender,
-} from "../services/initializers";
-import useInterval from "../hooks/useInterval";
+} from "@/services/initializers";
 
 const DB_REFRESH_INTERVAL_MS = 10000; // how often to check for updates in Farrago's data directory
 

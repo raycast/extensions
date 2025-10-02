@@ -1,4 +1,5 @@
-import { AbortError } from "../../utils/helpers";
+import { AbortError } from "@/utils/helpers";
+
 import { initializeFarragoOscReceiver, initializeFarragoOscSender } from "../initializers";
 import { FarragoOscReceiver } from "./farragoOscReceiver";
 import { FarragoOscSender } from "./farragoOscSender";

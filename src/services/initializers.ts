@@ -1,4 +1,5 @@
-import { getPreferences } from "../utils/helpers";
+import { getPreferences } from "@/utils/helpers";
+
 import { FarragoOscReceiver } from "./farrago-osc/farragoOscReceiver";
 import { FarragoOscSender } from "./farrago-osc/farragoOscSender";
 import { FarragoDataParser } from "./farrago/farragoDataParser";

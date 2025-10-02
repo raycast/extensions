@@ -90,6 +90,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
+    "@trivago/prettier-plugin-sort-imports": "4.2.0",
     "@types/node": "22.13.10",
     "@types/node-osc": "^9.1.0",
     "@types/plist": "^3.0.5",

@@ -2,6 +2,10 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["src/**/*", "raycast-env.d.ts", "_/withFarragoRunning.tsx"],
   "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "lib": ["ES2023"],
     "module": "nodenext",
     "target": "ES2023",

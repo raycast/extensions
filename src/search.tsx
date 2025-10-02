@@ -1,7 +1,8 @@
 import { List } from "@raycast/api";
-import { SearchCommand } from "./commands/search";
-import { ServicesProvider } from "./contexts/servicesContext";
-import { withFarragoRunning } from "./contexts/appInfoContext";
+
+import { SearchCommand } from "@/commands/search";
+import { withFarragoRunning } from "@/contexts/appInfoContext";
+import { ServicesProvider } from "@/contexts/servicesContext";
 
 export default withFarragoRunning(
   () => (

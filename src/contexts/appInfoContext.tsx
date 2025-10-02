@@ -1,5 +1,3 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from "react";
-import { FC } from "react";
 import {
   Action,
   ActionPanel,
@@ -15,7 +13,11 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { GET_FARRAGO_URL, OSC_SETUP_INSTRUCTIONS_URL } from "../utils/constants";
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { FC } from "react";
+
+import { FarragoOscPinger } from "@/services/farrago-osc/farragoOscPinger";
+import { GET_FARRAGO_URL, OSC_SETUP_INSTRUCTIONS_URL } from "@/utils/constants";
 import {
   checkFarragoExists,
   farragoDataDirExists,
@@ -24,8 +26,7 @@ import {
   ignoreAbortError,
   isFarragoRunning,
   launchFarrago,
-} from "../utils/helpers";
-import { FarragoOscPinger } from "../services/farrago-osc/farragoOscPinger";
+} from "@/utils/helpers";
 
 // * CONTEXT
 

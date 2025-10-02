@@ -13,15 +13,16 @@ import {
   showToast,
 } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
-import { DBSoundTile } from "../types";
-import { applyShortcutTitleTemplate, formatDuration, getTileColorByIndex } from "../utils/helpers";
-import { FARRAGO_FADE_DURATION_MS, ICLOUD_SHORTCUT_LINK } from "../utils/constants";
-import { useLatestDbUpdate, useServices } from "../contexts/servicesContext";
+
+import { useLatestDbUpdate, useServices } from "@/contexts/servicesContext";
+import { DBSoundTile } from "@/types";
+import { FARRAGO_FADE_DURATION_MS, ICLOUD_SHORTCUT_LINK } from "@/utils/constants";
+import { applyShortcutTitleTemplate, formatDuration, getTileColorByIndex } from "@/utils/helpers";
 
 export function SearchCommand() {
   const { dataSource } = useServices();
   const latestDbUpdate = useLatestDbUpdate();
-  const [gridFilter, setGridFilter] = useState<string>("");
+  const [gridFilter, setGridFilter] = useState<any>("");
 
   const tiles = useMemo(() => {
     const allTiles = dataSource.getAllTiles();

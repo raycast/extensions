@@ -1,5 +1,6 @@
-import { DBSoundTile } from "../../types";
-import { OscReceiver } from "../osc/oscReceiver";
+import { OscReceiver } from "@/services/osc/oscReceiver";
+import { DBSoundTile } from "@/types";
+
 import { Endpoint, TileAction } from "./types";
 import { getTileBaseAddress } from "./utils";
 

@@ -1,5 +1,6 @@
-import { DBSoundSet, DBSoundTile } from "../../types";
-import { OscSender } from "../osc/oscSender";
+import { OscSender } from "@/services/osc/oscSender";
+import { DBSoundSet, DBSoundTile } from "@/types";
+
 import {
   Endpoint,
   GlobalAction,

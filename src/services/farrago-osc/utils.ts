@@ -1,4 +1,5 @@
-import { DBSoundTile } from "../../types";
+import { DBSoundTile } from "@/types";
+
 import { TileBaseAddress } from "./types";
 
 export function getTileCoordinates(tile: DBSoundTile) {
