@@ -1,7 +1,8 @@
 # ipapi.is Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements + Windows Support] - {PR_MERGE_DATE}
 
+- Add Windows Support
 - Add "Abuse object"
 - Show `Toast` on error
 - Remove "_clever_" code to reduce chances of errors
