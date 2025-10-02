@@ -5,6 +5,9 @@
   "description": "Smart, instant terminal session management.",
   "icon": "command-icon.png",
   "author": "joshmedeski",
+  "contributors": [
+    "sebastian_gunnarsson"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -26,6 +29,14 @@
           "title": "Open with (required)",
           "description": "Open with",
           "default": "Terminal"
+        },
+        {
+          "name": "searchPath",
+          "type": "textfield",
+          "required": true,
+          "title": "Search path",
+          "description": "Environment path, e.g /usr/local/bin:/usr/bin",
+          "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
         }
       ]
     }

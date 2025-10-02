@@ -1,5 +1,9 @@
 # Sesh Changelog
 
+## [Make PATH configurable]
+- Add a user-setting for the PATH variable
+- This is necessary for home-manager installations, because the path includes the users home-directory, and Raycast doesn't expand '~'.
+
 ## Improve list - 2025-09-25
 
 - Add support for tmuxinator list items

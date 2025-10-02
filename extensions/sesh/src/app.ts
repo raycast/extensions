@@ -1,6 +1,8 @@
 import { Application, getPreferenceValues } from "@raycast/api";
 import { exec } from "child_process";
-import { env } from "./env";
+import { getEnv } from "./env";
+
+const env = getEnv();
 
 interface Preferences {
   openWithApp: Application;
