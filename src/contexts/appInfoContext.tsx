@@ -17,10 +17,12 @@ import {
 } from "@raycast/api";
 import { GET_FARRAGO_URL, OSC_SETUP_INSTRUCTIONS_URL } from "../utils/constants";
 import {
+  AbortError,
   checkFarragoExists,
   farragoDataDirExists,
   findFarrago,
   getPreferences,
+  ignoreAbortError,
   isFarragoRunning,
   launchFarrago,
 } from "../utils/helpers";
@@ -42,24 +44,26 @@ function useOscPing() {
   const [oscIsAlive, setOscIsAlive] = useState(false);
 
   useEffect(() => {
-    console.log("... running effect ...");
     const pinger = new FarragoOscPinger();
     pinger.rcv.open();
-    pinger.ping().then((res) => {
-      console.log({ res });
-      setOscIsAlive(res);
-      setPinging(false);
-      try {
-        pinger.rcv.close();
-      } catch (_) {
-        // ignoring error if already closed
-      }
-    });
+    pinger
+      .ping()
+      .then((res) => {
+        setOscIsAlive(res);
+        setPinging(false);
+        try {
+          pinger.rcv.close();
+        } catch (error) {
+          if ((error as { code: string }).code == "ERR_SOCKET_DGRAM_NOT_RUNNING") {
+            // ignoring error if already closed
+          } else {
+            throw error;
+          }
+        }
+      })
+      .catch(ignoreAbortError);
 
-    return () => {
-      pinger.rcv.close();
-      // todo: abort the ping()
-    };
+    return () => pinger.abort();
   }, []);
 
   return { pinging, oscIsAlive };

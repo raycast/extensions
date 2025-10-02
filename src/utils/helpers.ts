@@ -132,3 +132,22 @@ export async function farragoDataDirExists() {
     });
   });
 }
+
+export class AbortError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = "AbortError";
+  }
+}
+
+export function ignoreAbortError<E extends any>(err: E, elseCallback?: (e: E) => any) {
+  elseCallback ??= (e) => {
+    throw e;
+  };
+
+  if (err instanceof AbortError) {
+    // ignoring...
+  } else {
+    return elseCallback(err);
+  }
+}
