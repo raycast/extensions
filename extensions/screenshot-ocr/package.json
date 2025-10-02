@@ -1,0 +1,210 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenshot-ocr",
+  "title": "Screenshot OCR",
+  "description": "Take a screenshot of your desktop, connect it to an OCR text model, and set the recognized text to your last clipboard copy.",
+  "icon": "extension_icon.png",
+  "author": "morgan_titcher",
+  "categories": [
+    "Productivity",
+    "System",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "ocr",
+    "screenshot",
+    "clipboard",
+    "text",
+    "paste",
+    "text recognition",
+    "extract text"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "copy",
+      "title": "Copy OCR Text",
+      "subtitle": "(⌘C) Copy recognized text to clipboard.",
+      "description": "Takes a screenshot of your desktop, applies OCR to the image, and copies the recognized text to your clipboard. Use ⌘V to paste.",
+      "mode": "no-view",
+      "icon": "extension_icon.png"
+    },
+    {
+      "name": "copyAndPaste",
+      "title": "Copy OCR Text and Paste",
+      "description": "Capture region, apply OCR, copy the recognized text to your clipboard, and paste it into the frontmost app automatically.",
+      "mode": "no-view",
+      "icon": "paste_icon.png"
+    },
+    {
+      "name": "openPreferences",
+      "title": "Open OCR Preferences",
+      "description": "Open the extension preferences for Screenshot OCR.",
+      "mode": "no-view",
+      "icon": "settings_icon.png"
+    },
+    {
+      "name": "toggleAutoPaste",
+      "title": "Toggle Auto Paste (⌘V after OCR)",
+      "description": "Toggle whether to paste the recognized text automatically after copying.",
+      "mode": "no-view",
+      "icon": "toggle_icon.png"
+    },
+    {
+      "name": "copyLastResult",
+      "title": "Copy Last OCR Result",
+      "description": "Copy the last recognized OCR text to the clipboard and show a snippet HUD.",
+      "mode": "no-view",
+      "icon": "repeat_icon.png"
+    },
+    {
+      "name": "demoGallery",
+      "title": "Demo Gallery",
+      "description": "Browse demo scenarios for Screenshot OCR functionality.",
+      "mode": "view",
+      "icon": "extension_icon.png"
+    },
+    {
+      "name": "lastOcrResult",
+      "title": "Last OCR Result",
+      "description": "View the last OCR result with metadata and copy options.",
+      "mode": "view",
+      "icon": "extension_icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "screenshot",
+      "title": "Screenshot OCR",
+      "description": "AI tool for screenshot OCR analysis. Use @screenshot-ocr in Raycast AI to analyze screenshots, extract text, or answer questions about image content. Takes screenshots, applies OCR, and provides AI-powered analysis of the extracted text.",
+      "icon": "ask_ai_icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ocrProvider",
+      "type": "dropdown",
+      "title": "OCR Provider",
+      "description": "Select the OCR backend to use.",
+      "default": "ocrspace",
+      "required": false,
+      "data": [
+        {
+          "title": "OCR.Space (Cloud)",
+          "value": "ocrspace"
+        },
+        {
+          "title": "Tesseract (Local)",
+          "value": "tesseract"
+        }
+      ]
+    },
+    {
+      "name": "ocrSpaceApiKey",
+      "type": "password",
+      "title": "API Keys",
+      "label": "OCR.Space API Key",
+      "description": "Optional. If empty, the demo key is used and heavily rate-limited.",
+      "required": false
+    },
+    {
+      "name": "includeCursor",
+      "type": "checkbox",
+      "title": "Screenshot Options",
+      "label": "Include Cursor in Screenshot",
+      "description": "If enabled, the system cursor is visible in captured screenshots.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoPaste",
+      "type": "checkbox",
+      "title": "After Copy",
+      "label": "Paste immediately after OCR",
+      "description": "If enabled, the recognized text will be pasted into the frontmost app automatically. Disabled by default for better control.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "ocrLanguage",
+      "type": "textfield",
+      "title": "OCR Language",
+      "description": "Three-letter ISO 639-2 language code, e.g., 'eng' for English. Defaults to 'eng'.",
+      "default": "eng",
+      "required": false
+    },
+    {
+      "name": "postprocessText",
+      "type": "checkbox",
+      "title": "Post-Processing",
+      "label": "Apply Heuristic Cleanup",
+      "description": "Fix common OCR artifacts (quotes, dashes, ligatures, spacing).",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "useAIRefinement",
+      "type": "checkbox",
+      "title": "Post-Processing (AI)",
+      "label": "Use Raycast AI to Refine Text (Raycast Pro)",
+      "description": "If enabled and configured, uses a local LLM to clean up OCR text.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "aiRefinementPrompt",
+      "type": "textfield",
+      "title": "AI Refinement Prompt",
+      "description": "Override the default instruction for AI-based cleanup.",
+      "required": false
+    },
+    {
+      "name": "useLocalAI",
+      "type": "checkbox",
+      "title": "Ollama (Local AI)",
+      "label": "Use Local Ollama for Refining Text",
+      "description": "If enabled and configured, use a local LLM to clean up OCR text.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "ollamaModel",
+      "type": "textfield",
+      "title": "Ollama Model",
+      "description": "Model name, e.g., 'llama3.2:3b'.",
+      "default": "llama3.2:3b",
+      "required": false
+    },
+    {
+      "name": "ollamaUrl",
+      "type": "textfield",
+      "title": "Ollama URL",
+      "description": "Base URL to the Ollama server.",
+      "default": "http://localhost:11434",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
