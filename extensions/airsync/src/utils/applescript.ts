@@ -137,7 +137,7 @@ export async function getNotifications(): Promise<Notification[]> {
 export async function notificationAction(
   notificationId: string,
   actionName: string,
-  replyText?: string
+  replyText?: string,
 ): Promise<NotificationActionResponse | string> {
   try {
     const actionString = replyText ? `${notificationId}|${actionName}|${replyText}` : `${notificationId}|${actionName}`;
@@ -183,7 +183,7 @@ export async function getMedia(): Promise<MediaInfo | null> {
 }
 
 export async function mediaControl(
-  action: "toggle" | "next" | "previous" | "like"
+  action: "toggle" | "next" | "previous" | "like",
 ): Promise<MediaControlResponse | string> {
   try {
     const result = await runAppleScript(`tell application "AirSync" to media control "${action}"`);

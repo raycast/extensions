@@ -74,7 +74,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action title="Refresh" onAction={revalidate} icon={Icon.ArrowClockwise} />
-          <Action.CopyToClipboard title="Copy Ip Address" content={status.device_ip} />
+          <Action.CopyToClipboard title="Copy IP Address" content={status.device_ip} />
         </ActionPanel>
       }
     />
