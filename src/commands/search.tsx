@@ -152,6 +152,7 @@ const TileListItem = React.memo(
                 />
               ) : null}
               <Action
+                // eslint-disable-next-line
                 title="Toggle AB Volume"
                 icon={Icon.Speaker}
                 onAction={() => oscSender.runTileAction("toggleAB", tile)}
@@ -166,6 +167,7 @@ const TileListItem = React.memo(
                 shortcut={{ key: "s", modifiers: ["ctrl"] }}
               />
               <Action
+                // eslint-disable-next-line
                 title="Copy Tile UUID"
                 icon={Icon.CopyClipboard}
                 onAction={() => {
