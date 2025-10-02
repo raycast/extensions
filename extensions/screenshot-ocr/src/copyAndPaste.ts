@@ -1,4 +1,4 @@
-// src/ocr-copy-and-paste.ts
+// src/copyAndPaste.ts
 
 import { performOcrCopyFlow } from "./flow"
 
