@@ -17,6 +17,9 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          sparse-checkout: |
+            extensions/**/package.json
+            scripts/generate-code-owners.js
 
       - name: Setup Node
         uses: actions/setup-node@v4
