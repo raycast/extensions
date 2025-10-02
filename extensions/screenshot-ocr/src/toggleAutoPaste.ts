@@ -1,4 +1,4 @@
-// src/toggle-auto-paste.ts
+// src/toggleAutoPaste.ts
 
 import { LocalStorage, showHUD } from "@raycast/api"
 
