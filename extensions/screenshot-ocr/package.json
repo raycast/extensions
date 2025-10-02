@@ -150,7 +150,7 @@
       "type": "checkbox",
       "title": "Post-Processing (AI)",
       "label": "Use Raycast AI to Refine Text (Raycast Pro)",
-      "description": "If enabled and configured, uses a local LLM to clean up OCR text.",
+      "description": "If enabled and configured, uses Raycast AI to clean up OCR text.",
       "default": false,
       "required": false
     },
