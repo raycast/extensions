@@ -1,6 +1,6 @@
 # Folder Organizer Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-10-02
 
 - **Organize Downloads Folder**: Automatically sort files in Downloads folder into categorized subfolders
 - **Organize Custom Folder**: Choose any folder and organize its files by type
