@@ -215,6 +215,8 @@ export function DetailedAccountView({ accountId, stakingPool, onSaveAccount }: D
       epochInfo.currentBlock.header.height,
       epochInfo.epochLength,
     );
+    const blocksProduced = epochInfo.currentBlock.header.height - epochInfo.epochInfo.epoch_start_height;
+    const totalBlocks = epochInfo.epochLength;
     const barLength = 10;
     const filledBars = Math.floor((progress / 100) * barLength);
     const emptyBars = barLength - filledBars;
@@ -241,7 +243,7 @@ export function DetailedAccountView({ accountId, stakingPool, onSaveAccount }: D
           subtitle={`${progress}% ${progressBar}`}
           accessories={[
             {
-              text: `${(epochInfo.currentBlock.header.height - epochInfo.epochInfo.epoch_start_height).toLocaleString()} / ${epochInfo.epochLength} blocks`,
+              text: `${blocksProduced.toLocaleString()} / ${totalBlocks.toLocaleString()} blocks`,
               icon: Icon.BarChart,
             },
           ]}
