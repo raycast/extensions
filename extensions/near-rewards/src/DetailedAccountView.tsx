@@ -214,6 +214,7 @@ export function DetailedAccountView({ accountId, stakingPool, onSaveAccount }: D
     const progress = calculateCurrentPositionInEpoch(
       epochInfo.epochInfo.epoch_start_height,
       epochInfo.currentBlock.header.height,
+      epochInfo.epochLength,
     );
     const barLength = 10;
     const filledBars = Math.floor((progress / 100) * barLength);

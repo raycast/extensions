@@ -5,8 +5,6 @@ import { AccountInPoolResult } from "./types";
 import type { BlockResult, EpochValidatorInfo, BlockReference } from "@near-js/types";
 import type { AccountState } from "@near-js/accounts/lib/commonjs/account.cjs";
 
-const EPOCH_LENGTH = 43200; // The average number of blocks in an epoch on NEAR
-
 export class NearRewardsClient {
   private provider: JsonRpcProvider | FailoverRpcProvider;
 
@@ -172,6 +170,17 @@ export class NearRewardsClient {
     }
   }
 
+  async getEpochLength(): Promise<number> {
+    try {
+      const result = await this.provider.experimental_protocolConfig({ finality: "final" });
+      const epochLength = (result as unknown as { epoch_length: number }).epoch_length;
+      return epochLength;
+    } catch (error) {
+      console.error("Error fetching epoch length:", error);
+      throw error;
+    }
+  }
+
   async getValidators(): Promise<EpochValidatorInfo> {
     try {
       return await this.provider.validators(null);
@@ -262,6 +271,10 @@ export async function fetchNearPrice(): Promise<number> {
   }
 }
 
-export function calculateCurrentPositionInEpoch(epochStartHeight: number, currentHeight: number): number {
-  return Math.floor(((currentHeight - epochStartHeight) * 100) / EPOCH_LENGTH);
+export function calculateCurrentPositionInEpoch(
+  epochStartHeight: number,
+  currentHeight: number,
+  epochLength: number,
+): number {
+  return Math.floor(((currentHeight - epochStartHeight) * 100) / epochLength);
 }

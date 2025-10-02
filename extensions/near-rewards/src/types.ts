@@ -60,6 +60,7 @@ export interface AccountData {
   epoch_info?: {
     epochInfo: EpochValidatorInfo;
     currentBlock: BlockResult;
+    epochLength: number;
   };
 }
 

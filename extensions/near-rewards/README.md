@@ -24,6 +24,7 @@ A comprehensive Raycast extension for monitoring NEAR Protocol accounts, includi
 
 ### 🔧 **Technical Features**
 - **Intelligent Account Detection**: Automatically detects lockup contracts and staking pools
+- **Dynamic Epoch Length**: Fetches current epoch length from protocol configuration (currently 43,200 blocks ≈ 12 hours)
 - **Failover RPC Setup**: Multiple endpoints for maximum reliability
 - **Precise Calculations**: BigInt-based calculations for exact balance precision
 - **Official NEAR SDK**: Uses `@near-js/tokens` for native formatting and conversions
@@ -59,7 +60,8 @@ A comprehensive Raycast extension for monitoring NEAR Protocol accounts, includi
 - **Staked/Unstaked Balances**: Delegation information with USD values
 - **Rewards Tracking**: Current epoch rewards with +/- indicators
 - **Token Balances**: USDT/USDC holdings for advanced accounts
-- **Epoch Progress**: Visual progress bar showing epoch completion
+- **Epoch Progress**: Visual progress bar showing epoch completion (based on dynamic epoch length from protocol config)
+- **Protocol Information**: Current block height, epoch start height, and real-time epoch progress
 
 ### Account Types Supported
 
@@ -87,6 +89,9 @@ const isContract = await client.isContract(accountId);
 // Get lockup contract information with block height
 const lockedAmount = await client.getLockedAmount(accountId, blockHeight);
 const liquidBalance = await client.getLiquidOwnersBalance(accountId);
+
+// Get current epoch length from protocol configuration
+const epochLength = await client.getEpochLength();
 ```
 
 #### `NearRewardsService`
@@ -119,6 +124,9 @@ const formatted = NEAR.toDecimal(amount, 2); // Always 2 decimals
 // Get current NEAR price
 const price = await fetchNearPrice();
 
+// Get dynamic epoch length from protocol config
+const epochLength = await client.getEpochLength();
+
 // Calculate epoch progress
 const progress = calculateCurrentPositionInEpoch(epochStart, currentHeight);
 ```
@@ -150,6 +158,22 @@ The extension uses multiple RPC endpoints for reliability:
 - Graceful handling of contract method calls on regular accounts
 - Automatic fallback between RPC providers
 - User-friendly error messages for invalid accounts
+
+### Epoch Management
+The extension dynamically fetches epoch configuration from the NEAR Protocol:
+
+- **Dynamic Epoch Length**: Uses the `provider.experimental_protocolConfig()` method to get current epoch length
+- **Protocol Accuracy**: Both testnet and mainnet use 43,200 blocks per epoch (≈12 hours)
+- **Real-time Progress**: Calculates exact epoch progress based on current block height vs epoch start
+- **Documentation**: See [NEAR Epoch Documentation](https://docs.near.org/protocol/network/epoch) for details
+
+The epoch length is fetched using the provider method:
+```typescript
+const result = await this.provider.experimental_protocolConfig({ finality: "final" });
+const epochLength = result.epoch_length;
+```
+
+This ensures the extension adapts to any future protocol changes in epoch duration.
 
 ## Development
 
@@ -220,6 +244,7 @@ The `DetailedAccountView` is organized into focused render functions:
 - **Block-Height Accuracy**: All balance queries now require specific block heights
 
 ### 🔧 **API Enhancements**
+- **Dynamic Epoch Detection**: Uses `provider.experimental_protocolConfig()` method to fetch current epoch length
 - **Required Parameters**: `getNativeBalance()` now requires `blockHeight` parameter for accuracy
 - **Lockup Support**: Enhanced `getLockedAmount()` with block-height support
 - **Pool Queries**: `getAccountInPool()` supports historical block queries
