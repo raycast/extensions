@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, LocalStorage, Icon, showHUD } from "@raycast/api"
 import { useEffect, useState } from "react"
+import { LS_LAST_OCR_TEXT, LS_LAST_OCR_META } from "./constants"
 
 interface OCRMetadata {
   lang?: string
@@ -15,8 +16,8 @@ export default function LastOCRResult() {
   useEffect(() => {
     const loadLastResult = async () => {
       try {
-        const lastText = await LocalStorage.getItem<string>("last_ocr_text")
-        const lastMeta = await LocalStorage.getItem<string>("last_ocr_meta")
+        const lastText = await LocalStorage.getItem<string>(LS_LAST_OCR_TEXT)
+        const lastMeta = await LocalStorage.getItem<string>(LS_LAST_OCR_META)
 
         setText(lastText || "(No OCR result yet)")
 
