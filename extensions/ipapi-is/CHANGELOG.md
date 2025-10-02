@@ -5,6 +5,7 @@
 - Add "Abuse object"
 - Show `Toast` on error
 - Remove "_clever_" code to reduce chances of errors
+- Modernize config files
 
 ## [Omit Argument to use your own IP] - 2024-10-22
 

@@ -43,6 +43,7 @@ export type ASN = {
   route?: string;
 };
 type Location = {
+  is_eu_member: boolean;
   continent: string;
   country: string;
   country_code: string;
@@ -70,7 +71,7 @@ type Abuse = {
   country?: string;
   email: string;
   phone: string;
-}
+};
 
 export type ASNRespones = ASN & {
   elapsed_ms: number;
