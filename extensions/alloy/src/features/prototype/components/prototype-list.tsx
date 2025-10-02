@@ -12,7 +12,11 @@ const PrototypeListItem = ({ prototype }: { prototype: PrototypeForList }) => {
   return (
     <List.Item
       id={prototype.prototypeId}
-      title={prototype.title ?? `${prototype.type.charAt(0).toUpperCase() + prototype.type.slice(1)} Prototype`}
+      title={
+        (prototype.title ?? prototype.type.toLowerCase() === "other")
+          ? "Prototype"
+          : `${prototype.type.charAt(0).toUpperCase() + prototype.type.slice(1)} Prototype`
+      }
       icon={PrototypeTypeToIcon(prototype.type)}
       accessories={[
         {

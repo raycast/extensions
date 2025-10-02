@@ -11,48 +11,57 @@ import { popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 export async function createPrototype(payload: PrototypeCreate, onSuccess?: () => void) {
-  const tokens = await client.getTokens();
-  const accessToken = tokens?.accessToken;
-  if (!accessToken) {
-    throw new Error("Not logged in");
-  }
-  const response = await fetch(`${BASE_URL}/api/raycast/create-prototype`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (response.status === 401) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "You are not authorized. Redirecting to login...",
+  try {
+    const tokens = await client.getTokens();
+    const accessToken = tokens?.accessToken;
+    if (!accessToken) {
+      throw new Error("Not logged in");
+    }
+    const response = await fetch(`${BASE_URL}/api/raycast/create-prototype`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
     });
-    await client.removeTokens();
-    popToRoot();
-    throw new Error("Not logged in");
+
+    if (response.status === 401) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "You are not authorized. Redirecting to login...",
+      });
+      await client.removeTokens();
+      popToRoot();
+      throw new Error("Not logged in");
+    }
+
+    if (!response.ok) {
+      throw new Error("Failed to create prototype");
+    }
+
+    const data = await response.json();
+
+    const result = {
+      success: data?.prototypeId ? true : false,
+      prototype: {
+        prototypeId: data?.prototypeId,
+        alloyUrl: data?.alloyUrl,
+        createdAt: data?.createdAt,
+        createdBy: data?.createdBy,
+        type: data?.type,
+      },
+    };
+
+    if (result.success && onSuccess) {
+      onSuccess();
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Failed to create prototype", error);
+    throw error;
   }
-
-  const data = await response.json();
-
-  const result = {
-    success: data?.prototypeId ? true : false,
-    prototype: {
-      prototypeId: data?.prototypeId,
-      alloyUrl: data?.alloyUrl,
-      createdAt: data?.createdAt,
-      createdBy: data?.createdBy,
-      type: data?.type,
-    },
-  };
-
-  if (result.success && onSuccess) {
-    onSuccess();
-  }
-
-  return result;
 }
 
 export async function getPrototype(prototypeId: string) {
@@ -87,6 +96,10 @@ export async function getPrototype(prototypeId: string) {
       throw new Error("Not logged in");
     }
 
+    if (!response.ok) {
+      throw new Error("Failed to fetch prototype");
+    }
+
     const data = await response.json();
     if (!data) {
       throw new Error("Cannot find the Alloy prototype");
@@ -95,7 +108,7 @@ export async function getPrototype(prototypeId: string) {
     return data;
   } catch (error) {
     console.error("Failed to fetch prototype", error);
-    throw new Error("Failed to fetch prototype");
+    throw error;
   }
 }
 
@@ -133,13 +146,17 @@ export async function listPrototypes() {
       throw new Error("Not logged in");
     }
 
+    if (!response.ok) {
+      throw new Error("Failed to fetch prototypes");
+    }
+
     const data = await response.json();
 
     const result: PrototypeForList[] = data?.map((prototype: unknown) => PrototypeForListSchema.parse(prototype)) || [];
     return result;
   } catch (error) {
     console.error("Failed to fetch prototypes", error);
-    throw new Error("Failed to fetch prototypes");
+    throw error;
   }
 }
 
@@ -157,6 +174,7 @@ export async function deletePrototype(prototypeId: string, onSuccess?: () => voi
         Authorization: `Bearer ${accessToken}`,
       },
     });
+
     if (response.status === 401) {
       await showToast({
         style: Toast.Style.Failure,
@@ -165,6 +183,10 @@ export async function deletePrototype(prototypeId: string, onSuccess?: () => voi
       await client.removeTokens();
       popToRoot();
       throw new Error("Not logged in");
+    }
+
+    if (!response.ok) {
+      throw new Error("Failed to delete prototype");
     }
 
     const data = await response.json();
@@ -183,7 +205,7 @@ export async function deletePrototype(prototypeId: string, onSuccess?: () => voi
     };
   } catch (error) {
     console.error("Failed to delete prototype", error);
-    throw new Error("Failed to delete prototype");
+    throw error;
   }
 }
 

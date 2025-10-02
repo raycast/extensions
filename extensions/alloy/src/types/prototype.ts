@@ -15,6 +15,11 @@ export const PrototypeTypeEnum = z.enum([
   "attio",
   "linear",
   "chrome",
+  "raycast",
+  "canny",
+  "featurebase",
+  "chatprd",
+  "other",
 ]);
 
 export const PrototypeIconEnum = z.enum([
@@ -58,6 +63,14 @@ export const PrototypeTypeToIcon = (type: PrototypeType): PrototypeIcon => {
       return Icon.BlankDocument;
     case "chrome":
       return Icon.Ellipsis;
+    case "canny":
+      return Icon.BlankDocument;
+    case "featurebase":
+      return Icon.TwoPeople;
+    case "chatprd":
+      return Icon.BlankDocument;
+    case "other":
+      return Icon.Tag;
     default:
       return Icon.Tag;
   }
