@@ -84,7 +84,8 @@ export class OscReceiver {
   }
 
   private extractOscMessages(msg: Buffer): osc.OscMessageOutput[] {
-    const decoded = osc.fromBuffer(msg);
+    const decoded = this.parseBuffer(msg);
+    if (!decoded) return [];
 
     function flatten(bundleOrMessage: osc.OscPacketOutput): osc.OscMessageOutput[] {
       const messages: osc.OscMessageOutput[] = [];
@@ -101,4 +102,23 @@ export class OscReceiver {
 
     return flatten(decoded);
   }
+
+  private parseBuffer(msg: Buffer): osc.OscPacketOutput | null {
+    try {
+      return osc.fromBuffer(msg);
+    } catch (err) {
+      if (isOscNullChararcterError(err)) {
+        console.warn(`encountered ${err.name} – "${err.message}"`);
+        return null;
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
+// idk what this error is, throws unpredictably
+// osc-min failing to parse message from Farrago
+function isOscNullChararcterError(error: any): error is Error {
+  return error.name == "OSCError" && error.message == "All osc-strings must contain a null character";
 }
