@@ -62,7 +62,7 @@
     },
     {
       "name": "connect-adb",
-      "title": "Connect Adb",
+      "title": "Connect ADB",
       "description": "Connect to device via ADB for mirroring",
       "mode": "no-view"
     }
