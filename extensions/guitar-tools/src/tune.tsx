@@ -17,9 +17,9 @@ export default function Command() {
   if (error) {
     return (
       <List>
-        <List.Item
+        <List.EmptyView
           title={error.title}
-          subtitle={error.subTitle}
+          description={error.subTitle}
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
         />
       </List>
@@ -33,9 +33,9 @@ export default function Command() {
 
     return (
       <List>
-        <List.Item
+        <List.EmptyView
           title={noteName}
-          subtitle={`${cents > 0 ? "+" : ""}${cents} cents`}
+          description={`${cents > 0 ? "+" : ""}${cents} cents`}
           icon={{ source: displayObject.icon, tintColor: displayObject.color }}
         />
       </List>
@@ -43,7 +43,7 @@ export default function Command() {
   }
   return (
     <List>
-      <List.Item title="Play your instrument" icon={{ source: Icon.Heartbeat, tintColor: Color.Blue }} />
+      <List.EmptyView title="Play your instrument" icon={{ source: Icon.Heartbeat, tintColor: Color.Blue }} />
     </List>
   );
 }
