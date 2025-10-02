@@ -121,6 +121,10 @@ async function makeAuthenticatedRequest<T>(
       throw new SupermemoryAPIError(errorMessage, response.status);
     }
 
+    if (!response.headers.get("content-type")?.includes("application/json")) {
+      throw new SupermemoryAPIError("Invalid response format from API");
+    }
+
     const data = (await response.json()) as T;
     return data;
   } catch (err) {
