@@ -1,6 +1,6 @@
 # Logseq Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2025-10-02
 
 - Added Windows support
 
