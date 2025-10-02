@@ -12,7 +12,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import React, { useEffect, useMemo, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { DBSoundTile } from "../types";
 import { applyShortcutTitleTemplate, formatDuration, getTileColorByIndex } from "../utils/helpers";
 import { FARRAGO_FADE_DURATION_MS, ICLOUD_SHORTCUT_LINK } from "../utils/constants";
@@ -22,7 +22,6 @@ export function SearchCommand() {
   const { dataSource } = useServices();
   const latestDbUpdate = useLatestDbUpdate();
   const [gridFilter, setGridFilter] = useState<string>("");
-  const [isLoading, finishLoading] = useReducer(() => false, true);
 
   const tiles = useMemo(() => {
     const allTiles = dataSource.getAllTiles();
@@ -34,15 +33,8 @@ export function SearchCommand() {
     return allTiles?.filter((t) => t.set.uuid === gridFilter);
   }, [latestDbUpdate, gridFilter]);
 
-  useEffect(() => {
-    if (!!tiles) finishLoading();
-  }, []);
-
   return (
-    <List
-      isLoading={isLoading}
-      searchBarAccessory={<FilterBySetDropdown value={gridFilter} onChange={setGridFilter} />}
-    >
+    <List searchBarAccessory={<FilterBySetDropdown value={gridFilter} onChange={setGridFilter} />}>
       {tiles && tiles.length == 0 ? (
         <List.EmptyView
           title="No Sounds Found"
