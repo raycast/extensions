@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "forceConsistentCasingInFileNames": false,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["node", "@raycast/api"]
+  },
+  "include": ["src", "raycast-env.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}

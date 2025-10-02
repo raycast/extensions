@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-case-transformer",
+  "title": "Text Case Transformer",
+  "description": "Transform selected text to different cases like lowercase, uppercase, camelCase, snake_case, kebab-case, and more",
+  "icon": "text.png",
+  "author": "juanmaosorioc",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "transformCase",
+      "title": "Transform Text Case",
+      "description": "Transform selected text to different case formats",
+      "mode": "view"
+    },
+    {
+      "name": "toLowercase",
+      "title": "To Lowercase",
+      "description": "Transform selected text to lowercase",
+      "mode": "no-view"
+    },
+    {
+      "name": "toUppercase",
+      "title": "To Uppercase", 
+      "description": "Transform selected text to uppercase",
+      "mode": "no-view"
+    },
+    {
+      "name": "toCamelCase",
+      "title": "To Camelcase",
+      "description": "Transform selected text to camelCase",
+      "mode": "no-view"
+    },
+    {
+      "name": "toPascalCase",
+      "title": "To Pascalcase",
+      "description": "Transform selected text to PascalCase",
+      "mode": "no-view"
+    },
+    {
+      "name": "toSnakeCase",
+      "title": "To Snake_case",
+      "description": "Transform selected text to snake_case",
+      "mode": "no-view"
+    },
+    {
+      "name": "toKebabCase",
+      "title": "To Kebab-case",
+      "description": "Transform selected text to kebab-case",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "change-case": "^5.4.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "npm run build",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
