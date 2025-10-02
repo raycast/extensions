@@ -34,7 +34,7 @@ import { applyPostProcessing } from "./postprocess"
  */
 export async function performOcrCopyFlow(options?: { autoPasteOverride?: boolean }): Promise<string | undefined> {
   const prefs = getPreferenceValues<ExtensionPreferences>()
-  const includeCursor = (prefs.includeCursor ?? prefs.screenshotCursor) ? true : false
+  const includeCursor = !!(prefs.includeCursor ?? prefs.screenshotCursor)
   // Language precedence: inline option (future) > LocalStorage override > preference
   let language = prefs.ocrLanguage || "eng"
   try {
