@@ -42,7 +42,7 @@ export class NearRewardsClient {
    * Returns the balance in yoctoNEAR.
    *
    * @param accountId - The NEAR account ID to fetch the balance for
-   * @param blockHeight - Optional block height to query historical balance
+   * @param blockId - Optional block height to query historical balance
    * @returns A Promise that resolves to the account balance in yoctoNEAR as a bigint
    */
   async getNativeBalance(accountId: string, blockId: number): Promise<bigint> {

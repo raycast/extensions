@@ -157,4 +157,8 @@ export class NearRewardsService {
       return false;
     }
   }
+
+  async getAccount(accountId: string) {
+    return await this.client.getAccount(accountId);
+  }
 }

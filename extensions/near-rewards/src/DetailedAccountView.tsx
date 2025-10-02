@@ -1,6 +1,5 @@
 import { Action, ActionPanel, List, showToast, Toast, Icon, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Account } from "@near-js/accounts";
 import { USDT, USDC } from "@near-js/tokens/mainnet";
 import type { AccountData, PriceInfo } from "./types";
 import { NearRewardsService } from "./rewards-service";
@@ -69,7 +68,7 @@ export function DetailedAccountView({ accountId, stakingPool, onSaveAccount }: D
         }
 
         if (accountRewardsData.current_data.pool_account_id) {
-          const account = new Account(accountId, service["client"]["provider"]);
+          const account = await service.getAccount(accountId);
           const [usdtBal, usdcBal] = await Promise.all([
             account.getBalance(USDT).catch(() => BigInt(0)),
             account.getBalance(USDC).catch(() => BigInt(0)),
@@ -78,7 +77,7 @@ export function DetailedAccountView({ accountId, stakingPool, onSaveAccount }: D
           setUsdcBalance(USDC.toDecimal(usdcBal));
         }
       } else {
-        const account = new Account(accountId, service["client"]["provider"]);
+        const account = await service.getAccount(accountId);
 
         const [accountRewardsData, price, usdtBal, usdcBal] = await Promise.all([
           service.getAccountRewardsData(accountId, stakingPool),
@@ -242,7 +241,7 @@ export function DetailedAccountView({ accountId, stakingPool, onSaveAccount }: D
           subtitle={`${progress}% ${progressBar}`}
           accessories={[
             {
-              text: `${(epochInfo.currentBlock.header.height - epochInfo.epochInfo.epoch_start_height).toLocaleString()} / 43,200 blocks`,
+              text: `${(epochInfo.currentBlock.header.height - epochInfo.epochInfo.epoch_start_height).toLocaleString()} / ${epochInfo.epochLength} blocks`,
               icon: Icon.BarChart,
             },
           ]}
