@@ -1,33 +1,20 @@
-# AirSync Changelog# Changelog
+# AirSync Changelog
 
-
-
-## [Initial Version] - 2025-10-02The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Initial Version] - {PR_MERGE_DATE}
 
 Initial release of AirSync extension for Raycast.
 
-## [1.0.0] - 2025-10-02
+### Added
 
-- View device status with detailed connection information
+#### Core Features
+- **Show Status** - View detailed device information including IP, port, ADB status, notification count, and device version
+- **Disconnect Device** - No-view command to quickly disconnect with HUD feedback
+- **Reconnect Device** - No-view command to reconnect with HUD feedback
 
-- Manage device connection (disconnect/reconnect)### Added
-
-- View and interact with Android notifications
-
-- Reply to notifications directly from Raycast#### Core Features
-
-- Control media playback with keyboard shortcuts- **Show Status** - View detailed device information including IP, port, ADB status, notification count, and device version
-
-- Launch Android device mirroring- **Disconnect Device** - No-view command to quickly disconnect with HUD feedback
-
-- Enable desktop mode for Android 15+- **Reconnect Device** - No-view command to reconnect with HUD feedback
-
-- Mirror specific apps with app browser
-
-- Connect ADB for advanced features#### Notifications
-
+#### Notifications
 - **View Notifications** - Browse all notifications with app icons in a two-row layout
 - **Reply to Notifications** - Interactive reply form for notifications with reply actions
 - **Notification Actions** - Execute button actions (Mark as Read, etc.)
