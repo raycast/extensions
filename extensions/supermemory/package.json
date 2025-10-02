@@ -18,13 +18,14 @@
     {
       "name": "add-memory",
       "title": "Add Memory",
-      "subtitle": "add memory to your supermemory app",
+      "subtitle": "Supermemory",
       "description": "Add text, URLs, or documents to your supermemory knowledge base",
       "mode": "view"
     },
     {
       "name": "search-memories",
       "title": "Search Memories",
+      "subtitle": "Supermemory",
       "description": "Search through your saved memories and find relevant information",
       "mode": "view"
     }
