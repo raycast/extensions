@@ -1,11 +1,20 @@
-import { Action, ActionPanel, List, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Form, useNavigation, TextArea } from "@raycast/api";
+import { useState, useRef } from "react";
 import { ModelDropdown } from "./components/models-dropdown";
 import { Conversation } from "./components/conversation";
 
 export default function Command() {
   const [question, setQuestion] = useState("");
   const { push } = useNavigation();
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleTextChange = (value: string) => {
+    setQuestion(value);
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = 'auto';
+      textAreaRef.current.style.height = Math.min(textAreaRef.current.scrollHeight, 200) + 'px';
+    }
+  };
 
   async function handleSubmit() {
     if (question.length) {
@@ -20,22 +29,23 @@ export default function Command() {
   }
 
   return (
-    <List
-      searchBarPlaceholder="Ask Mistral"
-      searchText={question}
-      onSearchTextChange={(text) => setQuestion(text)}
-      searchBarAccessory={<ModelDropdown />}
+    <Form
       actions={
         <ActionPanel>
-          <Action title="Ask" onAction={handleSubmit} />
+          <Action.SubmitAction title="Ask" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <List.EmptyView
-        icon={{ source: "mistral-logo.svg" }}
-        title="Ask Mistral"
-        description="Type your message and hit enter"
+      <Form.TextArea
+        id="question"
+        value={question}
+        onChange={handleTextChange}
+        placeholder="Ask Mistral..."
+        ref={textAreaRef}
+        enableMultiline={true}
+        style={{ resize: "none", minHeight: "40px", maxHeight: "200px", overflowY: "auto" }}
       />
-    </List>
+      <Form.Description text="Select model via dropdown if needed" />
+    </Form>
   );
 }

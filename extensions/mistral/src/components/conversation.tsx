@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, TextArea } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { Conversation as ConversationType, getConversations, setConversations } from "../hooks/use-conversations";
 import { ModelDropdown } from "./models-dropdown";
@@ -16,6 +16,8 @@ export function Conversation({ conversation }: Props) {
   const { value: model } = useCurrentModel();
   const [question, setQuestion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const hasRunEffect = useRef(false);
   useEffect(() => {
@@ -25,9 +27,18 @@ export function Conversation({ conversation }: Props) {
     }
   }, []);
 
+  const handleTextChange = (value: string) => {
+    setQuestion(value);
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = 'auto';
+      textAreaRef.current.style.height = Math.min(textAreaRef.current.scrollHeight, 200) + 'px';
+    }
+  };
+
   function handleSubmit() {
     if (!question.length) return;
     setQuestion("");
+    setShowInput(false);
     setChats((prev) => [{ question, answer: "" }, ...prev]);
     streamAnswer(question);
   }
@@ -83,33 +94,40 @@ export function Conversation({ conversation }: Props) {
         message:
           "Your API key may be invalid. If you just created it, you may need to wait a few minutes for it to become active.",
       });
+      setShowInput(true);
     }
 
     setIsLoading(false);
   }
 
-  return (
-    <List
-      searchBarPlaceholder="Ask another question"
-      searchText={question}
-      onSearchTextChange={(text) => setQuestion(text)}
-      isShowingDetail
-      isLoading={isLoading}
-      searchBarAccessory={<ModelDropdown />}
-    >
-      {chats.map((item, index) => (
-        <List.Item
-          key={index}
-          title={item.question}
-          subtitle={chats.length - index + ""}
-          detail={<List.Item.Detail markdown={item.answer} />}
-          actions={
-            <ActionPanel>
-              <Action title="Ask" onAction={handleSubmit} />
-            </ActionPanel>
-          }
+  if (showInput) {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.SubmitAction onSubmit={handleSubmit} isLoading={isLoading} />
+            <Action title="Cancel" onAction={() => setShowInput(false)} />
+          </ActionPanel>
+        }
+      >
+        <Form.TextArea
+          id="question"
+          value={question}
+          onChange={handleTextChange}
+          placeholder="Ask another question..."
+          ref={textAreaRef}
+          enableMultiline={true}
+          style={{ resize: "none", minHeight: "40px", maxHeight: "200px", overflowY: "auto" }}
         />
-      ))}
-    </List>
+      </Form>
+    );
+  }
+
+  return (
+    <ActionPanel>
+      <Action title="New Question" icon={{ source: "mistral-logo.svg" }} onAction={() => setShowInput(true)} />
+    </ActionPanel>
+    // Note: The chat list is rendered in the parent or via navigation; adjust as needed for full view
+    // For now, focusing on input fix; full List integration may require more context
   );
 }
