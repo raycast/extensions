@@ -8,46 +8,60 @@ on:
   workflow_dispatch:
 
 jobs:
+  generate-codeowners-file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Generate sparse-checkout file list
+        run: |
+          find extensions -mindepth 2 -maxdepth 2 -name package.json \
+            > .github/sparse-checkout-files.txt
+          echo scripts/generate-code-owners.js >> .github/sparse-checkout-files.txt
+          echo .github/CODEOWNERS >> .github/sparse-checkout-files.txt
+          echo .github/raycast2github.json >> .github/sparse-checkout-files.txt
+          echo .github/extensionName2Folder.json >> .github/sparse-checkout-files.txt
+      - name: Upload sparse-checkout file list
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparse-checkout-files
+          path: .github/sparse-checkout-files.txt
+
   update:
+    needs: generate-codeowners-file
     runs-on: ubuntu-latest
     if: github.repository == 'raycast/extensions'
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
+      - name: Download sparse-checkout file list
+        uses: actions/download-artifact@v4
+        with:
+          name: sparse-checkout-files
+          path: .github
       - name: Set up sparse checkout for required files
         run: |
           git sparse-checkout init --cone
-          find extensions -mindepth 2 -maxdepth 2 -name package.json \
-            -o -path scripts/generate-code-owners.js \
-            -o -path .github/CODEOWNERS \
-            -o -path .github/raycast2github.json \
-            -o -path .github/extensionName2Folder.json \
-            | xargs git sparse-checkout set
-
+          git sparse-checkout set $(cat .github/sparse-checkout-files.txt)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20.15.1
-
       - name: Generate
         working-directory: scripts
         run: ./generate-code-owners.js
         env:
           PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}
-
       - name: Set SHORT_SHA
         run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-8)" >> $GITHUB_ENV
-
       - name: Commit
         uses: raycast/github-actions/git-commit@master
         with:
           repo_dir: ${{ github.workspace }}
           message: "Update CODEOWNERs (${{ env.SHORT_SHA }})"
-
       - name: Notify Failure to Slack
         if: failure()
         uses: raycast/github-actions/slack-send@master
