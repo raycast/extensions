@@ -6,6 +6,7 @@
   "icon": "grafana-logo.png",
   "author": "Francois",
   "license": "MIT",
+  "type": "module",
   "commands": [
     {
       "name": "searchDashboards",
