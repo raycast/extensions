@@ -20,45 +20,51 @@ jobs:
           sparse-checkout: |
             scripts/
             .github/
-            extensions/
       - name: Generate and apply sparse checkout
         run: |
-          # Get list of package.json files using GitHub API with error handling
-          echo "Fetching package.json files from GitHub API..."
-          if ! PACKAGE_FILES=$(gh api repos/${{ github.repository }}/git/trees/${{ github.sha }}?recursive=1 \
-            --jq '.tree[] | select(.path | test("^extensions/.*/package\\.json$")) | .path' 2>/dev/null); then
-            echo "Failed to fetch file list from GitHub API"
+          # Fetch package.json files using git
+          echo "Fetching package.json files using git..."
+          if ! PACKAGE_FILES=$(git ls-tree -r --name-only HEAD -- extensions/ | grep '/package\.json$'); then
+            echo "::error::Failed to fetch file list using git"
             exit 1
           fi
           
           if [ -z "$PACKAGE_FILES" ]; then
-            echo "No package.json files found"
+            echo "::warning::No package.json files found in extensions/"
             exit 1
           fi
           
           echo "Found package.json files:"
           echo "$PACKAGE_FILES"
           
+          # Join with spaces for Git (fix for multi-line expansion)
+          PACKAGE_FILES_SPACED=$(echo "$PACKAGE_FILES" | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+          
           # Set up sparse checkout with all required files
           echo "Setting up sparse checkout..."
           if ! git sparse-checkout set --no-cone; then
-            echo "Failed to initialize sparse checkout"
+            echo "::error::Failed to initialize sparse checkout"
             exit 1
           fi
           
-          if ! git sparse-checkout set $PACKAGE_FILES scripts/generate-code-owners.js .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json; then
-            echo "Failed to set sparse checkout files"
+          # Use space-separated paths for git sparse-checkout
+          if ! git sparse-checkout set $PACKAGE_FILES_SPACED scripts/generate-code-owners.js .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json; then
+            echo "::error::Failed to set sparse checkout files"
             exit 1
           fi
           
           # Force update working directory
           if ! git read-tree -m -u HEAD; then
-            echo "Failed to update working directory"
+            echo "::error::Failed to update working directory"
             exit 1
           fi
           
           echo "Files actually checked out:"
           find . -type f -name "*.json" | head -20
+          
+          # Store both formats for the script
+          echo "PACKAGE_FILES=$PACKAGE_FILES" >> $GITHUB_ENV
+          echo "PACKAGE_FILES_SPACED=$PACKAGE_FILES_SPACED" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node
@@ -67,22 +73,4 @@ jobs:
           node-version: 20.15.1
       - name: Generate
         working-directory: scripts
-        run: ./generate-code-owners.js
-        env:
-          PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}
-      - name: Set SHORT_SHA
-        run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-8)" >> $GITHUB_ENV
-      - name: Commit
-        uses: raycast/github-actions/git-commit@master
-        with:
-          repo_dir: ${{ github.workspace }}
-          message: "Update CODEOWNERs (${{ env.SHORT_SHA }})"
-      - name: Notify Failure to Slack
-        if: failure()
-        uses: raycast/github-actions/slack-send@master
-        with:
-          webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
-          color: "danger"
-          text: |
-            :no_entry_sign: ${env.GITHUB_WORKFLOW} has failed for commit ${{ env.SHORT_SHA }}
-            <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|Action logs> | <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }|Commit: ${ env.SHORT_SHA }>
+        run: ./generate-code-owners.js "$PACKAGE_FIL
