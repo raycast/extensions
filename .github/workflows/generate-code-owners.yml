@@ -12,26 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'raycast/extensions'
     steps:
-      - name: Generate sparse-checkout file list using GitHub API
-        run: |
-          # Get list of package.json files using GitHub API
-          gh api repos/${{ github.repository }}/git/trees/main?recursive=1 \
-            --jq '.tree[] | select(.path | test("^extensions/.*/package\\.json$")) | .path' \
-            > .github/sparse-checkout-files.txt
-          
-          # Add required files
-          echo scripts/generate-code-owners.js >> .github/sparse-checkout-files.txt
-          echo .github/CODEOWNERS >> .github/sparse-checkout-files.txt
-          echo .github/raycast2github.json >> .github/sparse-checkout-files.txt
-          echo .github/extensionName2Folder.json >> .github/sparse-checkout-files.txt
-          
-          # Sort and deduplicate
-          sort -u .github/sparse-checkout-files.txt -o .github/sparse-checkout-files.txt
-          
-          echo "Files to checkout:"
-          cat .github/sparse-checkout-files.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout with minimal sparse checkout
         uses: actions/checkout@v4
         with:
@@ -41,16 +21,46 @@ jobs:
             scripts/
             .github/
             extensions/
-      - name: Apply specific file filter
+      - name: Generate and apply sparse checkout
         run: |
-          git sparse-checkout set --no-cone
-          git sparse-checkout set $(cat .github/sparse-checkout-files.txt)
-          # Force update working directory
-          git read-tree -m -u HEAD
+          # Get list of package.json files using GitHub API with error handling
+          echo "Fetching package.json files from GitHub API..."
+          if ! PACKAGE_FILES=$(gh api repos/${{ github.repository }}/git/trees/${{ github.sha }}?recursive=1 \
+            --jq '.tree[] | select(.path | test("^extensions/.*/package\\.json$")) | .path' 2>/dev/null); then
+            echo "Failed to fetch file list from GitHub API"
+            exit 1
+          fi
           
-          # Show what we actually have
+          if [ -z "$PACKAGE_FILES" ]; then
+            echo "No package.json files found"
+            exit 1
+          fi
+          
+          echo "Found package.json files:"
+          echo "$PACKAGE_FILES"
+          
+          # Set up sparse checkout with all required files
+          echo "Setting up sparse checkout..."
+          if ! git sparse-checkout set --no-cone; then
+            echo "Failed to initialize sparse checkout"
+            exit 1
+          fi
+          
+          if ! git sparse-checkout set $PACKAGE_FILES scripts/generate-code-owners.js .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json; then
+            echo "Failed to set sparse checkout files"
+            exit 1
+          fi
+          
+          # Force update working directory
+          if ! git read-tree -m -u HEAD; then
+            echo "Failed to update working directory"
+            exit 1
+          fi
+          
           echo "Files actually checked out:"
           find . -type f -name "*.json" | head -20
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
