@@ -18,8 +18,11 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           sparse-checkout: |
-            extensions/**/package.json
+            extensions/*/package.json
             scripts/generate-code-owners.js
+            .github/CODEOWNERS
+            .github/raycast2github.json
+            .github/extensionName2Folder.json
 
       - name: Setup Node
         uses: actions/setup-node@v4
