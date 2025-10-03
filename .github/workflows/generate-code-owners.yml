@@ -55,7 +55,7 @@ jobs:
           sparse-checkout: |
             scripts/
             .github/
-            extensions/*/
+            extensions/
       - name: Apply specific file filter
         run: |
           git sparse-checkout set --no-cone
@@ -81,7 +81,7 @@ jobs:
         uses: raycast/github-actions/git-commit@master
         with:
           repo_dir: ${{ github.workspace }}
-          message: "Update CODEOWNERs (${{ env.SHORT_SHA }})"
+          message: "Update CODEOWNERS (${{ env.SHORT_SHA }})"
       - name: Notify Failure to Slack
         if: failure()
         uses: raycast/github-actions/slack-send@master
