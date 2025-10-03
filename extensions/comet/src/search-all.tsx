@@ -40,6 +40,27 @@ export default function Command() {
     revalidate: revalidateBookmark,
   } = useBookmarkSearch(searchText);
 
+  // ALL hooks must be called before any conditional returns
+  const revalidate = (profile: string) => {
+    revalidateHistory?.(profile);
+    revalidateBookmark(profile);
+  };
+
+  // Limit results to prevent memory issues with optimized memoization
+  const limitedTabData = useMemo(() => tabData.slice(0, MAX_SEARCH_ALL_RESULTS), [tabData]);
+  const limitedHistoryData = useMemo(() => historyData.slice(0, MAX_SEARCH_ALL_RESULTS), [historyData]);
+  const limitedBookmarkData = useMemo(() => bookmarkData.slice(0, MAX_SEARCH_ALL_RESULTS), [bookmarkData]);
+
+  // Memoize grouped history data to avoid recalculating on every render
+  const groupedHistoryData = useMemo(() => {
+    return limitedHistoryData.length === 0
+      ? null
+      : Array.from(groupEntriesByDate(limitedHistoryData).entries(), ([groupDate, group]) => ({
+          groupDate,
+          group,
+        }));
+  }, [limitedHistoryData]);
+
   // If profile check is still pending, don't render anything
   if (profileValid === null) {
     return null;
@@ -49,16 +70,6 @@ export default function Command() {
   if (!profileValid) {
     return null;
   }
-
-  const revalidate = (profile: string) => {
-    revalidateHistory?.(profile);
-    revalidateBookmark(profile);
-  };
-
-  // Limit results to prevent memory issues
-  const limitedTabData = useMemo(() => tabData.slice(0, MAX_SEARCH_ALL_RESULTS), [tabData]);
-  const limitedHistoryData = useMemo(() => historyData.slice(0, MAX_SEARCH_ALL_RESULTS), [historyData]);
-  const limitedBookmarkData = useMemo(() => bookmarkData.slice(0, MAX_SEARCH_ALL_RESULTS), [bookmarkData]);
 
   return (
     <List
@@ -84,7 +95,7 @@ export default function Command() {
           <List.Item title="No history found" />
         </List.Section>
       ) : (
-        Array.from(groupEntriesByDate(limitedHistoryData).entries(), ([groupDate, group]) => (
+        groupedHistoryData?.map(({ groupDate, group }) => (
           <List.Section title={"History " + groupDate} key={groupDate}>
             {group.map((e) => (
               <CometListItems.TabHistory key={e.id} entry={e} profile={profile} type="History" />

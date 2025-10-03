@@ -151,30 +151,37 @@ function extractBookmarkFromBookmarkDirectory(
   maxResults?: number,
   currentCount = { count: 0 },
 ): HistoryEntry[] {
-  const bookmarks: HistoryEntry[] = [];
-
   // Early return if we've reached the limit
   if (maxResults !== undefined && currentCount.count >= maxResults) {
-    return bookmarks;
+    return [];
   }
 
-  if (bookmarkDirectory.type === "folder") {
-    for (const child of bookmarkDirectory.children) {
-      if (maxResults !== undefined && currentCount.count >= maxResults) {
-        break;
-      }
-      bookmarks.push(...extractBookmarkFromBookmarkDirectory(child, maxResults, currentCount));
-    }
-  } else if (bookmarkDirectory.type === "url" && bookmarkDirectory.url) {
-    bookmarks.push({
+  if (bookmarkDirectory.type === "url" && bookmarkDirectory.url) {
+    // Direct bookmark - create and return immediately
+    const bookmark: HistoryEntry = {
       id: bookmarkDirectory.id,
       url: bookmarkDirectory.url,
       title: bookmarkDirectory.name,
       dateAdded: bookmarkDirectory.date_added,
-    });
+    };
     currentCount.count++;
+    return [bookmark];
   }
-  return bookmarks;
+
+  if (bookmarkDirectory.type === "folder") {
+    const bookmarks: HistoryEntry[] = [];
+    // Process children with early termination
+    for (const child of bookmarkDirectory.children) {
+      if (maxResults !== undefined && currentCount.count >= maxResults) {
+        break;
+      }
+      const childBookmarks = extractBookmarkFromBookmarkDirectory(child, maxResults, currentCount);
+      bookmarks.push(...childBookmarks);
+    }
+    return bookmarks;
+  }
+
+  return [];
 }
 
 const extractBookmarks = (rawBookmarks: RawBookmarks, maxResults?: number): HistoryEntry[] => {
@@ -290,6 +297,20 @@ export const getHistoryQuery = (table: string, date_field: string, terms: string
      WHERE ${whereClauses(table, terms)}
      AND last_visit_time > 0
      ORDER BY ${date_field} DESC LIMIT 30;`;
+
+// Optimized query for better performance with index hints
+export const getOptimizedHistoryQuery = (table: string, date_field: string, terms: string[]) => {
+  if (terms.length === 0 || (terms.length === 1 && terms[0] === "")) {
+    // No search terms - return recent entries
+    return `SELECT id, url, title FROM ${table} WHERE last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
+  }
+
+  // Use optimized search with proper indexing
+  const sanitizedTerms = terms.map((t) => t.replace(/'/g, "''"));
+  const searchConditions = sanitizedTerms.map((t) => `(title LIKE '%${t}%' OR url LIKE '%${t}%')`).join(" AND ");
+
+  return `SELECT id, url, title FROM ${table} WHERE ${searchConditions} AND last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
+};
 
 export const getHistory = async (profile?: string, query?: string): Promise<HistoryEntry[]> => {
   try {

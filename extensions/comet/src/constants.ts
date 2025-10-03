@@ -20,3 +20,14 @@ export const MAX_HISTORY_RESULTS = 30;
 export const MAX_BOOKMARK_RESULTS = 100;
 export const MAX_TAB_RESULTS = 50;
 export const MAX_SEARCH_ALL_RESULTS = 50;
+
+// Performance optimization constants
+export const DEBOUNCE_DELAY = 300; // ms
+export const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+export const MAX_RETRY_ATTEMPTS = 3;
+export const RETRY_DELAY = 1000; // 1 second
+
+// AppleScript timing constants
+export const WINDOW_INIT_RETRY_LIMIT = 20;
+export const WINDOW_INIT_RETRY_DELAY = 0.1;
+export const WINDOW_ACTIVATION_DELAY = 0.2;

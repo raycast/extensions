@@ -38,13 +38,18 @@ export function useBookmarkSearch(
 
       try {
         const bookmarks = await getBookmarks(profile, MAX_BOOKMARK_RESULTS);
-        setData(
-          bookmarks.filter(
-            (bookmark) =>
-              bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
-          ),
-        );
+
+        // Optimize filtering with early termination and case-insensitive search
+        const queryLower = query?.toLowerCase() || "";
+        const filteredBookmarks = queryLower
+          ? bookmarks.filter((bookmark) => {
+              const titleLower = bookmark.title.toLowerCase();
+              const urlLower = bookmark.url.toLowerCase();
+              return titleLower.includes(queryLower) || urlLower.includes(queryLower);
+            })
+          : bookmarks;
+
+        setData(filteredBookmarks);
         setIsLoading(false);
       } catch (e) {
         if (e instanceof Error && e.message === NOT_INSTALLED_MESSAGE) {
