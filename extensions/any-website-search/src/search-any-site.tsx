@@ -11,7 +11,6 @@ import {
   updateSavedSites,
 } from "./saved-sites";
 import { ManageSavedSites } from "./manage-saved-sites";
-import { v4 as uuidv4 } from "uuid";
 import { strEq, toFullUrlIfLikely } from "./utils";
 import { parseSuggestionsFromDuckDuckGo, parseSuggestionsFromGoogle } from "./search-suggestions";
 
@@ -20,15 +19,19 @@ function fillTemplateUrl(templateUrl: string, query: string) {
     throw new Error(`Invalid URL template "${templateUrl}": missing template string "${SEARCH_TEMPLATE}"`);
   }
 
-  // We need to handle the case where query contains SEARCH_TEMPLATE To do this, we
-  // replace SEARCH_TEMPLATE with a random string that probably doesn't exist anywhere
-  // in the universe, replace that with the query string, then replace it back with
-  // SEARCH_TEMPLATE
-  const placeholderTemplate = uuidv4();
-  const templateUrlWithPlaceholder = templateUrl.replace(SEARCH_TEMPLATE, placeholderTemplate);
-  const placeholderUrl = templateUrlWithPlaceholder.replace(placeholderTemplate, encodeURIComponent(query));
-  const url = placeholderUrl.replace(placeholderTemplate, SEARCH_TEMPLATE);
-  return url;
+  // Handle the edge case where the query itself contains the template string "{}"
+  // by using a simple placeholder that's unlikely to appear in real queries
+  const PLACEHOLDER = "__TEMP_PLACEHOLDER__";
+
+  // Only use the placeholder approach if the query actually contains the template string
+  if (query.includes(SEARCH_TEMPLATE)) {
+    const templateUrlWithPlaceholder = templateUrl.replace(SEARCH_TEMPLATE, PLACEHOLDER);
+    const placeholderUrl = templateUrlWithPlaceholder.replace(PLACEHOLDER, encodeURIComponent(query));
+    return placeholderUrl.replace(PLACEHOLDER, SEARCH_TEMPLATE);
+  }
+
+  // For the common case, just do a simple replacement
+  return templateUrl.replace(SEARCH_TEMPLATE, encodeURIComponent(query));
 }
 
 function maybeStripBangFromQuery(templateUrl: string, query: string) {

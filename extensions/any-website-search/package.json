@@ -63,17 +63,13 @@
   "dependencies": {
     "@raycast/api": "^1.102.7",
     "@raycast/utils": "^2.2.1",
-    "he": "^1.2.0",
-    "node-fetch": "^3.2.10",
-    "uuid": "^9.0.0",
-    "xmlhttprequest": "^1.8.0"
+    "he": "^1.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/he": "^1.2.3",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.12",
-    "@types/uuid": "^10.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

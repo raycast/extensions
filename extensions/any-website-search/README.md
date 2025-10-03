@@ -1,9 +1,3 @@
-<!-- markdownlint-configure-file
-{ // NOTE: trailing commas not allowed!
-  "MD033": { "allowed_elements": ["kbd"] }
-}
--->
-
 # Search Any Site
 
 ## How to search
