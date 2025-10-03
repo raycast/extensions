@@ -1,13 +1,13 @@
 import { HistoryEntry, SearchResult } from "../interfaces";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
+import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE, MAX_BOOKMARK_RESULTS } from "../constants";
 import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
 import { getBookmarks } from "../util";
 import { useCometInstallation } from "./useCometInstallation";
 
 export function useBookmarkSearch(
   query?: string,
-  initialProfile?: string,
+  initialProfile?: string
 ): Required<SearchResult<HistoryEntry> & { readonly errorView: ReactNode }> {
   const [data, setData] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -37,13 +37,13 @@ export function useBookmarkSearch(
       setIsLoading(true);
 
       try {
-        const bookmarks = await getBookmarks(profile);
+        const bookmarks = await getBookmarks(profile, MAX_BOOKMARK_RESULTS);
         setData(
           bookmarks.filter(
             (bookmark) =>
               bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
-          ),
+              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
+          )
         );
         setIsLoading(false);
       } catch (e) {

@@ -1,8 +1,8 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { CometListItems } from "./components";
 import { useTabSearch } from "./hooks/useTabSearch";
-import { COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID } from "./constants";
+import { COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID, MAX_SEARCH_ALL_RESULTS } from "./constants";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { useCachedState } from "@raycast/utils";
 import { groupEntriesByDate } from "./search-history";
@@ -55,6 +55,11 @@ export default function Command() {
     revalidateBookmark(profile);
   };
 
+  // Limit results to prevent memory issues
+  const limitedTabData = useMemo(() => tabData.slice(0, MAX_SEARCH_ALL_RESULTS), [tabData]);
+  const limitedHistoryData = useMemo(() => historyData.slice(0, MAX_SEARCH_ALL_RESULTS), [historyData]);
+  const limitedBookmarkData = useMemo(() => bookmarkData.slice(0, MAX_SEARCH_ALL_RESULTS), [bookmarkData]);
+
   return (
     <List
       // loading appears not to matter, but leaving it case it handles a case that I'm unaware of
@@ -65,21 +70,21 @@ export default function Command() {
     >
       {/* use Item for titles instead of sections for explicit feedback that the list is empty */}
       <List.Section title="Tabs">
-        {tabData.length === 0 ? (
+        {limitedTabData.length === 0 ? (
           <List.Item title="No tabs found" key={"empty tab list item"} />
         ) : (
-          tabData.map((tab) => (
+          limitedTabData.map((tab) => (
             <CometListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
           ))
         )}
       </List.Section>
 
-      {historyData.length === 0 ? (
+      {limitedHistoryData.length === 0 ? (
         <List.Section title="History">
           <List.Item title="No history found" />
         </List.Section>
       ) : (
-        Array.from(groupEntriesByDate(historyData).entries(), ([groupDate, group]) => (
+        Array.from(groupEntriesByDate(limitedHistoryData).entries(), ([groupDate, group]) => (
           <List.Section title={"History " + groupDate} key={groupDate}>
             {group.map((e) => (
               <CometListItems.TabHistory key={e.id} entry={e} profile={profile} type="History" />
@@ -89,10 +94,12 @@ export default function Command() {
       )}
 
       <List.Section title="Bookmarks">
-        {bookmarkData.length === 0 ? (
+        {limitedBookmarkData.length === 0 ? (
           <List.Item title="No bookmarks found" key={"empty bookmark list item"} />
         ) : (
-          bookmarkData.map((e) => <CometListItems.TabHistory key={e.id} entry={e} profile={profile} type="Bookmark" />)
+          limitedBookmarkData.map((e) => (
+            <CometListItems.TabHistory key={e.id} entry={e} profile={profile} type="Bookmark" />
+          ))
         )}
       </List.Section>
     </List>

@@ -14,3 +14,9 @@ export const COMET_BOOKMARK_SORT_ORDERS: Record<BookmarkSortOrder, string> = {
 
 export const NOT_INSTALLED_MESSAGE = "Comet browser not installed";
 export const NO_BOOKMARKS_MESSAGE = "No bookmarks found in this profile";
+
+// Maximum results to prevent memory issues
+export const MAX_HISTORY_RESULTS = 30;
+export const MAX_BOOKMARK_RESULTS = 100;
+export const MAX_TAB_RESULTS = 50;
+export const MAX_SEARCH_ALL_RESULTS = 50;

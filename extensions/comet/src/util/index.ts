@@ -28,7 +28,7 @@ const getCometFilePath = (fileName: CometFile, profile?: string) => {
       userLibraryDirectoryPath(),
       ...defaultCometProfilePath,
       profile ?? DEFAULT_COMET_PROFILE_ID,
-      fileName,
+      fileName
     );
   }
 
@@ -146,13 +146,25 @@ export const resolveProfileName = (profileInput?: string): string | undefined =>
 
 const getBookmarksFilePath = (profile?: string) => getCometFilePath("Bookmarks", profile);
 
-function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
+function extractBookmarkFromBookmarkDirectory(
+  bookmarkDirectory: BookmarkDirectory,
+  maxResults?: number,
+  currentCount = { count: 0 }
+): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];
 
+  // Early return if we've reached the limit
+  if (maxResults !== undefined && currentCount.count >= maxResults) {
+    return bookmarks;
+  }
+
   if (bookmarkDirectory.type === "folder") {
-    bookmarkDirectory.children.forEach((child) => {
-      bookmarks.push(...extractBookmarkFromBookmarkDirectory(child));
-    });
+    for (const child of bookmarkDirectory.children) {
+      if (maxResults !== undefined && currentCount.count >= maxResults) {
+        break;
+      }
+      bookmarks.push(...extractBookmarkFromBookmarkDirectory(child, maxResults, currentCount));
+    }
   } else if (bookmarkDirectory.type === "url" && bookmarkDirectory.url) {
     bookmarks.push({
       id: bookmarkDirectory.id,
@@ -160,21 +172,27 @@ function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirecto
       title: bookmarkDirectory.name,
       dateAdded: bookmarkDirectory.date_added,
     });
+    currentCount.count++;
   }
   return bookmarks;
 }
 
-const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
+const extractBookmarks = (rawBookmarks: RawBookmarks, maxResults?: number): HistoryEntry[] => {
   const bookmarks: HistoryEntry[] = [];
-  Object.keys(rawBookmarks.roots).forEach((rootKey) => {
+  const currentCount = { count: 0 };
+
+  for (const rootKey of Object.keys(rawBookmarks.roots)) {
+    if (maxResults !== undefined && currentCount.count >= maxResults) {
+      break;
+    }
     const rootLevelBookmarkFolders = rawBookmarks.roots[rootKey];
-    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders);
+    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders, maxResults, currentCount);
     bookmarks.push(...bookmarkEntries);
-  });
+  }
   return bookmarks;
 };
 
-export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
+export const getBookmarks = async (profile?: string, maxResults?: number): Promise<HistoryEntry[]> => {
   try {
     const bookmarksFilePath = getBookmarksFilePath(profile);
 
@@ -184,7 +202,7 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
     }
 
     const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
-    const bookmarks = extractBookmarks(JSON.parse(fileBuffer));
+    const bookmarks = extractBookmarks(JSON.parse(fileBuffer), maxResults);
 
     if (bookmarks.length === 0) {
       throw new Error(NO_BOOKMARKS_MESSAGE);

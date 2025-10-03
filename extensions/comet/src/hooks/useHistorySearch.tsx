@@ -15,7 +15,7 @@ const ensureEmptyDbExists = () => {
   if (!fs.existsSync(EMPTY_DB_PATH)) {
     try {
       execSync(
-        `sqlite3 "${EMPTY_DB_PATH}" "CREATE TABLE IF NOT EXISTS urls (id TEXT, url TEXT, title TEXT, last_visit_time INTEGER);"`,
+        `sqlite3 "${EMPTY_DB_PATH}" "CREATE TABLE IF NOT EXISTS urls (id TEXT, url TEXT, title TEXT, last_visit_time INTEGER);"`
       );
     } catch {
       // Fallback: create empty file
