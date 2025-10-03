@@ -1,6 +1,6 @@
 # Pro Tools Changelog
 
-## [1.1.0] - 2025-05-29
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Fixed
 - Fixed sorting issue to ensure sessions are always displayed in order of modification date (newest first)
