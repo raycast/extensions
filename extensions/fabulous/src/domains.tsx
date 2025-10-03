@@ -2,9 +2,10 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/a
 import { getFavicon, useFetch } from "@raycast/utils";
 import { XMLParser } from "fast-xml-parser";
 
-const { username, password } = getPreferenceValues<Preferences>();
-const parser = new XMLParser();
-
+interface Domain {
+  domain: string; exdate: string
+}
+interface DNSRecord { id: number; name: string; type: string; content: string }
 interface XMLResult<T> {
   fabulous: {
     response: {
@@ -17,16 +18,19 @@ interface XMLResult<T> {
   };
 }
 
-function generateApiUrl(route: string, params: Record<string, string> = {}) {
-  const url = new URL(route, "https://api.fabulous.com/");
+const { username, password } = getPreferenceValues<Preferences>();
+const parser = new XMLParser();
+
+function buildApiUrl(endpoint: string, params: Record<string, string> = {}) {
+  const url = new URL(endpoint, "https://api.fabulous.com/");
   url.searchParams.append("username", username);
   url.searchParams.append("password", password);
   Object.entries(params).forEach(([key, val]) => url.searchParams.append(key, val));
   return url.toString();
 }
 
-function useFabulous<T>(route: string, params?: Record<string, string>) {
-  return useFetch(generateApiUrl(route, params), {
+function useFabulous<T>(endpoint: string, params?: Record<string, string>) {
+  return useFetch(buildApiUrl(endpoint, params), {
     async parseResponse(response) {
       const txt = await response.text();
       const obj: XMLResult<T> = await parser.parse(txt);
@@ -38,13 +42,13 @@ function useFabulous<T>(route: string, params?: Record<string, string>) {
 }
 
 export default function Domains() {
-  const { isLoading, data: domains = [] } = useFabulous<Array<{ domain: string; exdate: string }>>("listDomains");
+  const { isLoading, data: domains = [] } = useFabulous<Domain[]>("listDomains");
   return (
     <List isLoading={isLoading}>
       {domains.map((domainItem) => (
         <List.Item
           key={domainItem.domain}
-          icon={getFavicon(`https://${domainItem.domain}`)}
+          icon={getFavicon(`https://${domainItem.domain}`, {fallback: Icon.Globe})}
           title={domainItem.domain}
           accessories={[{ date: new Date(domainItem.exdate) }]}
           actions={
@@ -61,15 +65,15 @@ export default function Domains() {
 
 function DNSRecords({ domain }: { domain: string }) {
   const { isLoading, data: records = [] } = useFabulous<
-    Array<{ id: number; name: string; type: string; content: string }>
+    DNSRecord[]
   >("listDNSrecords", {
     domain,
   });
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {records.map((record) => (
+      {records.map((record, recordIndex) => (
         <List.Item
-          key={record.id}
+          key={recordIndex}
           title={record.id.toString()}
           detail={
             <List.Item.Detail
