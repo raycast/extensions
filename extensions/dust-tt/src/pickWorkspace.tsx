@@ -48,14 +48,11 @@ export default withDustClient(function PickWorkspaceCommand() {
 
   const { data: currentWorkspaceId, isLoading: isLoadingWorkspace } = usePromise(async () => getWorkspaceId(), []);
 
-  const setWorkspaceId = useCallback(
-    async (workspace: WorkspaceWithRegion) => {
-      updateCommandMetadata({ subtitle: `Currently using: "${workspace.name}" (${workspace.region})` });
-      await LocalStorage.setItem("workspaceId", workspace.sId);
-      await LocalStorage.setItem("selectedRegion", workspace.region);
-    },
-    [navigation],
-  );
+  const setWorkspaceId = useCallback(async (workspace: WorkspaceWithRegion) => {
+    updateCommandMetadata({ subtitle: `Currently using: "${workspace.name}" (${workspace.region})` });
+    await LocalStorage.setItem("workspaceId", workspace.sId);
+    await LocalStorage.setItem("selectedRegion", workspace.region);
+  }, []);
 
   const user = workspacesData?.user;
   const workspaces = workspacesData?.workspaces || [];

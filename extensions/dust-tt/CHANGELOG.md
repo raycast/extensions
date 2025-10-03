@@ -1,6 +1,6 @@
 # Dust.tt Changelog
 
-## [Update] - 2025-09-19
+## [Update] - {PR_MERGE_DATE}
 
 - Remove deprecated API Key flow.
 - OAuth flow without setup.
