@@ -33,19 +33,22 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'raycast/extensions'
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Download sparse-checkout file list
         uses: actions/download-artifact@v4
         with:
           name: sparse-checkout-files
           path: .github
-      - name: Set up sparse checkout for required files
-        run: |
-          git sparse-checkout init --cone
-          git sparse-checkout set $(cat .github/sparse-checkout-files.txt)
+      - name: Checkout with sparse checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          sparse-checkout: |
+            scripts/generate-code-owners.js
+            .github/CODEOWNERS
+            .github/raycast2github.json
+            .github/extensionName2Folder.json
+            extensions/*/package.json
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
