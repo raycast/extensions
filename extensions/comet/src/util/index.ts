@@ -223,6 +223,16 @@ export const getBookmarks = async (profile?: string, maxResults?: number): Promi
     return bookmarks;
   } catch (error) {
     console.error(`Bookmark extraction failed after ${Date.now() - startTime}ms:`, error);
+
+    // Add specific error handling for different failure modes
+    if (error instanceof SyntaxError) {
+      console.error("Invalid bookmark file format:", error);
+    } else if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      console.error("Bookmark file not found:", error);
+    } else if (error && typeof error === "object" && "code" in error && error.code === "EACCES") {
+      console.error("Permission denied accessing bookmark file:", error);
+    }
+
     // If it's a profile that doesn't exist or file that doesn't exist,
     // always return the "no bookmarks" message
     throw new Error(NO_BOOKMARKS_MESSAGE);
@@ -289,8 +299,10 @@ export function showCometNotOpenToast() {
 }
 
 const whereClauses = (tableTitle: string, terms: string[]) => {
-  // Properly escape single quotes and other SQL special characters
-  const sanitizedTerms = terms.map((t) => t.replace(/'/g, "''").replace(/"/g, '""'));
+  // More robust SQL sanitization to prevent injection attacks
+  const sanitizedTerms = terms.map((t) =>
+    t.replace(/'/g, "''").replace(/"/g, '""').replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_"),
+  );
   return sanitizedTerms
     .map((t) => `(${tableTitle}.title LIKE '%${t}%' OR ${tableTitle}.url LIKE '%${t}%')`)
     .join(" AND ");
@@ -313,7 +325,9 @@ export const getOptimizedHistoryQuery = (table: string, date_field: string, term
   }
 
   // Use optimized search with proper indexing and enhanced sanitization
-  const sanitizedTerms = terms.map((t) => t.replace(/'/g, "''").replace(/"/g, '""'));
+  const sanitizedTerms = terms.map((t) =>
+    t.replace(/'/g, "''").replace(/"/g, '""').replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_"),
+  );
   const searchConditions = sanitizedTerms.map((t) => `(title LIKE '%${t}%' OR url LIKE '%${t}%')`).join(" AND ");
 
   return `SELECT id, url, title FROM ${table} WHERE ${searchConditions} AND last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;

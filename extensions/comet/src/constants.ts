@@ -60,3 +60,33 @@ export const APPLESCRIPT_TIMING = {
 export const WINDOW_INIT_RETRY_LIMIT = APPLESCRIPT_TIMING.WINDOW_INIT_RETRY_LIMIT;
 export const WINDOW_INIT_RETRY_DELAY = APPLESCRIPT_TIMING.WINDOW_INIT_RETRY_DELAY;
 export const WINDOW_ACTIVATION_DELAY = APPLESCRIPT_TIMING.WINDOW_ACTIVATION_DELAY;
+
+// Configuration validation
+export const validateMemoryLimits = () => {
+  const warnings: string[] = [];
+
+  if (MEMORY_LIMITS.BOOKMARK_RESULTS < 1 || MEMORY_LIMITS.BOOKMARK_RESULTS > 1000) {
+    warnings.push(`Bookmark result limit (${MEMORY_LIMITS.BOOKMARK_RESULTS}) outside recommended range (1-1000)`);
+  }
+
+  if (MEMORY_LIMITS.HISTORY_RESULTS < 1 || MEMORY_LIMITS.HISTORY_RESULTS > 500) {
+    warnings.push(`History result limit (${MEMORY_LIMITS.HISTORY_RESULTS}) outside recommended range (1-500)`);
+  }
+
+  if (MEMORY_LIMITS.TAB_RESULTS < 1 || MEMORY_LIMITS.TAB_RESULTS > 200) {
+    warnings.push(`Tab result limit (${MEMORY_LIMITS.TAB_RESULTS}) outside recommended range (1-200)`);
+  }
+
+  if (MEMORY_LIMITS.SEARCH_ALL_RESULTS < 1 || MEMORY_LIMITS.SEARCH_ALL_RESULTS > 100) {
+    warnings.push(`Search all result limit (${MEMORY_LIMITS.SEARCH_ALL_RESULTS}) outside recommended range (1-100)`);
+  }
+
+  if (warnings.length > 0) {
+    console.warn("Memory limit configuration warnings:", warnings);
+  }
+
+  return warnings;
+};
+
+// Validate configuration on module load
+validateMemoryLimits();

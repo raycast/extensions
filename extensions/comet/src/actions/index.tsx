@@ -15,6 +15,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
     : '""';
 
   try {
+    const startTime = Date.now();
     const openTabs = await runAppleScript(`
       set _output to ""
       tell application "Comet"
@@ -33,10 +34,13 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       return _output
   `);
 
-    return openTabs
+    const tabs = openTabs
       .split("\n")
       .filter((line) => line.length !== 0)
       .map((line) => Tab.parse(line));
+
+    console.debug(`Tab extraction took ${Date.now() - startTime}ms for ${tabs.length} tabs`);
+    return tabs;
   } catch (err) {
     if ((err as Error).message.includes('Can\'t get application "Comet"')) {
       LocalStorage.removeItem("is-installed");
