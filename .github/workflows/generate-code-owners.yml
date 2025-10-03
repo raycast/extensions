@@ -43,20 +43,31 @@ jobs:
           # Join with spaces for Git
           PACKAGE_FILES_SPACED=$(echo "$PACKAGE_FILES" | tr '\n' ' ' | sed 's/[[:space:]]*$//')
           
-          # Set up sparse checkout with all required files (cone for dirs, files for extensions)
+          # Dynamically fetch all files from scripts/ and .github/ for full dir support (small overhead)
+          echo "Fetching core files from scripts/ and .github/..."
+          SCRIPTS_FILES=$(git ls-tree -r --name-only HEAD -- scripts/ | tr '\n' ' ' || echo "")
+          GITHUB_FILES=$(git ls-tree -r --name-only HEAD -- .github/ | tr '\n' ' ' || echo "")
+          
+          # Combine: extensions packages + core files + explicit must-haves (dedup via sort -u)
+          CORE_PATHS="$SCRIPTS_FILES $GITHUB_FILES scripts/generate-code-owners.js .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json"
+          ALL_SPACED="$PACKAGE_FILES_SPACED $CORE_PATHS"
+          ALL_SPACED=$(echo "$ALL_SPACED" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+          
+          echo "Total sparse paths: $(echo "$ALL_SPACED" | wc -w)"
+          
+          # Set up sparse checkout: No-cone for exact files (dirs created via read-tree)
           echo "Setting up sparse checkout..."
-          if ! git sparse-checkout set --cone; then
+          if ! git sparse-checkout set --no-cone; then
             echo "::error::Failed to initialize sparse checkout"
             exit 1
           fi
           
-          # Add patterns/files: Full scripts/ dir + exact package.jsons + configs
-          if ! git sparse-checkout add scripts/ $PACKAGE_FILES_SPACED .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json; then
+          if ! git sparse-checkout set $ALL_SPACED; then
             echo "::error::Failed to set sparse checkout files"
             exit 1
           fi
           
-          # Force update working directory
+          # Force update working directory (now with full file list = reliable dir creation)
           if ! git read-tree -m -u HEAD; then
             echo "::error::Failed to update working directory"
             exit 1
@@ -64,6 +75,7 @@ jobs:
           
           echo "Files actually checked out:"
           find . -type f -name "*.json" | head -20
+          ls -la scripts/ .github/ || true  # Debug: Confirm dirs/files
           
           # Store normalized for the script
           echo "PACKAGE_FILES<<EOF" >> $GITHUB_ENV
