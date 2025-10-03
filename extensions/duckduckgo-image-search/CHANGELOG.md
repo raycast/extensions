@@ -1,4 +1,7 @@
 # DuckDuckGo Image Search Changelog
+## [Update] - {PR_MERGE_DATE}
+
+- Fill this
 
 ## [Initial Version] - 2025-08-04
 
@@ -9,4 +12,3 @@ Originally the exception happened in the `src/search-image.tsx:96:37`:
 ```
 search-image | TypeError: Cannot read properties of undefined (reading 'length')
 ```
-
