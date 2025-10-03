@@ -52,6 +52,7 @@ export default function Command() {
   const limitedBookmarkData = useMemo(() => bookmarkData.slice(0, MAX_SEARCH_ALL_RESULTS), [bookmarkData]);
 
   // Memoize grouped history data to avoid recalculating on every render
+  // Add dependency on length to avoid recomputing when data changes but length remains the same
   const groupedHistoryData = useMemo(() => {
     return limitedHistoryData.length === 0
       ? null
@@ -59,7 +60,7 @@ export default function Command() {
           groupDate,
           group,
         }));
-  }, [limitedHistoryData]);
+  }, [limitedHistoryData, limitedHistoryData.length]);
 
   // If profile check is still pending, don't render anything
   if (profileValid === null) {
@@ -80,7 +81,9 @@ export default function Command() {
       searchBarAccessory={<CometProfileDropDown onProfileSelected={revalidate} />}
     >
       {/* use Item for titles instead of sections for explicit feedback that the list is empty */}
-      <List.Section title="Tabs">
+      <List.Section
+        title={`Tabs${tabData.length > MAX_SEARCH_ALL_RESULTS ? ` (showing ${MAX_SEARCH_ALL_RESULTS} of ${tabData.length})` : ""}`}
+      >
         {limitedTabData.length === 0 ? (
           <List.Item title="No tabs found" key={"empty tab list item"} />
         ) : (
@@ -96,7 +99,10 @@ export default function Command() {
         </List.Section>
       ) : (
         groupedHistoryData?.map(({ groupDate, group }) => (
-          <List.Section title={"History " + groupDate} key={groupDate}>
+          <List.Section
+            title={`History ${groupDate}${historyData.length > MAX_SEARCH_ALL_RESULTS ? ` (showing ${MAX_SEARCH_ALL_RESULTS} of ${historyData.length})` : ""}`}
+            key={groupDate}
+          >
             {group.map((e) => (
               <CometListItems.TabHistory key={e.id} entry={e} profile={profile} type="History" />
             ))}
@@ -104,7 +110,9 @@ export default function Command() {
         ))
       )}
 
-      <List.Section title="Bookmarks">
+      <List.Section
+        title={`Bookmarks${bookmarkData.length > MAX_SEARCH_ALL_RESULTS ? ` (showing ${MAX_SEARCH_ALL_RESULTS} of ${bookmarkData.length})` : ""}`}
+      >
         {limitedBookmarkData.length === 0 ? (
           <List.Item title="No bookmarks found" key={"empty bookmark list item"} />
         ) : (

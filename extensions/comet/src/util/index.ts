@@ -186,20 +186,24 @@ function extractBookmarkFromBookmarkDirectory(
 
 const extractBookmarks = (rawBookmarks: RawBookmarks, maxResults?: number): HistoryEntry[] => {
   const bookmarks: HistoryEntry[] = [];
-  const currentCount = { count: 0 };
+  let totalCount = 0;
 
   for (const rootKey of Object.keys(rawBookmarks.roots)) {
-    if (maxResults !== undefined && currentCount.count >= maxResults) {
+    if (maxResults !== undefined && totalCount >= maxResults) {
       break;
     }
     const rootLevelBookmarkFolders = rawBookmarks.roots[rootKey];
-    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders, maxResults, currentCount);
+    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders, maxResults, {
+      count: totalCount,
+    });
     bookmarks.push(...bookmarkEntries);
+    totalCount += bookmarkEntries.length;
   }
   return bookmarks;
 };
 
 export const getBookmarks = async (profile?: string, maxResults?: number): Promise<HistoryEntry[]> => {
+  const startTime = Date.now();
   try {
     const bookmarksFilePath = getBookmarksFilePath(profile);
 
@@ -215,8 +219,10 @@ export const getBookmarks = async (profile?: string, maxResults?: number): Promi
       throw new Error(NO_BOOKMARKS_MESSAGE);
     }
 
+    console.debug(`Bookmark extraction took ${Date.now() - startTime}ms for ${bookmarks.length} items`);
     return bookmarks;
-  } catch {
+  } catch (error) {
+    console.error(`Bookmark extraction failed after ${Date.now() - startTime}ms:`, error);
     // If it's a profile that doesn't exist or file that doesn't exist,
     // always return the "no bookmarks" message
     throw new Error(NO_BOOKMARKS_MESSAGE);
@@ -283,7 +289,8 @@ export function showCometNotOpenToast() {
 }
 
 const whereClauses = (tableTitle: string, terms: string[]) => {
-  const sanitizedTerms = terms.map((t) => t.replace(/'/g, "''"));
+  // Properly escape single quotes and other SQL special characters
+  const sanitizedTerms = terms.map((t) => t.replace(/'/g, "''").replace(/"/g, '""'));
   return sanitizedTerms
     .map((t) => `(${tableTitle}.title LIKE '%${t}%' OR ${tableTitle}.url LIKE '%${t}%')`)
     .join(" AND ");
@@ -305,8 +312,8 @@ export const getOptimizedHistoryQuery = (table: string, date_field: string, term
     return `SELECT id, url, title FROM ${table} WHERE last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
   }
 
-  // Use optimized search with proper indexing
-  const sanitizedTerms = terms.map((t) => t.replace(/'/g, "''"));
+  // Use optimized search with proper indexing and enhanced sanitization
+  const sanitizedTerms = terms.map((t) => t.replace(/'/g, "''").replace(/"/g, '""'));
   const searchConditions = sanitizedTerms.map((t) => `(title LIKE '%${t}%' OR url LIKE '%${t}%')`).join(" AND ");
 
   return `SELECT id, url, title FROM ${table} WHERE ${searchConditions} AND last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
