@@ -8,8 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  generate-codeowners-file:
+  update-codeowners:
     runs-on: ubuntu-latest
+    if: github.repository == 'raycast/extensions'
     steps:
       - name: Generate sparse-checkout file list using GitHub API
         run: |
@@ -31,22 +32,6 @@ jobs:
           cat .github/sparse-checkout-files.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload sparse-checkout file list
-        uses: actions/upload-artifact@v4
-        with:
-          name: sparse-checkout-files
-          path: .github/sparse-checkout-files.txt
-
-  update:
-    needs: generate-codeowners-file
-    runs-on: ubuntu-latest
-    if: github.repository == 'raycast/extensions'
-    steps:
-      - name: Download sparse-checkout file list
-        uses: actions/download-artifact@v4
-        with:
-          name: sparse-checkout-files
-          path: .github
       - name: Checkout with minimal sparse checkout
         uses: actions/checkout@v4
         with:
