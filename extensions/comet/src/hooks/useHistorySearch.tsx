@@ -61,16 +61,15 @@ const searchHistory = (profile: string, query?: string, enabled = true): SearchR
     return dbExists ? dbPath : EMPTY_DB_PATH;
   }, [enabled, dbPath]);
   const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(sqlPath, queries as unknown as string, {
-    onData(results) {
-      // Limit results to prevent memory issues
-      const limitedResults = results.slice(0, MAX_HISTORY_RESULTS);
+    onData() {
+      // Reset retry state on successful data load
       setRetryWaiting(false);
       setRetryTimes(0);
       if (retryTimer) {
         clearTimeout(retryTimer);
         setRetryTimer(null);
       }
-      return limitedResults;
+      // Note: Result limiting is handled in the final return statement
     },
     onError(error) {
       // In rare cases, we encounter the SQLite error "database disk image is malformed (11)",
