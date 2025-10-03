@@ -40,7 +40,7 @@ const pages: Page[] = [
     id: "performance-monitoring",
     title: "Performance Monitoring (k6)",
     subtitle: "Load testing and performance monitoring",
-    url: "https://ninetailed.grafana.net/a/k6-app",
+    url: "/a/k6-app",
     icon: Icon.Gauge,
     keywords: ["performance", "k6", "load testing", "monitoring", "stress"],
   },
@@ -72,7 +72,7 @@ const pages: Page[] = [
     id: "alerting",
     title: "Alerting",
     subtitle: "Configure and manage alerts",
-    url: "https://ninetailed.grafana.net/alerting",
+    url: "/alerting",
     icon: Icon.Bell,
     keywords: ["alerting", "alerts", "notifications", "rules", "channels"],
   },
@@ -80,7 +80,7 @@ const pages: Page[] = [
     id: "slo",
     title: "SLO",
     subtitle: "Service Level Objectives monitoring",
-    url: "https://ninetailed.grafana.net/a/grafana-slo-app/home/insights",
+    url: "/a/grafana-slo-app/home/insights",
     icon: Icon.BullsEye,
     keywords: ["slo", "service level", "objectives", "monitoring", "reliability"],
   },
@@ -190,7 +190,7 @@ export default function Command() {
     <List searchBarPlaceholder="Search common Grafana pages...">
       {sortedPages.map((page) => (
         <List.Item
-          key={page.title}
+          key={page.id}
           title={page.title}
           subtitle={page.subtitle}
           icon={page.icon}
