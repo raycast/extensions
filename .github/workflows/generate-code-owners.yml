@@ -32,6 +32,8 @@ jobs:
       - name: Generate
         working-directory: scripts
         run: ./generate-code-owners.js
+        env:
+          PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}
 
       - name: Commit
         uses: raycast/github-actions/git-commit@master
