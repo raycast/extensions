@@ -1,6 +1,6 @@
 # Stripe Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-10-03
 
 Marked as Windows compatible.
 
