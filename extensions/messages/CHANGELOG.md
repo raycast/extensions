@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Spam and Unknown Sender Filtering] - {PR_MERGE_DATE}
+## [Spam and Unknown Sender Filtering] - 2025-10-03
 
 - Added backward-compatible support for the `is_filtered` field to filter spam and unknown sender messages
 - Added "Filter Out Spam" extension-level preference to hide messages marked as spam
