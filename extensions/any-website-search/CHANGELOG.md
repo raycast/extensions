@@ -1,6 +1,6 @@
 # Search Any Site Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-10-03
 
 - **Arc-like behavior**: Extension now behaves like Arc's Command+T, allowing both direct website opening and search functionality
 - **Smart URL detection**: Automatically detects and opens URLs directly (e.g., `example.com`, `www.site.com`, `localhost:3000`)
