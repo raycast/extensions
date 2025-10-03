@@ -23,13 +23,13 @@ const options = {
 export default function Agents() {
   const { isLoading, data: chatbots } = useFetch(API_URL + "get-chatbots", {
     ...options,
-    mapResult(result: { chatbots: { error: string | null; data: Chatbot[] } }) {
-      const { data, error } = result.chatbots;
+    mapResult(result) {
+      const { data, error } = (result as { chatbots: { error: string | null; data: Chatbot[] } }).chatbots;
       if (error) throw new Error(error);
       return {
         data,
       };
-    },
+    }
   });
 
   return (
@@ -115,8 +115,8 @@ function Conversations({ chatbot }: { chatbot: Chatbot }) {
       }),
     {
       ...options,
-      mapResult(result: { data: Conversation[] }) {
-        const { data } = result;
+      mapResult(result) {
+        const { data } = result as { data: Conversation[] };
         return {
           data,
           hasMore: data.length === 20,
