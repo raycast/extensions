@@ -1,6 +1,6 @@
 # QR Code Generator Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-10-03
 
 - Added a new action to copy QR code to clipboard
 
