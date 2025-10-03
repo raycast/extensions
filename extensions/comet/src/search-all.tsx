@@ -100,7 +100,7 @@ export default function Command() {
       ) : (
         groupedHistoryData?.map(({ groupDate, group }) => (
           <List.Section
-            title={`History ${groupDate}${historyData.length > MAX_SEARCH_ALL_RESULTS ? ` (showing ${MAX_SEARCH_ALL_RESULTS} of ${historyData.length})` : ""}`}
+            title={`History ${groupDate}${limitedHistoryData.length >= MAX_SEARCH_ALL_RESULTS ? ` (showing ${MAX_SEARCH_ALL_RESULTS}+)` : ""}`}
             key={groupDate}
           >
             {group.map((e) => (

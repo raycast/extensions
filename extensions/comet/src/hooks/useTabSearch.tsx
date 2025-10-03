@@ -53,7 +53,8 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
 
     try {
       const tabs = await getOpenTabs(useOriginalFavicon);
-      setAllTabs(tabs);
+      // Apply limit immediately to prevent memory issues with large tab collections
+      setAllTabs(tabs.slice(0, MAX_TAB_RESULTS * 2)); // Allow some buffer for filtering
       setIsLoading(false);
     } catch (e) {
       if (e instanceof Error && e.message === NOT_INSTALLED_MESSAGE) {

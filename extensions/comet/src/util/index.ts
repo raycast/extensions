@@ -333,6 +333,30 @@ export const getOptimizedHistoryQuery = (table: string, date_field: string, term
   return `SELECT id, url, title FROM ${table} WHERE ${searchConditions} AND last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
 };
 
+// Enhanced secure query builder with parameterized approach
+export const buildSecureHistoryQuery = (table: string, date_field: string, terms: string[]) => {
+  if (terms.length === 0 || (terms.length === 1 && terms[0] === "")) {
+    return {
+      query: `SELECT id, url, title FROM ${table} WHERE last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`,
+      params: [],
+    };
+  }
+
+  // Build parameterized query with placeholders
+  const placeholders = terms
+    .map((_, index) => `(title LIKE $${index * 2 + 1} OR url LIKE $${index * 2 + 2})`)
+    .join(" AND ");
+  const query = `SELECT id, url, title FROM ${table} WHERE ${placeholders} AND last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
+
+  // Create parameters array with LIKE patterns
+  const params: string[] = [];
+  terms.forEach((term) => {
+    params.push(`%${term}%`, `%${term}%`); // title and url patterns
+  });
+
+  return { query, params };
+};
+
 export const getHistory = async (profile?: string, query?: string): Promise<HistoryEntry[]> => {
   try {
     const dbPath = getHistoryDbPath(profile);
