@@ -1,6 +1,6 @@
 # Grafana Changelog
 
-## [New command] - {PR_MERGE_DATE}
+## [New command] - 2025-10-03
 
 - Add a new command Pages to go to the most common pages in Grafana
 - Updates dependencies & remove node-fetch from dependencies
