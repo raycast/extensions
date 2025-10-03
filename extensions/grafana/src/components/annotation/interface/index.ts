@@ -12,6 +12,6 @@ export interface Annotation {
 export interface Patch {
   text?: string;
   tags?: string[];
-  timee?: number;
+  time?: number;
   timeEnd?: number;
 }
