@@ -13,12 +13,23 @@ const PrototypeListItem = ({ prototype }: { prototype: PrototypeForList }) => {
     <List.Item
       id={prototype.prototypeId}
       title={
-        (prototype.title ?? prototype.type.toLowerCase() === "other")
-          ? "Prototype"
-          : `${prototype.type.charAt(0).toUpperCase() + prototype.type.slice(1)} Prototype`
+        prototype.title
+          ? prototype.title
+          : prototype.type.toLowerCase().trim() === "other"
+            ? "Prototype"
+            : `${prototype.type.charAt(0).toUpperCase() + prototype.type.slice(1)} Prototype`
       }
       icon={PrototypeTypeToIcon(prototype.type)}
       accessories={[
+        {
+          tag: {
+            value:
+              prototype.type.toLowerCase().trim() === "other"
+                ? "Other"
+                : prototype.type.charAt(0).toUpperCase() + prototype.type.slice(1),
+            color: prototype.type.toLowerCase().trim() === "other" ? Color.Red : Color.Blue,
+          },
+        },
         {
           text: `${prototype.createdAt ? `${formatDateForList(prototype.createdAt)}` : ""}`,
         },
