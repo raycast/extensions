@@ -11,17 +11,26 @@ jobs:
   generate-codeowners-file:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Generate sparse-checkout file list
+      - name: Generate sparse-checkout file list using GitHub API
         run: |
-          find extensions -mindepth 2 -maxdepth 2 -name package.json \
+          # Get list of package.json files using GitHub API
+          gh api repos/${{ github.repository }}/git/trees/main?recursive=1 \
+            --jq '.tree[] | select(.path | test("^extensions/.*/package\\.json$")) | .path' \
             > .github/sparse-checkout-files.txt
+          
+          # Add required files
           echo scripts/generate-code-owners.js >> .github/sparse-checkout-files.txt
           echo .github/CODEOWNERS >> .github/sparse-checkout-files.txt
           echo .github/raycast2github.json >> .github/sparse-checkout-files.txt
           echo .github/extensionName2Folder.json >> .github/sparse-checkout-files.txt
+          
+          # Sort and deduplicate
+          sort -u .github/sparse-checkout-files.txt -o .github/sparse-checkout-files.txt
+          
+          echo "Files to checkout:"
+          cat .github/sparse-checkout-files.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload sparse-checkout file list
         uses: actions/upload-artifact@v4
         with:
@@ -38,7 +47,7 @@ jobs:
         with:
           name: sparse-checkout-files
           path: .github
-      - name: Checkout with sparse checkout
+      - name: Checkout with minimal sparse checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -46,11 +55,17 @@ jobs:
           sparse-checkout: |
             scripts/
             .github/
-            extensions/
-      - name: Set up sparse checkout for specific files
+            extensions/*/
+      - name: Apply specific file filter
         run: |
           git sparse-checkout set --no-cone
           git sparse-checkout set $(cat .github/sparse-checkout-files.txt)
+          # Force update working directory
+          git read-tree -m -u HEAD
+          
+          # Show what we actually have
+          echo "Files actually checked out:"
+          find . -type f -name "*.json" | head -20
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
