@@ -73,6 +73,11 @@ jobs:
             exit 1
           fi
           
+          # Fallback: Ensure core dirs exist and key files are checked out (safety net for sparse quirks)
+          echo "Ensuring core dirs/files..."
+          mkdir -p scripts .github || true
+          git checkout HEAD -- scripts/generate-code-owners.js .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json || echo "::warning::Fallback checkout had issues (non-fatal)"
+          
           echo "Files actually checked out:"
           find . -type f -name "*.json" | head -20
           ls -la scripts/ .github/ || true  # Debug: Confirm dirs/files
