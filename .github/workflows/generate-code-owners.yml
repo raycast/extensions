@@ -44,11 +44,13 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           sparse-checkout: |
-            scripts/generate-code-owners.js
-            .github/CODEOWNERS
-            .github/raycast2github.json
-            .github/extensionName2Folder.json
-            extensions/*/package.json
+            scripts/
+            .github/
+            extensions/
+      - name: Set up sparse checkout for specific files
+        run: |
+          git sparse-checkout set --no-cone
+          git sparse-checkout set $(cat .github/sparse-checkout-files.txt)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
