@@ -3,7 +3,6 @@
 import { ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { DeleteAnnotationAction, PatchAnnotationAction } from "./annotationActions";
 import { useState, useEffect, useRef } from "react";
-import { AbortError } from "node-fetch";
 
 import { annotationGetQuery } from "./queries";
 
@@ -31,24 +30,27 @@ interface Annotation {
   email?: string;
   avatarUrl?: string;
   data?: any;
+  uniqueKey?: string;
 }
 
-export function SearchAnnotations(): JSX.Element {
+export function SearchAnnotations() {
   const { state, search } = useSearch();
 
   return (
     <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+          <SearchListItem
+            key={searchResult.uniqueKey || searchResult.id || Math.random()}
+            searchResult={searchResult}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: Annotation }): JSX.Element {
-  // console.log(searchResult)
+function SearchListItem({ searchResult }: { searchResult: Annotation }) {
   const humanReadableDate = new Date(searchResult.time).toLocaleString();
   return (
     <List.Item
@@ -96,7 +98,7 @@ function useSearch() {
         isLoading: false,
       }));
     } catch (error) {
-      if (error instanceof AbortError) {
+      if (error instanceof DOMException && error.name === "AbortError") {
         return;
       }
 
@@ -123,20 +125,21 @@ async function performSearchOnAnnotations(searchText: string, signal: AbortSigna
     return Promise.reject(response.statusText);
   }
 
-  type Json = Record<string, unknown>;
+  type Json = Record<string, any>;
 
   const annotations = (await response.json()) as Json[];
 
   return annotations
     .filter((annotation) => annotation.text || annotation.alertName)
-    .map((annotation) => {
+    .map((annotation, index) => {
       // console.log(annotation);
       return {
-        id: annotation.id as number,
+        id: (annotation.id as number) || index, // Use index as fallback if id is missing
         time: annotation.time as any,
         text: annotation.text as string,
         alertName: annotation.alertName as string,
         newState: annotation.newState as string,
+        uniqueKey: `${annotation.id || index}-${annotation.time || Date.now()}-${index}`, // Create unique key
       };
     });
 }

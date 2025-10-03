@@ -1,5 +1,10 @@
 # Grafana Changelog
 
+## [New command] - {PR_MERGE_DATE}
+
+- Add a new command Pages to go to the most common pages in Grafana
+- Updates dependencies & remove node-fetch from dependencies
+
 ## [Updates] - 2024-08-22
 
 - Use Service Account Token instead of API keys

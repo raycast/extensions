@@ -5,6 +5,8 @@ export interface Annotation {
   tags?: string[];
   dashboardId?: number;
   panelId?: number;
+  id?: number;
+  uniqueKey?: string;
 }
 
 export interface Patch {
