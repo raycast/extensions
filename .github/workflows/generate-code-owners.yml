@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - "extensions/**/package.json"
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -81,7 +81,7 @@ jobs:
         uses: raycast/github-actions/git-commit@master
         with:
           repo_dir: ${{ github.workspace }}
-          message: "Update CODEOWNERS (${{ env.SHORT_SHA }})"
+          message: "Update CODEOWNERs (${{ env.SHORT_SHA }})"
       - name: Notify Failure to Slack
         if: failure()
         uses: raycast/github-actions/slack-send@master
