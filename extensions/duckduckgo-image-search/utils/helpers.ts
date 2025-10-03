@@ -9,6 +9,7 @@ import mime from "mime-types";
 
 import path from "path";
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { homedir } from "os";
 
 export const emptyResult: ImageSearchResult = {
   vqd: "",
@@ -136,6 +137,50 @@ export async function copyImageToClipboard(image: DuckDuckGoImage) {
 export async function pasteImage(image: DuckDuckGoImage) {
   const file = await downloadImage(image);
   await Clipboard.paste({ file });
+}
+
+export async function saveImageToDownloads(image: DuckDuckGoImage) {
+  await showToast({
+    title: "Saving Image...",
+    style: Toast.Style.Animated,
+  });
+
+  try {
+    // Download the image to temp folder first
+    const tempFile = await downloadImage(image, false);
+
+    // Create a clean filename from the image title
+    const cleanTitle = image.title
+      .replace(/[^a-zA-Z0-9\s\-_.]/g, "") // Remove special characters
+      .replace(/\s+/g, "_") // Replace spaces with underscores
+      .substring(0, 100); // Limit filename length
+
+    // Get file extension from temp file
+    const extension = path.extname(tempFile);
+    const filename = `${cleanTitle || "duckduckgo_image"}_${image.image_token}${extension}`;
+
+    // Get Downloads folder path
+    const downloadsPath = path.join(homedir(), "Downloads");
+    const targetPath = path.join(downloadsPath, filename);
+
+    // Copy file from temp to Downloads
+    await fs.promises.copyFile(tempFile, targetPath);
+
+    await showToast({
+      title: "Image Saved!",
+      message: `Saved to Downloads folder as ${filename}`,
+      style: Toast.Style.Success,
+    });
+
+    return targetPath;
+  } catch (e: any) {
+    await showToast({
+      title: "Failed to Save Image!",
+      style: Toast.Style.Failure,
+      message: e.message,
+    });
+    throw e;
+  }
 }
 
 export function stringToPositiveNumber(value: string): number | undefined {

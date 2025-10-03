@@ -5,6 +5,9 @@
   "description": "Search Images inside Raycast by DuckDuckGo Image!",
   "icon": "extension-icon.png",
   "author": "jag-k",
+  "contributors": [
+    "anwarulislam"
+  ],
   "categories": [
     "Data",
     "Media",

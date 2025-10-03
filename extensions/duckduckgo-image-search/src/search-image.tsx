@@ -3,7 +3,7 @@ import { Action, ActionPanel, closeMainWindow, Grid, Icon, Image, PopToRootType,
 
 import { useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
-import { copyImageToClipboard, pasteImage, searchImage } from "../utils/helpers";
+import { copyImageToClipboard, pasteImage, saveImageToDownloads, searchImage } from "../utils/helpers";
 import { ImageLayout, ImageLayouts } from "../utils/consts";
 import { DuckDuckGoImage } from "../utils/search";
 
@@ -71,6 +71,15 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
             });
           })
         }
+      />
+      <Action
+        title="Save to Downloads"
+        shortcut={{
+          modifiers: ["cmd"],
+          key: "s",
+        }}
+        icon={Icon.Download}
+        onAction={() => saveImageToDownloads(item)}
       />
       <Action.CopyToClipboard
         title="Copy Image URL"
