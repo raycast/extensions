@@ -17,6 +17,10 @@
     "Productivity",
     "Finance"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "fill-checkout",
