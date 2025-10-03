@@ -52,6 +52,7 @@ jobs:
           CORE_PATHS="$SCRIPTS_FILES $GITHUB_FILES scripts/generate-code-owners.js .github/CODEOWNERS .github/raycast2github.json .github/extensionName2Folder.json"
           ALL_SPACED="$PACKAGE_FILES_SPACED $CORE_PATHS"
           ALL_SPACED=$(echo "$ALL_SPACED" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+          ALL_SPACED=$(echo "$ALL_SPACED" | tr ' ' '\n' | sed 's|^|\/|' | tr '\n' ' ' | sed 's/[[:space:]]*$//')  # Prefix / for exact non-cone paths (silence warnings)
           
           echo "Total sparse paths: $(echo "$ALL_SPACED" | wc -w)"
           
