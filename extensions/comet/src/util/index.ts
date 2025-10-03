@@ -28,7 +28,7 @@ const getCometFilePath = (fileName: CometFile, profile?: string) => {
       userLibraryDirectoryPath(),
       ...defaultCometProfilePath,
       profile ?? DEFAULT_COMET_PROFILE_ID,
-      fileName
+      fileName,
     );
   }
 
@@ -149,7 +149,7 @@ const getBookmarksFilePath = (profile?: string) => getCometFilePath("Bookmarks",
 function extractBookmarkFromBookmarkDirectory(
   bookmarkDirectory: BookmarkDirectory,
   maxResults?: number,
-  currentCount = { count: 0 }
+  currentCount = { count: 0 },
 ): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];
 

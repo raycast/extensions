@@ -22,7 +22,7 @@ export default async function (input: Input) {
     // Filter bookmarks based on the query
     const query = input.query.toLowerCase();
     const filteredBookmarks = bookmarks.filter(
-      (bookmark) => bookmark.title.toLowerCase().includes(query) || bookmark.url.toLowerCase().includes(query)
+      (bookmark) => bookmark.title.toLowerCase().includes(query) || bookmark.url.toLowerCase().includes(query),
     );
 
     return filteredBookmarks;

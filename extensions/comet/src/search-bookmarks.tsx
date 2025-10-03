@@ -42,7 +42,7 @@ export default function Command() {
             return bookmarkB - bookmarkA;
         }
       }),
-    [data, sortOrder]
+    [data, sortOrder],
   );
 
   // If profile check is still pending, don't render anything

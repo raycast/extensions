@@ -7,7 +7,7 @@ import { useCometInstallation } from "./useCometInstallation";
 
 export function useBookmarkSearch(
   query?: string,
-  initialProfile?: string
+  initialProfile?: string,
 ): Required<SearchResult<HistoryEntry> & { readonly errorView: ReactNode }> {
   const [data, setData] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,8 +42,8 @@ export function useBookmarkSearch(
           bookmarks.filter(
             (bookmark) =>
               bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
-          )
+              bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
+          ),
         );
         setIsLoading(false);
       } catch (e) {
