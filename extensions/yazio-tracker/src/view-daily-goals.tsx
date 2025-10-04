@@ -17,7 +17,7 @@ export default function Command() {
       ]);
       return { summary, goals, user };
     },
-    [selectedDate]
+    [selectedDate],
   );
 
   if (error) {
@@ -35,13 +35,23 @@ export default function Command() {
   }
 
   // --- Base Values ---
-  const consumedCalories = data ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["energy.energy"], 0)) : 0;
-  const consumedProtein = data ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.protein"], 0)) : 0;
-  const consumedCarbs = data ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.carb"], 0)) : 0;
-  const consumedFat = data ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.fat"], 0)) : 0;
-  
+  const consumedCalories = data
+    ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["energy.energy"], 0))
+    : 0;
+  const consumedProtein = data
+    ? Math.round(
+        Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.protein"], 0),
+      )
+    : 0;
+  const consumedCarbs = data
+    ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.carb"], 0))
+    : 0;
+  const consumedFat = data
+    ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.fat"], 0))
+    : 0;
+
   const burnedCalories = data ? Math.round(data.summary.activity_energy) : 0;
-  
+
   // --- Goal Calculations ---
   const baseGoalCalories = data ? Math.round(data.goals["energy.energy"]) : 0;
   const totalGoalCalories = baseGoalCalories + burnedCalories;
@@ -71,7 +81,10 @@ export default function Command() {
   const clampedFatProgress = Math.max(0, Math.min(1, fatProgress));
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<DateDropdown selectedDate={selectedDate} setSelectedDate={setSelectedDate} />}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={<DateDropdown selectedDate={selectedDate} setSelectedDate={setSelectedDate} />}
+    >
       <List.Section title="Summary">
         <List.Item
           icon={getProgressIcon(

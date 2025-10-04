@@ -1,33 +1,29 @@
 import { List } from "@raycast/api";
 import { formatDate } from "../utils/utils";
 
-  type DateDropdownProps = {
-    selectedDate: string;
-    setSelectedDate: (date: string) => void;
-  };
-  
-  export const DateDropdown = ({ selectedDate, setSelectedDate }: DateDropdownProps) => {
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      return date;
-    });
+type DateDropdownProps = {
+  selectedDate: string;
+  setSelectedDate: (date: string) => void;
+};
 
-    const getDayTitle = (date: Date, index: number) => {
-      if (index === 0) return "Today";
-      if (index === 1) return "Yesterday";
-      return date.toLocaleDateString(undefined, { weekday: "long" });
-    };
+export const DateDropdown = ({ selectedDate, setSelectedDate }: DateDropdownProps) => {
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    return date;
+  });
 
-    return (
-      <List.Dropdown tooltip="Select a date" value={selectedDate} onChange={(newValue) => setSelectedDate(newValue)}>
-        {days.map((date, index) => (
-          <List.Dropdown.Item
-            key={index}
-            title={getDayTitle(date, index)}
-            value={formatDate(date)}
-          />
-        ))}
-      </List.Dropdown>
-    );
+  const getDayTitle = (date: Date, index: number) => {
+    if (index === 0) return "Today";
+    if (index === 1) return "Yesterday";
+    return date.toLocaleDateString(undefined, { weekday: "long" });
   };
+
+  return (
+    <List.Dropdown tooltip="Select a date" value={selectedDate} onChange={(newValue) => setSelectedDate(newValue)}>
+      {days.map((date, index) => (
+        <List.Dropdown.Item key={index} title={getDayTitle(date, index)} value={formatDate(date)} />
+      ))}
+    </List.Dropdown>
+  );
+};

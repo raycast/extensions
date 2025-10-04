@@ -5,7 +5,7 @@ interface Product {
   id: string;
   name: string;
   producer: string | null;
-  nutrients: { "energy.energy": number; };
+  nutrients: { "energy.energy": number };
 }
 interface UserConsumedItem {
   id: string;
@@ -21,7 +21,9 @@ interface RecipePortion {
   name: string;
   calories: number;
 }
-type ConsumedItem = (UserConsumedItem & { productDetails?: Product | null; type: "product" }) | (RecipePortion & { type: "recipe" });
+type ConsumedItem =
+  | (UserConsumedItem & { productDetails?: Product | null; type: "product" })
+  | (RecipePortion & { type: "recipe" });
 
 interface MealDetailProps {
   meal: string;
@@ -41,30 +43,29 @@ export function MealDetail({ meal, items }: MealDetailProps) {
                 subtitle={item.productDetails?.producer || ""}
                 accessories={[
                   {
-                    text: `${Math.round(
-                      (item.productDetails?.nutrients["energy.energy"] || 0) * item.amount
-                    )} kcal`,
+                    text: `${Math.round((item.productDetails?.nutrients["energy.energy"] || 0) * item.amount)} kcal`,
                   },
                   { text: `${item.amount}g` },
                 ]}
               />
             );
-          } else { // item.type === 'recipe'
+          } else {
+            // item.type === 'recipe'
             return (
-               <List.Item
+              <List.Item
                 key={item.id}
                 title={item.name}
                 subtitle="Consumed from a recipe"
                 accessories={[
                   {
-                    text: `${item.calories==undefined?"Unknown":item.calories} kcal`,
+                    text: `${item.calories == undefined ? "Unknown" : item.calories} kcal`,
                   },
                   {
                     text: `${item.portion_count} portion${item.portion_count > 1 ? "s" : ""}`,
                   },
                 ]}
               />
-            )
+            );
           }
         })
       ) : (

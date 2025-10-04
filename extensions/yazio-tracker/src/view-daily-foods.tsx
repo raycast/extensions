@@ -11,7 +11,7 @@ interface Product {
   id: string;
   name: string;
   producer: string | null;
-  nutrients: { "energy.energy": number; };
+  nutrients: { "energy.energy": number };
 }
 interface UserConsumedItem {
   id: string;
@@ -27,8 +27,9 @@ interface RecipePortion {
   name: string;
   calories: number;
 }
-type ConsumedItem = (UserConsumedItem & { productDetails?: Product | null; type: "product" }) | (RecipePortion & { type: "recipe" });
-
+type ConsumedItem =
+  | (UserConsumedItem & { productDetails?: Product | null; type: "product" })
+  | (RecipePortion & { type: "recipe" });
 
 export default function Command() {
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
@@ -41,7 +42,7 @@ export default function Command() {
         (consumedItemsData.products as UserConsumedItem[]).map(async (item) => {
           const productDetails = await yazio.products.get(item.product_id);
           return { ...item, productDetails, type: "product" as const };
-        })
+        }),
       );
       console.log(productsWithDetails);
       const formattedRecipes = (consumedItemsData.recipe_portions as RecipePortion[]).map(
@@ -51,28 +52,33 @@ export default function Command() {
           name: "Recipe",
           portion_count: recipe.portion_count,
           type: "recipe" as const,
-        })
+        }),
       );
 
       const allConsumedItems: ConsumedItem[] = [...productsWithDetails, ...formattedRecipes];
 
-      const groupedByDaytime = allConsumedItems.reduce((acc, item) => {
-        const daytime = item.daytime;
-        if (!acc[daytime]) acc[daytime] = [];
-        acc[daytime].push(item);
-        return acc;
-      }, {} as Record<string, ConsumedItem[]>);
+      const groupedByDaytime = allConsumedItems.reduce(
+        (acc, item) => {
+          const daytime = item.daytime;
+          if (!acc[daytime]) acc[daytime] = [];
+          acc[daytime].push(item);
+          return acc;
+        },
+        {} as Record<string, ConsumedItem[]>,
+      );
 
       return groupedByDaytime;
     },
-    [selectedDate]
+    [selectedDate],
   );
-
 
   const mealOrder = ["breakfast", "lunch", "dinner", "snack"];
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<DateDropdown selectedDate={selectedDate} setSelectedDate={setSelectedDate} />}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={<DateDropdown selectedDate={selectedDate} setSelectedDate={setSelectedDate} />}
+    >
       {mealOrder.map((meal) => (
         <List.Item
           key={meal}
