@@ -32,7 +32,7 @@ export default function Command() {
       setError(null);
 
       const data = await fetchLatestHeadlines();
-      setArticles(Array.isArray(data) ? data : []);
+      setArticles(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message);

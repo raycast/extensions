@@ -1,10 +1,28 @@
 import fetch from "node-fetch";
 
+import { Article } from "./type";
+
 // Base Publico API URLs
 const BASE_URL = "https://www.publico.pt/api";
 
+function ensureArticleArray(data: unknown): Article[] {
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data as Article[];
+}
+
+function ensureArticle(data: unknown): Article | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  return data as Article;
+}
+
 // Fetch latest headlines
-export async function fetchLatestHeadlines() {
+export async function fetchLatestHeadlines(): Promise<Article[]> {
   try {
     const response = await fetch(`${BASE_URL}/list/ultimas`);
 
@@ -15,7 +33,7 @@ export async function fetchLatestHeadlines() {
     }
 
     const data = await response.json();
-    return data;
+    return ensureArticleArray(data);
   } catch (error) {
     console.error("Error fetching latest headlines:", error);
     throw error;
@@ -23,7 +41,7 @@ export async function fetchLatestHeadlines() {
 }
 
 // Fetch top news
-export async function fetchTopNews() {
+export async function fetchTopNews(): Promise<Article[]> {
   try {
     const response = await fetch(`${BASE_URL}/list/destaque`);
 
@@ -34,7 +52,7 @@ export async function fetchTopNews() {
     }
 
     const data = await response.json();
-    return data;
+    return ensureArticleArray(data);
   } catch (error) {
     console.error("Error fetching top news:", error);
     throw error;
@@ -42,7 +60,7 @@ export async function fetchTopNews() {
 }
 
 // Search articles
-export async function searchArticles(query: string) {
+export async function searchArticles(query: string): Promise<Article[]> {
   try {
     // Encode the query parameter
     const encodedQuery = encodeURIComponent(query);
@@ -57,7 +75,7 @@ export async function searchArticles(query: string) {
     }
 
     const data = await response.json();
-    return data;
+    return ensureArticleArray(data);
   } catch (error) {
     console.error("Error searching articles:", error);
     throw error;
@@ -112,7 +130,9 @@ export function extractArticleId(url: string): string | null {
 }
 
 // Fetch article detail by ID
-export async function fetchArticleDetail(articleId: string) {
+export async function fetchArticleDetail(
+  articleId: string,
+): Promise<Article | null> {
   try {
     if (!articleId) {
       throw new Error("Article ID is required");
@@ -129,7 +149,7 @@ export async function fetchArticleDetail(articleId: string) {
     }
 
     const data = await response.json();
-    return data;
+    return ensureArticle(data);
   } catch (error) {
     console.error("Error fetching article detail:", error);
     throw error;

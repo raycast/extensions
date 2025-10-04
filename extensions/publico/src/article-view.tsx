@@ -29,6 +29,13 @@ export default function ArticleView(props: ArticleViewProps) {
         }
 
         const data = await fetchArticleDetail(articleId);
+
+        if (!data) {
+          setError("Article details are not available right now");
+          setArticle(null);
+          return;
+        }
+
         setArticle(data);
       } catch (err) {
         setError(

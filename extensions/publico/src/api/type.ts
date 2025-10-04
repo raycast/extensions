@@ -39,6 +39,25 @@ export interface Article {
           url: string;
         };
       };
-  tags?: string[];
+  tags?:
+    | string
+    | string[]
+    | Array<
+        | string
+        | {
+            nome?: string;
+            name?: string;
+            value?: string;
+            titulo?: string;
+            title?: string;
+          }
+      >
+    | {
+        nome?: string;
+        name?: string;
+        value?: string;
+        titulo?: string;
+        title?: string;
+      };
   fullUrl?: string;
 }

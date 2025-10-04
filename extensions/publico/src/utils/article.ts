@@ -139,6 +139,17 @@ export function extractTags(tags: Article["tags"]): string[] {
     return [tags];
   }
 
+  if (typeof tags === "object" && tags !== null) {
+    const candidate =
+      (tags as Record<string, string | undefined>).nome ||
+      (tags as Record<string, string | undefined>).name ||
+      (tags as Record<string, string | undefined>).value ||
+      (tags as Record<string, string | undefined>).titulo ||
+      (tags as Record<string, string | undefined>).title;
+
+    return candidate ? [candidate] : [];
+  }
+
   return [];
 }
 

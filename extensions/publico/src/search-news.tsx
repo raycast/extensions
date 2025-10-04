@@ -51,7 +51,7 @@ export default function Command() {
       setIsLoading(true);
       setError(null);
       const data = await searchArticles(query);
-      setArticles(Array.isArray(data) ? data : []);
+      setArticles(data);
       setEnrichedArticles(new Map());
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -79,6 +79,10 @@ export default function Command() {
       setSelectedArticleId(articleId);
 
       const detail = await fetchArticleDetail(articleId);
+      if (!detail) {
+        return;
+      }
+
       setEnrichedArticles((prev) => {
         const updated = new Map(prev);
         updated.set(articleId, detail);
