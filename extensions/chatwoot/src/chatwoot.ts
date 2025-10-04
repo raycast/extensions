@@ -1,27 +1,33 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Integration, ListResult } from "./types";
+import { Contact, Conversation, Integration, ListResult } from "./types";
 
 class Chatwoot {
     private url: string;
     private accessToken: string;
     private accountId: string;
-    public contacts: IntegrationsService;
+    public contacts: ContactsService;
+    public conversations: ConversationsService;
+    public integrations: IntegrationsService;
 
     constructor(url: string, accessToken: string, accountId: string) {
         this.url = url;
         this.accessToken = accessToken;
         this.accountId = accountId;
-        this.contacts = new IntegrationsService(this);
+        this.contacts = new ContactsService(this);
+        this.conversations = new ConversationsService(this);
+        this.integrations = new IntegrationsService(this);
     }
 
     public buildUrl(route: string) {
         return new URL(route, this.url);
     }
 
-    protected async request<T> (endpoint: string) {
+    protected async request<T> (endpoint: string, options?: RequestInit) {
         const response = await fetch(this.buildUrl(`api/v1/accounts/${this.accountId}/${endpoint}`), {
+            ...options,
             headers : {
-                api_access_token: this.accessToken
+                api_access_token: this.accessToken,
+                "Content-Type": "application/json"
             }
         })
         if (!response.headers.get("content-type")?.includes("json")) throw new Error(response.statusText);
@@ -31,6 +37,18 @@ class Chatwoot {
     }
 }
 
+class ContactsService {
+    constructor(private client: Chatwoot) {}
+    async list(page: string) {
+        return this.client["request"]<ListResult<Contact>>(`contacts?page=${page}`);
+    }
+}
+class ConversationsService {
+    constructor(private client: Chatwoot) {}
+    async list(page: string) {
+        return this.client["request"]<{data: {payload: Conversation[]}}>(`conversations?page=${page}`);
+    }
+}
 class IntegrationsService {
     constructor(private client: Chatwoot) {}
     async list() {

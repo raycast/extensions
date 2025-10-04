@@ -10,7 +10,7 @@ function getIntegrationIcon(integration: Integration) {
 }
 export default function ListIntegrations() {
 const {isLoading, data: integrations}  = useCachedPromise(async() => {
-  const {payload} = await chatwoot.contacts.list();
+  const {payload} = await chatwoot.integrations.list();
   return payload;
 },[],{initialData:[]})
 

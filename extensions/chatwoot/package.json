@@ -41,6 +41,18 @@
   ],
   "commands": [
     {
+      "name": "list-contacts",
+      "title": "List Contacts",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "list-conversations",
+      "title": "List Conversations",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "list-integrations",
       "title": "List Integrations",
       "description": "",
