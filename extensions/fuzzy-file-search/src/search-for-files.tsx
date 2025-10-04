@@ -207,22 +207,26 @@ export default function Command() {
         await new Promise<void>((resolve, reject) => {
           const rl = readline.createInterface({ input: fzf.stdout as Stream.Readable });
           rl.on("line", (line) => {
-            filteredResults.push(line);
             // Limit results, as otherwise they will exceed memory limits,
             // raycast will terminate the extension. Issue #21580
-            if (filteredResults.length >= 500) {
-              // It sends the kill signal when reaching 500,
-              // so results will be larger than 500
+            if (filteredResults.length >= 1000) {
+              // It sends the kill signal when reaching 1000,
+              // so results will be larger than 1000
               fzf.kill();
+            } else {
+              filteredResults.push(line);
             }
           });
+
           let stderr = "";
           fzf.stderr?.on("data", (chunk) => {
             stderr += chunk;
           });
+
           fzf.on("error", () => {
             console.log("aborting fzf");
           });
+
           fzf.on("close", (code) => {
             rl.close();
             // Fzf returns error code 1 if output is empty
