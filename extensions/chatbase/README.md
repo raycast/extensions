@@ -10,7 +10,7 @@ This is a Raycast extension for [Chatbase](https://chatbase.co/) - _AI agents fo
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/chatbase) OR `install` via Raycast Store
 
-2. **Enter your Chatbase API Key**: The first time you use the extension, you'll need to enter the API Key in Preferences OR at first prompt:
+2. **Enter your Chatbase API Key**: The first time you use the extension, you'll need to enter the API Key in **Preferences** OR at first prompt:
 
     a. `Navigate` to Workspace settings > API keys (https://www.chatbase.co/dashboard/WORKSPACE-SLUG/settings/api-keys)
 
@@ -18,7 +18,7 @@ This is a Raycast extension for [Chatbase](https://chatbase.co/) - _AI agents fo
 
     c. `Copy` the Key
     
-    d. `Paste` in Preferences
+    d. `Paste` in **Preferences**
 
 ## ➕ More
 
