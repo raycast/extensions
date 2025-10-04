@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Grid, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { Chatbot, Conversation } from "./types";
 import { format, formatDistanceToNow } from "date-fns";
@@ -29,7 +29,7 @@ export default function Agents() {
       return {
         data,
       };
-    }
+    },
   });
 
   return (
