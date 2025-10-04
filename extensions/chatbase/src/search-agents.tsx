@@ -141,7 +141,7 @@ function Conversations({ chatbot }: { chatbot: Chatbot }) {
       ) : (
         conversations.map((conversation, conversationIndex) => (
           <List.Item
-            key={conversationIndex}
+            key={conversation.id}
             icon={Icon.List}
             title={conversation.messages.at(-1)?.content || conversationIndex.toString()}
             detail={<List.Item.Detail markdown={generateConversationMarkdown(conversation)} />}
@@ -162,7 +162,7 @@ function Messages({ conversation }: { conversation: Conversation }) {
     <List navigationTitle={`Conversations / ${conversation.id} / Messages`} isShowingDetail>
       {conversation.messages.map((message, messageIndex) => (
         <List.Item
-          key={messageIndex}
+          key={conversation.id + messageIndex}
           icon={Icon.Message}
           title={message.content}
           detail={<List.Item.Detail markdown={`**${message.role.toUpperCase()}**: ${message.content}`} />}
