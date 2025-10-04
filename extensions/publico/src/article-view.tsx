@@ -60,15 +60,16 @@ export default function ArticleView(props: ArticleViewProps) {
 
     const title = article.titulo || articleTitle;
     const lead = article.lead || "";
+    const body = article.body ?? "";
     const publishedDate = article.data
       ? formatDate(article.data)
       : "Not available";
     const authors = formatAuthors(article.autores);
-    const hasContent = article.body && article.body.trim().length > 0;
+    const hasContent = body.trim().length > 0;
 
     return `# ${title}\n\n*${authors} • ${publishedDate}*\n\n${lead ? `**${lead}**\n\n` : ""}${
       hasContent
-        ? article.body.replace(/<[^>]*>/g, "")
+        ? body.replace(/<[^>]*>/g, "")
         : "To read the full article, please click 'Open in Browser'.\n\nThe full content of this article is only available on the Público website.*"
     }\n`;
   }

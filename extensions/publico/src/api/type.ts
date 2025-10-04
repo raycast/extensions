@@ -1,3 +1,14 @@
+export type TagLike =
+  | string
+  | {
+      nome?: string;
+      name?: string;
+      value?: string;
+      titulo?: string;
+      title?: string;
+      toString?: () => string;
+    };
+
 export interface Article {
   id: number;
   titulo: string;
@@ -39,25 +50,6 @@ export interface Article {
           url: string;
         };
       };
-  tags?:
-    | string
-    | string[]
-    | Array<
-        | string
-        | {
-            nome?: string;
-            name?: string;
-            value?: string;
-            titulo?: string;
-            title?: string;
-          }
-      >
-    | {
-        nome?: string;
-        name?: string;
-        value?: string;
-        titulo?: string;
-        title?: string;
-      };
+  tags?: TagLike | TagLike[];
   fullUrl?: string;
 }

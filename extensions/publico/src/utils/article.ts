@@ -1,5 +1,5 @@
-import { Color, Image } from "@raycast/api";
-import { Article } from "../api/type";
+import { Color, Icon, Image } from "@raycast/api";
+import { Article, TagLike } from "../api/type";
 
 const FALLBACK_URL = "https://www.publico.pt";
 const TAG_COLORS: Color.ColorLike[] = [
@@ -87,70 +87,51 @@ export function formatAuthors(autores: Article["autores"]): string {
   return "Not available";
 }
 
+function normalizeTag(tag: TagLike | undefined): string {
+  if (!tag) {
+    return "";
+  }
+
+  if (typeof tag === "string") {
+    return tag;
+  }
+
+  const candidate =
+    tag.nome || tag.name || tag.value || tag.titulo || tag.title;
+
+  if (candidate) {
+    return candidate;
+  }
+
+  if (typeof tag.toString === "function") {
+    const text = tag.toString();
+    if (text !== "[object Object]") {
+      return text;
+    }
+  }
+
+  return "";
+}
+
 export function extractTags(tags: Article["tags"]): string[] {
   if (!tags) {
     return [];
   }
 
   if (Array.isArray(tags)) {
-    try {
-      return tags
-        .map((tag) => {
-          if (typeof tag === "string") {
-            return tag;
-          }
-
-          if (typeof tag === "object" && tag !== null) {
-            const candidate =
-              (tag as Record<string, string | undefined>).nome ||
-              (tag as Record<string, string | undefined>).name ||
-              (tag as Record<string, string | undefined>).value ||
-              (tag as Record<string, string | undefined>).titulo ||
-              (tag as Record<string, string | undefined>).title;
-
-            if (candidate) {
-              return candidate;
-            }
-
-            if (typeof tag.toString === "function") {
-              const text = tag.toString();
-              if (text !== "[object Object]") {
-                return text;
-              }
-            }
-          }
-
-          return String(tag);
-        })
-        .filter(
-          (tag) =>
-            Boolean(tag) &&
-            tag !== "undefined" &&
-            tag !== "null" &&
-            tag !== "[object Object]",
-        );
-    } catch (error) {
-      console.error("Error extracting tags:", error);
-      return [];
-    }
+    return tags
+      .map((tag) => normalizeTag(tag as TagLike))
+      .filter(
+        (tag) =>
+          Boolean(tag) &&
+          tag !== "undefined" &&
+          tag !== "null" &&
+          tag !== "[object Object]",
+      );
   }
 
-  if (typeof tags === "string") {
-    return [tags];
-  }
-
-  if (typeof tags === "object" && tags !== null) {
-    const candidate =
-      (tags as Record<string, string | undefined>).nome ||
-      (tags as Record<string, string | undefined>).name ||
-      (tags as Record<string, string | undefined>).value ||
-      (tags as Record<string, string | undefined>).titulo ||
-      (tags as Record<string, string | undefined>).title;
-
-    return candidate ? [candidate] : [];
-  }
-
-  return [];
+  const normalized = normalizeTag(tags as TagLike);
+  return normalized ? [normalized] : [];
 }
 
 export function getTagColor(index: number): Color.ColorLike {
@@ -182,6 +163,5 @@ export function getArticleIcon(article: Article): Image.ImageLike {
     return { source: article.imagem.src };
   }
 
-  const letter = article.titulo ? article.titulo.charAt(0).toUpperCase() : "P";
-  return { text: letter, tintColor: "#1E90FF" };
+  return { source: Icon.Newspaper, tintColor: "#1E90FF" };
 }
