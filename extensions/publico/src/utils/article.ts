@@ -87,13 +87,19 @@ export function formatAuthors(autores: Article["autores"]): string {
   return "Not available";
 }
 
-function normalizeTag(tag: TagLike | undefined): string {
-  if (!tag) {
-    return "";
-  }
+type TagObject = Exclude<TagLike, string>;
 
+function isTagObject(tag: TagLike | undefined): tag is TagObject {
+  return Boolean(tag) && typeof tag === "object";
+}
+
+function normalizeTag(tag: TagLike | undefined): string {
   if (typeof tag === "string") {
     return tag;
+  }
+
+  if (!isTagObject(tag)) {
+    return "";
   }
 
   const candidate =
@@ -163,5 +169,5 @@ export function getArticleIcon(article: Article): Image.ImageLike {
     return { source: article.imagem.src };
   }
 
-  return { source: Icon.Newspaper, tintColor: "#1E90FF" };
+  return { source: Icon.Globe, tintColor: "#1E90FF" };
 }
