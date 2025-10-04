@@ -87,7 +87,14 @@ export function formatAuthors(autores: Article["autores"]): string {
   return "Not available";
 }
 
-type TagObject = Exclude<TagLike, string>;
+type TagObject = {
+  nome?: string;
+  name?: string;
+  value?: string;
+  titulo?: string;
+  title?: string;
+  toString?: () => string;
+};
 
 function isTagObject(tag: TagLike | undefined): tag is TagObject {
   return Boolean(tag) && typeof tag === "object";
