@@ -2,8 +2,8 @@ import { List } from "@raycast/api";
 import { getProgressIcon, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { yazio } from "./utils/yazio";
-
-const formatDate = (date: Date) => date.toISOString().split("T")[0];
+import { DateDropdown } from "./components/DateDropdown";
+import { formatDate } from "./utils/utils";
 
 export default function Command() {
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
@@ -17,7 +17,7 @@ export default function Command() {
       ]);
       return { summary, goals, user };
     },
-    [selectedDate],
+    [selectedDate]
   );
 
   if (error) {
@@ -35,23 +35,13 @@ export default function Command() {
   }
 
   // --- Base Values ---
-  const consumedCalories = data
-    ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["energy.energy"], 0))
-    : 0;
-  const consumedProtein = data
-    ? Math.round(
-        Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.protein"], 0),
-      )
-    : 0;
-  const consumedCarbs = data
-    ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.carb"], 0))
-    : 0;
-  const consumedFat = data
-    ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.fat"], 0))
-    : 0;
-
+  const consumedCalories = data ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["energy.energy"], 0)) : 0;
+  const consumedProtein = data ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.protein"], 0)) : 0;
+  const consumedCarbs = data ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.carb"], 0)) : 0;
+  const consumedFat = data ? Math.round(Object.values(data.summary.meals).reduce((total, meal) => total + meal.nutrients["nutrient.fat"], 0)) : 0;
+  
   const burnedCalories = data ? Math.round(data.summary.activity_energy) : 0;
-
+  
   // --- Goal Calculations ---
   const baseGoalCalories = data ? Math.round(data.goals["energy.energy"]) : 0;
   const totalGoalCalories = baseGoalCalories + burnedCalories;
@@ -80,72 +70,48 @@ export default function Command() {
   const fatProgress = goalFat > 0 ? consumedFat / goalFat : 0;
   const clampedFatProgress = Math.max(0, Math.min(1, fatProgress));
 
-  const DateDropdown = () => {
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(today.getDate() - 2);
-    return (
-      <List.Dropdown tooltip="Select a date" value={selectedDate} onChange={(newValue) => setSelectedDate(newValue)}>
-        <List.Dropdown.Item title="Today" value={formatDate(today)} />
-        <List.Dropdown.Item title="Yesterday" value={formatDate(yesterday)} />
-        <List.Dropdown.Item
-          title={twoDaysAgo.toLocaleDateString(undefined, { weekday: "long" })}
-          value={formatDate(twoDaysAgo)}
-        />
-      </List.Dropdown>
-    );
-  };
-
   return (
-    <List isLoading={isLoading} searchBarAccessory={<DateDropdown />}>
-      {data ? (
-        <>
-          <List.Section title="Summary">
-            <List.Item
-              icon={getProgressIcon(
-                clampedCalorieProgress,
-                calorieProgress > 1 ? "#FF6347" : "#007AFF", // Tomato Red vs Blue
-              )}
-              title={`${remainingCalories} calories remaining`}
-              accessories={[
-                { text: `Consumed: ${consumedCalories}` },
-                { text: `Goal: ${totalGoalCalories}` },
-                { text: `Burned: ${burnedCalories}` },
-              ]}
-            />
-          </List.Section>
-          <List.Section title="Macronutrients">
-            <List.Item
-              icon={getProgressIcon(
-                clampedProteinProgress,
-                proteinProgress > 1 ? "#FF6347" : "#9C27B0", // Tomato Red vs Purple
-              )}
-              title="Protein"
-              accessories={[{ text: `${consumedProtein}g / ${goalProtein}g` }]}
-            />
-            <List.Item
-              icon={getProgressIcon(
-                clampedCarbsProgress,
-                carbsProgress > 1 ? "#FF6347" : "#FFC107", // Tomato Red vs Yellow
-              )}
-              title="Carbs"
-              accessories={[{ text: `${consumedCarbs}g / ${goalCarbs}g` }]}
-            />
-            <List.Item
-              icon={getProgressIcon(
-                clampedFatProgress,
-                fatProgress > 1 ? "#FF6347" : "#28A745", // Tomato Red vs Green
-              )}
-              title="Fat"
-              accessories={[{ text: `${consumedFat}g / ${goalFat}g` }]}
-            />
-          </List.Section>
-        </>
-      ) : (
-        <List.EmptyView title="Loading..." />
-      )}
+    <List isLoading={isLoading} searchBarAccessory={<DateDropdown selectedDate={selectedDate} setSelectedDate={setSelectedDate} />}>
+      <List.Section title="Summary">
+        <List.Item
+          icon={getProgressIcon(
+            clampedCalorieProgress,
+            calorieProgress > 1 ? "#FF6347" : "#007AFF", // Tomato Red vs Blue
+          )}
+          title={`${remainingCalories} calories remaining`}
+          accessories={[
+            { text: `Consumed: ${consumedCalories}` },
+            { text: `Goal: ${totalGoalCalories}` },
+            { text: `Burned: ${burnedCalories}` },
+          ]}
+        />
+      </List.Section>
+      <List.Section title="Macronutrients">
+        <List.Item
+          icon={getProgressIcon(
+            clampedProteinProgress,
+            proteinProgress > 1 ? "#FF6347" : "#9C27B0", // Tomato Red vs Purple
+          )}
+          title="Protein"
+          accessories={[{ text: `${consumedProtein}g / ${goalProtein}g` }]}
+        />
+        <List.Item
+          icon={getProgressIcon(
+            clampedCarbsProgress,
+            carbsProgress > 1 ? "#FF6347" : "#FFC107", // Tomato Red vs Yellow
+          )}
+          title="Carbs"
+          accessories={[{ text: `${consumedCarbs}g / ${goalCarbs}g` }]}
+        />
+        <List.Item
+          icon={getProgressIcon(
+            clampedFatProgress,
+            fatProgress > 1 ? "#FF6347" : "#28A745", // Tomato Red vs Green
+          )}
+          title="Fat"
+          accessories={[{ text: `${consumedFat}g / ${goalFat}g` }]}
+        />
+      </List.Section>
     </List>
   );
 }

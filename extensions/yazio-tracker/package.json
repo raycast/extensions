@@ -2,21 +2,21 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yazio-tracker",
   "title": "Yazio Tracker",
-  "description": "View you daily goals and calories in Yazio, and log food directly from Raycast.",
+  "description": "View your daily goals and calories in Yazio, and log food directly from Raycast.",  
   "icon": "yazio.png",
   "license": "MIT",
   "commands": [
     {
       "name": "view-daily-goals",
       "title": "View Daily Goals",
-      "description": "View you daily goals in Yazio.",
+      "description": "View your daily goals in Yazio.",  
       "mode": "view",
       "subtitle": "Yazio"
     },
     {
       "name": "view-daily-foods",
       "title": "View Daily Foods",
-      "description": "View you daily foods in Yazio.",
+      "description": "View your daily foods in Yazio.",  
       "mode": "view",
       "subtitle": "Yazio"
     },

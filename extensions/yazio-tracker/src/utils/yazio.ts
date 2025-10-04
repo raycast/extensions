@@ -1,18 +1,15 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Yazio } from "yazio";
+import { Yazio, YazioAuth } from "yazio";
 
 interface Preferences {
   username?: string;
   password?: string;
 }
 
-// Define a minimal Token type to satisfy the linter
 interface AuthToken {
   access_token: string;
-  // Add other token properties if needed by other parts of the logic
 }
 
-// Cache for the authentication promise, now with a specific type
 let authPromise: Promise<AuthToken> | null = null;
 
 class YazioClient {
@@ -22,6 +19,7 @@ class YazioClient {
     // Private constructor
   }
 
+  // This method remains the same, creating the instance only once.
   public static getInstance(): Yazio {
     if (!YazioClient.instance) {
       const preferences = getPreferenceValues<Preferences>();
@@ -30,32 +28,36 @@ class YazioClient {
         throw new Error("Username or password not set in preferences.");
       }
 
-      const yazioInstance = new Yazio({
+      const authHandler = new YazioAuth({
         credentials: {
           username: preferences.username,
           password: preferences.password,
         },
       });
 
-      // Wrap the original authenticate method
-      const originalAuthenticate = yazioInstance["auth"].authenticate.bind(yazioInstance["auth"]);
-
-      yazioInstance["auth"].authenticate = () => {
+      const originalAuthenticate = authHandler.authenticate.bind(authHandler);
+      authHandler.authenticate = () => {
         if (!authPromise) {
-          authPromise = originalAuthenticate().catch((error: Error) => {
-            // Clear the promise on failure to allow retries
+          authPromise = originalAuthenticate().catch((error) => {
             authPromise = null;
             throw error;
           });
         }
-        return authPromise;
+        return authPromise as Promise<AuthToken>;
       };
 
-      YazioClient.instance = yazioInstance;
+      YazioClient.instance = new Yazio(authHandler);
     }
 
     return YazioClient.instance;
   }
 }
 
-export const yazio = YazioClient.getInstance();
+export const yazio = {
+  get user() {
+    return YazioClient.getInstance().user;
+  },
+  get products() {
+    return YazioClient.getInstance().products;
+  },
+};
