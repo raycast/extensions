@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, getAvatarIcon, getFavicon, useCachedPromise, useCachedState, useForm} from "@raycast/utils";
 import { DNSRecord, Domain } from "./types";
 import { callOvh } from "./ovh";
@@ -69,17 +69,54 @@ export default function ManageDomains() {
 }
 
 function DNSRecords({domain}:{domain: Domain}) {
-  const {isLoading, data:records}= useCachedPromise(async()=>{
+  const {isLoading, data:records, mutate}= useCachedPromise(async()=>{
     const list = await callOvh<string[]>(`v1/domain/zone/${domain.domain}/record`);
     const records = await Promise.all(list.map(record => callOvh<DNSRecord>(`v1/domain/zone/${domain.domain}/record/${record}`)));
     return records;
   }, [], {
     initialData: []
   })
+
+  async function confirmAndDelete(record: DNSRecord) {
+    const options: Alert.Options = {
+      icon: {source:Icon.Trash, tintColor: Color.Red},
+      title: `Are you sure you want to delete the ${record.fieldType} record from the DNS zone of the domain?`,
+      message: `The deletion will be applied immediately on the DNS zone, but please note that the change may take up to 24 hours to propagate.`,
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Delete"
+      }
+    }
+    if (!(await confirmAlert(options))) return;
+
+    const toast = await showToast(Toast.Style.Animated, `Deleting ${record.fieldType}`, record.id.toString());
+    try {
+      await mutate(
+        callOvh(`v1/domain/zone/${record.zone}/record/${record.id}`), {
+          optimisticUpdate(data) {
+            return data.filter(d => d.id!==record.id)
+          },
+          shouldRevalidateAfter: false
+        }
+      )
+      toast.title = "Deleted! Refreshing"
+      await callOvh(`v1/domain/zone/${record.zone}/refresh`, {
+        method: "POST"
+      }).catch(() => {throw new Error("Could not refresh")})
+      toast.style = Toast.Style.Success;
+      toast.title = "Refreshed";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = `${error}`;
+    }
+  }
   return <List isLoading={isLoading} isShowingDetail>
     {records.map(record => <List.Item key={record.id} icon={getAvatarIcon(record.fieldType)} title={record.zone} accessories={[{tag: record.fieldType}]} detail={<List.Item.Detail markdown={record.target} />} actions={<ActionPanel>
       {/* eslint-disable-next-line @raycast/prefer-title-case */}
       <Action.Push icon={Icon.Plus} title="Create DNS Record" target={<CreateDNSRecord zoneName={record.zone} />} />
+      {/* eslint-disable-next-line @raycast/prefer-title-case */}
+      <Action icon={Icon.Trash} title="Delete DNS Record" onAction={() => confirmAndDelete(record)} style={Action.Style.Destructive} />
     </ActionPanel>} />)}
   </List>
 }
@@ -92,19 +129,26 @@ function CreateDNSRecord({zoneName}: {zoneName: string}) {
   const {pop} = useNavigation()
   type FormValues = {
     fieldType: string
+    subDomain: string
+    target: string
   }
-  const {handleSubmit,itemProps}= useForm<FormValues>({
+  const {handleSubmit,itemProps,values}= useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating", values.fieldType);
       try {
         await callOvh(`v1/domain/zone/${zoneName}/record`, {
           method: "POST",
-          // body: {
-          //   nameServers: Object.values(values).filter(host => !!host).map(host => ({host}))
-          // }
+          body: {
+            ...values,
+            subDomain: values.subDomain || null,
+          }
         })
+        toast.title = "Created! Refreshing"
+        await callOvh(`v1/domain/zone/${zoneName}/refresh`, {
+          method: "POST"
+        }).catch(() => {throw new Error("Could not refresh")})
         toast.style = Toast.Style.Success;
-        toast.title ="Created"
+        toast.title = "Refreshed";
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -113,7 +157,8 @@ function CreateDNSRecord({zoneName}: {zoneName: string}) {
       }
     },
     validation: {
-      fieldType: FormValidation.Required
+      fieldType: FormValidation.Required,
+      target: FormValidation.Required
     }
   })
   return <Form actions={<ActionPanel>
@@ -125,6 +170,9 @@ function CreateDNSRecord({zoneName}: {zoneName: string}) {
 {items.map(item => <Form.Dropdown.Item key={item} title={item} value={item} />)}
   </Form.Dropdown.Section>)}
 </Form.Dropdown>
+<Form.TextField title="Sub-domain" {...itemProps.subDomain} />
+<Form.Description text={`${values.subDomain || ""}.${zoneName}`} />
+<Form.TextField title="Value" {...itemProps.target} />
   </Form>
 }
 
