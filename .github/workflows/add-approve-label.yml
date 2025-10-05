@@ -164,7 +164,8 @@ jobs:
       if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
       uses: actions-ecosystem/action-add-labels@v1
       with:
-        github_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}  # <- This was missing in your paste!
+        labels: Approved
+        github_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
 
     - name: Debug label outcome
       if: always()
