@@ -10,7 +10,7 @@ on:
     types: [submitted]
 
 permissions:
-  pull-requests: write
+  issues: write  # Enables label adds on PRs (fixes 403); pull-requests: write optional here
 
 jobs:
   label_on_approval:
@@ -98,6 +98,21 @@ jobs:
 
     - name: Add Approved label
       if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
-      uses: actions-ecosystem/action-add-labels@v1
-      with:
-        labels: Approved
+      run: |
+        pr_number="${{ github.event.pull_request.number }}"
+        echo "::notice::Adding 'Approved' label to PR #$pr_number"
+        response=$(curl -s -w "\n%{http_code}" -X POST \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/repos/${{ github.repository }}/issues/$pr_number/labels" \
+          -d '{"labels":["Approved"]}')
+        http_code=$(echo "$response" | tail -n1)
+        echo "::debug::Label add HTTP Code: $http_code"
+        if [[ "$http_code" == "200" || "$http_code" == "201" ]]; then
+          echo "::notice::Label added successfully"
+        else
+          echo "::error::Failed to add label (code: $http_code) - Check perms"
+          exit 1  # Fail job on label error (now that logic's solid)
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
