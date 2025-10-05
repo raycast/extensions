@@ -3,13 +3,43 @@
   "name": "web-blocker",
   "title": "WebBlocker",
   "description": "Block distracting websites quickly and easily",
-  "icon": "assets/icon.png",
+  "icon": "🚫",
   "author": "ahmadbulbul",
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
   "version": "1.0.0",
+  "commands": [
+    {
+      "name": "add-website",
+      "title": "Add Website to Block",
+      "description": "Add a website to your block list",
+      "mode": "view",
+      "icon": "➕"
+    },
+    {
+      "name": "enable-blocking",
+      "title": "Enable Site Blocking",
+      "description": "Activate blocking for all websites in your list",
+      "mode": "no-view",
+      "icon": "🚫"
+    },
+    {
+      "name": "disable-blocking",
+      "title": "Disable Site Blocking",
+      "description": "Deactivate site blocking and restore access",
+      "mode": "no-view",
+      "icon": "✅"
+    },
+    {
+      "name": "view-blocked-sites",
+      "title": "View Blocked Sites",
+      "description": "View and manage your blocked websites list",
+      "mode": "view",
+      "icon": "📋"
+    }
+  ],
   "scripts": {
     "build": "npx tsc",
     "dev": "ray develop",
