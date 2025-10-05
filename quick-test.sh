@@ -16,16 +16,21 @@ echo ""
 echo "3. TypeScript compilation:"
 if [ -d "dist" ]; then
     echo "✅ Compiled files: $(ls dist/*.js | wc -l | xargs) JS files"
+    echo "   Files: $(ls dist/*.js | xargs basename -a | tr '\n' ' ')"
 else
     echo "❌ No dist folder - run 'npm run build'"
 fi
 echo ""
 
-echo "4. Extension path for Raycast import:"
-echo "📁 $(pwd)"
+echo "4. Command executable paths:"
+grep '"main":' package.json | sed 's/.*"main": "\(.*\)".*/✅ \1/' || echo "❌ Missing main fields"
 echo ""
 
-echo "5. Next steps:"
+echo "5. Extension path for Raycast import:"
+echo "📍 $(pwd)"
+echo ""
+
+echo "6. Next steps:"
 echo "   • Open Raycast preferences (⌘+,)"
 echo "   • Go to Extensions → Add Extension"
 echo "   • Import from the path above"
