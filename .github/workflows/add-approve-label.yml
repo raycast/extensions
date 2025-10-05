@@ -1,6 +1,6 @@
 # Auto-labels PRs "Approved" on non-maintainer approvals.
 # Skips write+/maintain/admin users to highlight community reviews.
-# Handles bots/externals/404s as allowable; only for open PRs.
+# Handles bots/externals/404s/none as allowable; only for open PRs.
 # Edge: API errors skip labeling (no job failure); idempotent adds.
 
 name: Auto-label approved PRs (external reviewers only)
@@ -8,59 +8,37 @@ name: Auto-label approved PRs (external reviewers only)
 on:
   pull_request_review:
     types: [submitted]
-  workflow_dispatch:  # Temporary for testing
+  workflow_dispatch:  # Keep for testing
     inputs:
       reviewer_login:
-        description: 'Reviewer login (e.g., xmo for read perms)'
+        description: 'Reviewer GitHub handle'
         required: true
-        default: 'xmok'
-      reviewer_type:
-        description: 'Reviewer type (User or Bot)'
-        required: true
-        default: 'User'
-      pr_state:
-        description: 'PR state (open or closed)'
-        required: true
-        default: 'open'
       pr_number:
         description: 'PR number'
         required: true
-        default: 21714
+        type: string
 
 permissions:
-  issues: write  # Reinforces repo settings for label adds on PRs
+  issues: write
 
 jobs:
   label_on_approval:
     runs-on: ubuntu-latest
-    # Use real event if available, fallback to dispatch inputs
     if: >-
-      github.event_name == 'pull_request_review' && github.event.review.state == 'approved' ||
+      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && github.event.pull_request.state == 'open') ||
       github.event_name == 'workflow_dispatch'
     steps:
-    - name: Debug context
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "::debug::Manual test mode - Inputs: reviewer=${{ inputs.reviewer_login }}, type=${{ inputs.reviewer_type }}, pr_state=${{ inputs.pr_state }}, pr_number=${{ inputs.pr_number }}"
-        else
-          echo "::debug::Event: pull_request_review submitted, state approved"
-          echo "::debug::PR Number: ${{ github.event.pull_request.number }}"
-          echo "::debug::Repo: ${{ github.repository }}"
-          echo "::debug::Reviewer (actor): ${{ github.actor }}"
-          echo "::debug::Reviewer type: ${{ github.event.review.user.type }}"
-        fi
-
     - name: Check PR state
       id: pr_check
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          pr_state="${{ inputs.pr_state }}"
+          pr_state="open"
           pr_number="${{ inputs.pr_number }}"
+          pr_number=$(echo "$pr_number" | sed 's/^#//')
         else
           pr_state="${{ github.event.pull_request.state }}"
           pr_number="${{ github.event.pull_request.number }}"
         fi
-        echo "::debug::PR state: $pr_state, number: $pr_number"
         if [[ "$pr_state" != "open" ]]; then
           echo "::notice::PR is not open (state: $pr_state), skipping label addition"
           echo "should_label=false" >> $GITHUB_OUTPUT
@@ -74,7 +52,7 @@ jobs:
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           reviewer_login="${{ inputs.reviewer_login }}"
-          reviewer_type="${{ inputs.reviewer_type }}"
+          reviewer_type="User"
         else
           reviewer_login="${{ github.actor }}"
           reviewer_type="${{ github.event.review.user.type }}"
@@ -116,10 +94,6 @@ jobs:
           exit 0
         elif [[ "$http_code" != "200" ]]; then
           echo "::warning::Unexpected API response (code: $http_code): Skipping label"
-          echo "::debug::Full perms response: $response_body"
-          if echo "$response_body" | jq . >/dev/null 2>&1; then
-            echo "::debug::Pretty perms error: $(echo "$response_body" | jq .)"
-          fi
           echo "should_label=false" >> $GITHUB_OUTPUT
           exit 0
         fi
@@ -127,37 +101,23 @@ jobs:
         # For 200, validate JSON and parse permission
         if ! echo "$response_body" | jq . >/dev/null 2>&1; then
           echo "::error::Invalid JSON response: Skipping label"
-          echo "::debug::Invalid JSON body: $response_body"
           echo "should_label=false" >> $GITHUB_OUTPUT
           exit 0
         fi
 
         permission=$(echo "$response_body" | jq -r '.permission // empty')
         echo "::notice::Permission: $permission"
-        echo "::debug::Full perms response: $response_body"
 
-        # Allow if read/triage; skip if write/maintain/admin
-        if [[ "$permission" == "read" || "$permission" == "triage" ]]; then
+        # Allow if read/triage/none; skip if write/maintain/admin
+        if [[ "$permission" == "read" || "$permission" == "triage" || "$permission" == "none" ]]; then
           echo "should_label=true" >> $GITHUB_OUTPUT
-          echo "::notice::Allowing label for non-write+ user"
+          echo "::notice::Allowing label for non-write+ user (permission: $permission)"
         else
           echo "should_label=false" >> $GITHUB_OUTPUT
-          echo "::notice::Skipping label for write+ user"
+          echo "::notice::Skipping label for write+ user (permission: $permission)"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Debug label inputs
-      if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          pr_number="${{ inputs.pr_number }}"
-        else
-          pr_number="${{ github.event.pull_request.number }}"
-        fi
-        echo "::debug::Label step triggered - PR #$pr_number"
-        echo "::debug::Repo: ${{ github.repository }}"
-        echo "::debug::Workflow GITHUB_TOKEN perms: issues:write (configured in workflow permissions)"
 
     - name: Add Approved label
       if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
@@ -166,13 +126,3 @@ jobs:
         labels: Approved
         github_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
         number: ${{ github.event.pull_request.number || inputs.pr_number }}
-
-    - name: Debug label outcome
-      if: always()
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          pr_number="${{ inputs.pr_number }}"
-        else
-          pr_number="${{ github.event.pull_request.number }}"
-        fi
-        echo "::debug::Label step completed - check PR #$pr_number for 'Approved' label"
