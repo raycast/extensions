@@ -16,7 +16,7 @@ on:
       pr_number:
         description: 'PR number'
         required: true
-        type: string
+        type: string  # String for clean input; parse to int below
 
 permissions:
   issues: write
@@ -32,9 +32,9 @@ jobs:
       id: pr_check
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          pr_state="open"
+          pr_state="open"  # Assume open for manual tests
           pr_number="${{ inputs.pr_number }}"
-          pr_number=$(echo "$pr_number" | sed 's/^#//')
+          pr_number=$(echo "$pr_number" | sed 's/^#//')  # Remove # if user adds it
         else
           pr_state="${{ github.event.pull_request.state }}"
           pr_number="${{ github.event.pull_request.number }}"
@@ -121,8 +121,29 @@ jobs:
 
     - name: Add Approved label
       if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
-      uses: actions-ecosystem/action-add-labels@v1
-      with:
-        labels: Approved
-        github_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN || github.token }}  # Fallback if bot secret empty
-        number: ${{ github.event.pull_request.number || inputs.pr_number }}
+      run: |
+        pr_number="${{ github.event.pull_request.number || inputs.pr_number }}"
+        echo "::notice::Adding 'Approved' label to PR #$pr_number (using bot token)"
+        response=$(curl -s -w "\n%{http_code}" -X POST \
+          -H "Authorization: token ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/repos/${{ github.repository }}/issues/$pr_number/labels" \
+          -d '{"labels":["Approved"]}')
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | sed '$d')
+        echo "::debug::Label add HTTP Code: $http_code"
+        echo "::debug::Response body: $response_body"
+        if [[ "$http_code" == "200" || "$http_code" == "201" ]]; then
+          echo "::notice::Label added successfully"
+        else
+          echo "::error::Failed to add label (code: $http_code): $response_body"
+          exit 1
+        fi
+      env:
+        RAYCAST_BOT_API_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+
+    - name: Debug label outcome
+      if: always()
+      run: |
+        pr_number="${{ github.event.pull_request.number || inputs.pr_number }}"
+        echo "::debug::Label step completed - check PR #$pr_number for 'Approved' label"
