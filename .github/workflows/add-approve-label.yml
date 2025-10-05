@@ -1,0 +1,19 @@
+name: Label Pull Request on Approval
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label_on_approval:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Add Approved label
+      if: ${{ github.event.review.state == 'approved' }}
+      uses: mshick/add-pr-label@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        labels: Approved
