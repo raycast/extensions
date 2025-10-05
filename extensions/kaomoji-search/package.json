@@ -38,7 +38,7 @@
     },
     {
       "name": "primaryAction",
-      "title": "Primary action",
+      "title": "Primary Action",
       "required": false,
       "description": "Choose the primary action for the results.",
       "default": "paste-to-active-app",
