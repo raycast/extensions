@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## [Make PATH configurable]
+## [Make PATH configurable] - {PR_MERGE_DATE}
 - Add a user-setting for the PATH variable
 - This is necessary for home-manager installations, because the path includes the users home-directory, and Raycast doesn't expand '~'.
 
