@@ -1,4 +1,4 @@
-name: Label Pull Request on Approval
+name: Label Pull Request on Approval (Skip Write+ Users Only)
 
 on:
   pull_request_review:
@@ -11,8 +11,47 @@ jobs:
   label_on_approval:
     runs-on: ubuntu-latest
     steps:
-    - name: Add Approved label
+    - name: Check reviewer permissions
+      id: check_permissions
       if: ${{ github.event.review.state == 'approved' }}
+      run: |
+        reviewer_login="${{ github.event.review.user.login }}"
+        reviewer_type="${{ github.event.review.user.type }}"
+        repo_owner="${{ github.repository_owner }}"
+        repo_name="${{ github.event.repository.name }}"
+        
+        echo "Reviewer: $reviewer_login, Type: $reviewer_type"
+        
+        # If not a human user (e.g., bot), always label
+        if [[ "$reviewer_type" != "User" ]]; then
+          echo "should_label=true" >> $GITHUB_OUTPUT
+          echo "Non-human reviewer: Allowing label"
+          exit 0
+        fi
+        
+        # For human users, fetch permission via GitHub API
+        response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/repos/${repo_owner}/${repo_name}/collaborators/${reviewer_login}/permission")
+        
+        permission=$(echo "$response" | jq -r '.permission // empty')
+        http_code=$(echo "$response" | jq -r '.message // empty')
+        
+        echo "Permission: $permission (HTTP note: $http_code)"
+        
+        # Allow if 404/empty (non-collaborator) or read/triage; skip if write/maintain/admin
+        if [[ -z "$permission" || "$permission" == "read" || "$permission" == "triage" ]]; then
+          echo "should_label=true" >> $GITHUB_OUTPUT
+          echo "Allowing label for non-write+ user"
+        else
+          echo "should_label=false" >> $GITHUB_OUTPUT
+          echo "Skipping label for write+ user"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Add Approved label
+      if: ${{ github.event.review.state == 'approved' && steps.check_permissions.outputs.should_label == 'true' }}
       uses: mshick/add-pr-label@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
