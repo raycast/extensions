@@ -35,7 +35,7 @@
           "type": "textfield",
           "required": true,
           "title": "Environment Path",
-          "description": "Environment path, e.g /usr/local/bin:/usr/bin",
+          "description": "Colon-separated PATH (Unix-style), e.g /usr/local/bin:/usr/bin",
           "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
         }
       ]
