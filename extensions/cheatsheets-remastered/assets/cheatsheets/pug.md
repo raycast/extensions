@@ -1,10 +1,15 @@
 ---
 title: Pug
 category: JavaScript libraries
-prism_languages: [jade]
-updated: 2017-10-30
+prism_languages:
+  - jade
+updated: 2017-10-30T00:00:00.000Z
 weight: -3
-tags: [Featurable]
+tags:
+  - Featurable
+tech: pug
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Pug

@@ -6,7 +6,8 @@
   "icon": "keepassxc.png",
   "author": "pabroux",
   "contributors": [
-    "zkytech"
+    "zkytech",
+    "CT-7567"
   ],
   "categories": [
     "Security"
@@ -28,14 +29,6 @@
       "required": true,
       "title": "KeePass Database",
       "description": "KeePass database to access"
-    },
-    {
-      "name": "keepassxcRootPath",
-      "type": "appPicker",
-      "required": true,
-      "title": "KeePassXC App",
-      "description": "KeePassXC app to use",
-      "default": "/Applications/KeePassXC.app"
     },
     {
       "name": "lockAfterInactivity",
@@ -97,22 +90,23 @@
       "default": false
     }
   ],
+  "platforms": ["macOS", "Windows"],
   "dependencies": {
-    "@raycast/api": "^1.94.3",
+    "@raycast/api": "^1.102.7",
     "@raycast/utils": "^1.19.1",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
     "csv-parse": "^5.6.0",
-    "otpauth": "^9.4.0",
+    "otpauth": "^9.4.1",
     "run-applescript": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.14.0",
-    "@types/react": "^19.1.0",
-    "eslint": "^9.23.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@types/node": "^22.18.1",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",

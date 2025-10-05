@@ -1,5 +1,16 @@
 # Password Generator Changelog
 
+## [Windows Support & Dependency Updates] - 2025-09-02
+
+- Added support for Raycast on Windows.
+- Updated dependencies to their latest versions:
+  - `@raycast/api`
+  - `@raycast/eslint-config`
+  - `@types/react`
+  - `prettier`
+  - `react`
+  - `typescript`
+
 ## [Guarantee presence of special characters] - 2025-08-20
 
 If "Use numbers?" and/or "Use special characters?" are selected, the password is guaranteed to have at least one of each of those characters.

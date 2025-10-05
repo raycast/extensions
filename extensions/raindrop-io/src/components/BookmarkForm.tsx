@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
-import fetch from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { FormValues } from "../types";
 
@@ -171,12 +170,12 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         <Form.Dropdown.Item key="-2" value="-2" title="Create Collection" icon={Icon.Plus} />
         <Form.Dropdown.Item key="-1" value="-1" title="Unsorted" icon={Icon.Tray} />
         <Form.Dropdown.Section title="Collections">
-          {collections.map(({ value, label, name }) => (
+          {collections.map(({ value, label, name, cover }) => (
             <Form.Dropdown.Item
               key={value}
               value={`${value ?? "-1"}`}
               title={name ? `${name} (${label})` : label}
-              icon={Icon.Folder}
+              icon={cover ? { source: cover } : { source: Icon.Folder }}
             />
           ))}
         </Form.Dropdown.Section>
@@ -185,7 +184,9 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         <Form.TextField {...itemProps.newCollection} title="New Collection" placeholder="Name" />
       )}
       <Form.TagPicker {...itemProps.tags} title="Tags">
-        {tags?.items?.map(({ _id }) => <Form.TagPicker.Item key={_id} value={_id} title={_id} />)}
+        {tags?.items?.map(({ _id }) => (
+          <Form.TagPicker.Item key={_id} value={_id} title={_id} />
+        ))}
       </Form.TagPicker>
     </Form>
   );

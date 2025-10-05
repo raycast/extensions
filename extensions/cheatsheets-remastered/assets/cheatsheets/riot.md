@@ -1,6 +1,9 @@
 ---
 title: Riot.js
 category: JavaScript libraries
+tech: riot
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

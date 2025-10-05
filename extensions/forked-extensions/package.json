@@ -3,11 +3,12 @@
   "name": "forked-extensions",
   "title": "Forked Extensions",
   "type": "module",
-  "description": "Efficiently manage your forked Raycast extensions using Git sparse-checkout. Explore the full extension catalog, selectively checkout specific extensions, and remove extensions from your forked collection with ease.",
+  "description": "Efficiently manage your forked Raycast extensions using Git sparse-checkout.",
   "icon": "forked-extensions-icon.png",
   "author": "litomore",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "yusifaliyevpro"
   ],
   "platforms": [
     "macOS",
@@ -39,7 +40,7 @@
     {
       "name": "githubPersonalAccessToken",
       "title": "GitHub Personal Access Token",
-      "description": "Optional. Your GitHub's personal access token. Required scope is: 'repo'.",
+      "description": "Optional. Your GitHub's personal access token. This only needs to be configured when you want to use another account for operations. Required scope is: 'repo'.",
       "type": "textfield",
       "required": false,
       "placeholder": "Your personal access token"
@@ -50,7 +51,7 @@
       "description": "Path to the repository where the extension is located.",
       "type": "directory",
       "required": true,
-      "default": "~/.config/raycast/forked-extensions"
+      "default": "~/Documents/forked-extensions"
     },
     {
       "name": "gitRemoteType",
@@ -78,18 +79,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.5",
-    "got": "^14.4.7",
-    "nano-spawn": "^1.0.2"
+    "@raycast/api": "^1.102.7",
+    "ky": "^1.10.0",
+    "nano-spawn": "^1.0.3"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.33.0",
     "@raycast/eslint-config": "^2.0.4",
     "@raycast/utils": "^2.2.1",
-    "@types/node": "^24.3.0",
-    "@types/react": "^19.1.10",
-    "eslint": "^9.33.0",
+    "@types/node": "^24.4.0",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.35.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   }

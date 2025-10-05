@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { useState, ReactElement } from "react";
-import { FirefoxListEntries } from "./components";
+import { HistoryListEntry } from "./components";
 import { GroupedEntries, HistoryEntry } from "./interfaces";
 
 const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
@@ -36,7 +36,7 @@ export default function Command(): ReactElement {
       {groups?.map((group) => (
         <List.Section title={group} key={group}>
           {groupedEntries?.get(group)?.map((e) => (
-            <FirefoxListEntries.HistoryEntry entry={e} key={e.id} />
+            <HistoryListEntry entry={e} key={e.id} />
           ))}
         </List.Section>
       ))}

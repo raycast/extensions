@@ -1,10 +1,14 @@
 ---
 title: Git revisions
 category: Git
-updated: 2017-10-11
-description: ""
-intro: |
-  A list of revision specifications you can use with `git log` and many other Git commands. Summarized from `gitrevisions(7)` man page.
+updated: 2017-10-11T00:00:00.000Z
+description: ''
+intro: >
+  A list of revision specifications you can use with `git log` and many other
+  Git commands. Summarized from `gitrevisions(7)` man page.
+tech: git-revisions
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Example usages

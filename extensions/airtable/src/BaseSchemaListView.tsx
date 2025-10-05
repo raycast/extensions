@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AirtableBaseMetadata, Field, Table, View } from "./types";
 import * as api from "./metadata-api";
@@ -97,6 +97,23 @@ function AirtableTableListItem(props: { baseMetadata: AirtableBaseMetadata; tabl
   );
 }
 
+const FIELD_TYPE_ICONS: Record<string, Image.ImageLike> = {
+  checkbox: Icon.CheckCircle,
+  createdTime: Icon.Clock,
+  date: { source: Icon.Calendar, mask: Image.Mask.Circle },
+  dateTime: Icon.Calendar,
+  email: Icon.AtSymbol,
+  formula: Icon.Code,
+  multilineText: Icon.Paragraph,
+  multipleAttachments: Icon.Paperclip,
+  multipleRecordLinks: Icon.ArrowNe,
+  multipleSelects: Icon.Tag,
+  number: Icon.NumberList,
+  singleLineText: Icon.ShortParagraph,
+  singleSelect: Icon.Circle,
+  url: Icon.Link,
+};
+
 export function AirtableBaseSchemaFieldsList(props: {
   baseMetadata: AirtableBaseMetadata;
   tableId: string;
@@ -117,6 +134,7 @@ export function AirtableBaseSchemaFieldsList(props: {
               return (
                 <List.Item
                   key={field.id}
+                  icon={FIELD_TYPE_ICONS[field.type] || Icon.QuestionMark}
                   title={field.name}
                   subtitle={field.description ? field.description : undefined}
                   accessories={[{ text: `${field.type}` }]}

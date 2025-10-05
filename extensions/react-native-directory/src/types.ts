@@ -16,6 +16,7 @@ export type Query = {
   expoGo?: string;
   ios?: string;
   macos?: string;
+  fireos?: string;
   tvos?: string;
   visionos?: string;
   web?: string;
@@ -23,21 +24,22 @@ export type Query = {
   order?: QueryOrder;
   direction?: QueryOrderDirection;
   search?: string;
-  offset?: string | number;
+  offset?: string | number | null;
   limit?: string | number;
   hasExample?: string;
   hasImage?: string;
   hasTypes?: string;
+  hasNativeCode?: string;
   isMaintained?: string;
   isPopular?: string;
   isRecommended?: string;
   wasRecentlyUpdated?: string;
   minPopularity?: string | number;
+  minMonthlyDownloads?: string | number;
   newArchitecture?: string;
 };
 
-export type Library = {
-  goldstar?: boolean;
+export type LibraryDataEntryType = {
   githubUrl: string;
   ios?: boolean;
   android?: boolean;
@@ -45,26 +47,34 @@ export type Library = {
   expoGo?: boolean;
   windows?: boolean;
   macos?: boolean;
+  fireos?: boolean;
   tvos?: boolean;
   visionos?: boolean;
   unmaintained?: boolean | string;
   dev?: boolean;
   template?: boolean;
-  newArchitecture?: boolean | string;
+  newArchitecture?: boolean | "new-arch-only";
   newArchitectureNote?: string;
   alternatives?: string[];
+  npmPkg?: string;
+  examples?: string[];
+  images?: string[];
+};
+
+export type LibraryType = LibraryDataEntryType & {
   github: {
     name: string;
-    isPackagePrivate: boolean;
     fullName: string;
     description: string;
+    registry?: string;
     topics?: string[];
     hasTypes?: boolean;
     newArchitecture?: boolean;
     isArchived?: boolean;
+    isPrivate?: boolean;
+    hasNativeCode: boolean;
     urls: {
       repo: string;
-      clone: string;
       homepage?: string | null;
     };
     stats: {
@@ -79,6 +89,7 @@ export type Library = {
       subscribers: number;
       stars: number;
       forks: number;
+      dependencies: number;
     };
     license: {
       key: string;
@@ -98,16 +109,12 @@ export type Library = {
   npm?: {
     downloads?: number;
     weekDownloads?: number;
-    start?: string;
-    end?: string;
-    period?: string;
+    size?: number;
   };
+  npmPkg: string;
   score: number;
   matchingScoreModifiers: string[];
   topicSearchString: string;
-  examples?: string[];
-  images?: string[];
-  npmPkg?: string;
   popularity?: number;
-  matchScore?: number;
+  matchScore: number;
 };

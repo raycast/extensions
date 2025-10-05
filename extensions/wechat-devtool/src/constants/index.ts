@@ -1,3 +1,7 @@
+export const EXTENSION_TITLE = "WeChat DevTool";
+
+export const PREVIEW_QRCODE_DIR = "/tmp/raycast-wechat-devtool";
+
 export const WECHAT_DEVTOOL_CLI_PATH = "/Applications/wechatwebdevtools.app/Contents/MacOS/cli";
 
 export const REPOSITORY_TYPE = {

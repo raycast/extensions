@@ -1,8 +1,11 @@
 ---
 title: Textile
 category: Markup
-updated: 2017-09-20
+updated: 2017-09-20T00:00:00.000Z
 weight: -1
+tech: textile
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Reference

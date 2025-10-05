@@ -1,6 +1,9 @@
 ---
 title: rename
 category: CLI
+tech: rename
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Installation

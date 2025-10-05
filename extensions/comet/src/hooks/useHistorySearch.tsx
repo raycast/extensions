@@ -15,9 +15,9 @@ const ensureEmptyDbExists = () => {
   if (!fs.existsSync(EMPTY_DB_PATH)) {
     try {
       execSync(
-        `sqlite3 "${EMPTY_DB_PATH}" "CREATE TABLE IF NOT EXISTS urls (id TEXT, url TEXT, title TEXT, last_visit_time INTEGER);"`
+        `sqlite3 "${EMPTY_DB_PATH}" "CREATE TABLE IF NOT EXISTS urls (id TEXT, url TEXT, title TEXT, last_visit_time INTEGER);"`,
       );
-    } catch (error) {
+    } catch {
       // Fallback: create empty file
       fs.writeFileSync(EMPTY_DB_PATH, "");
     }
@@ -40,7 +40,7 @@ const searchHistory = (profile: string, query?: string, enabled = true): SearchR
 
   useEffect(() => {
     return () => {
-      retryTimer && clearTimeout(retryTimer);
+      if (retryTimer) clearTimeout(retryTimer);
     };
   }, [retryTimer]);
 

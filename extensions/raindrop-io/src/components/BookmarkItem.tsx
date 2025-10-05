@@ -9,10 +9,10 @@ import {
   showToast,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
-import fetch from "node-fetch";
 import { BookmarkForm } from "./BookmarkForm";
 
 function ActionEditBookmark(props: { bookmark: Bookmark; revalidate: () => void }) {
@@ -52,7 +52,7 @@ function ActionEditBookmark(props: { bookmark: Bookmark; revalidate: () => void 
 export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: () => void }) {
   const { bookmark, revalidate } = props;
 
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
 
   const getDetails = () => {
     let md = `# ${bookmark.title}\n`;
@@ -239,6 +239,15 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
             icon={Icon.Trash}
           />
+          {preferences.secondaryBrowser && (
+            <Action.Open
+              icon={Icon.ArrowNe}
+              title={`Open in ${preferences.secondaryBrowser.name}`}
+              application={preferences.secondaryBrowser.name}
+              target={bookmark.link}
+              shortcut={Keyboard.Shortcut.Common.OpenWith}
+            />
+          )}
         </ActionPanel>
       }
     />

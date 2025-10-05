@@ -1,13 +1,11 @@
 import axios from "axios";
-import { LocalStorage, showToast, Toast, getPreferenceValues, Icon, Image, Color, environment } from "@raycast/api";
+import { LocalStorage, showToast, Toast, getPreferenceValues, environment } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import { DEFAULT_SHEET_METADATA, DefaultMetadata } from "./default-tags";
 
 interface ExtendedPreferences extends Preferences {
   githubToken?: string;
-  iconSource?: "raycast" | "custom";
-  customIconDirectory?: string;
 }
 
 const BRANCH = "master";
@@ -28,7 +26,7 @@ interface OfflineCheatsheet {
 
 interface FavoriteCheatsheet {
   id: string;
-  type: "custom" | "default";
+  type: "custom" | "default" | "repository";
   slug: string;
   title: string;
   favoritedAt: number;
@@ -36,11 +34,44 @@ interface FavoriteCheatsheet {
 
 interface ViewRecord {
   key: string; // `${type}:${slug}`
-  type: "custom" | "default";
+  type: "custom" | "default" | "repository";
   slug: string;
   title: string;
   count: number;
   lastViewedAt: number;
+}
+
+interface HiddenCheatsheet {
+  key: string; // `${type}:${slug}`
+  type: "custom" | "default" | "repository";
+  slug: string;
+  title: string;
+  hiddenAt: number;
+}
+
+interface UserRepository {
+  id: string;
+  name: string;
+  owner: string;
+  description?: string;
+  url: string;
+  addedAt: number;
+  lastAccessedAt?: number;
+  isPrivate: boolean;
+  defaultBranch: string;
+  subdirectory?: string; // Optional subdirectory filter
+  lastSyncedAt?: number; // Track when repository was last synced
+}
+
+interface RepositoryCheatsheet {
+  id: string;
+  repositoryId: string; // Reference to UserRepository
+  slug: string; // Original file path without .md
+  title: string; // Derived from filename or first heading
+  content: string;
+  filePath: string; // Original path in repository
+  syncedAt: number;
+  lastAccessedAt?: number;
 }
 
 // Configure axios with better defaults and retry logic
@@ -94,7 +125,6 @@ interface CustomCheatsheet {
   updatedAt: number;
   tags?: string[];
   description?: string;
-  iconKey?: string; // Raycast Icon key
 }
 
 // Type guards for untyped JSON
@@ -115,7 +145,6 @@ interface ImportedCheatsheetInput {
   content: string;
   tags?: string[];
   description?: string;
-  iconKey?: string;
   createdAt?: number;
   updatedAt?: number;
 }
@@ -705,119 +734,6 @@ class Service {
     );
   }
 
-  // Pick an icon for a default cheatsheet based on metadata iconKey or slug heuristics
-  static getDefaultIconKey(slug: string): string {
-    const md = this.getDefaultMetadata(slug);
-    if (md?.iconKey) return md.iconKey;
-    const key = slug.toLowerCase();
-    if (/((^|[-_/])js($|[-_/])|typescript|ts|react|vue|angular|svelte|graphql)/.test(key)) return "Code";
-    if (/(python|bash|zsh|fish|linux|shell|vim|tmux|sed|awk|grep|curl|ssh)/.test(key)) return "Terminal";
-    if (/(docker|kubernetes|git|github|box)/.test(key)) return "Box";
-    if (/(sql|postgres|mysql|sqlite|redis|mongo)/.test(key)) return "Document";
-    if (/(aws|cloud|terraform)/.test(key)) return "Cloud";
-    if (/(http|nginx)/.test(key)) return "Globe";
-    return "Document";
-  }
-
-  static iconForKey(key?: string): Icon {
-    switch ((key || "").toLowerCase()) {
-      case "code":
-        return Icon.Code;
-      case "terminal":
-        return Icon.Terminal;
-      case "document":
-        return Icon.Document;
-      case "cloud":
-        return Icon.Cloud;
-      case "globe":
-        return Icon.Globe;
-      case "box":
-        return Icon.Box;
-      case "gear":
-        return Icon.Gear;
-      case "window":
-        return Icon.Window;
-      case "keyboard":
-        return Icon.Keyboard;
-      case "link":
-        return Icon.Link;
-      case "star":
-        return Icon.Star;
-      case "stardisabled":
-      case "star_disabled":
-        return Icon.StarDisabled;
-      default:
-        return Icon.Document;
-    }
-  }
-
-  // Resolve icon for a slug or key considering preferences and bundled media
-  static resolveIconForSlug(slugOrKey: string): Image.ImageLike {
-    const prefs = this.getPreferences() as ExtendedPreferences;
-    const base = (slugOrKey.split("/").pop() || slugOrKey).toLowerCase();
-    const aliasBase = this.alias(base);
-    const isTerminal = this.isTerminalTool(base);
-    // Build candidate names from slug tokens + aliases, then base/alias, and finally terminal fallback
-    const tokenSet = new Set<string>();
-    for (const t of this.tokenize(slugOrKey)) {
-      if (t) tokenSet.add(t);
-      const a = this.alias(t);
-      if (a) tokenSet.add(a);
-    }
-    const tokenCandidates = Array.from(tokenSet);
-    const baseCandidates = [base, aliasBase].filter(Boolean);
-    const candidates = isTerminal
-      ? [...tokenCandidates, ...baseCandidates, "terminal"]
-      : [...tokenCandidates, ...baseCandidates];
-    if (prefs.iconSource === "raycast") {
-      return this.iconForKey(this.getDefaultIconKey(aliasBase));
-    }
-    if (prefs.iconSource === "custom" && prefs.customIconDirectory) {
-      for (const c of candidates) {
-        const png = path.join(prefs.customIconDirectory, `${c}.png`);
-        if (fs.existsSync(png)) return { source: png, tintColor: Color.PrimaryText };
-        const svg = path.join(prefs.customIconDirectory, `${c}.svg`);
-        if (fs.existsSync(svg)) return { source: svg, tintColor: Color.PrimaryText };
-      }
-    }
-    // Built-in media fallback
-    for (const c of candidates) {
-      const pPng = path.join(environment.assetsPath, `${c}.png`);
-      const pSvg = path.join(environment.assetsPath, `${c}.svg`);
-      if (fs.existsSync(pPng)) return { source: pPng, tintColor: Color.PrimaryText };
-      if (fs.existsSync(pSvg)) return { source: pSvg, tintColor: Color.PrimaryText };
-    }
-    // Finally, Raycast icon from metadata
-    return this.iconForKey(this.getDefaultIconKey(aliasBase));
-  }
-
-  private static alias(name: string): string {
-    if (name === "js" || name === "javascript") return "javascript";
-    if (name === "ts" || name === "typescript") return "typescript";
-    if (name === "nodejs" || name === "node") return "node";
-    if (name === "psql" || name === "postgresql") return "postgres";
-    if (name === "k8s" || name === "kubernetes") return "kubernetes";
-    if (name === "css" || name.startsWith("css-")) return "css";
-    if (name === "git" || name.startsWith("git-")) return "git";
-    if (name === "gh" || name.startsWith("gh-") || name === "github" || name.startsWith("github-")) return "github";
-    if (name === "angularjs" || name.startsWith("angularjs-")) return "angular";
-    return name;
-  }
-
-  private static isTerminalTool(name: string): boolean {
-    const key = name.toLowerCase();
-    return /(bash|zsh|fish|shell|^sh$|tmux|vim|emacs|sed|awk|grep|curl|ssh|npm|yarn|pnpm|nvm|brew|jq|make|^101$)/.test(
-      key,
-    );
-  }
-
-  private static tokenize(name: string): string[] {
-    const raw = (name || "").toLowerCase();
-    const tokens = raw.split(/[\s/_.-]+/).filter(Boolean);
-    // Filter out plain 'js' unless it's explicitly bounded by separators (handled in getDefaultIconKey)
-    return tokens.filter((t) => t !== "js");
-  }
-
   // Fast content search across default cheatsheets using GitHub code search
   static async searchDefaultContent(query: string): Promise<string[]> {
     try {
@@ -1018,7 +934,7 @@ class Service {
     }
   }
 
-  static async recordView(type: "custom" | "default", slug: string, title: string): Promise<void> {
+  static async recordView(type: "custom" | "default" | "repository", slug: string, title: string): Promise<void> {
     try {
       const key = `${type}:${slug}`;
       const views = await this.getViewHistory();
@@ -1072,7 +988,6 @@ class Service {
     content: string,
     tags?: string[],
     description?: string,
-    iconKey?: string,
   ): Promise<CustomCheatsheet> {
     try {
       // Validate input
@@ -1089,7 +1004,6 @@ class Service {
         updatedAt: Date.now(),
         tags: tags?.filter((tag) => tag.trim()),
         description: description?.trim(),
-        iconKey: iconKey?.trim() || undefined,
       };
 
       customSheets.push(newSheet);
@@ -1114,7 +1028,6 @@ class Service {
     content: string,
     tags?: string[],
     description?: string,
-    iconKey?: string,
   ): Promise<CustomCheatsheet | null> {
     try {
       if (!title.trim() || !content.trim()) {
@@ -1133,7 +1046,6 @@ class Service {
         updatedAt: Date.now(),
         tags: tags?.filter((tag) => tag.trim()),
         description: description?.trim(),
-        iconKey: iconKey?.trim() || customSheets[index].iconKey,
       };
 
       await LocalStorage.setItem("custom-cheatsheets", JSON.stringify(customSheets));
@@ -1227,7 +1139,6 @@ class Service {
         content: sheet.content,
         tags: sheet.tags,
         description: sheet.description,
-        iconKey: sheet.iconKey,
         createdAt: sheet.createdAt ?? Date.now(),
         updatedAt: Date.now(),
       }));
@@ -1261,7 +1172,7 @@ class Service {
     }
   }
 
-  static async addToFavorites(type: "custom" | "default", slug: string, title: string): Promise<void> {
+  static async addToFavorites(type: "custom" | "default" | "repository", slug: string, title: string): Promise<void> {
     try {
       const favorites = await this.getFavorites();
       const existingIndex = favorites.findIndex((fav) => fav.slug === slug && fav.type === type);
@@ -1288,7 +1199,7 @@ class Service {
     }
   }
 
-  static async removeFromFavorites(type: "custom" | "default", slug: string): Promise<void> {
+  static async removeFromFavorites(type: "custom" | "default" | "repository", slug: string): Promise<void> {
     try {
       const favorites = await this.getFavorites();
       const filtered = favorites.filter((fav) => !(fav.slug === slug && fav.type === type));
@@ -1299,7 +1210,7 @@ class Service {
     }
   }
 
-  static async isFavorited(type: "custom" | "default", slug: string): Promise<boolean> {
+  static async isFavorited(type: "custom" | "default" | "repository", slug: string): Promise<boolean> {
     try {
       const favorites = await this.getFavorites();
       return favorites.some((fav) => fav.slug === slug && fav.type === type);
@@ -1309,7 +1220,11 @@ class Service {
     }
   }
 
-  static async toggleFavorite(type: "custom" | "default", slug: string, title: string): Promise<boolean> {
+  static async toggleFavorite(
+    type: "custom" | "default" | "repository",
+    slug: string,
+    title: string,
+  ): Promise<boolean> {
     try {
       const isFavorited = await this.isFavorited(type, slug);
 
@@ -1323,6 +1238,877 @@ class Service {
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
       throw error;
+    }
+  }
+
+  // Hidden cheatsheets management
+  static async getHiddenCheatsheets(): Promise<HiddenCheatsheet[]> {
+    try {
+      const stored = await LocalStorage.getItem("hidden-cheatsheets");
+      return stored ? JSON.parse(stored as string) : [];
+    } catch (error) {
+      console.error("Failed to get hidden cheatsheets:", error);
+      return [];
+    }
+  }
+
+  static async hideCheatsheet(type: "custom" | "default" | "repository", slug: string, title: string): Promise<void> {
+    try {
+      const hidden = await this.getHiddenCheatsheets();
+      const key = `${type}:${slug}`;
+      const existingIndex = hidden.findIndex((item) => item.key === key);
+
+      if (existingIndex >= 0) {
+        // Update existing hidden item
+        hidden[existingIndex].hiddenAt = Date.now();
+      } else {
+        // Add new hidden item
+        const newHidden: HiddenCheatsheet = {
+          key,
+          type,
+          slug,
+          title,
+          hiddenAt: Date.now(),
+        };
+        hidden.push(newHidden);
+      }
+
+      await LocalStorage.setItem("hidden-cheatsheets", JSON.stringify(hidden));
+    } catch (error) {
+      console.error("Failed to hide cheatsheet:", error);
+      throw error;
+    }
+  }
+
+  static async showCheatsheet(type: "custom" | "default" | "repository", slug: string): Promise<void> {
+    try {
+      const hidden = await this.getHiddenCheatsheets();
+      const key = `${type}:${slug}`;
+      const filtered = hidden.filter((item) => item.key !== key);
+      await LocalStorage.setItem("hidden-cheatsheets", JSON.stringify(filtered));
+    } catch (error) {
+      console.error("Failed to show cheatsheet:", error);
+      throw error;
+    }
+  }
+
+  static async isHidden(type: "custom" | "default" | "repository", slug: string): Promise<boolean> {
+    try {
+      const hidden = await this.getHiddenCheatsheets();
+      const key = `${type}:${slug}`;
+      return hidden.some((item) => item.key === key);
+    } catch (error) {
+      console.error("Failed to check if cheatsheet is hidden:", error);
+      return false;
+    }
+  }
+
+  static async toggleHidden(type: "custom" | "default" | "repository", slug: string, title: string): Promise<boolean> {
+    try {
+      const isCurrentlyHidden = await this.isHidden(type, slug);
+      if (isCurrentlyHidden) {
+        await this.showCheatsheet(type, slug);
+        return false;
+      } else {
+        await this.hideCheatsheet(type, slug, title);
+        return true;
+      }
+    } catch (error) {
+      console.error("Failed to toggle hidden status:", error);
+      throw error;
+    }
+  }
+
+  // GitHub repository validation
+  static validateGitHubRepository(owner: string, repo: string): { isValid: boolean; error?: string } {
+    if (!owner.trim() || !repo.trim()) {
+      return { isValid: false, error: "Owner and repository name are required" };
+    }
+
+    // Validate owner format (alphanumeric, hyphens, underscores)
+    if (!/^[a-zA-Z0-9._-]+$/.test(owner.trim())) {
+      return {
+        isValid: false,
+        error: "Invalid owner format. Use alphanumeric characters, hyphens, underscores, or dots",
+      };
+    }
+
+    // Validate repo format (alphanumeric, hyphens, underscores, dots)
+    if (!/^[a-zA-Z0-9._-]+$/.test(repo.trim())) {
+      return {
+        isValid: false,
+        error: "Invalid repository name format. Use alphanumeric characters, hyphens, underscores, or dots",
+      };
+    }
+
+    return { isValid: true };
+  }
+
+  // Repository management methods
+  static async getUserRepositories(): Promise<UserRepository[]> {
+    try {
+      const reposJson = await LocalStorage.getItem<string>("user-repositories");
+      if (!reposJson) return [];
+
+      const originalRepos = JSON.parse(reposJson);
+
+      // Migration logic for schema changes
+      const migratedRepos = this.migrateUserRepositories(originalRepos);
+
+      // Check if migration occurred by comparing structure
+      const migrationNeeded = this.detectMigrationNeeded(originalRepos, migratedRepos);
+      if (migrationNeeded) {
+        // Save migrated data back to LocalStorage
+        await this.saveMigratedRepositories(migratedRepos);
+        console.log("Repository schema migration completed");
+      }
+
+      return migratedRepos;
+    } catch (error) {
+      console.warn("Failed to load user repositories:", error);
+      return [];
+    }
+  }
+
+  // Detect if migration was needed by comparing original and migrated data
+  private static detectMigrationNeeded(original: unknown[], migrated: UserRepository[]): boolean {
+    if (original.length !== migrated.length) return true;
+
+    return original.some((repo) => {
+      const repoObj = repo as Record<string, unknown>;
+      return (
+        !repoObj.id ||
+        !repoObj.name ||
+        !repoObj.defaultBranch ||
+        repoObj.repo !== undefined || // Legacy 'repo' field
+        repoObj.branch !== undefined // Legacy 'branch' field
+      );
+    });
+  }
+
+  // Migration logic for user repository schema changes
+  private static migrateUserRepositories(repos: unknown[]): UserRepository[] {
+    if (!Array.isArray(repos)) return [];
+
+    return repos.map((repo: unknown) => {
+      const repoObj = repo as Record<string, unknown>;
+      // Ensure required fields exist with defaults
+      const migratedRepo: UserRepository = {
+        id: (repoObj.id as string) || `repo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: (repoObj.name as string) || (repoObj.repo as string) || "Unknown",
+        owner: (repoObj.owner as string) || "unknown",
+        description: repoObj.description as string | undefined,
+        url:
+          (repoObj.url as string) ||
+          `https://github.com/${(repoObj.owner as string) || "unknown"}/${(repoObj.name as string) || (repoObj.repo as string) || "unknown"}`,
+        addedAt: (repoObj.addedAt as number) || Date.now(),
+        lastAccessedAt: repoObj.lastAccessedAt as number | undefined,
+        isPrivate: (repoObj.isPrivate as boolean) || false,
+        defaultBranch: (repoObj.defaultBranch as string) || (repoObj.branch as string) || "main",
+        subdirectory: repoObj.subdirectory as string | undefined,
+        lastSyncedAt: repoObj.lastSyncedAt as number | undefined,
+      };
+
+      // Handle legacy schema where 'repo' was used instead of 'name'
+      if (repoObj.repo && !repoObj.name) {
+        migratedRepo.name = repoObj.repo as string;
+      }
+
+      // Handle legacy schema where 'branch' was used instead of 'defaultBranch'
+      if (repoObj.branch && !repoObj.defaultBranch) {
+        migratedRepo.defaultBranch = repoObj.branch as string;
+      }
+
+      return migratedRepo;
+    });
+  }
+
+  // Save migrated repositories back to LocalStorage if migration occurred
+  private static async saveMigratedRepositories(repos: UserRepository[]): Promise<void> {
+    try {
+      await LocalStorage.setItem("user-repositories", JSON.stringify(repos));
+    } catch (error) {
+      console.warn("Failed to save migrated repositories:", error);
+    }
+  }
+
+  static async addUserRepository(
+    name: string,
+    owner: string,
+    description?: string,
+    url?: string,
+    isPrivate: boolean = false,
+    defaultBranch: string = "main",
+    subdirectory?: string,
+  ): Promise<UserRepository> {
+    try {
+      // Validate GitHub repository format
+      const validation = this.validateGitHubRepository(owner, name);
+      if (!validation.isValid) {
+        throw new Error(validation.error);
+      }
+
+      const repos = await this.getUserRepositories();
+
+      // Check if repository already exists
+      const existingRepo = repos.find(
+        (repo) => repo.name.toLowerCase() === name.toLowerCase() && repo.owner.toLowerCase() === owner.toLowerCase(),
+      );
+
+      if (existingRepo) {
+        throw new Error("Repository already exists in your list");
+      }
+
+      const newRepo: UserRepository = {
+        id: `repo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: name.trim(),
+        owner: owner.trim(),
+        description: description?.trim(),
+        url: url?.trim() || `https://github.com/${owner}/${name}`,
+        addedAt: Date.now(),
+        isPrivate,
+        defaultBranch: defaultBranch.trim() || "main",
+        subdirectory: subdirectory?.trim() || undefined,
+        lastSyncedAt: undefined,
+      };
+
+      repos.push(newRepo);
+      await LocalStorage.setItem("user-repositories", JSON.stringify(repos));
+
+      showToast({
+        style: Toast.Style.Success,
+        title: "Repository Added",
+        message: `${owner}/${name} has been added to your repositories`,
+      });
+
+      return newRepo;
+    } catch (error) {
+      console.error("Failed to add repository:", error);
+      throw error;
+    }
+  }
+
+  static async removeUserRepository(id: string): Promise<boolean> {
+    try {
+      const repos = await this.getUserRepositories();
+      const filteredRepos = repos.filter((repo) => repo.id !== id);
+
+      if (filteredRepos.length === repos.length) {
+        return false; // Repository not found
+      }
+
+      await LocalStorage.setItem("user-repositories", JSON.stringify(filteredRepos));
+
+      showToast({
+        style: Toast.Style.Success,
+        title: "Repository Removed",
+        message: "Repository has been removed from your list",
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Failed to remove repository:", error);
+      throw error;
+    }
+  }
+
+  static async updateUserRepository(
+    id: string,
+    updates: Partial<
+      Pick<UserRepository, "name" | "owner" | "description" | "url" | "defaultBranch" | "subdirectory" | "lastSyncedAt">
+    >,
+  ): Promise<UserRepository | null> {
+    try {
+      const repos = await this.getUserRepositories();
+      const index = repos.findIndex((repo) => repo.id === id);
+
+      if (index === -1) return null;
+
+      // Validate if name or owner are being updated
+      if (updates.name || updates.owner) {
+        const validation = this.validateGitHubRepository(
+          updates.owner || repos[index].owner,
+          updates.name || repos[index].name,
+        );
+        if (!validation.isValid) {
+          throw new Error(validation.error);
+        }
+      }
+
+      repos[index] = {
+        ...repos[index],
+        ...updates,
+      };
+
+      await LocalStorage.setItem("user-repositories", JSON.stringify(repos));
+
+      showToast({
+        style: Toast.Style.Success,
+        title: "Repository Updated",
+        message: "Repository details have been updated",
+      });
+
+      return repos[index];
+    } catch (error) {
+      console.error("Failed to update repository:", error);
+      throw error;
+    }
+  }
+
+  // Sync repository files from GitHub using OAuth token
+  static async syncRepositoryFiles(
+    repo: UserRepository,
+    accessToken: string,
+  ): Promise<{ success: number; failed: number }> {
+    try {
+      // Validate repository parameters
+      if (!repo.owner || !repo.name) {
+        throw new Error("Invalid repository: missing owner or name");
+      }
+
+      if (!repo.defaultBranch) {
+        throw new Error("Invalid repository: missing default branch");
+      }
+
+      if (!accessToken) {
+        throw new Error("GitHub token required for repository sync");
+      }
+
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Syncing Repository",
+        message: `Fetching files from ${repo.owner}/${repo.name}...`,
+      });
+
+      // Build API URL with optional subdirectory
+      const treeUrl = `https://api.github.com/repos/${repo.owner}/${repo.name}/git/trees/${repo.defaultBranch}`;
+      const params: Record<string, unknown> = { recursive: 1 };
+
+      const response = await axios
+        .get(treeUrl, {
+          params,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: "application/vnd.github.v3+json",
+            "User-Agent": "Cheatsheets-Remastered-Raycast",
+          },
+          timeout: 15000,
+        })
+        .catch((error) => {
+          // Handle specific GitHub API errors
+          if (error.response) {
+            const status = error.response.status;
+            const data = error.response.data;
+
+            switch (status) {
+              case 404:
+                if (data.message?.includes("Not Found")) {
+                  throw new Error(`Repository ${repo.owner}/${repo.name} not found or you don't have access to it`);
+                } else if (data.message?.includes("tree not found")) {
+                  throw new Error(`Branch '${repo.defaultBranch}' not found in repository ${repo.owner}/${repo.name}`);
+                }
+                break;
+              case 403:
+                if (data.message?.includes("API rate limit exceeded")) {
+                  throw new Error("GitHub API rate limit exceeded. Please try again later");
+                } else if (data.message?.includes("Resource not accessible")) {
+                  throw new Error(`Access denied to repository ${repo.owner}/${repo.name}. Check permissions`);
+                }
+                break;
+              case 401:
+                throw new Error("GitHub authentication failed. Please re-authenticate");
+              case 422:
+                throw new Error(`Invalid repository or branch: ${repo.owner}/${repo.name}#${repo.defaultBranch}`);
+              default:
+                throw new Error(`GitHub API error (${status}): ${data.message || "Unknown error"}`);
+            }
+          } else if (error.code === "ENOTFOUND" || error.code === "ECONNREFUSED") {
+            throw new Error("Unable to connect to GitHub. Please check your internet connection");
+          } else if (error.code === "ETIMEDOUT") {
+            throw new Error("Request timed out. Please try again");
+          }
+
+          throw error;
+        });
+
+      const files = response.data.tree || [];
+
+      // Filter markdown files and apply subdirectory filter
+      // Comprehensive exclusion system to ensure only valid cheatsheets are imported
+      const markdownFiles = files.filter((file: Record<string, unknown>) => {
+        // Basic requirements
+        const isMarkdown = (file.path as string)?.endsWith(".md");
+
+        // Subdirectory logic: if subdirectory is set, only sync that subdirectory
+        // If no subdirectory is set, sync ALL files in ALL subdirectories
+        const filePath = file.path as string;
+        const isInSubdir = !repo.subdirectory || filePath.startsWith(repo.subdirectory + "/");
+
+        // Debug logging for all files
+        if (isMarkdown) {
+          console.log(
+            `Processing file: ${filePath} (isMarkdown: ${isMarkdown}, isInSubdir: ${isInSubdir}, subdirectory: '${repo.subdirectory || "none"}')`,
+          );
+        }
+
+        // Skip if not markdown or not in subdirectory
+        if (!isMarkdown || !isInSubdir) {
+          if (isMarkdown && !isInSubdir) {
+            console.log(
+              `Excluding file (not in subdirectory): ${filePath} (subdirectory: ${repo.subdirectory || "none"})`,
+            );
+          }
+          return false;
+        }
+
+        // Admin and documentation file exclusions - be more precise
+        const isNotAdminFile = !filePath.match(/^(README|CONTRIBUTING|index|index@2016)\.md$/i);
+        const isNotInGitHubDir = !filePath.startsWith(".github/");
+        const isNotCodeOfConduct = !filePath.match(/code[_-]of[_-]conduct\.md$/i);
+        const isNotLicense = !filePath.match(/^(LICENSE|LICENCE)\.md$/i);
+        const isNotChangelog = !filePath.match(/^(CHANGELOG|HISTORY)\.md$/i);
+        const isNotSecurity = !filePath.match(/^(SECURITY|SECURITY\.md)$/i);
+        const isNotContributing = !filePath.match(/^(CONTRIBUTING|CONTRIBUTING\.md)$/i);
+        const isNotPullRequestTemplate = !filePath.match(/pull_request_template\.md$/i);
+        const isNotIssueTemplate = !filePath.startsWith(".github/ISSUE_TEMPLATE/");
+        const isNotWorkflow = !filePath.startsWith(".github/workflows/");
+        const isNotReleaseNotes = !filePath.match(/^(RELEASES?|RELEASE[_-]NOTES?)\.md$/i);
+        const isNotAuthors = !filePath.match(/^(AUTHORS?|CONTRIBUTORS?)\.md$/i);
+        const isNotRoadmap = !filePath.match(/^(ROADMAP|ROAD[_-]MAP)\.md$/i);
+        const isNotTodo = !filePath.match(/^(TODO|TASKS?)\.md$/i);
+        const isNotInstallation = !filePath.match(/^(INSTALL|INSTALLATION)\.md$/i);
+        const isNotGettingStarted = !filePath.match(/^(GETTING[_-]STARTED|QUICK[_-]START)\.md$/i);
+
+        // Directory and file pattern exclusions (as per requirements)
+        const isNotInUnderscoreDir = !filePath.match(/(^|\/)_[^/]+/); // Exclude dirs starting with _
+        const isNotAtSymbolFile = !filePath.includes("@"); // Exclude files with @ in name
+        const isNotInUnderscoreFile = !filePath.match(/(^|\/)_[^/]*\.md$/); // Exclude files starting with _ in filename
+
+        // Additional exclusions for common non-cheatsheet files
+        const isNotIndexFile = !filePath.match(
+          /^(Index|IndexASVS|IndexMASVS|IndexProactiveControls|IndexTopTen)\.md$/i,
+        );
+        const isNotPrefaceFile = !filePath.match(/^(Preface|HelpGuide)\.md$/i);
+        const isNotProjectFile = !filePath.match(/^Project\.[^/]*\.md$/i);
+
+        const shouldInclude =
+          isNotAdminFile &&
+          isNotInGitHubDir &&
+          isNotCodeOfConduct &&
+          isNotLicense &&
+          isNotChangelog &&
+          isNotSecurity &&
+          isNotContributing &&
+          isNotPullRequestTemplate &&
+          isNotIssueTemplate &&
+          isNotWorkflow &&
+          isNotReleaseNotes &&
+          isNotAuthors &&
+          isNotRoadmap &&
+          isNotTodo &&
+          isNotInstallation &&
+          isNotGettingStarted &&
+          isNotInUnderscoreDir &&
+          isNotAtSymbolFile &&
+          isNotInUnderscoreFile &&
+          isNotIndexFile &&
+          isNotPrefaceFile &&
+          isNotProjectFile;
+
+        // Debug logging for troubleshooting
+        if (isMarkdown && isInSubdir) {
+          if (!shouldInclude) {
+            console.log(
+              `Excluding file: ${filePath} (admin: ${!isNotAdminFile}, github: ${!isNotInGitHubDir}, codeOfConduct: ${!isNotCodeOfConduct}, license: ${!isNotLicense}, changelog: ${!isNotChangelog}, security: ${!isNotSecurity}, contributing: ${!isNotContributing}, prTemplate: ${!isNotPullRequestTemplate}, issueTemplate: ${!isNotIssueTemplate}, workflow: ${!isNotWorkflow}, releaseNotes: ${!isNotReleaseNotes}, authors: ${!isNotAuthors}, roadmap: ${!isNotRoadmap}, todo: ${!isNotTodo}, installation: ${!isNotInstallation}, gettingStarted: ${!isNotGettingStarted}, underscoreDir: ${!isNotInUnderscoreDir}, atSymbol: ${!isNotAtSymbolFile}, underscoreFile: ${!isNotInUnderscoreFile}, index: ${!isNotIndexFile}, preface: ${!isNotPrefaceFile}, project: ${!isNotProjectFile})`,
+            );
+          } else {
+            console.log(`INCLUDING file: ${filePath}`);
+          }
+        }
+
+        return shouldInclude;
+      });
+
+      // Clear existing cheatsheets for this repository
+      await this.deleteRepositoryCheatsheets(repo.id);
+
+      console.log(`Repository subdirectory setting: '${repo.subdirectory || "none"}'`);
+      console.log(`Total files from GitHub API: ${files.length}`);
+      console.log(
+        `Found ${markdownFiles.length} markdown files to process for ${repo.owner}/${repo.name}${repo.subdirectory ? ` in subdirectory '${repo.subdirectory}'` : ""}`,
+      );
+      if (markdownFiles.length > 0) {
+        console.log(
+          "Files to process:",
+          markdownFiles
+            .map((f) => f.path)
+            .slice(0, 10)
+            .join(", "),
+        );
+        if (markdownFiles.length > 10) {
+          console.log(`... and ${markdownFiles.length - 10} more files`);
+        }
+      } else {
+        console.log("NO FILES TO PROCESS - This is the problem!");
+      }
+
+      let success = 0;
+      let failed = 0;
+
+      // Fetch content for each markdown file
+      for (const file of markdownFiles) {
+        try {
+          const filePath = file.path as string;
+          const contentUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.name}/${repo.defaultBranch}/${filePath}`;
+          const contentResponse = await axios
+            .get(contentUrl, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                Accept: "text/plain",
+                "User-Agent": "Cheatsheets-Remastered-Raycast",
+              },
+              timeout: 10000,
+            })
+            .catch((error) => {
+              // Handle content fetching errors
+              if (error.response?.status === 404) {
+                throw new Error(`File not found: ${filePath}`);
+              } else if (error.response?.status === 403) {
+                throw new Error(`Access denied to file: ${filePath}`);
+              } else if (error.code === "ETIMEDOUT") {
+                throw new Error(`Timeout fetching file: ${filePath}`);
+              }
+              throw error;
+            });
+
+          const content = contentResponse.data;
+          const slug = filePath.replace(".md", "");
+          const title = this.extractTitleFromContent(content) || this.generateTitleFromSlug(slug);
+
+          const cheatsheet: RepositoryCheatsheet = {
+            id: `repo-${repo.id}-${slug}-${Date.now()}`,
+            repositoryId: repo.id,
+            slug,
+            title,
+            content,
+            filePath: filePath,
+            syncedAt: Date.now(),
+          };
+
+          await this.saveRepositoryCheatsheet(cheatsheet);
+          success++;
+        } catch (error) {
+          console.warn(`Failed to fetch content for ${(file as Record<string, unknown>).path}:`, error);
+          failed++;
+        }
+      }
+
+      // Update repository with sync timestamp
+      const repos = await this.getUserRepositories();
+      const repoIndex = repos.findIndex((r) => r.id === repo.id);
+      if (repoIndex !== -1) {
+        repos[repoIndex].lastSyncedAt = Date.now();
+        await LocalStorage.setItem("user-repositories", JSON.stringify(repos));
+      }
+
+      showToast({
+        style: Toast.Style.Success,
+        title: "Sync Complete",
+        message: `Synced ${success} cheatsheets from ${repo.owner}/${repo.name}${repo.subdirectory ? ` (${repo.subdirectory}/)` : ""}${failed > 0 ? ` (${failed} failed)` : ""}`,
+      });
+
+      return { success, failed };
+    } catch (error) {
+      console.error("Failed to sync repository files:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Sync Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
+    }
+  }
+
+  // Helper method to extract title from markdown content
+  private static extractTitleFromContent(content: string): string | null {
+    const lines = content.split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("# ")) {
+        return trimmed.substring(2).trim();
+      }
+    }
+    return null;
+  }
+
+  // Helper method to generate title from slug
+  private static generateTitleFromSlug(slug: string): string {
+    return slug
+      .split("/")
+      .pop()!
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
+  // Test function to validate exclusion filters against sample repository patterns
+  static testExclusionFilters(): void {
+    const testFiles = [
+      // Valid cheatsheets (should pass)
+      { path: "cheatsheets/git.md", type: "blob" },
+      { path: "docs/javascript.md", type: "blob" },
+      { path: "guides/react.md", type: "blob" },
+      { path: "tutorials/python.md", type: "blob" },
+      { path: "cheatsheets/AJAX_Security_Cheat_Sheet.md", type: "blob" },
+      { path: "cheatsheets/Abuse_Case_Cheat_Sheet.md", type: "blob" },
+
+      // Invalid files (should be excluded)
+      { path: "README.md", type: "blob" },
+      { path: "LICENSE.md", type: "blob" },
+      { path: "CONTRIBUTING.md", type: "blob" },
+      { path: ".github/README.md", type: "blob" },
+      { path: "_includes/header.md", type: "blob" },
+      { path: "_layouts/main.md", type: "blob" },
+      { path: "file@2023.md", type: "blob" },
+      { path: "index@2016.md", type: "blob" },
+      { path: "_private.md", type: "blob" },
+      { path: "docs/_internal.md", type: "blob" },
+      { path: "CHANGELOG.md", type: "blob" },
+      { path: "SECURITY.md", type: "blob" },
+      { path: "AUTHORS.md", type: "blob" },
+      { path: "ROADMAP.md", type: "blob" },
+      { path: "TODO.md", type: "blob" },
+      { path: "INSTALL.md", type: "blob" },
+      { path: "GETTING_STARTED.md", type: "blob" },
+      { path: ".github/workflows/ci.md", type: "blob" },
+      { path: ".github/ISSUE_TEMPLATE/bug.md", type: "blob" },
+      { path: "pull_request_template.md", type: "blob" },
+      { path: "RELEASE_NOTES.md", type: "blob" },
+      { path: "CONTRIBUTORS.md", type: "blob" },
+      { path: "TASKS.md", type: "blob" },
+      { path: "INSTALLATION.md", type: "blob" },
+      { path: "QUICK_START.md", type: "blob" },
+      { path: "Index.md", type: "blob" },
+      { path: "IndexASVS.md", type: "blob" },
+      { path: "Preface.md", type: "blob" },
+      { path: "HelpGuide.md", type: "blob" },
+      { path: "Project.code-workspace.md", type: "blob" },
+
+      // Non-markdown files (should be excluded)
+      { path: "script.js", type: "blob" },
+      { path: "style.css", type: "blob" },
+      { path: "package.json", type: "blob" },
+      { path: "config.yaml", type: "blob" },
+    ];
+
+    const mockRepo = {
+      id: "test-repo",
+      name: "test-repo",
+      owner: "test-owner",
+      defaultBranch: "main",
+      subdirectory: undefined,
+    };
+
+    // Apply the same filtering logic as in syncRepositoryFiles
+    const filteredFiles = testFiles.filter((file: Record<string, unknown>) => {
+      const filePath = file.path as string;
+      const isMarkdown = filePath.endsWith(".md");
+      const isInSubdir = !mockRepo.subdirectory || filePath.startsWith(mockRepo.subdirectory + "/");
+
+      // Skip if not markdown or not in subdirectory
+      if (!isMarkdown || !isInSubdir) {
+        return false;
+      }
+
+      // Admin and documentation file exclusions - be more precise
+      const isNotAdminFile = !filePath.match(/^(README|CONTRIBUTING|index|index@2016)\.md$/i);
+      const isNotInGitHubDir = !filePath.startsWith(".github/");
+      const isNotCodeOfConduct = !filePath.match(/code[_-]of[_-]conduct\.md$/i);
+      const isNotLicense = !filePath.match(/^(LICENSE|LICENCE)\.md$/i);
+      const isNotChangelog = !filePath.match(/^(CHANGELOG|HISTORY)\.md$/i);
+      const isNotSecurity = !filePath.match(/^(SECURITY|SECURITY\.md)$/i);
+      const isNotContributing = !filePath.match(/^(CONTRIBUTING|CONTRIBUTING\.md)$/i);
+      const isNotPullRequestTemplate = !filePath.match(/pull_request_template\.md$/i);
+      const isNotIssueTemplate = !filePath.startsWith(".github/ISSUE_TEMPLATE/");
+      const isNotWorkflow = !filePath.startsWith(".github/workflows/");
+      const isNotReleaseNotes = !filePath.match(/^(RELEASES?|RELEASE[_-]NOTES?)\.md$/i);
+      const isNotAuthors = !filePath.match(/^(AUTHORS?|CONTRIBUTORS?)\.md$/i);
+      const isNotRoadmap = !filePath.match(/^(ROADMAP|ROAD[_-]MAP)\.md$/i);
+      const isNotTodo = !filePath.match(/^(TODO|TASKS?)\.md$/i);
+      const isNotInstallation = !filePath.match(/^(INSTALL|INSTALLATION)\.md$/i);
+      const isNotGettingStarted = !filePath.match(/^(GETTING[_-]STARTED|QUICK[_-]START)\.md$/i);
+
+      // Directory and file pattern exclusions
+      const isNotInUnderscoreDir = !filePath.match(/(^|\/)_[^/]+/);
+      const isNotAtSymbolFile = !filePath.includes("@");
+      const isNotInUnderscoreFile = !filePath.match(/_[^/]*\.md$/);
+
+      // Additional exclusions for common non-cheatsheet files
+      const isNotIndexFile = !filePath.match(/^(Index|IndexASVS|IndexMASVS|IndexProactiveControls|IndexTopTen)\.md$/i);
+      const isNotPrefaceFile = !filePath.match(/^(Preface|HelpGuide)\.md$/i);
+      const isNotProjectFile = !filePath.match(/^Project\.[^/]*\.md$/i);
+
+      return (
+        isNotAdminFile &&
+        isNotInGitHubDir &&
+        isNotCodeOfConduct &&
+        isNotLicense &&
+        isNotChangelog &&
+        isNotSecurity &&
+        isNotContributing &&
+        isNotPullRequestTemplate &&
+        isNotIssueTemplate &&
+        isNotWorkflow &&
+        isNotReleaseNotes &&
+        isNotAuthors &&
+        isNotRoadmap &&
+        isNotTodo &&
+        isNotInstallation &&
+        isNotGettingStarted &&
+        isNotInUnderscoreDir &&
+        isNotAtSymbolFile &&
+        isNotInUnderscoreFile &&
+        isNotIndexFile &&
+        isNotPrefaceFile &&
+        isNotProjectFile
+      );
+    });
+
+    console.log("Exclusion Filter Test Results:");
+    console.log(`Total test files: ${testFiles.length}`);
+    console.log(`Filtered files: ${filteredFiles.length}`);
+    console.log("Valid cheatsheets that passed:");
+    filteredFiles.forEach((file) => console.log(`  ✅ ${file.path as string}`));
+
+    const expectedValid = [
+      "cheatsheets/git.md",
+      "docs/javascript.md",
+      "guides/react.md",
+      "tutorials/python.md",
+      "cheatsheets/AJAX_Security_Cheat_Sheet.md",
+      "cheatsheets/Abuse_Case_Cheat_Sheet.md",
+    ];
+    const actualValid = filteredFiles.map((f) => f.path as string);
+
+    console.log("\nValidation:");
+    expectedValid.forEach((expected) => {
+      const found = actualValid.includes(expected);
+      console.log(`${found ? "✅" : "❌"} ${expected} - ${found ? "PASS" : "FAIL"}`);
+    });
+
+    const unexpectedFiles = actualValid.filter((f) => !expectedValid.includes(f));
+    if (unexpectedFiles.length > 0) {
+      console.log("\nUnexpected files that passed:");
+      unexpectedFiles.forEach((file) => console.log(`  ⚠️  ${file}`));
+    }
+  }
+
+  static async getUserRepository(id: string): Promise<UserRepository | null> {
+    try {
+      const repos = await this.getUserRepositories();
+      return repos.find((repo) => repo.id === id) || null;
+    } catch (error) {
+      console.error("Failed to get repository:", error);
+      return null;
+    }
+  }
+
+  static async recordRepositoryAccess(id: string): Promise<void> {
+    try {
+      const repos = await this.getUserRepositories();
+      const index = repos.findIndex((repo) => repo.id === id);
+
+      if (index !== -1) {
+        repos[index].lastAccessedAt = Date.now();
+        await LocalStorage.setItem("user-repositories", JSON.stringify(repos));
+      }
+    } catch (error) {
+      console.warn("Failed to record repository access:", error);
+    }
+  }
+
+  static async searchUserRepositories(query: string): Promise<UserRepository[]> {
+    try {
+      const repos = await this.getUserRepositories();
+      const lowerQuery = query.toLowerCase();
+
+      return repos.filter(
+        (repo) =>
+          repo.name.toLowerCase().includes(lowerQuery) ||
+          repo.owner.toLowerCase().includes(lowerQuery) ||
+          repo.description?.toLowerCase().includes(lowerQuery),
+      );
+    } catch (error) {
+      console.error("Failed to search repositories:", error);
+      return [];
+    }
+  }
+
+  // Repository cheatsheet management methods
+  static async getRepositoryCheatsheets(repositoryId?: string): Promise<RepositoryCheatsheet[]> {
+    try {
+      const cheatsheetsJson = await LocalStorage.getItem<string>("repository-cheatsheets");
+      const cheatsheets = cheatsheetsJson ? JSON.parse(cheatsheetsJson) : [];
+
+      if (repositoryId) {
+        return cheatsheets.filter((sheet: RepositoryCheatsheet) => sheet.repositoryId === repositoryId);
+      }
+
+      return cheatsheets;
+    } catch (error) {
+      console.warn("Failed to load repository cheatsheets:", error);
+      return [];
+    }
+  }
+
+  static async saveRepositoryCheatsheet(cheatsheet: RepositoryCheatsheet): Promise<void> {
+    try {
+      const cheatsheets = await this.getRepositoryCheatsheets();
+      const existingIndex = cheatsheets.findIndex((sheet) => sheet.id === cheatsheet.id);
+
+      if (existingIndex >= 0) {
+        cheatsheets[existingIndex] = cheatsheet;
+      } else {
+        cheatsheets.push(cheatsheet);
+      }
+
+      await LocalStorage.setItem("repository-cheatsheets", JSON.stringify(cheatsheets));
+    } catch (error) {
+      console.error("Failed to save repository cheatsheet:", error);
+      throw error;
+    }
+  }
+
+  static async deleteRepositoryCheatsheets(repositoryId: string): Promise<void> {
+    try {
+      const cheatsheets = await this.getRepositoryCheatsheets();
+      const filtered = cheatsheets.filter((sheet: RepositoryCheatsheet) => sheet.repositoryId !== repositoryId);
+      await LocalStorage.setItem("repository-cheatsheets", JSON.stringify(filtered));
+    } catch (error) {
+      console.error("Failed to delete repository cheatsheets:", error);
+      throw error;
+    }
+  }
+
+  static async getRepositoryCheatsheet(id: string): Promise<RepositoryCheatsheet | null> {
+    try {
+      const cheatsheets = await this.getRepositoryCheatsheets();
+      return cheatsheets.find((sheet: RepositoryCheatsheet) => sheet.id === id) || null;
+    } catch (error) {
+      console.error("Failed to get repository cheatsheet:", error);
+      return null;
+    }
+  }
+
+  static async recordRepositoryCheatsheetAccess(id: string): Promise<void> {
+    try {
+      const cheatsheet = await this.getRepositoryCheatsheet(id);
+      if (cheatsheet) {
+        cheatsheet.lastAccessedAt = Date.now();
+        await this.saveRepositoryCheatsheet(cheatsheet);
+      }
+    } catch (error) {
+      console.warn("Failed to record repository cheatsheet access:", error);
     }
   }
 }
@@ -1343,4 +2129,12 @@ function getSheets(files: File[]): string[] {
 }
 
 export default Service;
-export type { File, CustomCheatsheet, Preferences, OfflineCheatsheet, FavoriteCheatsheet };
+export type {
+  File,
+  CustomCheatsheet,
+  Preferences,
+  OfflineCheatsheet,
+  FavoriteCheatsheet,
+  UserRepository,
+  RepositoryCheatsheet,
+};

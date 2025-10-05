@@ -1,5 +1,12 @@
 # Oracle Cloud Changelog
 
+## [Manage Bucket Objects + View NoSQL Database] - 2025-09-15
+
+- view NoSQL Databases
+- view objects in buckets w/ filesize
+    1. upload object
+    2. delete object
+
 ## [View Object Storage Buckets + Implement Provider w/ Context] - 2025-07-14
 
 - add initial "Object Storage" command to view buckets

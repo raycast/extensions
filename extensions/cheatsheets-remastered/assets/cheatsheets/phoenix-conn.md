@@ -1,8 +1,11 @@
 ---
-title: "Phoenix: Plug.Conn"
+title: 'Phoenix: Plug.Conn'
 category: Elixir
-updated: 2018-01-19
+updated: 2018-01-19T00:00:00.000Z
 weight: -5
+tech: phoenix-conn
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Request

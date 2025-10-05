@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { BranchDropdown, RepositoryDropdown } from "./components";
 import { useViewer } from "./hooks/useViewer";
-import { provider } from "./lib/oauth";
+import { provider, reauthorize } from "./lib/oauth";
 import { createTask } from "./services/copilot";
 
 type FormValues = {
@@ -36,7 +36,7 @@ function Command() {
       });
 
       try {
-        const response = await createTask(values.repository, values.prompt, values.branch);
+        const { pullRequestUrl } = await createTask(values.repository, values.prompt, values.branch);
 
         await showToast({
           style: Toast.Style.Success,
@@ -45,14 +45,14 @@ function Command() {
             title: "Open in Browser",
             shortcut: Keyboard.Shortcut.Common.Open,
             onAction: () => {
-              open(response.pull_request.html_url);
+              open(pullRequestUrl);
             },
           },
           secondaryAction: {
             title: "Copy URL",
             shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: async () => {
-              await Clipboard.copy(response.pull_request.html_url);
+              await Clipboard.copy(pullRequestUrl);
               await showToast({
                 style: Toast.Style.Success,
                 title: "Copied URL to Clipboard",
@@ -78,6 +78,7 @@ function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" icon={Icon.NewDocument} onSubmit={handleSubmit} />
+          <Action title="Log out" icon={Icon.Logout} onAction={reauthorize} />
         </ActionPanel>
       }
       isLoading={isLoading}

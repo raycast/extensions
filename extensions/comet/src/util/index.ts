@@ -8,7 +8,6 @@ import {
   NO_BOOKMARKS_MESSAGE,
 } from "../constants";
 import { getPreferenceValues, getApplications, showToast, Toast, open, openExtensionPreferences } from "@raycast/api";
-import { Preferences } from "../interfaces";
 import { BookmarkDirectory, HistoryEntry, RawBookmarks } from "../interfaces";
 
 type CometFile = "History" | "Bookmarks";
@@ -29,7 +28,7 @@ const getCometFilePath = (fileName: CometFile, profile?: string) => {
       userLibraryDirectoryPath(),
       ...defaultCometProfilePath,
       profile ?? DEFAULT_COMET_PROFILE_ID,
-      fileName
+      fileName,
     );
   }
 
@@ -53,7 +52,7 @@ const checkProfilePathExists = (): boolean => {
   try {
     const profilesDir = getCometProfilesDirectory();
     return fs.existsSync(profilesDir);
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -79,7 +78,7 @@ export const getAvailableProfiles = (): string[] => {
         try {
           const itemPath = path.join(profilesDir, item);
           return fs.statSync(itemPath).isDirectory() && (item.startsWith("Profile ") || item === "Default");
-        } catch (error) {
+        } catch {
           // Skip items that can't be stat'd (like broken symlinks)
           return false;
         }
@@ -91,7 +90,7 @@ export const getAvailableProfiles = (): string[] => {
       });
 
     return profiles;
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -122,7 +121,7 @@ export const getProfileMapping = (): { [key: string]: string } => {
 
       return mapping;
     }
-  } catch (error) {
+  } catch {
     // Fallback: just return available profiles mapped to themselves
   }
 
@@ -159,6 +158,7 @@ function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirecto
       id: bookmarkDirectory.id,
       url: bookmarkDirectory.url,
       title: bookmarkDirectory.name,
+      dateAdded: bookmarkDirectory.date_added,
     });
   }
   return bookmarks;
@@ -191,7 +191,7 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
     }
 
     return bookmarks;
-  } catch (error) {
+  } catch {
     // If it's a profile that doesn't exist or file that doesn't exist,
     // always return the "no bookmarks" message
     throw new Error(NO_BOOKMARKS_MESSAGE);
@@ -318,11 +318,11 @@ export const getHistory = async (profile?: string, query?: string): Promise<Hist
           return null;
         })
         .filter((item): item is HistoryEntry => Boolean(item));
-    } catch (error) {
+    } catch {
       // If copy approach fails, return empty array
       return [];
     }
-  } catch (error) {
+  } catch {
     return [];
   }
 };

@@ -1,6 +1,9 @@
 ---
 title: Sublime Text
 category: Apps
+tech: sublime-text
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Select & Expand

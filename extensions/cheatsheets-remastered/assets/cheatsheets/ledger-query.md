@@ -1,6 +1,9 @@
 ---
 title: Ledger queries
 category: Ledger
+tech: ledger-query
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

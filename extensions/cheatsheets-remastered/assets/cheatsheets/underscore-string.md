@@ -1,6 +1,9 @@
 ---
 title: Underscore-string
 category: JavaScript libraries
+tech: underscore-string
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Usage

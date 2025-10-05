@@ -2,9 +2,12 @@
 title: Lodash
 category: JavaScript libraries
 weight: -3
-updated: 2020-06-24
+updated: 2020-06-24T00:00:00.000Z
 description: |
   This is not a complete list.
+tech: lodash
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Collections

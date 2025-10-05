@@ -1,7 +1,11 @@
 ---
 title: Food delivery (Philippines)
-intro: |
-  Food delivery numbers & sites for top restaurant chains in Metro Manila. For numbers outside Metro Manila, check their websites.
+intro: >
+  Food delivery numbers & sites for top restaurant chains in Metro Manila. For
+  numbers outside Metro Manila, check their websites.
+tech: ph-food-delivery
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Numbers

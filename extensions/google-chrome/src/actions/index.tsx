@@ -94,8 +94,8 @@ export async function openNewTab({
         (url
           ? `with properties {URL:"${url}"}`
           : query
-          ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
-          : "") +
+            ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
+            : "") +
         `
             end tell
         end tell
@@ -107,7 +107,6 @@ export async function openNewTab({
       script = getOpenInProfileCommand(profileCurrent);
       break;
     case SettingsProfileOpenBehaviour.ProfileOriginal:
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       script = getOpenInProfileCommand(profileOriginal!);
       break;
   }

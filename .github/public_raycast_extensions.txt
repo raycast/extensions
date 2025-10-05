@@ -63,4 +63,6 @@ kaleidoscope
 exa
 v0-by-vercel
 github-copilot
+cursor-agents
+circleback
 pieces-raycast

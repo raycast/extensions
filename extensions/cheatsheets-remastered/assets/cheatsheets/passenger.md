@@ -1,6 +1,10 @@
 ---
 title: Phusion Passenger
-tags: [WIP]
+tags:
+  - WIP
+tech: passenger
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Enabling Phusion passenger

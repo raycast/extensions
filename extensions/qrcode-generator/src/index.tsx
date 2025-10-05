@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import QRCode from "qrcode";
 import { useState } from "react";
-import { generateQRCode, getQRCodePath, QRCodeView } from "./utils";
+import { generateQRCode, getQRCodePath, QRCodeView, copyQRCodeToClipboard } from "./utils";
 import { FormValidation, useForm, showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import { QR_OPTIONS, SVG_OPTIONS, QR_OPTIONS_PREVIEW } from "./config";
@@ -9,12 +9,13 @@ import { QR_OPTIONS, SVG_OPTIONS, QR_OPTIONS_PREVIEW } from "./config";
 interface FormValues {
   url: string;
   inline: boolean;
+  copy?: boolean;
   format: "png" | "svg" | "png-bg";
 }
 
 interface Preferences {
   Index: {
-    primaryAction: "save" | "inline";
+    primaryAction: "save" | "inline" | "copy";
   };
 }
 
@@ -42,6 +43,8 @@ export default function Command() {
             message: error instanceof Error ? error.message : "Failed to generate QR code",
           });
         }
+      } else if (values.copy) {
+        await copyQRCodeToClipboard({ url: values.url, format: values.format });
       } else {
         try {
           const path = getQRCodePath(values.url, "png");
@@ -98,17 +101,40 @@ export default function Command() {
       />
     );
 
-    return primaryAction === "save" ? (
-      <>
-        {saveAction}
-        {showAction}
-      </>
-    ) : (
-      <>
-        {showAction}
-        {saveAction}
-      </>
+    const copyAction = (
+      <Action.SubmitForm
+        title="Generate and Copy to Clipboard"
+        onSubmit={(values) => {
+          handleSubmit({ ...values, inline: false, copy: true } as FormValues);
+        }}
+      />
     );
+
+    if (primaryAction === "save") {
+      return (
+        <>
+          {saveAction}
+          {showAction}
+          {copyAction}
+        </>
+      );
+    } else if (primaryAction === "copy") {
+      return (
+        <>
+          {copyAction}
+          {saveAction}
+          {showAction}
+        </>
+      );
+    } else {
+      return (
+        <>
+          {showAction}
+          {saveAction}
+          {copyAction}
+        </>
+      );
+    }
   };
 
   if (qrData) {

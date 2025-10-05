@@ -60,6 +60,9 @@ export function actionsForItem(item: Item): ActionID[] {
     "copy-username",
     "copy-password",
     "copy-one-time-password",
+    "paste-username",
+    "paste-password",
+    "paste-one-time-password",
     "share-item",
     "switch-account",
   ];
@@ -72,7 +75,7 @@ export function actionsForItem(item: Item): ActionID[] {
     case "LOGIN":
       return deduplicatedActions;
     case "PASSWORD":
-      return deduplicatedActions.filter((action) => action !== "copy-username");
+      return deduplicatedActions.filter((action) => action !== "copy-username" && action !== "paste-username");
     default:
       return ["open-in-1password"];
   }
