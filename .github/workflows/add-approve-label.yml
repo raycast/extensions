@@ -10,17 +10,26 @@ on:
     types: [submitted]
 
 permissions:
-  issues: write  # Enables label adds on PRs (fixes 403)
+  issues: write  # Reinforces repo settings for label adds on PRs
 
 jobs:
   label_on_approval:
     runs-on: ubuntu-latest
     if: ${{ github.event.review.state == 'approved' }}
     steps:
+    - name: Debug context
+      run: |
+        echo "::debug::Event: pull_request_review submitted, state approved"
+        echo "::debug::PR Number: ${{ github.event.pull_request.number }}"
+        echo "::debug::Repo: ${{ github.repository }}"
+        echo "::debug::Reviewer (actor): ${{ github.actor }}"
+        echo "::debug::Reviewer type: ${{ github.event.review.user.type }}"
+
     - name: Check PR state
       id: pr_check
       run: |
         pr_state="${{ github.event.pull_request.state }}"
+        echo "::debug::PR state: $pr_state"
         if [[ "$pr_state" != "open" ]]; then
           echo "::notice::PR is not open (state: $pr_state), skipping label addition"
           echo "should_label=false" >> $GITHUB_OUTPUT
@@ -55,7 +64,7 @@ jobs:
         http_code=$(echo "$response" | tail -n1)
         response_body=$(echo "$response" | sed '$d')
 
-        echo "::debug::HTTP Code: $http_code"
+        echo "::debug::Perms API HTTP Code: $http_code"
 
         # Handle curl failure (non-zero exit) - skip labeling, no job fail
         if [[ $? -ne 0 ]]; then
@@ -71,6 +80,10 @@ jobs:
           exit 0
         elif [[ "$http_code" != "200" ]]; then
           echo "::warning::Unexpected API response (code: $http_code): Skipping label"
+          echo "::debug::Full perms response: $response_body"
+          if echo "$response_body" | jq . >/dev/null 2>&1; then
+            echo "::debug::Pretty perms error: $(echo "$response_body" | jq .)"
+          fi
           echo "should_label=false" >> $GITHUB_OUTPUT
           exit 0
         fi
@@ -78,12 +91,14 @@ jobs:
         # For 200, validate JSON and parse permission
         if ! echo "$response_body" | jq . >/dev/null 2>&1; then
           echo "::error::Invalid JSON response: Skipping label"
+          echo "::debug::Invalid JSON body: $response_body"
           echo "should_label=false" >> $GITHUB_OUTPUT
           exit 0
         fi
 
         permission=$(echo "$response_body" | jq -r '.permission // empty')
         echo "::notice::Permission: $permission"
+        echo "::debug::Full perms response: $response_body"
 
         # Allow if read/triage; skip if write/maintain/admin
         if [[ "$permission" == "read" || "$permission" == "triage" ]]; then
@@ -96,38 +111,21 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Setup Node for Octokit
+    - name: Debug label inputs
       if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-
-    - name: Install Octokit
-      if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
-      run: npm install @octokit/rest
+      run: |
+        echo "::debug::Label step triggered - PR #${{ github.event.pull_request.number }}"
+        echo "::debug::Repo: ${{ github.repository }}"
+        echo "::debug::Token scopes available (inferred from perms): issues:write"
 
     - name: Add Approved label
       if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
+      uses: actions-ecosystem/action-add-labels@v1
+      with:
+        labels: Approved
+
+    - name: Debug label outcome
+      if: always()
       run: |
-        node -e "
-          const { Octokit } = require('@octokit/rest');
-          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-          (async () => {
-            try {
-              const prNumber = ${ { github.event.pull_request.number } };
-              await octokit.issues.addLabels({
-                owner: '${{ github.repository_owner }}',
-                repo: '${{ github.event.repository.name }}',
-                issue_number: prNumber,
-                labels: ['Approved']
-              });
-              console.log('Label added successfully');
-            } catch (error) {
-              console.error('Failed to add label:', error.message);
-              process.exit(1);
-            }
-          })();
-        "
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        echo "::debug::Label step completed - check PR for 'Approved' label"
+        echo "::debug::Workflow GITHUB_TOKEN perms: ${{ toJson(github.token.scopes) }}"  # Note: This is pseudo; actual scopes not directly exposed, but logs context
