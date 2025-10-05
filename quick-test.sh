@@ -14,11 +14,11 @@ echo "✅ package.json: $(test -f package.json && echo "Present" || echo "Missin
 echo ""
 
 echo "3. TypeScript compilation:"
-if [ -d "dist" ]; then
-    echo "✅ Compiled files: $(ls dist/*.js | wc -l | xargs) JS files"
-    echo "   Files: $(ls dist/*.js | xargs basename -a | tr '\n' ' ')"
+if ls *.js 1> /dev/null 2>&1; then
+    echo "✅ Compiled files: $(ls *.js | wc -l | xargs) JS files"
+    echo "   Files: $(ls *.js | tr '\n' ' ')"
 else
-    echo "❌ No dist folder - run 'npm run build'"
+    echo "❌ No JS files found - run 'npm run build'"
 fi
 echo ""
 

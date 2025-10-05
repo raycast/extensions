@@ -6,6 +6,13 @@ npm-debug.log*
 dist/
 *.tsbuildinfo
 
+# Compiled TypeScript files (build artifacts)
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+lib/
+
 # Environment
 .env
 .env.local

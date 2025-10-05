@@ -17,7 +17,7 @@
       "description": "Add a website to your block list",
       "mode": "view",
       "icon": "➕",
-      "main": "dist/add-website.js"
+      "main": "add-website.js"
     },
     {
       "name": "enable-blocking",
@@ -25,7 +25,7 @@
       "description": "Activate blocking for all websites in your list",
       "mode": "no-view",
       "icon": "🚫",
-      "main": "dist/enable-blocking.js"
+      "main": "enable-blocking.js"
     },
     {
       "name": "disable-blocking",
@@ -33,7 +33,7 @@
       "description": "Deactivate site blocking and restore access",
       "mode": "no-view",
       "icon": "✅",
-      "main": "dist/disable-blocking.js"
+      "main": "disable-blocking.js"
     },
     {
       "name": "view-blocked-sites",
@@ -41,16 +41,19 @@
       "description": "View and manage your blocked websites list",
       "mode": "view",
       "icon": "📋",
-      "main": "dist/view-blocked-sites.js"
+      "main": "view-blocked-sites.js"
     }
   ],
   "scripts": {
     "build": "npx tsc",
+    "clean": "rm -f *.js *.js.map *.d.ts *.d.ts.map && rm -rf lib/ dist/",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "jest",
     "test:watch": "jest --watch",
+    "prebuild": "npm run clean",
+    "build:extension": "./build-extension.sh",
     "publish": "npx @raycast/api@latest publish"
   },
   "jest": {
