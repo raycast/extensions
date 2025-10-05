@@ -14,7 +14,7 @@
     {
       "name": "search-isin",
       "title": "Search Isin",
-      "subtitle": "via Tradegate Exchange",
+      "subtitle": "Tradegate Exchange",
       "description": "Find securities by name or ISIN",
       "mode": "view"
     }
