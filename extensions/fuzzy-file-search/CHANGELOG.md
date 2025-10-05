@@ -1,6 +1,6 @@
 # Fuzzy File Search Changelog
 
-## [Rework] - {PR_MERGE_DATE}
+## [Rework] - 2025-10-05
 
 - Use fzf CLI tool for fuzzy finding.
 - Add automatic installation of the fzf CLI tool.
