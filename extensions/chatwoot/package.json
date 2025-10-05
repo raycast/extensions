@@ -53,6 +53,12 @@
       "mode": "view"
     },
     {
+      "name": "list-inboxes",
+      "title": "List Inboxes",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "list-integrations",
       "title": "List Integrations",
       "description": "",
@@ -61,7 +67,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

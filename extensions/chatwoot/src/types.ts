@@ -8,8 +8,25 @@ export type Contact = {
   thumbnail: string;
   created_at: number;
 }
+type Message = {
+  content: string
+}
 export type Conversation = {
-  uuid: string;
+  meta: {
+    sender: {
+      name: string;
+    }
+  }
+  id: number;
+  messages: Message[]
+  "created_at": number
+  "last_activity_at": number
+}
+export type Inbox = {
+  id: number;
+  avatar_url: string;
+  name: string
+  channel_type: string
 }
 export type Integration = {
     id: string;

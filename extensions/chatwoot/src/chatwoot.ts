@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Contact, Conversation, Integration, ListResult } from "./types";
+import { Contact, Conversation, Inbox, Integration, ListResult } from "./types";
 
 class Chatwoot {
     private url: string;
@@ -7,6 +7,7 @@ class Chatwoot {
     private accountId: string;
     public contacts: ContactsService;
     public conversations: ConversationsService;
+    public inboxes: InboxesService;
     public integrations: IntegrationsService;
 
     constructor(url: string, accessToken: string, accountId: string) {
@@ -15,6 +16,7 @@ class Chatwoot {
         this.accountId = accountId;
         this.contacts = new ContactsService(this);
         this.conversations = new ConversationsService(this);
+        this.inboxes = new InboxesService(this);
         this.integrations = new IntegrationsService(this);
     }
 
@@ -45,8 +47,14 @@ class ContactsService {
 }
 class ConversationsService {
     constructor(private client: Chatwoot) {}
-    async list(page: string) {
-        return this.client["request"]<{data: {payload: Conversation[]}}>(`conversations?page=${page}`);
+    async list() {
+        return this.client["request"]<{data: {payload: Conversation[]}}>("conversations");
+    }
+}
+class InboxesService {
+    constructor(private client: Chatwoot) {}
+    async list() {
+        return this.client["request"]<{payload: Inbox[]}>("inboxes");
     }
 }
 class IntegrationsService {
