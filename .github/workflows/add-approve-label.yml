@@ -11,6 +11,16 @@ jobs:
   label_on_approval:
     runs-on: ubuntu-latest
     steps:
+    - name: Check PR state
+      if: ${{ github.event.review.state == 'approved' }}
+      run: |
+        pr_state="${{ github.event.pull_request.state }}"
+        if [[ "$pr_state" != "open" ]]; then
+          echo "::notice::PR is not open (state: $pr_state), skipping label"
+          exit 0
+        fi
+        echo "::notice::PR is open, proceeding"
+
     - name: Check reviewer permissions
       id: check_permissions
       if: ${{ github.event.review.state == 'approved' }}
@@ -19,33 +29,56 @@ jobs:
         reviewer_type="${{ github.event.review.user.type }}"
         repo_owner="${{ github.repository_owner }}"
         repo_name="${{ github.event.repository.name }}"
-        
-        echo "Reviewer: $reviewer_login, Type: $reviewer_type"
-        
+
+        echo "::notice::Reviewer: $reviewer_login, Type: $reviewer_type"
+
         # If not a human user (e.g., bot), always label
         if [[ "$reviewer_type" != "User" ]]; then
           echo "should_label=true" >> $GITHUB_OUTPUT
-          echo "Non-human reviewer: Allowing label"
+          echo "::notice::Non-human reviewer: Allowing label"
           exit 0
         fi
-        
-        # For human users, fetch permission via GitHub API
-        response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+
+        # For human users, fetch permission via GitHub API with error handling
+        response=$(curl -s -w "\n%{http_code}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
           "https://api.github.com/repos/${repo_owner}/${repo_name}/collaborators/${reviewer_login}/permission")
-        
-        permission=$(echo "$response" | jq -r '.permission // empty')
-        http_code=$(echo "$response" | jq -r '.message // empty')
-        
-        echo "Permission: $permission (HTTP note: $http_code)"
-        
-        # Allow if 404/empty (non-collaborator) or read/triage; skip if write/maintain/admin
-        if [[ -z "$permission" || "$permission" == "read" || "$permission" == "triage" ]]; then
+
+        # Split response body and HTTP code
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | sed '$d')
+
+        echo "::debug::HTTP Code: $http_code"
+
+        # Handle curl failure (non-zero exit)
+        if [[ $? -ne 0 ]]; then
+          echo "::error::API request failed (curl error)"
+          echo "should_label=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        # Handle HTTP codes
+        if [[ "$http_code" == "404" ]]; then
+          echo "::notice::User is not a collaborator (404): Allowing label"
           echo "should_label=true" >> $GITHUB_OUTPUT
-          echo "Allowing label for non-write+ user"
+          exit 0
+        elif [[ "$http_code" != "200" ]]; then
+          echo "::warning::Unexpected API response (code: $http_code): Skipping label"
+          echo "should_label=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        # For 200, parse permission
+        permission=$(echo "$response_body" | jq -r '.permission // empty')
+        echo "::notice::Permission: $permission"
+
+        # Allow if read/triage; skip if write/maintain/admin
+        if [[ "$permission" == "read" || "$permission" == "triage" ]]; then
+          echo "should_label=true" >> $GITHUB_OUTPUT
+          echo "::notice::Allowing label for non-write+ user"
         else
           echo "should_label=false" >> $GITHUB_OUTPUT
-          echo "Skipping label for write+ user"
+          echo "::notice::Skipping label for write+ user"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
