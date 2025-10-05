@@ -95,7 +95,7 @@ class PlausibleAnalytics {
    */
   async trackWebsiteSave(userId?: string) {
     await this.sendEvent("website_save", {
-      userId: userId || this.userId || undefined
+      userId: userId || this.userId || undefined,
     });
   }
 
@@ -104,7 +104,7 @@ class PlausibleAnalytics {
    */
   async trackWebsiteOpen(userId?: string) {
     await this.sendEvent("website_open", {
-      userId: userId || this.userId || undefined
+      userId: userId || this.userId || undefined,
     });
   }
 }
