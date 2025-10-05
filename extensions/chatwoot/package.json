@@ -6,8 +6,7 @@
   "icon": "chatwoot.png",
   "author": "xmok",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Communication"
@@ -68,8 +67,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.2",
     "@raycast/utils": "^1.17.0",
-    "date-fns": "^4.1.0",
-    "dayjs": "^1.11.18"
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

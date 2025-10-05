@@ -4,7 +4,7 @@ import {  Icon, List } from "@raycast/api";
 
 export default function ListContacts() {
 const {isLoading, data: contacts, pagination}  = useCachedPromise(() => async(options:{ page: number }) => {
-  const {meta, payload} = await chatwoot.contacts.list(String(options.page+1));
+  const {meta, payload} = await chatwoot.contacts.list({page: String(options.page+1)});
   return {
     data: payload,
     hasMore: meta.current_page!==options.page+1,

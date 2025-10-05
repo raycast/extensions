@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Contact, Conversation, Inbox, Integration, ListResult } from "./types";
+import { Contact, Conversation, Inbox, Integration, ListResult, Message } from "./types";
 
 class Chatwoot {
     private url: string;
@@ -9,6 +9,7 @@ class Chatwoot {
     public conversations: ConversationsService;
     public inboxes: InboxesService;
     public integrations: IntegrationsService;
+    public messages: MessagesService;
 
     constructor(url: string, accessToken: string, accountId: string) {
         this.url = url;
@@ -18,6 +19,7 @@ class Chatwoot {
         this.conversations = new ConversationsService(this);
         this.inboxes = new InboxesService(this);
         this.integrations = new IntegrationsService(this);
+        this.messages = new MessagesService(this);
     }
 
     public buildUrl(route: string) {
@@ -41,8 +43,8 @@ class Chatwoot {
 
 class ContactsService {
     constructor(private client: Chatwoot) {}
-    async list(page: string) {
-        return this.client["request"]<ListResult<Contact>>(`contacts?page=${page}`);
+    async list(props: {page: string}) {
+        return this.client["request"]<ListResult<Contact>>(`contacts?page=${props.page}`);
     }
 }
 class ConversationsService {
@@ -61,6 +63,18 @@ class IntegrationsService {
     constructor(private client: Chatwoot) {}
     async list() {
         return this.client["request"]<ListResult<Integration>>("integrations/apps");
+    }
+}
+class MessagesService {
+    constructor(private client: Chatwoot) {}
+    async create(props: {conversationId: number, message: Partial<Message>}) {
+        return this.client["request"]<Message>(`conversations/${props.conversationId}/messages`, {
+            method: "POST",
+        body: JSON.stringify(props.message)
+        });
+    }
+    async list(props: {conversationId: number}) {
+        return this.client["request"]<{payload: Message[]}>(`conversations/${props.conversationId}/messages`);
     }
 }
 

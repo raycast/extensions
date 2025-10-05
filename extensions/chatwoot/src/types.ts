@@ -8,9 +8,27 @@ export type Contact = {
   thumbnail: string;
   created_at: number;
 }
-type Message = {
-  content: string
+export enum MessageType {
+  Incoming,
+  Outgoing,
+  Bot=3
 }
+export type Message = {
+  id: number
+  content: string | null
+  created_at: number
+  private:boolean
+} & (
+  {
+    message_type: Exclude<MessageType, MessageType.Bot>
+    sender: {
+      name: string;
+    }
+  } | {
+    message_type: MessageType.Bot
+  sender?: never
+  }
+)
 export type Conversation = {
   meta: {
     sender: {
