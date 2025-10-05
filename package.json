@@ -16,28 +16,32 @@
       "title": "Add Website to Block",
       "description": "Add a website to your block list",
       "mode": "view",
-      "icon": "➕"
+      "icon": "➕",
+      "main": "dist/add-website.js"
     },
     {
       "name": "enable-blocking",
       "title": "Enable Site Blocking",
       "description": "Activate blocking for all websites in your list",
       "mode": "no-view",
-      "icon": "🚫"
+      "icon": "🚫",
+      "main": "dist/enable-blocking.js"
     },
     {
       "name": "disable-blocking",
       "title": "Disable Site Blocking",
       "description": "Deactivate site blocking and restore access",
       "mode": "no-view",
-      "icon": "✅"
+      "icon": "✅",
+      "main": "dist/disable-blocking.js"
     },
     {
       "name": "view-blocked-sites",
       "title": "View Blocked Sites",
       "description": "View and manage your blocked websites list",
       "mode": "view",
-      "icon": "📋"
+      "icon": "📋",
+      "main": "dist/view-blocked-sites.js"
     }
   ],
   "scripts": {
