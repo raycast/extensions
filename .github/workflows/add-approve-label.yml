@@ -18,6 +18,7 @@ jobs:
     if: ${{ github.event.review.state == 'approved' }}
     steps:
     - name: Check PR state
+      id: pr_check
       run: |
         pr_state="${{ github.event.pull_request.state }}"
         if [[ "$pr_state" != "open" ]]; then
@@ -26,8 +27,7 @@ jobs:
           exit 0
         fi
         echo "::notice::PR is open, proceeding"
-      id: pr_check
-      # Note: Outputs not needed here, but set for consistency
+        echo "should_label=true" >> $GITHUB_OUTPUT
 
     - name: Check reviewer permissions
       id: check_permissions
@@ -97,8 +97,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add Approved label
-      if: ${{ steps.check_permissions.outputs.should_label == 'true' }}
-      uses: mshick/add-pr-label@v2
+      if: ${{ steps.check_permissions.outputs.should_label == 'true' || steps.pr_check.outputs.should_label == 'true' }}
+      uses: mshick/add-pr-labels@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         labels: Approved
