@@ -97,7 +97,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add Approved label
-      if: ${{ steps.check_permissions.outputs.should_label == 'true' || steps.pr_check.outputs.should_label == 'true' }}
+      if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
       uses: mshick/add-pr-labels@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
