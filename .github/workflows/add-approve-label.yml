@@ -13,7 +13,7 @@ on:
       reviewer_login:
         description: 'Reviewer login (e.g., xmo for read perms)'
         required: true
-        default: 'xmo'
+        default: 'xmok'
       reviewer_type:
         description: 'Reviewer type (User or Bot)'
         required: true
@@ -23,10 +23,10 @@ on:
         required: true
         default: 'open'
       pr_number:
-        description: 'PR number to label'
+        description: 'PR number'
         required: true
         type: number
-        default: 1
+        default: 21714
 
 permissions:
   issues: write  # Reinforces repo settings for label adds on PRs
