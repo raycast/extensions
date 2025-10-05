@@ -16,7 +16,7 @@ import { showDeletionModal } from "./delete-modal";
 
 function getTitleErrorMessage(
   title: string,
-  { existingTitles, initialTitle }: { existingTitles: string[]; initialTitle: string }
+  { existingTitles, initialTitle }: { existingTitles: string[]; initialTitle: string },
 ) {
   if (title.length === 0) {
     return "Title may not be empty";
@@ -46,7 +46,7 @@ function getUrlErrorMessage(url: string, { existingUrls, initialUrl }: { existin
 
   try {
     new URL(url);
-  } catch (_) {
+  } catch {
     return 'Invalid URL (did you forget the "https://"?)';
   }
 
@@ -61,7 +61,7 @@ export function EditSavedSites(
   props: SavedSitesState &
     Partial<FormData> & {
       operation: SavedSitesEditingKind;
-    }
+    },
 ) {
   const {
     savedSites,
@@ -88,7 +88,7 @@ export function EditSavedSites(
       if (isEditingExistingSite) {
         updateSavedSites(
           { savedSites, setSavedSites },
-          { type: "edit", index: operation.index, ...newSavedSiteData, oldIsDefault: initialIsDefault ?? false }
+          { type: "edit", index: operation.index, ...newSavedSiteData, oldIsDefault: initialIsDefault ?? false },
         );
         // savedSitesDispatch({ type: "edit", index: operation.index, ...newSavedSiteData });
       } else {

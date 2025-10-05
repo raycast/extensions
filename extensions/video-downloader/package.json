@@ -178,7 +178,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.102.6",
+    "@raycast/api": "^1.103.2",
     "@raycast/utils": "^2.2.1",
     "date-fns": "^4.1.0",
     "execa": "^9.6.0",
@@ -187,10 +187,10 @@
     "srt-parser-2": "^1.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.9",
-    "@types/react": "^19.1.12",
-    "eslint": "^9.35.0",
+    "@types/react": "^19.2.0",
+    "eslint": "^9.36.0",
     "prettier": "^3.6.2",
     "typescript": "^5.8.2"
   },
