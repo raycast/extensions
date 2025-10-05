@@ -3,6 +3,7 @@
 ## [Windows Support + Modernize] - {PR_MERGE_DATE}
 
 - Add Windows Support
+- Add `metadata` images
 - Modernize: remove `Preferences` type + update deps
 - `usePromise` to reduce complexity of useSearch hook
 
