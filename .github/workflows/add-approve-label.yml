@@ -1,4 +1,9 @@
-name: Label Pull Request on Approval (Skip Write+ Users Only)
+# Auto-labels PRs "Approved" on non-maintainer approvals.
+# Skips write+/maintain/admin users to highlight community reviews.
+# Handles bots/externals/404s as allowable; only for open PRs.
+# Edge: API errors skip labeling (no job failure); idempotent adds.
+
+name: Auto-label approved PRs (external reviewers only)
 
 on:
   pull_request_review:
@@ -10,22 +15,24 @@ permissions:
 jobs:
   label_on_approval:
     runs-on: ubuntu-latest
+    if: ${{ github.event.review.state == 'approved' }}
     steps:
     - name: Check PR state
-      if: ${{ github.event.review.state == 'approved' }}
       run: |
         pr_state="${{ github.event.pull_request.state }}"
         if [[ "$pr_state" != "open" ]]; then
           echo "::notice::PR is not open (state: $pr_state), skipping label"
+          echo "should_label=false" >> $GITHUB_OUTPUT
           exit 0
         fi
         echo "::notice::PR is open, proceeding"
+      id: pr_check
+      # Note: Outputs not needed here, but set for consistency
 
     - name: Check reviewer permissions
       id: check_permissions
-      if: ${{ github.event.review.state == 'approved' }}
       run: |
-        reviewer_login="${{ github.event.review.user.login }}"
+        reviewer_login="${{ github.actor }}"
         reviewer_type="${{ github.event.review.user.type }}"
         repo_owner="${{ github.repository_owner }}"
         repo_name="${{ github.event.repository.name }}"
@@ -50,11 +57,11 @@ jobs:
 
         echo "::debug::HTTP Code: $http_code"
 
-        # Handle curl failure (non-zero exit)
+        # Handle curl failure (non-zero exit) - skip labeling, no job fail
         if [[ $? -ne 0 ]]; then
-          echo "::error::API request failed (curl error)"
+          echo "::error::API request failed (curl error): Skipping label"
           echo "should_label=false" >> $GITHUB_OUTPUT
-          exit 1
+          exit 0
         fi
 
         # Handle HTTP codes
@@ -68,7 +75,13 @@ jobs:
           exit 0
         fi
 
-        # For 200, parse permission
+        # For 200, validate JSON and parse permission
+        if ! echo "$response_body" | jq . >/dev/null 2>&1; then
+          echo "::error::Invalid JSON response: Skipping label"
+          echo "should_label=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
         permission=$(echo "$response_body" | jq -r '.permission // empty')
         echo "::notice::Permission: $permission"
 
@@ -84,7 +97,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add Approved label
-      if: ${{ github.event.review.state == 'approved' && steps.check_permissions.outputs.should_label == 'true' }}
+      if: ${{ steps.check_permissions.outputs.should_label == 'true' }}
       uses: mshick/add-pr-label@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
