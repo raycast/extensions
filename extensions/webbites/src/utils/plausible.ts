@@ -13,9 +13,9 @@ class PlausibleAnalytics {
   private userId: string | null;
 
   constructor() {
-    this.domain = 'webbites.io';
+    this.domain = "webbites.io";
     // this.domain = 'webbites-extension-chrome'
-    this.apiEndpoint = 'https://plausible.macosicons.com/api/event'; // ⚠️ CHANGE THIS to your Plausible server URL
+    this.apiEndpoint = "https://plausible.macosicons.com/api/event"; // ⚠️ CHANGE THIS to your Plausible server URL
     this.isInitialized = false;
     this.userId = null;
     this.init();
@@ -28,20 +28,21 @@ class PlausibleAnalytics {
     try {
       // Get user ID from local storage if available
       const { LocalStorage } = await import("@raycast/api");
-      const userDataString = await LocalStorage.getItem<string>('webbites_user_data');
+      const userDataString =
+        await LocalStorage.getItem<string>("webbites_user_data");
 
       if (userDataString) {
         try {
           const userData = JSON.parse(userDataString);
           this.userId = userData.objectId || null;
         } catch (error) {
-          console.error('Error parsing user data for Plausible:', error);
+          console.error("Error parsing user data for Plausible:", error);
         }
       }
 
       this.isInitialized = true;
     } catch (error) {
-      console.error('Error initializing Plausible:', error);
+      console.error("Error initializing Plausible:", error);
       this.isInitialized = true; // Still mark as initialized even on error
     }
   }
@@ -67,16 +68,16 @@ class PlausibleAnalytics {
       };
 
       await fetch(this.apiEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(eventData),
       });
 
       console.log(`Plausible event sent: ${eventName}`, eventData.props);
     } catch (error) {
-      console.error('Error sending Plausible event:', error);
+      console.error("Error sending Plausible event:", error);
       // Fail silently - we don't want analytics to break the app
     }
   }
@@ -85,7 +86,7 @@ class PlausibleAnalytics {
    * Track when user opens the Raycast extension
    */
   async trackExtensionOpen(userId?: string) {
-    await this.sendEvent('extension_open', {
+    await this.sendEvent("extension_open", {
       userId: userId || this.userId || undefined,
     });
   }
@@ -94,7 +95,7 @@ class PlausibleAnalytics {
    * Track when user saves a website with the Raycast extension
    */
   async trackWebsiteSave(userId?: string, url?: string) {
-    await this.sendEvent('website_save', {
+    await this.sendEvent("website_save", {
       userId: userId || this.userId || undefined,
       url,
     });
@@ -104,7 +105,7 @@ class PlausibleAnalytics {
    * Track when user opens a website from within the Raycast extension
    */
   async trackWebsiteOpen(userId?: string, url?: string) {
-    await this.sendEvent('website_open', {
+    await this.sendEvent("website_open", {
       userId: userId || this.userId || undefined,
       url,
     });
