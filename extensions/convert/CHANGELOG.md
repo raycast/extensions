@@ -1,6 +1,6 @@
 # Convert Changelog
 
-## [Feat: Windows Support] - {PR_MERGE_DATE}
+## [Feat: Windows Support] - 2025-10-05
 
 - Introduced Windows platform compatibility
 - Upgraded dependencies to latest versions
