@@ -1,14 +1,21 @@
 import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
-  searchPath: string;
+  environmentPath: string;
 }
 
 export function getEnv() {
-  const { searchPath } = getPreferenceValues<Preferences>();
+  const { environmentPath } = getPreferenceValues<Preferences>();
+
+  const patchedWithoutDuplicates = new Set([
+    ...(process.env.PATH?.split(":") ?? []),
+    ...(environmentPath?.split(":") ?? []),
+  ]);
+
+  const pathString = Array.from(patchedWithoutDuplicates).join(":");
 
   const env = Object.assign({}, process.env, {
-    PATH: searchPath,
+    PATH: pathString,
   });
 
   return env;
