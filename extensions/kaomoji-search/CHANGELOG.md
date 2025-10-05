@@ -1,8 +1,8 @@
 # Kaomoji Search Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Windows Support + Modernize] - {PR_MERGE_DATE}
 
-
+- Add Windows Support
 - Modernize: remove `Preferences` type + update deps
 - `usePromise` to reduce complexity of useSearch hook
 
