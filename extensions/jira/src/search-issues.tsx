@@ -35,7 +35,14 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
     }
 
     if (query === "") {
-      jql += "ORDER BY created DESC";
+      if (cachedProject) {
+        // Safe because project filter acts as restriction
+        jql += "ORDER BY created DESC";
+      } else {
+        // Add time-based restriction to avoid unbounded JQL error from Jira API
+        // Fetch issues created in the last 30 days by default
+        jql += "created >= -30d ORDER BY created DESC";
+      }
     } else if (query.startsWith("jql:")) {
       jql += query.split("jql:")[1];
     } else {

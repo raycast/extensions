@@ -1,8 +1,12 @@
 ---
 title: Harvey.js
 category: JavaScript libraries
-intro: |
-  [Harvey.js](http://harvesthq.github.io/harvey/) helps you build responsive interfaces.
+intro: >
+  [Harvey.js](http://harvesthq.github.io/harvey/) helps you build responsive
+  interfaces.
+tech: harvey.js
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Usage

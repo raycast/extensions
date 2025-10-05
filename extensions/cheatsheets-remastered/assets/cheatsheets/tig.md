@@ -1,8 +1,11 @@
 ---
 title: Tig
 category: Git
-updated: 2022-12-08
+updated: 2022-12-08T00:00:00.000Z
 weight: -3
+tech: tig
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Installing

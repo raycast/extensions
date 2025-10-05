@@ -1,9 +1,13 @@
 ---
 title: Intl.DateTimeFormat
 category: Hidden
-tags: [WIP]
+tags:
+  - WIP
 intro: |
   `Intl.DateTimeFormat` is used to format date strings in JavaScript.
+tech: intl-datetime
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Parsing

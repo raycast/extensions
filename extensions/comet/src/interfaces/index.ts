@@ -2,11 +2,6 @@ import { ReactNode } from "react";
 import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
-export interface Preferences {
-  readonly useOriginalFavicon: boolean;
-  readonly profilePath: string;
-}
-
 export interface SearchResult<T> {
   readonly isLoading: boolean;
   readonly errorView?: ReactNode;
@@ -18,6 +13,7 @@ export interface HistoryEntry {
   readonly id: string;
   readonly url: string;
   readonly title: string;
+  readonly dateAdded: string;
 }
 
 export type GroupedEntries = Map<string, HistoryEntry[]>;
@@ -31,7 +27,7 @@ export class Tab {
     public readonly favicon: string,
     public readonly windowsId: number,
     public readonly tabIndex: number,
-    public readonly sourceLine: string
+    public readonly sourceLine: string,
   ) {}
 
   static parse(line: string): Tab {
@@ -94,3 +90,5 @@ export interface CometProfile {
   readonly name: string;
   readonly id: string;
 }
+
+export type BookmarkSortOrder = "AddedAsc" | "AddedDes";

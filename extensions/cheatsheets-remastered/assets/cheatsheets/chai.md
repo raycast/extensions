@@ -2,10 +2,14 @@
 title: Chai.js
 category: JavaScript libraries
 weight: -3
-updated: 2018-06-25
+updated: 2018-06-25T00:00:00.000Z
 version: chai v4.x
-description: |
-  expect(x).to.be.equal(y) 〉 assert.equal(x, y) 〉 .to.be.true 〉 jQuery, assertions, TDD and BDD, and other Chai examples.
+description: >
+  expect(x).to.be.equal(y) 〉 assert.equal(x, y) 〉 .to.be.true 〉 jQuery,
+  assertions, TDD and BDD, and other Chai examples.
+tech: chai
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Assert

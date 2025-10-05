@@ -1,6 +1,9 @@
 ---
 title: Tape
 category: JavaScript libraries
+tech: tape
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Example

@@ -1,8 +1,12 @@
 ---
-title: "Phoenix: Ecto"
+title: 'Phoenix: Ecto'
 category: Elixir
-tags: [WIP]
-updated: 2017-08-30
+tags:
+  - WIP
+updated: 2017-08-30T00:00:00.000Z
+tech: phoenix-ecto
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Schemas

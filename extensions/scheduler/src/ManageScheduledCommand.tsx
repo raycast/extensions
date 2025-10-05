@@ -1,5 +1,5 @@
 import { ScheduledCommand, FormValues } from "./types";
-import { CommandForm } from "./components/CommandForm";
+import { CommandForm } from "./CommandForm";
 import { useScheduledCommands } from "./hooks/useScheduledCommands";
 
 type ManageScheduledCommandProps = {

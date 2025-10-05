@@ -1,8 +1,12 @@
 ---
 title: Jekyll for GitHub pages
 category: Jekyll
-tags: [WIP]
-updated: 2017-11-17
+tags:
+  - WIP
+updated: 2017-11-17T00:00:00.000Z
+tech: jekyll-github
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 {% raw %}

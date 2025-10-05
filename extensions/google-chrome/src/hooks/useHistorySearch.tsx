@@ -44,7 +44,7 @@ const searchHistory = (profile: string, query?: string): SearchResult<HistoryEnt
   const [retryTimer, setRetryTimer] = useState<NodeJS.Timeout | null>(null);
   useEffect(() => {
     return () => {
-      retryTimer && clearTimeout(retryTimer);
+      if (retryTimer) clearTimeout(retryTimer);
     };
   }, [retryTimer]);
 

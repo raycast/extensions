@@ -1,6 +1,5 @@
 import { BrowserExtension, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import fetch from "node-fetch";
 import { CollectionCreationResponse, FormValues } from "../types";
 
 export async function createCollection({

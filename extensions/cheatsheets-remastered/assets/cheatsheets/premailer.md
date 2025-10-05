@@ -1,8 +1,13 @@
 ---
 title: Premailer
-tags: [WIP]
-intro: |
-  [Premailer](https://github.com/premailer/premailer/) is a Ruby library that inlines CSS into HTML.
+tags:
+  - WIP
+intro: >
+  [Premailer](https://github.com/premailer/premailer/) is a Ruby library that
+  inlines CSS into HTML.
+tech: premailer
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Custom CSS properties

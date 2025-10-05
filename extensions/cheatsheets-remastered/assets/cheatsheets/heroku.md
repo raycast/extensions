@@ -1,11 +1,16 @@
 ---
 title: Heroku
 category: Devops
-updated: 2017-10-11
+updated: 2017-10-11T00:00:00.000Z
 description: |
   A one-page reference to common Heroku-CLI commands.
-intro: |
-  [Heroku](https://heroku.com/) is a web hosting platform supporting many languages, and this guide is a reference to Heroku's [command-line interface](https://heroku.com/).
+intro: >
+  [Heroku](https://heroku.com/) is a web hosting platform supporting many
+  languages, and this guide is a reference to Heroku's [command-line
+  interface](https://heroku.com/).
+tech: heroku
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### `create` - Create an app

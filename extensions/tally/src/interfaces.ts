@@ -1,4 +1,4 @@
-enum Status {
+export enum FormStatus {
   BLANK = "BLANK",
   DRAFT = "DRAFT",
   PUBLISHED = "PUBLISHED",
@@ -6,9 +6,21 @@ enum Status {
 }
 export interface Form {
   id: string;
-  name: string;
-  status: Status;
+  name: string | null;
+  status: FormStatus;
   updatedAt: string;
+}
+interface FormSettings {
+  hasProgressBar: boolean;
+  hasSelfEmailNotifications: boolean;
+  password: string | null;
+  isClosed: boolean;
+  submissionsLimit: number | null;
+  pageAutoJump: boolean;
+  saveForLater: boolean;
+}
+export interface DetailedForm extends Form {
+  settings: FormSettings;
 }
 
 interface Member {

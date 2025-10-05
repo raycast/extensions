@@ -12,18 +12,18 @@ export default function Command() {
   const { folders, isLoading: foldersLoading } = useFolders();
   const { noteData, panels, isLoading, hasError } = useGranolaData();
 
-  // Memoized filtering for better performance with accurate folder data
   const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
     const allNotes = noteData?.data?.docs || [];
+    const noteIds = new Set(allNotes.map((d) => d.id));
 
-    // Calculate which notes are in folders and which aren't using accurate folder data
     const notesInFolders = new Set<string>();
     const counts: Record<string, number> = {};
 
     folders.forEach((folder) => {
-      // folder.document_ids is now filtered to only include actual documents
-      counts[folder.id] = folder.document_ids.length;
-      folder.document_ids.forEach((docId) => notesInFolders.add(docId));
+      // Intersect folder.document_ids with currently loaded documents to keep counts accurate without cache
+      const filteredIds = folder.document_ids.filter((id) => noteIds.has(id));
+      counts[folder.id] = filteredIds.length;
+      filteredIds.forEach((docId) => notesInFolders.add(docId));
     });
 
     const orphanNotes = allNotes.filter((doc) => !notesInFolders.has(doc.id));
@@ -34,9 +34,11 @@ export default function Command() {
     } else if (selectedFolder === "orphans") {
       filtered = orphanNotes;
     } else {
-      filtered = allNotes.filter((doc) =>
-        folders.find((folder) => folder.id === selectedFolder && folder.document_ids.includes(doc.id)),
-      );
+      filtered = allNotes.filter((doc) => {
+        const folder = folders.find((f) => f.id === selectedFolder);
+        if (!folder) return false;
+        return folder.document_ids.includes(doc.id);
+      });
     }
 
     return {
@@ -46,7 +48,6 @@ export default function Command() {
     };
   }, [noteData?.data?.docs, folders, selectedFolder]);
 
-  // Handle loading and error states
   if (isLoading) {
     return <List isLoading={true} />;
   }

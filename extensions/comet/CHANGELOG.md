@@ -1,5 +1,18 @@
 # Comet Browser Changelog
 
+## [Change Bookmarks Sort Order] - 2025-09-29
+
+- Change bookmarks sort order by Date Added (ascending vs. descending) (ref: [Issue #21642](https://github.com/raycast/extensions/issues/21642))
+- Modernize extension: remove `Preferences` type + update deps
+
+## [1.0.1] - 2025-09-09
+
+### Fixed
+- Fixed "Command failed with exit code 1: osascript -e" error when no Comet windows are open
+- Resolved AppleScript race condition in window creation by adding proper delays and retry logic
+- Improved reliability of `new-tab` command when starting from zero open windows
+- Enhanced window initialization timing for `createNewTabWithProfile()`, `createNewTab()`, and window creation functions
+
 ## [Initial Release] - 2025-08-22
 
 - Search and navigate through open Comet tabs with fuzzy search

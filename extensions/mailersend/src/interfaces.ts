@@ -113,6 +113,21 @@ export interface Webhook {
   domain: Domain;
 }
 
+export interface DNSRecord {
+  hostname: string;
+  type: string;
+  value: string;
+  priority?: string;
+}
+export interface DNSRecords {
+  id: string;
+  spf: DNSRecord;
+  dkim: DNSRecord;
+  return_path: DNSRecord;
+  custom_tracking: DNSRecord;
+  inbound_routing: DNSRecord;
+}
+
 export interface ErrorResult {
   message: string;
   errors?: {

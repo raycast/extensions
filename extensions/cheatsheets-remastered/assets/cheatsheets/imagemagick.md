@@ -1,7 +1,11 @@
 ---
 title: Imagemagick
-intro: |
-  A quick reference for common [Imagemagick](https://www.imagemagick.org) commands and switches.
+intro: >
+  A quick reference for common [Imagemagick](https://www.imagemagick.org)
+  commands and switches.
+tech: imagemagick
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Common options

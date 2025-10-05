@@ -1,6 +1,9 @@
 ---
 title: Ledger periods
 category: Ledger
+tech: ledger-periods
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

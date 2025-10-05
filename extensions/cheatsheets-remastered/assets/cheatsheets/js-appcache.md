@@ -1,6 +1,9 @@
 ---
 title: applicationCache
 category: JavaScript
+tech: js-appcache
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Reference

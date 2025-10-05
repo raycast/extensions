@@ -1,8 +1,12 @@
 ---
 title: Gulp
 category: JavaScript libraries
-tags: [Archived]
+tags:
+  - Archived
 archived: The information on this sheet may possibly be outdated.
+tech: gulp
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Available plugins

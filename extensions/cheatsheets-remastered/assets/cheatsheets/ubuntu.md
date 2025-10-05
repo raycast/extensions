@@ -1,5 +1,8 @@
 ---
 title: Ubuntu
+tech: ubuntu
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Aptitude stuff

@@ -1,7 +1,10 @@
 ---
 title: MySQL
-updated: 2020-07-05
+updated: 2020-07-05T00:00:00.000Z
 category: Databases
+tech: mysql
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Browsing

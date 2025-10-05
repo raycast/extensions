@@ -1,7 +1,11 @@
 ---
 title: Google Webfonts
-intro: |
-  Short snippets on using [Google Webfonts](https://google.com/fonts) in a web page.
+intro: >
+  Short snippets on using [Google Webfonts](https://google.com/fonts) in a web
+  page.
+tech: google-webfonts
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Link tag

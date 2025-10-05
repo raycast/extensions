@@ -1,5 +1,13 @@
 # Google Chrome Changelog
 
+## [Fix Search Bookmarks] - 2025-10-01
+
+- Fix the "Search Bookmarks" command returning an error when the hard-coded default profile directory does not exist.
+
+## [Update the dependencies to fix search history and find tab] - 2025-09-03
+
+## [Chore: Updated contributors] - 2025-09-03
+
 ## [Add Refresh Tab Command] - 2025-08-25
 
 - Add Reload Tab action to refresh a selected tab in the Search Tab command.

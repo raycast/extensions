@@ -61,12 +61,7 @@ function UnreadNotifications() {
 
     return Promise.all(
       notifications.map(async (notification: Notification) => {
-        let icon: { value: Image; tooltip: string };
-        try {
-          icon = await getNotificationIcon(notification);
-        } catch (error) {
-          icon = { value: { source: Icon.Warning, tintColor: Color.Red }, tooltip: "Could not load icon" };
-        }
+        const icon = await getNotificationIcon(notification);
         return { ...notification, icon };
       }),
     );

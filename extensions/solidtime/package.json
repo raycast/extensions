@@ -5,6 +5,9 @@
   "description": "Manage your clients, projects and time entries for Solidtime",
   "icon": "solidtime.png",
   "author": "cupcakearmy",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -32,11 +35,21 @@
   ],
   "preferences": [
     {
+      "name": "url",
+      "title": "Solidtime URL",
+      "description": "Your Solidtime URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://app.solidtime.io/",
+      "default": "https://app.solidtime.io/"
+    },
+    {
       "name": "apiKey",
       "title": "API Key",
       "description": "Your Solidtime API Key",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "eY...xx"
     },
     {
       "name": "onTimeEntryAction",
@@ -58,7 +71,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.91.2",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.17.0",
     "@tanstack/react-query": "^5.66.9",
     "@zodios/core": "^10.9.6",
@@ -66,12 +79,13 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",

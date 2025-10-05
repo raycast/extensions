@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  getPreferenceValues,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { Bitwarden } from "~/api/bitwarden";
@@ -19,6 +30,8 @@ import { useInterval } from "~/utils/hooks/useInterval";
 
 const searchBarPlaceholder = "Search sends";
 const LoadingFallback = () => <List searchBarPlaceholder={searchBarPlaceholder} isLoading />;
+
+const { syncOnLaunch } = getPreferenceValues<AllPreferences>();
 
 const SearchSendsCommand = () => (
   <RootErrorBoundary>
@@ -171,8 +184,8 @@ const useListSends = (bitwarden: Bitwarden) => {
   };
 };
 
-const syncSendsAction = {
-  title: "Sync Sends",
+const syncAction = {
+  title: "Sync Vault",
   get shortcut(): Keyboard.Shortcut {
     return { key: "r", modifiers: ["opt"] };
   },
@@ -195,12 +208,12 @@ function SearchSendsCommandContent() {
   const pasteActionTitle = usePasteActionTitle();
   const selectedItemIdRef = useRef<string>();
 
-  useInterval(() => onSync(true), { skip: !called });
+  useInterval(() => onSync(true), { skip: !called || !syncOnLaunch });
 
   function onSync(isPeriodic: boolean) {
     return queueOperation("sync", async () => {
       const toast = await showToast({
-        title: "Syncing Sends...",
+        title: "Syncing Vault...",
         message: isPeriodic ? "Background Task" : undefined,
         style: Toast.Style.Animated,
       });
@@ -212,12 +225,12 @@ function SearchSendsCommandContent() {
           await toast?.hide();
         } else {
           toast.style = Toast.Style.Success;
-          toast.title = "Sends synced";
+          toast.title = "Vault synced";
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to sync Sends";
-        captureException(["Failed to sync Sends", isPeriodic && "periodically"], error);
+        toast.title = "Failed to sync vault";
+        captureException(["Failed to sync vault", isPeriodic && "periodically"], error);
       }
     });
   }
@@ -273,8 +286,8 @@ function SearchSendsCommandContent() {
           shouldRevalidateAfter: true,
         });
       } catch (error) {
-        await showToast({ title: "Failed to sync Sends", style: Toast.Style.Failure });
-        captureException("Failed to sync Sends", error);
+        await showToast({ title: "Failed to refresh Sends", style: Toast.Style.Failure });
+        captureException("Failed to refresh Sends", error);
       }
     });
   };
@@ -336,10 +349,10 @@ function SearchSendsCommandContent() {
         shortcut={{ key: "n", modifiers: ["opt"] }}
       />
       <Action
-        title={syncSendsAction.title}
+        title={syncAction.title}
         onAction={() => onSync(false)}
         icon={Icon.ArrowClockwise}
-        shortcut={syncSendsAction.shortcut}
+        shortcut={syncAction.shortcut}
       />
     </ActionPanel.Section>
   );
@@ -356,7 +369,7 @@ function SearchSendsCommandContent() {
               <DebuggingBugReportingActionSection />
             </ActionPanel>
           }
-          description={`Try syncing your sends with the ${syncSendsAction.title} (${syncSendsAction.shortcutLabel}) action.`}
+          description={`Try syncing your vault with the ${syncAction.title} (${syncAction.shortcutLabel}) action.`}
         />
       </List>
     );

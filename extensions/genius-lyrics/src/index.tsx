@@ -18,7 +18,7 @@ type Hit = {
   };
 };
 
-export default function Command(props: LaunchProps<{ arguments: { query: string } }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const [searchText, setSearchText] = useState(props.arguments.query || "");
   const { data, isLoading } = useFetch<QueryResponse>(
     `https://genius.com/api/search?q=${encodeURIComponent(searchText)}`,

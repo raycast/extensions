@@ -1,7 +1,10 @@
 ---
 title: Semver
-updated: 2019-12-31
+updated: 2019-12-31T00:00:00.000Z
 weight: -3
+tech: semver
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Semver

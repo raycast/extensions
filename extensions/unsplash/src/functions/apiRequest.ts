@@ -1,6 +1,6 @@
 import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
-import fetch, { type RequestInit } from "node-fetch";
 import { client, doAuth } from "@/oauth";
+import { Errors } from "@/types";
 
 const { accessKey } = getPreferenceValues<Preferences>();
 
@@ -25,8 +25,11 @@ export const apiRequest = async <T>(path: string, options?: RequestInit) => {
       Authorization: `Bearer ${accessToken}`,
       ...options?.headers,
     },
-  }).then(async (res) => res.json() as Promise<T>);
-  return response;
+  });
+  if (!response.headers.get("Content-Type")?.includes("json")) throw new Error(await response.text());
+  const result = await response.json();
+  if (!response.ok) throw new Error((result as Errors).errors[0]);
+  return result as T;
 };
 
 async function refreshTokens(refreshToken: string) {

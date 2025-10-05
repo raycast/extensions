@@ -1,8 +1,12 @@
 ---
 title: CSS Grid
 category: CSS
-updated: 2019-08-23
-prism_languages: [css]
+updated: 2019-08-23T00:00:00.000Z
+prism_languages:
+  - css
+tech: css-grid
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Container
