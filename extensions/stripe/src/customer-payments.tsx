@@ -3,12 +3,18 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { withEnvContext } from "./components";
 import { useStripeDashboard, useEnvContext } from "./hooks";
 import { STRIPE_API_VERSION } from "./enums";
+import { 
+  formatAmount, 
+  getPaymentIntentId, 
+  getCustomerId, 
+  getChargeIcon, 
+  isRefundable 
+} from "./utils";
 import Stripe from "stripe";
 import { getPreferenceValues } from "@raycast/api";
 
 const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
 
-// Create Stripe clients for both environments
 const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 

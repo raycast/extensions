@@ -1,78 +1,114 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type Stripe from "stripe";
-import { convertAmount, convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
-import { useStripeApi } from "./hooks";
+import { 
+  convertTimestampToDate, 
+  titleCase, 
+  formatAmountWithSign, 
+  getTransactionIcon, 
+  getSourceId 
+} from "./utils";
+import { useStripeApi, useStripeDashboard } from "./hooks";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
-import { theme } from "./theme";
 
-type BalanceTransaction = {
-  id: string;
-  amount: number;
-  available_on: string;
-  created_at: string;
-  currency: string;
-  description: string | null;
-  fee: number;
-  net: number;
-  type: string;
-  status: string;
+const TransactionActions = ({ id, source, dashboardUrl }: { id: string; source: string; dashboardUrl: string }) => (
+  <ActionPanel>
+    <Action.OpenInBrowser 
+      title="View in Stripe Dashboard" 
+      url={`${dashboardUrl}/balance/transactions/${id}`} 
+      icon={Icon.Globe}
+    />
+    <Action.CopyToClipboard 
+      title="Copy Transaction ID" 
+      content={id} 
+      shortcut={{ modifiers: ["cmd"], key: "c" }}
+    />
+    {source && (
+      <Action.CopyToClipboard 
+        title="Copy Source ID" 
+        content={source} 
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      />
+    )}
+  </ActionPanel>
+);
+
+const TransactionDetail = ({ transaction, icon, color }: { 
+  transaction: Stripe.BalanceTransaction; 
+  icon: Icon; 
+  color: Color; 
+}) => {
+  const sourceId = getSourceId(transaction.source);
+  
+  return (
+    <List.Item.Detail
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label 
+            title="Type" 
+            text={titleCase(transaction.type)} 
+            icon={{ source: icon, tintColor: color as Color.ColorLike }}
+          />
+          <List.Item.Detail.Metadata.Label title="Status" text={titleCase(transaction.status)} />
+          {transaction.description && <List.Item.Detail.Metadata.Label title="Description" text={transaction.description} />}
+          
+          <List.Item.Detail.Metadata.Separator />
+          
+          <List.Item.Detail.Metadata.Label title="Financial Details" />
+          <List.Item.Detail.Metadata.Label title="Amount" text={formatAmountWithSign(transaction.amount, transaction.currency)} />
+          <List.Item.Detail.Metadata.Label title="Fee" text={formatAmountWithSign(transaction.fee, transaction.currency)} />
+          <List.Item.Detail.Metadata.Label title="Net" text={formatAmountWithSign(transaction.net, transaction.currency)} />
+          
+          <List.Item.Detail.Metadata.Separator />
+          
+          <List.Item.Detail.Metadata.Label title="Timing" />
+          <List.Item.Detail.Metadata.Label title="Created" text={convertTimestampToDate(transaction.created)} />
+          <List.Item.Detail.Metadata.Label title="Available On" text={convertTimestampToDate(transaction.available_on)} />
+          
+          <List.Item.Detail.Metadata.Separator />
+          
+          <List.Item.Detail.Metadata.Label title="Identifiers" />
+          <List.Item.Detail.Metadata.Label title="Transaction ID" text={transaction.id} />
+          {sourceId && <List.Item.Detail.Metadata.Label title="Source ID" text={sourceId} />}
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
 };
 
-const resolveBalanceTransaction = (balanceTransaction: Stripe.BalanceTransaction): BalanceTransaction => {
-  const resolvedBalanceTransaction: BalanceTransaction = {
-    ...balanceTransaction,
-    available_on: convertTimestampToDate(balanceTransaction.available_on),
-    created_at: convertTimestampToDate(balanceTransaction.created),
-    amount: convertAmount(balanceTransaction.amount),
-    currency: balanceTransaction.currency.toUpperCase(),
-    description: balanceTransaction.description ?? "",
-    fee: convertAmount(balanceTransaction.fee),
-    net: convertAmount(balanceTransaction.net),
-  };
+const TransactionItem = ({ transaction, dashboardUrl }: { 
+  transaction: Stripe.BalanceTransaction; 
+  dashboardUrl: string; 
+}) => {
+  const { icon, color } = getTransactionIcon(transaction.type);
+  const title = transaction.description ? titleCase(transaction.description) : titleCase(transaction.type);
+  const subtitle = transaction.amount !== 0 ? formatAmountWithSign(transaction.amount, transaction.currency) : undefined;
+  const sourceId = getSourceId(transaction.source);
 
-  return resolvedBalanceTransaction;
+  return (
+    <List.Item
+      key={transaction.id}
+      title={title}
+      subtitle={subtitle}
+      icon={{ source: icon, tintColor: color as Color.ColorLike }}
+      actions={<TransactionActions id={transaction.id} source={sourceId} dashboardUrl={dashboardUrl} />}
+      detail={<TransactionDetail transaction={transaction} icon={icon} color={color} />}
+    />
+  );
 };
 
 const BalanceTransactions = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.BALANCE_TRANSACTIONS, true);
-  const formattedBalanceTransactions = (data as Stripe.BalanceTransaction[]).map(resolveBalanceTransaction);
-
-  const renderBalanceTransactions = (transaction: BalanceTransaction) => {
-    const { amount, currency, id } = transaction;
-    return (
-      <List.Item
-        key={id}
-        title={`${currency} ${amount}`}
-        icon={{ source: Icon.Receipt, tintColor: theme.colors.stripeBlue }}
-        actions={
-          <ActionPanel title="Copy">
-            <Action.CopyToClipboard title="Copy Transaction ID" content={id} />
-          </ActionPanel>
-        }
-        detail={
-          <List.Item.Detail
-            metadata={
-              <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Metadata" />
-                <List.Item.Detail.Metadata.Separator />
-                {Object.entries(transaction).map(([type, value]) => {
-                  const resolvedValue = resolveMetadataValue(value);
-                  if (!resolvedValue || !type) return null;
-
-                  return <List.Item.Detail.Metadata.Label key={type} title={titleCase(type)} text={resolvedValue} />;
-                })}
-              </List.Item.Detail.Metadata>
-            }
-          />
-        }
-      />
-    );
-  };
+  const { dashboardUrl } = useStripeDashboard();
+  const transactions = data as Stripe.BalanceTransaction[];
 
   return (
     <ListContainer isLoading={isLoading} isShowingDetail={!isLoading}>
-      <List.Section title="Transactions">{formattedBalanceTransactions.map(renderBalanceTransactions)}</List.Section>
+      <List.Section title="Transactions">
+        {transactions.map((transaction) => (
+          <TransactionItem key={transaction.id} transaction={transaction} dashboardUrl={dashboardUrl} />
+        ))}
+      </List.Section>
     </ListContainer>
   );
 };

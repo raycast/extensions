@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useEnvContext } from "./use-env-context";
 import { Environment } from "./../types";
 import { titleCase } from "../utils";
@@ -94,17 +94,31 @@ export const useStripeApi = (endpoint: string, isList = false) => {
 
   const apiKey = environment === "test" ? stripeTestApiKey : stripeLiveApiKey;
 
-  const fetch = useFetch(BASE_URL + endpoint, {
-    initialData: {
-      data: [],
-    },
-    keepPreviousData: false,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-  });
+  const { isLoading, data, error, revalidate, mutate } = useCachedPromise(
+    async (url: string, key: string) => {
+      if (!key) {
+        throw new Error(`Stripe ${environment} API key is not configured`);
+      }
 
-  const { isLoading, data, error } = fetch;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${key}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({})) as any;
+        throw new Error(errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return response.json();
+    },
+    [BASE_URL + endpoint, apiKey],
+    {
+      keepPreviousData: true,
+      initialData: isList ? { data: [] } : undefined,
+    },
+  );
 
   useEffect(() => {
     const options = resolveToastOptions({
@@ -117,16 +131,13 @@ export const useStripeApi = (endpoint: string, isList = false) => {
       stripeTestApiKey,
     });
     showToast(options);
-
-    return () => {
-      if (isLoading) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: `Fetch cancelled`,
-        });
-      }
-    };
   }, [isLoading, data, error]);
 
-  return { ...fetch, data: resolveData(data, error, isList) };
+  return {
+    isLoading,
+    data: resolveData(data, error, isList),
+    error,
+    revalidate,
+    mutate,
+  };
 };

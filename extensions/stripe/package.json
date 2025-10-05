@@ -105,6 +105,35 @@
       "subtitle": "Stripe",
       "description": "Search and manage your Stripe customers and their active subscriptions",
       "mode": "view"
+    },
+    {
+      "name": "create-coupon",
+      "title": "Create Coupon",
+      "subtitle": "Stripe",
+      "description": "Create a discount coupon with automatic ID copy to clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "create-coupon-quick",
+      "title": "Create Coupon (Quick)",
+      "subtitle": "Stripe",
+      "description": "Quickly create a percentage-based coupon with random ID",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "percentage",
+          "placeholder": "25",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-payment-link",
+      "title": "Create Payment Link",
+      "subtitle": "Stripe",
+      "description": "Generate a payment link for your products with URL copy to clipboard",
+      "mode": "view"
     }
   ],
   "preferences": [

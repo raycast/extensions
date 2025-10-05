@@ -1,100 +1,176 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import omit from "lodash/omit";
 import type Stripe from "stripe";
 import { useStripeApi, useStripeDashboard } from "./hooks";
-import { convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
+import { convertTimestampToDate, titleCase, formatBillingAddress } from "./utils";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
 
-type ConnectedAccount = {
-  id: string;
-  created: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  capabilities: string;
-  default_currency: string;
-  company_address: string;
-  dob: string;
+const formatDateOfBirth = (dob?: { day: number | null; month: number | null; year: number | null }) => {
+  if (!dob?.year || !dob?.month || !dob?.day) return "";
+  return `${dob.day}/${dob.month}/${dob.year}`;
 };
 
-const omittedFields = ["client_secret"];
-
-const createDateOfBirth = (connectedAccount: Stripe.Account) => {
-  const year = connectedAccount.individual?.dob?.year ?? "";
-  const month = connectedAccount.individual?.dob?.month ?? "";
-  const day = connectedAccount.individual?.dob?.day ?? "";
-
-  if (!year || !month || !day) {
-    return "";
+const getAccountIcon = (account: Stripe.Account): { icon: Icon; color: Color } => {
+  if (account.charges_enabled && account.payouts_enabled) {
+    return { icon: Icon.CheckCircle, color: Color.Green };
   }
-
-  return `${day}/${month}/${year}`;
+  if (account.charges_enabled) {
+    return { icon: Icon.Circle, color: Color.Yellow };
+  }
+  return { icon: Icon.Circle, color: Color.Orange };
 };
 
-const resolveConnectedAccount = (connectedAccount: Stripe.Account): ConnectedAccount => {
-  const { city, country, line1, postal_code, state } = connectedAccount.company?.address ?? {};
-  const companyAddress = [line1, city, state, postal_code, country].filter(Boolean).join(", ");
+const AccountActions = ({ account, dashboardUrl }: { account: Stripe.Account; dashboardUrl: string }) => (
+  <ActionPanel>
+    <Action.OpenInBrowser
+      title="View in Stripe Dashboard"
+      url={`${dashboardUrl}/connect/accounts/${account.id}`}
+      icon={Icon.Globe}
+    />
+    <Action.CopyToClipboard
+      title="Copy Account ID"
+      content={account.id}
+      shortcut={{ modifiers: ["cmd"], key: "c" }}
+    />
+    {account.email && (
+      <Action.CopyToClipboard
+        title="Copy Email"
+        content={account.email}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+      />
+    )}
+  </ActionPanel>
+);
 
-  const resolvedConnectedAccount: ConnectedAccount = {
-    ...connectedAccount,
-    default_currency: connectedAccount.default_currency?.toUpperCase() ?? "",
-    created: connectedAccount.created ? convertTimestampToDate(connectedAccount.created) : "",
-    dob: createDateOfBirth(connectedAccount),
-    company_address: companyAddress,
-    capabilities: Object.keys(connectedAccount.capabilities ?? {}).join(", "),
-    first_name: titleCase(connectedAccount.individual?.first_name ?? ""),
-    last_name: titleCase(connectedAccount.individual?.last_name ?? ""),
-    email: connectedAccount.email ?? "",
-  };
+const AccountDetail = ({ account }: { account: Stripe.Account }) => {
+  const { icon, color } = getAccountIcon(account);
+  const companyAddress = formatBillingAddress(account.company?.address);
+  const dob = formatDateOfBirth(account.individual?.dob);
 
-  return resolvedConnectedAccount;
+  return (
+    <List.Item.Detail
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label
+            title="Status"
+            text={account.charges_enabled && account.payouts_enabled ? "Fully Enabled" : "Limited"}
+            icon={{ source: icon, tintColor: color as Color.ColorLike }}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Type"
+            text={titleCase(account.type || "standard")}
+          />
+
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label title="Capabilities" />
+          <List.Item.Detail.Metadata.Label
+            title="Charges"
+            text={account.charges_enabled ? "Enabled" : "Disabled"}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Payouts"
+            text={account.payouts_enabled ? "Enabled" : "Disabled"}
+          />
+          {account.capabilities && Object.keys(account.capabilities).length > 0 && (
+            <List.Item.Detail.Metadata.Label
+              title="Available"
+              text={Object.keys(account.capabilities).join(", ")}
+            />
+          )}
+
+          {(account.individual || account.company) && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label
+                title={account.individual ? "Individual Details" : "Company Details"}
+              />
+              {account.individual?.first_name && (
+                <List.Item.Detail.Metadata.Label
+                  title="Name"
+                  text={`${account.individual.first_name} ${account.individual.last_name || ""}`.trim()}
+                />
+              )}
+              {account.company?.name && (
+                <List.Item.Detail.Metadata.Label title="Company Name" text={account.company.name} />
+              )}
+              {account.email && <List.Item.Detail.Metadata.Label title="Email" text={account.email} />}
+              {dob && <List.Item.Detail.Metadata.Label title="Date of Birth" text={dob} />}
+              {companyAddress && <List.Item.Detail.Metadata.Label title="Address" text={companyAddress} />}
+            </>
+          )}
+
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label title="Account Details" />
+          {account.default_currency && (
+            <List.Item.Detail.Metadata.Label
+              title="Default Currency"
+              text={account.default_currency.toUpperCase()}
+            />
+          )}
+          {account.country && <List.Item.Detail.Metadata.Label title="Country" text={account.country} />}
+          {account.created && (
+            <List.Item.Detail.Metadata.Label title="Created" text={convertTimestampToDate(account.created)} />
+          )}
+
+          <List.Item.Detail.Metadata.Separator />
+
+          <List.Item.Detail.Metadata.Label title="Identifiers" />
+          <List.Item.Detail.Metadata.Label title="Account ID" text={account.id} />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+};
+
+const AccountItem = ({ account, dashboardUrl }: { account: Stripe.Account; dashboardUrl: string }) => {
+  const { icon, color } = getAccountIcon(account);
+  const name =
+    account.individual?.first_name && account.individual?.last_name
+      ? `${account.individual.first_name} ${account.individual.last_name}`
+      : account.company?.name || account.email || account.id;
+
+  const subtitle = account.email || account.default_currency?.toUpperCase();
+
+  return (
+    <List.Item
+      key={account.id}
+      title={name}
+      subtitle={subtitle}
+      icon={{ source: icon, tintColor: color as Color.ColorLike }}
+      actions={<AccountActions account={account} dashboardUrl={dashboardUrl} />}
+      detail={<AccountDetail account={account} />}
+    />
+  );
 };
 
 const ConnectedAccounts = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CONNECTED_ACCOUNTS, true);
   const { dashboardUrl } = useStripeDashboard();
-  const formattedConnectedAccounts = (data as Stripe.Account[]).map(resolveConnectedAccount);
+  const accounts = data as Stripe.Account[];
 
-  const renderConnectedAccounts = (connectedAccount: ConnectedAccount) => {
-    const { email, id } = connectedAccount;
-    const fields = omit(connectedAccount, omittedFields);
-
-    return (
-      <List.Item
-        key={id}
-        title={email}
-        icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}
-        actions={
-          <ActionPanel title="Actions">
-            <Action.OpenInBrowser title="View Connected Account" url={`${dashboardUrl}/connect/accounts/${id}`} />
-            <Action.CopyToClipboard title="Copy Connected Account ID" content={id} />
-            <Action.CopyToClipboard title="Copy Connected Account Email" content={email} />
-          </ActionPanel>
-        }
-        detail={
-          <List.Item.Detail
-            metadata={
-              <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Metadata" />
-                <List.Item.Detail.Metadata.Separator />
-                {Object.entries(fields).map(([type, value]) => {
-                  const resolvedValue = resolveMetadataValue(value);
-                  if (!resolvedValue) return null;
-
-                  return <List.Item.Detail.Metadata.Label key={type} title={titleCase(type)} text={resolvedValue} />;
-                })}
-              </List.Item.Detail.Metadata>
-            }
-          />
-        }
-      />
-    );
-  };
+  // Group by status
+  const fullyEnabled = accounts.filter((a) => a.charges_enabled && a.payouts_enabled);
+  const limited = accounts.filter((a) => !a.charges_enabled || !a.payouts_enabled);
 
   return (
     <ListContainer isLoading={isLoading} isShowingDetail={!isLoading}>
-      <List.Section title="Connected Accounts">{formattedConnectedAccounts.map(renderConnectedAccounts)}</List.Section>
+      {fullyEnabled.length > 0 && (
+        <List.Section title={`✅ Fully Enabled (${fullyEnabled.length})`}>
+          {fullyEnabled.map((account) => (
+            <AccountItem key={account.id} account={account} dashboardUrl={dashboardUrl} />
+          ))}
+        </List.Section>
+      )}
+
+      {limited.length > 0 && (
+        <List.Section title={`⚠️ Limited Access (${limited.length})`}>
+          {limited.map((account) => (
+            <AccountItem key={account.id} account={account} dashboardUrl={dashboardUrl} />
+          ))}
+        </List.Section>
+      )}
     </ListContainer>
   );
 };
