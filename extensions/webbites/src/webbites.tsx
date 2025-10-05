@@ -343,7 +343,7 @@ export default function Command() {
       });
 
       // Track website save
-      await plausible.trackWebsiteSave(user.id, url);
+      await plausible.trackWebsiteSave(user.id);
 
       showToast({
         title: "Saved to WebBites",
@@ -452,7 +452,7 @@ export default function Command() {
               // Track website open
               const user = await getSimpleCurrentUser();
               if (user) {
-                await plausible.trackWebsiteOpen(user.id, result.url);
+                await plausible.trackWebsiteOpen(user.id);
               }
             }}
           />

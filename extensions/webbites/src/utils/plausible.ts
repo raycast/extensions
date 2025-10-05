@@ -14,8 +14,7 @@ class PlausibleAnalytics {
 
   constructor() {
     this.domain = "webbites.io";
-    // this.domain = 'webbites-extension-chrome'
-    this.apiEndpoint = "https://plausible.macosicons.com/api/event"; // ⚠️ CHANGE THIS to your Plausible server URL
+    this.apiEndpoint = "https://plausible.macosicons.com/api/event";
     this.isInitialized = false;
     this.userId = null;
     this.init();
@@ -94,20 +93,18 @@ class PlausibleAnalytics {
   /**
    * Track when user saves a website with the Raycast extension
    */
-  async trackWebsiteSave(userId?: string, url?: string) {
+  async trackWebsiteSave(userId?: string) {
     await this.sendEvent("website_save", {
-      userId: userId || this.userId || undefined,
-      url,
+      userId: userId || this.userId || undefined
     });
   }
 
   /**
    * Track when user opens a website from within the Raycast extension
    */
-  async trackWebsiteOpen(userId?: string, url?: string) {
+  async trackWebsiteOpen(userId?: string) {
     await this.sendEvent("website_open", {
-      userId: userId || this.userId || undefined,
-      url,
+      userId: userId || this.userId || undefined
     });
   }
 }

@@ -104,7 +104,7 @@ export default async function SaveToWebBites(
 
     // Track website save with Plausible
     if (isUrl) {
-      await plausible.trackWebsiteSave(currentUser.id, data.url);
+      await plausible.trackWebsiteSave(currentUser.id);
     }
 
     await showToast({
