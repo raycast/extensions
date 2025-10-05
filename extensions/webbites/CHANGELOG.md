@@ -1,9 +1,9 @@
 # Webbites Raycast Extension Changelog
 
-## [Improvement] - 2025-10-05
+## [Improvement] - {PR_MERGE_DATE}
 
-* Fixed bug where the user could not login due to a typo.
-* Added analytics for tracking usage. All that is collected is when a user opens the extension, no other data is collected.
+- Fixed bug where the user could not login due to a typo.
+- Added analytics for tracking usage. All that is collected is when a user opens the extension, no other data is collected.
 
 ## [Initial Version] - 2025-09-22
 
