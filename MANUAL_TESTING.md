@@ -1,6 +1,6 @@
-# Manual Testing Guide - SiteBlocker Extension
+# Manual Testing Guide - WebBlocker Extension
 
-This guide helps you manually test all functionality of the SiteBlocker extension.
+This guide helps you manually test all functionality of the WebBlocker extension.
 
 ## Prerequisites
 
@@ -92,17 +92,17 @@ This guide helps you manually test all functionality of the SiteBlocker extensio
 **Test Case 5.1: Hosts File Verification**
 ```bash
 # Check if domains are added when blocking enabled
-sudo cat /etc/hosts | grep "# SiteBlocker"
+sudo cat /etc/hosts | grep "# WebBlocker"
 
 # Expected output (when active):
-127.0.0.1 youtube.com # SiteBlocker
-127.0.0.1 facebook.com # SiteBlocker
+127.0.0.1 youtube.com # WebBlocker
+127.0.0.1 facebook.com # WebBlocker
 ```
 
 **Test Case 5.2: Backup File Creation**
 ```bash
 # Check if backup was created
-ls -la /etc/hosts.siteblocker.bak
+ls -la /etc/hosts.webblocker.bak
 
 # Should exist after first enable operation
 ```
@@ -135,7 +135,7 @@ nslookup youtube.com
 **Test Case 6.2: Hosts File Recovery**
 ```bash
 # If something goes wrong, test recovery
-sudo cp /etc/hosts.siteblocker.bak /etc/hosts
+sudo cp /etc/hosts.webblocker.bak /etc/hosts
 ```
 
 **Test Case 6.3: Large Domain List**
@@ -162,14 +162,14 @@ sudo cp /etc/hosts.siteblocker.bak /etc/hosts
 
 ```bash
 # Quick status check
-cat /etc/hosts | grep -c "# SiteBlocker"
+cat /etc/hosts | grep -c "# WebBlocker"
 
 # DNS flush (if needed during testing)
 sudo dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 
 # Restore original hosts file
-sudo cp /etc/hosts.siteblocker.bak /etc/hosts
+sudo cp /etc/hosts.webblocker.bak /etc/hosts
 ```
 
 ## Common Issues & Solutions

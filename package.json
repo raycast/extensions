@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension",
-  "name": "site-blocker",
-  "title": "SiteBlocker",
+  "name": "web-blocker",
+  "title": "WebBlocker",
   "description": "Block distracting websites quickly and easily",
   "icon": "assets/icon.png",
   "author": "ahmadbulbul",

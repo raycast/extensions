@@ -1,4 +1,4 @@
-# 🚫 SiteBlocker - Raycast Extension
+# 🚫 WebBlocker - Raycast Extension
 
 A powerful and easy-to-use Raycast extension for blocking distracting websites on macOS. Boost your productivity by blocking access to time-wasting sites with just a few keystrokes.
 
@@ -68,13 +68,13 @@ npm run build
 ## 🔐 Security & Privacy
 
 ### How It Works
-SiteBlocker works by modifying your system's `/etc/hosts` file, which is a standard method for blocking websites on Unix-like systems. When a website is blocked, requests to that domain are redirected to `127.0.0.1` (your local machine), effectively making the site unreachable.
+WebBlocker works by modifying your system's `/etc/hosts` file, which is a standard method for blocking websites on Unix-like systems. When a website is blocked, requests to that domain are redirected to `127.0.0.1` (your local machine), effectively making the site unreachable.
 
 ### Security Features
 - **Native Authentication**: Uses macOS's built-in authentication dialog
 - **Automatic Backups**: Creates `/etc/hosts.siteblocker.bak` before any modifications
-- **Tagged Entries**: All modifications are clearly marked with `# SiteBlocker` tags
-- **Safe Removal**: Only removes entries that were added by SiteBlocker
+- **Tagged Entries**: All modifications are clearly marked with `# WebBlocker` tags
+- **Safe Removal**: Only removes entries that were added by WebBlocker
 - **No Network Access**: Extension works entirely offline
 
 ### Permissions Required
@@ -174,9 +174,9 @@ src/
 
 ### Hosts File Format
 ```
-# SiteBlocker - Added by Raycast SiteBlocker Extension
-127.0.0.1 facebook.com # SiteBlocker
-127.0.0.1 youtube.com # SiteBlocker
+# WebBlocker - Added by Raycast WebBlocker Extension
+127.0.0.1 facebook.com # WebBlocker
+127.0.0.1 youtube.com # WebBlocker
 ```
 
 ## 📄 License

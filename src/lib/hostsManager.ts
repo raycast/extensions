@@ -11,8 +11,8 @@ const execAsync = promisify(exec);
 
 // Constants
 const HOSTS_FILE_PATH = '/etc/hosts';
-const BACKUP_FILE_PATH = '/etc/hosts.siteblocker.bak';
-const SITEBLOCKER_TAG = '# SiteBlocker';
+const BACKUP_FILE_PATH = '/etc/hosts.webblocker.bak';
+const WEBGLOCKER_TAG = '# WebBlocker';
 const REDIRECT_IP = '127.0.0.1';
 
 export interface HostsOperationResult {
@@ -143,8 +143,8 @@ export async function restoreHostsFromBackup(): Promise<HostsOperationResult> {
 function generateHostsEntries(domains: string[]): string {
   if (domains.length === 0) return '';
   
-  const entries = domains.map(domain => `${REDIRECT_IP} ${domain} ${SITEBLOCKER_TAG}`);
-  return `\\n\\n# SiteBlocker - Added by Raycast SiteBlocker Extension\\n${entries.join('\\n')}\\n`;
+  const entries = domains.map(domain => `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`);
+  return `\\n\\n# WebBlocker - Added by Raycast WebBlocker Extension\\n${entries.join('\\n')}\\n`;
 }
 
 /**
@@ -172,7 +172,7 @@ export async function addDomainsToHosts(domains: string[]): Promise<HostsOperati
     
     // Check if any domains are already blocked
     const alreadyBlocked = domains.filter(domain => 
-      currentContent.includes(`${REDIRECT_IP} ${domain} ${SITEBLOCKER_TAG}`)
+      currentContent.includes(`${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`)
     );
     
     if (alreadyBlocked.length > 0) {
@@ -213,8 +213,8 @@ export async function removeDomainsFromHosts(): Promise<HostsOperationResult> {
     // Read current hosts file
     const currentContent = await readHostsFile();
     
-    // Check if there are any SiteBlocker entries
-    if (!currentContent.includes(SITEBLOCKER_TAG)) {
+    // Check if there are any WebBlocker entries
+    if (!currentContent.includes(WEBGLOCKER_TAG)) {
       return {
         success: true,
         message: 'No blocked domains found in hosts file'
@@ -223,7 +223,7 @@ export async function removeDomainsFromHosts(): Promise<HostsOperationResult> {
 
     // Create a temporary file with filtered content
     const lines = currentContent.split('\\n');
-    const filteredLines = lines.filter(line => !line.includes(SITEBLOCKER_TAG));
+    const filteredLines = lines.filter(line => !line.includes(WEBGLOCKER_TAG));
     const filteredContent = filteredLines.join('\\n');
     
     // Write the filtered content back to hosts file
@@ -257,7 +257,7 @@ export async function checkDomainsBlocked(domains: string[]): Promise<{[domain: 
     const result: {[domain: string]: boolean} = {};
     
     domains.forEach(domain => {
-      result[domain] = currentContent.includes(`${REDIRECT_IP} ${domain} ${SITEBLOCKER_TAG}`);
+      result[domain] = currentContent.includes(`${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`);
     });
     
     return result;
@@ -283,7 +283,7 @@ export async function getBlockedDomainsFromHosts(): Promise<string[]> {
     
     const blockedDomains: string[] = [];
     lines.forEach(line => {
-      if (line.includes(SITEBLOCKER_TAG) && line.includes(REDIRECT_IP)) {
+      if (line.includes(WEBGLOCKER_TAG) && line.includes(REDIRECT_IP)) {
         const parts = line.trim().split(/\\s+/);
         if (parts.length >= 2 && parts[0] === REDIRECT_IP) {
           blockedDomains.push(parts[1]);
