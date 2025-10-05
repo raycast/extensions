@@ -22,7 +22,7 @@ jobs:
       run: |
         pr_state="${{ github.event.pull_request.state }}"
         if [[ "$pr_state" != "open" ]]; then
-          echo "::notice::PR is not open (state: $pr_state), skipping label"
+          echo "::notice::PR is not open (state: $pr_state), skipping label addition"
           echo "should_label=false" >> $GITHUB_OUTPUT
           exit 0
         fi
