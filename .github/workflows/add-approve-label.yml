@@ -165,7 +165,7 @@ jobs:
       with:
         labels: Approved
         github_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-        number: ${{ github.event.pull_request.number || inputs.pr_number }}  # <- Fixes manual mode undefined issue_number
+        number: ${{ github.event.pull_request.number || inputs.pr_number }}
 
     - name: Debug label outcome
       if: always()
