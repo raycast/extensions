@@ -52,7 +52,7 @@ jobs:
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           reviewer_login="${{ inputs.reviewer_login }}"
-          reviewer_type="User"
+          reviewer_type="User"  # Default for manual; real events use event.review.user.type
         else
           reviewer_login="${{ github.actor }}"
           reviewer_type="${{ github.event.review.user.type }}"
@@ -124,5 +124,5 @@ jobs:
       uses: actions-ecosystem/action-add-labels@v1
       with:
         labels: Approved
-        github_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+        github_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN || github.token }}  # Fallback if bot secret empty
         number: ${{ github.event.pull_request.number || inputs.pr_number }}
