@@ -7,6 +7,7 @@ import {
   setDefaultOutputDevice,
   setDefaultInputDevice,
   setDefaultSystemDevice,
+  AudioDevice,
 } from "./audio-device";
 import { getOutputPriorityList, getInputPriorityList } from "./priority-utils";
 

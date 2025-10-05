@@ -10,6 +10,7 @@ import {
   setDefaultOutputDevice,
   setDefaultInputDevice,
   setDefaultSystemDevice,
+  AudioDevice,
 } from "./audio-device";
 import {
   getOutputPriorityList,
@@ -58,32 +59,67 @@ export default function ListDevices() {
     // Get stored device info for transport types of disconnected devices
     const [outputDeviceInfo, inputDeviceInfo] = await Promise.all([getDeviceInfo(true), getDeviceInfo(false)]);
 
-    // Process transport types for storage
-    const outputDevicesWithTransport = outputDevices.map((device) => ({
-      ...device,
-      transportType: Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0] || "Unknown",
-    }));
+    // Save device info for currently available devices, merging with existing stored info
+    // This ensures we keep info for disconnected devices while updating info for connected ones
+    const updatedOutputDeviceInfo = [...outputDeviceInfo];
+    const updatedInputDeviceInfo = [...inputDeviceInfo];
 
-    const inputDevicesWithTransport = inputDevices.map((device) => ({
-      ...device,
-      transportType: Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0] || "Unknown",
-    }));
+    // Update or add info for currently available devices
+    outputDevices.forEach((device) => {
+      const existingIndex = updatedOutputDeviceInfo.findIndex((info) => info.name === device.name);
+      const deviceInfo = { name: device.name, transportType: device.transportType };
+      if (existingIndex >= 0) {
+        updatedOutputDeviceInfo[existingIndex] = deviceInfo;
+      } else {
+        updatedOutputDeviceInfo.push(deviceInfo);
+      }
+    });
 
-    // Save current device info for future reference
+    inputDevices.forEach((device) => {
+      const existingIndex = updatedInputDeviceInfo.findIndex((info) => info.name === device.name);
+      const deviceInfo = { name: device.name, transportType: device.transportType };
+      if (existingIndex >= 0) {
+        updatedInputDeviceInfo[existingIndex] = deviceInfo;
+      } else {
+        updatedInputDeviceInfo.push(deviceInfo);
+      }
+    });
+
+    // Save the merged device info
     await Promise.all([
-      saveDeviceInfo(outputDevicesWithTransport, true),
-      saveDeviceInfo(inputDevicesWithTransport, false),
+      saveDeviceInfo(
+        updatedOutputDeviceInfo.map((info) => ({
+          name: info.name,
+          transportType: info.transportType as TransportType,
+          id: "",
+          uid: "",
+          isInput: false,
+          isOutput: true,
+        })),
+        true,
+      ),
+      saveDeviceInfo(
+        updatedInputDeviceInfo.map((info) => ({
+          name: info.name,
+          transportType: info.transportType as TransportType,
+          id: "",
+          uid: "",
+          isInput: true,
+          isOutput: false,
+        })),
+        false,
+      ),
     ]);
 
     // Auto-initialize priority lists if empty - rank all available devices with current active device as #1
-    if (outputPriorityList.length === 0 && outputDevicesWithTransport.length > 0) {
+    if (outputPriorityList.length === 0 && outputDevices.length > 0) {
       // Start with current active device, then add others
       const prioritizedDevices: string[] = [];
       if (currentOutputDevice) {
         prioritizedDevices.push(currentOutputDevice.name);
       }
       // Add remaining devices that aren't the current one
-      outputDevicesWithTransport.forEach((device) => {
+      outputDevices.forEach((device) => {
         if (!prioritizedDevices.includes(device.name)) {
           prioritizedDevices.push(device.name);
         }
@@ -92,14 +128,14 @@ export default function ListDevices() {
       await setOutputPriorityList(outputPriorityList);
     }
 
-    if (inputPriorityList.length === 0 && inputDevicesWithTransport.length > 0) {
+    if (inputPriorityList.length === 0 && inputDevices.length > 0) {
       // Start with current active device, then add others
       const prioritizedDevices: string[] = [];
       if (currentInputDevice) {
         prioritizedDevices.push(currentInputDevice.name);
       }
       // Add remaining devices that aren't the current one
-      inputDevicesWithTransport.forEach((device) => {
+      inputDevices.forEach((device) => {
         if (!prioritizedDevices.includes(device.name)) {
           prioritizedDevices.push(device.name);
         }
@@ -167,10 +203,10 @@ export default function ListDevices() {
     };
 
     // Add any new devices to priority lists before creating device lists
-    const newOutputDevices = outputDevicesWithTransport.filter(
+    const newOutputDevices = outputDevices.filter(
       (device) => !outputPriorityList.some((name) => name.toLowerCase() === device.name.toLowerCase()),
     );
-    const newInputDevices = inputDevicesWithTransport.filter(
+    const newInputDevices = inputDevices.filter(
       (device) => !inputPriorityList.some((name) => name.toLowerCase() === device.name.toLowerCase()),
     );
 
@@ -186,18 +222,8 @@ export default function ListDevices() {
       await setInputPriorityList(updatedInputPriorityList);
     }
 
-    const processedOutputDevices = createFullDeviceList(
-      outputDevicesWithTransport,
-      outputPriorityList,
-      true,
-      currentOutputDevice,
-    );
-    const processedInputDevices = createFullDeviceList(
-      inputDevicesWithTransport,
-      inputPriorityList,
-      false,
-      currentInputDevice,
-    );
+    const processedOutputDevices = createFullDeviceList(outputDevices, outputPriorityList, true, currentOutputDevice);
+    const processedInputDevices = createFullDeviceList(inputDevices, inputPriorityList, false, currentInputDevice);
 
     // Sort devices by priority rank (lower rank = higher priority)
     processedOutputDevices.sort((a, b) => a.priorityRank - b.priorityRank);
@@ -475,13 +501,8 @@ export default function ListDevices() {
   );
 
   const getDeviceIcon = (device: Device): Icon => {
-    // Check for AirPlay devices first
-    if (device.transportType === "Airplay") {
-      return Icon.AirplayVideo;
-    }
-
     // Check if it's a Bluetooth device
-    if (device.transportType === "Bluetooth" || device.transportType === "BluetoothLowEnergy") {
+    if (device.transportType === TransportType.Bluetooth || device.transportType === TransportType.BluetoothLowEnergy) {
       const name = device.name.toLowerCase();
       if (name.includes("airpods")) {
         return Icon.Airpods;
@@ -492,7 +513,7 @@ export default function ListDevices() {
       return Icon.Bluetooth;
     }
 
-    // Default icons based on device type
+    // Default icons based on device type (includes AirPlay, USB, HDMI, etc.)
     return device.isInput ? Icon.Microphone : Icon.Speaker;
   };
 

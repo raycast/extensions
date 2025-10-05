@@ -1,6 +1,6 @@
 # Sound Stack Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-10-04
 
 - Added List Devices command to view and reorder audio devices by priority
 - Added automatic priority-based device switching with background monitoring
