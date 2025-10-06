@@ -5,7 +5,7 @@ import { Project } from "./lib/interfaces";
 import { Logger } from "./utils/LoggerSingleton";
 import ApiClient from "./services/ApiClient";
 
-const preferences = getPreferenceValues();
+const preferences = getPreferenceValues<Preferences>();
 const apiClient = new ApiClient(
   "https://" + preferences.deployHQAccountName + ".deployhq.com",
   preferences.deployHQAPIKey,
