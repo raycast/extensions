@@ -56,6 +56,11 @@
       "description": "Unsubscribe from an RSS feed."
     },
     {
+      "name": "rename-feed",
+      "title": "Rename Feed",
+      "description": "Rename an RSS feed subscription."
+    },
+    {
       "name": "mark-as-read",
       "title": "Mark Story as Read",
       "description": "Mark an RSS story as read."
@@ -144,6 +149,39 @@
           },
           {
             "meetsCriteria": "The answer lists all subscribed feeds with their titles."
+          }
+        ]
+      },
+      {
+        "input": "@rss-reader Rename Tech News feed to My Tech Feed",
+        "mocks": {
+          "get-feeds": [
+            {
+              "url": "https://technews.com/feed",
+              "title": "Tech News",
+              "link": "https://technews.com",
+              "originalTitle": "Tech News"
+            }
+          ],
+          "rename-feed": {
+            "url": "https://technews.com/feed",
+            "oldTitle": "Tech News",
+            "newTitle": "My Tech Feed",
+            "originalTitle": "Tech News"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rename-feed",
+              "arguments": {
+                "url": "https://technews.com/feed",
+                "newTitle": "My Tech Feed"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The answer confirms the feed has been renamed."
           }
         ]
       }

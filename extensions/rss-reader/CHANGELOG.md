@@ -3,7 +3,7 @@
 ## [AI Tool Support] - 2025-10-06
 
 - Add AI tool support for interacting with RSS feeds via Raycast AI
-- Add tools: get-feeds, get-stories, add-feed, remove-feed, mark-as-read
+- Add tools: get-feeds, get-stories, add-feed, remove-feed, rename-feed, mark-as-read
 - Add confirmation dialog for removing feeds
 
 ## [Fix Feeds Not Moving] - 2025-04-02
