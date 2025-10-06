@@ -2,7 +2,7 @@
 
 ## [Run missed schedules immediately] - {PR_MERGE_DATE}
 
-- ▶️ Added an option to immediately run a scheduled command if it was missed (e.g., the machine was asleep).
+- ▶️ Added an option to immediately run a scheduled command if it was missed (e.g., the machine was asleep). Note: in this case "immediately" means within one minute of Raycast starting.
 
 ## [Added new schedule types] - 2025-09-10
 

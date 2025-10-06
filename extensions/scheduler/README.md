@@ -16,7 +16,7 @@ This extension allows you to schedule any Raycast command to run automatically a
 - **View & Filter**: See all your scheduled commands with filtering by schedule type
 - **Enable/Disable**: Easily toggle commands on or off without deleting them
 - **Edit Schedules**: Modify existing scheduled commands anytime
-- **Run missed schedules**: Immediately run a scheduled command that was missed (e.g., when the machine was asleep)
+- **Run missed schedules**: Immediately run a scheduled command that was missed (e.g., when the machine was asleep). Note: in this case "immediately" means within one minute of Raycast starting.
 - **Execution Logs**: Track when commands run and view any errors
 
 ## Creating a Scheduled Command
