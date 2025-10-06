@@ -60,6 +60,7 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
       command: (draftValues?.command as string) ?? (command ? command.command.deeplink : ""),
       name: (draftValues?.name as string) ?? (command?.name || ""),
       runInBackground: (draftValues?.runInBackground as boolean | undefined) ?? command?.command.type === "background",
+      runIfMissed: (draftValues?.runIfMissed as boolean | undefined) ?? command?.runIfMissed ?? false,
       scheduleType: (draftValues?.scheduleType as ScheduleType) ?? (command?.schedule.type || "daily"),
       time: (draftValues?.time as string) ?? (command?.schedule.time || "09:00"),
       date: (draftValues?.date as string) ?? (command?.schedule.date || ""),
@@ -247,6 +248,12 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
         title="Run in Background"
         label="Execute this command in the background."
         info="When enabled, the command will run silently without user interaction. Best for automated tasks and scripts."
+      />
+      <Form.Checkbox
+        {...itemProps.runIfMissed}
+        title="Run Immediately if Missed"
+        label="Execute this command immediately if it was missed."
+        info="When enabled, the command will run as soon as possible if it was scheduled to run while your machine was asleep."
       />
       {parsedCommand && (
         <>

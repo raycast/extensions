@@ -25,6 +25,8 @@ export type ScheduledCommand = {
   createdAt: string;
   updatedAt: string;
   lastExecutedAt?: string; // ISO string for when the command was last successfully executed
+  runIfMissed?: boolean; // If true, run the command once if a scheduled execution was missed
+  lastMissedCheck?: string; // ISO string for when we last checked for missed schedules
 };
 
 export interface FormValues {
@@ -37,6 +39,7 @@ export interface FormValues {
   dayOfMonth?: string;
   cronExpression?: string;
   runInBackground?: boolean;
+  runIfMissed?: boolean;
 }
 
 export type CommandPermissionStatus = {
