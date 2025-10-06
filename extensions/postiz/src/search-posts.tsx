@@ -1,9 +1,11 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
-import { useMemo } from "react";
-import { format, getISOWeek, subDays } from "date-fns";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Form, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { format, getISOWeek, startOfMonth, subDays } from "date-fns";
 import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
-import { buildPostizUrl, POSTIZ_HEADERS, STATE_COLORS } from "./postiz";
+import { buildPostizUrl, parsePostizResponse, POSTIZ_HEADERS, STATE_COLORS } from "./postiz";
 import { Identifier, Integration, Post } from "./types";
+
+const {postiz_version} = getPreferenceValues<Preferences>();
 
 const generateMarkdown = (post: Post) => {
   switch (post.integration.providerIdentifier) {
@@ -21,24 +23,40 @@ const generateMarkdown = (post: Post) => {
 };
 
 export default function SearchPosts() {
+  type Display = "day" | "week" | "month";
+  const [display, setDisplay] = useState<Display>("week");
   const date = useMemo(() => new Date(), []);
+  const startDate = useMemo(() => {
+    switch (display) {
+      case "day":
+        return date;
+      case "week":
+        return subDays(date, 6);
+      case "month":
+        return startOfMonth(date);
+    }
+  }, [date, display])
   const {
     isLoading,
     data: posts,
     revalidate,
     mutate,
   } = useFetch(
-    buildPostizUrl("posts", {
+    buildPostizUrl("posts",postiz_version==="1" ? {
       display: "week",
       day: date.getDay().toString(),
       week: getISOWeek(date).toString(),
       month: (date.getMonth() + 1).toString(),
       year: date.getFullYear().toString(),
+    } : {
+      startDate: startDate.toISOString(),
+      endDate: date.toISOString(),
     }),
     {
       headers: POSTIZ_HEADERS,
-      mapResult(result: { posts: Post[] }) {
-        return { data: result.posts };
+      parseResponse: parsePostizResponse,
+      mapResult(result) {
+        return { data: (result as { posts: Post[] }).posts };
       },
       initialData: [],
     },
@@ -63,9 +81,7 @@ export default function SearchPosts() {
         fetch(buildPostizUrl(`posts/${postId}`), {
           method: "DELETE",
           headers: POSTIZ_HEADERS,
-        }).then((res) => {
-          if (!res.ok) throw new Error("Failed");
-        }),
+        }).then(parsePostizResponse),
         {
           optimisticUpdate(data) {
             return data.filter((p) => p.id !== postId);
@@ -77,12 +93,17 @@ export default function SearchPosts() {
       await showFailureToast(error);
     }
   };
-
+const subtitle = `${format(postiz_version==="1" ? subDays(date, 6) : startDate, "MM/dd/yyyy")} - ${format(date, "MM/dd/yyyy")}`;
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail searchBarAccessory={postiz_version==="1" ? undefined : <List.Dropdown tooltip="Display" onChange={(d) => setDisplay(d as Display)} defaultValue="week" storeValue>
+      <List.Dropdown.Item title="Day" value="day" />
+      <List.Dropdown.Item title="Week" value="week" />
+      <List.Dropdown.Item title="Month" value="month" />
+    </List.Dropdown>}>
+    <List.EmptyView title="No Results" description={subtitle} />
       <List.Section
         title="Today"
-        subtitle={`${format(subDays(date, 6), "MM/dd/yyyy")} - ${format(date, "MM/dd/yyyy")}`}
+        subtitle={subtitle}
       >
         {posts.map((post) => (
           <List.Item
@@ -160,11 +181,7 @@ function CreatePost() {
           headers: POSTIZ_HEADERS,
           body: JSON.stringify(body),
         });
-        const result = await response.json();
-        if (!response.ok) {
-          const err = result as { error?: string; message: string[] | string };
-          throw new Error(Array.isArray(err.message) ? err.message[0] : err.message);
-        }
+        await parsePostizResponse(response);
         pop();
       } catch (error) {
         await showFailureToast(error);
