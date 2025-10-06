@@ -1,6 +1,6 @@
 # Kaomoji Search Changelog
 
-## [Windows Support + Modernize] - {PR_MERGE_DATE}
+## [Windows Support + Modernize] - 2025-10-06
 
 - Add Windows Support
 - Add `metadata` images
