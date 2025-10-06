@@ -10,6 +10,7 @@ import {
   Icon,
   Color,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import React from "react";
@@ -487,7 +488,7 @@ export default function Command() {
 
       setData({ userId: data.userId, roles: rolesWithActiveStatus });
     } catch (e) {
-      console.error("Failed to refresh roles:", e);
+      await showFailureToast(e, { title: "Failed to refresh roles" });
     }
   }, [data]);
 
