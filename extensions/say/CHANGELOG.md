@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-10-06
 
 - Fix missing await for say function to keep the command process alive
 - Say the error message with its error name
