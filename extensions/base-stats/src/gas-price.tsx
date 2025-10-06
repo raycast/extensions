@@ -6,7 +6,7 @@ interface Preferences {
   apiKey: string;
 }
 
-interface BaseScanResponse {
+interface EtherscanResponse {
   jsonrpc: string;
   id: number;
   result: string;
@@ -16,28 +16,20 @@ const cache = new Cache();
 const PRICE_CACHE_KEY = "base-gas-price";
 
 async function fetchGasPrice(apiKey: string): Promise<number> {
-  try {
-    console.log("Fetching gas price...");
-    const response = await fetch(
-      `https://api.etherscan.io/v2/api?chainid=8453&module=proxy&action=eth_gasPrice&apikey=${apiKey}`,
-    );
+  const response = await fetch(
+    `https://api.etherscan.io/v2/api?chainid=8453&module=proxy&action=eth_gasPrice&apikey=${apiKey}`,
+  );
 
-    const data = (await response.json()) as EtherscanResponse;
-    console.log("Response:", data);
+  const data = (await response.json()) as EtherscanResponse;
 
-    if (!data.result) {
-      throw new Error("Invalid response");
-    }
-
-    const priceInWei = Number.parseInt(data.result.substring(2), 16);
-    const finalPrice = priceInWei / 1e6;
-    console.log("Price:", finalPrice.toFixed(0), "MWei");
-
-    return finalPrice;
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
+  if (!data.result) {
+    throw new Error("Invalid response");
   }
+
+  const priceInWei = Number.parseInt(data.result.substring(2), 16);
+  const finalPrice = priceInWei / 1e6;
+
+  return finalPrice;
 }
 
 export default function Command(): JSX.Element {
