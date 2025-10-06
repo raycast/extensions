@@ -14,8 +14,8 @@ type Input = {
 export default async function (input: Input) {
   const { storyGuid } = input;
 
-  const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
-  const storyLastRead: Record<string, number> = JSON.parse(storyLastViewedString ?? "{}");
+  const storyLastReadString = await LocalStorage.getItem<string>("storyLastRead");
+  const storyLastRead: Record<string, number> = JSON.parse(storyLastReadString ?? "{}");
 
   const lastRead = new Date().valueOf();
   storyLastRead[storyGuid] = lastRead;
