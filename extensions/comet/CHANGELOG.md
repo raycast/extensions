@@ -1,6 +1,6 @@
 # Comet Browser Changelog
 
-## [Fix Memory Limit Errors] - {PR_MERGE_DATE}
+## [Fix Memory Limit Errors] - 2025-10-06
 
 - Fixed "Worker terminated due to reaching memory limit: JS heap out of memory" errors in search-history and search-bookmarks commands
 - Added memory usage limits: bookmarks limited to 100 results, search-all limited to 50 results per category
