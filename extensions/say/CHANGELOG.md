@@ -1,5 +1,11 @@
 # Say - Text to Speech Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add Stop Say command to stop the current running Say process
+- Add config option to allow silent on error
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-08-22
 
 - Add support for stopping the text-to-speech process
