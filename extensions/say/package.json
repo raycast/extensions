@@ -75,5 +75,8 @@
     "eslint": "^9.37.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

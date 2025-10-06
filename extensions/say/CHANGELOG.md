@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-10-06
 
 - Add Stop Say command to stop the current running Say process
 - Add config option to allow silent on error
