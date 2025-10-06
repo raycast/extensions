@@ -1,6 +1,6 @@
 # Entra PIM Role Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-10-06
 
 Automatically refresh user role status after activation to ensure up-to-date information.
 
