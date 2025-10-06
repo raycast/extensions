@@ -29,7 +29,7 @@ With this extension, users can use this extension's configuration page for more 
 
 ### Use `raycast-cross-extension`
 
-This is the most recommended way, `raycast-corss-extension` will verify the `corssExtensions` field in the `package.json`.
+This is the most recommended way, `raycast-cross-extension` will verify the `crossExtensions` field in the `package.json`.
 This helps your upstream extension provider to get to know who is using their extension. For more details, see [Raycast Cross Extension Conventsions][raycast-cross-extension-link].
 
 ```javascript

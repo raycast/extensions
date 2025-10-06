@@ -14,5 +14,5 @@ export type ParsedSaySettings = {
   voice?: string;
   rate?: number;
   audioDevice?: string;
-  keepSilentOnError: boolean;
+  keepSilentOnError?: boolean;
 };

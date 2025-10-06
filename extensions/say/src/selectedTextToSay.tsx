@@ -9,7 +9,7 @@ export default async function SelectionToSay() {
     const selectedText = await getSelectedText();
     await say(selectedText, saySettings);
   } catch (error) {
-    if (!keepSilentOnError) return;
+    if (keepSilentOnError) return;
     say(error instanceof Error ? error.message : String(error), saySettings);
   }
 }
