@@ -10,6 +10,6 @@ export default async function SelectionToSay() {
     await say(selectedText, saySettings);
   } catch (error) {
     if (keepSilentOnError) return;
-    say(error instanceof Error ? error.message : String(error), saySettings);
+    await say(String(error), saySettings);
   }
 }

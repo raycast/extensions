@@ -1,5 +1,10 @@
 # Say - Text to Speech Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fix missing await for say function to keep the command process alive
+- Say the error message with its error name
+
 ## [Enhancement] - 2025-10-06
 
 - Add Stop Say command to stop the current running Say process
