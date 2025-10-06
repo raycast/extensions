@@ -1,5 +1,22 @@
 # Base Stats Changelog
 
+## [1.2.0] - 2025-01-20
+
+### Changed
+- Fixed ESLint configuration to work with ESLint 8.57.0
+- Cleaned up console logging to remove ANSI escape codes in output
+- Simplified error handling by removing unnecessary try/catch wrappers
+- Updated TypeScript interfaces for better type safety
+
+### Removed
+- Removed stats command entirely - extension now focuses solely on gas price monitoring
+- Removed all console.log statements for cleaner production code
+
+### Fixed
+- Resolved "BaseScanResponse is defined but never used" linting warnings
+- Fixed ESLint configuration import errors
+- Eliminated "unnecessary try/catch wrapper" linting errors
+
 ## [1.1.0] - 2024-12-19
 
 ### Changed

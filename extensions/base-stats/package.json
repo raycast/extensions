@@ -22,12 +22,6 @@
   ],
   "commands": [
     {
-      "name": "stats",
-      "title": "Stats",
-      "description": "Displays various stats for Base (via L2Beat.com)",
-      "mode": "view"
-    },
-    {
       "name": "gas-price",
       "title": "Gas Price",
       "description": "View the current Base Gas Price (MWei) in your menu bar - updates every minute",
