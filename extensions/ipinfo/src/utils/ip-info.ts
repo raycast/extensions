@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import IPinfoWrapper, { IPinfoLiteWrapper } from "node-ipinfo";
 
 interface Preferences {
-  apiToken?: string;
+  apiToken: string;
 }
 
 const getLiteClient = () => {

@@ -1,9 +1,9 @@
 import { Color, Icon, List } from "@raycast/api";
 import { IPBogon } from "node-ipinfo/dist/src/common";
 
-interface BogonIPProps {
+type BogonIPProps = {
   ipInfo: IPBogon;
-}
+};
 
 export const BogonIP = ({ ipInfo }: BogonIPProps) => {
   return (

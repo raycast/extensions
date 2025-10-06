@@ -4,10 +4,10 @@ import { BogonIP } from "./bogon-ip";
 import { constructMarkdown } from "../utils/markdown";
 import { IPActions } from "./ip-actions";
 
-interface IpDetailsProps {
+type IpDetailsProps = {
   ipInfo: IPinfoLite | IPinfo | IPBogon | null;
   isLoading: boolean;
-}
+};
 
 export const IpDetails = ({ ipInfo, isLoading }: IpDetailsProps) => {
   if (ipInfo && "bogon" in ipInfo && ipInfo.bogon) {
