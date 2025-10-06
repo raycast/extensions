@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon, MenuBarExtra, openCommandPreferences, getPreferenceValues, Cache } from "@raycast/api";
 import fetch from "node-fetch";
 
@@ -32,7 +32,7 @@ async function fetchGasPrice(apiKey: string): Promise<number> {
   return finalPrice;
 }
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const { apiKey } = getPreferenceValues<Preferences>();
