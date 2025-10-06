@@ -1,4 +1,3 @@
-import { environment } from "@raycast/api";
 import { Logger } from "../utils/LoggerSingleton";
 import { Project } from "../lib/interfaces";
 
@@ -28,13 +27,13 @@ export default class ApiClient {
           Authorization: this.headerAuth,
         },
       });
+
       if (response.status !== 200) {
-        Logger.error("Error fetching projects:", response.statusText);
-        return {
-          data: [],
-          headers: {},
-        };
+        const errorText = await response.text();
+        Logger.error(`API Error (${response.status}): ${errorText}`);
+        throw new Error(`DeployHQ API error: ${response.status} ${response.statusText}`);
       }
+
       const data = (await response.json()) as Array<Project>;
 
       const headers: Record<string, string> = {};
@@ -47,7 +46,7 @@ export default class ApiClient {
         headers,
       };
     } catch (error) {
-      if (environment.isDevelopment) Logger.error("Error fetching projects:", error);
+      Logger.error("Error fetching projects:", error);
       throw error;
     }
   }

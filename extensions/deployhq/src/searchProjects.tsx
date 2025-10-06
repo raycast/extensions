@@ -1,53 +1,65 @@
-import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues, List, Action, ActionPanel, environment } from "@raycast/api";
+import { getPreferenceValues, List, Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import { Project } from "./lib/interfaces";
 import { Logger } from "./utils/LoggerSingleton";
 import ApiClient from "./services/ApiClient";
+import { validateCredentials } from "./utils/validation";
 
-const preferences = getPreferenceValues<Preferences>();
-const apiClient = new ApiClient(
-  "https://" + preferences.deployHQAccountName + ".deployhq.com",
-  preferences.deployHQAPIKey,
-  preferences.deployHQUsername,
-  preferences.deployHQAccountName,
-);
-
-interface State {
-  items?: Project[];
+interface Preferences {
+  logPath: string;
+  deployHQAPIKey: string;
+  deployHQAccountName: string;
+  deployHQUsername: string;
+  defaultAction: string;
 }
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
+  const preferences = getPreferenceValues<Preferences>();
 
-  useCachedPromise(async () => {
-    async function fetchProjects() {
-      const result = await apiClient.call("/projects");
-      const projectData = result.data as Project[];
+  // Validate credentials
+  const validation = validateCredentials(preferences);
+  if (!validation.isValid) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid Configuration",
+      message: validation.errors.join(", "),
+    });
+    return (
+      <List>
+        <List.Item title="Configuration Error" subtitle={validation.errors.join(", ")} />
+      </List>
+    );
+  }
 
-      if (projectData.length === 0) {
-        if (environment.isDevelopment) Logger.error("No projects found");
-        return [];
-      }
+  const apiClient = new ApiClient(
+    "https://" + preferences.deployHQAccountName + ".deployhq.com",
+    preferences.deployHQAPIKey,
+    preferences.deployHQUsername,
+    preferences.deployHQAccountName,
+  );
 
-      setState({
-        items: projectData,
-      });
+  const { data: projects, isLoading } = useCachedPromise(async () => {
+    const result = await apiClient.call("/projects");
+    const projectData = result.data as Project[];
+
+    if (projectData.length === 0) {
+      Logger.error("No projects found");
+      return [];
     }
 
-    fetchProjects();
+    return projectData;
   }, []);
 
   return (
-    <List throttle={true} isLoading={state.items === undefined}>
-      {state.items?.map((item) => (
-        <List.Item key={item.identifier} title={item.name} actions={projectActions(item)} />
+    <List throttle={true} isLoading={isLoading}>
+      {projects?.map((item) => (
+        <List.Item key={item.identifier} title={item.name} actions={projectActions(item, preferences)} />
       ))}
     </List>
   );
 }
 
-function projectActions(item: Project) {
+function projectActions(item: Project, preferences: Preferences) {
   return (
     <ActionPanel>
       <Action.OpenInBrowser
