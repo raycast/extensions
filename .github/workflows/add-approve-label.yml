@@ -8,59 +8,25 @@ name: Auto-label approved PRs (external reviewers only)
 on:
   pull_request_review:
     types: [submitted]
-  workflow_dispatch:  # Keep for testing
-    inputs:
-      reviewer_login:
-        description: 'Reviewer GitHub handle'
-        required: true
-      pr_number:
-        description: 'PR number'
-        required: true
-        type: string  # String for clean input; parse to int below
 
 permissions:
-  issues: write
+  pull-requests: write
 
 jobs:
   label_on_approval:
     runs-on: ubuntu-latest
-    if: >-
-      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && github.event.pull_request.state == 'open') ||
-      github.event_name == 'workflow_dispatch'
+    if: github.event.review.state == 'approved' && github.event.pull_request.state == 'open'
     steps:
-    - name: Check PR state
-      id: pr_check
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          pr_state="open"  # Assume open for manual tests
-          pr_number="${{ inputs.pr_number }}"
-          pr_number=$(echo "$pr_number" | sed 's/^#//')  # Remove # if user adds it
-        else
-          pr_state="${{ github.event.pull_request.state }}"
-          pr_number="${{ github.event.pull_request.number }}"
-        fi
-        if [[ "$pr_state" != "open" ]]; then
-          echo "::notice::PR is not open (state: $pr_state), skipping label addition"
-          echo "should_label=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-        echo "::notice::PR is open, proceeding"
-        echo "should_label=true" >> $GITHUB_OUTPUT
-
     - name: Check reviewer permissions
       id: check_permissions
       run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          reviewer_login="${{ inputs.reviewer_login }}"
-          reviewer_type="User"  # Default for manual; real events use event.review.user.type
-        else
-          reviewer_login="${{ github.actor }}"
-          reviewer_type="${{ github.event.review.user.type }}"
-        fi
+        reviewer_login="${{ github.event.review.user.login }}"
+        reviewer_type="${{ github.event.review.user.type }}"
         repo_owner="${{ github.repository_owner }}"
         repo_name="${{ github.event.repository.name }}"
+        pr_number="${{ github.event.pull_request.number }}"
 
-        echo "::notice::Reviewer: $reviewer_login, Type: $reviewer_type"
+        echo "::notice::Reviewer: $reviewer_login, Type: $reviewer_type, PR: #$pr_number"
 
         # If not a human user (e.g., bot), always label
         if [[ "$reviewer_type" != "User" ]]; then
@@ -70,22 +36,20 @@ jobs:
         fi
 
         # For human users, fetch permission via GitHub API with error handling
-        response=$(curl -s -w "\n%{http_code}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        http_code=$(curl -s -w "%{http_code}" -o /tmp/response.json \
+          -H "Authorization: token ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
           "https://api.github.com/repos/${repo_owner}/${repo_name}/collaborators/${reviewer_login}/permission")
 
-        # Split response body and HTTP code
-        http_code=$(echo "$response" | tail -n1)
-        response_body=$(echo "$response" | sed '$d')
-
-        echo "::debug::Perms API HTTP Code: $http_code"
-
-        # Handle curl failure (non-zero exit) - skip labeling, no job fail
+        # Check curl exit code
         if [[ $? -ne 0 ]]; then
           echo "::error::API request failed (curl error): Skipping label"
           echo "should_label=false" >> $GITHUB_OUTPUT
           exit 0
         fi
+
+        response_body=$(cat /tmp/response.json)
+        echo "::debug::Perms API HTTP Code: $http_code"
 
         # Handle HTTP codes
         if [[ "$http_code" == "404" ]]; then
@@ -108,8 +72,8 @@ jobs:
         permission=$(echo "$response_body" | jq -r '.permission // empty')
         echo "::notice::Permission: $permission"
 
-        # Allow if read/triage/none; skip if write/maintain/admin
-        if [[ "$permission" == "read" || "$permission" == "triage" || "$permission" == "none" ]]; then
+        # Allow if read/triage/none/empty; skip if write/maintain/admin
+        if [[ "$permission" == "read" || "$permission" == "triage" || "$permission" == "none" || -z "$permission" ]]; then
           echo "should_label=true" >> $GITHUB_OUTPUT
           echo "::notice::Allowing label for non-write+ user (permission: $permission)"
         else
@@ -117,40 +81,31 @@ jobs:
           echo "::notice::Skipping label for write+ user (permission: $permission)"
         fi
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RAYCAST_BOT_API_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
 
     - name: Add Approved label
-      if: ${{ steps.pr_check.outputs.should_label == 'true' && steps.check_permissions.outputs.should_label == 'true' }}
+      if: steps.check_permissions.outputs.should_label == 'true'
       run: |
-        pr_number="${{ github.event.pull_request.number || inputs.pr_number }}"
-        bot_token="${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}"
-        token_length=${#bot_token}
-        echo "::debug::Bot token length: $token_length (if 0, secret is empty)"
-        if [ $token_length -eq 0 ]; then
-          echo "::error::RAYCAST_BOT_API_ACCESS_TOKEN is empty - cannot add label as raycastbot"
-          exit 1
-        fi
-        echo "::notice::Adding 'Approved' label to PR #$pr_number (using bot token)"
-        response=$(curl -s -w "\n%{http_code}" -X POST \
-          -H "Authorization: token $bot_token" \
+        pr_number="${{ github.event.pull_request.number }}"
+        
+        response=$(curl -s -w "\n%{http_code}" \
+          -X POST \
+          -H "Authorization: token ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/${{ github.repository }}/issues/$pr_number/labels" \
+          "https://api.github.com/repos/${{ github.repository }}/issues/${pr_number}/labels" \
           -d '{"labels":["Approved"]}')
+        
         http_code=$(echo "$response" | tail -n1)
         response_body=$(echo "$response" | sed '$d')
-        echo "::debug::Label add HTTP Code: $http_code"
-        echo "::debug::Response body: $response_body"
-        if [[ "$http_code" == "200" || "$http_code" == "201" ]]; then
-          echo "::notice::Label added successfully by raycastbot"
+        
+        echo "::debug::Label API HTTP Code: $http_code"
+        
+        # 200 = success, 422 = label already exists (also success for our purposes)
+        if [[ "$http_code" == "200" || "$http_code" == "422" ]]; then
+          echo "::notice::Successfully added 'Approved' label to PR #$pr_number"
         else
-          echo "::error::Failed to add label (code: $http_code): $response_body"
+          echo "::error::Failed to add label (HTTP $http_code): $response_body"
           exit 1
         fi
       env:
         RAYCAST_BOT_API_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-
-    - name: Debug label outcome
-      if: always()
-      run: |
-        pr_number="${{ github.event.pull_request.number || inputs.pr_number }}"
-        echo "::debug::Label step completed - check PR #$pr_number for 'Approved' label"
