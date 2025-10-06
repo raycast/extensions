@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, LaunchProps } from "@raycast/api";
-import { getTranslations } from "./utils/getTranslations";
-import { getAutocomplete } from "./utils/autocomplete";
-import { useEffect, useState } from "react";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
+import * as cheerio from "cheerio";
 
 const URL = "https://tureng.com/en/turkish-english/";
 
@@ -40,39 +40,65 @@ function AutocompleteListItem(props: { item: string; selectItem: (item: string) 
 }
 
 export default function Command(props: LaunchProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [autocompleteResults, setAutocompleteResults] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState(props.launchContext?.term || "");
+  const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
 
-  const [data, setData] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Determine what to fetch based on current state
+  const shouldFetchTranslations = !!selectedTerm;
+  const shouldFetchAutocomplete = !selectedTerm && searchTerm.length >= 3;
 
-  useEffect(() => {
-    if (props.launchContext?.term) {
-      updateQuery(props.launchContext?.term);
-    }
-  }, []);
+  // Fetch autocomplete results
+  const { data: autocompleteResults, isLoading: isAutocompleteLoading } = useFetch<string[]>(
+    `https://ac.tureng.co/?t=${encodeURIComponent(searchTerm)}&l=entr`,
+    {
+      parseResponse: async (response) => {
+        const data = await response.json();
+        return data as string[];
+      },
+      execute: shouldFetchAutocomplete,
+    },
+  );
+
+  // Fetch translations for selected term
+  const { data: translations, isLoading: isTranslationsLoading } = useFetch<string[]>(
+    `https://tureng.com/en/turkish-english/${encodeURIComponent(selectedTerm || "")}`,
+    {
+      parseResponse: async (response) => {
+        const html = await response.text();
+        const $ = cheerio.load(html);
+        const translations: string[] = [];
+
+        $("#englishResultsTable tr").each((_, el) => {
+          const elements = $(el).find("td[lang='en'] a, td[lang='tr'] a");
+          if (elements.length === 0) return;
+
+          elements.each((_, trEl) => {
+            const text = $(trEl).text().trim();
+            if (text.length > 0 && text !== selectedTerm) {
+              translations.push(text);
+            }
+          });
+        });
+
+        return Array.from(new Set(translations)).slice(0, 3);
+      },
+      execute: shouldFetchTranslations,
+    },
+  );
 
   const updateQuery = (term: string) => {
-    setIsLoading(true);
+    setSelectedTerm(term);
     setSearchTerm(term);
-    getTranslations(term)
-      .then(setData)
-      .then(() => setIsLoading(false));
   };
 
   const updateSearchTerm = (text: string) => {
     setSearchTerm(text);
-    setAutocompleteResults([]);
-    setData([]);
-
-    if (text.length >= 3) {
-      setIsLoading(true);
-      getAutocomplete(text).then((res) => {
-        setAutocompleteResults(res);
-        setIsLoading(false);
-      });
-    }
+    setSelectedTerm(null);
   };
+
+  const isLoading = isAutocompleteLoading || isTranslationsLoading;
+  const data = shouldFetchTranslations ? translations || [] : [];
+  const autocompleteData = shouldFetchAutocomplete ? autocompleteResults || [] : [];
 
   return (
     <List
@@ -92,14 +118,21 @@ export default function Command(props: LaunchProps) {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
-                  url={`https://tureng.com/en/turkish-english/${encodeURIComponent(searchTerm)}`}
+                  url={`https://tureng.com/en/turkish-english/${encodeURIComponent(selectedTerm || searchTerm)}`}
                 ></Action.OpenInBrowser>
               </ActionPanel>
             }
           />
         </>
+      ) : autocompleteData.length > 0 ? (
+        autocompleteData.map((item, idx) => <AutocompleteListItem item={item} key={idx} selectItem={updateQuery} />)
+      ) : searchTerm.length > 0 && searchTerm.length < 3 ? (
+        <List.EmptyView title="Type at least 3 characters" description="Start typing to see autocomplete suggestions" />
       ) : (
-        autocompleteResults.map((item, idx) => <AutocompleteListItem item={item} key={idx} selectItem={updateQuery} />)
+        <List.EmptyView
+          title="Search Tureng Dictionary"
+          description="Type a Turkish or English word to get translations"
+        />
       )}
     </List>
   );
