@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
-import { DEFAULT_RETRIES, DEFAULT_SLEEP, HEADERS, ImageLayouts, ImageLicenses } from "./consts";
-import { getCachedImagePath, setCachedImagePath } from "./cache";
 import axios from "axios";
-import { tmpdir } from "os";
 import fs from "fs";
 import mime from "mime-types";
+import { tmpdir } from "os";
+import { getCachedImagePath, setCachedImagePath } from "./cache";
+import { DEFAULT_RETRIES, DEFAULT_SLEEP, HEADERS, ImageLayouts, ImageLicenses } from "./consts";
+import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
 
-import path from "path";
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
+import path from "path";
 
 export const emptyResult: ImageSearchResult = {
   vqd: "",
@@ -140,10 +140,12 @@ export async function pasteImage(image: DuckDuckGoImage) {
 }
 
 function expandTildePath(filePath: string): string {
+  if (!filePath) return "";
+  if (filePath === "~" || filePath === "~/") return homedir();
   if (filePath.startsWith("~/")) {
-    return path.join(homedir(), filePath.slice(2));
+    return path.resolve(homedir(), filePath.slice(2));
   }
-  return filePath;
+  return path.resolve(filePath);
 }
 
 export async function saveImage(image: DuckDuckGoImage) {
