@@ -391,81 +391,57 @@ async function addPlatformLabels(
     issue_number: context.issue.number,
   });
 
-  // Find existing platform labels to remove
+  // Find existing platform labels
   const existingPlatformLabels = currentLabels
     .filter(label => label.name.startsWith('platform: '))
     .map(label => label.name);
 
-  // Remove existing platform labels
-  if (existingPlatformLabels.length > 0) {
+  // Create the new platform labels we want to add
+  const newPlatformLabels = platforms.map(platform => `platform: ${platform}`);
+
+  // Find labels to remove (existing ones not in new list)
+  const labelsToRemove = existingPlatformLabels.filter(
+    existingLabel => !newPlatformLabels.includes(existingLabel)
+  );
+
+  // Find labels to add (new ones not in existing list)
+  const labelsToAdd = newPlatformLabels.filter(
+    newLabel => !existingPlatformLabels.includes(newLabel)
+  );
+
+  // Remove labels that are no longer needed
+  for (const labelToRemove of labelsToRemove) {
     try {
       await github.rest.issues.removeLabel({
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: context.issue.number,
-        name: existingPlatformLabels[0], // GitHub API only allows removing one at a time
+        name: labelToRemove,
       });
-      console.log(`Removed existing platform label: ${existingPlatformLabels[0]}`);
-      
-      // Remove additional platform labels if there are more
-      for (let i = 1; i < existingPlatformLabels.length; i++) {
-        await github.rest.issues.removeLabel({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: context.issue.number,
-          name: existingPlatformLabels[i],
-        });
-        console.log(`Removed existing platform label: ${existingPlatformLabels[i]}`);
-      }
+      console.log(`Removed platform label: ${labelToRemove}`);
     } catch (error) {
-      console.error(`Failed to remove existing platform labels:`, error);
+      console.error(`Failed to remove platform label ${labelToRemove}:`, error);
     }
   }
 
-  // Add new platform labels
-  const platformLabels = platforms.map(platform => `platform: ${platform}`);
-  
-  if (platformLabels.length > 0) {
+  // Add only the new labels that don't already exist
+  if (labelsToAdd.length > 0) {
     try {
       await github.rest.issues.addLabels({
         issue_number: context.issue.number,
         owner: context.repo.owner,
         repo: context.repo.repo,
-        labels: platformLabels,
+        labels: labelsToAdd,
       });
-      console.log(`Added platform labels: ${platformLabels.join(", ")}`);
+      console.log(`Added platform labels: ${labelsToAdd.join(", ")}`);
     } catch (error) {
       console.error(`Failed to add platform labels:`, error);
     }
   }
-}
 
-// Create a new comment or update the existing one
-async function comment({ github, context, comment }: Pick<API, "github" | "context"> & { comment: string }) {
-  // Get the existing comments on the PR
-  const { data: comments } = await github.rest.issues.listComments({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    issue_number: context.issue.number,
-  });
-
-  // Find any comment already made by the bot
-  const botComment = comments.find((comment) => comment.user?.login === "raycastbot");
-
-  if (botComment) {
-    await github.rest.issues.updateComment({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      comment_id: botComment.id,
-      body: comment,
-    });
-  } else {
-    await github.rest.issues.createComment({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: context.issue.number,
-      body: comment,
-    });
+  // Log summary of changes
+  if (labelsToRemove.length === 0 && labelsToAdd.length === 0) {
+    console.log(`No platform label changes needed. Current labels: ${existingPlatformLabels.join(", ")}`);
   }
 }
 
