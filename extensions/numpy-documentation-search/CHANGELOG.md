@@ -1,6 +1,6 @@
 # NumPy Documentation Search Changelog
 
-## [1.2.2] - {PR_MERGE_DATE}
+## [1.2.2] - 2025-10-07
 
 ### Fixed
 - Fix TypeScript compilation errors in strict mode
@@ -8,12 +8,12 @@
   - Added explicit type annotations for `.each()` callback parameters to resolve implicit any errors
   - Fixed `onSelectionChange` handler type mismatch by properly converting null to undefined
 
-## [1.2.1] - {PR_MERGE_DATE}
+## [1.2.1] - 2025-10-07
 
 ### Fixed
 - Remove ufunc assignment notation from function signatures - Universal function signatures no longer show `= <ufunc 'name'>` suffix
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2025-10-07
 
 ### Added
 - **Prefix Toggle Preference**: New user preference to display 'np.' instead of 'numpy.' prefix throughout the extension
@@ -22,17 +22,17 @@
   - Can be toggled in Raycast extension preferences: "Use Short Prefix" checkbox
   - Affects display only - does not change underlying functionality or URLs
 
-## [1.1.1] - {PR_MERGE_DATE}
+## [1.1.1] - 2025-10-07
 
 ### Fixed
 - Remove hash fragments from documentation URLs - URLs now open to the clean page URL (e.g., `https://numpy.org/doc/stable/reference/generated/numpy.absolute.html`) instead of including the anchor fragment (e.g., `https://numpy.org/doc/stable/reference/generated/numpy.absolute.html#numpy.absolute`)
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-10-07
 
 ### Fixed
 - Preserve inline code blocks in parameter descriptions - code references like `endpoint`, `False`, and `num + 1` now appear with proper backtick formatting instead of plain text
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-10-07
 
 ### Added
 
