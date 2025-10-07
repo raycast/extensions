@@ -15,7 +15,6 @@ export const PrototypeTypeEnum = z.enum([
   "attio",
   "linear",
   "chrome",
-  "raycast",
   "canny",
   "featurebase",
   "chatprd",
