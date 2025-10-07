@@ -15,49 +15,49 @@
     {
       "name": "generate-text",
       "title": "Write with ToneClone",
-      "subtitle": "Write in your unique voice and style with your custom AI Persona",
+      "subtitle": "ToneClone",
       "description": "Use ToneClone to write text for you in your unique voice and style. Write with AI without sounding like AI.",
       "mode": "view"
     },
     {
       "name": "generate-from-browser",
       "title": "Write with Browser Tab Context",
-      "subtitle": "Write with ToneClone using active browser tab as additional context",
+      "subtitle": "ToneClone",
       "description": "Use ToneClone to write text based on your active browser tab content, with domain-specific persona memory.",
       "mode": "view"
     },
     {
       "name": "train-toneclone",
       "title": "Train ToneClone",
-      "subtitle": "Send text to use as training data in ToneClone",
+      "subtitle": "ToneClone",
       "description": "Train your writing persona with new text to learn your unique writing style in ToneClone",
       "mode": "view"
     },
     {
       "name": "train-from-browser",
       "title": "Train from Browser Tab",
-      "subtitle": "Use current browser tab content to train your ToneClone persona",
+      "subtitle": "ToneClone",
       "description": "Train your writing persona using the content from your active browser tab",
       "mode": "view"
     },
     {
       "name": "manage-presets",
       "title": "Manage Presets",
-      "subtitle": "Create and manage your quick prompt presets",
+      "subtitle": "ToneClone",
       "description": "Create, edit, and reorder your preset prompts for faster writing with ToneClone",
       "mode": "view"
     },
     {
       "name": "manage-personas",
       "title": "Manage Personas",
-      "subtitle": "Open the personas management page",
+      "subtitle": "ToneClone",
       "description": "Opens the ToneClone personas management page in your browser",
       "mode": "view"
     },
     {
       "name": "manage-knowledge",
       "title": "Manage Knowledge",
-      "subtitle": "Create and manage your knowledge cards",
+      "subtitle": "ToneClone",
       "description": "Edit knowledge card instructions and manage persona associations",
       "mode": "view"
     }
@@ -90,13 +90,16 @@
       "default": true
     }
   ],
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/eslint-plugin": "github:raycast/eslint-plugin#main",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
