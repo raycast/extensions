@@ -1,6 +1,6 @@
 # Datetime formatter Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-10-07
 
 - Added `Auto Paste Clipboard Content` preference to set whether to automatically paste clipboard content when the command is executed.
 
