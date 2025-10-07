@@ -13,7 +13,7 @@
 ### Fixed
 - Remove ufunc assignment notation from function signatures - Universal function signatures no longer show `= <ufunc 'name'>` suffix
 
-## [1.2.0] - 2025-10-26
+## [1.2.0] - {PR_MERGE_DATE}
 
 ### Added
 - **Prefix Toggle Preference**: New user preference to display 'np.' instead of 'numpy.' prefix throughout the extension
