@@ -1,6 +1,6 @@
 # NumPy Documentation Search Changelog
 
-## [1.2.2] - 2025-01-07
+## [1.2.2] - {PR_MERGE_DATE}
 
 ### Fixed
 - Fix TypeScript compilation errors in strict mode
