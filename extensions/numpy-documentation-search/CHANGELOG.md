@@ -8,7 +8,7 @@
   - Added explicit type annotations for `.each()` callback parameters to resolve implicit any errors
   - Fixed `onSelectionChange` handler type mismatch by properly converting null to undefined
 
-## [1.2.1] - 2025-10-26
+## [1.2.1] - {PR_MERGE_DATE}
 
 ### Fixed
 - Remove ufunc assignment notation from function signatures - Universal function signatures no longer show `= <ufunc 'name'>` suffix
