@@ -139,7 +139,14 @@ export async function pasteImage(image: DuckDuckGoImage) {
   await Clipboard.paste({ file });
 }
 
-export async function saveImageToDownloads(image: DuckDuckGoImage) {
+function expandTildePath(filePath: string): string {
+  if (filePath.startsWith("~/")) {
+    return path.join(homedir(), filePath.slice(2));
+  }
+  return filePath;
+}
+
+export async function saveImage(image: DuckDuckGoImage) {
   await showToast({
     title: "Saving Image...",
     style: Toast.Style.Animated,
@@ -159,16 +166,22 @@ export async function saveImageToDownloads(image: DuckDuckGoImage) {
     const extension = path.extname(tempFile);
     const filename = `${cleanTitle || "duckduckgo_image"}_${image.image_token}${extension}`;
 
-    // Get Downloads folder path
-    const downloadsPath = path.join(homedir(), "Downloads");
-    const targetPath = path.join(downloadsPath, filename);
+    // Get save directory from preferences (with fallback to ~/Downloads)
+    const allPreferences = getPreferenceValues<Preferences & { saveDirectory?: string }>();
+    const saveDirectory = expandTildePath(allPreferences.saveDirectory || "~/Downloads");
 
-    // Copy file from temp to Downloads
+    // Ensure the save directory exists
+    await fs.promises.mkdir(saveDirectory, { recursive: true });
+
+    const targetPath = path.join(saveDirectory, filename);
+
+    // Copy file from temp to save directory
     await fs.promises.copyFile(tempFile, targetPath);
 
+    const directoryName = path.basename(saveDirectory);
     await showToast({
       title: "Image Saved!",
-      message: `Saved to Downloads folder as ${filename}`,
+      message: `Saved to ${directoryName} folder as ${filename}`,
       style: Toast.Style.Success,
     });
 

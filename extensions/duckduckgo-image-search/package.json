@@ -42,6 +42,15 @@
       "default": "en-us",
       "placeholder": "en-us",
       "required": false
+    },
+    {
+      "title": "Save Directory",
+      "name": "saveDirectory",
+      "description": "Directory where images will be saved (default: ~/Downloads)",
+      "type": "directory",
+      "default": "~/Downloads",
+      "placeholder": "~/Downloads",
+      "required": false
     }
   ],
   "commands": [
