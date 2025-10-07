@@ -75,6 +75,7 @@ export default async ({ github, context }: API) => {
     const owners = codeowners[`/extensions/${extensionFolder}`];
 
     let aiFilesOrToolsExist = false;
+    let platforms: string[] = ["macOS"]; // Default to macOS
 
     if (!owners) {
       // it's a new extension
@@ -101,6 +102,12 @@ export default async ({ github, context }: API) => {
         });
       }
 
+      // Check platforms for new extensions from PR diff
+      platforms = await getPlatformsFromPullRequestDiff(extensionFolder, { github, context });
+
+      // Add platform labels
+      await addPlatformLabels(platforms, { github, context });
+
       // `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`
       await comment({
         github,
@@ -123,8 +130,21 @@ export default async ({ github, context }: API) => {
       const packageJsonObj = JSON.parse(packageJson);
 
       aiFilesOrToolsExist = !!packageJsonObj.tools;
+      
+      // Check platforms from existing package.json
+      if (packageJsonObj.platforms && Array.isArray(packageJsonObj.platforms)) {
+        platforms = packageJsonObj.platforms;
+      }
     } catch {
       console.log(`No package.json tools for ${extensionFolder}`);
+    }
+
+    // For existing extensions, also check if package.json was modified in PR
+    // This will override the existing platforms if they were changed
+    const platformsFromPR = await getPlatformsFromPullRequestDiff(extensionFolder, { github, context });
+    if (platformsFromPR.length > 0) {
+      platforms = platformsFromPR;
+      console.log(`Using platforms from PR diff: ${platforms.join(", ")}`);
     }
 
     // Only check AI files if no tools found in package.json
@@ -167,6 +187,9 @@ export default async ({ github, context }: API) => {
         labels: ["AI Extension"],
       });
     }
+
+    // Add platform labels for existing extensions
+    await addPlatformLabels(platforms, { github, context });
 
     if (!owners.length) {
       console.log("no maintainer for this extension");
@@ -307,6 +330,114 @@ async function checkForAiInPullRequestDiff(
   }
 
   return aiFilesOrToolsExist;
+}
+
+async function getPlatformsFromPullRequestDiff(
+  extensionFolder: string,
+  { github, context }: Pick<API, "github" | "context">
+): Promise<string[]> {
+  const { data: files } = await github.rest.pulls.listFiles({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: context.issue.number,
+  });
+
+  for (const file of files) {
+    const filePath = file.filename;
+
+    // we only care about files in the extension folder
+    if (!filePath.startsWith(`extensions/${extensionFolder}/`)) {
+      continue;
+    }
+
+    if (filePath === `extensions/${extensionFolder}/package.json`) {
+      try {
+        // Check if package.json is added or modified in the PR
+        if (file.status === "added" || file.status === "modified") {
+          const { data: content } = await github.rest.repos.getContent({
+            mediaType: {
+              format: "raw",
+            },
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            path: filePath,
+            ref: context.payload.pull_request.head.sha,
+          });
+
+          const packageJsonObj = JSON.parse(content as unknown as string);
+
+          if (packageJsonObj.platforms && Array.isArray(packageJsonObj.platforms)) {
+            return packageJsonObj.platforms;
+          }
+        }
+      } catch {
+        console.log(`Could not parse package.json for ${extensionFolder}`);
+      }
+    }
+  }
+
+  // Return empty array if no platforms found in PR diff
+  return [];
+}
+
+async function addPlatformLabels(
+  platforms: string[],
+  { github, context }: Pick<API, "github" | "context">
+) {
+  // First, get all current labels on the PR
+  const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    issue_number: context.issue.number,
+  });
+
+  // Find existing platform labels to remove
+  const existingPlatformLabels = currentLabels
+    .filter(label => label.name.startsWith('platform: '))
+    .map(label => label.name);
+
+  // Remove existing platform labels
+  if (existingPlatformLabels.length > 0) {
+    try {
+      await github.rest.issues.removeLabel({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: context.issue.number,
+        name: existingPlatformLabels[0], // GitHub API only allows removing one at a time
+      });
+      console.log(`Removed existing platform label: ${existingPlatformLabels[0]}`);
+      
+      // Remove additional platform labels if there are more
+      for (let i = 1; i < existingPlatformLabels.length; i++) {
+        await github.rest.issues.removeLabel({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: context.issue.number,
+          name: existingPlatformLabels[i],
+        });
+        console.log(`Removed existing platform label: ${existingPlatformLabels[i]}`);
+      }
+    } catch (error) {
+      console.error(`Failed to remove existing platform labels:`, error);
+    }
+  }
+
+  // Add new platform labels
+  const platformLabels = platforms.map(platform => `platform: ${platform}`);
+  
+  if (platformLabels.length > 0) {
+    try {
+      await github.rest.issues.addLabels({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: platformLabels,
+      });
+      console.log(`Added platform labels: ${platformLabels.join(", ")}`);
+    } catch (error) {
+      console.error(`Failed to add platform labels:`, error);
+    }
+  }
 }
 
 // Create a new comment or update the existing one
