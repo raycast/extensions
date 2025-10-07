@@ -16,7 +16,8 @@
     "samuel_ivarsson",
     "gaspihabif",
     "marinsokol",
-    "jose-elias-alvarez"
+    "jose-elias-alvarez",
+    "krambono"
   ],
   "pastContributors": [
     "pomdtr"
@@ -198,6 +199,14 @@
       "subtitle": "Bitwarden",
       "description": "Create a folder in the authenticated Bitwarden vault.",
       "icon": "create-folder.png",
+      "mode": "view"
+    },
+    {
+      "name": "create-login",
+      "title": "Create Login",
+      "subtitle": "Bitwarden",
+      "description": "Create a new login item in the authenticated Bitwarden vault.",
+      "icon": "create-login.png",
       "mode": "view"
     },
     {
@@ -441,5 +450,8 @@
     "lint": "ray lint",
     "test": "jest --verbose",
     "test:watch": "jest --watch"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
