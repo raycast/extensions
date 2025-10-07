@@ -49,8 +49,8 @@ npm run test
   - Increment PATCH version (e.g., 1.1.0 → 1.1.1) for bug fixes
   - Increment MINOR version (e.g., 1.1.0 → 1.2.0) for new features
   - Increment MAJOR version (e.g., 1.1.0 → 2.0.0) for breaking changes
-  - Add date in YYYY-MM-DD format (e.g., `## [1.1.1] - 2025-01-07`)
-  - Do not use `[Unreleased]` - always specify a version number and date
+  - Add entries with format `## [XX] - {PR_MERGE_DATE}` (do not replace {PR_MERGE_DATE} with actual dates)
+  - Do not use `[Unreleased]` - always specify a version number
 - Always push your branch immediately after each commit to keep remote history in sync.
 
 ## Raycast-Specific Tips
