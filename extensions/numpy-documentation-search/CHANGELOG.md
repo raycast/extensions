@@ -22,7 +22,7 @@
   - Can be toggled in Raycast extension preferences: "Use Short Prefix" checkbox
   - Affects display only - does not change underlying functionality or URLs
 
-## [1.1.1] - 2025-10-26
+## [1.1.1] - {PR_MERGE_DATE}
 
 ### Fixed
 - Remove hash fragments from documentation URLs - URLs now open to the clean page URL (e.g., `https://numpy.org/doc/stable/reference/generated/numpy.absolute.html`) instead of including the anchor fragment (e.g., `https://numpy.org/doc/stable/reference/generated/numpy.absolute.html#numpy.absolute`)
