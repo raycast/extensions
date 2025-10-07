@@ -27,7 +27,7 @@
 ### Fixed
 - Remove hash fragments from documentation URLs - URLs now open to the clean page URL (e.g., `https://numpy.org/doc/stable/reference/generated/numpy.absolute.html`) instead of including the anchor fragment (e.g., `https://numpy.org/doc/stable/reference/generated/numpy.absolute.html#numpy.absolute`)
 
-## [1.1.0] - 2025-10-06
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Fixed
 - Preserve inline code blocks in parameter descriptions - code references like `endpoint`, `False`, and `num + 1` now appear with proper backtick formatting instead of plain text
