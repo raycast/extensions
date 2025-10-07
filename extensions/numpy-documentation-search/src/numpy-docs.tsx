@@ -55,7 +55,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle
       selectedItemId={selectedId}
-      onSelectionChange={setSelectedId}
+      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
     >
       {inventoryError ? (
         <List.EmptyView

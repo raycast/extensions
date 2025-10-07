@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import type { AnyNode, Element } from "domhandler";
 import type { InventoryItem } from "./inventory";
 import { applyPrefixPreference } from "./prefix";
 
@@ -106,7 +107,7 @@ function extractAnchor(url: string): string | undefined {
   return url.slice(hashIndex + 1);
 }
 
-function extractDescription($: cheerio.CheerioAPI, detailNode: cheerio.Cheerio): string[] {
+function extractDescription($: cheerio.CheerioAPI, detailNode: cheerio.Cheerio<AnyNode>): string[] {
   const description: string[] = [];
 
   if (!detailNode || detailNode.length === 0) {
@@ -138,7 +139,7 @@ function extractDescription($: cheerio.CheerioAPI, detailNode: cheerio.Cheerio):
 
 function extractFieldLists(
   $: cheerio.CheerioAPI,
-  detailNode: cheerio.Cheerio,
+  detailNode: cheerio.Cheerio<AnyNode>,
 ): { parameters: DocFieldItem[]; returns: DocFieldItem[] } {
   const parameters: DocFieldItem[] = [];
   const returns: DocFieldItem[] = [];
@@ -147,7 +148,7 @@ function extractFieldLists(
     return { parameters, returns };
   }
 
-  detailNode.find("dl.field-list").each((_, fieldList) => {
+  detailNode.find("dl.field-list").each((_: number, fieldList: Element) => {
     const $fieldList = $(fieldList);
     const definitionTerms = $fieldList.children("dt");
 
@@ -168,7 +169,7 @@ function extractFieldLists(
   return { parameters, returns };
 }
 
-function parseFieldDefinition($: cheerio.CheerioAPI, container: cheerio.Cheerio): DocFieldItem[] {
+function parseFieldDefinition($: cheerio.CheerioAPI, container: cheerio.Cheerio<AnyNode>): DocFieldItem[] {
   const items: DocFieldItem[] = [];
 
   if (!container || container.length === 0) {
@@ -177,7 +178,7 @@ function parseFieldDefinition($: cheerio.CheerioAPI, container: cheerio.Cheerio)
 
   const innerList = container.find("dl").first();
 
-  innerList.children("dt").each((_, definitionTerm) => {
+  innerList.children("dt").each((_: number, definitionTerm: Element) => {
     const term = $(definitionTerm);
     const classifier = term
       .find("span.classifier")
@@ -231,12 +232,12 @@ function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
-function convertHtmlToMarkdown(element: cheerio.Cheerio): string {
+function convertHtmlToMarkdown(element: cheerio.Cheerio<AnyNode>): string {
   // Clone the element to avoid modifying the original
   const clone = element.clone();
 
   // Convert <code> tags to markdown backticks
-  clone.find("code").each((_, codeElement) => {
+  clone.find("code").each((_: number, codeElement: Element) => {
     const codeText = clone.find(codeElement).text();
     clone.find(codeElement).replaceWith(`\`${codeText}\``);
   });

@@ -1,5 +1,13 @@
 # NumPy Documentation Search Changelog
 
+## [1.2.2] - 2025-01-07
+
+### Fixed
+- Fix TypeScript compilation errors in strict mode
+  - Updated Cheerio type annotations to use `Cheerio<AnyNode>` with proper imports from domhandler
+  - Added explicit type annotations for `.each()` callback parameters to resolve implicit any errors
+  - Fixed `onSelectionChange` handler type mismatch by properly converting null to undefined
+
 ## [1.2.1] - 2025-10-26
 
 ### Fixed
