@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Action, Icon, confirmAlert, useNavigation } from "@raycast/api";
+import { Action, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import Diagnostics from "./diagnostics.js";
 import { catchError } from "../errors.js";
@@ -46,13 +46,25 @@ export default function SyncFork({
   const diffMessageOptions = { prependSpace: true, includeAhead: true, includeParentheses: true };
   const remoteDiff = getCommitDiffMessage(commitDiff?.github, diffMessageOptions);
   const localDiff = getCommitDiffMessage(commitDiff?.local, diffMessageOptions);
+  const hasRemoteDiffAhead = commitDiff?.github.ahead && commitDiff.github.ahead > 0;
+  const hasLocalDiffAhead = commitDiff?.local.ahead && commitDiff.local.ahead > 0;
 
   return (
     <>
       <Action
         icon={Icon.Repeat}
         title={`Sync Remote${remoteDiff}`}
-        onAction={async () =>
+        onAction={async () => {
+          if (hasRemoteDiffAhead) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Cannot Sync Remote",
+              message: "You have commits ahead of remote on GitHub, please reset them if necessary.",
+              ...diagnosticsAction,
+            });
+            return;
+          }
+
           await confirmAlert({
             title: "Sync Remote",
             message:
@@ -65,14 +77,24 @@ export default function SyncFork({
                 onSyncFinished();
               }, diagnosticsAction),
             },
-          })
-        }
+          });
+        }}
       />
       <Action
         icon={Icon.ArrowDown}
         title={`Pull Changes${localDiff}`}
-        onAction={() => {
-          confirmAlert({
+        onAction={async () => {
+          if (hasLocalDiffAhead) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Cannot Pull Changes",
+              message: "You have commits ahead of remote on GitHub, please reset them if necessary.",
+              ...diagnosticsAction,
+            });
+            return;
+          }
+
+          await confirmAlert({
             title: "Pull Changes",
             message:
               "This will pull the latest changes from the remote forked repository to your local machine. Do you want to continue?",

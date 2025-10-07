@@ -1,5 +1,15 @@
 # Video Downloader Changelog
 
+## [Fix: Instagram Same Title Issue] - 2025-10-03
+
+- Resolved a bug where videos from the same Instagram user overwrote each other due to identical filenames. Filenames now include both username and video ID for uniqueness.
+- Updated dependencies.
+
+## [Fix: Long Video Name Compatibility] - 2025-09-29
+
+- Resolved issues with long video names on Windows and macOS.
+- Automatically removes invalid characters from video file names to ensure compatibility.
+
 ## [Fix: Add install flags] - 2025-09-15
 
 - Added acceptance flags when installing packages with winget.

@@ -26,7 +26,7 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
     </a>
     <img
       src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
-      alt="PRs welcome!"  
+      alt="PRs welcome!"
     />
     <a href="https://open.vscode.dev/organization/repository">
       <img
@@ -47,14 +47,15 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
 
 ## Getting started
 
-- Go to to your Bitbucket Cloud profile, [under App Passwords](https://bitbucket.org/account/settings/app-passwords/)
-- Click on `Create App Password`
-- Give your App password a name e.g. `Raycast`, and select all the read options you need (Account, projects, repositories, Pull Requests, Pipelines)
-- Store in a secure location the given App Password
+- [Generate a Bitbucket API token](https://id.atlassian.com/manage-profile/security/api-tokens) with `read:*` scopes, or narrow to:
+  - read:workspace:bitbucket
+  - read:user:bitbucket
+  - read:repository:bitbucket
+  - read:pullrequest:bitbucket
 - Start a bitbucket command and fill the required fields:
   - Workspace: You can see your workspaces [here](https://bitbucket.org/account/workspaces/), and use the slug. You can find it in the URL of your workspace: `https://bitbucket.org/{organization}/`
-  - Account Name: You can find it [here](https://bitbucket.org/account/settings/) under `Bitbucket profile settings > Username`
-  - App Password
+  - Account email
+  - API token
 
 Now you should be able to run Bitbucket commands with Raycast 🚀.
 

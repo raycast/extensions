@@ -3,12 +3,13 @@ import { List } from "@raycast/api";
 import { useListContext } from "@/context/ListContext";
 
 const DataSetSelector = () => {
-  const { availableSets, setDatasetFilterAnd } = useListContext();
+  const { availableSets, setDatasetFilterAnd, filter } = useListContext();
 
   return (
     <List.Dropdown
       tooltip="Select a character set"
       onChange={(val) => setDatasetFilterAnd(val === "null" ? null : val)}
+      value={filter === null ? "null" : filter}
     >
       <List.Dropdown.Item key="all" title="<All Characters>" value={"null"} />
       {availableSets.map((set) => (

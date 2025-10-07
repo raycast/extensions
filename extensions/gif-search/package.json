@@ -104,6 +104,10 @@
           "value": "copyFile"
         },
         {
+          "title": "Paste GIF",
+          "value": "pasteFile"
+        },
+        {
           "title": "Copy GIF Link",
           "value": "copyGifUrl"
         },

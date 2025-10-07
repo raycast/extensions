@@ -1,5 +1,12 @@
 # Unicode Symbols
 
+## [Improvements] - 2025-09-24
+
+- Update to `unidata16` to version `1.1.0`, which contains a bit more info
+- Improve generate script to add back Tab and add mirror and age code
+- Update Grid/List item actions to reset filters on the top
+- Search for number in the `1/2` format as well
+
 ## [Improvements] - 2025-09-17
 
 - Update to `unidata16` to version `1.0.0`, which contains the latest Unicode data set (version 17.0.0)

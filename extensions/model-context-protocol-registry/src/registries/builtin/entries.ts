@@ -536,10 +536,10 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Access Nuxt UI documentation, components, and configuration with the official Nuxt UI Model Context Protocol (MCP) server.",
     icon: "nuxt.svg",
-    homepage: "https://ui4.nuxt.com/docs/getting-started/ai/mcp",
+    homepage: "https://ui.nuxt.com/docs/getting-started/ai/mcp",
     configuration: {
       command: "npx",
-      args: ["mcp-remote", "https://ui4.nuxt.com/mcp"],
+      args: ["mcp-remote", "https://ui.nuxt.com/mcp"],
     },
   },
   {

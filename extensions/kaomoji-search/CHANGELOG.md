@@ -1,9 +1,11 @@
 # Kaomoji Search Changelog
 
-## [Windows Support] - 2025-09-28
+## [Windows Support + Modernize] - 2025-10-06
 
-- Updated refences to support Windows
-- Added know contributors
+- Add Windows Support
+- Add `metadata` images
+- Modernize: remove `Preferences` type + update deps
+- `usePromise` to reduce complexity of useSearch hook
 
 ## [Grid layout] - 2023-02-07
 

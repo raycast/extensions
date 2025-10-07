@@ -21,10 +21,16 @@ export type Character = {
   v: string;
   /** Name */
   n: string;
+  /** Unicode Version */
+  u: string;
+  /** Mirror Code */
+  m?: number;
   /** Aliases */
   a: string[];
   /** Old name */
   o: string;
+  /** Number */
+  nn?: string;
   recentlyUsed?: boolean;
   isExtra?: boolean;
   score?: number;

@@ -84,3 +84,14 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
   const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
   return extractBookmarks(JSON.parse(fileBuffer));
 };
+
+export const getDefaultProfileID = () => {
+  try {
+    const path = getLocalStatePath();
+    const chromeState = fs.readFileSync(path, "utf-8");
+    const profiles = JSON.parse(chromeState).profile.info_cache;
+    return Object.keys(profiles)[0];
+  } catch {
+    return "Default";
+  }
+};
