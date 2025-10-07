@@ -32,7 +32,7 @@
 ### Fixed
 - Preserve inline code blocks in parameter descriptions - code references like `endpoint`, `False`, and `num + 1` now appear with proper backtick formatting instead of plain text
 
-## [1.0.0] - 2025-10-06
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
