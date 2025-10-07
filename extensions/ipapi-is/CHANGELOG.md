@@ -1,6 +1,6 @@
 # ipapi.is Changelog
 
-## [Enhancements + Windows Support] - {PR_MERGE_DATE}
+## [Enhancements + Windows Support] - 2025-10-07
 
 - Add Windows Support
 - Add "Abuse object"
