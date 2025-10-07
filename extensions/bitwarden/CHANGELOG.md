@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2025-10-07
 
 - Add Create Login command to create new login items
 

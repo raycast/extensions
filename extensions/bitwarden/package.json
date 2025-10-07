@@ -450,5 +450,8 @@
     "lint": "ray lint",
     "test": "jest --verbose",
     "test:watch": "jest --watch"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
