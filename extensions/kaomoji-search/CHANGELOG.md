@@ -1,5 +1,7 @@
 # Kaomoji Search Changelog
 
+## [Merge for PR] - 2025-10-07
+
 ## [Windows Support + Modernize] - 2025-10-06
 
 - Add Windows Support
