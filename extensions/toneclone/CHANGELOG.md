@@ -1,6 +1,6 @@
 # ToneClone Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-10-07
 
 ### Added
 - **Write with ToneClone** - Write with AI using your trained personas for your custom voice/style
