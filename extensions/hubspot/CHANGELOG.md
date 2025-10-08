@@ -1,6 +1,6 @@
 # HubSpot Changelog
 
-## [Tasks Management] - 2025-10-08
+## [Tasks Management] - {PR_MERGE_DATE}
 
 - Added "Search Tasks" command to search and list HubSpot tasks
   - Filter to show only incomplete tasks, sorted by due date (earliest first)
