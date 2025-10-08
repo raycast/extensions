@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [1.6.1] - {PR_MERGE_DATE}
+## [1.6.1] - 2025-10-08
 
 ### ✨ Enhancements
 - Added folder-aware filtering to the **Export Transcripts** and **Export Notes** commands, including note counts, folder icons, and a dedicated "Notes Not in Folders" view.
