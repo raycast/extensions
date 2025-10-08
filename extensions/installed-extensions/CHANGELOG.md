@@ -1,6 +1,6 @@
 # Installed Extensions Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-10-08
 
 - Add support for Windows
 - Bump all dependencies to the latest
