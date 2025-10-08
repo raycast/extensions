@@ -1,0 +1,83 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "haystack",
+	"title": "Haystack",
+	"description": "Organize anything by capturing screenshots",
+	"icon": "hs-icon.png",
+	"author": "dimuuu",
+	"categories": [
+		"Productivity"
+	],
+	"platforms": [
+		"macOS"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "create-new-stack",
+			"title": "Create New Stack",
+			"description": "Use to create a new stack for collecting captures.",
+			"mode": "view"
+		},
+		{
+			"name": "list-all-stacks",
+			"title": "List All Stacks",
+			"description": "Use to list all created stacks.",
+			"mode": "view"
+		},
+		{
+			"name": "list-all-captures",
+			"title": "List All Captures",
+			"description": "Use to list all captures.",
+			"mode": "view"
+		},
+		{
+			"name": "create-new-capture",
+			"title": "Create New Capture",
+			"description": "Use to create a new capture.",
+			"mode": "no-view"
+		}
+	],
+	"tools": [
+		{
+			"name": "chat-with-captures",
+			"title": "Chat with Captures",
+			"description": "Use to chat with captures."
+		}
+	],
+	"preferences": [
+		{
+			"name": "apiKey",
+			"title": "API Key",
+			"description": "An OpenAI API key.",
+			"type": "password",
+			"required": true
+		}
+	],
+	"dependencies": {
+		"@ai-sdk/openai": "^2.0.15",
+		"@raycast/api": "^1.102.4",
+		"@raycast/utils": "^1.17.0",
+		"ai": "^5.0.15",
+		"jimp": "^1.6.0",
+		"nanoid": "^5.1.5",
+		"zod": "^3.25.76"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.0.4",
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.10",
+		"eslint": "^9.22.0",
+		"prettier": "^3.5.3",
+		"typescript": "^5.8.2"
+	},
+	"scripts": {
+		"build": "ray build",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+		"publish": "npx @raycast/api@latest publish"
+	},
+	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

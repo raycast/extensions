@@ -1,0 +1,99 @@
+import { Action, ActionPanel, captureException, Icon, List, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import type { StackField, StackFieldType } from "../types";
+import { deleteFieldFromStack, getStackFields } from "../utils/stacks";
+import { EditStackFieldForm } from "./edit-stack-field-form";
+
+const getStackFieldIcon = ({ type }: { type: StackFieldType }) => {
+  switch (type) {
+    case "text":
+      return Icon.Text;
+    case "number":
+      return Icon.PlusMinusDivideMultiply;
+    case "date":
+      return Icon.Calendar;
+    case "time":
+      return Icon.Clock;
+    case "currency":
+      return Icon.Coins;
+    case "boolean":
+      return Icon.CheckCircle;
+    default:
+      return Icon.Text;
+  }
+};
+
+export const StackFieldsList = ({ stackId }: { stackId: string }) => {
+  const { isLoading, data, revalidate } = usePromise(async () => {
+    let data: StackField[] = [];
+
+    try {
+      data = await getStackFields(stackId);
+    } catch (error) {
+      captureException(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not load stack fields",
+      });
+    }
+
+    return data.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  }, []);
+
+  const handleDelete = async (stackId: string, labelKey: string) => {
+    try {
+      await deleteFieldFromStack(stackId, labelKey);
+      revalidate();
+    } catch (error) {
+      captureException(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not delete field",
+      });
+    }
+  };
+
+  return (
+    <List isLoading={isLoading}>
+      {data?.map(({ id, label, description, type, isTitleField }) => (
+        <List.Item
+          key={id}
+          title={label.value}
+          subtitle={description}
+          accessories={[
+            {
+              tag: isTitleField ? "Title Field" : undefined,
+            },
+          ]}
+          icon={getStackFieldIcon({ type })}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Edit Field"
+                icon={Icon.Pencil}
+                target={
+                  <EditStackFieldForm
+                    stackId={stackId}
+                    id={id}
+                    onUpdate={revalidate}
+                    label={label.value}
+                    description={description}
+                    type={type}
+                    isTitleField={isTitleField}
+                  />
+                }
+              />
+              <Action
+                title="Remove Field"
+                style={Action.Style.Destructive}
+                icon={Icon.Trash}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={() => handleDelete(stackId, label.key)}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+};
