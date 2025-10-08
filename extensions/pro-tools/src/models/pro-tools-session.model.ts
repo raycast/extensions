@@ -1,4 +1,4 @@
-export interface ProToolsSession {
+export type ProToolsSession = {
   name: string;
   directoryPath: string;
   modifiedDate: Date;
