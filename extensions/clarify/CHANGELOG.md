@@ -1,6 +1,6 @@
 # Clarify Changelog
 
-## [Deprecated extension] - {PR_MERGE_DATE}
+## [Deprecated extension] - 2025-10-08
 
 - This extension has been deprecated due to compatibility issues with Clarify's new authentication system.
 - Users are advised to uninstall this extension in Preferences.
