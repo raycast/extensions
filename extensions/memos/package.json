@@ -67,7 +67,6 @@
     "@types/url-parse": "^1.4.8",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^4.24.6",
     "typescript": "^5.2.2"
   },
   "scripts": {

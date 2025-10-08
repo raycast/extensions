@@ -71,8 +71,7 @@
     "@types/react": "^18.2.52",
     "@raycast/eslint-config": "^1.0.8",
     "eslint": "^8.56.0",
-    "react-devtools": "^4.28.4",
-    "prettier": "^3.2.5",
+        "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
   "scripts": {

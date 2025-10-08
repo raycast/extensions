@@ -8,7 +8,7 @@ export default function useSearch(
   token: string | undefined,
   selectedWorkspace: SelectedWorkspace | undefined,
   query: string | undefined,
-  shortId?: string
+  shortId?: string,
 ): {
   data: Record<"shares", Share[] | EntriesEntity[]> | undefined;
   error?: string;

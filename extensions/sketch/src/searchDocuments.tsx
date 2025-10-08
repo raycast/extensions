@@ -99,7 +99,7 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
       console.log("caching...");
       await setLocalStorageItem(
         "cachedData",
-        JSON.stringify({ identifier: selectedWorkspace?.identifier, shares: data?.shares })
+        JSON.stringify({ identifier: selectedWorkspace?.identifier, shares: data?.shares }),
       );
       console.log("caching done");
     }

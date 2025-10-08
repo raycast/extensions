@@ -101,7 +101,7 @@ export default function ProjectsList() {
       console.log("caching...");
       await setLocalStorageItem(
         "cachedProjects",
-        JSON.stringify({ identifier: selectedWorkspace?.identifier, projects: projects })
+        JSON.stringify({ identifier: selectedWorkspace?.identifier, projects: projects }),
       );
       console.log("caching done");
     }
