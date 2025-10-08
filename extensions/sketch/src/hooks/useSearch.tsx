@@ -47,7 +47,7 @@ export default function useSearch(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error) {
         if (!cancel) {
-          setError((error as ErrorEvent).message);
+          setError((error as Error).message);
         }
       } finally {
         if (!cancel) {

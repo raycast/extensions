@@ -1,6 +1,6 @@
 import { ReadmeDetail } from "@components";
 
-import { IconConstants, ShortcutConstants } from "@constants";
+import { IconConstants, ShortcutConstants } from "Const";
 
 import { CompactGroup } from "@models";
 

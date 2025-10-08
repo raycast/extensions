@@ -250,7 +250,7 @@
     "numeral": "^2.0.6"
   },
   "devDependencies": {
-    "@types/node": "^17.0.40",
+    "@types/node": "22.13.10",
     "@types/numeral": "^2.0.2",
     "@types/react": "^18.0.15",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
