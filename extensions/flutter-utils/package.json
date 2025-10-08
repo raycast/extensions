@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flutter-utils",
-  "version": "0.5.2",
+  "version": "0.5.4",
   "title": "Flutter Utils",
   "description": "Quick commands for Flutter: run, pub get, clean, analyze, test, build, doctor",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "ymunsch8",
   "platforms": [
     "macOS"

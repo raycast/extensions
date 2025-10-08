@@ -261,7 +261,7 @@ type ProgressViewProps = {
  * Execution statuses of an external process.
  */
 enum ExecutionStatus {
-  pending = "pending",
+  Pending = "pending",
   Running = "running",
   Success = "success",
   Error = "error",
@@ -272,7 +272,7 @@ enum ExecutionStatus {
  */
 function ProgressView({ title, command, cwd }: ProgressViewProps) {
   const [lines, setLines] = useState<string[]>([]);
-  const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.pending);
+  const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.Pending);
   const childRef = useRef<ReturnType<typeof spawn> | null>(null);
   const spawnErrorRef = useRef<string | null>(null);
 
@@ -303,10 +303,9 @@ function ProgressView({ title, command, cwd }: ProgressViewProps) {
     childRef.current = child;
 
     const handleData = (data: Buffer) => {
-      setStatus(ExecutionStatus.pending);
       const text = data.toString();
-      if (text.trim().length > 0 && status === ExecutionStatus.pending) {
-        setStatus(ExecutionStatus.Running);
+      if (text.trim().length > 0) {
+        setStatus((prev) => (prev === ExecutionStatus.Pending ? ExecutionStatus.Running : prev));
       }
       const incomingLines = text.split("\n");
       const visibleLines = incomingLines.filter((l) => !isFlutterRunInteractiveHelpLine(l));
@@ -401,7 +400,7 @@ function ProgressView({ title, command, cwd }: ProgressViewProps) {
 
   const markdown = useMemo(() => {
     const headerText =
-      status === ExecutionStatus.pending
+      status === ExecutionStatus.Pending
         ? "Preparing…"
         : status === ExecutionStatus.Running
           ? "Running…"
@@ -411,7 +410,7 @@ function ProgressView({ title, command, cwd }: ProgressViewProps) {
               ? "Error ❌"
               : "";
     const headerIcon =
-      status === ExecutionStatus.pending
+      status === ExecutionStatus.Pending
         ? "⏳"
         : status === ExecutionStatus.Running
           ? "🏃"
@@ -427,7 +426,7 @@ function ProgressView({ title, command, cwd }: ProgressViewProps) {
   }, [title, status, lines]);
 
   return (
-    <Detail isLoading={status === ExecutionStatus.pending || status === ExecutionStatus.Running} markdown={markdown} />
+    <Detail isLoading={status === ExecutionStatus.Pending || status === ExecutionStatus.Running} markdown={markdown} />
   );
 }
 
