@@ -23,6 +23,6 @@ export class ProToolsService {
         // the process is truly running
         "sleep 2",
       ].join(" && ")
-    ).then();
+    );
   }
 }
