@@ -5,6 +5,55 @@ import type { InventoryItem } from "./inventory";
 
 export interface DocDetail {
   markdown: string;
+  signature?: string;
+}
+
+/**
+ * Extract signature without type annotations from markdown.
+ * Parses the fortran code block and extracts just the routine name and parameters.
+ *
+ * @param markdown The markdown content
+ * @returns The signature without types, or undefined if not found
+ */
+function extractSignature(markdown: string): string | undefined {
+  // Match the fortran code block with the signature
+  // This handles both:
+  // - subroutine name (params)
+  // - function name (params) OR type function name (params)
+  const signatureMatch = markdown.match(
+    /```fortran\n(?:(?:\w+\s+)+)?(subroutine|function)\s+(\w+)\s*\(\s*([\s\S]*?)\s*\)\s*\n```/i,
+  );
+
+  if (!signatureMatch) {
+    return undefined;
+  }
+
+  const routineName = signatureMatch[2].toLowerCase();
+  const paramsBlock = signatureMatch[3];
+
+  // Extract parameter names (without types)
+  // Each parameter is on its own line with format: "type name," or just "name,"
+  const paramNames: string[] = [];
+  const lines = paramsBlock.split("\n");
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // Remove trailing comma
+    const withoutComma = trimmed.replace(/,$/, "");
+
+    // Split by spaces and take the last part (the parameter name)
+    const parts = withoutComma.split(/\s+/);
+    const paramName = parts[parts.length - 1];
+
+    if (paramName) {
+      paramNames.push(paramName);
+    }
+  }
+
+  // Build signature: routineName(param1, param2, ...)
+  return `${routineName}(${paramNames.join(", ")})`;
 }
 
 /**
@@ -23,7 +72,10 @@ export async function loadDocDetail(item: InventoryItem): Promise<DocDetail> {
     // Read the markdown file synchronously
     const markdown = readFileSync(docsPath, "utf-8");
 
-    return { markdown };
+    // Extract signature without types
+    const signature = extractSignature(markdown);
+
+    return { markdown, signature };
   } catch (error) {
     console.error(`Failed to load documentation for ${item.name}:`, error);
 

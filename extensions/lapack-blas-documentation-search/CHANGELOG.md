@@ -1,5 +1,12 @@
 # LAPACK/BLAS Documentation Search Changelog
 
+## [1.2.0] - {PR_MERGE_DATE}
+
+### Added
+- Added "Copy Function Signature" action to copy function signatures without type annotations
+- Function signatures are now extracted from documentation and available for quick copying
+- Signature format: `routineName(param1, param2, ...)` (e.g., `dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)`)
+
 ## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
