@@ -13,7 +13,7 @@
   ],
   "commands": [
     {
-      "name": "search-pro-tools-sessions.command",
+      "name": "search-pro-tools-sessions",
       "title": "Search Recent Sessions",
       "subtitle": "Pro Tools",
       "description": "Search for recent Pro Tools Sessions.",
