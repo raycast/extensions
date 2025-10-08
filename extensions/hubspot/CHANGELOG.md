@@ -1,5 +1,21 @@
 # HubSpot Changelog
 
+## [Tasks Management] - 2025-10-08
+
+- Added "Search Tasks" command to search and list HubSpot tasks
+  - Filter to show only incomplete tasks, sorted by due date (earliest first)
+  - Owner dropdown filter to view tasks by assigned user
+  - Color-coded priority tags (high=red, medium=orange, low=blue) and status tags (completed=green, incomplete=red)
+  - Toggle between compact list view and detailed view
+  - Display task associations (contacts, companies, deals) with clickable links to HubSpot
+  - Actions to mark tasks as complete/incomplete
+  - Copy task ID to clipboard
+  - Keyboard shortcuts: Enter=toggle details, Cmd+O=open in HubSpot, Cmd+Shift+E=mark complete, Cmd+Shift+C=copy ID
+- Added "Create Task" command to create new HubSpot tasks
+  - Set title, notes, due date (defaults to 2 days from now), owner, priority, and type
+  - Searchable dropdowns to associate tasks with contacts, companies, and deals
+  - Form-based interface for easy task creation
+
 ## [Copy Contact Properties] - 2025-06-10
 
 - You can now `copy` some properties of a Contact through new "Copy to Clipboard..." submenu (ref: [Issue #19583](https://github.com/raycast/extensions/issues/19583))

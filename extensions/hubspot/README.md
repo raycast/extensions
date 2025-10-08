@@ -16,11 +16,15 @@
   - `e-commerce`
   - `crm.lists.read`
   - `crm.objects.contacts.read`
+  - `crm.objects.contacts.write`
   - `crm.objects.companies.read`
   - `crm.objects.deals.read`
   - `crm.objects.custom.read`
   - `crm.objects.custom.write`
   - `media_bridge.read`
+  - `crm.schemas.contacts.read`
+  - `crm.schemas.companies.read`
+  - `crm.schemas.deals.read`
 
 Copy the AccessToken that is generated. This is your HubSpot accessToken.
 
