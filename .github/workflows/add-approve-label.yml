@@ -19,74 +19,57 @@ jobs:
     steps:
     - name: Check reviewer permissions
       id: check_permissions
-      run: |
-        reviewer_login="${{ github.event.review.user.login }}"
-        reviewer_type="${{ github.event.review.user.type }}"
-        repo_owner="${{ github.repository_owner }}"
-        repo_name="${{ github.event.repository.name }}"
-        pr_number="${{ github.event.pull_request.number }}"
-
-        echo "::notice::Reviewer: $reviewer_login, Type: $reviewer_type, PR: #$pr_number"
-
-        # If not a human user (e.g., bot), always label
-        if [[ "$reviewer_type" != "User" ]]; then
-          echo "should_label=true" >> $GITHUB_OUTPUT
-          echo "::notice::Non-human reviewer: Allowing label"
-          exit 0
-        fi
-
-        # For human users, fetch permission via GitHub API with error handling
-        http_code=$(curl -s -w "%{http_code}" -o /tmp/response.json \
-          -H "Authorization: token ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/${repo_owner}/${repo_name}/collaborators/${reviewer_login}/permission")
-
-        # Check curl exit code
-        if [[ $? -ne 0 ]]; then
-          echo "::error::API request failed (curl error): Skipping label"
-          echo "should_label=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        response_body=$(cat /tmp/response.json)
-        echo "::debug::Perms API HTTP Code: $http_code"
-
-        # Handle HTTP codes
-        if [[ "$http_code" == "404" ]]; then
-          echo "::notice::User is not a collaborator (404): Allowing label"
-          echo "should_label=true" >> $GITHUB_OUTPUT
-          exit 0
-        elif [[ "$http_code" != "200" ]]; then
-          echo "::warning::Unexpected API response (code: $http_code): Skipping label"
-          echo "should_label=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        # For 200, validate JSON and parse permission
-        if ! echo "$response_body" | jq . >/dev/null 2>&1; then
-          echo "::error::Invalid JSON response: Skipping label"
-          echo "should_label=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-
-        permission=$(echo "$response_body" | jq -r '.permission // empty')
-        echo "::notice::Permission: $permission"
-
-        # Allow if read/triage/none/empty; skip if write/maintain/admin
-        if [[ "$permission" == "read" || "$permission" == "triage" || "$permission" == "none" || -z "$permission" ]]; then
-          echo "should_label=true" >> $GITHUB_OUTPUT
-          echo "::notice::Allowing label for non-write+ user (permission: $permission)"
-        else
-          echo "should_label=false" >> $GITHUB_OUTPUT
-          echo "::notice::Skipping label for write+ user (permission: $permission)"
-        fi
-      env:
-        RAYCAST_BOT_API_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const reviewer = context.payload.review.user;
+          const pr = context.payload.pull_request;
+          
+          console.log(`Reviewer: ${reviewer.login}, Type: ${reviewer.type}`);
+          
+          // If not a human user (e.g., bot), always label
+          if (reviewer.type !== 'User') {
+            console.log('Non-human reviewer: Will add label');
+            return 'label';
+          }
+          
+          // For human users, check if they're a collaborator using GITHUB_TOKEN
+          try {
+            const { data: collaborator } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: reviewer.login
+            });
+            
+            const permission = collaborator.permission;
+            console.log(`User permission: ${permission}`);
+            
+            // Only label if they have read/triage/none permissions
+            if (['read', 'triage', 'none'].includes(permission)) {
+              console.log(`Will add label for ${permission} user`);
+              return 'label';
+            } else {
+              console.log(`Will skip label for ${permission} user`);
+              return 'skip';
+            }
+          } catch (error) {
+            if (error.status === 404) {
+              // User is not a collaborator, allow labeling
+              console.log('User is not a collaborator: Will add label');
+              return 'label';
+            } else {
+              console.log(`Permission check error: ${error.message}`);
+              return 'skip';
+            }
+          }
+        result-encoding: string
 
     - name: Add Approved label
-      if: steps.check_permissions.outputs.should_label == 'true'
+      if: steps.check_permissions.outputs.result == 'label'
       run: |
         pr_number="${{ github.event.pull_request.number }}"
+        
+        echo "Adding 'Approved' label using RAYCAST_BOT_API_ACCESS_TOKEN..."
         
         response=$(curl -s -w "\n%{http_code}" \
           -X POST \
@@ -98,13 +81,13 @@ jobs:
         http_code=$(echo "$response" | tail -n1)
         response_body=$(echo "$response" | sed '$d')
         
-        echo "::debug::Label API HTTP Code: $http_code"
+        echo "Label API HTTP Code: $http_code"
         
         # 200 = success, 422 = label already exists (also success for our purposes)
         if [[ "$http_code" == "200" || "$http_code" == "422" ]]; then
-          echo "::notice::Successfully added 'Approved' label to PR #$pr_number"
+          echo "Successfully added 'Approved' label to PR #$pr_number"
         else
-          echo "::error::Failed to add label (HTTP $http_code): $response_body"
+          echo "Failed to add label (HTTP $http_code): $response_body"
           exit 1
         fi
       env:
