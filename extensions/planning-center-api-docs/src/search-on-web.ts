@@ -1,8 +1,8 @@
 import { LaunchProps, showToast, Toast, open } from "@raycast/api";
 
-interface SearchArguments {
+type SearchArguments = {
   query?: string;
-}
+};
 
 export default async function Command(props: LaunchProps<{ arguments: SearchArguments }>) {
   const { query } = props.arguments;
