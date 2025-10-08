@@ -445,6 +445,35 @@ async function addPlatformLabels(
   }
 }
 
+// Create a new comment or update the existing one
+async function comment({ github, context, comment }: Pick<API, "github" | "context"> & { comment: string }) {
+  // Get the existing comments on the PR
+  const { data: comments } = await github.rest.issues.listComments({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    issue_number: context.issue.number,
+  });
+
+  // Find any comment already made by the bot
+  const botComment = comments.find((comment) => comment.user?.login === "raycastbot");
+
+  if (botComment) {
+    await github.rest.issues.updateComment({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      comment_id: botComment.id,
+      body: comment,
+    });
+  } else {
+    await github.rest.issues.createComment({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number: context.issue.number,
+      body: comment,
+    });
+  }
+}
+
 async function extensionLabel(extensionFolder: string, api: Pick<API, "github" | "context">) {
   const extensionName2Folder = await getExtensionName2Folder(api);
 
