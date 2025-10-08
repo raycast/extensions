@@ -1,6 +1,9 @@
 # Postiz Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Support v2 Endpoints + Toggle Display] - {PR_MERGE_DATE}
+
+- New `Preference` to specify Postiz v1 or v2 since the structure is different
+- If using v2, can toggle between Day, Week, Month diplays
 
 ## [Initial Version] - 2025-09-18
 

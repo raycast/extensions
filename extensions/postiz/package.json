@@ -39,7 +39,8 @@
         }
       ],
       "required": true,
-      "description": "Later versions return a different API response"
+      "description": "Later versions return a different API response",
+      "default": "2"
     }
   ],
   "commands": [

@@ -28,7 +28,7 @@ export const parsePostizResponse = async (response: Response) => {
     throw new Error(message);
   }
   return result;
-}
+};
 
 export const STATE_COLORS: Record<State, Color> = {
   QUEUE: Color.Blue,

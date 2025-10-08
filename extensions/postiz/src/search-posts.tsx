@@ -1,11 +1,22 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  getPreferenceValues,
+  Icon,
+  List,
+  useNavigation,
+} from "@raycast/api";
 import { useMemo, useState } from "react";
 import { format, getISOWeek, startOfMonth, subDays } from "date-fns";
 import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
 import { buildPostizUrl, parsePostizResponse, POSTIZ_HEADERS, STATE_COLORS } from "./postiz";
 import { Identifier, Integration, Post } from "./types";
 
-const {postiz_version} = getPreferenceValues<Preferences>();
+const { postiz_version } = getPreferenceValues<Preferences>();
 
 const generateMarkdown = (post: Post) => {
   switch (post.integration.providerIdentifier) {
@@ -35,23 +46,28 @@ export default function SearchPosts() {
       case "month":
         return startOfMonth(date);
     }
-  }, [date, display])
+  }, [date, display]);
   const {
     isLoading,
     data: posts,
     revalidate,
     mutate,
   } = useFetch(
-    buildPostizUrl("posts",postiz_version==="1" ? {
-      display: "week",
-      day: date.getDay().toString(),
-      week: getISOWeek(date).toString(),
-      month: (date.getMonth() + 1).toString(),
-      year: date.getFullYear().toString(),
-    } : {
-      startDate: startDate.toISOString(),
-      endDate: date.toISOString(),
-    }),
+    buildPostizUrl(
+      "posts",
+      postiz_version === "1"
+        ? {
+            display: "week",
+            day: date.getDay().toString(),
+            week: getISOWeek(date).toString(),
+            month: (date.getMonth() + 1).toString(),
+            year: date.getFullYear().toString(),
+          }
+        : {
+            startDate: startDate.toISOString(),
+            endDate: date.toISOString(),
+          },
+    ),
     {
       headers: POSTIZ_HEADERS,
       parseResponse: parsePostizResponse,
@@ -93,18 +109,23 @@ export default function SearchPosts() {
       await showFailureToast(error);
     }
   };
-const subtitle = `${format(postiz_version==="1" ? subDays(date, 6) : startDate, "MM/dd/yyyy")} - ${format(date, "MM/dd/yyyy")}`;
+  const subtitle = `${format(postiz_version === "1" ? subDays(date, 6) : startDate, "MM/dd/yyyy")} - ${format(date, "MM/dd/yyyy")}`;
   return (
-    <List isLoading={isLoading} isShowingDetail searchBarAccessory={postiz_version==="1" ? undefined : <List.Dropdown tooltip="Display" onChange={(d) => setDisplay(d as Display)} defaultValue="week" storeValue>
-      <List.Dropdown.Item title="Day" value="day" />
-      <List.Dropdown.Item title="Week" value="week" />
-      <List.Dropdown.Item title="Month" value="month" />
-    </List.Dropdown>}>
-    <List.EmptyView title="No Results" description={subtitle} />
-      <List.Section
-        title="Today"
-        subtitle={subtitle}
-      >
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarAccessory={
+        postiz_version === "1" ? undefined : (
+          <List.Dropdown tooltip="Display" onChange={(d) => setDisplay(d as Display)} defaultValue="week" storeValue>
+            <List.Dropdown.Item title="Day" value="day" />
+            <List.Dropdown.Item title="Week" value="week" />
+            <List.Dropdown.Item title="Month" value="month" />
+          </List.Dropdown>
+        )
+      }
+    >
+      <List.EmptyView title="No Results" description={subtitle} />
+      <List.Section title="Today" subtitle={subtitle}>
         {posts.map((post) => (
           <List.Item
             key={post.id}
