@@ -16,6 +16,6 @@
 - Enhanced UI to show full file names and relative paths
 - Updated documentation with detailed feature descriptions
 
-## [1.0.0] - 2025-05-28
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Initial Release
