@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-10-08
 
 - Add support for Windows platform (Text-to-Speech disabled)
 - Bump all dependencies to the latest
