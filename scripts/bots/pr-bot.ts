@@ -446,7 +446,7 @@ async function addPlatformLabels(
 }
 
 // Create a new comment or update the existing one
-async function comment({ github, context, comment }: Pick<API, "github" | "context"> & { comment: string }) {
+async function comment({ github, context, comment: commentText }: Pick<API, "github" | "context"> & { comment: string }) {
   // Get the existing comments on the PR
   const { data: comments } = await github.rest.issues.listComments({
     owner: context.repo.owner,
@@ -462,14 +462,14 @@ async function comment({ github, context, comment }: Pick<API, "github" | "conte
       owner: context.repo.owner,
       repo: context.repo.repo,
       comment_id: botComment.id,
-      body: comment,
+      body: commentText,
     });
   } else {
     await github.rest.issues.createComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       issue_number: context.issue.number,
-      body: comment,
+      body: commentText,
     });
   }
 }
