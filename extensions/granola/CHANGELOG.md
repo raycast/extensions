@@ -1,5 +1,10 @@
 # Granola Changelog
 
+## [1.6.1] - {PR_MERGE_DATE}
+
+### 🔧 Bug Fixes
+- Fixed a bug with fetching recipes.
+
 ## [1.6] - 2025-09-17
 
 ### 🚀 New Commands

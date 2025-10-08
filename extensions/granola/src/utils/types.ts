@@ -326,6 +326,7 @@ export interface RecipesApiResponse {
   userRecipes?: Recipe[];
   defaultRecipes?: DefaultRecipe[];
   sharedRecipes?: Recipe[];
+  publicRecipes?: Recipe[];
 }
 
 export interface RecipesListResult {
