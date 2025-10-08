@@ -9,9 +9,10 @@ import {
   LocalStorage,
   launchCommand,
   LaunchType,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ShodanAPI, ShodanStatsResult } from "./shodan-api";
+} from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
+import { useState, useEffect } from 'react';
+import { ShodanAPI, ShodanStatsResult } from './shodan-api';
 
 // Search history interface
 interface SearchHistoryItem {
@@ -22,26 +23,26 @@ interface SearchHistoryItem {
 
 // Common search filters for quick access
 const COMMON_FILTERS = [
-  { name: "Webcams with Screenshots", query: "webcam has_screenshot:true", icon: Icon.Camera },
-  { name: "SSH Servers", query: "port:22", icon: Icon.Terminal },
-  { name: "HTTP Servers", query: "port:80", icon: Icon.Globe },
-  { name: "HTTPS Servers", query: "port:443", icon: Icon.Lock },
-  { name: "FTP Servers", query: "port:21", icon: Icon.Folder },
-  { name: "Telnet Servers", query: "port:23", icon: Icon.Terminal },
-  { name: "MySQL Databases", query: "port:3306", icon: Icon.Gear },
-  { name: "PostgreSQL Databases", query: "port:5432", icon: Icon.Gear },
-  { name: "MongoDB", query: "port:27017", icon: Icon.Gear },
-  { name: "Redis", query: "port:6379", icon: Icon.MemoryChip },
-  { name: "VNC Servers", query: "port:5900", icon: Icon.Desktop },
-  { name: "RDP Servers", query: "port:3389", icon: Icon.Desktop },
-  { name: "Printers", query: "printer", icon: Icon.Print },
-  { name: "Cameras", query: "camera", icon: Icon.Camera },
-  { name: "Routers", query: "router", icon: Icon.Network },
-  { name: "IoT Devices", query: "iot", icon: Icon.Gear },
+  { name: 'Webcams with Screenshots', query: 'webcam has_screenshot:true', icon: Icon.Camera },
+  { name: 'SSH Servers', query: 'port:22', icon: Icon.Terminal },
+  { name: 'HTTP Servers', query: 'port:80', icon: Icon.Globe },
+  { name: 'HTTPS Servers', query: 'port:443', icon: Icon.Lock },
+  { name: 'FTP Servers', query: 'port:21', icon: Icon.Folder },
+  { name: 'Telnet Servers', query: 'port:23', icon: Icon.Terminal },
+  { name: 'MySQL Databases', query: 'port:3306', icon: Icon.Gear },
+  { name: 'PostgreSQL Databases', query: 'port:5432', icon: Icon.Gear },
+  { name: 'MongoDB', query: 'port:27017', icon: Icon.Gear },
+  { name: 'Redis', query: 'port:6379', icon: Icon.MemoryChip },
+  { name: 'VNC Servers', query: 'port:5900', icon: Icon.Desktop },
+  { name: 'RDP Servers', query: 'port:3389', icon: Icon.Desktop },
+  { name: 'Printers', query: 'printer', icon: Icon.Print },
+  { name: 'Cameras', query: 'camera', icon: Icon.Camera },
+  { name: 'Routers', query: 'router', icon: Icon.Network },
+  { name: 'IoT Devices', query: 'iot', icon: Icon.Gear },
 ];
 
 export default function Stats() {
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [statsResult, setStatsResult] = useState<ShodanStatsResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +55,7 @@ export default function Stats() {
   }, []);
 
   const loadSearchHistory = async () => {
-    const history = await LocalStorage.getItem<string>("statsHistory");
+    const history = await LocalStorage.getItem<string>('statsHistory');
     if (history) {
       const parsedHistory = JSON.parse(history) as SearchHistoryItem[];
       setSearchHistory(parsedHistory);
@@ -64,13 +65,13 @@ export default function Stats() {
   const saveSearchHistory = async (newItem: SearchHistoryItem) => {
     const updatedHistory = [newItem, ...searchHistory.filter((item) => item.query !== newItem.query)].slice(0, 20);
     setSearchHistory(updatedHistory);
-    await LocalStorage.setItem("statsHistory", JSON.stringify(updatedHistory));
+    await LocalStorage.setItem('statsHistory', JSON.stringify(updatedHistory));
   };
 
   const clearSearchHistory = async () => {
     setSearchHistory([]);
-    await LocalStorage.removeItem("statsHistory");
-    showToast({ title: "Search history cleared", style: Toast.Style.Success });
+    await LocalStorage.removeItem('statsHistory');
+    showToast({ title: 'Search history cleared', style: Toast.Style.Success });
   };
 
   const handleStatsSearch = async (query: string) => {
@@ -91,7 +92,7 @@ export default function Stats() {
       if (result.total === 0) {
         showToast({
           style: Toast.Style.Failure,
-          title: "No results found",
+          title: 'No results found',
           message: `No results found for "${query}"`,
         });
       } else {
@@ -104,13 +105,9 @@ export default function Stats() {
         await saveSearchHistory(historyItem);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Stats search failed",
-        message: errorMessage,
-      });
+      showFailureToast('Stats search failed', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +134,7 @@ export default function Stats() {
             key={`${facetName}-${item.value}-${index}`}
             title={item.value}
             subtitle={`${item.count.toLocaleString()} results`}
-            icon={facetName === "country" ? Icon.Globe : Icon.Building}
+            icon={facetName === 'country' ? Icon.Globe : Icon.Building}
             actions={
               <ActionPanel>
                 <Action
@@ -146,7 +143,7 @@ export default function Stats() {
                   onAction={() => {
                     const newQuery = `${searchText} ${facetName}:${item.value}`;
                     launchCommand({
-                      name: "search-criteria",
+                      name: 'search-criteria',
                       type: LaunchType.UserInitiated,
                       arguments: { query: newQuery },
                     });
@@ -221,7 +218,7 @@ export default function Stats() {
                       icon={Icon.MagnifyingGlass}
                       onAction={() => {
                         launchCommand({
-                          name: "search-criteria",
+                          name: 'search-criteria',
                           type: LaunchType.UserInitiated,
                           arguments: { query: filter.query },
                         });
@@ -257,7 +254,7 @@ export default function Stats() {
                         icon={Icon.MagnifyingGlass}
                         onAction={() => {
                           launchCommand({
-                            name: "search-criteria",
+                            name: 'search-criteria',
                             type: LaunchType.UserInitiated,
                             arguments: { query: item.query },
                           });
@@ -302,7 +299,7 @@ export default function Stats() {
                     icon={Icon.MagnifyingGlass}
                     onAction={() => {
                       launchCommand({
-                        name: "search-criteria",
+                        name: 'search-criteria',
                         type: LaunchType.UserInitiated,
                         arguments: { query: searchText },
                       });

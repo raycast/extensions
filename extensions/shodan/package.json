@@ -34,7 +34,7 @@
         },
         {
             "name": "api-info",
-            "title": "Api Info",
+            "title": "API Info",
             "description": "View your Shodan API usage and account information",
             "mode": "view"
         },
@@ -46,7 +46,7 @@
         },
         {
             "name": "monitored-ips",
-            "title": "Monitored Ips",
+            "title": "Monitored IPs",
             "description": "View your monitored IP alerts and notifications",
             "mode": "view"
         }

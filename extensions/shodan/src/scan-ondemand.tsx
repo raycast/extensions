@@ -11,10 +11,10 @@ import {
   LaunchType,
   open,
   LaunchProps,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ShodanAPI, ShodanScanRequest, ShodanScanStatus, ShodanScanResult } from "./shodan-api";
-import { COMMON_SERVICES, getProtocolsFromCategory } from "./protocol-categories";
+} from '@raycast/api';
+import { useState, useEffect } from 'react';
+import { ShodanAPI, ShodanScanRequest, ShodanScanStatus, ShodanScanResult } from './shodan-api';
+import { COMMON_SERVICES, getProtocolsFromCategory } from './protocol-categories';
 
 interface ScanOndemandArguments {
   ips?: string;
@@ -35,105 +35,105 @@ interface RecentScanItem {
 // Quick scan actions
 const QUICK_SCAN_ACTIONS = [
   {
-    name: "All Services",
-    description: "Scan all available services (no filtering)",
+    name: 'All Services',
+    description: 'Scan all available services (no filtering)',
     icon: Icon.Globe,
-    action: "all-scan",
+    action: 'all-scan',
   },
   {
-    name: "Common Services",
-    description: "HTTP, HTTPS, SSH, FTP, SMTP, etc.",
+    name: 'Common Services',
+    description: 'HTTP, HTTPS, SSH, FTP, SMTP, etc.',
     icon: Icon.Network,
-    action: "common-scan",
+    action: 'common-scan',
   },
   {
-    name: "Web Services",
-    description: "HTTP, HTTPS, and web-related protocols",
+    name: 'Web Services',
+    description: 'HTTP, HTTPS, and web-related protocols',
     icon: Icon.Globe,
-    action: "web-scan",
+    action: 'web-scan',
   },
   {
-    name: "Database Services",
-    description: "MySQL, PostgreSQL, MongoDB, Redis, etc.",
+    name: 'Database Services',
+    description: 'MySQL, PostgreSQL, MongoDB, Redis, etc.',
     icon: Icon.Gear,
-    action: "database-scan",
+    action: 'database-scan',
   },
   {
-    name: "Industrial & IoT",
-    description: "Modbus, S7, BACnet, EtherNet/IP, etc.",
+    name: 'Industrial & IoT',
+    description: 'Modbus, S7, BACnet, EtherNet/IP, etc.',
     icon: Icon.ComputerChip,
-    action: "iot-scan",
+    action: 'iot-scan',
   },
   {
-    name: "Cameras & Video",
-    description: "RTSP, Dahua DVR, ONVIF, etc.",
+    name: 'Cameras & Video',
+    description: 'RTSP, Dahua DVR, ONVIF, etc.',
     icon: Icon.Camera,
-    action: "camera-scan",
+    action: 'camera-scan',
   },
   {
-    name: "Network Services",
-    description: "SSH, FTP, SMTP, DNS, Telnet, etc.",
+    name: 'Network Services',
+    description: 'SSH, FTP, SMTP, DNS, Telnet, etc.',
     icon: Icon.Network,
-    action: "network-scan",
+    action: 'network-scan',
   },
   {
-    name: "Remote Access",
-    description: "RDP, VNC, TeamViewer, etc.",
+    name: 'Remote Access',
+    description: 'RDP, VNC, TeamViewer, etc.',
     icon: Icon.Desktop,
-    action: "remote-scan",
+    action: 'remote-scan',
   },
   {
-    name: "Gaming & Entertainment",
-    description: "Minecraft, Steam, PlayStation, etc.",
+    name: 'Gaming & Entertainment',
+    description: 'Minecraft, Steam, PlayStation, etc.',
     icon: Icon.GameController,
-    action: "gaming-scan",
+    action: 'gaming-scan',
   },
   {
-    name: "Cryptocurrency",
-    description: "Bitcoin, Ethereum, Monero, etc.",
+    name: 'Cryptocurrency',
+    description: 'Bitcoin, Ethereum, Monero, etc.',
     icon: Icon.Coin,
-    action: "crypto-scan",
+    action: 'crypto-scan',
   },
   {
-    name: "Security & Monitoring",
-    description: "ClamAV, Tor, SOCKS5, etc.",
+    name: 'Security & Monitoring',
+    description: 'ClamAV, Tor, SOCKS5, etc.',
     icon: Icon.Lock,
-    action: "security-scan",
+    action: 'security-scan',
   },
   {
-    name: "Smart Home & IoT",
-    description: "TP-Link Kasa, Tuya, Xiaomi, etc.",
+    name: 'Smart Home & IoT',
+    description: 'TP-Link Kasa, Tuya, Xiaomi, etc.',
     icon: Icon.House,
-    action: "smarthome-scan",
+    action: 'smarthome-scan',
   },
   {
-    name: "Messaging & Communication",
-    description: "IRC, XMPP, SIP, Mumble, etc.",
+    name: 'Messaging & Communication',
+    description: 'IRC, XMPP, SIP, Mumble, etc.',
     icon: Icon.Message,
-    action: "messaging-scan",
+    action: 'messaging-scan',
   },
   {
-    name: "File Sharing & Storage",
-    description: "SMB, NFS, FTP, AFP, etc.",
+    name: 'File Sharing & Storage',
+    description: 'SMB, NFS, FTP, AFP, etc.',
     icon: Icon.Folder,
-    action: "fileshare-scan",
+    action: 'fileshare-scan',
   },
   {
-    name: "Development & Tools",
-    description: "Git, Java RMI, WebLogic, etc.",
+    name: 'Development & Tools',
+    description: 'Git, Java RMI, WebLogic, etc.',
     icon: Icon.Code,
-    action: "dev-scan",
+    action: 'dev-scan',
   },
   {
-    name: "Printers & Peripherals",
-    description: "Printers, scanners, biometric devices",
+    name: 'Printers & Peripherals',
+    description: 'Printers, scanners, biometric devices',
     icon: Icon.Print,
-    action: "printer-scan",
+    action: 'printer-scan',
   },
 ];
 
 export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndemandArguments }>) {
-  const [searchText, setSearchText] = useState(props.arguments.ips || "");
+  const [searchText, setSearchText] = useState(props.arguments.ips || '');
   const [isLoading, setIsLoading] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,9 +145,9 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
   // Helper function to build search query from scan parameters
   const buildSearchQuery = (scan: RecentScanItem): string => {
     const ipList = scan.ips
-      .split(",")
+      .split(',')
       .map((ip) => ip.trim())
-      .join(",");
+      .join(',');
     const netQuery = `net:${ipList}`;
 
     // Handle backward compatibility - protocols might be undefined for older scans
@@ -158,7 +158,7 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
       return netQuery;
     }
 
-    const protocolQuery = protocols.map((protocol) => `shodan.module:${protocol}`).join(" ");
+    const protocolQuery = protocols.map((protocol) => `shodan.module:${protocol}`).join(' ');
     return `${netQuery} ${protocolQuery}`;
   };
 
@@ -173,7 +173,7 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
 
     if (isPolling && recentScans.length > 0) {
       intervalId = setInterval(async () => {
-        const activeScans = recentScans.filter((scan) => scan.status === "PENDING" || scan.status === "RUNNING");
+        const activeScans = recentScans.filter((scan) => scan.status === 'PENDING' || scan.status === 'RUNNING');
 
         if (activeScans.length === 0) {
           setIsPolling(false);
@@ -184,24 +184,24 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
           const status = await shodanAPI.getScanStatus(scan.id);
           setScanStatuses((prev) => new Map(prev.set(scan.id, status)));
 
-          if (status.status === "DONE") {
+          if (status.status === 'DONE') {
             // Fetch results when scan is complete
             const results = await shodanAPI.getScanResults(scan.id);
             setScanResults((prev) => new Map(prev.set(scan.id, results)));
 
             // Update recent scans
-            updateRecentScan(scan.id, { status: "DONE", totalResults: results.total });
+            updateRecentScan(scan.id, { status: 'DONE', totalResults: results.total });
 
             showToast({
               style: Toast.Style.Success,
-              title: "Scan Complete",
+              title: 'Scan Complete',
               message: `Scan ${scan.id} found ${results.total} results`,
             });
-          } else if (status.status === "ERROR") {
-            updateRecentScan(scan.id, { status: "ERROR" });
+          } else if (status.status === 'ERROR') {
+            updateRecentScan(scan.id, { status: 'ERROR' });
             showToast({
               style: Toast.Style.Failure,
-              title: "Scan Failed",
+              title: 'Scan Failed',
               message: `Scan ${scan.id} encountered an error`,
             });
           }
@@ -217,13 +217,13 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
   }, [isPolling, recentScans]);
 
   const loadRecentScans = async () => {
-    const history = await LocalStorage.getItem<string>("recentScans");
+    const history = await LocalStorage.getItem<string>('recentScans');
     if (history) {
       const parsedHistory = JSON.parse(history) as RecentScanItem[];
       setRecentScans(parsedHistory);
 
       // Check if there are any active scans to poll
-      const hasActiveScans = parsedHistory.some((scan) => scan.status === "PENDING" || scan.status === "RUNNING");
+      const hasActiveScans = parsedHistory.some((scan) => scan.status === 'PENDING' || scan.status === 'RUNNING');
       if (hasActiveScans) {
         setIsPolling(true);
       }
@@ -232,7 +232,7 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
 
   const saveRecentScans = async (scans: RecentScanItem[]) => {
     setRecentScans(scans);
-    await LocalStorage.setItem("recentScans", JSON.stringify(scans));
+    await LocalStorage.setItem('recentScans', JSON.stringify(scans));
   };
 
   const updateRecentScan = (scanId: string, updates: Partial<RecentScanItem>) => {
@@ -248,136 +248,136 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
 
   const clearRecentScans = async () => {
     setRecentScans([]);
-    await LocalStorage.removeItem("recentScans");
-    showToast({ title: "Recent scans cleared", style: Toast.Style.Success });
+    await LocalStorage.removeItem('recentScans');
+    showToast({ title: 'Recent scans cleared', style: Toast.Style.Success });
   };
 
   const handleQuickScan = async (action: string, ips?: string) => {
     let scanRequest: ShodanScanRequest;
 
     switch (action) {
-      case "all-scan":
+      case 'all-scan':
         // No service filtering - scan all available services
         scanRequest = {
-          ips: ips || "8.8.8.8",
+          ips: ips || '8.8.8.8',
           service: [], // Empty array means no service filtering
         };
         break;
-      case "common-scan":
+      case 'common-scan':
         scanRequest = {
-          ips: ips || "8.8.8.8",
+          ips: ips || '8.8.8.8',
           service: COMMON_SERVICES.map((s) => [s.port, s.protocol]),
         };
         break;
-      case "web-scan": {
-        const webProtocols = getProtocolsFromCategory("Web Services");
+      case 'web-scan': {
+        const webProtocols = getProtocolsFromCategory('Web Services');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: webProtocols.slice(0, 10).map((p, i) => [80 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: webProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "database-scan": {
-        const dbProtocols = getProtocolsFromCategory("Databases");
+      case 'database-scan': {
+        const dbProtocols = getProtocolsFromCategory('Databases');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: dbProtocols.slice(0, 10).map((p, i) => [3306 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: dbProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "iot-scan": {
-        const iotProtocols = getProtocolsFromCategory("Industrial & IoT");
+      case 'iot-scan': {
+        const iotProtocols = getProtocolsFromCategory('Industrial & IoT');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: iotProtocols.slice(0, 10).map((p, i) => [502 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: iotProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "camera-scan": {
-        const cameraProtocols = getProtocolsFromCategory("Cameras & Video");
+      case 'camera-scan': {
+        const cameraProtocols = getProtocolsFromCategory('Cameras & Video');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: cameraProtocols.slice(0, 10).map((p, i) => [554 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: cameraProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "network-scan": {
-        const networkProtocols = getProtocolsFromCategory("Network Services");
+      case 'network-scan': {
+        const networkProtocols = getProtocolsFromCategory('Network Services');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: networkProtocols.slice(0, 10).map((p, i) => [22 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: networkProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "remote-scan": {
-        const remoteProtocols = getProtocolsFromCategory("Remote Access");
+      case 'remote-scan': {
+        const remoteProtocols = getProtocolsFromCategory('Remote Access');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: remoteProtocols.slice(0, 10).map((p, i) => [3389 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: remoteProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "gaming-scan": {
-        const gamingProtocols = getProtocolsFromCategory("Gaming & Entertainment");
+      case 'gaming-scan': {
+        const gamingProtocols = getProtocolsFromCategory('Gaming & Entertainment');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: gamingProtocols.slice(0, 10).map((p, i) => [25565 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: gamingProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "crypto-scan": {
-        const cryptoProtocols = getProtocolsFromCategory("Cryptocurrency");
+      case 'crypto-scan': {
+        const cryptoProtocols = getProtocolsFromCategory('Cryptocurrency');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: cryptoProtocols.slice(0, 10).map((p, i) => [8333 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: cryptoProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "security-scan": {
-        const securityProtocols = getProtocolsFromCategory("Security & Monitoring");
+      case 'security-scan': {
+        const securityProtocols = getProtocolsFromCategory('Security & Monitoring');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: securityProtocols.slice(0, 10).map((p, i) => [161 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: securityProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "smarthome-scan": {
-        const smarthomeProtocols = getProtocolsFromCategory("Smart Home & IoT");
+      case 'smarthome-scan': {
+        const smarthomeProtocols = getProtocolsFromCategory('Smart Home & IoT');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: smarthomeProtocols.slice(0, 10).map((p, i) => [8080 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: smarthomeProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "messaging-scan": {
-        const messagingProtocols = getProtocolsFromCategory("Messaging & Communication");
+      case 'messaging-scan': {
+        const messagingProtocols = getProtocolsFromCategory('Messaging & Communication');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: messagingProtocols.slice(0, 10).map((p, i) => [6667 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: messagingProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "fileshare-scan": {
-        const fileshareProtocols = getProtocolsFromCategory("File Sharing & Storage");
+      case 'fileshare-scan': {
+        const fileshareProtocols = getProtocolsFromCategory('File Sharing & Storage');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: fileshareProtocols.slice(0, 10).map((p, i) => [445 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: fileshareProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "dev-scan": {
-        const devProtocols = getProtocolsFromCategory("Development & Tools");
+      case 'dev-scan': {
+        const devProtocols = getProtocolsFromCategory('Development & Tools');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: devProtocols.slice(0, 10).map((p, i) => [9418 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: devProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
-      case "printer-scan": {
-        const printerProtocols = getProtocolsFromCategory("Printers & Peripherals");
+      case 'printer-scan': {
+        const printerProtocols = getProtocolsFromCategory('Printers & Peripherals');
         scanRequest = {
-          ips: ips || "8.8.8.8",
-          service: printerProtocols.slice(0, 10).map((p, i) => [9100 + i, p.name]),
+          ips: ips || '8.8.8.8',
+          service: printerProtocols.slice(0, 10).map((p) => p.name),
         };
         break;
       }
@@ -400,9 +400,13 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
         ips: scanRequest.ips,
         services:
           scanRequest.service.length > 0
-            ? scanRequest.service.map(([, protocol]) => `${protocol}`).join(", ")
-            : "All Services",
-        protocols: scanRequest.service.map(([, protocol]) => protocol),
+            ? Array.isArray(scanRequest.service[0])
+              ? (scanRequest.service as [number, string][]).map(([, protocol]) => `${protocol}`).join(', ')
+              : (scanRequest.service as string[]).join(', ')
+            : 'All Services',
+        protocols: Array.isArray(scanRequest.service[0])
+          ? (scanRequest.service as [number, string][]).map(([, protocol]) => protocol)
+          : (scanRequest.service as string[]),
         timestamp: Date.now(),
         status: result.status,
       };
@@ -411,15 +415,15 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
 
       showToast({
         style: Toast.Style.Success,
-        title: "Scan requested",
+        title: 'Scan requested',
         message: `Scan ID: ${result.id} - Monitoring progress...`,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
-        title: "Scan failed",
+        title: 'Scan failed',
         message: errorMessage,
       });
     } finally {
@@ -429,13 +433,13 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "DONE":
+      case 'DONE':
         return { source: Icon.CheckCircle, tintColor: Color.Green };
-      case "RUNNING":
+      case 'RUNNING':
         return { source: Icon.Clock, tintColor: Color.Blue };
-      case "PENDING":
+      case 'PENDING':
         return { source: Icon.Clock, tintColor: Color.Orange };
-      case "ERROR":
+      case 'ERROR':
         return { source: Icon.ExclamationMark, tintColor: Color.Red };
       default:
         return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
@@ -444,14 +448,14 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "DONE":
-        return "Complete";
-      case "RUNNING":
-        return "Running";
-      case "PENDING":
-        return "Pending";
-      case "ERROR":
-        return "Error";
+      case 'DONE':
+        return 'Complete';
+      case 'RUNNING':
+        return 'Running';
+      case 'PENDING':
+        return 'Pending';
+      case 'ERROR':
+        return 'Error';
       default:
         return status;
     }
@@ -482,7 +486,7 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
 **IPs:** ${scan.ips}
 **Services:** ${scan.services}
 **Created:** ${new Date(scan.timestamp).toLocaleString()}
-**Credits Left:** ${"credits_left" in status ? status.credits_left : "Unknown"}
+**Credits Left:** ${'credits_left' in status ? status.credits_left : 'Unknown'}
 
 ${
   results
@@ -490,10 +494,10 @@ ${
         .slice(0, 5)
         .map(
           (host, i) =>
-            `${i + 1}. **${host.ip_str}**${host.hostnames?.[0] ? ` (${host.hostnames[0]})` : ""}${host.ports?.length ? ` - Ports: ${host.ports.slice(0, 3).join(", ")}` : ""}`,
+            `${i + 1}. **${host.ip_str}**${host.hostnames?.[0] ? ` (${host.hostnames[0]})` : ''}${host.ports?.length ? ` - Ports: ${host.ports.slice(0, 3).join(', ')}` : ''}`,
         )
-        .join("\n")}${results.matches.length > 5 ? `\n\n*... and ${results.matches.length - 5} more results*` : ""}`
-    : ""
+        .join('\n')}${results.matches.length > 5 ? `\n\n*... and ${results.matches.length - 5} more results*` : ''}`
+    : ''
 }`}
             metadata={
               <List.Item.Detail.Metadata>
@@ -510,14 +514,14 @@ ${
         actions={
           <ActionPanel>
             {/* Primary action based on scan status */}
-            {status.status === "DONE" || scan.status === "DONE" ? (
+            {status.status === 'DONE' || scan.status === 'DONE' ? (
               <Action
                 title="View Scan Results"
                 icon={Icon.MagnifyingGlass}
                 onAction={() => {
                   const searchQuery = buildSearchQuery(scan);
                   launchCommand({
-                    name: "search-criteria",
+                    name: 'search-criteria',
                     type: LaunchType.UserInitiated,
                     arguments: { query: searchQuery },
                   });
@@ -532,7 +536,7 @@ ${
                   setScanStatuses((prev) => new Map(prev.set(scan.id, status)));
                   updateRecentScan(scan.id, { status: status.status });
 
-                  if (status.status === "DONE") {
+                  if (status.status === 'DONE') {
                     // Fetch results when scan is complete
                     const results = await shodanAPI.getScanResults(scan.id);
                     setScanResults((prev) => new Map(prev.set(scan.id, results)));
@@ -540,7 +544,7 @@ ${
 
                     showToast({
                       style: Toast.Style.Success,
-                      title: "Scan Complete",
+                      title: 'Scan Complete',
                       message: `Found ${results.total} results`,
                     });
                   }
@@ -558,7 +562,7 @@ ${
                 onAction={() => {
                   const searchQuery = buildSearchQuery(scan);
                   launchCommand({
-                    name: "search-criteria",
+                    name: 'search-criteria',
                     type: LaunchType.UserInitiated,
                     arguments: { query: searchQuery },
                   });
@@ -566,7 +570,7 @@ ${
               />
             )}
 
-            <Action title="Open in Shodan" icon={Icon.Globe} onAction={() => open("https://www.shodan.io/")} />
+            <Action title="Open in Shodan" icon={Icon.Globe} onAction={() => open('https://www.shodan.io/')} />
 
             <Action
               title="Delete Scan"
@@ -577,7 +581,7 @@ ${
                 saveRecentScans(updatedScans);
                 showToast({
                   style: Toast.Style.Success,
-                  title: "Scan deleted",
+                  title: 'Scan deleted',
                   message: `Removed scan ${scan.id}`,
                 });
               }}
@@ -623,13 +627,6 @@ ${
                       icon={Icon.MagnifyingGlass}
                       onAction={() => handleQuickScan(action.action)}
                     />
-                    {searchText && (
-                      <Action
-                        title={`Scan ${searchText}`}
-                        icon={Icon.MagnifyingGlass}
-                        onAction={() => handleQuickScan(action.action, searchText)}
-                      />
-                    )}
                   </ActionPanel>
                 }
               />
@@ -639,7 +636,7 @@ ${
           {recentScans.length > 0 && (
             <List.Section
               title={`Recent Scans (${recentScans.length})`}
-              subtitle={isPolling ? "Monitoring active scans..." : ""}
+              subtitle={isPolling ? 'Monitoring active scans...' : ''}
             >
               {recentScans.map(renderScanItem)}
               <List.Item

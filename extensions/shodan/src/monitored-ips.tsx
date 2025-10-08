@@ -9,9 +9,9 @@ import {
   open,
   launchCommand,
   LaunchType,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ShodanAPI, ShodanAlertInfo } from "./shodan-api";
+} from '@raycast/api';
+import { useState, useEffect } from 'react';
+import { ShodanAPI, ShodanAlertInfo } from './shodan-api';
 
 export default function MonitoredIPs() {
   const [alerts, setAlerts] = useState<ShodanAlertInfo[]>([]);
@@ -35,8 +35,8 @@ export default function MonitoredIPs() {
         setAlerts([]);
         showToast({
           style: Toast.Style.Success,
-          title: "No alerts found",
-          message: "API returned non-array response",
+          title: 'No alerts found',
+          message: 'API returned non-array response',
         });
         return;
       }
@@ -46,22 +46,22 @@ export default function MonitoredIPs() {
       if (alertData.length === 0) {
         showToast({
           style: Toast.Style.Success,
-          title: "No alerts found",
+          title: 'No alerts found',
           message: "You don't have any IP alerts configured",
         });
       } else {
         showToast({
           style: Toast.Style.Success,
-          title: "Alerts loaded",
-          message: `Found ${alertData.length} alert${alertData.length !== 1 ? "s" : ""}`,
+          title: 'Alerts loaded',
+          message: `Found ${alertData.length} alert${alertData.length !== 1 ? 's' : ''}`,
         });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load alerts",
+        title: 'Failed to load alerts',
         message: errorMessage,
       });
     } finally {
@@ -75,7 +75,7 @@ export default function MonitoredIPs() {
 
   const formatExpiryDate = (expires: number) => {
     if (expires === 0) {
-      return "Never expires";
+      return 'Never expires';
     }
 
     const date = new Date(expires * 1000);
@@ -84,11 +84,11 @@ export default function MonitoredIPs() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return "Expired";
+      return 'Expired';
     } else if (diffDays === 0) {
-      return "Expires today";
+      return 'Expires today';
     } else if (diffDays === 1) {
-      return "Expires tomorrow";
+      return 'Expires tomorrow';
     } else {
       return `Expires in ${diffDays} days`;
     }
@@ -146,7 +146,7 @@ export default function MonitoredIPs() {
               <Action
                 title="Open Shodan Alerts"
                 icon={Icon.Globe}
-                onAction={() => open("https://account.shodan.io/notifier")}
+                onAction={() => open('https://account.shodan.io/notifier')}
               />
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={loadAlerts} />
             </ActionPanel>
@@ -180,22 +180,22 @@ export default function MonitoredIPs() {
                     <List.Item.Detail.Metadata.Label title="Notifiers" text={alert.notifiers.length.toString()} />
                     <List.Item.Detail.Metadata.Label
                       title="Triggers"
-                      text={alert.has_triggers ? "Enabled" : "Disabled"}
+                      text={alert.has_triggers ? 'Enabled' : 'Disabled'}
                     />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Monitored IPs" text={alert.filters.ip.join(", ")} />
+                    <List.Item.Detail.Metadata.Label title="Monitored IPs" text={alert.filters.ip.join(', ')} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Active Triggers"
                       text={Object.keys(alert.triggers)
                         .filter((key) => Object.keys(alert.triggers[key]).length > 0)
-                        .map((trigger) => trigger.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()))
-                        .join(", ")}
+                        .map((trigger) => trigger.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()))
+                        .join(', ')}
                     />
                     {alert.notifiers.length > 0 && (
                       <List.Item.Detail.Metadata.Label
                         title="Notification Methods"
-                        text={alert.notifiers.map((n) => n.provider).join(", ")}
+                        text={alert.notifiers.map((n) => n.provider).join(', ')}
                       />
                     )}
                   </List.Item.Detail.Metadata>
@@ -211,7 +211,7 @@ export default function MonitoredIPs() {
                     showToast({
                       style: Toast.Style.Success,
                       title: `IPs in ${alert.name}`,
-                      message: alert.filters.ip.join(", "),
+                      message: alert.filters.ip.join(', '),
                     });
                   }}
                 />
@@ -219,20 +219,20 @@ export default function MonitoredIPs() {
                   title="Search Ips"
                   icon={Icon.MagnifyingGlass}
                   onAction={() => {
-                    const ipQuery = alert.filters.ip.map((ip: string) => `ip:${ip}`).join(" ");
+                    const ipQuery = alert.filters.ip.map((ip: string) => `ip:${ip}`).join(' ');
                     launchCommand({
-                      name: "search-criteria",
+                      name: 'search-criteria',
                       type: LaunchType.UserInitiated,
                       arguments: { query: ipQuery },
                     });
                   }}
                 />
                 <Action.CopyToClipboard title="Copy Alert ID" content={alert.id} />
-                <Action.CopyToClipboard title="Copy Ips" content={alert.filters.ip.join(", ")} />
+                <Action.CopyToClipboard title="Copy Ips" content={alert.filters.ip.join(', ')} />
                 <Action
                   title="Open in Shodan"
                   icon={Icon.Globe}
-                  onAction={() => open("https://account.shodan.io/notifier")}
+                  onAction={() => open('https://account.shodan.io/notifier')}
                 />
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={loadAlerts} />
               </ActionPanel>

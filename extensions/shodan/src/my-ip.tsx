@@ -10,35 +10,35 @@ import {
   open,
   launchCommand,
   LaunchType,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ShodanAPI, ShodanHostInfo, ShodanPortInfo } from "./shodan-api";
+} from '@raycast/api';
+import { useState, useEffect } from 'react';
+import { ShodanAPI, ShodanHostInfo, ShodanPortInfo } from './shodan-api';
 
 // Helper function to get service name from port number
 const getServiceName = (port: number): string => {
   const commonPorts: { [key: number]: string } = {
-    20: "FTP Data",
-    21: "FTP Control",
-    22: "SSH",
-    23: "Telnet",
-    25: "SMTP",
-    53: "DNS",
-    80: "HTTP",
-    110: "POP3",
-    143: "IMAP",
-    443: "HTTPS",
-    993: "IMAPS",
-    995: "POP3S",
-    1433: "MSSQL",
-    3306: "MySQL",
-    3389: "RDP",
-    5432: "PostgreSQL",
-    5900: "VNC",
-    6379: "Redis",
-    8080: "HTTP Alt",
-    8443: "HTTPS Alt",
-    27017: "MongoDB",
-    11211: "Memcached",
+    20: 'FTP Data',
+    21: 'FTP Control',
+    22: 'SSH',
+    23: 'Telnet',
+    25: 'SMTP',
+    53: 'DNS',
+    80: 'HTTP',
+    110: 'POP3',
+    143: 'IMAP',
+    443: 'HTTPS',
+    993: 'IMAPS',
+    995: 'POP3S',
+    1433: 'MSSQL',
+    3306: 'MySQL',
+    3389: 'RDP',
+    5432: 'PostgreSQL',
+    5900: 'VNC',
+    6379: 'Redis',
+    8080: 'HTTP Alt',
+    8443: 'HTTPS Alt',
+    27017: 'MongoDB',
+    11211: 'Memcached',
   };
   return commonPorts[port] || `Port ${port}`;
 };
@@ -53,42 +53,47 @@ export default function MyIP() {
   const getExternalIP = async (): Promise<string> => {
     // Try multiple IPv4-only services for reliability
     const ipServices = [
-      { url: "https://ipv4.icanhazip.com", type: "text" },
-      { url: "https://api.ipify.org?format=text", type: "text" },
-      { url: "https://checkip.amazonaws.com", type: "text" },
-      { url: "https://api.ipify.org", type: "json" },
-      { url: "https://httpbin.org/ip", type: "json" },
+      { url: 'https://ipv4.icanhazip.com', type: 'text' },
+      { url: 'https://api.ipify.org?format=text', type: 'text' },
+      { url: 'https://checkip.amazonaws.com', type: 'text' },
+      { url: 'https://api.ipify.org', type: 'json' },
+      { url: 'https://httpbin.org/ip', type: 'json' },
     ];
 
     for (const service of ipServices) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(service.url, { signal: controller.signal });
-      clearTimeout(timeoutId);
+        const response = await fetch(service.url, { signal: controller.signal });
+        clearTimeout(timeoutId);
 
-      if (response.ok) {
-        if (service.type === "text") {
-          const text = await response.text();
-          const ip = text.trim();
-          // Validate IPv4 format
-          if (/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
-            return ip;
-          }
-        } else {
-          const data = (await response.json()) as { ip?: string; origin?: string };
-          let ip = "";
-          if (data.ip) ip = data.ip;
-          else if (data.origin) ip = data.origin.split(",")[0].trim();
+        if (response.ok) {
+          if (service.type === 'text') {
+            const text = await response.text();
+            const ip = text.trim();
+            // Validate IPv4 format
+            if (/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+              return ip;
+            }
+          } else {
+            const data = (await response.json()) as { ip?: string; origin?: string };
+            let ip = '';
+            if (data.ip) ip = data.ip;
+            else if (data.origin) ip = data.origin.split(',')[0].trim();
 
-          // Validate IPv4 format
-          if (ip && /^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
-            return ip;
+            // Validate IPv4 format
+            if (ip && /^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+              return ip;
+            }
           }
         }
+      } catch {
+        // Continue to next service if this one fails
+        continue;
       }
     }
-    throw new Error("Failed to determine external IP address");
+    throw new Error('Failed to determine external IP address');
   };
 
   const lookupMyIP = async () => {
@@ -102,7 +107,7 @@ export default function MyIP() {
 
       showToast({
         style: Toast.Style.Animated,
-        title: "Looking up your IP",
+        title: 'Looking up your IP',
         message: `Searching Shodan for ${ip}...`,
       });
 
@@ -113,22 +118,22 @@ export default function MyIP() {
       if (!result) {
         showToast({
           style: Toast.Style.Failure,
-          title: "IP not found in Shodan",
+          title: 'IP not found in Shodan',
           message: `No information found for ${ip}`,
         });
       } else {
         showToast({
           style: Toast.Style.Success,
-          title: "IP lookup successful",
+          title: 'IP lookup successful',
           message: `Found information for ${ip}`,
         });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
-        title: "Lookup failed",
+        title: 'Lookup failed',
         message: errorMessage,
       });
     } finally {
@@ -151,10 +156,10 @@ export default function MyIP() {
     sections.push(`## 📋 Basic Information`);
     sections.push(`**IP Address:** \`${info.ip_str}\``);
     if (info.hostnames.length > 0) {
-      sections.push(`**Hostnames:** ${info.hostnames.join(", ")}`);
+      sections.push(`**Hostnames:** ${info.hostnames.join(', ')}`);
     }
-    sections.push(`**Organization:** ${info.org || "Unknown"}`);
-    sections.push(`**ISP:** ${info.isp || "Unknown"}`);
+    sections.push(`**Organization:** ${info.org || 'Unknown'}`);
+    sections.push(`**ISP:** ${info.isp || 'Unknown'}`);
     sections.push(`**Last Seen:** ${new Date(info.timestamp).toLocaleString()}`);
     sections.push(``);
 
@@ -189,14 +194,14 @@ export default function MyIP() {
             sections.push(`**Version:** ${portData.version}`);
           }
           if (portData.banner) {
-            const banner = portData.banner.length > 150 ? portData.banner.substring(0, 150) + "..." : portData.banner;
+            const banner = portData.banner.length > 150 ? portData.banner.substring(0, 150) + '...' : portData.banner;
             sections.push(`**Banner:** \`${banner}\``);
           }
           if (portData.vulns && portData.vulns.length > 0) {
-            sections.push(`**Vulnerabilities:** ${portData.vulns.join(", ")}`);
+            sections.push(`**Vulnerabilities:** ${portData.vulns.join(', ')}`);
           }
           if (portData.cpe && portData.cpe.length > 0) {
-            sections.push(`**CPE:** ${portData.cpe.join(", ")}`);
+            sections.push(`**CPE:** ${portData.cpe.join(', ')}`);
           }
         } else {
           // Fallback to basic service name if no detailed data
@@ -237,7 +242,7 @@ export default function MyIP() {
     // Tags
     if (info.tags && info.tags.length > 0) {
       sections.push(`## 🏷️ Tags`);
-      sections.push(info.tags.map((tag) => `\`${tag}\``).join(" "));
+      sections.push(info.tags.map((tag) => `\`${tag}\``).join(' '));
       sections.push(``);
     }
 
@@ -254,7 +259,7 @@ export default function MyIP() {
     sections.push(`---`);
     sections.push(`*Data provided by [Shodan](https://www.shodan.io/)*`);
 
-    return sections.join("\n");
+    return sections.join('\n');
   };
 
   if (hostInfo) {
@@ -276,10 +281,10 @@ export default function MyIP() {
             <Action
               title="Request On-Demand Scan"
               icon={Icon.MagnifyingGlass}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={{ modifiers: ['cmd'], key: 'd' }}
               onAction={() => {
                 launchCommand({
-                  name: "scan-ondemand",
+                  name: 'scan-ondemand',
                   type: LaunchType.UserInitiated,
                   arguments: { ips: hostInfo.ip_str },
                 });

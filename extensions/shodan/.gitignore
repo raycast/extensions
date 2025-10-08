@@ -12,6 +12,7 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+latest_pr
 
 # Internal deployment and development files
 deploy.sh

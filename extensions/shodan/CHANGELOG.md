@@ -1,6 +1,6 @@
 # Shodan Changelog
 
-## [1.3.0] - 2025-09-15
+## [1.3.0] - {PR_MERGE_DATE}
 
 ### Added
 - Search history with persistent storage using LocalStorage
@@ -18,7 +18,7 @@
 - Quick re-search functionality
 - History management actions
 
-## [1.2.0] - 2025-09-15
+## [1.2.0] - {PR_MERGE_DATE}
 
 ### Added
 - Side-by-side detail views with metadata panels
@@ -33,7 +33,7 @@
 - Port information display with TCP/UDP protocols
 - Metadata organization for better data presentation
 
-## [1.1.0] - 2025-09-15
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
 - Comprehensive Shodan integration with 7 commands
@@ -53,7 +53,7 @@
 - Copy to clipboard functionality
 - Open in Shodan browser integration
 
-## [1.0.0] - 2025-09-15
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Shodan Raycast Extension

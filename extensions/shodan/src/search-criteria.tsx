@@ -11,12 +11,13 @@ import {
   LaunchProps,
   launchCommand,
   LaunchType,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ShodanAPI, ShodanSearchHostInfo } from "./shodan-api";
-import * as fs from "fs";
-import * as path from "path";
-import * as os from "os";
+} from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
+import { useState, useEffect } from 'react';
+import { ShodanAPI, ShodanSearchHostInfo } from './shodan-api';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
 // Search history interface
 interface SearchHistoryItem {
@@ -27,22 +28,22 @@ interface SearchHistoryItem {
 
 // Common search filters for quick access
 const COMMON_FILTERS = [
-  { name: "Webcams with Screenshots", query: "webcam has_screenshot:true", icon: Icon.Camera },
-  { name: "SSH Servers", query: "port:22", icon: Icon.Terminal },
-  { name: "HTTP Servers", query: "port:80", icon: Icon.Globe },
-  { name: "HTTPS Servers", query: "port:443", icon: Icon.Lock },
-  { name: "FTP Servers", query: "port:21", icon: Icon.Folder },
-  { name: "Telnet Servers", query: "port:23", icon: Icon.Terminal },
-  { name: "MySQL Databases", query: "port:3306", icon: Icon.Gear },
-  { name: "PostgreSQL Databases", query: "port:5432", icon: Icon.Gear },
-  { name: "MongoDB", query: "port:27017", icon: Icon.Gear },
-  { name: "Redis", query: "port:6379", icon: Icon.MemoryChip },
-  { name: "VNC Servers", query: "port:5900", icon: Icon.Desktop },
-  { name: "RDP Servers", query: "port:3389", icon: Icon.Desktop },
-  { name: "Printers", query: "printer", icon: Icon.Print },
-  { name: "Cameras", query: "camera", icon: Icon.Camera },
-  { name: "Routers", query: "router", icon: Icon.Network },
-  { name: "IoT Devices", query: "iot", icon: Icon.Gear },
+  { name: 'Webcams with Screenshots', query: 'webcam has_screenshot:true', icon: Icon.Camera },
+  { name: 'SSH Servers', query: 'port:22', icon: Icon.Terminal },
+  { name: 'HTTP Servers', query: 'port:80', icon: Icon.Globe },
+  { name: 'HTTPS Servers', query: 'port:443', icon: Icon.Lock },
+  { name: 'FTP Servers', query: 'port:21', icon: Icon.Folder },
+  { name: 'Telnet Servers', query: 'port:23', icon: Icon.Terminal },
+  { name: 'MySQL Databases', query: 'port:3306', icon: Icon.Gear },
+  { name: 'PostgreSQL Databases', query: 'port:5432', icon: Icon.Gear },
+  { name: 'MongoDB', query: 'port:27017', icon: Icon.Gear },
+  { name: 'Redis', query: 'port:6379', icon: Icon.MemoryChip },
+  { name: 'VNC Servers', query: 'port:5900', icon: Icon.Desktop },
+  { name: 'RDP Servers', query: 'port:3389', icon: Icon.Desktop },
+  { name: 'Printers', query: 'printer', icon: Icon.Print },
+  { name: 'Cameras', query: 'camera', icon: Icon.Camera },
+  { name: 'Routers', query: 'router', icon: Icon.Network },
+  { name: 'IoT Devices', query: 'iot', icon: Icon.Gear },
 ];
 
 // Helper function to format search result for display
@@ -52,20 +53,20 @@ const formatSearchResult = (result: ShodanSearchHostInfo): string => {
 
 // Helper function to get result subtitle
 const getResultSubtitle = (result: ShodanSearchHostInfo): string => {
-  return result.port ? `:${result.port}` : "";
+  return result.port ? `:${result.port}` : '';
 };
 
 // Helper function to save base64 screenshot to temporary file (full size)
 const saveScreenshotToTempFile = (base64Data: string): string | null => {
   const tempDir = os.tmpdir();
-  const imageFileName = `shodan_screenshot_full_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
+  const imageFileName = `shodan_screenshot_full_${Date.now()}_${Math.random().toString(36).slice(2, 11)}.png`;
   const imagePath = path.join(tempDir, imageFileName);
 
   // Remove the data URL prefix if present
-  const cleanBase64Data = base64Data.replace(/^data:image\/\w+;base64,/, "");
+  const cleanBase64Data = base64Data.replace(/^data:image\/\w+;base64,/, '');
 
   // Write the image file
-  fs.writeFileSync(imagePath, cleanBase64Data, { encoding: "base64" });
+  fs.writeFileSync(imagePath, cleanBase64Data, { encoding: 'base64' });
 
   return imagePath;
 };
@@ -75,7 +76,7 @@ interface SearchCriteriaArguments {
 }
 
 export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCriteriaArguments }>) {
-  const [searchText, setSearchText] = useState(props.arguments.query || "");
+  const [searchText, setSearchText] = useState(props.arguments.query || '');
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<ShodanSearchHostInfo[]>([]);
   const [totalResults, setTotalResults] = useState(0);
@@ -97,7 +98,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
   }, [props.arguments.query]);
 
   const loadSearchHistory = async () => {
-    const history = await LocalStorage.getItem<string>("searchCriteriaHistory");
+    const history = await LocalStorage.getItem<string>('searchCriteriaHistory');
     if (history) {
       const parsedHistory = JSON.parse(history) as SearchHistoryItem[];
       setSearchHistory(parsedHistory);
@@ -107,13 +108,13 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
   const saveSearchHistory = async (newItem: SearchHistoryItem) => {
     const updatedHistory = [newItem, ...searchHistory.filter((item) => item.query !== newItem.query)].slice(0, 20);
     setSearchHistory(updatedHistory);
-    await LocalStorage.setItem("searchCriteriaHistory", JSON.stringify(updatedHistory));
+    await LocalStorage.setItem('searchCriteriaHistory', JSON.stringify(updatedHistory));
   };
 
   const clearSearchHistory = async () => {
     setSearchHistory([]);
-    await LocalStorage.removeItem("searchCriteriaHistory");
-    showToast({ title: "Search history cleared", style: Toast.Style.Success });
+    await LocalStorage.removeItem('searchCriteriaHistory');
+    showToast({ title: 'Search history cleared', style: Toast.Style.Success });
   };
 
   const handleSearch = async (query: string, page = 1) => {
@@ -138,7 +139,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
       if (result.matches.length === 0) {
         showToast({
           style: Toast.Style.Failure,
-          title: "No results found",
+          title: 'No results found',
           message: `No results found for "${query}"`,
         });
       } else {
@@ -151,13 +152,9 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
         await saveSearchHistory(historyItem);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Search failed",
-        message: errorMessage,
-      });
+      showFailureToast('Search failed', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -214,7 +211,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
 
   // Check if this is a scan result query (contains net: filter)
   // This covers both specific protocol scans and "All Services" scans
-  const isScanResult = searchText.includes("net:");
+  const isScanResult = searchText.includes('net:');
 
   // Render grouped results for scan queries
   const renderGroupedResults = () => {
@@ -226,7 +223,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
           <List.Item
             key={`${result.ip_str}-${result.port}-${resultIndex}`}
             title={`Port ${result.port}`}
-            subtitle={result.product || result.data || "Unknown service"}
+            subtitle={result.product || result.data || 'Unknown service'}
             icon={result.screenshot ? Icon.Camera : Icon.Network}
             detail={
               <List.Item.Detail
@@ -268,7 +265,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
                   }
 
                   if (result.tags && result.tags.length > 0) {
-                    markdown += `**Tags:** ${result.tags.join(", ")}\n\n`;
+                    markdown += `**Tags:** ${result.tags.join(', ')}\n\n`;
                   }
 
                   return markdown;
@@ -277,9 +274,9 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="IP Address" text={group.ip} />
                     {result.hostnames && result.hostnames.length > 0 && (
-                      <List.Item.Detail.Metadata.Label title="Hostnames" text={result.hostnames.join(", ")} />
+                      <List.Item.Detail.Metadata.Label title="Hostnames" text={result.hostnames.join(', ')} />
                     )}
-                    <List.Item.Detail.Metadata.Label title="Port" text={result.port?.toString() || "Unknown"} />
+                    <List.Item.Detail.Metadata.Label title="Port" text={result.port?.toString() || 'Unknown'} />
                     {result.org && <List.Item.Detail.Metadata.Label title="Organization" text={result.org} />}
                     {result.isp && <List.Item.Detail.Metadata.Label title="ISP" text={result.isp} />}
                     {result.location && (
@@ -293,7 +290,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
                     {result.os && <List.Item.Detail.Metadata.Label title="OS" text={result.os} />}
                     {result.product && <List.Item.Detail.Metadata.Label title="Product" text={result.product} />}
                     {result.version && <List.Item.Detail.Metadata.Label title="Version" text={result.version} />}
-                    <List.Item.Detail.Metadata.Label title="Open Ports on IP" text={group.openPorts.join(", ")} />
+                    <List.Item.Detail.Metadata.Label title="Open Ports on IP" text={group.openPorts.join(', ')} />
                     {result.vulns && result.vulns.length > 0 && (
                       <List.Item.Detail.Metadata.Label title="Vulnerabilities" text={result.vulns.length.toString()} />
                     )}
@@ -308,7 +305,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
                   icon={Icon.MagnifyingGlass}
                   onAction={() => {
                     launchCommand({
-                      name: "search-host",
+                      name: 'search-host',
                       type: LaunchType.UserInitiated,
                       arguments: { ip: group.ip },
                     });
@@ -319,14 +316,14 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
                   icon={Icon.MagnifyingGlass}
                   onAction={() => {
                     launchCommand({
-                      name: "scan-ondemand",
+                      name: 'scan-ondemand',
                       type: LaunchType.UserInitiated,
                       arguments: { ips: group.ip },
                     });
                   }}
                 />
                 <Action.CopyToClipboard title="Copy IP Address" content={group.ip} />
-                <Action.CopyToClipboard title="Copy Port" content={result.port?.toString() || ""} />
+                <Action.CopyToClipboard title="Copy Port" content={result.port?.toString() || ''} />
                 <Action
                   title="Open in Shodan"
                   icon={Icon.Globe}
@@ -384,7 +381,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
               }
 
               if (result.ports && result.ports.length > 0) {
-                markdown += `**Open Ports:** ${result.ports.join(", ")}\n\n`;
+                markdown += `**Open Ports:** ${result.ports.join(', ')}\n\n`;
               }
 
               if (result.vulns && result.vulns.length > 0) {
@@ -392,7 +389,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
               }
 
               if (result.tags && result.tags.length > 0) {
-                markdown += `**Tags:** ${result.tags.join(", ")}\n\n`;
+                markdown += `**Tags:** ${result.tags.join(', ')}\n\n`;
               }
 
               return markdown;
@@ -401,7 +398,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="IP Address" text={result.ip_str} />
                 {result.hostnames && result.hostnames.length > 0 && (
-                  <List.Item.Detail.Metadata.Label title="Hostnames" text={result.hostnames.join(", ")} />
+                  <List.Item.Detail.Metadata.Label title="Hostnames" text={result.hostnames.join(', ')} />
                 )}
                 {result.port && <List.Item.Detail.Metadata.Label title="Port" text={result.port.toString()} />}
                 {result.org && <List.Item.Detail.Metadata.Label title="Organization" text={result.org} />}
@@ -444,10 +441,10 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
             <Action
               title="Request On-Demand Scan"
               icon={Icon.MagnifyingGlass}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={{ modifiers: ['cmd'], key: 'd' }}
               onAction={() => {
                 launchCommand({
-                  name: "scan-ondemand",
+                  name: 'scan-ondemand',
                   type: LaunchType.UserInitiated,
                   arguments: { ips: result.ip_str },
                 });
@@ -457,7 +454,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
               <Action
                 title="View Full Screenshot"
                 icon={Icon.Camera}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={{ modifiers: ['cmd'], key: 's' }}
                 onAction={() => {
                   // Save screenshot to temp file and open it
                   const screenshotPath = saveScreenshotToTempFile(result.screenshot!.data);
@@ -466,8 +463,8 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
                   } else {
                     showToast({
                       style: Toast.Style.Failure,
-                      title: "Error",
-                      message: "Failed to save screenshot",
+                      title: 'Error',
+                      message: 'Failed to save screenshot',
                     });
                   }
                 }}
@@ -610,7 +607,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
         <List.Section title="Pagination">
           <List.Item
             title="Previous Page"
-            subtitle={currentPage > 1 ? `Go to page ${currentPage - 1}` : "Already on first page"}
+            subtitle={currentPage > 1 ? `Go to page ${currentPage - 1}` : 'Already on first page'}
             icon={Icon.ChevronLeft}
             actions={
               <ActionPanel>
@@ -622,7 +619,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
           />
           <List.Item
             title="Next Page"
-            subtitle={currentPage * 100 < totalResults ? `Go to page ${currentPage + 1}` : "No more pages"}
+            subtitle={currentPage * 100 < totalResults ? `Go to page ${currentPage + 1}` : 'No more pages'}
             icon={Icon.ChevronRight}
             actions={
               <ActionPanel>

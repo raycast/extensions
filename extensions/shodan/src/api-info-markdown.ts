@@ -1,4 +1,4 @@
-import { ShodanAPIInfo } from "./shodan-api";
+import { ShodanAPIInfo } from './shodan-api';
 
 export interface UsageInfo {
   query: { used: number; total: number; percentage: number };
@@ -36,22 +36,22 @@ export const generateAPIInfoMarkdown = (apiInfo: ShodanAPIInfo, usage: UsageInfo
 
 ## 🔍 Query Credits
 **Used:** ${usage.query.percentage}%  
-**Used Credits:** ${usage.query.used.toLocaleString()}/${usage.query.total === -1 ? "∞" : usage.query.total.toLocaleString()}  
-**Remaining Credits:** ${apiInfo.query_credits === -1 ? "Unlimited" : apiInfo.query_credits.toLocaleString()}/${apiInfo.usage_limits.query_credits === -1 ? "∞" : apiInfo.usage_limits.query_credits.toLocaleString()}
+**Used Credits:** ${usage.query.used.toLocaleString()}/${usage.query.total === -1 ? '∞' : usage.query.total.toLocaleString()}  
+**Remaining Credits:** ${apiInfo.query_credits === -1 ? 'Unlimited' : apiInfo.query_credits.toLocaleString()}/${apiInfo.usage_limits.query_credits === -1 ? '∞' : apiInfo.usage_limits.query_credits.toLocaleString()}
 
 ---
 
 ## 🔎 Scan Credits
 **Used:** ${usage.scan.percentage}%  
-**Used Credits:** ${usage.scan.used.toLocaleString()}/${usage.scan.total === -1 ? "∞" : usage.scan.total.toLocaleString()}  
-**Remaining Credits:** ${apiInfo.scan_credits === -1 ? "Unlimited" : apiInfo.scan_credits.toLocaleString()}/${apiInfo.usage_limits.scan_credits === -1 ? "∞" : apiInfo.usage_limits.scan_credits.toLocaleString()}
+**Used Credits:** ${usage.scan.used.toLocaleString()}/${usage.scan.total === -1 ? '∞' : usage.scan.total.toLocaleString()}  
+**Remaining Credits:** ${apiInfo.scan_credits === -1 ? 'Unlimited' : apiInfo.scan_credits.toLocaleString()}/${apiInfo.usage_limits.scan_credits === -1 ? '∞' : apiInfo.usage_limits.scan_credits.toLocaleString()}
 
 ---
 
 ## 👁️ Monitored IPs
 **Used:** ${usage.monitored.percentage}%  
-**Used Monitors:** ${usage.monitored.used.toLocaleString()}/${usage.monitored.total === -1 ? "∞" : usage.monitored.total.toLocaleString()}  
-**Remaining Monitors:** ${apiInfo.monitored_ips === -1 ? "Unlimited" : apiInfo.monitored_ips.toLocaleString()}/${apiInfo.usage_limits.monitored_ips === -1 ? "∞" : apiInfo.usage_limits.monitored_ips.toLocaleString()}
+**Used Monitors:** ${usage.monitored.used.toLocaleString()}/${usage.monitored.total === -1 ? '∞' : usage.monitored.total.toLocaleString()}  
+**Remaining Monitors:** ${apiInfo.monitored_ips === -1 ? 'Unlimited' : apiInfo.monitored_ips.toLocaleString()}/${apiInfo.usage_limits.monitored_ips === -1 ? '∞' : apiInfo.usage_limits.monitored_ips.toLocaleString()}
 
 ---
 

@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from '@raycast/api';
 
 export interface ShodanPortInfo {
   port: number;
@@ -92,7 +92,7 @@ export interface ShodanStatsResult {
 
 export interface ShodanScanRequest {
   ips: string; // Comma-separated list of IPs or netblocks
-  service: Array<[number, string]>; // Array of [port, protocol] pairs
+  service: Array<[number, string]> | string[]; // Array of [port, protocol] pairs or protocol names
 }
 
 export interface ShodanScanResponse {
@@ -149,7 +149,7 @@ export interface ShodanAlertInfo {
 
 export class ShodanAPI {
   private apiKey: string;
-  private baseUrl = "https://api.shodan.io";
+  private baseUrl = 'https://api.shodan.io';
 
   constructor() {
     const preferences = getPreferenceValues<{ shodanApiKey: string }>();
@@ -185,7 +185,7 @@ export class ShodanAPI {
     let url = `${this.baseUrl}/shodan/host/search?key=${this.apiKey}&query=${encodeURIComponent(query)}&page=${page}`;
 
     if (facets && facets.length > 0) {
-      url += `&facets=${facets.join(",")}`;
+      url += `&facets=${facets.join(',')}`;
     }
 
     const response = await fetch(url);
@@ -207,8 +207,8 @@ export class ShodanAPI {
     return await response.json();
   }
 
-  async getStats(query: string, facets: string[] = ["country", "org"]): Promise<ShodanStatsResult> {
-    const facetsParam = facets.join(",");
+  async getStats(query: string, facets: string[] = ['country', 'org']): Promise<ShodanStatsResult> {
+    const facetsParam = facets.join(',');
     const response = await fetch(
       `${this.baseUrl}/shodan/host/search?key=${this.apiKey}&query=${encodeURIComponent(query)}&facets=${facetsParam}`,
     );
@@ -222,9 +222,9 @@ export class ShodanAPI {
 
   async requestScan(scanRequest: ShodanScanRequest): Promise<ShodanScanResponse> {
     const response = await fetch(`${this.baseUrl}/shodan/scan?key=${this.apiKey}`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(scanRequest),
     });

@@ -10,9 +10,9 @@ import {
   LocalStorage,
   launchCommand,
   LaunchType,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ShodanAPI, ShodanHostInfo, ShodanPortInfo } from "./shodan-api";
+} from '@raycast/api';
+import { useState, useEffect } from 'react';
+import { ShodanAPI, ShodanHostInfo, ShodanPortInfo } from './shodan-api';
 
 // Search history interface
 interface SearchHistoryItem {
@@ -25,28 +25,28 @@ interface SearchHistoryItem {
 // Helper function to get service name from port number
 const getServiceName = (port: number): string => {
   const commonPorts: { [key: number]: string } = {
-    20: "FTP Data",
-    21: "FTP Control",
-    22: "SSH",
-    23: "Telnet",
-    25: "SMTP",
-    53: "DNS",
-    80: "HTTP",
-    110: "POP3",
-    143: "IMAP",
-    443: "HTTPS",
-    993: "IMAPS",
-    995: "POP3S",
-    1433: "MSSQL",
-    3306: "MySQL",
-    3389: "RDP",
-    5432: "PostgreSQL",
-    5900: "VNC",
-    6379: "Redis",
-    8080: "HTTP Alt",
-    8443: "HTTPS Alt",
-    27017: "MongoDB",
-    11211: "Memcached",
+    20: 'FTP Data',
+    21: 'FTP Control',
+    22: 'SSH',
+    23: 'Telnet',
+    25: 'SMTP',
+    53: 'DNS',
+    80: 'HTTP',
+    110: 'POP3',
+    143: 'IMAP',
+    443: 'HTTPS',
+    993: 'IMAPS',
+    995: 'POP3S',
+    1433: 'MSSQL',
+    3306: 'MySQL',
+    3389: 'RDP',
+    5432: 'PostgreSQL',
+    5900: 'VNC',
+    6379: 'Redis',
+    8080: 'HTTP Alt',
+    8443: 'HTTPS Alt',
+    27017: 'MongoDB',
+    11211: 'Memcached',
   };
   return commonPorts[port] || `Port ${port}`;
 };
@@ -76,16 +76,16 @@ const getProtocol = (port: number, transport?: string): string => {
   const udpPorts = [53, 67, 68, 69, 123, 161, 162, 500, 514, 520, 631, 1434, 1900, 5353];
 
   if (udpPorts.includes(port)) {
-    return "UDP";
+    return 'UDP';
   }
 
   // Default to TCP for most ports
-  return "TCP";
+  return 'TCP';
 };
 
 // Helper function to format port metadata for tooltip
 const formatPortMetadata = (portData: ShodanPortInfo, port: number): string => {
-  const metadata = [];
+  const metadata: string[] = [];
 
   metadata.push(`Port: ${port}`);
   metadata.push(`Protocol: ${getProtocol(port, portData.transport)}`);
@@ -125,11 +125,11 @@ const formatPortMetadata = (portData: ShodanPortInfo, port: number): string => {
     metadata.push(`CPE: ${portData.cpe.length} entries`);
   }
 
-  return metadata.join("\n");
+  return metadata.join('\n');
 };
 
 export default function SearchHost() {
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hostInfo, setHostInfo] = useState<ShodanHostInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -142,7 +142,7 @@ export default function SearchHost() {
   }, []);
 
   const loadSearchHistory = async () => {
-    const history = await LocalStorage.getItem<string>("searchHistory");
+    const history = await LocalStorage.getItem<string>('searchHistory');
     if (history) {
       const parsedHistory = JSON.parse(history) as SearchHistoryItem[];
       setSearchHistory(parsedHistory);
@@ -152,13 +152,13 @@ export default function SearchHost() {
   const saveSearchHistory = async (newItem: SearchHistoryItem) => {
     const updatedHistory = [newItem, ...searchHistory.filter((item) => item.ip !== newItem.ip)].slice(0, 20); // Keep last 20 searches
     setSearchHistory(updatedHistory);
-    await LocalStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
+    await LocalStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
   };
 
   const clearSearchHistory = async () => {
     setSearchHistory([]);
-    await LocalStorage.removeItem("searchHistory");
-    showToast({ title: "Search history cleared", style: Toast.Style.Success });
+    await LocalStorage.removeItem('searchHistory');
+    showToast({ title: 'Search history cleared', style: Toast.Style.Success });
   };
 
   const handleSearch = async (query: string) => {
@@ -177,7 +177,7 @@ export default function SearchHost() {
       if (!result) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Host not found",
+          title: 'Host not found',
           message: `No information found for ${query}`,
         });
       } else {
@@ -191,11 +191,11 @@ export default function SearchHost() {
         await saveSearchHistory(historyItem);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
-        title: "Search failed",
+        title: 'Search failed',
         message: errorMessage,
       });
     } finally {
@@ -228,7 +228,7 @@ export default function SearchHost() {
         <List.Item
           title="IP Address"
           subtitle={hostInfo.ip_str}
-          accessories={[{ text: "Primary" }]}
+          accessories={[{ text: 'Primary' }]}
           icon={Icon.Globe}
           detail={
             <List.Item.Detail
@@ -239,19 +239,19 @@ export default function SearchHost() {
                   {hostInfo.hostnames.length > 0 && (
                     <List.Item.Detail.Metadata.Label
                       title="Hostnames"
-                      text={`${hostInfo.hostnames.length} hostname${hostInfo.hostnames.length > 1 ? "s" : ""}`}
+                      text={`${hostInfo.hostnames.length} hostname${hostInfo.hostnames.length > 1 ? 's' : ''}`}
                     />
                   )}
                   {hostInfo.hostnames.length > 0 && (
-                    <List.Item.Detail.Metadata.Label title="Domains" text={hostInfo.hostnames.join(", ")} />
+                    <List.Item.Detail.Metadata.Label title="Domains" text={hostInfo.hostnames.join(', ')} />
                   )}
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Organization" text={hostInfo.org || "Unknown"} />
-                  <List.Item.Detail.Metadata.Label title="ISP" text={hostInfo.isp || "Unknown"} />
+                  <List.Item.Detail.Metadata.Label title="Organization" text={hostInfo.org || 'Unknown'} />
+                  <List.Item.Detail.Metadata.Label title="ISP" text={hostInfo.isp || 'Unknown'} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Last Seen"
-                    text={hostInfo.last_update || hostInfo.timestamp || "Unknown"}
+                    text={hostInfo.last_update || hostInfo.timestamp || 'Unknown'}
                   />
                   <List.Item.Detail.Metadata.Label title="Open Ports" text={`${hostInfo.ports.length} ports`} />
                 </List.Item.Detail.Metadata>
@@ -272,13 +272,21 @@ export default function SearchHost() {
               <Action
                 title="Request On-Demand Scan"
                 icon={Icon.MagnifyingGlass}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-                onAction={() => {
-                  launchCommand({
-                    name: "scan-ondemand",
-                    type: LaunchType.UserInitiated,
-                    arguments: { ips: hostInfo.ip_str },
-                  });
+                shortcut={{ modifiers: ['cmd'], key: 'd' }}
+                onAction={async () => {
+                  try {
+                    await launchCommand({
+                      name: 'scan-ondemand',
+                      type: LaunchType.UserInitiated,
+                      arguments: { ips: hostInfo.ip_str },
+                    });
+                  } catch (error) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: 'Failed to launch command',
+                      message: error instanceof Error ? error.message : 'Unknown error occurred',
+                    });
+                  }
                 }}
               />
             </ActionPanel>
@@ -362,7 +370,7 @@ export default function SearchHost() {
                     <List.Item.Detail
                       markdown={(() => {
                         const bannerText = portData.banner || portData.data;
-                        if (!bannerText) return "";
+                        if (!bannerText) return '';
 
                         return `## Banner/Header Data\n\n\`\`\`\n${bannerText}\n\`\`\``;
                       })()}
@@ -413,7 +421,7 @@ export default function SearchHost() {
                           {(portData.banner || portData.data) && (
                             <List.Item.Detail.Metadata.Label
                               title="Banner Length"
-                              text={`${(portData.banner || portData.data || "").length} characters`}
+                              text={`${(portData.banner || portData.data || '').length} characters`}
                             />
                           )}
                         </List.Item.Detail.Metadata>
@@ -436,7 +444,7 @@ export default function SearchHost() {
                         title="View Headers"
                         icon={Icon.Document}
                         onAction={() => {
-                          const bannerText = portData.banner || portData.data || "";
+                          const bannerText = portData.banner || portData.data || '';
                           showToast({
                             style: Toast.Style.Success,
                             title: `Port ${port} Headers`,
@@ -449,7 +457,7 @@ export default function SearchHost() {
                     )}
                     <Action.CopyToClipboard title="Copy Port" content={port.toString()} />
                     {(portData?.banner || portData?.data) && (
-                      <Action.CopyToClipboard title="Copy Banner" content={portData.banner || portData.data || ""} />
+                      <Action.CopyToClipboard title="Copy Banner" content={portData.banner || portData.data || ''} />
                     )}
                     {portData && (
                       <Action
@@ -499,11 +507,11 @@ export default function SearchHost() {
         <List.Section key="tags" title="Tags">
           <List.Item
             title="Tags"
-            subtitle={hostInfo.tags.join(", ")}
+            subtitle={hostInfo.tags.join(', ')}
             icon={Icon.Tag}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Tags" content={hostInfo.tags.join(", ")} />
+                <Action.CopyToClipboard title="Copy Tags" content={hostInfo.tags.join(', ')} />
               </ActionPanel>
             }
           />

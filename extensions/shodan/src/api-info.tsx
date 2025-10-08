@@ -1,12 +1,13 @@
-import { Detail, ActionPanel, Action, Icon, Color, showToast, Toast, List } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ShodanAPI, ShodanAPIInfo } from "./shodan-api";
+import { Detail, ActionPanel, Action, Icon, Color, List } from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
+import { useState, useEffect } from 'react';
+import { ShodanAPI, ShodanAPIInfo } from './shodan-api';
 import {
   getUsageInfo,
   generateErrorMarkdown,
   generateLoadingMarkdown,
   generateNoDataMarkdown,
-} from "./api-info-markdown";
+} from './api-info-markdown';
 
 export default function APIInfo() {
   const [apiInfo, setApiInfo] = useState<ShodanAPIInfo | null>(null);
@@ -22,13 +23,9 @@ export default function APIInfo() {
       const info = await shodanAPI.getAPIInfo();
       setApiInfo(info);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load API info",
-        message: errorMessage,
-      });
+      await showFailureToast('Failed to load API info', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +36,7 @@ export default function APIInfo() {
   }, []);
 
   const formatCredits = (credits: number) => {
-    if (credits === -1) return "Unlimited";
+    if (credits === -1) return 'Unlimited';
     return credits.toLocaleString();
   };
 
@@ -94,27 +91,27 @@ export default function APIInfo() {
       <List.Section title="Usage Statistics">
         <List.Item
           title="Query Credits"
-          subtitle={`Used: ${usage.query.percentage}% • ${usage.query.used.toLocaleString()}/${usage.query.total === -1 ? "∞" : usage.query.total.toLocaleString()}`}
+          subtitle={`Used: ${usage.query.percentage}% • ${usage.query.used.toLocaleString()}/${usage.query.total === -1 ? '∞' : usage.query.total.toLocaleString()}`}
           icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Blue }}
           accessories={[
             {
-              text: `Remaining: ${apiInfo.query_credits === -1 ? "Unlimited" : apiInfo.query_credits.toLocaleString()}`,
+              text: `Remaining: ${apiInfo.query_credits === -1 ? 'Unlimited' : apiInfo.query_credits.toLocaleString()}`,
             },
           ]}
         />
 
         <List.Item
           title="Scan Credits"
-          subtitle={`Used: ${usage.scan.percentage}% • ${usage.scan.used.toLocaleString()}/${usage.scan.total === -1 ? "∞" : usage.scan.total.toLocaleString()}`}
+          subtitle={`Used: ${usage.scan.percentage}% • ${usage.scan.used.toLocaleString()}/${usage.scan.total === -1 ? '∞' : usage.scan.total.toLocaleString()}`}
           icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Green }}
           accessories={[
-            { text: `Remaining: ${apiInfo.scan_credits === -1 ? "Unlimited" : apiInfo.scan_credits.toLocaleString()}` },
+            { text: `Remaining: ${apiInfo.scan_credits === -1 ? 'Unlimited' : apiInfo.scan_credits.toLocaleString()}` },
           ]}
         />
 
         <List.Item
           title="Monitored IPs"
-          subtitle={`Used: ${usage.monitored.percentage}% • ${usage.monitored.used.toLocaleString()}/${usage.monitored.total === -1 ? "∞" : usage.monitored.total.toLocaleString()}`}
+          subtitle={`Used: ${usage.monitored.percentage}% • ${usage.monitored.used.toLocaleString()}/${usage.monitored.total === -1 ? '∞' : usage.monitored.total.toLocaleString()}`}
           icon={{ source: Icon.Eye, tintColor: Color.Orange }}
           accessories={[{ text: `Active: ${apiInfo.monitored_ips.toLocaleString()}` }]}
         />
