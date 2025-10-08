@@ -36,7 +36,12 @@ export default function ListConversations() {
                   : "") + (conversation.messages[0].content || "No content available")
             }
             accessories={[
-              conversation.meta.sender.email ? {} : {icon: {source:Icon.Warning, tintColor: Color.Yellow}, tooltip: "The identity of this user is not verified"},
+              conversation.meta.sender.email
+                ? {}
+                : {
+                    icon: { source: Icon.Warning, tintColor: Color.Yellow },
+                    tooltip: "The identity of this user is not verified",
+                  },
               {
                 date: new Date(conversation.created_at * 1000),
                 tooltip: `Created ${formatDistanceToNow(new Date(conversation.created_at * 1000), { addSuffix: true })}`,

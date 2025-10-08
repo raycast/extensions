@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Contact, Conversation, Inbox, Integration, ListResult, Message } from "./types";
+import { Contact, Conversation, Inbox, Integration, ListResult, Message, Portal } from "./types";
 
 class Chatwoot {
   private url: string;
@@ -10,6 +10,7 @@ class Chatwoot {
   public inboxes: InboxesService;
   public integrations: IntegrationsService;
   public messages: MessagesService;
+  public portals: PortalsService;
 
   constructor(url: string, accessToken: string, accountId: string) {
     this.url = url;
@@ -20,6 +21,7 @@ class Chatwoot {
     this.inboxes = new InboxesService(this);
     this.integrations = new IntegrationsService(this);
     this.messages = new MessagesService(this);
+    this.portals = new PortalsService(this);
   }
 
   public buildUrl(route: string) {
@@ -37,8 +39,8 @@ class Chatwoot {
     if (!response.headers.get("content-type")?.includes("json")) throw new Error(response.statusText);
     const result = await response.json();
     if (!response.ok) {
-      const errorResult = result as {error: string} | {message: string, attributes: string[]};
-      throw new Error(("error" in errorResult) ? errorResult.error : errorResult.message);
+      const errorResult = result as { error: string } | { message: string; attributes: string[] };
+      throw new Error("error" in errorResult ? errorResult.error : errorResult.message);
     }
     return result as T;
   }
@@ -47,7 +49,7 @@ class Chatwoot {
 class ContactsService {
   constructor(private client: Chatwoot) {}
   async create(props: { contact: Partial<Contact> }) {
-    return this.client["request"]<Contact>(`contacts`, {
+    return this.client["request"]<Contact>("contacts", {
       method: "POST",
       body: JSON.stringify(props.contact),
     });
@@ -84,6 +86,18 @@ class MessagesService {
   }
   async list(props: { conversationId: number }) {
     return this.client["request"]<{ payload: Message[] }>(`conversations/${props.conversationId}/messages`);
+  }
+}
+class PortalsService {
+  constructor(private client: Chatwoot) {}
+  async create(props: { portal: Partial<Portal> }) {
+    return this.client["request"]<Portal>("portals", {
+      method: "POST",
+      body: JSON.stringify(props.portal),
+    });
+  }
+  async list() {
+    return this.client["request"]<{meta: {current_page: number, portals_count: number}, payload: Portal[]}>("portals");
   }
 }
 

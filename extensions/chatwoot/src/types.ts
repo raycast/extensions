@@ -54,6 +54,24 @@ export type Integration = {
   description: string;
   enabled: boolean;
 };
+export type Portal = {
+  id: number;
+  color: string;
+  name: string;
+  header_text: string;
+  slug: string;
+  custom_domain: string;
+  homepage_link: string;
+  page_title: string;
+  archived: boolean
+  "config": {
+    "allowed_locales": string[]
+    "default_locale": string
+  }
+  logo?: {
+    file_url: string;
+  }
+}
 
 export type ListResult<T> = {
   meta: {

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatwoot",
   "title": "Chatwoot",
-  "description": "",
+  "description": "The modern, open source, self-hosted customer support platform",
   "icon": "chatwoot.png",
   "author": "xmok",
   "platforms": [
@@ -16,14 +16,15 @@
     {
       "name": "chatwoot_url",
       "title": "Chatwoot URL",
-      "placeholder": "",
+      "placeholder": "https://app.chatwoot.com/",
       "type": "textfield",
       "required": true,
-      "description": "Chatwoot URL"
+      "description": "Chatwoot URL",
+      "default": "https://app.chatwoot.com/"
     },
     {
       "name": "access_token",
-      "title": "Access Token",
+      "title": "Application Access Token",
       "placeholder": "xXxxX...xxx",
       "type": "password",
       "required": true,
@@ -42,25 +43,31 @@
     {
       "name": "list-contacts",
       "title": "List Contacts",
-      "description": "",
+      "description": "View Contacts",
       "mode": "view"
     },
     {
       "name": "list-conversations",
       "title": "List Conversations",
-      "description": "",
+      "description": "View Conversations & Messages",
       "mode": "view"
     },
     {
       "name": "list-inboxes",
       "title": "List Inboxes",
-      "description": "",
+      "description": "View Inboxes",
       "mode": "view"
     },
     {
       "name": "list-integrations",
       "title": "List Integrations",
-      "description": "",
+      "description": "View Integrations",
+      "mode": "view"
+    },
+    {
+      "name": "list-portals",
+      "title": "List Portals",
+      "description": "View Portals",
       "mode": "view"
     }
   ],

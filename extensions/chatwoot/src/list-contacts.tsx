@@ -7,7 +7,7 @@ export default function ListContacts() {
     isLoading,
     data: contacts,
     pagination,
-    mutate
+    mutate,
   } = useCachedPromise(
     () => async (options: { page: number }) => {
       const { meta, payload } = await chatwoot.contacts.list({ page: options.page + 1 });
@@ -32,9 +32,11 @@ export default function ListContacts() {
             { icon: Icon.Building, text: contact.additional_attributes.company_name },
             { date: new Date(contact.created_at * 1000) },
           ]}
-          actions={<ActionPanel>
-            <Action.Push icon={Icon.AddPerson} title="Add Contact" target={<AddContact />} onPop={mutate} />
-          </ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action.Push icon={Icon.AddPerson} title="Add Contact" target={<AddContact />} onPop={mutate} />
+            </ActionPanel>
+          }
         />
       ))}
     </List>
@@ -42,12 +44,12 @@ export default function ListContacts() {
 }
 
 function AddContact() {
-    const { pop } = useNavigation();
+  const { pop } = useNavigation();
   type FormValues = {
-    name: string
-    email: string
-  }
-  const {handleSubmit,itemProps} = useForm<FormValues>({
+    name: string;
+    email: string;
+  };
+  const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Adding", values.name);
       try {
@@ -63,13 +65,19 @@ function AddContact() {
     },
     validation: {
       name: FormValidation.Required,
-      email: FormValidation.Required
-    }
-  })
-  return <Form actions={<ActionPanel>
-    <Action.SubmitForm icon={Icon.AddPerson} title="Add Contact" onSubmit={handleSubmit} />
-  </ActionPanel>}>
-  <Form.TextField title="Name" {...itemProps.name} />
-  <Form.TextField title="Email Address" {...itemProps.email} />
-  </Form>
+      email: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.AddPerson} title="Add Contact" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Name" {...itemProps.name} />
+      <Form.TextField title="Email Address" {...itemProps.email} />
+    </Form>
+  );
 }
