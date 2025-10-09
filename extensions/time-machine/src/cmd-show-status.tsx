@@ -137,7 +137,7 @@ export default function ShowBackupStatus() {
               accessories={[
                 {
                   tag: {
-                    value: `${(status.Progress * 100).toString().split(".")[0]}%`,
+                    value: `${Math.floor(status.Progress * 100)}%`,
                     color: Color.Blue,
                   },
                 },
