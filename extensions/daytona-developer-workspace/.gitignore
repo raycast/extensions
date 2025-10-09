@@ -35,9 +35,6 @@ dev-debug.log
 # tasks.json
 # tasks/
 
-# Package lock
-package-lock.json
-
 # AI assistants
 /.claude
 /.cursor
