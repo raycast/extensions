@@ -10,7 +10,7 @@ interface Props {
   onProfileSelected?: (profile: string) => void;
 }
 
-async function loadChromeProfiles(): Promise<ChromeProfile[]> {
+export async function loadChromeProfiles(): Promise<ChromeProfile[]> {
   const path = getLocalStatePath();
   if (!existsSync(path)) {
     return [{ name: "Default", id: "Default" }];
