@@ -1,37 +1,34 @@
-// UI utility functions
+import { Image } from "@raycast/api";
+import { getProgressIcon as getRaycastProgressIcon } from "@raycast/utils";
 import { PROGRESS_COLORS } from "../constants";
 
-export function getProgressIcon(progress: number): string {
-  const percentage = Math.round(progress * 100);
-
-  // Create a visual progress indicator using Unicode blocks
-  if (percentage <= 10) return `🔴`; // Very low
-  if (percentage <= 25) return `🟠`; // Low
-  if (percentage <= 50) return `🟡`; // Medium-low
-  if (percentage <= 75) return `🟢`; // Medium-high
-  if (percentage <= 90) return `🔵`; // High
-  return `🟣`; // Very high/complete
-}
-
-export function getProgressColor(progress: number, nutrientType: "calories" | "protein" | "carbs" | "fat"): string {
+export function getProgressIcon(progress: number, nutrientType: "calories" | "protein" | "carbs" | "fat"): Image.Asset {
   const isOverLimit = progress > 1;
-
+  let color: string;
+  console.log("Nutrient Type:", nutrientType, "Progress:", progress);
   if (isOverLimit) {
-    return PROGRESS_COLORS.OVER_LIMIT;
+    color = PROGRESS_COLORS.OVER_LIMIT;
+  } else {
+    switch (nutrientType) {
+      case "calories":
+        color = PROGRESS_COLORS.NORMAL;
+        break;
+      case "protein":
+        color = PROGRESS_COLORS.PROTEIN;
+        break;
+      case "carbs":
+        color = PROGRESS_COLORS.CARBS;
+        break;
+      case "fat":
+        color = PROGRESS_COLORS.FAT;
+        break;
+      default:
+        color = PROGRESS_COLORS.NORMAL;
+        break;
+    }
   }
 
-  switch (nutrientType) {
-    case "calories":
-      return PROGRESS_COLORS.NORMAL;
-    case "protein":
-      return PROGRESS_COLORS.PROTEIN;
-    case "carbs":
-      return PROGRESS_COLORS.CARBS;
-    case "fat":
-      return PROGRESS_COLORS.FAT;
-    default:
-      return PROGRESS_COLORS.NORMAL;
-  }
+  return getRaycastProgressIcon(progress, color);
 }
 
 export function formatMealName(meal: string): string {

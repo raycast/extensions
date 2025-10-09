@@ -50,25 +50,40 @@ export function calculateDailyGoals(summary: DailySummary, goals: Goals): GoalsC
     0,
   );
 
-  // Get goals
-  const goalCalories = goals[NUTRIENT_KEYS.ENERGY] || 0;
-  const goalProtein = goals[NUTRIENT_KEYS.PROTEIN] || 0;
-  const goalCarbs = goals[NUTRIENT_KEYS.CARBS] || 0;
-  const goalFat = goals[NUTRIENT_KEYS.FAT] || 0;
-
-  // Calculate burned calories
-  const burnedCalories = Math.abs(summary.activities?.nutrients?.[NUTRIENT_KEYS.ENERGY] || 0);
-
-  // Calculate adjusted goals and remaining
-  const totalGoalCalories = goalCalories + burnedCalories;
+  const totalGoalCalories = summary.goals ? Math.round(summary.goals["energy.energy"]) : 0;
   const remainingCalories = totalGoalCalories - consumedCalories;
+  const burnedCalories = summary.activity_energy || 0;
 
-  // Calculate progress ratios
-  const calorieProgress = consumedCalories / totalGoalCalories;
-  const proteinProgress = consumedProtein / goalProtein;
-  const carbsProgress = consumedCarbs / goalCarbs;
-  const fatProgress = consumedFat / goalFat;
+  let goalProtein = 0;
+  let goalCarbs = 0;
+  let goalFat = 0;
 
+  if (goals) {
+    const baseProteinGrams = goals["nutrient.protein"];
+    const baseCarbGrams = goals["nutrient.carb"];
+    const baseFatGrams = goals["nutrient.fat"];
+
+    const proteinCalories = baseProteinGrams * 4.1;
+    const carbCalories = baseCarbGrams * 4.1;
+    const fatCalories = baseFatGrams * 9.3;
+
+    const totalBaseCalories = proteinCalories + carbCalories + fatCalories;
+
+    if (totalBaseCalories > 0) {
+      const proteinPercentage = proteinCalories / totalBaseCalories;
+      const carbPercentage = carbCalories / totalBaseCalories;
+      const fatPercentage = fatCalories / totalBaseCalories;
+
+      goalProtein = Math.round((totalGoalCalories * proteinPercentage) / 4.1);
+      goalCarbs = Math.round((totalGoalCalories * carbPercentage) / 4.1);
+      goalFat = Math.round((totalGoalCalories * fatPercentage) / 9.3);
+    }
+  }
+
+  const calorieProgress = totalGoalCalories > 0 ? consumedCalories / totalGoalCalories : 0;
+  const proteinProgress = goalProtein > 0 ? consumedProtein / goalProtein : 0;
+  const carbsProgress = goalCarbs > 0 ? consumedCarbs / goalCarbs : 0;
+  const fatProgress = goalFat > 0 ? consumedFat / goalFat : 0;
   // Clamp progress for display (0-1 range)
   const clampedCalorieProgress = Math.min(Math.max(calorieProgress, 0), 1);
   const clampedProteinProgress = Math.min(Math.max(proteinProgress, 0), 1);

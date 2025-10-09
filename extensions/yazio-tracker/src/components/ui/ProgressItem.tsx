@@ -21,7 +21,6 @@ export function ProgressItem({
   nutrientType,
   accessories = [],
 }: ProgressItemProps) {
-  const clampedProgress = Math.min(Math.max(progress, 0), 1);
   const displayUnit = nutrientType === "calories" && unit === "g" ? "kcal" : unit;
 
   const defaultAccessories: List.Item.Accessory[] = [
@@ -30,7 +29,7 @@ export function ProgressItem({
 
   return (
     <List.Item
-      icon={getProgressIcon(clampedProgress)}
+      icon={getProgressIcon(progress, nutrientType)}
       title={title}
       accessories={[...defaultAccessories, ...accessories]}
     />
