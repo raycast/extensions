@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Added Open Workspace Command] - {PR_MERGE_DATE}
+## [Added Open Workspace Command] - 2025-10-09
 
 - Added a command to open a specific workspace in Zen Browser.
 - Added a hook to fetch user shortcuts.
