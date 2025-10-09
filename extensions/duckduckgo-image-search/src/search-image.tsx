@@ -1,10 +1,20 @@
-import { Action, ActionPanel, closeMainWindow, Grid, Icon, Image, PopToRootType, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  Grid,
+  Icon,
+  Image,
+  PopToRootType,
+  showHUD,
+} from "@raycast/api";
 import { useRef, useState } from "react";
 
 import { useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
 import { ImageLayout, ImageLayouts } from "../utils/consts";
-import { copyImageToClipboard, pasteImage, saveImage, searchImage } from "../utils/helpers";
+import { copyImageToClipboard, pasteImage, quickLookImage, saveImage, searchImage } from "../utils/helpers";
 import { DuckDuckGoImage } from "../utils/search";
 
 const QUERY_EXAMPLES: string[] = [
@@ -29,10 +39,43 @@ function getExampleQuery(): string {
   return QUERY_EXAMPLES[Math.floor(Math.random() * QUERY_EXAMPLES.length)];
 }
 
+interface Preferences {
+  primaryAction: "quicklook" | "browser";
+}
+
 function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
+  const preferences = getPreferenceValues<Preferences>();
+  const isPrimaryQuickLook = preferences.primaryAction === "quicklook";
+
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open Image in Browser" url={item.image} />
+      {isPrimaryQuickLook ? (
+        <>
+          <Action title="Quick Look" icon={Icon.Eye} onAction={() => quickLookImage(item)} />
+          <Action.OpenInBrowser
+            title="Open Image in Browser"
+            url={item.image}
+            shortcut={{
+              modifiers: ["cmd"],
+              key: "enter",
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <Action.OpenInBrowser title="Open Image in Browser" url={item.image} />
+          <Action
+            title="Quick Look"
+            icon={Icon.Eye}
+            onAction={() => quickLookImage(item)}
+            shortcut={{
+              modifiers: ["cmd"],
+              key: "enter",
+            }}
+          />
+        </>
+      )}
+      <Action.OpenWith title="Open With" path={item.image} />
       <Action
         title="Paste Image"
         shortcut={{

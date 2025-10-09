@@ -7,7 +7,7 @@ import { getCachedImagePath, setCachedImagePath } from "./cache";
 import { DEFAULT_RETRIES, DEFAULT_SLEEP, HEADERS, ImageLayouts, ImageLicenses } from "./consts";
 import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
 
-import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
 import path from "path";
 
@@ -191,6 +191,33 @@ export async function saveImage(image: DuckDuckGoImage) {
   } catch (e: any) {
     await showToast({
       title: "Failed to Save Image!",
+      style: Toast.Style.Failure,
+      message: e.message,
+    });
+    throw e;
+  }
+}
+
+export async function quickLookImage(image: DuckDuckGoImage) {
+  await showToast({
+    title: "Opening Image...",
+    style: Toast.Style.Animated,
+  });
+
+  try {
+    // Download the image to temp folder
+    const tempFilePath = await downloadImage(image, false);
+
+    // Open the image with Preview app
+    await open(tempFilePath, "Preview");
+
+    await showToast({
+      title: "Image Opened!",
+      style: Toast.Style.Success,
+    });
+  } catch (e: any) {
+    await showToast({
+      title: "Failed to Open Image!",
       style: Toast.Style.Failure,
       message: e.message,
     });
