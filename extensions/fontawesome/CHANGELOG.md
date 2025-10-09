@@ -1,5 +1,11 @@
 # Font Awesome Changelog
 
+## [Fix: Caching problems] - {PR_MERGE_DATE}
+
+- Fixed issue where the search would sometimes fail and the cached state gets corrupted (ref: [Issue #22051](https://github.com/raycast/extensions/issues/22051))
+- Added more loading state checks for the accessToken hook
+- Separate logic in a hook for better readability
+
 ## [Fix: Search would get stuck] - 2025-09-29
 
 - Fixed issue where search would get stuck since token was not persisted (ref: [Issue #21781](https://github.com/raycast/extensions/issues/21781))
