@@ -47,7 +47,7 @@ export default function useDomainFetch(query: string) {
       if (response.status === 429) {
         return { type: "error-429" } as const;
       }
-      const json: DomainSearchResponse = await response.json();
+      const json = (await response.json()) as DomainSearchResponse;
       return {
         type: "success" as const,
         data: json,

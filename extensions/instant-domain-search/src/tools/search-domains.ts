@@ -26,7 +26,7 @@ export default async function tool(input: Input) {
       "X-Raycast-Anonymous-UUID": anonymousUserID,
     },
   });
-  const data: BulkCheckResponse = await response.json();
+  const data = (await response.json()) as BulkCheckResponse;
   return data.results.map((result) => ({
     domain: result.domain,
     action: result.backlink,
