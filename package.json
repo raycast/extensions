@@ -1,16 +1,19 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "raycast-timeular",
-  "title": "Timeular",
-  "description": "Track time with Timeular",
+  "name": "raycast-early",
+  "title": "EARLY",
+  "description": "Track time with EARLY",
   "icon": "icon.png",
   "author": "bgnfu7re",
+  "contributors": [
+    "ztrls"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "command-status",
       "title": "Status",
-      "subtitle": "Timeular",
+      "subtitle": "EARLY",
       "description": "Check the status of time track. Start and stop time tracking.",
       "mode": "view"
     }
@@ -20,7 +23,7 @@
       "name": "apiToken",
       "type": "password",
       "title": "API Token",
-      "description": "Timeular API Token",
+      "description": "EARLY API Token",
       "required": true
     }
   ],
@@ -42,6 +45,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

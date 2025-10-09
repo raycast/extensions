@@ -95,6 +95,6 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
         ))}
       </ActionPanel.Submenu>
     )}
-    <OpenInBrowserAction url="https://app.timeular.com/#/weekly_view/calendar" title="Open Calendar in Browser" />
+    <OpenInBrowserAction url="https://product.early.app/#/weekly_view/calendar" title="Open Calendar in Browser" />
   </ActionPanel>
 );
