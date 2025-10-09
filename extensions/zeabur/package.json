@@ -35,16 +35,7 @@
       "title": "Manage Projects",
       "subtitle": "Zeabur",
       "description": "Manage Zeabur Projects",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "zeaburToken",
-          "title": "Zeabur Token",
-          "description": "Zeabur Token",
-          "type": "password",
-          "required": true
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "deploy-project",
@@ -52,6 +43,22 @@
       "subtitle": "Zeabur",
       "description": "Deploy a project to Zeabur",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar-projects",
+      "title": "Menu Bar Projects",
+      "subtitle": "Zeabur",
+      "description": "See your Zeabur projects at a glance",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "zeaburToken",
+      "title": "Zeabur Token",
+      "description": "Zeabur Token",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
