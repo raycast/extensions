@@ -49,13 +49,318 @@
 			"description": "Use to chat with captures."
 		}
 	],
+
+	"ai": {
+		"evals": [
+			{
+				"input": "@haystack what flights did i capture",
+				"mocks": {
+					"chat-with-captures": [
+						{
+							"createdAt": "2025-10-09T08:15:29.789Z",
+							"data": {
+								"Airline": {
+									"type": "text",
+									"value": "easyJet"
+								},
+								"Arrival city": {
+									"type": "text",
+									"value": "Paris"
+								},
+								"Date": {
+									"type": "date",
+									"value": "November 19"
+								},
+								"Departure city": {
+									"type": "text",
+									"value": "London"
+								},
+								"Price": {
+									"type": "currency",
+									"value": "€48"
+								},
+								"Time": {
+									"type": "time",
+									"value": "2:40 PM"
+								}
+							},
+							"id": "yhLfI48EH-DjuwiHMdGHo",
+							"imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/yhLfI48EH-DjuwiHMdGHo.png",
+							"stackName": "Plane Tickets",
+							"title": "easyJet London Paris"
+						},
+						{
+							"createdAt": "2025-10-09T08:16:28.373Z",
+							"data": {
+								"Airline": {
+									"type": "text",
+									"value": "KLM"
+								},
+								"Arrival city": {
+									"type": "text",
+									"value": "Amsterdam"
+								},
+								"Date": {
+									"type": "date",
+									"value": "November 19"
+								},
+								"Departure city": {
+									"type": "text",
+									"value": "London"
+								},
+								"Price": {
+									"type": "currency",
+									"value": "€155"
+								},
+								"Time": {
+									"type": "time",
+									"value": "10:00 AM"
+								}
+							},
+							"id": "WfM5AmwTGQ1_WkgUvEyiV",
+							"imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/WfM5AmwTGQ1_WkgUvEyiV.png",
+							"stackName": "Plane Tickets",
+							"title": "KLM London Amsterdam"
+						},
+						{
+							"createdAt": "2025-10-09T08:27:12.574Z",
+							"data": {
+								"Album name": {
+									"type": "text",
+									"value": "Getting Killed"
+								},
+								"Artist name": {
+									"type": "text",
+									"value": "Geese"
+								},
+								"Genre": {
+									"type": "text",
+									"value": "Rock"
+								},
+								"Rating": {
+									"type": "number",
+									"value": "9.0"
+								},
+								"Year released": {
+									"type": "number",
+									"value": "2025"
+								}
+							},
+							"id": "3sM755sM6wsRzunKL2vx6",
+							"imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/3sM755sM6wsRzunKL2vx6.png",
+							"stackName": "Pitchfork Albums",
+							"title": "Getting Killed"
+						},
+						{
+							"createdAt": "2025-10-09T08:28:03.986Z",
+							"data": {
+								"Album name": {
+									"type": "text",
+									"value": "Live Laugh Love"
+								},
+								"Artist name": {
+									"type": "text",
+									"value": "Earl Sweatshirt"
+								},
+								"Genre": {
+									"type": "text",
+									"value": "Rap"
+								},
+								"Rating": {
+									"type": "number",
+									"value": "8.5"
+								},
+								"Year released": {
+									"type": "number",
+									"value": "2025"
+								}
+							},
+							"id": "JflnkG2yqKKT9JrSMMgd3",
+							"imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/JflnkG2yqKKT9JrSMMgd3.png",
+							"stackName": "Pitchfork Albums",
+							"title": "Live Laugh Love"
+						}
+					]
+				},
+				"expected": [
+					{
+						"callsTool": {
+							"name": "chat-with-captures"
+						}
+					}
+				]
+			},
+			{
+				"input": "@haystack what is the highest rated album i captured",
+				"mocks": {
+					"chat-with-captures": [
+						{
+							"createdAt": "2025-10-09T08:15:29.789Z",
+							"data": {
+								"Airline": {
+									"type": "text",
+									"value": "easyJet"
+								},
+								"Arrival city": {
+									"type": "text",
+									"value": "Paris"
+								},
+								"Date": {
+									"type": "date",
+									"value": "November 19"
+								},
+								"Departure city": {
+									"type": "text",
+									"value": "London"
+								},
+								"Price": {
+									"type": "currency",
+									"value": "€48"
+								},
+								"Time": {
+									"type": "time",
+									"value": "2:40 PM"
+								}
+							},
+							"id": "yhLfI48EH-DjuwiHMdGHo",
+							"imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/yhLfI48EH-DjuwiHMdGHo.png",
+							"stackName": "Plane Tickets",
+							"title": "easyJet London Paris"
+						},
+						{
+							"createdAt": "2025-10-09T08:16:28.373Z",
+							"data": {
+								"Airline": {
+									"type": "text",
+									"value": "KLM"
+								},
+								"Arrival city": {
+									"type": "text",
+									"value": "Amsterdam"
+								},
+								"Date": {
+									"type": "date",
+									"value": "November 19"
+								},
+								"Departure city": {
+									"type": "text",
+									"value": "London"
+								},
+								"Price": {
+									"type": "currency",
+									"value": "€155"
+								},
+								"Time": {
+									"type": "time",
+									"value": "10:00 AM"
+								}
+							},
+							"id": "WfM5AmwTGQ1_WkgUvEyiV",
+							"imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/WfM5AmwTGQ1_WkgUvEyiV.png",
+							"stackName": "Plane Tickets",
+							"title": "KLM London Amsterdam"
+						},
+						{
+							"createdAt": "2025-10-09T08:27:12.574Z",
+							"data": {
+								"Album name": {
+									"type": "text",
+									"value": "Getting Killed"
+								},
+								"Artist name": {
+									"type": "text",
+									"value": "Geese"
+								},
+								"Genre": {
+									"type": "text",
+									"value": "Rock"
+								},
+								"Rating": {
+									"type": "number",
+									"value": "9.0"
+								},
+								"Year released": {
+									"type": "number",
+									"value": "2025"
+								}
+							},
+							"id": "3sM755sM6wsRzunKL2vx6",
+							"imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/3sM755sM6wsRzunKL2vx6.png",
+							"stackName": "Pitchfork Albums",
+							"title": "Getting Killed"
+						},
+						{
+							"createdAt": "2025-10-09T08:28:03.986Z",
+							"data": {
+								"Album name": {
+									"type": "text",
+									"value": "Live Laugh Love"
+								},
+								"Artist name": {
+									"type": "text",
+									"value": "Earl Sweatshirt"
+								},
+								"Genre": {
+									"type": "text",
+									"value": "Rap"
+								},
+								"Rating": {
+									"type": "number",
+									"value": "8.5"
+								},
+								"Year released": {
+									"type": "number",
+									"value": "2025"
+								}
+							},
+							"id": "JflnkG2yqKKT9JrSMMgd3",
+							"imagePath": "/Users/haystack/Library/Application Support/com.raycast.macos/extensions/haystack/captures/JflnkG2yqKKT9JrSMMgd3.png",
+							"stackName": "Pitchfork Albums",
+							"title": "Live Laugh Love"
+						}
+					]
+				},
+				"expected": [
+					{
+						"meetsCriteria": "Lists Getting Killed by Geese with a rating of 9.0"
+					}
+				]
+			}
+		]
+	},
 	"preferences": [
 		{
 			"name": "apiKey",
 			"title": "API Key",
-			"description": "An OpenAI API key.",
+			"description": "Your OpenAI API key. You can get one at https://platform.openai.com/account/api-keys.",
 			"type": "password",
 			"required": true
+		},
+		{
+			"name": "model",
+			"title": "Model",
+			"description": "GPT model to use for the API calls.",
+			"type": "dropdown",
+			"required": true,
+			"default": "gpt-5-mini",
+			"data": [
+				{
+					"title": "GPT-5",
+					"value": "gpt-5"
+				},
+				{
+					"title": "GPT-5 mini",
+					"value": "gpt-5-mini"
+				},
+				{
+					"title": "GPT-4o",
+					"value": "gpt-40"
+				},
+				{
+					"title": "GPT-4o mini",
+					"value": "gpt-4o-mini"
+				}
+			]
 		}
 	],
 	"dependencies": {

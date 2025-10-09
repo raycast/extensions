@@ -11,9 +11,11 @@ export async function createClient() {
     throw error;
   }
 
+  const model = preferences.model || AI_CONFIG.MODEL;
+
   try {
     const openai = createOpenAI({ apiKey: preferences.apiKey });
-    return openai(AI_CONFIG.MODEL);
+    return openai(model);
   } catch (error) {
     captureException(new Error("Failed to create OpenAI client", { cause: error }));
     throw new Error("Failed to create OpenAI client. Please check your API key.");

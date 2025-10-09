@@ -17,9 +17,9 @@ const getFieldDescription = (description: string, type: string) => {
         - For text return the text as is.
         - For numbers return a string that JS can easily parse into a number.
         - For currency return a string containing right formatting for this currency and include currency symbol.
-        - For date return a date as string in the format YYYY-MM-DD or MM-DD in case year is not present or YYYY-MM in case day is not present.
-        - For time return a time as string in the format HH:MM.
-        - For boolean return true or false.
+        - For date return a date as string in the format Month D, Yr or Month D in case year is not present or Yr, Month in case day is not present.
+        - For time return a time as string in the format hh:mm a (AM/PM).
+        - For boolean return "Yes" or "No".
         - If nothing on the capture matches this field, return an empty string.
     `;
 };
@@ -82,9 +82,6 @@ const getAvailableTools = async ({
           }
 
           const title = titleFields.map((field) => data[field.label.value].value).join(" ");
-
-          console.log("title", title);
-          console.log("data", data);
 
           await onExecute({ stackName: stack.name.value, title, data });
         } catch (error) {

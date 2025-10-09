@@ -1,48 +1,106 @@
-import fs from "node:fs";
+import fsSync from "node:fs";
+import fs from "node:fs/promises";
 import path from "node:path";
 import { captureException, environment } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { FILE_NAMES } from "../constants";
 import { CaptureSchema } from "../schemas";
+import type { Capture } from "../types";
 
-export default async function tool(): Promise<Record<string, unknown>[]> {
-  const capturesPath = path.join(environment.supportPath, "captures.json");
-
-  if (!fs.existsSync(capturesPath)) {
-    return [];
-  }
-
+/**
+ * Retrieves all captures stored in Haystack for AI analysis.
+ *
+ * This tool provides the AI with access to the user's captured screenshots and their extracted data.
+ * Each capture contains:
+ * - A title (generated from title fields)
+ * - The stack it belongs to (e.g., "Plane Tickets", "Concert Events")
+ * - Extracted structured data with field names and values
+ * - The date it was captured
+ * - Path to the original screenshot
+ *
+ * Use this tool to:
+ * - Answer questions about captured data (e.g., "What plane tickets do I have?")
+ * - Search across captures (e.g., "Find all concerts in March")
+ * - Summarize or aggregate information (e.g., "Total spending on tickets")
+ * - Provide insights based on captured data
+ *
+ * @returns Array of capture objects with title, stack name, structured data, and metadata
+ */
+export default async function tool(): Promise<
+  Array<{
+    id: string;
+    title: string;
+    stackName: string;
+    data: Record<string, { value: string; type: string }>;
+    createdAt: string;
+    imagePath: string;
+  }>
+> {
   try {
-    const fileContent = fs.readFileSync(capturesPath, "utf-8");
-    const rawData = JSON.parse(fileContent);
-
-    if (!Array.isArray(rawData)) {
-      captureException(new Error("Captures data is not an array"));
-      return [];
-    }
-
-    const captures = rawData
-      .map((item) => {
-        try {
-          return CaptureSchema.parse(item);
-        } catch (error) {
-          captureException(error);
-          return null;
-        }
-      })
-      .filter((capture): capture is NonNullable<typeof capture> => capture !== null);
+    const captures = await readCaptures();
 
     return captures.map((capture) => ({
-      createdAt: capture.createdAt,
-      imagePath: capture.imagePath,
+      id: capture.id,
       title: capture.title,
       stackName: capture.stackName,
       data: capture.data,
+      createdAt: capture.createdAt,
+      imagePath: capture.imagePath,
     }));
   } catch (error) {
-    showFailureToast({
-      title: "Failed to fetch captures",
-      message: String(error),
-    });
+    captureException(new Error("Failed to fetch captures for AI tool", { cause: error }));
     return [];
+  }
+}
+
+async function readCaptures(): Promise<Capture[]> {
+  const capturesPath = path.join(environment.supportPath, FILE_NAMES.CAPTURES_JSON);
+
+  await ensureCapturesFileExists(capturesPath);
+
+  try {
+    const fileContent = await fs.readFile(capturesPath, "utf-8");
+    const parsed = JSON.parse(fileContent);
+
+    if (!Array.isArray(parsed)) {
+      captureException(new Error("Captures file is not an array"));
+      return [];
+    }
+
+    const validCaptures: Capture[] = [];
+
+    for (const item of parsed) {
+      try {
+        const validated = CaptureSchema.parse(item);
+        validCaptures.push(validated);
+      } catch (error) {
+        captureException(
+          new Error(`Invalid capture data: ${JSON.stringify(item)}`, {
+            cause: error,
+          }),
+        );
+      }
+    }
+
+    return validCaptures;
+  } catch (error) {
+    captureException(new Error("Failed to read captures file", { cause: error }));
+    return [];
+  }
+}
+
+async function ensureCapturesFileExists(capturesPath: string) {
+  const dir = path.dirname(capturesPath);
+
+  try {
+    if (!fsSync.existsSync(dir)) {
+      await fs.mkdir(dir, { recursive: true });
+    }
+
+    if (!fsSync.existsSync(capturesPath)) {
+      await fs.writeFile(capturesPath, JSON.stringify([], null, 2));
+    }
+  } catch (error) {
+    captureException(new Error("Failed to ensure captures file exists", { cause: error }));
+    throw error;
   }
 }

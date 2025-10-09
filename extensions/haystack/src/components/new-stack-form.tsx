@@ -1,4 +1,14 @@
-import { Action, ActionPanel, captureException, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  captureException,
+  Form,
+  Icon,
+  openExtensionPreferences,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { APICallError } from "ai";
 import type { StackInput } from "../types";
@@ -47,6 +57,13 @@ export const NewStackForm = () => {
           if (statusCode === 401) {
             toast.style = Toast.Style.Failure;
             toast.title = title.trim();
+            toast.primaryAction = {
+              title: "Update API key",
+              onAction: () => {
+                openExtensionPreferences();
+                toast.hide();
+              },
+            };
           }
         } else {
           captureException(error);

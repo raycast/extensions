@@ -1,7 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import { captureException, closeMainWindow, environment, PopToRootType, showHUD } from "@raycast/api";
+import {
+  captureException,
+  closeMainWindow,
+  environment,
+  openExtensionPreferences,
+  PopToRootType,
+  showHUD,
+} from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { APICallError } from "ai";
 import { nanoid } from "nanoid";
 import { AI_CONFIG, FILE_NAMES } from "./constants";
 import { processCapture } from "./utils/process-capture";
@@ -53,7 +61,16 @@ export default async function main() {
     await processCapture({ id, path: outPath });
     await showHUD("Capture created successfully!");
   } catch (error) {
-    captureException(new Error("Failed to process capture", { cause: error }));
-    await showHUD("Failed to process capture. Please try again.");
+    if (error instanceof APICallError) {
+      const { statusCode, message } = error;
+      const [title] = message.split(".");
+      if (statusCode === 401) {
+        showHUD(title);
+        openExtensionPreferences();
+      }
+    } else {
+      captureException(new Error("Failed to process capture", { cause: error }));
+      await showHUD("Failed to process capture. Please try again.");
+    }
   }
 }
