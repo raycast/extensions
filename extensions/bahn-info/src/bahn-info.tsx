@@ -263,7 +263,7 @@ export default function Command() {
   }, [lastRefreshTime, countdown, revalidate]);
 
   return (
-    <List navigationTitle="Bahn Info" isLoading={isLoading}>
+    <List navigationTitle="German Train Info" isLoading={isLoading}>
       {trainInfo?.error && <ErrorItem error={trainInfo.error} />}
 
       {trainInfo && !trainInfo.error && !trainInfo.isOnTrain && <NotOnTrainItem />}

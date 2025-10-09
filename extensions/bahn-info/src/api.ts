@@ -36,7 +36,7 @@ async function fetchWithTimeout(url: string, timeout = 10000): Promise<Response>
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "Raycast-BahnInfo/1.0",
+        "User-Agent": "Raycast-GermanTrainInfo/1.0",
       },
     });
     clearTimeout(timeoutId);

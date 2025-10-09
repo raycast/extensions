@@ -1,4 +1,4 @@
-# Bahn Info
+# German Train Info
 
 Real-time Deutsche Bahn ICE train information for Raycast.
 
