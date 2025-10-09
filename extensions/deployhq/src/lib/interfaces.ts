@@ -1,27 +1,27 @@
 export interface HostingService {
-  name: string;
-  url: string;
-  tree_url: string;
-  commits_url: string;
+  readonly name: string;
+  readonly url: string;
+  readonly tree_url: string;
+  readonly commits_url: string;
 }
 
 export interface Repository {
-  scm_type: string;
-  url: string;
-  port: string | null;
-  username: string | null;
-  branch: string;
-  cached: boolean;
-  hosting_service?: HostingService;
+  readonly scm_type: string;
+  readonly url: string;
+  readonly port: string | null;
+  readonly username: string | null;
+  readonly branch: string;
+  readonly cached: boolean;
+  readonly hosting_service?: HostingService;
 }
 
 export interface Project {
-  name: string;
-  permalink: string;
-  identifier: string;
-  public_key: string;
-  repository?: Repository;
-  zone: string;
-  last_deployed_at: string;
-  auto_deploy_url: string;
+  readonly name: string;
+  readonly permalink: string;
+  readonly identifier: string;
+  readonly public_key: string;
+  readonly repository?: Repository;
+  readonly zone: string;
+  readonly last_deployed_at: string;
+  readonly auto_deploy_url: string;
 }
