@@ -81,12 +81,21 @@ function getNextScheduledTime(command: ScheduledCommand, afterTime: Date): Date 
       const [hours, minutes] = schedule.time.split(":").map(Number);
 
       const nextTime = new Date(afterTime);
-      nextTime.setDate(schedule.dayOfMonth);
       nextTime.setHours(hours, minutes, 0, 0);
+
+      // Get the last day of the current month
+      const lastDayOfMonth = new Date(nextTime.getFullYear(), nextTime.getMonth() + 1, 0).getDate();
+      // Use the scheduled day or the last day of the month, whichever is smaller
+      const actualDay = Math.min(schedule.dayOfMonth, lastDayOfMonth);
+      nextTime.setDate(actualDay);
 
       // If the time this month has passed, move to next month
       if (nextTime <= afterTime) {
         nextTime.setMonth(nextTime.getMonth() + 1);
+        // Recalculate for the new month in case it also doesn't have enough days
+        const newLastDayOfMonth = new Date(nextTime.getFullYear(), nextTime.getMonth() + 1, 0).getDate();
+        const newActualDay = Math.min(schedule.dayOfMonth, newLastDayOfMonth);
+        nextTime.setDate(newActualDay);
       }
       return nextTime;
     }

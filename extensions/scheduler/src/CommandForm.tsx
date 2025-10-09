@@ -335,7 +335,11 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
 
       {/* Monthly: Day of Month */}
       {currentScheduleType === "monthly" && (
-        <Form.Dropdown title="Day of Month" {...itemProps.dayOfMonth}>
+        <Form.Dropdown
+          title="Day of Month"
+          info="If the selected day is not present in the month, the command will run on the last day of the month."
+          {...itemProps.dayOfMonth}
+        >
           {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
             <Form.Dropdown.Item key={day} value={day.toString()} title={`Day ${day}`} />
           ))}
