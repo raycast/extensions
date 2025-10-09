@@ -5,7 +5,6 @@ export function discoverApps(): string[] {
   const output = execSync(`mdfind 'kMDItemContentType == "com.apple.application-bundle"'`).toString();
   const allPaths = output.split("\n").filter(Boolean);
 
-  // 简化过滤：支持所有磁盘，只排除系统服务
   return allPaths.filter((path) => {
     const isMainApp = path.match(/\/Applications\/[^/]+\.app$/) || path.match(/\/System\/Applications\/[^/]+\.app$/);
     const isSystemService =

@@ -1,19 +1,8 @@
-import { Detail, ActionPanel, Action, Clipboard, showToast, Toast } from "@raycast/api";
+import { Detail, ActionPanel, Action, Clipboard, showToast, Toast, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { loadTags } from "./services/tagStorage";
 import { discoverApps, createInitialApps } from "./services/appDiscovery";
-
-interface ExportData {
-  exportTime: string;
-  totalApps: number;
-  appsWithTags: number;
-  apps: Array<{
-    name: string;
-    displayName: string;
-    path: string;
-    tags: string[];
-  }>;
-}
+import { ExportData } from "./types";
 
 const AIPrompt = `Role:
 
@@ -170,11 +159,11 @@ ${AIPrompt}
         <ActionPanel>
           {exportData && (
             <>
-              <Action title="Export to Clipboard" onAction={performExport} icon="doc.on.clipboard" />
-              <Action title="Copy AI Prompt" onAction={copyPrompt} icon="text.quote" />
+              <Action title="Export to Clipboard" onAction={performExport} icon={Icon.Download} />
+              <Action title="Copy AI Prompt" onAction={copyPrompt} icon={Icon.Message} />
             </>
           )}
-          <Action title="Refresh Data" onAction={loadData} icon="arrow.clockwise" />
+          <Action title="Refresh Data" onAction={loadData} icon={Icon.ArrowClockwise} />
         </ActionPanel>
       }
     />

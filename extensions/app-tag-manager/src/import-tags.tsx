@@ -1,19 +1,8 @@
-import { ActionPanel, Action, Detail, Clipboard, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { ActionPanel, Action, Detail, Clipboard, showToast, Toast, confirmAlert, Alert, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { saveTags, loadTags } from "./services/tagStorage";
 import { discoverApps, createInitialApps } from "./services/appDiscovery";
-
-interface ExportData {
-  exportTime: string;
-  totalApps: number;
-  appsWithTags: number;
-  apps: Array<{
-    name: string;
-    displayName: string;
-    path: string;
-    tags: string[];
-  }>;
-}
+import { ExportData } from "./types";
 
 export default function ImportTagsCommand() {
   const [importData, setImportData] = useState<ExportData | null>(null);
@@ -163,15 +152,8 @@ Use the "Import Tags" action to proceed with the import.`;
       markdown={getMarkdownContent()}
       actions={
         <ActionPanel>
-          {importData && (
-            <Action
-              title="Import Tags"
-              onAction={performImport}
-              icon="square.and.arrow.down"
-              style={Action.Style.Destructive}
-            />
-          )}
-          <Action title="Reload Clipboard" onAction={loadClipboardContent} icon="arrow.clockwise" />
+          {importData && <Action title="Import Tags" onAction={performImport} icon={Icon.Upload} />}
+          <Action title="Reload Clipboard" onAction={loadClipboardContent} icon={Icon.ArrowClockwise} />
         </ActionPanel>
       }
     />

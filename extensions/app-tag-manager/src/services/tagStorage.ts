@@ -9,7 +9,7 @@ export async function loadTags(): Promise<TagStorage> {
     try {
       tagMap[key] = JSON.parse(value);
     } catch {
-      // 跳过无效的标签数据
+      // skip invalid tag data
     }
   }
 
