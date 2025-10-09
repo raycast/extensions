@@ -261,15 +261,15 @@ export default function Command(props: LaunchProps) {
               ) : (
                 <>
                   <Action
-                    title="Remove Pinned Modification"
+                    title="Remove from Pinned Modification"
                     icon={Icon.PinDisabled}
-                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    shortcut={Keyboard.Shortcut.Common.Pin}
                     onAction={() => {
                       setPinned(pinned.filter((c) => c !== props.modification));
                     }}
                   />
                   <Action
-                    title="Clear Pinned Modifications"
+                    title="Clear All Pinned Modifications"
                     style={Action.Style.Destructive}
                     icon={{ source: Icon.XMarkCircle }}
                     shortcut={Keyboard.Shortcut.Common.RemoveAll}
