@@ -18,6 +18,17 @@ export const POSTIZ_HEADERS = {
   Authorization: api_key,
   "Content-Type": "application/json",
 };
+export const parsePostizResponse = async (response: Response) => {
+  if (!response.headers.get("content-type")?.includes("json")) throw new Error(response.statusText);
+  const result = await response.json();
+  if (!response.ok) {
+    const err = result as { error?: string; message: string[] | string };
+    let message = err.error ? `${err.error} | ` : "";
+    message += Array.isArray(err.message) ? err.message[0] : err.message;
+    throw new Error(message);
+  }
+  return result;
+};
 
 export const STATE_COLORS: Record<State, Color> = {
   QUEUE: Color.Blue,
