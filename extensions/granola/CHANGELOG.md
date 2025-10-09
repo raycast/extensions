@@ -1,5 +1,28 @@
 # Granola Changelog
 
+## [1.6.1] - 2025-10-08
+
+### ✨ Enhancements
+- Added folder-aware filtering to the **Export Transcripts** and **Export Notes** commands, including note counts, folder icons, and a dedicated "Notes Not in Folders" view.
+- ZIP exports are now grouped by original folder when available, keeping downloaded files grouped the way they appear in Granola.
+
+### 🔧 Bug Fixes
+- Fixed a bug with fetching recipes.
+
+## [1.6] - 2025-09-17
+
+### 🚀 New Commands
+- **Search People** - Browse and search people from your Granola meetings
+- **Search Companies** - Explore companies from your meetings 
+
+### ✨ New AI Tools
+- **Recipes Tool** - Use recipes from Granola within Raycast AI
+- **List Meetings Tool** - List meetings from Granola, with optional filtering by title, date, or folder
+
+
+### 🗑 Removed
+- **Browse Folders** command removed as redundant. Use `Search Notes` with the folder filter instead
+
 ## [1.5.1] - 2025-08-19
 
 ### 🔧 Bug Fixes

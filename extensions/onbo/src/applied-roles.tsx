@@ -22,7 +22,7 @@ import { enhanceJobTitles } from "./utils/enhanceJobTitles";
 import { ApplicationStatus } from "./utils/roles";
 import { getStatusIcon } from "./utils/icons";
 import CsvTools from "./components/ExportCSV";
-import { formatLastUpdated } from "./utils/format";
+import { formatDaysAgo } from "./utils/format";
 import ImportCSVCommand from "./components/ImportCSV";
 import NotesView from "./components/NotesView";
 
@@ -195,7 +195,8 @@ export default function Command() {
                     },
                   ]
                 : []),
-              { text: formatLastUpdated(job.statusUpdatedAt) },
+              { icon: Icon.Pin, tooltip: job.locations.join("\n") },
+              { text: formatDaysAgo(job.statusUpdatedAt ?? "") },
             ]}
             actions={
               <ActionPanel>

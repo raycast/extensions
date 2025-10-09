@@ -1,16 +1,16 @@
 import { calendar_v3 } from "@googleapis/calendar";
-import { CalendarEvent, CalendarServicePreferences, GoogleCalendarEventData } from "../types";
+import { CalendarEvent, CalendarServicePreferences } from "../types";
 import { getCalendarClient } from "../utils/oauth";
 
 export async function createGoogleCalendarEvent(
   event: CalendarEvent,
-  color: string,
+  color: string | null,
   preferences: CalendarServicePreferences,
 ): Promise<calendar_v3.Schema$Event> {
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const calendarId = preferences.defaultCalendar || "primary";
 
-  const eventData: GoogleCalendarEventData = {
+  const eventData: calendar_v3.Schema$Event = {
     summary: event.title,
     start: {
       dateTime: event.start,
@@ -22,7 +22,7 @@ export async function createGoogleCalendarEvent(
     },
     description: event.description,
     ...(event.location && { location: event.location }),
-    colorId: color || "1",
+    colorId: color,
   };
 
   if (preferences.enableNotifications) {

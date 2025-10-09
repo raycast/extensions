@@ -1,38 +1,44 @@
 # Fuzzy File Search
 
-Search for files using their full paths with a fuzzy find algorithm.
+Raycast command that lets you fuzzy-find files by their full path, not only by filename. It is built for people who keep projects in deeply nested folder structures and want to jump straight to the right file.
 
-![screenshot](./metadata/fuzzy-file-search-1.png)
+![Screenshot of the command list](./metadata/fuzzy-file-search-1.png)
 
-This extension is meant as a replacement/alternative for the built-in **Search Files**.  
-Raycast’s built-in extension _Search Files_ only searches for filenames, which is not ideal when organizing files using directories.  
-Imagine the following scenario:
+## Why Use It Instead of Raycast's Built-in Search Files?
 
-```
-~/
-    algorithms/
-        homework.pdf
-    data-structures/
-        homework.pdf
-```
+- Matches folder names and file names together (e.g. `algo home pdf` → `~/algorithms/homework.pdf`).
+- Keeps context when several files share the same name in different directories.
+- Indexes with [`fd`](https://github.com/sharkdp/fd) and filters with [`fzf`](https://github.com/junegunn/fzf) for lightning-fast results on large trees.
+- Offers quick actions (open, show in Finder, copy path, Quick Look) without leaving Raycast.
 
-Using Raycast’s built-in _Search Files_, you can search for `homework.pdf`, but you will get both files.  
-With **Fuzzy File Search**, you can search for `algo homework` and directly find `~/algorithms/homework.pdf`.  
-This functionality is very helpful for highly structured data in deeply nested directories.
+## How It Works
 
-Raycast’s _Search Files_ allows you to specify in which directory the file is located, e.g., `homework in ~/algorithms/`.  
-However, this approach requires the user to know the exact directory and provide the full path.
+- On first run the extension downloads portable copies of `fd` and `fzf` to the Raycast support directory.
+- Every time you open the command it reindexes the selected search roots with `fd` and caches the list locally for the session.
+- Filtering is delegated to `fzf`, which performs path-aware fuzzy matching and returns the best hits immediately.
 
-Another solution is to add directory information into filenames, e.g., `algorithms_homework.pdf`, but this leads to extremely long filenames and duplication of information (directory path + filename).  
-This plugin, using the **fzf** approach, avoids that issue.
+## Configure the Search
 
-## How does it work
+Open the Raycast extension preferences to tailor the results:
 
-Under the hood, this extension runs `fd` to find all the files in the searched directories (by default, the home directory).  
-I chose `fd` because it ignores hidden files and files ignored by Git, while also being fast.  
-This allows for very quick lookups.
+- `Include Directories`: show both directories and files (enabled by default).
+- `Include Hidden`: surface dot-files and hidden folders.
+- `Follow Symbolic Links`: descend into symlinked directories.
+- `Ignore Spaces in Search`: strip spaces from the query so `src foo bar` behaves like `srcfoobar`.
+- `Custom Search Directories`: space-separated list of extra roots. Use the search bar dropdown inside the command to switch between `Home (~)`, `Everything (/)`, or your custom set.
 
-Afterwards, the files are filtered using the npm `fzf` package to provide the user with fast results.  
-Since `fd` doesn’t support fuzzy searching, I chose to use this package.
+## Ignore Rules and `.fdignore`
 
-> **Note:** This Raycast extension automatically installs `fd` on the first run.
+`fd` respects the same ignore rules as the desktop CLI:
+
+- `.gitignore`, `.git/info/exclude`, and `.ignore` files are obeyed automatically.
+- `.fdignore` files are also honored. You can place them in any directory to prune matches.
+- On first run the extension creates a global `$HOME/.config/fd/ignore` (if missing) with sensible defaults to keep the index snappy.
+  Edit that file to fine-tune global ignores.
+
+If you need different rules per project, add a `.fdignore` alongside the folders you index or rely on the project's `.gitignore`. The command will pick up the changes the next time the index is refreshed.
+
+## Tips
+
+- Large trees index fastest when unnecessary paths are ignored—tune your `.fdignore` to skip build output and vendor folders.
+- Combine folder hints and filename fragments in the query to jump straight to the exact file you want.

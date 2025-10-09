@@ -1,104 +1,33 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { homedir } from "os";
-import { join } from "path";
-import { readFile, access } from "fs/promises";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const removeBOM = (source: string) => source.replace(/^\uFEFF/, "");
-const execAsync = promisify(exec);
-
-interface PlayniteGameSource {
-  Id: string;
-  Name: string;
-}
-
-interface PlayniteGameReleaseDate {
-  Date: string;
-  Day: number;
-  Month: number;
-  Year: number;
-}
-
-export interface PlayniteGame {
-  Id: string;
-  Name: string;
-  Icon?: string | null;
-  InstallDirectory?: string | null;
-  IsInstalled: boolean;
-  Source: PlayniteGameSource;
-  ReleaseDate?: PlayniteGameReleaseDate;
-  Playtime: number;
-  Hidden: boolean;
-}
-
-function getPlayniteLibraryPath(): string {
-  const appDataPath = process.env.APPDATA || join(homedir(), "AppData", "Roaming");
-  return join(appDataPath, "Playnite", "ExtensionsData", "FlowLauncherExporter", "library.json");
-}
-
-function getPlayniteIconPath(iconPath: string): string {
-  const appDataPath = process.env.APPDATA || join(homedir(), "AppData", "Roaming");
-  const fullPath = join(appDataPath, "Playnite", "library", "files", iconPath);
-  return `file://${fullPath.replace(/\\/g, "/")}`;
-}
-
-async function loadPlayniteGames(includeHidden: boolean): Promise<PlayniteGame[]> {
-  const libraryPath = getPlayniteLibraryPath();
-
-  try {
-    await access(libraryPath);
-  } catch {
-    throw new Error(
-      "FlowLauncherExporter addon not found. Please install it from https://github.com/Garulf/FlowLauncherExporter/releases/latest",
-    );
-  }
-
-  try {
-    const libraryData = JSON.parse(removeBOM(await readFile(libraryPath, "utf-8"))) as PlayniteGame[];
-
-    return libraryData
-      .filter((game) => includeHidden || !game.Hidden)
-      .map((game) => ({
-        ...game,
-        Icon: game.Icon ? getPlayniteIconPath(game.Icon) : null,
-      }));
-  } catch (error) {
-    throw new Error(`Failed to load Playnite library: ${error instanceof Error ? error.message : "Unknown error"}`);
-  }
-}
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { loadPlayniteGames } from "../playnite";
+import type { PlayniteGame } from "../types";
+import { execAsync } from "../utils";
 
 export function usePlaynite() {
   const preferences = getPreferenceValues();
-  const {
-    data: games = [],
-    isLoading,
-    error: loadError,
-  } = useCachedPromise(
-    async (includeHidden: boolean) => {
-      return await loadPlayniteGames(includeHidden);
-    },
-    [preferences.includeHidden],
-    {
-      initialData: [],
-      onError: async (error) => {
-        if (error.message === "ADDON_NOT_FOUND") {
-          return;
+  const { data, error, isLoading } = useCachedPromise(
+    async (includeHidden: boolean, customPlaynitePath: string | null) => {
+      try {
+        return {
+          games: await loadPlayniteGames(includeHidden, customPlaynitePath),
+          error: null,
+        };
+      } catch (err) {
+        if (err instanceof Error) {
+          return {
+            games: [],
+            error: err,
+          };
         }
-        await showFailureToast(error, {
-          title: "Failed to load Playnite library",
-        });
-      },
+        throw err;
+      }
+    },
+    [preferences.includeHidden, preferences.customPlaynitePath],
+    {
+      initialData: { error: null, games: [] },
     },
   );
-
-  const error =
-    loadError?.message === "ADDON_NOT_FOUND"
-      ? "Please install the FlowLauncherExporter addon from:\nhttps://github.com/Garulf/FlowLauncherExporter/releases/latest"
-      : loadError
-        ? "Failed to load Playnite library"
-        : null;
 
   const launchGame = async (game: PlayniteGame) => {
     try {
@@ -176,7 +105,7 @@ export function usePlaynite() {
   };
 
   return {
-    games,
+    data,
     isLoading,
     error,
     launchGame,

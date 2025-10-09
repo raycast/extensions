@@ -1,8 +1,9 @@
-import { ActionPanel, Action, List, Toast, showToast, Icon, open, Color } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { Delivery, STATUS_DESCRIPTIONS, FilterMode } from "./api";
+import { Action, ActionPanel, Color, Icon, List, Toast, open, showToast } from "@raycast/api";
+import { isValid, parse } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useEffect, useState } from "react";
+import { Delivery, FilterMode, STATUS_DESCRIPTIONS } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
-import { parse, isValid } from "date-fns";
 
 /**
  * Placeholder value returned by some carriers when the date is unknown.
@@ -34,6 +35,8 @@ export default function Command() {
     "yyyy-MM-dd HH:mm:ss", // ISO 8601
     "EEEE, d MMMM h:mm a", // Day name, date, 12-hour time (e.g. "Saturday, 31 May 5:26 am")
     "EEEE, d MMMM", // Day name and date (e.g. "Saturday, 31 May")
+    "EEEE d MMMM h:mm a", // Portuguese format (e.g. "domingo 24 agosto 11:23 PM")
+    "EEEE d MMMM", // Portuguese format without time (e.g. "domingo 24 agosto")
   ];
 
   /**
@@ -60,20 +63,24 @@ export default function Command() {
    */
   const parseDate = (dateString: string): Date | null => {
     for (const fmt of DATE_FORMATS) {
-      const date = parse(dateString, fmt, new Date());
+      const date = parse(dateString, fmt, new Date(), { locale: ptBR });
       if (isValid(date)) return date;
     }
     return null;
   };
 
   /**
-   * Format a date string as 'Feb 26, 14:30'.
+   * Format a date string as 'Feb 26, 14:30' or 'Feb 26' if no time.
    *
    * @param dateString The date string to format
    * @returns Formatted date and time or 'Not available' if invalid
    */
   const formatCompactDate = (dateString: string | undefined | null): string => {
     if (!dateString || dateString === UNKNOWN_DATE_PLACEHOLDER || !/\d/.test(dateString)) return "Not available";
+
+    // Check if the original string contains time information
+    const hasTimeInfo = /[0-9]{1,2}:[0-9]{2}/.test(dateString) || /[0-9]{1,2}:[0-9]{2} [AP]M/i.test(dateString);
+
     const date = parseDate(dateString);
     if (!date) {
       console.error(`All supported date formats failed for: ${dateString}`);
@@ -83,6 +90,12 @@ export default function Command() {
       month: "short",
       day: "numeric",
     });
+
+    // Only show time if the original string had time information
+    if (!hasTimeInfo) {
+      return dateFormatted;
+    }
+
     const timeFormatted = date.toLocaleTimeString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
@@ -166,34 +179,50 @@ export default function Command() {
   };
 
   /**
-   * Generate a markdown string with full delivery details and tracking history.
+   * Generate a markdown with the tracking history.
    *
    * @param delivery Delivery object
-   * @returns Markdown string for detail view
+   * @returns Markdown string for tracking history
    */
-  const generateDetailMarkdown = (delivery: Delivery): string => {
-    const packageName = delivery.description || `From ${delivery.carrier_code.toUpperCase()}`;
-    const deliveryDate = formatExpectedDelivery(delivery);
-    let markdown = `**Package**: ${packageName}\n\n`;
-    markdown += `**Expected Delivery**: ${deliveryDate}\n\n`;
-    markdown += `**Status**: ${STATUS_DESCRIPTIONS[delivery.status_code]}\n\n`;
-    markdown += `**Carrier**: ${delivery.carrier_code.toUpperCase()}\n\n`;
-    markdown += `**Tracking Number**: ${delivery.tracking_number}\n\n`;
-    if (delivery.extra_information) {
-      markdown += `**Additional Info**: ${delivery.extra_information}\n\n`;
-    }
-    markdown += `### History\n\n`;
+  const generateHistoryMarkdown = (delivery: Delivery): string => {
+    let markdown = "";
     if (!delivery.events || delivery.events.length === 0) {
       markdown += "No tracking information available\n";
     } else {
-      delivery.events.forEach((event, index) => {
+      delivery.events.forEach((event) => {
         const dateStr = formatCompactDate(event.date);
         const eventText = event.event + (event.location ? ` (${event.location})` : "");
-        const icon = index === 0 ? "🔵" : "⚪️";
-        markdown += `${icon} **${dateStr}** ${eventText}\n\n`;
+        markdown += `🚚 **${dateStr}**\n\n${eventText}\n\n`;
       });
     }
     return markdown;
+  };
+
+  /**
+   * Generate metadata for the delivery.
+   *
+   * @param delivery Delivery object
+   * @param daysUntil Number of days until delivery
+   * @returns JSX element for metadata panel
+   */
+  const generateDetailMetadata = (delivery: Delivery, daysUntil: number | null) => {
+    const packageName = delivery.description || `From ${delivery.carrier_code.toUpperCase()}`;
+    const deliveryDate = delivery.date_expected
+      ? `${formatExpectedDelivery(delivery)} ${daysUntil !== null ? (daysUntil < 0 ? `(${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? "s" : ""} ago)` : daysUntil === 0 ? "(Today)" : `(in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`) : ""}`
+      : "Not available";
+
+    return (
+      <List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.Label title="Package" text={packageName} />
+        <List.Item.Detail.Metadata.Label title="Expected Delivery Date" text={deliveryDate} />
+        <List.Item.Detail.Metadata.Label title="Status" text={STATUS_DESCRIPTIONS[delivery.status_code]} />
+        <List.Item.Detail.Metadata.Label title="Carrier" text={delivery.carrier_code} />
+        <List.Item.Detail.Metadata.Label title="Tracking Number" text={delivery.tracking_number} />
+        {delivery.extra_information && (
+          <List.Item.Detail.Metadata.Label title="Additional Info" text={delivery.extra_information} />
+        )}
+      </List.Item.Detail.Metadata>
+    );
   };
 
   useEffect(() => {
@@ -271,7 +300,7 @@ export default function Command() {
 
           return (
             <List.Item
-              key={delivery.tracking_number}
+              key={`${delivery.tracking_number}-${delivery.extra_information || ""}`}
               title={delivery.description || `Package from ${delivery.carrier_code.toUpperCase()}`}
               accessories={
                 [
@@ -295,7 +324,12 @@ export default function Command() {
                     : null,
                 ].filter(Boolean) as List.Item.Accessory[]
               }
-              detail={<List.Item.Detail markdown={generateDetailMarkdown(delivery)} />}
+              detail={
+                <List.Item.Detail
+                  markdown={generateHistoryMarkdown(delivery)}
+                  metadata={generateDetailMetadata(delivery, daysUntil)}
+                />
+              }
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser
@@ -304,13 +338,6 @@ export default function Command() {
                   />
                   <Action.CopyToClipboard title="Copy Tracking Number" content={delivery.tracking_number} />
                   <Action.OpenInBrowser title="Open Parcel Web" url="https://web.parcelapp.net/" />
-                  <Action
-                    title={filterMode === FilterMode.ACTIVE ? "View Recent Deliveries" : "View Active Deliveries"}
-                    icon={Icon.Switch}
-                    onAction={() =>
-                      setFilterMode(filterMode === FilterMode.ACTIVE ? FilterMode.RECENT : FilterMode.ACTIVE)
-                    }
-                  />
                 </ActionPanel>
               }
             />

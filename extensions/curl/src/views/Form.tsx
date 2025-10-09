@@ -11,6 +11,7 @@ import {
 } from "../../utils";
 import ResultView from "./Result";
 import axios from "axios";
+import { isMac } from "../utils";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const curlString = require("curl-string");
@@ -161,25 +162,37 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
           <Action
             title="Add Parameter"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["opt"], key: "p" }}
+            shortcut={{
+              macOS: { modifiers: ["opt"], key: "p" },
+              windows: { modifiers: ["alt"], key: "p" },
+            }}
             onAction={handleAddParameter}
           />
           <Action
             title="Remove Last Parameter"
             icon={Icon.Minus}
-            shortcut={{ modifiers: ["opt", "shift"], key: "p" }}
+            shortcut={{
+              macOS: { modifiers: ["opt", "shift"], key: "p" },
+              windows: { modifiers: ["alt", "shift"], key: "p" },
+            }}
             onAction={handleRemoveParameter}
           />
           <Action
             title="Add Headers"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "h" },
+              windows: { modifiers: ["ctrl"], key: "h" },
+            }}
             onAction={handleAddHeader}
           />
           <Action
             title="Remove Last Header"
             icon={Icon.Minus}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "h" },
+              windows: { modifiers: ["ctrl", "shift"], key: "h" },
+            }}
             onAction={handleRemoveHeader}
           />
         </ActionPanel>
@@ -203,7 +216,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
 
       {/* URL Parameters */}
       <Form.Separator />
-      <Form.Description title="Parameters" text="⌥P Add" />
+      <Form.Description title="Parameters" text={isMac ? "⌥P Add" : "Alt + P Add"} />
       {parameters.map((param, index) => (
         <Fragment key={`parameter-${index}`}>
           <Form.Checkbox
@@ -230,12 +243,14 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
         </Fragment>
       ))}
 
-      {parameters.length > 0 && <Form.Description title="" text="⌥⇧P Remove Last" />}
+      {parameters.length > 0 && (
+        <Form.Description title="" text={isMac ? "⌥⇧P Remove Last" : "Alt + Shift + P Remove Last"} />
+      )}
 
       <Form.Separator />
 
       {/* Headers */}
-      <Form.Description title="Headers" text="⌘H Add" />
+      <Form.Description title="Headers" text={isMac ? "⌘H Add" : "Ctrl + H Add"} />
       {headers.length &&
         headers.map((_, index) => {
           return (
@@ -271,7 +286,9 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
           );
         })}
 
-      {headers.length > 1 && <Form.Description title="" text="⌘⇧H Remove Last" />}
+      {headers.length > 1 && (
+        <Form.Description title="" text={isMac ? "⌘⇧H Remove Last" : "Ctrl + Shift + H Remove Last"} />
+      )}
 
       {method !== "GET" && method !== "DELETE" && (
         <>

@@ -4,7 +4,12 @@ import { getSaySettings, parseSaySettings } from "./utils.js";
 
 export default async function SelectionToSay() {
   await closeMainWindow();
-  const selectedText = await getSelectedText().catch((error) => error.toString());
-  const saySettings = parseSaySettings(getSaySettings());
-  await say(selectedText, saySettings);
+  const { keepSilentOnError, ...saySettings } = parseSaySettings(getSaySettings());
+  try {
+    const selectedText = await getSelectedText();
+    await say(selectedText, saySettings);
+  } catch (error) {
+    if (keepSilentOnError) return;
+    await say(String(error), saySettings);
+  }
 }

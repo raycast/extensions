@@ -1,6 +1,6 @@
 # KeePassXC Extension Changelog
 
-## [1.7.0] - 2025-09-09
+## [1.7.0] - 2025-09-29
 
 ### Added
 

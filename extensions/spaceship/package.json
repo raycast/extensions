@@ -35,9 +35,14 @@
       "mode": "view"
     }
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.1.0"
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "dayjs": "^1.11.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -45,7 +50,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.8.2"
   },
   "scripts": {

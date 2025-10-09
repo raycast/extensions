@@ -10,20 +10,11 @@ global.Request = Request;
 // @ts-expect-error there are some diff in the unidi types but it works
 global.Response = Response;
 
-import {
-  Detail,
-  getPreferenceValues,
-  OAuth,
-  launchCommand,
-  LaunchType,
-  openExtensionPreferences,
-  closeMainWindow,
-  PopToRootType,
-} from "@raycast/api";
+import { Detail, OAuth, launchCommand, LaunchType } from "@raycast/api";
 import { withAccessToken, OAuthService, usePromise } from "@raycast/utils";
 import { DustAPI } from "@dust-tt/client";
-import { useEffect } from "react";
 import { getUser, getWorkspaceId, setUser } from "../utils";
+import env from "./env";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -34,8 +25,8 @@ const client = new OAuth.PKCEClient({
 });
 
 let dustApi: DustAPI | null = null;
+let currentToken: string | null = null;
 
-const preferences = getPreferenceValues<ExtensionPreferences>();
 const DEFAULT_WORKOS_TOKEN_EXPIRY = 60 * 5; // 5 minutes
 
 type WorkOSTokenResponse = {
@@ -64,22 +55,27 @@ function parseTokenResponse(response: unknown) {
   throw new Error("Invalid token response format");
 }
 
-const provider = new OAuthService({
+export const provider = new OAuthService({
   client,
-  clientId: preferences.oauthClientID,
+  clientId: env.auth.OAUTH_CLIENT_ID,
   scope: "openid profile email offline_access",
-  authorizeUrl: `${preferences.oauthDomain}/user_management/authorize`,
-  tokenUrl: `${preferences.oauthDomain}/user_management/authenticate`,
-  refreshTokenUrl: `${preferences.oauthDomain}/user_management/authenticate`,
-  personalAccessToken: preferences.connexionFlow === "apiKey" ? preferences.apiKey : undefined,
+  authorizeUrl: `${env.auth.OAUTH_DOMAIN}/user_management/authorize`,
+  tokenUrl: `${env.auth.OAUTH_DOMAIN}/user_management/authenticate`,
+  refreshTokenUrl: `${env.auth.OAUTH_DOMAIN}/user_management/authenticate`,
   // Raycast OAuthService does not automaticaly parses WorkOS token expiry
   // we set the expiry manually to the default WorkOS token expiry.
   tokenResponseParser: parseTokenResponse,
   tokenRefreshResponseParser: parseTokenResponse,
-  onAuthorize(params) {
+  async onAuthorize(params) {
+    // Store the token for multi-region access
+    currentToken = params.token;
+
+    // Use default US region initially, region will be determined when workspace is selected
+    const apiUrl = await env.getDustDomain();
+
     dustApi = new DustAPI(
       {
-        url: preferences.apiUrl,
+        url: apiUrl,
       },
       {
         apiKey: params.token,
@@ -95,88 +91,46 @@ const provider = new OAuthService({
 
 export const withPickedWorkspace = <T,>(Component: React.ComponentType<T>) => {
   const fn = (Component: React.ComponentType<T>) => {
-    if (preferences.connexionFlow === "oauth") {
-      const OauthCheckComponent: React.ComponentType<T> = (props) => {
-        const dustAPI = getDustClient();
+    const OauthCheckComponent: React.ComponentType<T> = (props) => {
+      const dustAPI = getDustClient();
 
-        const { data: user, isLoading: isLoadingUser } = usePromise(async () => {
-          const cachedUser = await getUser();
-          if (cachedUser) {
-            return cachedUser;
-          }
-
-          const r = await dustAPI.me();
-          if (r.isErr()) {
-            return undefined;
-          } else {
-            await setUser(r.value);
-            return r.value;
-          }
-        }, []);
-
-        const { data: workspaceId, isLoading: isLoadingWorkspace } = usePromise(async () => {
-          return await getWorkspaceId();
-        }, []);
-
-        if (isLoadingUser || isLoadingWorkspace) {
-          return <Detail isLoading />;
-        } else if (user && workspaceId) {
-          dustAPI.setWorkspaceId(workspaceId);
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore too complicated for TS
-          return <Component {...props} />;
-        } else {
-          launchCommand({
-            name: "pickWorkspace",
-            type: LaunchType.UserInitiated,
-            context: {
-              missingWorkspace: true,
-            },
-          });
+      const { data: user, isLoading: isLoadingUser } = usePromise(async () => {
+        const cachedUser = await getUser();
+        if (cachedUser) {
+          return cachedUser;
         }
-      };
-      return withDustClient(OauthCheckComponent);
-    } else {
-      const LegacyCheckComponent: React.ComponentType<T> = (props) => {
-        const dustAPI = getDustClient();
 
-        useEffect(() => {
-          if (!preferences.apiKey || !preferences.workspaceId || !preferences.userEmail) {
-            const timeoutId = setTimeout(() => {
-              void openExtensionPreferences();
-              void closeMainWindow({
-                clearRootSearch: true,
-                popToRootType: PopToRootType.Immediate,
-              });
-            }, 3000);
-
-            return () => {
-              clearTimeout(timeoutId);
-            };
-          }
-        }, [preferences.apiKey, preferences.workspaceId, preferences.userEmail]);
-
-        if (!preferences.apiKey || !preferences.workspaceId || !preferences.userEmail) {
-          return (
-            <Detail
-              isLoading
-              navigationTitle="Missing API Key"
-              markdown={
-                "As you have chosen to connect to Dust using a workspace API Key, please provide the apiKey, userEmail and the workspaceId in the extension preferences or change the connect method..."
-              }
-            />
-          );
+        const r = await dustAPI.me();
+        if (r.isErr()) {
+          return undefined;
         } else {
-          dustAPI.setWorkspaceId(preferences.workspaceId);
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore too complicated for TS
-          return <Component {...props} />;
+          await setUser(r.value);
+          return r.value;
         }
-      };
-      return withDustClient(LegacyCheckComponent);
-    }
+      }, []);
+
+      const { data: workspaceId, isLoading: isLoadingWorkspace } = usePromise(async () => {
+        return await getWorkspaceId();
+      }, []);
+
+      if (isLoadingUser || isLoadingWorkspace) {
+        return <Detail isLoading />;
+      } else if (user && workspaceId) {
+        dustAPI.setWorkspaceId(workspaceId);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore too complicated for TS
+        return <Component {...props} />;
+      } else {
+        launchCommand({
+          name: "pickWorkspace",
+          type: LaunchType.UserInitiated,
+          context: {
+            missingWorkspace: true,
+          },
+        });
+      }
+    };
+    return withDustClient(OauthCheckComponent);
   };
 
   return fn(Component);
@@ -192,4 +146,11 @@ export function getDustClient(): DustAPI {
   }
 
   return dustApi;
+}
+
+export function getCurrentToken(): string {
+  if (!currentToken) {
+    throw new Error("No token available");
+  }
+  return currentToken;
 }

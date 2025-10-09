@@ -31,7 +31,7 @@ export const ItemList = memo(() => {
                 title={getFilteredValue(item, section)}
                 subtitle={getFilteredSubtitle(item, section)}
                 accessories={accessories}
-                actions={<CharacterActionPanel item={item} />}
+                actions={<CharacterActionPanel item={item} section={section.sectionTitle} />}
               />
             );
           })}

@@ -1,4 +1,10 @@
-# Raindrop.io extension for Raycast
+<p align="center">
+    <img src="./assets/raindrop-icon-big.png" width="150" height="150" />
+</p>
+
+# Raindrop.io
+
+This is a [Raycast](https://raycast.com/) extension for [Raindrop.io](https://raindrop.io).
 
 ## Instructions
 
@@ -17,3 +23,7 @@ Install the extension and the first time you run any command it will ask you for
 ### Browser Extension (Recommended)
 
 For enhanced functionality when capturing URLs and titles, we recommend installing the [Raycast Browser Extension](https://www.raycast.com/browser-extension). This extension provides better integration with your browser for a smoother experience.
+
+### Open in Browser Configuration
+
+The primary `Action` will open links in default browser. In `Preferences` you can select a secondary browser which will add a new `Action` for opening in that browser, instead. If you selected an invalid app (i.e. an app that is not a browser), link will open in default browser.

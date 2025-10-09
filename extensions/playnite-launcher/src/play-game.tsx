@@ -1,38 +1,11 @@
-import { List, ActionPanel, Action, Icon, Detail, Image } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { usePlaynite } from "./hooks/usePlaynite";
 import { showFailureToast } from "@raycast/utils";
-
-function ErrorView({ error }: { error: string }) {
-  const isAddonError = error.includes("FlowLauncherExporter");
-
-  if (isAddonError) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Playnite Extension Required"
-          description="Please install the FlowLauncherExporter addon"
-          icon={Icon.Download}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                // eslint-disable-next-line @raycast/prefer-title-case
-                title="Download FlowLauncherExporter"
-                url="https://github.com/Garulf/FlowLauncherExporter/releases/latest"
-                icon={Icon.Download}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
-
-  return <Detail markdown={`# Error\n\n${error}`} />;
-}
+import { ErrorView } from "./errorView";
 
 export default function Command() {
-  const { games, isLoading, error, launchGame, viewInPlaynite, openInstallFolder, defaultFilter } = usePlaynite();
+  const { data, error, isLoading, launchGame, viewInPlaynite, openInstallFolder, defaultFilter } = usePlaynite();
   const [installFilter, setInstallFilter] = useState(defaultFilter || "installed");
   const [renderErrors, setRenderErrors] = useState<string[]>([]);
 
@@ -44,11 +17,14 @@ export default function Command() {
     }
   }, [renderErrors]);
 
-  if (error) {
+  if (data.error != null && !isLoading) {
+    return <ErrorView error={data.error} />;
+  }
+  if (error !== undefined && !isLoading) {
     return <ErrorView error={error} />;
   }
 
-  const filteredGames = games
+  const filteredGames = data.games
     .filter((game) => {
       if (installFilter === "installed") return game.IsInstalled;
       if (installFilter === "notInstalled") return !game.IsInstalled;
@@ -98,19 +74,9 @@ export default function Command() {
                     icon={game.IsInstalled ? Icon.Play : Icon.XMarkCircle}
                     onAction={() => launchGame(game)}
                   />
-                  <Action
-                    title="View in Playnite"
-                    icon={Icon.Eye}
-                    shortcut={{ modifiers: ["cmd"], key: "p" }}
-                    onAction={() => viewInPlaynite(game)}
-                  />
+                  <Action title="View in Playnite" icon={Icon.Eye} onAction={() => viewInPlaynite(game)} />
                   {game.IsInstalled && game.InstallDirectory && (
-                    <Action
-                      title="Open Install Folder"
-                      icon={Icon.Folder}
-                      shortcut={{ modifiers: ["cmd"], key: "f" }}
-                      onAction={() => openInstallFolder(game)}
-                    />
+                    <Action title="Open Install Folder" icon={Icon.Folder} onAction={() => openInstallFolder(game)} />
                   )}
                 </ActionPanel>
               }

@@ -1,6 +1,8 @@
+import { getDefaultProfileID } from "./util";
+
 export const defaultChromeProfilePath = ["Application Support", "Google", "Chrome"];
 export const defaultChromeStatePath = ["Application Support", "Google", "Chrome", "Local State"];
-export const DEFAULT_CHROME_PROFILE_ID = "Default";
+export const DEFAULT_CHROME_PROFILE_ID = getDefaultProfileID();
 export const CHROME_PROFILE_KEY = "CHROME_PROFILE_KEY";
 export const CHROME_PROFILES_KEY = "CHROME_PROFILES_KEY";
 

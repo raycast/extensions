@@ -106,6 +106,15 @@ export const checkIfGitIsValid = async () => {
 };
 
 /**
+ * Gets the name of the current branch.
+ * @returns The name of the current branch as a string.
+ */
+export const getCurrentBranch = async () => {
+  const { output } = await git(["branch", "--show-current"]);
+  return output.trim();
+};
+
+/**
  * Gets the last full commit hash of the current branch.
  * @remarks Returns an empty string if the repository is not initialized.
  * @returns The last commit hash as a string.

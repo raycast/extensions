@@ -26,9 +26,11 @@ import {
   getFormatTitle,
   getFormatValue,
   getytdlPath,
+  isMac,
   isValidHHMM,
   isValidUrl,
   parseHHMM,
+  sanitizeVideoTitle,
 } from "./utils.js";
 import { Video } from "./types.js";
 import Installer from "./views/installer.js";
@@ -56,7 +58,7 @@ export default function DownloadVideo() {
     },
     onSubmit: async (values) => {
       if (!values.format) return;
-      const options = ["-P", downloadPath];
+      const options = ["-o", path.join(downloadPath, `${video?.title || "video"} (%(id)s).%(ext)s`)];
       const [downloadFormat, recodeFormat] = values.format.split("#");
 
       options.push("--ffmpeg-location", ffmpegPath);
@@ -77,8 +79,7 @@ export default function DownloadVideo() {
       let filePath = "";
 
       process.stdout.on("data", (data) => {
-        const line = data.toString();
-        console.log(line);
+        const line = data.toString() as string;
 
         const progress = Number(/\[download\]\s+(\d+(\.\d+)?)%.*/.exec(line)?.[1]);
         if (progress) {
@@ -90,14 +91,13 @@ export default function DownloadVideo() {
           toast.message = `${Math.floor(progress)}%`;
         }
 
-        if (line.startsWith("/")) {
-          filePath = line;
+        if (isMac ? line.startsWith("/") : line.match(/^[a-zA-Z]:\\/)) {
+          filePath = line.trim();
         }
       });
 
       process.stderr.on("data", (data) => {
         const line = data.toString();
-        console.error(line);
 
         if (line.startsWith("WARNING:")) {
           setWarning(line);
@@ -178,7 +178,9 @@ export default function DownloadVideo() {
           Boolean(x),
         ),
       );
-      return JSON.parse(result.stdout) as Video;
+      const data = JSON.parse(result.stdout) as Video;
+
+      return { ...data, title: sanitizeVideoTitle(data.title) };
     },
     [values.url],
     {
@@ -273,9 +275,11 @@ export default function DownloadVideo() {
               }}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
-          </ActionPanel.Section>
+          {isMac && (
+            <ActionPanel.Section>
+              <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
       searchBarAccessory={

@@ -48,7 +48,7 @@ export function SnakeGame(): JSX.Element {
         game.draw();
       }
     },
-    pause ? null : speedMs
+    pause ? null : speedMs,
   );
 
   const codefence = "```" + field + "```";
@@ -132,7 +132,7 @@ export function SnakeGame(): JSX.Element {
 
 function useGame(
   setError: React.Dispatch<React.SetStateAction<string | undefined>>,
-  textSize: TextSize
+  textSize: TextSize,
 ): {
   field: string;
   game: Game;
