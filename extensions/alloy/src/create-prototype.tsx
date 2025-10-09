@@ -10,10 +10,6 @@ export default function CreatePrototypeCommand() {
   const { handleSubmit, itemProps, reset, setValidationError } = useForm<PrototypeCreate>({
     async onSubmit(values) {
       const prompt = values.prompt;
-      if (!prompt) {
-        setValidationError("prompt", "Prompt cannot be empty");
-        return false;
-      }
       if (prompt.trim().length < 20) {
         setValidationError("prompt", "Prompt must be at least 20 characters long");
         return false;
