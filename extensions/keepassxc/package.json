@@ -90,23 +90,26 @@
       "default": false
     }
   ],
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.102.7",
+    "@raycast/api": "^1.103.3",
     "@raycast/utils": "^1.19.1",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
     "csv-parse": "^5.6.0",
     "otpauth": "^9.4.1",
-    "run-applescript": "^7.0.0"
+    "run-applescript": "^7.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.18.1",
-    "@types/react": "^19.1.12",
-    "eslint": "^9.35.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.18.9",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.37.0",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
