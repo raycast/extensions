@@ -1,6 +1,6 @@
 # Sportssync Changelog
 
-## [New Boxscore Actions] - {PR_MERGE_DATE}
+## [New Boxscore Actions] - 2025-10-09
 
 - Added new box score views across most leagues to display team and play info during live games. Credits to icomey8 ❤️
 
