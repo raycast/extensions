@@ -1,5 +1,9 @@
 # Unicode Symbols
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added Windows support as this is not using any macOS specific APIs
+
 ## [Improvements] - 2025-09-24
 
 - Update to `unidata16` to version `1.1.0`, which contains a bit more info
