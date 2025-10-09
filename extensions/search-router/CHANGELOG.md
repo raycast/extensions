@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Feature] - {{PR_MERGE_DATE}}
+## [Feature] - {2025-10-09}
 
 - Added custom search engines functionality
 
