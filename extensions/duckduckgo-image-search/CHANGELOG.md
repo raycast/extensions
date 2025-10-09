@@ -1,6 +1,6 @@
 # DuckDuckGo Image Search Changelog
 
-## [Save image] - {PR_MERGE_DATE}
+## [Save image] - 2025-10-09
 
 - Added functionality to save images.
 - Added a preference to set the save directory for images.
