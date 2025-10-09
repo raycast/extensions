@@ -6,7 +6,11 @@
   "icon": "extension-icon.png",
   "author": "narghev",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "YourMCGeek"
   ],
   "categories": [
     "Applications",
@@ -14,6 +18,7 @@
     "Productivity"
   ],
   "license": "MIT",
+  "type": "module",
   "preferences": [
     {
       "name": "apiToken",
