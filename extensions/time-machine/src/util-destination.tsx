@@ -341,7 +341,7 @@ const parseStatusXmlString = async (xml: string): Promise<StatusInfo> => {
   const statusInfo: StatusInfo = {
     BackupPhase: (dict.string[0] || "Unknown") as BackupPhaseEnum,
     DestinationMountPoint: dict.string[3] || "",
-    Running: dict.true !== undefined || false,
+    Running: dict.true !== undefined,
     Progress: dict?.dict?.real[0] ? parseFloat(dict?.dict?.real[0]) : 0,
     LastBackup: undefined,
   };
