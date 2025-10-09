@@ -26,4 +26,4 @@ By default the secondary `Action` performs "Deletion" but if you prefer, you can
 
 ## 🗒️ NOTE
 
-The Free Plan of Brand.dev includes 100 API Calls per month so to reduce usage of API Calls, when you retrieve a Brand, it is stored locally in `LocalStorage`.
+The Free Plan of Brand.dev includes **50** API Calls per month so to reduce usage of API Calls, when you retrieve a Brand, it is stored locally in `LocalStorage`.

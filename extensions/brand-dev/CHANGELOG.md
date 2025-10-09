@@ -1,5 +1,7 @@
 # Brand.dev Changelog
 
+## [] - {PR_MERGE_DATE}
+
 ## [Quick Search via Search Text] - 2025-08-14
 
 - If a Brand is not found when you search/filter, you can now quickly trigger a search for that query
