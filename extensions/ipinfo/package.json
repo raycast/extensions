@@ -18,7 +18,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "type": "module",
   "preferences": [
     {
       "name": "apiToken",
