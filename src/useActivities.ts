@@ -1,6 +1,6 @@
 import { Activity } from "./types";
 import { useEffect, useState } from "react";
-import { apiListAllActivities } from "./api-timeular";
+import { apiListAllActivities } from "./api-early";
 import { showError } from "./utils";
 
 type State = {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { apiGetTimeTrackingEntries } from "./api-timeular";
+import { apiGetTimeTrackingEntries } from "./api-early";
 import { Activity, ActivityReport, TimeEntry, Tracking } from "./types";
 import { humanizeDuration } from "./useCurrentTrackingStatus";
 import { date, showError } from "./utils";

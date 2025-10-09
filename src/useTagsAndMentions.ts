@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Mention, Tag } from "./types";
-import { apiListAllTagsAndMentions } from "./api-timeular";
+import { apiListAllTagsAndMentions } from "./api-early";
 import { showError } from "./utils";
 
 export const useTagsAndMentions = () => {
