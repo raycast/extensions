@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [AI Tool Support] - 2025-10-06
+## [AI Tool Support] - {PR_MERGE_DATE}
 
 - Add AI tool support for interacting with RSS feeds via Raycast AI
 - Add tools: get-feeds, get-stories, add-feed, remove-feed, rename-feed, mark-as-read
