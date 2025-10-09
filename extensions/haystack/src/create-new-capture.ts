@@ -65,7 +65,7 @@ export default async function main() {
       const { statusCode, message } = error;
       const [title] = message.split(".");
       if (statusCode === 401) {
-        showHUD(title);
+        await showHUD(title);
         openExtensionPreferences();
       }
     } else {
