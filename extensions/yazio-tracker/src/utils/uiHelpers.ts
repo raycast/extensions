@@ -5,7 +5,6 @@ import { PROGRESS_COLORS } from "../constants";
 export function getProgressIcon(progress: number, nutrientType: "calories" | "protein" | "carbs" | "fat"): Image.Asset {
   const isOverLimit = progress > 1;
   let color: string;
-  console.log("Nutrient Type:", nutrientType, "Progress:", progress);
   if (isOverLimit) {
     color = PROGRESS_COLORS.OVER_LIMIT;
   } else {

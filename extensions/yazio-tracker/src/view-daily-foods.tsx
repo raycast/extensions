@@ -57,7 +57,6 @@ export default function Command() {
             return { ...item, productDetails, type: "product" as const };
           }),
         );
-        console.log(productsWithDetails);
         const formattedRecipes = (consumedItemsData.recipe_portions as RecipePortion[]).map(
           (recipe): ConsumedItem => ({
             ...recipe,
