@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  environmentPath: string;
-}
-
 export function getEnv() {
   const { environmentPath } = getPreferenceValues<Preferences>();
 
