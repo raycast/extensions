@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## [Make PATH configurable] - {PR_MERGE_DATE}
+## [Make PATH configurable] - 2025-10-09
 - Add a user-setting for the PATH variable
 
 ## Improve list - 2025-09-25
