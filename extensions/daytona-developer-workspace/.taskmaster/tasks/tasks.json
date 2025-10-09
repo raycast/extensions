@@ -1,0 +1,1224 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Integrate Daytona SDK and Implement Authentication",
+        "description": "Replace the E2B HTTP proxy with a direct Daytona SDK integration. This includes setting up the project with the @daytonaio/sdk dependency and implementing the authentication flow using API keys stored in environment variables.",
+        "details": "Initialize the Daytona SDK client with authentication credentials. Handle authentication failures gracefully. Follow Raycast best practices for secure credential storage. This task is the foundation for all other Daytona interactions.",
+        "testStrategy": "Write unit tests to verify SDK client initialization with valid and invalid API keys. Ensure authentication errors are caught and reported correctly. Manually test by setting the DAYTONA_API_KEY environment variable.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update Project Dependencies",
+            "description": "Modify the project's package.json to add the '@daytonaio/sdk' dependency and completely remove any packages and configurations related to the old E2B HTTP proxy.",
+            "dependencies": [],
+            "details": "This initial step involves cleaning the project environment. Run `npm install @daytonaio/sdk` and `npm uninstall <e2b-proxy-package>`. Ensure the lock file is updated and the project builds successfully without the old proxy client.",
+            "status": "done",
+            "testStrategy": "Verify that `package.json` and the lock file are correctly updated. Confirm that a clean build of the project completes without errors after the dependency changes."
+          },
+          {
+            "id": 2,
+            "title": "Implement Secure API Key Retrieval",
+            "description": "Create a secure mechanism to retrieve the Daytona API key from environment variables, adhering to Raycast's best practices for handling secrets.",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Develop a utility function, e.g., `getApiKey()`, that reads the `DAYTONA_API_KEY` from the extension's preferences, which are populated from environment variables. The function must handle the case where the key is missing and throw a clear, user-facing error.",
+            "status": "done",
+            "testStrategy": "Write unit tests to mock Raycast's preference-getting functions. Test the scenario where the key is present and the scenario where it is absent, ensuring the correct value or error is returned. Manually test by running the extension with and without the API key set."
+          },
+          {
+            "id": 3,
+            "title": "Create Daytona SDK Client Initialization Service",
+            "description": "Develop a singleton service or factory function that initializes and provides a shared instance of the Daytona SDK client using the securely retrieved API key.",
+            "dependencies": [
+              "1.2"
+            ],
+            "details": "Create a new module (e.g., `src/lib/daytona.ts`) that exports a `getDaytonaClient()` function. This function will use the `getApiKey()` utility to fetch the key and instantiate the Daytona SDK client. The client instance should be cached to prevent re-initialization on every use.",
+            "status": "done",
+            "testStrategy": "Unit test the factory function. Mock the API key retrieval to provide a dummy key and verify that the Daytona SDK constructor is called with the correct parameters. Assert that subsequent calls to the function return the same client instance."
+          },
+          {
+            "id": 4,
+            "title": "Implement Graceful Authentication Failure Handling",
+            "description": "Wrap the SDK client's first interaction in error handling logic to gracefully manage authentication failures, such as an invalid API key, and report it clearly to the user.",
+            "dependencies": [
+              "1.3"
+            ],
+            "details": "In the client initialization service, or on the first API call, implement a try-catch block. If an authentication-specific error is caught from the SDK, it should be translated into a user-friendly error message instructing the user to check their API key configuration in Raycast.",
+            "status": "done",
+            "testStrategy": "Write a unit test where the mocked SDK client throws an authentication error. Verify that the custom error handling logic catches this and produces a specific, actionable error message. Manually test by providing an invalid API key and confirming the correct error is displayed in the UI."
+          },
+          {
+            "id": 5,
+            "title": "Refactor Codebase to Use New SDK Client",
+            "description": "Perform a project-wide refactoring to replace all usages of the old E2B HTTP proxy with the new Daytona SDK client initialization service.",
+            "dependencies": [
+              "1.4"
+            ],
+            "details": "Search the codebase for any remaining imports or function calls related to the E2B proxy. Replace these instances with calls to the new `getDaytonaClient()` service. This ensures all Daytona-related interactions are now routed through the new SDK-based foundation.",
+            "status": "done",
+            "testStrategy": "Perform a static code analysis or a project-wide search to ensure no references to the old proxy client remain. Run any existing test suites to check for regressions. Manually verify that commands that previously used the proxy now attempt to use the new SDK client."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Core Python Code Execution Engine",
+        "description": "Create the core logic for executing Python code in a Daytona sandbox. This involves managing the sandbox lifecycle: creating a sandbox, executing the code using `sandbox.process.codeRun()`, and processing the basic response.",
+        "details": "The engine should accept a string of Python code and return an `CodeExecutionResponse` object containing stdout, stderr, and the exit code. This task focuses on the happy path of code execution.",
+        "testStrategy": "Test with simple Python scripts (e.g., 'print(\"hello world\")') to verify that stdout is captured correctly. Check that the exit code is 0 for successful executions.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define the CodeExecutionResponse Data Model",
+            "description": "Create the data structure or class for `CodeExecutionResponse` that will serve as the standardized return object for the code execution engine.",
+            "dependencies": [],
+            "details": "The model must include fields for `stdout` (string), `stderr` (string), and `exitCode` (number). This establishes the data contract for all code execution results, ensuring consistency.",
+            "status": "done",
+            "testStrategy": "Validate the data model through its implementation and usage in subsequent subtasks. Ensure type correctness in the implementation."
+          },
+          {
+            "id": 2,
+            "title": "Implement Sandbox Creation Function",
+            "description": "Develop the logic to request and create a new, isolated sandbox environment using the Daytona SDK.",
+            "dependencies": [],
+            "details": "This function will encapsulate the call to the Daytona SDK's sandbox creation method. It should handle the asynchronous nature of the request and return a sandbox object instance upon successful creation.",
+            "status": "done",
+            "testStrategy": "Write a unit test that mocks the Daytona SDK and verifies that the `sandbox.create()` method is called. The test should confirm that a mocked sandbox object is returned."
+          },
+          {
+            "id": 3,
+            "title": "Implement Code Execution Wrapper for sandbox.process.codeRun",
+            "description": "Create a wrapper function that takes a sandbox instance and a Python code string, then executes the code using the `sandbox.process.codeRun()` method.",
+            "dependencies": [
+              "2.2"
+            ],
+            "details": "This function is the core of the execution logic. It will invoke `codeRun` on the process manager of the provided sandbox object and await the raw result from the Daytona platform.",
+            "status": "done",
+            "testStrategy": "Using a mocked sandbox object from subtask 2.2, test that the `process.codeRun()` method is called with the correct code string. Verify that the function returns the raw, unprocessed response from the mocked SDK call."
+          },
+          {
+            "id": 4,
+            "title": "Map Raw Execution Result to CodeExecutionResponse",
+            "description": "Implement a function to parse the raw response from `codeRun` and map its contents to the structured `CodeExecutionResponse` object.",
+            "dependencies": [
+              "2.1",
+              "2.3"
+            ],
+            "details": "This function will extract the stdout, stderr, and exit code from the raw result object returned by the execution wrapper. It will then instantiate and populate the `CodeExecutionResponse` data model defined in subtask 2.1.",
+            "status": "done",
+            "testStrategy": "Create unit tests that pass sample raw SDK responses (simulating successful execution) to this mapping function. Assert that the resulting `CodeExecutionResponse` object contains the correctly extracted `stdout`, `stderr`, and `exitCode` values."
+          },
+          {
+            "id": 5,
+            "title": "Assemble the Core Execution Engine Service",
+            "description": "Combine the sandbox creation, code execution, and response processing functions into a single, high-level service that orchestrates the entire happy-path execution flow.",
+            "dependencies": [
+              "2.2",
+              "2.3",
+              "2.4"
+            ],
+            "details": "This main service function will accept a string of Python code as input. It will sequentially call the functions for creating a sandbox, executing the code within it, and processing the response, finally returning the populated `CodeExecutionResponse` object. This task does not include sandbox cleanup, which is handled in Task 3.",
+            "status": "done",
+            "testStrategy": "Write an integration test for the service. Mock the underlying Daytona SDK calls. Pass a simple script like 'print(\"hello world\")' and verify that the final `CodeExecutionResponse` object correctly contains 'hello world\\n' as stdout, an empty stderr, and an exit code of 0."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement Automatic Sandbox Cleanup",
+        "description": "Ensure that every sandbox created for code execution is automatically and reliably deleted after the execution is complete, regardless of whether it succeeded or failed, to prevent resource leaks.",
+        "details": "Use a `finally` block or similar construct around the execution logic to call `sandbox.delete()`. Implement robust logging to monitor cleanup operations.",
+        "testStrategy": "Verify through logs or Daytona platform monitoring that sandboxes are deleted after successful execution, after a runtime error, and after a timeout. Write tests that mock the sandbox object and confirm `delete()` is called.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Refactor Core Execution Logic into a Try-Finally Structure",
+            "description": "Modify the core code execution function from Task 2 to wrap the sandbox creation and execution logic within a `try...finally` block. This establishes the structural foundation for guaranteed cleanup.",
+            "dependencies": [],
+            "details": "The `try` block will contain the logic for creating a sandbox and running the code via `sandbox.process.codeRun()`. The `finally` block will be prepared for the subsequent cleanup logic, ensuring it is positioned to execute regardless of the outcome within the `try` block.",
+            "status": "done",
+            "testStrategy": "Manually verify that the code structure is correctly refactored. Existing tests for Task 2 should still pass, confirming no regressions in the happy-path execution logic."
+          },
+          {
+            "id": 2,
+            "title": "Implement Sandbox Deletion Call within the Finally Block",
+            "description": "Place the `sandbox.delete()` method call inside the `finally` block that was created in the previous subtask. This is the core step to ensure the sandbox is marked for deletion after every execution attempt.",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "The `finally` block must contain the `await sandbox.delete()` call. Ensure that the `sandbox` object is accessible within the scope of the `finally` block, which may require declaring it outside the `try` block.",
+            "status": "done",
+            "testStrategy": "Write a preliminary unit test that mocks the sandbox object and confirms that the `delete()` method is called after a successful execution."
+          },
+          {
+            "id": 3,
+            "title": "Implement Robust Logging for Cleanup Operations",
+            "description": "Integrate structured logging around the cleanup process to provide visibility into its operations. Log the start of a cleanup attempt, its success, or its failure.",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "Add a log entry before calling `sandbox.delete()`, including the sandbox ID (e.g., 'Attempting to clean up sandbox [ID]'). Add a success log entry after the call completes (e.g., 'Successfully deleted sandbox [ID]'). These logs are critical for monitoring and debugging resource leaks.",
+            "status": "done",
+            "testStrategy": "Inspect application logs during test runs to confirm that cleanup-related messages are being generated with the correct information."
+          },
+          {
+            "id": 4,
+            "title": "Add Error Handling for the Sandbox Deletion Call",
+            "description": "Make the cleanup process more resilient by wrapping the `sandbox.delete()` call itself in a nested `try...catch` block. This prevents a failure during cleanup from crashing the entire process and ensures the failure is logged.",
+            "dependencies": [
+              "3.2",
+              "3.3"
+            ],
+            "details": "Inside the main `finally` block, the `try...catch` will execute `sandbox.delete()`. If it fails, the `catch` block will log the specific deletion error (e.g., 'Failed to delete sandbox [ID]: [error message]') but will not re-throw the error, allowing the original execution result or error to be returned to the user.",
+            "status": "done",
+            "testStrategy": "Write a unit test where the mocked `sandbox.delete()` method is configured to throw an error. Verify that the error is caught, logged correctly, and does not prevent the function from completing."
+          },
+          {
+            "id": 5,
+            "title": "Develop Comprehensive Unit Tests for All Cleanup Scenarios",
+            "description": "Create a full suite of unit tests to verify that the sandbox cleanup logic works reliably under all specified conditions: successful execution, runtime errors, and timeouts.",
+            "dependencies": [
+              "3.4"
+            ],
+            "details": "Using a mocking framework, write separate tests that simulate: 1) A successful `codeRun()` call. 2) A `codeRun()` call that rejects with an error. 3) A `codeRun()` call that simulates a timeout. In each case, assert that `sandbox.delete()` is called exactly once.",
+            "status": "done",
+            "testStrategy": "Confirm that all tests pass and that code coverage for the cleanup logic is high. The tests should mock the sandbox object and spy on the `delete` method to verify it was called."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Develop Basic Error Handling Framework",
+        "description": "Implement a basic error handling system to capture and report errors from the Daytona execution process. This includes handling syntax errors, runtime errors, and timeouts.",
+        "details": "Map Daytona's exit codes and error messages to the `ExecutionError` model. The output should be clear enough for a user to understand what went wrong. This initial version does not need to be exhaustive but must cover common cases.",
+        "testStrategy": "Execute code snippets with known errors (e.g., syntax errors, division by zero) and verify that the correct error type and message are returned and displayed to the user.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define the ExecutionError Data Model",
+            "description": "Create the TypeScript interface or class for `ExecutionError`. This model will standardize how different types of execution failures (syntax, runtime, timeout) are represented within the application.",
+            "dependencies": [],
+            "details": "The model must include fields for a categorized error type (e.g., 'SyntaxError', 'RuntimeError', 'TimeoutError'), a user-friendly message explaining the error, and the original raw `stderr` or exit code for debugging purposes.",
+            "status": "done",
+            "testStrategy": "Perform a code review of the new interface/class to ensure it can adequately represent the common error cases specified in the parent task."
+          },
+          {
+            "id": 2,
+            "title": "Research and Catalog Daytona Error Outputs",
+            "description": "Investigate and document the common exit codes and `stderr` message formats returned by the Daytona `codeRun` process for typical Python errors.",
+            "dependencies": [],
+            "details": "Execute code snippets with known errors (e.g., invalid syntax, division by zero, undefined variable) against the Daytona sandbox. Record the resulting exit codes and `stderr` strings to identify patterns that can be used for mapping.",
+            "status": "done",
+            "testStrategy": "Create a reference document or a set of constants in the code that lists the identified error patterns and their corresponding Daytona outputs."
+          },
+          {
+            "id": 3,
+            "title": "Implement Mapper for Exit Codes and Stderr",
+            "description": "Create a utility function that takes the raw output from a Daytona execution (`exitCode`, `stderr`) and maps it to a populated `ExecutionError` object.",
+            "dependencies": [
+              "4.1",
+              "4.2"
+            ],
+            "details": "This function will be the core of the error handling framework. It should check if the `exitCode` is non-zero, and if so, parse the `stderr` string using the patterns identified in subtask 4.2 to determine the error type and construct a clear, user-facing message.",
+            "status": "done",
+            "testStrategy": "Write unit tests for the mapper function, providing it with mock `stderr` strings and exit codes for common errors, and assert that the correct `ExecutionError` object is returned."
+          },
+          {
+            "id": 4,
+            "title": "Implement Specific Handling for Timeouts",
+            "description": "Add logic to the code execution wrapper to detect and handle execution timeouts, generating a specific `ExecutionError` for this case.",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Wrap the `sandbox.process.codeRun()` call in a mechanism like `Promise.race` with a timer. If the execution exceeds a configured duration, the logic should abort the wait and create an `ExecutionError` with the type 'TimeoutError' and an appropriate message.",
+            "status": "done",
+            "testStrategy": "Test with a Python script that has a long sleep duration (e.g., `time.sleep(10)`). Set the timeout to a shorter value (e.g., 3 seconds) and verify that the correct `ExecutionError` for a timeout is generated."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Error Handling into Execution Engine Response",
+            "description": "Modify the core execution engine (from Task 2) to return a structured response that includes either the successful result or an `ExecutionError` object.",
+            "dependencies": [
+              "4.3",
+              "4.4"
+            ],
+            "details": "The `CodeExecutionResponse` object should be updated to include an optional `error` field of type `ExecutionError`. The main execution function will now catch all exceptions (including timeouts) and populate this field, ensuring a consistent return type for both success and failure scenarios, which is crucial for the 'Run Code' command (Task 5).",
+            "status": "done",
+            "testStrategy": "Perform end-to-end tests by calling the main execution function with code that succeeds, fails with a syntax error, and times out. Verify that the returned `CodeExecutionResponse` object has the correct structure and data in each case."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Integrate Execution Engine with 'Run Code' Command",
+        "description": "Connect the core execution engine to the primary user-facing Raycast command, 'Run Code'. The user should be able to type the command, enter Python code, and see the results or errors directly in the Raycast interface.",
+        "details": "This involves updating the `src/run-code.ts` command handler to call the new Daytona execution service. The results should be formatted for clear presentation in Raycast's standard result view.",
+        "testStrategy": "Perform end-to-end testing via the Raycast UI. Test with valid code, code that produces errors, and long-running code to test timeouts. Ensure results are displayed correctly.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3,
+          4
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Refactor 'run-code.ts' to Accept Input for Service Call",
+            "description": "Modify the primary command function in `src/run-code.ts`. Set it up to take the user's Python code as an argument and prepare the structure for an asynchronous call to the execution service.",
+            "dependencies": [],
+            "details": "This initial step involves cleaning up any old logic and structuring the command to handle user input. The main goal is to create a clear entry point for the Daytona service integration without yet making the call.",
+            "status": "done",
+            "testStrategy": "Run the Raycast command and confirm it accepts text input without errors. Log the captured code to the console to verify it's being received correctly."
+          },
+          {
+            "id": 2,
+            "title": "Invoke Daytona Execution Service and Await Response",
+            "description": "Import the Daytona execution service function into `src/run-code.ts`. Call this function with the user's code and handle the asynchronous promise to receive the raw execution result (stdout, stderr, exit code).",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "This is the core integration step. The command handler must now communicate with the backend service created in Task 2. Focus on correctly passing the code and receiving the response object.",
+            "status": "done",
+            "testStrategy": "Use `console.log` to inspect the raw response object from the service call. Test with a simple 'hello world' script to ensure the connection is successful."
+          },
+          {
+            "id": 3,
+            "title": "Implement UI for Successful Code Execution",
+            "description": "When the execution service returns a successful result (e.g., exit code 0), format the `stdout` data and present it clearly to the user within the Raycast result view.",
+            "dependencies": [
+              "5.2"
+            ],
+            "details": "Use Raycast's UI components, such as `<List.Item>` with a title and subtitle, or the `<List.Item.Detail>` view for longer output. The presentation should be clean and easy to read.",
+            "status": "done",
+            "testStrategy": "Execute valid Python code (e.g., `print(2+2)`) and verify the output '4' is displayed correctly and professionally in the Raycast UI."
+          },
+          {
+            "id": 4,
+            "title": "Implement UI for Execution Errors and Failures",
+            "description": "Handle cases where the code execution fails. If the service returns a non-zero exit code or `stderr` content, format this error information and display it clearly in the Raycast UI.",
+            "dependencies": [
+              "5.2"
+            ],
+            "details": "The error display should be distinct from the success display, perhaps using a different icon or accessory title. The `stderr` message is crucial for helping the user debug their code.",
+            "status": "done",
+            "testStrategy": "Test with code that has a syntax error (e.g., `print('hello)`) and code with a runtime error (e.g., `import non_existent_module`). Verify the error message is shown."
+          },
+          {
+            "id": 5,
+            "title": "Add Loading Indicator for Asynchronous Execution",
+            "description": "Implement a loading state in the Raycast command UI that is active from the moment the user submits their code until a result or error is displayed. This provides essential user feedback.",
+            "dependencies": [
+              "5.3",
+              "5.4"
+            ],
+            "details": "Use the `isLoading` prop available in Raycast's React components. The state should be set to `true` before the service call and `false` inside a `finally` block after the call completes.",
+            "status": "done",
+            "testStrategy": "Execute a Python script with a delay (e.g., `import time; time.sleep(2); print('done')`) and confirm that a loading indicator is visible for the duration of the execution."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Integrate Execution Engine with Raycast AI Tool",
+        "description": "Update the Raycast AI tool definition to use the new Daytona execution engine. This enables natural language to code workflows where Raycast AI can automatically execute Python code to answer user queries.",
+        "details": "Modify `src/tools/run-code.ts` to hand off code generated by the AI to the Daytona service. Ensure the execution results are formatted and returned to the AI for its response.",
+        "testStrategy": "Test with Raycast AI by asking questions that require computation (e.g., 'what is 50!'). Verify that the AI tool is invoked, the code runs successfully, and the correct answer is returned in the chat.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3,
+          4
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Refactor AI Tool for Daytona Service Integration",
+            "description": "Modify the `src/tools/run-code.ts` file to import the Daytona execution service created in Task 2. This involves updating the tool's definition and removing any previous or placeholder code execution logic.",
+            "dependencies": [],
+            "details": "Locate the AI tool definition within `src/tools/run-code.ts`. Import the core `executePythonCode` function (or equivalent service). Ensure the tool's function signature is prepared to receive AI-generated code and call the new service.",
+            "status": "done",
+            "testStrategy": "Verify that the project compiles successfully after the import and structural changes. No functional change is expected yet."
+          },
+          {
+            "id": 2,
+            "title": "Implement Daytona Execution Service Call",
+            "description": "Wire the AI tool to the Daytona execution engine. When the tool is invoked, it should pass the AI-generated Python code to the imported Daytona service.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Inside the tool's execution block, call the `executePythonCode` function, passing the code string provided by the AI. Use `await` to handle the asynchronous nature of the call and store the returned `CodeExecutionResponse` object in a variable.",
+            "status": "done",
+            "testStrategy": "Use a mock of the execution service to test that it is called with the correct code string when the tool is invoked."
+          },
+          {
+            "id": 3,
+            "title": "Format Successful Execution Output for the AI",
+            "description": "Process the response from the Daytona service for successful executions. Format the `stdout` into a clear, structured string that the AI can easily parse and use in its final response.",
+            "dependencies": [
+              "6.2"
+            ],
+            "details": "Check the `CodeExecutionResponse` for an exit code of 0 and empty `stderr`. If the execution was successful, format the result into a string, for example: `Execution successful. Output: [stdout content]`. This string will be the return value of the tool.",
+            "status": "done",
+            "testStrategy": "Write a unit test that provides a mock successful response object to the formatting logic and asserts that the output string is correctly structured."
+          },
+          {
+            "id": 4,
+            "title": "Format Execution Errors and Failures for the AI",
+            "description": "Handle failed executions by processing the `stderr` and non-zero exit code from the Daytona service. Format this information into a descriptive error message for the AI.",
+            "dependencies": [
+              "6.2"
+            ],
+            "details": "If the `CodeExecutionResponse` contains a non-zero exit code or content in `stderr`, format the output to clearly indicate failure. For example: `Execution failed. Error: [stderr content]. Exit Code: [exit code]`. This allows the AI to understand the error and inform the user.",
+            "status": "done",
+            "testStrategy": "Write a unit test that provides a mock failure response object (with stderr and a non-zero exit code) and asserts that the error string is formatted correctly."
+          },
+          {
+            "id": 5,
+            "title": "End-to-End Test with Live Raycast AI Queries",
+            "description": "Perform manual, end-to-end testing within the Raycast application to validate the complete natural language to code workflow.",
+            "dependencies": [
+              "6.3",
+              "6.4"
+            ],
+            "details": "Open Raycast AI and ask questions that require computation, such as 'what is 50!' or 'calculate the 20th number in the Fibonacci sequence'. Verify that the AI tool is invoked, the code runs via Daytona, and the correct, calculated answer is returned in the chat.",
+            "status": "done",
+            "testStrategy": "Test with both valid queries that should succeed and queries that might generate Python errors to ensure both success and failure paths are handled correctly by the AI."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Rich Output Handling for Charts and Data",
+        "description": "Enhance the result presentation to support rich outputs from Daytona, such as charts, graphs, and structured data. This allows for data analysis and visualization workflows.",
+        "details": "Process the `artifacts` field in the `CodeExecutionResponse` from Daytona. Convert chart data into a format that can be displayed in Raycast, likely as base64 encoded images or markdown links.",
+        "testStrategy": "Execute Python code that generates a chart using a library like Matplotlib. Verify that the resulting chart image is captured as an artifact and displayed correctly in the Raycast results view.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "deferred",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Enhance Error Reporting with Detailed Debugging Info",
+        "description": "Improve the user experience for debugging by providing more detailed and user-friendly error messages, including stack traces, line numbers, and context.",
+        "details": "Parse the error output from Daytona to extract structured information. Format this information into a clear, readable error message in Raycast, potentially using markdown for better formatting.",
+        "testStrategy": "Run code with multi-level function calls that result in an error. Verify that the full stack trace is presented to the user in a readable format. User feedback will be a key metric.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze and Document Daytona's `stderr` Format",
+            "description": "Trigger various Python errors within the Daytona environment to capture and analyze the raw string format of the `stderr` output. Document the patterns for stack traces, error types, and messages to inform the parser's design.",
+            "dependencies": [],
+            "details": "Execute simple Python scripts designed to fail (e.g., NameError, TypeError, multi-level function call error) and inspect the `CodeExecutionResponse.stderr` string. Note the structure of the 'Traceback (most recent call last):' section.",
+            "status": "done",
+            "testStrategy": "Confirm that a document or comment block is created detailing the expected `stderr` format for at least three different common Python error types."
+          },
+          {
+            "id": 2,
+            "title": "Define a Structured Error Data Model",
+            "description": "Create a clear data structure, likely a TypeScript interface, to hold the parsed error information. This model will serve as the contract between the parser and the formatter.",
+            "dependencies": [],
+            "details": "The model should include fields like `errorType` (e.g., 'ValueError'), `errorMessage`, and an array of `stackFrames`. Each `stackFrame` object should contain `filePath`, `lineNumber`, and `context` (the line of code).",
+            "status": "done",
+            "testStrategy": "Review the defined TypeScript interface to ensure it can represent all the information identified in the analysis phase (subtask 8.1)."
+          },
+          {
+            "id": 3,
+            "title": "Implement the `stderr` Parser",
+            "description": "Develop a robust parsing function that takes the raw `stderr` string as input and outputs an instance of the Structured Error Data Model. This function will use regular expressions or string manipulation to extract the relevant details.",
+            "dependencies": [
+              "8.1",
+              "8.2"
+            ],
+            "details": "The parser must handle multi-line error messages and multiple frames in the stack trace. It should gracefully handle cases where the `stderr` format might not be a standard Python traceback.",
+            "status": "done",
+            "testStrategy": "Unit test the parser with various captured `stderr` strings, including single-line errors, multi-frame stack traces, and syntax errors, verifying the output matches the defined data model."
+          },
+          {
+            "id": 4,
+            "title": "Create a Markdown Formatter for Errors",
+            "description": "Build a function that converts a Structured Error Data object into a formatted markdown string. The output should be optimized for readability in the Raycast UI.",
+            "dependencies": [
+              "8.2"
+            ],
+            "details": "Use markdown features like code blocks (` ``` `) for stack traces, bold text for the error type, and clear separation between the main error message and the trace. The most recent call should be highlighted.",
+            "status": "done",
+            "testStrategy": "Provide a sample structured error object to the formatter and verify the generated markdown string renders clearly and correctly in a markdown previewer."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Formatted Errors into Raycast UI",
+            "description": "Update the main code execution logic to detect non-zero exit codes or `stderr` content. When an error is found, invoke the parser and formatter, and then display the resulting markdown in the Raycast results view.",
+            "dependencies": [
+              "8.3",
+              "8.4"
+            ],
+            "details": "The integration should be placed in the part of the code that processes the `CodeExecutionResponse`. The formatted markdown should be set as the primary content of the Raycast detail view for a failed execution.",
+            "status": "done",
+            "testStrategy": "Run a Python script with a multi-level function call that results in an error via the Raycast extension. Verify the full, formatted stack trace is presented to the user in a readable format as specified in the parent task."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Optimize Performance and Benchmark Execution Speed",
+        "description": "Analyze and optimize the performance of the code execution workflow to minimize latency. The goal is to achieve execution times under 2 seconds for simple scripts.",
+        "details": "Benchmark the entire process from command invocation to result display. Investigate potential bottlenecks, such as sandbox creation time or network latency. Explore SDK features like connection pooling if available.",
+        "testStrategy": "Create a suite of benchmark tests for different types of code snippets. Measure and log execution times. Compare performance against the previous E2B implementation to ensure no regression.",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          6
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Create User Documentation and Migration Guide",
+        "description": "Develop comprehensive documentation for the updated extension. This includes a guide for new users on setup and a migration guide for existing users moving from the E2B-based version.",
+        "details": "The documentation should clearly explain the new authentication method (DAYTONA_API_KEY), showcase new features like rich output, and provide troubleshooting tips for common errors.",
+        "testStrategy": "Have a new user follow the setup guide to install and configure the extension. Have an existing user follow the migration guide. Collect feedback and revise the documentation for clarity.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          7,
+          8
+        ],
+        "status": "deferred",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Draft Documentation Structure and Outline",
+            "description": "Create a detailed outline for the entire documentation set. This includes defining the main sections for a new user guide, a migration guide for existing users, a feature showcase, and a troubleshooting FAQ.",
+            "dependencies": [],
+            "details": "The outline should establish a logical flow, ensuring all requirements from the main task description are allocated to a specific section. Plan where to detail the DAYTONA_API_KEY setup, showcase rich output, and list common errors.",
+            "status": "pending",
+            "testStrategy": "Review the outline against the main task's requirements to ensure all points are covered before writing begins."
+          },
+          {
+            "id": 2,
+            "title": "Write 'Getting Started' Guide for New Users",
+            "description": "Author the documentation section that guides a new user through the entire setup process, from installation to running their first piece of code.",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "This guide must provide step-by-step instructions on installing the Raycast extension and configuring the new authentication method using the DAYTONA_API_KEY. Use screenshots to illustrate the process.",
+            "status": "pending",
+            "testStrategy": "Have a user unfamiliar with the extension attempt to follow the draft guide to see if they can successfully set it up without assistance."
+          },
+          {
+            "id": 3,
+            "title": "Write Migration Guide for Existing E2B Users",
+            "description": "Develop a specific guide for users of the previous E2B-based version, explaining the changes and how to upgrade.",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Clearly explain the transition from the E2B proxy to the direct Daytona SDK. Detail the steps to remove old settings and configure the new DAYTONA_API_KEY. Emphasize the benefits of the new version, like improved performance and features.",
+            "status": "pending",
+            "testStrategy": "Provide the draft guide to a user of the old version and ask them to perform the migration. Note any points of confusion."
+          },
+          {
+            "id": 4,
+            "title": "Document New Features and Troubleshooting Tips",
+            "description": "Create content to showcase new capabilities and provide solutions for common issues.",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Use clear examples and visuals (e.g., GIFs or screenshots) to demonstrate new features like rich output. Compile a troubleshooting section addressing common errors such as 'Invalid API Key', 'Sandbox Creation Failed', or 'Connection Timeout'.",
+            "status": "pending",
+            "testStrategy": "Verify that the feature descriptions match the actual implementation. Intentionally create common errors to confirm the troubleshooting steps are accurate."
+          },
+          {
+            "id": 5,
+            "title": "Review, Finalize, and Publish Documentation",
+            "description": "Consolidate all written sections, perform a final review for clarity and accuracy, incorporate feedback from test users, and publish the documentation.",
+            "dependencies": [
+              "10.2",
+              "10.3",
+              "10.4"
+            ],
+            "details": "Execute the test strategy from the parent task: have a new user follow the setup guide and an existing user follow the migration guide. Collect their feedback, make necessary revisions, and then merge/publish the final documentation.",
+            "status": "pending",
+            "testStrategy": "Perform a final proofread for grammatical errors and technical inaccuracies after all feedback has been incorporated."
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Implement Daytona Dashboard Command",
+        "description": "Create a Raycast command to list, view, and manage Daytona sandboxes. This command will serve as the main interface for starting, stopping, deleting, archiving, and creating sandboxes.",
+        "details": "1. **Command Scaffolding:** Create a new Raycast `ListCommand` named 'Daytona Dashboard'. This will be the entry point for all sandbox management.\n2. **API Integration:** Utilize the Daytona SDK to fetch the list of sandboxes (`daytona.sandbox.list()`). Implement `usePromise` or a similar hook to handle the asynchronous data fetching, including loading and error states.\n3. **List View Implementation:**\n   - Use the `<List>` component to display the sandboxes.\n   - For each `<List.Item>`, display the sandbox name as the `title` and its Git repository as the `subtitle`.\n   - Use `<List.Item.Accessory>` to show the sandbox status (e.g., '🟢 Running', '⚪ Stopped', '🗄️ Archived') for quick visual identification.\n   - Add relevant `keywords` to each item for easy filtering.\n4. **Action Panel:**\n   - Attach an `<ActionPanel>` to each sandbox item.\n   - **Primary Action:** `Action.Push` to a new `<Detail>` component showing comprehensive sandbox info.\n   - **Lifecycle Actions:** Implement actions for 'Start', 'Stop', 'Delete', and 'Archive'. These actions will call the corresponding Daytona API endpoints. Use `Action.Style.Destructive` for the delete action and include a confirmation dialog.\n   - **Creation Action:** Add a global action or an action in the empty view to create a new sandbox, which will push a `<Form>` component.\n5. **Detail View:**\n   - Create a `<Detail>` component that uses markdown to present a structured view of a sandbox's properties (ID, Name, Status, Creation Date, Environment Details, etc.).\n   - The Detail view should also contain an `ActionPanel` with the same management actions.\n6. **Creation Form:**\n   - Implement a `<Form>` for creating new sandboxes.\n   - Include fields for the Git repository URL (required) and an optional sandbox name.\n   - On submission, call the creation API, show a toast notification, and refresh the main list.",
+        "testStrategy": "1. **List Verification:** Launch the command and confirm it correctly displays a list of all sandboxes with accurate statuses and accessories. Test the search/filtering functionality.\n2. **Action Testing:**\n   - For a 'stopped' sandbox, use the 'Start' action and verify its status updates to 'running' after a list refresh.\n   - For a 'running' sandbox, use the 'Stop' action and verify its status updates to 'stopped'.\n   - Use the 'Delete' action, confirm the alert, and verify the sandbox is removed from the list.\n3. **Detail View Test:** Navigate to the detail view for a sandbox. Verify all information is present and correctly formatted. Test that actions within the detail view's ActionPanel work as expected.\n4. **Creation Test:** Use the 'Create New Sandbox' action. Fill and submit the form with a valid repository. Verify a success toast is shown and the new sandbox appears in the list.\n5. **Error Handling Test:** Invalidate the `DAYTONA_API_KEY` and launch the command. Verify that a clear error message is shown instead of an empty list or a crash.",
+        "status": "done",
+        "dependencies": [
+          1
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Implement Sandbox Files Command",
+        "description": "Create a Raycast command for browsing, managing, and editing files within a Daytona sandbox, providing a complete file management interface.",
+        "details": "1. **Command Integration:** This feature will be implemented as a primary `<Action>` on each sandbox item within the 'Daytona Dashboard' command (from Task 11). The action will be labeled 'Browse Files'.\n2. **API & SDK Utilization:** Leverage the Daytona SDK's filesystem module. Key methods to use will be `daytona.sandbox.fs.list(path)`, `daytona.sandbox.fs.read(path)`, `daytona.sandbox.fs.write(path, content)`, `daytona.sandbox.fs.mkdir(path)`, `daytona.sandbox.fs.rm(path)`, and potentially `daytona.sandbox.fs.chmod(path)`. All asynchronous operations must use the `usePromise` hook to manage loading, data, and error states gracefully.\n3. **Hierarchical List View:**\n   - Use the `<List>` component to display the contents of the current directory.\n   - Differentiate items with icons (e.g., Raycast's built-in `Icon.Folder` and `Icon.Document`).\n   - Display file metadata (size, last modified date, permissions) as `<List.Item.Accessory>` elements.\n   - Implement navigation by re-rendering the list with the new path when a directory is selected. Include a '..' entry to navigate to the parent directory.\n4. **File & Directory Actions:** Implement an `<ActionPanel>` with context-aware actions:\n   - **On Files:** 'View/Edit', 'Download', 'Rename', 'Delete', 'Change Permissions'.\n   - **On Directories:** 'Rename', 'Delete'.\n   - **Global Actions:** 'Create File', 'Create Directory', 'Upload File'.\n5. **File Editing:** The 'View/Edit' action will open a `<Detail>` view. The file content will be displayed in a markdown code block. An action on this view, 'Save Changes', will use `daytona.sandbox.fs.write()` to persist changes.\n6. **Search & State:** Implement search on the `<List>` component for filtering the current directory. Manage the current path as a state variable that updates on navigation.\n<info added on 2025-08-13T09:42:54.298Z>\n[]\n</info added on 2025-08-13T09:42:54.298Z>",
+        "testStrategy": "1. **Navigation Verification:**\n   - Launch the file browser from a sandbox in the dashboard.\n   - Navigate into a nested directory and verify the file list updates correctly.\n   - Use the '..' entry to navigate back up the directory tree to the root.\n   - Test edge cases like empty directories and directories with special characters.\n2. **CRUD Operations Testing:**\n   - **Create:** Create a new file and a new directory. Verify they appear in the list.\n   - **Read/Edit:** Open a text file, verify its content. Edit the content, save, and reopen to confirm the changes are saved in the sandbox.\n   - **Upload/Download:** Upload a local file; verify it exists in the sandbox with correct content. Download a sandbox file; verify it matches the original.\n   - **Delete:** Delete a file and then an empty directory. Attempt to delete a non-empty directory and verify the command handles it correctly (either by recursive deletion with confirmation or by showing an error).\n3. **Permissions Management:**\n   - View the permissions of a file in the UI.\n   - Use the 'Change Permissions' action and verify the UI updates. If possible, confirm the change within the sandbox via a separate command.\n4. **Error Handling:**\n   - Attempt to read a non-existent file or navigate into an invalid path. Verify that a clear, user-friendly error message is displayed.\n   - Test operations that might fail due to sandbox permissions and ensure errors are handled gracefully.",
+        "status": "done",
+        "dependencies": [
+          11
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "File Browser Scaffolding and Navigation",
+            "description": "Implement the basic structure for the file browser command. This includes creating the entry point action on the Daytona Dashboard, fetching and displaying the root directory contents, and enabling navigation into subdirectories and back to parent directories.",
+            "dependencies": [],
+            "details": "Create a new React component for the file browser, triggered by the 'Browse Files' action on a sandbox item. Use `daytona.sandbox.fs.list(path)` with the `usePromise` hook to fetch directory contents. Render items in a `<List>`, using `Icon.Folder` and `Icon.Document`. Handle selection of a directory to re-render the component with the new path. Add a '..' item for navigating up to the parent directory.",
+            "status": "done",
+            "testStrategy": "Verify that the file browser opens from the dashboard. Confirm that files and folders are listed with correct icons. Test navigation by entering a subdirectory and returning to the parent using the '..' entry. Ensure loading and error states are handled."
+          },
+          {
+            "id": 2,
+            "title": "Display File Metadata and Implement Search",
+            "description": "Enhance the file list by displaying metadata for each file and directory, and implement a search filter for the current directory view.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Parse the metadata (size, last modified date, permissions) returned by the `daytona.sandbox.fs.list()` call. Display this information concisely using `<List.Item.Accessory>`. Enable the built-in search functionality of the `<List>` component to filter the currently displayed items by name. The current path state must be managed correctly.",
+            "status": "done",
+            "testStrategy": "Check that file size, modification date, and permissions are correctly displayed next to each list item. Type in the search bar and verify that the list filters to show only matching file/directory names in the current directory."
+          },
+          {
+            "id": 3,
+            "title": "Implement Create and Delete Actions",
+            "description": "Add actions to the `<ActionPanel>` for creating new files and directories, and for deleting existing ones.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Implement a 'Create Directory' global action that prompts for a name and calls `daytona.sandbox.fs.mkdir()`. Implement a 'Create File' global action that prompts for a name and calls `daytona.sandbox.fs.write()` with empty content. Implement a 'Delete' action on files and directories that prompts for confirmation and calls `daytona.sandbox.fs.rm()`. Refresh the list view after each operation.",
+            "status": "done",
+            "testStrategy": "Use the 'Create Directory' action and verify the new directory appears. Create a file inside it. Select the file and use the 'Delete' action, confirming it disappears. Delete the directory and confirm it is removed from the list."
+          },
+          {
+            "id": 4,
+            "title": "Implement File Content Viewing and Editing",
+            "description": "Create the functionality for users to view the contents of a file and edit it. The 'View/Edit' action should open a new view displaying the file's content, with an option to save changes.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "On file items, add a 'View/Edit' action. When triggered, use `daytona.sandbox.fs.read()` to fetch the file content. Push a `<Detail>` view displaying the content within a markdown code block. Add a 'Save Changes' action to this view. This action will use a form or state to capture modifications and persist them using `daytona.sandbox.fs.write()`.",
+            "status": "done",
+            "testStrategy": "Select a text file and use 'View/Edit'. Verify its content is displayed correctly. Modify the content in the UI, save the changes, and re-open the file to confirm the changes were persisted. Test with a large file to check performance."
+          },
+          {
+            "id": 5,
+            "title": "Implement Advanced File Operations",
+            "description": "Implement the remaining file management actions: renaming files/directories, downloading files to the local machine, uploading local files to the sandbox, and changing file permissions.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Implement a 'Rename' action that uses a form to get the new name. Implement 'Download' using `daytona.sandbox.fs.read()` and writing the content to the local filesystem. Implement 'Upload File' as a global action that uses Raycast's file picker and `daytona.sandbox.fs.write()`. Implement 'Change Permissions' using a form to get the new mode and `daytona.sandbox.fs.chmod()`.",
+            "status": "done",
+            "testStrategy": "Rename a file and verify its name changes in the list. Download a file and check its contents locally. Upload a new file and confirm it appears in the sandbox directory. Change a file's permissions and verify the metadata updates in the list accessory."
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Implement Git Manager Command",
+        "description": "Create a comprehensive Git operations interface for Daytona sandboxes, enabling users to clone repositories, manage branches, commit changes, and synchronize with remotes directly from Raycast.",
+        "details": "1. **Command Entry Point:** Implement as a primary `<Action>` on each sandbox item within the 'Daytona Dashboard' (from Task 11). The action should be labeled 'Manage Git Repository' and be conditionally visible only for running sandboxes.\n2. **Core Logic & SDK Integration:** Utilize the Daytona SDK's process execution method (`daytona.sandbox.process.run()`) to execute all git commands (e.g., `git status`, `git branch`, `git commit`). Ensure all commands are executed within the correct project directory inside the sandbox.\n3. **Main Git Dashboard (`List`):** Upon selecting the action, present a `<List>` view that serves as the main Git dashboard. This view should dynamically display:\n    - The current active branch.\n    - A summary of pending changes (e.g., '3 modified, 1 untracked').\n    - A list of primary actions: 'View Status & Diff', 'Commit Changes', 'Push', 'Pull', 'Manage Branches'.\n4. **Status and Diff View (`Detail`):** The 'View Status & Diff' action will open a `<List.Item.Detail>` view. It will show the formatted, colorized output of `git status` and `git diff HEAD`, using markdown for clarity.\n5. **Commit Workflow (`Form`):** The 'Commit Changes' action will open a Raycast `<Form>`. The form will automatically list all changed/untracked files as a checklist for staging (`git add`). It will include a required text area for the commit message. On submission, it will execute the necessary `git add` and `git commit` commands.\n6. **Branch Management (`List`):** The 'Manage Branches' action will navigate to a new `<List>` showing all local and remote branches (`git branch -a`). Each branch item will have actions like 'Checkout', 'Delete Branch'. A primary action will allow creating a new branch via a form.\n7. **Initial Clone Workflow:** If a `.git` directory is not detected in the sandbox's project folder, the interface should present a `<Form>` to clone a repository, asking for the repository URL.",
+        "testStrategy": "1. **Entry Point Verification:** From the Daytona Dashboard, confirm the 'Manage Git Repository' action appears on a running sandbox and successfully opens the Git interface.\n2. **Status View Test:** In a sandbox with a clean repository, verify the status shows no changes. Modify a file and confirm the dashboard summary and detailed view accurately reflect the changes from `git status` and `git diff`.\n3. **Commit Workflow Test:** Modify several files. Use the 'Commit' form to stage only some of them and write a commit message. Verify that a new commit is created with the correct files and message by checking `git log` and `git status` afterwards.\n4. **Branching Test:** Use the 'Manage Branches' view to create a new branch named 'feature-test'. Verify it appears in the list. Use the 'Checkout' action to switch to it and confirm the main dashboard reflects the new branch name.\n5. **Push/Pull Test:** Make a local commit and use the 'Push' action. Verify the commit appears on the remote (e.g., GitHub). Then, make a change on the remote, use the 'Pull' action, and verify the changes are correctly fetched and applied locally.\n6. **Clone Test:** Create a new, empty sandbox. Access the Git Manager and verify it prompts to clone. Provide a public repository URL and confirm the repository is successfully cloned into the sandbox.",
+        "status": "done",
+        "dependencies": [
+          11
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate 'Git Manager' Action and Create Initial Clone Workflow",
+            "description": "Create the entry point for the Git Manager from the Daytona Dashboard. This involves adding a new action to running sandboxes and building the initial component that checks for a Git repository, presenting a clone form if one is not found.",
+            "dependencies": [],
+            "details": "1. **Modify `src/dashboard.tsx`**: In the `ActionPanel` for sandbox list items, add a new `<Action.Push>` labeled 'Manage Git Repository'. This action should only be visible if `sandbox.state === 'running'`. It should target a new component, `GitManager`, and pass the `sandboxId` and `projectName` as props.\n2. **Create `src/git.tsx`**: Create a new file for the `GitManager` command. This component will receive the sandbox props.\n3. **Implement Repository Check**: On load, the `GitManager` component will use `daytona.sandbox.process.run()` to execute `git status` within the project directory (`/daytona/{projectName}`).\n4. **Implement Clone Form**: If the `git status` command fails (indicating no repository), display a Raycast `<Form>` that prompts the user for a 'Repository URL'. On submission, execute `git clone <URL> .` inside the project directory.",
+            "status": "done",
+            "testStrategy": "1. Verify the 'Manage Git Repository' action appears only on 'running' sandboxes in the dashboard.\n2. For a sandbox without a Git repository, confirm that the action leads to the 'Clone Repository' form.\n3. Submit a valid repository URL and verify that a success toast is shown and the view reloads to the main Git dashboard."
+          },
+          {
+            "id": 2,
+            "title": "Build the Main Git Dashboard and Status View",
+            "description": "Develop the main `<List>` view for the Git Manager. This view will serve as the central dashboard, displaying the current branch, a summary of changes, and the primary Git actions.",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "1. **In `src/git.tsx`**: After a successful repository check (or clone), render a `<List>` component.\n2. **Fetch Git State**: Use `daytona.sandbox.process.run()` to execute `git branch --show-current` and `git status --porcelain`. Parse the output to get the active branch name and a count of modified/untracked files.\n3. **Display State**: Use the `<List.Item>` title to show the current branch (e.g., 'Current Branch: main') and an accessory title for the status summary (e.g., '3 modified, 1 untracked').\n4. **Implement 'View Status' Action**: Add a primary action 'View Status' to the list. When triggered, it should show the formatted output of `git status` in the `<List.Item.Detail>` view. Use markdown code blocks for readability.",
+            "status": "done",
+            "testStrategy": "1. Open the Git Manager for a repository with a clean working directory; verify the status summary is empty.\n2. Modify a file in the sandbox and refresh the view; verify the branch and status summary update correctly.\n3. Trigger the 'View Status' action and confirm the `git status` output is displayed correctly in the detail view."
+          },
+          {
+            "id": 3,
+            "title": "Implement Commit, Push, and Pull Actions",
+            "description": "Add the core remote synchronization and state-saving actions to the Git Manager dashboard. This includes a simplified commit workflow and direct actions for push and pull.",
+            "dependencies": [
+              "13.2"
+            ],
+            "details": "1. **Implement Commit Action**: In the `ActionPanel` of the main Git dashboard list, add an `<Action.Push>` for 'Commit Changes'. This should lead to a `<Form>`.\n2. **Create Commit Form**: The form will have one required `<Form.TextArea>` for the 'Commit Message'. On submission, it will execute `git add .` followed by `git commit -m \"<message>\"`. Use toasts to provide feedback on success or failure.\n3. **Implement Push/Pull Actions**: Add 'Push' and 'Pull' actions to the `ActionPanel`. These actions will directly execute `git push` and `git pull` respectively, using `daytona.sandbox.process.run()`. Display toasts to indicate the outcome of the operations.",
+            "status": "done",
+            "testStrategy": "1. Modify a file, use the 'Commit Changes' action, enter a message, and submit. Verify a success toast and that `git status` now shows a clean working tree.\n2. After committing, use the 'Push' action and verify the success toast.\n3. In another environment, push a change to the same branch. Use the 'Pull' action in Raycast and verify the success toast and that the new changes are present."
+          },
+          {
+            "id": 4,
+            "title": "Implement Basic Branch Management",
+            "description": "Create a view for managing Git branches, allowing users to list all branches, switch to an existing branch, and create a new branch.",
+            "dependencies": [
+              "13.2"
+            ],
+            "details": "1. **Add 'Manage Branches' Action**: In the main Git dashboard's `ActionPanel`, add an `<Action.Push>` labeled 'Manage Branches' that navigates to a new `BranchList` component.\n2. **Create `BranchList` Component**: This component will execute `git branch -a` to get all local and remote branches. It will display them in a `<List>`.\n3. **Implement 'Checkout' Action**: For each branch item in the list, add a primary action 'Checkout Branch'. This action will execute `git checkout <branch-name>` and pop back to the main Git dashboard upon success.\n4. **Implement 'Create Branch' Action**: Add a primary action to the `BranchList` itself, 'Create New Branch'. This will open a `<Form>` asking for a 'Branch Name'. On submission, it will execute `git checkout -b <new-branch-name>` and navigate back to the main dashboard.",
+            "status": "done",
+            "testStrategy": "1. Navigate to 'Manage Branches' and verify all local and remote branches are listed.\n2. Use the 'Checkout Branch' action on a different branch and confirm the main dashboard reloads showing the new active branch.\n3. Use the 'Create New Branch' action, provide a name, and confirm the main dashboard reloads showing the newly created branch as active."
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Implement Daytona Settings Command",
+        "description": "Create a Raycast command for managing Daytona configuration, including API key setup, default sandbox preferences, and connection status checks using a secure preferences store.",
+        "details": "1. **Command Scaffolding:** Create a new Raycast command named 'Daytona Settings' using the `<Form>` component as the primary interface for all configuration.\n2. **Secure API Key Management:**\n   - Utilize Raycast's `Preferences` API for securely storing the `DAYTONA_API_KEY`.\n   - Implement a `<Form.PasswordField>` for API key input to ensure the value is masked.\n   - On form load, pre-populate the field with the stored key. On submit, save the updated value.\n3. **Connection Status Check:**\n   - Add a secondary `<Action>` to the form labeled 'Test Connection'.\n   - This action will trigger a call to a lightweight Daytona SDK endpoint (e.g., `daytona.agent.info()`) using the API key currently in the form field.\n   - Provide user feedback via `showToast`, indicating success or failure with a descriptive error message.\n4. **Default Sandbox Preferences:**\n   - Add a `<Form.Separator />` to create a 'Defaults' section.\n   - Implement a `<Form.Dropdown>` for 'Default Auto-Stop Interval' (e.g., '30m', '1h', '4h', 'Never').\n   - Add `<Form.TextField>` inputs for 'Default CPU Allocation' and 'Default Memory Allocation'.\n   - Store these values in Raycast `Preferences` to be used by the 'Create Sandbox' flow (Task 11).\n5. **Status Information Display:**\n   - Asynchronously fetch and display non-editable information, such as the Daytona Daemon version and API URL, in the form's footer or as accessories to provide users with immediate context about their connection.",
+        "testStrategy": "1. **API Key Configuration:**\n   - On a fresh install, open the settings and verify the API key field is empty.\n   - Enter a valid key, save, and reopen. Confirm the key persists and is masked.\n   - Enter an invalid key, save, and attempt to run the 'Daytona Dashboard' command (Task 11). Verify it fails with an authentication error.\n2. **Connection Test Action:**\n   - With a valid key, trigger the 'Test Connection' action and verify a success toast is displayed.\n   - With an invalid key, trigger the action and verify a failure toast with a clear error message appears.\n3. **Default Preferences:**\n   - Set a specific 'Default Auto-Stop Interval' and save.\n   - Go to the 'Create Sandbox' flow (from Task 11) and verify the interval field is pre-filled with the saved value.\n   - Repeat the test for CPU and Memory default settings.\n4. **UI Verification:**\n   - Confirm the form renders correctly with all fields, separators, and labels.\n   - Verify the API key is always masked from view.\n   - Ensure the connection status information in the footer loads without blocking form interaction.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Implement Enhanced Run Code Command",
+        "description": "Create a powerful, multi-language code execution command with support for persistent sandboxes, rich media output (charts, images, webviews), file I/O, code history, and execution templates.",
+        "details": "This task replaces the basic code execution functionality (Task 2) with a feature-rich implementation. The command should be built using Raycast's <Form> component.\n\n1. **Multi-Language Support:**\n   - Implement a `<Form.Dropdown>` for language selection (e.g., Python, JavaScript/TypeScript, Shell).\n   - The backend logic must invoke the correct runtime and environment within the Daytona sandbox for the selected language.\n\n2. **Sandbox Execution Modes:**\n   - Add a form option (e.g., `<Form.Checkbox>` labeled 'Use Persistent Session') to control the sandbox lifecycle.\n   - **Ephemeral Mode (Default):** Create a sandbox, execute code, stream results, and destroy the sandbox upon completion.\n   - **Persistent Mode:** On first run, create a sandbox and keep it active. Subsequent executions in this mode will reuse the same sandbox, allowing for stateful operations (e.g., installing packages, defining variables). This mode will require state management to track the active sandbox ID, which should be visible and manageable via the Daytona Dashboard (Task 11).\n\n3. **Rich Output Handling:**\n   - The execution engine must detect and handle various output MIME types beyond plain text.\n   - **Images/Plots:** For Python, use libraries like Matplotlib/Pillow. The output image should be base64 encoded and rendered directly in the Raycast results view (`<Detail>`).\n   - **HTML/Web Previews:** Render HTML output in a webview for interactive elements or complex reports.\n   - **Charts:** Standardize on a JSON-based chart format like Vega-Lite. The command will parse this JSON and render it, potentially using a webview-based library.\n\n4. **File Upload/Download Integration:**\n   - Use `<Form.FilePicker>` to allow users to select local files for upload.\n   - Before execution, use the Daytona SDK's filesystem API (`daytona.sandbox.fs.write()`) to place the file in the sandbox's working directory.\n   - For downloads, implement a mechanism where code can designate a file for download, which is then presented as an action to the user.\n\n5. **Code History & Templates:**\n   - Utilize Raycast's `LocalStorage` to save a history of recently executed code snippets.\n   - Implement form actions to navigate (`Cmd+Up/Down`) through the execution history.\n   - Include a `<Form.Dropdown>` to select from a predefined list of code templates (e.g., 'Fetch API data with Python', 'Analyze CSV with Pandas') that populate the code area.",
+        "testStrategy": "1. **Multi-Language Test:**\n   - Execute 'print(\"Hello from Python\")' and verify stdout.\n   - Execute 'console.log(\"Hello from Node.js\")' and verify stdout.\n   - Execute 'ls -la' in Shell mode and verify the file listing output.\n\n2. **Sandbox Mode Test:**\n   - **Ephemeral:** Run a script, then check the Daytona Dashboard (Task 11) to confirm no new sandboxes persist.\n   - **Persistent:** Check 'Persistent Session', run a Python script `x = 10`. In a second execution, run `print(x)` and verify the output is `10`. Stop the session and confirm the sandbox is terminated.\n\n3. **Rich Output Test:**\n   - Run a Python script using Matplotlib to generate and save a plot. Verify the plot image is displayed in the results.\n   - Run a script that outputs a simple HTML table. Verify it renders correctly.\n\n4. **File I/O Test:**\n   - Upload a local `test.txt` file containing 'abc'. Run `cat test.txt` and verify the output is 'abc'.\n   - Run a script that creates a file `result.json`. Verify a 'Download result.json' action appears and works correctly.\n\n5. **History & Template Test:**\n   - Execute three different commands. Close and reopen the command. Use keyboard shortcuts to cycle through the history and verify all three commands are present.\n   - Select a predefined template and confirm the code input field is populated with the correct template code.\n\n6. **Error Handling Test:**\n   - Run code with a syntax error. Verify the enhanced error view (from Task 8) is shown with proper highlighting and context.",
+        "status": "done",
+        "dependencies": [
+          2,
+          8,
+          11,
+          12
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Implement Multi-Command Architecture Foundation",
+        "description": "Restructure the project to support multiple specialized Daytona commands with shared infrastructure, including a unified client, state management, and error handling. This task establishes the foundation for all other commands and migrates the existing code execution logic into the new structure.",
+        "details": "1. **Project Structure Refactoring:** Create a `src/commands` directory to house individual command files (e.g., `dashboard.tsx`, `settings.tsx`). Establish a `src/lib` or `src/core` directory for all shared logic, including API clients, type definitions, and utility functions.\n\n2. **Daytona Client Singleton:** Implement a `src/lib/daytona-client.ts` module. This module will initialize and export a single, shared instance of the Daytona SDK client. The client will be configured using the API key retrieved from Raycast's secure `getPreferenceValues`. This pattern prevents redundant initializations and ensures consistent authentication across all commands.\n\n3. **Unified Error Handling:** Develop a higher-order component or utility function (e.g., `withDaytona`, `handleCommandErrors`) that wraps the main logic of each command. This wrapper will implement a global `try...catch` block to gracefully handle common API errors (e.g., authentication failures, network issues, sandbox not found) and display standardized, user-friendly error messages using Raycast's `showToast` API.\n\n4. **State Management with Raycast Cache:** Utilize Raycast's `Cache` API for managing and sharing state between commands. For instance, the dashboard can cache the list of sandboxes, and other commands (like the Git Manager) can read from this cache to get the current state without making redundant API calls. Define a clear strategy for cache keys and invalidation (e.g., time-based expiration, manual refresh action).\n\n5. **Command Registration:** Update the `package.json` file to define the new command structure. Register each new command (Dashboard, Settings, etc.) in the `commands` array, specifying its name, title, description, and entry point pointing to the corresponding file in the `dist/commands` directory.\n\n6. **Migration Strategy:** Refactor the core logic from the original single-command implementation (Task 2). Abstract the code execution functionality into a reusable module within the new `src/lib` directory. The new 'Enhanced Run Code Command' (Task 15) will then consume this shared module. Ensure the original command entry point is either removed or updated to delegate to the new structure to maintain backward compatibility during the transition.",
+        "testStrategy": "1. **Singleton Verification:** Add logging to the Daytona client constructor. Launch two different commands sequentially and verify from the logs that the constructor is only called once, confirming a single instance is shared.\n\n2. **Error Handling Test:** Manually trigger an error condition (e.g., by providing an invalid API key in preferences). Run any command and verify that the unified error handler catches the exception and displays the appropriate, user-friendly toast notification.\n\n3. **Cache Verification:** Run the 'Daytona Dashboard' command to populate the sandbox list in the cache. Immediately launch another command that depends on this data and verify (via logs or by observing the lack of a loading indicator) that it reads directly from the cache instead of making a new API request. Test the cache invalidation by performing an action that should clear it (e.g., a 'Refresh' action).\n\n4. **Command Registration Test:** After a successful build (`npm run build`), open Raycast and confirm that all new commands ('Daytona Dashboard', 'Daytona Settings', etc.) are listed correctly with their specified titles and descriptions.\n\n5. **Migration Test:** Execute a simple script using the 'Enhanced Run Code Command'. Verify that it functions correctly and that logs show it's utilizing the new shared client singleton and error handling infrastructure, confirming the migration from the Task 2 implementation was successful.",
+        "status": "done",
+        "dependencies": [
+          1,
+          2
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Implement Daytona Snapshots Management Command",
+        "description": "Create a Raycast command to create, browse, restore, and delete Daytona snapshots, mirroring the webapp's functionality and integrating with the Daytona Dashboard.",
+        "details": "1. **Command Structure & Entry Points:**\n   - **Create Snapshot Action:** Implement a new `<Action>` on running sandbox items within the 'Daytona Dashboard' (Task 11). Label it 'Create Snapshot'. This action will prompt the user for a snapshot name and initiate the creation process.\n   - **Browse Snapshots Command:** Create a new, standalone Raycast `ListCommand` named 'Browse Snapshots'. This will serve as the central hub for viewing and managing all snapshots.\n\n2. **API & SDK Integration:**\n   - Leverage the Daytona SDK for all core functionality: `daytona.snapshot.create(sandboxId, name)`, `daytona.snapshot.list()`, `daytona.snapshot.restore(snapshotId, newSandboxName)`, and `daytona.snapshot.delete(snapshotId)`.\n   - Use `usePromise` or a similar hook in the 'Browse Snapshots' command to fetch the snapshot list, ensuring proper handling of loading, data, and error states.\n\n3. **Raycast UI Implementation:**\n   - **List View:** In the 'Browse Snapshots' command, use the `<List>` component. Each `<List.Item>` should display the snapshot name, source sandbox, and creation date. Use accessories to show the snapshot size.\n   - **Detail View:** Utilize `<List.Item.Detail>` to present comprehensive metadata for the selected snapshot, including its unique ID, size on disk, and full creation timestamp.\n   - **Actions:** Attach the following actions to each snapshot list item:\n     - `<Action>` 'Restore Snapshot': This will open a form (`<Action.Push>`) asking for the new sandbox name, then trigger the restoration.\n     - `<Action>` 'Delete Snapshot': Protect this with an `<Action.ConfirmationDialog>` to prevent accidental data loss.\n     - `<Action.CopyToClipboard>` 'Copy Snapshot ID': A utility for easy sharing or scripting.\n\n4. **State Management & User Feedback:**\n   - Use Raycast's `showToast` API to provide real-time feedback for long-running operations like creation and restoration (e.g., 'Creating snapshot...', 'Snapshot created successfully', 'Error: ...').\n   - Implement state management to ensure data consistency. After a successful restoration, the 'Daytona Dashboard' list should be revalidated to show the newly created sandbox.",
+        "testStrategy": "1. **Snapshot Creation:**\n   - Navigate to the 'Daytona Dashboard', select a 'running' sandbox, and invoke the 'Create Snapshot' action.\n   - Provide a name and confirm. Verify a success toast is displayed.\n   - Open the 'Browse Snapshots' command and confirm the new snapshot appears at the top of the list with correct metadata.\n\n2. **Snapshot Browsing & Details:**\n   - Launch the 'Browse Snapshots' command. Verify that all snapshots are listed correctly.\n   - Select a snapshot and check that the Detail pane displays the correct ID, size, and creation date.\n   - Test the 'Copy Snapshot ID' action and verify the correct ID is in the clipboard.\n\n3. **Snapshot Restoration:**\n   - From the 'Browse Snapshots' list, trigger the 'Restore Snapshot' action on an item.\n   - Enter a unique name for the new sandbox in the form and submit.\n   - Verify a toast indicates the restoration is in progress.\n   - Upon completion, switch to the 'Daytona Dashboard' and confirm the new sandbox exists and is functional.\n\n4. **Snapshot Deletion:**\n   - Select a snapshot to delete from the 'Browse Snapshots' command.\n   - Trigger the 'Delete Snapshot' action and verify the confirmation dialog appears.\n   - Confirm the deletion and ensure the snapshot is removed from the list.\n\n5. **Edge Case & Error Handling:**\n   - Verify the 'Create Snapshot' action is disabled or hidden for 'stopped' sandboxes in the dashboard.\n   - Attempt to restore a snapshot using a name that already exists for a sandbox and verify a user-friendly error is shown.",
+        "status": "done",
+        "dependencies": [
+          11,
+          16
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Replace Dashboard Mock Data with Live API Calls",
+        "description": "Refactor the Daytona Dashboard command to replace all hardcoded mock sandbox data with live data fetched using the Daytona SDK, ensuring the dashboard reflects the user's actual sandboxes.",
+        "details": "This task involves transitioning the 'Daytona Dashboard' command from a static, mocked-up state to a dynamic, data-driven component. The primary location for this change is the `src/commands/dashboard.tsx` file.\n\n1.  **Identify and Remove Mock Data:** Locate the static array of sandbox objects within `dashboard.tsx`. This array currently contains placeholder data like `{ name: \"python-analytics\", status: \"running\" }`, `{ name: \"web-scraper\", status: \"stopped\" }`, and `{ name: \"ml-experiments\", status: \"running\" }`. This entire static array and any logic that consumes it must be removed.\n\n2.  **Integrate Daytona Client:** Import the shared Daytona SDK client instance from `src/lib/daytona-client.ts` (established in Task 16).\n\n3.  **Fetch Live Data:** Utilize Raycast's `usePromise` hook for asynchronous data fetching and state management (loading, data, error). The function passed to `usePromise` should be an async function that calls `daytona.sandbox.list()`.\n\n4.  **Handle Loading State:** The `isLoading` property from the `usePromise` hook should be passed to the main `<List isLoading={isLoading}>` component. This will automatically display a loading indicator while the API call is in progress.\n\n5.  **Render Real Sandbox Data:** Map the `data` returned by `usePromise` (which will be an array of actual Sandbox objects from the API) to `<List.Item>` components. Ensure the following properties are correctly mapped:\n    *   `key` and `id`: Use `sandbox.id`.\n    *   `title`: Use `sandbox.name`.\n    *   `accessories`: Use `sandbox.status` to display the current state (e.g., 'Running', 'Stopped') with an appropriate colored tag or icon.\n    *   `actions`: Ensure existing actions (like those from Tasks 12, 13, 17) are correctly attached to these dynamically generated items.\n\n6.  **Implement Error and Empty States:**\n    *   If the `usePromise` hook returns an error, display a user-friendly message using `<List.EmptyView icon={Icon.Warning} title=\"Failed to load sandboxes\" />`.\n    *   If the API call succeeds but returns an empty array, use `<List.EmptyView icon={Icon.Desktop} title=\"No Sandboxes Found\" description=\"Create a new sandbox using the Daytona CLI or web UI.\" />`.",
+        "testStrategy": "1.  **Loading State Verification:** Launch the 'Daytona Dashboard' command. Verify that the Raycast loading spinner is displayed immediately and disappears once the API call completes.\n\n2.  **Empty State Verification:** With no sandboxes configured in the target Daytona instance, run the command. Confirm that the 'No Sandboxes Found' empty view is displayed correctly.\n\n3.  **Populated State Verification:**\n    *   Create at least two sandboxes via the Daytona CLI: one in a 'running' state and one in a 'stopped' state.\n    *   Launch the command and verify that both sandboxes appear in the list.\n    *   Confirm that the names are correct and the status accessories accurately reflect their state (e.g., a green tag for 'running', a red tag for 'stopped').\n\n4.  **API Error Handling:**\n    *   Temporarily invalidate the API key in the settings (from Task 14).\n    *   Launch the 'Daytona Dashboard' command.\n    *   Verify that the 'Failed to load sandboxes' error view is displayed instead of the list.",
+        "status": "done",
+        "dependencies": [
+          1,
+          16
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Refactor Dashboard Command to Use Live API Data",
+            "description": "Replace the hardcoded mock sandbox array in the 'Daytona Dashboard' command with a live API call to fetch the user's actual sandboxes, implementing loading, empty, and error states.",
+            "dependencies": [],
+            "details": "Modify `src/commands/dashboard.tsx`. Remove the static sandbox array. Import the Daytona client and use Raycast's `usePromise` hook to call `daytona.sandbox.list()`. Map the returned data to `<List.Item>` components, binding `sandbox.id`, `sandbox.name`, and `sandbox.status`. Pass the `isLoading` state from the hook to the `<List>` component. Implement `<List.EmptyView>` for both error and no-sandbox scenarios.",
+            "status": "done",
+            "testStrategy": "Launch the dashboard command. Verify the loading indicator shows. With no sandboxes, confirm the 'No Sandboxes Found' view appears. With active sandboxes, confirm they are listed correctly with their real-time status."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Live Sandbox Creation into 'Run Code' Command",
+            "description": "Update the 'Run Code' command to dynamically create a sandbox for code execution using a live API call, replacing any placeholder or simplified creation logic.",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "In the 'Run Code' command's implementation file (e.g., `src/commands/run-code.tsx`), replace any mock sandbox creation logic with an API call to `daytona.sandbox.create()`. Ensure the parameters for the creation call are derived from the command's inputs. Verify that the automatic cleanup logic from Task 3, which calls `sandbox.delete()`, is correctly integrated within a `finally` block to handle the newly created live sandbox.",
+            "status": "done",
+            "testStrategy": "Execute the 'Run Code' command. Check the live Dashboard (from subtask 18.1) to see the temporary sandbox appear. Confirm the code runs and the sandbox is automatically deleted upon completion or failure."
+          },
+          {
+            "id": 3,
+            "title": "Implement Live API Connection Test in Settings Command",
+            "description": "Enhance the 'Daytona Settings' command by adding a feature to test the API connection using the configured API key, providing immediate feedback to the user.",
+            "dependencies": [],
+            "details": "In `src/commands/settings.tsx`, add a `<Form.Action title=\"Test Connection\" />` to the settings form. When triggered, this action should call a lightweight, read-only Daytona SDK method, such as `daytona.info.version()`. Use Raycast's `showToast` API to display a 'Connection Successful' or 'Connection Failed' message based on the API call's outcome.",
+            "status": "done",
+            "testStrategy": "Navigate to the settings command. Enter a valid API key and use the 'Test Connection' action; verify a success toast. Enter an invalid key and test again; verify a failure toast with a descriptive error."
+          },
+          {
+            "id": 4,
+            "title": "Abstract API Call Logic into a Reusable Hook",
+            "description": "Create a custom React hook to encapsulate the common data-fetching pattern (`usePromise`, loading, error handling) for Daytona API calls to promote code reuse and consistency.",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Create a new file, `src/hooks/useDaytonaApi.ts`. Implement a custom hook, `useDaytonaApi`, that accepts an async function (the Daytona SDK call) as an argument. This hook will internally manage the `usePromise` logic. Refactor the Dashboard command in `src/commands/dashboard.tsx` to use this new `useDaytonaApi` hook instead of using `usePromise` directly.",
+            "status": "done",
+            "testStrategy": "After refactoring the Dashboard command to use the new hook, verify that its functionality (loading, data display, error states) remains identical to the implementation in subtask 18.1. This confirms the abstraction works correctly."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Raycast Caching for API Responses",
+            "description": "Implement caching for frequently accessed API data, such as the sandbox list, to improve the extension's performance and reduce unnecessary network requests.",
+            "dependencies": [
+              "18.1",
+              "18.4"
+            ],
+            "details": "Modify the `useDaytonaApi` hook in `src/hooks/useDaytonaApi.ts` to integrate with Raycast's `Cache` API. Before making an API call, check for a valid cached entry. If one exists, return it. Otherwise, proceed with the API call and use `Cache.set()` to store the new data with a short TTL (e.g., 30-60 seconds). Add a 'Clear Cache & Refresh' action to the Dashboard command for manual refreshes.",
+            "status": "done",
+            "testStrategy": "Load the Dashboard. Close and reopen it within the cache TTL; verify it loads instantly without a loading indicator. Wait for the TTL to expire, reopen, and confirm the loading indicator reappears as a fresh API call is made."
+          },
+          {
+            "id": 6,
+            "title": "Standardize API Error Handling and User Feedback",
+            "description": "Develop a centralized error handling utility to parse errors from the Daytona SDK and present consistent, user-friendly messages across all commands.",
+            "dependencies": [
+              "18.1",
+              "18.2",
+              "18.3"
+            ],
+            "details": "Create a new utility file, `src/lib/errorHandler.ts`. Implement a function that takes an `error` object, inspects it for known SDK or network error types, and returns a standardized message object. Refactor the `catch` blocks and error handling logic in `dashboard.tsx`, `settings.tsx`, and the 'Run Code' command to use this new centralized utility, ensuring consistent error presentation in toasts and empty views.",
+            "status": "done",
+            "testStrategy": "Trigger various errors (invalid API key, network offline, invalid sandbox ID) in different commands. Verify that each command displays a consistent and user-friendly error message formatted by the new `errorHandler` utility."
+          },
+          {
+            "id": 7,
+            "title": "Archive Implementation Documentation",
+            "description": "Document the successful implementation of Option 2 repository handling solution with API migration and repository cloning functionality",
+            "details": "Complete documentation and archival of the successful implementation that:\n\n1. **Fixed Daytona SDK API Usage**: Migrated from private `client.sandboxApi` methods to public Daytona class methods (client.list(), client.get(), client.start(), client.stop(), client.delete(), client.create())\n\n2. **Implemented Optional Repository Cloning**: Added repository field as optional in create sandbox form, with automatic cloning after sandbox creation using sandbox.git.clone() when repository URL provided\n\n3. **Enhanced User Experience**: Progressive feedback system with toast notifications for each step (Creating → Created → Cloning → Cloned), graceful error handling for clone failures\n\n4. **Code Quality**: Resolved all TypeScript compilation errors, fixed ESLint issues, successful production build\n\n5. **Verified Functionality**: Console output confirms real API integration working with actual sandboxes, proper status mapping, and successful repository cloning to workspace directory\n\nThe solution addresses the root cause where Daytona doesn't store repository metadata in sandbox properties by cloning directly to workspace directory where it's needed for development.\"",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 18
+          }
+        ]
+      },
+      {
+        "id": 19,
+        "title": "Comprehensive Codebase Refactoring and Modernization (Enhanced)",
+        "description": "Execute a strategic, phased refactoring of the Raycast Daytona extension codebase to create a maintainable, type-safe, and performant architecture. This enhanced plan leverages existing implementations from Tasks 16 and 18 while introducing modern React patterns, reusable components, and comprehensive type safety.",
+        "status": "done",
+        "dependencies": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          17,
+          18
+        ],
+        "priority": "medium",
+        "details": "## Strategic Overview\nThis refactoring builds upon existing solid foundations:\n- Error handling system (error-handler.ts, enhanced-error-types.ts) from Task 16.3\n- useDaytonaApi hook from Task 18.4  \n- Utility libraries: daytona-utils, toast-utils, error-formatter\n\n## Enhanced Architecture Goals\n\n### 1. Modular Directory Structure\n```\nsrc/\n├── commands/          # All command files (dashboard.tsx, etc.)\n├── components/        # Reusable UI components\n│   ├── common/        # Generic components (LoadingView, EmptyState)\n│   ├── sandbox/       # Sandbox-specific components\n│   └── forms/         # Form components\n├── hooks/             # Custom React hooks\n│   ├── useDaytonaApi.ts (existing)\n│   ├── useForm.ts     # Form validation & state\n│   ├── useDebounce.ts # Search optimization\n│   └── usePagination.ts # Large data handling\n├── lib/\n│   ├── api/           # API utilities and wrappers\n│   ├── formatters/    # Data presentation utilities\n│   ├── validators/    # Input validation logic\n│   └── constants/     # Shared constants\n├── types/\n│   ├── index.ts       # Main exports\n│   ├── sandbox.ts     # Sandbox domain types\n│   ├── git.ts         # Git operation types\n│   ├── api.ts         # API response types\n│   └── ui.ts          # UI component types\n└── utils/\n    ├── cache.ts       # Enhanced caching\n    └── helpers.ts     # Generic utilities\n```\n\n### 2. Component-First Development\n- Create reusable components before refactoring commands\n- Standardize UI patterns across all commands\n- Implement performance optimizations from the start\n\n### 3. Type Safety & Performance\n- Eliminate all `any` types with comprehensive type definitions\n- Implement React.memo, useMemo, useCallback strategically\n- Add virtualization for large lists\n- Optimize state management patterns\n\n### 4. Quality Assurance\n- Configure strict TypeScript and ESLint rules\n- Implement pre-commit hooks with Husky\n- Add comprehensive testing infrastructure\n- Create migration documentation\n\n## Implementation Phases\n\n**Phase 1 (Low Risk):** Foundation - Directory structure and type system\n**Phase 2 (Medium Risk):** Utilities - Hooks, formatters, validators  \n**Phase 3 (Medium Risk):** Components - Reusable UI building blocks\n**Phase 4 (High Risk):** Integration - Command refactoring with new abstractions\n**Phase 5 (Low Risk):** Quality - Tooling, documentation, and optimization\n\n## Success Metrics\n- Zero functional regression\n- 100% TypeScript type coverage (no `any`)\n- Consistent code style across all files\n- Improved performance benchmarks\n- Reduced code duplication by 60%+",
+        "testStrategy": "## Comprehensive Testing Approach\n\n### 1. Regression Testing\n- Full test execution for all feature tasks (11-18)\n- Verify identical behavior from user perspective\n- Test all edge cases: empty states, errors, loading states\n- Performance benchmarking before/after refactoring\n\n### 2. Quality Verification\n- TypeScript strict mode compilation (`tsc --noEmit`)\n- ESLint with zero warnings (`eslint . --max-warnings 0`)\n- Manual audit for remaining `any` types\n- Code review focusing on new abstractions\n\n### 3. Performance Testing\n- Benchmark command load times (Dashboard, Snapshots)\n- Test UI responsiveness during state changes\n- Verify no performance degradation\n- Test large data set handling\n\n### 4. Integration Testing\n- Test all command interactions with new utilities\n- Verify error handling consistency\n- Test form validation across all forms\n- Validate API integration with new hooks",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Phase 1: Foundation Architecture Setup",
+            "description": "Establish the enhanced directory structure and comprehensive type system foundation for the refactoring project.",
+            "details": "## Objectives\nCreate the modular directory structure and establish a comprehensive type system that will serve as the foundation for all subsequent refactoring phases.\n\n## Directory Structure Implementation\n1. **Create Enhanced Directory Structure:**\n   ```\n   src/\n   ├── commands/          # Move all command files here\n   ├── components/        # NEW: Reusable UI components\n   │   ├── common/        # LoadingView, EmptyState, ErrorView\n   │   ├── sandbox/       # SandboxItem, SandboxActionPanel\n   │   └── forms/         # FormComponents, ValidationComponents\n   ├── hooks/             # Enhanced custom hooks\n   ├── lib/\n   │   ├── api/           # NEW: API utilities and wrappers\n   │   ├── formatters/    # NEW: Data presentation utilities\n   │   ├── validators/    # NEW: Input validation logic\n   │   └── constants/     # NEW: Shared constants\n   ├── types/             # NEW: Comprehensive type definitions\n   │   ├── index.ts       # Main exports\n   │   ├── sandbox.ts     # Sandbox domain types\n   │   ├── git.ts         # Git operation types\n   │   ├── api.ts         # API response types\n   │   └── ui.ts          # UI component types\n   └── utils/             # Enhanced utilities\n   ```\n\n2. **Comprehensive Type System:**\n   - Create domain-specific type files (sandbox.ts, git.ts, api.ts)\n   - Define UI component prop types (ui.ts)\n   - Establish consistent enum patterns\n   - Create generic utility types\n\n3. **Migration Preparation:**\n   - Audit existing inline type definitions\n   - Document current patterns for standardization\n   - Create type migration checklist\n   - Plan incremental type adoption strategy\n\n## Key Deliverables\n- Complete directory structure with placeholder files\n- Comprehensive type definitions in types/ directory\n- Migration strategy document\n- Baseline code audit report\n\n## Success Criteria\n- All new directories created and properly structured\n- Initial type definitions cover 80% of identified patterns\n- TypeScript compilation succeeds with new structure\n- Clear migration path documented",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 19
+          },
+          {
+            "id": 2,
+            "title": "Phase 2: Enhanced Utilities and Hooks",
+            "description": "Build comprehensive utility libraries and custom hooks that extend existing implementations with new functionality.",
+            "details": "## Objectives\nEnhance the existing utility foundation by creating additional utilities, formatters, validators, and custom hooks that will power the refactored components and commands.\n\n## Enhanced Utilities Development\n\n### 1. API Utilities (lib/api/)\n- **daytonaApiClient.ts**: Enhanced wrapper around existing daytona-client\n- **apiHelpers.ts**: Request/response transformation utilities\n- **cacheManager.ts**: Enhanced caching layer with TTL and invalidation\n\n### 2. Formatters (lib/formatters/)\n- **dateFormatter.ts**: Comprehensive date/time formatting (extend existing)\n- **statusFormatter.ts**: Sandbox and git status formatting with icons\n- **sizeFormatter.ts**: File size and data formatting\n- **urlFormatter.ts**: Repository URL and path formatting\n\n### 3. Validators (lib/validators/)\n- **formValidators.ts**: Reusable form validation rules\n- **inputSanitizers.ts**: Input cleaning and sanitization\n- **typeGuards.ts**: Runtime type checking utilities\n\n### 4. Constants (lib/constants/)\n- **apiConstants.ts**: API endpoints, timeouts, retry counts\n- **uiConstants.ts**: Colors, icons, sizing constants\n- **errorConstants.ts**: Error codes and messages\n\n### 5. Enhanced Custom Hooks\n\n#### useForm<T> Hook\n```typescript\nexport function useForm<T>(\n  initialValues: T,\n  validationRules?: ValidationRules<T>,\n  options?: FormOptions\n) {\n  // Form state management\n  // Validation logic\n  // Error handling\n  // Submit handling\n}\n```\n\n#### useDebounce Hook\n```typescript\nexport function useDebounce<T>(\n  value: T,\n  delay: number,\n  options?: DebounceOptions\n): T {\n  // Debounced value with configurable delay\n  // Cancel functionality\n  // Immediate execution option\n}\n```\n\n#### usePagination Hook\n```typescript\nexport function usePagination<T>(\n  data: T[],\n  itemsPerPage: number = 20\n) {\n  // Pagination state and controls\n  // Virtual scrolling support\n  // Search integration\n}\n```\n\n#### useLocalStorage Hook\n```typescript\nexport function useLocalStorage<T>(\n  key: string,\n  defaultValue: T\n): [T, (value: T) => void] {\n  // Persistent state management\n  // Error handling for storage failures\n  // Type-safe serialization\n}\n```\n\n## Integration with Existing Code\n- Build upon existing useDaytonaApi hook\n- Enhance existing error-handler utilities\n- Extend existing toast-utils functionality\n- Integrate with existing cache.ts implementation\n\n## Key Deliverables\n- Complete utility library in lib/ subdirectories\n- Four new custom hooks with comprehensive functionality\n- Enhanced integration with existing utilities\n- Comprehensive TypeScript definitions\n- Unit tests for all utilities and hooks\n\n## Success Criteria\n- All utilities compile without TypeScript errors\n- Integration tests pass with existing systems\n- Performance benchmarks meet or exceed current implementation\n- Code coverage >90% for new utilities",
+            "status": "done",
+            "dependencies": [
+              1
+            ],
+            "parentTaskId": 19
+          },
+          {
+            "id": 3,
+            "title": "Phase 3: Reusable Component Library",
+            "description": "Create a comprehensive library of reusable UI components that standardize patterns across all commands with performance optimizations.",
+            "details": "## Objectives\nBuild a complete library of reusable components that eliminate code duplication, standardize UI patterns, and include performance optimizations like memoization and virtualization.\n\n## Component Library Architecture\n\n### 1. Common Components (components/common/)\n\n#### LoadingView Component\n```typescript\ninterface LoadingViewProps {\n  message?: string;\n  showSpinner?: boolean;\n  size?: 'small' | 'medium' | 'large';\n}\nexport const LoadingView = React.memo<LoadingViewProps>(({ ... }) => { ... });\n```\n\n#### EmptyState Component\n```typescript\ninterface EmptyStateProps {\n  type: 'sandbox' | 'snapshot' | 'file' | 'git' | 'search';\n  title?: string;\n  description?: string;\n  actions?: EmptyStateAction[];\n}\nexport const EmptyState = React.memo<EmptyStateProps>(({ ... }) => { ... });\n```\n\n#### ErrorView Component\n```typescript\ninterface ErrorViewProps {\n  error: DaytonaError | Error;\n  onRetry?: () => void;\n  showDetails?: boolean;\n}\nexport const ErrorView = React.memo<ErrorViewProps>(({ ... }) => { ... });\n```\n\n### 2. Sandbox Components (components/sandbox/)\n\n#### SandboxItem Component\n```typescript\ninterface SandboxItemProps {\n  sandbox: Sandbox;\n  onAction?: (action: SandboxAction, sandbox: Sandbox) => void;\n  showRepository?: boolean;\n  showMetadata?: boolean;\n  compact?: boolean;\n}\nexport const SandboxItem = React.memo<SandboxItemProps>(({ ... }) => { ... });\n```\n\n#### SandboxActionPanel Component\n```typescript\ninterface SandboxActionPanelProps {\n  sandbox: Sandbox;\n  onAction: (action: SandboxAction) => void;\n  customActions?: ActionPanelItem[];\n}\nexport const SandboxActionPanel = React.memo<SandboxActionPanelProps>(({ ... }) => { ... });\n```\n\n#### SandboxStatusBadge Component\n```typescript\ninterface SandboxStatusBadgeProps {\n  status: SandboxStatus;\n  showText?: boolean;\n  size?: 'small' | 'medium';\n}\nexport const SandboxStatusBadge = React.memo<SandboxStatusBadgeProps>(({ ... }) => { ... });\n```\n\n### 3. Form Components (components/forms/)\n\n#### FormField Component\n```typescript\ninterface FormFieldProps<T> {\n  name: keyof T;\n  label: string;\n  type: 'text' | 'password' | 'email' | 'url' | 'textarea';\n  validation?: ValidationRule[];\n  placeholder?: string;\n  required?: boolean;\n}\nexport const FormField = React.memo<FormFieldProps<any>>(({ ... }) => { ... });\n```\n\n#### FormSelect Component\n```typescript\ninterface FormSelectProps<T> {\n  name: keyof T;\n  label: string;\n  options: SelectOption[];\n  placeholder?: string;\n  required?: boolean;\n}\nexport const FormSelect = React.memo<FormSelectProps<any>>(({ ... }) => { ... });\n```\n\n### 4. List Components (components/lists/)\n\n#### VirtualizedList Component\n```typescript\ninterface VirtualizedListProps<T> {\n  items: T[];\n  renderItem: (item: T, index: number) => React.ReactNode;\n  itemHeight?: number;\n  searchable?: boolean;\n  filterFunction?: (item: T, query: string) => boolean;\n}\nexport const VirtualizedList = React.memo<VirtualizedListProps<any>>(({ ... }) => { ... });\n```\n\n## Performance Optimizations\n\n### 1. Memoization Strategy\n- React.memo for all components with prop comparisons\n- useMemo for expensive computations\n- useCallback for event handlers\n- Custom comparison functions for complex props\n\n### 2. Virtualization\n- Implement virtual scrolling for lists >50 items\n- Lazy loading for heavy components\n- Intersection Observer for off-screen components\n\n### 3. Code Splitting\n- Dynamic imports for heavy components\n- Lazy loading for rarely used features\n- Bundle size optimization\n\n## Integration Patterns\n\n### 1. Prop Interfaces\n- Consistent prop naming conventions\n- Generic type support where appropriate\n- Optional props with sensible defaults\n- Comprehensive prop documentation\n\n### 2. Event Handling\n- Consistent callback patterns\n- Event bubbling considerations\n- Keyboard navigation support\n- Accessibility compliance\n\n### 3. Styling\n- Consistent spacing using Raycast design tokens\n- Theme-aware components\n- Responsive behavior\n- Icon consistency\n\n## Key Deliverables\n- Complete component library with 15+ reusable components\n- Performance-optimized implementations\n- Comprehensive TypeScript prop interfaces\n- Storybook documentation (optional)\n- Component unit tests\n- Usage examples and guidelines\n\n## Success Criteria\n- All components render without errors\n- Performance benchmarks show improved render times\n- Components pass accessibility audits\n- Zero TypeScript errors in component implementations\n- Consistent visual design across all components\n- Components successfully integrate with existing commands",
+            "status": "done",
+            "dependencies": [
+              2
+            ],
+            "parentTaskId": 19
+          },
+          {
+            "id": 4,
+            "title": "Phase 4: Command Integration and Refactoring",
+            "description": "Systematically refactor all command files to use the new architecture, components, and utilities while maintaining identical functionality.",
+            "details": "## Objectives\nIncrementally refactor all command files to utilize the new component library, utilities, and hooks while ensuring zero functional regression and improved maintainability.\n\n## Command Refactoring Strategy\n\n### 1. Refactoring Order (Risk-Based)\n1. **Low Risk Commands:**\n   - settings.tsx (minimal API interaction)\n   - Enhanced-run-code.tsx (already well-structured)\n\n2. **Medium Risk Commands:**\n   - snapshots.tsx (standard list/action patterns)\n   - files.tsx (file management patterns)\n\n3. **High Risk Commands:**\n   - dashboard.tsx (complex state management)\n   - git-manager.tsx (multiple API integrations)\n\n### 2. Standard Refactoring Pattern\n\n#### Before Refactoring Template:\n```typescript\n// Current pattern in commands\nfunction Command() {\n  const [data, setData] = useState();\n  const [isLoading, setIsLoading] = useState(true);\n  const [error, setError] = useState();\n\n  useEffect(() => {\n    // Direct API calls with try/catch\n  }, []);\n\n  if (isLoading) return <List isLoading />;\n  if (error) return <List><List.Item title=\"Error occurred\" /></List>;\n  \n  return (\n    <List>\n      {data?.map(item => (\n        <List.Item \n          key={item.id}\n          title={item.name}\n          // Inline rendering logic\n        />\n      ))}\n    </List>\n  );\n}\n```\n\n#### After Refactoring Template:\n```typescript\n// New pattern using abstractions\nfunction Command() {\n  const { data, isLoading, error, reload } = useDaytonaApi(\n    () => apiClient.getData(),\n    []\n  );\n\n  if (isLoading) return <LoadingView message=\"Loading data...\" />;\n  if (error) return <ErrorView error={error} onRetry={reload} />;\n  if (!data?.length) return <EmptyState type=\"data\" />;\n\n  return (\n    <VirtualizedList\n      items={data}\n      renderItem={(item) => <DataItem item={item} onAction={handleAction} />}\n      searchable\n    />\n  );\n}\n```\n\n### 3. Command-Specific Refactoring Plans\n\n#### Dashboard Command (dashboard.tsx)\n- Replace inline Sandbox types with centralized types\n- Use SandboxItem component for list rendering\n- Implement SandboxActionPanel for actions\n- Use useDaytonaApi for sandbox data fetching\n- Apply useDebounce for search functionality\n- Add virtualization for large sandbox lists\n\n#### Snapshots Command (snapshots.tsx)\n- Create SnapshotItem component (similar to SandboxItem)\n- Use enhanced date formatting utilities\n- Implement snapshot action patterns\n- Add search and filtering capabilities\n\n#### Files Command (files.tsx)\n- Create FileItem and FolderItem components\n- Use file size formatters\n- Implement breadcrumb navigation component\n- Add file operation action panels\n\n#### Git Manager (git-manager.tsx)\n- Create GitStatusItem component\n- Use git branch formatting utilities\n- Implement git action patterns\n- Add branch switching components\n\n#### Settings (settings.tsx)\n- Use FormField components for all inputs\n- Implement useForm hook for validation\n- Create settings section components\n- Add form submission handling\n\n#### Enhanced Run Code (enhanced-run-code.tsx)\n- Enhance with new error handling patterns\n- Use code execution components\n- Add result formatting utilities\n\n### 4. Migration Process\n\n#### Step-by-Step Approach:\n1. **Prepare Command:**\n   - Create backup of current implementation\n   - Identify all current functionality\n   - Map to new component equivalents\n\n2. **Incremental Replacement:**\n   - Replace types with centralized types\n   - Replace hooks with enhanced versions\n   - Replace UI elements with components\n   - Replace utilities with enhanced versions\n\n3. **Testing and Validation:**\n   - Functional testing after each major change\n   - Performance benchmarking\n   - User experience validation\n   - Error case testing\n\n4. **Optimization:**\n   - Apply memoization where beneficial\n   - Add virtualization if needed\n   - Optimize re-renders\n   - Bundle size verification\n\n## Integration Requirements\n\n### 1. Type Safety\n- All commands must use centralized types\n- Eliminate all `any` types\n- Proper error type handling\n- Generic type support where applicable\n\n### 2. Performance\n- Implement React.memo where beneficial\n- Use useCallback for event handlers\n- Apply useMemo for expensive calculations\n- Minimize unnecessary re-renders\n\n### 3. Consistency\n- Standardized error handling patterns\n- Consistent loading states\n- Uniform action panel behaviors\n- Consistent spacing and styling\n\n## Key Deliverables\n- All 6 commands refactored to use new architecture\n- Zero functional regression verified\n- Performance improvements documented\n- Consistent code patterns across all commands\n- Comprehensive integration testing\n- Updated command documentation\n\n## Success Criteria\n- All commands compile without TypeScript errors\n- All commands pass comprehensive functional tests\n- Performance benchmarks show improvement or equivalent performance\n- User experience remains identical from end-user perspective\n- Code maintainability significantly improved\n- No `any` types remain in command files\n- All commands follow consistent architectural patterns",
+            "status": "done",
+            "dependencies": [
+              3
+            ],
+            "parentTaskId": 19
+          },
+          {
+            "id": 5,
+            "title": "Phase 5: Quality Assurance and Documentation",
+            "description": "Implement comprehensive quality tools, performance optimizations, and create thorough documentation to ensure long-term maintainability.",
+            "details": "## Objectives\nFinalize the refactoring by implementing quality assurance tools, optimizing performance, and creating comprehensive documentation to ensure the refactored codebase is maintainable and follows best practices.\n\n## Quality Assurance Implementation\n\n### 1. TypeScript Configuration Enhancement\n```json\n// Enhanced tsconfig.json\n{\n  \"compilerOptions\": {\n    \"strict\": true,\n    \"noImplicitAny\": true,\n    \"noImplicitReturns\": true,\n    \"noUnusedLocals\": true,\n    \"noUnusedParameters\": true,\n    \"exactOptionalPropertyTypes\": true,\n    \"noImplicitOverride\": true\n  }\n}\n```\n\n### 2. ESLint Configuration\n```json\n// Enhanced .eslintrc.json\n{\n  \"extends\": [\n    \"@raycast/eslint-config\",\n    \"@typescript-eslint/recommended\",\n    \"prettier\"\n  ],\n  \"rules\": {\n    \"@typescript-eslint/no-explicit-any\": \"error\",\n    \"@typescript-eslint/no-unused-vars\": \"error\",\n    \"react-hooks/exhaustive-deps\": \"error\",\n    \"import/order\": [\"error\", { \"groups\": [\"builtin\", \"external\", \"internal\"] }]\n  }\n}\n```\n\n### 3. Prettier Configuration\n```json\n// .prettierrc\n{\n  \"semi\": true,\n  \"trailingComma\": \"es5\",\n  \"singleQuote\": false,\n  \"printWidth\": 120,\n  \"tabWidth\": 2,\n  \"useTabs\": false\n}\n```\n\n### 4. Pre-commit Hooks with Husky\n```json\n// package.json additions\n{\n  \"scripts\": {\n    \"prepare\": \"husky install\",\n    \"lint\": \"eslint src --ext .ts,.tsx --max-warnings 0\",\n    \"lint:fix\": \"eslint src --ext .ts,.tsx --fix\",\n    \"type-check\": \"tsc --noEmit\",\n    \"format\": \"prettier --write src/**/*.{ts,tsx}\",\n    \"test\": \"jest\",\n    \"pre-commit\": \"lint-staged\"\n  },\n  \"lint-staged\": {\n    \"src/**/*.{ts,tsx}\": [\n      \"eslint --fix\",\n      \"prettier --write\",\n      \"git add\"\n    ]\n  }\n}\n```\n\n## Performance Optimization\n\n### 1. Bundle Analysis\n- Implement bundle size monitoring\n- Identify and eliminate unused dependencies\n- Optimize import patterns\n- Use dynamic imports for heavy features\n\n### 2. Runtime Performance\n- Profile component render times\n- Optimize React component hierarchies\n- Implement proper memoization strategies\n- Monitor memory usage patterns\n\n### 3. API Performance\n- Implement request deduplication\n- Add proper caching strategies\n- Optimize API call patterns\n- Add request/response compression\n\n## Testing Infrastructure\n\n### 1. Unit Testing Setup\n```javascript\n// jest.config.js\nmodule.exports = {\n  preset: 'ts-jest',\n  testEnvironment: 'jsdom',\n  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],\n  moduleNameMapping: {\n    '^@/(.*)$': '<rootDir>/src/$1',\n  },\n  collectCoverageFrom: [\n    'src/**/*.{ts,tsx}',\n    '!src/**/*.d.ts',\n    '!src/test/**/*',\n  ],\n  coverageThreshold: {\n    global: {\n      branches: 80,\n      functions: 80,\n      lines: 80,\n      statements: 80,\n    },\n  },\n};\n```\n\n### 2. Component Testing\n- Unit tests for all reusable components\n- Hook testing with React Testing Library\n- Utility function testing\n- API integration testing\n\n### 3. End-to-End Testing (Optional)\n- Critical user journey testing\n- Command interaction testing\n- Error scenario testing\n\n## Documentation Creation\n\n### 1. Architecture Documentation\n```markdown\n# Architecture Guide\n## Directory Structure\n## Component Patterns\n## Hook Usage Guidelines\n## Type System Overview\n## Performance Considerations\n```\n\n### 2. Component Documentation\n- Props interface documentation\n- Usage examples for each component\n- Performance characteristics\n- Accessibility guidelines\n\n### 3. Migration Guide\n```markdown\n# Migration Guide\n## Before and After Patterns\n## Common Pitfalls\n## Testing Checklist\n## Performance Verification\n```\n\n### 4. Development Guidelines\n```markdown\n# Development Guidelines\n## Code Style Standards\n## Component Creation Process\n## Hook Development Patterns\n## Testing Requirements\n```\n\n## Final Verification\n\n### 1. Code Quality Audit\n- Zero TypeScript errors with strict mode\n- Zero ESLint warnings/errors\n- 100% Prettier formatting compliance\n- No remaining `any` types\n\n### 2. Performance Benchmarking\n- Command load time comparisons\n- Bundle size analysis\n- Memory usage profiling\n- Runtime performance metrics\n\n### 3. Functional Verification\n- Complete regression testing\n- User experience validation\n- Error handling verification\n- Edge case testing\n\n### 4. Maintainability Assessment\n- Code complexity analysis\n- Documentation completeness\n- Developer onboarding ease\n- Future enhancement readiness\n\n## Key Deliverables\n- Complete quality tooling configuration\n- Comprehensive test suite (>80% coverage)\n- Performance optimization implementation\n- Complete documentation suite\n- Migration guide and best practices\n- Developer onboarding documentation\n- Final verification report\n\n## Success Criteria\n- Zero build errors or warnings\n- All tests pass with >80% coverage\n- Performance metrics meet or exceed baseline\n- Documentation passes completeness review\n- Code quality tools integrate seamlessly\n- Pre-commit hooks function correctly\n- Codebase passes final quality audit\n- Team can successfully onboard new developers using documentation",
+            "status": "done",
+            "dependencies": [
+              4
+            ],
+            "parentTaskId": 19
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "title": "Implement Placeholder API Methods and Finalize Core Functionality",
+        "description": "Implement all placeholder methods in the DaytonaApiClient, connect UI actions to their corresponding backend logic, and remove all temporary code and TODOs to finalize the extension's core features.",
+        "details": "This task involves filling in all remaining implementation gaps to make the extension fully functional. The work is divided into three main areas:\n\n1.  **DaytonaApiClient Method Implementation:**\n    *   Flesh out all placeholder methods within the shared client established in Task 16.\n    *   **Code Execution:** Implement the client method that wraps `daytona.sandbox.process.codeRun()`, handling language selection and sandbox mode logic as required by the 'Enhanced Run Code' command (Task 15).\n    *   **File Management:** Implement methods for `list`, `read`, `write`, `mkdir`, and `rm` by calling the corresponding `daytona.sandbox.fs` methods. Ensure paths are correctly resolved and errors are propagated.\n    *   **Git Commands:** Implement a generic client method that uses `daytona.sandbox.process.run()` to execute arbitrary git commands passed from the 'Git Manager' command (Task 13).\n    *   **Snapshots:** Implement client methods for `create`, `list`, `restore`, and `delete` that call the underlying Daytona snapshot management APIs, as required by Task 17.\n\n2.  **UI Action Implementation:**\n    *   Wire up all UI actions defined in previous tasks.\n    *   **Clipboard Actions:** Use Raycast's `Clipboard.copy()` API to implement all 'Copy ...' actions (e.g., copy sandbox ID, copy git URL).\n    *   **Browser Actions:** Use Raycast's `open()` API to implement actions like 'Open in Browser' for sandboxes.\n\n3.  **Code Cleanup and Refinement:**\n    *   Perform a full codebase search for `// TODO:` comments and resolve each one.\n    *   Ensure all components, hooks, and utilities are correctly exported from their respective modules (`index.ts` files) for proper consumption by the commands.\n    *   Remove all unused code blocks, commented-out logic, and unnecessary imports to improve code quality and maintainability.\n<info added on 2025-08-15T09:44:22.360Z>\n**UPDATE: Scope Reduction and Refocus**\n\nA recent codebase review has determined that the initial plan to build a comprehensive, centralized `DaytonaApiClient` class (covered in subtasks 20.1-20.4) is unnecessary. The existing `daytonaUtils.withClient()` utility pattern already provides the required functionality for file management, Git operations, and code execution, making the original approach an over-engineered solution.\n\nAs a result, the scope of this task has been significantly reduced. Subtasks 20.1, 20.2, 20.3, 20.4, and 20.8 have been deferred.\n\nThe remaining work for this task is now focused on final polish and UI connectivity:\n1.  **Implement UI Actions:** Wire up all remaining 'Copy to Clipboard' and 'Open in Browser' actions using the respective Raycast APIs (`Clipboard.copy()` and `open()`).\n2.  **Code Cleanup:** Perform a final pass to remove all `// TODO:` comments and any unused code identified by the linter.\n3.  **Bug Fix:** Resolve a specific type error identified in `useForm.ts`.\n\nThe estimated time for completion is now approximately 45 minutes.\n</info added on 2025-08-15T09:44:22.360Z>",
+        "testStrategy": "1.  **API Functional Testing (Indirect):**\n    *   **File Management:** Use the 'Browse Files' command (Task 12). Create a new directory, create a file inside it, read its content, and then delete both. Verify each step succeeds.\n    *   **Git Management:** Use the 'Manage Git Repository' command (Task 13). Check the status of a repository, view branches, and attempt a fetch. Verify the output is correct.\n    *   **Code Execution:** Use the 'Enhanced Run Code' command (Task 15). Execute a simple script in Python and Node.js and verify the output is displayed correctly.\n    *   **Snapshots:** Use the 'Create Snapshot' action and 'Browse Snapshots' command (Task 17). Create a new snapshot and verify it appears in the list. Then, delete it and confirm it is removed.\n\n2.  **UI Action Verification:**\n    *   Navigate to the 'Daytona Dashboard' (Task 11). Use the 'Copy Sandbox ID' action and paste the result into a text editor to confirm it's correct.\n    *   Use the 'Open in Browser' action and verify that the correct URL opens in the default web browser.\n\n3.  **Static Analysis and Review:**\n    *   Run the project's linter to detect unused variables and imports.\n    *   Perform a global search for `TODO` to ensure none remain.\n    *   Manually review the main command files to confirm that all actions are now linked to functional implementations and no placeholders are left.",
+        "status": "done",
+        "dependencies": [
+          11,
+          12,
+          13,
+          15,
+          16,
+          17
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement File Management Methods in DaytonaApiClient",
+            "description": "Implement the file system methods (`list`, `read`, `write`, `mkdir`, `rm`) in the `DaytonaApiClient` by wrapping the corresponding `daytona.sandbox.fs` SDK calls to support the 'Sandbox Files' command (Task 12).",
+            "dependencies": [],
+            "details": "Flesh out the placeholder methods in the shared client. Ensure that paths passed from the 'Browse Files' command are correctly resolved and that any errors from the Daytona SDK are properly handled and propagated up to the UI layer.",
+            "status": "done",
+            "testStrategy": "Indirectly tested via the 'Browse Files' command (Task 12). Manually create, read, update, and delete files and directories to ensure all client methods function as expected."
+          },
+          {
+            "id": 2,
+            "title": "Implement Generic Git Command Executor in DaytonaApiClient",
+            "description": "Implement a generic method in the `DaytonaApiClient` to execute arbitrary Git commands using `daytona.sandbox.process.run()`, as required by the 'Git Manager' command (Task 13).",
+            "dependencies": [],
+            "details": "This method will serve as the backend for the 'Git Manager' command. It should accept a string command (e.g., `git status`, `git pull`) and execute it within the context of a specified sandbox's project directory. The method must return the command's stdout, stderr, and exit code.",
+            "status": "done",
+            "testStrategy": "Indirectly tested via the 'Manage Git Repository' command (Task 13). Execute various git commands like `status`, `log`, and `branch` and verify the output is correctly displayed in the UI."
+          },
+          {
+            "id": 3,
+            "title": "Implement Code Execution Method in DaytonaApiClient",
+            "description": "Implement the client method that wraps `daytona.sandbox.process.codeRun()` to support the 'Enhanced Run Code' command (Task 15), including logic for language selection and sandbox mode.",
+            "dependencies": [],
+            "details": "This method needs to handle the logic for language selection and sandbox mode as specified in Task 15. It will be responsible for creating a temporary sandbox, executing the code, and returning the output. It should also integrate the cleanup logic from Task 3 to ensure the sandbox is deleted afterward.",
+            "status": "done",
+            "testStrategy": "Use the 'Enhanced Run Code' command to execute code snippets in different languages. Verify that the correct output is returned and that the temporary sandbox is deleted after execution by checking Daytona logs or the platform UI."
+          },
+          {
+            "id": 4,
+            "title": "Implement Snapshot Management Methods in DaytonaApiClient",
+            "description": "Implement the `create`, `list`, `restore`, and `delete` methods for snapshots in the `DaytonaApiClient`, calling the underlying Daytona snapshot management APIs to support Task 17.",
+            "dependencies": [],
+            "details": "Flesh out the placeholder methods in the client to provide full support for the 'Daytona Snapshots Management' command. Ensure each method correctly handles parameters (like snapshot name or ID) and returns the expected data or success/failure status.",
+            "status": "done",
+            "testStrategy": "Indirectly tested via the 'Browse Snapshots' command and the 'Create Snapshot' action (Task 17). Create a new snapshot, list all snapshots to verify its presence, restore it, and finally delete it, confirming each operation's success through the UI."
+          },
+          {
+            "id": 5,
+            "title": "Connect UI to File, Git, and Code Execution APIs",
+            "description": "Wire up the UI components and actions from the 'Browse Files' (Task 12), 'Git Manager' (Task 13), and 'Enhanced Run Code' (Task 15) commands to their corresponding, newly implemented `DaytonaApiClient` methods.",
+            "dependencies": [
+              "20.1",
+              "20.2",
+              "20.3"
+            ],
+            "details": "This involves replacing any mock data or placeholder functions in the UI layer with actual calls to the API client. For example, when a user clicks 'Create File' in the file browser, it should now call `DaytonaApiClient.writeFile()`. Ensure loading states and error handling are implemented in the UI.",
+            "status": "done",
+            "testStrategy": "Perform the full test strategies for Tasks 12, 13, and 15. Confirm that all UI actions trigger the correct backend API calls and that the UI updates correctly based on the API response."
+          },
+          {
+            "id": 6,
+            "title": "Connect Snapshot UI and Implement General UI Actions",
+            "description": "Connect the 'Browse Snapshots' command UI (Task 17) to the snapshot API methods and implement all remaining general UI actions, such as 'Copy ID' and 'Open in Browser'.",
+            "dependencies": [
+              "20.4"
+            ],
+            "details": "Wire up the snapshot management UI to call the `DaytonaApiClient` methods for creating, listing, restoring, and deleting snapshots. Additionally, implement the smaller UI actions across the extension using Raycast's `Clipboard.copy()` and `open()` APIs.",
+            "status": "done",
+            "testStrategy": "Perform the full test strategy for Task 17. Click every 'Copy...' action and verify the correct value is in the clipboard. Click every 'Open...' action and verify the correct URL opens in the default browser."
+          },
+          {
+            "id": 7,
+            "title": "Resolve All TODOs and Remove Unused Code",
+            "description": "Perform a comprehensive codebase search for `// TODO:` comments and address each one. Subsequently, remove all dead code, commented-out logic, and unnecessary imports.",
+            "dependencies": [
+              "20.5",
+              "20.6"
+            ],
+            "details": "Systematically go through the entire project. For each `// TODO:`, either implement the described functionality or remove the comment if it's no longer relevant. Use a linter or static analysis tool to identify and remove unused code.",
+            "status": "done",
+            "testStrategy": "Run a global search for `// TODO:` and confirm it returns no results. Run the linter's 'unused code' rules and verify no issues are reported. The application should still pass all functional tests after cleanup."
+          },
+          {
+            "id": 8,
+            "title": "Finalize Module Exports and Conduct Final Code Review",
+            "description": "Ensure all shared components, hooks, and utilities are correctly exported from their respective module `index.ts` files and conduct a final review of the codebase for consistency and quality.",
+            "dependencies": [
+              "20.7"
+            ],
+            "details": "Review all `index.ts` barrel files to ensure they properly export all necessary modules for consumption by the Raycast commands. This prevents import/export errors. Perform a final pass over the entire feature set to ensure a cohesive user experience and consistent coding style.",
+            "status": "done",
+            "testStrategy": "Build the extension and confirm there are no compilation or import/export errors. Manually navigate through all commands and features one last time to catch any regressions or inconsistencies introduced during the finalization process."
+          }
+        ]
+      },
+      {
+        "id": 21,
+        "title": "Implement Container Registry Management Command",
+        "description": "Create a new Raycast command to list, add, edit, delete, and test connections for Docker container registries used by Daytona. This command will provide a full lifecycle management interface for registries like Docker Hub, GHCR, and ECR.",
+        "details": "1. **Command Scaffolding:** Create a new Raycast `ListCommand` named 'Manage Container Registries'. This will be the main entry point for viewing all configured registries.\n\n2. **API Integration & Data Fetching:** Utilize the shared Daytona client singleton (from Task 20). Implement a `usePromise` hook to call `daytona.registry.listRegistries()` to fetch and display the data. Implement proper loading states and error handling for the API call.\n\n3. **List View Implementation:**\n   - For each `<List.Item>`, display the registry `name` as the title and the `url` as the subtitle.\n   - Use `<List.Item.Accessory>` to display the `registryType` and a 'Default' tag if the `isDefault` flag is true.\n\n4. **Action Panel Implementation:**\n   - **Add Registry:** An `<Action.Push>` that opens a new `RegistryForm` component for creating a new registry.\n   - **Edit Registry:** An `<Action.Push>` on each item that opens the `RegistryForm` pre-filled with the selected registry's data (fetched via `daytona.registry.getRegistry(id)`).\n   - **Delete Registry:** An `<Action>` with `Action.Style.Destructive` that prompts for confirmation before calling `daytona.registry.deleteRegistry(id)`.\n   - **Set as Default:** An `<Action>` that calls `daytona.registry.setDefaultRegistry(id)` and reloads the list to reflect the change.\n   - **Test Connection:** An `<Action>` that triggers a connection test against the selected registry. Display the result ('Success' or 'Failure') using a Raycast `Toast`.\n\n5. **Add/Edit Form Component (`RegistryForm.tsx`):**\n   - Create a reusable `<Form>` component that can handle both create and update operations.\n   - Use `<Form.TextField>` for `name`, `url`, `username`, and `project`.\n   - Use `<Form.PasswordField>` for the `password` field to ensure credentials are masked, following the pattern from Task 14.\n   - Use `<Form.Dropdown>` for `registryType`.\n   - Implement robust form validation for required fields and URL format.\n   - On submit, call `daytona.registry.createRegistry()` or `daytona.registry.updateRegistry()` based on whether an existing registry ID is present.",
+        "testStrategy": "1. **List View Verification:** Launch the command and confirm it correctly displays a list of all pre-configured registries with accurate names, URLs, types, and default status. Verify the loading indicator is shown during the initial fetch.\n\n2. **Add Functionality:**\n   - Use the 'Add Registry' action to open the form.\n   - Test form validation by attempting to submit with empty required fields.\n   - Successfully add a new Docker Hub registry and verify it appears in the list.\n\n3. **Edit Functionality:**\n   - Select an existing registry and invoke the 'Edit' action.\n   - Verify the form is pre-populated with the correct data.\n   - Modify the registry's name and save. Confirm the list view updates with the new name.\n\n4. **Delete Functionality:**\n   - Select a registry and use the 'Delete' action.\n   - Cancel the confirmation dialog and verify the registry remains.\n   - Proceed with the deletion and verify the registry is removed from the list.\n\n5. **Core Actions:**\n   - **Set Default:** Use the 'Set as Default' action on a non-default registry. Verify the 'Default' tag moves to the correct item in the list.\n   - **Test Connection:** Use the 'Test Connection' action on a registry with valid credentials and verify a success toast. Modify the credentials to be invalid and verify a failure toast with a clear error message is shown.",
+        "status": "done",
+        "dependencies": [
+          4,
+          11,
+          14,
+          20
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Scaffold Command and Implement Initial Data Fetching",
+            "description": "Create the 'Manage Container Registries' command, set up the basic `ListCommand` structure, and integrate the `daytona.registry.listRegistries()` API call using `usePromise` to fetch and display a basic list of registries.",
+            "dependencies": [],
+            "details": "Create the new command file for 'Manage Container Registries'. Implement a Raycast `ListCommand` as the main component. Utilize the shared Daytona client singleton and the `usePromise` hook to call `daytona.registry.listRegistries()`. Ensure proper loading states and error handling are implemented. The initial list item should display the registry `name` as the title and `url` as the subtitle.",
+            "status": "done",
+            "testStrategy": "Launch the command and verify that it shows a loading indicator, then displays the list of registries fetched from the API with correct names and URLs. Test the error state by simulating an API failure and ensuring a proper error message is shown."
+          },
+          {
+            "id": 2,
+            "title": "Enhance List View and Add Action Panel Shell",
+            "description": "Improve the list item display by adding accessories for `registryType` and a 'Default' tag. Implement the full `ActionPanel` with placeholder actions for Add, Edit, Delete, Set as Default, and Test Connection.",
+            "dependencies": [
+              "21.1"
+            ],
+            "details": "For each `<List.Item>`, use `<List.Item.Accessory>` to display the `registryType` and a `<Tag>` with the text 'Default' if the `isDefault` flag is true. Construct the `<ActionPanel>` with all five required actions: `<Action.Push>` for 'Add Registry' and 'Edit Registry', and `<Action>` for 'Delete Registry', 'Set as Default', and 'Test Connection'. Style the 'Delete' action with `Action.Style.Destructive`. The actions will not have their logic implemented yet.",
+            "status": "done",
+            "testStrategy": "Verify that each list item correctly displays the registry type and the 'Default' tag for the appropriate registry. Confirm that the Action Panel appears on each item with all five actions correctly labeled and styled."
+          },
+          {
+            "id": 3,
+            "title": "Create Reusable RegistryForm Component",
+            "description": "Develop the `RegistryForm.tsx` component to handle both creating and editing container registries. The form should include all necessary fields, validation logic, and be capable of being pre-filled for editing.",
+            "dependencies": [],
+            "details": "Create a new file `RegistryForm.tsx`. Implement a reusable `<Form>` component that accepts an optional registry object for editing. Use `<Form.TextField>` for `name`, `url`, `username`, and `project`. Use `<Form.PasswordField>` for `password`. Use `<Form.Dropdown>` for `registryType`. Implement form validation for required fields and proper URL format. The form's submission logic will be connected in a subsequent task.",
+            "status": "done",
+            "testStrategy": "Manually render the form in a test environment in both 'add' (empty) and 'edit' (pre-filled) modes. Test validation by submitting with empty required fields or an invalid URL and confirm error messages appear. Ensure the password field correctly masks input."
+          },
+          {
+            "id": 4,
+            "title": "Implement Add, Edit, Delete, and Set Default Logic",
+            "description": "Wire up the actions in the `ActionPanel` to their corresponding API calls and UI flows. This includes pushing the `RegistryForm` for add/edit operations and calling the Daytona client for delete/set-default.",
+            "dependencies": [
+              "21.2",
+              "21.3"
+            ],
+            "details": "Connect the 'Add Registry' action to push an empty `RegistryForm`. Connect the 'Edit Registry' action to fetch full registry details via `daytona.registry.getRegistry(id)` and push the `RegistryForm` with pre-filled data. Implement the 'Delete Registry' action with a confirmation dialog before calling `daytona.registry.deleteRegistry(id)`. Implement the 'Set as Default' action to call `daytona.registry.setDefaultRegistry(id)`. All successful mutations should trigger a list refresh using the `revalidate` function from `usePromise`.",
+            "status": "done",
+            "testStrategy": "1. Use 'Add Registry' and verify the new registry appears in the list. 2. Use 'Edit Registry' on an item, change its details, and confirm the list updates. 3. Use 'Delete Registry' and confirm the item is removed after confirmation. 4. Use 'Set as Default' and verify the 'Default' tag moves to the correct item."
+          },
+          {
+            "id": 5,
+            "title": "Implement Test Connection Action",
+            "description": "Implement the 'Test Connection' action to provide users with immediate feedback on registry configuration using a Raycast Toast.",
+            "dependencies": [
+              "21.2"
+            ],
+            "details": "Implement the logic for the 'Test Connection' action. This will involve calling a new or existing Daytona client method that performs the connection test for a given registry. Use a Raycast `Toast` to display the progress and result. The toast should initially show a loading state (e.g., 'Testing connection...') and then update to 'Success' or 'Failure' with a descriptive message based on the API response.",
+            "status": "done",
+            "testStrategy": "Select a correctly configured registry and trigger 'Test Connection', verifying a success toast appears. Select a registry with incorrect credentials, trigger the action, and verify a failure toast appears. Ensure the initial loading toast is displayed during the test."
+          }
+        ]
+      },
+      {
+        "id": 22,
+        "title": "Implement Volume Manager Command",
+        "description": "Create a Raycast command for the complete lifecycle management of persistent storage volumes. This command will allow users to list, create, delete, and view details of volumes that can be mounted to Daytona sandboxes.",
+        "details": "This task involves creating a new Raycast command, 'Manage Volumes', that provides a full CRUD interface for persistent storage volumes, following the design patterns established in the 'Daytona Dashboard' (Task 11) and 'Manage Container Registries' (Task 21) commands.\n\n1.  **Command Scaffolding:**\n    *   Create a new Raycast `ListCommand` named 'Manage Volumes'.\n    *   This command will serve as the central hub for all volume-related operations.\n\n2.  **API & SDK Integration:**\n    *   Utilize the shared Daytona SDK client singleton for all API interactions.\n    *   Implement a `usePromise` hook to asynchronously call `daytona.volume.list()` to fetch and display the list of volumes.\n    *   Ensure proper loading states (e.g., `<List isLoading={true}>`) and error states (e.g., `<List.EmptyView icon={Icon.Warning} title=\"Failed to load volumes\" />`) are handled.\n\n3.  **List View Implementation:**\n    *   Use the `<List>` component to display the fetched volumes.\n    *   For each `<List.Item>`, display the volume's `name` as the title and its `id` as the subtitle.\n    *   Use `<List.Item.Accessory>` to display key metadata: `state` (e.g., 'Unused', 'Mounted'), `creationDate`, and `lastUsedDate`.\n\n4.  **Action Panel Implementation:**\n    *   **Create Volume:** Implement a primary action (`<Action.Push>`) to open a `<Form>` for creating a new volume. The form will prompt for a `name`. On submission, it will call `daytona.volume.create({ name })`, show a success/error toast, and `revalidate` the list.\n    *   **Delete Volume:** Implement a destructive action (`<Action style={Action.Style.Destructive}>`) on each volume item. Before executing `daytona.volume.delete(volumeId)`, use an `<Alert>` to get user confirmation. This action should be disabled or handled gracefully if the volume is currently in use (the API should prevent this, but the UI can be proactive).\n    *   **View Details:** Implement an `<Action.Push>` to a `<Detail>` view. This view will fetch comprehensive data using `daytona.volume.get(volumeId)` and display all properties (ID, Name, State, Dates, Mount Info) in a clean, readable Markdown format.\n\n5.  **Types and Error Handling:**\n    *   Use the `Volume` type definitions from the Daytona SDK for type safety.\n    *   Integrate the existing error handling framework (Task 4) to catch and display user-friendly error messages via Raycast toasts for all API operations.",
+        "testStrategy": "1.  **List View Verification:**\n    *   Launch the 'Manage Volumes' command. Verify that a loading indicator is shown initially.\n    *   Confirm that the list populates correctly, displaying each volume's name, ID, state, and date accessories.\n    *   Test with an empty set of volumes to ensure the empty view is displayed correctly.\n    *   Simulate an API error and verify the error state is shown in the empty view.\n\n2.  **Create Volume Functionality:**\n    *   Use the 'Create Volume' action.\n    *   Enter a valid name in the form and submit.\n    *   Verify a success toast is displayed (e.g., \"Volume 'my-data' created successfully\").\n    *   Confirm the volume list refreshes and the new volume appears.\n    *   Attempt to create a volume with an invalid or duplicate name and verify a descriptive error toast is shown.\n\n3.  **Delete Volume Functionality:**\n    *   Select an unused volume and trigger the 'Delete Volume' action.\n    *   Verify the confirmation `Alert` appears. Cancel the action and confirm nothing happens.\n    *   Trigger the action again and confirm the deletion. Verify a success toast is shown and the volume is removed from the list.\n    *   Attempt to delete a volume that is currently mounted to a sandbox. Verify that a user-friendly error toast is displayed (e.g., \"Failed to delete: Volume is in use by sandbox '...'\").\n\n4.  **View Details Verification:**\n    *   Select any volume and use the 'View Details' action.\n    *   Confirm the `<Detail>` view opens and displays all expected properties (ID, Name, State, Creation Date, Last Used Date, Mount Information) accurately and in a well-formatted manner.",
+        "status": "done",
+        "dependencies": [
+          4,
+          11,
+          14,
+          21
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "Implement API Key Manager Command",
+        "description": "Create a Raycast command for comprehensive API key management, allowing users to list, create, and revoke API keys for secure access to the Daytona API.",
+        "details": "This task involves creating a new Raycast `ListCommand` named 'API Key Manager' to provide full lifecycle management for API keys.\n\n1. **Command Scaffolding:**\n   - Create a new TypeScript file for a Raycast `ListCommand` named 'API Key Manager'.\n   - This command will be the central interface for all API key operations.\n\n2. **API Integration & Data Fetching:**\n   - Utilize the shared, configured `@daytonaio/api-client` instance (as established in Task 14).\n   - Specifically use the `ApiKeysApi` class.\n   - Implement the `usePromise` hook to call `apiKeysApi.listApiKeys()` for fetching the list of keys. Ensure proper handling of loading states (show loading indicator) and API errors (show toast notifications).\n\n3. **List View Implementation:**\n   - Use the `<List>` component to display the fetched API keys.\n   - For each `<List.Item>`, display the key's `name` as the title.\n   - Use `<List.Item.Accessory>` to display the creation date (`createdAt`) and last used date (`lastUsed`), formatted for readability (e.g., 'Created: 2 days ago').\n   - Use a `<List.Item.Accessory>` with a `<Tag>` to indicate the key's status if available.\n\n4. **Action Implementation:**\n   - **Create Key:** Implement a primary `Action.Push` that opens a `<Form>`. The form will contain a `<Form.TextField>` for the key's `name`. On submission, call `apiKeysApi.createApiKey()`. On success, push a `<Detail>` view that displays the newly generated key with a prominent warning that it will only be shown once. Include an `Action.CopyToClipboard` for the new key.\n   - **Revoke Key:** On each list item, add a destructive-style action (`Action.Style.Destructive`) labeled 'Revoke Key'. Before executing, use Raycast's `confirmAlert()` to get user confirmation. On confirmation, call `apiKeysApi.deleteApiKey()` with the appropriate key name. Refresh the list upon successful deletion.\n   - **View Details:** Implement an `Action.Push` to a `<Detail>` view that uses `apiKeysApi.getApiKey()` to fetch and display all available metadata for the selected key.\n\n5. **Error Handling & Security:**\n   - Wrap all API calls in `try...catch` blocks to handle network or API errors gracefully.\n   - Use Raycast's `<Toast>` component to provide clear, user-friendly feedback for both successful operations (e.g., 'Key Revoked') and failures (e.g., 'Failed to create key: Invalid name').\n   - Ensure the `ApiKey` type from the API client is used throughout for type safety.",
+        "testStrategy": "1. **List View Verification:**\n   - Launch the 'API Key Manager' command. Verify a loading indicator is shown.\n   - Confirm the list populates correctly, displaying each key's name, creation date, and last used date.\n   - Test with an account that has no API keys to ensure the empty state is handled correctly (e.g., shows a 'No keys found' message with a 'Create Key' action).\n\n2. **Create Key Workflow:**\n   - Use the 'Create API Key' action.\n   - Enter a name in the form and submit. Verify the form validates input.\n   - Confirm a new view appears showing the generated key and a 'show once' warning.\n   - Use the 'Copy to Clipboard' action and verify the key is copied.\n   - Navigate back to the list and confirm the new key is present.\n\n3. **Revoke Key Workflow:**\n   - Select a key and trigger the 'Revoke Key' action.\n   - Verify a confirmation dialog appears. First, test the 'Cancel' option and confirm the key is not revoked.\n   - Trigger the action again and confirm the revocation. Verify a success toast is displayed and the key is removed from the list.\n\n4. **Error Handling Tests:**\n   - Disconnect from the network and launch the command. Verify an appropriate error toast is shown for the failed list fetch.\n   - Attempt to create a key with an invalid name (if the API has constraints) and verify a validation error is shown.",
+        "status": "deferred",
+        "dependencies": [
+          1,
+          11,
+          14
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 24,
+        "title": "Implement Runner Manager Command",
+        "description": "Create a Raycast command to provide infrastructure visibility and management for compute runners that host sandboxes, including status, capacity, and health monitoring.",
+        "details": "This task involves creating a new Raycast `ListCommand` named 'Runner Manager' to give users direct control and insight into their compute infrastructure.\n\n1. **Command Scaffolding:**\n   - Create a new TypeScript file for a Raycast `ListCommand` named 'Runner Manager'.\n   - This command will serve as the primary interface for all runner operations, following the pattern of the 'Daytona Dashboard' (Task 11).\n\n2. **API Integration & Data Fetching:**\n   - Utilize the shared, configured `@daytonaio/api-client` instance.\n   - Use the `RunnersApi` for all runner-related data. The primary method will be `listRunners()` to populate the main view.\n   - Implement `useCachedPromise` or a similar hook to handle asynchronous data fetching, including loading states, error states, and automatic revalidation for real-time status updates.\n\n3. **List View Implementation:**\n   - For each runner returned by the API, render a `<List.Item>`.\n   - **Display:** Show the runner's ID, state (e.g., 'HEALTHY', 'DEGRADED', 'UNHEALTHY'), and location.\n   - **Accessories:** Use accessories to display key metrics at a glance: capacity (e.g., 'Sandboxes: 2/4'), and a health status icon (e.g., green circle for healthy, red for error).\n   - **Tooltip:** Provide a tooltip with the full runner ID or other relevant metadata.\n\n4. **Actions Implementation:**\n   - **View Details:** Implement an `<Action.Push>` to a `<Detail>` view. This view should display all runner properties, resource utilization metrics (CPU/Memory/Disk if available), and a list of sandboxes currently running on it. The `getRunnerBySandboxId` method might be useful here to cross-reference.\n   - **Create New Runner:** Implement an `<Action.Push>` that opens a `<Form>` for provisioning a new runner. The form will use the `createRunner` API method and should include fields for runner name, target, and potentially snapshot reference (using `getRunnersBySnapshotRef` to populate options).\n   - **View Sandboxes on Runner:** An action that navigates to the 'Daytona Dashboard' (Task 11) and pre-filters the list to show only the sandboxes hosted on the selected runner.\n   - **Refresh:** A standard `<Action>` to manually re-fetch the runner list.\n\n5. **Error Handling & Status Monitoring:**\n   - Implement comprehensive error handling for API calls. Use `<List.EmptyView>` to display user-friendly messages for network errors, authentication failures, or when no runners are found.\n   - Use Raycast toasts to provide feedback for actions like creating a runner.\n   - Ensure the list view automatically reflects changes in runner state and health through periodic revalidation.",
+        "testStrategy": "1. **List View Verification:**\n   - Launch the 'Runner Manager' command and verify a loading indicator is shown.\n   - Confirm the list populates correctly, displaying each runner's ID, state, capacity, and health status as accessories.\n   - Test with an account that has no runners to ensure the empty state view is displayed correctly.\n   - Leave the command open and verify that status information updates automatically after a short interval.\n\n2. **Action Testing:**\n   - **View Details:** Select a runner and use the 'View Details' action. Verify the detail view shows all expected information, including a correct list of sandboxes running on it.\n   - **Create Runner:** Use the 'Create New Runner' action. Fill out the form with valid data and submit. Verify a success toast is shown and the new runner appears in the main list upon refresh.\n   - **Form Validation:** Attempt to submit the 'Create Runner' form with invalid or missing data and verify that appropriate validation errors are displayed.\n   - **View Sandboxes:** Use the 'View Sandboxes on Runner' action and confirm it navigates to the Daytona Dashboard and correctly filters the sandbox list.\n\n3. **Error Handling:**\n   - Temporarily use an invalid API key in settings (Task 14) and run the command. Verify that a clear authentication error is shown.\n   - Simulate a network failure and confirm a network error message is displayed.",
+        "status": "cancelled",
+        "dependencies": [
+          1,
+          11,
+          14
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 25,
+        "title": "Implement Image Builder Command",
+        "description": "Create a Raycast command for building custom Daytona sandbox images using the Daytona Image SDK, allowing users to define environments with specific base images, packages, and configurations.",
+        "details": "This task involves creating a new Raycast `FormCommand` named 'Image Builder' to provide a user-friendly interface for creating custom sandbox images.\n\n1. **Command Scaffolding:**\n   - Create a new TypeScript file for a Raycast `FormCommand` named 'Image Builder'.\n   - This command will be the primary interface for all image creation operations.\n\n2. **SDK Integration:**\n   - Heavily utilize the `@daytonaio/sdk` `Image` and `Context` classes for the declarative build process.\n   - Ensure the command uses the shared, configured API client established in Task 14 for authentication.\n\n3. **Form UI Implementation:**\n   - Use `<Form.TextField>` for the new image name (e.g., `my-custom-app:latest`).\n   - Implement a `<Form.Dropdown>` for selecting an image template/preset (e.g., 'From Dockerfile', 'Debian Slim + Python', 'Ubuntu + Node.js').\n   - Conditionally render form fields based on the selected template.\n   - For 'From Dockerfile': Add a `<Form.TextArea>` for Dockerfile content and a `<Form.FilePicker>` for the build context directory.\n   - For 'Debian Slim + Python': Add a `<Form.TagPicker>` for pip packages, and optional `<Form.TextField>` fields for advanced options like `--index-url`, `--find-links`, and a `<Form.Checkbox>` for `--pre` (pre-release).\n\n4. **Build Process & Logging:**\n   - On form submission, programmatically construct the `Image` object using the declarative SDK methods (e.g., `new Image().from('ubuntu:22.04').aptInstall(['curl']).build()`).\n   - Initiate the build using `image.build()`. This method should support streaming logs.\n   - Use `Action.Push` to navigate to a new view that displays the streaming build logs in real-time, providing feedback to the user.\n   - Use a `Toast` with `style: Toast.Style.Animated` to indicate that a build is in progress.\n\n5. **Error Handling:**\n   - Wrap the build process in a `try...catch` block to handle failures.\n   - If the build fails, display a `Toast` with `style: Toast.Style.Failure` and present the detailed error logs from the build process to the user for debugging.\n\n6. **Image Testing and Validation:**\n   - After a successful build, include a new action on the success screen labeled 'Test Image'.\n   - This action will provision a temporary sandbox using the newly created image and run a basic validation command (e.g., `whoami`) to confirm the image is functional.",
+        "testStrategy": "1. **UI and Form Validation:**\n   - Launch the 'Image Builder' command and verify all form elements render correctly.\n   - Test that submitting the form with an empty image name shows a validation error.\n   - Verify that switching between templates (e.g., 'Dockerfile' vs 'Python') correctly shows and hides the relevant form fields.\n\n2. **Preset Build Test:**\n   - Select the 'Debian Slim + Python' preset.\n   - Add packages like `requests` and `numpy`.\n   - Initiate the build and verify it completes successfully.\n   - Use the 'Test Image' action or manually create a sandbox with the new image and run `python -c 'import requests; import numpy'` to confirm installation.\n\n3. **Custom Dockerfile Build Test:**\n   - Select the 'From Dockerfile' template.\n   - Paste a simple Dockerfile (e.g., `FROM alpine\nRUN apk add --no-cache cowsay\nCMD [\"cowsay\", \"Moo!\"]`).\n   - Build the image and test it to verify `cowsay` is installed and executable.\n\n4. **Build with Context Test:**\n   - Create a local directory with a `requirements.txt` file.\n   - Use a Dockerfile with a `COPY requirements.txt .` and `RUN pip install -r requirements.txt` command.\n   - Select the local directory as the build context and build the image. Verify the packages are installed correctly in the final image.\n\n5. **Progress and Error Handling Test:**\n   - Start a long build and confirm the animated toast and streaming log view are displayed correctly.\n   - Create a build designed to fail (e.g., an invalid Dockerfile command or a non-existent pip package).\n   - Verify that the build process stops, a failure toast is shown, and the specific error message from the build log is clearly displayed to the user.",
+        "status": "pending",
+        "dependencies": [
+          1,
+          14
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 26,
+        "title": "Implement Audit Logs Viewer Command",
+        "description": "Create a Raycast command to view, filter, and export audit logs, providing comprehensive activity monitoring and security event tracking for Daytona. [Updated: 8/15/2025]",
+        "details": "This task involves creating a new Raycast `ListCommand` named 'Audit Logs Viewer' for comprehensive security and activity monitoring.\n\n1. **Command Scaffolding:**\n   - Create a new TypeScript file for a Raycast `ListCommand` named 'Audit Logs Viewer'.\n   - This command will be the primary interface for viewing all audit trail data.\n\n2. **API Integration & Typing:**\n   - Utilize the shared, configured `@daytonaio/api-client` instance (from Task 14).\n   - Integrate with the `AuditApi`, specifically using `getAllAuditLogs` or `getOrganizationAuditLogs` for data fetching.\n   - Use the `AuditLog` and `PaginatedAuditLogs` types from the API client for type safety.\n\n3. **Paginated List View:**\n   - Use a data-fetching hook like `usePromise` to handle asynchronous loading, error states, and revalidation.\n   - Implement the `<List.Paginator>` component to work with the `PaginatedAuditLogs` response, allowing users to navigate through large log volumes efficiently.\n   - For each `<List.Item>`, display the `action`, `user`, and `timestamp`. Use `<List.Item.Accessory>` to show `resource` and `outcome` (e.g., 'Success', 'Failure').\n\n4. **Filtering and Search:**\n   - Implement `<List.Dropdown>` components for filtering logs by `Action Type`, `User`, and `Resource`.\n   - Add a mechanism for date range filtering, potentially using a form action to set start and end dates.\n   - Leverage the built-in search functionality of the `ListCommand` to perform text-based searches on log content.\n\n5. **Detailed View & Highlighting:**\n   - Use an `<Action.Push>` to open a `<Detail>` view for any selected log item, showing the full raw log data for in-depth analysis.\n   - Implement visual cues for log severity. Use icons and color tinting (e.g., red for 'Failure' or critical security events, green for 'Success') to make important events stand out.\n\n6. **Export Capabilities:**\n   - Add an `<Action>` labeled 'Export Filtered Logs' that allows users to export the current view (respecting all active filters) to a compliance-friendly format like JSON or CSV.\n\n7. **Real-time Streaming:**\n   - Implement a toggle action 'Enable Real-time Stream'.\n   - When active, use a polling mechanism (e.g., `setInterval` combined with the data hook's `revalidate` function) to fetch and prepend new logs to the list every few seconds, providing a live view of activity.\n<info added on 2025-08-15T16:24:53.138Z>\nBased on the user request to \"Only show first page of audits which is 25 logs per page\", the implementation should be modified to disable pagination functionality and limit the display to only the first 25 audit logs. Remove the `<List.Paginator>` component and modify the API call parameters to fetch only the first page with a limit of 25 items. Update the data fetching logic to not allow navigation to subsequent pages, ensuring users see only the most recent 25 audit log entries without the ability to load more.\n</info added on 2025-08-15T16:24:53.138Z>",
+        "testStrategy": "1. **List View & Pagination:**\n   - Launch the command and verify a loading indicator is shown, followed by a list of audit logs.\n   - Confirm each item correctly displays `action`, `user`, `timestamp`, `resource`, and `outcome`.\n   - Navigate to the next page using the paginator and verify the list updates. Test navigating back.\n   - Test with an account that has no audit logs to ensure a proper empty state message is displayed.\n\n2. **Filtering & Search:**\n   - Use the `Action Type` dropdown to filter for 'sandbox.created' and verify only matching logs are shown.\n   - Filter by a specific user and confirm the list is correctly narrowed.\n   - Use the search bar to find a log containing a specific resource ID.\n   - Test the date range filter to ensure it excludes logs outside the selected period.\n\n3. **Detailed View & Highlighting:**\n   - Trigger a failed action (e.g., try to delete a non-existent resource) and find the corresponding log. Verify it is highlighted with a red icon/tint and has an outcome of 'Failure'.\n   - Select a log item and press Enter. Confirm the detail view opens and displays the full, un-truncated log information.\n\n4. **Export Functionality:**\n   - Apply a filter (e.g., by user and date). Invoke the 'Export Filtered Logs' action.\n   - Verify that a file is generated (or data is copied to the clipboard) in the chosen format (JSON/CSV) and that its content matches the filtered view.\n\n5. **Real-time Streaming:**\n   - Enable the real-time stream toggle.\n   - In a separate terminal or UI, perform an action like starting a sandbox.\n   - Return to the Raycast command and verify that the new log for 'sandbox.started' appears at the top of the list automatically within a few seconds.",
+        "status": "cancelled",
+        "dependencies": [
+          1,
+          11,
+          14
+        ],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 27,
+        "title": "Implement Team Management Command",
+        "description": "Create a new Raycast command to manage Daytona organizations, allowing users to view, invite, remove, and change the roles of members directly within the extension using the Organizations API.",
+        "details": "This task involves creating a comprehensive interface for organization management within Raycast.\n\n1. **Command Scaffolding:**\n   - Create a new Raycast `ListCommand` named 'Manage Organization'. This will be the central hub for viewing members and invitations.\n   - The command should be discoverable from the Raycast root search.\n\n2. **API Integration (OrganizationsApi):\n**   - Extend the shared Daytona API client (from Task 16 & 20) to include methods for the Organizations API.\n   - Implement functions to wrap the following API calls:\n     - `listMembers()`: To fetch all current members of the organization.\n     - `listInvitations()`: To fetch all pending invitations.\n     - `inviteMember(email, role)`: To send an invitation to a new member.\n     - `removeMember(userId)`: To remove a member from the organization.\n     - `updateMemberRole(userId, newRole)`: To modify an existing member's role.\n     - `revokeInvitation(invitationId)`: To cancel a pending invitation.\n\n3. **UI and UX Implementation:**\n   - Use `usePromise` to fetch and display data, handling loading and error states gracefully.\n   - The main `<List>` should be divided into two sections: 'Members' and 'Pending Invitations'.\n   - For each `<List.Item>` in the 'Members' section, display the member's name/email and use an `<List.Item.Accessory>` to show their role (e.g., 'Admin', 'Member').\n   - For each `<List.Item>` in the 'Pending Invitations' section, display the invitee's email and an 'Invited' status.\n\n4. **Action Panel Implementation:**\n   - **Primary Action:** Implement a global 'Invite New Member' action. This should open a `<Action.Push>` target with a `<Form>` to capture the new member's email and select their role from a `<Form.Dropdown>`.\n   - **Member Item Actions:** For each member, provide actions for 'Change Role' (which could push a view with a role selector) and 'Remove Member' (with a confirmation dialog).\n   - **Invitation Item Actions:** For each pending invitation, provide an action for 'Revoke Invitation' (with confirmation).",
+        "testStrategy": "1. **View and Data Loading Verification:**\n   - Launch the 'Manage Organization' command. Verify a loading indicator is shown.\n   - Confirm the list populates correctly with 'Members' and 'Pending Invitations' sections.\n   - Verify that member details (email, role) and invitation details (email) are accurate.\n   - Test with an organization that has no pending invitations to ensure the section is gracefully hidden or shows an empty state.\n\n2. **Invite Member Workflow:**\n   - Trigger the 'Invite New Member' action.\n   - Test form validation: attempt to submit with an invalid email and ensure an error is shown.\n   - Successfully submit the form with a valid email and role. Verify a success toast is displayed.\n   - Confirm that the main list automatically refreshes and the new invitation appears in the 'Pending Invitations' section.\n\n3. **Member Management Workflow:**\n   - Select a member from the list.\n   - Use the 'Change Role' action. Select a new role and confirm. Verify the member's role accessory updates in the list.\n   - Select another member and use the 'Remove Member' action. Go through the confirmation step and verify the member is removed from the list upon refresh.\n\n4. **Invitation Management Workflow:**\n   - Select a pending invitation.\n   - Use the 'Revoke Invitation' action. Confirm the action and verify the invitation is removed from the list.\n\n5. **Error Handling:**\n   - Attempt to invite an email address that is already a member and verify a user-friendly error message is shown.\n   - Disconnect from the network and trigger an action to verify that API call failures are handled gracefully.",
+        "status": "pending",
+        "dependencies": [
+          16,
+          20
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 28,
+        "title": "Create Usage Dashboard Command",
+        "description": "Create a Raycast command using the OrganizationsApi to display comprehensive usage and billing information, providing users with a clear overview of their account's consumption and quick access to cost management portals.",
+        "details": "This task involves creating a new Raycast command named 'Usage Dashboard' to provide users with at-a-glance visibility into their account's metrics and billing status.\n\n1. **Command Scaffolding:**\n   - Create a new TypeScript file for a Raycast `DetailCommand` named 'Usage Dashboard'. The `Detail` component is ideal for presenting a rich, formatted summary of information rather than a list.\n\n2. **API Integration & Data Fetching:**\n   - Utilize the shared, configured `@daytonaio/api-client` instance established in Task 14.\n   - Integrate with the `OrganizationsApi` to fetch all necessary data. This will likely involve calling endpoints such as `organizationsApi.getUsage()` and `organizationsApi.getBillingDetails()`.\n   - Use the `usePromise` hook to manage the asynchronous data fetching, including initial loading and error states.\n\n3. **UI Implementation & Data Presentation:**\n   - While data is loading, display a placeholder or loading text within the `Detail` component.\n   - On successful data fetch, use Markdown to render the information in a structured and readable format. Organize the content with clear headings:\n     - **Usage Overview:** Display key metrics like active sandboxes, total compute hours (current cycle), and total storage used.\n     - **Billing Information:** Show the current billing cycle dates, estimated next bill amount, and plan details.\n   - Use Markdown tables to present detailed breakdowns where appropriate (e.g., usage per project or resource type).\n\n4. **Action Panel Implementation:**\n   - Create an `<ActionPanel>` with essential, context-aware actions:\n     - **Primary Action:** A `Refresh` action to refetch the usage and billing data.\n     - **Portal Links:** Use `Action.OpenInBrowser` to provide direct links to the 'Daytona Billing Portal' and 'Cost Management Dashboard'. These URLs should be retrieved from the API or configuration to avoid hardcoding.\n     - **Copy Actions:** Implement `Action.CopyToClipboard` for key pieces of information, such as 'Account ID' or 'Current Billed Amount'.",
+        "testStrategy": "1. **Command Launch & Loading State:**\n   - Launch the 'Usage Dashboard' command and verify that a loading indicator or placeholder text is displayed immediately.\n\n2. **Data Verification:**\n   - Using a test account with known usage data, confirm that the command correctly populates and displays all sections: Usage Overview, Compute Hours, Storage, and Billing Information.\n   - Verify that all numerical data is formatted correctly (e.g., currency, hours).\n   - Test with a new account that has zero usage to ensure the dashboard displays zeros or an appropriate 'No usage data available' message without errors.\n\n3. **Action Panel Testing:**\n   - Execute the 'Refresh' action and confirm that the API is called again and the view updates with any new data.\n   - Click the 'Open Billing Portal' and 'Open Cost Management' actions and verify they open the correct URLs in the default browser.\n   - Test each 'Copy to Clipboard' action and paste the result to ensure the correct value was copied.\n\n4. **Error Handling:**\n   - Temporarily configure an invalid API key in the settings (from Task 14) and run the command. Verify that a user-friendly error message is displayed in the `Detail` view, guiding the user to check their settings.\n   - Simulate a network failure and confirm a connection error is shown.",
+        "status": "pending",
+        "dependencies": [
+          1,
+          14
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 29,
+        "title": "Enhance Settings Command with Organization Management",
+        "description": "Enhance the existing Settings command to include organization switching, display current organization details, and provide summaries and links to related management commands like Team Management.",
+        "details": "This task involves refactoring the existing `settings.tsx` to serve as a central hub for user and organization-level configuration.\n\n1. **Component Refactoring:**\n   - Restructure the `settings.tsx` command using `<List.Section>` to create distinct areas for 'Account', 'Active Organization', and 'Management'.\n\n2. **Organization Switching Logic:**\n   - Use the Daytona API client (extended in Task #27) to fetch a list of all organizations the authenticated user belongs to.\n   - Implement an `<Action.Submenu>` on the 'Active Organization' section titled 'Switch Organization'. Populate this submenu with the fetched list of organizations.\n   - When a user selects a new organization, update the global state/context for the extension and persist the new active organization ID in Raycast's `LocalStorage`. All subsequent API calls should use this new organization context.\n   - Display a toast notification confirming the switch.\n\n3. **Organization Details Display:**\n   - In the 'Active Organization' section, display key details for the currently selected organization, such as 'Organization Name', 'Organization ID', and 'Current Plan' (if available from the API).\n\n4. **Team Summary & Command Integration:**\n   - Add a list item under the 'Active Organization' section that provides a summary of team members (e.g., 'Team: 5 members, 2 pending invites'). This data should be fetched using the same endpoints as Task #27.\n   - Attach a primary `<Action>` to this item labeled 'Manage Team' that navigates the user directly to the 'Manage Organization' command (from Task #27).\n   - Add another list item in the 'Management' section to serve as a placeholder or direct link for the 'Usage Dashboard' command, ensuring forward compatibility.",
+        "testStrategy": "1. **UI Verification:**\n   - Open the Settings command and verify the new layout with 'Account', 'Active Organization', and 'Management' sections is clear and readable.\n\n2. **Data Loading & Display:**\n   - Confirm that the 'Active Organization' section correctly displays the name and ID of the default/current organization.\n   - Verify the team summary count (e.g., '5 members') is accurate by cross-referencing with the full list in the 'Manage Organization' command.\n\n3. **Organization Switching Test:**\n   - Using a test account belonging to at least two organizations, open the 'Switch Organization' submenu and confirm all organizations are listed.\n   - Select a different organization. Verify a success toast appears and the details in the 'Active Organization' section update immediately.\n   - Close and reopen the Settings command to ensure the new organization selection has been persisted in `LocalStorage`.\n   - Navigate to the 'Daytona Dashboard' (Task 11) and verify that the resources listed (e.g., sandboxes) correspond to the newly selected organization.\n\n4. **Navigation Test:**\n   - Click the 'Manage Team' action and confirm it successfully navigates to the 'Manage Organization' command view.",
+        "status": "done",
+        "dependencies": [
+          27
+        ],
+        "priority": "medium",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-11T16:49:20.214Z",
+      "updated": "2025-08-15T17:39:35.857Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

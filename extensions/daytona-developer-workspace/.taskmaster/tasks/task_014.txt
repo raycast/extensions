@@ -1,0 +1,40 @@
+# Task ID: 14
+# Title: Implement Daytona Settings Command
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Create a Raycast command for managing Daytona configuration, including API key setup, default sandbox preferences, and connection status checks using a secure preferences store.
+# Details:
+1. **Command Scaffolding:** Create a new Raycast command named 'Daytona Settings' using the `<Form>` component as the primary interface for all configuration.
+2. **Secure API Key Management:**
+   - Utilize Raycast's `Preferences` API for securely storing the `DAYTONA_API_KEY`.
+   - Implement a `<Form.PasswordField>` for API key input to ensure the value is masked.
+   - On form load, pre-populate the field with the stored key. On submit, save the updated value.
+3. **Connection Status Check:**
+   - Add a secondary `<Action>` to the form labeled 'Test Connection'.
+   - This action will trigger a call to a lightweight Daytona SDK endpoint (e.g., `daytona.agent.info()`) using the API key currently in the form field.
+   - Provide user feedback via `showToast`, indicating success or failure with a descriptive error message.
+4. **Default Sandbox Preferences:**
+   - Add a `<Form.Separator />` to create a 'Defaults' section.
+   - Implement a `<Form.Dropdown>` for 'Default Auto-Stop Interval' (e.g., '30m', '1h', '4h', 'Never').
+   - Add `<Form.TextField>` inputs for 'Default CPU Allocation' and 'Default Memory Allocation'.
+   - Store these values in Raycast `Preferences` to be used by the 'Create Sandbox' flow (Task 11).
+5. **Status Information Display:**
+   - Asynchronously fetch and display non-editable information, such as the Daytona Daemon version and API URL, in the form's footer or as accessories to provide users with immediate context about their connection.
+
+# Test Strategy:
+1. **API Key Configuration:**
+   - On a fresh install, open the settings and verify the API key field is empty.
+   - Enter a valid key, save, and reopen. Confirm the key persists and is masked.
+   - Enter an invalid key, save, and attempt to run the 'Daytona Dashboard' command (Task 11). Verify it fails with an authentication error.
+2. **Connection Test Action:**
+   - With a valid key, trigger the 'Test Connection' action and verify a success toast is displayed.
+   - With an invalid key, trigger the action and verify a failure toast with a clear error message appears.
+3. **Default Preferences:**
+   - Set a specific 'Default Auto-Stop Interval' and save.
+   - Go to the 'Create Sandbox' flow (from Task 11) and verify the interval field is pre-filled with the saved value.
+   - Repeat the test for CPU and Memory default settings.
+4. **UI Verification:**
+   - Confirm the form renders correctly with all fields, separators, and labels.
+   - Verify the API key is always masked from view.
+   - Ensure the connection status information in the footer loads without blocking form interaction.

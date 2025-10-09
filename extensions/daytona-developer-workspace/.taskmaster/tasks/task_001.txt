@@ -1,0 +1,43 @@
+# Task ID: 1
+# Title: Integrate Daytona SDK and Implement Authentication
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Replace the E2B HTTP proxy with a direct Daytona SDK integration. This includes setting up the project with the @daytonaio/sdk dependency and implementing the authentication flow using API keys stored in environment variables.
+# Details:
+Initialize the Daytona SDK client with authentication credentials. Handle authentication failures gracefully. Follow Raycast best practices for secure credential storage. This task is the foundation for all other Daytona interactions.
+
+# Test Strategy:
+Write unit tests to verify SDK client initialization with valid and invalid API keys. Ensure authentication errors are caught and reported correctly. Manually test by setting the DAYTONA_API_KEY environment variable.
+
+# Subtasks:
+## 1. Update Project Dependencies [done]
+### Dependencies: None
+### Description: Modify the project's package.json to add the '@daytonaio/sdk' dependency and completely remove any packages and configurations related to the old E2B HTTP proxy.
+### Details:
+This initial step involves cleaning the project environment. Run `npm install @daytonaio/sdk` and `npm uninstall <e2b-proxy-package>`. Ensure the lock file is updated and the project builds successfully without the old proxy client.
+
+## 2. Implement Secure API Key Retrieval [done]
+### Dependencies: 1.1
+### Description: Create a secure mechanism to retrieve the Daytona API key from environment variables, adhering to Raycast's best practices for handling secrets.
+### Details:
+Develop a utility function, e.g., `getApiKey()`, that reads the `DAYTONA_API_KEY` from the extension's preferences, which are populated from environment variables. The function must handle the case where the key is missing and throw a clear, user-facing error.
+
+## 3. Create Daytona SDK Client Initialization Service [done]
+### Dependencies: 1.2
+### Description: Develop a singleton service or factory function that initializes and provides a shared instance of the Daytona SDK client using the securely retrieved API key.
+### Details:
+Create a new module (e.g., `src/lib/daytona.ts`) that exports a `getDaytonaClient()` function. This function will use the `getApiKey()` utility to fetch the key and instantiate the Daytona SDK client. The client instance should be cached to prevent re-initialization on every use.
+
+## 4. Implement Graceful Authentication Failure Handling [done]
+### Dependencies: 1.3
+### Description: Wrap the SDK client's first interaction in error handling logic to gracefully manage authentication failures, such as an invalid API key, and report it clearly to the user.
+### Details:
+In the client initialization service, or on the first API call, implement a try-catch block. If an authentication-specific error is caught from the SDK, it should be translated into a user-friendly error message instructing the user to check their API key configuration in Raycast.
+
+## 5. Refactor Codebase to Use New SDK Client [done]
+### Dependencies: 1.4
+### Description: Perform a project-wide refactoring to replace all usages of the old E2B HTTP proxy with the new Daytona SDK client initialization service.
+### Details:
+Search the codebase for any remaining imports or function calls related to the E2B proxy. Replace these instances with calls to the new `getDaytonaClient()` service. This ensures all Daytona-related interactions are now routed through the new SDK-based foundation.
+

@@ -1,0 +1,255 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "daytona-developer-workspace",
+  "title": "Daytona Developer Workspace",
+  "description": "Complete Daytona developer workspace management with code execution, file management, Git operations, and workspace control",
+  "icon": "icon.png",
+  "author": "erayack",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-code",
+      "title": "Run Code",
+      "description": "Execute code in a Jupyter notebook cell and return result",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "code",
+          "type": "text",
+          "placeholder": "Enter code to execute",
+          "description": "The code to execute"
+        }
+      ]
+    },
+    {
+      "name": "sandboxes",
+      "title": "Sandboxes",
+      "description": "View and manage your sandboxes with overview and quick actions",
+      "mode": "view"
+    },
+    {
+      "name": "settings",
+      "title": "Settings",
+      "description": "Configure preferences, API keys, and extension settings",
+      "mode": "view"
+    },
+    {
+      "name": "enhanced-run-code",
+      "title": "Enhanced Code Runner",
+      "description": "Advanced code execution with persistent sandboxes and rich output",
+      "mode": "view"
+    },
+    {
+      "name": "files",
+      "title": "File Manager",
+      "description": "Browse, edit, and manage files in your sandboxes",
+      "mode": "view"
+    },
+    {
+      "name": "git-manager",
+      "title": "Git Manager",
+      "description": "Git operations and repository management for workspace projects",
+      "mode": "view"
+    },
+    {
+      "name": "snapshots",
+      "title": "Snapshots",
+      "description": "Create, restore, and manage workspace snapshots and backups",
+      "mode": "view"
+    },
+    {
+      "name": "registries",
+      "title": "Container Registries",
+      "description": "Manage Docker container registries for workspace deployments",
+      "mode": "view"
+    },
+    {
+      "name": "volumes",
+      "title": "Volume Manager",
+      "description": "Manage persistent storage volumes for data persistence across sandboxes",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "run-code",
+      "title": "Run Code",
+      "description": "Allow AI to execute code in a Jupyter notebook cell and return result"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Daytona API Key",
+      "description": "Your Daytona API key for workspace management."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "generate first 10 fibonacci numbers",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": "fibonacci"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "calculate the factorial of 12",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": ["factorial", "12"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "what's the square root of 144?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": ["sqrt", "144"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "solve quadratic equation x^2 + 5x + 6 = 0",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": ["quadratic", "5", "6"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "create a list of prime numbers under 50",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": ["prime", "50"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "generate 100 random numbers and find their average",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": ["random", "100", "average"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "convert temperature 98.6°F to Celsius",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": ["98.6", "celsius", "fahrenheit"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "analyze this data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] and calculate mean, median, mode",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": ["mean", "median", "mode"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "calculate standard deviation and variance for [2, 4, 4, 4, 5, 5, 7, 9]",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-code",
+              "arguments": {
+                "code": {
+                  "includes": ["standard deviation", "variance"]
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@daytonaio/sdk": "^0.25.5",
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.18.1",
+    "cross-fetch": "^4.1.0",
+    "node-fetch": "^3.3.2"
+  }
+}

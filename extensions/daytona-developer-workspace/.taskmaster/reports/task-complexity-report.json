@@ -1,0 +1,21 @@
+{
+	"meta": {
+		"generatedAt": "2025-08-13T16:39:13.969Z",
+		"tasksAnalyzed": 1,
+		"totalTasks": 19,
+		"analysisCount": 1,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 19,
+			"taskTitle": "Comprehensive Codebase Refactoring and Modernization",
+			"complexityScore": 9,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "This comprehensive refactoring task involves analyzing the entire Raycast Daytona extension codebase spanning 6 main command files (dashboard.tsx, snapshots.tsx, enhanced-run-code.tsx, files.tsx, git-manager.tsx, settings.tsx) plus 7 library modules. The task requires identifying redundant patterns across API calls, state management, and error handling, then creating reusable abstractions. Break this down into: (1) audit and architecture planning, (2) type system consolidation, (3) utility and hook creation, (4) command refactoring with new abstractions, and (5) code quality enforcement. Each subtask should focus on maintaining zero functional regression while improving maintainability, reducing code duplication, and strengthening TypeScript usage.",
+			"reasoning": "This is an extremely complex refactoring task with complexity score 9/10. The codebase analysis reveals significant redundancy across multiple commands: all 6 main command files use repetitive patterns for getDaytonaClient(), useState/useEffect for API calls, showToast for notifications, and try-catch blocks for error handling. The dashboard.tsx alone is 578 lines with complex state management. Each command file (snapshots.tsx: 236 lines, enhanced-run-code.tsx: 178 lines) implements similar patterns independently. The task involves creating a new architecture with src/hooks/, src/utils/, and src/types/ directories, developing a generic useDaytonaAPI hook, consolidating error handling across 4+ existing error modules, and refactoring 6 major commands without functional regression. The existing error handling system is already partially centralized but needs full integration. The TypeScript interfaces are scattered across files and need consolidation. This refactoring spans the entire codebase and requires careful coordination to avoid breaking existing functionality while achieving significant architectural improvements."
+		}
+	]
+}

@@ -1,0 +1,43 @@
+# Task ID: 3
+# Title: Implement Automatic Sandbox Cleanup
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Ensure that every sandbox created for code execution is automatically and reliably deleted after the execution is complete, regardless of whether it succeeded or failed, to prevent resource leaks.
+# Details:
+Use a `finally` block or similar construct around the execution logic to call `sandbox.delete()`. Implement robust logging to monitor cleanup operations.
+
+# Test Strategy:
+Verify through logs or Daytona platform monitoring that sandboxes are deleted after successful execution, after a runtime error, and after a timeout. Write tests that mock the sandbox object and confirm `delete()` is called.
+
+# Subtasks:
+## 1. Refactor Core Execution Logic into a Try-Finally Structure [done]
+### Dependencies: None
+### Description: Modify the core code execution function from Task 2 to wrap the sandbox creation and execution logic within a `try...finally` block. This establishes the structural foundation for guaranteed cleanup.
+### Details:
+The `try` block will contain the logic for creating a sandbox and running the code via `sandbox.process.codeRun()`. The `finally` block will be prepared for the subsequent cleanup logic, ensuring it is positioned to execute regardless of the outcome within the `try` block.
+
+## 2. Implement Sandbox Deletion Call within the Finally Block [done]
+### Dependencies: 3.1
+### Description: Place the `sandbox.delete()` method call inside the `finally` block that was created in the previous subtask. This is the core step to ensure the sandbox is marked for deletion after every execution attempt.
+### Details:
+The `finally` block must contain the `await sandbox.delete()` call. Ensure that the `sandbox` object is accessible within the scope of the `finally` block, which may require declaring it outside the `try` block.
+
+## 3. Implement Robust Logging for Cleanup Operations [done]
+### Dependencies: 3.2
+### Description: Integrate structured logging around the cleanup process to provide visibility into its operations. Log the start of a cleanup attempt, its success, or its failure.
+### Details:
+Add a log entry before calling `sandbox.delete()`, including the sandbox ID (e.g., 'Attempting to clean up sandbox [ID]'). Add a success log entry after the call completes (e.g., 'Successfully deleted sandbox [ID]'). These logs are critical for monitoring and debugging resource leaks.
+
+## 4. Add Error Handling for the Sandbox Deletion Call [done]
+### Dependencies: 3.2, 3.3
+### Description: Make the cleanup process more resilient by wrapping the `sandbox.delete()` call itself in a nested `try...catch` block. This prevents a failure during cleanup from crashing the entire process and ensures the failure is logged.
+### Details:
+Inside the main `finally` block, the `try...catch` will execute `sandbox.delete()`. If it fails, the `catch` block will log the specific deletion error (e.g., 'Failed to delete sandbox [ID]: [error message]') but will not re-throw the error, allowing the original execution result or error to be returned to the user.
+
+## 5. Develop Comprehensive Unit Tests for All Cleanup Scenarios [done]
+### Dependencies: 3.4
+### Description: Create a full suite of unit tests to verify that the sandbox cleanup logic works reliably under all specified conditions: successful execution, runtime errors, and timeouts.
+### Details:
+Using a mocking framework, write separate tests that simulate: 1) A successful `codeRun()` call. 2) A `codeRun()` call that rejects with an error. 3) A `codeRun()` call that simulates a timeout. In each case, assert that `sandbox.delete()` is called exactly once.
+

@@ -1,0 +1,43 @@
+# Task ID: 2
+# Title: Implement Core Python Code Execution Engine
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Create the core logic for executing Python code in a Daytona sandbox. This involves managing the sandbox lifecycle: creating a sandbox, executing the code using `sandbox.process.codeRun()`, and processing the basic response.
+# Details:
+The engine should accept a string of Python code and return an `CodeExecutionResponse` object containing stdout, stderr, and the exit code. This task focuses on the happy path of code execution.
+
+# Test Strategy:
+Test with simple Python scripts (e.g., 'print("hello world")') to verify that stdout is captured correctly. Check that the exit code is 0 for successful executions.
+
+# Subtasks:
+## 1. Define the CodeExecutionResponse Data Model [done]
+### Dependencies: None
+### Description: Create the data structure or class for `CodeExecutionResponse` that will serve as the standardized return object for the code execution engine.
+### Details:
+The model must include fields for `stdout` (string), `stderr` (string), and `exitCode` (number). This establishes the data contract for all code execution results, ensuring consistency.
+
+## 2. Implement Sandbox Creation Function [done]
+### Dependencies: None
+### Description: Develop the logic to request and create a new, isolated sandbox environment using the Daytona SDK.
+### Details:
+This function will encapsulate the call to the Daytona SDK's sandbox creation method. It should handle the asynchronous nature of the request and return a sandbox object instance upon successful creation.
+
+## 3. Implement Code Execution Wrapper for sandbox.process.codeRun [done]
+### Dependencies: 2.2
+### Description: Create a wrapper function that takes a sandbox instance and a Python code string, then executes the code using the `sandbox.process.codeRun()` method.
+### Details:
+This function is the core of the execution logic. It will invoke `codeRun` on the process manager of the provided sandbox object and await the raw result from the Daytona platform.
+
+## 4. Map Raw Execution Result to CodeExecutionResponse [done]
+### Dependencies: 2.1, 2.3
+### Description: Implement a function to parse the raw response from `codeRun` and map its contents to the structured `CodeExecutionResponse` object.
+### Details:
+This function will extract the stdout, stderr, and exit code from the raw result object returned by the execution wrapper. It will then instantiate and populate the `CodeExecutionResponse` data model defined in subtask 2.1.
+
+## 5. Assemble the Core Execution Engine Service [done]
+### Dependencies: 2.2, 2.3, 2.4
+### Description: Combine the sandbox creation, code execution, and response processing functions into a single, high-level service that orchestrates the entire happy-path execution flow.
+### Details:
+This main service function will accept a string of Python code as input. It will sequentially call the functions for creating a sandbox, executing the code within it, and processing the response, finally returning the populated `CodeExecutionResponse` object. This task does not include sandbox cleanup, which is handled in Task 3.
+

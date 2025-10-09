@@ -1,0 +1,73 @@
+# Task ID: 12
+# Title: Implement Sandbox Files Command
+# Status: done
+# Dependencies: 11
+# Priority: medium
+# Description: Create a Raycast command for browsing, managing, and editing files within a Daytona sandbox, providing a complete file management interface.
+# Details:
+1. **Command Integration:** This feature will be implemented as a primary `<Action>` on each sandbox item within the 'Daytona Dashboard' command (from Task 11). The action will be labeled 'Browse Files'.
+2. **API & SDK Utilization:** Leverage the Daytona SDK's filesystem module. Key methods to use will be `daytona.sandbox.fs.list(path)`, `daytona.sandbox.fs.read(path)`, `daytona.sandbox.fs.write(path, content)`, `daytona.sandbox.fs.mkdir(path)`, `daytona.sandbox.fs.rm(path)`, and potentially `daytona.sandbox.fs.chmod(path)`. All asynchronous operations must use the `usePromise` hook to manage loading, data, and error states gracefully.
+3. **Hierarchical List View:**
+   - Use the `<List>` component to display the contents of the current directory.
+   - Differentiate items with icons (e.g., Raycast's built-in `Icon.Folder` and `Icon.Document`).
+   - Display file metadata (size, last modified date, permissions) as `<List.Item.Accessory>` elements.
+   - Implement navigation by re-rendering the list with the new path when a directory is selected. Include a '..' entry to navigate to the parent directory.
+4. **File & Directory Actions:** Implement an `<ActionPanel>` with context-aware actions:
+   - **On Files:** 'View/Edit', 'Download', 'Rename', 'Delete', 'Change Permissions'.
+   - **On Directories:** 'Rename', 'Delete'.
+   - **Global Actions:** 'Create File', 'Create Directory', 'Upload File'.
+5. **File Editing:** The 'View/Edit' action will open a `<Detail>` view. The file content will be displayed in a markdown code block. An action on this view, 'Save Changes', will use `daytona.sandbox.fs.write()` to persist changes.
+6. **Search & State:** Implement search on the `<List>` component for filtering the current directory. Manage the current path as a state variable that updates on navigation.
+<info added on 2025-08-13T09:42:54.298Z>
+[]
+</info added on 2025-08-13T09:42:54.298Z>
+
+# Test Strategy:
+1. **Navigation Verification:**
+   - Launch the file browser from a sandbox in the dashboard.
+   - Navigate into a nested directory and verify the file list updates correctly.
+   - Use the '..' entry to navigate back up the directory tree to the root.
+   - Test edge cases like empty directories and directories with special characters.
+2. **CRUD Operations Testing:**
+   - **Create:** Create a new file and a new directory. Verify they appear in the list.
+   - **Read/Edit:** Open a text file, verify its content. Edit the content, save, and reopen to confirm the changes are saved in the sandbox.
+   - **Upload/Download:** Upload a local file; verify it exists in the sandbox with correct content. Download a sandbox file; verify it matches the original.
+   - **Delete:** Delete a file and then an empty directory. Attempt to delete a non-empty directory and verify the command handles it correctly (either by recursive deletion with confirmation or by showing an error).
+3. **Permissions Management:**
+   - View the permissions of a file in the UI.
+   - Use the 'Change Permissions' action and verify the UI updates. If possible, confirm the change within the sandbox via a separate command.
+4. **Error Handling:**
+   - Attempt to read a non-existent file or navigate into an invalid path. Verify that a clear, user-friendly error message is displayed.
+   - Test operations that might fail due to sandbox permissions and ensure errors are handled gracefully.
+
+# Subtasks:
+## 1. File Browser Scaffolding and Navigation [done]
+### Dependencies: None
+### Description: Implement the basic structure for the file browser command. This includes creating the entry point action on the Daytona Dashboard, fetching and displaying the root directory contents, and enabling navigation into subdirectories and back to parent directories.
+### Details:
+Create a new React component for the file browser, triggered by the 'Browse Files' action on a sandbox item. Use `daytona.sandbox.fs.list(path)` with the `usePromise` hook to fetch directory contents. Render items in a `<List>`, using `Icon.Folder` and `Icon.Document`. Handle selection of a directory to re-render the component with the new path. Add a '..' item for navigating up to the parent directory.
+
+## 2. Display File Metadata and Implement Search [done]
+### Dependencies: 12.1
+### Description: Enhance the file list by displaying metadata for each file and directory, and implement a search filter for the current directory view.
+### Details:
+Parse the metadata (size, last modified date, permissions) returned by the `daytona.sandbox.fs.list()` call. Display this information concisely using `<List.Item.Accessory>`. Enable the built-in search functionality of the `<List>` component to filter the currently displayed items by name. The current path state must be managed correctly.
+
+## 3. Implement Create and Delete Actions [done]
+### Dependencies: 12.1
+### Description: Add actions to the `<ActionPanel>` for creating new files and directories, and for deleting existing ones.
+### Details:
+Implement a 'Create Directory' global action that prompts for a name and calls `daytona.sandbox.fs.mkdir()`. Implement a 'Create File' global action that prompts for a name and calls `daytona.sandbox.fs.write()` with empty content. Implement a 'Delete' action on files and directories that prompts for confirmation and calls `daytona.sandbox.fs.rm()`. Refresh the list view after each operation.
+
+## 4. Implement File Content Viewing and Editing [done]
+### Dependencies: 12.1
+### Description: Create the functionality for users to view the contents of a file and edit it. The 'View/Edit' action should open a new view displaying the file's content, with an option to save changes.
+### Details:
+On file items, add a 'View/Edit' action. When triggered, use `daytona.sandbox.fs.read()` to fetch the file content. Push a `<Detail>` view displaying the content within a markdown code block. Add a 'Save Changes' action to this view. This action will use a form or state to capture modifications and persist them using `daytona.sandbox.fs.write()`.
+
+## 5. Implement Advanced File Operations [done]
+### Dependencies: 12.1
+### Description: Implement the remaining file management actions: renaming files/directories, downloading files to the local machine, uploading local files to the sandbox, and changing file permissions.
+### Details:
+Implement a 'Rename' action that uses a form to get the new name. Implement 'Download' using `daytona.sandbox.fs.read()` and writing the content to the local filesystem. Implement 'Upload File' as a global action that uses Raycast's file picker and `daytona.sandbox.fs.write()`. Implement 'Change Permissions' using a form to get the new mode and `daytona.sandbox.fs.chmod()`.
+

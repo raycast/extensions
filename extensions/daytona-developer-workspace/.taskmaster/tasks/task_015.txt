@@ -1,0 +1,58 @@
+# Task ID: 15
+# Title: Implement Enhanced Run Code Command
+# Status: done
+# Dependencies: 2, 8, 11, 12
+# Priority: medium
+# Description: Create a powerful, multi-language code execution command with support for persistent sandboxes, rich media output (charts, images, webviews), file I/O, code history, and execution templates.
+# Details:
+This task replaces the basic code execution functionality (Task 2) with a feature-rich implementation. The command should be built using Raycast's <Form> component.
+
+1. **Multi-Language Support:**
+   - Implement a `<Form.Dropdown>` for language selection (e.g., Python, JavaScript/TypeScript, Shell).
+   - The backend logic must invoke the correct runtime and environment within the Daytona sandbox for the selected language.
+
+2. **Sandbox Execution Modes:**
+   - Add a form option (e.g., `<Form.Checkbox>` labeled 'Use Persistent Session') to control the sandbox lifecycle.
+   - **Ephemeral Mode (Default):** Create a sandbox, execute code, stream results, and destroy the sandbox upon completion.
+   - **Persistent Mode:** On first run, create a sandbox and keep it active. Subsequent executions in this mode will reuse the same sandbox, allowing for stateful operations (e.g., installing packages, defining variables). This mode will require state management to track the active sandbox ID, which should be visible and manageable via the Daytona Dashboard (Task 11).
+
+3. **Rich Output Handling:**
+   - The execution engine must detect and handle various output MIME types beyond plain text.
+   - **Images/Plots:** For Python, use libraries like Matplotlib/Pillow. The output image should be base64 encoded and rendered directly in the Raycast results view (`<Detail>`).
+   - **HTML/Web Previews:** Render HTML output in a webview for interactive elements or complex reports.
+   - **Charts:** Standardize on a JSON-based chart format like Vega-Lite. The command will parse this JSON and render it, potentially using a webview-based library.
+
+4. **File Upload/Download Integration:**
+   - Use `<Form.FilePicker>` to allow users to select local files for upload.
+   - Before execution, use the Daytona SDK's filesystem API (`daytona.sandbox.fs.write()`) to place the file in the sandbox's working directory.
+   - For downloads, implement a mechanism where code can designate a file for download, which is then presented as an action to the user.
+
+5. **Code History & Templates:**
+   - Utilize Raycast's `LocalStorage` to save a history of recently executed code snippets.
+   - Implement form actions to navigate (`Cmd+Up/Down`) through the execution history.
+   - Include a `<Form.Dropdown>` to select from a predefined list of code templates (e.g., 'Fetch API data with Python', 'Analyze CSV with Pandas') that populate the code area.
+
+# Test Strategy:
+1. **Multi-Language Test:**
+   - Execute 'print("Hello from Python")' and verify stdout.
+   - Execute 'console.log("Hello from Node.js")' and verify stdout.
+   - Execute 'ls -la' in Shell mode and verify the file listing output.
+
+2. **Sandbox Mode Test:**
+   - **Ephemeral:** Run a script, then check the Daytona Dashboard (Task 11) to confirm no new sandboxes persist.
+   - **Persistent:** Check 'Persistent Session', run a Python script `x = 10`. In a second execution, run `print(x)` and verify the output is `10`. Stop the session and confirm the sandbox is terminated.
+
+3. **Rich Output Test:**
+   - Run a Python script using Matplotlib to generate and save a plot. Verify the plot image is displayed in the results.
+   - Run a script that outputs a simple HTML table. Verify it renders correctly.
+
+4. **File I/O Test:**
+   - Upload a local `test.txt` file containing 'abc'. Run `cat test.txt` and verify the output is 'abc'.
+   - Run a script that creates a file `result.json`. Verify a 'Download result.json' action appears and works correctly.
+
+5. **History & Template Test:**
+   - Execute three different commands. Close and reopen the command. Use keyboard shortcuts to cycle through the history and verify all three commands are present.
+   - Select a predefined template and confirm the code input field is populated with the correct template code.
+
+6. **Error Handling Test:**
+   - Run code with a syntax error. Verify the enhanced error view (from Task 8) is shown with proper highlighting and context.

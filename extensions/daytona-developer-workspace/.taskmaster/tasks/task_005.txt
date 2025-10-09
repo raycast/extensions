@@ -1,0 +1,43 @@
+# Task ID: 5
+# Title: Integrate Execution Engine with 'Run Code' Command
+# Status: done
+# Dependencies: 2, 3, 4
+# Priority: high
+# Description: Connect the core execution engine to the primary user-facing Raycast command, 'Run Code'. The user should be able to type the command, enter Python code, and see the results or errors directly in the Raycast interface.
+# Details:
+This involves updating the `src/run-code.ts` command handler to call the new Daytona execution service. The results should be formatted for clear presentation in Raycast's standard result view.
+
+# Test Strategy:
+Perform end-to-end testing via the Raycast UI. Test with valid code, code that produces errors, and long-running code to test timeouts. Ensure results are displayed correctly.
+
+# Subtasks:
+## 1. Refactor 'run-code.ts' to Accept Input for Service Call [done]
+### Dependencies: None
+### Description: Modify the primary command function in `src/run-code.ts`. Set it up to take the user's Python code as an argument and prepare the structure for an asynchronous call to the execution service.
+### Details:
+This initial step involves cleaning up any old logic and structuring the command to handle user input. The main goal is to create a clear entry point for the Daytona service integration without yet making the call.
+
+## 2. Invoke Daytona Execution Service and Await Response [done]
+### Dependencies: 5.1
+### Description: Import the Daytona execution service function into `src/run-code.ts`. Call this function with the user's code and handle the asynchronous promise to receive the raw execution result (stdout, stderr, exit code).
+### Details:
+This is the core integration step. The command handler must now communicate with the backend service created in Task 2. Focus on correctly passing the code and receiving the response object.
+
+## 3. Implement UI for Successful Code Execution [done]
+### Dependencies: 5.2
+### Description: When the execution service returns a successful result (e.g., exit code 0), format the `stdout` data and present it clearly to the user within the Raycast result view.
+### Details:
+Use Raycast's UI components, such as `<List.Item>` with a title and subtitle, or the `<List.Item.Detail>` view for longer output. The presentation should be clean and easy to read.
+
+## 4. Implement UI for Execution Errors and Failures [done]
+### Dependencies: 5.2
+### Description: Handle cases where the code execution fails. If the service returns a non-zero exit code or `stderr` content, format this error information and display it clearly in the Raycast UI.
+### Details:
+The error display should be distinct from the success display, perhaps using a different icon or accessory title. The `stderr` message is crucial for helping the user debug their code.
+
+## 5. Add Loading Indicator for Asynchronous Execution [done]
+### Dependencies: 5.3, 5.4
+### Description: Implement a loading state in the Raycast command UI that is active from the moment the user submits their code until a result or error is displayed. This provides essential user feedback.
+### Details:
+Use the `isLoading` prop available in Raycast's React components. The state should be set to `true` before the service call and `false` inside a `finally` block after the call completes.
+

@@ -1,0 +1,43 @@
+# Task ID: 4
+# Title: Develop Basic Error Handling Framework
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Implement a basic error handling system to capture and report errors from the Daytona execution process. This includes handling syntax errors, runtime errors, and timeouts.
+# Details:
+Map Daytona's exit codes and error messages to the `ExecutionError` model. The output should be clear enough for a user to understand what went wrong. This initial version does not need to be exhaustive but must cover common cases.
+
+# Test Strategy:
+Execute code snippets with known errors (e.g., syntax errors, division by zero) and verify that the correct error type and message are returned and displayed to the user.
+
+# Subtasks:
+## 1. Define the ExecutionError Data Model [done]
+### Dependencies: None
+### Description: Create the TypeScript interface or class for `ExecutionError`. This model will standardize how different types of execution failures (syntax, runtime, timeout) are represented within the application.
+### Details:
+The model must include fields for a categorized error type (e.g., 'SyntaxError', 'RuntimeError', 'TimeoutError'), a user-friendly message explaining the error, and the original raw `stderr` or exit code for debugging purposes.
+
+## 2. Research and Catalog Daytona Error Outputs [done]
+### Dependencies: None
+### Description: Investigate and document the common exit codes and `stderr` message formats returned by the Daytona `codeRun` process for typical Python errors.
+### Details:
+Execute code snippets with known errors (e.g., invalid syntax, division by zero, undefined variable) against the Daytona sandbox. Record the resulting exit codes and `stderr` strings to identify patterns that can be used for mapping.
+
+## 3. Implement Mapper for Exit Codes and Stderr [done]
+### Dependencies: 4.1, 4.2
+### Description: Create a utility function that takes the raw output from a Daytona execution (`exitCode`, `stderr`) and maps it to a populated `ExecutionError` object.
+### Details:
+This function will be the core of the error handling framework. It should check if the `exitCode` is non-zero, and if so, parse the `stderr` string using the patterns identified in subtask 4.2 to determine the error type and construct a clear, user-facing message.
+
+## 4. Implement Specific Handling for Timeouts [done]
+### Dependencies: 4.1
+### Description: Add logic to the code execution wrapper to detect and handle execution timeouts, generating a specific `ExecutionError` for this case.
+### Details:
+Wrap the `sandbox.process.codeRun()` call in a mechanism like `Promise.race` with a timer. If the execution exceeds a configured duration, the logic should abort the wait and create an `ExecutionError` with the type 'TimeoutError' and an appropriate message.
+
+## 5. Integrate Error Handling into Execution Engine Response [done]
+### Dependencies: 4.3, 4.4
+### Description: Modify the core execution engine (from Task 2) to return a structured response that includes either the successful result or an `ExecutionError` object.
+### Details:
+The `CodeExecutionResponse` object should be updated to include an optional `error` field of type `ExecutionError`. The main execution function will now catch all exceptions (including timeouts) and populate this field, ensuring a consistent return type for both success and failure scenarios, which is crucial for the 'Run Code' command (Task 5).
+

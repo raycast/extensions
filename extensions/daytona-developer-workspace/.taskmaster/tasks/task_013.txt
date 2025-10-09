@@ -1,0 +1,62 @@
+# Task ID: 13
+# Title: Implement Git Manager Command
+# Status: done
+# Dependencies: 11
+# Priority: medium
+# Description: Create a comprehensive Git operations interface for Daytona sandboxes, enabling users to clone repositories, manage branches, commit changes, and synchronize with remotes directly from Raycast.
+# Details:
+1. **Command Entry Point:** Implement as a primary `<Action>` on each sandbox item within the 'Daytona Dashboard' (from Task 11). The action should be labeled 'Manage Git Repository' and be conditionally visible only for running sandboxes.
+2. **Core Logic & SDK Integration:** Utilize the Daytona SDK's process execution method (`daytona.sandbox.process.run()`) to execute all git commands (e.g., `git status`, `git branch`, `git commit`). Ensure all commands are executed within the correct project directory inside the sandbox.
+3. **Main Git Dashboard (`List`):** Upon selecting the action, present a `<List>` view that serves as the main Git dashboard. This view should dynamically display:
+    - The current active branch.
+    - A summary of pending changes (e.g., '3 modified, 1 untracked').
+    - A list of primary actions: 'View Status & Diff', 'Commit Changes', 'Push', 'Pull', 'Manage Branches'.
+4. **Status and Diff View (`Detail`):** The 'View Status & Diff' action will open a `<List.Item.Detail>` view. It will show the formatted, colorized output of `git status` and `git diff HEAD`, using markdown for clarity.
+5. **Commit Workflow (`Form`):** The 'Commit Changes' action will open a Raycast `<Form>`. The form will automatically list all changed/untracked files as a checklist for staging (`git add`). It will include a required text area for the commit message. On submission, it will execute the necessary `git add` and `git commit` commands.
+6. **Branch Management (`List`):** The 'Manage Branches' action will navigate to a new `<List>` showing all local and remote branches (`git branch -a`). Each branch item will have actions like 'Checkout', 'Delete Branch'. A primary action will allow creating a new branch via a form.
+7. **Initial Clone Workflow:** If a `.git` directory is not detected in the sandbox's project folder, the interface should present a `<Form>` to clone a repository, asking for the repository URL.
+
+# Test Strategy:
+1. **Entry Point Verification:** From the Daytona Dashboard, confirm the 'Manage Git Repository' action appears on a running sandbox and successfully opens the Git interface.
+2. **Status View Test:** In a sandbox with a clean repository, verify the status shows no changes. Modify a file and confirm the dashboard summary and detailed view accurately reflect the changes from `git status` and `git diff`.
+3. **Commit Workflow Test:** Modify several files. Use the 'Commit' form to stage only some of them and write a commit message. Verify that a new commit is created with the correct files and message by checking `git log` and `git status` afterwards.
+4. **Branching Test:** Use the 'Manage Branches' view to create a new branch named 'feature-test'. Verify it appears in the list. Use the 'Checkout' action to switch to it and confirm the main dashboard reflects the new branch name.
+5. **Push/Pull Test:** Make a local commit and use the 'Push' action. Verify the commit appears on the remote (e.g., GitHub). Then, make a change on the remote, use the 'Pull' action, and verify the changes are correctly fetched and applied locally.
+6. **Clone Test:** Create a new, empty sandbox. Access the Git Manager and verify it prompts to clone. Provide a public repository URL and confirm the repository is successfully cloned into the sandbox.
+
+# Subtasks:
+## 1. Integrate 'Git Manager' Action and Create Initial Clone Workflow [done]
+### Dependencies: None
+### Description: Create the entry point for the Git Manager from the Daytona Dashboard. This involves adding a new action to running sandboxes and building the initial component that checks for a Git repository, presenting a clone form if one is not found.
+### Details:
+1. **Modify `src/dashboard.tsx`**: In the `ActionPanel` for sandbox list items, add a new `<Action.Push>` labeled 'Manage Git Repository'. This action should only be visible if `sandbox.state === 'running'`. It should target a new component, `GitManager`, and pass the `sandboxId` and `projectName` as props.
+2. **Create `src/git.tsx`**: Create a new file for the `GitManager` command. This component will receive the sandbox props.
+3. **Implement Repository Check**: On load, the `GitManager` component will use `daytona.sandbox.process.run()` to execute `git status` within the project directory (`/daytona/{projectName}`).
+4. **Implement Clone Form**: If the `git status` command fails (indicating no repository), display a Raycast `<Form>` that prompts the user for a 'Repository URL'. On submission, execute `git clone <URL> .` inside the project directory.
+
+## 2. Build the Main Git Dashboard and Status View [done]
+### Dependencies: 13.1
+### Description: Develop the main `<List>` view for the Git Manager. This view will serve as the central dashboard, displaying the current branch, a summary of changes, and the primary Git actions.
+### Details:
+1. **In `src/git.tsx`**: After a successful repository check (or clone), render a `<List>` component.
+2. **Fetch Git State**: Use `daytona.sandbox.process.run()` to execute `git branch --show-current` and `git status --porcelain`. Parse the output to get the active branch name and a count of modified/untracked files.
+3. **Display State**: Use the `<List.Item>` title to show the current branch (e.g., 'Current Branch: main') and an accessory title for the status summary (e.g., '3 modified, 1 untracked').
+4. **Implement 'View Status' Action**: Add a primary action 'View Status' to the list. When triggered, it should show the formatted output of `git status` in the `<List.Item.Detail>` view. Use markdown code blocks for readability.
+
+## 3. Implement Commit, Push, and Pull Actions [done]
+### Dependencies: 13.2
+### Description: Add the core remote synchronization and state-saving actions to the Git Manager dashboard. This includes a simplified commit workflow and direct actions for push and pull.
+### Details:
+1. **Implement Commit Action**: In the `ActionPanel` of the main Git dashboard list, add an `<Action.Push>` for 'Commit Changes'. This should lead to a `<Form>`.
+2. **Create Commit Form**: The form will have one required `<Form.TextArea>` for the 'Commit Message'. On submission, it will execute `git add .` followed by `git commit -m "<message>"`. Use toasts to provide feedback on success or failure.
+3. **Implement Push/Pull Actions**: Add 'Push' and 'Pull' actions to the `ActionPanel`. These actions will directly execute `git push` and `git pull` respectively, using `daytona.sandbox.process.run()`. Display toasts to indicate the outcome of the operations.
+
+## 4. Implement Basic Branch Management [done]
+### Dependencies: 13.2
+### Description: Create a view for managing Git branches, allowing users to list all branches, switch to an existing branch, and create a new branch.
+### Details:
+1. **Add 'Manage Branches' Action**: In the main Git dashboard's `ActionPanel`, add an `<Action.Push>` labeled 'Manage Branches' that navigates to a new `BranchList` component.
+2. **Create `BranchList` Component**: This component will execute `git branch -a` to get all local and remote branches. It will display them in a `<List>`.
+3. **Implement 'Checkout' Action**: For each branch item in the list, add a primary action 'Checkout Branch'. This action will execute `git checkout <branch-name>` and pop back to the main Git dashboard upon success.
+4. **Implement 'Create Branch' Action**: Add a primary action to the `BranchList` itself, 'Create New Branch'. This will open a `<Form>` asking for a 'Branch Name'. On submission, it will execute `git checkout -b <new-branch-name>` and navigate back to the main dashboard.
+

@@ -1,0 +1,43 @@
+# Task ID: 10
+# Title: Create User Documentation and Migration Guide
+# Status: deferred
+# Dependencies: 1, 7, 8
+# Priority: medium
+# Description: Develop comprehensive documentation for the updated extension. This includes a guide for new users on setup and a migration guide for existing users moving from the E2B-based version.
+# Details:
+The documentation should clearly explain the new authentication method (DAYTONA_API_KEY), showcase new features like rich output, and provide troubleshooting tips for common errors.
+
+# Test Strategy:
+Have a new user follow the setup guide to install and configure the extension. Have an existing user follow the migration guide. Collect feedback and revise the documentation for clarity.
+
+# Subtasks:
+## 1. Draft Documentation Structure and Outline [pending]
+### Dependencies: None
+### Description: Create a detailed outline for the entire documentation set. This includes defining the main sections for a new user guide, a migration guide for existing users, a feature showcase, and a troubleshooting FAQ.
+### Details:
+The outline should establish a logical flow, ensuring all requirements from the main task description are allocated to a specific section. Plan where to detail the DAYTONA_API_KEY setup, showcase rich output, and list common errors.
+
+## 2. Write 'Getting Started' Guide for New Users [pending]
+### Dependencies: 10.1
+### Description: Author the documentation section that guides a new user through the entire setup process, from installation to running their first piece of code.
+### Details:
+This guide must provide step-by-step instructions on installing the Raycast extension and configuring the new authentication method using the DAYTONA_API_KEY. Use screenshots to illustrate the process.
+
+## 3. Write Migration Guide for Existing E2B Users [pending]
+### Dependencies: 10.1
+### Description: Develop a specific guide for users of the previous E2B-based version, explaining the changes and how to upgrade.
+### Details:
+Clearly explain the transition from the E2B proxy to the direct Daytona SDK. Detail the steps to remove old settings and configure the new DAYTONA_API_KEY. Emphasize the benefits of the new version, like improved performance and features.
+
+## 4. Document New Features and Troubleshooting Tips [pending]
+### Dependencies: 10.1
+### Description: Create content to showcase new capabilities and provide solutions for common issues.
+### Details:
+Use clear examples and visuals (e.g., GIFs or screenshots) to demonstrate new features like rich output. Compile a troubleshooting section addressing common errors such as 'Invalid API Key', 'Sandbox Creation Failed', or 'Connection Timeout'.
+
+## 5. Review, Finalize, and Publish Documentation [pending]
+### Dependencies: 10.2, 10.3, 10.4
+### Description: Consolidate all written sections, perform a final review for clarity and accuracy, incorporate feedback from test users, and publish the documentation.
+### Details:
+Execute the test strategy from the parent task: have a new user follow the setup guide and an existing user follow the migration guide. Collect their feedback, make necessary revisions, and then merge/publish the final documentation.
+

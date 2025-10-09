@@ -1,0 +1,97 @@
+# Task ID: 18
+# Title: Replace Dashboard Mock Data with Live API Calls
+# Status: done
+# Dependencies: 1, 16
+# Priority: medium
+# Description: Refactor the Daytona Dashboard command to replace all hardcoded mock sandbox data with live data fetched using the Daytona SDK, ensuring the dashboard reflects the user's actual sandboxes.
+# Details:
+This task involves transitioning the 'Daytona Dashboard' command from a static, mocked-up state to a dynamic, data-driven component. The primary location for this change is the `src/commands/dashboard.tsx` file.
+
+1.  **Identify and Remove Mock Data:** Locate the static array of sandbox objects within `dashboard.tsx`. This array currently contains placeholder data like `{ name: "python-analytics", status: "running" }`, `{ name: "web-scraper", status: "stopped" }`, and `{ name: "ml-experiments", status: "running" }`. This entire static array and any logic that consumes it must be removed.
+
+2.  **Integrate Daytona Client:** Import the shared Daytona SDK client instance from `src/lib/daytona-client.ts` (established in Task 16).
+
+3.  **Fetch Live Data:** Utilize Raycast's `usePromise` hook for asynchronous data fetching and state management (loading, data, error). The function passed to `usePromise` should be an async function that calls `daytona.sandbox.list()`.
+
+4.  **Handle Loading State:** The `isLoading` property from the `usePromise` hook should be passed to the main `<List isLoading={isLoading}>` component. This will automatically display a loading indicator while the API call is in progress.
+
+5.  **Render Real Sandbox Data:** Map the `data` returned by `usePromise` (which will be an array of actual Sandbox objects from the API) to `<List.Item>` components. Ensure the following properties are correctly mapped:
+    *   `key` and `id`: Use `sandbox.id`.
+    *   `title`: Use `sandbox.name`.
+    *   `accessories`: Use `sandbox.status` to display the current state (e.g., 'Running', 'Stopped') with an appropriate colored tag or icon.
+    *   `actions`: Ensure existing actions (like those from Tasks 12, 13, 17) are correctly attached to these dynamically generated items.
+
+6.  **Implement Error and Empty States:**
+    *   If the `usePromise` hook returns an error, display a user-friendly message using `<List.EmptyView icon={Icon.Warning} title="Failed to load sandboxes" />`.
+    *   If the API call succeeds but returns an empty array, use `<List.EmptyView icon={Icon.Desktop} title="No Sandboxes Found" description="Create a new sandbox using the Daytona CLI or web UI." />`.
+
+# Test Strategy:
+1.  **Loading State Verification:** Launch the 'Daytona Dashboard' command. Verify that the Raycast loading spinner is displayed immediately and disappears once the API call completes.
+
+2.  **Empty State Verification:** With no sandboxes configured in the target Daytona instance, run the command. Confirm that the 'No Sandboxes Found' empty view is displayed correctly.
+
+3.  **Populated State Verification:**
+    *   Create at least two sandboxes via the Daytona CLI: one in a 'running' state and one in a 'stopped' state.
+    *   Launch the command and verify that both sandboxes appear in the list.
+    *   Confirm that the names are correct and the status accessories accurately reflect their state (e.g., a green tag for 'running', a red tag for 'stopped').
+
+4.  **API Error Handling:**
+    *   Temporarily invalidate the API key in the settings (from Task 14).
+    *   Launch the 'Daytona Dashboard' command.
+    *   Verify that the 'Failed to load sandboxes' error view is displayed instead of the list.
+
+# Subtasks:
+## 1. Refactor Dashboard Command to Use Live API Data [done]
+### Dependencies: None
+### Description: Replace the hardcoded mock sandbox array in the 'Daytona Dashboard' command with a live API call to fetch the user's actual sandboxes, implementing loading, empty, and error states.
+### Details:
+Modify `src/commands/dashboard.tsx`. Remove the static sandbox array. Import the Daytona client and use Raycast's `usePromise` hook to call `daytona.sandbox.list()`. Map the returned data to `<List.Item>` components, binding `sandbox.id`, `sandbox.name`, and `sandbox.status`. Pass the `isLoading` state from the hook to the `<List>` component. Implement `<List.EmptyView>` for both error and no-sandbox scenarios.
+
+## 2. Integrate Live Sandbox Creation into 'Run Code' Command [done]
+### Dependencies: 18.1
+### Description: Update the 'Run Code' command to dynamically create a sandbox for code execution using a live API call, replacing any placeholder or simplified creation logic.
+### Details:
+In the 'Run Code' command's implementation file (e.g., `src/commands/run-code.tsx`), replace any mock sandbox creation logic with an API call to `daytona.sandbox.create()`. Ensure the parameters for the creation call are derived from the command's inputs. Verify that the automatic cleanup logic from Task 3, which calls `sandbox.delete()`, is correctly integrated within a `finally` block to handle the newly created live sandbox.
+
+## 3. Implement Live API Connection Test in Settings Command [done]
+### Dependencies: None
+### Description: Enhance the 'Daytona Settings' command by adding a feature to test the API connection using the configured API key, providing immediate feedback to the user.
+### Details:
+In `src/commands/settings.tsx`, add a `<Form.Action title="Test Connection" />` to the settings form. When triggered, this action should call a lightweight, read-only Daytona SDK method, such as `daytona.info.version()`. Use Raycast's `showToast` API to display a 'Connection Successful' or 'Connection Failed' message based on the API call's outcome.
+
+## 4. Abstract API Call Logic into a Reusable Hook [done]
+### Dependencies: 18.1
+### Description: Create a custom React hook to encapsulate the common data-fetching pattern (`usePromise`, loading, error handling) for Daytona API calls to promote code reuse and consistency.
+### Details:
+Create a new file, `src/hooks/useDaytonaApi.ts`. Implement a custom hook, `useDaytonaApi`, that accepts an async function (the Daytona SDK call) as an argument. This hook will internally manage the `usePromise` logic. Refactor the Dashboard command in `src/commands/dashboard.tsx` to use this new `useDaytonaApi` hook instead of using `usePromise` directly.
+
+## 5. Integrate Raycast Caching for API Responses [done]
+### Dependencies: 18.1, 18.4
+### Description: Implement caching for frequently accessed API data, such as the sandbox list, to improve the extension's performance and reduce unnecessary network requests.
+### Details:
+Modify the `useDaytonaApi` hook in `src/hooks/useDaytonaApi.ts` to integrate with Raycast's `Cache` API. Before making an API call, check for a valid cached entry. If one exists, return it. Otherwise, proceed with the API call and use `Cache.set()` to store the new data with a short TTL (e.g., 30-60 seconds). Add a 'Clear Cache & Refresh' action to the Dashboard command for manual refreshes.
+
+## 6. Standardize API Error Handling and User Feedback [done]
+### Dependencies: 18.1, 18.2, 18.3
+### Description: Develop a centralized error handling utility to parse errors from the Daytona SDK and present consistent, user-friendly messages across all commands.
+### Details:
+Create a new utility file, `src/lib/errorHandler.ts`. Implement a function that takes an `error` object, inspects it for known SDK or network error types, and returns a standardized message object. Refactor the `catch` blocks and error handling logic in `dashboard.tsx`, `settings.tsx`, and the 'Run Code' command to use this new centralized utility, ensuring consistent error presentation in toasts and empty views.
+
+## 7. Archive Implementation Documentation [done]
+### Dependencies: None
+### Description: Document the successful implementation of Option 2 repository handling solution with API migration and repository cloning functionality
+### Details:
+Complete documentation and archival of the successful implementation that:
+
+1. **Fixed Daytona SDK API Usage**: Migrated from private `client.sandboxApi` methods to public Daytona class methods (client.list(), client.get(), client.start(), client.stop(), client.delete(), client.create())
+
+2. **Implemented Optional Repository Cloning**: Added repository field as optional in create sandbox form, with automatic cloning after sandbox creation using sandbox.git.clone() when repository URL provided
+
+3. **Enhanced User Experience**: Progressive feedback system with toast notifications for each step (Creating → Created → Cloning → Cloned), graceful error handling for clone failures
+
+4. **Code Quality**: Resolved all TypeScript compilation errors, fixed ESLint issues, successful production build
+
+5. **Verified Functionality**: Console output confirms real API integration working with actual sandboxes, proper status mapping, and successful repository cloning to workspace directory
+
+The solution addresses the root cause where Daytona doesn't store repository metadata in sandbox properties by cloning directly to workspace directory where it's needed for development."
+

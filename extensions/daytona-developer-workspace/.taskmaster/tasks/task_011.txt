@@ -1,0 +1,36 @@
+# Task ID: 11
+# Title: Implement Daytona Dashboard Command
+# Status: done
+# Dependencies: 1
+# Priority: medium
+# Description: Create a Raycast command to list, view, and manage Daytona sandboxes. This command will serve as the main interface for starting, stopping, deleting, archiving, and creating sandboxes.
+# Details:
+1. **Command Scaffolding:** Create a new Raycast `ListCommand` named 'Daytona Dashboard'. This will be the entry point for all sandbox management.
+2. **API Integration:** Utilize the Daytona SDK to fetch the list of sandboxes (`daytona.sandbox.list()`). Implement `usePromise` or a similar hook to handle the asynchronous data fetching, including loading and error states.
+3. **List View Implementation:**
+   - Use the `<List>` component to display the sandboxes.
+   - For each `<List.Item>`, display the sandbox name as the `title` and its Git repository as the `subtitle`.
+   - Use `<List.Item.Accessory>` to show the sandbox status (e.g., '🟢 Running', '⚪ Stopped', '🗄️ Archived') for quick visual identification.
+   - Add relevant `keywords` to each item for easy filtering.
+4. **Action Panel:**
+   - Attach an `<ActionPanel>` to each sandbox item.
+   - **Primary Action:** `Action.Push` to a new `<Detail>` component showing comprehensive sandbox info.
+   - **Lifecycle Actions:** Implement actions for 'Start', 'Stop', 'Delete', and 'Archive'. These actions will call the corresponding Daytona API endpoints. Use `Action.Style.Destructive` for the delete action and include a confirmation dialog.
+   - **Creation Action:** Add a global action or an action in the empty view to create a new sandbox, which will push a `<Form>` component.
+5. **Detail View:**
+   - Create a `<Detail>` component that uses markdown to present a structured view of a sandbox's properties (ID, Name, Status, Creation Date, Environment Details, etc.).
+   - The Detail view should also contain an `ActionPanel` with the same management actions.
+6. **Creation Form:**
+   - Implement a `<Form>` for creating new sandboxes.
+   - Include fields for the Git repository URL (required) and an optional sandbox name.
+   - On submission, call the creation API, show a toast notification, and refresh the main list.
+
+# Test Strategy:
+1. **List Verification:** Launch the command and confirm it correctly displays a list of all sandboxes with accurate statuses and accessories. Test the search/filtering functionality.
+2. **Action Testing:**
+   - For a 'stopped' sandbox, use the 'Start' action and verify its status updates to 'running' after a list refresh.
+   - For a 'running' sandbox, use the 'Stop' action and verify its status updates to 'stopped'.
+   - Use the 'Delete' action, confirm the alert, and verify the sandbox is removed from the list.
+3. **Detail View Test:** Navigate to the detail view for a sandbox. Verify all information is present and correctly formatted. Test that actions within the detail view's ActionPanel work as expected.
+4. **Creation Test:** Use the 'Create New Sandbox' action. Fill and submit the form with a valid repository. Verify a success toast is shown and the new sandbox appears in the list.
+5. **Error Handling Test:** Invalidate the `DAYTONA_API_KEY` and launch the command. Verify that a clear error message is shown instead of an empty list or a crash.

@@ -1,0 +1,29 @@
+# Task ID: 16
+# Title: Implement Multi-Command Architecture Foundation
+# Status: done
+# Dependencies: 1, 2
+# Priority: medium
+# Description: Restructure the project to support multiple specialized Daytona commands with shared infrastructure, including a unified client, state management, and error handling. This task establishes the foundation for all other commands and migrates the existing code execution logic into the new structure.
+# Details:
+1. **Project Structure Refactoring:** Create a `src/commands` directory to house individual command files (e.g., `dashboard.tsx`, `settings.tsx`). Establish a `src/lib` or `src/core` directory for all shared logic, including API clients, type definitions, and utility functions.
+
+2. **Daytona Client Singleton:** Implement a `src/lib/daytona-client.ts` module. This module will initialize and export a single, shared instance of the Daytona SDK client. The client will be configured using the API key retrieved from Raycast's secure `getPreferenceValues`. This pattern prevents redundant initializations and ensures consistent authentication across all commands.
+
+3. **Unified Error Handling:** Develop a higher-order component or utility function (e.g., `withDaytona`, `handleCommandErrors`) that wraps the main logic of each command. This wrapper will implement a global `try...catch` block to gracefully handle common API errors (e.g., authentication failures, network issues, sandbox not found) and display standardized, user-friendly error messages using Raycast's `showToast` API.
+
+4. **State Management with Raycast Cache:** Utilize Raycast's `Cache` API for managing and sharing state between commands. For instance, the dashboard can cache the list of sandboxes, and other commands (like the Git Manager) can read from this cache to get the current state without making redundant API calls. Define a clear strategy for cache keys and invalidation (e.g., time-based expiration, manual refresh action).
+
+5. **Command Registration:** Update the `package.json` file to define the new command structure. Register each new command (Dashboard, Settings, etc.) in the `commands` array, specifying its name, title, description, and entry point pointing to the corresponding file in the `dist/commands` directory.
+
+6. **Migration Strategy:** Refactor the core logic from the original single-command implementation (Task 2). Abstract the code execution functionality into a reusable module within the new `src/lib` directory. The new 'Enhanced Run Code Command' (Task 15) will then consume this shared module. Ensure the original command entry point is either removed or updated to delegate to the new structure to maintain backward compatibility during the transition.
+
+# Test Strategy:
+1. **Singleton Verification:** Add logging to the Daytona client constructor. Launch two different commands sequentially and verify from the logs that the constructor is only called once, confirming a single instance is shared.
+
+2. **Error Handling Test:** Manually trigger an error condition (e.g., by providing an invalid API key in preferences). Run any command and verify that the unified error handler catches the exception and displays the appropriate, user-friendly toast notification.
+
+3. **Cache Verification:** Run the 'Daytona Dashboard' command to populate the sandbox list in the cache. Immediately launch another command that depends on this data and verify (via logs or by observing the lack of a loading indicator) that it reads directly from the cache instead of making a new API request. Test the cache invalidation by performing an action that should clear it (e.g., a 'Refresh' action).
+
+4. **Command Registration Test:** After a successful build (`npm run build`), open Raycast and confirm that all new commands ('Daytona Dashboard', 'Daytona Settings', etc.) are listed correctly with their specified titles and descriptions.
+
+5. **Migration Test:** Execute a simple script using the 'Enhanced Run Code Command'. Verify that it functions correctly and that logs show it's utilizing the new shared client singleton and error handling infrastructure, confirming the migration from the Task 2 implementation was successful.

@@ -1,0 +1,43 @@
+# Task ID: 8
+# Title: Enhance Error Reporting with Detailed Debugging Info
+# Status: done
+# Dependencies: 4
+# Priority: medium
+# Description: Improve the user experience for debugging by providing more detailed and user-friendly error messages, including stack traces, line numbers, and context.
+# Details:
+Parse the error output from Daytona to extract structured information. Format this information into a clear, readable error message in Raycast, potentially using markdown for better formatting.
+
+# Test Strategy:
+Run code with multi-level function calls that result in an error. Verify that the full stack trace is presented to the user in a readable format. User feedback will be a key metric.
+
+# Subtasks:
+## 1. Analyze and Document Daytona's `stderr` Format [done]
+### Dependencies: None
+### Description: Trigger various Python errors within the Daytona environment to capture and analyze the raw string format of the `stderr` output. Document the patterns for stack traces, error types, and messages to inform the parser's design.
+### Details:
+Execute simple Python scripts designed to fail (e.g., NameError, TypeError, multi-level function call error) and inspect the `CodeExecutionResponse.stderr` string. Note the structure of the 'Traceback (most recent call last):' section.
+
+## 2. Define a Structured Error Data Model [done]
+### Dependencies: None
+### Description: Create a clear data structure, likely a TypeScript interface, to hold the parsed error information. This model will serve as the contract between the parser and the formatter.
+### Details:
+The model should include fields like `errorType` (e.g., 'ValueError'), `errorMessage`, and an array of `stackFrames`. Each `stackFrame` object should contain `filePath`, `lineNumber`, and `context` (the line of code).
+
+## 3. Implement the `stderr` Parser [done]
+### Dependencies: 8.1, 8.2
+### Description: Develop a robust parsing function that takes the raw `stderr` string as input and outputs an instance of the Structured Error Data Model. This function will use regular expressions or string manipulation to extract the relevant details.
+### Details:
+The parser must handle multi-line error messages and multiple frames in the stack trace. It should gracefully handle cases where the `stderr` format might not be a standard Python traceback.
+
+## 4. Create a Markdown Formatter for Errors [done]
+### Dependencies: 8.2
+### Description: Build a function that converts a Structured Error Data object into a formatted markdown string. The output should be optimized for readability in the Raycast UI.
+### Details:
+Use markdown features like code blocks (` ``` `) for stack traces, bold text for the error type, and clear separation between the main error message and the trace. The most recent call should be highlighted.
+
+## 5. Integrate Formatted Errors into Raycast UI [done]
+### Dependencies: 8.3, 8.4
+### Description: Update the main code execution logic to detect non-zero exit codes or `stderr` content. When an error is found, invoke the parser and formatter, and then display the resulting markdown in the Raycast results view.
+### Details:
+The integration should be placed in the part of the code that processes the `CodeExecutionResponse`. The formatted markdown should be set as the primary content of the Raycast detail view for a failed execution.
+

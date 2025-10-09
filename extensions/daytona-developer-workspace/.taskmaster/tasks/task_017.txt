@@ -1,0 +1,52 @@
+# Task ID: 17
+# Title: Implement Daytona Snapshots Management Command
+# Status: done
+# Dependencies: 11, 16
+# Priority: medium
+# Description: Create a Raycast command to create, browse, restore, and delete Daytona snapshots, mirroring the webapp's functionality and integrating with the Daytona Dashboard.
+# Details:
+1. **Command Structure & Entry Points:**
+   - **Create Snapshot Action:** Implement a new `<Action>` on running sandbox items within the 'Daytona Dashboard' (Task 11). Label it 'Create Snapshot'. This action will prompt the user for a snapshot name and initiate the creation process.
+   - **Browse Snapshots Command:** Create a new, standalone Raycast `ListCommand` named 'Browse Snapshots'. This will serve as the central hub for viewing and managing all snapshots.
+
+2. **API & SDK Integration:**
+   - Leverage the Daytona SDK for all core functionality: `daytona.snapshot.create(sandboxId, name)`, `daytona.snapshot.list()`, `daytona.snapshot.restore(snapshotId, newSandboxName)`, and `daytona.snapshot.delete(snapshotId)`.
+   - Use `usePromise` or a similar hook in the 'Browse Snapshots' command to fetch the snapshot list, ensuring proper handling of loading, data, and error states.
+
+3. **Raycast UI Implementation:**
+   - **List View:** In the 'Browse Snapshots' command, use the `<List>` component. Each `<List.Item>` should display the snapshot name, source sandbox, and creation date. Use accessories to show the snapshot size.
+   - **Detail View:** Utilize `<List.Item.Detail>` to present comprehensive metadata for the selected snapshot, including its unique ID, size on disk, and full creation timestamp.
+   - **Actions:** Attach the following actions to each snapshot list item:
+     - `<Action>` 'Restore Snapshot': This will open a form (`<Action.Push>`) asking for the new sandbox name, then trigger the restoration.
+     - `<Action>` 'Delete Snapshot': Protect this with an `<Action.ConfirmationDialog>` to prevent accidental data loss.
+     - `<Action.CopyToClipboard>` 'Copy Snapshot ID': A utility for easy sharing or scripting.
+
+4. **State Management & User Feedback:**
+   - Use Raycast's `showToast` API to provide real-time feedback for long-running operations like creation and restoration (e.g., 'Creating snapshot...', 'Snapshot created successfully', 'Error: ...').
+   - Implement state management to ensure data consistency. After a successful restoration, the 'Daytona Dashboard' list should be revalidated to show the newly created sandbox.
+
+# Test Strategy:
+1. **Snapshot Creation:**
+   - Navigate to the 'Daytona Dashboard', select a 'running' sandbox, and invoke the 'Create Snapshot' action.
+   - Provide a name and confirm. Verify a success toast is displayed.
+   - Open the 'Browse Snapshots' command and confirm the new snapshot appears at the top of the list with correct metadata.
+
+2. **Snapshot Browsing & Details:**
+   - Launch the 'Browse Snapshots' command. Verify that all snapshots are listed correctly.
+   - Select a snapshot and check that the Detail pane displays the correct ID, size, and creation date.
+   - Test the 'Copy Snapshot ID' action and verify the correct ID is in the clipboard.
+
+3. **Snapshot Restoration:**
+   - From the 'Browse Snapshots' list, trigger the 'Restore Snapshot' action on an item.
+   - Enter a unique name for the new sandbox in the form and submit.
+   - Verify a toast indicates the restoration is in progress.
+   - Upon completion, switch to the 'Daytona Dashboard' and confirm the new sandbox exists and is functional.
+
+4. **Snapshot Deletion:**
+   - Select a snapshot to delete from the 'Browse Snapshots' command.
+   - Trigger the 'Delete Snapshot' action and verify the confirmation dialog appears.
+   - Confirm the deletion and ensure the snapshot is removed from the list.
+
+5. **Edge Case & Error Handling:**
+   - Verify the 'Create Snapshot' action is disabled or hidden for 'stopped' sandboxes in the dashboard.
+   - Attempt to restore a snapshot using a name that already exists for a sandbox and verify a user-friendly error is shown.
