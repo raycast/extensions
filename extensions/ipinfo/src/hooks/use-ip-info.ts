@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getIpInfo, getMyIPInfo } from "../utils/ip-info";
 import { IPBogon, IPinfo, IPinfoLite } from "node-ipinfo/dist/src/common";
-import { isValidIpV4 } from "../utils/ip-validator";
+import { isValidIp } from "../utils/ip-validator";
 import { addToHistory } from "../utils/history";
 
 export const useIpInfo = (ip?: string) => {
@@ -19,8 +19,8 @@ export const useIpInfo = (ip?: string) => {
           setErrorText((err as Error).message);
         }
       } else {
-        if (!isValidIpV4(ip)) {
-          setErrorText("Invalid IPv4 address.");
+        if (!isValidIp(ip)) {
+          setErrorText("Invalid IP address.");
           setIsLoading(false);
           return;
         }
