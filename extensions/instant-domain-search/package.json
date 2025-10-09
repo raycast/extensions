@@ -31,97 +31,111 @@
       "description": "Check domain availability, find popular extensions, and buy premium domains."
     }
   ],
-  "evals": [
-    {
-      "input": "@instant-domain-search Domain ideas for productivity geeks",
-      "mocks": {
-        "search-domains": [
+  "ai": {
+    "evals": [
+      {
+        "input": "@instant-domain-search Domain ideas for productivity geeks",
+        "mocks": {
+          "search-domains": [
+            {
+              "action": "https://instantdomainsearch.com/get/productivitygeek.com",
+              "availability": "aftermarket",
+              "domain": "productivitygeek.com",
+              "price": 309500
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/geekproductivity.com",
+              "availability": "aftermarket",
+              "domain": "geekproductivity.com",
+              "price": 48800
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/prodgeek.com",
+              "availability": "taken",
+              "domain": "prodgeek.com"
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/productivityhacker.com",
+              "availability": "taken",
+              "domain": "productivityhacker.com"
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/geekefficiency.com",
+              "availability": "available",
+              "domain": "geekefficiency.com"
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/productivityninja.com",
+              "availability": "aftermarket",
+              "domain": "productivityninja.com",
+              "price": 29900
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/techproductivity.com",
+              "availability": "aftermarket",
+              "domain": "techproductivity.com",
+              "price": 218800
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/productivitylab.com",
+              "availability": "taken",
+              "domain": "productivitylab.com"
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/geekoptimize.com",
+              "availability": "available",
+              "domain": "geekoptimize.com"
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/productivitypro.com",
+              "availability": "taken",
+              "domain": "productivitypro.com"
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/efficiencygeek.com",
+              "availability": "taken",
+              "domain": "efficiencygeek.com"
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/productivitytools.com",
+              "availability": "aftermarket",
+              "domain": "productivitytools.com",
+              "price": 2500000
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/geekworkflow.com",
+              "availability": "available",
+              "domain": "geekworkflow.com"
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/productivityhub.com",
+              "availability": "aftermarket",
+              "domain": "productivityhub.com",
+              "price": 249900
+            },
+            {
+              "action": "https://instantdomainsearch.com/get/smartproductivity.com",
+              "availability": "taken",
+              "domain": "smartproductivity.com"
+            }
+          ]
+        },
+        "expected": [
           {
-            "action": "https://instantdomainsearch.com/get/productivitygeeks.com",
-            "availability": "taken",
-            "domain": "productivitygeeks.com"
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/geekyproductivity.com",
-            "availability": "available",
-            "domain": "geekyproductivity.com"
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/productivityhacks.com",
-            "availability": "taken",
-            "domain": "productivityhacks.com"
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/geekytools.com",
-            "availability": "taken",
-            "domain": "geekytools.com"
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/efficiencygeeks.com",
-            "availability": "aftermarket",
-            "domain": "efficiencygeeks.com",
-            "price": 78800
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/productivityninja.com",
-            "availability": "aftermarket",
-            "domain": "productivityninja.com",
-            "price": 29900
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/geekyworkflows.com",
-            "availability": "available",
-            "domain": "geekyworkflows.com"
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/productivityhub.com",
-            "availability": "aftermarket",
-            "domain": "productivityhub.com",
-            "price": 249900
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/smartproductivity.com",
-            "availability": "taken",
-            "domain": "smartproductivity.com"
-          },
-          {
-            "action": "https://instantdomainsearch.com/get/geekproductivitytips.com",
-            "availability": "available",
-            "domain": "geekproductivitytips.com"
+            "callsTool": {
+              "name": "search-domains"
+            }
           }
         ]
-      },
-      "expected": [
-        {
-          "callsTool": {
-            "arguments": {
-              "domains": {
-                "eq": [
-                  "productivitygeeks.com",
-                  "geekyproductivity.com",
-                  "productivityhacks.com",
-                  "geekytools.com",
-                  "efficiencygeeks.com",
-                  "productivityninja.com",
-                  "geekyworkflows.com",
-                  "productivityhub.com",
-                  "smartproductivity.com",
-                  "geekproductivitytips.com"
-                ]
-              }
-            },
-            "name": "search-domains"
-          }
-        }
-      ]
-    }
-  ],
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.103.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
