@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "done-task-tracker",
+  "title": "Done Task Tracker",
+  "description": "A simple extension to track completed tasks",
+  "icon": "extension-icon.png",
+  "author": "khaledsmq",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-tasks",
+      "title": "View Done Tasks",
+      "description": "View a list of all completed tasks, organized by day.",
+      "mode": "view",
+      "icon": "view-tasks-icon.png"
+    },
+    {
+      "name": "log-task",
+      "title": "Log Done Task",
+      "description": "Quickly log a task that you just completed.",
+      "mode": "view",
+      "icon": "log-task-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.7.0",
+    "@types/react": "19.2.2",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
