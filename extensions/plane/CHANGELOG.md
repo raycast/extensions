@@ -1,6 +1,6 @@
 # Plane Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-10-09
 
 ### Added
 - **Create Work Items**: Ability to create new work items with title, description, and assignee
