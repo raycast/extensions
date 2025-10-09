@@ -283,7 +283,8 @@ function CreateDNSRecord({ zoneName }: { zoneName: string }) {
     },
   });
   return (
-    <Form navigationTitle={`... / DNS Records / ${zoneName} / Create`}
+    <Form
+      navigationTitle={`... / DNS Records / ${zoneName} / Create`}
       actions={
         <ActionPanel>
           {/* eslint-disable-next-line @raycast/prefer-title-case */}
