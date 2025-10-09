@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Status Preference] - {PR_MERGE_DATE}
+## [Status Preference] - 2025-10-09
 
 - Added "Preferred Status" preference to "Create Issue for Myself" command to specify the initial status for new issues
 
