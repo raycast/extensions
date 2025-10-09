@@ -50,7 +50,7 @@ function DailyGoalsContent() {
         <>
           <List.Section title="Summary">
             <ProgressItem
-              title={`${calculations.remainingCalories} calories remaining`}
+              title={`${Math.round(calculations.remainingCalories)} calories remaining`}
               progress={calculations.calorieProgress}
               current={calculations.consumedCalories}
               goal={calculations.totalGoalCalories}
