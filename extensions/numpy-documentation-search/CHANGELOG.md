@@ -1,6 +1,6 @@
 # NumPy Documentation Search Changelog
 
-## [1.2.3] - {PR_MERGE_DATE}
+## [1.2.3] - 2025-10-09
 
 ### Changed
 - Refresh README to focus on a concise Raycast user overview with key in-app features
