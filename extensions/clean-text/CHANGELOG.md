@@ -1,9 +1,6 @@
 # Clean Text Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
-## [Initial Version] - {PR_MERGE_DATE}
-### First Release
-### First Release
 
 - Initial release of Clean Text Raycast Extension
 - Features:
