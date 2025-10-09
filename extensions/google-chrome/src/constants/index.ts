@@ -1,7 +1,7 @@
 import fs from "fs";
 import { getLocalStatePath } from "../util";
 
-export const getDefaultProfileID = () => {
+const getDefaultProfileID = () => {
   try {
     const path = getLocalStatePath();
     const chromeState = fs.readFileSync(path, "utf-8");
