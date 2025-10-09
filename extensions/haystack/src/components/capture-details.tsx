@@ -26,7 +26,7 @@ export const CaptureDetails = ({ capture }: { capture: Capture }) => {
   };
 
   const markdown = `
-![Screenshot](file://${capture.imagePath.replace(" ", "%20")})
+![Screenshot](file://${encodeURI(capture.imagePath)})
 
 ## ${capture.title}
 ${renderCaptureData(capture.data)}

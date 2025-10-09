@@ -1,5 +1,5 @@
-import { Action, ActionPanel, captureException, Icon, List, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, captureException, Icon, List } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { EditStackForm } from "./components/edit-stack-form";
 import { NewStackFieldForm } from "./components/new-stack-field-form";
 import { StackFieldsList } from "./components/stack-fields-list";
@@ -14,10 +14,7 @@ export default function Command() {
       data = await getStacks();
     } catch (error) {
       captureException(error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not load stacks",
-      });
+      await showFailureToast("Could not load stacks", error);
     }
 
     return data.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
@@ -29,10 +26,7 @@ export default function Command() {
       revalidate();
     } catch (error) {
       captureException(error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not delete stack",
-      });
+      await showFailureToast("Could not delete stack", error);
     }
   };
 

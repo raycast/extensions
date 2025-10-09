@@ -16,24 +16,28 @@
 		{
 			"name": "create-new-stack",
 			"title": "Create New Stack",
+			"subtitle": "Haystack",
 			"description": "Use to create a new stack for collecting captures.",
 			"mode": "view"
 		},
 		{
 			"name": "list-all-stacks",
 			"title": "List All Stacks",
+			"subtitle": "Haystack",
 			"description": "Use to list all created stacks.",
 			"mode": "view"
 		},
 		{
 			"name": "list-all-captures",
 			"title": "List All Captures",
+			"subtitle": "Haystack",
 			"description": "Use to list all captures.",
 			"mode": "view"
 		},
 		{
 			"name": "create-new-capture",
 			"title": "Create New Capture",
+			"subtitle": "Haystack",
 			"description": "Use to create a new capture.",
 			"mode": "no-view"
 		}

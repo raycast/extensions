@@ -71,7 +71,6 @@ export const EditStackFieldForm = ({
       label: FormValidation.Required,
       description: FormValidation.Required,
       type: FormValidation.Required,
-      isTitleField: FormValidation.Required,
     },
   });
 
@@ -86,7 +85,7 @@ export const EditStackFieldForm = ({
       <Form.Description text="Update a field in your stack" />
       <Form.TextField title="Label" placeholder="Name" {...itemProps.label} />
       <Form.TextArea
-        title="Stack description"
+        title="Field description"
         placeholder="Provide a detailed description of your field"
         {...itemProps.description}
       />

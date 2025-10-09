@@ -49,7 +49,6 @@ export const NewStackFieldForm = ({ stackId, onAdd }: { stackId: string; onAdd: 
       label: FormValidation.Required,
       description: FormValidation.Required,
       type: FormValidation.Required,
-      isTitleField: FormValidation.Required,
     },
   });
 

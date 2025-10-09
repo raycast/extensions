@@ -73,7 +73,14 @@ export const generateStackFields = async (description: string) => {
 
   if (!hasAtLeastOneTitleField(fields)) {
     captureException(new Error("At least one title field is required when generating stack fields"));
-    fields[0].isTitleField = true;
+    if (fields.length > 0) {
+      try {
+        fields[0].isTitleField = true;
+      } catch (error) {
+        captureException(error);
+        throw error;
+      }
+    }
   }
 
   const returnFields: StackFieldInput[] = fields.map((field) => ({

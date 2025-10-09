@@ -38,11 +38,17 @@ export const formatDate = (dateString: string): string => {
         // YYYY-MM
         const year = first;
         const month = parseInt(parts[1], 10) - 1;
+        if (month < 0 || month >= MONTH_NAMES.length) {
+          return dateString;
+        }
         return `${MONTH_NAMES[month]} ${year}`;
       } else {
         // MM-DD
         const month = first - 1;
         const day = parseInt(parts[1], 10);
+        if (month < 0 || month >= MONTH_NAMES.length) {
+          return dateString;
+        }
         return `${MONTH_NAMES[month]} ${day}`;
       }
     }
