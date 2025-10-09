@@ -5,7 +5,10 @@
   "description": "Search open tabs, bookmarks and history in Comet.",
   "icon": "comet-icon.png",
   "author": "xjo_nd",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok",
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Web",
@@ -267,7 +270,7 @@
     "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",

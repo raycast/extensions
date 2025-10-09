@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alloy",
+  "title": "Alloy - AI Prototyping for Product Management",
+  "description": "Create AI-generated Prototypes for Product Management",
+  "icon": "logo-512.png",
+  "author": "minh_thanh_dang",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Design Tools"
+  ],
+  "commands": [
+    {
+      "name": "create-prototype",
+      "title": "Create Prototype",
+      "subtitle": "Alloy",
+      "description": "Describe your product and Alloy will generate a prototype for you",
+      "mode": "view"
+    },
+    {
+      "name": "manage-prototypes",
+      "title": "Manage Prototypes",
+      "subtitle": "Alloy",
+      "description": "View your prototypes",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.17.0",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

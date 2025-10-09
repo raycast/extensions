@@ -18,6 +18,7 @@ export interface ExportResult {
   error?: string;
   fileName?: string;
   fileSize?: number;
+  folderName?: string;
 }
 
 export interface ExportOptions {
@@ -83,6 +84,7 @@ export class ExportService {
         noteId: item.id,
         title: item.title || "Untitled",
         status: "pending",
+        folderName: includeOrganization ? documentToFolders[item.id] : undefined,
       });
     });
 
@@ -96,9 +98,13 @@ export class ExportService {
       // Process batch in parallel
       await Promise.all(
         batch.map(async (item) => {
+          const folderFromOrganization = includeOrganization ? documentToFolders[item.id] : undefined;
+          let resolvedFolderName = folderFromOrganization;
+
           try {
             const { content, fileName, folderName } = await processor(item);
-            const relativePath = writeExportFile(tempDir, fileName, content, folderName);
+            resolvedFolderName = folderName ?? folderFromOrganization;
+            const relativePath = writeExportFile(tempDir, fileName, content, resolvedFolderName);
 
             // Update result
             const resultIndex = results.findIndex((r) => r.noteId === item.id);
@@ -108,6 +114,7 @@ export class ExportService {
                 status: "success",
                 fileName: relativePath,
                 fileSize: content.length,
+                folderName: resolvedFolderName,
               };
             }
           } catch (error) {
@@ -118,6 +125,7 @@ export class ExportService {
                 ...results[resultIndex],
                 status: "error",
                 error: errorMessage,
+                folderName: resolvedFolderName,
               };
             }
           }

@@ -1,6 +1,6 @@
 import { HistoryEntry, SearchResult } from "../interfaces";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
+import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE, MAX_BOOKMARK_RESULTS } from "../constants";
 import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
 import { getBookmarks } from "../util";
 import { useCometInstallation } from "./useCometInstallation";
@@ -37,14 +37,19 @@ export function useBookmarkSearch(
       setIsLoading(true);
 
       try {
-        const bookmarks = await getBookmarks(profile);
-        setData(
-          bookmarks.filter(
-            (bookmark) =>
-              bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
-          ),
-        );
+        const bookmarks = await getBookmarks(profile, MAX_BOOKMARK_RESULTS);
+
+        // Optimize filtering with early termination and case-insensitive search
+        const queryLower = query?.toLowerCase() || "";
+        const filteredBookmarks = queryLower
+          ? bookmarks.filter((bookmark) => {
+              const titleLower = bookmark.title.toLowerCase();
+              const urlLower = bookmark.url.toLowerCase();
+              return titleLower.includes(queryLower) || urlLower.includes(queryLower);
+            })
+          : bookmarks;
+
+        setData(filteredBookmarks);
         setIsLoading(false);
       } catch (e) {
         if (e instanceof Error && e.message === NOT_INSTALLED_MESSAGE) {
