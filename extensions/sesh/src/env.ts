@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export function getEnv() {
-  const { environmentPath } = getPreferenceValues<Preferences>();
+  const { environmentPath } = getPreferenceValues<Preferences.CmdConnect>();
 
   const patchedWithoutDuplicates = new Set([
     ...(process.env.PATH?.split(":") ?? []),
