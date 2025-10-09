@@ -2,21 +2,29 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yazio-tracker",
   "title": "Yazio Tracker",
-  "description": "View your daily goals and calories in Yazio, and log food directly from Raycast.",  
+  "description": "View your daily goals and calories in Yazio, and log food directly from Raycast.",
   "icon": "yazio.png",
+  "author": "zsombor_biro",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "view-daily-goals",
       "title": "View Daily Goals",
-      "description": "View your daily goals in Yazio.",  
+      "description": "View your daily goals in Yazio.",
       "mode": "view",
       "subtitle": "Yazio"
     },
     {
       "name": "view-daily-foods",
       "title": "View Daily Foods",
-      "description": "View your daily foods in Yazio.",  
+      "description": "View your daily foods in Yazio.",
       "mode": "view",
       "subtitle": "Yazio"
     },
@@ -63,15 +71,19 @@
       "description": "Your Yazio password.",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "useMockData",
+      "title": "Use Mock Data",
+      "label": "Use Mock Data",
+      "description": "Enable mock data for development and store screenshots (no Yazio account needed).",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
-  "author": "zsombor_biro",
   "platforms": [
     "Windows",
     "macOS"
-  ],
-  "categories": [
-    "Applications",
-    "Productivity"
   ]
 }

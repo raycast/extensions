@@ -3,6 +3,8 @@ import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { yazio } from "./utils/yazio";
 import { LogFoodForm } from "./components/LogFoodForm";
+import { ErrorView } from "./components/ErrorView";
+import { isDevelopment, mockProductSearchResults } from "./utils/mockData";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -12,22 +14,32 @@ export default function Command() {
       if (!query) {
         return [];
       }
-      const results = await yazio.products.search({ query });
-      return results;
+
+      if (isDevelopment()) {
+        // Return filtered mock data in development mode
+        return mockProductSearchResults.filter(
+          (item) =>
+            item.name.toLowerCase().includes(query.toLowerCase()) ||
+            (item.producer && item.producer.toLowerCase().includes(query.toLowerCase())),
+        );
+      }
+
+      try {
+        const results = await yazio.products.search({ query });
+        return results;
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("oauth/token")) {
+          throw new Error("Please check your Yazio credentials in extension preferences");
+        }
+        throw error;
+      }
     },
     [searchText],
   );
 
-  if (error) {
-    return (
-      <List>
-        <List.EmptyView title="Error" description={error.message} />
-      </List>
-    );
-  }
-
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search for a food..." throttle>
+      <ErrorView error={error} />
       {data && data.length > 0 ? (
         <List.Section title="Search Results">
           {data.map((item) => (
@@ -50,7 +62,7 @@ export default function Command() {
           ))}
         </List.Section>
       ) : (
-        <List.EmptyView title="Type to search for food" />
+        !error && <List.EmptyView title="Type to search for food" />
       )}
     </List>
   );

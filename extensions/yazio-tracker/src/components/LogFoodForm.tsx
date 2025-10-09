@@ -1,14 +1,7 @@
 import { Action, ActionPanel, Form, Toast, popToRoot, showToast } from "@raycast/api";
 import { yazio } from "../utils/yazio";
-
-// Define the type for the product we're logging
-interface ProductSearchResult {
-  product_id: string;
-  name: string;
-  serving: string | null;
-  serving_quantity: number | null;
-}
-
+import { isDevelopment } from "../utils/mockData";
+import type { ProductSearchResult } from "../types";
 interface LogFoodFormProps {
   product: ProductSearchResult;
 }
@@ -26,20 +19,30 @@ export function LogFoodForm({ product }: LogFoodFormProps) {
         throw new Error("Please enter a valid amount.");
       }
 
-      await yazio.user.addConsumedItem({
-        id: crypto.randomUUID(), // The API requires a UUID, so we generate one
-        product_id: product.product_id,
-        date: new Date(),
-        daytime: values.daytime as "breakfast" | "lunch" | "dinner" | "snack",
-        amount: amount,
-        // For simplicity, we'll log by gram amount for now
-        serving: null,
-        serving_quantity: null,
-      });
+      if (isDevelopment()) {
+        // In development mode, simulate the API call without actually making it
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Logged Food Successfully";
-      toast.message = `${amount}g of ${product.name} added to your diary.`;
+        toast.style = Toast.Style.Success;
+        toast.title = "Logged Food Successfully (Mock)";
+        toast.message = `${amount}g of ${product.name} added to your diary (development mode).`;
+      } else {
+        await yazio.user.addConsumedItem({
+          id: crypto.randomUUID(), // The API requires a UUID, so we generate one
+          product_id: product.product_id,
+          date: new Date(),
+          daytime: values.daytime as "breakfast" | "lunch" | "dinner" | "snack",
+          amount: amount,
+          // For simplicity, we'll log by gram amount for now
+          serving: null,
+          serving_quantity: null,
+        });
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Logged Food Successfully";
+        toast.message = `${amount}g of ${product.name} added to your diary.`;
+      }
+
       await popToRoot();
     } catch (error) {
       toast.style = Toast.Style.Failure;

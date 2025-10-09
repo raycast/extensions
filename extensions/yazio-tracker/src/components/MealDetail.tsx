@@ -1,30 +1,5 @@
 import { List } from "@raycast/api";
-
-// --- (Type definitions are needed here as well) ---
-interface Product {
-  id: string;
-  name: string;
-  producer: string | null;
-  nutrients: { "energy.energy": number };
-}
-interface UserConsumedItem {
-  id: string;
-  product_id: string;
-  daytime: "breakfast" | "lunch" | "dinner" | "snack";
-  amount: number;
-}
-interface RecipePortion {
-  id: string;
-  recipe_id: string;
-  daytime: "breakfast" | "lunch" | "dinner" | "snack";
-  portion_count: number;
-  name: string;
-  calories: number;
-}
-type ConsumedItem =
-  | (UserConsumedItem & { productDetails?: Product | null; type: "product" })
-  | (RecipePortion & { type: "recipe" });
-
+import type { ConsumedItem } from "../types";
 interface MealDetailProps {
   meal: string;
   items: ConsumedItem[];
