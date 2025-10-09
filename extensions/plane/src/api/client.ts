@@ -11,7 +11,6 @@ import {
   WorkItemTypesApi,
 } from "@makeplane/plane-node-sdk";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../types/preferences";
 
 const preferences = getPreferenceValues<Preferences>();
 

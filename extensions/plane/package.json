@@ -25,13 +25,6 @@
       "subtitle": "Plane",
       "description": "Search work items across projects",
       "mode": "view"
-    },
-    {
-      "name": "my-work-items",
-      "title": "My Work Items",
-      "subtitle": "Plane",
-      "description": "View your assigned work items",
-      "mode": "view"
     }
   ],
   "dependencies": {

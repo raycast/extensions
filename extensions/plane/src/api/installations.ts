@@ -1,9 +1,8 @@
 import { Configuration, OAuthApi } from "@makeplane/plane-node-sdk";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../types/preferences";
 import { PlaneOAuthAppInstallation } from "@makeplane/plane-node-sdk/dist/oauth/models";
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues();
 
 export const getAppInstallations = async ({
   accessToken,
