@@ -14,7 +14,7 @@ export default function Command() {
       data = await getStacks();
     } catch (error) {
       captureException(error);
-      await showFailureToast("Could not load stacks", error);
+      await showFailureToast("Could not load stacks");
     }
 
     return data.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
@@ -26,7 +26,7 @@ export default function Command() {
       revalidate();
     } catch (error) {
       captureException(error);
-      await showFailureToast("Could not delete stack", error);
+      await showFailureToast("Could not delete stack");
     }
   };
 
