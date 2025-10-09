@@ -40,7 +40,7 @@ function generateDomainAccessories(domain: Domain) {
       accessories.push({ icon: Icon.Shield, tooltip: "Dnssec is disabled" });
       break;
     case "enabled":
-      accessories.push({ icon: { source: Icon.Shield, tintColor: Color.Green }, tooltip: "Dnssec is disabled" });
+      accessories.push({ icon: { source: Icon.Shield, tintColor: Color.Green }, tooltip: "Dnssec is enabled" });
       break;
     default:
       break;
@@ -200,7 +200,7 @@ function DNSRecords({ domain }: { domain: Domain }) {
     }
   }
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail navigationTitle={`Manage Domains / ${domain.domain} / DNS Records`}>
       {records.map((record) => (
         <List.Item
           key={record.id}
@@ -283,7 +283,7 @@ function CreateDNSRecord({ zoneName }: { zoneName: string }) {
     },
   });
   return (
-    <Form
+    <Form navigationTitle={`... / DNS Records / ${zoneName} / Create`}
       actions={
         <ActionPanel>
           {/* eslint-disable-next-line @raycast/prefer-title-case */}

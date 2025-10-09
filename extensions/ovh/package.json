@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ovhcloud",
   "title": "OVHcloud",
-  "description": "",
-  "icon": "extension_icon.png",
+  "description": "Manage Domains in OVHCloud",
+  "icon": "white-cloud-blue-bg.png",
   "author": "xmok",
   "platforms": [
     "macOS",
@@ -21,9 +21,9 @@
       "type": "dropdown",
       "required": true,
       "data": [
-      {
-       "title": "OVH Europe",
-        "value":"eu.api.ovh.com"
+        {
+          "title": "OVH Europe",
+          "value":"eu.api.ovh.com"
         },
         {
          "title": "OVH US",
@@ -80,8 +80,8 @@
     {
       "name": "manage-domains",
       "title": "Manage Domains",
-        "subtitle": "OVHcloud",
-"description": "",
+      "subtitle": "OVHcloud",
+      "description": "Manage Domains, DNS Records, Nameservers",
       "mode": "view"
     }
   ],

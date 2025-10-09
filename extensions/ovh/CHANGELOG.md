@@ -1,3 +1,5 @@
 # OVHcloud Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Manage Domains] - {PR_MERGE_DATE}
+
+- Manage Domains, DNS Records and Nameservers
