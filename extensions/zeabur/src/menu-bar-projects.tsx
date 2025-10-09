@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { MenuBarExtra, Image, Icon, getPreferenceValues, openExtensionPreferences, open, showHUD } from "@raycast/api";
+import { MenuBarExtra, Image, Icon, getPreferenceValues, openExtensionPreferences, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ProjectInfo, ServiceInfo } from "./type";
 import { getProjects, getServices } from "./utils/zeabur-graphql";
 
@@ -27,7 +28,7 @@ export default function Command() {
 
         setIsLoading(false);
       } catch {
-        showHUD("Failed to fetch projects");
+        showFailureToast("Failed to fetch projects");
         setIsLoading(false);
       }
     };
