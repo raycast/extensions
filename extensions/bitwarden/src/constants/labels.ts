@@ -57,4 +57,6 @@ export const MODIFIER_TO_LABEL: Record<Keyboard.KeyModifier, string> = {
   shift: "⇧",
   opt: "⌥",
   ctrl: "⌃",
+  alt: "⌥",
+  windows: "⊞",
 };

@@ -113,7 +113,7 @@ type Operation = { id: string; execute: () => Promise<any> };
 
 const useOperationQueue = () => {
   const operationQueueRef = useRef<Operation[]>([]);
-  const currentOperationTimeoutRef = useRef<NodeJS.Timeout>();
+  const currentOperationTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const processOperations = () => {
     const [operation] = operationQueueRef.current;
@@ -186,15 +186,26 @@ const useListSends = (bitwarden: Bitwarden) => {
 
 const syncAction = {
   title: "Sync Vault",
-  get shortcut(): Keyboard.Shortcut {
-    return { key: "r", modifiers: ["opt"] };
+  get shortcut() {
+    return {
+      windows: { key: "r", modifiers: ["alt"] },
+      macOS: { key: "r", modifiers: ["opt"] },
+    } satisfies Keyboard.Shortcut;
   },
   get modifierToLabelMap(): Record<Keyboard.KeyModifier, string> {
-    return { cmd: "⌘", shift: "⇧", opt: "⌥", ctrl: "⌃" };
+    return { cmd: "⌘", shift: "⇧", opt: "⌥", ctrl: "⌃", alt: "⌥", windows: "⊞" };
   },
   get shortcutLabel(): string {
+    if (process.platform === "win32") {
+      return (
+        this.shortcut.windows.modifiers.map((mod) => MODIFIER_TO_LABEL[mod] ?? "").join("") +
+        this.shortcut.windows.key.toUpperCase()
+      );
+    }
+
     return (
-      this.shortcut.modifiers.map((mod) => MODIFIER_TO_LABEL[mod] ?? "").join("") + this.shortcut.key.toUpperCase()
+      this.shortcut.macOS.modifiers.map((mod) => MODIFIER_TO_LABEL[mod] ?? "").join("") +
+      this.shortcut.macOS.key.toUpperCase()
     );
   },
 };
@@ -206,7 +217,7 @@ function SearchSendsCommandContent() {
   const { sends, isFirstLoading, called, refresh: refreshSends, filterByType } = useListSends(bitwarden);
 
   const pasteActionTitle = usePasteActionTitle();
-  const selectedItemIdRef = useRef<string>();
+  const selectedItemIdRef = useRef<string | undefined>(undefined);
 
   useInterval(() => onSync(true), { skip: !called || !syncOnLaunch });
 
