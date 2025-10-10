@@ -277,6 +277,9 @@
               "arguments": {},
               "name": "get-profiles"
             }
+          },
+          {
+            "meetsCriteria": "Returns Chrome profiles with their names and IDs"
           }
         ]
       }
