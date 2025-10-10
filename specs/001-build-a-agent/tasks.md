@@ -24,12 +24,12 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create project structure per implementation plan in src/
-- [ ] T002 Initialize TypeScript project with @raycast/api dependencies
+- [X] T001 Create project structure per implementation plan in src/
+- [X] T002 Initialize TypeScript project with @raycast/api dependencies
 - [ ] T003 [P] Configure ESLint and Prettier for code quality standards
-- [ ] T004 [P] Configure Jest testing framework for TDD approach
-- [ ] T005 [P] Setup TypeScript strict mode and comprehensive type checking
-- [ ] T006 [P] Install @zed-industries/agent-client-protocol SDK dependency
+- [X] T004 [P] Configure Jest testing framework for TDD approach
+- [X] T005 [P] Setup TypeScript strict mode and comprehensive type checking
+- [X] T006 [P] Install @zed-industries/agent-client-protocol SDK dependency
 - [ ] T007 [P] Install and configure Gemini CLI for local testing (npm install -g @google-ai/generativelanguage-cli)
 
 ---
@@ -40,17 +40,17 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Create ACP protocol types in src/types/acp.ts based on contracts/acp-client.ts
+- [X] T008 Create ACP protocol types in src/types/acp.ts based on contracts/acp-client.ts
 - [ ] T009 [P] Create extension types in src/types/extension.ts based on contracts/raycast-api.ts
 - [ ] T010 [P] Create data model types in src/types/entities.ts from data-model.md
-- [ ] T011 [P] Create storage keys constants in src/utils/storageKeys.ts
+- [X] T011 [P] Create storage keys constants in src/utils/storageKeys.ts
 - [ ] T012 Implement base ACP client service in src/services/acpClient.ts
-- [ ] T013 [P] Implement configuration service using Raycast LocalStorage in src/services/configService.ts
-- [ ] T014 [P] Implement storage service using Raycast LocalStorage in src/services/storageService.ts
-- [ ] T015 Create error handling utilities in src/utils/errors.ts
-- [ ] T016 [P] Create logging utilities in src/utils/logging.ts
-- [ ] T017 [P] Setup built-in agent configurations (Gemini CLI, default agents)
-- [ ] T018 [P] Setup extension manifest and Raycast command registration
+- [X] T013 [P] Implement configuration service using Raycast LocalStorage in src/services/configService.ts
+- [X] T014 [P] Implement storage service using Raycast LocalStorage in src/services/storageService.ts
+- [X] T015 Create error handling utilities in src/utils/errors.ts
+- [X] T016 [P] Create logging utilities in src/utils/logging.ts
+- [X] T017 [P] Setup built-in agent configurations (Gemini CLI, default agents)
+- [X] T018 [P] Setup extension manifest and Raycast command registration
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
