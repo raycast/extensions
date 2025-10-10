@@ -16,8 +16,8 @@ import {
   Color
 } from '@raycast/api';
 
-import { BlockedDomain, getBlockedDomains, removeBlockedDomain, getBlockingStatus } from './lib/storage';
-import { formatDomainForDisplay } from './lib/domainUtils';
+import { BlockedDomain, getBlockedDomains, removeBlockedDomain, getBlockingStatus } from './storage';
+import { formatDomainForDisplay } from './domainUtils';
 import AddWebsite from './add-website';
 
 export default function ViewBlockedSites() {

@@ -4,8 +4,8 @@ exports.default = AddWebsite;
 const jsx_runtime_1 = require("react/jsx-runtime");
 const react_1 = require("react");
 const api_1 = require("@raycast/api");
-const domainUtils_1 = require("./lib/domainUtils");
-const storage_1 = require("./lib/storage");
+const domainUtils_1 = require("./domainUtils");
+const storage_1 = require("./storage");
 function AddWebsite() {
     const [isLoading, setIsLoading] = (0, react_1.useState)(false);
     const { pop } = (0, api_1.useNavigation)();

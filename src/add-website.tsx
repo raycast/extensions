@@ -15,8 +15,8 @@ import {
   useNavigation
 } from '@raycast/api';
 
-import { processDomainInput, isDuplicateDomain } from './lib/domainUtils';
-import { addBlockedDomain, getBlockedDomainList } from './lib/storage';
+import { processDomainInput, isDuplicateDomain } from './domainUtils';
+import { addBlockedDomain, getBlockedDomainList } from './storage';
 
 interface FormValues {
   domain: string;

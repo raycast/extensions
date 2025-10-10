@@ -11,8 +11,8 @@ import {
   Alert
 } from '@raycast/api';
 
-import { getBlockedDomainList, setBlockingStatus } from './lib/storage';
-import { addDomainsToHosts, isSudoAvailable } from './lib/hostsManager';
+import { getBlockedDomainList, setBlockingStatus } from './storage';
+import { addDomainsToHosts, isSudoAvailable } from './hostsManager';
 
 export default async function EnableBlocking() {
   try {

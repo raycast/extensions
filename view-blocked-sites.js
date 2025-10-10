@@ -7,8 +7,8 @@ exports.default = ViewBlockedSites;
 const jsx_runtime_1 = require("react/jsx-runtime");
 const react_1 = require("react");
 const api_1 = require("@raycast/api");
-const storage_1 = require("./lib/storage");
-const domainUtils_1 = require("./lib/domainUtils");
+const storage_1 = require("./storage");
+const domainUtils_1 = require("./domainUtils");
 const add_website_1 = __importDefault(require("./add-website"));
 function ViewBlockedSites() {
     const [domains, setDomains] = (0, react_1.useState)([]);

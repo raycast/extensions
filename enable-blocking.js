@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = EnableBlocking;
 const api_1 = require("@raycast/api");
-const storage_1 = require("./lib/storage");
-const hostsManager_1 = require("./lib/hostsManager");
+const storage_1 = require("./storage");
+const hostsManager_1 = require("./hostsManager");
 async function EnableBlocking() {
     try {
         const domainsToBlock = await (0, storage_1.getBlockedDomainList)();
