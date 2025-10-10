@@ -273,10 +273,10 @@ export class Bitwarden {
     return this;
   }
 
-  async checkServerUrl(serverUrl: string): Promise<void> {
+  async checkServerUrl(serverUrl: string | undefined): Promise<void> {
     // Check the CLI has been configured to use the preference Url
-    const cliServer = (await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL)) || "";
-    if (cliServer === serverUrl) return;
+    const storedServer = (await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL));
+    if (!serverUrl || storedServer === serverUrl) return;
 
     // Update the server Url
     const toast = await this.showToast({
