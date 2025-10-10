@@ -1,24 +1,43 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { FormValidation, showFailureToast, useForm, useLocalStorage } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, getFavicon, useForm, useLocalStorage } from "@raycast/utils";
 import BrandDev from "brand.dev";
 import { API_HEADERS, API_URL, parseBrandDevResponse } from "./common";
 
 type Screenshot = {domain: string; screenshot: string; screenshotType: "viewport" | "page"}
 type ScreenshotInStorage = Screenshot & {
+page:string
+prioritize: string;
   created_on: string;
   updated_on: string;
 };
-export default function TakeScreenshot() {
+export default function TakeScreenshots() {
     const { isLoading, value: screenshots = [], setValue: setScreenshots } = useLocalStorage<ScreenshotInStorage[]>("screenshots", []);
-    
-    return <List isLoading={isLoading} actions={<ActionPanel>
-        <Action.Push icon={Icon.Camera} title="Take Screenshot" target={<TakeScreenshotForm />} />
-    </ActionPanel>}>
-
+    async function updateScreenshots(screenshot: ScreenshotInStorage) {
+        const newScreenshots = [...screenshots];
+        newScreenshots.push(screenshot);
+        await setScreenshots(newScreenshots);
+    }
+    return <List isLoading={isLoading} isShowingDetail>
+    <List.EmptyView title="No Results" description="Take a screenshot to get started" actions={<ActionPanel>
+        <Action.Push icon={Icon.Camera} title="Take Screenshot" target={<TakeScreenshot onScreenshot={updateScreenshots} />} />
+    </ActionPanel>} />
+    {screenshots.map(screenshot => <List.Item key={screenshot.domain} icon={getFavicon(screenshot.domain, {fallback: Icon.Image})} title={screenshot.domain} accessories={[{date: new Date(screenshot.created_on)}]} detail={<List.Item.Detail markdown={`![](${screenshot.screenshot})`} metadata={<List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.TagList title="Type">
+<List.Item.Detail.Metadata.TagList.Item text={screenshot.screenshotType} />
+        </List.Item.Detail.Metadata.TagList>
+        <List.Item.Detail.Metadata.Label title="Page" text={screenshot.page || "Default (Landing)"} />
+        
+        <List.Item.Detail.Metadata.TagList title="Prioritize">
+<List.Item.Detail.Metadata.TagList.Item text={screenshot.prioritize} />
+        </List.Item.Detail.Metadata.TagList>
+    </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
+        <Action.Push icon={Icon.Camera} title="Take Screenshot" target={<TakeScreenshot onScreenshot={updateScreenshots} />} />
+    </ActionPanel>} />)}
     </List>
 }
 
-function TakeScreenshotForm() {
+function TakeScreenshot({onScreenshot}: {onScreenshot: (screenshot: ScreenshotInStorage) => void}) {
+    const {pop} = useNavigation();
     type FormValues = {
         domain: string;
         fullScreenshot: boolean
@@ -39,15 +58,21 @@ function TakeScreenshotForm() {
                     headers: API_HEADERS
                 });
                 const result = await parseBrandDevResponse<Screenshot>(response);
+                   const newScreenshot: ScreenshotInStorage = {
+                    ...result,
+                    prioritize: values.prioritize,
+                    page: values.page,
+                    created_on: new Date().toISOString(),
+                    updated_on: new Date().toISOString(),
+                   }
+                   toast.style = Toast.Style.Success
+                   toast.title = "Screenshotted";
+                onScreenshot(newScreenshot);
+pop()
             } catch (error) {
-                let message = `${error}`;
-                    if (error instanceof BrandDev.APIError) {
-                        const err = error.error;
-                        message = (err.message && Array.isArray(err.message)) ? err.message[0]?.message : err.message ?? err.error_code;
-                    }
                 toast.style = Toast.Style.Failure;
                 toast.title = "Failed";
-                toast.message = message;
+                toast.message = `${error}`;
             }
         },
         validation: {

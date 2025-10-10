@@ -23,6 +23,12 @@
   ],
   "commands": [
     {
+      "name": "retrieve-styleguides",
+      "title": "Retrieve Styleguides",
+      "description": "Get a company's styleguide",
+      "mode": "view"
+    },
+    {
       "name": "retrieve-brands",
       "title": "Retrieve Brands",
       "description": "Get a company's brand logos, colors, slogan, socials, and more",
@@ -57,16 +63,15 @@
       ]
     },
     {
-      "name": "take-screenshot",
-      "title": "Take Screenshot",
+      "name": "take-screenshots",
+      "title": "Take Screenshots",
       "description": "Take a company website's screenshot",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.0",
-    "brand.dev": "^0.9.0"
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
