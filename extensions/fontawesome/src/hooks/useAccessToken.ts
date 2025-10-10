@@ -27,7 +27,7 @@ export const useAccessToken = (API_TOKEN: string) => {
   });
 
   const isLoading = isTokenTimerLoading || isTokenLoading;
-  const executeDataLoading = accessToken && !isLoading ? true : false;
+  const executeDataLoading = !!(accessToken && !isLoading);
 
   return { accessToken, isLoading, executeDataLoading };
 };
