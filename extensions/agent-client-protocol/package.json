@@ -23,14 +23,18 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "@zed-industries/agent-client-protocol": "^0.4.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
+    "@types/jest": "^30.0.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
+    "jest": "^30.2.0",
     "prettier": "^3.5.3",
+    "ts-jest": "^29.4.5",
     "typescript": "^5.8.2"
   },
   "scripts": {
