@@ -4,7 +4,7 @@
 
 ### Fixed
 
-- Find KeePassXC app location using Raycast API (#22043).
+- Find KeePassXC app location using Raycast API for macOS (#22043).
 
 ## [1.7.0] - 2025-09-29
 
