@@ -103,7 +103,10 @@ const platform = getPlatform();
 
 export const cliInfo = {
   version: "2025.2.0",
-  sha256: "fade51012a46011c016a2e5aee2f2e534c1ed078e49d1178a69e2889d2812a96",
+  get sha256() {
+    if (platform === "windows") return "33a131017ac9c99d721e430a86e929383314d3f91c9f2fbf413d872565654c18"
+    return "fade51012a46011c016a2e5aee2f2e534c1ed078e49d1178a69e2889d2812a96"
+  },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
     get downloadedBin() {
