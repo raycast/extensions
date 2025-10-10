@@ -5,14 +5,11 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Icon,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import {
-  addMemory,
-  fetchProjects,
-  checkApiConnection,
-  type Project,
-} from "./api";
+import { useState } from "react";
+import { addMemory, fetchProjects, checkApiConnection } from "./api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 
 interface FormValues {
   content: string;
@@ -20,32 +17,15 @@ interface FormValues {
 }
 
 export default function Command() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { pop } = useNavigation();
 
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        setIsLoading(true);
-        const isConnected = await checkApiConnection();
-        if (!isConnected) {
-          return;
-        }
-
-        const fetchedProjects = await fetchProjects();
-        setProjects(fetchedProjects);
-      } catch (error) {
-        console.error("Failed to load projects:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadProjects();
-  }, []);
-
+  const { isLoading, data: projects = [] } = usePromise(async () => {
+    const isConnected = await checkApiConnection();
+    if (!isConnected) return;
+    const fetchedProjects = await fetchProjects();
+    return fetchedProjects;
+  });
   async function handleSubmit(values: FormValues) {
     if (!values.content.trim()) {
       await showToast({
@@ -78,9 +58,15 @@ export default function Command() {
     <Form
       isLoading={isLoading || isSubmitting}
       actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Add Memory" onSubmit={handleSubmit} />
-        </ActionPanel>
+        !isLoading && (
+          <ActionPanel>
+            <Action.SubmitForm
+              icon={Icon.Plus}
+              title="Add Memory"
+              onSubmit={handleSubmit}
+            />
+          </ActionPanel>
+        )
       }
     >
       <Form.TextArea

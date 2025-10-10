@@ -9,8 +9,9 @@ import {
   Clipboard,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { searchMemories, checkApiConnection, type SearchResult } from "./api";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 
 const extractContent = (memory: SearchResult) => {
   if (memory.chunks && memory.chunks.length > 0) {
@@ -47,65 +48,35 @@ const extractUrl = (memory: SearchResult) => {
 };
 
 export default function Command() {
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [hasSearched, setHasSearched] = useState(false);
-  const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    async function checkConnection() {
-      const connected = await checkApiConnection();
-      setIsConnected(connected);
-    }
-    checkConnection();
-  }, []);
+  const { isLoading: isConnecting, data: isConnected } =
+    usePromise(checkApiConnection);
 
-  const performSearch = useCallback(
+  const { isLoading: isSearching, data: searchResults } = useCachedPromise(
     async (query: string) => {
-      if (!query.trim() || !isConnected) return;
+      const q = query.trim();
+      if (!q) return [];
 
-      try {
-        setIsLoading(true);
-        setHasSearched(true);
-
-        const results = await searchMemories({
-          q: query.trim(),
-          limit: 50,
+      const results = await searchMemories({
+        q,
+        limit: 50,
+      });
+      if (!results.length) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Search Complete",
+          message: "No memories found for your query",
         });
-
-        setSearchResults(results);
-
-        if (results.length === 0) {
-          await showToast({
-            style: Toast.Style.Success,
-            title: "Search Complete",
-            message: "No memories found for your query",
-          });
-        }
-      } catch (error) {
-        console.error("Search failed:", error);
-        setSearchResults([]);
-      } finally {
-        setIsLoading(false);
       }
+      return results;
     },
-    [isConnected],
+    [searchText],
+    {
+      execute: !!isConnected,
+      initialData: [],
+    },
   );
-
-  useEffect(() => {
-    if (!searchText.trim()) {
-      setSearchResults([]);
-      setHasSearched(false);
-      return;
-    }
-
-    const debounceTimer = setTimeout(() => {
-      performSearch(searchText);
-    }, 500);
-
-    return () => clearTimeout(debounceTimer);
-  }, [searchText, performSearch]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -146,7 +117,8 @@ export default function Command() {
       </List>
     );
   }
-
+  const isLoading = isConnecting || isSearching;
+  const hasSearched = !isLoading && !searchResults.length;
   return (
     <List
       isLoading={isLoading}
@@ -154,17 +126,22 @@ export default function Command() {
       searchBarPlaceholder="Search your memories..."
       throttle
     >
-      {!hasSearched && !searchText.trim() ? (
+      {hasSearched && !searchText.trim() ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="Search Your Memories"
           description="Type to search through your Supermemory collection"
         />
-      ) : hasSearched && searchResults.length === 0 ? (
+      ) : hasSearched ? (
         <List.EmptyView
           icon={Icon.Document}
           title="No Memories Found"
           description={`No memories found for "${searchText}"`}
+        />
+      ) : isLoading && searchText.trim() ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="Searching Your Memories"
         />
       ) : (
         searchResults.map((memory) => {
@@ -189,11 +166,10 @@ export default function Command() {
                     target={<MemoryDetail memory={memory} />}
                     icon={Icon.Eye}
                   />
-                  <Action
+                  <Action.CopyToClipboard
                     title="Copy Content"
-                    onAction={() => Clipboard.copy(content)}
-                    icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    content={content}
                   />
                   {url && (
                     <Action.OpenInBrowser
@@ -233,11 +209,10 @@ ${memory.score ? `**Relevance:** ${Math.round(memory.score * 100)}%` : ""}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
+          <Action.CopyToClipboard
             title="Copy Content"
-            onAction={() => Clipboard.copy(content)}
-            icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
+            content={content}
           />
           {url && (
             <Action.OpenInBrowser

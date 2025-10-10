@@ -66,28 +66,16 @@ class AuthenticationError extends Error {
   }
 }
 
-async function getApiKey(): Promise<string> {
-  try {
-    const preferences = getPreferenceValues<{ apiKey: string }>();
-    const apiKey = preferences.apiKey?.trim();
-
-    if (!apiKey) {
-      throw new AuthenticationError(
-        "API key is required. Please add your Supermemory API key in preferences.",
-      );
-    }
-
-    return apiKey;
-  } catch {
-    throw new AuthenticationError("Failed to get API key from preferences.");
-  }
+function getApiKey(): string {
+  const {apiKey} = getPreferenceValues<Preferences>();
+  return apiKey;
 }
 
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const apiKey = await getApiKey();
+  const apiKey = getApiKey();
 
   const url = `${API_BASE_URL}${endpoint}`;
 
