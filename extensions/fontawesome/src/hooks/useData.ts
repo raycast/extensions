@@ -1,22 +1,22 @@
-import { useCachedState, useFetch } from '@raycast/utils';
-import { SearchResult } from '@/types';
-import { familyStylesByPrefix } from '@/utils/data';
-import { iconQuery } from '@/utils/query';
+import { useCachedState, useFetch } from "@raycast/utils";
+import { SearchResult } from "@/types";
+import { familyStylesByPrefix } from "@/utils/data";
+import { iconQuery } from "@/utils/query";
 
 export const useData = (accessToken: string, execute: boolean, query: string, type: string) => {
-  const [iconData, setIconData] = useCachedState<SearchResult>('iconData');
+  const [iconData, setIconData] = useCachedState<SearchResult>("iconData");
 
   // Fetch icons for a specific family and style based on query
-  const { isLoading, data, revalidate } = useFetch<SearchResult>('https://api.fontawesome.com', {
+  const { isLoading, data, revalidate } = useFetch<SearchResult>("https://api.fontawesome.com", {
     execute: !!(accessToken && execute),
     keepPreviousData: true,
-    method: 'POST',
+    method: "POST",
     body: iconQuery(query, familyStylesByPrefix[type]),
     onData: (data) => {
       setIconData(data);
     },
     headers: {
-      Accept: 'application/json',
+      Accept: "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
   });

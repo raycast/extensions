@@ -5,10 +5,10 @@ export const iconQuery = (squery: string, stype: string) => `query Search {
         unicode
         svgs(filter: { familyStyles: [
           { family: ${
-            stype.split(' ').length === 3
-              ? stype.split(', ')[0].replace(' ', '_').toUpperCase()
-              : stype.split(', ')[0].toUpperCase()
-          }, style: ${stype.split(', ')[1].toUpperCase()} }
+            stype.split(" ").length === 3
+              ? stype.split(", ")[0].replace(" ", "_").toUpperCase()
+              : stype.split(", ")[0].toUpperCase()
+          }, style: ${stype.split(", ")[1].toUpperCase()} }
           { family: CLASSIC, style: BRANDS }
         ] }) {
             html

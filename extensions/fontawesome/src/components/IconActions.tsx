@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
-import { Action, ActionPanel, getPreferenceValues } from '@raycast/api';
-import { SearchItem } from '@/types';
+import { useMemo } from "react";
+import { Action, ActionPanel, getPreferenceValues } from "@raycast/api";
+import { SearchItem } from "@/types";
 import {
   copyFAClassesToClipboard,
   copyFAGlyphToClipboard,
   copyFASlugToClipboard,
   copyFAUnicodeClipboard,
   copySvgToClipboard,
-} from '@/utils/actions';
+} from "@/utils/actions";
 
 type IconActionsProps = {
   searchItem: SearchItem;
@@ -27,7 +27,7 @@ export const IconActions = ({ searchItem }: IconActionsProps) => {
             onAction={() => copyFASlugToClipboard(searchItem)}
           />
         ),
-        id: 'copyIconName',
+        id: "copyIconName",
       },
       {
         action: (
@@ -38,7 +38,7 @@ export const IconActions = ({ searchItem }: IconActionsProps) => {
             onAction={() => copyFAClassesToClipboard(searchItem)}
           />
         ),
-        id: 'copyIconClasses',
+        id: "copyIconClasses",
       },
       {
         action: (
@@ -49,7 +49,7 @@ export const IconActions = ({ searchItem }: IconActionsProps) => {
             onAction={() => copySvgToClipboard(searchItem)}
           />
         ),
-        id: 'copyAsSvg',
+        id: "copyAsSvg",
       },
       {
         action: (
@@ -60,7 +60,7 @@ export const IconActions = ({ searchItem }: IconActionsProps) => {
             onAction={() => copyFAGlyphToClipboard(searchItem)}
           />
         ),
-        id: 'copyIconGlyph',
+        id: "copyIconGlyph",
       },
       {
         action: (
@@ -71,7 +71,7 @@ export const IconActions = ({ searchItem }: IconActionsProps) => {
             onAction={() => copyFAUnicodeClipboard(searchItem)}
           />
         ),
-        id: 'copyIconUnicode',
+        id: "copyIconUnicode",
       },
     ];
 

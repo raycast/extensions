@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { Color, Grid } from '@raycast/api';
-import { useAccessToken } from '@/hooks/useAccessToken';
-import { useData } from '@/hooks/useData';
-import { usePreferences } from '@/hooks/usePreferences';
-import { IconActions } from '@/components/IconActions';
-import { StyleSelector } from '@/components/StyleSelector';
+import { useState } from "react";
+import { Color, Grid } from "@raycast/api";
+import { useAccessToken } from "@/hooks/useAccessToken";
+import { useData } from "@/hooks/useData";
+import { usePreferences } from "@/hooks/usePreferences";
+import { IconActions } from "@/components/IconActions";
+import { StyleSelector } from "@/components/StyleSelector";
 
 export default function Command() {
   const { API_TOKEN, STYLE_PREFERENCE, account } = usePreferences();
 
   const [type, setType] = useState<string>(STYLE_PREFERENCE);
-  const [query, setQuery] = useState<string>('');
+  const [query, setQuery] = useState<string>("");
 
   const { accessToken, isLoading: isAccessTokenLoading } = useAccessToken(API_TOKEN);
   const { isLoading: isDataLoading, data } = useData(accessToken, !isAccessTokenLoading, query, type);
@@ -34,7 +34,7 @@ export default function Command() {
           actions={<IconActions searchItem={searchItem} />}
           content={{
             value: {
-              source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString('base64')}`,
+              source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString("base64")}`,
               tintColor: Color.PrimaryText,
             },
             tooltip: searchItem.id,

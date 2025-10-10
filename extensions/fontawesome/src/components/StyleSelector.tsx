@@ -1,5 +1,5 @@
-import { Color, Grid } from '@raycast/api';
-import { familyStylesByPrefix, iconForStyle } from '@/utils/data';
+import { Color, Grid } from "@raycast/api";
+import { familyStylesByPrefix, iconForStyle } from "@/utils/data";
 
 type StyleSelectorProps = {
   setType: (newValue: string) => void;
@@ -14,7 +14,7 @@ export const StyleSelector = ({ setType, STYLE_PREFERENCE, account }: StyleSelec
       onChange={(newValue) => setType(newValue)}
       defaultValue={STYLE_PREFERENCE}
     >
-      {account === 'pro' ? (
+      {account === "pro" ? (
         <>
           <Grid.Dropdown.Section title="Classic Icons">
             {Object.entries(familyStylesByPrefix)
@@ -71,13 +71,13 @@ export const StyleSelector = ({ setType, STYLE_PREFERENCE, account }: StyleSelec
             key="fas"
             title="Classic, Solid"
             value="fas"
-            icon={{ source: iconForStyle('fas'), tintColor: Color.SecondaryText }}
+            icon={{ source: iconForStyle("fas"), tintColor: Color.SecondaryText }}
           />
           <Grid.Dropdown.Item
             key="fab"
             title="Classic, Brands"
             value="fab"
-            icon={{ source: iconForStyle('fab'), tintColor: Color.SecondaryText }}
+            icon={{ source: iconForStyle("fab"), tintColor: Color.SecondaryText }}
           />
         </>
       )}
