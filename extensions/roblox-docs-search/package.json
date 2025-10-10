@@ -13,6 +13,12 @@
 		"Documentation"
 	],
 	"license": "MIT",
+	"screenshots": [
+		{
+			"title": "Search Roblox Documentation",
+			"url": "screenshot.png"
+		}
+	],
 	"commands": [
 		{
 			"name": "search-roblox-docs",
