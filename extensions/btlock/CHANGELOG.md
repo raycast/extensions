@@ -2,34 +2,24 @@
 
 All notable changes to the BTLock extension will be documented in this file.
 
-## [Unreleased]
-
-### Changed
-- Refactored codebase into separate modules (types, constants, bluetooth service)
-- Improved type safety with BLEDeviceInfo type
-- Cleaned up main component to focus on UI only
-
-## [0.3.0] - 2025-10-10
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
-- Periodic refresh for real-time device status updates
-- Background proximity checking command (runs every 10 seconds)
-- Automatic device locking when trusted device disconnects
 
-## [0.2.0] - 2025-10-10
+- Bluetooth device discovery using macOS system_profiler
+- Proximity-based automatic Mac locking when watched device exceeds -70 dB threshold
+- Real-time RSSI (signal strength) monitoring for connected devices
+- Background proximity checking every 10 seconds
+- Device watcher with toggle functionality (Set/Remove Watcher for Lock)
+- Local storage for persisting watched device settings
+- Auto-refresh device list every 5 seconds
+- Toast notifications for watcher changes
+- Metadata folder with screenshots for store submission
 
-### Added
-- Bluetooth device fetching from macOS system profiler
-- Local storage setup for saving watched devices
-- Device watcher functionality to monitor connection status
-- Signal strength (RSSI) display for connected devices
-- Toggle between "Set watcher" and "Remove watcher" actions
+### Technical
 
-## [0.1.0] - 2025-10-10
-
-### Added
-- Initial project setup
-- Basic Bluetooth device discovery
-- Cross-platform support structure (macOS focused)
-- Raycast extension foundation
-- Device list UI with connection status
+- Refactored codebase into modular structure (types, constants, bluetooth service)
+- TypeScript type safety with BLEDeviceInfo interface
+- Proper cleanup of intervals on component unmount
+- Title Case naming conventions for Raycast UI compliance
+- ESLint and Prettier formatting applied

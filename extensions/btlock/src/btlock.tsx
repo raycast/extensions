@@ -42,7 +42,7 @@ export default function Command() {
           <List.Item
             key={index}
             title={device.name}
-            subtitle={device.connected ? device.rssi.toString() + "dB" : { value: null, tooltip: null }}
+            subtitle={device.connected ? device.rssi.toString() + "dB" : undefined}
             actions={
               <ActionPanel>
                 <ActionPanel.Submenu title="Open Actions">

@@ -6,8 +6,10 @@ export default async function Command() {
   const savedSerialNumber = await LocalStorage.getItem(SERIAL_NUMBER_KEY);
   const savedDevice = (await getBluetoothDevices()).find((value) => value.serialNumber === savedSerialNumber);
 
-  if (savedDevice != undefined && savedDevice.rssi * -1 > 60) {
-    lockDevice();
+  if (savedDevice) {
+    if (savedDevice.rssi * -1 > 80) {
+      lockDevice();
+    }
   }
 
   return;
