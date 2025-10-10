@@ -1,13 +1,13 @@
 # LAPACK/BLAS Documentation Search Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2025-10-10
 
 ### Added
 - Added "Copy Function Signature" action to copy function signatures without type annotations
 - Function signatures are now extracted from documentation and available for quick copying
 - Signature format: `routineName(param1, param2, ...)` (e.g., `dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)`)
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-10-10
 
 ### Added
 - Scripted Netlib synchronization (`scripts/generate_inventory.py`) to backfill markdown docs and rebuild metadata.
@@ -18,7 +18,7 @@
 - Removed legacy markdown files for routines not present in the official Netlib topics index to keep the dataset aligned.
 - Removed the unused helper script (`scripts/update_markdown_description_blocks.py`) now that Netlib regeneration handles formatting.
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-10-10
 
 ### Added
 - Initial implementation of LAPACK/BLAS Documentation Search extension
