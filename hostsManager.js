@@ -19,19 +19,23 @@ async function isSudoAvailable() {
     return true;
 }
 async function executeWithAdminPrivileges(command) {
-    const applescriptCommand = `
-    do shell script "${command.replace(/"/g, '\\"')}" with administrator privileges
-  `;
+    const escapedCommand = command.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const applescriptCommand = `do shell script "${escapedCommand}" with administrator privileges`;
     try {
         const { stdout } = await execAsync(`osascript -e '${applescriptCommand}'`);
         return stdout;
     }
     catch (error) {
-        if (error.message.includes('User canceled')) {
+        if (error.message.includes('User canceled') || error.message.includes('canceled')) {
             throw new Error('Authentication was canceled by user');
         }
         throw error;
     }
+}
+async function executeMultipleWithAdminPrivileges(commands) {
+    const combinedCommand = commands.join(' && ');
+    const result = await executeWithAdminPrivileges(combinedCommand);
+    return result.split('\n').filter(line => line.trim() !== '');
 }
 async function readHostsFile() {
     try {
@@ -107,28 +111,28 @@ async function addDomainsToHosts(domains) {
         };
     }
     try {
-        const backupResult = await createHostsBackup();
-        if (!backupResult.success) {
-            return backupResult;
-        }
-        const currentContent = await readHostsFile();
-        const alreadyBlocked = domains.filter(domain => currentContent.includes(`${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`));
-        if (alreadyBlocked.length > 0) {
-            return {
-                success: false,
-                message: `Some domains are already blocked: ${alreadyBlocked.join(', ')}`
-            };
-        }
-        const newEntries = generateHostsEntries(domains);
-        await executeWithAdminPrivileges(`echo "${newEntries}" >> "${HOSTS_FILE_PATH}"`);
-        await executeWithAdminPrivileges('dscacheutil -flushcache');
+        const entries = domains.map(domain => `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`);
+        const newContent = `\n\n# WebBlocker - Added by Raycast WebBlocker Extension\n${entries.join('\n')}\n`;
+        const commands = [
+            `[ ! -f "${BACKUP_FILE_PATH}" ] && cp "${HOSTS_FILE_PATH}" "${BACKUP_FILE_PATH}" || echo "Backup exists"`,
+            `echo '${newContent}' >> "${HOSTS_FILE_PATH}"`,
+            'dscacheutil -flushcache',
+            'echo "SUCCESS"'
+        ];
+        const result = await executeMultipleWithAdminPrivileges(commands);
         return {
             success: true,
             message: `Successfully blocked ${domains.length} domain(s)`,
-            backupCreated: backupResult.backupCreated
+            backupCreated: !result[0].includes('Backup exists')
         };
     }
     catch (error) {
+        if (error.message.includes('Authentication was canceled')) {
+            return {
+                success: false,
+                message: 'Authentication was canceled by user'
+            };
+        }
         return {
             success: false,
             message: `Failed to add domains to hosts file: ${error.message}`
@@ -137,26 +141,25 @@ async function addDomainsToHosts(domains) {
 }
 async function removeDomainsFromHosts() {
     try {
-        const currentContent = await readHostsFile();
-        if (!currentContent.includes(WEBGLOCKER_TAG)) {
-            return {
-                success: true,
-                message: 'No blocked domains found in hosts file'
-            };
-        }
-        const lines = currentContent.split('\\n');
-        const filteredLines = lines.filter(line => !line.includes(WEBGLOCKER_TAG));
-        const filteredContent = filteredLines.join('\\n');
-        const tempFile = '/tmp/hosts_temp';
-        await executeWithAdminPrivileges(`echo "${filteredContent}" > "${tempFile}"`);
-        await executeWithAdminPrivileges(`mv "${tempFile}" "${HOSTS_FILE_PATH}"`);
-        await executeWithAdminPrivileges('dscacheutil -flushcache');
+        const commands = [
+            `grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > "/tmp/hosts_filtered" || echo "No entries to remove"`,
+            `mv "/tmp/hosts_filtered" "${HOSTS_FILE_PATH}" 2>/dev/null || echo "Already clean"`,
+            'dscacheutil -flushcache',
+            'echo "SUCCESS"'
+        ];
+        const result = await executeMultipleWithAdminPrivileges(commands);
         return {
             success: true,
             message: 'Successfully removed all blocked domains from hosts file'
         };
     }
     catch (error) {
+        if (error.message.includes('Authentication was canceled')) {
+            return {
+                success: false,
+                message: 'Authentication was canceled by user'
+            };
+        }
         return {
             success: false,
             message: `Failed to remove domains from hosts file: ${error.message}`
