@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wubi-encoding-query",
+  "title": "Wubi Encoding Query",
+  "description": "Query Wubi encoding and character decomposition diagrams for Chinese characters",
+  "version": "1.0.1",
+  "icon": "logo.png",
+  "author": "reinject",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xlane/raycast_wubi.git"
+  },
+  "homepage": "https://github.com/0xlane/raycast_wubi",
+  "bugs": {
+    "url": "https://github.com/0xlane/raycast_wubi/issues"
+  },
+  "commands": [
+    {
+      "name": "search-wubi",
+      "title": "Wubi Encoding Query",
+      "description": "Search for Wubi encoding and decomposition diagram of Chinese characters",
+      "mode": "view",
+      "keywords": ["wubi", "86", "98"],
+      "arguments": [
+        {
+          "name": "hanzi",
+          "placeholder": "Chinese characters",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.60.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.4",
+    "@types/react": "18.0.9",
+    "eslint": "^8.0.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
