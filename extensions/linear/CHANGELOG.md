@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Status Preference] - 2025-10-09
+
+- Added "Preferred Status" preference to "Create Issue for Myself" command to specify the initial status for new issues
+
 ## [Update API and bug fixes] - 2025-04-15
 
 - Updated dependencies

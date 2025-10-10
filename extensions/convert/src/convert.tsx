@@ -104,7 +104,7 @@ export default function Command() {
 
     // check if input is rgb color
     const rgbMatch = value.match(
-      /^rgb(a)?\((\d{1,3}),(\s)?(\d{1,3}),(\s)?(\d{1,3})(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i
+      /^rgb(a)?\((\d{1,3}),(\s)?(\d{1,3}),(\s)?(\d{1,3})(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i,
     );
     if (rgbMatch) {
       console.log("its a rgb");
@@ -123,7 +123,7 @@ export default function Command() {
 
     // check if input is hsl color
     const hslMatch = value.match(
-      /^hsl(a)?\((\d{1,3}),(\s)?(\d{1,3})(%)?,(\s)?(\d{1,3})(%)?(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i
+      /^hsl(a)?\((\d{1,3}),(\s)?(\d{1,3})(%)?,(\s)?(\d{1,3})(%)?(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i,
     );
     if (hslMatch) {
       console.log("its a hsl");

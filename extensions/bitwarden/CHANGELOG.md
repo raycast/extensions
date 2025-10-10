@@ -2,6 +2,10 @@
 
 ## [Added support for Windows] - {PR_MERGE_DATE}
 
+## [New Command] - 2025-10-07
+
+- Add Create Login command to create new login items
+
 ## [Improvements] - 2025-09-02
 
 - Sync vault on command launch

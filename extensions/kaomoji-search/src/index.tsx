@@ -1,27 +1,17 @@
-import {
-  ActionPanel,
-  List,
-  showToast,
-  Action,
-  Toast,
-  getPreferenceValues,
-  Grid,
-  Clipboard,
-  Icon,
-  showHUD,
-} from "@raycast/api";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { AbortError } from "node-fetch";
+import { ActionPanel, List, Action, getPreferenceValues, Grid, Clipboard, Icon, showHUD } from "@raycast/api";
+import { useState, useMemo, useCallback } from "react";
 import { lib } from "asciilib";
 import { nanoid } from "nanoid";
 import { useRecentKaomoji } from "./useRecentKaomoji";
-import { Preference, SearchResult, SearchState } from "./types";
+import { SearchResult } from "./types";
+import { usePromise } from "@raycast/utils";
 
 export default function Command() {
-  const { state, search } = useSearch();
-  const { displayMode, primaryAction } = getPreferenceValues<Preference>();
+  const [searchText, setSearchText] = useState("");
+  const state = useSearch(searchText);
+  const { displayMode, primaryAction } = getPreferenceValues<Preferences>();
 
-  const displayGroupedResults = state.searchText.length === 0;
+  const displayGroupedResults = searchText.length === 0;
   const groupedResultsByCategory = useMemo(() => {
     const groupedResults: Record<string, SearchResult[]> = {};
     state.results.forEach((result) => {
@@ -55,7 +45,7 @@ export default function Command() {
   return (
     <ListComponent
       isLoading={state.isLoading}
-      onSearchTextChange={search}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search by name..."
       throttle
     >
@@ -95,7 +85,7 @@ function ItemActions({
   primaryAction,
 }: {
   searchResult: SearchResult;
-  primaryAction: Preference["primaryAction"];
+  primaryAction: Preferences["primaryAction"];
 }) {
   const { addKaomoji } = useRecentKaomoji();
 
@@ -142,7 +132,7 @@ function SearchListItem({
   primaryAction,
 }: {
   searchResult: SearchResult;
-  primaryAction: Preference["primaryAction"];
+  primaryAction: Preferences["primaryAction"];
 }) {
   return (
     <List.Item
@@ -182,7 +172,7 @@ function SearchGridItem({
   primaryAction,
 }: {
   searchResult: SearchResult;
-  primaryAction: Preference["primaryAction"];
+  primaryAction: Preferences["primaryAction"];
 }) {
   return (
     <Grid.Item
@@ -198,63 +188,27 @@ function SearchGridItem({
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true, searchText: "" });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  async function search(searchText: string) {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-    try {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      const results = await performSearch(searchText, cancelRef.current.signal);
-      setState((oldState) => ({
-        ...oldState,
-        results: results,
-        isLoading: false,
-        searchText,
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-      console.error("search error", error);
-      showToast(Toast.Style.Failure, "Could not perform search", String(error));
-    }
-  }
+function useSearch(searchText: string) {
+  const { isLoading, data = [] } = usePromise(async (search) => await performSearch(search), [searchText], {
+    failureToastOptions: {
+      title: "Could not perform search",
+    },
+  });
 
   return {
-    state: state,
-    search: search,
+    isLoading,
+    results: data,
   };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  console.log("searching for", searchText);
-
+async function performSearch(searchText: string): Promise<SearchResult[]> {
   const results = await searchForResults(searchText);
-
-  if (signal.aborted) {
-    return Promise.reject(new AbortError());
-  }
-
-  console.log("results count", results.length);
 
   return results.map((entry: AsciiLibEntry) => {
     return {
       id: nanoid(),
-      name: entry.entry as string,
-      description: entry.name as string,
+      name: entry.entry,
+      description: entry.name,
       category: entry.category,
     };
   });

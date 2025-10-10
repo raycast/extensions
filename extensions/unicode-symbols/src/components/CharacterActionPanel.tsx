@@ -60,7 +60,6 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
       <ActionPanel.Section title="Main">{main}</ActionPanel.Section>
       <ActionPanel.Section title="Hex">
         <Action.CopyToClipboard
-          // eslint-disable-next-line @raycast/prefer-title-case
           title={`Copy "${numberToHex(item.c)}" (HEX) to Clipboard`}
           content={numberToHex(item.c)}
           onCopy={() => addToRecentlyUsedItems(item)}

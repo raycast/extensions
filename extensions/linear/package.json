@@ -165,6 +165,14 @@
           "required": false
         },
         {
+          "name": "preferredStatusName",
+          "type": "textfield",
+          "title": "Preferred Status",
+          "placeholder": "Todo",
+          "description": "Specify the name of the preferred status for new issues (e.g. Todo, Backlog). If not specified, uses Linear's default.",
+          "required": false
+        },
+        {
           "name": "shouldCloseMainWindow",
           "type": "checkbox",
           "title": "Advanced",

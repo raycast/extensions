@@ -61,7 +61,7 @@ const CopyShadcnRegistryActions = ({ svg }: { svg: Svg }) => {
           dark: "https://svgl.app/library/shadcn-ui_dark.svg",
         },
       }}
-      title="Copy shadcn/ui Registry Install Command"
+      title="Copy Shadcn/ui Registry Install Command"
       onAction={handleAction}
     />
   );

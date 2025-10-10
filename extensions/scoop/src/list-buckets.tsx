@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { scoopBucketList, scoopBucketRm, ScoopBucket } from "./scoop";
+import { useScoop } from "./hooks/scoopHooks";
 import { withToast } from "./utils";
+import { ScoopBucket } from "./types/index.types";
 
 export default function ListBucketsCommand() {
+  const scoop = useScoop();
   const [buckets, setBuckets] = useState<ScoopBucket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   async function refreshBuckets() {
     setIsLoading(true);
-    const fetchedBuckets = await scoopBucketList();
+    const fetchedBuckets = await scoop.listBuckets();
     setBuckets(fetchedBuckets);
     setIsLoading(false);
   }
@@ -36,7 +38,7 @@ export default function ListBucketsCommand() {
                 onAction={() =>
                   withToast(
                     async () => {
-                      await scoopBucketRm(bucket.Name);
+                      await scoop.bucketRemove(bucket.Name);
                       await refreshBuckets();
                     },
                     {
