@@ -1,7 +1,6 @@
 import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
 import { existsSync, unlinkSync, writeFileSync, accessSync, constants, chmodSync } from "fs";
-import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL, CACHE_KEYS } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
@@ -19,7 +18,7 @@ import {
   tryExec,
   VaultIsLockedError,
 } from "~/utils/errors";
-import { join } from "path";
+import { join, dirname } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { download } from "~/utils/network";
