@@ -112,18 +112,22 @@ async function addDomainsToHosts(domains) {
     }
     try {
         const entries = domains.map(domain => `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`);
-        const newContent = `\n\n# WebBlocker - Added by Raycast WebBlocker Extension\n${entries.join('\n')}\n`;
+        const tempFile = '/tmp/webblocker_entries.txt';
         const commands = [
-            `[ ! -f "${BACKUP_FILE_PATH}" ] && cp "${HOSTS_FILE_PATH}" "${BACKUP_FILE_PATH}" || echo "Backup exists"`,
-            `echo '${newContent}' >> "${HOSTS_FILE_PATH}"`,
-            'dscacheutil -flushcache',
-            'echo "SUCCESS"'
+            `test -f "${BACKUP_FILE_PATH}" || cp "${HOSTS_FILE_PATH}" "${BACKUP_FILE_PATH}"`,
+            `echo "" > "${tempFile}"`,
+            `echo "" >> "${tempFile}"`,
+            `echo "# WebBlocker - Added by Raycast WebBlocker Extension" >> "${tempFile}"`,
+            ...entries.map(entry => `echo "${entry}" >> "${tempFile}"`),
+            `cat "${tempFile}" >> "${HOSTS_FILE_PATH}"`,
+            `rm "${tempFile}"`,
+            'dscacheutil -flushcache'
         ];
-        const result = await executeMultipleWithAdminPrivileges(commands);
+        await executeMultipleWithAdminPrivileges(commands);
         return {
             success: true,
             message: `Successfully blocked ${domains.length} domain(s)`,
-            backupCreated: !result[0].includes('Backup exists')
+            backupCreated: true
         };
     }
     catch (error) {
@@ -141,13 +145,14 @@ async function addDomainsToHosts(domains) {
 }
 async function removeDomainsFromHosts() {
     try {
+        const tempFile = '/tmp/hosts_filtered.txt';
         const commands = [
-            `grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > "/tmp/hosts_filtered" || echo "No entries to remove"`,
-            `mv "/tmp/hosts_filtered" "${HOSTS_FILE_PATH}" 2>/dev/null || echo "Already clean"`,
-            'dscacheutil -flushcache',
-            'echo "SUCCESS"'
+            `grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > "${tempFile}"`,
+            `cp "${tempFile}" "${HOSTS_FILE_PATH}"`,
+            `rm "${tempFile}"`,
+            'dscacheutil -flushcache'
         ];
-        const result = await executeMultipleWithAdminPrivileges(commands);
+        await executeMultipleWithAdminPrivileges(commands);
         return {
             success: true,
             message: 'Successfully removed all blocked domains from hosts file'
