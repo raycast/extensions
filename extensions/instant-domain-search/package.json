@@ -5,6 +5,9 @@
   "description": "Find domains, check availability, search popular extensions, and buy premium domains.",
   "icon": "extension-icon.png",
   "author": "instantdomainsearch",
+  "contributors": [
+    "antonios"
+  ],
   "platforms": [
     "macOS",
     "Windows"
