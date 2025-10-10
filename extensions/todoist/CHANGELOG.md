@@ -1,6 +1,7 @@
 # Todoist Changelog
 
 ## [Set Due Date to Everyday for Existing Tasks]  - {PR_MERGE_DATE}
+
 - **Add Option To Schedule "Everyday" for existing tasks**: Now on the homepage you can set schedule the due date of tasks to repeat everyday. Useful to setting tasks to recurring events.
 
 ## [Improved Due Time Handling] - 2025-09-04
