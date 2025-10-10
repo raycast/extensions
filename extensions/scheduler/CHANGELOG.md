@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Run missed schedules immediately] - {PR_MERGE_DATE}
+## [Run missed schedules immediately] - 2025-10-10
 
 - ▶️ Added an option to immediately run a scheduled command if it was missed (e.g., the machine was asleep). Note: in this case "immediately" means within one minute of Raycast starting.
 
