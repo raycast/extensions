@@ -7,7 +7,8 @@ import getUserAgent from "./getUserAgent";
 
 export default function useDomainFetch(query: string) {
   const regex = useMemo(() => {
-    return new RegExp(`^(?<domain>.+?)(\\.(?<tld>${Array.from(ALL_TLDs).join("|")}))?$`);
+    const sortedTLDs = Array.from(ALL_TLDs).sort((a, b) => b.length - a.length);
+    return new RegExp(`^(?<domain>.+?)(\\.(?<tld>${sortedTLDs.join("|")}))?$`);
   }, []);
   const parsedSearch = useMemo(() => {
     const trimmedQuery = query.trim();
@@ -15,7 +16,7 @@ export default function useDomainFetch(query: string) {
     const domain = match?.groups?.domain ?? trimmedQuery;
     const tld = match?.groups?.tld ?? "com";
     return { domain, tld };
-  }, [query]);
+  }, [query, regex]);
 
   const { value: anonymousUserID, isLoading: isAnonymousUserIDLoading } = useLocalStorage(
     ANONYMOUS_USER_ID_KEY,
