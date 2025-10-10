@@ -1,6 +1,7 @@
 # Todoist Changelog
 
-## [Set Due Date to Everyday for Existing Tasks]  - {PR_MERGE_DATE}
+## [Set Due Date to Everyday for Existing Tasks] - {PR_MERGE_DATE}
+
 - **Add Option To Schedule "Everyday" for existing tasks**: Now on the homepage you can set schedule the due date of tasks to repeat everyday. Useful to setting tasks to recurring events.
 
 ## [Improved Due Time Handling] - 2025-09-04
@@ -61,9 +62,11 @@
 - Added Windows support
 
 ## [Add task priority mapping for Todoist API] - 2025-06-12
- - Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
+
+- Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
 
 ## [Use confetti when completing tasks] - 2025-05-28
+
 - Add option to use the Raycast confetti command when completing tasks.
 
 ## [Automatically create labels on quick add command] - 2025-05-09
