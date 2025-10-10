@@ -76,7 +76,7 @@ async function getLatestReleaseInfo(): Promise<ReleaseInfo> {
   if (!response.ok) {
     throw new Error(`Failed to fetch release info: ${response.statusText}`);
   }
-  return response.json();
+  return response.json() as Promise<ReleaseInfo>;
 }
 
 async function fetchMetadataFromRelease(releaseInfo: ReleaseInfo): Promise<MetadataItem[]> {
@@ -95,7 +95,7 @@ async function fetchMetadataFromRelease(releaseInfo: ReleaseInfo): Promise<Metad
     throw new Error(`Failed to fetch metadata: ${response.statusText}`);
   }
 
-  const metadata = await response.json();
+  const metadata = (await response.json()) as MetadataItem[];
   await cacheMetadata(metadata, tagName);
   return metadata;
 }
