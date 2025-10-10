@@ -1,6 +1,6 @@
 # Raycast Wubi Encoding Query Extension
 
-An efficient Raycast extension for quickly querying Wubi encoding and character decomposition diagrams of Chinese characters.
+An efficient Raycast extension for quickly querying Wubi encoding and character decomposition diagrams of Chinese characters
 
 ## 🎯 Features
 
