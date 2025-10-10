@@ -1,4 +1,5 @@
 import { getBookmarks, getAvailableProfiles, resolveProfileName } from "../util";
+import { MAX_BOOKMARK_RESULTS } from "../constants";
 
 type Input = {
   /** The query to search for in the bookmarks (optional, returns all bookmarks if empty) */
@@ -9,11 +10,11 @@ type Input = {
 
 export default async function (input: Input) {
   try {
-    // Resolve profile name (e.g., "yunit" -> "Profile 3")
+    // Resolve profile name (e.g., "Test" -> "Profile 3")
     const resolvedProfile = resolveProfileName(input.profile);
-    const bookmarks = await getBookmarks(resolvedProfile);
+    const bookmarks = await getBookmarks(resolvedProfile, MAX_BOOKMARK_RESULTS);
 
-    // If no query provided, return all bookmarks
+    // If no query provided, return all bookmarks (already limited by MAX_BOOKMARK_RESULTS)
     if (!input.query || input.query.trim() === "") {
       return bookmarks;
     }

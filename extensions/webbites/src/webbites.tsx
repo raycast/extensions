@@ -20,6 +20,7 @@ import { search } from "./utils/search";
 import { getSimpleCurrentUser, clearUserData } from "./utils/userHelpers";
 import { saveTabToQstash, isValidUrl } from "./utils/qstash";
 import { BookmarkItem } from "./types";
+import { plausible } from "./utils/plausible";
 
 // Constants
 const HITS_PER_PAGE = 40;
@@ -88,6 +89,12 @@ export default function Command() {
       // If not authenticated, try to log in with credentials from preferences
       if (!authenticated) {
         await tryAutoLogin();
+      }
+
+      // Track extension open
+      const user = await getSimpleCurrentUser();
+      if (user) {
+        await plausible.trackExtensionOpen(user.id);
       }
     } catch (error) {
       console.error("Initialization error:", error);
@@ -335,6 +342,9 @@ export default function Command() {
         customId: null,
       });
 
+      // Track website save
+      await plausible.trackWebsiteSave(user.id);
+
       showToast({
         title: "Saved to WebBites",
         message: "Successfully saved website",
@@ -438,6 +448,13 @@ export default function Command() {
                 ? `https://www.webbites.io/app?bookmarkId=${result.objectId}`
                 : result.url
             }
+            onOpen={async () => {
+              // Track website open
+              const user = await getSimpleCurrentUser();
+              if (user) {
+                await plausible.trackWebsiteOpen(user.id);
+              }
+            }}
           />
           <Action.CopyToClipboard content={result.url} title="Copy URL" />
           <Action.OpenInBrowser

@@ -1,8 +1,8 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useMemo } from "react";
 import { getOpenTabs } from "../actions";
 import { SearchResult, Tab } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
-import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { NOT_INSTALLED_MESSAGE, MAX_TAB_RESULTS } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
 import { useCometInstallation } from "./useCometInstallation";
 
@@ -20,11 +20,22 @@ import { useCometInstallation } from "./useCometInstallation";
  */
 export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullable<Tab[]>; revalidate?: () => void } {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
-  const [data, setData] = useState<Tab[]>([]);
+  const [allTabs, setAllTabs] = useState<Tab[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
   const { isInstalled, isChecking } = useCometInstallation();
   const queryParts = query.toLowerCase().split(/\s+/);
+
+  // Memoize filtered tabs to prevent unnecessary re-computation
+  const data = useMemo(() => {
+    const filteredTabs = allTabs
+      .map((tab): [Tab, string] => [tab, `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`])
+      .filter(([, searchable]) => queryParts.reduce((isMatch, part) => isMatch && searchable.includes(part), true))
+      .map(([tab]) => tab)
+      .slice(0, MAX_TAB_RESULTS); // Limit results to prevent memory issues
+
+    return filteredTabs;
+  }, [allTabs, queryParts]);
 
   const loadTabs = async () => {
     // Wait for installation check to complete
@@ -42,12 +53,8 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
 
     try {
       const tabs = await getOpenTabs(useOriginalFavicon);
-      const filteredTabs = tabs
-        .map((tab): [Tab, string] => [tab, `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`])
-        .filter(([, searchable]) => queryParts.reduce((isMatch, part) => isMatch && searchable.includes(part), true))
-        .map(([tab]) => tab);
-
-      setData(filteredTabs);
+      // Apply limit immediately to prevent memory issues with large tab collections
+      setAllTabs(tabs.slice(0, MAX_TAB_RESULTS * 2)); // Allow some buffer for filtering
       setIsLoading(false);
     } catch (e) {
       if (e instanceof Error && e.message === NOT_INSTALLED_MESSAGE) {
@@ -61,7 +68,7 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
 
   useEffect(() => {
     loadTabs();
-  }, [query, isInstalled, isChecking]);
+  }, [isInstalled, isChecking]); // Remove query dependency since filtering is now memoized
 
   const revalidate = () => {
     setIsLoading(true);

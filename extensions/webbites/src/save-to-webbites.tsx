@@ -7,6 +7,7 @@ import {
 } from "@raycast/api";
 import { isLoggedIn, login, getCurrentUser } from "./utils/auth";
 import { saveTabToQstash, isValidUrl } from "./utils/qstash";
+import { plausible } from "./utils/plausible";
 
 interface Arguments {
   content: string;
@@ -100,6 +101,11 @@ export default async function SaveToWebBites(
 
     // Send to backend API
     await saveTabToQstash(data);
+
+    // Track website save with Plausible
+    if (isUrl) {
+      await plausible.trackWebsiteSave(currentUser.id);
+    }
 
     await showToast({
       style: Toast.Style.Success,

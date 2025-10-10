@@ -34,12 +34,12 @@ export default function Command() {
             />
             <Action.OpenInBrowser
               icon={Icon.Globe}
-              title="Open svgl shadcn/ui Registry Docs"
+              title="Open Svgl Shadcn/ui Registry Docs"
               url="https://svgl.app/docs/shadcn-ui"
             />
             <Action.OpenInBrowser
               icon={Icon.Globe}
-              title="Open shadcn/ui Registry Docs"
+              title="Open Shadcn/ui Registry Docs"
               url="https://ui.shadcn.com/docs/registry"
             />
           </ActionPanel>

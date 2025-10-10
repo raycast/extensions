@@ -234,7 +234,7 @@ export class Game {
     setField: React.Dispatch<React.SetStateAction<string>>,
     setError: React.Dispatch<React.SetStateAction<string | undefined>>,
     setScore: React.Dispatch<React.SetStateAction<GameScore | undefined>>,
-    setMessage: React.Dispatch<React.SetStateAction<string | undefined>>
+    setMessage: React.Dispatch<React.SetStateAction<string | undefined>>,
   ) {
     this.setField = setField;
     this.setError = setError;
