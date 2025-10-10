@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-10-10
 
 - Added Windows support as this is not using any macOS specific APIs
 
