@@ -137,7 +137,7 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 - [ ] T052 [P] [US3] Implement conversation history management in src/services/historyService.ts
 - [ ] T053 [US3] Add conversation list view in src/components/ConversationList.tsx
 - [ ] T054 [US3] Add conversation management UI (archive, delete, search)
-- [ ] T055 [US3] Implement conversation loading and resumption
+- [X] T055 [US3] Implement conversation loading and resumption
 - [ ] T056 [US3] Add conversation history export functionality
 - [ ] T057 [US3] Implement conversation search and filtering
 - [ ] T058 [US3] Add conversation auto-save and recovery features

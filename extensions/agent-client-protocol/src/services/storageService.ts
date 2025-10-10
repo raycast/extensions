@@ -369,6 +369,7 @@ export class StorageService {
       ...session,
       createdAt: this.toDate(session.createdAt),
       lastActivity: this.toDate(session.lastActivity),
+      agentConfigId: session.agentConfigId ?? 'unknown-agent',
       messages: session.messages.map((message, index) => {
         const normalized = this.normalizeMessage(message);
         if (normalized.metadata.sequence === undefined) {

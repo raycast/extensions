@@ -21,9 +21,16 @@ import type {
 import type {
   SessionMessage as ACPSessionMessage,
   MessageContent as ACPMessageContent,
-  PromptResponse
+  PromptResponse,
+  SessionUpdate,
+  SessionUpdateNotification,
+  ToolCall,
+  ToolCallUpdate,
+  PlanUpdate,
+  CommandsUpdate,
+  ModeChange
 } from '@/types/acp';
-import type { SessionServiceInterface } from '@/types/extension';
+import type { AgentConfig, SessionServiceInterface } from '@/types/extension';
 import type { StorageService } from './storageService';
 import type { ACPClient } from './acpClient';
 
@@ -33,7 +40,23 @@ export class SessionService implements SessionServiceInterface {
   constructor(
     private storageService: StorageService,
     private acpClient: ACPClient
-  ) {}
+  ) {
+    if (typeof this.acpClient.registerSessionUpdateListener === 'function') {
+      this.acpClient.registerSessionUpdateListener((update) => {
+        void this.handleSessionUpdate(update);
+      });
+    }
+  }
+
+  private sessionObservers: Map<string, (message: SessionMessage) => void> = new Map();
+
+  onSessionMessage(sessionId: string, handler: (message: SessionMessage) => void): void {
+    this.sessionObservers.set(sessionId, handler);
+  }
+
+  offSessionMessage(sessionId: string): void {
+    this.sessionObservers.delete(sessionId);
+  }
 
   /**
    * Create a new conversation session
@@ -43,6 +66,14 @@ export class SessionService implements SessionServiceInterface {
     PerformanceLogger.start(operationId);
 
     try {
+      if (!request.agentConfigId) {
+        throw new ACPError(
+          ErrorCode.InvalidConfiguration,
+          'Agent configuration ID is required to create a session',
+          'No agent configuration was provided for session creation'
+        );
+      }
+
       logger.info('Creating new session', {
         agentConnectionId: request.agentConnectionId,
         promptLength: request.prompt.length
@@ -68,6 +99,7 @@ export class SessionService implements SessionServiceInterface {
       const session: ConversationSession = {
         sessionId,
         agentConnectionId: request.agentConnectionId,
+        agentConfigId: request.agentConfigId,
         status: 'active',
         createdAt: new Date(),
         lastActivity: new Date(),
@@ -77,7 +109,12 @@ export class SessionService implements SessionServiceInterface {
           tags: request.metadata?.tags || [],
           priority: request.metadata?.priority || 'normal'
         },
-        context: request.context
+        context: {
+          ...request.context,
+          additionalContext: {
+            ...(request.context?.additionalContext ?? {})
+          }
+        }
       };
 
       // Send initial prompt to agent via ACP
@@ -104,10 +141,11 @@ export class SessionService implements SessionServiceInterface {
           }
         }
 
+        session.agentSessionId = acpSession.sessionId;
         session.context = {
-          ...request.context,
+          ...session.context,
           additionalContext: {
-            ...request.context?.additionalContext,
+            ...(session.context?.additionalContext ?? {}),
             agentSessionId: acpSession.sessionId
           }
         };
@@ -257,6 +295,7 @@ export class SessionService implements SessionServiceInterface {
   async sendMessage(
     sessionId: string,
     content: string,
+    agentConfig: AgentConfig,
     context?: MessageRequest['context']
   ): Promise<SessionMessage> {
     const operationId = `sendMessage-${sessionId}`;
@@ -277,6 +316,19 @@ export class SessionService implements SessionServiceInterface {
           `Session not found: ${sessionId}`,
           'Cannot send message to a session that does not exist',
           { sessionId }
+        );
+      }
+
+      if (!session.agentConfigId) {
+        session.agentConfigId = agentConfig.id;
+      }
+
+      if (session.agentConfigId !== agentConfig.id) {
+        throw new ACPError(
+          ErrorCode.InvalidConfiguration,
+          `Session is associated with a different agent configuration (${session.agentConfigId})`,
+          'Please reopen the conversation using the original agent',
+          { sessionId, expectedAgent: session.agentConfigId, providedAgent: agentConfig.id }
         );
       }
 
@@ -303,6 +355,8 @@ export class SessionService implements SessionServiceInterface {
       };
 
       // Add user message to session
+      const historyBeforeNewMessage = [...session.messages];
+
       session.messages.push(userMessage);
       session.lastActivity = new Date();
 
@@ -312,8 +366,28 @@ export class SessionService implements SessionServiceInterface {
       // Send message to agent via ACP
       let promptResponse: PromptResponse;
       let agentMessages: SessionMessage[] = [];
+      let agentSessionId = session.agentSessionId;
+      let retriedWithNewSession = false;
       try {
-        promptResponse = await this.acpClient.sendPrompt(sessionId, content);
+        if (!agentSessionId) {
+          const newAgentSession = await this.acpClient.createSession({
+            cwd: session.context?.workingDirectory ?? process.cwd()
+          });
+          agentSessionId = newAgentSession.sessionId;
+          session.agentSessionId = agentSessionId;
+          session.context = {
+            ...session.context,
+            additionalContext: {
+              ...(session.context?.additionalContext ?? {}),
+              agentSessionId
+            }
+          };
+          await this.storageService.saveConversation(session);
+        }
+
+        const promptText = this.buildPromptWithHistory(historyBeforeNewMessage, content);
+
+        promptResponse = await this.acpClient.sendPrompt(agentSessionId, promptText);
 
         const responseMessages = promptResponse.messages ?? [];
         agentMessages = responseMessages
@@ -336,6 +410,7 @@ export class SessionService implements SessionServiceInterface {
                 source: 'agent',
                 messageType: 'text',
                 sequence: session.messages.length,
+                agentId: agentConfig.id,
                 processingTime: promptResponse.messages?.[0]?.metadata?.processingTime
               }
             }
@@ -349,22 +424,76 @@ export class SessionService implements SessionServiceInterface {
         });
 
       } catch (error) {
-        logger.error('Failed to send message to agent', { sessionId, error });
+        const details = typeof error === 'object' && error !== null && 'details' in (error as Record<string, unknown>)
+          ? String((error as Record<string, unknown>).details)
+          : '';
 
-        throw new ACPError(
-          ErrorCode.ProtocolError,
-          'Failed to send message to agent',
-          error instanceof Error ? error.message : 'ACP communication error',
-          { sessionId, messageId: userMessage.id }
-        );
+        const sessionNotFound = details.includes('Session not found');
+
+        if (sessionNotFound && !retriedWithNewSession) {
+          logger.warn('Agent session missing, creating new ACP session', {
+            sessionId,
+            agentConfigId: agentConfig.id
+          });
+
+          const newAgentSession = await this.acpClient.createSession({
+            cwd: session.context?.workingDirectory ?? process.cwd()
+          });
+
+          agentSessionId = newAgentSession.sessionId;
+          session.agentSessionId = agentSessionId;
+          session.context = {
+            ...session.context,
+            additionalContext: {
+              ...(session.context?.additionalContext ?? {}),
+              agentSessionId
+            }
+          };
+
+          await this.storageService.saveConversation(session);
+
+          const retryPrompt = this.buildPromptWithHistory(historyBeforeNewMessage, content);
+          promptResponse = await this.acpClient.sendPrompt(agentSessionId, retryPrompt);
+
+          const responseMessages = promptResponse.messages ?? [];
+          agentMessages = responseMessages
+            .filter(message => message.type !== 'user')
+            .map((message, index) =>
+              this.transformAcpMessage(
+                message,
+                session.messages.length + index
+              )
+            );
+
+          retriedWithNewSession = true;
+
+          logger.info('Agent response received after session renewal', {
+            sessionId,
+            responseCount: agentMessages.length
+          });
+
+        } else {
+          logger.error('Failed to send message to agent', { sessionId, error });
+
+          throw new ACPError(
+            ErrorCode.ProtocolError,
+            'Failed to send message to agent',
+            error instanceof Error ? error.message : 'ACP communication error',
+            { sessionId, messageId: userMessage.id }
+          );
+        }
       }
 
       // Add agent response to session
-      for (const agentMessage of agentMessages) {
-        agentMessage.metadata.sequence = session.messages.length;
-        session.messages.push(agentMessage);
-        session.lastActivity = new Date();
-        await this.storageService.addMessageToConversation(sessionId, agentMessage);
+      if (agentMessages.length === 0) {
+        logger.info('No synchronous agent messages returned; awaiting streaming updates', { sessionId });
+      } else {
+        for (const agentMessage of agentMessages) {
+          agentMessage.metadata.sequence = session.messages.length;
+          session.messages.push(agentMessage);
+          session.lastActivity = new Date();
+          await this.storageService.addMessageToConversation(sessionId, agentMessage);
+        }
       }
 
       logger.info('Message exchange completed', {
@@ -589,6 +718,167 @@ export class SessionService implements SessionServiceInterface {
         return 'agent';
       default:
         return 'system';
+    }
+  }
+
+  private buildPromptWithHistory(
+    historyMessages: SessionMessage[],
+    content: string
+  ): string {
+    const historyLines = historyMessages
+      .map((message) => {
+        const sender =
+          message.role === 'user' ? 'User' :
+          message.role === 'assistant' ? 'Assistant' :
+          'System';
+        return `${sender}: ${message.content}`;
+      })
+      .join('\n');
+
+    const newLine = `User: ${content}`;
+
+    if (!historyLines) {
+      return newLine;
+    }
+
+    return `Conversation history:\n${historyLines}\n\n${newLine}`;
+  }
+
+  private async handleSessionUpdate(update: SessionUpdateNotification): Promise<void> {
+    const sessionId = update.sessionId;
+    const session = await this.storageService.getConversation(sessionId);
+    if (!session) {
+      return;
+    }
+
+    const message = this.transformSessionUpdate(update, session.messages.length);
+    if (!message) {
+      return;
+    }
+
+    const lastMessage = session.messages[session.messages.length - 1];
+    let notificationTarget: SessionMessage = message;
+
+    if (
+      message.metadata.isStreaming &&
+      lastMessage &&
+      lastMessage.metadata?.isStreaming &&
+      lastMessage.role === message.role
+    ) {
+      lastMessage.content = `${lastMessage.content ?? ""}${message.content ?? ""}`;
+      lastMessage.timestamp = message.timestamp;
+      notificationTarget = lastMessage;
+    } else {
+      session.messages.push(message);
+    }
+
+    session.lastActivity = new Date();
+    await this.storageService.saveConversation(session);
+
+    const observer = this.sessionObservers.get(sessionId);
+    if (observer) {
+      observer(notificationTarget);
+    }
+  }
+
+  private transformSessionUpdate(update: SessionUpdateNotification, sequence: number): SessionMessage | null {
+    const { update: payload } = update;
+    if (!payload) {
+      return null;
+    }
+
+    switch (payload.sessionUpdate) {
+      case 'agent_message_chunk':
+      case 'user_message_chunk':
+      case 'agent_thought_chunk': {
+        const role = payload.sessionUpdate === 'user_message_chunk' ? 'user' :
+          payload.sessionUpdate === 'agent_message_chunk' ? 'assistant' : 'system';
+
+        const { text, messageType } = this.flattenAcpContent([payload.content]);
+
+        return {
+          id: `${payload.sessionUpdate}-${Date.now()}`,
+          role,
+          content: text,
+          timestamp: new Date(),
+          metadata: {
+            source: role === 'user' ? 'user' : role === 'assistant' ? 'agent' : 'system',
+            messageType,
+            sequence,
+            isStreaming: true
+          }
+        };
+      }
+      case 'tool_call':
+      case 'tool_call_update': {
+        const toolUpdate = payload as ToolCall | ToolCallUpdate;
+        return {
+          id: toolUpdate.toolCallId,
+          role: 'tool',
+          content: `Tool ${toolUpdate.toolCallId} ${toolUpdate.sessionUpdate === 'tool_call' ? toolUpdate.status : toolUpdate.status}`,
+          timestamp: new Date(),
+          metadata: {
+            source: 'agent',
+            messageType: 'tool_call',
+            sequence
+          },
+          toolCall: {
+            name: toolUpdate.sessionUpdate === 'tool_call' ? (toolUpdate.title ?? toolUpdate.toolCallId) : toolUpdate.toolCallId,
+            arguments: toolUpdate.sessionUpdate === 'tool_call' ? (toolUpdate.input ?? {}) : {},
+            callId: toolUpdate.toolCallId
+          }
+        };
+      }
+      case 'plan': {
+        const planUpdate = payload as PlanUpdate;
+        const planText = [
+          `Plan: ${planUpdate.plan.title}`,
+          planUpdate.plan.description ?? '',
+          ...planUpdate.plan.steps.map(step => `- [${step.status === 'completed' ? 'x' : ' '}] ${step.title}`)
+        ].join('\n');
+        return {
+          id: `plan-${Date.now()}`,
+          role: 'system',
+          content: planText,
+          timestamp: new Date(),
+          metadata: {
+            source: 'agent',
+            messageType: 'text',
+            sequence
+          }
+        };
+      }
+      case 'commands': {
+        const commandsUpdate = payload as CommandsUpdate;
+        const commandText = commandsUpdate.commands.map(command => `- ${command.name}: ${command.description}`).join('\n');
+        return {
+          id: `commands-${Date.now()}`,
+          role: 'system',
+          content: `Available Commands:\n${commandText}`,
+          timestamp: new Date(),
+          metadata: {
+            source: 'agent',
+            messageType: 'text',
+            sequence
+          }
+        };
+      }
+      case 'mode_change': {
+        const modeChange = payload as ModeChange;
+        return {
+          id: `mode-${Date.now()}`,
+          role: 'system',
+          content: `Agent switched to mode: ${modeChange.mode}`,
+          timestamp: new Date(),
+          metadata: {
+            source: 'agent',
+            messageType: 'text',
+            sequence
+          }
+        };
+      }
+      default:
+        return null;
     }
   }
 }

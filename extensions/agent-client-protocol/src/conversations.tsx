@@ -20,6 +20,7 @@ import { StorageService } from "@/services/storageService";
 import { ErrorHandler } from "@/utils/errors";
 import { createLogger } from "@/utils/logging";
 import type { ConversationSession } from "@/types/extension";
+import ChatCommand from "@/chat";
 
 const logger = createLogger("ConversationsCommand");
 
@@ -155,17 +156,15 @@ export default function ConversationsCommand() {
             detail={<List.Item.Detail markdown={getConversationDetail(conversation)} />}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Continue Conversation"
                   icon="💬"
-                  onAction={() => {
-                    // TODO: Navigate to chat with this session
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Feature Coming Soon",
-                      message: "Continue conversation feature is in development"
-                    });
-                  }}
+                  target={
+                    <ChatCommand
+                      initialSessionId={conversation.sessionId}
+                      initialAgentId={conversation.agentConfigId}
+                    />
+                  }
                 />
                 <Action
                   title="Archive Conversation"

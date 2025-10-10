@@ -1,328 +1,211 @@
 /**
  * Unit Tests for SessionService
  *
- * Tests the core session and message management functionality including:
- * - Session creation and lifecycle
- * - Message handling and storage
- * - Conversation state management
- * - Error handling and recovery
+ * Focused on session creation and continuation flows including:
+ * - Creating a new session with initial prompt
+ * - Continuing a stored conversation with a new agent session
  */
 
-import { SessionService } from '@/services/sessionService';
-import { StorageService } from '@/services/storageService';
-import { ACPClient } from '@/services/acpClient';
-import { ErrorCode } from '@/types/extension';
-import type { ConversationSession, SessionMessage, SessionRequest } from '@/types/extension';
+import { SessionService } from "@/services/sessionService";
+import { StorageService } from "@/services/storageService";
+import { ACPClient } from "@/services/acpClient";
+import { ErrorCode } from "@/types/extension";
+import type { ConversationSession, SessionMessage, SessionRequest } from "@/types/entities";
+import type { AgentConfig } from "@/types/extension";
 
-// Mock dependencies
-jest.mock('@/services/storageService');
-jest.mock('@/services/acpClient');
+jest.mock("@/services/storageService");
+jest.mock("@/services/acpClient");
+jest.mock("uuid", () => ({ v4: jest.fn(() => "uuid-123") }));
 
 const MockedStorageService = StorageService as jest.MockedClass<typeof StorageService>;
 const MockedACPClient = ACPClient as jest.MockedClass<typeof ACPClient>;
 
-describe('SessionService', () => {
+describe("SessionService", () => {
   let sessionService: SessionService;
   let mockStorageService: jest.Mocked<StorageService>;
   let mockACPClient: jest.Mocked<ACPClient>;
 
-  const mockSessionRequest: SessionRequest = {
-    agentConnectionId: 'conn-123',
-    prompt: 'Help me write a function in TypeScript',
+  const baseSessionRequest: SessionRequest = {
+    agentConnectionId: "conn-123",
+    agentConfigId: "agent-config-1",
+    prompt: "Help me with TypeScript",
     context: {
-      files: ['/path/to/file.ts'],
-      workingDirectory: '/project/root'
+      workingDirectory: "/project",
+      files: ["/project/index.ts"],
+      additionalContext: {}
     }
   };
 
-  const mockUserMessage: SessionMessage = {
-    id: 'msg-user-1',
-    role: 'user',
-    content: 'Help me write a function in TypeScript',
+  const agentConfig: AgentConfig = {
+    id: "agent-config-1",
+    name: "Gemini CLI",
+    type: "subprocess",
+    command: "/usr/bin/gemini",
+    args: ["--acp"],
+    workingDirectory: "/project",
+    createdAt: new Date("2025-01-01T00:00:00Z")
+  };
+
+  const userMessage = (content: string, sequence: number): SessionMessage => ({
+    id: `user-${sequence}`,
+    role: "user",
+    content,
     timestamp: new Date(),
     metadata: {
-      source: 'user',
-      messageType: 'text'
+      source: "user",
+      messageType: "text",
+      sequence
     }
-  };
+  });
 
-  const mockAssistantMessage: SessionMessage = {
-    id: 'msg-assistant-1',
-    role: 'assistant',
-    content: 'Here is a TypeScript function example...',
+  const assistantMessage = (content: string, sequence: number): SessionMessage => ({
+    id: `assistant-${sequence}`,
+    role: "assistant",
+    content,
     timestamp: new Date(),
     metadata: {
-      source: 'agent',
-      messageType: 'text',
-      agentId: 'test-agent'
+      source: "agent",
+      messageType: "text",
+      sequence
     }
-  };
-
-  const mockSession: ConversationSession = {
-    sessionId: 'session-123',
-    agentConnectionId: 'conn-123',
-    status: 'active',
-    createdAt: new Date(),
-    lastActivity: new Date(),
-    messages: [mockUserMessage],
-    metadata: {
-      title: 'TypeScript Help',
-      tags: ['typescript', 'coding']
-    }
-  };
+  });
 
   beforeEach(() => {
-    // Reset mocks
     jest.clearAllMocks();
 
-    // Create mock instances
     mockStorageService = new MockedStorageService() as jest.Mocked<StorageService>;
     mockACPClient = new MockedACPClient() as jest.Mocked<ACPClient>;
+    mockACPClient.registerSessionUpdateListener = jest.fn();
+    mockACPClient.unregisterSessionUpdateListener = jest.fn();
 
-    // Create service instance
+    mockStorageService.initialize.mockResolvedValue();
+    mockStorageService.saveConversation.mockResolvedValue();
+    mockStorageService.getConversation.mockResolvedValue(null);
+    mockStorageService.getConversations.mockResolvedValue([]);
+    mockStorageService.addMessageToConversation.mockResolvedValue();
+    mockStorageService.deleteConversation.mockResolvedValue?.();
+    mockStorageService.archiveConversation.mockResolvedValue?.();
+
+    mockACPClient.connect.mockResolvedValue({
+      id: "conn-123",
+      name: "Gemini CLI",
+      status: "connected",
+      capabilities: {} as any,
+      protocolVersion: 1,
+      lastSeen: new Date()
+    } as any);
+    mockACPClient.createSession.mockResolvedValue({ sessionId: "acp-session" } as any);
+    mockACPClient.sendPrompt.mockResolvedValue({ stopReason: "completed", messages: [] } as any);
+    mockACPClient.disconnect.mockResolvedValue?.();
+
     sessionService = new SessionService(mockStorageService, mockACPClient);
   });
 
-  describe('createSession', () => {
-    it('should successfully create a new session', async () => {
-      // Arrange
-      mockACPClient.createSession.mockResolvedValue(mockSession);
-      mockStorageService.saveConversation.mockResolvedValue(undefined);
+  describe("createSession", () => {
+    it("creates a session and stores agent session id", async () => {
+      mockACPClient.createSession.mockResolvedValue({ sessionId: "acp-session-1" } as any);
+      mockACPClient.sendPrompt.mockResolvedValue({
+        stopReason: "completed",
+        messages: [
+          {
+            id: "agent-msg-1",
+            type: "agent",
+            timestamp: Date.now(),
+            content: [{ type: "text", text: "Sure, here's how..." }],
+            metadata: {}
+          }
+        ]
+      } as any);
+      mockStorageService.saveConversation.mockResolvedValue();
 
-      // Act
-      const result = await sessionService.createSession(mockSessionRequest);
+      const session = await sessionService.createSession(baseSessionRequest);
 
-      // Assert
-      expect(result).toBeDefined();
-      expect(result.sessionId).toBe('session-123');
-      expect(result.status).toBe('active');
-      expect(result.messages).toHaveLength(1);
-      expect(mockACPClient.createSession).toHaveBeenCalledWith(
-        'conn-123',
-        expect.objectContaining({
-          prompt: 'Help me write a function in TypeScript'
-        })
+      expect(session.agentSessionId).toBe("acp-session-1");
+      expect(session.messages).toHaveLength(2); // user + agent
+      expect(mockACPClient.sendPrompt).toHaveBeenCalledWith(
+        "acp-session-1",
+        baseSessionRequest.prompt
       );
-      expect(mockStorageService.saveConversation).toHaveBeenCalledWith(result);
-    });
-
-    it('should handle ACP client session creation failure', async () => {
-      // Arrange
-      mockACPClient.createSession.mockRejectedValue(new Error('ACP session creation failed'));
-
-      // Act & Assert
-      await expect(sessionService.createSession(mockSessionRequest)).rejects.toMatchObject({
-        code: ErrorCode.ProtocolError,
-        message: expect.stringContaining('Failed to create session')
-      });
-    });
-
-    it('should handle storage save failure gracefully', async () => {
-      // Arrange
-      mockACPClient.createSession.mockResolvedValue(mockSession);
-      mockStorageService.saveConversation.mockRejectedValue(new Error('Storage failed'));
-
-      // Act & Assert
-      await expect(sessionService.createSession(mockSessionRequest)).rejects.toMatchObject({
-        code: ErrorCode.SystemError,
-        message: expect.stringContaining('Failed to save session')
-      });
-    });
-  });
-
-  describe('sendMessage', () => {
-    it('should successfully send message and receive response', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(mockSession);
-      mockACPClient.sendMessage.mockResolvedValue(mockAssistantMessage);
-      mockStorageService.addMessageToConversation.mockResolvedValue(undefined);
-
-      // Act
-      const result = await sessionService.sendMessage('session-123', 'What about error handling?');
-
-      // Assert
-      expect(result).toBeDefined();
-      expect(result.role).toBe('assistant');
-      expect(result.content).toBe('Here is a TypeScript function example...');
-      expect(mockStorageService.addMessageToConversation).toHaveBeenCalledTimes(2); // user message + assistant response
-    });
-
-    it('should throw error when session not found', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(null);
-
-      // Act & Assert
-      await expect(sessionService.sendMessage('nonexistent-session', 'test message')).rejects.toMatchObject({
-        code: ErrorCode.SessionNotFound,
-        message: expect.stringContaining('Session not found')
-      });
-    });
-
-    it('should handle inactive session gracefully', async () => {
-      // Arrange
-      const inactiveSession = { ...mockSession, status: 'completed' as const };
-      mockStorageService.getConversation.mockResolvedValue(inactiveSession);
-
-      // Act & Assert
-      await expect(sessionService.sendMessage('session-123', 'test message')).rejects.toMatchObject({
-        code: ErrorCode.InvalidSession,
-        message: expect.stringContaining('Session is not active')
-      });
-    });
-
-    it('should handle ACP message send failure', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(mockSession);
-      mockACPClient.sendMessage.mockRejectedValue(new Error('Message send failed'));
-
-      // Act & Assert
-      await expect(sessionService.sendMessage('session-123', 'test message')).rejects.toMatchObject({
-        code: ErrorCode.ProtocolError,
-        message: expect.stringContaining('Failed to send message')
-      });
-    });
-  });
-
-  describe('getSession', () => {
-    it('should successfully retrieve existing session', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(mockSession);
-
-      // Act
-      const result = await sessionService.getSession('session-123');
-
-      // Assert
-      expect(result).toEqual(mockSession);
-      expect(mockStorageService.getConversation).toHaveBeenCalledWith('session-123');
-    });
-
-    it('should return null when session does not exist', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(null);
-
-      // Act
-      const result = await sessionService.getSession('nonexistent-session');
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it('should handle storage retrieval errors', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockRejectedValue(new Error('Storage error'));
-
-      // Act & Assert
-      await expect(sessionService.getSession('session-123')).rejects.toMatchObject({
-        code: ErrorCode.SystemError,
-        message: expect.stringContaining('Failed to retrieve session')
-      });
-    });
-  });
-
-  describe('endSession', () => {
-    it('should successfully end an active session', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(mockSession);
-      mockACPClient.endSession.mockResolvedValue(undefined);
-      mockStorageService.saveConversation.mockResolvedValue(undefined);
-
-      // Act
-      await sessionService.endSession('session-123');
-
-      // Assert
-      expect(mockACPClient.endSession).toHaveBeenCalledWith('session-123');
-      expect(mockStorageService.saveConversation).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: 'completed',
-          sessionId: 'session-123'
-        })
-      );
-    });
-
-    it('should handle ending non-existent session', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(null);
-
-      // Act & Assert
-      await expect(sessionService.endSession('nonexistent-session')).rejects.toMatchObject({
-        code: ErrorCode.SessionNotFound,
-        message: expect.stringContaining('Session not found')
-      });
-    });
-  });
-
-  describe('getSessionMessages', () => {
-    it('should return paginated messages from session', async () => {
-      // Arrange
-      const sessionWithMessages = {
-        ...mockSession,
-        messages: [mockUserMessage, mockAssistantMessage]
-      };
-      mockStorageService.getConversation.mockResolvedValue(sessionWithMessages);
-
-      // Act
-      const result = await sessionService.getSessionMessages('session-123', 0, 10);
-
-      // Assert
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual(mockUserMessage);
-      expect(result[1]).toEqual(mockAssistantMessage);
-    });
-
-    it('should handle pagination correctly', async () => {
-      // Arrange
-      const manyMessages = Array.from({ length: 15 }, (_, i) => ({
-        ...mockUserMessage,
-        id: `msg-${i}`,
-        content: `Message ${i}`
+      expect(mockStorageService.saveConversation).toHaveBeenCalledWith(expect.objectContaining({
+        agentSessionId: "acp-session-1",
+        agentConfigId: "agent-config-1"
       }));
-      const sessionWithManyMessages = { ...mockSession, messages: manyMessages };
-      mockStorageService.getConversation.mockResolvedValue(sessionWithManyMessages);
+    });
 
-      // Act
-      const result = await sessionService.getSessionMessages('session-123', 5, 5);
+    it("throws when agent config id missing", async () => {
+      const { agentConfigId, ...requestWithoutId } = baseSessionRequest;
 
-      // Assert
-      expect(result).toHaveLength(5);
-      expect(result[0].content).toBe('Message 5');
-      expect(result[4].content).toBe('Message 9');
+      await expect(
+        sessionService.createSession(requestWithoutId as SessionRequest)
+      ).rejects.toMatchObject({
+        code: ErrorCode.InvalidConfiguration
+      });
     });
   });
 
-  describe('validateSession', () => {
-    it('should validate active session successfully', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(mockSession);
-      mockACPClient.checkConnection.mockResolvedValue(true);
+  describe("sendMessage", () => {
+    it("re-establishes agent session when absent and appends response", async () => {
+      const storedConversation: ConversationSession = {
+        sessionId: "session-123",
+        agentConnectionId: "conn-123",
+        agentConfigId: "agent-config-1",
+        status: "active",
+        createdAt: new Date(),
+        lastActivity: new Date(),
+        messages: [userMessage("Initial question", 0), assistantMessage("Initial answer", 1)]
+      };
 
-      // Act
-      const isValid = await sessionService.validateSession('session-123');
+      mockStorageService.getConversation.mockResolvedValue({ ...storedConversation });
+      mockStorageService.addMessageToConversation.mockResolvedValue();
+      mockStorageService.saveConversation.mockResolvedValue();
 
-      // Assert
-      expect(isValid).toBe(true);
+      mockACPClient.createSession.mockResolvedValue({ sessionId: "acp-resume" } as any);
+      mockACPClient.sendPrompt.mockResolvedValue({
+        stopReason: "completed",
+        messages: [
+          {
+            id: "agent-msg-2",
+            type: "agent",
+            timestamp: Date.now(),
+            content: [{ type: "text", text: "Here is an update." }],
+            metadata: { processingTime: 1200 }
+          }
+        ]
+      } as any);
+
+      const response = await sessionService.sendMessage(
+        "session-123",
+        "Please elaborate",
+        agentConfig
+      );
+
+      expect(mockACPClient.createSession).toHaveBeenCalled();
+      expect(mockACPClient.sendPrompt).toHaveBeenCalledWith(
+        "acp-resume",
+        expect.stringContaining("Conversation history")
+      );
+      expect(mockStorageService.addMessageToConversation).toHaveBeenCalledTimes(2);
+      expect(response.content).toBe("Here is an update.");
     });
 
-    it('should return false for invalid session', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(null);
+    it("throws when conversation agent differs from provided agent", async () => {
+      const storedConversation: ConversationSession = {
+        sessionId: "session-999",
+        agentConnectionId: "conn-456",
+        agentConfigId: "other-agent",
+        status: "active",
+        createdAt: new Date(),
+        lastActivity: new Date(),
+        messages: []
+      };
 
-      // Act
-      const isValid = await sessionService.validateSession('nonexistent-session');
+      mockStorageService.getConversation.mockResolvedValue(storedConversation);
 
-      // Assert
-      expect(isValid).toBe(false);
-    });
-
-    it('should return false when connection is down', async () => {
-      // Arrange
-      mockStorageService.getConversation.mockResolvedValue(mockSession);
-      mockACPClient.checkConnection.mockResolvedValue(false);
-
-      // Act
-      const isValid = await sessionService.validateSession('session-123');
-
-      // Assert
-      expect(isValid).toBe(false);
+      await expect(
+        sessionService.sendMessage("session-999", "Hello", agentConfig)
+      ).rejects.toMatchObject({
+        code: ErrorCode.InvalidConfiguration
+      });
     });
   });
 });

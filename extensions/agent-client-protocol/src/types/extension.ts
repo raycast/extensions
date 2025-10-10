@@ -106,11 +106,15 @@ export interface SessionServiceInterface {
   endSession(sessionId: string): Promise<void>;
 
   // Message management
-  sendMessage(sessionId: string, content: string, context?: MessageRequest['context']): Promise<SessionMessage>;
+  sendMessage(sessionId: string, content: string, agent: AgentConfig, context?: MessageRequest['context']): Promise<SessionMessage>;
   getSessionMessages(sessionId: string, offset: number, limit: number): Promise<SessionMessage[]>;
 
   // Session validation
   validateSession(sessionId: string): Promise<boolean>;
+
+  // Streaming updates
+  onSessionMessage(sessionId: string, handler: (message: SessionMessage) => void): void;
+  offSessionMessage(sessionId: string): void;
 }
 
 export interface MessageContent {

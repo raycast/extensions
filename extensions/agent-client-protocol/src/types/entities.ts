@@ -87,6 +87,9 @@ export interface SessionRequest {
   /** ID of the agent connection to use */
   agentConnectionId: string;
 
+  /** ID of the agent configuration used to establish the session */
+  agentConfigId?: string;
+
   /** Initial prompt/message to send to the agent */
   prompt: string;
 
@@ -120,6 +123,12 @@ export interface ConversationSession {
 
   /** ID of the agent connection used for this session */
   agentConnectionId: string;
+
+  /** ID of the agent configuration used for this session */
+  agentConfigId: string;
+
+  /** Underlying ACP agent session identifier */
+  agentSessionId?: string;
 
   /** Current status of the session */
   status: 'active' | 'completed' | 'archived' | 'error';

@@ -8,36 +8,37 @@
 import {
   Action,
   ActionPanel,
-  Form,
   Icon,
   List,
   showToast,
-  Toast,
-  useNavigation
+  Toast
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { ConfigService } from "@/services/configService";
+import { StorageService } from "@/services/storageService";
 import { createLogger } from "@/utils/logging";
 import { ErrorHandler } from "@/utils/errors";
 import type { AgentConfig } from "@/types/extension";
 import type { SessionMessage } from "@/types/entities";
 import { useChatSession } from "@/hooks/useChatSession";
 
-interface MessageComposerProps {
-  title: string;
-  initialMessage?: string;
-  onSubmit: (text: string) => Promise<void>;
-}
-
 const logger = createLogger("ChatCommand");
 
-export default function ChatCommand() {
+type ChatCommandProps = {
+  initialSessionId?: string;
+  initialAgentId?: string;
+};
+
+export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCommandProps = {}) {
   const chat = useChatSession();
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined);
   const [isLoadingAgents, setIsLoadingAgents] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   const configService = useMemo(() => new ConfigService(), []);
+  const storageService = useMemo(() => new StorageService(), []);
 
   useEffect(() => {
     async function loadAgents() {
@@ -83,6 +84,62 @@ export default function ChatCommand() {
     }
   }, [selectedAgentId, agents, chat.setActiveAgent]);
 
+  useEffect(() => {
+    if (!initialSessionId && !initialLoadComplete && !isLoadingAgents) {
+      setInitialLoadComplete(true);
+      return;
+    }
+
+    if (!initialSessionId || initialLoadComplete || isLoadingAgents) {
+      return;
+    }
+
+    async function loadInitialConversation() {
+      try {
+        await storageService.initialize();
+        const existing = await storageService.getConversation(initialSessionId);
+
+        if (!existing) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Conversation Not Found",
+            message: "Unable to locate the selected conversation."
+          });
+          return;
+        }
+
+        const agentId = existing.agentConfigId || initialAgentId || selectedAgentId || agents[0]?.id;
+        if (!agentId) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Agent Not Available",
+            message: "No agent configuration is available for this conversation."
+          });
+          return;
+        }
+
+        const agent = agents.find((item) => item.id === agentId);
+        if (!agent) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Agent Not Found",
+            message: "Please recreate the agent configuration before continuing the conversation."
+          });
+          return;
+        }
+
+        setSelectedAgentId(agent.id);
+        await chat.loadConversation(initialSessionId, agent);
+      } catch (error) {
+        await ErrorHandler.handleError(error, "Loading conversation");
+      } finally {
+        setInitialLoadComplete(true);
+      }
+    }
+
+    loadInitialConversation();
+  }, [initialSessionId, initialAgentId, initialLoadComplete, isLoadingAgents, agents, storageService, chat.loadConversation, selectedAgentId]);
+
   const isProcessing = chat.status === "connecting" || chat.status === "processing";
   const selectedAgent = selectedAgentId ? agents.find((agent) => agent.id === selectedAgentId) : null;
 
@@ -106,7 +163,16 @@ export default function ChatCommand() {
     }
 
     await chat.sendMessage(message);
+    setSearchText("");
   }
+
+  const handleSearchSubmit = async (value: string) => {
+    if (!value.trim()) {
+      return;
+    }
+    await handleSend(value);
+    setSearchText("");
+  };
 
   function getMessageAccessory(message: SessionMessage) {
     const time = message.timestamp instanceof Date
@@ -126,13 +192,13 @@ export default function ChatCommand() {
   function getMessageIcon(message: SessionMessage) {
     switch (message.role) {
       case "user":
-        return Icon.Person;
+        return Icon.PersonCircle;
       case "assistant":
-        return Icon.Robot;
+        return Icon.Message;
       case "system":
         return Icon.Info;
       case "tool":
-        return Icon.Wrench;
+        return Icon.Terminal;
       default:
         return Icon.Circle;
     }
@@ -154,52 +220,76 @@ export default function ChatCommand() {
     ? chat.conversation.metadata?.title ?? chat.conversation.sessionId
     : "New Conversation";
 
-  const messageItems = chat.messages.map((message, index) => (
-    <List.Item
-      key={`${message.id}-${index}`}
-      icon={getMessageIcon(message)}
-      title={message.role === "user" ? "User Message" : "Agent Response"}
-      accessories={getMessageAccessory(message)}
-      detail={<List.Item.Detail markdown={formatMessageMarkdown(message)} />}
-      actions={
-        <ActionPanel>
-          <Action.Push
-            title={chat.conversation ? "Send Follow-Up Message" : "Send Message"}
-            icon={Icon.PaperPlane}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-            target={
-              <MessageComposer
-                title={chat.conversation ? "Send Follow-Up" : "Send Message"}
-                onSubmit={handleSend}
-              />
-            }
-          />
-          {message.content && (
-            <Action.CopyToClipboard
-              title="Copy Message"
-              content={message.content}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-          )}
-          <ActionPanel.Section>
+  const messageItems = chat.messages.map((message, index) => {
+    const speakerLabel = message.role === "user"
+      ? "You"
+      : message.role === "assistant"
+        ? selectedAgent?.name ?? "Agent"
+        : message.role === "tool"
+          ? "Tool"
+          : "System";
+
+    const firstLine = message.content?.split("\n")[0] ?? "";
+    const itemTitle = firstLine ? `${speakerLabel}: ${firstLine}` : speakerLabel;
+
+    return (
+      <List.Item
+        key={`${message.id}-${index}`}
+        icon={getMessageIcon(message)}
+        title={itemTitle}
+        accessories={getMessageAccessory(message)}
+        detail={<List.Item.Detail markdown={formatMessageMarkdown(message)} />}
+        actions={
+          <ActionPanel>
             <Action
-              title="Restart Conversation"
-              icon={Icon.Repeat}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-              onAction={chat.resetSession}
+              title={chat.conversation ? "Send Follow-Up Message" : "Send Message"}
+              icon={Icon.PaperPlane}
+              onAction={async () => {
+                if (!searchText.trim()) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Enter a message",
+                    message: "Type your message in the search bar first."
+                  });
+                  return;
+                }
+                await handleSend(searchText);
+              }}
             />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  ));
+            {message.content && (
+              <Action.CopyToClipboard
+                title="Copy Message"
+                content={message.content}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
+              />
+            )}
+            <ActionPanel.Section>
+              <Action
+                title="Restart Conversation"
+                icon={Icon.Repeat}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                onAction={async () => {
+                  setSearchText("");
+                  await chat.resetSession();
+                }}
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  });
 
   return (
     <List
       isLoading={isLoadingAgents || isProcessing}
       isShowingDetail
-      searchBarPlaceholder="Search in conversation..."
+      filtering={false}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      onSearchSubmit={handleSearchSubmit}
+      searchBarPlaceholder="Type a message and press Enter"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Agent"
@@ -216,21 +306,8 @@ export default function ChatCommand() {
         <List.EmptyView
           icon="🤖"
           title="Start a Conversation"
-          description="Select an agent and send your first message to begin."
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Send Message"
-                icon={Icon.PaperPlane}
-                target={
-                  <MessageComposer
-                    title="Send Message"
-                    onSubmit={handleSend}
-                  />
-                }
-              />
-            </ActionPanel>
-          }
+          description="Select an agent, type your question above, and press Enter to begin."
+          actions={undefined}
         />
       ) : (
         <List.Section title={conversationTitle} subtitle={`${chat.messages.length} messages`}>
@@ -238,38 +315,5 @@ export default function ChatCommand() {
         </List.Section>
       )}
     </List>
-  );
-}
-
-function MessageComposer({ title, initialMessage, onSubmit }: MessageComposerProps) {
-  const { pop } = useNavigation();
-
-  async function handleSubmit(values: { message?: string }) {
-    const text = values.message ?? "";
-    await onSubmit(text);
-    pop();
-  }
-
-  return (
-    <Form
-      navigationTitle={title}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Send"
-            icon={Icon.PaperPlane}
-            onSubmit={handleSubmit}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextArea
-        id="message"
-        title="Message"
-        placeholder="Ask a question or describe what you need help with..."
-        defaultValue={initialMessage ?? ""}
-        autoFocus
-      />
-    </Form>
   );
 }

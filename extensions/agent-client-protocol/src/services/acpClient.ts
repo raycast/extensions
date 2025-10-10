@@ -36,6 +36,7 @@ export class ACPClient implements acp.Client {
   private isConnecting = false;
   private isConnected = false;
   private lastError: ExtensionError | null = null;
+  private updateListeners = new Set<(update: SessionUpdateNotification) => void>();
 
   /**
    * Connect to an ACP agent using the provided configuration
@@ -68,15 +69,22 @@ export class ACPClient implements acp.Client {
       // Initialize the agent
       const initResult = await this.initialize();
 
+      const connectedAt = new Date();
+
       // Create agent connection object
       const agentConnection: AgentConnection = {
         id: this.connectionId,
-        name: config.name,
+        agentId: config.id,
         status: 'connected',
-        capabilities: initResult.agentCapabilities,
-        protocolVersion: initResult.protocolVersion,
-        lastSeen: new Date(),
-        errorMessage: undefined
+        connectedAt,
+        lastActivity: connectedAt,
+        sessionCount: 0,
+        metadata: {
+          endpoint: config.endpoint,
+          capabilities: Object.entries(initResult.agentCapabilities)
+            .filter(([, value]) => value)
+            .map(([key]) => key)
+        }
       };
 
       this.isConnected = true;
@@ -103,7 +111,7 @@ export class ACPClient implements acp.Client {
   /**
    * Disconnect from the current agent
    */
-  async disconnect(): Promise<void> {
+  async disconnect(_connectionId?: string): Promise<void> {
     if (this.agentProcess) {
       this.agentProcess.kill();
       this.agentProcess = null;
@@ -187,12 +195,14 @@ export class ACPClient implements acp.Client {
    * Handle session updates from the agent (streaming responses)
    */
   async sessionUpdate(params: acp.SessionNotification): Promise<void> {
-    // This method is called by the ACP SDK when the agent sends updates
-    // We can emit events or call callbacks here to update the UI
-    console.log('Session update received:', params);
-
-    // TODO: Implement event emission for UI updates
-    // this.eventEmitter.emit('session:update', params);
+    logger.debug('Session update received', { updateType: params.update?.sessionUpdate });
+    for (const listener of this.updateListeners) {
+      try {
+        listener(params as SessionUpdateNotification);
+      } catch (error) {
+        logger.warn('Session update listener failed', { error });
+      }
+    }
   }
 
   /**
@@ -370,5 +380,13 @@ export class ACPClient implements acp.Client {
       timestamp: new Date(),
       context
     };
+  }
+
+  registerSessionUpdateListener(listener: (update: SessionUpdateNotification) => void): void {
+    this.updateListeners.add(listener);
+  }
+
+  unregisterSessionUpdateListener(listener: (update: SessionUpdateNotification) => void): void {
+    this.updateListeners.delete(listener);
   }
 }

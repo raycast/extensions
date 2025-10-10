@@ -23,6 +23,7 @@ interface UseChatSessionResult extends ChatSessionState {
   resetSession: () => Promise<void>;
   setActiveAgent: (agent: AgentConfig | null) => void;
   activeAgent: AgentConfig | null;
+  loadConversation: (sessionId: string, agent: AgentConfig) => Promise<void>;
 }
 
 const logger = createLogger("useChatSession");
@@ -56,6 +57,30 @@ export function useChatSession(): UseChatSessionResult {
   const [connection, setConnection] = useState<AgentConnection | null>(null);
   const [messages, setMessages] = useState<SessionMessage[]>([]);
   const [status, setStatus] = useState<ChatStatus>("idle");
+  const isLoadingConversationRef = useRef(false);
+  const activeSessionIdRef = useRef<string | null>(null);
+
+  const refreshConversation = useCallback(
+    async (sessionId: string) => {
+      const latest = await sessionService.getSession(sessionId);
+      if (latest) {
+        setConversation(latest);
+        setMessages(latest.messages);
+      }
+    },
+    [sessionService]
+  );
+
+  const handleStreamingMessage = useCallback(
+    (_message: SessionMessage) => {
+      const currentId = activeSessionIdRef.current;
+      if (!currentId) {
+        return;
+      }
+      void refreshConversation(currentId);
+    },
+    [refreshConversation]
+  );
 
   useEffect(() => {
     async function initStorage() {
@@ -103,6 +128,7 @@ export function useChatSession(): UseChatSessionResult {
 
       const session = await sessionService.createSession({
         agentConnectionId: agentConnection.id,
+        agentConfigId: agent.id,
         prompt,
         context: {
           workingDirectory: agent.workingDirectory ?? process.cwd(),
@@ -116,6 +142,11 @@ export function useChatSession(): UseChatSessionResult {
 
       setConversation(session);
       setMessages(session.messages);
+      if (activeSessionIdRef.current) {
+        sessionService.offSessionMessage(activeSessionIdRef.current);
+      }
+      activeSessionIdRef.current = session.sessionId;
+      sessionService.onSessionMessage(session.sessionId, handleStreamingMessage);
       setStatus("ready");
 
       logger.info("Session initialized", { sessionId: session.sessionId });
@@ -123,7 +154,7 @@ export function useChatSession(): UseChatSessionResult {
       setStatus("idle");
       await ErrorHandler.handleError(error, "Starting chat session");
     }
-  }, [acpClient, sessionService]);
+  }, [acpClient, sessionService, handleStreamingMessage]);
 
   const sendMessage = useCallback(async (message: string) => {
     if (!conversation) {
@@ -157,21 +188,26 @@ export function useChatSession(): UseChatSessionResult {
         length: message.length
       });
 
-      await sessionService.sendMessage(conversation.sessionId, message);
-
-      const updatedConversation = await sessionService.getSession(conversation.sessionId);
-
-      if (updatedConversation) {
-        setConversation(updatedConversation);
-        setMessages(updatedConversation.messages);
+      if (!activeAgent) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Agent Not Selected",
+          message: "Select an agent before continuing the conversation."
+        });
+        setStatus("ready");
+        return;
       }
+
+      await sessionService.sendMessage(conversation.sessionId, message, activeAgent);
+
+      await refreshConversation(conversation.sessionId);
 
       setStatus("ready");
     } catch (error) {
       setStatus("ready");
       await ErrorHandler.handleError(error, "Sending message to agent");
     }
-  }, [conversation, activeAgent, sessionService, startSession]);
+  }, [conversation, activeAgent, sessionService, startSession, refreshConversation]);
 
   const resetSession = useCallback(async () => {
     try {
@@ -188,12 +224,63 @@ export function useChatSession(): UseChatSessionResult {
         error
       });
     } finally {
+      if (activeSessionIdRef.current) {
+        sessionService.offSessionMessage(activeSessionIdRef.current);
+        activeSessionIdRef.current = null;
+      }
       setConversation(null);
       setConnection(null);
       setMessages([]);
       setStatus("idle");
     }
-  }, [conversation, connection, acpClient]);
+  }, [conversation, connection, acpClient, sessionService]);
+
+  const loadConversation = useCallback(
+    async (sessionId: string, agent: AgentConfig) => {
+
+      if (isLoadingConversationRef.current) {
+        return;
+      }
+
+      try {
+        isLoadingConversationRef.current = true;
+        setStatus("connecting");
+        setActiveAgent(agent);
+
+        let agentConnection = connection;
+        if (!agentConnection || agentConnection.agentId !== agent.id) {
+          agentConnection = await acpClient.connect(agent);
+          setConnection(agentConnection);
+        }
+
+        const existing = await sessionService.getSession(sessionId);
+        if (!existing) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Conversation Not Found",
+            message: "The selected conversation could not be loaded."
+          });
+          setStatus("idle");
+          return;
+        }
+
+        setConversation(existing);
+        setMessages(existing.messages);
+        if (activeSessionIdRef.current) {
+          sessionService.offSessionMessage(activeSessionIdRef.current);
+        }
+        activeSessionIdRef.current = existing.sessionId;
+        sessionService.onSessionMessage(existing.sessionId, handleStreamingMessage);
+        setStatus("ready");
+      } catch (error) {
+        setStatus("idle");
+        await ErrorHandler.handleError(error, "Loading conversation");
+      } finally {
+        isLoadingConversationRef.current = false;
+      }
+    },
+    [acpClient, sessionService, connection, handleStreamingMessage]
+  );
 
   return useMemo(
     () => ({
@@ -205,7 +292,8 @@ export function useChatSession(): UseChatSessionResult {
       sendMessage,
       resetSession,
       setActiveAgent,
-      activeAgent
+      activeAgent,
+      loadConversation
     }),
     [
       conversation,
@@ -215,7 +303,8 @@ export function useChatSession(): UseChatSessionResult {
       activeAgent,
       startSession,
       sendMessage,
-      resetSession
+      resetSession,
+      loadConversation
     ]
   );
 }
