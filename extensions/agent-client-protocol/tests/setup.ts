@@ -1,36 +1,24 @@
 // Jest setup file for ACP extension tests
-import { jest } from '@jest/globals';
 
-// Mock Raycast API
-jest.mock('@raycast/api', () => ({
-  showToast: jest.fn(),
-  showHUD: jest.fn(),
-  LocalStorage: {
-    getItem: jest.fn(),
-    setItem: jest.fn(),
-    removeItem: jest.fn(),
-    clear: jest.fn(),
-  },
-  Action: {
-    OpenInBrowser: jest.fn(),
-    CopyToClipboard: jest.fn(),
-  },
-  ActionPanel: jest.fn(),
-  List: jest.fn(),
-  Form: jest.fn(),
-  Icon: {},
-  Toast: {
-    Style: {
-      Success: 'success',
-      Failure: 'failure',
-    },
-  },
-}));
+// Set up test environment globals
+process.env.NODE_ENV = 'test';
 
-// Mock console for cleaner test output
+// Mock process.cwd for consistent testing
+const originalCwd = process.cwd;
+process.cwd = () => '/test/directory';
+
+// Restore after tests if needed
+afterAll(() => {
+  process.cwd = originalCwd;
+});
+
+// Mock console for cleaner test output (only for tests)
+const originalConsole = global.console;
 global.console = {
   ...console,
   log: jest.fn(),
-  error: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
   warn: jest.fn(),
+  error: jest.fn(),
 };

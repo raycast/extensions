@@ -6,6 +6,56 @@
  */
 
 import type { AgentCapabilities } from "./acp";
+import type {
+  AgentConnection,
+  ConversationSession,
+  SessionMessage,
+  SessionRequest,
+  MessageRequest,
+  ConnectionHealth,
+  MessageRole,
+  SessionStatistics,
+  MessagePagination,
+  PaginatedMessages
+} from "./entities";
+
+// Error codes for consistent error handling
+export enum ErrorCode {
+  // Agent-related errors
+  AgentUnavailable = 'AGENT_UNAVAILABLE',
+  AgentConnectionFailed = 'AGENT_CONNECTION_FAILED',
+
+  // Protocol-related errors
+  ProtocolError = 'PROTOCOL_ERROR',
+
+  // Session-related errors
+  SessionNotFound = 'SESSION_NOT_FOUND',
+  InvalidSession = 'INVALID_SESSION',
+  SessionExpired = 'SESSION_EXPIRED',
+
+  // File-related errors
+  FileNotFound = 'FILE_NOT_FOUND',
+  FileAccessDenied = 'FILE_ACCESS_DENIED',
+  InvalidFilePath = 'INVALID_FILE_PATH',
+
+  // Configuration errors
+  InvalidConfiguration = 'INVALID_CONFIGURATION',
+  MissingConfiguration = 'MISSING_CONFIGURATION',
+
+  // System errors
+  NetworkError = 'NETWORK_ERROR',
+  SystemError = 'SYSTEM_ERROR',
+  UnknownError = 'UNKNOWN_ERROR'
+}
+
+// Extension error interface
+export interface ExtensionError {
+  code: ErrorCode;
+  message: string;
+  details: string;
+  timestamp: Date;
+  context?: Record<string, unknown>;
+}
 
 // Main Extension Commands
 export interface ACPExtensionCommands {
@@ -20,16 +70,16 @@ export interface ACPExtensionCommands {
 }
 
 // Agent Management Service
-export interface AgentService {
+export interface AgentServiceInterface {
   // Connection management
-  connect(config: AgentConfig): Promise<AgentConnection>;
-  disconnect(connectionId: string): Promise<void>;
+  connectToAgent(agentId: string): Promise<AgentConnection>;
+  disconnectAgent(connectionId: string): Promise<void>;
   getConnection(connectionId: string): Promise<AgentConnection | null>;
-  listConnections(): Promise<AgentConnection[]>;
+  getActiveConnections(): Promise<AgentConnection[]>;
 
   // Health monitoring
-  healthCheck(connectionId: string): Promise<boolean>;
-  reconnect(connectionId: string): Promise<AgentConnection>;
+  getConnectionHealth(connectionId: string): Promise<ConnectionHealth>;
+  reconnectAgent(connectionId: string): Promise<AgentConnection>;
 }
 
 export interface AgentConfig {
@@ -47,53 +97,19 @@ export interface AgentConfig {
   lastUsed?: Date;
 }
 
-export interface AgentConnection {
-  id: string;
-  name: string;
-  status: 'connecting' | 'connected' | 'disconnected' | 'error';
-  capabilities: AgentCapabilities;
-  protocolVersion: number;
-  lastSeen: Date;
-  errorMessage?: string;
-}
-
 // Session Management Service
-export interface SessionService {
+export interface SessionServiceInterface {
   // Session lifecycle
-  createSession(agentId: string, title?: string): Promise<ConversationSession>;
-  loadSession(sessionId: string): Promise<ConversationSession | null>;
-  deleteSession(sessionId: string): Promise<void>;
-  listSessions(agentId?: string): Promise<ConversationSession[]>;
+  createSession(request: SessionRequest): Promise<ConversationSession>;
+  getSession(sessionId: string): Promise<ConversationSession | null>;
+  endSession(sessionId: string): Promise<void>;
 
   // Message management
-  sendMessage(sessionId: string, content: string): Promise<void>;
-  addContextFile(sessionId: string, filePath: string): Promise<void>;
-  clearHistory(sessionId: string): Promise<void>;
+  sendMessage(sessionId: string, content: string, context?: MessageRequest['context']): Promise<SessionMessage>;
+  getSessionMessages(sessionId: string, offset: number, limit: number): Promise<SessionMessage[]>;
 
-  // Session state
-  updateSessionTitle(sessionId: string, title: string): Promise<void>;
-  archiveSession(sessionId: string): Promise<void>;
-}
-
-export interface ConversationSession {
-  sessionId: string;
-  agentConnectionId: string;
-  title: string;
-  messages: SessionMessage[];
-  createdAt: Date;
-  lastActivity: Date;
-  status: 'active' | 'archived' | 'error';
-  context: ProjectContext[];
-}
-
-export interface SessionMessage {
-  id: string;
-  sessionId: string;
-  type: 'user' | 'agent' | 'system';
-  content: MessageContent[];
-  timestamp: Date;
-  status: 'sending' | 'sent' | 'failed';
-  metadata?: MessageMetadata;
+  // Session validation
+  validateSession(sessionId: string): Promise<boolean>;
 }
 
 export interface MessageContent {
@@ -101,13 +117,6 @@ export interface MessageContent {
   content: string;
   language?: string; // For code content
   filename?: string; // For file content
-}
-
-export interface MessageMetadata {
-  tokensUsed?: number;
-  processingTime?: number;
-  stopReason?: string;
-  toolCalls?: ToolCallInfo[];
 }
 
 export interface ToolCallInfo {

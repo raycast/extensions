@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-client-protocol",
   "title": "Agent Client Protocol",
-  "description": "",
+  "description": "Connect to AI agents via Agent Client Protocol for coding assistance",
   "icon": "extension-icon.png",
   "author": "Yukai",
   "platforms": [
@@ -15,22 +15,36 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "start-agent",
-      "title": "Start Agent",
-      "description": "",
-      "mode": "no-view"
+      "name": "chat",
+      "title": "Ask AI Agent",
+      "description": "Start a conversation with an AI agent",
+      "mode": "view"
+    },
+    {
+      "name": "conversations",
+      "title": "View Conversations",
+      "description": "Browse and manage past conversations",
+      "mode": "view"
+    },
+    {
+      "name": "configure-agents",
+      "title": "Configure Agents",
+      "description": "Manage AI agent configurations",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.2",
     "@raycast/utils": "^1.17.0",
-    "@zed-industries/agent-client-protocol": "^0.4.5"
+    "@zed-industries/agent-client-protocol": "^0.4.5",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/jest": "^30.0.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9.22.0",
     "jest": "^30.2.0",
     "prettier": "^3.5.3",
@@ -42,6 +56,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

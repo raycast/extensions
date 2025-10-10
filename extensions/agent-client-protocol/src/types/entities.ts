@@ -1,192 +1,355 @@
 /**
- * Data Model Entities for Agent Client Protocol Raycast Extension
+ * Core Entity Models for Agent Client Protocol Extension
  *
- * These types define the core data structures used throughout the extension
- * based on the data model specification.
+ * Defines the main data entities used throughout the application:
+ * - AgentConnection: Represents active connections to ACP agents
+ * - ConversationSession: Represents conversation sessions with agents
+ * - Message: Individual messages within conversations
  */
 
-import type { AgentCapabilities } from "./acp";
-
-// Agent Connection Entity
+/**
+ * Represents an active connection to an ACP agent
+ */
 export interface AgentConnection {
+  /** Unique identifier for this connection */
   id: string;
-  name: string;
-  endpoint: string; // command/args for subprocess, URL for remote
+
+  /** ID of the agent configuration used for this connection */
+  agentId: string;
+
+  /** Current status of the connection */
   status: 'connecting' | 'connected' | 'disconnected' | 'error';
-  capabilities: AgentCapabilities;
-  protocolVersion: number;
-  lastSeen: Date;
-  connectionType: 'subprocess' | 'remote';
-  errorMessage?: string;
-}
 
-// Conversation Session Entity
-export interface ConversationSession {
-  sessionId: string;
-  agentConnectionId: string;
-  title: string;
-  messages: Message[];
-  createdAt: Date;
+  /** When the connection was established */
+  connectedAt: Date;
+
+  /** Last activity timestamp */
   lastActivity: Date;
-  status: 'active' | 'archived' | 'error';
-  context: ProjectContext[];
+
+  /** Number of active sessions using this connection */
+  sessionCount: number;
+
+  /** Optional error information if status is 'error' */
+  error?: {
+    code: string;
+    message: string;
+    details?: string;
+  };
+
+  /** Connection metadata */
+  metadata?: {
+    /** Process ID for subprocess agents */
+    processId?: number;
+    /** Endpoint URL for remote agents */
+    endpoint?: string;
+    /** Agent capabilities negotiated during connection */
+    capabilities?: string[];
+    /** Performance metrics */
+    metrics?: {
+      averageResponseTime?: number;
+      totalRequests?: number;
+      errorCount?: number;
+    };
+  };
 }
 
-// Message Entity
-export interface Message {
-  id: string;
+/**
+ * Health status for an agent connection
+ */
+export interface ConnectionHealth {
+  /** Whether the connection is healthy and responsive */
+  isHealthy: boolean;
+
+  /** When the health check was performed */
+  lastChecked: Date;
+
+  /** Response time in milliseconds */
+  responseTime?: number;
+
+  /** Error message if unhealthy */
+  error?: string;
+
+  /** Additional health metrics */
+  metrics?: {
+    /** Memory usage (if available) */
+    memoryUsage?: number;
+    /** CPU usage (if available) */
+    cpuUsage?: number;
+    /** Uptime in seconds */
+    uptime?: number;
+  };
+}
+
+/**
+ * Request to create a new session
+ */
+export interface SessionRequest {
+  /** ID of the agent connection to use */
+  agentConnectionId: string;
+
+  /** Initial prompt/message to send to the agent */
+  prompt: string;
+
+  /** Context to share with the agent */
+  context: {
+    /** Current working directory */
+    workingDirectory?: string;
+    /** Files to share as context */
+    files?: string[];
+    /** Additional structured context */
+    additionalContext?: Record<string, unknown>;
+  };
+
+  /** Optional session metadata */
+  metadata?: {
+    /** Human-readable title for the session */
+    title?: string;
+    /** Tags for categorization */
+    tags?: string[];
+    /** Priority level */
+    priority?: 'low' | 'normal' | 'high';
+  };
+}
+
+/**
+ * Represents a conversation session with an agent
+ */
+export interface ConversationSession {
+  /** Unique identifier for this session */
   sessionId: string;
-  type: 'user' | 'agent' | 'system';
-  content: MessageContent[];
+
+  /** ID of the agent connection used for this session */
+  agentConnectionId: string;
+
+  /** Current status of the session */
+  status: 'active' | 'completed' | 'archived' | 'error';
+
+  /** When the session was created */
+  createdAt: Date;
+
+  /** Last activity timestamp */
+  lastActivity: Date;
+
+  /** All messages in this conversation */
+  messages: SessionMessage[];
+
+  /** Session metadata */
+  metadata?: {
+    /** Human-readable title */
+    title?: string;
+    /** Tags for categorization */
+    tags?: string[];
+    /** Priority level */
+    priority?: 'low' | 'normal' | 'high';
+    /** Total token count (if available) */
+    tokenCount?: number;
+    /** Estimated cost (if available) */
+    estimatedCost?: number;
+  };
+
+  /** Context shared with the agent for this session */
+  context?: {
+    /** Working directory */
+    workingDirectory?: string;
+    /** Files shared as context */
+    files?: string[];
+    /** Additional context data */
+    additionalContext?: Record<string, unknown>;
+  };
+}
+
+/**
+ * Message role types
+ */
+export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
+
+/**
+ * Represents a single message in a conversation
+ */
+export interface SessionMessage {
+  /** Unique identifier for this message */
+  id: string;
+
+  /** Role of the message sender */
+  role: MessageRole;
+
+  /** Content of the message */
+  content: string;
+
+  /** When the message was created */
   timestamp: Date;
-  status: 'sending' | 'sent' | 'failed';
-  metadata: MessageMetadata;
+
+  /** Message metadata */
+  metadata: {
+    /** Source of the message */
+    source: 'user' | 'agent' | 'system';
+    /** Type of message content */
+    messageType: 'text' | 'code' | 'file' | 'tool_call' | 'tool_result';
+    /** Agent ID if from agent */
+    agentId?: string;
+    /** Token count for this message */
+    tokenCount?: number;
+    /** Processing time for agent responses */
+    processingTime?: number;
+    /** Whether message is part of a streaming response */
+    isStreaming?: boolean;
+    /** Sequence number for ordering */
+    sequence?: number;
+  };
+
+  /** Optional tool call information */
+  toolCall?: {
+    /** Name of the tool being called */
+    name: string;
+    /** Arguments passed to the tool */
+    arguments: Record<string, unknown>;
+    /** Call ID for correlation */
+    callId: string;
+  };
+
+  /** Optional tool result information */
+  toolResult?: {
+    /** Call ID this result corresponds to */
+    callId: string;
+    /** Result data */
+    result: unknown;
+    /** Whether the call was successful */
+    success: boolean;
+    /** Error information if unsuccessful */
+    error?: string;
+  };
+
+  /** Optional file attachments */
+  attachments?: {
+    /** File path */
+    path: string;
+    /** File type/extension */
+    type: string;
+    /** File size in bytes */
+    size: number;
+    /** Whether file content is included */
+    includeContent: boolean;
+  }[];
 }
 
-export type MessageContent =
-  | { type: 'text'; text: string }
-  | { type: 'code'; code: string; language?: string }
-  | { type: 'file'; filename: string; content: string }
-  | { type: 'error'; error: string; details?: string };
+/**
+ * Message creation request
+ */
+export interface MessageRequest {
+  /** Content of the message */
+  content: string;
 
-export interface MessageMetadata {
-  tokensUsed?: number;
-  processingTime?: number;
-  stopReason?: string;
-  toolCalls?: ToolCall[];
+  /** Optional message metadata */
+  metadata?: Partial<SessionMessage['metadata']>;
+
+  /** Optional file attachments */
+  attachments?: SessionMessage['attachments'];
+
+  /** Context for this specific message */
+  context?: {
+    /** Files to include with this message */
+    files?: string[];
+    /** Additional context */
+    additionalContext?: Record<string, unknown>;
+  };
 }
 
-export interface ToolCall {
-  id: string;
-  title: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  description?: string;
-  input?: Record<string, unknown>;
-  output?: unknown;
-}
-
-// Project Context Entity
-export interface ProjectContext {
-  id: string;
+/**
+ * Session update event
+ */
+export interface SessionUpdate {
+  /** Session ID being updated */
   sessionId: string;
-  type: 'file' | 'directory' | 'selection';
-  path: string; // absolute path
-  content?: string; // file content (for file type)
-  language?: string; // programming language detected
-  addedAt: Date;
-  size: number; // content size in bytes
-}
 
-// Agent Configuration Entity
-export interface AgentConfiguration {
-  defaultAgent: string;
-  agentCommands: Record<string, AgentCommand>;
-  preferences: UserPreferences;
-  security: SecuritySettings;
-}
+  /** Type of update */
+  type: 'message_added' | 'message_updated' | 'status_changed' | 'metadata_updated';
 
-export interface AgentCommand {
-  name: string;
-  command: string;
-  args: string[];
-  workingDirectory?: string;
-  environmentVariables?: Record<string, string>;
-}
+  /** Update payload */
+  payload: {
+    /** New message if type is message_added */
+    message?: SessionMessage;
+    /** Updated message if type is message_updated */
+    updatedMessage?: SessionMessage;
+    /** New status if type is status_changed */
+    status?: ConversationSession['status'];
+    /** Updated metadata if type is metadata_updated */
+    metadata?: ConversationSession['metadata'];
+  };
 
-export interface UserPreferences {
-  maxMessageHistory: number; // Default: 100
-  autoSaveConversations: boolean; // Default: true
-  showTypingIndicator: boolean; // Default: true
-  theme: 'auto' | 'light' | 'dark'; // Default: 'auto'
-}
-
-export interface SecuritySettings {
-  allowFileAccess: boolean; // Default: false
-  allowedDirectories: string[]; // Whitelisted paths
-  requirePermissionForTools: boolean; // Default: true
-}
-
-// Error Entity
-export interface ExtensionError {
-  id: string;
-  type: 'connection' | 'protocol' | 'validation' | 'system';
-  message: string; // User-friendly error message
-  details: string; // Technical error details
+  /** When the update occurred */
   timestamp: Date;
-  resolved: boolean;
-  context: ErrorContext;
 }
 
-export interface ErrorContext {
-  sessionId?: string;
-  agentId?: string;
-  operation?: string;
-  stackTrace?: string;
-  userAgent?: string;
+/**
+ * Statistics for a conversation session
+ */
+export interface SessionStatistics {
+  /** Session ID */
+  sessionId: string;
+
+  /** Total number of messages */
+  messageCount: number;
+
+  /** Message count by role */
+  messagesByRole: Record<MessageRole, number>;
+
+  /** Total token count (if available) */
+  totalTokens?: number;
+
+  /** Average response time */
+  averageResponseTime?: number;
+
+  /** Session duration */
+  duration: number;
+
+  /** Cost estimation (if available) */
+  estimatedCost?: number;
+
+  /** Context sharing statistics */
+  contextStats: {
+    /** Number of files shared */
+    filesShared: number;
+    /** Total size of shared content */
+    totalContentSize: number;
+  };
 }
 
-// Storage Keys Constants
-export const STORAGE_KEYS = {
-  AGENT_CONFIGS: "acp.agents",
-  CONVERSATIONS: "acp.conversations",
-  PREFERENCES: "acp.preferences",
-  ACTIVE_SESSIONS: "acp.sessions",
-  DEFAULT_AGENT: "acp.defaultAgent",
-  SECURITY_SETTINGS: "acp.security"
-} as const;
+/**
+ * Pagination parameters for message retrieval
+ */
+export interface MessagePagination {
+  /** Offset from start */
+  offset: number;
 
-// Validation Types
-export interface ValidationRule {
-  field: string;
-  required?: boolean;
-  type?: 'string' | 'number' | 'boolean' | 'array' | 'object';
-  minLength?: number;
-  maxLength?: number;
-  pattern?: RegExp;
-  custom?: (value: unknown) => boolean | string;
+  /** Maximum number of messages to return */
+  limit: number;
+
+  /** Sort order */
+  order?: 'asc' | 'desc';
+
+  /** Filter by role */
+  roleFilter?: MessageRole[];
+
+  /** Filter by message type */
+  typeFilter?: SessionMessage['metadata']['messageType'][];
 }
 
-export interface ValidationResult {
-  isValid: boolean;
-  errors: ValidationError[];
-}
+/**
+ * Paginated message result
+ */
+export interface PaginatedMessages {
+  /** Messages for this page */
+  messages: SessionMessage[];
 
-export interface ValidationError {
-  field: string;
-  message: string;
-  code: string;
-}
+  /** Total number of messages available */
+  total: number;
 
-// State Types for UI Components
-export interface ConnectionState {
-  isConnecting: boolean;
-  isConnected: boolean;
-  error?: string;
-  lastAttempt?: Date;
-}
+  /** Current offset */
+  offset: number;
 
-export interface ConversationState {
-  isLoading: boolean;
-  isStreaming: boolean;
-  isSending: boolean;
-  error?: string;
-  currentMessage?: string;
-}
+  /** Number of messages in this page */
+  count: number;
 
-export interface AgentSelectorState {
-  availableAgents: AgentConnection[];
-  selectedAgent?: string;
-  isLoading: boolean;
-  error?: string;
+  /** Whether there are more messages available */
+  hasMore: boolean;
 }
-
-// Built-in Agent Configurations
-export const BUILT_IN_AGENTS: Readonly<AgentCommand[]> = [
-  {
-    name: "Gemini CLI",
-    command: "gemini",
-    args: ["--acp"],
-    workingDirectory: process.cwd(),
-    environmentVariables: {}
-  }
-] as const;
