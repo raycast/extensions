@@ -162,13 +162,12 @@ class KeePassLoader {
    * If the list is empty, it does nothing.
    */
   static findApplication = async (): Promise<void> => {
-    const installedApplications = await getApplications();
-    const apps = installedApplications.filter((application) => application.name == "KeePassXC");
-    if (apps.length > 0) {
-      if (process.platform === "win32") {
-        const pathParts = apps[0].path.split("\\");
-        this.keepassxcCli = pathParts.slice(0, -1).concat("keepassxc-cli.exe").join("\\");
-      } else {
+    if (process.platform === "win32") {
+      this.keepassxcCli = "C:\\Program Files\\KeePassXC\\keepassxc-cli.exe";
+    } else {
+      const installedApplications = await getApplications();
+      const apps = installedApplications.filter((application) => application.name == "KeePassXC");
+      if (apps.length > 0) {
         this.keepassxcCli = apps[0].path + "/Contents/MacOS/keepassxc-cli";
       }
     }
