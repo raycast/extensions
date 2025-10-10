@@ -24,6 +24,9 @@ import type {
 } from "@/types/acp";
 import type { AgentConfig, AgentConnection, ExtensionError } from "@/types/extension";
 import { ErrorCode } from "@/types/extension";
+import { createLogger } from "@/utils/logging";
+
+const logger = createLogger("ACPClient");
 
 export class ACPClient implements acp.Client {
   private connection: acp.ClientSideConnection | null = null;
@@ -132,12 +135,17 @@ export class ACPClient implements acp.Client {
   /**
    * Create a new session with the connected agent
    */
-  async createSession(cwd: string = process.cwd()): Promise<NewSessionResponse> {
+  async createSession(options?: {
+    cwd?: string;
+    mcpServers?: acp.MCPServer[];
+    mode?: string;
+  }): Promise<NewSessionResponse> {
     this.ensureConnected();
 
     const request: NewSessionRequest = {
-      cwd,
-      mcpServers: []
+      cwd: options?.cwd ?? process.cwd(),
+      mcpServers: options?.mcpServers ?? [],
+      mode: options?.mode
     };
 
     try {
@@ -269,11 +277,47 @@ export class ACPClient implements acp.Client {
       throw this.createError(ErrorCode.InvalidConfiguration, "Subprocess agent requires command");
     }
 
+    const baseEnv: NodeJS.ProcessEnv = { ...process.env };
+    const mergedEnv: NodeJS.ProcessEnv = { ...baseEnv, ...(config.environmentVariables ?? {}) };
+
+    if (config.appendToPath?.length) {
+      const existingPath =
+        mergedEnv.PATH ??
+        mergedEnv.Path ??
+        mergedEnv.path ??
+        process.env.PATH ??
+        "";
+
+      const currentSegments = existingPath
+        ? existingPath.split(":").map((segment) => segment.trim()).filter(Boolean)
+        : [];
+
+      const appendSegments = config.appendToPath.filter(Boolean);
+      for (const segment of appendSegments) {
+        if (!currentSegments.includes(segment)) {
+          currentSegments.push(segment);
+        }
+      }
+
+      if (currentSegments.length > 0) {
+        mergedEnv.PATH = currentSegments.join(":");
+        mergedEnv.Path = mergedEnv.PATH;
+        mergedEnv.path = mergedEnv.PATH;
+      }
+    }
+
+    logger.info("Spawning ACP agent subprocess", {
+      command: config.command,
+      args: config.args,
+      cwd: config.workingDirectory || process.cwd(),
+      path: mergedEnv.PATH ?? process.env.PATH ?? ""
+    });
+
     // Spawn the agent process
     this.agentProcess = spawn(config.command, config.args || [], {
       stdio: ['pipe', 'pipe', 'inherit'],
       cwd: config.workingDirectory || process.cwd(),
-      env: { ...process.env, ...config.environmentVariables }
+      env: mergedEnv
     });
 
     if (!this.agentProcess.stdin || !this.agentProcess.stdout) {

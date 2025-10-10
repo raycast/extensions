@@ -44,14 +44,16 @@ export class StorageService {
       const conversations = await this.getConversations();
       const existingIndex = conversations.findIndex(c => c.sessionId === session.sessionId);
 
+      const normalized = this.normalizeConversation(session);
+
       if (existingIndex >= 0) {
-        conversations[existingIndex] = session;
+        conversations[existingIndex] = normalized;
       } else {
-        conversations.push(session);
+        conversations.push(normalized);
       }
 
       // Sort by last activity (most recent first)
-      conversations.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime());
+      conversations.sort((a, b) => this.toDate(b.lastActivity).getTime() - this.toDate(a.lastActivity).getTime());
 
       await LocalStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(conversations, this.dateReplacer));
     } catch (error) {
@@ -91,7 +93,8 @@ export class StorageService {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.CONVERSATIONS);
       const conversationsJson = stored || getDefaultValue(STORAGE_KEYS.CONVERSATIONS);
 
-      const conversations = JSON.parse(conversationsJson, this.dateReviver) as ConversationSession[];
+      const conversations = (JSON.parse(conversationsJson, this.dateReviver) as ConversationSession[])
+        .map(session => this.normalizeConversation(session));
 
       if (agentId) {
         return conversations.filter(c => c.agentConnectionId === agentId);
@@ -167,7 +170,7 @@ export class StorageService {
         throw this.createError(ErrorCode.SessionNotFound, `Conversation not found: ${sessionId}`);
       }
 
-      conversation.messages.push(message);
+      conversation.messages.push(this.normalizeMessage(message));
       conversation.lastActivity = new Date();
 
       // Limit message history based on preferences
@@ -359,6 +362,52 @@ export class StorageService {
     if (!this.initialized) {
       await this.initialize();
     }
+  }
+
+  private normalizeConversation(session: ConversationSession): ConversationSession {
+    return {
+      ...session,
+      createdAt: this.toDate(session.createdAt),
+      lastActivity: this.toDate(session.lastActivity),
+      messages: session.messages.map((message, index) => {
+        const normalized = this.normalizeMessage(message);
+        if (normalized.metadata.sequence === undefined) {
+          normalized.metadata.sequence = index;
+        }
+        return normalized;
+      }),
+      context: session.context
+        ? {
+            ...session.context,
+            additionalContext: session.context.additionalContext
+          }
+        : session.context
+    };
+  }
+
+  private normalizeMessage(message: SessionMessage): SessionMessage {
+    return {
+      ...message,
+      timestamp: this.toDate(message.timestamp),
+      metadata: {
+        ...message.metadata,
+        isStreaming: Boolean(message.metadata.isStreaming),
+        sequence: message.metadata.sequence
+      }
+    };
+  }
+
+  private toDate(value: Date | string | number | undefined): Date {
+    if (value instanceof Date) {
+      return value;
+    }
+    if (typeof value === 'string' || typeof value === 'number') {
+      const parsed = new Date(value);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+    return new Date();
   }
 
   /**

@@ -8,11 +8,12 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
   List,
   showToast,
-  Toast,
-  confirmAlert,
-  Alert
+  Toast
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { StorageService } from "@/services/storageService";
@@ -94,27 +95,47 @@ export default function ConversationsCommand() {
 
   function getConversationSubtitle(conversation: ConversationSession): string {
     const messageCount = conversation.messages.length;
-    const lastActivity = conversation.lastActivity.toLocaleDateString();
+    const lastActivity = conversation.lastActivity.toLocaleString();
     return `${messageCount} messages • ${lastActivity}`;
   }
 
-  function getStatusIcon(status: ConversationSession["status"]): string {
+  function getConversationDetail(conversation: ConversationSession): string {
+    if (conversation.messages.length === 0) {
+      return "_No messages in this conversation._";
+    }
+
+    const recentMessages = conversation.messages.slice(-10);
+    const lines = recentMessages.map((message) => {
+      const timestamp = message.timestamp.toLocaleTimeString();
+      const sender = message.role === "user" ? "You" : "Agent";
+      const content = message.content || "_No content_";
+      return `**${sender}** (${timestamp})\n\n${content}`;
+    });
+
+    return lines.join("\n\n---\n\n");
+  }
+
+  function getStatusIcon(status: ConversationSession["status"]) {
     switch (status) {
       case "active":
-        return "🟢";
+        return Icon.Dot;
       case "completed":
-        return "✅";
+        return Icon.Check;
       case "archived":
-        return "📦";
+        return Icon.Archive;
       case "error":
-        return "❌";
+        return Icon.ExclamationMark;
       default:
-        return "⚪";
+        return Icon.Circle;
     }
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search conversations...">
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarPlaceholder="Search conversations..."
+    >
       {conversations.length === 0 ? (
         <List.EmptyView
           icon="💬"
@@ -131,6 +152,7 @@ export default function ConversationsCommand() {
             accessories={[
               { text: conversation.agentConnectionId },
             ]}
+            detail={<List.Item.Detail markdown={getConversationDetail(conversation)} />}
             actions={
               <ActionPanel>
                 <Action

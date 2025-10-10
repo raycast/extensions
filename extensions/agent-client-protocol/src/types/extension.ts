@@ -91,6 +91,7 @@ export interface AgentConfig {
   endpoint?: string;
   workingDirectory?: string;
   environmentVariables?: Record<string, string>;
+  appendToPath?: string[];
   isBuiltIn?: boolean; // For built-in agents like Gemini CLI
   description?: string;
   createdAt: Date;

@@ -13,19 +13,19 @@ import {
   Toast,
   confirmAlert,
   Alert,
-  useNavigation
+  Icon
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ConfigService } from "@/services/configService";
 import { ErrorHandler } from "@/utils/errors";
 import { createLogger } from "@/utils/logging";
-import { BUILT_IN_AGENTS, checkAgentAvailability, getInstallationGuide } from "@/utils/builtInAgents";
+import { checkAgentAvailability, getInstallationGuide } from "@/utils/builtInAgents";
 import type { AgentConfig } from "@/types/extension";
+import { AddAgentForm, EditAgentForm } from "@/components/AgentConfig";
 
 const logger = createLogger("ConfigureAgentsCommand");
 
 export default function ConfigureAgentsCommand() {
-  const { push } = useNavigation();
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [defaultAgent, setDefaultAgent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -107,10 +107,21 @@ export default function ConfigureAgentsCommand() {
           message: `${agent.name} is ready to use`
         });
       } else {
+        const message = result.error || "Agent command not found";
         await showToast({
           style: Toast.Style.Failure,
           title: "Agent Unavailable",
-          message: result.error || "Agent command not found"
+          message
+        });
+
+        logger.error("Agent availability check failed", {
+          agentId: agent.id,
+          command: agent.command,
+          args: agent.args,
+          workingDirectory: agent.workingDirectory,
+          appendToPath: agent.appendToPath,
+          error: result.error,
+          details: result.details
         });
       }
     } catch (error) {
@@ -162,17 +173,10 @@ export default function ConfigureAgentsCommand() {
         description="Add your first AI agent configuration to get started."
         actions={
           <ActionPanel>
-            <Action
+            <Action.Push
               title="Add Agent"
-              icon="+"
-              onAction={() => {
-                // TODO: Navigate to add agent form
-                showToast({
-                  style: Toast.Style.Success,
-                  title: "Feature Coming Soon",
-                  message: "Add agent configuration feature is in development"
-                });
-              }}
+              icon={Icon.Plus}
+              target={<AddAgentForm onSave={loadAgents} />}
             />
           </ActionPanel>
         }
@@ -193,6 +197,11 @@ export default function ConfigureAgentsCommand() {
                   icon="🔗"
                   onAction={() => checkAvailability(agent)}
                 />
+                <Action.Push
+                  title="Edit Configuration"
+                  icon={Icon.Pencil}
+                  target={<EditAgentForm existingConfig={agent} onSave={loadAgents} />}
+                />
                 {agent.id !== defaultAgent && (
                   <Action
                     title="Set as Default"
@@ -201,32 +210,17 @@ export default function ConfigureAgentsCommand() {
                   />
                 )}
                 {!agent.isBuiltIn && (
-                  <>
-                    <Action
-                      title="Edit Configuration"
-                      icon="✏️"
-                      onAction={() => {
-                        // TODO: Navigate to edit agent form
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Feature Coming Soon",
-                          message: "Edit agent configuration feature is in development"
-                        });
-                      }}
-                    />
-                    <Action
-                      title="Duplicate Configuration"
-                      icon="📋"
-                      onAction={() => {
-                        // TODO: Implement duplicate functionality
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Feature Coming Soon",
-                          message: "Duplicate configuration feature is in development"
-                        });
-                      }}
-                    />
-                  </>
+                  <Action
+                    title="Duplicate Configuration"
+                    icon="📋"
+                    onAction={() => {
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Feature Coming Soon",
+                        message: "Duplicate configuration feature is in development"
+                      });
+                    }}
+                  />
                 )}
               </ActionPanel.Section>
 
@@ -250,18 +244,11 @@ export default function ConfigureAgentsCommand() {
               )}
 
               <ActionPanel.Section title="Management">
-                <Action
+                <Action.Push
                   title="Add New Agent"
-                  icon="+"
+                  icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  onAction={() => {
-                    // TODO: Navigate to add agent form
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Feature Coming Soon",
-                      message: "Add agent configuration feature is in development"
-                    });
-                  }}
+                  target={<AddAgentForm onSave={loadAgents} />}
                 />
                 <Action
                   title="Refresh"

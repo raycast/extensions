@@ -1,47 +1,63 @@
 /**
- * Chat Command - Main AI agent conversation interface
+ * Chat Command - Interactive AI conversation interface
  *
- * This is the primary command for interacting with AI agents through ACP.
- * Supports real-time conversation with context sharing and file access.
+ * Provides a rich list-based chat experience with support for
+ * message history, follow-up prompts, and long-lived sessions.
  */
 
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState, useEffect } from "react";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation
+} from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { ConfigService } from "@/services/configService";
-import { ACPClient } from "@/services/acpClient";
-import { StorageService } from "@/services/storageService";
-import { ErrorHandler } from "@/utils/errors";
 import { createLogger } from "@/utils/logging";
+import { ErrorHandler } from "@/utils/errors";
 import type { AgentConfig } from "@/types/extension";
+import type { SessionMessage } from "@/types/entities";
+import { useChatSession } from "@/hooks/useChatSession";
+
+interface MessageComposerProps {
+  title: string;
+  initialMessage?: string;
+  onSubmit: (text: string) => Promise<void>;
+}
 
 const logger = createLogger("ChatCommand");
 
-interface ChatFormValues {
-  message: string;
-  agentId: string;
-}
-
 export default function ChatCommand() {
-  const { push } = useNavigation();
+  const chat = useChatSession();
   const [agents, setAgents] = useState<AgentConfig[]>([]);
-  const [defaultAgent, setDefaultAgent] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined);
+  const [isLoadingAgents, setIsLoadingAgents] = useState(true);
 
-  const configService = new ConfigService();
-  const acpClient = new ACPClient();
-  const storageService = new StorageService();
+  const configService = useMemo(() => new ConfigService(), []);
 
   useEffect(() => {
     async function loadAgents() {
       try {
-        await storageService.initialize();
+        setIsLoadingAgents(true);
         const [agentConfigs, defaultAgentId] = await Promise.all([
           configService.getAgentConfigs(),
           configService.getDefaultAgent()
         ]);
 
         setAgents(agentConfigs);
-        setDefaultAgent(defaultAgentId || (agentConfigs[0]?.id ?? null));
+        const preferredAgentId = defaultAgentId ?? agentConfigs[0]?.id;
+        setSelectedAgentId(preferredAgentId ?? undefined);
+
+        if (preferredAgentId) {
+          const agent = agentConfigs.find((item) => item.id === preferredAgentId);
+          if (agent) {
+            chat.setActiveAgent(agent);
+          }
+        }
 
         logger.info("Agents loaded successfully", {
           count: agentConfigs.length,
@@ -50,110 +66,210 @@ export default function ChatCommand() {
       } catch (error) {
         await ErrorHandler.handleError(error, "Loading agents");
       } finally {
-        setIsLoading(false);
+        setIsLoadingAgents(false);
       }
     }
 
     loadAgents();
-  }, []);
+  }, [configService, chat.setActiveAgent]);
 
-  async function handleSubmit(values: ChatFormValues) {
-    if (!values.message.trim()) {
+  useEffect(() => {
+    if (!selectedAgentId) {
+      return;
+    }
+    const agent = agents.find((item) => item.id === selectedAgentId);
+    if (agent) {
+      chat.setActiveAgent(agent);
+    }
+  }, [selectedAgentId, agents, chat.setActiveAgent]);
+
+  const isProcessing = chat.status === "connecting" || chat.status === "processing";
+  const selectedAgent = selectedAgentId ? agents.find((agent) => agent.id === selectedAgentId) : null;
+
+  async function handleSend(message: string) {
+    if (!message.trim()) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Error",
-        message: "Please enter a message"
+        title: "Enter a message",
+        message: "Please provide a message to send."
       });
       return;
     }
 
-    if (!values.agentId) {
+    if (!selectedAgent) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Error",
-        message: "Please select an agent"
+        title: "Select an agent",
+        message: "Choose an agent before sending a message."
       });
       return;
     }
 
-    try {
-      setIsLoading(true);
+    await chat.sendMessage(message);
+  }
 
-      // Find the selected agent configuration
-      const agentConfig = agents.find(a => a.id === values.agentId);
-      if (!agentConfig) {
-        throw new Error(`Agent configuration not found: ${values.agentId}`);
+  function getMessageAccessory(message: SessionMessage) {
+    const time = message.timestamp instanceof Date
+      ? message.timestamp.toLocaleTimeString()
+      : "";
+
+    return [
+      {
+        text: message.role === "user" ? "You" : message.role === "assistant" ? selectedAgent?.name ?? "Agent" : "System"
+      },
+      {
+        text: time
       }
+    ];
+  }
 
-      logger.userAction("Starting chat session", {
-        agentId: values.agentId,
-        messageLength: values.message.length
-      });
-
-      // Connect to agent
-      const connection = await acpClient.connect(agentConfig);
-
-      // Create new session
-      const session = await acpClient.createSession(connection.id, {
-        prompt: values.message
-      });
-
-      // Save conversation to storage
-      await storageService.saveConversation(session);
-
-      await ErrorHandler.showSuccess("Connected to agent successfully");
-
-      // TODO: Navigate to conversation view
-      logger.info("Chat session started successfully", { sessionId: session.sessionId });
-
-    } catch (error) {
-      await ErrorHandler.handleError(error, "Starting chat session");
-    } finally {
-      setIsLoading(false);
+  function getMessageIcon(message: SessionMessage) {
+    switch (message.role) {
+      case "user":
+        return Icon.Person;
+      case "assistant":
+        return Icon.Robot;
+      case "system":
+        return Icon.Info;
+      case "tool":
+        return Icon.Wrench;
+      default:
+        return Icon.Circle;
     }
   }
 
-  if (isLoading && agents.length === 0) {
-    return <Form isLoading={true} />;
+  function formatMessageMarkdown(message: SessionMessage): string {
+    if (!message.content) {
+      return "_No content_";
+    }
+
+    if (message.role === "system") {
+      return `> ${message.content}`;
+    }
+
+    return message.content;
+  }
+
+  const conversationTitle = chat.conversation
+    ? chat.conversation.metadata?.title ?? chat.conversation.sessionId
+    : "New Conversation";
+
+  const messageItems = chat.messages.map((message, index) => (
+    <List.Item
+      key={`${message.id}-${index}`}
+      icon={getMessageIcon(message)}
+      title={message.role === "user" ? "User Message" : "Agent Response"}
+      accessories={getMessageAccessory(message)}
+      detail={<List.Item.Detail markdown={formatMessageMarkdown(message)} />}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title={chat.conversation ? "Send Follow-Up Message" : "Send Message"}
+            icon={Icon.PaperPlane}
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            target={
+              <MessageComposer
+                title={chat.conversation ? "Send Follow-Up" : "Send Message"}
+                onSubmit={handleSend}
+              />
+            }
+          />
+          {message.content && (
+            <Action.CopyToClipboard
+              title="Copy Message"
+              content={message.content}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+          )}
+          <ActionPanel.Section>
+            <Action
+              title="Restart Conversation"
+              icon={Icon.Repeat}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+              onAction={chat.resetSession}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  ));
+
+  return (
+    <List
+      isLoading={isLoadingAgents || isProcessing}
+      isShowingDetail
+      searchBarPlaceholder="Search in conversation..."
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Agent"
+          value={selectedAgentId}
+          onChange={setSelectedAgentId}
+        >
+          {agents.map((agent) => (
+            <List.Dropdown.Item key={agent.id} value={agent.id} title={agent.name} />
+          ))}
+        </List.Dropdown>
+      }
+    >
+      {chat.messages.length === 0 ? (
+        <List.EmptyView
+          icon="🤖"
+          title="Start a Conversation"
+          description="Select an agent and send your first message to begin."
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Send Message"
+                icon={Icon.PaperPlane}
+                target={
+                  <MessageComposer
+                    title="Send Message"
+                    onSubmit={handleSend}
+                  />
+                }
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section title={conversationTitle} subtitle={`${chat.messages.length} messages`}>
+          {messageItems}
+        </List.Section>
+      )}
+    </List>
+  );
+}
+
+function MessageComposer({ title, initialMessage, onSubmit }: MessageComposerProps) {
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: { message?: string }) {
+    const text = values.message ?? "";
+    await onSubmit(text);
+    pop();
   }
 
   return (
     <Form
-      isLoading={isLoading}
+      navigationTitle={title}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Send Message"
+            title="Send"
+            icon={Icon.PaperPlane}
             onSubmit={handleSubmit}
-            icon="💬"
           />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="agentId"
-        title="AI Agent"
-        placeholder="Select an agent"
-        defaultValue={defaultAgent || undefined}
-      >
-        {agents.map((agent) => (
-          <Form.Dropdown.Item
-            key={agent.id}
-            value={agent.id}
-            title={agent.name}
-            icon={agent.isBuiltIn ? "🤖" : "⚙️"}
-          />
-        ))}
-      </Form.Dropdown>
-
       <Form.TextArea
         id="message"
-        title="Your Message"
-        placeholder="Ask for coding help, code generation, or technical guidance..."
-        defaultValue=""
+        title="Message"
+        placeholder="Ask a question or describe what you need help with..."
+        defaultValue={initialMessage ?? ""}
+        autoFocus
       />
-
-      <Form.Description text="Tip: You can share file context and have multi-turn conversations with the agent." />
     </Form>
   );
 }

@@ -14,6 +14,7 @@ import type {
 } from "@/types/extension";
 import { STORAGE_KEYS, getDefaultValue } from "@/utils/storageKeys";
 import { ErrorCode, type ExtensionError } from "@/types/extension";
+import { BUILT_IN_AGENTS } from "@/utils/builtInAgents";
 
 export class ConfigService implements ConfigurationService {
 
@@ -25,19 +26,49 @@ export class ConfigService implements ConfigurationService {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.AGENT_CONFIGS);
       const configsJson = stored || getDefaultValue(STORAGE_KEYS.AGENT_CONFIGS);
 
-      const configs = JSON.parse(configsJson) as AgentConfig[];
+      const parsed = JSON.parse(configsJson) as AgentConfig[];
+      const storedConfigs = parsed.map((config) => this.normalizeAgentConfig(config));
 
-      // Add built-in agents if not present
-      const builtInAgents = await this.getBuiltInAgents();
-      const existingIds = new Set(configs.map(c => c.id));
+      const builtInMap = new Map<string, AgentConfig>();
+      for (const builtIn of BUILT_IN_AGENTS) {
+        builtInMap.set(
+          builtIn.id,
+          this.normalizeAgentConfig({
+            ...builtIn,
+            createdAt: builtIn.createdAt ?? new Date("2025-01-01"),
+            isBuiltIn: true,
+          })
+        );
+      }
 
-      for (const builtIn of builtInAgents) {
-        if (!existingIds.has(builtIn.id)) {
-          configs.unshift(builtIn); // Add built-ins first
+      for (const config of storedConfigs) {
+        const existing = builtInMap.get(config.id);
+        if (existing) {
+          builtInMap.set(config.id, {
+            ...existing,
+            ...config,
+            createdAt: existing.createdAt,
+            isBuiltIn: existing.isBuiltIn ?? config.isBuiltIn,
+            lastUsed: config.lastUsed ?? existing.lastUsed,
+          });
+        } else {
+          builtInMap.set(config.id, config);
         }
       }
 
-      return configs;
+      const merged = Array.from(builtInMap.values());
+      merged.sort((a, b) => {
+        const aBuiltIn = Boolean(a.isBuiltIn);
+        const bBuiltIn = Boolean(b.isBuiltIn);
+
+        if (aBuiltIn === bBuiltIn) {
+          return a.name.localeCompare(b.name);
+        }
+
+        return aBuiltIn ? -1 : 1;
+      });
+
+      return merged;
     } catch (error) {
       throw this.createError(
         ErrorCode.InvalidConfiguration,
@@ -54,33 +85,27 @@ export class ConfigService implements ConfigurationService {
       const configs = await this.getAgentConfigs();
       const existingIndex = configs.findIndex(c => c.id === config.id);
 
-      // Update lastUsed timestamp
-      const updatedConfig: AgentConfig = {
+      const normalizedConfig = this.normalizeAgentConfig({
         ...config,
-        lastUsed: new Date()
-      };
+        createdAt: config.createdAt ?? new Date(),
+        lastUsed: new Date(),
+      });
 
       if (existingIndex >= 0) {
-        // Don't allow overwriting built-in agents
-        if (configs[existingIndex].isBuiltIn) {
-          throw this.createError(
-            ErrorCode.InvalidConfiguration,
-            "Cannot modify built-in agent configurations"
-          );
-        }
-        configs[existingIndex] = updatedConfig;
+        const existing = configs[existingIndex];
+        configs[existingIndex] = {
+          ...existing,
+          ...normalizedConfig,
+          createdAt: existing.createdAt,
+          isBuiltIn: existing.isBuiltIn ?? normalizedConfig.isBuiltIn,
+        };
       } else {
-        configs.push(updatedConfig);
+        configs.push(normalizedConfig);
       }
 
-      // Filter out built-in agents before saving (they're added dynamically)
-      const customConfigs = configs.filter(c => !c.isBuiltIn);
-      await LocalStorage.setItem(STORAGE_KEYS.AGENT_CONFIGS, JSON.stringify(customConfigs));
+      await this.persistAgentConfigs(configs);
 
     } catch (error) {
-      if (error instanceof Error && error.message.includes("built-in")) {
-        throw error; // Re-throw our custom error
-      }
       throw this.createError(
         ErrorCode.SystemError,
         `Failed to save agent configuration: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -104,8 +129,8 @@ export class ConfigService implements ConfigurationService {
         throw this.createError(ErrorCode.InvalidConfiguration, "Cannot delete built-in agent configurations");
       }
 
-      const updatedConfigs = configs.filter(c => c.id !== id && !c.isBuiltIn);
-      await LocalStorage.setItem(STORAGE_KEYS.AGENT_CONFIGS, JSON.stringify(updatedConfigs));
+      const updatedConfigs = configs.filter(c => c.id !== id);
+      await this.persistAgentConfigs(updatedConfigs);
 
       // Clear default agent if it was deleted
       const defaultAgent = await this.getDefaultAgent();
@@ -302,22 +327,32 @@ export class ConfigService implements ConfigurationService {
   }
 
   /**
-   * Private: Get built-in agent configurations
+   * Private helper: ensure agent configs have consistent shapes
    */
-  private async getBuiltInAgents(): Promise<AgentConfig[]> {
-    return [
-      {
-        id: "gemini-cli",
-        name: "Gemini CLI",
-        type: "subprocess",
-        command: "gemini",
-        args: ["--acp"],
-        workingDirectory: process.cwd(),
-        isBuiltIn: true,
-        description: "Google's Gemini AI agent with ACP support",
-        createdAt: new Date("2025-01-01"), // Static date for built-ins
-      }
-    ];
+  private normalizeAgentConfig(config: AgentConfig): AgentConfig {
+    return {
+      ...config,
+      args: config.args ? [...config.args] : config.args,
+      environmentVariables: config.environmentVariables ? { ...config.environmentVariables } : config.environmentVariables,
+      appendToPath: config.appendToPath ? [...config.appendToPath] : undefined,
+      createdAt: config.createdAt instanceof Date ? config.createdAt : new Date(config.createdAt ?? Date.now()),
+      lastUsed: config.lastUsed
+        ? (config.lastUsed instanceof Date ? config.lastUsed : new Date(config.lastUsed))
+        : undefined,
+    };
+  }
+
+  /**
+   * Private helper: persist agent configs to LocalStorage with ISO dates
+   */
+  private async persistAgentConfigs(configs: AgentConfig[]): Promise<void> {
+    const serializable = configs.map((config) => ({
+      ...config,
+      createdAt: config.createdAt instanceof Date ? config.createdAt.toISOString() : config.createdAt,
+      lastUsed: config.lastUsed instanceof Date ? config.lastUsed.toISOString() : config.lastUsed,
+    }));
+
+    await LocalStorage.setItem(STORAGE_KEYS.AGENT_CONFIGS, JSON.stringify(serializable));
   }
 
   /**

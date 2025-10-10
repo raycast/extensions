@@ -6,6 +6,9 @@
  */
 
 import type { AgentConfig } from "@/types/extension";
+import { createLogger } from "./logging";
+
+const logger = createLogger("BuiltInAgents");
 
 /**
  * Built-in agent configurations
@@ -219,6 +222,13 @@ export function validateAgentConfig(config: Partial<AgentConfig>): {
     errors.push("Description must be 200 characters or less");
   }
 
+  if (config.appendToPath) {
+    const invalidSegments = config.appendToPath.filter(segment => !segment?.trim());
+    if (invalidSegments.length > 0) {
+      errors.push("Append to PATH entries must be non-empty");
+    }
+  }
+
   return {
     isValid: errors.length === 0,
     errors
@@ -231,6 +241,7 @@ export function validateAgentConfig(config: Partial<AgentConfig>): {
 export async function checkAgentAvailability(config: AgentConfig): Promise<{
   isAvailable: boolean;
   error?: string;
+  details?: string;
 }> {
   if (config.type !== "subprocess" || !config.command) {
     return { isAvailable: true }; // Can't check remote agents
@@ -239,45 +250,162 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
   try {
     const { spawn } = await import("child_process");
 
+    const baseEnv: NodeJS.ProcessEnv = { ...process.env };
+    const mergedEnv: NodeJS.ProcessEnv = { ...baseEnv, ...(config.environmentVariables ?? {}) };
+
+    if (config.appendToPath?.length) {
+      const currentPath =
+        mergedEnv.PATH ??
+        mergedEnv.Path ??
+        mergedEnv.path ??
+        process.env.PATH ??
+        "";
+
+      const pathSegments = currentPath
+        ? currentPath.split(":").map(segment => segment.trim()).filter(Boolean)
+        : [];
+
+      for (const segment of config.appendToPath) {
+        if (segment && !pathSegments.includes(segment)) {
+          pathSegments.push(segment);
+        }
+      }
+
+      if (pathSegments.length > 0) {
+        const finalPath = pathSegments.join(":");
+        mergedEnv.PATH = finalPath;
+        mergedEnv.Path = finalPath;
+        mergedEnv.path = finalPath;
+      }
+    }
+
+    const args = config.args && config.args.length > 0 ? [...config.args] : ["--version"];
+    const isLongRunningCheck = args.some(arg => arg !== "--version");
+
+    logger.info("Checking agent availability", {
+      agentId: config.id,
+      command: config.command,
+      args,
+      cwd: config.workingDirectory || process.cwd(),
+      path: mergedEnv.PATH
+    });
+
     return new Promise((resolve) => {
-      const process = spawn(config.command!, ["--version"], {
-        stdio: "pipe",
-        timeout: 5000
+      const child = spawn(config.command!, args, {
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 0,
+        cwd: config.workingDirectory || process.cwd(),
+        env: mergedEnv
       });
 
       let resolved = false;
+      let stderr = "";
+      let stdout = "";
+      let successTimer: NodeJS.Timeout | null = null;
+      let timeoutTimer: NodeJS.Timeout | null = null;
 
-      process.on("error", (error) => {
-        if (!resolved) {
-          resolved = true;
-          resolve({
-            isAvailable: false,
-            error: `Command not found: ${config.command} (${error.message})`
-          });
-        }
+      child.stderr?.on("data", (chunk: Buffer) => {
+        stderr += chunk.toString();
       });
 
-      process.on("exit", (code) => {
-        if (!resolved) {
-          resolved = true;
-          resolve({
-            isAvailable: code === 0,
-            error: code !== 0 ? `Command exited with code ${code}` : undefined
-          });
-        }
+      child.stdout?.on("data", (chunk: Buffer) => {
+        stdout += chunk.toString();
       });
 
-      // Timeout fallback
-      setTimeout(() => {
+      const finalize = (result: { isAvailable: boolean; error?: string; details?: string }) => {
+        if (resolved) {
+          return;
+        }
+        resolved = true;
+        if (successTimer) {
+          clearTimeout(successTimer);
+        }
+        if (timeoutTimer) {
+          clearTimeout(timeoutTimer);
+        }
+        resolve(result);
+      };
+
+      if (isLongRunningCheck) {
+        successTimer = setTimeout(() => {
+          logger.info("Agent long-running command started successfully", {
+            agentId: config.id,
+            command: config.command,
+            args,
+            path: mergedEnv.PATH
+          });
+          finalize({ isAvailable: true });
+          child.kill();
+          setTimeout(() => child.kill("SIGKILL"), 1000);
+        }, 3000);
+      }
+
+      timeoutTimer = setTimeout(() => {
         if (!resolved) {
-          resolved = true;
-          process.kill();
-          resolve({
+          logger.warn("Agent availability check timed out", {
+            agentId: config.id,
+            command: config.command,
+            args,
+            path: mergedEnv.PATH
+          });
+          child.kill();
+          setTimeout(() => child.kill("SIGKILL"), 1000);
+          finalize({
             isAvailable: false,
             error: "Command check timed out"
           });
         }
-      }, 5000);
+      }, isLongRunningCheck ? 10000 : 5000);
+
+      child.on("error", (error) => {
+        if (resolved) {
+          return;
+        }
+        logger.error("Agent availability check failed", {
+          agentId: config.id,
+          command: config.command,
+          error: error.message,
+          path: mergedEnv.PATH
+        });
+        finalize({
+          isAvailable: false,
+          error: `Command not found: ${config.command}`,
+          details: error.message
+        });
+      });
+
+      child.on("exit", (code, signal) => {
+        if (resolved) {
+          return;
+        }
+        if (code === 0) {
+          finalize({ isAvailable: true });
+          return;
+        }
+
+        const message = code !== null
+          ? `Command exited with code ${code}`
+          : `Command terminated by signal ${signal ?? "unknown"}`;
+
+        logger.warn("Agent availability command exited with error", {
+          agentId: config.id,
+          command: config.command,
+          exitCode: code,
+          signal,
+          stderr: stderr.trim(),
+          stdout: stdout.trim(),
+          path: mergedEnv.PATH
+        });
+
+        finalize({
+          isAvailable: false,
+          error: message,
+          details: stderr.trim() || stdout.trim() || undefined
+        });
+      });
+
+      // Timeout fallback
+      // handled above with timeoutTimer
     });
   } catch (error) {
     return {

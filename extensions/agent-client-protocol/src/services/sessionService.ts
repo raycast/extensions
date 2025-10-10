@@ -18,6 +18,11 @@ import type {
   MessageRequest,
   MessageRole
 } from '@/types/entities';
+import type {
+  SessionMessage as ACPSessionMessage,
+  MessageContent as ACPMessageContent,
+  PromptResponse
+} from '@/types/acp';
 import type { SessionServiceInterface } from '@/types/extension';
 import type { StorageService } from './storageService';
 import type { ACPClient } from './acpClient';
@@ -77,20 +82,35 @@ export class SessionService implements SessionServiceInterface {
 
       // Send initial prompt to agent via ACP
       try {
-        const acpSession = await this.acpClient.createSession(
-          request.agentConnectionId,
-          {
-            prompt: request.prompt,
-            context: request.context
-          }
-        );
+        const acpSession = await this.acpClient.createSession({
+          cwd: request.context?.workingDirectory ?? process.cwd()
+        });
 
-        // Update session with any additional data from ACP
-        if (acpSession.messages && acpSession.messages.length > 1) {
-          // Add any additional messages returned by the agent
-          const additionalMessages = acpSession.messages.slice(1);
-          session.messages.push(...additionalMessages);
+        const promptResponse = await this.acpClient.sendPrompt(acpSession.sessionId, request.prompt);
+
+        if (promptResponse.messages && promptResponse.messages.length > 0) {
+          const agentMessages = promptResponse.messages
+            .filter(message => message.type !== 'user')
+            .map((message, index) =>
+              this.transformAcpMessage(
+                message,
+                session.messages.length + index + 1
+              )
+            );
+
+          if (agentMessages.length > 0) {
+            session.messages.push(...agentMessages);
+            session.lastActivity = new Date();
+          }
         }
+
+        session.context = {
+          ...request.context,
+          additionalContext: {
+            ...request.context?.additionalContext,
+            agentSessionId: acpSession.sessionId
+          }
+        };
 
         logger.info('Session created successfully', {
           sessionId,
@@ -290,17 +310,42 @@ export class SessionService implements SessionServiceInterface {
       await this.storageService.addMessageToConversation(sessionId, userMessage);
 
       // Send message to agent via ACP
-      let agentResponse: SessionMessage;
+      let promptResponse: PromptResponse;
+      let agentMessages: SessionMessage[] = [];
       try {
-        agentResponse = await this.acpClient.sendMessage(sessionId, content, context || {});
+        promptResponse = await this.acpClient.sendPrompt(sessionId, content);
 
-        // Update sequence number
-        agentResponse.metadata.sequence = session.messages.length;
+        const responseMessages = promptResponse.messages ?? [];
+        agentMessages = responseMessages
+          .filter(message => message.type !== 'user')
+          .map((message, index) =>
+            this.transformAcpMessage(
+              message,
+              session.messages.length + index
+            )
+          );
+
+        if (agentMessages.length === 0) {
+          agentMessages = [
+            {
+              id: uuidv4(),
+              role: 'assistant',
+              content: '',
+              timestamp: new Date(),
+              metadata: {
+                source: 'agent',
+                messageType: 'text',
+                sequence: session.messages.length,
+                processingTime: promptResponse.messages?.[0]?.metadata?.processingTime
+              }
+            }
+          ];
+        }
 
         logger.info('Agent response received', {
           sessionId,
-          responseLength: agentResponse.content.length,
-          processingTime: agentResponse.metadata.processingTime
+          responseCount: agentMessages.length,
+          processingTime: agentMessages.at(-1)?.metadata.processingTime
         });
 
       } catch (error) {
@@ -315,26 +360,27 @@ export class SessionService implements SessionServiceInterface {
       }
 
       // Add agent response to session
-      session.messages.push(agentResponse);
-      session.lastActivity = new Date();
-
-      // Save agent response
-      await this.storageService.addMessageToConversation(sessionId, agentResponse);
+      for (const agentMessage of agentMessages) {
+        agentMessage.metadata.sequence = session.messages.length;
+        session.messages.push(agentMessage);
+        session.lastActivity = new Date();
+        await this.storageService.addMessageToConversation(sessionId, agentMessage);
+      }
 
       logger.info('Message exchange completed', {
         sessionId,
         userMessageId: userMessage.id,
-        agentMessageId: agentResponse.id
+        agentMessageIds: agentMessages.map(msg => msg.id)
       });
 
       PerformanceLogger.end(operationId, {
         success: true,
         sessionId,
         messageCount: session.messages.length,
-        responseTime: agentResponse.metadata.processingTime
+        responseTime: agentMessages.at(-1)?.metadata.processingTime
       });
 
-      return agentResponse;
+      return agentMessages.at(-1)!;
 
     } catch (error) {
       PerformanceLogger.end(operationId, {
@@ -470,5 +516,79 @@ export class SessionService implements SessionServiceInterface {
     }
 
     return title;
+  }
+
+  private transformAcpMessage(message: ACPSessionMessage, sequence: number): SessionMessage {
+    const { text, messageType } = this.flattenAcpContent(message.content);
+
+    return {
+      id: message.id,
+      role: this.mapAcpRole(message.type),
+      content: text,
+      timestamp: new Date(message.timestamp),
+      metadata: {
+        source: this.mapAcpSource(message.type),
+        messageType,
+        sequence,
+        tokenCount: message.metadata?.tokensUsed,
+        processingTime: message.metadata?.processingTime,
+        isStreaming: false
+      }
+    };
+  }
+
+  private flattenAcpContent(contents: ACPMessageContent[]): { text: string; messageType: SessionMessage['metadata']['messageType'] } {
+    let messageType: SessionMessage['metadata']['messageType'] = 'text';
+    const parts: string[] = [];
+
+    for (const content of contents) {
+      switch (content.type) {
+        case 'text':
+          parts.push(content.text);
+          break;
+        case 'code':
+          parts.push(content.code);
+          messageType = messageType === 'text' ? 'code' : messageType;
+          break;
+        case 'file':
+          parts.push(`${content.filename ?? 'File'}: ${content.content ?? ''}`);
+          messageType = messageType === 'text' ? 'file' : messageType;
+          break;
+        case 'error':
+          parts.push(`Error: ${content.error}`);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return {
+      text: parts.join('\n\n').trim(),
+      messageType
+    };
+  }
+
+  private mapAcpRole(role: ACPSessionMessage['type']): MessageRole {
+    switch (role) {
+      case 'user':
+        return 'user';
+      case 'agent':
+        return 'assistant';
+      case 'system':
+        return 'system';
+      default:
+        return 'system';
+    }
+  }
+
+  private mapAcpSource(role: ACPSessionMessage['type']): SessionMessage['metadata']['source'] {
+    switch (role) {
+      case 'user':
+        return 'user';
+      case 'agent':
+        return 'agent';
+      default:
+        return 'system';
+    }
   }
 }

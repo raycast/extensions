@@ -8,6 +8,7 @@
 import { showToast, Toast } from "@raycast/api";
 import type { ExtensionError } from "@/types/extension";
 import { ErrorCode } from "@/types/extension";
+export { ErrorCode } from "@/types/extension";
 
 /**
  * Custom error class for ACP extension
