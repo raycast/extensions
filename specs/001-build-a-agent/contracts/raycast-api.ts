@@ -39,6 +39,10 @@ export interface AgentConfig {
   endpoint?: string;
   workingDirectory?: string;
   environmentVariables?: Record<string, string>;
+  isBuiltIn?: boolean; // For built-in agents like Gemini CLI
+  description?: string;
+  createdAt: Date;
+  lastUsed?: Date;
 }
 
 export interface AgentConnection {
@@ -124,18 +128,25 @@ export interface ProjectContext {
 
 // Configuration Service
 export interface ConfigurationService {
-  // Agent configurations
+  // Agent configurations (using Raycast LocalStorage)
   getAgentConfigs(): Promise<AgentConfig[]>;
   saveAgentConfig(config: AgentConfig): Promise<void>;
   deleteAgentConfig(id: string): Promise<void>;
+  getDefaultAgent(): Promise<string | null>;
+  setDefaultAgent(agentId: string): Promise<void>;
 
-  // User preferences
+  // User preferences (using Raycast LocalStorage)
   getPreferences(): Promise<UserPreferences>;
   updatePreferences(preferences: Partial<UserPreferences>): Promise<void>;
 
-  // Security settings
+  // Security settings (using Raycast LocalStorage)
   getSecuritySettings(): Promise<SecuritySettings>;
   updateSecuritySettings(settings: Partial<SecuritySettings>): Promise<void>;
+
+  // Storage utilities
+  clearAllData(): Promise<void>;
+  exportData(): Promise<string>; // JSON export
+  importData(data: string): Promise<void>; // JSON import
 }
 
 export interface UserPreferences {

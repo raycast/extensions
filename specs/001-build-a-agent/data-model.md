@@ -177,22 +177,31 @@ interface SecuritySettings {
 
 ## Data Persistence
 
-### Local Storage
-**Format**: JSON files in Raycast extension data directory
-```
-~/.raycast/extensions/agent-client-protocol/
-├── sessions/           # Conversation sessions
-│   ├── {sessionId}.json
-├── agents/             # Agent configurations
-│   └── config.json
-└── preferences.json    # User preferences
+### Raycast LocalStorage
+**Implementation**: Using @raycast/api LocalStorage class for all persistence
+```typescript
+import { LocalStorage } from "@raycast/api";
+
+// Storage keys
+const STORAGE_KEYS = {
+  AGENT_CONFIGS: "acp.agents",
+  CONVERSATIONS: "acp.conversations",
+  PREFERENCES: "acp.preferences",
+  ACTIVE_SESSIONS: "acp.sessions"
+} as const;
+
+// Storage operations
+await LocalStorage.setItem(STORAGE_KEYS.AGENT_CONFIGS, JSON.stringify(agents));
+const agents = JSON.parse(await LocalStorage.getItem(STORAGE_KEYS.AGENT_CONFIGS) ?? "[]");
 ```
 
 **Storage Strategy**:
-- Immediate persistence for critical state
-- Batched writes for performance
-- Backup and recovery for data protection
-- Cleanup of old/orphaned data
+- **Agent Configurations**: Persistent storage of custom agent setups
+- **Conversation History**: Session data with message history
+- **User Preferences**: Extension settings and defaults
+- **Active Sessions**: Current conversation state
+- **Automatic serialization**: JSON encoding for complex objects
+- **Atomic operations**: Single key updates for consistency
 
 ### Memory Management
 **Message Limits**:

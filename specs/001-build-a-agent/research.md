@@ -98,27 +98,34 @@ const stream = acp.ndJsonStream(
 
 ## Testing Framework
 
-### Decision: Jest with Raycast API mocks
-**Rationale**: Jest is standard for TypeScript projects. Raycast provides testing utilities for extension development.
+### Decision: Jest with Raycast API mocks + Gemini CLI for integration testing
+**Rationale**: Jest is standard for TypeScript projects. Raycast provides testing utilities for extension development. Gemini CLI provides real ACP agent for integration testing.
 
 **Testing Strategy**:
 - **Unit Tests**: ACP client logic, message handling, state management
-- **Integration Tests**: End-to-end protocol communication with mock agents
+- **Integration Tests**: End-to-end protocol communication with Gemini CLI agent
 - **UI Tests**: Raycast component behavior with mocked ACP responses
 
 **Test Structure**:
 ```
 tests/
 ├── unit/           # Service and utility tests
-├── integration/    # ACP protocol tests
-└── mocks/          # Mock agent implementations
+├── integration/    # ACP protocol tests with Gemini CLI
+├── mocks/          # Mock agent implementations
+└── fixtures/       # Test data and Gemini CLI setup
 ```
+
+**Local Testing Agent**:
+- **Gemini CLI**: Real ACP-compatible agent for integration testing
+- **Installation**: `npm install -g @google-ai/generativelanguage-cli`
+- **Usage**: `gemini` command provides ACP endpoint for testing
+- **Benefits**: Real protocol testing, actual AI responses, validation of ACP compliance
 
 **Coverage Requirements**: 80% minimum per constitution
 **TDD Approach**: Write tests first, implement features to pass tests
 
-**Alternatives considered**: Vitest, custom test framework
-**Why chosen**: Jest ecosystem maturity, Raycast compatibility, TypeScript support
+**Alternatives considered**: Vitest, custom test framework, mock agents only
+**Why chosen**: Jest ecosystem maturity, Raycast compatibility, real agent testing with Gemini CLI
 
 ## Performance Considerations
 
