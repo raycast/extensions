@@ -22,16 +22,13 @@ export interface HostsOperationResult {
 }
 
 /**
- * Checks if sudo is available on the system
- * @returns Promise resolving to true if sudo is available
+ * Checks if admin privileges are available (always true on macOS with AppleScript)
+ * @returns Promise resolving to true since we use AppleScript authentication
  */
 export async function isSudoAvailable(): Promise<boolean> {
-  try {
-    await execAsync('which sudo');
-    return true;
-  } catch {
-    return false;
-  }
+  // We use AppleScript with "administrator privileges" which handles authentication
+  // via the native macOS dialog, so this should always return true on macOS
+  return true;
 }
 
 /**

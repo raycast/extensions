@@ -16,13 +16,7 @@ const BACKUP_FILE_PATH = '/etc/hosts.webblocker.bak';
 const WEBGLOCKER_TAG = '# WebBlocker';
 const REDIRECT_IP = '127.0.0.1';
 async function isSudoAvailable() {
-    try {
-        await execAsync('which sudo');
-        return true;
-    }
-    catch {
-        return false;
-    }
+    return true;
 }
 async function executeWithAdminPrivileges(command) {
     const applescriptCommand = `
