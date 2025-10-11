@@ -1,15 +1,7 @@
 import { getApplications, getPreferenceValues, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { runPowerShellScript, runAppleScript } from "@raycast/utils";
+import { isMac } from "./utils";
 
-interface OpenVSCodePreferences {
-  VSCodeVariant: string;
-}
-
-/**
- * Gets the selected Finder window.
- * @throws — An error when Finder is not the frontmost application.
- * @returns A Promise that resolves with the selected Finder window's path.
- */
 const getSelectedFinderWindow = (): Promise<string> => {
   const appleScript = `
   if application "Finder" is running and frontmost of application "Finder" then
@@ -22,27 +14,54 @@ const getSelectedFinderWindow = (): Promise<string> => {
     error "Could not get the selected Finder window"
   end if
  `;
-  return new Promise((resolve, reject) => {
-    const child = exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
-      if (error || stderr) reject(Error("Could not get the selected Finder window"));
-      resolve(stdout.trim());
+  return runAppleScript(appleScript)
+    .then((result) => result.trim())
+    .catch(() => {
+      throw new Error("Could not get the selected Finder window");
     });
+};
 
-    child.on("close", () => {
-      child.kill();
-    });
-  });
+const getActiveExplorerWindow = async (): Promise<string> => {
+  const script = `
+    $shell = New-Object -ComObject Shell.Application
+    $windows = $shell.Windows()
+    
+    foreach ($window in $windows) {
+      if ($window.Name -eq "File Explorer") {
+        $path = $window.Document.Folder.Self.Path
+        if ($path) {
+          Write-Output $path
+          exit 0
+        }
+      }
+    }
+    exit 1
+  `;
+
+  try {
+    const result = await runPowerShellScript(script);
+    if (!result.trim()) {
+      throw new Error("Could not get the active File Explorer window");
+    }
+    return result.trim();
+  } catch (error) {
+    throw new Error("Could not get the active File Explorer window");
+  }
+};
+
+const getActiveFileManagerWindow = (): Promise<string> => {
+  return isMac ? getSelectedFinderWindow() : getActiveExplorerWindow();
 };
 
 export default async () => {
-  const preferences = getPreferenceValues<OpenVSCodePreferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const applications = await getApplications();
-  const vscodeApplication = applications.find((app) => app.bundleId === preferences.VSCodeVariant);
+  const vscodeApplication = applications.find((app) => app.name === preferences.CodeEditorVariant);
 
   if (!vscodeApplication) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Visual Studio Code is not installed",
+      title: `${preferences.CodeEditorVariant} is not installed`,
       primaryAction: {
         title: "Install Visual Studio Code",
         onAction: () => open("https://code.visualstudio.com/download"),
@@ -63,13 +82,15 @@ export default async () => {
       }
       return;
     }
-    const selectedFinderWindow = await getSelectedFinderWindow();
-    await open(selectedFinderWindow, vscodeApplication);
+
+    const activeFileManagerPath = await getActiveFileManagerWindow();
+    await open(activeFileManagerPath, vscodeApplication);
     return;
   } catch (error: any) {
+    const fileManagerName = isMac ? "Finder" : "File Explorer";
     await showToast({
       style: Toast.Style.Failure,
-      title: "No Finder items or window selected",
+      title: `No ${fileManagerName} items or window selected`,
     });
   }
 };
