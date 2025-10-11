@@ -6,12 +6,11 @@ import {
   Icon,
   showToast,
   Toast,
-  Clipboard,
-  openExtensionPreferences,
 } from "@raycast/api";
 import { useState } from "react";
-import { searchMemories, checkApiConnection, type SearchResult } from "./api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { searchMemories, type SearchResult } from "./api";
+import { usePromise } from "@raycast/utils";
+import { withSupermemory } from "./withSupermemory";
 
 const extractContent = (memory: SearchResult) => {
   if (memory.chunks && memory.chunks.length > 0) {
@@ -47,13 +46,11 @@ const extractUrl = (memory: SearchResult) => {
   return null;
 };
 
-export default function Command() {
+export default withSupermemory(Command);
+function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading: isConnecting, data: isConnected } =
-    usePromise(checkApiConnection);
-
-  const { isLoading: isSearching, data: searchResults } = useCachedPromise(
+  const { isLoading, data: searchResults = [] } = usePromise(
     async (query: string) => {
       const q = query.trim();
       if (!q) return [];
@@ -72,10 +69,6 @@ export default function Command() {
       return results;
     },
     [searchText],
-    {
-      execute: !!isConnected,
-      initialData: [],
-    },
   );
 
   const formatDate = (dateString: string) => {
@@ -97,27 +90,6 @@ export default function Command() {
     return `${content.substring(0, maxLength)}...`;
   };
 
-  if (isConnected === false) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="API Key Required"
-          description="Please configure your Supermemory API key to search memories"
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open Extension Preferences"
-                onAction={() => openExtensionPreferences()}
-                icon={Icon.Gear}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
-  const isLoading = isConnecting || isSearching;
   const hasSearched = !isLoading && !searchResults.length;
   return (
     <List
@@ -152,7 +124,7 @@ export default function Command() {
               key={memory.documentId}
               icon={url ? Icon.Link : Icon.Document}
               title={memory.title || "Untitled Memory"}
-              subtitle={truncateContent(content)}
+              subtitle={{ value: truncateContent(content), tooltip: content }}
               accessories={[
                 { text: formatDate(memory.createdAt) },
                 ...(memory.score

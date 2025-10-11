@@ -35,6 +35,10 @@ export interface AddMemoryRequest {
   metadata?: Record<string, unknown>;
 }
 
+interface AddProjectRequest {
+  name: string;
+}
+
 export interface SearchRequest {
   q: string;
   containerTags?: string[];
@@ -67,7 +71,7 @@ class AuthenticationError extends Error {
 }
 
 function getApiKey(): string {
-  const {apiKey} = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   return apiKey;
 }
 
@@ -145,6 +149,21 @@ export async function fetchProjects(): Promise<Project[]> {
     });
     throw error;
   }
+}
+
+export async function addProject(request: AddProjectRequest): Promise<Project> {
+  const response = await makeAuthenticatedRequest<Project>("/v3/projects", {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
+
+  await showToast({
+    style: Toast.Style.Success,
+    title: "Project Added",
+    message: "Successfully added project to Supermemory",
+  });
+
+  return response;
 }
 
 export async function addMemory(request: AddMemoryRequest): Promise<Memory> {

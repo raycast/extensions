@@ -8,24 +8,21 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState } from "react";
-import { addMemory, fetchProjects, checkApiConnection } from "./api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { addMemory, fetchProjects } from "./api";
+import { usePromise } from "@raycast/utils";
+import { withSupermemory } from "./withSupermemory";
 
 interface FormValues {
   content: string;
   project: string;
 }
 
-export default function Command() {
+export default withSupermemory(Command);
+function Command() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { pop } = useNavigation();
 
-  const { isLoading, data: projects = [] } = usePromise(async () => {
-    const isConnected = await checkApiConnection();
-    if (!isConnected) return;
-    const fetchedProjects = await fetchProjects();
-    return fetchedProjects;
-  });
+  const { isLoading, data: projects = [] } = usePromise(fetchProjects);
   async function handleSubmit(values: FormValues) {
     if (!values.content.trim()) {
       await showToast({

@@ -31,6 +31,13 @@
       "subtitle": "Supermemory",
       "description": "Search through your saved memories and find relevant information",
       "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Supermemory",
+      "description": "Search through your saved projects and find relevant information",
+      "mode": "view"
     }
   ],
   "preferences": [
