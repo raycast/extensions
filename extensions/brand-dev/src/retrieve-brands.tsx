@@ -61,7 +61,7 @@ type Font = {
 type EIC = {
   industry: string;
   subindustry: string;
-}
+};
 type Brand = {
   domain: string;
   title: string | null;
@@ -79,15 +79,15 @@ type Brand = {
   is_nsfw?: boolean;
   industries?: {
     eic: EIC[];
-  }
+  };
   links?: {
-    careers: string | null
-    terms: string | null
-    contact: string | null
-    privacy: string | null
-    blog: string | null
-    pricing: string | null
-  }
+    careers: string | null;
+    terms: string | null;
+    contact: string | null;
+    privacy: string | null;
+    blog: string | null;
+    pricing: string | null;
+  };
 };
 type Response = {
   status: "ok";
@@ -150,11 +150,14 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
         description={!searchText ? "Search for a brand to get started" : `Search for "${searchText}"`}
         actions={
           <ActionPanel>
-            {["Domain", "Ticker", "Name"].map(by => <Action.Push key={by}
-              icon={Icon.MagnifyingGlass}
-              title={`Search ${searchText || "Brand"} by ${by}`}
-              target={<SearchBrand search={searchText} by={by} onSearched={updateBrands} />}
-            />)}
+            {["Domain", "Ticker", "Name"].map((by) => (
+              <Action.Push
+                key={by}
+                icon={Icon.MagnifyingGlass}
+                title={`Search ${searchText || "Brand"} by ${by}`}
+                target={<SearchBrand search={searchText} by={by} onSearched={updateBrands} />}
+              />
+            ))}
           </ActionPanel>
         }
       />
@@ -217,7 +220,7 @@ type SearchBrandProps = {
   onSearched: (brand: BrandInStorage) => void;
 };
 type FormValues = { value: string; by: string };
-function SearchBrand({ search, onSearched, by="Domain" }: SearchBrandProps) {
+function SearchBrand({ search, onSearched, by = "Domain" }: SearchBrandProps) {
   const { pop } = useNavigation();
   const [execute, setExecute] = useState(false);
 
@@ -256,8 +259,8 @@ function SearchBrand({ search, onSearched, by="Domain" }: SearchBrandProps) {
     },
     execute,
     failureToastOptions: {
-      title: "Failed"
-    }
+      title: "Failed",
+    },
   });
 
   return (
@@ -270,7 +273,17 @@ function SearchBrand({ search, onSearched, by="Domain" }: SearchBrandProps) {
       }
     >
       <Form.Description text="Search Brand" />
-      <Form.TextField title={values.by} placeholder={values.by==="Domain" ? "Enter domain (e.g. apple.com)" : values.by==="Ticker" ? "Enter stock ticker (e.g. AAPL)" : "Enter brand name (e.g. Apple)"} {...itemProps.value} />
+      <Form.TextField
+        title={values.by}
+        placeholder={
+          values.by === "Domain"
+            ? "Enter domain (e.g. apple.com)"
+            : values.by === "Ticker"
+              ? "Enter stock ticker (e.g. AAPL)"
+              : "Enter brand name (e.g. Apple)"
+        }
+        {...itemProps.value}
+      />
       <Form.Dropdown title="" {...itemProps.by}>
         <Form.Dropdown.Item title="By Domain" value="Domain" />
         <Form.Dropdown.Item title="By Ticker" value="Ticker" />
@@ -363,17 +376,36 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
             <Detail.Metadata.Label title="Phone" text="N/A" />
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Content Rating" text={brand.is_nsfw===undefined ? "N/A" : brand.is_nsfw ? "Not Safe for Work" : "Safe for Work"} />
+          <Detail.Metadata.Label
+            title="Content Rating"
+            text={brand.is_nsfw === undefined ? "N/A" : brand.is_nsfw ? "Not Safe for Work" : "Safe for Work"}
+          />
           <Detail.Metadata.Separator />
-          {brand.industries?.eic?.length ? <>
-            <Detail.Metadata.Label title="Industries" icon={Icon.EllipsisVertical} />
-            {brand.industries.eic.map((e,eIndex) => <Detail.Metadata.Label key={e.industry + eIndex} title={e.industry} text={e.subindustry} />)}
-          </>: <Detail.Metadata.Label title="Industries" text="N/A" />}
+          {brand.industries?.eic?.length ? (
+            <>
+              <Detail.Metadata.Label title="Industries" icon={Icon.EllipsisVertical} />
+              {brand.industries.eic.map((e, eIndex) => (
+                <Detail.Metadata.Label key={e.industry + eIndex} title={e.industry} text={e.subindustry} />
+              ))}
+            </>
+          ) : (
+            <Detail.Metadata.Label title="Industries" text="N/A" />
+          )}
           <Detail.Metadata.Separator />
-          {brand.links ? <>
-          <Detail.Metadata.Label title="Links" icon={Icon.EllipsisVertical} />
-{Object.entries(brand.links).map(([key,val]) =>  (val ? <Detail.Metadata.Link key={key} title={key} text={val} target={val} /> : <Detail.Metadata.Label key={key} title={key} text="N/A" />))}
-          </> : <Detail.Metadata.Label title="Links" text="N/A" />}
+          {brand.links ? (
+            <>
+              <Detail.Metadata.Label title="Links" icon={Icon.EllipsisVertical} />
+              {Object.entries(brand.links).map(([key, val]) =>
+                val ? (
+                  <Detail.Metadata.Link key={key} title={key} text={val} target={val} />
+                ) : (
+                  <Detail.Metadata.Label key={key} title={key} text="N/A" />
+                ),
+              )}
+            </>
+          ) : (
+            <Detail.Metadata.Label title="Links" text="N/A" />
+          )}
         </Detail.Metadata>
       }
       actions={
