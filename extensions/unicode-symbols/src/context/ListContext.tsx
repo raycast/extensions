@@ -5,8 +5,7 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import { environment } from "@raycast/api";
 
 import { getFilteredDataset } from "@/lib/dataset-manager";
-import { useFavorites } from "@/lib/use-favorites";
-import { useRecentlyUsedItems } from "@/lib/use-recently-used-items";
+import { useItemList } from "@/lib/use-item-list";
 import type { Character, CharacterSection } from "@/types";
 import { buildList } from "@/utils/list";
 
@@ -57,22 +56,29 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
   }
 
   const {
-    recentlyUsedItems,
-    addToRecentlyUsedItems,
-    areRecentlyUsedItemsLoaded,
-    clearRecentlyUsedItems,
-    removeFromRecentlyUsedItems,
-  } = useRecentlyUsedItems<Character>({
+    items: recentlyUsedItems,
+    addItem: addToRecentlyUsedItems,
+    areItemsLoaded: areRecentlyUsedItemsLoaded,
+    clearItems: clearRecentlyUsedItems,
+    removeItem: removeFromRecentlyUsedItems,
+  } = useItemList<Character>({
     key: "recently-used-v2",
     comparator: "c",
+    limit: 10,
   });
 
-  const { favorites, addToFavorites, removeFromFavorites, clearFavorites, isFavorite, areFavoritesLoaded } =
-    useFavorites<Character>({
-      key: "favorites-v1",
-      comparator: "c",
-      limit: 50,
-    });
+  const {
+    items: favorites,
+    addItem: addToFavorites,
+    removeItem: removeFromFavorites,
+    clearItems: clearFavorites,
+    isInList: isFavorite,
+    areItemsLoaded: areFavoritesLoaded,
+  } = useItemList<Character>({
+    key: "favorites-v1",
+    comparator: "c",
+    limit: 50,
+  });
 
   const isRecentlyUsed = useCallback(
     (item: Character) => recentlyUsedItems.some((i) => i.c === item.c),
