@@ -27,26 +27,26 @@
     {
       "title": "Code Editor Variant",
       "description": "Code editor to open the selected finder into.",
-      "name": "CodeEditorVariant",
+      "name": "VSCodeVariant",
       "type": "dropdown",
       "required": false,
       "default": "Visual Studio Code",
       "data": [
         {
           "title": "Visual Studio Code",
-          "value": "Visual Studio Code"
+          "value": "com.microsoft.VSCode"
         },
         {
           "title": "Visual Studio Code - Insiders",
-          "value": "Visual Studio Code - Insiders"
+          "value": "com.microsoft.VSCodeInsiders"
         },
         {
           "title": "VSCodium",
-          "value": "VSCodium"
+          "value": "com.vscodium"
         },
         {
           "title": "Cursor",
-          "value": "Cursor"
+          "value": "com.todesktop.230313mzl4w4u92"
         }
       ]
     }

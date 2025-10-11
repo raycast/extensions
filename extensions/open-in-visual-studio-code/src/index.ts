@@ -1,4 +1,12 @@
-import { getApplications, getPreferenceValues, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
+import {
+  Application,
+  getApplications,
+  getPreferenceValues,
+  getSelectedFinderItems,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { runPowerShellScript, runAppleScript } from "@raycast/utils";
 import { isMac } from "./utils";
 
@@ -44,8 +52,7 @@ const getActiveExplorerWindow = async (): Promise<string> => {
       throw new Error("Could not get the active File Explorer window");
     }
     return result.trim();
-  } catch (error: unknown) {
-    console.log(error);
+  } catch {
     throw new Error("Could not get the active File Explorer window");
   }
 };
@@ -57,12 +64,27 @@ const getActiveFileManagerWindow = (): Promise<string> => {
 export default async () => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const applications = await getApplications();
-  const vscodeApplication = applications.find((app) => app.name === preferences.CodeEditorVariant);
+  let vscodeApplication: Application | undefined;
+
+  if (isMac) {
+    vscodeApplication = applications.find((app) => app.bundleId === preferences.VSCodeVariant);
+  } else {
+    const appNameMap: Record<string, string> = {
+      "com.microsoft.VSCode": "Visual Studio Code",
+      "com.microsoft.VSCodeInsiders": "Visual Studio Code - Insiders",
+      "com.vscodium": "VSCodium",
+      "com.todesktop.230313mzl4w4u92": "Cursor",
+    };
+    const appName = appNameMap[preferences.VSCodeVariant];
+    if (appName) {
+      vscodeApplication = applications.find((app) => app.name.includes(appName));
+    }
+  }
 
   if (!vscodeApplication) {
     await showToast({
       style: Toast.Style.Failure,
-      title: `${preferences.CodeEditorVariant} is not installed`,
+      title: `${preferences.VSCodeVariant} is not installed`,
       primaryAction: {
         title: "Install Visual Studio Code",
         onAction: () => open("https://code.visualstudio.com/download"),
@@ -87,8 +109,7 @@ export default async () => {
     const activeFileManagerPath = await getActiveFileManagerWindow();
     await open(activeFileManagerPath, vscodeApplication);
     return;
-  } catch (error: unknown) {
-    console.log(error);
+  } catch {
     const fileManagerName = isMac ? "Finder" : "File Explorer";
     await showToast({
       style: Toast.Style.Failure,
