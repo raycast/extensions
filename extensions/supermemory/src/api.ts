@@ -216,19 +216,7 @@ export async function searchMemories(
 }
 
 // Helper function to check if API key is configured and valid
-export async function checkApiConnection(): Promise<boolean> {
-  try {
-    await fetchProjects();
-    return true;
-  } catch (error) {
-    if (error instanceof AuthenticationError) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "API Key Required",
-        message:
-          "Please configure your Supermemory API key in preferences. Get it from https://supermemory.link/raycast",
-      });
-    }
-    return false;
-  }
+export async function fetchSettings(): Promise<object> {
+  const response = await makeAuthenticatedRequest<object>("/v3/settings");
+  return response;
 }

@@ -1,5 +1,5 @@
 import { usePromise } from "@raycast/utils";
-import { fetchProjects } from "./api";
+import { fetchSettings } from "./api";
 import {
   Action,
   ActionPanel,
@@ -12,7 +12,7 @@ import { ComponentType } from "react";
 
 export function withSupermemory<P extends object>(Component: ComponentType<P>) {
   return function SupermemoryWrappedComponent(props: P) {
-    const { isLoading, data } = usePromise(fetchProjects, [], {
+    const { isLoading, data } = usePromise(fetchSettings, [], {
       failureToastOptions: {
         title: "Invalid API Key",
         message:

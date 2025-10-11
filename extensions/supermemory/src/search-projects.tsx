@@ -22,27 +22,10 @@ function Command() {
   const { isLoading, data: projects, mutate } = useCachedPromise(fetchProjects);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search your projects"
-      actions={
-        <ActionPanel>
-          <Action.Push
-            icon={Icon.Plus}
-            title="Create Project"
-            target={<CreateProject />}
-            onPop={mutate}
-          />
-        </ActionPanel>
-      }
-    >
-      {projects?.map((project) => (
-        <List.Item
-          key={project.id}
-          icon={Icon.Folder}
-          title={project.name}
-          subtitle={project.description}
-          accessories={[{ tag: project.containerTag }]}
+    <List isLoading={isLoading} searchBarPlaceholder="Search your projects">
+      {!isLoading && !projects?.length ? (
+        <List.EmptyView
+          title="No Projects Found"
           actions={
             <ActionPanel>
               <Action.Push
@@ -54,7 +37,27 @@ function Command() {
             </ActionPanel>
           }
         />
-      ))}
+      ) : (
+        projects?.map((project) => (
+          <List.Item
+            key={project.id}
+            icon={Icon.Folder}
+            title={project.name}
+            subtitle={project.description}
+            accessories={[{ tag: project.containerTag }]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Create Project"
+                  target={<CreateProject />}
+                  onPop={mutate}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
