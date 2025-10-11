@@ -7,7 +7,7 @@
 - Add Favorites functionality
 - Improve search performance
 - Add Copy (Unicode Escape) to Clipboard action
-
+- Refactor code to use hooks and clean up the codebase
 
 ## [Improvements] - 2025-10-10
 

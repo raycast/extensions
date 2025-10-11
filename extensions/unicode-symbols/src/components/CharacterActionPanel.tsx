@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { Action, ActionPanel, Icon, getFrontmostApplication } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useCharacterFormatting } from "@/lib/character-formatting";
+import type { Character } from "@/types";
 import { primaryAction } from "@/lib/preferences";
 import { useListContext } from "@/context/ListContext";
-import type { Character } from "@/types";
+import { useCharacterFormatting } from "@/hooks/use-character-formatting";
 
 export const CharacterActionPanel = ({ item, section }: { item: Character; section?: string }) => {
   const { data: frontmostApp } = usePromise(getFrontmostApplication, []);

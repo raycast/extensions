@@ -1,8 +1,8 @@
 import fs from "fs";
 import Fuse from "fuse.js";
 import { environment } from "@raycast/api";
-import { dataSetName, searchResultLimit } from "@/lib/preferences";
 import type { Character, Dataset } from "@/types";
+import { dataSetName, searchResultLimit } from "@/lib/preferences";
 
 const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/${dataSetName}.json`, "utf-8")) as Dataset;
 

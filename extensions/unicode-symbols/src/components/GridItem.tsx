@@ -1,9 +1,10 @@
 import { memo } from "react";
 import { Color, Grid, Icon } from "@raycast/api";
-import { formatCharacterTooltip, useCharacterFormatting } from "@/lib/character-formatting";
-import { useListContext } from "@/context/ListContext";
-import { CharacterActionPanel } from "@/components/CharacterActionPanel";
 import type { Character } from "@/types";
+import { useListContext } from "@/context/ListContext";
+import { useCharacterFormatting } from "@/hooks/use-character-formatting";
+import { useFormatCharacterTooltip } from "@/hooks/use-format-character-tooltip";
+import { CharacterActionPanel } from "@/components/CharacterActionPanel";
 
 type Props = {
   item: Character;
@@ -15,7 +16,7 @@ export const GridItem = memo(({ item, section }: Props) => {
   const html = findHtmlEntity(item.c);
 
   const formatting = useCharacterFormatting(item);
-  const gridItemTooltip = formatCharacterTooltip(item, section, filter, html);
+  const gridItemTooltip = useFormatCharacterTooltip(item, section, filter, html);
 
   return (
     <Grid.Item

@@ -1,9 +1,9 @@
 import { memo } from "react";
 import { List } from "@raycast/api";
+import type { Character, CharacterSection } from "@/types";
 import { useListContext } from "@/context/ListContext";
 import { CharacterActionPanel } from "@/components/CharacterActionPanel";
 import DataSetSelector from "@/components/DataSetSelector";
-import type { Character, CharacterSection } from "@/types";
 
 const upperCaseFirst = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
