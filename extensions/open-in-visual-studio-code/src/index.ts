@@ -44,7 +44,8 @@ const getActiveExplorerWindow = async (): Promise<string> => {
       throw new Error("Could not get the active File Explorer window");
     }
     return result.trim();
-  } catch (error) {
+  } catch (error: unknown) {
+    console.log(error);
     throw new Error("Could not get the active File Explorer window");
   }
 };
@@ -86,7 +87,8 @@ export default async () => {
     const activeFileManagerPath = await getActiveFileManagerWindow();
     await open(activeFileManagerPath, vscodeApplication);
     return;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.log(error);
     const fileManagerName = isMac ? "Finder" : "File Explorer";
     await showToast({
       style: Toast.Style.Failure,
