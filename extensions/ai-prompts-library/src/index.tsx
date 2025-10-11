@@ -1,5 +1,15 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { List, ActionPanel, Action, showToast, Toast, Icon, Color, Clipboard } from "@raycast/api";
+import { useState, useEffect, useMemo } from "react";
+import {
+  List,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Icon,
+  Color,
+  Clipboard,
+  Detail,
+} from "@raycast/api";
 import { loadPrompts } from "./utils/loadPrompts";
 import { Prompt, Category, CATEGORY_LABELS, CATEGORY_ICONS } from "./types";
 
@@ -80,7 +90,7 @@ export default function SearchPrompts() {
         <List.Dropdown
           tooltip="Filter by Category"
           value={selectedCategory}
-          onChange={(newValue) => setSelectedCategory(newValue as Category)}
+          onChange={(newValue: string) => setSelectedCategory(newValue as Category)}
         >
           {Object.values(Category).map((category) => (
             <List.Dropdown.Item
@@ -183,19 +193,33 @@ function PromptListItem({ prompt }: { prompt: Prompt }) {
 }
 
 function PromptDetail({ prompt }: { prompt: Prompt }) {
+  async function handlePaste() {
+    try {
+      await Clipboard.paste(prompt.prompt);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Pasted to active app",
+      });
+    } catch (error) {
+      await Clipboard.copy(prompt.prompt);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Copied to clipboard",
+        message: "Could not paste to active app",
+      });
+    }
+  }
+
   return (
-    <List>
-      <List.Item
-        title={prompt.name}
-        subtitle={CATEGORY_LABELS[prompt.category]}
-        accessories={[
-          {
-            text: `${prompt.prompt.length} characters`,
-          },
-        ]}
-      />
-      <List.Item title="Full Prompt" subtitle={prompt.prompt} />
-    </List>
+    <Detail
+      markdown={`# ${prompt.name}\n\n**Category:** ${CATEGORY_LABELS[prompt.category]}\n\n**Characters:** ${prompt.prompt.length}\n\n---\n\n${prompt.prompt}`}
+      actions={
+        <ActionPanel>
+          <Action title="Paste to Active App" icon={Icon.Clipboard} onAction={handlePaste} />
+          <Action.CopyToClipboard content={prompt.prompt} title="Copy Prompt" />
+        </ActionPanel>
+      }
+    />
   );
 }
 
