@@ -168,28 +168,30 @@ export async function addDomainsToHosts(domains: string[]): Promise<HostsOperati
   }
 
   try {
-    // Generate entries for all domains
-    const entries = domains.map(domain => `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`);
-    const tempFile = '/tmp/webblocker_entries.txt';
+    // Create a single, robust script that handles all operations
+    const entriesContent = domains.map(domain => `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`).join('\n');
     
-    // Create commands that are simple and safe
-    const commands = [
-      // Create backup if it doesn't exist
-      `test -f "${BACKUP_FILE_PATH}" || cp "${HOSTS_FILE_PATH}" "${BACKUP_FILE_PATH}"`,
-      // Create temporary file with our entries
-      `echo "" > "${tempFile}"`,
-      `echo "" >> "${tempFile}"`,
-      `echo "# WebBlocker - Added by Raycast WebBlocker Extension" >> "${tempFile}"`,
-      ...entries.map(entry => `echo "${entry}" >> "${tempFile}"`),
-      // Append to hosts file
-      `cat "${tempFile}" >> "${HOSTS_FILE_PATH}"`,
-      // Clean up
-      `rm "${tempFile}"`,
-      // Flush DNS
-      'dscacheutil -flushcache'
-    ];
+    // Create a single command that does everything at once
+    const script = `
+      # Backup hosts file if backup doesn't exist
+      if [ ! -f "${BACKUP_FILE_PATH}" ]; then
+        cp "${HOSTS_FILE_PATH}" "${BACKUP_FILE_PATH}"
+      fi
+      
+      # Add WebBlocker entries to hosts file
+      echo "" >> "${HOSTS_FILE_PATH}"
+      echo "" >> "${HOSTS_FILE_PATH}"
+      echo "# WebBlocker - Added by Raycast WebBlocker Extension" >> "${HOSTS_FILE_PATH}"
+      echo '${entriesContent}' >> "${HOSTS_FILE_PATH}"
+      
+      # Flush DNS cache
+      dscacheutil -flushcache
+      
+      # Output success message
+      echo "WebBlocker: Successfully added ${domains.length} domain(s)"
+    `;
 
-    await executeMultipleWithAdminPrivileges(commands);
+    const result = await executeWithAdminPrivileges(script);
     
     return {
       success: true,
@@ -216,20 +218,25 @@ export async function addDomainsToHosts(domains: string[]): Promise<HostsOperati
  */
 export async function removeDomainsFromHosts(): Promise<HostsOperationResult> {
   try {
-    const tempFile = '/tmp/hosts_filtered.txt';
-    
-    const commands = [
-      // Filter out WebBlocker entries
-      `grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > "${tempFile}"`,
-      // Replace hosts file with filtered version
-      `cp "${tempFile}" "${HOSTS_FILE_PATH}"`,
-      // Clean up
-      `rm "${tempFile}"`,
-      // Flush DNS
-      'dscacheutil -flushcache'
-    ];
+    // Create a script that removes all WebBlocker entries
+    const script = `
+      # Filter out WebBlocker entries from hosts file
+      grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > "/tmp/hosts_filtered.txt"
+      
+      # Replace hosts file with filtered version
+      cp "/tmp/hosts_filtered.txt" "${HOSTS_FILE_PATH}"
+      
+      # Clean up temporary file
+      rm "/tmp/hosts_filtered.txt"
+      
+      # Flush DNS cache
+      dscacheutil -flushcache
+      
+      # Output success message
+      echo "WebBlocker: Successfully removed all blocked domains"
+    `;
 
-    await executeMultipleWithAdminPrivileges(commands);
+    const result = await executeWithAdminPrivileges(script);
     
     return {
       success: true,

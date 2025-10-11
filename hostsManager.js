@@ -111,19 +111,26 @@ async function addDomainsToHosts(domains) {
         };
     }
     try {
-        const entries = domains.map(domain => `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`);
-        const tempFile = '/tmp/webblocker_entries.txt';
-        const commands = [
-            `test -f "${BACKUP_FILE_PATH}" || cp "${HOSTS_FILE_PATH}" "${BACKUP_FILE_PATH}"`,
-            `echo "" > "${tempFile}"`,
-            `echo "" >> "${tempFile}"`,
-            `echo "# WebBlocker - Added by Raycast WebBlocker Extension" >> "${tempFile}"`,
-            ...entries.map(entry => `echo "${entry}" >> "${tempFile}"`),
-            `cat "${tempFile}" >> "${HOSTS_FILE_PATH}"`,
-            `rm "${tempFile}"`,
-            'dscacheutil -flushcache'
-        ];
-        await executeMultipleWithAdminPrivileges(commands);
+        const entriesContent = domains.map(domain => `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`).join('\n');
+        const script = `
+      # Backup hosts file if backup doesn't exist
+      if [ ! -f "${BACKUP_FILE_PATH}" ]; then
+        cp "${HOSTS_FILE_PATH}" "${BACKUP_FILE_PATH}"
+      fi
+      
+      # Add WebBlocker entries to hosts file
+      echo "" >> "${HOSTS_FILE_PATH}"
+      echo "" >> "${HOSTS_FILE_PATH}"
+      echo "# WebBlocker - Added by Raycast WebBlocker Extension" >> "${HOSTS_FILE_PATH}"
+      echo '${entriesContent}' >> "${HOSTS_FILE_PATH}"
+      
+      # Flush DNS cache
+      dscacheutil -flushcache
+      
+      # Output success message
+      echo "WebBlocker: Successfully added ${domains.length} domain(s)"
+    `;
+        const result = await executeWithAdminPrivileges(script);
         return {
             success: true,
             message: `Successfully blocked ${domains.length} domain(s)`,
@@ -145,14 +152,23 @@ async function addDomainsToHosts(domains) {
 }
 async function removeDomainsFromHosts() {
     try {
-        const tempFile = '/tmp/hosts_filtered.txt';
-        const commands = [
-            `grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > "${tempFile}"`,
-            `cp "${tempFile}" "${HOSTS_FILE_PATH}"`,
-            `rm "${tempFile}"`,
-            'dscacheutil -flushcache'
-        ];
-        await executeMultipleWithAdminPrivileges(commands);
+        const script = `
+      # Filter out WebBlocker entries from hosts file
+      grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > "/tmp/hosts_filtered.txt"
+      
+      # Replace hosts file with filtered version
+      cp "/tmp/hosts_filtered.txt" "${HOSTS_FILE_PATH}"
+      
+      # Clean up temporary file
+      rm "/tmp/hosts_filtered.txt"
+      
+      # Flush DNS cache
+      dscacheutil -flushcache
+      
+      # Output success message
+      echo "WebBlocker: Successfully removed all blocked domains"
+    `;
+        const result = await executeWithAdminPrivileges(script);
         return {
             success: true,
             message: 'Successfully removed all blocked domains from hosts file'
