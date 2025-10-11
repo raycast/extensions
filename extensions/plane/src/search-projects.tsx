@@ -4,10 +4,10 @@ import { useProjects } from "./hooks/useProjects";
 import ProjectItemListItem from "./components/ProjectItemListItem";
 
 function SearchProjects() {
-  const { isLoading, projects } = useProjects({});
+  const { isLoading, projects, pagination } = useProjects({});
 
   return (
-    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search projects">
+    <List isLoading={isLoading} searchBarPlaceholder="Search projects" pagination={pagination}>
       {projects.map((projectItem) => (
         <ProjectItemListItem key={projectItem.id + projectItem.name} projectItem={projectItem} />
       ))}

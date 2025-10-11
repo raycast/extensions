@@ -24,7 +24,7 @@ function SearchWorkItems() {
       throttle
       searchBarPlaceholder="Globally search work items across projects"
       searchBarAccessory={
-        <List.Dropdown tooltip="Project" onChange={setProjectId}>
+        <List.Dropdown tooltip="Select Project" onChange={setProjectId}>
           <List.Dropdown.Item title="All Projects" value="" />
           <List.Dropdown.Section>
             {projects.map((project) =>

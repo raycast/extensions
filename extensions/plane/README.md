@@ -12,7 +12,6 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 
 - **Create Work Item** - Create new work items with comprehensive details
 - **Search Work Items** - Search and filter work items across all projects
-- **My Work Items** - View your assigned work items (placeholder for future implementation)
 - **Search Projects** - View projects and their work items
 
 ### ✨ Work Item Management

@@ -6,9 +6,9 @@ import { getWorkItemBrowseUrl } from "../helpers/work-items";
 import { planeClient } from "../api/auth";
 
 export default function ProjectWorkItemsList({ projectItem }: { projectItem: Project }) {
-  const { isLoading, workItems } = useProjectWorkItems(projectItem.id as string);
+  const { isLoading, workItems, pagination } = useProjectWorkItems(projectItem.id as string);
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail pagination={pagination}>
       {workItems.map((workItem, i) => (
         <List.Item
           key={i}

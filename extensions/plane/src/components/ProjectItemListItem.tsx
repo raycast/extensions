@@ -1,4 +1,4 @@
-import { Project } from "@makeplane/plane-node-sdk";
+import { NetworkEnum, Project } from "@makeplane/plane-node-sdk";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getProjectIcon } from "../helpers/icons";
 import ProjectWorkItemsList from "./ProjectWorkItemsList";
@@ -8,21 +8,30 @@ type ProjectItemListItemProps = {
 };
 
 export default function ProjectItemListItem({ projectItem }: ProjectItemListItemProps) {
+  const projectTotalMembers = `${projectItem.totalMembers || 0}`;
+  const accessories: List.Item.Accessory[] = [
+    {
+      tag: projectItem.identifier,
+    },
+    { icon: Icon.TwoPeople, text: projectTotalMembers, tooltip: `${projectTotalMembers} members` },
+  ];
+  if (projectItem.network !== undefined) {
+    switch (projectItem.network) {
+      case NetworkEnum.NUMBER_0:
+        accessories.push({ icon: Icon.EyeDisabled, tooltip: "Private" });
+        break;
+      case NetworkEnum.NUMBER_2:
+        accessories.push({ icon: Icon.Eye, tooltip: "Public" });
+        break;
+    }
+  }
   return (
     <List.Item
       icon={getProjectIcon(projectItem.logoProps)}
       title={projectItem.name}
+      subtitle={projectItem.description}
       keywords={[projectItem.identifier]}
-      detail={
-        <List.Item.Detail
-          markdown={`![Cover](${projectItem.coverImage}) \n\n ${projectItem.description}`}
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="Identifier" text={projectItem.identifier} />
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
+      accessories={accessories}
       actions={
         <ActionPanel title={projectItem.identifier}>
           <Action.Push
