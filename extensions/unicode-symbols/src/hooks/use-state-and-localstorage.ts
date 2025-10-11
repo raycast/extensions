@@ -1,6 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
-
 import { LocalStorage } from "@raycast/api";
 
 /**

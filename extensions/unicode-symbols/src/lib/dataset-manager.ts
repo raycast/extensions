@@ -1,8 +1,6 @@
 import fs from "fs";
 import Fuse from "fuse.js";
-
 import { environment } from "@raycast/api";
-
 import { dataSetName, searchResultLimit } from "@/lib/preferences";
 import type { Character, Dataset } from "@/types";
 

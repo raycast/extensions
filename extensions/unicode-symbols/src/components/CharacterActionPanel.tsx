@@ -1,17 +1,16 @@
 import { useMemo } from "react";
-
 import { Action, ActionPanel, Icon, getFrontmostApplication } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-
-import { useListContext } from "@/context/ListContext";
+import { useCharacterFormatting } from "@/lib/character-formatting";
 import { primaryAction } from "@/lib/preferences";
+import { useListContext } from "@/context/ListContext";
 import type { Character } from "@/types";
-import { numberToHex } from "@/utils/string";
 
 export const CharacterActionPanel = ({ item, section }: { item: Character; section?: string }) => {
   const { data: frontmostApp } = usePromise(getFrontmostApplication, []);
   const { findHtmlEntity, setDatasetFilterAnd, filter } = useListContext();
   const html = findHtmlEntity(item.c);
+  const formatting = useCharacterFormatting(item);
 
   const {
     addToRecentlyUsedItems,
@@ -71,15 +70,15 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
       <ActionPanel.Section title="Main">{main}</ActionPanel.Section>
       <ActionPanel.Section title="Formats">
         <Action.CopyToClipboard
-          title={`Copy "${numberToHex(item.c)}" (HEX) to Clipboard`}
-          content={numberToHex(item.c)}
+          title={`Copy "${formatting.hex}" (HEX) to Clipboard`}
+          content={formatting.hex}
           onCopy={() => addToRecentlyUsedItems(item)}
           shortcut={{ modifiers: ["cmd"], key: "h" }}
         />
         <Action.CopyToClipboard
           // eslint-disable-next-line @raycast/prefer-title-case
-          title={`Copy "\\u${numberToHex(item.c)}" (Unicode Escape) to Clipboard`}
-          content={`\\u${numberToHex(item.c)}`}
+          title={`Copy "\\u${formatting.unicodeEscape}" (Unicode Escape) to Clipboard`}
+          content={`\\u${formatting.unicodeEscape}`}
           onCopy={() => addToRecentlyUsedItems(item)}
           shortcut={{ modifiers: ["cmd"], key: "u" }}
         />
@@ -92,8 +91,8 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
           />
         ) : null}
         <Action.CopyToClipboard
-          title={`Copy "&#${item.c};" (HTML Decimal) to Clipboard`}
-          content={`&#${item.c};`}
+          title={`Copy "${formatting.htmlDecimal}" (HTML Decimal) to Clipboard`}
+          content={`&#${formatting.htmlDecimal};`}
           onCopy={() => addToRecentlyUsedItems(item)}
           shortcut={{ modifiers: ["cmd", "shift"], key: html !== null ? "t" : "h" }}
         />
@@ -162,12 +161,12 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
       <ActionPanel.Section title="Browser">
         <Action.OpenInBrowser
           title="Open Character on Compart"
-          url={`https://www.compart.com/en/unicode/U+${numberToHex(item.c)}`}
+          url={`https://www.compart.com/en/unicode/U+${formatting.hex}`}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
         <Action.OpenInBrowser
           title="Open Character on Unicode Explorer"
-          url={`https://unicode-explorer.com/c/${numberToHex(item.c)}`}
+          url={`https://unicode-explorer.com/c/${formatting.hex}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
         />
       </ActionPanel.Section>

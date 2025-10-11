@@ -1,11 +1,9 @@
-import { memo, useMemo } from "react";
-
+import { memo } from "react";
 import { Color, Grid, Icon } from "@raycast/api";
-
-import { CharacterActionPanel } from "@/components/CharacterActionPanel";
+import { formatCharacterTooltip, useCharacterFormatting } from "@/lib/character-formatting";
 import { useListContext } from "@/context/ListContext";
+import { CharacterActionPanel } from "@/components/CharacterActionPanel";
 import type { Character } from "@/types";
-import { encodeSVG, numberToHex, upperCaseFirst } from "@/utils/string";
 
 type Props = {
   item: Character;
@@ -16,26 +14,13 @@ export const GridItem = memo(({ item, section }: Props) => {
   const { findHtmlEntity, filter } = useListContext();
   const html = findHtmlEntity(item.c);
 
-  const [light, dark] = useMemo(() => [encodeSVG(item.v), encodeSVG(item.v, true)], [item.v]);
-
-  const gridItemTooltip: string = [
-    `Name: ${upperCaseFirst(item.n)}`,
-    `Dec: ${item.c}`,
-    `Hex: ${numberToHex(item.c)}`,
-    filter === null && typeof section !== "undefined" ? `Section: ${section}` : "",
-    html ? `HTML Entity: ${html}` : "",
-    item.a?.length ? `Aliases: "${item.a.map(upperCaseFirst).join(", ")}"` : "",
-    item.u ? `Unicode Version: ${item.u}` : "",
-    item.m ? `Mirror Code: ${item.m}` : "",
-    ...(item.isExtra ? [" ", "> Note: This character is actually in a different Character Set"] : [""]),
-  ]
-    .filter((s) => s.length > 0)
-    .join("\n");
+  const formatting = useCharacterFormatting(item);
+  const gridItemTooltip = formatCharacterTooltip(item, section, filter, html);
 
   return (
     <Grid.Item
       key={item.n}
-      title={upperCaseFirst(item.n)}
+      title={formatting.formattedName}
       accessory={{
         tooltip: gridItemTooltip,
         icon: {
@@ -45,8 +30,8 @@ export const GridItem = memo(({ item, section }: Props) => {
       }}
       content={{
         source: {
-          light,
-          dark,
+          light: formatting.lightSvg,
+          dark: formatting.darkSvg,
         },
       }}
       actions={<CharacterActionPanel item={item} section={section} />}

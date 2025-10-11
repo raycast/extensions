@@ -1,11 +1,9 @@
 import { memo, useMemo } from "react";
-
 import { Grid } from "@raycast/api";
-
+import { gridColumnNumber } from "@/lib/preferences";
+import { useListContext } from "@/context/ListContext";
 import DataSetSelector from "@/components/DataSetSelector";
 import { GridItem } from "@/components/GridItem";
-import { useListContext } from "@/context/ListContext";
-import { gridColumnNumber } from "@/lib/preferences";
 
 export const ItemGrid = memo(() => {
   const columnNumber = useMemo(() => gridColumnNumber(), []);

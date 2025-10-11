@@ -1,6 +1,5 @@
 import { useCallback } from "react";
-
-import { useStateAndLocalStorage } from "./use-state-and-localstorage";
+import { useStateAndLocalStorage } from "@/hooks/use-state-and-localstorage";
 
 export type UseItemListParams<T> = {
   key: string;

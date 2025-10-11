@@ -1,13 +1,11 @@
 import fs from "fs";
 import type { FC, ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-
 import { environment } from "@raycast/api";
-
 import { getFilteredDataset } from "@/lib/dataset-manager";
-import { useItemList } from "@/lib/use-item-list";
+import { buildList } from "@/lib/list";
+import { useItemList } from "@/hooks/use-item-list";
 import type { Character, CharacterSection } from "@/types";
-import { buildList } from "@/utils/list";
 
 const html = JSON.parse(fs.readFileSync(`${environment.assetsPath}/html.json`, "utf-8")) as {
   html_entities: { code: number; value: string }[];
