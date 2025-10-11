@@ -1,5 +1,5 @@
 import { Color, Icon, Image } from "@raycast/api";
-import { PriorityEnum, State, UserLite } from "@makeplane/plane-node-sdk";
+import { PriorityEnum, Project, State, UserLite } from "@makeplane/plane-node-sdk";
 import { getAvatarIcon } from "@raycast/utils";
 
 export const getStateIcon = (state: State): Image.ImageLike => {
@@ -28,4 +28,9 @@ export const getUserLogo = (user: UserLite): Image.ImageLike => {
     };
   }
   return getAvatarIcon("User");
+};
+
+export const getProjectIcon = (logo: Project["logoProps"]): Image.ImageLike => {
+  if (logo.in_use === "emoji") return logo.emoji.url;
+  return { source: Icon.Folder, tintColor: logo.icon.color };
 };

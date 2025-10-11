@@ -19,6 +19,14 @@ export async function getWorkItem(workItemId: string, projectId: string) {
   return response;
 }
 
+export async function getProjectWorkItems(projectId: string) {
+  const response = await planeClient?.workItemsApi.listWorkItems({
+    projectId,
+    slug: planeClient?.workspaceSlug,
+  });
+  return response?.results;
+}
+
 export async function searchWorkItems({
   searchText,
   projectId,
