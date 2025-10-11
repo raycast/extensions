@@ -39,7 +39,7 @@ export const GridItem = memo(({ item, section }: Props) => {
       accessory={{
         tooltip: gridItemTooltip,
         icon: {
-          source: item.isExtra ? "exclamation-outline.svg" : Icon.QuestionMarkCircle,
+          source: item.isExtra ? "exclamation-outline.svg" : Icon.Info,
           tintColor: Color.PrimaryText,
         },
       }}

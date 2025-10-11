@@ -48,62 +48,70 @@ const useStateAndLocalStorage = <T, _ = void>(
   return [state, setStateAndLocalStorage, ready];
 };
 
-interface UseRecentlyUsedParams<T> {
+interface UseFavoritesParams<T> {
   key: string;
   comparator: keyof T | ((existingItem: T, itemToAdd: T) => boolean);
   limit?: number;
 }
 
-export function useRecentlyUsedItems<T>(params: UseRecentlyUsedParams<T>) {
-  const { key, comparator, limit = 10 } = params;
+export function useFavorites<T>(params: UseFavoritesParams<T>) {
+  const { key, comparator, limit = 50 } = params;
 
-  const [recentlyUsedItems, setRecentlyUsedItems, areRecentlyUsedItemsLoaded] = useStateAndLocalStorage<T[]>(key, []);
+  const [favorites, setFavorites, areFavoritesLoaded] = useStateAndLocalStorage<T[]>(key, []);
 
-  const addToRecentlyUsedItems = useCallback(
+  const addToFavorites = useCallback(
     (itemToAdd: T) => {
-      setRecentlyUsedItems((currRecentlyUsedItems) => {
-        const isItemToAddAlreadyInRecentlyUsedList = currRecentlyUsedItems.some((existingItem) =>
+      setFavorites((currFavorites) => {
+        const isItemToAddAlreadyInFavorites = currFavorites.some((existingItem) =>
           typeof comparator === "function"
             ? comparator(existingItem, itemToAdd)
             : existingItem[comparator] === itemToAdd[comparator],
         );
-        return isItemToAddAlreadyInRecentlyUsedList
-          ? currRecentlyUsedItems
-          : [itemToAdd, ...currRecentlyUsedItems].slice(0, limit);
+        return isItemToAddAlreadyInFavorites ? currFavorites : [itemToAdd, ...currFavorites].slice(0, limit);
       });
     },
     [comparator, limit],
   );
 
-  const removeFromRecentlyUsedItems = useCallback(
+  const removeFromFavorites = useCallback(
     (itemToRemove: T) => {
-      setRecentlyUsedItems((currRecentlyUsedItems) => {
-        const isItemToRemoveInRecentlyUsedList = currRecentlyUsedItems.find((existingItem) =>
+      setFavorites((currFavorites) => {
+        const isItemToRemoveInFavorites = currFavorites.find((existingItem) =>
           typeof comparator === "function"
             ? comparator(existingItem, itemToRemove)
             : existingItem[comparator] === itemToRemove[comparator],
         );
-        return isItemToRemoveInRecentlyUsedList
-          ? currRecentlyUsedItems.filter((existingItem) =>
+        return isItemToRemoveInFavorites
+          ? currFavorites.filter((existingItem) =>
               typeof comparator === "function"
                 ? !comparator(existingItem, itemToRemove)
                 : existingItem[comparator] !== itemToRemove[comparator],
             )
-          : currRecentlyUsedItems;
+          : currFavorites;
       });
     },
     [comparator],
   );
 
-  const clearRecentlyUsedItems = useCallback(() => {
-    setRecentlyUsedItems([]);
-  }, [comparator, limit]);
+  const clearFavorites = useCallback(() => {
+    setFavorites([]);
+  }, []);
+
+  const isFavorite = useCallback(
+    (item: T) => {
+      return favorites.some((favorite) =>
+        typeof comparator === "function" ? comparator(favorite, item) : favorite[comparator] === item[comparator],
+      );
+    },
+    [favorites, comparator],
+  );
 
   return {
-    recentlyUsedItems,
-    addToRecentlyUsedItems,
-    areRecentlyUsedItemsLoaded,
-    clearRecentlyUsedItems,
-    removeFromRecentlyUsedItems,
+    favorites,
+    addToFavorites,
+    removeFromFavorites,
+    clearFavorites,
+    isFavorite,
+    areFavoritesLoaded,
   };
 }

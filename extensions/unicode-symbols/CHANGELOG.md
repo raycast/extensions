@@ -4,6 +4,9 @@
 
 - Fixing an issue where the extension does not show proper icons in the Grid view on Windows (ref: [#22082](https://github.com/raycast/extensions/issues/22082))
 - Remove `encode`, opting for a built-in method instead
+- Add Favorites functionality
+- Improve search performance
+- Add Copy (Unicode Escape) to Clipboard action
 
 
 ## [Improvements] - 2025-10-10

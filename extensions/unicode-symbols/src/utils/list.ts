@@ -13,6 +13,7 @@ export function buildList(
   recentlyUsedCharacters: Character[],
   isFilterEmpty: boolean,
   datasetFilter: string | null,
+  favorites: Character[] = [],
 ): CharacterSection[] {
   const datasetListSections = dataset.blocks
     .filter((block) => !dataset.selectedBlock || block.blockName === dataset.selectedBlock.blockName)
@@ -38,6 +39,18 @@ export function buildList(
         items,
       };
     });
+  if (favorites.length && !datasetFilter) {
+    datasetListSections.unshift({
+      sectionTitle: "Favorites",
+      lowestScore: -1,
+      items: isFilterEmpty
+        ? favorites
+        : favorites.filter((favoriteCharacter) =>
+            dataset.characters.find((character) => character.c === favoriteCharacter.c),
+          ),
+    });
+  }
+
   if (recentlyUsedCharacters.length && !datasetFilter) {
     datasetListSections.unshift({
       sectionTitle: "Recently Used",
