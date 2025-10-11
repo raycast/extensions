@@ -1,0 +1,20 @@
+{
+  "screenshots": [
+    {
+      "filename": "store-screenshot-1.png",
+      "title": "Main Interface - Browse AI Prompts by Category",
+      "description": "Search and browse through 199 curated AI prompts organized into categories"
+    },
+    {
+      "filename": "store-screenshot-2.png",
+      "title": "Search Functionality",
+      "description": "Instantly find prompts with real-time search"
+    },
+    {
+      "filename": "store-screenshot-3.png",
+      "title": "Category Filtering",
+      "description": "Filter prompts by Development, Marketing, Writing, Research, Design, Business, and more"
+    }
+  ],
+  "ready_for_publish": true
+}
