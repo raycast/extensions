@@ -63,15 +63,15 @@ export type Portal = {
   custom_domain: string;
   homepage_link: string;
   page_title: string;
-  archived: boolean
-  "config": {
-    "allowed_locales": string[]
-    "default_locale": string
-  }
+  archived: boolean;
+  config: {
+    allowed_locales: string[];
+    default_locale: string;
+  };
   logo?: {
     file_url: string;
-  }
-}
+  };
+};
 
 export type ListResult<T> = {
   meta: {

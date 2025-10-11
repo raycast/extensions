@@ -88,7 +88,7 @@ function ListMessages({ conversation }: { conversation: Conversation }) {
     { initialData: [] },
   );
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail navigationTitle={`List Conversations / ${conversation.id} / Messages`}>
       {messages.map((message) => (
         <List.Item
           key={message.id}

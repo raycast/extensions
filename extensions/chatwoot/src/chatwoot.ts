@@ -36,7 +36,7 @@ class Chatwoot {
         "Content-Type": "application/json",
       },
     });
-    if (!response.headers.get("content-type")?.includes("json")) throw new Error(response.statusText);
+    if (!response.headers.get("content-type")?.includes("application/json")) throw new Error(response.statusText);
     const result = await response.json();
     if (!response.ok) {
       const errorResult = result as { error: string } | { message: string; attributes: string[] };
@@ -97,7 +97,9 @@ class PortalsService {
     });
   }
   async list() {
-    return this.client["request"]<{meta: {current_page: number, portals_count: number}, payload: Portal[]}>("portals");
+    return this.client["request"]<{ meta: { current_page: number; portals_count: number }; payload: Portal[] }>(
+      "portals",
+    );
   }
 }
 
