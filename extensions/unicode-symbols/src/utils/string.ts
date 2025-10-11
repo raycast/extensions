@@ -1,5 +1,8 @@
 import type { Character, CharacterSection } from "@/types";
 
+// Are we in Windows?
+const isWindows = process.platform === "win32";
+
 /**
  * Utility to uppercase only the first character of a given string
  * @param str Input string
@@ -19,7 +22,7 @@ export const numberToHex = (number: number): string => {
  * @param dark Should the square be dark?
  * @returns SVG string for a square with the given value
  */
-export const getSquareSVGString = (value: string, dark = false) => {
+const getSquareSVGString = (value: string, dark = false) => {
   let val = value;
   if (value === "&") {
     val = "&amp;";
@@ -30,20 +33,45 @@ export const getSquareSVGString = (value: string, dark = false) => {
   }
   const textColor = dark ? "#fff" : "#000";
   const size = 200;
+
+  // For Windows we need to use different values to make it working...
+  const fontFamily = isWindows ? "monospace" : "mono-space";
+  const textY = isWindows ? size / 2 : size / 1.3;
+
   return `
-  <svg height="${size}" width="${size}">
+  <svg height="${size}" width="${size}" xmlns="http://www.w3.org/2000/svg">
     <rect fill="transparent" x="0" y="0" width="${size}" height="${size}"></rect>
     <text x="${size / 2}" y="${
-      size / 1.3
+      textY
     }" fill="${textColor}" text-anchor="middle" alignment-baseline="central" font-size="${
       size / 2
-    }" line-height="0" font-family="mono-space">${val}</text>
+    }" line-height="0" font-family="${fontFamily}">${val}</text>
   </svg>
   `;
 };
 
-// Raycast is breaking on certain character sets in List Mode, so we filter the value and subtitle
+/**
+ * Encode a string to base64
+ * @param str Input string
+ * @returns The input string encoded to base64
+ */
+const encode = (str: string) => Buffer.from(str).toString("base64");
 
+/**
+ * Encode a SVG string to base64 image string
+ * @param str Input string
+ * @param dark Should the square be dark?
+ * @returns The input string encoded to base64
+ */
+export const encodeSVG = (str: string, dark = false) =>
+  `data:image/svg+xml;base64,${encode(getSquareSVGString(str, dark))}`;
+
+/**
+ * Raycast is breaking on certain character sets in List Mode, so we filter the value and subtitle
+ * @param item The character item
+ * @param section The character section
+ * @returns The filtered value
+ */
 export const getFilteredValue = (item: Character, section: CharacterSection): string => {
   if (section.sectionTitle === "Ancient Symbols") {
     return "?";
@@ -51,6 +79,12 @@ export const getFilteredValue = (item: Character, section: CharacterSection): st
   return item.v;
 };
 
+/**
+ * Raycast is breaking on certain character sets in List Mode, so we filter the subtitle
+ * @param item The character item
+ * @param section The character section
+ * @returns The filtered subtitle
+ */
 export const getFilteredSubtitle = (item: Character, section: CharacterSection): string => {
   const subTitle = upperCaseFirst(item.n);
   if (section.sectionTitle === "Ancient Symbols") {

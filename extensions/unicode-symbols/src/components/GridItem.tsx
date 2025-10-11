@@ -1,12 +1,11 @@
-import { encode } from "js-base64";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 import { Color, Grid, Icon } from "@raycast/api";
 
 import { CharacterActionPanel } from "@/components/CharacterActionPanel";
 import { useListContext } from "@/context/ListContext";
 import type { Character } from "@/types";
-import { getSquareSVGString, numberToHex, upperCaseFirst } from "@/utils/string";
+import { encodeSVG, numberToHex, upperCaseFirst } from "@/utils/string";
 
 type Props = {
   item: Character;
@@ -17,10 +16,7 @@ export const GridItem = memo(({ item, section }: Props) => {
   const { findHtmlEntity, filter } = useListContext();
   const html = findHtmlEntity(item.c);
 
-  const [light, dark] = [
-    `data:image/svg+xml;base64,${encode(getSquareSVGString(item.v))}`,
-    `data:image/svg+xml;base64,${encode(getSquareSVGString(item.v, true))}`,
-  ];
+  const [light, dark] = useMemo(() => [encodeSVG(item.v), encodeSVG(item.v, true)], [item.v]);
 
   const gridItemTooltip: string = [
     `Name: ${upperCaseFirst(item.n)}`,

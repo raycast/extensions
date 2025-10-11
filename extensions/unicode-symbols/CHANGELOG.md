@@ -1,5 +1,11 @@
 # Unicode Symbols
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fixing an issue where the extension does not show proper icons in the Grid view on Windows (ref: [#22082](https://github.com/raycast/extensions/issues/22082))
+- Remove `encode`, opting for a built-in method instead
+
+
 ## [Improvements] - 2025-10-10
 
 - Added Windows support as this is not using any macOS specific APIs
