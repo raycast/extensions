@@ -91,8 +91,7 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
         ) : null}
         <Action.CopyToClipboard
           title={`Copy "${formatting.htmlDecimal}" (HTML Decimal) to Clipboard`}
-          content={`&#${formatting.htmlDecimal};`}
-          onCopy={() => addToRecentlyUsedItems(item)}
+          content={formatting.htmlDecimal}
           shortcut={{ modifiers: ["cmd", "shift"], key: html !== null ? "t" : "h" }}
         />
       </ActionPanel.Section>
