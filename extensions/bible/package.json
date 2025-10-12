@@ -83,8 +83,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.3",
-    "cheerio": "^1.1.2",
-    "node-html-parser": "^7.0.1"
+    "cheerio": "^1.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

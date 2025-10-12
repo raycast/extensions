@@ -8,7 +8,7 @@
 - Don't include copyright in copied text
 - Bug fixes in the React component causing undesired re-renders
 - Upgrade to latest Raycast API and dependencies
-- Remove dependency on axios; use native fetch
+- Remove dependency on `axios` (use native fetch) and unused `node-html-parser`
 - Decouple parsing from display formatting
 
 ## [Search via selection] - 2023-12-23
