@@ -66,26 +66,26 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T019 [P] [US1] Unit test for agent connection in tests/unit/services/agentService.test.ts
-- [ ] T020 [P] [US1] Unit test for message handling in tests/unit/services/sessionService.test.ts
-- [ ] T021 [P] [US1] Integration test with Gemini CLI in tests/integration/geminiCli.test.ts
-- [ ] T022 [P] [US1] Integration test for ACP protocol compliance in tests/integration/acpProtocol.test.ts
-- [ ] T023 [P] [US1] E2E test for basic conversation flow in tests/e2e/basicConversation.test.ts
+- [X] T019 [P] [US1] Unit test for agent connection in tests/unit/services/agentService.test.ts
+- [X] T020 [P] [US1] Unit test for message handling in tests/unit/services/sessionService.test.ts
+- [X] T021 [P] [US1] Integration test with Gemini CLI in tests/integration/geminiCli.test.ts
+- [X] T022 [P] [US1] Integration test for ACP protocol compliance in tests/integration/acpProtocol.test.ts
+- [X] T023 [P] [US1] E2E test for basic conversation flow in tests/e2e/basicConversation.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T024 [P] [US1] Create AgentConnection entity model in src/types/entities.ts
-- [ ] T025 [P] [US1] Create ConversationSession entity model in src/types/entities.ts
-- [ ] T026 [P] [US1] Create Message entity model in src/types/entities.ts
-- [ ] T027 [US1] Implement AgentService for connection management in src/services/agentService.ts (depends on T024)
-- [ ] T028 [US1] Implement SessionService for conversation management in src/services/sessionService.ts (depends on T025, T026)
-- [ ] T029 [US1] Create StartAgent command handler in src/commands/startAgent.tsx
-- [ ] T030 [US1] Create ConversationView component in src/components/ConversationView.tsx
-- [ ] T031 [US1] Create MessageItem component in src/components/MessageItem.tsx
-- [ ] T032 [US1] Implement agent selection logic with built-in and custom agents
-- [ ] T033 [US1] Implement basic agent connection flow with error handling
-- [ ] T034 [US1] Add message send/receive functionality with streaming support
-- [ ] T035 [US1] Add copy-to-clipboard functionality for agent responses
+- [X] T024 [P] [US1] Create AgentConnection entity model in src/types/entities.ts
+- [X] T025 [P] [US1] Create ConversationSession entity model in src/types/entities.ts
+- [X] T026 [P] [US1] Create Message entity model in src/types/entities.ts
+- [X] T027 [US1] Implement AgentService for connection management in src/services/agentService.ts (depends on T024)
+- [X] T028 [US1] Implement SessionService for conversation management in src/services/sessionService.ts (depends on T025, T026)
+- [X] T029 [US1] Create StartAgent command handler in src/start-chat-form.tsx
+- [X] T030 [US1] Create ConversationView component in src/chat.tsx (List component)
+- [X] T031 [US1] Create MessageItem component in src/chat.tsx (List.Item component)
+- [X] T032 [US1] Implement agent selection logic with built-in and custom agents
+- [X] T033 [US1] Implement basic agent connection flow with error handling
+- [X] T034 [US1] Add message send/receive functionality with streaming support
+- [X] T035 [US1] Add copy-to-clipboard functionality for agent responses
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
