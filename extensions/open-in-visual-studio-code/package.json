@@ -30,7 +30,7 @@
       "name": "VSCodeVariant",
       "type": "dropdown",
       "required": false,
-      "default": "Visual Studio Code",
+      "default": "com.microsoft.VSCode",
       "data": [
         {
           "title": "Visual Studio Code",

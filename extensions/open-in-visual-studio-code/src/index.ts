@@ -66,16 +66,18 @@ export default async () => {
   const applications = await getApplications();
   let vscodeApplication: Application | undefined;
 
+  const appNameMap = {
+    "com.microsoft.VSCode": "Visual Studio Code",
+    "com.microsoft.VSCodeInsiders": "Visual Studio Code - Insiders",
+    "com.vscodium": "VSCodium",
+    "com.todesktop.230313mzl4w4u92": "Cursor",
+  };
+
+  const appName = appNameMap[preferences.VSCodeVariant];
+
   if (isMac) {
     vscodeApplication = applications.find((app) => app.bundleId === preferences.VSCodeVariant);
   } else {
-    const appNameMap: Record<string, string> = {
-      "com.microsoft.VSCode": "Visual Studio Code",
-      "com.microsoft.VSCodeInsiders": "Visual Studio Code - Insiders",
-      "com.vscodium": "VSCodium",
-      "com.todesktop.230313mzl4w4u92": "Cursor",
-    };
-    const appName = appNameMap[preferences.VSCodeVariant];
     if (appName) {
       vscodeApplication = applications.find((app) => app.name.includes(appName));
     }
@@ -84,7 +86,7 @@ export default async () => {
   if (!vscodeApplication) {
     await showToast({
       style: Toast.Style.Failure,
-      title: `${preferences.VSCodeVariant} is not installed`,
+      title: `${appName || "Code Editor"} is not installed`,
       primaryAction: {
         title: "Install Visual Studio Code",
         onAction: () => open("https://code.visualstudio.com/download"),
