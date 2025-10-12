@@ -6,6 +6,7 @@ import WatchHistory from "@/screens/WatchHistory";
 import { getUrl, watchIcon } from "@/utils";
 import { WatchesResponse, WatchWithID } from "@/types";
 import { MutatePromise } from "@raycast/utils";
+import { SeenUnseenAction } from "./SeenUnseenAction";
 
 type WatchItemProps = {
   watch: WatchWithID;
@@ -14,6 +15,7 @@ type WatchItemProps = {
 };
 
 export const WatchItem = ({ watch, mutate, revalidate }: WatchItemProps) => {
+  //   console.log(watch);
   return (
     <List.Item
       key={watch.id}
@@ -40,6 +42,12 @@ export const WatchItem = ({ watch, mutate, revalidate }: WatchItemProps) => {
         <ActionPanel>
           <Action.Push icon={Icon.Eye} title="View Details" target={<WatchDetails id={watch.id} />} />
           <Action.OpenInBrowser icon={Icon.ArrowNe} title="Preview" url={getUrl(`preview/${watch.id}#text`)} />
+          <Action.OpenInBrowser
+            icon={Icon.QuoteBlock}
+            title="Diff"
+            url={getUrl(`diff/${watch.id}#text`)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+          />
           <Action.Push
             icon={Icon.List}
             title="View History"
@@ -53,6 +61,8 @@ export const WatchItem = ({ watch, mutate, revalidate }: WatchItemProps) => {
             shortcut={Keyboard.Shortcut.Common.Edit}
           />
           <Action.OpenInBrowser icon={watchIcon(watch.url)} url={watch.url} shortcut={Keyboard.Shortcut.Common.Open} />
+          {watch.viewed && watch.last_changed && <SeenUnseenAction markAsSeen={false} watch={watch} mutate={mutate} />}
+          {!watch.viewed && watch.last_changed && <SeenUnseenAction markAsSeen={true} watch={watch} mutate={mutate} />}
           <Action
             icon={Icon.Trash}
             title="Delete Watch"

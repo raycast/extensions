@@ -73,14 +73,18 @@ export const useWatches = ({ sortBy, sortOrder }: { sortBy: SortBy; sortOrder: S
 
 export const callApi = async (
   endpoint: string,
-  { method, body }: { method: "DELETE" | "POST"; body?: Record<string, string | boolean> },
+  { method, body }: { method: "DELETE" | "POST" | "PUT"; body?: Record<string, string | boolean | number> },
 ) => {
   const url = new URL(`api/v1/${endpoint}`, instance_url).toString();
+  console.log(url);
+  console.log(method);
+  console.log(body);
   const response = await fetch(url, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+  console.log(response);
   if (response.status === 204) return;
   const result = await response.json();
   if (!response.ok) {
