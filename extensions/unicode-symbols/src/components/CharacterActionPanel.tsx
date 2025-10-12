@@ -76,7 +76,6 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
           shortcut={{ modifiers: ["cmd"], key: "h" }}
         />
         <Action.CopyToClipboard
-          // eslint-disable-next-line @raycast/prefer-title-case
           title={`Copy "${formatting.unicodeEscape}" (Unicode Escape) to Clipboard`}
           content={formatting.unicodeEscape}
           shortcut={{ modifiers: ["cmd"], key: "u" }}
@@ -136,6 +135,7 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
           icon={Icon.Trash}
           onAction={() => clearFavorites()}
           shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section title="Recently Used">
         {recentlyUsed ? (

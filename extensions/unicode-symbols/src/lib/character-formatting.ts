@@ -82,6 +82,3 @@ export const encodeSVG = (str: string, dark = false) => {
 
   return dark ? cached.dark : cached.light;
 };
-
-  return encoded;
-};
