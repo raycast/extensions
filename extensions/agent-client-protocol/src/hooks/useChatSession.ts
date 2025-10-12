@@ -4,9 +4,10 @@ import { ACPClient } from "@/services/acpClient";
 import { SessionService } from "@/services/sessionService";
 import { StorageService } from "@/services/storageService";
 import type { AgentConfig, AgentConnection } from "@/types/extension";
-import type { ConversationSession, SessionMessage } from "@/types/entities";
+import type { ConversationSession, SessionMessage, ProjectContext } from "@/types/entities";
 import { ErrorHandler } from "@/utils/errors";
 import { createLogger } from "@/utils/logging";
+import { ContextService } from "@/services/contextService";
 
 type ChatStatus = "idle" | "connecting" | "ready" | "processing";
 
@@ -15,6 +16,7 @@ interface ChatSessionState {
   connection: AgentConnection | null;
   messages: SessionMessage[];
   status: ChatStatus;
+  contexts: ProjectContext[];
 }
 
 interface UseChatSessionResult extends ChatSessionState {
@@ -24,6 +26,10 @@ interface UseChatSessionResult extends ChatSessionState {
   setActiveAgent: (agent: AgentConfig | null) => void;
   activeAgent: AgentConfig | null;
   loadConversation: (sessionId: string, agent: AgentConfig) => Promise<void>;
+  addFileContexts: (paths: string[]) => Promise<ProjectContext[]>;
+  addDirectoryContexts: (paths: string[]) => Promise<ProjectContext[]>;
+  removeContext: (contextId: string) => Promise<void>;
+  refreshContexts: () => Promise<void>;
 }
 
 const logger = createLogger("useChatSession");
@@ -32,6 +38,7 @@ export function useChatSession(): UseChatSessionResult {
   const acpClientRef = useRef<ACPClient | undefined>(undefined);
   const storageServiceRef = useRef<StorageService | undefined>(undefined);
   const sessionServiceRef = useRef<SessionService | undefined>(undefined);
+  const contextServiceRef = useRef<ContextService | undefined>(undefined);
 
   if (!acpClientRef.current) {
     acpClientRef.current = new ACPClient();
@@ -41,24 +48,122 @@ export function useChatSession(): UseChatSessionResult {
     storageServiceRef.current = new StorageService();
   }
 
+  if (!contextServiceRef.current) {
+    contextServiceRef.current = new ContextService();
+  }
+
   if (!sessionServiceRef.current) {
     sessionServiceRef.current = new SessionService(
       storageServiceRef.current,
-      acpClientRef.current
+      acpClientRef.current,
+      contextServiceRef.current
     );
   }
 
   const acpClient = acpClientRef.current;
   const sessionService = sessionServiceRef.current;
   const storageService = storageServiceRef.current;
+  const contextService = contextServiceRef.current;
 
   const [activeAgent, setActiveAgent] = useState<AgentConfig | null>(null);
   const [conversation, setConversation] = useState<ConversationSession | null>(null);
   const [connection, setConnection] = useState<AgentConnection | null>(null);
   const [messages, setMessages] = useState<SessionMessage[]>([]);
+  const [contexts, setContexts] = useState<ProjectContext[]>([]);
   const [status, setStatus] = useState<ChatStatus>("idle");
   const isLoadingConversationRef = useRef(false);
   const activeSessionIdRef = useRef<string | null>(null);
+
+  const loadContextsForSession = useCallback(
+    async (sessionId: string | null) => {
+      if (!sessionId) {
+        setContexts([]);
+        return;
+      }
+
+      try {
+        const sessionContexts = await contextService.getSessionContext(sessionId);
+        setContexts(sessionContexts);
+      } catch (error) {
+        logger.warn("Failed to load contexts for session", { sessionId, error });
+        setContexts([]);
+      }
+    },
+    [contextService]
+  );
+
+  const refreshContexts = useCallback(async () => {
+    await loadContextsForSession(conversation?.sessionId ?? null);
+  }, [conversation, loadContextsForSession]);
+
+  const addFileContexts = useCallback(
+    async (paths: string[]): Promise<ProjectContext[]> => {
+      if (!conversation) {
+        throw new Error("No active conversation available for adding context");
+      }
+
+      if (paths.length === 0) {
+        return [];
+      }
+
+      try {
+        const added: ProjectContext[] = [];
+        for (const filePath of paths) {
+          const context = await contextService.addFileFromPath(conversation.sessionId, filePath);
+          added.push(context);
+        }
+        await loadContextsForSession(conversation.sessionId);
+        return added;
+      } catch (error) {
+        await ErrorHandler.handleError(error, "Adding file context");
+        throw error;
+      }
+    },
+    [conversation, contextService, loadContextsForSession]
+  );
+
+  const addDirectoryContexts = useCallback(
+    async (paths: string[]): Promise<ProjectContext[]> => {
+      if (!conversation) {
+        throw new Error("No active conversation available for adding context");
+      }
+
+      if (paths.length === 0) {
+        return [];
+      }
+
+      try {
+        const added: ProjectContext[] = [];
+        for (const directoryPath of paths) {
+          const context = await contextService.addDirectoryFromPath(conversation.sessionId, directoryPath);
+          added.push(context);
+        }
+        await loadContextsForSession(conversation.sessionId);
+        return added;
+      } catch (error) {
+        await ErrorHandler.handleError(error, "Adding directory context");
+        throw error;
+      }
+    },
+    [conversation, contextService, loadContextsForSession]
+  );
+
+  const removeContext = useCallback(
+    async (contextId: string): Promise<void> => {
+      try {
+        await contextService.removeContext(contextId);
+        if (conversation) {
+          await loadContextsForSession(conversation.sessionId);
+        } else {
+          setContexts((current) => current.filter((ctx) => ctx.id !== contextId));
+        }
+      } catch (error) {
+        await ErrorHandler.handleError(error, "Removing context");
+        throw error;
+      }
+    },
+    [contextService, conversation, loadContextsForSession]
+  );
 
   const refreshConversation = useCallback(
     async (sessionId: string) => {
@@ -174,6 +279,7 @@ export function useChatSession(): UseChatSessionResult {
 
       // Refresh conversation to ensure any streaming messages are captured
       await refreshConversation(session.sessionId);
+      await loadContextsForSession(session.sessionId);
 
       setStatus("ready");
 
@@ -182,7 +288,7 @@ export function useChatSession(): UseChatSessionResult {
       setStatus("idle");
       await ErrorHandler.handleError(error, "Starting chat session");
     }
-  }, [acpClient, sessionService, handleStreamingMessage, connection]);
+  }, [acpClient, sessionService, handleStreamingMessage, connection, refreshConversation, loadContextsForSession]);
 
   const sendMessage = useCallback(async (message: string) => {
     if (status === "processing" || status === "connecting") {
@@ -274,6 +380,7 @@ export function useChatSession(): UseChatSessionResult {
       setConversation(null);
       setConnection(null);
       setMessages([]);
+      setContexts([]);
       setStatus("idle");
     }
   }, [conversation, connection, acpClient, sessionService]);
@@ -301,6 +408,7 @@ export function useChatSession(): UseChatSessionResult {
             title: "Conversation Not Found",
             message: "The selected conversation could not be loaded."
           });
+          setContexts([]);
           setStatus("idle");
           return;
         }
@@ -314,6 +422,7 @@ export function useChatSession(): UseChatSessionResult {
         }
         activeSessionIdRef.current = existing.sessionId;
         sessionService.onSessionMessage(existing.sessionId, handleStreamingMessage);
+        await loadContextsForSession(existing.sessionId);
         setStatus("ready");
 
         logger.info("Conversation loaded successfully", {
@@ -327,7 +436,7 @@ export function useChatSession(): UseChatSessionResult {
         isLoadingConversationRef.current = false;
       }
     },
-    [sessionService, handleStreamingMessage]
+    [sessionService, handleStreamingMessage, loadContextsForSession]
   );
 
   return useMemo(
@@ -336,23 +445,33 @@ export function useChatSession(): UseChatSessionResult {
       connection,
       messages,
       status,
+      contexts,
       startSession,
       sendMessage,
       resetSession,
       setActiveAgent,
       activeAgent,
-      loadConversation
+      loadConversation,
+      addFileContexts,
+      addDirectoryContexts,
+      removeContext,
+      refreshContexts
     }),
     [
       conversation,
       connection,
       messages,
       status,
+      contexts,
       activeAgent,
       startSession,
       sendMessage,
       resetSession,
-      loadConversation
+      loadConversation,
+      addFileContexts,
+      addDirectoryContexts,
+      removeContext,
+      refreshContexts
     ]
   );
 }

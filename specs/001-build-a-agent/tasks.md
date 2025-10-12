@@ -108,12 +108,12 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 - [X] T039 [P] [US2] Create ProjectContext entity model in src/types/entities.ts
 - [X] T040 [US2] Implement ContextService for file sharing in src/services/contextService.ts
 - [X] T041 [P] [US2] Create file utilities for path validation in src/utils/fileUtils.ts
-- [ ] T042 [P] [US2] Create file picker integration in src/utils/filePicker.ts
-- [ ] T043 [US2] Add context sharing UI to ConversationView component
-- [ ] T044 [US2] Implement file content reading and sharing via ACP protocol
-- [ ] T045 [US2] Add context display in conversation with file information
-- [ ] T046 [US2] Implement context removal and management features
-- [ ] T047 [US2] Add permission handling for file access requests
+- [X] T042 [P] [US2] Create file picker integration in src/utils/filePicker.ts
+- [X] T043 [US2] Add context sharing UI to ConversationView component
+- [X] T044 [US2] Implement file content reading and sharing via ACP protocol
+- [X] T045 [US2] Add context display in conversation with file information
+- [X] T046 [US2] Implement context removal and management features
+- [X] T047 [US2] Add permission handling for file access requests
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 

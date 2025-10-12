@@ -3,25 +3,31 @@
  * Manages file context sharing for agent conversations
  */
 
+import { LocalStorage, Alert, confirmAlert } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
-import { ProjectContext, ProjectContextType } from "../types/entities";
-import { detectLanguage, validateFilePath, sanitizeFilePath } from "../utils/fileUtils";
-import { LocalStorage } from "@raycast/api";
+import type { Dirent } from "fs";
+import { readFile, readdir, stat } from "fs/promises";
+import { ConfigService } from "./configService";
+import {
+  detectLanguage,
+  validateFilePath,
+  sanitizeFilePath,
+  truncateContent,
+  isWithinAllowedDirectory,
+  getParentDirectory,
+} from "@/utils/fileUtils";
+import { ProjectContext, ProjectContextType } from "@/types/entities";
+import { STORAGE_KEYS } from "@/utils/storageKeys";
 
-/**
- * Storage key for project contexts
- */
-const CONTEXT_STORAGE_KEY = "acp.project_contexts";
+const CONTEXT_STORAGE_KEY = STORAGE_KEYS.PROJECT_CONTEXTS;
+const MAX_FILE_CONTEXT_BYTES = 64 * 1024; // 64KB per shared file
+const DIRECTORY_SUMMARY_LIMIT = 20;
 
-/**
- * Service for managing project context (files, directories, etc.) for agent conversations
- */
 export class ContextService {
-  private contexts: Map<string, ProjectContext[]>;
+  private contexts: Map<string, ProjectContext[]> = new Map();
 
-  constructor() {
-    this.contexts = new Map();
-    this.loadContexts();
+  constructor(private configService: ConfigService = new ConfigService()) {
+    void this.loadContexts();
   }
 
   /**
@@ -29,28 +35,29 @@ export class ContextService {
    */
   private async loadContexts(): Promise<void> {
     try {
-      const stored = await LocalStorage.getItem(CONTEXT_STORAGE_KEY);
-      if (stored && typeof stored === "string") {
-        const parsed = JSON.parse(stored);
-        this.contexts = new Map(Object.entries(parsed));
-
-        // Convert date strings back to Date objects
-        for (const [sessionId, contexts] of this.contexts.entries()) {
-          this.contexts.set(
-            sessionId,
-            contexts.map((ctx: any) => ({
-              ...ctx,
-              addedAt: new Date(ctx.addedAt),
-              metadata: ctx.metadata
-                ? {
-                    ...ctx.metadata,
-                    lastModified: ctx.metadata.lastModified ? new Date(ctx.metadata.lastModified) : undefined,
-                  }
-                : undefined,
-            }))
-          );
-        }
+      const stored = await LocalStorage.getItem<string>(CONTEXT_STORAGE_KEY);
+      if (!stored) {
+        this.contexts = new Map();
+        return;
       }
+
+      const parsed = JSON.parse(stored) as Record<string, ProjectContext[]>;
+
+      this.contexts = new Map(
+        Object.entries(parsed).map(([sessionId, contexts]) => [
+          sessionId,
+          contexts.map((ctx) => ({
+            ...ctx,
+            addedAt: new Date(ctx.addedAt),
+            metadata: ctx.metadata
+              ? {
+                  ...ctx.metadata,
+                  lastModified: ctx.metadata.lastModified ? new Date(ctx.metadata.lastModified) : undefined,
+                }
+              : undefined,
+          })),
+        ]),
+      );
     } catch (error) {
       console.error("Failed to load contexts from storage:", error);
       this.contexts = new Map();
@@ -58,68 +65,107 @@ export class ContextService {
   }
 
   /**
-   * Save contexts to LocalStorage
+   * Persist contexts to LocalStorage
    */
   private async saveContexts(): Promise<void> {
     try {
-      const toStore = Object.fromEntries(this.contexts);
-      await LocalStorage.setItem(CONTEXT_STORAGE_KEY, JSON.stringify(toStore));
+      const serializable = Object.fromEntries(
+        Array.from(this.contexts.entries()).map(([sessionId, contexts]) => [
+          sessionId,
+          contexts.map((ctx) => ({
+            ...ctx,
+            addedAt: ctx.addedAt instanceof Date ? ctx.addedAt.toISOString() : ctx.addedAt,
+            metadata: ctx.metadata
+              ? {
+                  ...ctx.metadata,
+                  lastModified:
+                    ctx.metadata.lastModified instanceof Date ? ctx.metadata.lastModified.toISOString() : ctx.metadata.lastModified,
+                }
+              : undefined,
+          })),
+        ]),
+      );
+
+      await LocalStorage.setItem(CONTEXT_STORAGE_KEY, JSON.stringify(serializable));
     } catch (error) {
       console.error("Failed to save contexts to storage:", error);
     }
   }
 
   /**
-   * Add file context to a session
+   * Store a context for a session and persist the change.
    */
-  async addFileContext(sessionId: string, filePath: string, content: string): Promise<ProjectContext> {
-    // Validate path
-    validateFilePath(filePath);
+  private async storeContext(sessionId: string, context: ProjectContext): Promise<ProjectContext> {
+    const sessionContexts = this.contexts.get(sessionId) ?? [];
+    sessionContexts.push(context);
+    this.contexts.set(sessionId, sessionContexts);
+    await this.saveContexts();
+    return context;
+  }
 
-    // Sanitize path
-    const sanitizedPath = sanitizeFilePath(filePath);
+  /**
+   * Add file context by reading content from disk and enforcing permission policies.
+   */
+  async addFileFromPath(sessionId: string, filePath: string): Promise<ProjectContext> {
+    const sanitizedPath = await this.ensureFileAccessAllowed(filePath);
 
-    // Detect language
-    const language = detectLanguage(sanitizedPath);
+    let fileStat;
+    try {
+      fileStat = await stat(sanitizedPath);
+    } catch (error) {
+      throw new Error(`Unable to access file: ${sanitizedPath}`);
+    }
 
-    // Create context
+    if (!fileStat.isFile()) {
+      throw new Error("Selected path is not a file");
+    }
+
+    if (fileStat.size === 0) {
+      throw new Error("File is empty");
+    }
+
+    const rawContent = await readFile(sanitizedPath, "utf-8");
+    const { content, isTruncated } = truncateContent(rawContent, MAX_FILE_CONTEXT_BYTES);
+
     const context: ProjectContext = {
       id: uuidv4(),
       sessionId,
       type: "file",
       path: sanitizedPath,
       content,
-      language,
+      language: detectLanguage(sanitizedPath),
       addedAt: new Date(),
-      size: content.length,
+      size: rawContent.length,
+      metadata: {
+        lastModified: fileStat.mtime,
+        permissions: (fileStat.mode & 0o777).toString(8),
+        isTruncated,
+      },
     };
 
-    // Add to session contexts
-    const sessionContexts = this.contexts.get(sessionId) || [];
-    sessionContexts.push(context);
-    this.contexts.set(sessionId, sessionContexts);
-
-    // Persist
-    await this.saveContexts();
-
-    return context;
+    return this.storeContext(sessionId, context);
   }
 
   /**
-   * Add directory context to a session
+   * Add directory context by summarizing directory contents.
    */
-  async addDirectoryContext(
-    sessionId: string,
-    dirPath: string,
-    summary?: string
-  ): Promise<ProjectContext> {
-    // Validate path
-    validateFilePath(dirPath);
+  async addDirectoryFromPath(sessionId: string, directoryPath: string): Promise<ProjectContext> {
+    const sanitizedPath = await this.ensureFileAccessAllowed(directoryPath);
 
-    // Sanitize path
-    const sanitizedPath = sanitizeFilePath(dirPath);
+    let directoryStat;
+    try {
+      directoryStat = await stat(sanitizedPath);
+    } catch {
+      throw new Error(`Unable to access directory: ${sanitizedPath}`);
+    }
 
-    // Create context
+    if (!directoryStat.isDirectory()) {
+      throw new Error("Selected path is not a directory");
+    }
+
+    const dirents = await readdir(sanitizedPath, { withFileTypes: true });
+    const summary = this.formatDirectorySummary(dirents);
+
     const context: ProjectContext = {
       id: uuidv4(),
       sessionId,
@@ -127,39 +173,69 @@ export class ContextService {
       path: sanitizedPath,
       content: summary,
       addedAt: new Date(),
-      size: summary?.length || 0,
+      size: summary.length,
+      metadata: {
+        lastModified: directoryStat.mtime,
+      },
     };
 
-    // Add to session contexts
-    const sessionContexts = this.contexts.get(sessionId) || [];
-    sessionContexts.push(context);
-    this.contexts.set(sessionId, sessionContexts);
-
-    // Persist
-    await this.saveContexts();
-
-    return context;
+    return this.storeContext(sessionId, context);
   }
 
   /**
-   * Add code selection context to a session
+   * Add file context to a session when content has already been provided.
+   */
+  async addFileContext(sessionId: string, filePath: string, content: string): Promise<ProjectContext> {
+    validateFilePath(filePath);
+    const sanitizedPath = sanitizeFilePath(filePath);
+
+    const context: ProjectContext = {
+      id: uuidv4(),
+      sessionId,
+      type: "file",
+      path: sanitizedPath,
+      content,
+      language: detectLanguage(sanitizedPath),
+      addedAt: new Date(),
+      size: content.length,
+    };
+
+    return this.storeContext(sessionId, context);
+  }
+
+  /**
+   * Add directory context to a session.
+   */
+  async addDirectoryContext(sessionId: string, dirPath: string, summary?: string): Promise<ProjectContext> {
+    validateFilePath(dirPath);
+    const sanitizedPath = sanitizeFilePath(dirPath);
+
+    const context: ProjectContext = {
+      id: uuidv4(),
+      sessionId,
+      type: "directory",
+      path: sanitizedPath,
+      content: summary,
+      addedAt: new Date(),
+      size: summary?.length ?? 0,
+    };
+
+    return this.storeContext(sessionId, context);
+  }
+
+  /**
+   * Add code selection context to a session.
    */
   async addSelectionContext(
     sessionId: string,
     filePath: string,
     content: string,
-    lineRange: { start: number; end: number }
+    lineRange: { start: number; end: number },
   ): Promise<ProjectContext> {
-    // Validate path
     validateFilePath(filePath);
-
-    // Sanitize path
     const sanitizedPath = sanitizeFilePath(filePath);
-
-    // Detect language
     const language = detectLanguage(sanitizedPath);
 
-    // Create context
     const context: ProjectContext = {
       id: uuidv4(),
       sessionId,
@@ -174,35 +250,32 @@ export class ContextService {
       },
     };
 
-    // Add to session contexts
-    const sessionContexts = this.contexts.get(sessionId) || [];
-    sessionContexts.push(context);
-    this.contexts.set(sessionId, sessionContexts);
-
-    // Persist
-    await this.saveContexts();
-
-    return context;
+    return this.storeContext(sessionId, context);
   }
 
   /**
    * Get all contexts for a session
    */
   async getSessionContext(sessionId: string): Promise<ProjectContext[]> {
-    return this.contexts.get(sessionId) || [];
+    return this.contexts.get(sessionId) ?? [];
   }
 
   /**
    * Remove a specific context by ID
    */
   async removeContext(contextId: string): Promise<void> {
+    let modified = false;
+
     for (const [sessionId, contexts] of this.contexts.entries()) {
       const filtered = contexts.filter((ctx) => ctx.id !== contextId);
       if (filtered.length !== contexts.length) {
         this.contexts.set(sessionId, filtered);
-        await this.saveContexts();
-        return;
+        modified = true;
       }
+    }
+
+    if (modified) {
+      await this.saveContexts();
     }
   }
 
@@ -210,8 +283,9 @@ export class ContextService {
    * Clear all context for a session
    */
   async clearSessionContext(sessionId: string): Promise<void> {
-    this.contexts.delete(sessionId);
-    await this.saveContexts();
+    if (this.contexts.delete(sessionId)) {
+      await this.saveContexts();
+    }
   }
 
   /**
@@ -261,7 +335,6 @@ export class ContextService {
     };
 
     const byLanguage: Record<string, number> = {};
-
     let totalSize = 0;
 
     for (const ctx of contexts) {
@@ -279,5 +352,80 @@ export class ContextService {
       byType,
       byLanguage,
     };
+  }
+
+  /**
+   * Ensure file access is permitted based on security settings.
+   */
+  private async ensureFileAccessAllowed(targetPath: string): Promise<string> {
+    validateFilePath(targetPath);
+
+    const sanitizedPath = sanitizeFilePath(targetPath);
+    const directory = getParentDirectory(sanitizedPath);
+    let securitySettings = await this.configService.getSecuritySettings();
+
+    if (!securitySettings.allowFileAccess) {
+      const confirmed = await confirmAlert({
+        title: "Enable File Access",
+        message: `Allow the agent extension to read files from:\n${directory}?`,
+        primaryAction: { title: "Allow", style: Alert.ActionStyle.Default },
+        dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
+      });
+
+      if (!confirmed) {
+        throw new Error("File access denied by user");
+      }
+
+      const updatedDirs = Array.from(new Set([...(securitySettings.allowedDirectories ?? []), directory]));
+      await this.configService.updateSecuritySettings({
+        allowFileAccess: true,
+        allowedDirectories: updatedDirs,
+      });
+
+      securitySettings = {
+        ...securitySettings,
+        allowFileAccess: true,
+        allowedDirectories: updatedDirs,
+      };
+    } else if (
+      securitySettings.allowedDirectories &&
+      securitySettings.allowedDirectories.length > 0 &&
+      !isWithinAllowedDirectory(sanitizedPath, securitySettings.allowedDirectories)
+    ) {
+      const confirmed = await confirmAlert({
+        title: "Allow New Directory?",
+        message: `The selected path is outside of your allowed directories.\nAdd "${directory}" to the allowed list?`,
+        primaryAction: { title: "Allow", style: Alert.ActionStyle.Default },
+        dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
+      });
+
+      if (!confirmed) {
+        throw new Error("File access restricted by security settings");
+      }
+
+      const updatedDirs = Array.from(new Set([...securitySettings.allowedDirectories, directory]));
+      await this.configService.updateSecuritySettings({ allowedDirectories: updatedDirs });
+    }
+
+    return sanitizedPath;
+  }
+
+  /**
+   * Format directory contents for display in context metadata.
+   */
+  private formatDirectorySummary(entries: Dirent[]): string {
+    if (entries.length === 0) {
+      return "Directory is empty.";
+    }
+
+    const visible = entries
+      .slice(0, DIRECTORY_SUMMARY_LIMIT)
+      .map((entry) => `- ${entry.name}${entry.isDirectory() ? "/" : ""}`);
+
+    if (entries.length > DIRECTORY_SUMMARY_LIMIT) {
+      visible.push(`- …and ${entries.length - DIRECTORY_SUMMARY_LIMIT} more`);
+    }
+
+    return visible.join("\n");
   }
 }

@@ -16,6 +16,7 @@ import type { AgentConfig, AgentConnection, ExtensionError } from "@/types/exten
 import { ErrorCode } from "@/types/extension";
 import { createLogger } from "@/utils/logging";
 import { ProcessTracker } from "./processTracker";
+import { PermissionService } from "./permissionService";
 
 const logger = createLogger("ACPClient");
 
@@ -28,6 +29,7 @@ export class ACPClient implements acp.Client {
   private isConnected = false;
   private lastError: ExtensionError | null = null;
   private updateListeners = new Set<(update: SessionUpdateNotification) => void>();
+  private permissionService = new PermissionService();
 
   constructor() {
     // Initialize process tracker on first instantiation
@@ -249,15 +251,13 @@ export class ACPClient implements acp.Client {
    * Handle permission requests from the agent
    */
   async requestPermission(params: acp.RequestPermissionRequest): Promise<acp.RequestPermissionResponse> {
-    // TODO: Implement permission UI dialog
-    console.log('Permission request:', params);
+    logger.info('Permission request received from agent', {
+      sessionId: params.sessionId,
+      toolTitle: params.toolCall.title,
+      toolKind: params.toolCall.kind
+    });
 
-    // For now, default to deny
-    return {
-      outcome: {
-        outcome: "cancelled"
-      }
-    };
+    return this.permissionService.handlePermissionRequest(params);
   }
 
   /**

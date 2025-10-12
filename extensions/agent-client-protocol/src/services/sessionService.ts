@@ -16,7 +16,8 @@ import type {
   SessionMessage,
   SessionRequest,
   MessageRequest,
-  MessageRole
+  MessageRole,
+  ProjectContext
 } from '@/types/entities';
 import type {
   SessionMessage as ACPSessionMessage,
@@ -36,14 +37,20 @@ import type {
 import type { AgentConfig, SessionServiceInterface } from '@/types/extension';
 import type { StorageService } from './storageService';
 import type { ACPClient } from './acpClient';
+import { ContextService } from './contextService';
 
 const logger = createLogger('SessionService');
 
 export class SessionService implements SessionServiceInterface {
+  private contextService: ContextService;
+
   constructor(
     private storageService: StorageService,
-    private acpClient: ACPClient
+    private acpClient: ACPClient,
+    contextService?: ContextService
   ) {
+    this.contextService = contextService ?? new ContextService();
+
     if (typeof this.acpClient.registerSessionUpdateListener === 'function') {
       this.acpClient.registerSessionUpdateListener((update) => {
         void this.handleSessionUpdate(update);
@@ -359,12 +366,16 @@ export class SessionService implements SessionServiceInterface {
       // Save user message
       await this.storageService.addMessageToConversation(sessionId, userMessage);
 
+      const contexts = await this.contextService.getSessionContext(sessionId);
+
       // Send message to agent via ACP
       let promptResponse: PromptResponse;
       let agentMessages: SessionMessage[] = [];
       let agentSessionId = session.agentSessionId;
       let retriedWithNewSession = false;
       try {
+        let includeHistoryInPrompt = false;
+
         if (!agentSessionId) {
           const newAgentSession = await this.acpClient.createSession({
             cwd: session.context?.workingDirectory ?? process.cwd()
@@ -380,14 +391,16 @@ export class SessionService implements SessionServiceInterface {
           };
           await this.storageService.saveConversation(session);
 
-          // This is a new ACP session for an existing conversation (recovery scenario)
-          // Send full history to restore context
-          const promptWithHistory = this.buildPromptWithHistory(historyBeforeNewMessage, content);
-          promptResponse = await this.acpClient.sendPrompt(agentSessionId, promptWithHistory);
-        } else {
-          // ACP session exists and maintains context - just send the new message
-          promptResponse = await this.acpClient.sendPrompt(agentSessionId, content);
+          includeHistoryInPrompt = true;
         }
+
+        const promptPayload = this.buildPromptPayload({
+          history: includeHistoryInPrompt ? historyBeforeNewMessage : undefined,
+          message: content,
+          contexts
+        });
+
+        promptResponse = await this.acpClient.sendPrompt(agentSessionId, promptPayload);
 
         logger.debug('Prompt response received', {
           sessionId,
@@ -435,7 +448,11 @@ export class SessionService implements SessionServiceInterface {
 
           // When creating a new session, we need to send history since this is a fresh session
           // Build the full conversation context for the new session
-          const retryPrompt = this.buildPromptWithHistory(historyBeforeNewMessage, content);
+          const retryPrompt = this.buildPromptPayload({
+            history: historyBeforeNewMessage,
+            message: content,
+            contexts
+          });
           promptResponse = await this.acpClient.sendPrompt(agentSessionId, retryPrompt);
 
           // Responses come via sessionUpdate callbacks
@@ -1022,27 +1039,69 @@ export class SessionService implements SessionServiceInterface {
     }
   }
 
-  private buildPromptWithHistory(
-    historyMessages: SessionMessage[],
-    content: string
-  ): string {
-    const historyLines = historyMessages
-      .map((message) => {
-        const sender =
-          message.role === 'user' ? 'User' :
-          message.role === 'assistant' ? 'Assistant' :
-          'System';
-        return `${sender}: ${message.content}`;
-      })
-      .join('\n');
+  private buildPromptPayload({
+    history,
+    message,
+    contexts
+  }: {
+    history?: SessionMessage[];
+    message: string;
+    contexts?: ProjectContext[];
+  }): string {
+    const sections: string[] = [];
 
-    const newLine = `User: ${content}`;
+    if (history && history.length > 0) {
+      const historyLines = history
+        .map((entry) => {
+          const sender =
+            entry.role === 'user' ? 'User' :
+            entry.role === 'assistant' ? 'Assistant' :
+            'System';
+          return `${sender}: ${entry.content}`;
+        })
+        .join('\n');
 
-    if (!historyLines) {
-      return newLine;
+      sections.push(`Conversation history:\n${historyLines}`);
     }
 
-    return `Conversation history:\n${historyLines}\n\n${newLine}`;
+    if (contexts && contexts.length > 0) {
+      sections.push(this.formatContextsForPrompt(contexts));
+    }
+
+    sections.push(`User: ${message}`);
+
+    return sections.filter(Boolean).join('\n\n');
+  }
+
+  private formatContextsForPrompt(contexts: ProjectContext[]): string {
+    const lines: string[] = ['Shared project context:'];
+
+    contexts.forEach((ctx, index) => {
+      const contextLines: string[] = [];
+
+      contextLines.push(
+        `Context ${index + 1}: ${ctx.path}`,
+        `Type: ${ctx.type}${ctx.language ? ` | Language: ${ctx.language}` : ''}`,
+      );
+
+      if (ctx.metadata?.lineRange) {
+        contextLines.push(`Line range: ${ctx.metadata.lineRange.start}-${ctx.metadata.lineRange.end}`);
+      }
+
+      if (ctx.metadata?.isTruncated) {
+        contextLines.push('Note: Content truncated for size limits.');
+      }
+
+      if (ctx.content) {
+        contextLines.push(ctx.content);
+      } else {
+        contextLines.push('(no content provided)');
+      }
+
+      lines.push(contextLines.join('\n'), '');
+    });
+
+    return lines.join('\n').trimEnd();
   }
 
   /**

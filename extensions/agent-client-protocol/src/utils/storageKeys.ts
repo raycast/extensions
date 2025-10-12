@@ -103,7 +103,9 @@ export const DEFAULT_VALUES = {
     allowFileAccess: false,
     allowedDirectories: [],
     requirePermissionForTools: true,
-    enableLogging: false
+    enableLogging: false,
+    trustedTools: [],
+    trustedPaths: []
   }),
   [STORAGE_KEYS.PROJECT_CONTEXTS]: "[]",
   [STORAGE_KEYS.ERROR_LOG]: "[]",

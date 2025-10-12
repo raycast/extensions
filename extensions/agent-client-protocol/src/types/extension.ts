@@ -195,6 +195,8 @@ export interface SecuritySettings {
   allowedDirectories: string[];
   requirePermissionForTools: boolean;
   enableLogging: boolean;
+  trustedTools?: string[];
+  trustedPaths?: string[];
 }
 
 // UI Component Props

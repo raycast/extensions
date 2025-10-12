@@ -223,7 +223,8 @@ export class ConfigService implements ConfigurationService {
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.SECURITY_SETTINGS);
       const settingsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.SECURITY_SETTINGS);
-      return JSON.parse(settingsJson) as SecuritySettings;
+      const parsed = JSON.parse(settingsJson) as SecuritySettings;
+      return this.normalizeSecuritySettings(parsed);
     } catch (error) {
       throw this.createError(
         ErrorCode.InvalidConfiguration,
@@ -238,7 +239,7 @@ export class ConfigService implements ConfigurationService {
   async updateSecuritySettings(settings: Partial<SecuritySettings>): Promise<void> {
     try {
       const current = await this.getSecuritySettings();
-      const updated = { ...current, ...settings };
+      const updated = this.normalizeSecuritySettings({ ...current, ...settings });
       await LocalStorage.setItem(STORAGE_KEYS.SECURITY_SETTINGS, JSON.stringify(updated));
     } catch (error) {
       throw this.createError(
@@ -353,6 +354,20 @@ export class ConfigService implements ConfigurationService {
     }));
 
     await LocalStorage.setItem(STORAGE_KEYS.AGENT_CONFIGS, JSON.stringify(serializable));
+  }
+
+  /**
+   * Private helper: normalize security settings with defaults
+   */
+  private normalizeSecuritySettings(settings: SecuritySettings): SecuritySettings {
+    return {
+      allowFileAccess: Boolean(settings.allowFileAccess),
+      allowedDirectories: Array.isArray(settings.allowedDirectories) ? settings.allowedDirectories : [],
+      requirePermissionForTools: settings.requirePermissionForTools ?? true,
+      enableLogging: Boolean(settings.enableLogging),
+      trustedTools: Array.isArray(settings.trustedTools) ? settings.trustedTools : [],
+      trustedPaths: Array.isArray(settings.trustedPaths) ? settings.trustedPaths : []
+    };
   }
 
   /**

@@ -8,8 +8,11 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  Color,
   Icon,
   List,
+  confirmAlert,
   showToast,
   Toast
 } from "@raycast/api";
@@ -19,10 +22,69 @@ import { StorageService } from "@/services/storageService";
 import { createLogger } from "@/utils/logging";
 import { ErrorHandler } from "@/utils/errors";
 import type { AgentConfig } from "@/types/extension";
-import type { SessionMessage } from "@/types/entities";
+import type { SessionMessage, ProjectContext } from "@/types/entities";
 import { useChatSession } from "@/hooks/useChatSession";
+import { pickDirectories, pickFiles } from "@/utils/filePicker";
+import * as path from "path";
 
 const logger = createLogger("ChatCommand");
+
+function formatBytes(size: number): string {
+  if (!Number.isFinite(size)) {
+    return `${size}`;
+  }
+
+  if (size < 1024) {
+    return `${size} B`;
+  }
+
+  const kb = size / 1024;
+  if (kb < 1024) {
+    return `${kb.toFixed(1)} KB`;
+  }
+
+  const mb = kb / 1024;
+  if (mb < 1024) {
+    return `${mb.toFixed(1)} MB`;
+  }
+
+  const gb = mb / 1024;
+  return `${gb.toFixed(1)} GB`;
+}
+
+function getContextTitle(context: ProjectContext): string {
+  const baseName = path.basename(context.path);
+  if (context.type === "selection") {
+    return `${baseName} (Selection)`;
+  }
+  return baseName || context.path;
+}
+
+function getContextIcon(context: ProjectContext): Icon {
+  switch (context.type) {
+    case "file":
+      return Icon.Document;
+    case "directory":
+      return Icon.Folder;
+    case "selection":
+      return Icon.Highlight;
+    default:
+      return Icon.Circle;
+  }
+}
+
+function buildContextMarkdown(context: ProjectContext): string {
+  if (!context.content) {
+    return "_No cached content_";
+  }
+
+  if (context.type === "directory") {
+    return `\`\`\`\n${context.content}\n\`\`\``;
+  }
+
+  const language = context.language ?? "text";
+  return `\`\`\`${language}\n${context.content}\n\`\`\``;
+}
 
 type ChatCommandProps = {
   initialSessionId?: string;
@@ -159,6 +221,181 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
 
   const isProcessing = chat.status === "connecting" || chat.status === "processing";
   const selectedAgent = selectedAgentId ? agents.find((agent) => agent.id === selectedAgentId) : null;
+  const hasConversation = Boolean(chat.conversation);
+
+  function getContextAccessories(context: ProjectContext): List.Item.Accessory[] {
+    const accessories: List.Item.Accessory[] = [];
+    const typeLabel = context.type === "file" ? "File" : context.type === "directory" ? "Directory" : "Selection";
+    const typeColor =
+      context.type === "directory" ? Color.Orange :
+      context.type === "selection" ? Color.Blue :
+      Color.Green;
+
+    accessories.push({ tag: { value: typeLabel, color: typeColor } });
+
+    if (context.language) {
+      accessories.push({ tag: { value: context.language, color: Color.Magenta } });
+    }
+
+    accessories.push({ text: formatBytes(context.size) });
+
+    if (context.metadata?.isTruncated) {
+      accessories.push({ tag: { value: "Truncated", color: Color.Red } });
+    }
+
+    return accessories;
+  }
+
+  async function handleAddFileContext() {
+    if (!hasConversation) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Start a Conversation",
+        message: "Share project files after a conversation has started."
+      });
+      return;
+    }
+
+    const paths = await pickFiles({
+      allowMultiple: true,
+      prompt: "Select files to share with the agent"
+    });
+
+    if (paths.length === 0) {
+      return;
+    }
+
+    try {
+      const added = await chat.addFileContexts(paths);
+      const message =
+        added.length === 1
+          ? getContextTitle(added[0])
+          : `${added.length} files shared`;
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Context Shared",
+        message
+      });
+    } catch (error) {
+      logger.warn("Failed to add file context", { error });
+    }
+  }
+
+  async function handleAddDirectoryContext() {
+    if (!hasConversation) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Start a Conversation",
+        message: "Share directories after a conversation has started."
+      });
+      return;
+    }
+
+    const paths = await pickDirectories({
+      allowMultiple: true,
+      prompt: "Select directories to summarize for the agent"
+    });
+
+    if (paths.length === 0) {
+      return;
+    }
+
+    try {
+      const added = await chat.addDirectoryContexts(paths);
+      const message =
+        added.length === 1
+          ? getContextTitle(added[0])
+          : `${added.length} directories shared`;
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Context Shared",
+        message
+      });
+    } catch (error) {
+      logger.warn("Failed to add directory context", { error });
+    }
+  }
+
+  async function handleRefreshContexts() {
+    if (!hasConversation) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Conversation",
+        message: "Create or load a conversation before refreshing context."
+      });
+      return;
+    }
+
+    try {
+      await chat.refreshContexts();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Contexts Refreshed"
+      });
+    } catch (error) {
+      logger.warn("Failed to refresh contexts", { error });
+    }
+  }
+
+  async function handleRemoveContext(context: ProjectContext) {
+    const confirmed = await confirmAlert({
+      title: "Remove Context?",
+      message: `Stop sharing:\n${context.path}`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive
+      },
+      dismissAction: {
+        title: "Cancel",
+        style: Alert.ActionStyle.Cancel
+      }
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await chat.removeContext(context.id);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Context Removed",
+        message: getContextTitle(context)
+      });
+    } catch (error) {
+      logger.warn("Failed to remove context", { error });
+    }
+  }
+
+  function renderContextActions() {
+    return (
+      <ActionPanel.Section title="Context">
+        <Action
+          title="Add File Context"
+          icon={Icon.Document}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={handleAddFileContext}
+          disabled={!hasConversation}
+        />
+        <Action
+          title="Add Directory Context"
+          icon={Icon.Folder}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          onAction={handleAddDirectoryContext}
+          disabled={!hasConversation}
+        />
+        {chat.contexts.length > 0 && (
+          <Action
+            title="Refresh Contexts"
+            icon={Icon.ArrowClockwise}
+            onAction={handleRefreshContexts}
+          />
+        )}
+      </ActionPanel.Section>
+    );
+  }
 
   async function handleSend(message: string) {
     if (chat.status === "connecting") {
@@ -302,6 +539,64 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     return parts.length > 0 ? parts.join(" | ") : undefined;
   })();
 
+  const contextItems = chat.contexts.map((context) => {
+    const lastModified =
+      context.metadata?.lastModified instanceof Date
+        ? context.metadata.lastModified.toLocaleString()
+        : context.metadata?.lastModified
+          ? String(context.metadata.lastModified)
+          : undefined;
+
+    return (
+      <List.Item
+        key={context.id}
+        icon={getContextIcon(context)}
+        title={getContextTitle(context)}
+        accessories={getContextAccessories(context)}
+        detail={
+          <List.Item.Detail
+            markdown={buildContextMarkdown(context)}
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Path" text={context.path} />
+                <List.Item.Detail.Metadata.Label title="Type" text={context.type} />
+                {context.language && <List.Item.Detail.Metadata.Label title="Language" text={context.language} />}
+                <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(context.size)} />
+                {lastModified && <List.Item.Detail.Metadata.Label title="Last Modified" text={lastModified} />}
+                {context.metadata?.lineRange && (
+                  <List.Item.Detail.Metadata.Label
+                    title="Line Range"
+                    text={`${context.metadata.lineRange.start}-${context.metadata.lineRange.end}`}
+                  />
+                )}
+                {context.metadata?.isTruncated && (
+                  <List.Item.Detail.Metadata.Label title="Note" text="Content truncated for size limits" />
+                )}
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+        actions={
+          <ActionPanel>
+            {renderContextActions()}
+            <ActionPanel.Section title="Context Item">
+              <Action.OpenInFinder path={context.path} />
+              <Action.CopyToClipboard title="Copy Path" content={context.path} />
+              <Action
+                title="Remove Context"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={async () => {
+                  await handleRemoveContext(context);
+                }}
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  });
+
   const messageItems = chat.messages.map((message, index) => {
     const speakerLabel = message.role === "user"
       ? "You"
@@ -345,6 +640,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
             )}
+            {renderContextActions()}
             <ActionPanel.Section>
               <Action
                 title="Restart Conversation"
@@ -372,7 +668,16 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={selectedAgent ? `Chatting with ${selectedAgent.name} - Type a message and press Enter` : "Type a message and press Enter"}
     >
-      {chat.messages.length === 0 ? (
+      {chat.contexts.length > 0 && (
+        <List.Section title="Shared Context" subtitle={`${chat.contexts.length} item${chat.contexts.length === 1 ? "" : "s"}`}>
+          {contextItems}
+        </List.Section>
+      )}
+      {chat.messages.length > 0 ? (
+        <List.Section title={conversationTitle} subtitle={conversationSubtitle || `${chat.messages.length} messages`}>
+          {messageItems}
+        </List.Section>
+      ) : chat.contexts.length === 0 ? (
         <List.EmptyView
           icon={Icon.ComputerChip}
           title="Start a Conversation"
@@ -397,14 +702,11 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
                   await chat.resetSession();
                 }}
               />
+              {renderContextActions()}
             </ActionPanel>
           }
         />
-      ) : (
-        <List.Section title={conversationTitle} subtitle={conversationSubtitle || `${chat.messages.length} messages`}>
-          {messageItems}
-        </List.Section>
-      )}
+      ) : null}
     </List>
   );
 }

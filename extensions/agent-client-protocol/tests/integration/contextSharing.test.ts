@@ -4,16 +4,12 @@
  */
 
 import { ContextService } from "../../src/services/contextService";
-import { SessionService } from "../../src/services/sessionService";
-import { AgentService } from "../../src/services/agentService";
 import * as fs from "fs/promises";
 import * as path from "path";
 import * as os from "os";
 
 describe("Context Sharing Integration", () => {
   let contextService: ContextService;
-  let sessionService: SessionService;
-  let agentService: AgentService;
   let tempDir: string;
   let testFilePath: string;
 
@@ -42,7 +38,6 @@ describe("Context Sharing Integration", () => {
 
   beforeEach(() => {
     contextService = new ContextService();
-    sessionService = new SessionService(agentService);
   });
 
   describe("File Context Workflow", () => {
