@@ -60,6 +60,13 @@ describe('AgentService', () => {
     agentService = new AgentService(mockConfigService, mockACPClient);
   });
 
+  afterEach(async () => {
+    // Clean up health monitoring to prevent Jest from hanging
+    if (agentService) {
+      await agentService.cleanup();
+    }
+  });
+
   describe('connectToAgent', () => {
     it('should successfully connect to a valid agent', async () => {
       // Arrange
