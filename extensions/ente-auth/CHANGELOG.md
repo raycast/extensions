@@ -1,5 +1,10 @@
 # Ente Auth Changelog
 
+## [Enhancements & Fixes] - {PR_MERGE_DATE}
+
+- Improves the UX for selecting the Cli path and Export path
+- Fixes multipule errors when trying to Import and Export 
+
 ## [Windows Support] - 2025-08-25
 
 - Added windows support

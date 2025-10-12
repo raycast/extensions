@@ -1,12 +1,23 @@
 import { getPreferenceValues } from "@raycast/api";
 import { execSync } from "child_process";
 import fse from "fs-extra";
+import os from "os"
 import { DEFAULT_EXPORT_DIR_PATH, EXPORT_FILE_PATH } from "../constants/ente";
+
 
 const DEFAULT_CLI_PATH = getPreferenceValues().cliPath || "/usr/local/bin/ente";
 
+export const runEnteCLI = (command: string): Buffer<ArrayBufferLike> => {
+	if (os.platform() == "win32") {
+		return execSync(`cd ${DEFAULT_CLI_PATH} && ente ${command}`)
+	}
+
+	//TODO On test if on macos/linux it requires a manual path move before executing the command
+	return execSync(`${DEFAULT_CLI_PATH} ente ${command}`)
+}
+
 export const checkEnteExportDirValue = (): boolean => {
-	const accountList = execSync(`${DEFAULT_CLI_PATH} account list`).toString();
+	const accountList = runEnteCLI(`account list`).toString();
 	const exportDirMatch = accountList.match(/^ExportDir:\s*(.*)$/m);
 
 	if (!exportDirMatch) {
@@ -36,7 +47,7 @@ export const createEntePath = (path: string): string => {
 
 export const checkEnteBinary = (): boolean => {
 	try {
-		execSync(`${DEFAULT_CLI_PATH} version`);
+		runEnteCLI(`version`);
 		return true;
 	} catch (error) {
 		console.error("Ente binary not found. Please install it.", error);
@@ -53,7 +64,7 @@ export const exportEnteAuthSecrets = (): boolean => {
 	}
 
 	try {
-		execSync(`${DEFAULT_CLI_PATH} export`);
+		runEnteCLI(`export`);
 		console.log("Export to", EXPORT_FILE_PATH);
 	} catch {
 		throw new Error("Export failed. Please check if the command is correct.");

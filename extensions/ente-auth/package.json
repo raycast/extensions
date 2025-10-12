@@ -8,7 +8,8 @@
   "author": "chkpwd",
   "contributors": [
     "albarin",
-    "wires5210"
+    "wires5210",
+    "CatsArmy"
   ],
   "categories": [
     "Security"
@@ -55,7 +56,7 @@
   "preferences": [
     {
       "name": "cliPath",
-      "type": "textfield",
+      "type": "directory",
       "required": true,
       "title": "Ente CLI Path",
       "description": "If you wish to use your own CLI, type here the location of your local installation.",
@@ -63,7 +64,7 @@
     },
     {
       "name": "exportPath",
-      "type": "textfield",
+      "type": "directory",
       "required": false,
       "title": "Ente CLI Export Location",
       "description": "If you wish to change the default export path, type here the location of your local installation.",
@@ -97,7 +98,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.16.3",
     "axios": "^1.7.8",
     "commander": "^9.0.0",
@@ -113,8 +114,8 @@
     "@raycast/eslint-config": "^1.0.8",
     "@types/figlet": "^1.5.8",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "@types/url-parse": "^1.4.11",
     "globals": "^15.10.0",
     "prettier": "^3.3.3",
