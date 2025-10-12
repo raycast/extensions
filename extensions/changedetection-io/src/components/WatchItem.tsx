@@ -15,7 +15,6 @@ type WatchItemProps = {
 };
 
 export const WatchItem = ({ watch, mutate, revalidate }: WatchItemProps) => {
-  //   console.log(watch);
   return (
     <List.Item
       key={watch.id}

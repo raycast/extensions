@@ -1,20 +1,23 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { useApi } from "@/api";
+import { useApi, useScreenshot } from "@/api";
 import { WatchDetails as WatchDetailsType, TagsResponse } from "@/types";
 import WatchHistory from "./WatchHistory";
 
 const WatchDetails = ({ id }: { id: string }) => {
   const { data: tags, isLoading: isLoadingTags } = useApi<TagsResponse>("tags");
+  const { data, isLoading: isLoadingWatch } = useApi<WatchDetailsType>(`watch/${id}`);
+  const { data: snapShot, isLoading: isLoadingSnapShot } = useApi<string>(`watch/${id}/history/latest`);
+  const screenshot = useScreenshot(id);
 
-  const { isLoading, data } = useApi<WatchDetailsType>(`watch/${id}`);
-
-  const markdown = !data ? "" : `${data.title ?? ""} \n\n ${data.url}`;
-
+  const markdown = !data
+    ? ""
+    : `${data.title ?? ""} \n\n ${data.url} \n\nSnapshot:\n${screenshot ? `\n![](${screenshot})\n\n` : "\n"} \`\`\`text\n${snapShot}\n\`\`\``;
   const tagLabels = (tags && data && data.tags.map((tag) => tags[tag])) ?? [];
+  const isLoading = isLoadingWatch || isLoadingTags || isLoadingSnapShot;
 
   return (
     <Detail
-      isLoading={isLoading || isLoadingTags}
+      isLoading={isLoading}
       markdown={markdown}
       metadata={
         data ? (

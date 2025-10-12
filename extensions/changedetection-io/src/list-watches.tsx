@@ -2,6 +2,10 @@ import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, openExten
 import { validUrl, useWatches } from "@/api";
 import CreateWatch from "@/screens/CreateWatch";
 import { WatchItem } from "@/components/WatchItem";
+import { PropsWithChildren } from "react";
+
+const WithOptionalSection = ({ title, children }: PropsWithChildren<{ title: string | null }>) =>
+  title ? <List.Section title={title}>{children}</List.Section> : children;
 
 const ListWatches = () => {
   if (!validUrl()) {
@@ -20,6 +24,9 @@ const ListWatches = () => {
   const { sort_by, sort_order } = getPreferenceValues<Preferences.ListWatches>();
   const { isLoading, data, error, revalidate, mutate } = useWatches({ sortBy: sort_by, sortOrder: sort_order });
 
+  // If we only have one section, we don't need to use separate section titles
+  const needsSection = data.unseen.length > 0 && data.seen.length > 0;
+
   return (
     <List isLoading={isLoading}>
       {!isLoading && !error && (
@@ -34,18 +41,18 @@ const ListWatches = () => {
         />
       )}
       {data.unseen.length > 0 ? (
-        <List.Section title="Unseen">
+        <WithOptionalSection title={needsSection ? "Unseen" : null}>
           {data.unseen.map((watch) => {
             return <WatchItem key={watch.id} watch={watch} mutate={mutate} revalidate={revalidate} />;
           })}
-        </List.Section>
+        </WithOptionalSection>
       ) : null}
       {data.seen.length > 0 ? (
-        <List.Section title="Seen">
+        <WithOptionalSection title={needsSection ? "Seen" : null}>
           {data.seen.map((watch) => {
             return <WatchItem key={watch.id} watch={watch} mutate={mutate} revalidate={revalidate} />;
           })}
-        </List.Section>
+        </WithOptionalSection>
       ) : null}
     </List>
   );

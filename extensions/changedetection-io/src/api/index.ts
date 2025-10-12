@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { SortBy, SortOrder, TagsResponse, UseWatchesResult, WatchesResponse, WatchWithID } from "../types";
+import { SortBy, SortOrder, UseWatchesResult, WatchesResponse, WatchWithID } from "../types";
 
 export const { instance_url, api_key } = getPreferenceValues<Preferences>();
 
@@ -25,10 +25,27 @@ export const useApi = <T>(endpoint: string) => {
   });
 };
 
-export const useTags = () => {
-  const { data: tagsResponse, ...rest } = useApi<TagsResponse>("tag");
-  const tags = Object.values(tagsResponse ?? {});
-  return { data: tags, ...rest };
+export const useScreenshot = (id: string) => {
+  const url = new URL(`static/screenshot/${id}`, instance_url).toString();
+
+  const { data, isLoading, error } = useFetch<string | null>(url, {
+    headers,
+    method: "GET",
+    parseResponse: (response) => {
+      if (response.ok && response.headers.get("Content-Type")?.includes("image/png")) {
+        return response.arrayBuffer().then((buffer) => {
+          return `data:image/png;base64,${Buffer.from(buffer).toString("base64")}`;
+        });
+      }
+      return Promise.resolve(null);
+    },
+  });
+
+  if (isLoading || error) {
+    return null;
+  }
+
+  return data;
 };
 
 export const useWatches = ({ sortBy, sortOrder }: { sortBy: SortBy; sortOrder: SortOrder }) => {
