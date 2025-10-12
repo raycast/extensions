@@ -61,7 +61,7 @@ async function loadWinSCPSessions(): Promise<WinSCPSession[]> {
         }
       }
     }
-    if (currentSession?.name) {
+    if (currentSession?.name && currentSession?.host && currentSession?.user) {
       sessions.push(currentSession as WinSCPSession);
     }
     return sessions;
