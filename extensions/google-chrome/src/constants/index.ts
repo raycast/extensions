@@ -6,6 +6,9 @@ const getDefaultProfileID = () => {
     const path = getLocalStatePath();
     const chromeState = fs.readFileSync(path, "utf-8");
     const profiles = JSON.parse(chromeState).profile.info_cache;
+    if (!profiles) {
+      return "Default";
+    }
     return Object.keys(profiles)[0];
   } catch {
     return "Default";
