@@ -374,11 +374,11 @@
           "value": "86400000"
         },
         {
-          "title": "On system lock (experimental)",
+          "title": "On system lock (experimental & macOS only)",
           "value": "-2"
         },
         {
-          "title": "On system sleep (experimental)",
+          "title": "On system sleep (experimental & macOS only)",
           "value": "-3"
         },
         {
