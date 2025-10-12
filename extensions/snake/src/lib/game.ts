@@ -118,7 +118,6 @@ export class Field {
       this.width = 90;
       this.height = 14;
     }
-    console.log(textSize);
   }
 
   clearField() {
