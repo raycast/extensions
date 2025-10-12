@@ -77,9 +77,8 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
         />
         <Action.CopyToClipboard
           // eslint-disable-next-line @raycast/prefer-title-case
-          title={`Copy "\\u${formatting.unicodeEscape}" (Unicode Escape) to Clipboard`}
-          content={`\\u${formatting.unicodeEscape}`}
-          onCopy={() => addToRecentlyUsedItems(item)}
+          title={`Copy "${formatting.unicodeEscape}" (Unicode Escape) to Clipboard`}
+          content={formatting.unicodeEscape}
           shortcut={{ modifiers: ["cmd"], key: "u" }}
         />
         {html ? (
