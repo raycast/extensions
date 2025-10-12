@@ -362,3 +362,52 @@ export interface PaginatedMessages {
   /** Whether there are more messages available */
   hasMore: boolean;
 }
+
+/**
+ * Type of project context
+ */
+export type ProjectContextType = 'file' | 'directory' | 'selection';
+
+/**
+ * Represents project context shared with an agent
+ */
+export interface ProjectContext {
+  /** Unique identifier for this context */
+  id: string;
+
+  /** Session this context belongs to */
+  sessionId: string;
+
+  /** Type of context */
+  type: ProjectContextType;
+
+  /** Absolute path to the file or directory */
+  path: string;
+
+  /** File content (for file type) */
+  content?: string;
+
+  /** Detected programming language */
+  language?: string;
+
+  /** When this context was added */
+  addedAt: Date;
+
+  /** Size of content in bytes */
+  size: number;
+
+  /** Additional metadata */
+  metadata?: {
+    /** Line range for selections */
+    lineRange?: {
+      start: number;
+      end: number;
+    };
+    /** File permissions */
+    permissions?: string;
+    /** Last modified timestamp */
+    lastModified?: Date;
+    /** Whether content is truncated */
+    isTruncated?: boolean;
+  };
+}

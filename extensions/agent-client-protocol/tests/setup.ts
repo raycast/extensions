@@ -22,3 +22,40 @@ global.console = {
   warn: jest.fn(),
   error: jest.fn(),
 };
+
+// Mock uuid
+let uuidCounter = 0;
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => `test-uuid-${++uuidCounter}`),
+}));
+
+// Mock Raycast API LocalStorage
+const mockStorage = new Map<string, string>();
+
+jest.mock('@raycast/api', () => ({
+  LocalStorage: {
+    getItem: jest.fn((key: string) => Promise.resolve(mockStorage.get(key))),
+    setItem: jest.fn((key: string, value: string) => {
+      mockStorage.set(key, value);
+      return Promise.resolve();
+    }),
+    removeItem: jest.fn((key: string) => {
+      mockStorage.delete(key);
+      return Promise.resolve();
+    }),
+    clear: jest.fn(() => {
+      mockStorage.clear();
+      return Promise.resolve();
+    }),
+    allItems: jest.fn(() => Promise.resolve(Object.fromEntries(mockStorage))),
+  },
+  showToast: jest.fn(),
+  showHUD: jest.fn(),
+  Toast: {
+    Style: {
+      Success: 'success',
+      Failure: 'failure',
+      Animated: 'animated',
+    },
+  },
+}));

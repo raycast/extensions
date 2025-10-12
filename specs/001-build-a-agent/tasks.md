@@ -26,11 +26,11 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 
 - [X] T001 Create project structure per implementation plan in src/
 - [X] T002 Initialize TypeScript project with @raycast/api dependencies
-- [ ] T003 [P] Configure ESLint and Prettier for code quality standards
+- [X] T003 [P] Configure ESLint and Prettier for code quality standards
 - [X] T004 [P] Configure Jest testing framework for TDD approach
 - [X] T005 [P] Setup TypeScript strict mode and comprehensive type checking
 - [X] T006 [P] Install @zed-industries/agent-client-protocol SDK dependency
-- [ ] T007 [P] Install and configure Gemini CLI for local testing (npm install -g @google-ai/generativelanguage-cli)
+- [X] T007 [P] Install and configure Gemini CLI for local testing (npm install -g @google-ai/generativelanguage-cli)
 
 ---
 
@@ -99,15 +99,15 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 
 ### Tests for User Story 2 (TDD - WRITE THESE FIRST) ⚠️
 
-- [ ] T036 [P] [US2] Unit test for file context sharing in tests/unit/services/contextService.test.ts
-- [ ] T037 [P] [US2] Unit test for context validation in tests/unit/utils/fileUtils.test.ts
-- [ ] T038 [P] [US2] Integration test for file sharing workflow in tests/integration/contextSharing.test.ts
+- [X] T036 [P] [US2] Unit test for file context sharing in tests/unit/services/contextService.test.ts
+- [X] T037 [P] [US2] Unit test for context validation in tests/unit/utils/fileUtils.test.ts
+- [X] T038 [P] [US2] Integration test for file sharing workflow in tests/integration/contextSharing.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T039 [P] [US2] Create ProjectContext entity model in src/types/entities.ts
-- [ ] T040 [US2] Implement ContextService for file sharing in src/services/contextService.ts
-- [ ] T041 [P] [US2] Create file utilities for path validation in src/utils/fileUtils.ts
+- [X] T039 [P] [US2] Create ProjectContext entity model in src/types/entities.ts
+- [X] T040 [US2] Implement ContextService for file sharing in src/services/contextService.ts
+- [X] T041 [P] [US2] Create file utilities for path validation in src/utils/fileUtils.ts
 - [ ] T042 [P] [US2] Create file picker integration in src/utils/filePicker.ts
 - [ ] T043 [US2] Add context sharing UI to ConversationView component
 - [ ] T044 [US2] Implement file content reading and sharing via ACP protocol
