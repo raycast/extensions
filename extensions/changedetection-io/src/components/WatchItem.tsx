@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
-import { callApi } from "@/api";
+import { MutatePromise } from "@raycast/utils";
+import { WatchWithID, WatchesResponse } from "@/types";
+import { callApi, getUrl, watchIcon } from "@/utils";
 import CreateWatch from "@/screens/CreateWatch";
 import WatchDetails from "@/screens/WatchDetails";
 import WatchHistory from "@/screens/WatchHistory";
-import { getUrl, watchIcon } from "@/utils";
-import { WatchesResponse, WatchWithID } from "@/types";
-import { MutatePromise } from "@raycast/utils";
 import { SeenUnseenAction } from "./SeenUnseenAction";
 
 type WatchItemProps = {

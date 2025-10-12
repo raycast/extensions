@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { useApi, useScreenshot } from "@/api";
-import { WatchDetails as WatchDetailsType, TagsResponse } from "@/types";
-import WatchHistory from "./WatchHistory";
+import { TagsResponse, WatchDetails as WatchDetailsType } from "@/types";
+import { useApi } from "@/hooks/use-api";
+import { useScreenshot } from "@/hooks/use-screenshot";
+import WatchHistory from "@/screens/WatchHistory";
 
 const WatchDetails = ({ id }: { id: string }) => {
   const { data: tags, isLoading: isLoadingTags } = useApi<TagsResponse>("tags");

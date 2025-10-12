@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useApi, instance_url } from "@/api";
 import { WatchHistoryResponse } from "@/types";
-
-// http://brain:5054/diff/ce489c15-dca2-4e5c-83fb-bd84b0a554f5?from_version=1736505830&to_version=1736516635&diff_type=diffLines#text
+import { getUrl } from "@/utils";
+import { useApi } from "@/hooks/use-api";
 
 const WatchHistory = ({ id }: { id: string }) => {
   const { isLoading, data } = useApi<WatchHistoryResponse>(`watch/${id}/history`);
@@ -23,13 +22,13 @@ const WatchHistory = ({ id }: { id: string }) => {
                     <Action.OpenInBrowser
                       icon={Icon.ArrowNe}
                       title="View Snapshot"
-                      url={`${new URL(`preview/${id}`, instance_url)}?version=${timestamp}#text`}
+                      url={`${getUrl(`preview/${id}`)}?version=${timestamp}#text`}
                     />
                     {index < arr.length - 1 ? (
                       <Action.OpenInBrowser
                         icon={Icon.ArrowNe}
                         title="View Diff"
-                        url={`${new URL(`diff/${id}`, instance_url)}?from_version=${arr[index + 1]}&to_version=${timestamp}#text`}
+                        url={`${getUrl(`diff/${id}`)}?from_version=${arr[index + 1]}&to_version=${timestamp}#text`}
                       />
                     ) : null}
                   </ActionPanel>

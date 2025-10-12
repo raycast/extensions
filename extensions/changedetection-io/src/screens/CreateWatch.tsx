@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { callApi } from "@/api";
+import { callApi } from "@/utils";
 
 const CreateWatch = ({ onCreate }: { onCreate: () => void }) => {
   const { pop } = useNavigation();

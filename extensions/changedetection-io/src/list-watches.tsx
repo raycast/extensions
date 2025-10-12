@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, openExtensionPreferences } from "@raycast/api";
-import { validUrl, useWatches } from "@/api";
+import { PropsWithChildren } from "react";
+import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { validUrl } from "@/utils";
+import { useWatches } from "@/hooks/use-watches";
 import CreateWatch from "@/screens/CreateWatch";
 import { WatchItem } from "@/components/WatchItem";
-import { PropsWithChildren } from "react";
 
 const WithOptionalSection = ({ title, children }: PropsWithChildren<{ title: string | null }>) =>
   title ? <List.Section title={title}>{children}</List.Section> : children;
