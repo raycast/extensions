@@ -86,21 +86,22 @@ export class AgentService implements AgentServiceInterface {
       // Establish new connection
       try {
         const connection = await this.acpClient.connect(agentConfig);
+        const normalized = this.cloneConnection(connection);
 
         // Store connection
-        this.activeConnections.set(connection.id, connection);
+        this.activeConnections.set(normalized.id, normalized);
 
         logger.info('Agent connected successfully', {
-          connectionId: connection.id,
+          connectionId: normalized.id,
           agentId
         });
 
         PerformanceLogger.end(operationId, {
           success: true,
-          connectionId: connection.id
+          connectionId: normalized.id
         });
 
-        return connection;
+        return normalized;
 
       } catch (error) {
         logger.error('Failed to establish connection', { agentId, error });
@@ -134,9 +135,13 @@ export class AgentService implements AgentServiceInterface {
       this.activeConnections.delete(connectionId);
 
       if (connection) {
-        // Update connection status
-        connection.status = 'disconnected';
-        connection.lastActivity = new Date();
+        // Update connection status without mutating original reference
+        const updatedConnection: AgentConnection = {
+          ...connection,
+          status: 'disconnected',
+          lastActivity: new Date()
+        };
+        this.activeConnections.set(connectionId, updatedConnection);
       }
 
       // Disconnect via ACP client
@@ -167,8 +172,9 @@ export class AgentService implements AgentServiceInterface {
       try {
         const clientConnection = await this.acpClient.getConnection(connectionId);
         if (clientConnection) {
-          this.activeConnections.set(connectionId, clientConnection);
-          return clientConnection;
+          const normalized = this.cloneConnection(clientConnection);
+          this.activeConnections.set(connectionId, normalized);
+          return normalized;
         }
       } catch (error) {
         logger.debug('Connection not found in client', { connectionId });
@@ -185,15 +191,16 @@ export class AgentService implements AgentServiceInterface {
     try {
       // Get fresh list from ACP client
       const clientConnections = await this.acpClient.getActiveConnections();
+      const normalizedConnections = clientConnections.map(this.cloneConnection);
 
       // Update our cache
-      for (const connection of clientConnections) {
+      for (const connection of normalizedConnections) {
         this.activeConnections.set(connection.id, connection);
       }
 
       // Remove stale connections from cache
       for (const [id] of this.activeConnections.entries()) {
-        if (!clientConnections.find((c: AgentConnection) => c.id === id)) {
+        if (!normalizedConnections.find((c: AgentConnection) => c.id === id)) {
           this.activeConnections.delete(id);
         }
       }
@@ -288,7 +295,7 @@ export class AgentService implements AgentServiceInterface {
       // Check if already connected
       if (existingConnection.status === 'connected') {
         const health = await this.getConnectionHealth(connectionId);
-        if (health.isHealthy) {
+        if (health.isHealthy !== false) {
           throw new ACPError(
             ErrorCode.InvalidConfiguration,
             'Connection is already active',
@@ -323,14 +330,15 @@ export class AgentService implements AgentServiceInterface {
 
       // Establish new connection
       const newConnection = await this.connectToAgent(existingConnection.agentId);
+      const normalized = this.cloneConnection(newConnection);
 
       logger.info('Agent reconnected successfully', {
         oldConnectionId: connectionId,
-        newConnectionId: newConnection.id,
+        newConnectionId: normalized.id,
         agentId: existingConnection.agentId
       });
 
-      return newConnection;
+      return normalized;
 
     } catch (error) {
       logger.error('Failed to reconnect agent', { connectionId, error });
@@ -375,6 +383,15 @@ export class AgentService implements AgentServiceInterface {
     }, 30000);
 
     logger.info('Health monitoring started');
+  }
+
+  private cloneConnection(connection: AgentConnection): AgentConnection {
+    return {
+      ...connection,
+      connectedAt: new Date(connection.connectedAt),
+      lastActivity: new Date(connection.lastActivity),
+      status: connection.status
+    };
   }
 
   /**

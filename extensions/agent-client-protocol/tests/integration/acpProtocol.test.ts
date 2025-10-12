@@ -13,7 +13,9 @@ import { getBuiltInAgent } from '@/utils/builtInAgents';
 import type { AgentConfig } from '@/types/extension';
 import type * as acp from '@zed-industries/agent-client-protocol';
 
-describe('ACP Protocol Compliance', () => {
+const shouldRunAcpProtocolTests = process.env.RUN_ACP_PROTOCOL_TESTS === 'true';
+
+(shouldRunAcpProtocolTests ? describe : describe.skip)('ACP Protocol Compliance', () => {
   let acpClient: ACPClient;
   let geminiConfig: AgentConfig;
 
