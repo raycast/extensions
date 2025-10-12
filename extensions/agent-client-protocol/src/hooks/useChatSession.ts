@@ -108,7 +108,11 @@ export function useChatSession(): UseChatSessionResult {
       setStatus("connecting");
       setActiveAgent(agent);
 
-      logger.info("Starting new session", { agentId: agent.id });
+      logger.info("Starting new session", {
+        agentId: agent.id,
+        workingDirectory: agent.workingDirectory,
+        agentName: agent.name
+      });
 
       const userMessage: SessionMessage = {
         id: `local-${Date.now()}`,
@@ -126,12 +130,19 @@ export function useChatSession(): UseChatSessionResult {
       const agentConnection = await acpClient.connect(agent);
       setConnection(agentConnection);
 
+      const sessionWorkingDirectory = agent.workingDirectory ?? process.cwd();
+      logger.info("Creating session with working directory", {
+        workingDirectory: sessionWorkingDirectory,
+        agentConfiguredDir: agent.workingDirectory,
+        fallbackDir: process.cwd()
+      });
+
       const session = await sessionService.createSession({
         agentConnectionId: agentConnection.id,
         agentConfigId: agent.id,
         prompt,
         context: {
-          workingDirectory: agent.workingDirectory ?? process.cwd(),
+          workingDirectory: sessionWorkingDirectory,
           files: [],
           additionalContext: {}
         },

@@ -27,9 +27,10 @@ const logger = createLogger("ChatCommand");
 type ChatCommandProps = {
   initialSessionId?: string;
   initialAgentId?: string;
+  initialAgent?: AgentConfig; // Pre-configured agent with working directory
 };
 
-export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCommandProps = {}) {
+export default function ChatCommand({ initialSessionId, initialAgentId, initialAgent }: ChatCommandProps = {}) {
   const chat = useChatSession();
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined);
@@ -50,19 +51,28 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
         ]);
 
         setAgents(agentConfigs);
-        const preferredAgentId = defaultAgentId ?? agentConfigs[0]?.id;
-        setSelectedAgentId(preferredAgentId ?? undefined);
 
-        if (preferredAgentId) {
-          const agent = agentConfigs.find((item) => item.id === preferredAgentId);
-          if (agent) {
-            chat.setActiveAgent(agent);
+        // If we have an initial agent, use it
+        if (initialAgent) {
+          setSelectedAgentId(initialAgent.id);
+          chat.setActiveAgent(initialAgent);
+          logger.info("Using initial agent configuration", { agentId: initialAgent.id, workingDirectory: initialAgent.workingDirectory });
+        } else {
+          const preferredAgentId = initialAgentId ?? defaultAgentId ?? agentConfigs[0]?.id;
+          setSelectedAgentId(preferredAgentId ?? undefined);
+
+          if (preferredAgentId) {
+            const agent = agentConfigs.find((item) => item.id === preferredAgentId);
+            if (agent) {
+              chat.setActiveAgent(agent);
+            }
           }
         }
 
         logger.info("Agents loaded successfully", {
           count: agentConfigs.length,
-          defaultAgent: defaultAgentId
+          defaultAgent: defaultAgentId,
+          hasInitialAgent: !!initialAgent
         });
       } catch (error) {
         await ErrorHandler.handleError(error, "Loading agents");
@@ -72,9 +82,14 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
     }
 
     loadAgents();
-  }, [configService, chat.setActiveAgent]);
+  }, [configService, chat.setActiveAgent, initialAgent, initialAgentId]);
 
   useEffect(() => {
+    // Skip this effect if we have an initialAgent - it's already set in the first useEffect
+    if (initialAgent) {
+      return;
+    }
+
     if (!selectedAgentId) {
       return;
     }
@@ -82,7 +97,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
     if (agent) {
       chat.setActiveAgent(agent);
     }
-  }, [selectedAgentId, agents, chat.setActiveAgent]);
+  }, [selectedAgentId, agents, chat.setActiveAgent, initialAgent]);
 
   useEffect(() => {
     if (!initialSessionId && !initialLoadComplete && !isLoadingAgents) {
@@ -184,13 +199,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
     setSearchText("");
   }
 
-  const handleSearchSubmit = async (value: string) => {
-    if (!value.trim()) {
-      return;
-    }
-    await handleSend(value);
-    setSearchText("");
-  };
+  // Remove handleSearchSubmit - we'll use Enter key via actions instead
 
   function getMessageAccessory(message: SessionMessage) {
     const time = message.timestamp instanceof Date
@@ -276,6 +285,21 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
     ? chat.conversation.metadata?.title ?? chat.conversation.sessionId
     : "New Conversation";
 
+  const conversationSubtitle = (() => {
+    if (!chat.conversation) {
+      return selectedAgent ? `Agent: ${selectedAgent.name}` : undefined;
+    }
+
+    const parts: string[] = [];
+    if (selectedAgent) {
+      parts.push(`Agent: ${selectedAgent.name}`);
+    }
+    if (chat.conversation.context?.workingDirectory) {
+      parts.push(`CWD: ${chat.conversation.context.workingDirectory}`);
+    }
+    return parts.length > 0 ? parts.join(" | ") : undefined;
+  })();
+
   const messageItems = chat.messages.map((message, index) => {
     const speakerLabel = message.role === "user"
       ? "You"
@@ -299,7 +323,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
           <ActionPanel>
             <Action
               title={chat.conversation ? "Send Follow-Up Message" : "Send Message"}
-              icon={Icon.PaperPlane}
+              icon={Icon.Envelope}
               onAction={async () => {
                 if (!searchText.trim()) {
                   await showToast({
@@ -344,19 +368,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      onSearchSubmit={handleSearchSubmit}
-      searchBarPlaceholder="Type a message and press Enter"
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Agent"
-          value={selectedAgentId}
-          onChange={setSelectedAgentId}
-        >
-          {agents.map((agent) => (
-            <List.Dropdown.Item key={agent.id} value={agent.id} title={agent.name} />
-          ))}
-        </List.Dropdown>
-      }
+      searchBarPlaceholder={selectedAgent ? `Chatting with ${selectedAgent.name} - Type a message and press Enter` : "Type a message and press Enter"}
     >
       {chat.messages.length === 0 ? (
         <List.EmptyView
@@ -367,10 +379,10 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
             <ActionPanel>
               <Action
                 title="Send Message"
-                icon={Icon.PaperPlane}
+                icon={Icon.Envelope}
                 shortcut={{ modifiers: [], key: "return" }}
                 onAction={async () => {
-                  await handleSearchSubmit(searchText);
+                  await handleSend(searchText);
                 }}
               />
               <Action
@@ -387,7 +399,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
           }
         />
       ) : (
-        <List.Section title={conversationTitle} subtitle={`${chat.messages.length} messages`}>
+        <List.Section title={conversationTitle} subtitle={conversationSubtitle || `${chat.messages.length} messages`}>
           {messageItems}
         </List.Section>
       )}

@@ -7,17 +7,31 @@
 
 import type { AgentCapabilities } from "./acp";
 import type {
-  AgentConnection,
-  ConversationSession,
-  SessionMessage,
+  AgentConnection as BaseAgentConnection,
+  ConversationSession as BaseConversationSession,
+  SessionMessage as BaseSessionMessage,
   SessionRequest,
   MessageRequest,
   ConnectionHealth,
-  MessageRole,
+  MessageRole as BaseMessageRole,
   SessionStatistics,
   MessagePagination,
   PaginatedMessages
 } from "./entities";
+
+// Re-export entity types
+export type {
+  BaseAgentConnection as AgentConnection,
+  BaseConversationSession as ConversationSession,
+  BaseSessionMessage as SessionMessage,
+  BaseMessageRole as MessageRole,
+  SessionRequest,
+  MessageRequest,
+  ConnectionHealth,
+  SessionStatistics,
+  MessagePagination,
+  PaginatedMessages
+};
 
 // Error codes for consistent error handling
 export enum ErrorCode {
@@ -216,40 +230,6 @@ export interface MessageItemProps {
   isStreaming?: boolean;
 }
 
-// Error Handling
-export interface ExtensionError {
-  code: string;
-  message: string;
-  details?: string;
-  timestamp: Date;
-  context?: Record<string, unknown>;
-}
-
-export enum ErrorCode {
-  // Connection errors
-  AgentConnectionFailed = 'AGENT_CONNECTION_FAILED',
-  AgentUnavailable = 'AGENT_UNAVAILABLE',
-  ProtocolError = 'PROTOCOL_ERROR',
-
-  // Session errors
-  SessionNotFound = 'SESSION_NOT_FOUND',
-  InvalidSession = 'INVALID_SESSION',
-  SessionExpired = 'SESSION_EXPIRED',
-
-  // File system errors
-  FileNotFound = 'FILE_NOT_FOUND',
-  FileAccessDenied = 'FILE_ACCESS_DENIED',
-  InvalidFilePath = 'INVALID_FILE_PATH',
-
-  // Configuration errors
-  InvalidConfiguration = 'INVALID_CONFIGURATION',
-  MissingConfiguration = 'MISSING_CONFIGURATION',
-
-  // System errors
-  NetworkError = 'NETWORK_ERROR',
-  SystemError = 'SYSTEM_ERROR',
-  UnknownError = 'UNKNOWN_ERROR'
-}
 
 // Event Types for Service Communication
 export interface ServiceEvents {

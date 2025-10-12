@@ -15,9 +15,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "chat",
+      "name": "start-chat-form",
       "title": "Ask AI Agent",
-      "description": "Start a conversation with an AI agent",
+      "description": "Configure and start a conversation with an AI agent",
       "mode": "view"
     },
     {

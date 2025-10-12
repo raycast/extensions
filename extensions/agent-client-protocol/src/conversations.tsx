@@ -19,7 +19,8 @@ import { useState, useEffect } from "react";
 import { StorageService } from "@/services/storageService";
 import { ErrorHandler } from "@/utils/errors";
 import { createLogger } from "@/utils/logging";
-import type { ConversationSession } from "@/types/extension";
+import type { ConversationSession } from "@/types/entities";
+import type { SessionMessage } from "@/types/entities";
 import ChatCommand from "@/chat";
 
 const logger = createLogger("ConversationsCommand");
@@ -85,7 +86,7 @@ export default function ConversationsCommand() {
 
   function getConversationTitle(conversation: ConversationSession): string {
     // Use the first user message as title, truncated
-    const firstUserMessage = conversation.messages.find(m => m.role === "user");
+    const firstUserMessage = conversation.messages.find((m: SessionMessage) => m.role === "user");
     if (firstUserMessage?.content) {
       return firstUserMessage.content.length > 50
         ? firstUserMessage.content.substring(0, 50) + "..."
@@ -95,25 +96,55 @@ export default function ConversationsCommand() {
   }
 
   function getConversationSubtitle(conversation: ConversationSession): string {
-    const messageCount = conversation.messages.length;
-    const lastActivity = conversation.lastActivity.toLocaleString();
-    return `${messageCount} messages • ${lastActivity}`;
+    const parts: string[] = [];
+
+    parts.push(`${conversation.messages.length} messages`);
+
+    if (conversation.context?.workingDirectory) {
+      const cwd = conversation.context.workingDirectory;
+      const cwdDisplay = cwd.length > 30 ? `...${cwd.slice(-27)}` : cwd;
+      parts.push(`📁 ${cwdDisplay}`);
+    }
+
+    parts.push(conversation.lastActivity.toLocaleString());
+
+    return parts.join(" • ");
   }
 
   function getConversationDetail(conversation: ConversationSession): string {
-    if (conversation.messages.length === 0) {
-      return "_No messages in this conversation._";
+    const sections: string[] = [];
+
+    // Add session metadata section
+    const metadata: string[] = [];
+    metadata.push(`**Session ID:** ${conversation.sessionId.substring(0, 8)}...`);
+    metadata.push(`**Agent:** ${conversation.agentConfigId}`);
+
+    if (conversation.context?.workingDirectory) {
+      metadata.push(`**Working Directory:** \`${conversation.context.workingDirectory}\``);
     }
 
-    const recentMessages = conversation.messages.slice(-10);
-    const lines = recentMessages.map((message) => {
-      const timestamp = message.timestamp.toLocaleTimeString();
-      const sender = message.role === "user" ? "You" : "Agent";
-      const content = message.content || "_No content_";
-      return `**${sender}** (${timestamp})\n\n${content}`;
-    });
+    metadata.push(`**Created:** ${conversation.createdAt.toLocaleString()}`);
+    metadata.push(`**Last Activity:** ${conversation.lastActivity.toLocaleString()}`);
+    metadata.push(`**Status:** ${conversation.status}`);
 
-    return lines.join("\n\n---\n\n");
+    sections.push(metadata.join("\n"));
+
+    // Add recent messages section
+    if (conversation.messages.length === 0) {
+      sections.push("\n---\n\n_No messages in this conversation._");
+    } else {
+      const recentMessages = conversation.messages.slice(-10);
+      const messageLines = recentMessages.map((message: SessionMessage) => {
+        const timestamp = message.timestamp.toLocaleTimeString();
+        const sender = message.role === "user" ? "You" : "Agent";
+        const content = message.content || "_No content_";
+        return `**${sender}** (${timestamp})\n\n${content}`;
+      });
+
+      sections.push("\n---\n\n## Recent Messages\n\n" + messageLines.join("\n\n---\n\n"));
+    }
+
+    return sections.join("\n");
   }
 
   function getStatusIcon(status: ConversationSession["status"]) {
@@ -123,7 +154,7 @@ export default function ConversationsCommand() {
       case "completed":
         return Icon.Check;
       case "archived":
-        return Icon.Archive;
+        return Icon.Box;
       case "error":
         return Icon.ExclamationMark;
       default:
