@@ -357,7 +357,7 @@ function SearchSendsCommandContent() {
         title="Create New Send"
         target={<CreateSendCommand onSuccess={onCreateSuccess} />}
         icon={Icon.NewDocument}
-        shortcut={{ key: "n", modifiers: ["opt"] }}
+        shortcut={{ macOS: { key: "n", modifiers: ["opt"] }, windows: { key: "n", modifiers: ["alt"] } }}
       />
       <Action
         title={syncAction.title}
@@ -408,21 +408,21 @@ function SearchSendsCommandContent() {
                   title="Remove Password"
                   onAction={() => onRemovePassword(send.id)}
                   icon={Icon.LockUnlocked}
-                  shortcut={{ key: "p", modifiers: ["opt"] }}
+                  shortcut={{ macOS: { key: "p", modifiers: ["opt"] }, windows: { key: "p", modifiers: ["alt"] } }}
                 />
               )}
               <Action.Push
                 title="Edit Send"
                 target={<CreateSendCommand send={send} onSuccess={onEditSuccess} />}
                 icon={Icon.Pencil}
-                shortcut={{ key: "e", modifiers: ["opt"] }}
+                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, windows: { key: "e", modifiers: ["alt"] } }}
               />
               <Action
                 title="Delete Send"
                 style={Action.Style.Destructive}
                 onAction={() => onDelete(send.id)}
                 icon={Icon.Trash}
-                shortcut={{ key: "d", modifiers: ["opt"] }}
+                shortcut={{ macOS: { key: "d", modifiers: ["opt"] }, windows: { key: "d", modifiers: ["alt"] } }}
               />
               {sendManagementActionSection}
               <DebuggingBugReportingActionSection />
