@@ -144,6 +144,24 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
   const selectedAgent = selectedAgentId ? agents.find((agent) => agent.id === selectedAgentId) : null;
 
   async function handleSend(message: string) {
+    if (chat.status === "connecting") {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Connecting to agent",
+        message: "Please wait for the connection to establish."
+      });
+      return;
+    }
+
+    if (chat.status === "processing") {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Agent is thinking",
+        message: "Wait for the current response to finish before sending another message."
+      });
+      return;
+    }
+
     if (!message.trim()) {
       await showToast({
         style: Toast.Style.Failure,
@@ -253,9 +271,9 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
                   });
                   return;
                 }
-                await handleSend(searchText);
-              }}
-            />
+              await handleSend(searchText);
+            }}
+          />
             {message.content && (
               <Action.CopyToClipboard
                 title="Copy Message"

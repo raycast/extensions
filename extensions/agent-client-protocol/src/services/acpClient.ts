@@ -176,7 +176,13 @@ export class ACPClient implements acp.Client {
 
     const request: PromptRequest = {
       sessionId,
-      prompt: [{ type: "text", text }]
+      prompt: [
+        {
+          type: "text",
+          text,
+          annotations: null
+        }
+      ]
     };
 
     try {

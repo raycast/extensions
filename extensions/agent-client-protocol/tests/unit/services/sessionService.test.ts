@@ -111,7 +111,15 @@ describe("SessionService", () => {
             id: "agent-msg-1",
             type: "agent",
             timestamp: Date.now(),
-            content: [{ type: "text", text: "Sure, here's how..." }],
+            content: [
+              {
+                type: "content",
+                content: {
+                  type: "text",
+                  text: "Sure, here's how..."
+                }
+              }
+            ],
             metadata: {}
           }
         ]
@@ -167,7 +175,15 @@ describe("SessionService", () => {
             id: "agent-msg-2",
             type: "agent",
             timestamp: Date.now(),
-            content: [{ type: "text", text: "Here is an update." }],
+            content: [
+              {
+                type: "content",
+                content: {
+                  type: "text",
+                  text: "Here is an update."
+                }
+              }
+            ],
             metadata: { processingTime: 1200 }
           }
         ]
@@ -206,6 +222,58 @@ describe("SessionService", () => {
       ).rejects.toMatchObject({
         code: ErrorCode.InvalidConfiguration
       });
+    });
+  });
+
+  describe("session update handling", () => {
+    it("persists tool call output content when tool call completes", async () => {
+      const existingSession: ConversationSession = {
+        sessionId: "session-777",
+        agentConnectionId: "conn-123",
+        agentConfigId: "agent-config-1",
+        status: "active",
+        createdAt: new Date(),
+        lastActivity: new Date(),
+        messages: [userMessage("Run the list files tool", 0)]
+      };
+
+      mockStorageService.getConversation.mockResolvedValue(existingSession);
+
+      const updateListener = mockACPClient.registerSessionUpdateListener.mock.calls[0][0];
+
+      const toolUpdate = {
+        sessionId: existingSession.sessionId,
+        update: {
+          sessionUpdate: "tool_call_update",
+          toolCallId: "tool-42",
+          status: "completed",
+          content: [
+            {
+              type: "content",
+              content: {
+                type: "text",
+                text: "Directory listing:\n- src\n- tests"
+              }
+            }
+          ]
+        }
+      };
+
+      await updateListener(toolUpdate as any);
+
+      expect(mockStorageService.saveConversation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: expect.arrayContaining([
+            expect.objectContaining({
+              role: "tool",
+              content: expect.stringContaining("Directory listing"),
+              metadata: expect.objectContaining({
+                messageType: "tool_result"
+              })
+            })
+          ])
+        })
+      );
     });
   });
 });

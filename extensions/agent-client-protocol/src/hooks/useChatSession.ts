@@ -157,6 +157,10 @@ export function useChatSession(): UseChatSessionResult {
   }, [acpClient, sessionService, handleStreamingMessage]);
 
   const sendMessage = useCallback(async (message: string) => {
+    if (status === "processing" || status === "connecting") {
+      return;
+    }
+
     if (!conversation) {
       if (!activeAgent) {
         await showToast({
@@ -207,7 +211,7 @@ export function useChatSession(): UseChatSessionResult {
       setStatus("ready");
       await ErrorHandler.handleError(error, "Sending message to agent");
     }
-  }, [conversation, activeAgent, sessionService, startSession, refreshConversation]);
+  }, [status, conversation, activeAgent, sessionService, startSession, refreshConversation]);
 
   const resetSession = useCallback(async () => {
     try {

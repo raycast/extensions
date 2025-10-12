@@ -27,8 +27,11 @@ import type {
   ToolCall,
   ToolCallUpdate,
   PlanUpdate,
-  CommandsUpdate,
-  ModeChange
+  AvailableCommandsUpdate,
+  CurrentModeUpdate,
+  ToolCallContent,
+  ContentBlock,
+  ToolCallStatus
 } from '@/types/acp';
 import type { AgentConfig, SessionServiceInterface } from '@/types/extension';
 import type { StorageService } from './storageService';
@@ -389,15 +392,28 @@ export class SessionService implements SessionServiceInterface {
 
         promptResponse = await this.acpClient.sendPrompt(agentSessionId, promptText);
 
+        logger.debug('Prompt response received', {
+          sessionId,
+          stopReason: promptResponse.stopReason,
+          messageCount: promptResponse.messages?.length
+        });
+
         const responseMessages = promptResponse.messages ?? [];
         agentMessages = responseMessages
           .filter(message => message.type !== 'user')
-          .map((message, index) =>
-            this.transformAcpMessage(
+          .map((message, index) => {
+            const transformed = this.transformAcpMessage(
               message,
               session.messages.length + index
-            )
-          );
+            );
+            logger.debug('Prompt response message transformed', {
+              sessionId,
+              messageId: transformed.id,
+              role: transformed.role,
+              snippet: transformed.content.slice(0, 120)
+            });
+            return transformed;
+          });
 
         if (agentMessages.length === 0) {
           agentMessages = [
@@ -467,10 +483,10 @@ export class SessionService implements SessionServiceInterface {
 
           retriedWithNewSession = true;
 
-          logger.info('Agent response received after session renewal', {
-            sessionId,
-            responseCount: agentMessages.length
-          });
+        logger.info('Agent response received after session renewal', {
+          sessionId,
+          responseCount: agentMessages.length
+        });
 
         } else {
           logger.error('Failed to send message to agent', { sessionId, error });
@@ -666,28 +682,63 @@ export class SessionService implements SessionServiceInterface {
     };
   }
 
-  private flattenAcpContent(contents: ACPMessageContent[]): { text: string; messageType: SessionMessage['metadata']['messageType'] } {
+  private flattenAcpContent(
+    contents: Array<ACPMessageContent | ContentBlock | null | undefined>
+  ): { text: string; messageType: SessionMessage['metadata']['messageType'] } {
     let messageType: SessionMessage['metadata']['messageType'] = 'text';
     const parts: string[] = [];
 
-    for (const content of contents) {
+    for (const rawContent of contents) {
+      if (!rawContent) {
+        continue;
+      }
+
+      if (this.isContentWrapper(rawContent)) {
+        const rendered = this.renderContentBlock(rawContent.content);
+        if (rendered) {
+          parts.push(rendered);
+        }
+        messageType = this.deriveMessageTypeFromBlock(rawContent.content, messageType);
+        continue;
+      }
+
+      if (this.isContentBlock(rawContent)) {
+        const rendered = this.renderContentBlock(rawContent);
+        if (rendered) {
+          parts.push(rendered);
+        }
+        messageType = this.deriveMessageTypeFromBlock(rawContent, messageType);
+        continue;
+      }
+
+      const content = rawContent as ACPMessageContent;
       switch (content.type) {
         case 'text':
-          parts.push(content.text);
+          if (typeof content.text === 'string') {
+            parts.push(content.text);
+          }
           break;
         case 'code':
           parts.push(content.code);
           messageType = messageType === 'text' ? 'code' : messageType;
           break;
-        case 'file':
-          parts.push(`${content.filename ?? 'File'}: ${content.content ?? ''}`);
+        case 'file': {
+          const label = content.filename ?? (typeof (content as any).path === 'string' ? (content as any).path : 'File');
+          const body = content.content ?? (typeof (content as any).text === 'string' ? (content as any).text : '');
+          parts.push(`${label}: ${body}`.trim());
           messageType = messageType === 'text' ? 'file' : messageType;
           break;
+        }
         case 'error':
           parts.push(`Error: ${content.error}`);
           break;
-        default:
+        default: {
+          const fallback = this.stringifyUnknownContent(content as Record<string, unknown>);
+          if (fallback) {
+            parts.push(fallback);
+          }
           break;
+        }
       }
     }
 
@@ -695,6 +746,129 @@ export class SessionService implements SessionServiceInterface {
       text: parts.join('\n\n').trim(),
       messageType
     };
+  }
+
+  private flattenToolCallContent(contents?: ToolCallContent[] | null): string {
+    if (!contents || contents.length === 0) {
+      return '';
+    }
+
+    const parts: string[] = [];
+
+    for (const item of contents) {
+      switch (item.type) {
+        case 'content':
+          parts.push(this.renderContentBlock(item.content));
+          break;
+        case 'diff':
+          parts.push(`Diff (${item.path}):\n${item.newText}`);
+          break;
+        case 'terminal':
+          parts.push(`Terminal output available (id: ${item.terminalId})`);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return parts.join('\n\n').trim();
+  }
+
+  private renderContentBlock(block: ContentBlock): string {
+    switch (block.type) {
+      case 'text':
+        return typeof block.text === 'string' ? block.text : '';
+      case 'image': {
+        const uriPart = typeof block.uri === 'string' && block.uri.length > 0 ? ` (${block.uri})` : '';
+        return `[Image ${block.mimeType}${uriPart}]`;
+      }
+      case 'audio':
+        return `[Audio ${block.mimeType}]`;
+      case 'resource_link': {
+        const name = 'name' in block && typeof block.name === 'string' ? block.name : 'Resource';
+        return `[Resource Link] ${name} → ${block.uri}`;
+      }
+      case 'resource': {
+        try {
+          return JSON.stringify(block.resource);
+        } catch {
+          return '[Resource]';
+        }
+      }
+      default:
+        try {
+          return JSON.stringify(block);
+        } catch {
+          return `${block.type} content`;
+        }
+    }
+  }
+
+  private formatToolStatus(status?: ToolCallStatus | null): string {
+    if (!status) {
+      return '';
+    }
+    return status.replace(/_/g, ' ');
+  }
+
+  private isContentBlock(value: unknown): value is ContentBlock {
+    if (!value || typeof value !== 'object') {
+      return false;
+    }
+    const type = (value as { type?: unknown }).type;
+    if (typeof type !== 'string') {
+      return false;
+    }
+    return ['text', 'image', 'audio', 'resource_link', 'resource'].includes(type);
+  }
+
+  private isContentWrapper(value: unknown): value is { type: 'content'; content: ContentBlock } {
+    if (!value || typeof value !== 'object') {
+      return false;
+    }
+    const record = value as { type?: unknown; content?: unknown };
+    return record.type === 'content' && this.isContentBlock(record.content);
+  }
+
+  private deriveMessageTypeFromBlock(
+    block: ContentBlock,
+    current: SessionMessage['metadata']['messageType']
+  ): SessionMessage['metadata']['messageType'] {
+    switch (block.type) {
+      case 'text':
+        return current;
+      case 'image':
+      case 'audio':
+      case 'resource':
+      case 'resource_link':
+        return current === 'text' ? 'file' : current;
+      default:
+        return current;
+    }
+  }
+
+  private stringifyUnknownContent(content: Record<string, unknown>): string {
+    try {
+      return JSON.stringify(content);
+    } catch {
+      return '';
+    }
+  }
+
+  private stringifyRawOutput(raw?: Record<string, unknown> | null): string | null {
+    if (raw === undefined || raw === null) {
+      return null;
+    }
+
+    if (typeof raw === 'string') {
+      return raw;
+    }
+
+    try {
+      return JSON.stringify(raw, null, 2);
+    } catch {
+      return String(raw);
+    }
   }
 
   private mapAcpRole(role: ACPSessionMessage['type']): MessageRole {
@@ -796,6 +970,13 @@ export class SessionService implements SessionServiceInterface {
 
         const { text, messageType } = this.flattenAcpContent([payload.content]);
 
+        logger.debug('Streaming chunk received', {
+          sessionId: update.sessionId,
+          role,
+          messageType,
+          textSnippet: text.slice(0, 120)
+        });
+
         return {
           id: `${payload.sessionUpdate}-${Date.now()}`,
           role,
@@ -809,13 +990,19 @@ export class SessionService implements SessionServiceInterface {
           }
         };
       }
-      case 'tool_call':
-      case 'tool_call_update': {
-        const toolUpdate = payload as ToolCall | ToolCallUpdate;
+      case 'tool_call': {
+        const toolCall = payload as ToolCall;
+        const statusText = this.formatToolStatus(toolCall.status);
+        const detailText = this.flattenToolCallContent(toolCall.content);
+        const sections = [
+          [toolCall.title ?? toolCall.toolCallId, statusText].filter(Boolean).join(' - '),
+          detailText
+        ].filter((section) => section && section.trim().length > 0);
+
         return {
-          id: toolUpdate.toolCallId,
+          id: toolCall.toolCallId,
           role: 'tool',
-          content: `Tool ${toolUpdate.toolCallId} ${toolUpdate.sessionUpdate === 'tool_call' ? toolUpdate.status : toolUpdate.status}`,
+          content: sections.join('\n\n').trim(),
           timestamp: new Date(),
           metadata: {
             source: 'agent',
@@ -823,19 +1010,98 @@ export class SessionService implements SessionServiceInterface {
             sequence
           },
           toolCall: {
-            name: toolUpdate.sessionUpdate === 'tool_call' ? (toolUpdate.title ?? toolUpdate.toolCallId) : toolUpdate.toolCallId,
-            arguments: toolUpdate.sessionUpdate === 'tool_call' ? (toolUpdate.input ?? {}) : {},
-            callId: toolUpdate.toolCallId
+            name: toolCall.title ?? toolCall.toolCallId,
+            arguments: toolCall.rawInput ?? {},
+            callId: toolCall.toolCallId
           }
+        };
+      }
+      case 'tool_call_update': {
+        const toolUpdate = payload as ToolCallUpdate;
+        const status = toolUpdate.status ?? null;
+        const statusText = this.formatToolStatus(status);
+        const contentText = this.flattenToolCallContent(toolUpdate.content ?? undefined);
+        const rawOutputText = this.stringifyRawOutput(toolUpdate.rawOutput);
+
+        const bodySections = [
+          [toolUpdate.title ?? toolUpdate.toolCallId, statusText ? `Status: ${statusText}` : null]
+            .filter(Boolean)
+            .join(' - '),
+          contentText || rawOutputText || ''
+        ].filter((section) => section && section.trim().length > 0);
+
+        const renderedText = bodySections.join('\n\n').trim() || `Tool update${statusText ? ` (${statusText})` : ''}`;
+        const isTerminal = status === 'completed' || status === 'failed';
+
+        return {
+          id: toolUpdate.toolCallId,
+          role: 'tool',
+          content: renderedText,
+          timestamp: new Date(),
+          metadata: {
+            source: 'agent',
+            messageType: isTerminal ? 'tool_result' : 'tool_call',
+            sequence
+          },
+          toolCall: {
+            name: toolUpdate.title ?? toolUpdate.toolCallId,
+            arguments: toolUpdate.rawInput ?? {},
+            callId: toolUpdate.toolCallId
+          },
+          toolResult: isTerminal
+            ? {
+                callId: toolUpdate.toolCallId,
+                result: toolUpdate.rawOutput ?? (contentText || rawOutputText || null),
+                success: status === 'completed',
+                error: status === 'failed' ? (rawOutputText ?? 'Tool call failed') : undefined
+              }
+            : undefined
         };
       }
       case 'plan': {
         const planUpdate = payload as PlanUpdate;
-        const planText = [
-          `Plan: ${planUpdate.plan.title}`,
-          planUpdate.plan.description ?? '',
-          ...planUpdate.plan.steps.map(step => `- [${step.status === 'completed' ? 'x' : ' '}] ${step.title}`)
-        ].join('\n');
+        const planEntries = Array.isArray(planUpdate.entries)
+          ? planUpdate.entries.map((entry, index) => {
+              const statusSymbol = entry.status === 'completed'
+                ? 'x'
+                : entry.status === 'in_progress'
+                  ? '~'
+                  : ' ';
+              return `${index + 1}. [${statusSymbol}] ${entry.content} (${entry.priority})`;
+            })
+          : [];
+
+        const legacyPlan = (planUpdate as unknown as { plan?: { title?: string; description?: string; steps?: { title: string; status?: string }[] } }).plan;
+
+        const lines: string[] = ['Plan update:'];
+
+        if (planEntries.length > 0) {
+          lines.push(...planEntries);
+        } else if (legacyPlan) {
+          if (legacyPlan.title) {
+            lines.push(legacyPlan.title);
+          }
+          if (legacyPlan.description) {
+            lines.push(legacyPlan.description);
+          }
+          if (Array.isArray(legacyPlan.steps)) {
+            lines.push(
+              ...legacyPlan.steps.map((step, index) => {
+                const statusSymbol = step.status === 'completed'
+                  ? 'x'
+                  : step.status === 'running'
+                    ? '~'
+                    : ' ';
+                return `${index + 1}. [${statusSymbol}] ${step.title}`;
+              })
+            );
+          }
+        } else {
+          lines.push('No plan details provided.');
+        }
+
+        const planText = lines.join('\n');
+
         return {
           id: `plan-${Date.now()}`,
           role: 'system',
@@ -848,9 +1114,12 @@ export class SessionService implements SessionServiceInterface {
           }
         };
       }
-      case 'commands': {
-        const commandsUpdate = payload as CommandsUpdate;
-        const commandText = commandsUpdate.commands.map(command => `- ${command.name}: ${command.description}`).join('\n');
+      case 'available_commands_update': {
+        const commandsUpdate = payload as AvailableCommandsUpdate;
+        const commandText = commandsUpdate.availableCommands
+          .map((command) => `- ${command.name}${command.description ? `: ${command.description}` : ''}`)
+          .join('\n');
+
         return {
           id: `commands-${Date.now()}`,
           role: 'system',
@@ -863,12 +1132,12 @@ export class SessionService implements SessionServiceInterface {
           }
         };
       }
-      case 'mode_change': {
-        const modeChange = payload as ModeChange;
+      case 'current_mode_update': {
+        const modeChange = payload as CurrentModeUpdate;
         return {
           id: `mode-${Date.now()}`,
           role: 'system',
-          content: `Agent switched to mode: ${modeChange.mode}`,
+          content: `Agent switched to mode: ${modeChange.currentModeId}`,
           timestamp: new Date(),
           metadata: {
             source: 'agent',
