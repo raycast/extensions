@@ -61,8 +61,12 @@ export const WatchItem = ({ watch, mutate, revalidate }: WatchItemProps) => {
             shortcut={Keyboard.Shortcut.Common.Edit}
           />
           <Action.OpenInBrowser icon={watchIcon(watch.url)} url={watch.url} shortcut={Keyboard.Shortcut.Common.Open} />
-          {watch.viewed && watch.last_changed && <SeenUnseenAction markAsSeen={false} watch={watch} mutate={mutate} />}
-          {!watch.viewed && watch.last_changed && <SeenUnseenAction markAsSeen={true} watch={watch} mutate={mutate} />}
+          {watch.viewed && watch.last_changed ? (
+            <SeenUnseenAction markAsSeen={false} watch={watch} mutate={mutate} />
+          ) : null}
+          {!watch.viewed && watch.last_changed ? (
+            <SeenUnseenAction markAsSeen={true} watch={watch} mutate={mutate} />
+          ) : null}
           <Action
             icon={Icon.Trash}
             title="Delete Watch"

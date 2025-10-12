@@ -44,6 +44,7 @@ type ApiResponse<T> = {
 
 export type WatchesResponse = ApiResponse<Watch>;
 export type TagsResponse = ApiResponse<Tag>;
+export type WatchHistoryResponse = ApiResponse<string>;
 
 export type SortBy = "none" | "last_checked" | "last_changed";
 export type SortOrder = "asc" | "desc";
