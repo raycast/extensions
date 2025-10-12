@@ -153,13 +153,13 @@ export default function ConfigureAgentsCommand() {
     const accessories = [];
 
     if (agent.id === defaultAgent) {
-      accessories.push({ text: "Default", icon: "⭐" });
+      accessories.push({ text: "Default", icon: Icon.Star });
     }
 
     if (agent.isBuiltIn) {
-      accessories.push({ text: "Built-in", icon: "🤖" });
+      accessories.push({ text: "Built-in", icon: Icon.ComputerChip });
     } else {
-      accessories.push({ text: "Custom", icon: "⚙️" });
+      accessories.push({ text: "Custom", icon: Icon.Gear });
     }
 
     return accessories;
@@ -168,7 +168,7 @@ export default function ConfigureAgentsCommand() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search agent configurations...">
       <List.EmptyView
-        icon="🤖"
+        icon={Icon.ComputerChip}
         title="No Agent Configurations"
         description="Add your first AI agent configuration to get started."
         actions={
@@ -185,7 +185,7 @@ export default function ConfigureAgentsCommand() {
       {agents.map((agent) => (
         <List.Item
           key={agent.id}
-          icon={agent.isBuiltIn ? "🤖" : "⚙️"}
+          icon={agent.isBuiltIn ? Icon.ComputerChip : Icon.Gear}
           title={agent.name}
           subtitle={getAgentSubtitle(agent)}
           accessories={getAgentAccessories(agent)}
@@ -194,7 +194,7 @@ export default function ConfigureAgentsCommand() {
               <ActionPanel.Section title="Agent Actions">
                 <Action
                   title="Test Connection"
-                  icon="🔗"
+                  icon={Icon.Link}
                   onAction={() => checkAvailability(agent)}
                 />
                 <Action.Push
@@ -205,14 +205,14 @@ export default function ConfigureAgentsCommand() {
                 {agent.id !== defaultAgent && (
                   <Action
                     title="Set as Default"
-                    icon="⭐"
+                    icon={Icon.Star}
                     onAction={() => setAsDefault(agent.id)}
                   />
                 )}
                 {!agent.isBuiltIn && (
                   <Action
                     title="Duplicate Configuration"
-                    icon="📋"
+                    icon={Icon.Document}
                     onAction={() => {
                       showToast({
                         style: Toast.Style.Success,
@@ -228,7 +228,7 @@ export default function ConfigureAgentsCommand() {
                 <ActionPanel.Section title="Installation">
                   <Action
                     title="View Installation Guide"
-                    icon="📖"
+                    icon={Icon.Book}
                     onAction={() => {
                       const guide = getInstallationGuide(agent.id);
                       if (guide) {
@@ -252,14 +252,14 @@ export default function ConfigureAgentsCommand() {
                 />
                 <Action
                   title="Refresh"
-                  icon="🔄"
+                  icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={loadAgents}
                 />
                 {!agent.isBuiltIn && (
                   <Action
                     title="Delete Configuration"
-                    icon="🗑"
+                    icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["cmd"], key: "delete" }}
                     onAction={() => deleteAgent(agent.id)}

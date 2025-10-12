@@ -294,7 +294,7 @@ export default function StartChatForm() {
                 key={fav.id}
                 value={fav.id}
                 title={fav.name}
-                icon={agent?.isBuiltIn ? "🤖" : "⚙️"}
+                icon={agent?.isBuiltIn ? Icon.ComputerChip : Icon.Gear}
               />
             );
           })}
@@ -319,7 +319,7 @@ export default function StartChatForm() {
               key={agent.id}
               value={agent.id}
               title={agent.name}
-              icon={agent.isBuiltIn ? "🤖" : "⚙️"}
+              icon={agent.isBuiltIn ? Icon.ComputerChip : Icon.Gear}
             />
           ))
         )}

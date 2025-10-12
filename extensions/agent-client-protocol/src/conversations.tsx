@@ -103,7 +103,7 @@ export default function ConversationsCommand() {
     if (conversation.context?.workingDirectory) {
       const cwd = conversation.context.workingDirectory;
       const cwdDisplay = cwd.length > 30 ? `...${cwd.slice(-27)}` : cwd;
-      parts.push(`📁 ${cwdDisplay}`);
+      parts.push(cwdDisplay);
     }
 
     parts.push(conversation.lastActivity.toLocaleString());
@@ -170,7 +170,7 @@ export default function ConversationsCommand() {
     >
       {conversations.length === 0 ? (
         <List.EmptyView
-          icon="💬"
+          icon={Icon.Message}
           title="No Conversations Yet"
           description="Start your first conversation with an AI agent using the 'Ask AI Agent' command."
         />
@@ -189,7 +189,7 @@ export default function ConversationsCommand() {
               <ActionPanel>
                 <Action.Push
                   title="Continue Conversation"
-                  icon="💬"
+                  icon={Icon.Message}
                   target={
                     <ChatCommand
                       initialSessionId={conversation.sessionId}
@@ -199,18 +199,19 @@ export default function ConversationsCommand() {
                 />
                 <Action
                   title="Archive Conversation"
-                  icon="📦"
+                  icon={Icon.Box}
                   onAction={() => archiveConversation(conversation.sessionId)}
                 />
                 <Action
                   title="Delete Conversation"
-                  icon="🗑"
+                  icon={Icon.Trash}
                   style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   onAction={() => deleteConversation(conversation.sessionId)}
                 />
                 <Action
                   title="Refresh"
-                  icon="🔄"
+                  icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={loadConversations}
                 />

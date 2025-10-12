@@ -374,7 +374,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     >
       {chat.messages.length === 0 ? (
         <List.EmptyView
-          icon="🤖"
+          icon={Icon.ComputerChip}
           title="Start a Conversation"
           description="Select an agent, type your question above, and press Enter to begin."
           actions={
