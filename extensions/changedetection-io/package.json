@@ -5,6 +5,9 @@
   "description": "Website Change Detection For Clever People",
   "icon": "changedetection.png",
   "author": "xmok",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"

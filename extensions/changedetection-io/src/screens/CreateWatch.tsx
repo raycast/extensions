@@ -1,17 +1,12 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { CreateWatchFormValues } from "@/types";
 import { callApi } from "@/utils";
 
 const CreateWatch = ({ onCreate }: { onCreate: () => void }) => {
   const { pop } = useNavigation();
-  interface FormValues {
-    url: string;
-    title: string;
-    paused: boolean;
-    muted: boolean;
-    method: string;
-  }
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+
+  const { handleSubmit, itemProps } = useForm<CreateWatchFormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating", values.title);
       try {

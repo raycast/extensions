@@ -48,3 +48,11 @@ export type WatchHistoryResponse = ApiResponse<string>;
 
 export type SortBy = "none" | "last_checked" | "last_changed";
 export type SortOrder = "asc" | "desc";
+
+export type CreateWatchFormValues = {
+  url: string;
+  title: string;
+  paused: boolean;
+  muted: boolean;
+  method: string;
+};
