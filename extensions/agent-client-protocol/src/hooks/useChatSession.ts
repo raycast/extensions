@@ -127,8 +127,21 @@ export function useChatSession(): UseChatSessionResult {
       };
       setMessages([userMessage]);
 
-      const agentConnection = await acpClient.connect(agent);
-      setConnection(agentConnection);
+      // Reuse existing connection if it's for the same agent
+      let agentConnection = connection;
+      if (!agentConnection || agentConnection.agentId !== agent.id) {
+        logger.info("Creating new agent connection", {
+          agentId: agent.id,
+          previousAgentId: agentConnection?.agentId
+        });
+        agentConnection = await acpClient.connect(agent);
+        setConnection(agentConnection);
+      } else {
+        logger.info("Reusing existing agent connection", {
+          agentId: agent.id,
+          connectionId: agentConnection.id
+        });
+      }
 
       const sessionWorkingDirectory = agent.workingDirectory ?? process.cwd();
       logger.info("Creating session with working directory", {
@@ -169,7 +182,7 @@ export function useChatSession(): UseChatSessionResult {
       setStatus("idle");
       await ErrorHandler.handleError(error, "Starting chat session");
     }
-  }, [acpClient, sessionService, handleStreamingMessage]);
+  }, [acpClient, sessionService, handleStreamingMessage, connection]);
 
   const sendMessage = useCallback(async (message: string) => {
     if (status === "processing" || status === "connecting") {
@@ -217,6 +230,17 @@ export function useChatSession(): UseChatSessionResult {
         return;
       }
 
+      // Lazily connect to agent if not already connected
+      let agentConnection = connection;
+      if (!agentConnection || agentConnection.agentId !== activeAgent.id) {
+        logger.info("Connecting to agent for message", {
+          agentId: activeAgent.id,
+          sessionId: conversation.sessionId
+        });
+        agentConnection = await acpClient.connect(activeAgent);
+        setConnection(agentConnection);
+      }
+
       await sessionService.sendMessage(conversation.sessionId, message, activeAgent);
 
       await refreshConversation(conversation.sessionId);
@@ -226,7 +250,7 @@ export function useChatSession(): UseChatSessionResult {
       setStatus("ready");
       await ErrorHandler.handleError(error, "Sending message to agent");
     }
-  }, [status, conversation, activeAgent, sessionService, startSession, refreshConversation]);
+  }, [status, conversation, activeAgent, sessionService, startSession, refreshConversation, connection, acpClient]);
 
   const resetSession = useCallback(async () => {
     try {
@@ -263,14 +287,12 @@ export function useChatSession(): UseChatSessionResult {
 
       try {
         isLoadingConversationRef.current = true;
-        setStatus("connecting");
         setActiveAgent(agent);
 
-        let agentConnection = connection;
-        if (!agentConnection || agentConnection.agentId !== agent.id) {
-          agentConnection = await acpClient.connect(agent);
-          setConnection(agentConnection);
-        }
+        logger.info("Loading conversation", {
+          sessionId,
+          agentId: agent.id
+        });
 
         const existing = await sessionService.getSession(sessionId);
         if (!existing) {
@@ -283,6 +305,8 @@ export function useChatSession(): UseChatSessionResult {
           return;
         }
 
+        // Just load the conversation - don't connect to agent yet
+        // Agent will be connected lazily when user sends a message
         setConversation(existing);
         setMessages(existing.messages);
         if (activeSessionIdRef.current) {
@@ -291,6 +315,11 @@ export function useChatSession(): UseChatSessionResult {
         activeSessionIdRef.current = existing.sessionId;
         sessionService.onSessionMessage(existing.sessionId, handleStreamingMessage);
         setStatus("ready");
+
+        logger.info("Conversation loaded successfully", {
+          sessionId,
+          messageCount: existing.messages.length
+        });
       } catch (error) {
         setStatus("idle");
         await ErrorHandler.handleError(error, "Loading conversation");
@@ -298,7 +327,7 @@ export function useChatSession(): UseChatSessionResult {
         isLoadingConversationRef.current = false;
       }
     },
-    [acpClient, sessionService, connection, handleStreamingMessage]
+    [sessionService, handleStreamingMessage]
   );
 
   return useMemo(

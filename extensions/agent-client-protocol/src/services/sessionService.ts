@@ -379,11 +379,15 @@ export class SessionService implements SessionServiceInterface {
             }
           };
           await this.storageService.saveConversation(session);
+
+          // This is a new ACP session for an existing conversation (recovery scenario)
+          // Send full history to restore context
+          const promptWithHistory = this.buildPromptWithHistory(historyBeforeNewMessage, content);
+          promptResponse = await this.acpClient.sendPrompt(agentSessionId, promptWithHistory);
+        } else {
+          // ACP session exists and maintains context - just send the new message
+          promptResponse = await this.acpClient.sendPrompt(agentSessionId, content);
         }
-
-        const promptText = this.buildPromptWithHistory(historyBeforeNewMessage, content);
-
-        promptResponse = await this.acpClient.sendPrompt(agentSessionId, promptText);
 
         logger.debug('Prompt response received', {
           sessionId,
@@ -429,6 +433,8 @@ export class SessionService implements SessionServiceInterface {
 
           await this.storageService.saveConversation(session);
 
+          // When creating a new session, we need to send history since this is a fresh session
+          // Build the full conversation context for the new session
           const retryPrompt = this.buildPromptWithHistory(historyBeforeNewMessage, content);
           promptResponse = await this.acpClient.sendPrompt(agentSessionId, retryPrompt);
 

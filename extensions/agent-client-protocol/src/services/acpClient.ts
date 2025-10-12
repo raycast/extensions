@@ -15,6 +15,7 @@ import type {
 import type { AgentConfig, AgentConnection, ExtensionError } from "@/types/extension";
 import { ErrorCode } from "@/types/extension";
 import { createLogger } from "@/utils/logging";
+import { ProcessTracker } from "./processTracker";
 
 const logger = createLogger("ACPClient");
 
@@ -29,7 +30,10 @@ export class ACPClient implements acp.Client {
   private updateListeners = new Set<(update: SessionUpdateNotification) => void>();
 
   constructor() {
-    // No initialization needed
+    // Initialize process tracker on first instantiation
+    ProcessTracker.initialize().catch(error => {
+      logger.error('Failed to initialize process tracker', { error });
+    });
   }
 
   /**
@@ -40,7 +44,33 @@ export class ACPClient implements acp.Client {
       throw this.createError(ErrorCode.SystemError, "Connection already in progress");
     }
 
+    // Reuse existing connection if it's for the same agent
+    if (this.isConnected && this.config?.id === config.id) {
+      logger.info("Reusing existing agent connection", {
+        agentId: config.id,
+        connectionId: this.connectionId
+      });
+
+      return {
+        id: this.connectionId!,
+        agentId: config.id,
+        status: 'connected',
+        connectedAt: new Date(), // We don't track original connection time
+        lastActivity: new Date(),
+        sessionCount: 0,
+        metadata: {
+          endpoint: config.endpoint,
+          capabilities: []
+        }
+      };
+    }
+
+    // Disconnect from different agent if currently connected
     if (this.isConnected) {
+      logger.info("Disconnecting from previous agent", {
+        previousAgentId: this.config?.id,
+        newAgentId: config.id
+      });
       await this.disconnect();
     }
 
@@ -108,6 +138,11 @@ export class ACPClient implements acp.Client {
    * Disconnect from the current agent
    */
   async disconnect(_connectionId?: string): Promise<void> {
+    if (this.config?.id) {
+      // Kill tracked process using ProcessTracker
+      ProcessTracker.killProcess(this.config.id);
+    }
+
     if (this.agentProcess) {
       this.agentProcess.kill();
       this.agentProcess = null;
@@ -494,6 +529,16 @@ export class ACPClient implements acp.Client {
       path: mergedEnv.PATH ?? process.env.PATH ?? ""
     });
 
+    // Check if there's already a running process for this agent
+    const existingPid = ProcessTracker.getProcessPid(config.id);
+    if (existingPid) {
+      logger.info("Found existing agent process, killing it first", {
+        agentId: config.id,
+        existingPid
+      });
+      ProcessTracker.killProcess(config.id);
+    }
+
     // Spawn the agent process
     this.agentProcess = spawn(config.command, config.args || [], {
       stdio: ['pipe', 'pipe', 'inherit'],
@@ -505,15 +550,26 @@ export class ACPClient implements acp.Client {
       throw this.createError(ErrorCode.SystemError, "Failed to create agent process streams");
     }
 
+    // Register the process with tracker
+    if (this.agentProcess.pid) {
+      ProcessTracker.registerProcess(config.id, this.agentProcess.pid, config.command);
+      logger.info("Registered agent process with tracker", {
+        agentId: config.id,
+        pid: this.agentProcess.pid
+      });
+    }
+
     // Handle process errors
     this.agentProcess.on('error', (error) => {
       console.error('Agent process error:', error);
       this.lastError = this.createError(ErrorCode.AgentUnavailable, `Agent process error: ${error.message}`);
+      ProcessTracker.unregisterProcess(config.id);
     });
 
     this.agentProcess.on('exit', (code, signal) => {
       console.log(`Agent process exited with code ${code}, signal ${signal}`);
       this.isConnected = false;
+      ProcessTracker.unregisterProcess(config.id);
     });
 
     // Create streams for ACP communication

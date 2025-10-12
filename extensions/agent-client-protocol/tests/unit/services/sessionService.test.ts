@@ -129,7 +129,8 @@ describe("SessionService", () => {
       const session = await sessionService.createSession(baseSessionRequest);
 
       expect(session.agentSessionId).toBe("acp-session-1");
-      expect(session.messages).toHaveLength(2); // user + agent
+      // Only user message is included initially; agent responses come via streaming callbacks
+      expect(session.messages).toHaveLength(1); // user only
       expect(mockACPClient.sendPrompt).toHaveBeenCalledWith(
         "acp-session-1",
         baseSessionRequest.prompt
@@ -196,12 +197,19 @@ describe("SessionService", () => {
       );
 
       expect(mockACPClient.createSession).toHaveBeenCalled();
+      // When creating a new ACP session (session recovery), history should be sent
       expect(mockACPClient.sendPrompt).toHaveBeenCalledWith(
         "acp-resume",
         expect.stringContaining("Conversation history")
       );
-      expect(mockStorageService.addMessageToConversation).toHaveBeenCalledTimes(2);
-      expect(response.content).toBe("Here is an update.");
+      // Only user message is saved synchronously; agent responses come via streaming
+      expect(mockStorageService.addMessageToConversation).toHaveBeenCalledWith(
+        "session-123",
+        expect.objectContaining({
+          content: "Please elaborate",
+          role: "user"
+        })
+      );
     });
 
     it("throws when conversation agent differs from provided agent", async () => {
