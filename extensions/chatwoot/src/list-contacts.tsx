@@ -12,8 +12,7 @@ export default function ListContacts() {
     () => async (options: { page: number }) => {
       const { meta, payload } = await chatwoot.contacts.list({ page: options.page + 1 });
       return {
-        data: payload,
-        hasMore: meta.current_page !== options.page + 1,
+        hasMore: meta.current_page === options.page + 1,
       };
     },
     [],
