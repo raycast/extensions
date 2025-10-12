@@ -136,8 +136,7 @@ export const CharacterActionPanel = ({ item, section }: { item: Character; secti
           title="Clear All Favorites"
           icon={Icon.Trash}
           onAction={() => clearFavorites()}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-        />
+          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
       </ActionPanel.Section>
       <ActionPanel.Section title="Recently Used">
         {recentlyUsed ? (
