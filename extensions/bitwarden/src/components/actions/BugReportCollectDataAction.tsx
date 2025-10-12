@@ -8,6 +8,8 @@ import { dirname } from "path";
 import { getPlatform } from "~/utils/platform";
 
 const exec = promisify(execWithCallbacks);
+const platform = getPlatform();
+const { supportPath } = environment;
 
 /** strip out any sensitive data from preferences */
 const getSafePreferences = () => {
@@ -45,7 +47,14 @@ const getSafePreferences = () => {
 const NA = "N/A";
 const tryExec = async (command: string, trimLineBreaks = true) => {
   try {
-    const { stdout } = await exec(`PATH="$PATH:${dirname(process.execPath)}" ${command}`);
+    let cmd = command;
+
+    if (platform === "windows") {
+      cmd = `powershell -Command "${command}"`;
+    } else {
+      cmd = `PATH="$PATH:${dirname(process.execPath)}" ${command}`;
+    }
+    const { stdout } = await exec(cmd, { env: { BITWARDENCLI_APPDATA_DIR: supportPath } });
     const response = stdout.trim();
     if (trimLineBreaks) return response.replace(/\n|\r/g, "");
     return response;
@@ -97,10 +106,14 @@ function BugReportCollectDataAction() {
       const bwInfo = getBwBinInfo();
       const platform = getPlatform();
       const [systemArch, osVersion, osBuildVersion, bwVersion] = await Promise.all([
-        tryExec("uname -m"),
-        tryExec("sw_vers -productVersion"),
-        tryExec("sw_vers -buildVersion"),
-        tryExec(`"${bwInfo.path}" --version`),
+        ...(platform === "macos"
+          ? [tryExec("uname -m"), tryExec("sw_vers -productVersion"), tryExec("sw_vers -buildVersion")]
+          : [
+              tryExec("(Get-CimInstance Win32_OperatingSystem).OSArchitecture"),
+              tryExec("(Get-CimInstance Win32_OperatingSystem).Caption"),
+              tryExec("(Get-CimInstance Win32_OperatingSystem).Version"),
+            ]),
+        tryExec(`${bwInfo.path} --version`),
       ]);
 
       const data: Record<string, any> = {
