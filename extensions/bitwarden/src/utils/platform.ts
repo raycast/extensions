@@ -1,3 +1,1 @@
-export function getPlatform() {
-  return process.platform === "darwin" ? "macos" : "windows";
-}
+export const platform = process.platform === "darwin" ? "macos" : "windows"

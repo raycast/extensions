@@ -5,10 +5,9 @@ import { promisify } from "util";
 import { cliInfo } from "~/api/bitwarden";
 import { existsSync } from "fs";
 import { dirname } from "path";
-import { getPlatform } from "~/utils/platform";
+import { platform } from "~/utils/platform";
 
 const exec = promisify(execWithCallbacks);
-const platform = getPlatform();
 const { supportPath } = environment;
 
 /** strip out any sensitive data from preferences */
@@ -104,7 +103,6 @@ function BugReportCollectDataAction() {
     try {
       const preferences = getSafePreferences();
       const bwInfo = getBwBinInfo();
-      const platform = getPlatform();
       const [systemArch, osVersion, osBuildVersion, bwVersion] = await Promise.all([
         ...(platform === "macos"
           ? [tryExec("uname -m"), tryExec("sw_vers -productVersion"), tryExec("sw_vers -buildVersion")]

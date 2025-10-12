@@ -26,7 +26,7 @@ import { captureException } from "~/utils/development";
 import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
 import { Cache } from "~/utils/cache";
-import { getPlatform } from "~/utils/platform";
+import { platform } from "~/utils/platform";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -98,8 +98,6 @@ const BinDownloadLogger = (() => {
     hasError: () => tryExec(() => existsSync(filePath), false),
   };
 })();
-
-const platform = getPlatform();
 
 export const cliInfo = {
   version: "2025.2.0",
