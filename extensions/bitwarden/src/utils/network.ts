@@ -104,7 +104,7 @@ export function download(url: string, path: string, options?: DownloadOptions): 
 function waitForHashToMatch(path: string, sha256: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const fileSha = getFileSha256(path);
-    if (!fileSha) return reject(new Error("Could not verify file hash."));
+    if (!fileSha) return reject(new Error(`Could not generate hash for file ${path}.`));
     if (fileSha === sha256) return resolve();
 
     const interval = setInterval(() => {
