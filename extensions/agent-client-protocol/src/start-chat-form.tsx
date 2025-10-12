@@ -260,7 +260,7 @@ export default function StartChatForm() {
             <Action
               title="Configure Agents"
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
               onAction={() => open("raycast://extensions/agent-client-protocol/configure-agents")}
             />
             {selectedFavoriteId && (
