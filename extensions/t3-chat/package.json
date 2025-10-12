@@ -71,7 +71,7 @@
             { "title": "DeepSeek v3 (Fireworks)", "value": "deepseek-v3-fireworks" },
 
             { "title": "Gemini 2.0 Flash", "value": "gemini-2.0-flash" },
-            { "title": "Gemini 2.0 Flash Lite", "value": "gemini-2.0-flash-lite" },
+            { "title": "Gemini 2.0 Flash Lite", "value": "gemini-2.0-flash-lite-preview-02-05" },
             { "title": "Gemini 2.5 Flash", "value": "gemini-2.5-flash" },
             { "title": "Gemini 2.5 Flash (Thinking)", "value": "gemini-2.5-flash-thinking" },
             { "title": "Gemini 2.5 Flash Lite", "value": "gemini-2.5-flash-lite" },
