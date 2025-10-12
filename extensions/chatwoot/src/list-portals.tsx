@@ -96,7 +96,7 @@ function CreatePortal() {
       <Form.Description text="Give your portal a name and create a user-friendly URL slug. You can modify both later in the settings." />
       <Form.TextField title="Name" placeholder="Portal name" {...itemProps.name} />
       <Form.TextField title="Slug" placeholder="Portal slug" {...itemProps.slug} />
-      <Form.Description text={chatwoot.buildUrl(values.slug).toString()} />
+      <Form.Description text={chatwoot.buildUrl(values.slug || "SLUG").toString()} />
     </Form>
   );
 }

@@ -152,6 +152,7 @@ function CreateMessage({ conversation }: { conversation: Conversation }) {
       <Form.TextArea
         title="Content"
         placeholder={values.private ? "This will be visible only to Agents" : ""}
+        autoFocus
         {...itemProps.content}
       />
     </Form>

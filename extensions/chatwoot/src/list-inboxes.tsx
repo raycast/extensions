@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 import { chatwoot } from "./chatwoot";
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import OpenInChatwoot from "./open-in-chatwoot";
 
 export default function ListInboxes() {
@@ -18,7 +18,12 @@ export default function ListInboxes() {
       {inboxes.map((inbox) => (
         <List.Item
           key={inbox.id}
-          icon={inbox.avatar_url || (inbox.channel_type === "Channel::WebWidget" ? "website.svg" : Icon.Tray)}
+          icon={
+            inbox.avatar_url ||
+            (inbox.channel_type === "Channel::WebWidget"
+              ? { source: "website.svg", tintColor: Color.SecondaryText }
+              : Icon.Tray)
+          }
           title={inbox.name}
           accessories={[{ tag: inbox.channel_type }]}
           actions={
