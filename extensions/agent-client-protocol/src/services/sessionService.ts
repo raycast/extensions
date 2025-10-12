@@ -159,9 +159,6 @@ export class SessionService implements SessionServiceInterface {
           messageCount: session.messages.length
         });
 
-        // Process any buffered updates that arrived before the session was saved
-        await this.processPendingUpdates(acpSession.sessionId, sessionId);
-
       } catch (error) {
         logger.error('Failed to create ACP session', {
           sessionId,
@@ -177,11 +174,16 @@ export class SessionService implements SessionServiceInterface {
         );
       }
 
-      // Save session to storage
+      // Save session to storage BEFORE processing pending updates
+      // This ensures the session exists when processPendingUpdates tries to find it
       try {
         await this.storageService.saveConversation(session);
 
         logger.info('Session saved to storage', { sessionId });
+
+        // Process any buffered updates that arrived while session was being created
+        // Now that the session is saved, these updates can be properly applied
+        await this.processPendingUpdates(session.agentSessionId!, sessionId);
 
         PerformanceLogger.end(operationId, {
           success: true,

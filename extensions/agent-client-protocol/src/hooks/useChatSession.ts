@@ -147,6 +147,10 @@ export function useChatSession(): UseChatSessionResult {
       }
       activeSessionIdRef.current = session.sessionId;
       sessionService.onSessionMessage(session.sessionId, handleStreamingMessage);
+
+      // Refresh conversation to ensure any streaming messages are captured
+      await refreshConversation(session.sessionId);
+
       setStatus("ready");
 
       logger.info("Session initialized", { sessionId: session.sessionId });
