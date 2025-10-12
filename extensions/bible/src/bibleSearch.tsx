@@ -14,10 +14,15 @@ import { versions as bibleVersions } from "../assets/bible-versions.json";
 import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 
 type Preferences = Preferences.BibleSearch;
+type FormattingOptions = Pick<
+  Preferences,
+  "includeVerseNumbers" | "includeReferences" | "includeCopyright" | "oneVersePerLine"
+>;
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.BibleSearch }>) {
-  const prefs = getPreferenceValues<Preferences>();
-  const { ref, version = prefs.defaultBibleVersion } = props.arguments;
+  const { defaultBibleVersion, includeCopyright, includeVerseNumbers, includeReferences, oneVersePerLine } =
+    getPreferenceValues<Preferences>();
+  const { ref, version = defaultBibleVersion } = props.arguments;
   const [query, setQuery] = React.useState({ search: ref, version: version.trim().toUpperCase() });
   const { data: searchResult, isLoading, error } = useBibleSearch(query);
 
@@ -25,7 +30,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.BibleS
     async function setSelectedTextAsQuery() {
       try {
         const selectedText = await getSelectedText();
-        if (selectedText) {
+        if (selectedText.trim()) {
           const { ref, version } = parseReference(selectedText);
           setQuery((old) => ({ search: ref, version: version || old.version }));
         }
@@ -34,9 +39,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.BibleS
       }
     }
 
-    const isArgsEmpty =
-      Object.keys(props.arguments).length === 0 || (props.arguments.ref === "" && props.arguments.version === "");
-    if (isArgsEmpty) {
+    if (props.arguments.ref === "" && props.arguments.version === "") {
       setSelectedTextAsQuery();
     }
   }, []);
@@ -49,11 +52,17 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.BibleS
 
   const detailContent = React.useMemo(() => {
     if (!searchResult?.passages.length) return null;
-    return {
-      markdown: createMarkdown(prefs, searchResult),
-      clipboardText: createClipboardText(prefs, searchResult),
+    const formattingOptions: FormattingOptions = {
+      includeCopyright,
+      includeVerseNumbers,
+      includeReferences,
+      oneVersePerLine,
     };
-  }, [prefs, searchResult]);
+    return {
+      markdown: createMarkdown(formattingOptions, searchResult),
+      clipboardText: createClipboardText(formattingOptions, searchResult),
+    };
+  }, [includeCopyright, includeVerseNumbers, includeReferences, oneVersePerLine, searchResult]);
 
   function getEmptyViewText() {
     if (isLoading) {
@@ -76,7 +85,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.BibleS
           tooltip="Select Bible Version"
           onChange={(version) => setQuery((old) => ({ ...old, version }))}
           value={query.version || undefined}
-          defaultValue={prefs.defaultBibleVersion}
+          defaultValue={defaultBibleVersion}
         >
           {bibleVersions.map(([name, abbreviation]) => (
             <List.Dropdown.Item title={name} value={abbreviation} key={abbreviation} />
@@ -142,16 +151,19 @@ function useBibleSearch(query: { search: string; version: string }) {
         }
       })
       .finally(() => {
-        if (!ignore) setIsLoading(false);
+        if (!ignore) {
+          setIsLoading(false);
+        }
       });
+
     return () => {
       ignore = true;
     };
-  }, [query]);
+  }, [query.search, query.version]);
   return { data, error, isLoading };
 }
 
-function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult) {
+function createMarkdown(prefs: FormattingOptions, searchResult: ReferenceSearchResult) {
   const { includeCopyright, includeReferences, includeVerseNumbers, oneVersePerLine } = prefs;
 
   const formattedPassages = searchResult.passages
@@ -173,7 +185,7 @@ function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult)
   return formattedPassages.trim();
 }
 
-function createClipboardText(prefs: Preferences, searchResult: ReferenceSearchResult) {
+function createClipboardText(prefs: FormattingOptions, searchResult: ReferenceSearchResult) {
   const { includeReferences, includeVerseNumbers, oneVersePerLine } = prefs;
 
   const formattedPassages = searchResult.passages
