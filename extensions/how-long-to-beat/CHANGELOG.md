@@ -1,5 +1,9 @@
 # Howlongtobeat Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix: Hash not found error when fetching games by search
+
 ## [Maintenance] - 2025-09-18
 
 - Add support for Windows platform.
