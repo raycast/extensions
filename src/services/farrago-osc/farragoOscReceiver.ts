@@ -4,29 +4,25 @@ import { DBSoundTile } from "@/types";
 import { Endpoint, TileAction } from "./types";
 import { getTileBaseAddress } from "./utils";
 
-export class FarragoOscReceiver extends OscReceiver {
-  subscribeToTileAction<T>(opts: { tile: DBSoundTile; action: TileAction; handler: (...values: T[]) => void }) {
-    const { tile, action, handler } = opts;
+type OscMessageHandler<T = any> = (...values: T[]) => void;
 
-    const _handler = this.addMessageHandler(makeStrictRegExp(`${getTileBaseAddress(tile)}/${action}`), (msg) => {
+export class FarragoOscReceiver extends OscReceiver {
+  private addTypedHandler<T>(pattern: Endpoint | RegExp, handler: OscMessageHandler<T>) {
+    const regexp = typeof pattern === "string" ? makeStrictRegExp(pattern) : pattern;
+    const _handler = this.addMessageHandler(regexp, (msg) => {
       const values = msg.args.map((arg) => arg.value) as T[];
       handler(...values);
     });
-
-    return () => {
-      this.removeMessageHandler(_handler);
-    };
+    return () => this.removeMessageHandler(_handler);
   }
 
-  subscribeToPing<T>(handler: (...values: T[]) => void) {
-    const _handler = this.addMessageHandler(/.*/, (msg) => {
-      const values = msg.args.map((arg) => arg.value) as T[];
-      handler(...values);
-    });
+  subscribeToTileAction<T>(opts: { tile: DBSoundTile; action: TileAction; handler: OscMessageHandler<T> }) {
+    const { tile, action, handler } = opts;
+    return this.addTypedHandler<T>(`${getTileBaseAddress(tile)}/${action}`, handler);
+  }
 
-    return () => {
-      this.removeMessageHandler(_handler);
-    };
+  subscribeToPing<T>(handler: OscMessageHandler<T>) {
+    return this.addTypedHandler<T>(/.*/, handler);
   }
 }
 
