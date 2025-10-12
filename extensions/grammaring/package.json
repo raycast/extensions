@@ -33,12 +33,43 @@
       "description": "Your OpenAI API key to use Grammaring.",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "model",
+      "title": "AI Model",
+      "description": "Choose which OpenAI model to use. Larger models are more capable but slower.",
+      "type": "dropdown",
+      "required": true,
+      "default": "gpt-4o-mini",
+      "data": [
+        {
+          "title": "GPT-4o Mini (Default)",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4.1 Mini",
+          "value": "gpt-4.1-mini"
+        },
+        {
+          "title": "GPT-4.1 Nano",
+          "value": "gpt-4.1-nano"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-5 Nano",
+          "value": "gpt-5-nano"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.98.4",
     "@raycast/utils": "^1.17.0",
-    "openai": "^4.98.0"
+    "ai": "^4.0.0",
+    "@ai-sdk/openai": "^1.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

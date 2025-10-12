@@ -1,6 +1,11 @@
 import { Clipboard, getSelectedText, getPreferenceValues, showHUD } from "@raycast/api";
 import { processText } from "./utils";
 
+interface Preferences {
+  apiKey: string;
+  model: string;
+}
+
 export default async function main() {
   try {
     const input = (await getSelectedText().catch(() => Clipboard.readText()))?.trim();
@@ -9,13 +14,13 @@ export default async function main() {
       return;
     }
 
-    const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+    const { apiKey, model } = getPreferenceValues<Preferences>();
     if (!apiKey) {
       await showHUD("❌ API key not found. Please set it in preferences.");
       return;
     }
 
-    const processedContent = await processText(input, apiKey);
+    const processedContent = await processText(input, apiKey, model);
     await Clipboard.paste(processedContent);
     await showHUD("✅ Text fixed");
   } catch (err) {
