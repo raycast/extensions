@@ -1,5 +1,11 @@
 # Bento Extension Changelog
 
+## [1.2.0] - {PR_MERGE_DATE}
+
+### Added
+
+- Support for Windows.
+
 ## [1.1.0] - 2025-04-11
 
 ### Added
