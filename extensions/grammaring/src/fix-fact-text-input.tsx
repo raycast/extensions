@@ -12,11 +12,6 @@ interface CommandLaunchArguments {
   draftText?: string;
 }
 
-interface Preferences {
-  apiKey: string;
-  model: string;
-}
-
 export default function Command(props: LaunchProps<{ arguments: CommandLaunchArguments }>) {
   const [textToProcessError, setTextToProcessError] = useState<string | undefined>();
   const [processedTextOutput, setProcessedTextOutput] = useState<string | undefined>();

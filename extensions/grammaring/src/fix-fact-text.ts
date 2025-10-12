@@ -1,11 +1,6 @@
 import { Clipboard, getSelectedText, getPreferenceValues, showHUD } from "@raycast/api";
 import { processText } from "./utils";
 
-interface Preferences {
-  apiKey: string;
-  model: string;
-}
-
 export default async function main() {
   try {
     const input = (await getSelectedText().catch(() => Clipboard.readText()))?.trim();
