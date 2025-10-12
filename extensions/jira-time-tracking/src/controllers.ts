@@ -23,7 +23,7 @@ function getApiPath(path: string): string {
     if (path.includes("/project/search")) {
       path = path.replace("/rest/api/3/project/search", "/rest/api/2/project");
     } else if (path.includes("/search")) {
-      path = path.replace("/rest/api/3/search", "/rest/api/2/search");
+      path = path.replace("/rest/api/3/search/jql", "/rest/api/2/search/jql");
     } else {
       path = path.replace("/rest/api/3", `/rest/api/${version}`);
     }
@@ -58,7 +58,7 @@ export const getIssues = async (begin: number, projectId?: string) => {
 
   // Construct JQL query dynamically
   const jql = jqlParts.length > 0 ? `&jql=${jqlParts.join(" AND ")}` : "";
-  const basePath = `/rest/api/3/search?fields=summary,parent,project&maxResults=500&startAt=${begin}${jql}`;
+  const basePath = `/rest/api/3/search/jql?fields=summary,parent,project&maxResults=500&startAt=${begin}${jql}`;
   const apiPath = getApiPath(basePath);
 
   console.log(`Fetching issues from: ${apiPath}`); // Debugging log

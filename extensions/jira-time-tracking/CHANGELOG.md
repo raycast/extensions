@@ -1,5 +1,9 @@
 # Changelog
 
+## [Migration to Jira /jql API] - {PR_MERGE_DATE}
+
+- Migrated the search endpoint used to `/jql`.
+
 ## [Custom JQL and Default Project Preference] - 2024-12-05
 
 - Removed Only My Issues preference.
