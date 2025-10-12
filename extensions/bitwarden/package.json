@@ -292,7 +292,7 @@
       "type": "textfield",
       "required": false,
       "title": "Bitwarden CLI Path",
-      "description": "If you wish to use your own CLI, type here the location of your local installation. For macOS, the typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs. For Windows, using Chocolatey, it's typically 'C:\\ProgramData\\chocolatey\\bin\\bw.exe'. Try executing 'where bw' (or 'where.exe bw' for Windows) in your terminal to find the path.",
+      "description": "If you would like to use your own CLI, please enter the path to your local installation here. For macOS, the typical installation locations are '/usr/local/bin/bw' for Intel-based Macs and '/opt/homebrew/bin/bw' for M1/Apple Silicon Macs. On Windows, if you installed via Chocolatey, the usual path is 'C:\\ProgramData\\chocolatey\bin\\bw.exe'. You can find the path by executing 'where bw' (or 'where.exe bw' for Windows) in your terminal.",
       "placeholder": "CLI Path"
     },
     {
