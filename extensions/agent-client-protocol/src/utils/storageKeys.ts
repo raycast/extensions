@@ -118,12 +118,14 @@ export const STORAGE_VERSION_KEY = "acp.storageVersion";
  * Get the default value for a storage key
  */
 export function getDefaultValue(key: StorageKey): string {
-  return DEFAULT_VALUES[key] || "null";
+  const value = DEFAULT_VALUES[key as keyof typeof DEFAULT_VALUES];
+  return value !== undefined ? value : "null";
 }
 
 /**
  * Check if a storage key belongs to a specific category
  */
 export function isKeyInCategory(key: StorageKey, category: keyof typeof STORAGE_CATEGORIES): boolean {
-  return STORAGE_CATEGORIES[category].includes(key);
+  const categoryKeys = STORAGE_CATEGORIES[category] as readonly string[];
+  return categoryKeys.some(k => k === key);
 }

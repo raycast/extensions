@@ -192,8 +192,8 @@ export class AgentService implements AgentServiceInterface {
       }
 
       // Remove stale connections from cache
-      for (const [id, connection] of this.activeConnections.entries()) {
-        if (!clientConnections.find(c => c.id === id)) {
+      for (const [id] of this.activeConnections.entries()) {
+        if (!clientConnections.find((c: AgentConnection) => c.id === id)) {
           this.activeConnections.delete(id);
         }
       }
@@ -382,7 +382,7 @@ export class AgentService implements AgentServiceInterface {
    */
   public stopHealthMonitoring(): void {
     if (this.healthCheckInterval) {
-      clearInterval(this.healthCheckInterval);
+      clearInterval(this.healthCheckInterval as unknown as NodeJS.Timeout);
       this.healthCheckInterval = null;
       logger.info('Health monitoring stopped');
     }

@@ -190,7 +190,7 @@ export class Logger {
     try {
       // Get existing logs
       const stored = await LocalStorage.getItem(STORAGE_KEYS.DEBUG_LOG);
-      const logs = stored ? JSON.parse(stored) : [];
+      const logs = stored && typeof stored === 'string' ? JSON.parse(stored) : [];
 
       // Add new log
       logs.unshift({

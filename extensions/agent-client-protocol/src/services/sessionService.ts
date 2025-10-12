@@ -127,23 +127,10 @@ export class SessionService implements SessionServiceInterface {
           cwd: request.context?.workingDirectory ?? process.cwd()
         });
 
-        const promptResponse = await this.acpClient.sendPrompt(acpSession.sessionId, request.prompt);
+        await this.acpClient.sendPrompt(acpSession.sessionId, request.prompt);
 
-        if (promptResponse.messages && promptResponse.messages.length > 0) {
-          const agentMessages = promptResponse.messages
-            .filter(message => message.type !== 'user')
-            .map((message, index) =>
-              this.transformAcpMessage(
-                message,
-                session.messages.length + index + 1
-              )
-            );
-
-          if (agentMessages.length > 0) {
-            session.messages.push(...agentMessages);
-            session.lastActivity = new Date();
-          }
-        }
+        // Note: Agent responses come via sessionUpdate callbacks, not in the prompt response
+        // The prompt response just indicates the request was accepted
 
         session.agentSessionId = acpSession.sessionId;
         session.context = {
@@ -401,70 +388,16 @@ export class SessionService implements SessionServiceInterface {
         logger.debug('Prompt response received', {
           sessionId,
           stopReason: promptResponse.stopReason,
-          messageCount: promptResponse.messages?.length,
           fullPromptResponse: JSON.stringify(promptResponse, null, 2)
         });
 
-        const responseMessages = promptResponse.messages ?? [];
-        logger.debug('Analyzing prompt response messages', {
+        // Note: Agent responses come via sessionUpdate callbacks, not in the prompt response
+        // We'll receive updates through the streaming mechanism
+        agentMessages = [];
+
+        logger.info('Prompt sent successfully, waiting for streaming updates', {
           sessionId,
-          totalMessages: responseMessages.length,
-          messageTypes: responseMessages.map(msg => msg.type),
-          messages: responseMessages.map(msg => ({
-            id: msg.id,
-            type: msg.type,
-            contentLength: msg.content?.length || 0,
-            contentPreview: JSON.stringify(msg.content?.slice(0, 2), null, 2),
-            fullMessage: JSON.stringify(msg, null, 2)
-          }))
-        });
-
-        agentMessages = responseMessages
-          .filter(message => message.type !== 'user')
-          .map((message, index) => {
-            const transformed = this.transformAcpMessage(
-              message,
-              session.messages.length + index
-            );
-            logger.debug('Prompt response message transformed', {
-              sessionId,
-              messageId: transformed.id,
-              role: transformed.role,
-              contentLength: transformed.content.length,
-              snippet: transformed.content.slice(0, 120),
-              fullContent: transformed.content
-            });
-            return transformed;
-          });
-
-        if (agentMessages.length === 0) {
-          logger.warn('No agent messages in prompt response, creating placeholder', {
-            sessionId,
-            promptResponseMessages: promptResponse.messages?.length || 0,
-            stopReason: promptResponse.stopReason
-          });
-
-          agentMessages = [
-            {
-              id: uuidv4(),
-              role: 'assistant',
-              content: '',
-              timestamp: new Date(),
-              metadata: {
-                source: 'agent',
-                messageType: 'text',
-                sequence: session.messages.length,
-                agentId: agentConfig.id,
-                processingTime: promptResponse.messages?.[0]?.metadata?.processingTime
-              }
-            }
-          ];
-        }
-
-        logger.info('Agent response received', {
-          sessionId,
-          responseCount: agentMessages.length,
-          processingTime: agentMessages.at(-1)?.metadata.processingTime
+          stopReason: promptResponse.stopReason
         });
 
       } catch (error) {
@@ -499,21 +432,12 @@ export class SessionService implements SessionServiceInterface {
           const retryPrompt = this.buildPromptWithHistory(historyBeforeNewMessage, content);
           promptResponse = await this.acpClient.sendPrompt(agentSessionId, retryPrompt);
 
-          const responseMessages = promptResponse.messages ?? [];
-          agentMessages = responseMessages
-            .filter(message => message.type !== 'user')
-            .map((message, index) =>
-              this.transformAcpMessage(
-                message,
-                session.messages.length + index
-              )
-            );
-
+          // Responses come via sessionUpdate callbacks
+          agentMessages = [];
           retriedWithNewSession = true;
 
-        logger.info('Agent response received after session renewal', {
-          sessionId,
-          responseCount: agentMessages.length
+        logger.info('Prompt sent after session renewal, waiting for updates', {
+          sessionId
         });
 
         } else {
@@ -747,8 +671,10 @@ export class SessionService implements SessionServiceInterface {
           }
           break;
         case 'code':
-          parts.push(content.code);
-          messageType = messageType === 'text' ? 'code' : messageType;
+          if ('code' in content && typeof content.code === 'string') {
+            parts.push(content.code);
+            messageType = messageType === 'text' ? 'code' : messageType;
+          }
           break;
         case 'file': {
           const label = content.filename ?? (typeof (content as any).path === 'string' ? (content as any).path : 'File');
@@ -758,7 +684,9 @@ export class SessionService implements SessionServiceInterface {
           break;
         }
         case 'error':
-          parts.push(`Error: ${content.error}`);
+          if ('error' in content && typeof content.error === 'string') {
+            parts.push(`Error: ${content.error}`);
+          }
           break;
         default: {
           const fallback = this.stringifyUnknownContent(content as Record<string, unknown>);
@@ -827,7 +755,7 @@ export class SessionService implements SessionServiceInterface {
           break;
         default:
           logger.debug('Unknown tool call content type', {
-            type: item.type,
+            type: (item as any).type,
             item: JSON.stringify(item, null, 2)
           });
           break;
@@ -948,7 +876,7 @@ export class SessionService implements SessionServiceInterface {
     }
   }
 
-  private stringifyRawOutput(raw?: Record<string, unknown> | null): string | null {
+  private stringifyRawOutput(raw?: Record<string, unknown> | string | number | boolean | null): string | null {
     if (raw === undefined || raw === null) {
       return null;
     }

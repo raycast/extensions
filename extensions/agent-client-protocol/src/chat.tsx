@@ -112,7 +112,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     async function loadInitialConversation() {
       try {
         await storageService.initialize();
-        const existing = await storageService.getConversation(initialSessionId);
+        const existing = initialSessionId ? await storageService.getConversation(initialSessionId) : null;
 
         if (!existing) {
           await showToast({
@@ -144,7 +144,9 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
         }
 
         setSelectedAgentId(agent.id);
-        await chat.loadConversation(initialSessionId, agent);
+        if (initialSessionId) {
+          await chat.loadConversation(initialSessionId, agent);
+        }
       } catch (error) {
         await ErrorHandler.handleError(error, "Loading conversation");
       } finally {

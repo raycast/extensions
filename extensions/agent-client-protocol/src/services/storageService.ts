@@ -17,6 +17,10 @@ import { ErrorCode, type ExtensionError } from "@/types/extension";
 export class StorageService {
   private initialized = false;
 
+  constructor() {
+    // No initialization needed
+  }
+
   /**
    * Initialize storage service and handle migrations
    */
@@ -91,7 +95,7 @@ export class StorageService {
 
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.CONVERSATIONS);
-      const conversationsJson = stored || getDefaultValue(STORAGE_KEYS.CONVERSATIONS);
+      const conversationsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.CONVERSATIONS);
 
       const conversations = (JSON.parse(conversationsJson, this.dateReviver) as ConversationSession[])
         .map(session => this.normalizeConversation(session));
@@ -223,7 +227,7 @@ export class StorageService {
 
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.PROJECT_CONTEXTS);
-      const contextsJson = stored || getDefaultValue(STORAGE_KEYS.PROJECT_CONTEXTS);
+      const contextsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.PROJECT_CONTEXTS);
 
       const contexts = JSON.parse(contextsJson, this.dateReviver) as ProjectContext[];
 

@@ -29,9 +29,9 @@ interface UseChatSessionResult extends ChatSessionState {
 const logger = createLogger("useChatSession");
 
 export function useChatSession(): UseChatSessionResult {
-  const acpClientRef = useRef<ACPClient>();
-  const storageServiceRef = useRef<StorageService>();
-  const sessionServiceRef = useRef<SessionService>();
+  const acpClientRef = useRef<ACPClient | undefined>(undefined);
+  const storageServiceRef = useRef<StorageService | undefined>(undefined);
+  const sessionServiceRef = useRef<SessionService | undefined>(undefined);
 
   if (!acpClientRef.current) {
     acpClientRef.current = new ACPClient();

@@ -133,9 +133,9 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             endpoint: values.type === "remote" ? values.endpoint?.trim() : undefined,
             environmentVariables: environmentVariables ?? undefined,
             appendToPath,
-            isBuiltIn: existingConfig?.isBuiltIn ?? false,
-            createdAt: existingConfig?.createdAt ?? new Date(),
-            lastUsed: existingConfig?.lastUsed,
+            isBuiltIn: false,
+            createdAt: new Date(),
+            lastUsed: undefined,
           };
 
       const validation = validateAgentConfig(config);

@@ -41,10 +41,10 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
 - [X] T008 Create ACP protocol types in src/types/acp.ts based on contracts/acp-client.ts
-- [ ] T009 [P] Create extension types in src/types/extension.ts based on contracts/raycast-api.ts
-- [ ] T010 [P] Create data model types in src/types/entities.ts from data-model.md
+- [X] T009 [P] Create extension types in src/types/extension.ts based on contracts/raycast-api.ts
+- [X] T010 [P] Create data model types in src/types/entities.ts from data-model.md
 - [X] T011 [P] Create storage keys constants in src/utils/storageKeys.ts
-- [ ] T012 Implement base ACP client service in src/services/acpClient.ts
+- [X] T012 Implement base ACP client service in src/services/acpClient.ts
 - [X] T013 [P] Implement configuration service using Raycast LocalStorage in src/services/configService.ts
 - [X] T014 [P] Implement storage service using Raycast LocalStorage in src/services/storageService.ts
 - [X] T015 Create error handling utilities in src/utils/errors.ts

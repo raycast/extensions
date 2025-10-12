@@ -19,12 +19,13 @@ import type {
   PaginatedMessages
 } from "./entities";
 
-// Re-export entity types
+// Re-export entity types with proper aliases
+export type AgentConnection = BaseAgentConnection;
+export type ConversationSession = BaseConversationSession;
+export type SessionMessage = BaseSessionMessage;
+export type MessageRole = BaseMessageRole;
+
 export type {
-  BaseAgentConnection as AgentConnection,
-  BaseConversationSession as ConversationSession,
-  BaseSessionMessage as SessionMessage,
-  BaseMessageRole as MessageRole,
   SessionRequest,
   MessageRequest,
   ConnectionHealth,

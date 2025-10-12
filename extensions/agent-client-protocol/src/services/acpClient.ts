@@ -8,19 +8,9 @@
 import { spawn, ChildProcess } from "child_process";
 import { Writable, Readable } from "stream";
 import * as acp from "@zed-industries/agent-client-protocol";
+import type { Stream } from "@zed-industries/agent-client-protocol";
 import type {
-  ACPRequest,
-  ACPResponse,
-  ACPNotification,
-  InitializeRequest,
-  InitializeResponse,
-  NewSessionRequest,
-  NewSessionResponse,
-  PromptRequest,
-  PromptResponse,
-  SessionUpdateNotification,
-  ClientCapabilities,
-  AgentCapabilities
+  SessionUpdateNotification
 } from "@/types/acp";
 import type { AgentConfig, AgentConnection, ExtensionError } from "@/types/extension";
 import { ErrorCode } from "@/types/extension";
@@ -37,6 +27,10 @@ export class ACPClient implements acp.Client {
   private isConnected = false;
   private lastError: ExtensionError | null = null;
   private updateListeners = new Set<(update: SessionUpdateNotification) => void>();
+
+  constructor() {
+    // No initialization needed
+  }
 
   /**
    * Connect to an ACP agent using the provided configuration
@@ -55,7 +49,7 @@ export class ACPClient implements acp.Client {
     this.connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     try {
-      let stream: acp.Transport;
+      let stream: Stream;
 
       if (config.type === 'subprocess') {
         stream = await this.createSubprocessConnection(config);
@@ -81,9 +75,11 @@ export class ACPClient implements acp.Client {
         sessionCount: 0,
         metadata: {
           endpoint: config.endpoint,
-          capabilities: Object.entries(initResult.agentCapabilities)
-            .filter(([, value]) => value)
-            .map(([key]) => key)
+          capabilities: initResult.agentCapabilities
+            ? Object.entries(initResult.agentCapabilities)
+                .filter(([, value]) => value)
+                .map(([key]) => key)
+            : []
         }
       };
 
@@ -145,15 +141,14 @@ export class ACPClient implements acp.Client {
    */
   async createSession(options?: {
     cwd?: string;
-    mcpServers?: acp.MCPServer[];
+    mcpServers?: acp.McpServer[];
     mode?: string;
-  }): Promise<NewSessionResponse> {
+  }): Promise<acp.NewSessionResponse> {
     this.ensureConnected();
 
-    const request: NewSessionRequest = {
+    const request: acp.NewSessionRequest = {
       cwd: options?.cwd ?? process.cwd(),
-      mcpServers: options?.mcpServers ?? [],
-      mode: options?.mode
+      mcpServers: options?.mcpServers ?? []
     };
 
     try {
@@ -171,16 +166,15 @@ export class ACPClient implements acp.Client {
   /**
    * Send a prompt to the agent
    */
-  async sendPrompt(sessionId: string, text: string): Promise<PromptResponse> {
+  async sendPrompt(sessionId: string, text: string): Promise<acp.PromptResponse> {
     this.ensureConnected();
 
-    const request: PromptRequest = {
+    const request: acp.PromptRequest = {
       sessionId,
       prompt: [
         {
           type: "text",
-          text,
-          annotations: null
+          text
         }
       ]
     };
@@ -426,12 +420,12 @@ export class ACPClient implements acp.Client {
   /**
    * Private: Initialize connection with agent
    */
-  private async initialize(): Promise<InitializeResponse> {
+  private async initialize(): Promise<acp.InitializeResponse> {
     if (!this.connection) {
       throw this.createError(ErrorCode.SystemError, "No connection available");
     }
 
-    const clientCapabilities: ClientCapabilities = {
+    const clientCapabilities: acp.ClientCapabilities = {
       fs: {
         readTextFile: true,
         writeTextFile: true
@@ -439,7 +433,7 @@ export class ACPClient implements acp.Client {
       terminal: false
     };
 
-    const request: InitializeRequest = {
+    const request: acp.InitializeRequest = {
       protocolVersion: acp.PROTOCOL_VERSION,
       clientCapabilities
     };
@@ -449,7 +443,7 @@ export class ACPClient implements acp.Client {
       return response;
     } catch (error) {
       throw this.createError(
-        ErrorCode.ProtocolVersionMismatch,
+        ErrorCode.SystemError,
         `Agent initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         { request, originalError: error }
       );
@@ -459,7 +453,7 @@ export class ACPClient implements acp.Client {
   /**
    * Private: Create subprocess connection for local agents
    */
-  private async createSubprocessConnection(config: AgentConfig): Promise<acp.Transport> {
+  private async createSubprocessConnection(config: AgentConfig): Promise<Stream> {
     if (!config.command) {
       throw this.createError(ErrorCode.InvalidConfiguration, "Subprocess agent requires command");
     }
@@ -532,7 +526,7 @@ export class ACPClient implements acp.Client {
   /**
    * Private: Create remote connection for network agents
    */
-  private async createRemoteConnection(config: AgentConfig): Promise<acp.Transport> {
+  private async createRemoteConnection(config: AgentConfig): Promise<Stream> {
     // TODO: Implement WebSocket or HTTP connection for remote agents
     throw this.createError(ErrorCode.SystemError, "Remote agent connections not implemented yet");
   }
@@ -565,5 +559,52 @@ export class ACPClient implements acp.Client {
 
   unregisterSessionUpdateListener(listener: (update: SessionUpdateNotification) => void): void {
     this.updateListeners.delete(listener);
+  }
+
+  /**
+   * Get a specific connection by ID
+   */
+  async getConnection(connectionId: string): Promise<AgentConnection | null> {
+    if (this.connectionId === connectionId && this.isConnected && this.config) {
+      return {
+        id: this.connectionId,
+        agentId: this.config.id,
+        status: this.getConnectionStatus(),
+        connectedAt: new Date(), // We don't track this, using current time as fallback
+        lastActivity: new Date(),
+        sessionCount: 0,
+        metadata: {
+          endpoint: this.config.endpoint
+        }
+      };
+    }
+    return null;
+  }
+
+  /**
+   * Get all active connections
+   */
+  async getActiveConnections(): Promise<AgentConnection[]> {
+    const connection = await this.getConnection(this.connectionId || '');
+    return connection ? [connection] : [];
+  }
+
+  /**
+   * Check if a connection is healthy
+   */
+  async checkConnection(connectionId: string): Promise<boolean> {
+    if (this.connectionId !== connectionId) {
+      return false;
+    }
+    return this.isAgentConnected();
+  }
+
+  /**
+   * End a session
+   */
+  async endSession(sessionId: string): Promise<void> {
+    // For now, we don't have explicit session management on the ACP side
+    // This is a no-op that allows the session service to work
+    logger.debug('endSession called', { sessionId });
   }
 }

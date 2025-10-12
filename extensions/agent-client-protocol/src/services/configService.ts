@@ -24,7 +24,7 @@ export class ConfigService implements ConfigurationService {
   async getAgentConfigs(): Promise<AgentConfig[]> {
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.AGENT_CONFIGS);
-      const configsJson = stored || getDefaultValue(STORAGE_KEYS.AGENT_CONFIGS);
+      const configsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.AGENT_CONFIGS);
 
       const parsed = JSON.parse(configsJson) as AgentConfig[];
       const storedConfigs = parsed.map((config) => this.normalizeAgentConfig(config));
@@ -155,7 +155,7 @@ export class ConfigService implements ConfigurationService {
   async getDefaultAgent(): Promise<string | null> {
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.DEFAULT_AGENT);
-      return stored ? JSON.parse(stored) : null;
+      return stored && typeof stored === 'string' ? JSON.parse(stored) : null;
     } catch (error) {
       console.error('Failed to get default agent:', error);
       return null;
@@ -190,7 +190,7 @@ export class ConfigService implements ConfigurationService {
   async getPreferences(): Promise<UserPreferences> {
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.PREFERENCES);
-      const prefsJson = stored || getDefaultValue(STORAGE_KEYS.PREFERENCES);
+      const prefsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.PREFERENCES);
       return JSON.parse(prefsJson) as UserPreferences;
     } catch (error) {
       throw this.createError(
@@ -222,7 +222,7 @@ export class ConfigService implements ConfigurationService {
   async getSecuritySettings(): Promise<SecuritySettings> {
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.SECURITY_SETTINGS);
-      const settingsJson = stored || getDefaultValue(STORAGE_KEYS.SECURITY_SETTINGS);
+      const settingsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.SECURITY_SETTINGS);
       return JSON.parse(settingsJson) as SecuritySettings;
     } catch (error) {
       throw this.createError(
