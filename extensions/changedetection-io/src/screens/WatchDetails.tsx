@@ -1,6 +1,6 @@
 import { Detail, Icon } from "@raycast/api";
-import { useApi } from "../api";
-import { WatchDetails as WatchDetailsType } from "../types";
+import { useApi } from "@/api";
+import { WatchDetails as WatchDetailsType } from "@/types";
 
 const WatchDetails = ({ id }: { id: string }) => {
   const { isLoading, data } = useApi<WatchDetailsType>(`watch/${id}`);

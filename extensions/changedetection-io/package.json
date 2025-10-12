@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "changedetection-io",
-  "title": "changedetection.io",
+  "title": "Changedetection.io",
   "description": "Website Change Detection For Clever People",
   "icon": "changedetection.png",
   "author": "xmok",
@@ -33,7 +33,50 @@
       "name": "list-watches",
       "title": "List Watches",
       "description": "List Watches and go to Preview, Edit, History",
-      "mode": "view"
+      "mode": "view",
+      "required": false,
+      "preferences": [
+        {
+          "name": "sort_by",
+          "title": "Sort By",
+          "type": "dropdown",
+          "required": false,
+          "description": "Sort watches by",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Last Checked",
+              "value": "last_checked"
+            },
+            {
+              "title": "Last Changed",
+              "value": "last_changed"
+            }
+          ],
+          "default": "none"
+        },
+        {
+          "name": "sort_order",
+          "title": "Sort Order",
+          "type": "dropdown",
+          "required": false,
+          "description": "Sort order",
+          "data": [
+            {
+              "title": "Ascending (Oldest First)",
+              "value": "asc"
+            },
+            {
+              "title": "Descending (Newest First)",
+              "value": "desc"
+            }
+          ],
+          "default": "asc"
+        }
+      ]
     }
   ],
   "dependencies": {

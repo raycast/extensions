@@ -11,6 +11,11 @@ export type WatchWithID = Watch & {
   id: string;
 };
 
+export type UseWatchesResult = {
+  unseen: WatchWithID[];
+  seen: WatchWithID[];
+};
+
 export type WatchDetails = Watch & {
   check_count: number;
   date_created: number;
@@ -39,3 +44,6 @@ type ApiResponse<T> = {
 
 export type WatchesResponse = ApiResponse<Watch>;
 export type TagsResponse = ApiResponse<Tag>;
+
+export type SortBy = "none" | "last_checked" | "last_changed";
+export type SortOrder = "asc" | "desc";

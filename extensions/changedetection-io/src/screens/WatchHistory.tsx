@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useApi, instance_url } from "../api";
+import { useApi, instance_url } from "@/api";
 
 const WatchHistory = ({ id }: { id: string }) => {
   interface WatchHistory {

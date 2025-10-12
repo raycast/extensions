@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { TagsResponse, WatchesResponse, WatchWithID } from "../types";
+import { SortBy, SortOrder, TagsResponse, UseWatchesResult, WatchesResponse, WatchWithID } from "../types";
 
 export const { instance_url, api_key } = getPreferenceValues<Preferences>();
 
@@ -31,9 +31,37 @@ export const useTags = () => {
   return { data: tags, ...rest };
 };
 
-export const useWatches = () => {
+export const useWatches = ({ sortBy, sortOrder }: { sortBy: SortBy; sortOrder: SortOrder }) => {
   const { data: watchesResponse, ...rest } = useApi<WatchesResponse>("watch");
-  const watches = Object.entries(watchesResponse ?? {}).map(([id, watch]) => ({ ...watch, id })) as WatchWithID[];
+  const watches: UseWatchesResult = Object.entries(watchesResponse ?? {})
+    .map(([id, watch]) => ({ ...watch, id }) as WatchWithID)
+    .reduce(
+      (acc: UseWatchesResult, watch) => {
+        if (watch.viewed) {
+          acc.seen.push(watch);
+        } else {
+          acc.unseen.push(watch);
+        }
+        return acc;
+      },
+      { unseen: [], seen: [] },
+    );
+
+  if (sortBy === "last_checked") {
+    watches.unseen.sort((a, b) =>
+      sortOrder === "asc" ? a.last_checked - b.last_checked : b.last_checked - a.last_checked,
+    );
+    watches.seen.sort((a, b) =>
+      sortOrder === "asc" ? a.last_checked - b.last_checked : b.last_checked - a.last_checked,
+    );
+  } else if (sortBy === "last_changed") {
+    watches.unseen.sort((a, b) =>
+      sortOrder === "asc" ? a.last_changed - b.last_changed : b.last_changed - a.last_changed,
+    );
+    watches.seen.sort((a, b) =>
+      sortOrder === "asc" ? a.last_changed - b.last_changed : b.last_changed - a.last_changed,
+    );
+  }
   return { data: watches, ...rest };
 };
 
