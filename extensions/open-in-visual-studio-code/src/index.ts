@@ -7,55 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { runPowerShellScript, runAppleScript } from "@raycast/utils";
-import { isMac } from "./utils";
-
-const getSelectedFinderWindow = (): Promise<string> => {
-  const appleScript = `
-  if application "Finder" is running and frontmost of application "Finder" then
-    tell app "Finder"
-      set finderWindow to window 1
-      set finderWindowPath to (POSIX path of (target of finderWindow as alias))
-      return finderWindowPath
-    end tell
-  else 
-    error "Could not get the selected Finder window"
-  end if
- `;
-  return runAppleScript(appleScript)
-    .then((result) => result.trim())
-    .catch(() => {
-      throw new Error("Could not get the selected Finder window");
-    });
-};
-
-const getActiveExplorerWindow = async (): Promise<string> => {
-  const script = `
-    $shell = New-Object -ComObject Shell.Application
-    $windows = $shell.Windows()
-    
-    foreach ($window in $windows) {
-      if ($window.Name -eq "File Explorer") {
-        $path = $window.Document.Folder.Self.Path
-        if ($path) {
-          Write-Output $path
-          exit 0
-        }
-      }
-    }
-    exit 1
-  `;
-
-  try {
-    const result = await runPowerShellScript(script);
-    if (!result.trim()) {
-      throw new Error("Could not get the active File Explorer window");
-    }
-    return result.trim();
-  } catch {
-    throw new Error("Could not get the active File Explorer window");
-  }
-};
+import { getActiveExplorerWindow, getSelectedFinderWindow, isMac } from "./utils";
 
 const getActiveFileManagerWindow = (): Promise<string> => {
   return isMac ? getSelectedFinderWindow() : getActiveExplorerWindow();
@@ -101,6 +53,7 @@ export default async () => {
 
   try {
     const selectedFinderItems = await getSelectedFinderItems();
+
     if (selectedFinderItems.length) {
       for (const finderItem of selectedFinderItems) {
         await open(finderItem.path, vscodeApplication);
