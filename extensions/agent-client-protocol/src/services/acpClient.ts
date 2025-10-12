@@ -201,7 +201,12 @@ export class ACPClient implements acp.Client {
    * Handle session updates from the agent (streaming responses)
    */
   async sessionUpdate(params: acp.SessionNotification): Promise<void> {
-    logger.debug('Session update received', { updateType: params.update?.sessionUpdate });
+    logger.debug('ACP session update received from agent', {
+      sessionId: params.sessionId,
+      updateType: params.update?.sessionUpdate,
+      fullUpdate: JSON.stringify(params, null, 2)
+    });
+
     for (const listener of this.updateListeners) {
       try {
         listener(params as SessionUpdateNotification);

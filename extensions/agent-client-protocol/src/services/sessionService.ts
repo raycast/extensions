@@ -52,6 +52,7 @@ export class SessionService implements SessionServiceInterface {
   }
 
   private sessionObservers: Map<string, (message: SessionMessage) => void> = new Map();
+  private pendingUpdates: Map<string, SessionUpdateNotification[]> = new Map();
 
   onSessionMessage(sessionId: string, handler: (message: SessionMessage) => void): void {
     this.sessionObservers.set(sessionId, handler);
@@ -157,6 +158,9 @@ export class SessionService implements SessionServiceInterface {
           sessionId,
           messageCount: session.messages.length
         });
+
+        // Process any buffered updates that arrived before the session was saved
+        await this.processPendingUpdates(acpSession.sessionId, sessionId);
 
       } catch (error) {
         logger.error('Failed to create ACP session', {
@@ -395,10 +399,24 @@ export class SessionService implements SessionServiceInterface {
         logger.debug('Prompt response received', {
           sessionId,
           stopReason: promptResponse.stopReason,
-          messageCount: promptResponse.messages?.length
+          messageCount: promptResponse.messages?.length,
+          fullPromptResponse: JSON.stringify(promptResponse, null, 2)
         });
 
         const responseMessages = promptResponse.messages ?? [];
+        logger.debug('Analyzing prompt response messages', {
+          sessionId,
+          totalMessages: responseMessages.length,
+          messageTypes: responseMessages.map(msg => msg.type),
+          messages: responseMessages.map(msg => ({
+            id: msg.id,
+            type: msg.type,
+            contentLength: msg.content?.length || 0,
+            contentPreview: JSON.stringify(msg.content?.slice(0, 2), null, 2),
+            fullMessage: JSON.stringify(msg, null, 2)
+          }))
+        });
+
         agentMessages = responseMessages
           .filter(message => message.type !== 'user')
           .map((message, index) => {
@@ -410,12 +428,20 @@ export class SessionService implements SessionServiceInterface {
               sessionId,
               messageId: transformed.id,
               role: transformed.role,
-              snippet: transformed.content.slice(0, 120)
+              contentLength: transformed.content.length,
+              snippet: transformed.content.slice(0, 120),
+              fullContent: transformed.content
             });
             return transformed;
           });
 
         if (agentMessages.length === 0) {
+          logger.warn('No agent messages in prompt response, creating placeholder', {
+            sessionId,
+            promptResponseMessages: promptResponse.messages?.length || 0,
+            stopReason: promptResponse.stopReason
+          });
+
           agentMessages = [
             {
               id: uuidv4(),
@@ -749,32 +775,78 @@ export class SessionService implements SessionServiceInterface {
   }
 
   private flattenToolCallContent(contents?: ToolCallContent[] | null): string {
+    logger.debug('flattenToolCallContent called', {
+      contentsNull: contents === null,
+      contentsUndefined: contents === undefined,
+      contentsLength: contents?.length || 0,
+      contents: JSON.stringify(contents, null, 2)
+    });
+
     if (!contents || contents.length === 0) {
+      logger.debug('flattenToolCallContent returning empty - no contents');
       return '';
     }
 
     const parts: string[] = [];
 
     for (const item of contents) {
+      logger.debug('Processing tool call content item', {
+        itemType: item.type,
+        item: JSON.stringify(item, null, 2)
+      });
+
       switch (item.type) {
         case 'content':
-          parts.push(this.renderContentBlock(item.content));
+          const renderedContent = this.renderContentBlock(item.content);
+          logger.debug('Rendered content block', {
+            contentType: item.content.type,
+            renderedLength: renderedContent.length,
+            rendered: renderedContent
+          });
+          parts.push(renderedContent);
           break;
         case 'diff':
-          parts.push(`Diff (${item.path}):\n${item.newText}`);
+          const diffContent = `Diff (${item.path}):\n${item.newText}`;
+          logger.debug('Rendered diff content', {
+            path: item.path,
+            newTextLength: item.newText?.length || 0,
+            diffContentLength: diffContent.length,
+            diffContent
+          });
+          parts.push(diffContent);
           break;
         case 'terminal':
-          parts.push(`Terminal output available (id: ${item.terminalId})`);
+          const terminalContent = `Terminal output available (id: ${item.terminalId})`;
+          logger.debug('Rendered terminal content', {
+            terminalId: item.terminalId,
+            terminalContent
+          });
+          parts.push(terminalContent);
           break;
         default:
+          logger.debug('Unknown tool call content type', {
+            type: item.type,
+            item: JSON.stringify(item, null, 2)
+          });
           break;
       }
     }
 
-    return parts.join('\n\n').trim();
+    const result = parts.join('\n\n').trim();
+    logger.debug('flattenToolCallContent result', {
+      partsCount: parts.length,
+      resultLength: result.length,
+      result
+    });
+
+    return result;
   }
 
   private renderContentBlock(block: ContentBlock): string {
+    if (!block || typeof block !== 'object') {
+      return '';
+    }
+
     switch (block.type) {
       case 'text':
         return typeof block.text === 'string' ? block.text : '';
@@ -795,12 +867,31 @@ export class SessionService implements SessionServiceInterface {
           return '[Resource]';
         }
       }
-      default:
-        try {
-          return JSON.stringify(block);
-        } catch {
-          return `${block.type} content`;
+      default: {
+        // Try to extract meaningful content from unknown block types
+        const blockRecord = block as Record<string, unknown>;
+
+        // Common content fields to check
+        const contentFields = ['text', 'content', 'output', 'result', 'message', 'data'];
+        for (const field of contentFields) {
+          if (field in blockRecord && typeof blockRecord[field] === 'string' && blockRecord[field]) {
+            return blockRecord[field] as string;
+          }
         }
+
+        // If it has a meaningful structure, show it
+        try {
+          const jsonStr = JSON.stringify(block, null, 2);
+          // Don't show empty objects or just type fields
+          if (jsonStr !== '{}' && !jsonStr.match(/^\s*\{\s*"type"\s*:\s*"[^"]*"\s*\}\s*$/)) {
+            return jsonStr;
+          }
+        } catch {
+          // ignore
+        }
+
+        return `[${block.type || 'Unknown'} content]`;
+      }
     }
   }
 
@@ -861,7 +952,57 @@ export class SessionService implements SessionServiceInterface {
     }
 
     if (typeof raw === 'string') {
-      return raw;
+      return raw.trim() || null;
+    }
+
+    if (typeof raw === 'number' || typeof raw === 'boolean') {
+      return String(raw);
+    }
+
+    // Handle arrays
+    if (Array.isArray(raw)) {
+      if (raw.length === 0) {
+        return null;
+      }
+      try {
+        return raw.map(item =>
+          typeof item === 'string' ? item : JSON.stringify(item)
+        ).join('\n');
+      } catch {
+        return String(raw);
+      }
+    }
+
+    // Handle objects
+    if (typeof raw === 'object') {
+      // Check for common output patterns
+      if ('output' in raw && typeof raw.output === 'string') {
+        return raw.output.trim() || null;
+      }
+      if ('result' in raw && typeof raw.result === 'string') {
+        return raw.result.trim() || null;
+      }
+      if ('content' in raw && typeof raw.content === 'string') {
+        return raw.content.trim() || null;
+      }
+      if ('text' in raw && typeof raw.text === 'string') {
+        return raw.text.trim() || null;
+      }
+      if ('message' in raw && typeof raw.message === 'string') {
+        return raw.message.trim() || null;
+      }
+
+      // If it's an empty object, return null
+      if (Object.keys(raw).length === 0) {
+        return null;
+      }
+
+      try {
+        const jsonString = JSON.stringify(raw, null, 2);
+        return jsonString === '{}' ? null : jsonString;
+      } catch {
+        return String(raw);
+      }
     }
 
     try {
@@ -918,17 +1059,133 @@ export class SessionService implements SessionServiceInterface {
     return `Conversation history:\n${historyLines}\n\n${newLine}`;
   }
 
+  /**
+   * Process buffered updates that arrived before session was saved
+   */
+  private async processPendingUpdates(agentSessionId: string, conversationSessionId: string): Promise<void> {
+    const bufferedUpdates = this.pendingUpdates.get(agentSessionId);
+    if (!bufferedUpdates || bufferedUpdates.length === 0) {
+      return;
+    }
+
+    logger.info('Processing buffered session updates', {
+      agentSessionId,
+      conversationSessionId,
+      updateCount: bufferedUpdates.length
+    });
+
+    // Remove from buffer
+    this.pendingUpdates.delete(agentSessionId);
+
+    // Process each update with the correct session ID
+    for (const update of bufferedUpdates) {
+      const correctedUpdate: SessionUpdateNotification = {
+        ...update,
+        sessionId: conversationSessionId
+      };
+
+      logger.debug('Processing buffered update', {
+        originalSessionId: update.sessionId,
+        correctedSessionId: conversationSessionId,
+        updateType: update.update?.sessionUpdate
+      });
+
+      await this.handleSessionUpdate(correctedUpdate);
+    }
+  }
+
   private async handleSessionUpdate(update: SessionUpdateNotification): Promise<void> {
     const sessionId = update.sessionId;
+
+    logger.debug('Session update received', {
+      sessionId,
+      updateType: update.update?.sessionUpdate,
+      updateData: JSON.stringify(update.update, null, 2)
+    });
+
     const session = await this.storageService.getConversation(sessionId);
     if (!session) {
+      logger.warn('Session not found for update', {
+        sessionId,
+        updateType: update.update?.sessionUpdate
+      });
+
+      // Try to find any session that might match - sometimes session IDs don't match exactly
+      const allConversations = await this.storageService.getConversations();
+      logger.debug('Available sessions when update failed', {
+        requestedSessionId: sessionId,
+        availableSessions: allConversations.map(conv => ({
+          sessionId: conv.sessionId,
+          agentSessionId: conv.agentSessionId,
+          status: conv.status,
+          messageCount: conv.messages.length
+        }))
+      });
+
+      // Try to match by agent session ID for any session update type
+      if (update.update?.sessionUpdate) {
+        for (const conv of allConversations) {
+          if (conv.agentSessionId === sessionId || conv.context?.additionalContext?.agentSessionId === sessionId) {
+            logger.info('Found matching session by agent session ID', {
+              originalSessionId: sessionId,
+              matchedConversationId: conv.sessionId,
+              updateType: update.update.sessionUpdate
+            });
+
+            // Recursively call with correct session ID
+            const correctedUpdate: SessionUpdateNotification = {
+              ...update,
+              sessionId: conv.sessionId
+            };
+            await this.handleSessionUpdate(correctedUpdate);
+            return;
+          }
+        }
+      }
+
+      // Buffer the update for later processing when session becomes available
+      logger.info('Buffering session update for later processing', {
+        agentSessionId: sessionId,
+        updateType: update.update?.sessionUpdate
+      });
+
+      if (!this.pendingUpdates.has(sessionId)) {
+        this.pendingUpdates.set(sessionId, []);
+      }
+      this.pendingUpdates.get(sessionId)!.push(update);
+
+      // Clean up old buffers (older than 30 seconds)
+      setTimeout(() => {
+        const buffer = this.pendingUpdates.get(sessionId);
+        if (buffer) {
+          const remainingUpdates = buffer.filter(u => u !== update);
+          if (remainingUpdates.length === 0) {
+            this.pendingUpdates.delete(sessionId);
+          } else {
+            this.pendingUpdates.set(sessionId, remainingUpdates);
+          }
+        }
+      }, 30000);
+
       return;
     }
 
     const message = this.transformSessionUpdate(update, session.messages.length);
     if (!message) {
+      logger.debug('No message produced from session update', {
+        sessionId,
+        updateType: update.update?.sessionUpdate
+      });
       return;
     }
+
+    logger.debug('Session update transformed to message', {
+      sessionId,
+      messageId: message.id,
+      messageRole: message.role,
+      contentLength: message.content?.length || 0,
+      contentPreview: message.content?.slice(0, 200) || 'empty'
+    });
 
     const lastMessage = session.messages[session.messages.length - 1];
     let notificationTarget: SessionMessage = message;
@@ -968,13 +1225,22 @@ export class SessionService implements SessionServiceInterface {
         const role = payload.sessionUpdate === 'user_message_chunk' ? 'user' :
           payload.sessionUpdate === 'agent_message_chunk' ? 'assistant' : 'system';
 
+        logger.debug('Processing streaming chunk', {
+          sessionId: update.sessionId,
+          updateType: payload.sessionUpdate,
+          payloadContent: JSON.stringify(payload.content, null, 2),
+          fullPayload: JSON.stringify(payload, null, 2)
+        });
+
         const { text, messageType } = this.flattenAcpContent([payload.content]);
 
-        logger.debug('Streaming chunk received', {
+        logger.debug('Streaming chunk processed', {
           sessionId: update.sessionId,
           role,
           messageType,
-          textSnippet: text.slice(0, 120)
+          textLength: text.length,
+          textSnippet: text.slice(0, 120),
+          fullText: text
         });
 
         return {
@@ -992,17 +1258,49 @@ export class SessionService implements SessionServiceInterface {
       }
       case 'tool_call': {
         const toolCall = payload as ToolCall;
+
+        logger.debug('Processing tool_call', {
+          toolCallId: toolCall.toolCallId,
+          title: toolCall.title,
+          status: toolCall.status,
+          kind: toolCall.kind,
+          contentLength: toolCall.content?.length || 0,
+          rawInput: JSON.stringify(toolCall.rawInput, null, 2),
+          rawOutput: JSON.stringify(toolCall.rawOutput, null, 2),
+          fullToolCall: JSON.stringify(toolCall, null, 2)
+        });
+
         const statusText = this.formatToolStatus(toolCall.status);
         const detailText = this.flattenToolCallContent(toolCall.content);
+        const rawOutputText = this.stringifyRawOutput(toolCall.rawOutput);
+
+        logger.debug('Tool call content processing', {
+          toolCallId: toolCall.toolCallId,
+          statusText,
+          detailTextLength: detailText?.length || 0,
+          detailText: detailText || 'empty',
+          rawOutputTextLength: rawOutputText?.length || 0,
+          rawOutputText: rawOutputText || 'empty'
+        });
+
         const sections = [
           [toolCall.title ?? toolCall.toolCallId, statusText].filter(Boolean).join(' - '),
-          detailText
+          detailText || rawOutputText || 'Tool call executed'
         ].filter((section) => section && section.trim().length > 0);
+
+        const finalContent = sections.join('\n\n').trim() || `Tool call: ${toolCall.title ?? toolCall.toolCallId}`;
+
+        logger.debug('Tool call final content', {
+          toolCallId: toolCall.toolCallId,
+          sectionsCount: sections.length,
+          finalContentLength: finalContent.length,
+          finalContent
+        });
 
         return {
           id: toolCall.toolCallId,
           role: 'tool',
-          content: sections.join('\n\n').trim(),
+          content: finalContent,
           timestamp: new Date(),
           metadata: {
             source: 'agent',
@@ -1018,20 +1316,50 @@ export class SessionService implements SessionServiceInterface {
       }
       case 'tool_call_update': {
         const toolUpdate = payload as ToolCallUpdate;
+
+        logger.debug('Processing tool_call_update', {
+          toolCallId: toolUpdate.toolCallId,
+          title: toolUpdate.title,
+          status: toolUpdate.status,
+          kind: toolUpdate.kind,
+          contentLength: toolUpdate.content?.length || 0,
+          rawInput: JSON.stringify(toolUpdate.rawInput, null, 2),
+          rawOutput: JSON.stringify(toolUpdate.rawOutput, null, 2),
+          fullToolUpdate: JSON.stringify(toolUpdate, null, 2)
+        });
+
         const status = toolUpdate.status ?? null;
         const statusText = this.formatToolStatus(status);
         const contentText = this.flattenToolCallContent(toolUpdate.content ?? undefined);
         const rawOutputText = this.stringifyRawOutput(toolUpdate.rawOutput);
 
+        logger.debug('Tool call update content processing', {
+          toolCallId: toolUpdate.toolCallId,
+          status,
+          statusText,
+          contentTextLength: contentText?.length || 0,
+          contentText: contentText || 'empty',
+          rawOutputTextLength: rawOutputText?.length || 0,
+          rawOutputText: rawOutputText || 'empty'
+        });
+
         const bodySections = [
           [toolUpdate.title ?? toolUpdate.toolCallId, statusText ? `Status: ${statusText}` : null]
             .filter(Boolean)
             .join(' - '),
-          contentText || rawOutputText || ''
+          contentText || rawOutputText || 'Tool update received'
         ].filter((section) => section && section.trim().length > 0);
 
         const renderedText = bodySections.join('\n\n').trim() || `Tool update${statusText ? ` (${statusText})` : ''}`;
         const isTerminal = status === 'completed' || status === 'failed';
+
+        logger.debug('Tool call update final content', {
+          toolCallId: toolUpdate.toolCallId,
+          bodySectionsCount: bodySections.length,
+          renderedTextLength: renderedText.length,
+          renderedText,
+          isTerminal
+        });
 
         return {
           id: toolUpdate.toolCallId,

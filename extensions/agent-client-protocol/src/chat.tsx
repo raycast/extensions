@@ -223,6 +223,44 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
   }
 
   function formatMessageMarkdown(message: SessionMessage): string {
+    // Handle tool messages specially
+    if (message.role === "tool") {
+      if (message.content && message.content.trim()) {
+        return message.content;
+      }
+
+      // If no content but we have tool call info, show tool details
+      if (message.toolCall) {
+        const parts = [`**Tool:** ${message.toolCall.name}`];
+
+        if (message.toolCall.arguments && Object.keys(message.toolCall.arguments).length > 0) {
+          parts.push(`**Arguments:**\n\`\`\`json\n${JSON.stringify(message.toolCall.arguments, null, 2)}\n\`\`\``);
+        }
+
+        if (message.toolResult) {
+          if (message.toolResult.success) {
+            parts.push(`**Status:** ✅ Completed`);
+            if (message.toolResult.result) {
+              parts.push(`**Result:**\n\`\`\`\n${typeof message.toolResult.result === 'string' ? message.toolResult.result : JSON.stringify(message.toolResult.result, null, 2)}\n\`\`\``);
+            }
+          } else {
+            parts.push(`**Status:** ❌ Failed`);
+            if (message.toolResult.error) {
+              parts.push(`**Error:** ${message.toolResult.error}`);
+            }
+          }
+        } else {
+          // Tool call without result (might be in progress)
+          parts.push(`**Status:** ⏳ In progress`);
+        }
+
+        return parts.join('\n\n');
+      }
+
+      // Fallback for tool messages with no info
+      return "_Tool call executed_";
+    }
+
     if (!message.content) {
       return "_No content_";
     }
@@ -325,7 +363,28 @@ export default function ChatCommand({ initialSessionId, initialAgentId }: ChatCo
           icon="🤖"
           title="Start a Conversation"
           description="Select an agent, type your question above, and press Enter to begin."
-          actions={undefined}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Send Message"
+                icon={Icon.PaperPlane}
+                shortcut={{ modifiers: [], key: "return" }}
+                onAction={async () => {
+                  await handleSearchSubmit(searchText);
+                }}
+              />
+              <Action
+                title="Restart Conversation"
+                icon={Icon.Repeat}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                onAction={async () => {
+                  setSearchText("");
+                  await chat.resetSession();
+                }}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         <List.Section title={conversationTitle} subtitle={`${chat.messages.length} messages`}>
