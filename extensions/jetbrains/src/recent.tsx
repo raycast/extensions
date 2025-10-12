@@ -33,10 +33,10 @@ export default function ProjectList(): React.JSX.Element {
       `Please check that you have installed [JetBrains Toolbox](${tbUrl})`,
     ];
     return <HelpTextDetail message={message} toolbox={undefined} />;
-  } else if (!toolboxApp.isV2) {
+  } else if (!toolboxApp.isV2orV3) {
     const message = [
       `# Unsupported Version of JetBrains Toolbox: ${toolboxApp.version}`,
-      "This extension only support version 2 of JetBrains Toolbox",
+      "This extension only support version 2 and 3 of JetBrains Toolbox",
       `Please check that you have installed the latest [JetBrains Toolbox](${tbUrl})`,
     ];
     return <HelpTextDetail message={message} toolbox={toolboxApp} />;

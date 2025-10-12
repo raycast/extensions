@@ -292,7 +292,7 @@ export function useAppHistory(): appHistoryReturn {
     if (toolboxApp === undefined || toolboxApp === false) {
       return;
     }
-    if (!toolboxApp.isV2) {
+    if (!toolboxApp.isV2orV3) {
       return dispatch({ type: "finished" });
     }
   }, [toolboxApp]);

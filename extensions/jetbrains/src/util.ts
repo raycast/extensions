@@ -86,7 +86,7 @@ export interface AppHistory {
 
 export interface ToolboxApp extends Application {
   version: string;
-  isV2: boolean;
+  isV2orV3: boolean;
 }
 
 async function getFile(path: string) {
@@ -224,7 +224,7 @@ export const getJetBrainsToolboxApp = async (): Promise<ToolboxApp | undefined> 
   return {
     ...jb,
     version,
-    isV2: Boolean(version.match(/^2\./)),
+    isV2orV3: Boolean(version.match(/^[23]\./)),
   };
 };
 
