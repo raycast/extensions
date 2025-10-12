@@ -959,6 +959,11 @@ export class SessionService implements SessionServiceInterface {
       return String(raw);
     }
 
+    // Handle Error objects specifically
+    if (raw instanceof Error) {
+      return raw.message || raw.toString();
+    }
+
     // Handle arrays
     if (Array.isArray(raw)) {
       if (raw.length === 0) {
@@ -975,6 +980,17 @@ export class SessionService implements SessionServiceInterface {
 
     // Handle objects
     if (typeof raw === 'object') {
+      // Check for error-like objects first
+      if ('message' in raw && typeof raw.message === 'string') {
+        return raw.message.trim() || null;
+      }
+      if ('error' in raw && typeof raw.error === 'string') {
+        return raw.error.trim() || null;
+      }
+      if ('details' in raw && typeof raw.details === 'string') {
+        return raw.details.trim() || null;
+      }
+
       // Check for common output patterns
       if ('output' in raw && typeof raw.output === 'string') {
         return raw.output.trim() || null;
@@ -988,9 +1004,6 @@ export class SessionService implements SessionServiceInterface {
       if ('text' in raw && typeof raw.text === 'string') {
         return raw.text.trim() || null;
       }
-      if ('message' in raw && typeof raw.message === 'string') {
-        return raw.message.trim() || null;
-      }
 
       // If it's an empty object, return null
       if (Object.keys(raw).length === 0) {
@@ -998,17 +1011,54 @@ export class SessionService implements SessionServiceInterface {
       }
 
       try {
-        const jsonString = JSON.stringify(raw, null, 2);
+        // Use a replacer function to handle circular references and other issues
+        const jsonString = JSON.stringify(raw, (key, value) => {
+          // Handle circular references
+          if (typeof value === 'object' && value !== null) {
+            if (value instanceof Error) {
+              return {
+                name: value.name,
+                message: value.message,
+                stack: value.stack
+              };
+            }
+            // Handle other special object types
+            if (value.constructor && value.constructor.name !== 'Object') {
+              return `[${value.constructor.name}]`;
+            }
+          }
+          return value;
+        }, 2);
         return jsonString === '{}' ? null : jsonString;
-      } catch {
-        return String(raw);
+      } catch (error) {
+        // Fallback to toString or a descriptive message
+        try {
+          return raw.toString();
+        } catch {
+          return '[Complex Object]';
+        }
       }
     }
 
     try {
-      return JSON.stringify(raw, null, 2);
+      return JSON.stringify(raw, (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+          if (value instanceof Error) {
+            return {
+              name: value.name,
+              message: value.message,
+              stack: value.stack
+            };
+          }
+        }
+        return value;
+      }, 2);
     } catch {
-      return String(raw);
+      try {
+        return String(raw);
+      } catch {
+        return '[Unstringifiable Object]';
+      }
     }
   }
 
@@ -1091,6 +1141,22 @@ export class SessionService implements SessionServiceInterface {
       });
 
       await this.handleSessionUpdate(correctedUpdate);
+    }
+
+    // Notify observers that buffered updates have been processed
+    const observer = this.sessionObservers.get(conversationSessionId);
+    if (observer && bufferedUpdates.length > 0) {
+      logger.debug('Notifying observer after processing buffered updates', {
+        conversationSessionId,
+        updateCount: bufferedUpdates.length
+      });
+
+      // Get the last processed message to trigger UI refresh
+      const session = await this.storageService.getConversation(conversationSessionId);
+      if (session && session.messages.length > 0) {
+        const lastMessage = session.messages[session.messages.length - 1];
+        observer(lastMessage);
+      }
     }
   }
 
@@ -1187,19 +1253,74 @@ export class SessionService implements SessionServiceInterface {
       contentPreview: message.content?.slice(0, 200) || 'empty'
     });
 
-    const lastMessage = session.messages[session.messages.length - 1];
     let notificationTarget: SessionMessage = message;
+    let messageUpdated = false;
 
-    if (
-      message.metadata.isStreaming &&
-      lastMessage &&
-      lastMessage.metadata?.isStreaming &&
-      lastMessage.role === message.role
-    ) {
-      lastMessage.content = `${lastMessage.content ?? ""}${message.content ?? ""}`;
-      lastMessage.timestamp = message.timestamp;
-      notificationTarget = lastMessage;
-    } else {
+    // For tool calls, update existing message by tool call ID
+    if (message.role === 'tool' && message.toolCall?.callId) {
+      const existingIndex = session.messages.findIndex(
+        m => m.role === 'tool' && m.toolCall?.callId === message.toolCall!.callId
+      );
+
+      if (existingIndex >= 0) {
+        logger.debug('Updating existing tool call message', {
+          sessionId,
+          toolCallId: message.toolCall.callId,
+          existingMessageId: session.messages[existingIndex].id,
+          newContentLength: message.content.length
+        });
+
+        // Update the existing tool call message
+        session.messages[existingIndex] = {
+          ...session.messages[existingIndex],
+          content: message.content,
+          timestamp: message.timestamp,
+          metadata: {
+            ...session.messages[existingIndex].metadata,
+            ...message.metadata
+          },
+          toolCall: message.toolCall,
+          toolResult: message.toolResult
+        };
+
+        notificationTarget = session.messages[existingIndex];
+        messageUpdated = true;
+      }
+    }
+
+    // For streaming text messages, append content to the last streaming message of same role
+    if (!messageUpdated && message.metadata.isStreaming) {
+      const lastMessage = session.messages[session.messages.length - 1];
+
+      if (
+        lastMessage &&
+        lastMessage.metadata?.isStreaming &&
+        lastMessage.role === message.role &&
+        lastMessage.role !== 'tool' // Don't merge tool messages this way
+      ) {
+        logger.debug('Appending to streaming message', {
+          sessionId,
+          existingMessageId: lastMessage.id,
+          existingContentLength: lastMessage.content?.length || 0,
+          newChunkLength: message.content?.length || 0
+        });
+
+        lastMessage.content = `${lastMessage.content ?? ""}${message.content ?? ""}`;
+        lastMessage.timestamp = message.timestamp;
+        notificationTarget = lastMessage;
+        messageUpdated = true;
+      }
+    }
+
+    // If no existing message was updated, add as new message
+    if (!messageUpdated) {
+      logger.debug('Adding new message to session', {
+        sessionId,
+        messageId: message.id,
+        messageRole: message.role,
+        contentLength: message.content?.length || 0
+      });
+
       session.messages.push(message);
     }
 
@@ -1220,10 +1341,8 @@ export class SessionService implements SessionServiceInterface {
 
     switch (payload.sessionUpdate) {
       case 'agent_message_chunk':
-      case 'user_message_chunk':
-      case 'agent_thought_chunk': {
-        const role = payload.sessionUpdate === 'user_message_chunk' ? 'user' :
-          payload.sessionUpdate === 'agent_message_chunk' ? 'assistant' : 'system';
+      case 'user_message_chunk': {
+        const role = payload.sessionUpdate === 'user_message_chunk' ? 'user' : 'assistant';
 
         logger.debug('Processing streaming chunk', {
           sessionId: update.sessionId,
@@ -1249,12 +1368,20 @@ export class SessionService implements SessionServiceInterface {
           content: text,
           timestamp: new Date(),
           metadata: {
-            source: role === 'user' ? 'user' : role === 'assistant' ? 'agent' : 'system',
+            source: role === 'user' ? 'user' : 'agent',
             messageType,
             sequence,
             isStreaming: true
           }
         };
+      }
+      case 'agent_thought_chunk': {
+        // Filter out internal agent thoughts - these should not be displayed to the user
+        logger.debug('Filtering out agent thought chunk', {
+          sessionId: update.sessionId,
+          thoughtContent: JSON.stringify(payload.content, null, 2)
+        });
+        return null;
       }
       case 'tool_call': {
         const toolCall = payload as ToolCall;
@@ -1340,7 +1467,9 @@ export class SessionService implements SessionServiceInterface {
           contentTextLength: contentText?.length || 0,
           contentText: contentText || 'empty',
           rawOutputTextLength: rawOutputText?.length || 0,
-          rawOutputText: rawOutputText || 'empty'
+          rawOutputText: rawOutputText || 'empty',
+          rawOutputType: typeof toolUpdate.rawOutput,
+          rawOutputDebug: toolUpdate.rawOutput ? JSON.stringify(toolUpdate.rawOutput, null, 2) : 'null'
         });
 
         const bodySections = [

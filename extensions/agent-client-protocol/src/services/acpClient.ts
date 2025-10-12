@@ -235,26 +235,192 @@ export class ACPClient implements acp.Client {
    * Read text file (if agent requests file access)
    */
   async readTextFile(params: acp.ReadTextFileRequest): Promise<acp.ReadTextFileResponse> {
-    // TODO: Implement file reading with permission checks
-    console.log('File read request:', params.path);
+    logger.info('File read request', {
+      path: params.path,
+      sessionId: params.sessionId
+    });
 
-    throw this.createError(
-      ErrorCode.FileAccessDenied,
-      "File access not implemented yet"
-    );
+    try {
+      // Import fs dynamically to avoid issues in browser environments
+      const fs = await import('fs');
+      const path = await import('path');
+
+      // Validate the path
+      if (!params.path || typeof params.path !== 'string') {
+        throw new Error('Invalid file path provided');
+      }
+
+      // Security check - prevent access to sensitive files
+      const normalizedPath = path.resolve(params.path);
+      const fileName = path.basename(normalizedPath);
+
+      // Block access to sensitive files
+      const blockedPatterns = [
+        /^\.env/, /\.key$/, /\.pem$/, /\.p12$/, /\.password$/,
+        /^id_rsa/, /^id_dsa/, /^id_ecdsa/, /^id_ed25519/,
+        /\.ssh/, /\.aws/, /\.gcp/, /password/i, /secret/i
+      ];
+
+      if (blockedPatterns.some(pattern => pattern.test(fileName))) {
+        logger.warn('Blocked access to sensitive file', { path: params.path });
+        throw this.createError(
+          ErrorCode.FileAccessDenied,
+          'Access to sensitive files is not allowed'
+        );
+      }
+
+      // Check if file exists and is readable
+      if (!fs.existsSync(normalizedPath)) {
+        throw this.createError(
+          ErrorCode.FileNotFound,
+          `File not found: ${params.path}`
+        );
+      }
+
+      const stats = fs.statSync(normalizedPath);
+      if (!stats.isFile()) {
+        throw this.createError(
+          ErrorCode.FileNotFound,
+          `Path is not a file: ${params.path}`
+        );
+      }
+
+      // Check file size (limit to 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (stats.size > maxSize) {
+        throw this.createError(
+          ErrorCode.FileAccessDenied,
+          `File too large (max 10MB): ${params.path}`
+        );
+      }
+
+      // Read the file
+      const content = fs.readFileSync(normalizedPath, 'utf-8');
+
+      logger.info('File read successful', {
+        path: params.path,
+        size: content.length
+      });
+
+      return { content };
+
+    } catch (error) {
+      if (error instanceof Error && 'code' in error) {
+        // Re-throw our custom errors
+        throw error;
+      }
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('File read failed', {
+        path: params.path,
+        error: errorMessage
+      });
+
+      throw this.createError(
+        ErrorCode.SystemError,
+        `Failed to read file: ${errorMessage}`
+      );
+    }
   }
 
   /**
    * Write text file (if agent requests file write)
    */
   async writeTextFile(params: acp.WriteTextFileRequest): Promise<acp.WriteTextFileResponse> {
-    // TODO: Implement file writing with permission checks
-    console.log('File write request:', params.path);
+    logger.info('File write request', {
+      path: params.path,
+      contentLength: params.content?.length || 0,
+      sessionId: params.sessionId
+    });
 
-    throw this.createError(
-      ErrorCode.FileAccessDenied,
-      "File write access not implemented yet"
-    );
+    try {
+      // Import fs dynamically to avoid issues in browser environments
+      const fs = await import('fs');
+      const path = await import('path');
+
+      // Validate the path and content
+      if (!params.path || typeof params.path !== 'string') {
+        throw new Error('Invalid file path provided');
+      }
+
+      if (typeof params.content !== 'string') {
+        throw new Error('Invalid content provided');
+      }
+
+      // Security checks
+      const normalizedPath = path.resolve(params.path);
+      const fileName = path.basename(normalizedPath);
+      const dirName = path.dirname(normalizedPath);
+
+      // Block access to sensitive files and directories
+      const blockedPatterns = [
+        /^\.env/, /\.key$/, /\.pem$/, /\.p12$/, /\.password$/,
+        /^id_rsa/, /^id_dsa/, /^id_ecdsa/, /^id_ed25519/,
+        /\.ssh/, /\.aws/, /\.gcp/, /password/i, /secret/i
+      ];
+
+      const blockedDirs = [
+        '/etc', '/usr', '/bin', '/sbin', '/var', '/root',
+        '/System', '/Library', '/Applications'
+      ];
+
+      if (blockedPatterns.some(pattern => pattern.test(fileName))) {
+        logger.warn('Blocked write to sensitive file', { path: params.path });
+        throw this.createError(
+          ErrorCode.FileAccessDenied,
+          'Writing to sensitive files is not allowed'
+        );
+      }
+
+      if (blockedDirs.some(dir => normalizedPath.startsWith(dir))) {
+        logger.warn('Blocked write to system directory', { path: params.path });
+        throw this.createError(
+          ErrorCode.FileAccessDenied,
+          'Writing to system directories is not allowed'
+        );
+      }
+
+      // Check content size (limit to 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (params.content.length > maxSize) {
+        throw this.createError(
+          ErrorCode.FileAccessDenied,
+          'Content too large (max 10MB)'
+        );
+      }
+
+      // Ensure directory exists
+      if (!fs.existsSync(dirName)) {
+        fs.mkdirSync(dirName, { recursive: true });
+      }
+
+      // Write the file
+      fs.writeFileSync(normalizedPath, params.content, 'utf-8');
+
+      logger.info('File write successful', {
+        path: params.path,
+        size: params.content.length
+      });
+
+      return {}; // Empty response on success per ACP spec
+
+    } catch (error) {
+      if (error instanceof Error && 'code' in error) {
+        // Re-throw our custom errors
+        throw error;
+      }
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('File write failed', {
+        path: params.path,
+        error: errorMessage
+      });
+
+      throw this.createError(
+        ErrorCode.SystemError,
+        `Failed to write file: ${errorMessage}`
+      );
+    }
   }
 
   /**
