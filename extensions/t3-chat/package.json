@@ -66,7 +66,7 @@
 
             { "title": "DeepSeek R1 (Llama Distilled)", "value": "deepseek-r1-groq" },
             { "title": "DeepSeek R1 (OpenRouter)", "value": "deepseek-r1-openrouter" },
-            {"title": "DeepSeek R1 (Qwen Distilled)", "value": "deepseek-r1-distill-qwen-32b-groq"},
+            { "title": "DeepSeek R1 (Qwen Distilled)", "value": "deepseek-r1-distill-qwen-32b-groq" },
             { "title": "DeepSeek v3 (0324)", "value": "deepseek-v3-0324" },
             { "title": "DeepSeek v3 (Fireworks)", "value": "deepseek-v3-fireworks" },
 
