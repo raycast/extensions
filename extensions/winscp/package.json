@@ -20,7 +20,7 @@
       "type": "directory",
       "required": false,
       "title": "WinSCP Installation Folder",
-      "default": "%USERPROFILE%\\AppData\\Local\\Programs\\WinSCP",
+      "default": "",
       "description": "The folder where WinSCP is installed, only change this if the program is returning errors. You should find it at C:\\Users\\{user}\\AppData\\Local\\Programs\\WinSCP"
     }
   ],
