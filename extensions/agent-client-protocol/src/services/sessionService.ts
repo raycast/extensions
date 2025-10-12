@@ -38,22 +38,27 @@ import type { AgentConfig, SessionServiceInterface } from '@/types/extension';
 import type { StorageService } from './storageService';
 import type { ACPClient } from './acpClient';
 import { ContextService } from './contextService';
+import { PersistenceService } from './persistenceService';
 
 const logger = createLogger('SessionService');
 
 export class SessionService implements SessionServiceInterface {
   private contextService: ContextService;
 
+  private persistenceService: PersistenceService;
+
   constructor(
     private storageService: StorageService,
     private acpClient: ACPClient,
-    contextService?: ContextService
+    contextService?: ContextService,
+    persistenceService?: PersistenceService
   ) {
     this.contextService = contextService ?? new ContextService();
+    this.persistenceService = persistenceService ?? new PersistenceService(this.storageService);
 
     if (typeof this.acpClient.registerSessionUpdateListener === 'function') {
       this.acpClient.registerSessionUpdateListener((update) => {
-        void this.handleSessionUpdate(update);
+        return this.handleSessionUpdate(update);
       });
     }
   }
@@ -172,6 +177,7 @@ export class SessionService implements SessionServiceInterface {
       // This ensures the session exists when processPendingUpdates tries to find it
       try {
         await this.storageService.saveConversation(session);
+        await this.persistenceService.saveSessionSnapshot(session);
 
         logger.info('Session saved to storage', { sessionId });
 
@@ -271,8 +277,9 @@ export class SessionService implements SessionServiceInterface {
       session.status = 'completed';
       session.lastActivity = new Date();
 
-      // Save updated session
+      // Save updated session and clear active tracking
       await this.storageService.saveConversation(session);
+      await this.persistenceService.markSessionCompleted(sessionId);
 
       logger.info('Session ended successfully', { sessionId });
 
@@ -364,7 +371,7 @@ export class SessionService implements SessionServiceInterface {
       session.lastActivity = new Date();
 
       // Save user message
-      await this.storageService.addMessageToConversation(sessionId, userMessage);
+      await this.persistenceService.recordMessage(sessionId, userMessage);
 
       const contexts = await this.contextService.getSessionContext(sessionId);
 
@@ -390,6 +397,7 @@ export class SessionService implements SessionServiceInterface {
             }
           };
           await this.storageService.saveConversation(session);
+          await this.persistenceService.saveSessionSnapshot(session);
 
           includeHistoryInPrompt = true;
         }
@@ -445,6 +453,7 @@ export class SessionService implements SessionServiceInterface {
           };
 
           await this.storageService.saveConversation(session);
+          await this.persistenceService.saveSessionSnapshot(session);
 
           // When creating a new session, we need to send history since this is a fresh session
           // Build the full conversation context for the new session
@@ -483,7 +492,7 @@ export class SessionService implements SessionServiceInterface {
           agentMessage.metadata.sequence = session.messages.length;
           session.messages.push(agentMessage);
           session.lastActivity = new Date();
-          await this.storageService.addMessageToConversation(sessionId, agentMessage);
+          await this.persistenceService.recordMessage(sessionId, agentMessage);
         }
       }
 
@@ -492,6 +501,8 @@ export class SessionService implements SessionServiceInterface {
         userMessageId: userMessage.id,
         agentMessageIds: agentMessages.map(msg => msg.id)
       });
+
+      await this.persistenceService.saveSessionSnapshot(session);
 
       PerformanceLogger.end(operationId, {
         success: true,
@@ -1320,7 +1331,13 @@ export class SessionService implements SessionServiceInterface {
     }
 
     session.lastActivity = new Date();
-    await this.storageService.saveConversation(session);
+    if (messageUpdated) {
+      await this.storageService.saveConversation(session);
+      await this.persistenceService.saveSessionSnapshot(session);
+    } else {
+      await this.persistenceService.recordMessage(sessionId, message);
+      await this.persistenceService.saveSessionSnapshot(session);
+    }
 
     const observer = this.sessionObservers.get(sessionId);
     if (observer) {

@@ -9,6 +9,7 @@
 import { SessionService } from "@/services/sessionService";
 import { StorageService } from "@/services/storageService";
 import { ACPClient } from "@/services/acpClient";
+import { PersistenceService } from "@/services/persistenceService";
 import { ErrorCode } from "@/types/extension";
 import type { ConversationSession, SessionMessage, SessionRequest } from "@/types/entities";
 import type { AgentConfig } from "@/types/extension";
@@ -24,6 +25,13 @@ describe("SessionService", () => {
   let sessionService: SessionService;
   let mockStorageService: jest.Mocked<StorageService>;
   let mockACPClient: jest.Mocked<ACPClient>;
+  let mockPersistenceService: PersistenceService;
+  let persistenceSpies: {
+    saveSessionSnapshot: jest.Mock;
+    recordMessage: jest.Mock;
+    markSessionCompleted: jest.Mock;
+    getRecoverableSessions: jest.Mock;
+  };
 
   const baseSessionRequest: SessionRequest = {
     agentConnectionId: "conn-123",
@@ -98,7 +106,25 @@ describe("SessionService", () => {
     mockACPClient.sendPrompt.mockResolvedValue({ stopReason: "completed", messages: [] } as any);
     mockACPClient.disconnect.mockResolvedValue?.();
 
-    sessionService = new SessionService(mockStorageService, mockACPClient);
+    persistenceSpies = {
+      saveSessionSnapshot: jest.fn(async (session: ConversationSession) => {
+        await mockStorageService.saveConversation(session);
+      }),
+      recordMessage: jest.fn(async (sessionId: string, message: SessionMessage) => {
+        await mockStorageService.addMessageToConversation(sessionId, message);
+      }),
+      markSessionCompleted: jest.fn().mockResolvedValue(undefined),
+      getRecoverableSessions: jest.fn().mockResolvedValue([])
+    };
+    mockPersistenceService = persistenceSpies as unknown as PersistenceService;
+
+    sessionService = new SessionService(
+      mockStorageService,
+      mockACPClient,
+      undefined,
+      mockPersistenceService
+    );
+
   });
 
   describe("createSession", () => {
@@ -269,7 +295,7 @@ describe("SessionService", () => {
 
       await updateListener(toolUpdate as any);
 
-      expect(mockStorageService.saveConversation).toHaveBeenCalledWith(
+      expect(persistenceSpies.saveSessionSnapshot).toHaveBeenCalledWith(
         expect.objectContaining({
           messages: expect.arrayContaining([
             expect.objectContaining({

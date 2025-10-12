@@ -127,20 +127,20 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 
 ### Tests for User Story 3 (TDD - WRITE THESE FIRST) ⚠️
 
-- [ ] T048 [P] [US3] Unit test for conversation persistence in tests/unit/services/persistenceService.test.ts
-- [ ] T049 [P] [US3] Unit test for conversation history management in tests/unit/services/historyService.test.ts
-- [ ] T050 [P] [US3] Integration test for multi-turn conversation flow in tests/integration/multiTurnConversation.test.ts
+- [X] T048 [P] [US3] Unit test for conversation persistence in tests/unit/services/persistenceService.test.ts
+- [X] T049 [P] [US3] Unit test for conversation history management in tests/unit/services/historyService.test.ts
+- [X] T050 [P] [US3] Integration test for multi-turn conversation flow in tests/integration/multiTurnConversation.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T051 [P] [US3] Implement conversation persistence using LocalStorage in src/services/persistenceService.ts
-- [ ] T052 [P] [US3] Implement conversation history management in src/services/historyService.ts
-- [ ] T053 [US3] Add conversation list view in src/components/ConversationList.tsx
-- [ ] T054 [US3] Add conversation management UI (archive, delete, search)
+- [X] T051 [P] [US3] Implement conversation persistence using LocalStorage in src/services/persistenceService.ts
+- [X] T052 [P] [US3] Implement conversation history management in src/services/historyService.ts
+- [X] T053 [US3] Add conversation list view in src/components/ConversationList.tsx
+- [X] T054 [US3] Add conversation management UI (archive, delete, search)
 - [X] T055 [US3] Implement conversation loading and resumption
-- [ ] T056 [US3] Add conversation history export functionality
-- [ ] T057 [US3] Implement conversation search and filtering
-- [ ] T058 [US3] Add conversation auto-save and recovery features
+- [X] T056 [US3] Add conversation history export functionality
+- [X] T057 [US3] Implement conversation search and filtering
+- [X] T058 [US3] Add conversation auto-save and recovery features
 
 **Checkpoint**: All user stories should now be independently functional
 

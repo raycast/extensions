@@ -11,6 +11,10 @@ export const LocalStorage = {
   clear: jest.fn().mockResolvedValue(undefined),
 };
 
+export const Clipboard = {
+  copy: jest.fn().mockResolvedValue(undefined),
+};
+
 export const Toast = {
   Style: {
     Success: 'success',

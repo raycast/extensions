@@ -8,6 +8,7 @@ import type { ConversationSession, SessionMessage, ProjectContext } from "@/type
 import { ErrorHandler } from "@/utils/errors";
 import { createLogger } from "@/utils/logging";
 import { ContextService } from "@/services/contextService";
+import { PersistenceService } from "@/services/persistenceService";
 
 type ChatStatus = "idle" | "connecting" | "ready" | "processing";
 
@@ -39,6 +40,7 @@ export function useChatSession(): UseChatSessionResult {
   const storageServiceRef = useRef<StorageService | undefined>(undefined);
   const sessionServiceRef = useRef<SessionService | undefined>(undefined);
   const contextServiceRef = useRef<ContextService | undefined>(undefined);
+  const persistenceServiceRef = useRef<PersistenceService | undefined>(undefined);
 
   if (!acpClientRef.current) {
     acpClientRef.current = new ACPClient();
@@ -46,6 +48,10 @@ export function useChatSession(): UseChatSessionResult {
 
   if (!storageServiceRef.current) {
     storageServiceRef.current = new StorageService();
+  }
+
+  if (!persistenceServiceRef.current) {
+    persistenceServiceRef.current = new PersistenceService(storageServiceRef.current);
   }
 
   if (!contextServiceRef.current) {
@@ -56,7 +62,8 @@ export function useChatSession(): UseChatSessionResult {
     sessionServiceRef.current = new SessionService(
       storageServiceRef.current,
       acpClientRef.current,
-      contextServiceRef.current
+      contextServiceRef.current,
+      persistenceServiceRef.current
     );
   }
 
