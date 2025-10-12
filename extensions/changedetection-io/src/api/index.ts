@@ -34,7 +34,13 @@ export const useTags = () => {
 export const useWatches = ({ sortBy, sortOrder }: { sortBy: SortBy; sortOrder: SortOrder }) => {
   const { data: watchesResponse, ...rest } = useApi<WatchesResponse>("watch");
   const watches: UseWatchesResult = Object.entries(watchesResponse ?? {})
-    .map(([id, watch]) => ({ ...watch, id }) as WatchWithID)
+    .map(([id, watch]) => {
+      // We're fixing an issue here where it doesn't make sense it is not seen as viewed when it has not changed yet
+      if (!watch.viewed && !watch.last_changed) {
+        watch.viewed = true;
+      }
+      return { ...watch, id } as WatchWithID;
+    })
     .reduce(
       (acc: UseWatchesResult, watch) => {
         if (watch.viewed) {
