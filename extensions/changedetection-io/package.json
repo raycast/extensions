@@ -12,6 +12,10 @@
     "Developer Tools",
     "Productivity"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "preferences": [
     {

@@ -8,6 +8,7 @@
 - Added tags to watch details
 - Added screenshot (and text snapshot) to watch details
 - Refactored into separate screens/components/hooks for better readability and maintainability
+- Enable extension for Windows as well
 
 ## [Create + Delete] - 2025-08-25
 
