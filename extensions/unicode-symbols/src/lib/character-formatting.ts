@@ -70,21 +70,18 @@ const encode = (str: string) => Buffer.from(str).toString("base64");
  * @returns The input string encoded to base64
  */
 export const encodeSVG = (str: string, dark = false) => {
-  const cacheKey = `${str}-${dark}`;
-  const cached = svgCache.get(cacheKey);
+  const cacheKey = str;
+  let cached = svgCache.get(cacheKey);
 
-  if (cached) {
-    return dark ? cached.dark : cached.light;
-  }
-
-  const encoded = `data:image/svg+xml;base64,${encode(getSquareSVGString(str, dark))}`;
-
-  // Cache both light and dark versions
-  if (!svgCache.has(`${str}-false`)) {
+  if (!cached) {
     const lightEncoded = `data:image/svg+xml;base64,${encode(getSquareSVGString(str, false))}`;
     const darkEncoded = `data:image/svg+xml;base64,${encode(getSquareSVGString(str, true))}`;
-    svgCache.set(cacheKey, { light: lightEncoded, dark: darkEncoded });
+    cached = { light: lightEncoded, dark: darkEncoded };
+    svgCache.set(cacheKey, cached);
   }
+
+  return dark ? cached.dark : cached.light;
+};
 
   return encoded;
 };
