@@ -17,7 +17,6 @@ import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { ListLoadingView } from "~/components/ListLoadingView";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { CACHE_KEYS } from "~/constants/general";
-import { MODIFIER_TO_LABEL } from "~/constants/labels";
 import { SendTypeOptions } from "~/constants/send";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -27,6 +26,7 @@ import { getFormattedDate } from "~/utils/dates";
 import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { useInterval } from "~/utils/hooks/useInterval";
+import { platform } from "./utils/platform";
 
 const searchBarPlaceholder = "Search sends";
 const LoadingFallback = () => <List searchBarPlaceholder={searchBarPlaceholder} isLoading />;
@@ -186,28 +186,10 @@ const useListSends = (bitwarden: Bitwarden) => {
 
 const syncAction = {
   title: "Sync Vault",
-  get shortcut() {
-    return {
-      windows: { key: "r", modifiers: ["alt"] },
-      macOS: { key: "r", modifiers: ["opt"] },
-    } satisfies Keyboard.Shortcut;
-  },
-  get modifierToLabelMap(): Record<Keyboard.KeyModifier, string> {
-    return { cmd: "⌘", shift: "⇧", opt: "⌥", ctrl: "⌃", alt: "⌥", windows: "⊞" };
-  },
-  get shortcutLabel(): string {
-    if (process.platform === "win32") {
-      return (
-        this.shortcut.windows.modifiers.map((mod) => MODIFIER_TO_LABEL[mod] ?? "").join("") +
-        this.shortcut.windows.key.toUpperCase()
-      );
-    }
-
-    return (
-      this.shortcut.macOS.modifiers.map((mod) => MODIFIER_TO_LABEL[mod] ?? "").join("") +
-      this.shortcut.macOS.key.toUpperCase()
-    );
-  },
+  shortcut: (platform === "windows"
+    ? { key: "r", modifiers: ["alt"] }
+    : { key: "r", modifiers: ["opt"] }) satisfies Keyboard.Shortcut,
+  shortcutLabel: platform === "windows" ? "Alt+R" : "⌥+R",
 };
 
 function SearchSendsCommandContent() {

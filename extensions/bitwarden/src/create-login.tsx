@@ -9,6 +9,7 @@ import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { getPasswordGeneratorOptions } from "./utils/passwords";
+import { platform } from "~/utils/platform";
 
 type CreateLoginFormValues = {
   name: string;
@@ -169,7 +170,9 @@ function CreateLoginComponent() {
       )}
       <Form.Description
         title=""
-        text={`Press ⌘E to ${showPassword ? "hide" : "show"} password\nPress ⌘G to generate password`}
+        text={`Press ${platform === "macos" ? "⌥" : "Alt"}+E to ${showPassword ? "hide" : "show"} password\nPress ${
+          platform === "macos" ? "⌥" : "Alt"
+        }+G to generate password`}
       />
     </Form>
   );
