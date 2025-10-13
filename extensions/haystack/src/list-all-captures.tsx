@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import { join } from "node:path";
 import { Action, ActionPanel, captureException, environment, Icon, List } from "@raycast/api";
 import { useStreamJSON } from "@raycast/utils";
@@ -8,7 +7,7 @@ import { CaptureDetails } from "./components/capture-details";
 import { FILE_NAMES } from "./constants";
 import { CaptureSchema } from "./schemas";
 import type { Capture } from "./types";
-import { deleteCapture } from "./utils/captures";
+import { deleteCapture, ensureCapturesFileExists } from "./utils/captures";
 import { formatDate } from "./utils/date-formatter";
 
 export default function Main(): React.JSX.Element {
@@ -18,18 +17,12 @@ export default function Main(): React.JSX.Element {
   const capturesPath = join(environment.supportPath, FILE_NAMES.CAPTURES_JSON);
 
   useEffect(() => {
-    if (!fs.existsSync(capturesPath)) {
-      try {
-        const dir = join(environment.supportPath);
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
-        }
-        fs.writeFileSync(capturesPath, JSON.stringify([], null, 2));
-      } catch (error) {
-        captureException(new Error("Error creating captures.json file: ", { cause: error }));
-      }
-    }
-    setIsFileReady(true);
+    const initFile = async () => {
+      await ensureCapturesFileExists();
+      setIsFileReady(true);
+    };
+
+    initFile();
   }, [capturesPath]);
 
   const captureFilter = useCallback(

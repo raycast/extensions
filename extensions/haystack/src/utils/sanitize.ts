@@ -12,3 +12,7 @@ export const sanitizePath = (pathComponent: string): string => {
 export const isValidId = (id: string): boolean => {
   return /^[a-zA-Z0-9_-]+$/.test(id) && id.length > 0 && id.length <= 255;
 };
+
+export const escapeShellPath = (filePath: string): string => {
+  return filePath.replace(/'/g, "'\\''");
+};

@@ -1,10 +1,10 @@
-import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { captureException, environment } from "@raycast/api";
 import { FILE_NAMES } from "../constants";
 import { CaptureSchema } from "../schemas";
 import type { Capture } from "../types";
+import { ensureCapturesFileExists } from "../utils/captures";
 
 /**
  * Retrieves all captures stored in Haystack for AI analysis.
@@ -55,7 +55,7 @@ export default async function tool(): Promise<
 async function readCaptures(): Promise<Capture[]> {
   const capturesPath = path.join(environment.supportPath, FILE_NAMES.CAPTURES_JSON);
 
-  await ensureCapturesFileExists(capturesPath);
+  await ensureCapturesFileExists();
 
   try {
     const fileContent = await fs.readFile(capturesPath, "utf-8");
@@ -85,22 +85,5 @@ async function readCaptures(): Promise<Capture[]> {
   } catch (error) {
     captureException(new Error("Failed to read captures file", { cause: error }));
     return [];
-  }
-}
-
-async function ensureCapturesFileExists(capturesPath: string) {
-  const dir = path.dirname(capturesPath);
-
-  try {
-    if (!fsSync.existsSync(dir)) {
-      await fs.mkdir(dir, { recursive: true });
-    }
-
-    if (!fsSync.existsSync(capturesPath)) {
-      await fs.writeFile(capturesPath, JSON.stringify([], null, 2));
-    }
-  } catch (error) {
-    captureException(new Error("Failed to ensure captures file exists", { cause: error }));
-    throw error;
   }
 }

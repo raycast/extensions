@@ -15,7 +15,7 @@ const getFieldDescription = (description: string, type: string) => {
         Type of this field is: ${type}.
         Instructions on how to deal with each type:
         - For text return the text as is.
-        - For numbers return a string that JS can easily parse into a number.
+        - For numbers return a en-US formatted number string.
         - For currency return a string containing right formatting for this currency and include currency symbol.
         - For date return a date as string in the format Month D, Yr or Month D in case year is not present or Yr, Month in case day is not present.
         - For time return a time as string in the format hh:mm a (AM/PM).

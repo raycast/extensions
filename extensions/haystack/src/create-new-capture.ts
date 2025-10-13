@@ -13,7 +13,7 @@ import { APICallError } from "ai";
 import { nanoid } from "nanoid";
 import { AI_CONFIG, FILE_NAMES } from "./constants";
 import { processCapture } from "./utils/process-capture";
-import { sanitizePath } from "./utils/sanitize";
+import { escapeShellPath, sanitizePath } from "./utils/sanitize";
 
 export default async function main() {
   closeMainWindow({ popToRootType: PopToRootType.Suspended });
@@ -33,7 +33,8 @@ export default async function main() {
   const id = nanoid();
   const sanitizedId = sanitizePath(id);
   const outPath = path.join(capturesDir, `${sanitizedId}.png`);
-  const shellScript = `screencapture -i '${outPath}'`;
+  const escapedPath = escapeShellPath(outPath);
+  const shellScript = `screencapture -i '${escapedPath}'`;
 
   try {
     await runAppleScript(`do shell script "${shellScript}"`, {
