@@ -50,7 +50,7 @@ export default function Command() {
               <Action title="Open Project" onAction={() => openProject(project, application)} />
               {alternateApplication && (
                 <Action
-                  title="Open (Alternate)"
+                  title="Open Alternate"
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                   onAction={() => openProject(project, alternateApplication)}
                 />
