@@ -1,3 +1,5 @@
+import { AttributeTypeCheckbox, AttributeTypeCurrency, AttributeTypeDate, AttributeTypeDomain, AttributeTypeEmailAddress, AttributeTypeNumber, AttributeTypePersonalName, AttributeTypePhoneNumber, AttributeTypeRating, AttributeTypeSelect1, AttributeTypeText, AttributeTypeTimestamp } from "attio-js/dist/commonjs/models/components/outputvalue";
+
 export type QueryRecordsResponse = {
   data: Array<{
     id: {
@@ -13,43 +15,43 @@ export type QueryRecordsResponse = {
 
 type CheckboxValue = {
   value: boolean;
-  attribute_type: "checkbox";
+  attribute_type: AttributeTypeCheckbox;
 };
 
 type CurrencyValue = {
   currency_value: number;
   currency_code: string | null;
-  attribute_type: "currency";
+  attribute_type: AttributeTypeCurrency;
 };
 
 type DateValue = {
-  attribute_type: "date";
+  attribute_type: AttributeTypeDate;
   value: string;
 };
 
 type DomainValue = {
   domain: string;
-  attribute_type: "domain";
+  attribute_type: AttributeTypeDomain;
 };
 
 type EmailAddressValue = {
   email_address: string;
-  attribute_type: "email-address";
+  attribute_type: AttributeTypeEmailAddress;
 };
 
 type NumberValue = {
   value: number;
-  attribute_type: "number";
+  attribute_type: AttributeTypeNumber;
 };
 
 type PersonalNameValue = {
   full_name: string;
-  attribute_type: "personal-name";
+  attribute_type: AttributeTypePersonalName;
 };
 
 type PhoneNumberValue = {
   phone_number: string;
-  attribute_type: "phone-number";
+  attribute_type: AttributeTypePhoneNumber
 };
 
 type StatusValue = {
@@ -59,21 +61,21 @@ type StatusValue = {
 
 type RatingValue = {
   value: number;
-  attribute_type: "rating";
+  attribute_type: AttributeTypeRating
 };
 
 type SelectValue = {
   option: unknown
-  attribute_type: "select";
+  attribute_type: AttributeTypeSelect1;
 };
 
 type TextValue = {
   value: string;
-  attribute_type: "text";
+  attribute_type: AttributeTypeText;
 };
 
 type TimestampValue = {
-  attribute_type: "timestamp";
+  attribute_type: AttributeTypeTimestamp;
   value: string;
 };
 

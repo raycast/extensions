@@ -1,6 +1,6 @@
 import { usePromise } from "@raycast/utils";
-import { AttributeValue, QueryRecordsResponse } from "./types";
-import { attio } from "./attio";
+import { AttributeValue } from "./types";
+import { queryRecords } from "./attio";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 function getValue(val: AttributeValue[]) {
@@ -49,18 +49,7 @@ ${Object.entries(values).map(([key, val]) => `| ${key} | ${getValue(val)} |`).jo
 }
 export default function Records({objectId}:{objectId: string}) {
     const {isLoading,data:records=[]} = usePromise(async() => {
-        // This crashes since web_url is passed so we bypass using a manual fetch
-        // const {data} = await attio.records.query({object: objectId, requestBody: {}})
-
-        const response = await fetch(new URL(`v2/objects/${objectId}/records/query`, attio._baseURL?.origin), {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${attio._options.apiKey}`
-            }
-        })
-        const result = await response.json();
-        if (!response.ok) throw new Error((result as Error).message);
-        const { data } = result as QueryRecordsResponse;
+        const { data } = await queryRecords({objectId});
         return data;
     })
     return <List isLoading={isLoading} isShowingDetail>
