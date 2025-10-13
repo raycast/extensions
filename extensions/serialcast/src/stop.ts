@@ -1,5 +1,5 @@
-import { openSerialPlotterUrl } from "./utils"
+import { openSerialPlotterUrl } from "./utils";
 
 export default async function main() {
-  await openSerialPlotterUrl("stop", "Stopped Monitoring.")
+  await openSerialPlotterUrl("stop", "Stopped Monitoring.");
 }
