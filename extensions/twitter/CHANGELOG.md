@@ -1,6 +1,6 @@
 # Twitter Changelog
 
-## [Modernize] - {PR_MERGE_DATE}
+## [Modernize] - 2025-10-13
 
 - Remove `node-fetch`
 - Modernize extension to use latest configuration
