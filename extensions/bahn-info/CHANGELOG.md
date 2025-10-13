@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2025-10-13
 
 ### Fixed
 - Fixed "Unexpected end of JSON input" error when not connected to ICE WiFi
