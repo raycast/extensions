@@ -153,15 +153,15 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 _Agent selection happens before a chat session starts (via the Start Agent form or configuration views). Mid-conversation agent switching is out of scope for this phase._
 
 - [X] T059 [P] Create agent configuration UI in src/components/AgentConfig.tsx
-- [ ] T060 [P] Implement agent management with LocalStorage in src/services/agentConfigService.ts
-- [ ] T061 [P] Add agent health monitoring in src/services/healthService.ts
-- [ ] T062 Create agent list component for configure-agents command in src/components/AgentSelector.tsx
+- [X] T060 [P] Implement agent management with LocalStorage in src/services/agentConfigService.ts
+- [X] T061 [P] Add agent health monitoring in src/services/healthService.ts
+- [X] T062 Create agent list component for configure-agents command in src/components/AgentSelector.tsx
 - [X] T063 Implement add/edit/delete agent workflow with LocalStorage persistence
-- [ ] T064 Add agent connection testing and validation
-- [ ] T065 [P] Implement user preferences management with LocalStorage
-- [ ] T066 [P] Add security settings for file access permissions
-- [ ] T067 [P] Create built-in agent templates (Gemini CLI, Claude Code, custom)
-- [ ] T068 [P] Add agent import/export functionality
+- [X] T064 Add agent connection testing and validation
+- [X] T065 [P] Implement user preferences management with LocalStorage
+- [X] T066 [P] Add security settings for file access permissions
+- [X] T067 [P] Create built-in agent templates (Gemini CLI, Claude Code, custom)
+- [X] T068 [P] Add agent import/export functionality
 
 ---
 

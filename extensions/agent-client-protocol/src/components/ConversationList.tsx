@@ -10,7 +10,7 @@ import {
   confirmAlert,
   showToast
 } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { HistoryService, type ConversationSummary } from "@/services/historyService";
 import { PersistenceService, type ActiveSessionRecord } from "@/services/persistenceService";
 import { StorageService } from "@/services/storageService";
@@ -58,7 +58,7 @@ const INITIAL_STATE: ConversationListState = {
   agentMap: {}
 };
 
-export function ConversationList(): JSX.Element {
+export function ConversationList(): React.ReactElement {
   const [state, setState] = useState<ConversationListState>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -185,7 +185,7 @@ export function ConversationList(): JSX.Element {
     return state.agentConfigs.find((config) => config.id === agentId);
   }
 
-  function renderSummaryItem(summary: ConversationSummary): JSX.Element {
+  function renderSummaryItem(summary: ConversationSummary): React.ReactElement {
     const agentName = state.agentMap[summary.agentConfigId] ?? summary.agentConfigId;
     const title = summary.title ?? summary.preview ?? `Conversation ${summary.sessionId.slice(0, 8)}`;
     const detail = `${summary.messageCount} messages • ${formatTimestamp(summary.lastActivity)}`;
@@ -248,7 +248,7 @@ export function ConversationList(): JSX.Element {
     );
   }
 
-  function renderRecoverableItem(record: ActiveSessionRecord): JSX.Element {
+  function renderRecoverableItem(record: ActiveSessionRecord): React.ReactElement {
     const agentName = state.agentMap[record.agentConfigId] ?? record.agentConfigId;
     const lastActivity = formatTimestamp(new Date(record.lastActivity));
     const title = record.title ?? `Active session ${record.sessionId.slice(0, 8)}`;
@@ -278,7 +278,7 @@ export function ConversationList(): JSX.Element {
             />
             <Action
               title="Dismiss Recovery Entry"
-              icon={Icon.X}
+              icon={Icon.XMarkCircle}
               onAction={async () => {
                 try {
                   await persistenceService.markSessionCompleted(record.sessionId);
@@ -334,7 +334,7 @@ export function ConversationList(): JSX.Element {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search conversations..."
-      searchBarAccessory={[statusDropdown, agentDropdown]}
+      searchBarAccessory={statusDropdown}
     >
       {state.recoverable.length > 0 && (
         <List.Section title="Resume Recent Sessions">

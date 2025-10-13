@@ -253,8 +253,7 @@ export class ACPClient implements acp.Client {
   async requestPermission(params: acp.RequestPermissionRequest): Promise<acp.RequestPermissionResponse> {
     logger.info('Permission request received from agent', {
       sessionId: params.sessionId,
-      toolTitle: params.toolCall.title,
-      toolKind: params.toolCall.kind
+      toolTitle: params.toolCall.title
     });
 
     return this.permissionService.handlePermissionRequest(params);

@@ -75,9 +75,6 @@ const LANGUAGE_MAP: Record<string, string> = {
   // Swift
   swift: "swift",
 
-  // Kotlin
-  kt: "kotlin",
-
   // SQL
   sql: "sql",
 

@@ -289,12 +289,18 @@ export interface PermissionOption {
   kind: "allow" | "deny" | "allow_once" | "allow_always";
 }
 
-export interface RequestPermissionResponse {
-  outcome: {
-    outcome: "selected" | "cancelled";
-    optionId?: string;
-  };
-}
+export type RequestPermissionResponse =
+  | {
+      outcome: {
+        outcome: "selected";
+        optionId: string;
+      };
+    }
+  | {
+      outcome: {
+        outcome: "cancelled";
+      };
+    };
 
 // File System Operations
 export interface ReadTextFileRequest {

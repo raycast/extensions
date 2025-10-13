@@ -560,7 +560,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           <ActionPanel>
             {renderContextActions()}
             <ActionPanel.Section title="Context Item">
-              <Action.OpenInFinder path={context.path} />
+              <Action.ShowInFinder path={context.path} />
               <Action.CopyToClipboard title="Copy Path" content={context.path} />
               <Action
                 title="Remove Context"

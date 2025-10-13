@@ -8,7 +8,7 @@ import { Alert, confirmAlert, showToast, Toast } from "@raycast/api";
 import { createLogger } from "@/utils/logging";
 import { ConfigService } from "./configService";
 import type { SecuritySettings } from "@/types/extension";
-import type { RequestPermissionRequest, RequestPermissionResponse, PermissionOption } from "@/types/acp";
+import type { RequestPermissionRequest, RequestPermissionResponse, PermissionOption } from "@zed-industries/agent-client-protocol/dist/schema";
 
 const logger = createLogger("PermissionService");
 
@@ -71,7 +71,6 @@ export class PermissionService {
     const messageParts = [
       request.toolCall.title ?? "Agent action request",
       primaryPath ? `Path: ${primaryPath}` : null,
-      request.toolCall.kind ? `Action: ${request.toolCall.kind}` : null,
       "",
       "Always allow this action for future requests?"
     ].filter(Boolean);
@@ -143,19 +142,15 @@ export class PermissionService {
   }
 
   private findAllowAlwaysOption(options: PermissionOption[]): PermissionOption | undefined {
-    return options.find((option) => option.kind === "allow_always" || option.kind === "allow");
+    return options.find((option) => option.kind === "allow_always");
   }
 
   private findAllowOption(options: PermissionOption[]): PermissionOption | undefined {
-    const allowOnce = options.find((option) => option.kind === "allow_once");
-    if (allowOnce) {
-      return allowOnce;
-    }
-    return options.find((option) => option.kind === "allow" || option.kind === "allow_always");
+    return options.find((option) => option.kind === "allow_once" || option.kind === "allow_always");
   }
 
   private findDenyOption(options: PermissionOption[]): PermissionOption | undefined {
-    return options.find((option) => option.kind === "deny" || option.kind === "reject_once");
+    return options.find((option) => option.kind === "reject_once" || option.kind === "reject_always");
   }
 
   private buildResponse(option?: PermissionOption): RequestPermissionResponse {
@@ -183,27 +178,34 @@ export class PermissionService {
     const primaryPath = this.getPrimaryPath(request);
     return JSON.stringify({
       title: request.toolCall.title,
-      kind: request.toolCall.kind,
       path: primaryPath
     });
   }
 
   private getPrimaryPath(request: RequestPermissionRequest): string | undefined {
-    const location = request.toolCall.locations?.find((item) => "path" in item) as { path?: string } | undefined;
-    return location?.path;
-  }
+    // Try to extract path from the tool call locations or raw input
+    const toolCall = request.toolCall as unknown as { rawInput?: Record<string, unknown>; locations?: Array<Record<string, unknown>> };
 
-  private getDescription(request: RequestPermissionRequest): string | undefined {
-    const firstContent = request.toolCall.content?.[0];
-    if (!firstContent) {
-      return undefined;
+    // Check locations first
+    if (toolCall.locations) {
+      for (const loc of toolCall.locations) {
+        if (typeof loc.path === "string") {
+          return loc.path;
+        }
+      }
     }
 
-    if ("text" in firstContent && typeof firstContent.text === "string") {
-      return firstContent.text;
+    // Check rawInput
+    if (toolCall.rawInput && typeof toolCall.rawInput.path === "string") {
+      return toolCall.rawInput.path;
     }
 
     return undefined;
+  }
+
+  private getDescription(request: RequestPermissionRequest): string | undefined {
+    const toolCall = request.toolCall as unknown as { description?: string };
+    return toolCall.description;
   }
 
   private async persistTrustedTool(descriptor: string, settings: SecuritySettings): Promise<void> {
