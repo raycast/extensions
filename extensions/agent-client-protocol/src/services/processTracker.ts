@@ -28,11 +28,15 @@ interface ProcessInfo {
 }
 
 export class ProcessTracker {
-  // Use Raycast's support directory for stable, extension-specific storage
-  private static readonly PROCESS_DIR = path.join(environment.supportPath, 'processes');
   // Kill processes older than 2 hours (aggressive for lightweight tasks)
   private static readonly MAX_PROCESS_AGE_MS = 2 * 60 * 60 * 1000;
   private static initialized = false;
+
+  // Use Raycast's support directory for stable, extension-specific storage
+  // Lazy getter to avoid accessing environment at module load time (for testing)
+  private static get PROCESS_DIR(): string {
+    return path.join(environment.supportPath, 'processes');
+  }
 
   /**
    * Initialize the process tracker and clean up orphaned processes
@@ -59,6 +63,13 @@ export class ProcessTracker {
       logger.error('Failed to initialize process tracker', { error });
       throw error;
     }
+  }
+
+  /**
+   * Reset the tracker state (useful for testing)
+   */
+  static reset(): void {
+    this.initialized = false;
   }
 
   /**
@@ -203,6 +214,17 @@ export class ProcessTracker {
           const isExpired = processAge > this.MAX_PROCESS_AGE_MS;
 
           if (this.isProcessRunning(processInfo.pid)) {
+            // Safety check: never kill the current process or its parent
+            if (processInfo.pid === process.pid || processInfo.pid === process.ppid) {
+              logger.warn('Skipping current/parent process', {
+                pid: processInfo.pid,
+                currentPid: process.pid,
+                parentPid: process.ppid
+              });
+              // Don't remove the PID file for current process
+              continue;
+            }
+
             // Process is still running - kill it if orphaned or expired
             if (isExpired) {
               logger.info('Found expired process, killing', {

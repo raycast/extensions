@@ -32,6 +32,10 @@ jest.mock('uuid', () => ({
 // Mock Raycast API LocalStorage
 const mockStorage = new Map<string, string>();
 
+// Use a unique test directory for each test run to avoid conflicts
+const testRunId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const testSupportPath = `/tmp/raycast-acp-${testRunId}`;
+
 jest.mock('@raycast/api', () => ({
   LocalStorage: {
     getItem: jest.fn((key: string) => Promise.resolve(mockStorage.get(key))),
@@ -48,6 +52,9 @@ jest.mock('@raycast/api', () => ({
       return Promise.resolve();
     }),
     allItems: jest.fn(() => Promise.resolve(Object.fromEntries(mockStorage))),
+  },
+  environment: {
+    supportPath: testSupportPath,
   },
   showToast: jest.fn(),
   showHUD: jest.fn(),
