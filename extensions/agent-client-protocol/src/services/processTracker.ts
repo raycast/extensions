@@ -1,13 +1,21 @@
 /**
  * Process Tracker - Filesystem-based Process Management
  *
- * Tracks agent subprocesses using PID files in /tmp to survive extension reloads.
- * Automatically cleans up orphaned processes on startup.
+ * Tracks agent subprocesses using PID files in Raycast's support directory.
+ * Uses environment.supportPath for reliable, extension-specific storage.
+ *
+ * Cleanup Strategy:
+ * - On initialization: kills ALL orphaned processes (aggressive cleanup)
+ * - TTL enforcement: processes older than MAX_PROCESS_AGE are terminated
+ * - Opportunistic cleanup: stale PIDs removed when accessed
+ *
+ * Note: Raycast extensions are ephemeral - they unload after inactivity.
+ * We rely on frequent extension restarts to keep processes under control.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
+import { environment } from '@raycast/api';
 import { createLogger } from '@/utils/logging';
 
 const logger = createLogger('ProcessTracker');
@@ -20,7 +28,10 @@ interface ProcessInfo {
 }
 
 export class ProcessTracker {
-  private static readonly PROCESS_DIR = path.join(os.tmpdir(), 'raycast-acp-processes');
+  // Use Raycast's support directory for stable, extension-specific storage
+  private static readonly PROCESS_DIR = path.join(environment.supportPath, 'processes');
+  // Kill processes older than 2 hours (aggressive for lightweight tasks)
+  private static readonly MAX_PROCESS_AGE_MS = 2 * 60 * 60 * 1000;
   private static initialized = false;
 
   /**
@@ -39,6 +50,7 @@ export class ProcessTracker {
       }
 
       // Clean up stale PID files and orphaned processes
+      // This runs every time the extension starts (which is frequent in Raycast)
       await this.cleanupOrphanedProcesses();
 
       this.initialized = true;
@@ -164,6 +176,7 @@ export class ProcessTracker {
 
   /**
    * Clean up orphaned processes from previous sessions
+   * Kills ALL running processes tracked in PID files and removes old processes exceeding TTL
    */
   private static async cleanupOrphanedProcesses(): Promise<void> {
     try {
@@ -178,6 +191,7 @@ export class ProcessTracker {
 
       let cleaned = 0;
       let killed = 0;
+      let expired = 0;
 
       for (const file of pidFiles) {
         try {
@@ -185,20 +199,32 @@ export class ProcessTracker {
           const content = fs.readFileSync(pidFile, 'utf-8');
           const processInfo: ProcessInfo = JSON.parse(content);
 
+          const processAge = Date.now() - processInfo.startedAt;
+          const isExpired = processAge > this.MAX_PROCESS_AGE_MS;
+
           if (this.isProcessRunning(processInfo.pid)) {
-            // Process is still running - kill it
-            logger.info('Found orphaned process, killing', {
-              agentId: processInfo.agentId,
-              pid: processInfo.pid,
-              uptime: Date.now() - processInfo.startedAt
-            });
+            // Process is still running - kill it if orphaned or expired
+            if (isExpired) {
+              logger.info('Found expired process, killing', {
+                agentId: processInfo.agentId,
+                pid: processInfo.pid,
+                ageHours: (processAge / (60 * 60 * 1000)).toFixed(2)
+              });
+              expired++;
+            } else {
+              logger.info('Found orphaned process, killing', {
+                agentId: processInfo.agentId,
+                pid: processInfo.pid,
+                ageMinutes: (processAge / (60 * 1000)).toFixed(2)
+              });
+            }
 
             try {
               process.kill(processInfo.pid, 'SIGTERM');
               killed++;
             } catch (error) {
               if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
-                logger.warn('Failed to kill orphaned process', {
+                logger.warn('Failed to kill process', {
                   pid: processInfo.pid,
                   error
                 });
@@ -214,7 +240,7 @@ export class ProcessTracker {
         }
       }
 
-      logger.info('Orphaned process cleanup complete', { cleaned, killed });
+      logger.info('Orphaned process cleanup complete', { cleaned, killed, expired });
     } catch (error) {
       logger.error('Failed to cleanup orphaned processes', { error });
     }
@@ -244,6 +270,7 @@ export class ProcessTracker {
 
   /**
    * Get all tracked processes
+   * Performs opportunistic cleanup of stale and expired processes
    */
   static getAllProcesses(): ProcessInfo[] {
     try {
@@ -260,6 +287,26 @@ export class ProcessTracker {
           const pidFile = path.join(this.PROCESS_DIR, file);
           const content = fs.readFileSync(pidFile, 'utf-8');
           const processInfo: ProcessInfo = JSON.parse(content);
+
+          const processAge = Date.now() - processInfo.startedAt;
+          const isExpired = processAge > this.MAX_PROCESS_AGE_MS;
+
+          // Clean up expired processes opportunistically
+          if (isExpired && this.isProcessRunning(processInfo.pid)) {
+            logger.info('Killing expired process during scan', {
+              agentId: processInfo.agentId,
+              pid: processInfo.pid,
+              ageHours: (processAge / (60 * 60 * 1000)).toFixed(2)
+            });
+            try {
+              process.kill(processInfo.pid, 'SIGTERM');
+            } catch (error) {
+              logger.warn('Failed to kill expired process', { pid: processInfo.pid, error });
+            }
+            // Remove PID file
+            fs.unlinkSync(pidFile);
+            continue;
+          }
 
           // Only include running processes
           if (this.isProcessRunning(processInfo.pid)) {
