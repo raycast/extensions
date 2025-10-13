@@ -1,26 +1,49 @@
 import { Action, ActionPanel, List, showToast, Toast, Icon, Color } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { AllTasks, getTasks, formatTasksForGoogleSheets, formatDayTasksForGoogleSheets, deleteTask } from "./utils";
-import { format, parseISO } from "date-fns";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
+import { getTasks, formatTasksForGoogleSheets, formatDayTasksForGoogleSheets, deleteTask } from "./utils";
+
+// Simple date formatting functions
+function formatDate(date: Date, format: string): string {
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  switch (format) {
+    case "EEEE, MMMM d, yyyy":
+      return `${dayNames[date.getDay()]}, ${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    case "MMMM d, yyyy":
+      return `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    default:
+      return date.toISOString();
+  }
+}
+
+function parseISODate(dateString: string): Date {
+  return new Date(dateString + "T00:00:00.000Z");
+}
 
 export default function Command() {
-  const [tasks, setTasks] = useState<AllTasks>({});
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  async function fetchTasks() {
-    try {
-      const allTasks = await getTasks();
-      setTasks(allTasks);
-    } catch (error) {
-      console.error("Failed to fetch tasks", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const {
+    data: tasks = {},
+    isLoading,
+    revalidate,
+  } = useCachedPromise(getTasks, [], {
+    onError: (error) => {
+      showFailureToast(error, { title: "Failed to fetch tasks" });
+    },
+  });
 
   const sortedDates = Object.keys(tasks).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   const totalTasks = sortedDates.reduce((sum, date) => sum + tasks[date].length, 0);
@@ -31,7 +54,7 @@ export default function Command() {
         <List.Section title={`${totalTasks} Total Tasks`}>
           {sortedDates.map((date) => {
             const taskCount = tasks[date].length;
-            const formattedDate = format(parseISO(date), "EEEE, MMMM d, yyyy");
+            const formattedDate = formatDate(parseISODate(date), "EEEE, MMMM d, yyyy");
 
             return (
               <List.Item
@@ -46,7 +69,7 @@ export default function Command() {
                       <Action.Push
                         title="View Tasks"
                         icon={Icon.List}
-                        target={<DailyTasksList date={date} tasks={tasks[date]} onTasksChange={fetchTasks} />}
+                        target={<DailyTasksList date={date} tasks={tasks[date]} onTasksChange={revalidate} />}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Copy">
@@ -97,7 +120,7 @@ export default function Command() {
 
 // This is the component for the detailed view of a single day
 function DailyTasksList({ date, tasks, onTasksChange }: { date: string; tasks: string[]; onTasksChange: () => void }) {
-  const formattedDate = format(parseISO(date), "MMMM d, yyyy");
+  const formattedDate = formatDate(parseISODate(date), "MMMM d, yyyy");
   const taskCount = tasks.length;
 
   async function handleDeleteTask(taskIndex: number) {
@@ -109,11 +132,7 @@ function DailyTasksList({ date, tasks, onTasksChange }: { date: string; tasks: s
       });
       onTasksChange();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to delete task",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Failed to delete task" });
     }
   }
 
