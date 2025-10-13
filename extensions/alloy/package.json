@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alloy",
-  "title": "Alloy - AI Prototyping for Product Management",
-  "description": "Create AI-generated Prototypes for Product Management",
+  "title": "Alloy",
+  "description": "AI Prototyping for Product Management",
   "icon": "logo-512.png",
-  "author": "minh_thanh_dang",
+  "author": "alloyprototyping",
   "license": "MIT",
   "categories": [
     "Applications",
@@ -46,8 +46,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }
