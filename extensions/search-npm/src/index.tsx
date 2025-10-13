@@ -1,74 +1,62 @@
-import {
-  List,
-  showToast,
-  Toast,
-  Icon,
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-} from '@raycast/api'
-import { useFetch, useCachedState } from '@raycast/utils'
-import { useState, useEffect } from 'react'
-import { PackageListItem } from './components/PackagListItem'
-import { addToHistory, getHistory } from './utils/history-storage'
-import { HistoryListItem } from './components/HistoryListItem'
-import { useDebouncedCallback } from 'use-debounce'
-import type {
-  NpmFetchResponse,
-  FetchResponseObject,
-} from './model/npmResponse.model'
-import type { HistoryItem } from './utils/history-storage'
-import { useFavorites } from './hooks/useFavorites'
+import { useEffect, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { useCachedState, useFetch } from "@raycast/utils";
+import type { FetchResponseObject, NpmFetchResponse } from "@/model/npmResponse.model";
+import { addToHistory, getHistory } from "@/utils/history-storage";
+import type { HistoryItem } from "@/utils/history-storage";
+import { useFavorites } from "@/hooks/useFavorites";
+import { HistoryListItem } from "@/components/HistoryListItem";
+import { PackageListItem } from "@/components/PackagListItem";
 
-const API_PATH = 'https://registry.npmjs.org/-/v1/search?text='
+const API_PATH = "https://registry.npmjs.org/-/v1/search?text=";
 export default function PackageList() {
-  const [searchTerm, setSearchTerm] = useState<string>('')
-  const [history, setHistory] = useCachedState<HistoryItem[]>('history', [])
-  const [favorites, fetchFavorites] = useFavorites()
-  const { historyCount, showLinkToSearchResultsInListView } =
-    getPreferenceValues<ExtensionPreferences>()
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [history, setHistory] = useCachedState<HistoryItem[]>("history", []);
+  const [favorites, fetchFavorites] = useFavorites();
+  const { historyCount, showLinkToSearchResultsInListView } = getPreferenceValues<ExtensionPreferences>();
 
   const { isLoading, data, revalidate } = useFetch<FetchResponseObject[]>(
-    `${API_PATH}${searchTerm.replace(/\s/g, '+')}`,
+    `${API_PATH}${searchTerm.replace(/\s/g, "+")}`,
     {
       execute: !!searchTerm,
       onError: (error) => {
         if (searchTerm) {
-          console.error(error)
-          showToast(Toast.Style.Failure, 'Could not fetch packages')
+          console.error(error);
+          showToast(Toast.Style.Failure, "Could not fetch packages");
         }
       },
       parseResponse: async (response) => {
-        return ((await response.json()) as NpmFetchResponse).objects
+        return ((await response.json()) as NpmFetchResponse).objects;
       },
       keepPreviousData: true,
     },
-  )
+  );
 
   const debounced = useDebouncedCallback(
     async (value) => {
-      const history = await addToHistory({ term: value, type: 'search' })
-      setHistory(history)
+      const history = await addToHistory({ term: value, type: "search" });
+      setHistory(history);
     },
     600,
     { debounceOnServer: true },
-  )
+  );
 
   useEffect(() => {
     if (searchTerm) {
-      debounced(searchTerm)
+      debounced(searchTerm);
     } else {
-      revalidate()
+      revalidate();
     }
-  }, [searchTerm])
+  }, [searchTerm]);
 
   useEffect(() => {
     async function fetchHistory() {
-      const historyItems = await getHistory()
-      setHistory(historyItems)
+      const historyItems = await getHistory();
+      setHistory(historyItems);
     }
-    fetchHistory()
-  }, [])
+    fetchHistory();
+  }, []);
 
   return (
     <List
@@ -98,7 +86,7 @@ export default function PackageList() {
               <List.Section title="Results" subtitle={data.length.toString()}>
                 {data.map((result) => {
                   if (!result.package.name) {
-                    return null
+                    return null;
                   }
                   return (
                     <PackageListItem
@@ -106,14 +94,10 @@ export default function PackageList() {
                       result={result.package}
                       searchTerm={searchTerm}
                       setHistory={setHistory}
-                      isFavorited={
-                        favorites.findIndex(
-                          (item) => item.name === result.package.name,
-                        ) !== -1
-                      }
+                      isFavorited={favorites.findIndex((item) => item.name === result.package.name) !== -1}
                       handleFaveChange={fetchFavorites}
                     />
-                  )
+                  );
                 })}
               </List.Section>
             </>
@@ -125,23 +109,19 @@ export default function PackageList() {
             history.length ? (
               <List.Section title="History">
                 {history.map((item) => {
-                  if (item.type === 'package' && item?.package?.name) {
-                    const pkgName = item.package.name
+                  if (item.type === "package" && item?.package?.name) {
+                    const pkgName = item.package.name;
                     return (
                       <PackageListItem
                         key={`history-${pkgName}`}
                         result={item.package}
                         searchTerm={searchTerm}
                         setHistory={setHistory}
-                        isFavorited={
-                          favorites.findIndex(
-                            (fave) => fave.name === pkgName,
-                          ) !== -1
-                        }
+                        isFavorited={favorites.findIndex((fave) => fave.name === pkgName) !== -1}
                         handleFaveChange={fetchFavorites}
                         isHistoryItem={true}
                       />
-                    )
+                    );
                   }
 
                   return (
@@ -151,7 +131,7 @@ export default function PackageList() {
                       setHistory={setHistory}
                       setSearchTerm={setSearchTerm}
                     />
-                  )
+                  );
                 })}
               </List.Section>
             ) : (
@@ -161,5 +141,5 @@ export default function PackageList() {
         </>
       )}
     </List>
-  )
+  );
 }
