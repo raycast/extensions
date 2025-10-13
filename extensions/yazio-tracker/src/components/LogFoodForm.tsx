@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast } from "@raycast/api";
 import { yazio } from "../utils/yazio";
 import { isDevelopment } from "../utils/mockData";
 import type { ProductSearchResult } from "../types";
@@ -56,7 +56,7 @@ export function LogFoodForm({ product }: LogFoodFormProps) {
       navigationTitle={`Log ${product.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Log Food" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Checkmark} title="Log Food" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

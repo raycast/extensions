@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { yazio } from "./utils/yazio";
@@ -55,7 +55,7 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Log This Food" target={<LogFoodForm product={item} />} />
+                  <Action.Push icon={Icon.Plus} title="Log This Food" target={<LogFoodForm product={item} />} />
                 </ActionPanel>
               }
             />

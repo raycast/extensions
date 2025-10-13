@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { yazio } from "./utils/yazio";
@@ -68,6 +68,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push
+                  icon={Icon.List}
                   title={`View ${meal.charAt(0).toUpperCase() + meal.slice(1)}`}
                   target={<MealDetail meal={meal} items={data?.[meal] || []} />}
                 />
