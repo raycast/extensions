@@ -1,0 +1,18 @@
+import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+
+import { IVPN } from "@/api/ivpn";
+import { withNoViewErrorHandler } from "@/utils/errorHandler";
+
+import { IvpnInfoMap } from "./api/ivpn/types";
+
+export default withNoViewErrorHandler(async () => {
+  showToast({ title: "IVPN Connecting...", style: Toast.Style.Animated });
+  const info = (await IVPN.connect({
+    strategy: "RANDOM",
+    protocol: getPrefs().preferredProtocol,
+  })) as IvpnInfoMap["CONNECTED"];
+  const { city, countryCode } = info.serverLocation;
+  showToast({ title: `IVPN Connected to ${city}, ${countryCode}` });
+});
+
+const getPrefs = () => getPreferenceValues<Preferences.QuickConnect>();
