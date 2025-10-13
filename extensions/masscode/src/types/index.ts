@@ -31,8 +31,3 @@ export interface ListItem {
   value: string;
   language: string;
 }
-
-export interface State {
-  list?: ListItem[];
-  error?: Error;
-}
