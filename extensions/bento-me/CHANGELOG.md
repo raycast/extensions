@@ -1,6 +1,6 @@
 # Bento Extension Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2025-10-13
 
 ### Added
 
