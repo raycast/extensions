@@ -1,6 +1,6 @@
 # Snake Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2025-10-13
 
 - Port Snake to Windows
 
