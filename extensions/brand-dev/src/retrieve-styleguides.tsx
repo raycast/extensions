@@ -298,7 +298,7 @@ function SearchStyleguide({ onSearched }: { onSearched: (styleguide: StyleguideI
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.CodeBlock} title="Take Screenshot" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.CodeBlock} title="Retrieve Styleguide" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
