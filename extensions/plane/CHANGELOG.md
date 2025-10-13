@@ -1,5 +1,10 @@
 # Plane Changelog
 
+## [Fix Issue in getProjectIcon] - {PR_MERGE_DATE}
+
+### Fixed
+- `getProjectIcon`: Extension was crashing due to different response in project logo (ref: [Issue #22144](https://github.com/raycast/extensions/issues/22144))
+
 ## [Search Projects + Filter Work Items] - 2025-10-13
 
 ### Added
