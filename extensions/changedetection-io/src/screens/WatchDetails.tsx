@@ -47,7 +47,10 @@ const WatchDetails = ({ id }: { id: string }) => {
                   : "Webpage Text/HTML, JSON and PDF changes"
               }
             />
-            <Detail.Metadata.Label title="Sort Text Alphabetically" icon={data.sort_text_alphabetically ? Icon.Check : Icon.Xmark} />
+            <Detail.Metadata.Label
+              title="Sort Text Alphabetically"
+              icon={data.sort_text_alphabetically ? Icon.Check : Icon.Xmark}
+            />
           </Detail.Metadata>
         ) : null
       }
