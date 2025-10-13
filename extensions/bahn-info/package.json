@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "bahn-info",
-      "title": "German Train Info",
-      "subtitle": "Real-time ICE train information",
+      "title": "View German Train Info",
       "description": "View current journey progress, next stops, delays, speed, and connection status",
       "mode": "view"
     }
