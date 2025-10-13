@@ -4,7 +4,7 @@ import path from "node:path";
 import { captureException, environment } from "@raycast/api";
 import { FILE_NAMES } from "../constants";
 import { CaptureSchema } from "../schemas";
-import type { Capture, CaptureData } from "../types";
+import type { Capture, CaptureData, CaptureStack } from "../types";
 import { getCurrentTimestamp } from "./date-formatter";
 import { isValidId } from "./sanitize";
 
@@ -145,7 +145,7 @@ const writeCapturesUnsafe = async (captures: Capture[]): Promise<void> => {
  */
 export const createCapture = async (
   id: string,
-  stackName: string,
+  stack: CaptureStack,
   title: string,
   imagePath: string,
   data: CaptureData,
@@ -160,7 +160,7 @@ export const createCapture = async (
     const timestamp = getCurrentTimestamp();
     const newCapture: Capture = {
       id,
-      stackName,
+      stack,
       title,
       imagePath,
       data,

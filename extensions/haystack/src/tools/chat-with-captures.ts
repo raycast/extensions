@@ -29,7 +29,11 @@ export default async function tool(): Promise<
   Array<{
     id: string;
     title: string;
-    stackName: string;
+    stack: {
+      id: string;
+      name: string;
+      version: number;
+    };
     data: Record<string, { value: string; type: string }>;
     createdAt: string;
     imagePath: string;
@@ -41,7 +45,7 @@ export default async function tool(): Promise<
     return captures.map((capture) => ({
       id: capture.id,
       title: capture.title,
-      stackName: capture.stackName,
+      stack: capture.stack,
       data: capture.data,
       createdAt: capture.createdAt,
       imagePath: capture.imagePath,

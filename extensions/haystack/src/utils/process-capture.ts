@@ -4,7 +4,7 @@ import { generateText, jsonSchema, type Tool, tool } from "ai";
 import type { JSONSchema7Definition } from "json-schema";
 import z from "zod";
 import { PROCESS_CAPTURE_PROMPT } from "../constants/prompts";
-import type { CaptureData, StackField } from "../types";
+import type { CaptureData, CaptureStack, StackField } from "../types";
 import { createCapture } from "./captures";
 import { createClient } from "./create-client";
 import { getStacks } from "./stacks";
@@ -49,7 +49,7 @@ const captureDataSchema = z.record(z.string());
 const getAvailableTools = async ({
   onExecute,
 }: {
-  onExecute: ({ stackName, data }: { stackName: string; title: string; data: CaptureData }) => Promise<void>;
+  onExecute: ({ stack, data }: { stack: CaptureStack; title: string; data: CaptureData }) => Promise<void>;
 }) => {
   const stacks = await getStacks();
   return stacks.reduce<Record<string, Tool>>((tools, stack) => {
@@ -83,7 +83,7 @@ const getAvailableTools = async ({
 
           const title = titleFields.map((field) => data[field.label.value].value).join(" ");
 
-          await onExecute({ stackName: stack.name.value, title, data });
+          await onExecute({ stack: { id: stack.id, name: stack.name.value, version: stack.version }, title, data });
         } catch (error) {
           captureException(error);
           return;
@@ -99,16 +99,8 @@ export const processCapture = async ({ id, path }: { id: string; path: string })
     const openai = await createClient();
     const text = await Clipboard.readText();
 
-    const handleExecute = async ({
-      stackName,
-      title,
-      data,
-    }: {
-      stackName: string;
-      title: string;
-      data: CaptureData;
-    }) => {
-      await createCapture(id, stackName, title, path, data);
+    const handleExecute = async ({ stack, title, data }: { stack: CaptureStack; title: string; data: CaptureData }) => {
+      await createCapture(id, stack, title, path, data);
     };
 
     const tools = await getAvailableTools({ onExecute: handleExecute });

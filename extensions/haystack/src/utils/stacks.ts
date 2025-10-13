@@ -67,7 +67,7 @@ export const createStack = async (input: StackInput) => {
       createdAt: timestamp,
       updatedAt: timestamp,
       fields: [],
-      version: 1,
+      version: 0,
     };
 
     await LocalStorage.setItem(getStackKey(id), JSON.stringify(stack));

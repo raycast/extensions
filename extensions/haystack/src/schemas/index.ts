@@ -36,9 +36,15 @@ export const StackSchema = StackInputSchema.merge(MetadataSchema).extend({
 
 export const CaptureDataSchema = z.record(z.string(), z.object({ value: z.string(), type: StackFieldTypeSchema }));
 
+export const CaptureStackSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  version: z.number().int().positive(),
+});
+
 export const CaptureSchema = z.object({
   id: z.string().min(1),
-  stackName: z.string().min(1),
+  stack: CaptureStackSchema,
   title: z.string().min(1),
   imagePath: z.string().min(1),
   data: CaptureDataSchema,

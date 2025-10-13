@@ -14,9 +14,17 @@ import { nanoid } from "nanoid";
 import { AI_CONFIG, FILE_NAMES } from "./constants";
 import { processCapture } from "./utils/process-capture";
 import { escapeShellPath, sanitizePath } from "./utils/sanitize";
+import { getStacks } from "./utils/stacks";
 
 export default async function main() {
   closeMainWindow({ popToRootType: PopToRootType.Suspended });
+
+  const stacks = await getStacks();
+
+  if (!stacks.length) {
+    await showHUD("Create at least one stack to start capturing.");
+    return;
+  }
 
   const capturesDir = path.join(environment.supportPath, FILE_NAMES.CAPTURES_DIR);
 

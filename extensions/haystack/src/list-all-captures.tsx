@@ -82,7 +82,7 @@ export default function Main(): React.JSX.Element {
             subtitle={formatDate(capture.createdAt)}
             accessories={[
               {
-                tag: capture.stackName,
+                tag: capture.stack.name,
               },
             ]}
             actions={

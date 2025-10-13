@@ -18,7 +18,7 @@ export const CaptureDetails = ({ capture }: { capture: Capture }) => {
 ## ${capture.title}
 ${renderCaptureData(capture.data)}
 
-_Captured in ${capture.stackName}_
+_Captured in ${capture.stack.name}_
 `;
 
   return (

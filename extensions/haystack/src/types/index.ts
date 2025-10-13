@@ -42,9 +42,15 @@ export type Stack = StackInput &
 
 export type StackField = StackFieldInput & Metadata;
 
+export type CaptureStack = {
+  id: string;
+  name: string;
+  version: number;
+};
+
 export type Capture = {
   id: string;
-  stackName: string;
+  stack: CaptureStack;
   title: string;
   imagePath: string;
   data: CaptureData;
