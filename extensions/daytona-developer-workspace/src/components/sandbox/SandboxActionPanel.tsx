@@ -73,7 +73,7 @@ export const SandboxActionPanel = React.memo<SandboxActionPanelProps>(
             />
           )}
 
-          <Action.CopyToClipboard title="Copy Sandbox Id" content={sandbox.id} icon={ICONS.ACTIONS.COPY} />
+          <Action.CopyToClipboard title="Copy Sandbox ID" content={sandbox.id} icon={ICONS.ACTIONS.COPY} />
 
           {sandbox.repository && (
             <Action.OpenInBrowser title="Open Repository" url={sandbox.repository} icon={ICONS.GIT.BRANCH} />

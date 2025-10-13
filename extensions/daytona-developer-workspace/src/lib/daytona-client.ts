@@ -6,10 +6,6 @@
 import { Daytona } from "@daytonaio/sdk";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-}
-
 let daytonaClientInstance: Daytona | null = null;
 
 /**

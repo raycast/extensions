@@ -1,10 +1,6 @@
 import { Daytona } from "@daytonaio/sdk";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-}
-
 // Task 2.1: CodeExecutionResponse Data Model
 export interface CodeExecutionResponse {
   stdout: string;

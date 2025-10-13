@@ -67,7 +67,9 @@ export default function ManageVolumes() {
           }
         />
       )}
-      {volumes?.map((volume) => <VolumeItem key={volume.id} volume={volume} onUpdate={revalidate} />)}
+      {volumes?.map((volume) => (
+        <VolumeItem key={volume.id} volume={volume} onUpdate={revalidate} />
+      ))}
     </List>
   );
 }

@@ -3,20 +3,6 @@
  * Centralized definitions for user preferences and extension settings
  */
 
-export interface Preferences {
-  daytonaApiKey: string;
-  daytonaUrl?: string;
-  defaultLanguage?: string;
-  autoSave?: boolean;
-  executionTimeout?: number;
-  maxExecutionHistory?: number;
-  showExecutionTime?: boolean;
-  enableNotifications?: boolean;
-  debugMode?: boolean;
-  theme?: "system" | "light" | "dark";
-  compactMode?: boolean;
-}
-
 export interface ExtensionSettings {
   // API Configuration
   api: {

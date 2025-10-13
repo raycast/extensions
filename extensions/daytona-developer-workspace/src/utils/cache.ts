@@ -255,7 +255,7 @@ export function getCacheStats(): { [key: string]: { exists: boolean; age?: numbe
           const cachedItem = JSON.parse(cached);
           age = Date.now() - cachedItem.timestamp;
         }
-      } catch (error) {
+      } catch {
         // Ignore parse errors
       }
     }

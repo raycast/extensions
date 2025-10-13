@@ -27,10 +27,6 @@ import {
   CreateDockerRegistryRegistryTypeEnum,
 } from "@daytonaio/api-client";
 
-interface Preferences {
-  apiKey: string;
-}
-
 // Use DockerRegistry from API client directly
 type Registry = DockerRegistry & {
   isDefault?: boolean;
@@ -99,7 +95,9 @@ export default function ManageRegistries() {
           }
         />
       )}
-      {registries?.map((registry) => <RegistryItem key={registry.id} registry={registry} onUpdate={revalidate} />)}
+      {registries?.map((registry) => (
+        <RegistryItem key={registry.id} registry={registry} onUpdate={revalidate} />
+      ))}
     </List>
   );
 }

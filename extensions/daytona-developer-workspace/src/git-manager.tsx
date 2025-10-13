@@ -414,13 +414,13 @@ except Exception as e:
                     {remoteInfo?.hasRemote ? (
                       <>
                         <Action
-                          title={remoteInfo.canPush ? "Push" : "Push (auth Required)"}
+                          title={remoteInfo.canPush ? "Push" : "Push (Auth Required)"}
                           icon={remoteInfo.canPush ? Icon.ArrowUp : Icon.ExclamationMark}
                           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                           onAction={() => executeGitCommand("git push", "Changes pushed successfully")}
                         />
                         <Action
-                          title={remoteInfo.canPush ? "Pull" : "Pull (auth Required)"}
+                          title={remoteInfo.canPush ? "Pull" : "Pull (Auth Required)"}
                           icon={remoteInfo.canPush ? Icon.ArrowDown : Icon.ExclamationMark}
                           shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
                           onAction={() => executeGitCommand("git pull", "Changes pulled successfully")}

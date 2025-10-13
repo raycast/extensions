@@ -8,10 +8,6 @@ import { useState, useEffect } from "react";
 import { getDaytonaClient, isDaytonaClientInitialized } from "./lib/daytona-client";
 import { getCacheStats, clearAllCache } from "./utils/cache";
 
-interface Preferences {
-  apiKey: string;
-}
-
 // Define cache stats type
 interface CacheStatsItem {
   exists: boolean;

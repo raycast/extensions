@@ -16,6 +16,7 @@
     {
       "name": "run-code",
       "title": "Run Code",
+      "subtitle": "Daytona Developer Workspace",
       "description": "Execute code in a Jupyter notebook cell and return result",
       "mode": "view",
       "arguments": [
@@ -29,49 +30,57 @@
     },
     {
       "name": "sandboxes",
-      "title": "Sandboxes",
+      "title": "View Sandboxes",
+      "subtitle": "Daytona Developer Workspace",
       "description": "View and manage your sandboxes with overview and quick actions",
       "mode": "view"
     },
     {
       "name": "settings",
-      "title": "Settings",
+      "title": "View Settings",
+      "subtitle": "Daytona Developer Workspace",
       "description": "Configure preferences, API keys, and extension settings",
       "mode": "view"
     },
     {
       "name": "enhanced-run-code",
       "title": "Enhanced Code Runner",
+      "subtitle": "Daytona Developer Workspace",
       "description": "Advanced code execution with persistent sandboxes and rich output",
       "mode": "view"
     },
     {
       "name": "files",
       "title": "File Manager",
+      "subtitle": "Daytona Developer Workspace",
       "description": "Browse, edit, and manage files in your sandboxes",
       "mode": "view"
     },
     {
       "name": "git-manager",
       "title": "Git Manager",
+      "subtitle": "Daytona Developer Workspace",
       "description": "Git operations and repository management for workspace projects",
       "mode": "view"
     },
     {
       "name": "snapshots",
-      "title": "Snapshots",
+      "title": "View Snapshots",
+      "subtitle": "Daytona Developer Workspace",
       "description": "Create, restore, and manage workspace snapshots and backups",
       "mode": "view"
     },
     {
       "name": "registries",
-      "title": "Container Registries",
+      "title": "View Container Registries",
+      "subtitle": "Daytona Developer Workspace",
       "description": "Manage Docker container registries for workspace deployments",
       "mode": "view"
     },
     {
       "name": "volumes",
-      "title": "Volume Manager",
+      "title": "View Volumes",
+      "subtitle": "Daytona Developer Workspace",
       "description": "Manage persistent storage volumes for data persistence across sandboxes",
       "mode": "view"
     }
@@ -117,7 +126,10 @@
               "name": "run-code",
               "arguments": {
                 "code": {
-                  "includes": ["factorial", "12"]
+                  "includes": [
+                    "factorial",
+                    "12"
+                  ]
                 }
               }
             }
@@ -132,7 +144,10 @@
               "name": "run-code",
               "arguments": {
                 "code": {
-                  "includes": ["sqrt", "144"]
+                  "includes": [
+                    "sqrt",
+                    "144"
+                  ]
                 }
               }
             }
@@ -147,7 +162,11 @@
               "name": "run-code",
               "arguments": {
                 "code": {
-                  "includes": ["quadratic", "5", "6"]
+                  "includes": [
+                    "quadratic",
+                    "5",
+                    "6"
+                  ]
                 }
               }
             }
@@ -162,7 +181,10 @@
               "name": "run-code",
               "arguments": {
                 "code": {
-                  "includes": ["prime", "50"]
+                  "includes": [
+                    "prime",
+                    "50"
+                  ]
                 }
               }
             }
@@ -177,7 +199,11 @@
               "name": "run-code",
               "arguments": {
                 "code": {
-                  "includes": ["random", "100", "average"]
+                  "includes": [
+                    "random",
+                    "100",
+                    "average"
+                  ]
                 }
               }
             }
@@ -192,7 +218,11 @@
               "name": "run-code",
               "arguments": {
                 "code": {
-                  "includes": ["98.6", "celsius", "fahrenheit"]
+                  "includes": [
+                    "98.6",
+                    "celsius",
+                    "fahrenheit"
+                  ]
                 }
               }
             }
@@ -207,7 +237,11 @@
               "name": "run-code",
               "arguments": {
                 "code": {
-                  "includes": ["mean", "median", "mode"]
+                  "includes": [
+                    "mean",
+                    "median",
+                    "mode"
+                  ]
                 }
               }
             }
@@ -222,7 +256,10 @@
               "name": "run-code",
               "arguments": {
                 "code": {
-                  "includes": ["standard deviation", "variance"]
+                  "includes": [
+                    "standard deviation",
+                    "variance"
+                  ]
                 }
               }
             }
@@ -231,12 +268,19 @@
       }
     ]
   },
+  "dependencies": {
+    "@daytonaio/api-client": "^0.25.6",
+    "@daytonaio/sdk": "^0.25.5",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.0"
+  },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
@@ -245,12 +289,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "dependencies": {
-    "@daytonaio/sdk": "^0.25.5",
-    "@raycast/api": "^1.91.2",
-    "@raycast/utils": "^1.18.1",
-    "cross-fetch": "^4.1.0",
-    "node-fetch": "^3.3.2"
   }
 }

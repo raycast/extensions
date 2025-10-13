@@ -55,7 +55,7 @@ function FilesCommand() {
         setCurrentPath("/home/daytona");
         await loadFiles("/home/daytona");
       }
-    } catch (error) {
+    } catch {
       // Fallback to root
       setCurrentPath("/");
       await loadFiles("/");
@@ -379,7 +379,7 @@ print(content)
             icon={Icon.ChevronUp}
             actions={
               <ActionPanel>
-                <Action title="Go Up" icon={Icon.ChevronUp} onAction={navigateUp} />
+                <Action title="Go up" icon={Icon.ChevronUp} onAction={navigateUp} />
               </ActionPanel>
             }
           />
