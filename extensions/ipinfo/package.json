@@ -62,6 +62,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.3",
     "@raycast/utils": "^2.2.1",
+    "ip-address": "^10.0.1",
     "node-ipinfo": "^4.1.0"
   },
   "devDependencies": {
