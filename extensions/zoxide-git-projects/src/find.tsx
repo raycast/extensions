@@ -7,7 +7,7 @@ import { getGitProjects } from "./git-projects";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { application, alternateApplication } = getPreferenceValues<Preferences>();
+  const { application, alternativeApplication } = getPreferenceValues();
 
   const { data: projects = [], isLoading } = useCachedPromise(async () => {
     return getGitProjects();
@@ -43,11 +43,11 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Open Project" onAction={() => openProject(project, application)} />
-              {alternateApplication && (
+              {alternativeApplication && (
                 <Action
-                  title="Open Alternate"
+                  title="Open Alternative"
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  onAction={() => openProject(project, alternateApplication)}
+                  onAction={() => openProject(project, alternativeApplication)}
                 />
               )}
               <Action

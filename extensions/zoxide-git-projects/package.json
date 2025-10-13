@@ -42,9 +42,9 @@
       "required": true
     },
     {
-      "name": "alternateApplication",
-      "title": "Alternate Application",
-      "description": "Alternate application to open projects with (⌘O)",
+      "name": "alternativeApplication",
+      "title": "Alternative Application",
+      "description": "Alternative application to open projects with (⌘O)",
       "type": "appPicker",
       "required": false
     }
