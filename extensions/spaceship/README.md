@@ -7,7 +7,7 @@
 This is a Raycast extension for [Spaceship](https://spaceship.com/) - next-level domain name management. With this extension you can easily manage your Spaceship products. For now:
 
 - View List of Domains with Info
-- View DNS Records
+- Manage DNS Records
 
 ## 🚀 Getting Started
 

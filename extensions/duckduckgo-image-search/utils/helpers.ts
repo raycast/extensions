@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
-import { DEFAULT_RETRIES, DEFAULT_SLEEP, HEADERS, ImageLayouts, ImageLicenses } from "./consts";
-import { getCachedImagePath, setCachedImagePath } from "./cache";
 import axios from "axios";
-import { tmpdir } from "os";
 import fs from "fs";
 import mime from "mime-types";
+import { tmpdir } from "os";
+import { getCachedImagePath, setCachedImagePath } from "./cache";
+import { DEFAULT_RETRIES, DEFAULT_SLEEP, HEADERS, ImageLayouts, ImageLicenses } from "./consts";
+import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
 
-import path from "path";
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { homedir } from "os";
+import path from "path";
 
 export const emptyResult: ImageSearchResult = {
   vqd: "",
@@ -136,6 +137,65 @@ export async function copyImageToClipboard(image: DuckDuckGoImage) {
 export async function pasteImage(image: DuckDuckGoImage) {
   const file = await downloadImage(image);
   await Clipboard.paste({ file });
+}
+
+function expandTildePath(filePath: string): string {
+  if (!filePath) return "";
+  if (filePath === "~" || filePath === "~/") return homedir();
+  if (filePath.startsWith("~/")) {
+    return path.resolve(homedir(), filePath.slice(2));
+  }
+  return path.resolve(filePath);
+}
+
+export async function saveImage(image: DuckDuckGoImage) {
+  await showToast({
+    title: "Saving Image...",
+    style: Toast.Style.Animated,
+  });
+
+  try {
+    // Download the image to temp folder first
+    const tempFile = await downloadImage(image, false);
+
+    // Create a clean filename from the image title
+    const cleanTitle = image.title
+      .replace(/[^a-zA-Z0-9\s\-_.]/g, "") // Remove special characters
+      .replace(/\s+/g, "_") // Replace spaces with underscores
+      .substring(0, 100); // Limit filename length
+
+    // Get file extension from temp file
+    const extension = path.extname(tempFile);
+    const filename = `${cleanTitle || "duckduckgo_image"}_${image.image_token}${extension}`;
+
+    // Get save directory from preferences (with fallback to ~/Downloads)
+    const allPreferences = getPreferenceValues<Preferences & { saveDirectory?: string }>();
+    const saveDirectory = expandTildePath(allPreferences.saveDirectory || "~/Downloads");
+
+    // Ensure the save directory exists
+    await fs.promises.mkdir(saveDirectory, { recursive: true });
+
+    const targetPath = path.join(saveDirectory, filename);
+
+    // Copy file from temp to save directory
+    await fs.promises.copyFile(tempFile, targetPath);
+
+    const directoryName = path.basename(saveDirectory);
+    await showToast({
+      title: "Image Saved!",
+      message: `Saved to ${directoryName} folder as ${filename}`,
+      style: Toast.Style.Success,
+    });
+
+    return targetPath;
+  } catch (e: any) {
+    await showToast({
+      title: "Failed to Save Image!",
+      style: Toast.Style.Failure,
+      message: e.message,
+    });
+    throw e;
+  }
 }
 
 export function stringToPositiveNumber(value: string): number | undefined {

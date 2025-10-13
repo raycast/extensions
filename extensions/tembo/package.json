@@ -3,7 +3,7 @@
   "title": "Tembo",
   "description": "Tembo Raycast Extension for task management and creation",
   "icon": "extension-icon.png",
-  "author": "vinicius_miguel",
+  "author": "tembo",
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -266,5 +266,8 @@
         ]
       }
     ]
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

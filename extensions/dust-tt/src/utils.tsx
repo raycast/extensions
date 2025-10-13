@@ -85,6 +85,11 @@ export const ConnectorProviders: Record<ConnectorProvider, ConnectorProviderConf
     color: Color.Green,
     name: "Gong",
   },
+  slack_bot: {
+    icon: "icons/slack_bot.svg",
+    color: Color.Red,
+    name: "Slack Bot",
+  },
 };
 
 const GREETINGS = [

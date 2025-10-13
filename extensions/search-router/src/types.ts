@@ -26,6 +26,8 @@ export interface SearchEngine {
   fmt?: (typeof BANG_FORMATS)[number][];
   /** Whether specs should be run on this bang */
   skip_tests?: boolean;
+  /** Whether the search engine is a custom user-defined engine */
+  isCustom?: boolean;
 }
 
 export const BANG_CATEGORIES = [

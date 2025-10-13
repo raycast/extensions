@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react";
 import { Action, ActionPanel, closeMainWindow, Grid, Icon, Image, PopToRootType, showHUD } from "@raycast/api";
+import { useRef, useState } from "react";
 
 import { useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
-import { copyImageToClipboard, pasteImage, searchImage } from "../utils/helpers";
 import { ImageLayout, ImageLayouts } from "../utils/consts";
+import { copyImageToClipboard, pasteImage, saveImage, searchImage } from "../utils/helpers";
 import { DuckDuckGoImage } from "../utils/search";
 
 const QUERY_EXAMPLES: string[] = [
@@ -71,6 +71,15 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
             });
           })
         }
+      />
+      <Action
+        title="Save Image"
+        shortcut={{
+          modifiers: ["cmd"],
+          key: "s",
+        }}
+        icon={Icon.Download}
+        onAction={() => saveImage(item)}
       />
       <Action.CopyToClipboard
         title="Copy Image URL"

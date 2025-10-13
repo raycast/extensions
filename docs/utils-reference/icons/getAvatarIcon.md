@@ -2,7 +2,7 @@
 
 Icon to represent an avatar when you don't have one. The generated avatar will be generated from the initials of the name and have a colorful but consistent background.
 
-![Avatar Icon example](../../.gitbook/assets/utils-avatar-icon.png)
+![Avatar Icon example](../.gitbook/assets/utils-avatar-icon.png)
 
 ## Signature
 

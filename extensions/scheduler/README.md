@@ -16,6 +16,7 @@ This extension allows you to schedule any Raycast command to run automatically a
 - **View & Filter**: See all your scheduled commands with filtering by schedule type
 - **Enable/Disable**: Easily toggle commands on or off without deleting them
 - **Edit Schedules**: Modify existing scheduled commands anytime
+- **Run missed schedules**: Immediately run a scheduled command that was missed (e.g., when the machine was asleep). Note: in this case "immediately" means within one minute of Raycast starting.
 - **Execution Logs**: Track when commands run and view any errors
 
 ## Creating a Scheduled Command
@@ -38,14 +39,14 @@ To grab Raycast command:
 
 ## Schedule Types
 
-| Type              | Description                                | Example Use Cases                                    |
-| ----------------- | ------------------------------------------ | ---------------------------------------------------- |
-| **One-time**      | Execute once at a specific date and time   | Meeting reminders, deadline alerts                   |
-| **15/30 minutes** | Run every 15 or 30 minutes                 | AI model checks, quick status updates                |
-| **Hourly**        | Execute every hour                         | System monitoring, regular backups                   |
-| **Daily**         | Run at the same time every day             | Morning briefings, daily reports                     |
-| **Weekly**        | Execute on specific days of the week       | Weekly summaries, maintenance tasks                  |
-| **Monthly**       | Run on a specific day each month           | Monthly reports, billing reminders                   |
+| Type              | Description                                | Example Use Cases                                           |
+| ----------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| **One-time**      | Execute once at a specific date and time   | Meeting reminders, deadline alerts                          |
+| **15/30 minutes** | Run every 15 or 30 minutes                 | AI model checks, quick status updates                       |
+| **Hourly**        | Execute every hour                         | System monitoring, regular backups                          |
+| **Daily**         | Run at the same time every day             | Morning briefings, daily reports                            |
+| **Weekly**        | Execute on specific days of the week       | Weekly summaries, maintenance tasks                         |
+| **Monthly**       | Run on a specific day each month           | Monthly reports, billing reminders                          |
 | **Custom Cron**   | Use cron expressions for complex schedules | "Tuesdays and Fridays at 9 AM", "Every 2 hours on weekends" |
 
 ## Troubleshooting

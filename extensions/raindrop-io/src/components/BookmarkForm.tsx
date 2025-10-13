@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
-import fetch from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { FormValues } from "../types";
 
@@ -185,7 +184,9 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         <Form.TextField {...itemProps.newCollection} title="New Collection" placeholder="Name" />
       )}
       <Form.TagPicker {...itemProps.tags} title="Tags">
-        {tags?.items?.map(({ _id }) => <Form.TagPicker.Item key={_id} value={_id} title={_id} />)}
+        {tags?.items?.map(({ _id }) => (
+          <Form.TagPicker.Item key={_id} value={_id} title={_id} />
+        ))}
       </Form.TagPicker>
     </Form>
   );

@@ -16,7 +16,8 @@
     "samuel_ivarsson",
     "gaspihabif",
     "marinsokol",
-    "jose-elias-alvarez"
+    "jose-elias-alvarez",
+    "krambono"
   ],
   "pastContributors": [
     "pomdtr"
@@ -198,6 +199,14 @@
       "subtitle": "Bitwarden",
       "description": "Create a folder in the authenticated Bitwarden vault.",
       "icon": "create-folder.png",
+      "mode": "view"
+    },
+    {
+      "name": "create-login",
+      "title": "Create Login",
+      "subtitle": "Bitwarden",
+      "description": "Create a new login item in the authenticated Bitwarden vault.",
+      "icon": "create-login.png",
       "mode": "view"
     },
     {
@@ -428,7 +437,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.5.0",
     "prettier": "^2.8.4",
-    "react-devtools": "^5.2.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.5.4"
@@ -441,5 +449,8 @@
     "lint": "ray lint",
     "test": "jest --verbose",
     "test:watch": "jest --watch"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

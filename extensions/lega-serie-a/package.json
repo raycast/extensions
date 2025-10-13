@@ -83,7 +83,6 @@
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
     "prettier": "^3.5.3",
-    "react-devtools": "^4.27.2",
     "typescript": "^4.9.5"
   },
   "scripts": {

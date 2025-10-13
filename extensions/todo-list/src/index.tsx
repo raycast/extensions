@@ -14,7 +14,7 @@ export default function TodoList() {
   return (
     <List
       actions={<ListActions />}
-      enableFiltering={searchMode}
+      filtering={searchMode}
       key={searchMode ? "search" : "nosearch"}
       navigationTitle={`Manage Todo List${editing !== false ? " • Editing" : searchMode ? " • Searching" : ""}`}
       onSearchTextChange={(text: string) => setSearchBarText(text)}

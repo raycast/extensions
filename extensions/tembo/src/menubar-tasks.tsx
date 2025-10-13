@@ -1,5 +1,5 @@
 import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { temboAPI, TEMBO_UI_BASE, type Issue } from "./api";
 import { getIssueStatus, getIssueIntegrationType, getIssueRepo, getIntegrationIcon } from "./issue-utils";
 
@@ -10,7 +10,16 @@ async function fetchIssues(): Promise<Issue[]> {
       pageSize: 20,
     });
 
-    issues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    issues.sort((a, b) => {
+      const aQueuedAt = a.lastQueuedAt ? new Date(a.lastQueuedAt).getTime() : 0;
+      const bQueuedAt = b.lastQueuedAt ? new Date(b.lastQueuedAt).getTime() : 0;
+
+      if (aQueuedAt !== bQueuedAt) {
+        return bQueuedAt - aQueuedAt; // Descending order (most recent first)
+      }
+
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
     return issues;
   } catch (error) {
     console.error("Failed to fetch issues for menubar:", error);
@@ -19,17 +28,13 @@ async function fetchIssues(): Promise<Issue[]> {
 }
 
 export default function MenubarTasks() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [issues, setIssues] = useState<Issue[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const data = await fetchIssues();
-      setIssues(data);
-      setIsLoading(false);
-    })();
-  }, []);
+  const {
+    data: issues = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(fetchIssues, [], {
+    initialData: [],
+  });
 
   const activeIssues = issues.filter((issue) => {
     const status = getIssueStatus(issue);
@@ -144,11 +149,7 @@ export default function MenubarTasks() {
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
-            setIsLoading(true);
-            fetchIssues().then((data) => {
-              setIssues(data);
-              setIsLoading(false);
-            });
+            revalidate();
           }}
         />
       </MenuBarExtra.Section>

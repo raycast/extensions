@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Enhancement] - 2025-09-29
+
+- Add a new action to paste a GIF into the front-most application
+
 ## [Fix] - 2025-07-10
 
 - Expanded Tenor URL detection in ⁠getServiceFromUrl.ts to ensure GIFs from ⁠tenor.com, ⁠c.tenor.com, and ⁠media.tenor.com are added to the "Recent" list in GIF Search.
