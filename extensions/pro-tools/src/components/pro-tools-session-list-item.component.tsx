@@ -1,8 +1,14 @@
 import { ProToolsSession } from "../models/pro-tools-session.model";
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  useNavigation,
+} from "@raycast/api";
 import React from "react";
 import { ProToolsService } from "../services/pro-tools.service";
-import { getPreferences } from "../shared/get-preferences";
 import * as Path from "path";
 
 // Format date as YYYY-MM-DD
@@ -21,7 +27,7 @@ export function ProToolsSessionListItem(props: {
 }): React.ReactElement {
   const navigation = useNavigation();
   // Get preferences
-  const preferences = getPreferences();
+  const preferences = getPreferenceValues();
   const showPath = preferences.showPath || false;
 
   // Determine what to show as subtitle

@@ -12,11 +12,11 @@ export function ProToolsSessionList(props: {
   actions?: (proToolsSession: ProToolsSession) => React.ReactNode;
 }): React.ReactElement {
   const proToolsSessionsState = useCachedPromise(
-    ProToolsSessionService.proToolsSessions
+    ProToolsSessionService.proToolsSessions,
   );
 
   const favoriteProToolsSessionsState = useCachedPromise(
-    ProToolsFavoriteSessionService.favorites
+    ProToolsFavoriteSessionService.favorites,
   );
 
   // The sessions are already sorted by modification date in the service layer
@@ -25,13 +25,13 @@ export function ProToolsSessionList(props: {
   // Filter favorite sessions while preserving original order
   const favoriteProToolsSessions = proToolsSessionsState.data?.filter(
     (proToolsSession) =>
-      favoriteProToolsSessionsState.data?.includes(proToolsSession.filePath)
+      favoriteProToolsSessionsState.data?.includes(proToolsSession.filePath),
   );
 
   // Filter regular sessions while preserving original order
   const proToolsSessions = proToolsSessionsState.data?.filter(
     (proToolsSession) =>
-      !favoriteProToolsSessionsState.data?.includes(proToolsSession.filePath)
+      !favoriteProToolsSessionsState.data?.includes(proToolsSession.filePath),
   );
 
   // Custom search filtering implementation that preserves sort order
@@ -109,11 +109,11 @@ function ProToolsSessionListItemContainer(props: {
       onToggleFavoriteAction={async () => {
         if (props.isFavorite) {
           await ProToolsFavoriteSessionService.removeFromFavorites(
-            props.proToolsSession
+            props.proToolsSession,
           );
         } else {
           await ProToolsFavoriteSessionService.addToFavorites(
-            props.proToolsSession
+            props.proToolsSession,
           );
         }
         props.revalidate();

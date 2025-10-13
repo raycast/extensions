@@ -6,7 +6,7 @@ export class ProToolsFavoriteSessionService {
 
   static async favorites(): Promise<string[]> {
     const favoriteItem: string | undefined = await LocalStorage.getItem(
-      ProToolsFavoriteSessionService.localStorageKey
+      ProToolsFavoriteSessionService.localStorageKey,
     );
     if (favoriteItem) {
       return JSON.parse(favoriteItem) as string[];
@@ -30,7 +30,7 @@ export class ProToolsFavoriteSessionService {
   private static async saveFavorites(favorites: string[]) {
     await LocalStorage.setItem(
       ProToolsFavoriteSessionService.localStorageKey,
-      JSON.stringify(favorites)
+      JSON.stringify(favorites),
     );
   }
 }

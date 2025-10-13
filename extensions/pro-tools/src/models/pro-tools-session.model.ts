@@ -5,4 +5,4 @@ export type ProToolsSession = {
   filePath: string;
   relativePath: string; // Path relative to search directory
   keywords: string[];
-}
+};

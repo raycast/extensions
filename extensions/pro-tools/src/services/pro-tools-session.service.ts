@@ -2,14 +2,14 @@ import { ProToolsSession } from "../models/pro-tools-session.model";
 import { execAsync, defaultExecOptions } from "../shared/exec-async";
 import * as Path from "path";
 import * as fs from "fs";
-import { getPreferences } from "../shared/get-preferences";
 import untildify from "untildify";
+import { getPreferenceValues } from "@raycast/api";
 
 export class ProToolsSessionService {
   static async proToolsSessions(): Promise<ProToolsSession[]> {
     try {
       // Get user preferences
-      const preferences = getPreferences();
+      const preferences = getPreferenceValues();
       const showProToolsTemplates = preferences.showProToolsTemplates;
       const excludedProToolsSessionPaths =
         ProToolsSessionService.excludedProToolsSessionPaths();
@@ -52,7 +52,7 @@ export class ProToolsSessionService {
       // Combine results
       filePaths = [...ptxFiles, ...ptfFiles];
       console.log(
-        `Found ${filePaths.length} Pro Tools files (${ptxFiles.length} PTX, ${ptfFiles.length} PTF)`
+        `Found ${filePaths.length} Pro Tools files (${ptxFiles.length} PTX, ${ptfFiles.length} PTF)`,
       );
 
       // If no files found, log a message
@@ -78,7 +78,7 @@ export class ProToolsSessionService {
         // Skip excluded paths
         if (
           excludedProToolsSessionPaths.some((excludedPath) =>
-            file.startsWith(excludedPath)
+            file.startsWith(excludedPath),
           )
         )
           return false;
@@ -108,7 +108,7 @@ export class ProToolsSessionService {
           }
         })
         .filter(
-          (item): item is { path: string; mtime: number } => item !== null
+          (item): item is { path: string; mtime: number } => item !== null,
         );
 
       // Sort by modification time (newest first) and take the 100 most recent
@@ -116,7 +116,7 @@ export class ProToolsSessionService {
       const recentFiles = fileStats.slice(0, 100);
 
       console.log(
-        `Final result: ${recentFiles.length} recent Pro Tools sessions`
+        `Final result: ${recentFiles.length} recent Pro Tools sessions`,
       );
 
       // Process files to create session objects
@@ -131,7 +131,7 @@ export class ProToolsSessionService {
         // Decode and add the session with its exact modification time
         const session = ProToolsSessionService.decodeProToolsSession(
           fileStat.path,
-          fileStat.mtime
+          fileStat.mtime,
         );
         if (session) {
           proToolsSessions.push(session);
@@ -148,7 +148,7 @@ export class ProToolsSessionService {
 
   private static decodeProToolsSession(
     filePath: string,
-    cachedModTime?: number
+    cachedModTime?: number,
   ): ProToolsSession | undefined {
     // Check if the file has a .ptx or .ptf extension
     const isPtx = filePath.endsWith(".ptx");
@@ -167,7 +167,7 @@ export class ProToolsSessionService {
     // Get the name without extension for backward compatibility
     const name = filePath.substring(
       lastSlashIndex + 1,
-      filePath.length - fileExtension.length
+      filePath.length - fileExtension.length,
     );
 
     // Use cached modification time if available, otherwise get it from the file
@@ -186,7 +186,7 @@ export class ProToolsSessionService {
 
     // Get relative path if search directory is specified
     let relativePath = filePath;
-    const searchDirectory = getPreferences().searchDirectory;
+    const searchDirectory = getPreferenceValues().searchDirectory;
     if (searchDirectory) {
       const expandedSearchDir = untildify(searchDirectory.trim());
       if (filePath.startsWith(expandedSearchDir)) {
@@ -219,7 +219,7 @@ export class ProToolsSessionService {
 
   private static excludedProToolsSessionPaths(): string[] {
     const excludedProToolsSessionPathsString =
-      getPreferences().excludedProToolsSessionPaths;
+      getPreferenceValues().excludedProToolsSessionPaths;
 
     if (!excludedProToolsSessionPathsString) {
       return [];
@@ -230,9 +230,9 @@ export class ProToolsSessionService {
         // Split by comma
         .split(",")
         // Trim each path
-        .map((path) => path.trim())
+        .map((path: string) => path.trim())
         // Untildify each path
-        .map((path) => untildify(path))
+        .map((path: string) => untildify(path))
     );
   }
 }

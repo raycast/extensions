@@ -9,7 +9,8 @@ export class ProToolsService {
   static async isProToolsInstalled(): Promise<boolean> {
     const applications = await getApplications();
     return !!applications.find(
-      (application) => application.bundleId === ProToolsService.bundleIdentifier
+      (application) =>
+        application.bundleId === ProToolsService.bundleIdentifier,
     );
   }
 
@@ -22,7 +23,7 @@ export class ProToolsService {
         // Sleep for two seconds to ensure
         // the process is truly running
         "sleep 2",
-      ].join(" && ")
-    );
+      ].join(" && "),
+    ).then(() => undefined);
   }
 }
