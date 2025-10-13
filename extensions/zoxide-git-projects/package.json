@@ -37,9 +37,16 @@
     {
       "name": "application",
       "title": "Application",
-      "description": "Application to open projects with",
+      "description": "Application to open projects with (Enter)",
       "type": "appPicker",
       "required": true
+    },
+    {
+      "name": "alternateApplication",
+      "title": "Alternate Application",
+      "description": "Alternate application to open projects with (⌘O)",
+      "type": "appPicker",
+      "required": false
     }
   ],
   "scripts": {
