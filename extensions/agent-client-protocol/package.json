@@ -33,6 +33,43 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "enableLogging",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Logging",
+      "label": "Enable console logging",
+      "description": "Show detailed logs in the console for debugging",
+      "default": false
+    },
+    {
+      "name": "logLevel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Log Level",
+      "description": "Minimum level of logs to display",
+      "default": "info",
+      "data": [
+        {
+          "title": "Debug",
+          "value": "debug"
+        },
+        {
+          "title": "Info",
+          "value": "info"
+        },
+        {
+          "title": "Warning",
+          "value": "warn"
+        },
+        {
+          "title": "Error",
+          "value": "error"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.2",
     "@raycast/utils": "^1.17.0",

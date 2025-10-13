@@ -1,6 +1,9 @@
 import { LocalStorage } from "@raycast/api";
 import { STORAGE_KEYS } from "@/utils/storageKeys";
 import type { AgentHealthRecord } from "@/types/extension";
+import { createLogger } from "@/utils/logging";
+
+const logger = createLogger("HealthService");
 
 interface StoredAgentHealthRecord extends Omit<AgentHealthRecord, "lastChecked"> {
   lastChecked: string;
@@ -76,7 +79,7 @@ export class HealthService {
         }))
         .filter((item) => item.agentId);
     } catch (error) {
-      console.error("Failed to parse agent health records", error);
+      logger.error("Failed to parse agent health records", { error });
       return [];
     }
   }

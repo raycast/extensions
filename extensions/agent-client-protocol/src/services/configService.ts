@@ -15,6 +15,9 @@ import type {
 import { STORAGE_KEYS, getDefaultValue } from "@/utils/storageKeys";
 import { ErrorCode, type ExtensionError } from "@/types/extension";
 import { BUILT_IN_AGENTS } from "@/utils/builtInAgents";
+import { createLogger } from "@/utils/logging";
+
+const logger = createLogger("ConfigService");
 
 export class ConfigService implements ConfigurationService {
 
@@ -157,7 +160,7 @@ export class ConfigService implements ConfigurationService {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.DEFAULT_AGENT);
       return stored && typeof stored === 'string' ? JSON.parse(stored) : null;
     } catch (error) {
-      console.error('Failed to get default agent:', error);
+      logger.error('Failed to get default agent', { error });
       return null;
     }
   }

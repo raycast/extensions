@@ -560,13 +560,13 @@ export class ACPClient implements acp.Client {
 
     // Handle process errors
     this.agentProcess.on('error', (error) => {
-      console.error('Agent process error:', error);
+      logger.error('Agent process error', { error: error.message });
       this.lastError = this.createError(ErrorCode.AgentUnavailable, `Agent process error: ${error.message}`);
       ProcessTracker.unregisterProcess(config.id);
     });
 
     this.agentProcess.on('exit', (code, signal) => {
-      console.log(`Agent process exited with code ${code}, signal ${signal}`);
+      logger.info('Agent process exited', { code, signal });
       this.isConnected = false;
       ProcessTracker.unregisterProcess(config.id);
     });

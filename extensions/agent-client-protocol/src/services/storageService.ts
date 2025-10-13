@@ -250,7 +250,7 @@ export class StorageService {
       archivedMessages.push(...messages);
       await LocalStorage.setItem(archiveKey, JSON.stringify(archivedMessages, this.dateReplacer));
     } catch (error) {
-      console.warn(`Failed to archive messages for session ${sessionId}:`, error);
+      logger.warn(`Failed to archive messages for session ${sessionId}`, { error });
       // Non-critical operation, don't throw
     }
   }
@@ -265,7 +265,7 @@ export class StorageService {
       const existing = await LocalStorage.getItem(archiveKey);
       return existing ? JSON.parse(String(existing), this.dateReviver) : [];
     } catch (error) {
-      console.warn(`Failed to get archived messages for session ${sessionId}:`, error);
+      logger.warn(`Failed to get archived messages for session ${sessionId}`, { error });
       return [];
     }
   }
@@ -521,7 +521,7 @@ export class StorageService {
 
     if (storedVersion !== STORAGE_VERSION) {
       // TODO: Implement migration logic for different versions
-      console.log(`Storage migration needed: ${storedVersion} -> ${STORAGE_VERSION}`);
+      logger.info('Storage migration needed', { from: storedVersion, to: STORAGE_VERSION });
       await LocalStorage.setItem(STORAGE_VERSION_KEY, STORAGE_VERSION);
     }
   }

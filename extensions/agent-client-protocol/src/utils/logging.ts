@@ -5,8 +5,13 @@
  * with configurable levels and storage integration.
  */
 
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { STORAGE_KEYS } from "./storageKeys";
+
+interface Preferences {
+  enableLogging: boolean;
+  logLevel: "debug" | "info" | "warn" | "error";
+}
 
 export enum LogLevel {
   DEBUG = 0,
@@ -38,9 +43,40 @@ export class Logger {
   private static logs: LogEntry[] = [];
   private static maxLogs = 1000;
   private static persistLogs = false;
+  private static consoleLoggingEnabled = false;
+  private static initialized = false;
 
   constructor(category: string) {
     this.category = category;
+    Logger.initializeIfNeeded();
+  }
+
+  /**
+   * Initialize logger with preferences
+   */
+  private static initializeIfNeeded(): void {
+    if (this.initialized) return;
+
+    try {
+      const preferences = getPreferenceValues<Preferences>();
+      this.consoleLoggingEnabled = preferences.enableLogging ?? false;
+
+      // Map string log level to enum
+      const logLevelMap: Record<string, LogLevel> = {
+        debug: LogLevel.DEBUG,
+        info: LogLevel.INFO,
+        warn: LogLevel.WARN,
+        error: LogLevel.ERROR,
+      };
+
+      this.currentLevel = logLevelMap[preferences.logLevel] ?? LogLevel.INFO;
+      this.initialized = true;
+    } catch (error) {
+      // Preferences not available, use defaults
+      this.consoleLoggingEnabled = false;
+      this.currentLevel = LogLevel.INFO;
+      this.initialized = true;
+    }
   }
 
   /**
@@ -48,6 +84,13 @@ export class Logger {
    */
   static setLevel(level: LogLevel): void {
     this.currentLevel = level;
+  }
+
+  /**
+   * Enable/disable console logging
+   */
+  static setConsoleLogging(enabled: boolean): void {
+    this.consoleLoggingEnabled = enabled;
   }
 
   /**
@@ -148,6 +191,11 @@ export class Logger {
    * Output to console with formatting
    */
   private logToConsole(entry: LogEntry): void {
+    // Skip console output if logging is disabled
+    if (!Logger.consoleLoggingEnabled) {
+      return;
+    }
+
     const timestamp = entry.timestamp.toISOString();
     const levelName = LogLevel[entry.level];
     const prefix = `[${timestamp}] [${levelName}] [${entry.category}]`;

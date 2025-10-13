@@ -9,6 +9,9 @@ import { LocalStorage } from "@raycast/api";
 import type { ConversationSession, SessionMessage } from "@/types/entities";
 import { STORAGE_KEYS } from "@/utils/storageKeys";
 import { StorageService } from "./storageService";
+import { createLogger } from "@/utils/logging";
+
+const logger = createLogger("PersistenceService");
 
 export type ActiveSessionStatus = "active" | "recoverable" | "completed";
 
@@ -134,7 +137,7 @@ export class PersistenceService {
       const parsed = JSON.parse(String(raw)) as ActiveSessionRecord[];
       return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
-      console.warn("Failed to parse active session metadata", error);
+      logger.warn("Failed to parse active session metadata", { error });
       return [];
     }
   }

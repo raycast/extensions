@@ -18,6 +18,9 @@ import {
 } from "@/utils/fileUtils";
 import { ProjectContext, ProjectContextType } from "@/types/entities";
 import { STORAGE_KEYS } from "@/utils/storageKeys";
+import { createLogger } from "@/utils/logging";
+
+const logger = createLogger("ContextService");
 
 const CONTEXT_STORAGE_KEY = STORAGE_KEYS.PROJECT_CONTEXTS;
 const MAX_FILE_CONTEXT_BYTES = 64 * 1024; // 64KB per shared file
@@ -59,7 +62,7 @@ export class ContextService {
         ]),
       );
     } catch (error) {
-      console.error("Failed to load contexts from storage:", error);
+      logger.error("Failed to load contexts from storage", { error });
       this.contexts = new Map();
     }
   }
@@ -88,7 +91,7 @@ export class ContextService {
 
       await LocalStorage.setItem(CONTEXT_STORAGE_KEY, JSON.stringify(serializable));
     } catch (error) {
-      console.error("Failed to save contexts to storage:", error);
+      logger.error("Failed to save contexts to storage", { error });
     }
   }
 
