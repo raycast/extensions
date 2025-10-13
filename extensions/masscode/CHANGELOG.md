@@ -1,6 +1,6 @@
 # massCode CHANGELOG
 
-## [2.0.0] - {PR_MERGE_DATE}
+## [2.0.0] - 2025-10-13
 
 ### BREAKING CHANGES
 
