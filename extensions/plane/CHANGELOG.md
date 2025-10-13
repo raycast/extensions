@@ -1,6 +1,6 @@
 # Plane Changelog
 
-## [Search Projects + Filter Work Items] - {PR_MERGE_DATE}
+## [Search Projects + Filter Work Items] - 2025-10-13
 
 ### Added
 - **Search Projects**: Ability to view projects and their work items (ref: [Issue #22093](https://github.com/raycast/extensions/issues/22093))
