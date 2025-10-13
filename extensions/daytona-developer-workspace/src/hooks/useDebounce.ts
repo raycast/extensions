@@ -37,7 +37,7 @@ export function useDebouncedValue<T>(value: T, delay: number, options: DebounceO
   const { leading = false, trailing = true } = options;
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
   const [isPending, setIsPending] = useState<boolean>(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const leadingRef = useRef<boolean>(true);
 
   useEffect(() => {
@@ -83,10 +83,10 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
 ): [T, () => void] {
   const { leading = false, trailing = true, maxWait } = options;
   const callbackRef = useRef(callback);
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const maxTimeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const maxTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const leadingRef = useRef<boolean>(true);
-  const argsRef = useRef<Parameters<T>>();
+  const argsRef = useRef<Parameters<T> | undefined>(undefined);
 
   // Update callback ref when callback changes
   useEffect(() => {
@@ -202,7 +202,7 @@ export function useDebouncedApi<T, Args extends unknown[]>(
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const abortControllerRef = useRef<AbortController>();
+  const abortControllerRef = useRef<AbortController | undefined>(undefined);
 
   const debouncedCall = useMemo(() => {
     return debounce(async (...args) => {
