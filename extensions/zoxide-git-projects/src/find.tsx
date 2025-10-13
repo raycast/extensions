@@ -5,11 +5,6 @@ import { homedir } from "os";
 import { useState } from "react";
 import { getGitProjects } from "./git-projects";
 
-type Preferences = {
-  application: string;
-  alternateApplication?: string;
-};
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { application, alternateApplication } = getPreferenceValues<Preferences>();
