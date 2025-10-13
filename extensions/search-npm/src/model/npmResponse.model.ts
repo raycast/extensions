@@ -1,4 +1,26 @@
-export type NpmFetchResponse = Package[]
+export type NpmFetchResponse = {
+  objects: FetchResponseObject[]
+  total: number
+  time: string
+}
+
+export type FetchResponseObject = {
+  downloads: {
+    monthly: number
+    weekly: number
+  }
+  dependents: string
+  updated: string
+  searchScore: number
+  package: Package
+  score: {
+    final: number
+    detail: Detail
+  }
+  flags: {
+    insecure: number
+  }
+}
 
 export interface Package {
   name: string

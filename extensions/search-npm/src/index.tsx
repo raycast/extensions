@@ -13,11 +13,14 @@ import { PackageListItem } from './components/PackagListItem'
 import { addToHistory, getHistory } from './utils/history-storage'
 import { HistoryListItem } from './components/HistoryListItem'
 import { useDebouncedCallback } from 'use-debounce'
-import type { NpmFetchResponse } from './model/npmResponse.model'
+import type {
+  NpmFetchResponse,
+  FetchResponseObject,
+} from './model/npmResponse.model'
 import type { HistoryItem } from './utils/history-storage'
 import { useFavorites } from './hooks/useFavorites'
 
-const API_PATH = 'https://www.npmjs.com/search/suggestions?q='
+const API_PATH = 'https://registry.npmjs.org/-/v1/search?text='
 export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [history, setHistory] = useCachedState<HistoryItem[]>('history', [])
@@ -25,7 +28,7 @@ export default function PackageList() {
   const { historyCount, showLinkToSearchResultsInListView } =
     getPreferenceValues<ExtensionPreferences>()
 
-  const { isLoading, data, revalidate } = useFetch<NpmFetchResponse>(
+  const { isLoading, data, revalidate } = useFetch<FetchResponseObject[]>(
     `${API_PATH}${searchTerm.replace(/\s/g, '+')}`,
     {
       execute: !!searchTerm,
@@ -34,6 +37,9 @@ export default function PackageList() {
           console.error(error)
           showToast(Toast.Style.Failure, 'Could not fetch packages')
         }
+      },
+      parseResponse: async (response) => {
+        return ((await response.json()) as NpmFetchResponse).objects
       },
       keepPreviousData: true,
     },
@@ -91,18 +97,18 @@ export default function PackageList() {
               ) : null}
               <List.Section title="Results" subtitle={data.length.toString()}>
                 {data.map((result) => {
-                  if (!result.name) {
+                  if (!result.package.name) {
                     return null
                   }
                   return (
                     <PackageListItem
-                      key={`search-${result.name}`}
-                      result={result}
+                      key={`search-${result.package.name}`}
+                      result={result.package}
                       searchTerm={searchTerm}
                       setHistory={setHistory}
                       isFavorited={
                         favorites.findIndex(
-                          (item) => item.name === result.name,
+                          (item) => item.name === result.package.name,
                         ) !== -1
                       }
                       handleFaveChange={fetchFavorites}
