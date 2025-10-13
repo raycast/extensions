@@ -32,13 +32,13 @@ export const SeenUnseenAction = ({ markAsSeen, watch, mutate }: SeenUnseenAction
               shouldRevalidateAfter: true,
             },
           );
+          toast.style = Toast.Style.Success;
+          toast.title = `Marked as ${actionTitle}`;
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed";
           toast.message = `${error}`;
         }
-        toast.style = Toast.Style.Success;
-        toast.title = `Marked as ${actionTitle}`;
       }}
     />
   );
