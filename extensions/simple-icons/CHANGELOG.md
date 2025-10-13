@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2025-10-13
 
 - Fix useEffect dependencies
 - Bump all dependencies to the latest
