@@ -10,6 +10,7 @@ import { HistoryListItem } from "@/components/HistoryListItem";
 import { PackageListItem } from "@/components/PackagListItem";
 
 const API_PATH = "https://registry.npmjs.org/-/v1/search?text=";
+
 export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [history, setHistory] = useCachedState<HistoryItem[]>("history", []);
