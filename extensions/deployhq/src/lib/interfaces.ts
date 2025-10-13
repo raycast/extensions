@@ -22,6 +22,6 @@ export interface Project {
   readonly public_key: string;
   readonly repository?: Repository;
   readonly zone: string;
-  readonly last_deployed_at: string;
+  readonly last_deployed_at: string | null;
   readonly auto_deploy_url: string;
 }
