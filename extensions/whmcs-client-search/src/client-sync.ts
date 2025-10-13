@@ -1,5 +1,4 @@
 import { showHUD, getPreferenceValues, environment, LaunchProps } from "@raycast/api";
-import fetch from "node-fetch";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 

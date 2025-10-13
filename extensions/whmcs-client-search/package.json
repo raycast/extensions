@@ -5,7 +5,9 @@
   "description": "Search your WHMCS Clients and quickly access the client's profile, billable entries, and more.",
   "icon": "extension-icon.png",
   "author": "mwender",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
