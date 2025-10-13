@@ -39,6 +39,10 @@
       ]
     }
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
     "@raycast/api": "^1.102.5",
     "@raycast/utils": "^2.2.1",
