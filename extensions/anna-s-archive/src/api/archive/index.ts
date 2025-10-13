@@ -45,10 +45,7 @@ export const parseArchivePage = (text: string): ArchiveItem[] => {
           .parent()
           .find("div[class='text-gray-800 dark:text-slate-400 font-semibold text-sm leading-[1.2] mt-2']");
         const infoRaw = $info.text().split("TODO")[0].split(", ");
-        const info = infoRaw
-          .map((s) => s.trim())[0]
-          .split("·")
-          .map((s) => s.replace("📕 ", "").trim());
+        const info = infoRaw.flatMap((s) => s.trim().split("·")).map((s) => s.replace("📕 ", "").trim());
 
         const ext = info.find((item) => !isEmpty(item) && fileTypes.includes(item.toLowerCase())) || "unknown";
         const type =
