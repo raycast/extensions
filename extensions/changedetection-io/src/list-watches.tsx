@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
-import { validUrl } from "@/utils";
+import { validInstanceUrl } from "@/utils";
 import { useWatches } from "@/hooks/use-watches";
 import CreateWatch from "@/screens/CreateWatch";
 import { WatchItem } from "@/components/WatchItem";
@@ -9,7 +9,7 @@ const WithOptionalSection = ({ title, children }: PropsWithChildren<{ title: str
   title ? <List.Section title={title}>{children}</List.Section> : children;
 
 const ListWatches = () => {
-  if (!validUrl()) {
+  if (!validInstanceUrl()) {
     return (
       <Detail
         markdown={"# Error \n\n Invalid URL"}

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { CreateWatchFormValues } from "@/types";
-import { callApi } from "@/utils";
+import { callApi, validUrl } from "@/utils";
 
 const CreateWatch = ({ onCreate }: { onCreate: () => void }) => {
   const { pop } = useNavigation();
@@ -31,11 +31,7 @@ const CreateWatch = ({ onCreate }: { onCreate: () => void }) => {
     validation: {
       url(value) {
         if (!value) return "The item is required";
-        try {
-          new URL(value);
-        } catch {
-          return "Must be a valid URL";
-        }
+        if (!validUrl(value)) return "Must be a valid URL";
       },
     },
   });

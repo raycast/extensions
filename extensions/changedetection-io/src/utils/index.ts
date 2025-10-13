@@ -9,14 +9,16 @@ export const headers = {
   "x-api-key": api_key,
 };
 
-export const validUrl = () => {
+export const validUrl = (url: string) => {
   try {
-    new URL(instance_url);
+    new URL(url);
   } catch {
     return false;
   }
   return true;
 };
+
+export const validInstanceUrl = () => validUrl(instance_url);
 
 export const callApi = async (
   endpoint: string,
