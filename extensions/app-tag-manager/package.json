@@ -14,22 +14,22 @@
   "commands": [
     {
       "name": "app",
-      "title": "App Tags Search",
-      "subtitle": "Search and tag applications",
+      "title": "Search App Tags",
+      "subtitle": "App Tag Manager",
       "description": "Search applications and manage tags",
       "mode": "view"
     },
     {
       "name": "export-tags",
-      "title": "App Tags Export",
-      "subtitle": "Copy all tag configurations to clipboard",
+      "title": "Export App Tags",
+      "subtitle": "App Tag Manager",
       "description": "Export all app tag configurations to clipboard as JSON",
       "mode": "view"
     },
     {
       "name": "import-tags",
-      "title": "App Tags Import",
-      "subtitle": "Import tag configurations from clipboard",
+      "title": "Import App Tags",
+      "subtitle": "App Tag Manager",
       "description": "Import and apply tag configurations from clipboard JSON",
       "mode": "view"
     }

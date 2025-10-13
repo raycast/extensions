@@ -10,30 +10,38 @@ export default function Command() {
   const loadApps = async (): Promise<AppInfo[]> => {
     const tagMap = await loadTags();
     const paths = discoverApps();
-    const initialApps = createInitialApps(paths, tagMap);
-
-    updateDisplayNamesInBatches(paths, (updates) => {
-      initialApps.forEach((app) => {
-        const newDisplayName = updates[app.path];
-        if (newDisplayName) {
-          app.displayName = newDisplayName;
-        }
-      });
-    });
-
-    return initialApps;
+    return createInitialApps(paths, tagMap);
   };
 
   const {
     data: apps = [],
     isLoading,
     mutate,
-  } = useCachedPromise(loadApps, [], {
-    onError: (error: Error) => {
-      console.error("Error loading apps:", error);
-      showToast(Toast.Style.Failure, "Failed to load apps");
+  } = useCachedPromise(
+    async () => {
+      const initialApps = await loadApps();
+      const paths = initialApps.map((app) => app.path);
+
+      // Start background updates for Chinese display names
+      updateDisplayNamesInBatches(paths, (updates) => {
+        const updatedApps = initialApps.map((app) => {
+          const newDisplayName = updates[app.path];
+          return newDisplayName ? { ...app, displayName: newDisplayName } : app;
+        });
+        // Trigger re-render with updated names
+        mutate(Promise.resolve(updatedApps), { optimisticUpdate: () => updatedApps });
+      });
+
+      return initialApps;
     },
-  });
+    [],
+    {
+      onError: (error: Error) => {
+        console.error("Error loading apps:", error);
+        showToast(Toast.Style.Failure, "Failed to load apps");
+      },
+    },
+  );
 
   const handleAppUpdate = (updatedApp: AppInfo) => {
     const updatedApps = apps.map((a) => (a.path === updatedApp.path ? updatedApp : a));
