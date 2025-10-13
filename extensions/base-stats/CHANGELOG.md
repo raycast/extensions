@@ -1,6 +1,6 @@
 # Base Stats Changelog
 
-## [1.2.0] - 2025-01-20
+## [1.2.0] - {PR_MERGE_DATE}
 
 ### Changed
 - Fixed ESLint configuration to work with ESLint 8.57.0
