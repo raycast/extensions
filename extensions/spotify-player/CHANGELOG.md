@@ -2,7 +2,7 @@
 
 ## [Improvement] - 2025-01-23
 
-- Increase the number of songs you can view in a Playlist when using the `Show All Songs` command.
+- Increase the number of songs you can view in a Playlist when using the `Show All Songs` command. You can view at least 500 songs and this fixes issues with old public playlists that are accesible via Raycast.
 
 ## [Generate Playlist Improvement - Artists] - 2024-12-03
 
