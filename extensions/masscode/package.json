@@ -44,12 +44,7 @@
     "@raycast/utils": "^2.0.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "bummp": "^0.2.0",
-    "lint-staged": "^16.1.2",
-    "simple-git-hooks": "^2.13.0",
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
@@ -60,15 +55,9 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "release": "bumpp -c 'build: release v' -t",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "prepare": "simple-git-hooks"
+    "lint": "ray lint"
   },
   "volta": {
     "node": "22.17.0"
-  },
-  "simple-git-hooks": {
-    "commit-msg": "npx commitlint --edit $1"
   }
 }
