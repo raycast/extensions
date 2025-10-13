@@ -1,6 +1,6 @@
 # Bible Search Changelog
 
-## [Windows support and enhancements] - {PR_MERGE_DATE}
+## [Windows support and enhancements] - 2025-10-13
 
 - Support for Windows
 - Remove "Press Enter to search" option. Searches are now always triggered on query change.
