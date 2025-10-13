@@ -1,5 +1,13 @@
 # Bible Search Changelog
 
+## [Unreleased] - {PR_MERGE_DATE}
+
+- Add option to show passages as separate list items
+- Clarify copyright option wording
+- Fix bug in searching with selected text when launched via a hotkey
+- Simplify README, remove fluff
+- Update screenshots
+
 ## [Windows support and enhancements] - 2025-10-13
 
 - Support for Windows

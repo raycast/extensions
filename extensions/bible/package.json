@@ -29,7 +29,7 @@
     {
       "name": "bibleSearch",
       "title": "Bible Search",
-      "description": "Search for, display, copy and paste bible passages. Configure whether to include verse numbers or show one verse per line.",
+      "description": "Search for bible passages by reference.",
       "mode": "view",
       "arguments": [
         {
@@ -47,6 +47,15 @@
       ],
       "preferences": [
         {
+          "name": "separatePassages",
+          "label": "Show passages as separate list items",
+          "description": "Display each passage as its own list item in the search results. Otherwise passages will be combined into one item.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "title": "Formatting Options",
           "name": "includeVerseNumbers",
           "label": "Include verse numbers",
           "description": "Include individual verse numbers in the results.",
@@ -56,8 +65,8 @@
         },
         {
           "name": "includeCopyright",
-          "label": "Include copyright",
-          "description": "Add copyright to the results.",
+          "label": "Show copyright",
+          "description": "Add copyright information to the shown results. Always excluded from copied text.",
           "type": "checkbox",
           "required": false,
           "default": true
