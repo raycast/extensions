@@ -14,7 +14,7 @@ export default class ApiClient {
   private readonly baseURL: string;
   private readonly headerAuth: string;
 
-  constructor(baseURL: string, apiKey: string, username: string, accountName: string) {
+  constructor(baseURL: string, apiKey: string, username: string) {
     this.baseURL = baseURL;
     this.headerAuth = `Basic ${btoa(`${username}:${apiKey}`)}`;
   }
