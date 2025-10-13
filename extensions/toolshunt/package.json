@@ -1,0 +1,189 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toolshunt",
+  "title": "Toolshunt",
+  "description": "Quick access to ToolsHunt utilities - Format, convert, and generate with ease",
+  "icon": "command-icon.png",
+  "author": "ssybb1988",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Tools",
+      "description": "Browse and open ToolsHunt utilities",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "time-format",
+      "title": "Convert Time Format",
+      "description": "Parse various time formats and convert to common development formats",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "json-formatter",
+      "title": "JSON Formatter",
+      "description": "Format, validate, beautify JSON data and filter with JSONPath",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "json-compare",
+      "title": "Compare JSON",
+      "description": "Compare two JSON objects and highlight differences",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "text-compare",
+      "title": "Compare Text",
+      "description": "Compare two text blocks and highlight differences line by line",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "curl-compare",
+      "title": "Compare CURL",
+      "description": "Compare two CURL commands and highlight parameter differences",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "cookie-formatter",
+      "title": "Format Cookie",
+      "description": "Convert cookie strings or list format to JSON format",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "base64-encode",
+      "title": "Encode/Decode Base64",
+      "description": "Encode and decode Base64 strings",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "base64-image",
+      "title": "Decode Base64 Image",
+      "description": "Decode Base64 image data and preview images",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "url-encode",
+      "title": "Encode/Decode URL",
+      "description": "Encode and decode URL strings",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "curl-to-requests",
+      "title": "Convert CURL to Requests",
+      "description": "Convert CURL commands to Python requests code",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "html-renderer",
+      "title": "Render HTML",
+      "description": "Real-time preview and test HTML code",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "uuid-generator",
+      "title": "Generate UUID",
+      "description": "Generate and decode UUIDs and ULIDs",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "qr-generator",
+      "title": "Generate QR Code",
+      "description": "Generate QR codes and read QR codes from images",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "hash-generator",
+      "title": "Generate Hash",
+      "description": "Generate various hash values from text input",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "favicon-generator",
+      "title": "Generate Favicon",
+      "description": "Upload images to generate favicon icons in various sizes",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "domain-generator",
+      "title": "Generate Domain",
+      "description": "Generate creative domain names based on keywords and check availability",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "id-photo-generator",
+      "title": "Generate ID Photo",
+      "description": "Upload a photo to generate ID photos of various specifications",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "photo-enhancer",
+      "title": "Enhance Photo",
+      "description": "Automatically enhance photo effects using AI technology",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "food-calorie-annotator",
+      "title": "Annotate Food Calories",
+      "description": "Automatically identify food and annotate calorie information using AI",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "json-to-sql",
+      "title": "Convert JSON to SQL",
+      "description": "Convert JSON data to SQL statements for different databases",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "js-formatter",
+      "title": "Format Javascript",
+      "description": "Format and beautify JavaScript/TypeScript code with syntax highlighting",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.4",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.5",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
+
