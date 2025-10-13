@@ -20,6 +20,13 @@ export default function TakeScreenshots() {
     newScreenshots.push(screenshot);
     await setScreenshots(newScreenshots);
   }
+  async function removeScreenshot(oldScreenshot: ScreenshotInStorage) {
+    const newScreenshots = screenshots;
+    const index = newScreenshots.findIndex((screenshot) => screenshot.domain === oldScreenshot.domain);
+    if (index !== -1) newScreenshots.splice(index, 1);
+    await setScreenshots(newScreenshots);
+  }
+
   return (
     <List isLoading={isLoading} isShowingDetail>
       <List.EmptyView
@@ -64,6 +71,12 @@ export default function TakeScreenshots() {
                 icon={Icon.Camera}
                 title="Take Screenshot"
                 target={<TakeScreenshot onScreenshot={updateScreenshots} />}
+              />
+              <Action
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                title="Remove Screenshot"
+                onAction={() => removeScreenshot(screenshot)}
               />
             </ActionPanel>
           }

@@ -22,7 +22,7 @@ This is a Raycast extension to get a company's brand logos, colors, slogan, soci
 
 ## ⚙️ Configuration
 
-By default the secondary `Action` performs "Deletion" but if you prefer, you can change this in Preferences to be "New".
+In "Retrieve Brands", by default the secondary `Action` performs "Deletion" but if you prefer, you can change this in Command `Preferences` to be "New".
 
 ## 🗒️ NOTE
 

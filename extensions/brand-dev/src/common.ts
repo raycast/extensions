@@ -7,7 +7,7 @@ export const API_HEADERS = {
   Authorization: `Bearer ${api_key}`,
 };
 export async function parseBrandDevResponse<T>(response: Response) {
-  if (!response.headers.get("content-type")?.includes("json")) throw new Error(response.statusText);
+  if (!response.headers.get("content-type")?.includes("application/json")) throw new Error(response.statusText);
   const result = await response.json();
   if (!response.ok) {
     const err = result as { error_code: string; message?: string | Array<{ message: string }> };
