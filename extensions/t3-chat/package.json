@@ -99,7 +99,8 @@
             { "title": "Grok 3", "value": "grok-v3" },
             { "title": "Grok 3 Mini", "value": "grok-v3-mini" },
             { "title": "Grok 4", "value": "grok-v4" },
-            { "title": "Grok 4 Mini", "value": "grok-v4-mini" },
+            { "title": "Grok 4 Fast", "value": "grok-v4-fast" },
+            { "title": "Grok 4 Fast Reasoning", "value": "grok-v4-fast-reasoning" },
 
             { "title": "Llama 3.3 70B", "value": "llama-3.3-70b-groq" },
             { "title": "Llama 4 Maverick", "value": "llama-4-maverick" },
