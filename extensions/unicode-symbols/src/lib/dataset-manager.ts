@@ -1,12 +1,14 @@
 import fs from "fs";
 import Fuse from "fuse.js";
-
 import { environment } from "@raycast/api";
-
-import { dataSetName, searchResultLimit } from "@/lib/preferences";
 import type { Character, Dataset } from "@/types";
+import { dataSetName, searchResultLimit } from "@/lib/preferences";
 
 const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/${dataSetName}.json`, "utf-8")) as Dataset;
+
+// Create lookup maps for better performance
+const characterByCodeMap = new Map(dataset.characters.map((char) => [char.c, char]));
+const characterByValueMap = new Map(dataset.characters.map((char) => [char.v, char]));
 
 // We use Fuse.js (https://fusejs.io/) to speed-up the unicode characters search.
 
@@ -30,12 +32,12 @@ function getExactChar(query: string): Character | null {
   const hex = parseInt(query, 16);
 
   if (!isNaN(dec)) {
-    const character = dataset.characters.find((char) => char.c === dec);
+    const character = characterByCodeMap.get(dec);
     if (character) {
       return character;
     }
   } else if (!isNaN(hex)) {
-    const character = dataset.characters.find((char) => char.c === hex);
+    const character = characterByCodeMap.get(hex);
     if (character) {
       return character;
     }
@@ -47,23 +49,49 @@ function getExactChar(query: string): Character | null {
     query.startsWith("0x")
   ) {
     const hex = parseInt(query.substring(2), 16);
-    const character = dataset.characters.find((char) => char.c === hex);
+    const character = characterByCodeMap.get(hex);
     return character || null;
   }
 
   if (query.length === 1) {
     const charCode = query.charCodeAt(0);
-    const character = dataset.characters.find((char) => char.c === charCode);
+    const character = characterByCodeMap.get(charCode);
     if (character) {
       return character;
     }
   }
 
-  const character = dataset.characters.find((char) => char.v === query);
+  const character = characterByValueMap.get(query);
   if (character) {
     return character;
   }
   return null;
+}
+
+/**
+ * Enhanced character search with multiple strategies
+ * @param query The user query
+ * @returns Character if found, null otherwise
+ */
+function getEnhancedChar(query: string): Character | null {
+  if (!query || query.length === 0) {
+    return null;
+  }
+
+  // Try exact character match first
+  const exactChar = getExactChar(query);
+  if (exactChar) {
+    return exactChar;
+  }
+
+  // Try case-insensitive name search
+  const lowerQuery = query.toLowerCase();
+  const nameMatch = dataset.characters.find(
+    (char) =>
+      char.n.toLowerCase().includes(lowerQuery) || char.a.some((alias) => alias.toLowerCase().includes(lowerQuery)),
+  );
+
+  return nameMatch || null;
 }
 
 /**
@@ -92,24 +120,37 @@ export function getFilteredDataset(query: string | null, filter: string | null):
 
   const splitQuery = query?.trim().split(" ");
 
-  // We use Fuse.js' extended search (https://fusejs.io/examples.html#extended-search) to
-  // fine-tune results.
-  // Instead of going with a full-fuzzy-search approach, we return only characters
-  // that have a name that include every query's word.
-  const fuseSearchPattern = splitQuery.map((item) => `'${item}`).join(" ") || "";
+  // Enhanced search patterns for better matching
+  let fuseSearchPattern = "";
+
+  if (splitQuery.length === 1) {
+    const singleQuery = splitQuery[0];
+    // For single queries, try multiple search strategies
+    fuseSearchPattern = `'${singleQuery} | ${singleQuery}`; // Exact match OR fuzzy match
+  } else {
+    // For multiple words, require all words to be present
+    fuseSearchPattern = splitQuery.map((item) => `'${item}`).join(" ");
+  }
 
   const fuse = new Fuse(allCharacters, {
-    // keys: ["name", "aliases", "old_name"],
-    keys: ["n", "s", "o", "nn"],
+    keys: [
+      { name: "n", weight: 0.4 }, // Name - highest priority
+      { name: "a", weight: 0.3 }, // Aliases - high priority
+      { name: "o", weight: 0.2 }, // Old name - medium priority
+      { name: "nn", weight: 0.1 }, // Number - low priority
+    ],
     useExtendedSearch: true,
     includeScore: true,
+    threshold: 0.3, // Lower threshold for more flexible matching
+    distance: 100, // Allow more distance for fuzzy matching
+    minMatchCharLength: 1, // Allow single character matches
   });
 
   const fuseResults = fuse.search(fuseSearchPattern, { limit: searchResultLimit });
   const characters = fuseResults.map((fuseResult) => ({ ...fuseResult.item, score: fuseResult.score }));
 
   if (splitQuery.length === 1) {
-    const char = getExactChar(splitQuery[0]);
+    const char = getEnhancedChar(splitQuery[0]);
     if (char) {
       const findItemIndex = characters.findIndex((c) => c.c === char.c);
       if (findItemIndex > -1) {
