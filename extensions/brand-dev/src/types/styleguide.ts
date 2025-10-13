@@ -4,7 +4,7 @@ type Typography = {
   fontWeight: number;
   lineHeight: string;
   letterSpacing: string;
-}
+};
 type Button = {
   backgroundColor: string;
   color: string;
@@ -28,7 +28,7 @@ export type Styleguide = {
   };
   typography: {
     headings: {
-      h1: Typography
+      h1: Typography;
       h2: Typography;
       h3: Typography;
       h4: Typography;

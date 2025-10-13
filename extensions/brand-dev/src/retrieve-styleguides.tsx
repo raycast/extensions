@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, Icon, Keyboard, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, getFavicon, useForm, useLocalStorage } from "@raycast/utils";
 import { API_HEADERS, API_URL, capitalize, parseBrandDevResponse } from "./common";
-import { Fragment } from "react/jsx-runtime";
 import { Styleguide } from "./types/styleguide";
+import { Fragment } from "react/jsx-runtime";
 
 type StyleguideResult = {
   status: "ok";
@@ -27,7 +27,10 @@ function ColorItem({ title, text }: { title: string; text: string }) {
     />
   );
 }
-function CopySubmenu({
+function TextItem({ title, text }: { title: string; text: string | number }) {
+  return <List.Item.Detail.Metadata.Label title={title} text={`${text}`} />;
+}
+function CopySubmenuAction({
   title,
   content,
   entries,
@@ -96,11 +99,11 @@ export default function RetrieveStyleguides() {
                     ([key, val]) => (
                       <Fragment key={key}>
                         <List.Item.Detail.Metadata.Label title={key.toUpperCase()} />
-                        <List.Item.Detail.Metadata.Label title="Font Family" text={val.fontFamily} />
-                        <List.Item.Detail.Metadata.Label title="Font Size" text={val.fontSize} />
-                        <List.Item.Detail.Metadata.Label title="Font Weight" text={val.fontWeight.toString()} />
-                        <List.Item.Detail.Metadata.Label title="Line Height" text={val.lineHeight} />
-                        <List.Item.Detail.Metadata.Label title="Letter Spacing" text={val.letterSpacing} />
+                        <TextItem title="Font Family" text={val.fontFamily} />
+                        <TextItem title="Font Size" text={val.fontSize} />
+                        <TextItem title="Font Weight" text={val.fontWeight.toString()} />
+                        <TextItem title="Line Height" text={val.lineHeight} />
+                        <TextItem title="Letter Spacing" text={val.letterSpacing} />
                       </Fragment>
                     ),
                   )}
@@ -124,14 +127,14 @@ export default function RetrieveStyleguides() {
                       <ColorItem title="Background Color" text={val.backgroundColor} />
                       <ColorItem title="Color" text={val.color} />
                       <ColorItem title="Border Color" text={val.borderColor} />
-                      <List.Item.Detail.Metadata.Label title="Border Radius" text={val.borderRadius} />
-                      <List.Item.Detail.Metadata.Label title="Border Width" text={val.borderWidth} />
-                      <List.Item.Detail.Metadata.Label title="Border Style" text={val.borderStyle} />
-                      <List.Item.Detail.Metadata.Label title="Padding" text={val.padding} />
-                      <List.Item.Detail.Metadata.Label title="Font Size" text={val.fontSize} />
-                      <List.Item.Detail.Metadata.Label title="Font Weight" text={val.fontWeight.toString()} />
-                      <List.Item.Detail.Metadata.Label title="Text Decoration" text={val.textDecoration} />
-                      <List.Item.Detail.Metadata.Label title="Box Shadow" text={val.boxShadow} />
+                      <TextItem title="Border Radius" text={val.borderRadius} />
+                      <TextItem title="Border Width" text={val.borderWidth} />
+                      <TextItem title="Border Style" text={val.borderStyle} />
+                      <TextItem title="Padding" text={val.padding} />
+                      <TextItem title="Font Size" text={val.fontSize} />
+                      <TextItem title="Font Weight" text={val.fontWeight} />
+                      <TextItem title="Text Decoration" text={val.textDecoration} />
+                      <TextItem title="Box Shadow" text={val.boxShadow} />
                       <List.Item.Detail.Metadata.Label title="" />
                     </Fragment>
                   ))}
@@ -143,10 +146,10 @@ export default function RetrieveStyleguides() {
                     title="Border Radius"
                     text={styleguide.components.card.borderRadius}
                   />
-                  <List.Item.Detail.Metadata.Label title="Border Width" text={styleguide.components.card.borderWidth} />
-                  <List.Item.Detail.Metadata.Label title="Border Style" text={styleguide.components.card.borderStyle} />
-                  <List.Item.Detail.Metadata.Label title="Padding" text={styleguide.components.card.padding} />
-                  <List.Item.Detail.Metadata.Label title="Box Shadow" text={styleguide.components.card.boxShadow} />
+                  <TextItem title="Border Width" text={styleguide.components.card.borderWidth} />
+                  <TextItem title="Border Style" text={styleguide.components.card.borderStyle} />
+                  <TextItem title="Padding" text={styleguide.components.card.padding} />
+                  <TextItem title="Box Shadow" text={styleguide.components.card.boxShadow} />
                   <ColorItem title="Text Color" text={styleguide.components.card.textColor} />
                   <List.Item.Detail.Metadata.Separator />
 
@@ -162,15 +165,15 @@ export default function RetrieveStyleguides() {
           }
           actions={
             <ActionPanel>
-              <CopySubmenu title="Colors" content={styleguide.colors} entries={styleguide.colors} />
-              <CopySubmenu title="Typography" content={styleguide.typography} />
-              <CopySubmenu
+              <CopySubmenuAction title="Colors" content={styleguide.colors} entries={styleguide.colors} />
+              <CopySubmenuAction title="Typography" content={styleguide.typography} />
+              <CopySubmenuAction
                 title="Element Spacing"
                 content={styleguide.elementSpacing}
                 entries={styleguide.elementSpacing}
               />
-              <CopySubmenu title="Shadows" content={styleguide.shadows} entries={styleguide.shadows} />
-              <CopySubmenu title="Components" content={styleguide.components} />
+              <CopySubmenuAction title="Shadows" content={styleguide.shadows} entries={styleguide.shadows} />
+              <CopySubmenuAction title="Components" content={styleguide.components} />
               <Action.Push
                 shortcut={Keyboard.Shortcut.Common.New}
                 icon={Icon.CodeBlock}
