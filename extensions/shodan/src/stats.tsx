@@ -107,7 +107,7 @@ export default function Stats() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
-      showFailureToast('Stats search failed', errorMessage);
+      showFailureToast(err, { title: 'Stats search failed' });
     } finally {
       setIsLoading(false);
     }

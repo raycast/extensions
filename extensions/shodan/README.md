@@ -5,37 +5,44 @@ A comprehensive Raycast extension that allows you to search and analyze hosts us
 ## ✨ Features
 
 ### 🔍 **Search Host**
+
 - Look up detailed information about any IP address or hostname
 - View comprehensive host data including organization, location, and system information
 - Access port information, services, and security vulnerabilities
 - Search history with persistent storage for quick re-access
 
 ### 🌐 **Search Shodan**
+
 - Advanced search with filters and criteria
 - Browse search results with detailed metadata
 - Filter by country, organization, port, and more
 
 ### 📊 **Shodan Stats**
+
 - Get statistics about search results
 - View country and organization breakdowns
 - Analyze trends and patterns in network data
 
 ### 🏠 **My IP**
+
 - Instantly look up your external IP address in Shodan
 - See what information is publicly available about your network
 - Quick security assessment of your public-facing services
 
 ### 📈 **API Info**
+
 - View your Shodan API usage and account information
 - Monitor query credits, scan credits, and monitored IPs
 - Track your API consumption and limits
 
 ### 🔬 **On-Demand Scan**
+
 - Request new scans of specific IPs and services
 - Schedule scans for later analysis
 - Monitor scan progress and results
 
 ### 👁️ **Monitored IPs**
+
 - View your monitored IP alerts and notifications
 - Track changes to specific IP addresses
 - Stay informed about network security events
@@ -45,6 +52,7 @@ A comprehensive Raycast extension that allows you to search and analyze hosts us
 ### 1. Install Extension
 
 #### Option A: From Raycast Store (Recommended)
+
 1. Open Raycast (⌘ + Space)
 2. Type "Store" and press Enter
 3. Search for "Shodan" in the store
@@ -52,6 +60,7 @@ A comprehensive Raycast extension that allows you to search and analyze hosts us
 5. The extension will be automatically installed and ready to use
 
 #### Option B: Manual Installation
+
 1. Download or clone this repository
 2. Open Raycast (⌘ + Space)
 3. Go to Extensions → Import Extension
@@ -59,11 +68,13 @@ A comprehensive Raycast extension that allows you to search and analyze hosts us
 5. The extension will be imported and ready to use
 
 ### 2. Get Shodan API Key
+
 - Visit [Shodan Account](https://account.shodan.io/)
 - Sign up for a free account (includes 100 free queries per month)
 - Get your API key from the account page
 
 ### 3. Configure API Key
+
 - Open Raycast and search for "Shodan"
 - Select any Shodan command
 - Enter your API key when prompted
@@ -71,17 +82,18 @@ A comprehensive Raycast extension that allows you to search and analyze hosts us
 
 ## 📱 Screenshots
 
-| Search Host | API Info | Search Results |
-|-------------|----------|----------------|
-| ![Search Host](metadata/SearchShodanResults.png) | ![API Info](metadata/ApiInfo.png) | ![Search Results](metadata/SearchShodanRecent.png) |
+| Search Host                                        | API Info                            | Search Results                                       |
+| -------------------------------------------------- | ----------------------------------- | ---------------------------------------------------- |
+| ![Search Host](./metadata/SearchShodanResults.png) | ![API Info](./metadata/ApiInfo.png) | ![Search Results](./metadata/SearchShodanRecent.png) |
 
-| Extension Commands | API Token Input | Statistics |
-|-------------------|-----------------|------------|
-| ![Commands](metadata/ExtensionCommands.png) | ![Token Input](metadata/ApiTokenInput.png) | ![Stats](metadata/StatsCommand.png) |
+| Extension Commands                          | API Token Input                              | Statistics                            |
+| ------------------------------------------- | -------------------------------------------- | ------------------------------------- |
+| ![Commands](./images/ExtensionCommands.png) | ![Token Input](./metadata/ApiTokenInput.png) | ![Stats](./metadata/StatsCommand.png) |
 
 ## 🎯 Usage Examples
 
 ### Search for a Host
+
 1. Open Raycast (⌘ + Space)
 2. Type "Search Host"
 3. Enter an IP address like `8.8.8.8` or hostname like `google.com`
@@ -94,17 +106,18 @@ A comprehensive Raycast extension that allows you to search and analyze hosts us
    - **Tags**: Security and service classifications
 
 ### Check Your IP
+
 1. Open Raycast (⌘ + Space)
 2. Type "My IP"
 3. Instantly see what Shodan knows about your external IP
 4. Review open ports and potential security issues
 
 ### View API Usage
+
 1. Open Raycast (⌘ + Space)
 2. Type "API Info"
 3. Check your remaining query credits
 4. Monitor your API consumption
-
 
 ## 🔑 API Key Requirements
 
@@ -142,4 +155,3 @@ This project is licensed under the MIT License.
 
 - [Shodan](https://www.shodan.io/) for providing the powerful network intelligence API
 - [Raycast](https://raycast.com/) for the excellent extension platform
-

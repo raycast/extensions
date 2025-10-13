@@ -154,7 +154,7 @@ export default function SearchCriteria(props: LaunchProps<{ arguments: SearchCri
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
-      showFailureToast('Search failed', errorMessage);
+      showFailureToast(err, { title: 'Search failed' });
     } finally {
       setIsLoading(false);
     }

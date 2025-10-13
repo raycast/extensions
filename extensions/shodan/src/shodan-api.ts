@@ -152,7 +152,7 @@ export class ShodanAPI {
   private baseUrl = 'https://api.shodan.io';
 
   constructor() {
-    const preferences = getPreferenceValues<{ shodanApiKey: string }>();
+    const preferences = getPreferenceValues<Preferences>();
     this.apiKey = preferences.shodanApiKey;
   }
 

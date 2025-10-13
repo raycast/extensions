@@ -266,7 +266,7 @@ export default function ScanOndemand(props: LaunchProps<{ arguments: ScanOndeman
       case 'common-scan':
         scanRequest = {
           ips: ips || '8.8.8.8',
-          service: COMMON_SERVICES.map((s) => [s.port, s.protocol]),
+          service: COMMON_SERVICES.map((s) => [s.port, s.protocol] as [number, string]),
         };
         break;
       case 'web-scan': {

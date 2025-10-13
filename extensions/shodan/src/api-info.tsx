@@ -25,7 +25,7 @@ export default function APIInfo() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
-      await showFailureToast('Failed to load API info', errorMessage);
+      await showFailureToast(err, { title: 'Failed to load API info' });
     } finally {
       setIsLoading(false);
     }
