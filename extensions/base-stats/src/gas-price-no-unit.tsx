@@ -2,10 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Icon, MenuBarExtra, openCommandPreferences, getPreferenceValues, Cache } from "@raycast/api";
 import fetch from "node-fetch";
 
-interface Preferences {
-  apiKey: string;
-}
-
 interface EtherscanResponse {
   jsonrpc: string;
   id: number;
