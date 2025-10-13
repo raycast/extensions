@@ -17,6 +17,7 @@ import { useAccountInfo } from "@/hooks/useAccountInfo";
 import { useOwners } from "@/hooks/useOwners";
 import { useAuthHeaders } from "@/hooks/useAuthHeaders";
 import type { Task } from "@/types/task";
+import { showFailureToast } from "@raycast/utils";
 
 interface AssociationResult {
   id: string;
@@ -117,7 +118,7 @@ const Detail = ({
           `https://api.hubapi.com/crm/v3/objects/tasks/${task.id}?associations=${encodeURIComponent("contact,company,deal")}`,
           { headers: authHeaders },
         );
-        const taskWithAssociations: TaskWithAssociations = await response.json();
+        const taskWithAssociations = (await response.json()) as TaskWithAssociations;
 
         const fetchedContactIds = (
           taskWithAssociations.associations?.contacts?.results ||
@@ -143,7 +144,7 @@ const Detail = ({
               .catch(() => null),
           );
           const contacts = await Promise.all(contactPromises);
-          setAssociatedContacts(contacts.filter(Boolean));
+          setAssociatedContacts(contacts.filter(Boolean) as ContactRecord[]);
         }
 
         // Fetch companies
@@ -154,7 +155,7 @@ const Detail = ({
               .catch(() => null),
           );
           const companies = await Promise.all(companyPromises);
-          setAssociatedCompanies(companies.filter(Boolean));
+          setAssociatedCompanies(companies.filter(Boolean) as CompanyRecord[]);
         }
 
         // Fetch deals
@@ -165,7 +166,7 @@ const Detail = ({
               .catch(() => null),
           );
           const deals = await Promise.all(dealPromises);
-          setAssociatedDeals(deals.filter(Boolean));
+          setAssociatedDeals(deals.filter(Boolean) as DealRecord[]);
         }
       } catch (error) {
         console.error("Error fetching associations:", error);
@@ -313,13 +314,9 @@ export default function Command() {
         message: taskSubject,
       });
 
-      await revalidate();
+      revalidate();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update task",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to update task" });
     }
   };
 
@@ -413,7 +410,7 @@ export default function Command() {
                   onAction={() => setShowingDetail(!showingDetail)}
                 />
                 <Action
-                  title="Open in Hubspot"
+                  title="Open in HubSpot"
                   onAction={async () => {
                     await open(hubspotUrl);
                     await closeMainWindow();
