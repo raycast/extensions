@@ -19,6 +19,29 @@ export async function getWorkItem(workItemId: string, projectId: string) {
   return response;
 }
 
+export async function getProjectWorkItems({
+  projectId,
+  perPage = 100,
+  cursor,
+}: {
+  projectId: string;
+  perPage?: number;
+  cursor?: string;
+}) {
+  const response = await planeClient?.workItemsApi.listWorkItems({
+    projectId,
+    slug: planeClient?.workspaceSlug,
+    perPage,
+    cursor,
+  });
+
+  return {
+    data: response?.results || [],
+    hasMore: !!response?.nextPageResults,
+    cursor: response?.nextCursor,
+  };
+}
+
 export async function searchWorkItems({
   searchText,
   projectId,

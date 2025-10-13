@@ -5,6 +5,13 @@
 - Added a new preference to choose between Quick Look or Open in Browser as the primary action
 - Added `Open With` option in the context menu to open images with other supported applications
 
+## [Windows Support] - 2025-10-13
+
+- Added platform-specific shortcuts for macOS and Windows.
+- Extended supported platforms to include Windows.
+- Introduced a fallback for the download directory and added validation.
+- Standardized naming to "DuckDuckGo" in metadata and documentation.
+
 ## [Save image] - 2025-10-09
 
 - Added functionality to save images.
