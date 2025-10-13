@@ -23,6 +23,7 @@ import { createLogger } from "@/utils/logging";
 import type { AgentConfig } from "@/types/extension";
 import ChatCommand from "@/chat";
 import { useNavigation } from "@raycast/api";
+import { STORAGE_KEYS } from "@/utils/storageKeys";
 
 const logger = createLogger("StartChatForm");
 
@@ -35,6 +36,12 @@ interface ChatFavorite {
   agentId: string;
   workingDirectory?: string;
   createdAt: Date;
+}
+
+interface LastChatConfig {
+  agentId: string;
+  workingDirectory?: string;
+  timestamp: string;
 }
 
 interface FormValues {
@@ -65,25 +72,52 @@ export default function StartChatForm() {
   async function loadInitialData() {
     try {
       setIsLoading(true);
-      const [agentConfigs, defaultAgentId, savedFavorites, recentDirs] = await Promise.all([
+      const [agentConfigs, defaultAgentId, savedFavorites, recentDirs, lastChatConfig] = await Promise.all([
         configService.getAgentConfigs(),
         configService.getDefaultAgent(),
         loadFavorites(),
-        loadRecentDirectories()
+        loadRecentDirectories(),
+        loadLastChatConfig()
       ]);
 
       setAgents(agentConfigs);
       setFavorites(savedFavorites);
       setRecentDirectories(recentDirs);
 
-      // Set default agent
-      const preferredAgentId = defaultAgentId ?? agentConfigs[0]?.id ?? "";
+      // Prioritize last chat config over default agent
+      let preferredAgentId = "";
+      let preferredWorkingDirectory = "";
+
+      if (lastChatConfig) {
+        // Verify the agent from last config still exists
+        const agentExists = agentConfigs.some(a => a.id === lastChatConfig.agentId);
+        if (agentExists) {
+          preferredAgentId = lastChatConfig.agentId;
+          preferredWorkingDirectory = lastChatConfig.workingDirectory || "";
+          logger.info("Loaded last chat configuration", {
+            agentId: preferredAgentId,
+            workingDirectory: preferredWorkingDirectory
+          });
+        } else {
+          logger.warn("Last used agent no longer exists, falling back to default", {
+            lastAgentId: lastChatConfig.agentId
+          });
+        }
+      }
+
+      // Fall back to default agent if no valid last config
+      if (!preferredAgentId) {
+        preferredAgentId = defaultAgentId ?? agentConfigs[0]?.id ?? "";
+      }
+
       setSelectedAgentId(preferredAgentId);
+      setWorkingDirectory(preferredWorkingDirectory);
 
       logger.info("Initial data loaded", {
         agentsCount: agentConfigs.length,
         favoritesCount: savedFavorites.length,
-        recentDirsCount: recentDirs.length
+        recentDirsCount: recentDirs.length,
+        hasLastConfig: !!lastChatConfig
       });
     } catch (error) {
       await ErrorHandler.handleError(error, "Loading initial data");
@@ -116,6 +150,31 @@ export default function StartChatForm() {
     } catch (error) {
       logger.error("Failed to load recent directories", { error });
       return [];
+    }
+  }
+
+  async function loadLastChatConfig(): Promise<LastChatConfig | null> {
+    try {
+      const data = await LocalStorage.getItem<string>(STORAGE_KEYS.LAST_CHAT_CONFIG);
+      if (!data) return null;
+      return JSON.parse(data);
+    } catch (error) {
+      logger.error("Failed to load last chat config", { error });
+      return null;
+    }
+  }
+
+  async function saveLastChatConfig(agentId: string, workingDirectory?: string) {
+    try {
+      const config: LastChatConfig = {
+        agentId,
+        workingDirectory,
+        timestamp: new Date().toISOString()
+      };
+      await LocalStorage.setItem(STORAGE_KEYS.LAST_CHAT_CONFIG, JSON.stringify(config));
+      logger.info("Last chat config saved", { agentId, workingDirectory });
+    } catch (error) {
+      logger.error("Failed to save last chat config", { error });
     }
   }
 
@@ -198,6 +257,9 @@ export default function StartChatForm() {
       if (cwd) {
         await updateRecentDirectories(cwd);
       }
+
+      // Save as last chat config for next time
+      await saveLastChatConfig(agentId, cwd);
 
       // Push to chat view
       push(<ChatCommand initialAgentId={agentId} initialAgent={agentWithCwd} />);

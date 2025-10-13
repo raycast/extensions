@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   PREFERENCES: "acp.preferences",
   UI_STATE: "acp.uiState",
   LAST_USED_AGENT: "acp.lastUsedAgent",
+  LAST_CHAT_CONFIG: "acp.lastChatConfig",
 
   // Security and Permissions
   SECURITY_SETTINGS: "acp.security",
@@ -66,7 +67,8 @@ export const STORAGE_CATEGORIES = {
   USER: [
     STORAGE_KEYS.PREFERENCES,
     STORAGE_KEYS.UI_STATE,
-    STORAGE_KEYS.SECURITY_SETTINGS
+    STORAGE_KEYS.SECURITY_SETTINGS,
+    STORAGE_KEYS.LAST_CHAT_CONFIG
   ],
   CONTEXT: [
     STORAGE_KEYS.PROJECT_CONTEXTS,
