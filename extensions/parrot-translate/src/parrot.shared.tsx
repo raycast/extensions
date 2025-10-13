@@ -94,7 +94,7 @@ export function fetchAPI(queryText: string, fromLanguage: string, targetLanguage
             appKey: APP_ID,
             curtime: timestamp,
             to: targetLanguage,
-        })
+        }),
     )
 }
 

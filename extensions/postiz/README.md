@@ -27,6 +27,12 @@ This is a Raycast extension for [Postiz](https://postiz.com/) - _The All-in-One 
     - `Click` "Copy Key"
     - `Paste` in **Preferences**
 
+4. **Specify Postiz Version**:
+
+    - Select the appropriate version (if you are using hosted, choose `v2` otherwise it depends on your installation)
+    - If you are unsure, first try `v1`, run `Search Posts` - if you get an error about "startDate", change to `v2` otherwise you are good to go 😀
+
+
 ## ➕ More
 
 Looking for more cool OSS? Try the following extensions:

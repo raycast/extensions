@@ -1,5 +1,10 @@
 # United Nations Extension
 
+## [Maintenance] - 2025-10-08
+
+- Add support for Windows platform (Text-to-Speech disabled)
+- Bump all dependencies to the latest
+
 ## [Maintenance] - 2025-08-22
 
 - Bump mac-say to handle SIGTERM signal to gracefully
