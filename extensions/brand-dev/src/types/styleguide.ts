@@ -1,3 +1,10 @@
+type Typography = {
+  fontFamily: string;
+  fontSize: string;
+  fontWeight: number;
+  lineHeight: string;
+  letterSpacing: string;
+}
 type Button = {
   backgroundColor: string;
   color: string;
@@ -21,42 +28,12 @@ export type Styleguide = {
   };
   typography: {
     headings: {
-      h1: {
-        fontFamily: string;
-        fontSize: string;
-        fontWeight: number;
-        lineHeight: string;
-        letterSpacing: string;
-      };
-      h2: {
-        fontFamily: string;
-        fontSize: string;
-        fontWeight: number;
-        lineHeight: string;
-        letterSpacing: string;
-      };
-      h3: {
-        fontFamily: string;
-        fontSize: string;
-        fontWeight: number;
-        lineHeight: string;
-        letterSpacing: string;
-      };
-      h4: {
-        fontFamily: string;
-        fontSize: string;
-        fontWeight: number;
-        lineHeight: string;
-        letterSpacing: string;
-      };
+      h1: Typography
+      h2: Typography;
+      h3: Typography;
+      h4: Typography;
     };
-    p: {
-      fontFamily: string;
-      fontSize: string;
-      fontWeight: number;
-      lineHeight: string;
-      letterSpacing: string;
-    };
+    p: Typography;
   };
   elementSpacing: {
     xs: string;
