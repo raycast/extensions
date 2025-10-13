@@ -48,7 +48,18 @@ export default function Command() {
   return (
     <List throttle={true} isLoading={isLoading}>
       {projects?.map((item) => (
-        <List.Item key={item.identifier} title={item.name} actions={projectActions(item, preferences)} />
+        <List.Item
+          key={item.identifier}
+          title={item.name}
+          accessories={[
+            {
+              text: item.last_deployed_at
+                ? `Last Deployed: ${new Date(item.last_deployed_at).toLocaleDateString()}`
+                : "Never Deployed",
+            },
+          ]}
+          actions={projectActions(item, preferences)}
+        />
       ))}
     </List>
   );

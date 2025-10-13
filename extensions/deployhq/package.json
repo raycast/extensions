@@ -5,6 +5,9 @@
   "description": "Search and navigate to your DeployHQ projects",
   "icon": "icon-deployhq.png",
   "author": "MelvinBrem",
+  "contributors": [
+    "olafvanmidden"
+  ],
   "platforms": [
     "macOS",
     "Windows"
