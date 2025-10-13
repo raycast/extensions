@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Schema deprecation and update SDK] - 2025-10-10
+## [Schema deprecation and update SDK] - {PR_MERGE_DATE}
 
 - Bumped `@linear/sdk` to v60.0.0
 - Removed references to "roadmap" which was [deprecated](https://linear.app/changelog/2024-07-25-priority-for-projects-and-micro-adjust) July 2024
