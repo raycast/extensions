@@ -247,15 +247,6 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
   }
 
   async function handleAddFileContext() {
-    if (!hasConversation) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Start a Conversation",
-        message: "Share project files after a conversation has started."
-      });
-      return;
-    }
-
     const paths = await pickFiles({
       allowMultiple: true,
       prompt: "Select files to share with the agent"
@@ -283,15 +274,6 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
   }
 
   async function handleAddDirectoryContext() {
-    if (!hasConversation) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Start a Conversation",
-        message: "Share directories after a conversation has started."
-      });
-      return;
-    }
-
     const paths = await pickDirectories({
       allowMultiple: true,
       prompt: "Select directories to summarize for the agent"
@@ -377,14 +359,12 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           icon={Icon.Document}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={handleAddFileContext}
-          disabled={!hasConversation}
         />
         <Action
           title="Add Directory Context"
           icon={Icon.Folder}
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onAction={handleAddDirectoryContext}
-          disabled={!hasConversation}
         />
         {chat.contexts.length > 0 && (
           <Action
@@ -684,11 +664,11 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           description="Select an agent, type your question above, and press Enter to begin."
           actions={
             <ActionPanel>
-              <Action
-                title="Send Message"
-                icon={Icon.Envelope}
-                shortcut={{ modifiers: [], key: "return" }}
-                onAction={async () => {
+            <Action
+              title="Send Message"
+              icon={Icon.Envelope}
+              shortcut={{ modifiers: [], key: "return" }}
+              onAction={async () => {
                   await handleSend(searchText);
                 }}
               />

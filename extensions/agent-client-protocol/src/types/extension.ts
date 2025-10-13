@@ -157,6 +157,14 @@ export interface ProjectContext {
   size: number;
 }
 
+export interface AgentHealthRecord {
+  agentId: string;
+  status: 'healthy' | 'unhealthy';
+  lastChecked: Date;
+  latencyMs?: number;
+  error?: string;
+}
+
 // Configuration Service
 export interface ConfigurationService {
   // Agent configurations (using Raycast LocalStorage)
@@ -218,11 +226,13 @@ export interface ConversationViewProps {
 }
 
 export interface AgentSelectorProps {
-  agents: AgentConnection[];
-  selectedAgent?: string;
+  agents: AgentConfig[];
+  selectedAgentId?: string;
   onSelectAgent: (agentId: string) => void;
   onConfigureAgent: () => void;
+  onTestAgent?: (agentId: string) => void;
   isLoading: boolean;
+  healthMap?: Record<string, AgentHealthRecord>;
 }
 
 export interface MessageItemProps {

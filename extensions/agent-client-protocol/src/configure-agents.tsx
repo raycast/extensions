@@ -13,15 +13,18 @@ import {
   Toast,
   confirmAlert,
   Alert,
-  Icon
+  Icon,
+  Clipboard
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ConfigService } from "@/services/configService";
+import { AgentConfigService } from "@/services/agentConfigService";
 import { ErrorHandler } from "@/utils/errors";
 import { createLogger } from "@/utils/logging";
-import { checkAgentAvailability, getInstallationGuide } from "@/utils/builtInAgents";
-import type { AgentConfig } from "@/types/extension";
+import { getInstallationGuide, AGENT_TEMPLATES } from "@/utils/builtInAgents";
+import type { AgentConfig, AgentHealthRecord } from "@/types/extension";
 import { AddAgentForm, EditAgentForm } from "@/components/AgentConfig";
+import { getAgentHealthAccessory } from "@/components/AgentSelector";
 
 const logger = createLogger("ConfigureAgentsCommand");
 
@@ -29,8 +32,10 @@ export default function ConfigureAgentsCommand() {
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [defaultAgent, setDefaultAgent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [healthMap, setHealthMap] = useState<Record<string, AgentHealthRecord>>({});
 
-  const configService = new ConfigService();
+  const configService = useMemo(() => new ConfigService(), []);
+  const agentConfigService = useMemo(() => new AgentConfigService(), []);
 
   useEffect(() => {
     loadAgents();
@@ -39,13 +44,19 @@ export default function ConfigureAgentsCommand() {
   async function loadAgents() {
     try {
       setIsLoading(true);
-      const [agentConfigs, defaultAgentId] = await Promise.all([
+      const [agentConfigs, defaultAgentId, healthRecords] = await Promise.all([
         configService.getAgentConfigs(),
-        configService.getDefaultAgent()
+        configService.getDefaultAgent(),
+        agentConfigService.getAllAgentHealth().catch((error) => {
+          logger.warn("Failed to load agent health records", { error });
+          return [] as AgentHealthRecord[];
+        })
       ]);
 
       setAgents(agentConfigs);
       setDefaultAgent(defaultAgentId);
+      const healthByAgent = Object.fromEntries(healthRecords.map((record) => [record.agentId, record] as const));
+      setHealthMap(healthByAgent);
       logger.info("Agent configurations loaded", { count: agentConfigs.length });
     } catch (error) {
       await ErrorHandler.handleError(error, "Loading agent configurations");
@@ -87,6 +98,71 @@ export default function ConfigureAgentsCommand() {
     }
   }
 
+  async function duplicateAgentConfiguration(agentId: string) {
+    try {
+      const duplicate = await agentConfigService.duplicateAgent(agentId);
+      await loadAgents();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Agent Duplicated",
+        message: `${duplicate.name} created`
+      });
+    } catch (error) {
+      await ErrorHandler.handleError(error, "Duplicating agent configuration");
+    }
+  }
+
+  async function createFromTemplate(templateName: string) {
+    try {
+      const created = await agentConfigService.createAgentFromTemplate(templateName, {});
+      await loadAgents();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Template Added",
+        message: `${created.name} ready to configure`
+      });
+    } catch (error) {
+      await ErrorHandler.handleError(error, "Creating agent from template");
+    }
+  }
+
+  async function exportConfigurationsToClipboard() {
+    try {
+      const payload = await agentConfigService.exportConfigurations();
+      await Clipboard.copy(payload);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Configurations Copied",
+        message: "Agent configurations copied to clipboard"
+      });
+    } catch (error) {
+      await ErrorHandler.handleError(error, "Exporting agent configurations");
+    }
+  }
+
+  async function importConfigurationsFromClipboard() {
+    try {
+      const clipboard = await Clipboard.read();
+      if (!clipboard.text) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Clipboard Empty",
+          message: "Copy exported agent configurations before importing"
+        });
+        return;
+      }
+
+      await agentConfigService.importConfigurations(clipboard.text);
+      await loadAgents();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Configurations Imported"
+      });
+    } catch (error) {
+      await ErrorHandler.handleError(error, "Importing agent configurations");
+    }
+  }
+
   async function setAsDefault(agentId: string) {
     try {
       await configService.setDefaultAgent(agentId);
@@ -99,29 +175,21 @@ export default function ConfigureAgentsCommand() {
 
   async function checkAvailability(agent: AgentConfig) {
     try {
-      const result = await checkAgentAvailability(agent);
-      if (result.isAvailable) {
+      const record = await agentConfigService.testAgentConnection(agent.id);
+      setHealthMap((existing) => ({ ...existing, [agent.id]: record }));
+
+      if (record.status === "healthy") {
+        const latencyText = typeof record.latencyMs === "number" ? `${record.latencyMs} ms` : undefined;
         await showToast({
           style: Toast.Style.Success,
           title: "Agent Available",
-          message: `${agent.name} is ready to use`
+          message: latencyText ? `${agent.name} • ${latencyText}` : `${agent.name} is ready to use`
         });
       } else {
-        const message = result.error || "Agent command not found";
         await showToast({
           style: Toast.Style.Failure,
           title: "Agent Unavailable",
-          message
-        });
-
-        logger.error("Agent availability check failed", {
-          agentId: agent.id,
-          command: agent.command,
-          args: agent.args,
-          workingDirectory: agent.workingDirectory,
-          appendToPath: agent.appendToPath,
-          error: result.error,
-          details: result.details
+          message: record.error ?? "Agent command not found"
         });
       }
     } catch (error) {
@@ -150,7 +218,7 @@ export default function ConfigureAgentsCommand() {
   }
 
   function getAgentAccessories(agent: AgentConfig) {
-    const accessories = [];
+    const accessories: List.Item.Accessory[] = [];
 
     if (agent.id === defaultAgent) {
       accessories.push({ text: "Default", icon: Icon.Star });
@@ -160,6 +228,12 @@ export default function ConfigureAgentsCommand() {
       accessories.push({ text: "Built-in", icon: Icon.ComputerChip });
     } else {
       accessories.push({ text: "Custom", icon: Icon.Gear });
+    }
+
+    const health = healthMap[agent.id];
+    const healthAccessory = getAgentHealthAccessory(health);
+    if (healthAccessory) {
+      accessories.push(healthAccessory);
     }
 
     return accessories;
@@ -213,13 +287,7 @@ export default function ConfigureAgentsCommand() {
                   <Action
                     title="Duplicate Configuration"
                     icon={Icon.Document}
-                    onAction={() => {
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Feature Coming Soon",
-                        message: "Duplicate configuration feature is in development"
-                      });
-                    }}
+                    onAction={() => duplicateAgentConfiguration(agent.id)}
                   />
                 )}
               </ActionPanel.Section>
@@ -250,6 +318,18 @@ export default function ConfigureAgentsCommand() {
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   target={<AddAgentForm onSave={loadAgents} />}
                 />
+                <ActionPanel.Submenu
+                  title="Add From Template"
+                  icon={Icon.TextDocument}
+                >
+                  {AGENT_TEMPLATES.filter((template) => Boolean(template.name)).map((template) => (
+                    <Action
+                      key={template.name}
+                      title={template.name ?? "Template"}
+                      onAction={() => createFromTemplate(template.name ?? "")}
+                    />
+                  ))}
+                </ActionPanel.Submenu>
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
@@ -265,6 +345,19 @@ export default function ConfigureAgentsCommand() {
                     onAction={() => deleteAgent(agent.id)}
                   />
                 )}
+              </ActionPanel.Section>
+
+              <ActionPanel.Section title="Templates & Data">
+                <Action
+                  title="Export Configurations to Clipboard"
+                  icon={Icon.Download}
+                  onAction={exportConfigurationsToClipboard}
+                />
+                <Action
+                  title="Import Configurations from Clipboard"
+                  icon={Icon.Upload}
+                  onAction={importConfigurationsFromClipboard}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }

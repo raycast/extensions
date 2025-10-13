@@ -242,6 +242,7 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
   isAvailable: boolean;
   error?: string;
   details?: string;
+  latencyMs?: number;
 }> {
   if (config.type !== "subprocess" || !config.command) {
     return { isAvailable: true }; // Can't check remote agents
@@ -291,6 +292,7 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
     });
 
     return new Promise((resolve) => {
+      const startedAt = Date.now();
       const child = spawn(config.command!, args, {
         stdio: ["ignore", "pipe", "pipe"],
         timeout: 0,
@@ -317,13 +319,15 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
           return;
         }
         resolved = true;
+        const latencyMs = Date.now() - startedAt;
+        const payload = { ...result, latencyMs };
         if (successTimer) {
           clearTimeout(successTimer);
         }
         if (timeoutTimer) {
           clearTimeout(timeoutTimer);
         }
-        resolve(result);
+        resolve(payload);
       };
 
       if (isLongRunningCheck) {

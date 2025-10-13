@@ -150,10 +150,12 @@ description: "Task list for Agent Client Protocol Raycast Extension implementati
 
 **Purpose**: Advanced configuration and agent management features
 
+_Agent selection happens before a chat session starts (via the Start Agent form or configuration views). Mid-conversation agent switching is out of scope for this phase._
+
 - [X] T059 [P] Create agent configuration UI in src/components/AgentConfig.tsx
 - [ ] T060 [P] Implement agent management with LocalStorage in src/services/agentConfigService.ts
 - [ ] T061 [P] Add agent health monitoring in src/services/healthService.ts
-- [ ] T062 Create agent selector component in src/components/AgentSelector.tsx
+- [ ] T062 Create agent list component for configure-agents command in src/components/AgentSelector.tsx
 - [X] T063 Implement add/edit/delete agent workflow with LocalStorage persistence
 - [ ] T064 Add agent connection testing and validation
 - [ ] T065 [P] Implement user preferences management with LocalStorage
