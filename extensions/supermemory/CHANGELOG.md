@@ -1,6 +1,6 @@
 # Supermemory Changelog
 
-## [Search Projects + Enhancements] - {PR_MERGE_DATE}
+## [Search Projects + Enhancements] - 2025-10-13
 
 - Added command to search and add projects
 - Removed `useEffect`
