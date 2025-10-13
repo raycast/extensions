@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, getFavicon, useForm, useLocalStorage } from "@raycast/utils";
 import { API_HEADERS, API_URL, parseBrandDevResponse } from "./common";
+import { Screenshot } from "./types/screenshot";
 
-type Screenshot = { domain: string; screenshot: string; screenshotType: "viewport" | "page" };
 type ScreenshotInStorage = Screenshot & {
   page: string;
   prioritize: string;

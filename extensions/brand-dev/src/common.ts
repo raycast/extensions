@@ -16,3 +16,6 @@ export async function parseBrandDevResponse<T>(response: Response) {
   }
   return result as T;
 }
+export function capitalize(txt: string) {
+  return txt.charAt(0).toUpperCase() + txt.slice(1);
+}

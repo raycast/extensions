@@ -1,6 +1,18 @@
 # Brand.dev Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Retrieve Styleguide + Take Screenshots] - {PR_MERGE_DATE}
+
+### Retrieve Styleguide
+
+### Take Screenshots
+
+### Retrieve Brands
+
+- Now search by Domain, Ticker or Name
+- More data:
+    1. Content Rating (NSFW/SFW)
+    2. Industries (EIC)
+    3. Links
 
 ## [Quick Search via Search Text] - 2025-08-14
 

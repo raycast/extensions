@@ -1,100 +1,9 @@
-import { Action, ActionPanel, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, getFavicon, useForm, useLocalStorage } from "@raycast/utils";
-import { API_HEADERS, API_URL, parseBrandDevResponse } from "./common";
+import { API_HEADERS, API_URL, capitalize, parseBrandDevResponse } from "./common";
 import { Fragment } from "react/jsx-runtime";
+import { Styleguide } from "./types/styleguide";
 
-type Button = {
-  backgroundColor: string;
-  color: string;
-  borderColor: string;
-  borderRadius: string;
-  borderWidth: string;
-  borderStyle: string;
-  padding: string;
-  fontSize: string;
-  fontWeight: number;
-  textDecoration: string;
-  boxShadow: string;
-};
-
-type Styleguide = {
-  mode: "light" | "dark";
-  colors: {
-    accent: string;
-    background: string;
-    text: string;
-  };
-  typography: {
-    headings: {
-      h1: {
-        fontFamily: string;
-        fontSize: string;
-        fontWeight: number;
-        lineHeight: string;
-        letterSpacing: string;
-      };
-      h2: {
-        fontFamily: string;
-        fontSize: string;
-        fontWeight: number;
-        lineHeight: string;
-        letterSpacing: string;
-      };
-      h3: {
-        fontFamily: string;
-        fontSize: string;
-        fontWeight: number;
-        lineHeight: string;
-        letterSpacing: string;
-      };
-      h4: {
-        fontFamily: string;
-        fontSize: string;
-        fontWeight: number;
-        lineHeight: string;
-        letterSpacing: string;
-      };
-    };
-    p: {
-      fontFamily: string;
-      fontSize: string;
-      fontWeight: number;
-      lineHeight: string;
-      letterSpacing: string;
-    };
-  };
-  elementSpacing: {
-    xs: string;
-    sm: string;
-    md: string;
-    lg: string;
-    xl: string;
-  };
-  shadows: {
-    sm: string;
-    md: string;
-    lg: string;
-    xl: string;
-    inner: string;
-  };
-  components: {
-    button: {
-      primary: Button;
-      secondary: Button;
-      link: Button;
-    };
-    card: {
-      backgroundColor: string;
-      borderColor: string;
-      borderRadius: string;
-      borderWidth: string;
-      borderStyle: string;
-      padding: string;
-      boxShadow: string;
-      textColor: string;
-    };
-  };
-};
 type StyleguideResult = {
   status: "ok";
   domain: string;
@@ -243,7 +152,32 @@ export default function RetrieveStyleguides() {
           }
           actions={
             <ActionPanel>
+              <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Colors">
+                <Action.CopyToClipboard title="All as JSON" content={JSON.stringify(styleguide.colors)} />
+                {Object.entries(styleguide.colors).map(([key, val]) => (
+                  <Action.CopyToClipboard key={key} title={capitalize(key)} content={val} />
+                ))}
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Typography">
+                <Action.CopyToClipboard title="All as JSON" content={JSON.stringify(styleguide.typography)} />
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Element Spacing">
+                <Action.CopyToClipboard title="All as JSON" content={JSON.stringify(styleguide.elementSpacing)} />
+                {Object.entries(styleguide.elementSpacing).map(([key, val]) => (
+                  <Action.CopyToClipboard key={key} title={key} content={val} />
+                ))}
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Shadows">
+                <Action.CopyToClipboard title="All as JSON" content={JSON.stringify(styleguide.shadows)} />
+                {Object.entries(styleguide.shadows).map(([key, val]) => (
+                  <Action.CopyToClipboard key={key} title={key} content={val} />
+                ))}
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Components">
+                <Action.CopyToClipboard title="All as JSON" content={JSON.stringify(styleguide.components)} />
+              </ActionPanel.Submenu>
               <Action.Push
+                shortcut={Keyboard.Shortcut.Common.New}
                 icon={Icon.CodeBlock}
                 title="Search"
                 target={<SearchStyleguide onSearched={updateStyleguides} />}
