@@ -1,11 +1,6 @@
 # Changelog
 
-All notable changes to the German Train Info Raycast extension will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [1.0.1] - 2024-09-11
+## [1.0.1] - {PR_MERGE_DATE}
 
 ### Fixed
 - Fixed "Unexpected end of JSON input" error when not connected to ICE WiFi
