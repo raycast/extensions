@@ -34,10 +34,8 @@ interface AgentFormValues {
   type: AgentType;
   command?: string;
   args?: string;
-  workingDirectory?: string;
   endpoint?: string;
   environmentVariables?: string;
-  appendToPath?: string;
 }
 
 const configService = new ConfigService();
@@ -63,14 +61,12 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
       type: existingConfig?.type ?? "subprocess",
       command: commandTokens.length > 0 ? commandTokens[0] : (existingConfig?.command ?? ""),
       args: combinedArgs.join(" "),
-      workingDirectory: existingConfig?.workingDirectory ?? "",
       endpoint: existingConfig?.endpoint ?? "",
       environmentVariables: existingConfig?.environmentVariables
         ? Object.entries(existingConfig.environmentVariables)
             .map(([key, value]) => `${key}=${value}`)
             .join("\n")
         : "",
-      appendToPath: existingConfig?.appendToPath?.join(":") ?? "",
     };
   }, [existingConfig]);
 
@@ -93,13 +89,9 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
         ...(args ?? [])
       ];
       let environmentVariables: Record<string, string> | undefined;
-      let appendToPath: string[] | undefined;
 
       try {
         environmentVariables = parseEnvironmentVariables(values.environmentVariables);
-        if (values.type === "subprocess") {
-          appendToPath = parseAppendPath(values.appendToPath);
-        }
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -117,10 +109,8 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             type: values.type,
             command: values.type === "subprocess" ? commandValue : undefined,
             args: values.type === "subprocess" ? (combinedArgs.length > 0 ? combinedArgs : undefined) : undefined,
-            workingDirectory: values.type === "subprocess" ? values.workingDirectory?.trim() || existingConfig.workingDirectory : undefined,
             endpoint: values.type === "remote" ? values.endpoint?.trim() : undefined,
             environmentVariables: environmentVariables ?? undefined,
-            appendToPath,
           }
         : {
             id: generateAgentId(values.name),
@@ -129,10 +119,8 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             type: values.type,
             command: values.type === "subprocess" ? commandValue : undefined,
             args: values.type === "subprocess" ? (combinedArgs.length > 0 ? combinedArgs : undefined) : undefined,
-            workingDirectory: values.type === "subprocess" ? values.workingDirectory?.trim() : undefined,
             endpoint: values.type === "remote" ? values.endpoint?.trim() : undefined,
             environmentVariables: environmentVariables ?? undefined,
-            appendToPath,
             isBuiltIn: false,
             createdAt: new Date(),
             lastUsed: undefined,
@@ -224,13 +212,6 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             placeholder="--acp --verbose"
             defaultValue={defaultValues.args}
           />
-
-          <Form.TextField
-            id="workingDirectory"
-            title="Working Directory"
-            placeholder="/Users/me/projects/agent"
-            defaultValue={defaultValues.workingDirectory}
-          />
         </>
       )}
 
@@ -249,16 +230,6 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
         placeholder="KEY=value (one per line)"
         defaultValue={defaultValues.environmentVariables}
       />
-
-      {agentType === "subprocess" && (
-        <Form.TextField
-          id="appendToPath"
-          title="Append to PATH"
-          placeholder="/opt/homebrew/bin:/usr/local/bin"
-          defaultValue={defaultValues.appendToPath}
-          info="Optional: directories to append to the PATH environment variable."
-        />
-      )}
     </Form>
   );
 }
@@ -311,19 +282,6 @@ function splitCommandLine(input: string): string[] {
   }
 
   return tokens;
-}
-
-function parseAppendPath(input?: string): string[] | undefined {
-  if (!input) {
-    return undefined;
-  }
-
-  const segments = input
-    .split(":")
-    .map((segment) => segment.trim())
-    .filter(Boolean);
-
-  return segments.length > 0 ? segments : undefined;
 }
 
 export function AddAgentForm(props: Omit<AgentConfigFormProps, "mode">) {
