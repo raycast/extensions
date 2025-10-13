@@ -1,76 +1,69 @@
 import { CreateOmniFocusTaskOptions, OmniFocusTask } from "../types/task";
 import { executeScript } from "../utils/executeScript";
+import { assignProjectToTask } from "./assign-project-to-task";
+import { assignTagsToTask } from "./assign-tags-to-task";
 
-function getTagsScriptFragment(tags: string[]): string {
-  return `
-    [${tags.map((tag) => `'${tag}'`).join(",")}].map(t => {
-      let tag = doc.flattenedTags.whose({name: t})
-      if (!tag.length) {
-       tag = omnifocus.Tag({name: t})
-       doc.tags.push(tag)
-      }
-      return tag
-    })
+type OmniFocusAddTaskResponse =
+  | {
+      task: OmniFocusTask;
+      error?: never;
+    }
+  | {
+      task?: never;
+      error: "tag_assignment_failed" | "project_assignment_failed";
+    };
+export async function addTask(options: CreateOmniFocusTaskOptions): Promise<OmniFocusAddTaskResponse> {
+  const { name, deferDate, flagged, note, dueDate } = options;
+
+  let source = `
+  const omnifocus = Application('OmniFocus');
+  const doc = omnifocus.defaultDocument();
+  
+  const task = omnifocus.Task({
+    name: \`${name}\`
+  });
   `;
-}
-function getCreateTaskAppleScript(options: CreateOmniFocusTaskOptions): string {
-  const { projectName, tags } = options;
-  const taskProperties = `
-    name: '${options.name}',
-    ${options.deferDate ? "deferDate: new Date('" + options.deferDate.toISOString() + "')," : ""}
-    ${options.dueDate ? "deferDate: new Date('" + options.dueDate + "')," : ""}
-    ${options.note ? "note: '${options.note}'," : ""}
-    ${options.flagged ? "flagged: true," : ""}
-    `;
 
-  if (!projectName) {
-    return `
-      const omnifocus = Application('OmniFocus');
-      const doc = omnifocus.defaultDocument();
-      
-      const task = omnifocus.InboxTask({
-        ${taskProperties}
-      })
-      doc.inboxTasks.push(task)
-
-      if (${tags.length}) {
-        omnifocus.add(${getTagsScriptFragment(tags)}, {to: task.tags})
-      }
-
-      return {
-        id: task.id(),
-        name: task.name()
-      }
-    `;
+  if (flagged) {
+    source += `task.flagged = true;\n`;
+  }
+  if (note) {
+    source += `task.note = \`${note}\`;\n`;
   }
 
-  // Add to specific project
-  return `
-    const omnifocus = Application('OmniFocus');
-    const doc = omnifocus.defaultDocument();
-  
-    const projects = doc.flattenedProjects()
-  
-    const project = projects.find(p => p.name() === '${projectName}')
-    const task = omnifocus.Task({
-      ${taskProperties}
-    })
-    project.tasks.push(task)
+  if (deferDate) {
+    const dateString = deferDate.toISOString();
+    source += `task.deferDate = new Date('${dateString}');\n`;
+  }
 
-    if (${tags.length}) {
-      omnifocus.add(${getTagsScriptFragment(tags)}, {to: task.tags})
+  if (dueDate) {
+    source += `task.dueDate = new Date('${dueDate}');\n`;
+  }
+
+  source += `doc.inboxTasks.push(task);`;
+
+  source += "return { id: task.id(), name: task.name() };";
+  const task = await executeScript<OmniFocusTask>(source);
+
+  if (options.tags) {
+    try {
+      await assignTagsToTask(task.id, options.tags);
+    } catch (error) {
+      console.error("Error assigning tags to task:", (error as Error).message);
+      return { error: "tag_assignment_failed" };
     }
+  }
 
-    return {
-      id: task.id(),
-      name: task.name()
+  // NOTE: give OmniFocus some time to process the task before assigning the project
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  if (options.projectName) {
+    try {
+      await assignProjectToTask(task.id, options.projectName);
+    } catch (error) {
+      console.error("Error assigning project to task:", (error as Error).message);
+      return { error: "project_assignment_failed" };
     }
-  `;
-}
-
-export async function addTask(options: CreateOmniFocusTaskOptions): Promise<OmniFocusTask> {
-  const script = getCreateTaskAppleScript(options);
-
-  const task = await executeScript<OmniFocusTask>(script);
-  return task;
+  }
+  return { task };
 }

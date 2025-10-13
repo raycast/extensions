@@ -38,7 +38,7 @@ let maxCharacters = (() => {
 const isTrueDirectory = (filepath: string) => {
   try {
     return fs.lstatSync(filepath).isDirectory() && !isApp(filepath);
-  } catch (e) {
+  } catch {
     return false;
   }
 };

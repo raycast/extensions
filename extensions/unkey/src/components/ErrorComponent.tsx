@@ -7,13 +7,13 @@ export default function ErrorComponent({ errorResponse }: { errorResponse: Error
       "Key:",
       `
 ---
-Key:`
+Key:`,
     )
     .replaceAll(
       "Error:",
       `
 
-Error:`
+Error:`,
     );
   return (
     <Detail

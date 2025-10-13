@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "evaluate-math-expression",
+  "title": "Evaluate Math Expression",
+  "description": "Reads current selection, evaluates the math expression, and shows it in a desired way",
+  "icon": "extension-icon.png",
+  "author": "Dervex",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "evaluate-math-expression",
+      "title": "Evaluate Math Expression from Selection",
+      "description": "Reads current selection, evaluates the math expression, and shows it in a desired way",
+      "preferences": [
+        {
+          "name": "maxDecimals",
+          "title": "Max Decimals",
+          "type": "textfield",
+          "description": "Maximum number of decimals to include in the result",
+          "required": true,
+          "default": "3",
+          "placeholder": "3"
+        },
+        {
+          "name": "replaceSelection",
+          "label": "Replace Selection",
+          "title": "Output Options",
+          "type": "checkbox",
+          "description": "Replace the current selection with the result",
+          "required": true,
+          "default": true
+        },
+        {
+          "name": "copyToClipboard",
+          "label": "Copy To Clipboard",
+          "type": "checkbox",
+          "description": "Copy the result to clipboard",
+          "required": true,
+          "default": false
+        },
+        {
+          "name": "displayResult",
+          "label": "Display Result",
+          "type": "checkbox",
+          "description": "Display the result in a notification",
+          "required": true,
+          "default": false
+        }
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0",
+    "expr-eval": "^2.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

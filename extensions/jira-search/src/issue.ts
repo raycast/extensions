@@ -80,7 +80,8 @@ function buildJql(query: string): string {
   ]
 
   const jql = jqlConditions.filter((condition) => condition !== undefined).join(" AND ")
-  return jql + " order by lastViewed desc"
+  const nonEmptyJql = jql.length > 0 ? jql : "updated >= -180d"
+  return nonEmptyJql + " order by lastViewed desc"
 }
 
 function jqlForFilter(filter?: IssueFilter) {
@@ -107,9 +108,9 @@ async function searchIssues(query: string, filter?: IssueFilter): Promise<Result
   console.debug(jql)
 
   const result = await jiraFetchObject<Issues>(
-    "/rest/api/3/search",
+    "/rest/api/3/search/jql",
     { jql, fields },
-    { 400: ErrorText("Invalid Query", "Unknown project, issue type or assignee") }
+    { 400: ErrorText("Invalid Query", "Unknown project, issue type or assignee") },
   )
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,
@@ -151,6 +152,6 @@ export default function SearchIssueCommand() {
         { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
       ],
     },
-    openIssueKey
+    openIssueKey,
   )
 }

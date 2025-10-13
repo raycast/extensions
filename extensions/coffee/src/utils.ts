@@ -120,3 +120,31 @@ export function isNotTodaysSchedule(schedule: Schedule) {
   if (schedule.day === currentDayString) return false;
   else return true;
 }
+
+/*
+Example usage:
+console.log(formatDuration(1337000)); // Output: "15d 11h 23m 20s"
+console.log(formatDuration(3600));    // Output: "1h"
+console.log(formatDuration(65));      // Output: "1m 5s"
+console.log(formatDuration(86400));   // Output: "1d"
+*/
+export function formatDuration(seconds: number): string {
+  const units = [
+    { label: "d", value: 86400 },
+    { label: "h", value: 3600 },
+    { label: "m", value: 60 },
+    { label: "s", value: 1 },
+  ];
+
+  const result: string[] = [];
+
+  for (const unit of units) {
+    const amount = Math.floor(seconds / unit.value);
+    seconds %= unit.value;
+    if (amount > 0) {
+      result.push(`${amount}${unit.label}`);
+    }
+  }
+
+  return result.join(" ");
+}

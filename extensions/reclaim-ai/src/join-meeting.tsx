@@ -43,7 +43,7 @@ const joinMeeting = async (event: ApiResponseMoment["event"]) => {
       try {
         await open(eventRequest.onlineMeetingUrl);
       } catch (cause) {
-        captureException(new Error(`Failed to open: ${eventRequest.onlineMeetingUrl}`));
+        captureException(new Error(`Failed to open: ${eventRequest.onlineMeetingUrl}`, { cause }));
       }
       return true;
     }

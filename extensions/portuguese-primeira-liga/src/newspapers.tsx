@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Grid } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
 import useNewspapers from "./hooks/useNewspapers";
 
 export default function GetNewspapers() {
@@ -18,6 +18,7 @@ export default function GetNewspapers() {
               <ActionPanel>
                 <Action.Push
                   title="Open"
+                  icon={Icon.SoccerBall}
                   target={
                     <Detail
                       markdown={`![](${paper.cover})`}

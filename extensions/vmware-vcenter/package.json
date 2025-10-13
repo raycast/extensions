@@ -5,7 +5,9 @@
   "description": "Manage VMware vCenter",
   "icon": "command-icon.png",
   "author": "massimiliano_pasquini",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -21,6 +23,55 @@
       "label": "Certificate Validation Enabled"
     }
   ],
+  "tools": [
+    {
+      "name": "vm-list",
+      "title": "List VMs",
+      "description": "List virtual machines from VMware vCenter infrastructure"
+    },
+    {
+      "name": "vm-get-info",
+      "title": "Get VMs Detailed Info",
+      "description": "Get virtual machines detailed info from VMware vCenter infrastructure"
+    },
+    {
+      "name": "vm-open-console",
+      "title": "Open VM Console",
+      "description": "Open virtual machine console"
+    },
+    {
+      "name": "vm-guest-power",
+      "title": "Guest Agent Power Action",
+      "description": "Reboot, Shutdown or Standby Virtual Machines using Guest Agent"
+    },
+    {
+      "name": "vm-power",
+      "title": "Guest Power Action",
+      "description": "Reset, Start, Stop or Suspend one or more Virtual Machines"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@vmware-vcenter List all power on machine"
+      },
+      {
+        "input": "@vmware-vcenter List all vm with more then two core and 8GB of RAM"
+      },
+      {
+        "input": "@vmware-vcenter Which OS do VM1 and VM2 use?"
+      },
+      {
+        "input": "@vmware-vcenter Restart VM1 and VM2"
+      },
+      {
+        "input": "@vmware-vcenter Startup VM1 and VM2"
+      },
+      {
+        "input": "@vmware-vcenter Open VM1 console"
+      }
+    ]
+  },
   "commands": [
     {
       "name": "vm",
@@ -53,8 +104,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.56.0",
-    "@raycast/utils": "^1.10.1",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",

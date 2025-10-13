@@ -5,7 +5,7 @@ import { homedir } from "os";
 import { resolve } from "path";
 import { Device, LocalTab, RemoteTab } from "../types";
 import { executeJxa, safariAppIdentifier } from "../utils";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 const DATABASE_PATH = `${resolve(homedir(), `Library/Containers/com.apple.Safari/Data/Library/Safari`)}/CloudTabs.db`;
 
@@ -57,7 +57,7 @@ export default function useDevices() {
   const { data: deviceName } = useDeviceName();
   const localTabs = useLocalTabs();
   const remoteTabs = useRemoteTabs();
-  const devices = useRef<Device[]>([]);
+  const [devices, setDevices] = useState<Device[]>([]);
   const permissionView = useRef<JSX.Element | null>(null);
 
   const localDevice: Device = useMemo(
@@ -84,10 +84,12 @@ export default function useDevices() {
         .reject(["name", deviceName])
         .value();
 
-      devices.current = [localDevice, ...remoteDevices];
+      setDevices([localDevice, ...remoteDevices]);
       permissionView.current = remoteTabs.permissionView || null;
+    } else {
+      setDevices([localDevice]);
     }
-  }, [localTabs, remoteTabs, deviceName]);
+  }, [localTabs.data, remoteTabs.data, deviceName]);
 
   return { devices, permissionView, refreshDevices: localTabs.revalidate };
 }

@@ -1,19 +1,23 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import React, { useMemo, useState } from "react";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { useMemo, useState } from "react";
 import ShortenLink from "./shorten-link";
 import { isEmpty } from "./utils/common-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
-import { ListEmptyView } from "./components/list-empty-view";
 import { useDomains } from "./hooks/useDomains";
 import { useDefaultDomain } from "./hooks/useDefaultDomain";
 import { Domain } from "./types/types";
+import AddDomain from "./add-domain";
 
 export default function ShortenLinkWithDomain() {
   const [refreshDomain, setRefreshDomain] = useState<Domain | undefined>(undefined);
 
-  const { data: defaultDomainData, isLoading: domainLoading } = useDefaultDomain(refreshDomain);
-  const { data: domainsData, isLoading: loading } = useDomains();
+  const {
+    data: defaultDomainData,
+    isLoading: domainLoading,
+    revalidate: revalidateDefaultDomains,
+  } = useDefaultDomain(refreshDomain);
+  const { data: domainsData, isLoading: loading, revalidate: revalidateDomains } = useDomains();
 
   const domains = useMemo(() => {
     return domainsData || [];
@@ -27,15 +31,38 @@ export default function ShortenLinkWithDomain() {
     }
   }, [defaultDomainData]);
 
+  const AddDomainAction = () => (
+    <Action.Push
+      icon={Icon.Plus}
+      title="Add Domain"
+      target={
+        <AddDomain
+          onAdd={() => {
+            revalidateDefaultDomains();
+            revalidateDomains();
+          }}
+        />
+      }
+      shortcut={Keyboard.Shortcut.Common.New}
+    />
+  );
+
   return (
     <List
-      isLoading={loading && domainLoading}
-      isShowingDetail={domains.length !== 0 && true}
+      isLoading={loading || domainLoading}
+      isShowingDetail={domains.length !== 0}
       searchBarPlaceholder={"Search domains"}
     >
-      <ListEmptyView
-        title={"No Domain"}
+      <List.EmptyView
+        title="No Domain"
         icon={{ source: { light: "empty-domain-icon.svg", dark: "empty-domain-icon@dark.svg" } }}
+        actions={
+          <ActionPanel>
+            <AddDomainAction />
+            <ActionGoShortIo />
+            <ActionOpenPreferences />
+          </ActionPanel>
+        }
       />
       {domains.map((value, index) => {
         return (
@@ -99,6 +126,7 @@ export default function ShortenLinkWithDomain() {
                     setRefreshDomain(value);
                   }}
                 />
+                <AddDomainAction />
                 <ActionGoShortIo />
                 <ActionOpenPreferences />
               </ActionPanel>

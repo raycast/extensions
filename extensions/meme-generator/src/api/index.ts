@@ -32,10 +32,13 @@ async function setMemeResultsCache(memes: Meme[]) {
 }
 
 export async function getMemes(): Promise<GetMemesResult> {
+  // Try cache first
   const memesFromCache = await getMemeResultsFromCache();
   if (memesFromCache) {
+    console.log("getMemes: Returning cached results.");
     return { success: true, memes: memesFromCache };
   }
+  console.log("getMemes: Cache miss or expired, fetching from API.");
 
   try {
     const response = await fetch("https://api.imgflip.com/get_memes");
@@ -55,15 +58,22 @@ export async function getMemes(): Promise<GetMemesResult> {
       boxCount,
     }));
 
-    setMemeResultsCache(memes);
+    setMemeResultsCache(memes); // Update cache
+    console.log(`getMemes: Fetched ${memes.length} memes from API.`);
     return {
       success: true,
       memes,
     };
-  } catch {
+  } catch (error) {
+    // Add type check for error message
+    let message = "An unexpected network error occurred.";
+    if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+      message = error.message;
+    }
+    console.error("getMemes: Error fetching from API:", message);
     throw {
       success: false,
-      message: "An unexpected network error occurred.",
+      message: message,
     };
   }
 }

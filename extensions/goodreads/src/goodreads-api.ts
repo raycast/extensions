@@ -1,5 +1,5 @@
 import got from "got";
-import { Cache, environment } from "@raycast/api";
+import { environment } from "@raycast/api";
 import {
   extractEntitiesFromBookDetailsPage,
   extractEntitiesFromBookSearchPage,
@@ -7,48 +7,6 @@ import {
   extractEntitiesFromPersonDetailsPage,
 } from "./utils";
 import type { Person, Book, BookDetails, PersonDetails } from "./types";
-
-const cache = new Cache();
-
-interface CacheEntry<T> {
-  lastSynced: number;
-  data: T;
-}
-
-const CACHE_EXPIRY_TIME = 1000 * 60 * 60 * 24; // 1 day
-
-const getFromCache = <T>(key: string): T | undefined => {
-  const response = cache.get(key);
-  if (response) {
-    const parsedResponse = JSON.parse(response) as CacheEntry<T>;
-    if (Date.now() < parsedResponse.lastSynced + CACHE_EXPIRY_TIME) {
-      return parsedResponse.data;
-    } else {
-      // Remove from cache if it has expired
-      cache.remove(key);
-    }
-  }
-};
-
-const addToCache = <T>(key: string, value: T) => {
-  const cacheEntry: CacheEntry<T> = { lastSynced: Date.now(), data: value };
-  cache.set(key, JSON.stringify(cacheEntry));
-};
-
-const enum SEARCH_TYPE {
-  BOOKS = "books",
-  PEOPLE = "people",
-}
-
-export const enum AsyncStatus {
-  Success,
-  Error,
-}
-
-interface ApiResponse<T> {
-  status: AsyncStatus;
-  data: T;
-}
 
 const GOODREADS_URL_BASE = "https://www.goodreads.com";
 const SEARCH_URL_BASE = `${GOODREADS_URL_BASE}/search`;
@@ -61,6 +19,36 @@ const HEADERS = {
   "sec-fetch-mode": "navigate",
 };
 const RETRY_BASE_DELAY = 1000;
+
+export const getCacheKey = (url: string): string => {
+  // Remove query params
+  const cleanUrl = url.split("?")[0];
+
+  // Extract book ID
+  const bookIdMatch = cleanUrl.match(/\/book\/show\/(.+)/);
+  if (bookIdMatch) {
+    return `book:${bookIdMatch[1]}`;
+  }
+
+  return `book:${cleanUrl}`;
+};
+
+const enum SEARCH_TYPE {
+  BOOKS = "books",
+  PEOPLE = "people",
+}
+
+export const enum AsyncStatus {
+  Idle,
+  Loading,
+  Success,
+  Error,
+}
+
+interface ApiResponse<T> {
+  status: AsyncStatus;
+  data: T;
+}
 
 const getSearchPageUrl = (query: string, searchType: SEARCH_TYPE) =>
   `${SEARCH_URL_BASE}?q=${encodeURIComponent(query)}&search_type=${searchType}&search%5Bfield%5D=on`;
@@ -82,13 +70,6 @@ export const fetchBooksByTitle = async (title: string): Promise<ApiResponse<Book
 };
 
 export const fetchBookDetails = async (urlSegment: string): Promise<ApiResponse<BookDetails>> => {
-  const cacheKey = urlSegment.split("?")[0];
-  const cachedResponse = getFromCache<BookDetails>(cacheKey);
-
-  if (cachedResponse) {
-    return { status: AsyncStatus.Success, data: cachedResponse };
-  }
-
   const url = getDetailsPageUrl(urlSegment);
 
   try {
@@ -98,7 +79,6 @@ export const fetchBookDetails = async (urlSegment: string): Promise<ApiResponse<
     // Need an alternative way to wait till the entire HTML is received during the GET page call.
     const response = await fetchWithRetry(url, 5, (response) => response.includes("BookPageTitleSection"));
     const data = extractEntitiesFromBookDetailsPage(response, url);
-    addToCache(cacheKey, data);
 
     return { status: AsyncStatus.Success, data };
   } catch (error) {
@@ -120,19 +100,11 @@ export const fetchPeopleByName = async (name: string): Promise<ApiResponse<Perso
 };
 
 export const fetchPersonDetails = async (urlSegment: string): Promise<ApiResponse<PersonDetails>> => {
-  const cacheKey = urlSegment.split("?")[0];
-  const cachedResponse = getFromCache<PersonDetails>(cacheKey);
-
-  if (cachedResponse) {
-    return { status: AsyncStatus.Success, data: cachedResponse };
-  }
-
   const url = getDetailsPageUrl(urlSegment);
 
   try {
     const response = await fetchWithRetry(url);
     const data = extractEntitiesFromPersonDetailsPage(response, url);
-    addToCache(cacheKey, data);
 
     return { status: AsyncStatus.Success, data };
   } catch (error) {

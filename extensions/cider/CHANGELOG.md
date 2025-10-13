@@ -1,5 +1,15 @@
 # Cider Changelog
 
+## [Windows] - 2025-07-07
+- Added support for Windows
+
+## [Fixes & Improvements] - 2025-01-26
+- Added token support (more details in [Overview](https://raycast.com/feyli/cider#readme))
+- Added handcrafted icons for all commands
+- Changed the command's name from favourite to favorite to fit Raycast's standards
+- Added global handling of Cider errors across all commands
+- Fixed and added toasts for better understanding of the situation
+
 ## [New Features & Fixes] - 2025-01-14
 - Fixed all endpoints to follow new API
 - Added queue command

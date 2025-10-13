@@ -1,27 +1,14 @@
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Form, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
 
-import { Action, ActionPanel, Form, Icon, showHUD, popToRoot } from "@raycast/api";
+import * as api from "./api";
+import useAlias from "./useAlias";
 
-import * as alias from "./api/alias";
-import type { Alias } from "./api/alias";
+type Props = {
+  id: string;
+};
 
-const EditAlias = () => {
-  const [aliases, setAliases] = useState<Alias[]>([]);
-
-  const [selectedAlias, setSelectedAlias] = useState<Alias | null>(null);
-
-  const [newDesc, setNewDesc] = useState("");
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  const init = async () => {
-    const allAliases = await alias.get();
-
-    setAliases(allAliases);
-    setSelectedAlias(allAliases[0]);
-  };
+const EditAlias = ({ id }: Props) => {
+  const { data: alias, isLoading } = useAlias(id);
 
   return (
     <Form
@@ -30,36 +17,26 @@ const EditAlias = () => {
           <Action.SubmitForm
             title="Edit Alias"
             onSubmit={async (values) => {
-              const success = await alias.edit(values.email, { description: values.desc });
+              const success = await api.alias.edit(alias?.id ?? "", { description: values.description });
 
               if (success) {
-                showHUD("✅ Alias edited");
-                popToRoot({ clearSearchBar: true });
+                await showHUD("✅ Alias edited");
+                await popToRoot();
               } else {
-                showHUD("❌ Error editing alias");
+                await showToast({
+                  message: "Please check your credentials in the extension preferences.",
+                  style: Toast.Style.Failure,
+                  title: "Error editing alias",
+                });
               }
             }}
           />
         </ActionPanel>
       }
+      isLoading={isLoading}
     >
-      <Form.Dropdown
-        id="email"
-        title="Alias Email"
-        value={selectedAlias?.id}
-        onChange={(newValue: string) => {
-          const selectedAlias = aliases.find((alias) => alias.id === newValue)!;
-
-          setSelectedAlias(selectedAlias);
-          setNewDesc(selectedAlias.description || "");
-        }}
-        autoFocus
-      >
-        {aliases.map((alias) => (
-          <Form.Dropdown.Item value={alias.id} key={alias.id} icon={Icon.Envelope} title={alias.email} />
-        ))}
-      </Form.Dropdown>
-      <Form.TextField id="desc" title="Description" value={newDesc} onChange={setNewDesc} placeholder="Newsletters" />
+      <Form.Description text={alias?.email ?? ""} />
+      <Form.TextField id="description" placeholder="Newsletter" title="Description" value={alias?.description ?? ""} />
     </Form>
   );
 };

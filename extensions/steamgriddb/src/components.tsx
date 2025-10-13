@@ -1,13 +1,11 @@
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Detail,
   Grid,
   Icon,
   Image,
-  closeMainWindow,
-  showHUD,
+  showInFinder,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ImageType, SGDBGame, SGDBImage } from "./types.js";
@@ -76,7 +74,7 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
               <Action
                 title={
                   // eslint-disable-next-line @raycast/prefer-title-case
-                  isDownloading ? "Downloading..." : "Copy Image to Clipboard"
+                  isDownloading ? "Downloading..." : "Download Image"
                 }
                 icon={Icon.Image}
                 onAction={async () => {
@@ -84,9 +82,7 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
                   setIsDownloading(true);
                   const file = await downloadImage(image.url.toString());
                   setIsDownloading(false);
-                  await Clipboard.copy({ file });
-                  await closeMainWindow();
-                  await showHUD("Copied to Clipboard");
+                  await showInFinder(file);
                 }}
               />
               <Action.CopyToClipboard

@@ -1,6 +1,5 @@
-import { CoreV1Api, V1PersistentVolumeClaim } from "@kubernetes/client-node";
-import { listPersistentVolumeClaims } from "./api/coreV1";
-import { ResourceList } from "./components/resource-list";
+import { V1PersistentVolumeClaim } from "@kubernetes/client-node";
+import { ResourceList } from "./components/ResourceList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
 import { kubernetesObjectAge } from "./utils/duration";
@@ -11,10 +10,8 @@ export default function Command() {
       <KubernetesNamespaceProvider>
         <ResourceList
           apiVersion="v1"
-          kind="PersistentVolumesClaims"
+          kind="PersistentVolumeClaim"
           namespaced={true}
-          apiClientType={CoreV1Api}
-          listResources={listPersistentVolumeClaims}
           matchResource={matchPersistentVolumeClaim}
           renderFields={renderPersistentVolumeClaimFields}
         />

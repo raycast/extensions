@@ -25,6 +25,13 @@
       "mode": "view"
     },
     {
+      "name": "devices",
+      "title": "Manage Devices",
+      "subtitle": "Dashlane",
+      "description": "List devices connected to your accunt",
+      "mode": "view"
+    },
+    {
       "name": "sync",
       "title": "Sync Vault",
       "subtitle": "Dashlane",
@@ -58,9 +65,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.3",
-    "@raycast/utils": "^1.18.0",
-    "execa": "^9.4.1",
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.1",
+    "execa": "^9.5.2",
+    "p-queue": "^8.1.0",
     "valibot": "~0.42.1"
   },
   "devDependencies": {

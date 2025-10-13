@@ -44,8 +44,7 @@ import CustomAction from "../actions/CustomAction";
 import HomeAction from "../actions/HomeAction";
 import LikeFeed from "./LikeFeed";
 import NewPost from "../../new-post";
-import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
-import { ThreadViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { isThreadViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { getPostMarkdownView } from "../../utils/parser";
 import { useDebounce } from "use-debounce";
 
@@ -239,13 +238,13 @@ export default function PostItem({
   const getThread = async (post: Post) => {
     const data = await getPostThread(post.uri);
 
-    if (data && data.thread && data.thread.replies) {
-      const replies: ThreadViewPost[] = data.thread.replies as ThreadViewPost[];
+    if (isThreadViewPost(data.thread) && isThreadViewPost(data.thread.replies)) {
+      const { replies } = data.thread;
       let replyMarkdown = RepliesMarkdown;
 
       for (const reply of replies) {
-        if (reply.post) {
-          const replyText = await getPostMarkdownView(reply.post as PostView, []);
+        if (isThreadViewPost(reply)) {
+          const replyText = await getPostMarkdownView(reply.post, []);
           replyMarkdown = replyMarkdown + replyText;
         }
       }

@@ -84,8 +84,10 @@ export default function Command() {
     if (!currencyData) {
       return "Cargando...";
     }
-    console.log("paso a esta parte");
+
     switch (selectedCurrency) {
+      case "Oficial":
+        return currencyData.dollar?.ahorro?.ask !== undefined ? formatPrice(currencyData.dollar.ahorro.ask) : "N/A";
       case "Blue":
         return currencyData.dollar?.blue?.ask !== undefined ? formatPrice(currencyData.dollar.blue.ask) : "N/A";
       case "MEP":
@@ -107,7 +109,7 @@ export default function Command() {
     }
   };
 
-  const title = getTitle();
+  const title = getTitle() as string;
 
   return (
     <MenuBarExtra title={title} isLoading={isLoading}>

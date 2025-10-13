@@ -9,6 +9,10 @@
   ],
   "icon": "icon.png",
   "author": "jwickers",
+  "contributors": [
+    "ViGeng",
+    "tofrankie"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -97,23 +101,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.102.7",
+    "run-applescript": "^7.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "2.4.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.1",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
-  }
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

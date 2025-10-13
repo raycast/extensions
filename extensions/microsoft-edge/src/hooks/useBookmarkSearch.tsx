@@ -57,7 +57,7 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
     (profileId: string) => {
       setProfile(profileId);
     },
-    [profile]
+    [profile],
   );
 
   useEffect(() => {

@@ -5,8 +5,12 @@
   "description": "Efficiently manage and launch groups of links in specific Chrome profiles.",
   "icon": "icon_.png",
   "author": "toni_birka",
+  "contributors": [
+    "alexs"
+  ],
   "categories": [
-    "Productivity", "Web"
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
@@ -19,12 +23,20 @@
     {
       "name": "create-link-bundle",
       "title": "Create Link Bundle",
-      "description": "Create a new bundle of links with custom title, description, and Chrome profile assignment.",
+      "description": "Create a new bundle of links with custom title, description, and optionally, Chrome profile assignment.",
       "mode": "view",
       "preferences": [
         {
-          "name": "defaultNewWindow",
+          "name": "defaultOpenInDefaultBrowser",
           "title": "Default values for flags in a form",
+          "label": "Open in Default Browser",
+          "description": "Whether new bundles should open in the default browser instead of Chrome",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "defaultNewWindow",
           "label": "Open in New Window",
           "description": "Whether new bundles should open in a new window",
           "type": "checkbox",
@@ -38,7 +50,8 @@
           "type": "checkbox",
           "required": false,
           "default": false
-        }]
+        }
+      ]
     }
   ],
   "dependencies": {

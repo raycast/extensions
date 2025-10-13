@@ -1,27 +1,28 @@
-import { useState, useEffect, useRef } from "react";
 import {
-  ActionPanel,
   Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  Image,
+  Keyboard,
   List,
   showToast,
   Toast,
-  Icon,
-  Color,
-  Clipboard,
-  getPreferenceValues,
-  Keyboard,
-  confirmAlert,
-  Alert,
   useNavigation,
-  Image,
+  LocalStorage,
 } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { iCloudService } from "./api/connect";
+import { iCloudSessionExpiredError } from "./api/errors";
 import { getIcon, HideMyEmail, MetaData } from "./api/hide-my-email";
-import { formatTimestamp } from "./utils";
 import { getiCloudService, Login } from "./components/Login";
 import { AddressForm, AddressFormValues } from "./components/forms/AddressForm";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { iCloudSessionExpiredError } from "./api/errors";
+import { formatTimestamp } from "./utils";
 
 enum EmailStatus {
   ANY = "ANY",
@@ -55,12 +56,13 @@ export default function Command() {
   const [service, setService] = useState<iCloudService | null>(null);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>(EmailStatus.ANY);
   const [showLoginAction, setShowLoginAction] = useState<boolean>(false);
+  const [isLoggedOut, setIsLoggedOut] = useCachedState<boolean>("isLoggedOut", false);
   const [appIcons, setAppIcons] = useCachedState<AppIcons>(
     "app-icons",
     { default: "extension-icon.png" },
     { cacheNamespace: "app-icons" },
   );
-  const { sortByCreationDate } = getPreferenceValues<Preferences.ListEmails>();
+  const { sortByCreationDate, popAfterCopy } = getPreferenceValues<Preferences.ListEmails>();
   const effectRan = useRef(false);
   const abortable = useRef<AbortController>();
   const { pop } = useNavigation();
@@ -92,6 +94,9 @@ export default function Command() {
         }
       },
       onData: async (data) => {
+        if (isLoggedOut) {
+          setIsLoggedOut(false);
+        }
         const newIcons: AppIcons = {};
         let newData = false;
         for (const hme of data) {
@@ -115,7 +120,7 @@ export default function Command() {
           showToast({ style: Toast.Style.Success, title: "Logged in" });
           setService(iService);
         } catch (error) {
-          if (emails.length > 0) {
+          if (emails.length > 0 && !isLoggedOut) {
             showToast({
               style: Toast.Style.Failure,
               title: "Failed to log in",
@@ -128,8 +133,18 @@ export default function Command() {
     }
   }, []);
 
-  if (!service && !emails.length) {
-    return <Login onLogin={(iService: iCloudService) => setService(iService)} />;
+  if (!service && (!emails.length || isLoggedOut)) {
+    return (
+      <Login
+        onLogin={(iService: iCloudService) => {
+          setService(iService);
+        }}
+      />
+    );
+  }
+
+  if (isLoggedOut) {
+    return <List isLoading={true} />;
   }
 
   async function isServiceAvailable() {
@@ -256,6 +271,21 @@ export default function Command() {
     }
   }
 
+  async function logOut() {
+    try {
+      await service?.logOut();
+      LocalStorage.clear();
+      setIsLoggedOut(true);
+      setService(null);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to log out",
+        message: (error as { message: string }).message,
+      });
+    }
+  }
+
   function onStatusChange(newStatus: EmailStatus) {
     setEmailStatus(newStatus);
   }
@@ -299,6 +329,7 @@ export default function Command() {
                 key={email.id}
                 id={email.id}
                 title={`${email.label}`}
+                keywords={[email.address, ...email.note.split(/\s+/g)]}
                 icon={{ source: Icon.ChevronRightSmall, tintColor: email.isActive ? Color.Green : Color.Red }}
                 detail={
                   <List.Item.Detail
@@ -333,7 +364,15 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action.CopyToClipboard title={"Copy Email"} content={email.address} />
+                      <Action.CopyToClipboard
+                        title={"Copy Email"}
+                        content={email.address}
+                        onCopy={() => {
+                          if (popAfterCopy) {
+                            pop();
+                          }
+                        }}
+                      />
                       {email.domain && <Action.OpenInBrowser title={"Open Website"} url={`https://${email.domain}`} />}
                       {showLoginAction && (
                         <Action.Push
@@ -407,6 +446,17 @@ export default function Command() {
                           }
                           icon={Icon.PlusCircle}
                           shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        />
+                      </ActionPanel.Section>
+                    )}
+                    {service && (
+                      <ActionPanel.Section>
+                        <Action
+                          title="Log Out"
+                          onAction={async () => {
+                            await logOut();
+                          }}
+                          icon={Icon.Logout}
                         />
                       </ActionPanel.Section>
                     )}

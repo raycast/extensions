@@ -5,6 +5,9 @@
   "description": "convert any decimal/hexadecimal code into actual OpenGL enum",
   "icon": "command-icon.png",
   "author": "visual_eugen",
+  "contributors": [
+    "litomore"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -18,15 +21,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0"
+    "@raycast/api": "^1.100.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.3",
+    "@types/react": "19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

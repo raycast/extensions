@@ -6,7 +6,7 @@ export default async function Command() {
   const data = await wip.fetchStreak();
 
   await updateCommandMetadata({
-    subtitle: `${data.streak} 🔥 – ${data.streaking ? "Your streak is safe" : "⚠️ No completed todos day!"}`,
+    subtitle: `${data.streak} 🔥 – ${data.streaking ? "Your streak is safe" : "⚠️ No completed todos today!"}`,
   });
 
   if (environment.launchType === "userInitiated") {

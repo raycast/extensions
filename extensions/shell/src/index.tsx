@@ -19,7 +19,7 @@ import { runAppleScript } from "run-applescript";
 import { usePersistentState } from "raycast-toolkit";
 import fs from "fs";
 
-interface EnvType {
+export interface EnvType {
   env: Record<string, string>;
   cwd: string;
   shell: string;
@@ -35,7 +35,7 @@ interface Preferences {
 
 let cachedEnv: null | EnvType = null;
 
-const getCachedEnv = async () => {
+export const getCachedEnv = async () => {
   if (cachedEnv) {
     return cachedEnv;
   }

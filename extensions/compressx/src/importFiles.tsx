@@ -11,11 +11,11 @@ export default async function main() {
   try {
     const filePaths = (await getSelectedFinderItems()).map((f) => f.path);
     const paths = filePaths.join("|");
-    const url = `compressx://import?path=${paths}`;
+    const url = `compresto://import?path=${paths}`;
     exec(`open "${url}"`);
     await showToast({
       style: Toast.Style.Success,
-      title: "imported into CompressX",
+      title: "imported into Compresto",
     });
   } catch (e) {
     await showToast({

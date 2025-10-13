@@ -41,15 +41,13 @@ function FavouritesActions({ favorites, quote, favoritesStore }: FavouritesActio
       <Action
         title="Move Up in Favorites"
         icon={Icon.ArrowUp}
-        // TODO: switch to cmd+opt+up, but that doesn't work for some reason. Raycast bug?
-        shortcut={{ modifiers: ["opt"], key: "k" }}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
         onAction={() => favoritesStore.moveUp(quote.symbol!)}
       />
       <Action
         title="Move Down in Favorites"
         icon={Icon.ArrowDown}
-        // TODO: switch to cmd+opt+down, but that doesn't work for some reason. Raycast bug?
-        shortcut={{ modifiers: ["opt"], key: "j" }}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
         onAction={() => favoritesStore.moveDown(quote.symbol!)}
       />
       <FavoritesAddRemoveAction favorites={favorites} favoritesStore={favoritesStore} symbol={quote.symbol!} />

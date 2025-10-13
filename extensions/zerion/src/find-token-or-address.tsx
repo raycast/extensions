@@ -51,7 +51,7 @@ function WalletLine({ wallet }: { wallet: SearchWallet }) {
         <ActionPanel title="Actions">
           <Action
             onAction={() => push(<AddressView addressOrDomain={normalizedAddress} />)}
-            title="Go To Wallet"
+            title="Go to Wallet"
             icon={Icon.Eye}
           />
           <Action.OpenInBrowser

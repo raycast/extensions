@@ -78,13 +78,10 @@ export interface DataValue {
 }
 
 export interface Metadata {
-  additionalInfo: AdditionalInfo;
   title: string;
   description: string;
   thumbnailURL: string;
 }
-
-export interface AdditionalInfo {}
 
 export interface Table {
   filter: string;

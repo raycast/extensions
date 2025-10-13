@@ -25,6 +25,7 @@ export function DirectoryItem(props: {
       id={filePath}
       title={props.fileData.name}
       subtitle={props.preferences.showFilePermissions ? props.fileData.permissions : ""}
+      keywords={props.preferences.searchByPermissions ? [props.fileData.permissions] : undefined}
       icon={{ fileIcon: filePath }}
       quickLook={{ path: filePath, name: props.fileData.name }}
       actions={

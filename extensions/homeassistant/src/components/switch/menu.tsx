@@ -1,3 +1,4 @@
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getIcon } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
@@ -5,7 +6,7 @@ import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { capitalize } from "lodash-es";
-import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "../menu";
+import React from "react";
 
 function SwitchToggleItem(props: { state: State }) {
   const handle = async () => {
@@ -46,7 +47,7 @@ function SwitchTurnOffItem(props: { state: State }) {
   return <MenuBarExtra.Item title="Turn Off" onAction={handle} icon={"power-off.svg"} />;
 }
 
-export function SwitchMenubarItem(props: { state: State }): JSX.Element | null {
+export function SwitchMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const friendlyName = getFriendlyName(s);
   const title = () => {

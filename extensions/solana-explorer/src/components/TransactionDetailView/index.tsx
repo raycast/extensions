@@ -58,7 +58,7 @@ const TransactionDetailView = ({ signature, connection }: Props) => {
       return transaction;
     },
     [signature],
-    { abortable }
+    { abortable },
   );
   const { pop } = useNavigation();
 

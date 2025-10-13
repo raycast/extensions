@@ -157,3 +157,7 @@ export function raycastForCursorURI(uri: string) {
 export async function openURIinCursor(uri: string) {
   await open(raycastForCursorURI(uri));
 }
+
+export function isValidHexColor(color: string): boolean {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
+}

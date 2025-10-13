@@ -51,7 +51,9 @@ export default function SearchAssets() {
             content={
               !asset.fields.file
                 ? { source: "untitled.svg", tintColor: Color.SecondaryText }
-                : `https:${asset.fields.file[CONTENTFUL_LOCALE].url}`
+                : asset.fields.file[CONTENTFUL_LOCALE].contentType.includes("video")
+                  ? { source: "video.svg", tintColor: Color.SecondaryText }
+                  : `https:${asset.fields.file[CONTENTFUL_LOCALE].url}`
             }
             actions={
               <ActionPanel>

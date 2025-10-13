@@ -33,6 +33,33 @@ You can change the active budget at any time using the command. For most people 
 
 ## Commands
 
+### AI Extensions
+
+Raynab now includes AI Extensions for querying your budget information through natural language. You can ask questions like:
+
+#### Transaction Management
+- "@raynab add a transaction for $25.50 at Starbucks"
+- "@raynab show me my recent transactions"
+- "@raynab show me my Amazon purchases from last year"
+- "@raynab what did I spend at Target in the past month?"
+- "@raynab what was my transaction with Amazon on March 14?"
+- "@raynab show me my transactions with Amazon this month"
+- "@raynab what did I spend at Amazon last month?"
+
+#### Account Queries
+- "@raynab show me my account balances"
+- "@raynab what is my checking account balance?"
+- "@raynab show me my checking account"
+- "@raynab how much is in my checking?"
+
+#### Big Numbers
+- "@raynab what are my big three numbers?"
+- "@raynab show me my big numbers"
+
+#### Budget Information
+- "@raynab what is the age of money in my current budget?"
+- "@raynab tell me about my this month's budget"
+
 ### List Transactions
 
 This command will list your transactions for up to a year. It is the heart of Raynab as this will probably the place where you will spend most of your time understanding your inflows, outflows, and transfers.
@@ -86,7 +113,7 @@ Pressing Enter (`↵`) will show the transaction detail view which provides more
 - Edit Transaction (`⌘` + `↵`): Edit any of the provided transaction information:
 
   - Date
-  - Amount
+  - Amount (Positive or Negative)
   - Payee Name
   - Memo
   - Flag
@@ -185,7 +212,7 @@ File a new transaction into your budget by entering its related information.
 The following fields are required:
 
 - Date
-- Amount (Must be a non-zero floating point number)
+- Amount (Positive or negative)
 - Payee Name
 - Category
 
@@ -196,7 +223,7 @@ Create a new scheduled transaction which will be applied at the specified future
 The following fields are required:
 
 - Date
-- Amount (Must be a non-zero floating point number)
+- Amount (Positive or negative)
 - Repeats (defaults to "Never")
 - Payee Name
 - Category
@@ -281,6 +308,10 @@ Categories are grouped in their original category group. Each category is presen
   - Account: The account of the transaction
 
 ### More about transaction forms
+
+#### Amounts
+
+Transaction amounts in Raynab accept amounts as inflows if they're positive (e.g. 12.34) and outflows if negative (-12.34). The amount supports the currency settings of your currently selected budget. For instance, if your decimal separator is a comma (,) instead of a period (.) you can enter "-12,34".
 
 #### Transfers
 

@@ -47,7 +47,9 @@ export default function Command() {
           setIsUnlocked(true);
         }
       } else {
-        lockAfterInactivity > 0 && InactivityTimer.launchInactivityTimer();
+        if (lockAfterInactivity > 0) {
+          InactivityTimer.launchInactivityTimer();
+        }
       }
       setIsLoaded(true);
     });

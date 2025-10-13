@@ -16,9 +16,11 @@ export default class ApplescriptDevicesService implements DevicesService {
 
   connectDevice(mac: string): boolean {
     const formattedMacAddress = mac.toUpperCase().replaceAll(":", "-");
-    const script = readFileSync(resolve(__dirname, "assets/scripts/connectDevice.applescript")).toString();
+    const script = readFileSync(
+      resolve(__dirname, this._getPath("assets/scripts/connectDevice.applescript"))
+    ).toString();
     const getFirstMatchingDeviceScript = readFileSync(
-      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
+      resolve(__dirname, this._getPath("assets/scripts/getFirstMatchingDevice.applescript"))
     ).toString();
     const exitCode = runAppleScriptSync(
       `
@@ -36,9 +38,11 @@ export default class ApplescriptDevicesService implements DevicesService {
 
   disconnectDevice(mac: string): boolean {
     const formattedMacAddress = mac.toUpperCase().replaceAll(":", "-");
-    const script = readFileSync(resolve(__dirname, "assets/scripts/disconnectDevice.applescript")).toString();
+    const script = readFileSync(
+      resolve(__dirname, this._getPath("assets/scripts/disconnectDevice.applescript"))
+    ).toString();
     const getFirstMatchingDeviceScript = readFileSync(
-      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
+      resolve(__dirname, this._getPath("assets/scripts/getFirstMatchingDevice.applescript"))
     ).toString();
     const exitCode = runAppleScriptSync(
       `
@@ -56,7 +60,9 @@ export default class ApplescriptDevicesService implements DevicesService {
 
   private _fetchRawDevicesData(): RawDeviceData[] {
     // Fetch Bluetooth data
-    const script = readFileSync(resolve(__dirname, "assets/scripts/getAllDevices.applescript")).toString();
+    const script = readFileSync(
+      resolve(__dirname, this._getPath("assets/scripts/getAllDevices.applescript"))
+    ).toString();
     const fetchedData = runAppleScriptSync(`${script}`);
 
     // Parse fetched data
@@ -142,5 +148,12 @@ export default class ApplescriptDevicesService implements DevicesService {
     }
 
     return device;
+  }
+
+  private _getPath(path: string): string {
+    if (__dirname.endsWith("/tools")) {
+      return `../${path}`;
+    }
+    return path;
   }
 }

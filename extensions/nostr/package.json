@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nostr",
+  "title": "Nostr",
+  "description": "Publish notes to Nostr",
+  "icon": "nostr.png",
+  "author": "saadel",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "publish",
+      "title": "Publish Note",
+      "subtitle": "Nostr",
+      "description": "Publish a note to Nostr",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "privateKey",
+      "type": "password",
+      "title": "Private Key (nsec or hex)",
+      "default": "",
+      "required": true,
+      "description": "Enter your private key (nsec or hex) for signing events on Nostr"
+    },
+    {
+      "name": "relays",
+      "type": "textfield",
+      "title": "Relay URLs",
+      "default": "wss://relay.nostr.band",
+      "required": true,
+      "description": "Enter relay URLs (comma-separated) to publish notes to"
+    },
+    {
+      "name": "includeClient",
+      "type": "checkbox",
+      "title": "Client Information",
+      "label": "Include Client info in post metadata",
+      "default": true,
+      "required": false,
+      "description": "Whether nostr-raycast should be included in the posts metadata"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.17.0",
+    "nostr-tools": "^2.12.0",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@noble/hashes": "^1.7.2",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

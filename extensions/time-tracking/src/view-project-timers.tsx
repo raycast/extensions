@@ -10,15 +10,76 @@ import {
   LaunchType,
   List,
   showToast,
+  Form,
 } from "@raycast/api";
+
 import { useEffect, useState } from "react";
-import { deleteTimer, exportTimers, formatDuration, getDuration, getTimers, Timer, TimerList } from "./Timers";
+import {
+  deleteTimer,
+  editTimer,
+  exportTimers,
+  formatDuration,
+  getDuration,
+  getTimers,
+  Timer,
+  TimerList,
+} from "./Timers";
+
+function EditForm(props: { timer: Timer; onUpdate: (start: Date, end: Date, name: string) => void }) {
+  const [error, setError] = useState("");
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit"
+            onSubmit={(input) => {
+              const name: string = input.name;
+              const start: Date = input["start-date"];
+              const end: Date = input["end-date"];
+              if (start >= end) {
+                setError("End Date must be after Start Date");
+                return false;
+              }
+              if (end > new Date()) {
+                setError("End Date must be a date in the past");
+                return false;
+              }
+              props.onUpdate(start, end, name);
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Name" id="name" defaultValue={props.timer.name || undefined} placeholder="Unnamed timer" />
+      <Form.DatePicker
+        title="Start Date"
+        id={"start-date"}
+        defaultValue={new Date(props.timer.start)}
+        // This is important to clear the state of the form. Without it, subsequent submits
+        // will send stale values.
+        onChange={() => setError("")}
+      />
+      <Form.DatePicker
+        error={error}
+        title="End Date"
+        id={"end-date"}
+        defaultValue={new Date(props.timer.end!)}
+        // This is important to clear the state of the form. Without it, subsequent submits
+        // will send stale values.
+        onChange={() => setError("")}
+      />
+    </Form>
+  );
+}
 
 export default function Command() {
   const [timers, setTimers] = useState<Timer[]>();
   const [filteredTimers, setFilteredTimers] = useState<Timer[]>([]);
 
   const [search, setSearch] = useState<string>("");
+
+  const [editingTimer, setEditingTimer] = useState<Timer | undefined>(undefined);
 
   useEffect(() => {
     getTimers().then(refresh);
@@ -38,6 +99,19 @@ export default function Command() {
       .slice(0, 50);
     setTimers(sortedTimers);
     setFilteredTimers(sortedTimers);
+  }
+
+  if (editingTimer) {
+    return (
+      <EditForm
+        timer={editingTimer}
+        onUpdate={async (start, end, name) => {
+          await editTimer({ ...editingTimer, start: start.getTime(), end: end.getTime(), name });
+          getTimers().then(refresh);
+          setEditingTimer(undefined);
+        }}
+      />
+    );
   }
 
   return (
@@ -94,6 +168,14 @@ export default function Command() {
                 title={"Copy Duration"}
                 content={formatDuration(getDuration(timer))}
               />
+              {!!timer.end && (
+                <Action
+                  icon={Icon.EditShape}
+                  title={"Edit Timer"}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                  onAction={() => setEditingTimer(timer)}
+                />
+              )}
               <Action
                 icon={Icon.Trash}
                 title={"Delete Timer"}
@@ -121,6 +203,7 @@ export default function Command() {
               />
               <Action
                 icon={Icon.Download}
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Export Timers as CSV"
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
                 onAction={exportTimers}

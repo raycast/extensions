@@ -1,22 +1,32 @@
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { search } from "../api/search";
 import { useMemo } from "react";
-import { apiLimit } from "../helpers/constants";
+import { search } from "../api";
+import { SortDirection } from "../models";
+import { apiLimit } from "../utils";
 
-export function useSearch(searchText: string, type: string[]) {
+export function useSearch(spaceId: string, query: string, types: string[], config?: { execute?: boolean }) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
-    (searchText: string, type: string[]) => async (options: { page: number }) => {
+    (spaceId: string, query: string, types: string[]) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
-      const response = await search(searchText, type, { offset, limit: apiLimit });
+      const sortPreference = getPreferenceValues().sort;
+      const sortDirection = sortPreference === "name" ? SortDirection.Ascending : SortDirection.Descending;
+
+      const response = await search(
+        spaceId,
+        { query, types, sort: { property_key: sortPreference, direction: sortDirection } },
+        { offset, limit: apiLimit },
+      );
 
       return {
         data: response.data,
         hasMore: response.pagination.has_more,
       };
     },
-    [searchText, type],
+    [spaceId, query, types],
     {
       keepPreviousData: true,
+      execute: !!spaceId && config?.execute !== false,
     },
   );
 

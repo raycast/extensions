@@ -59,12 +59,12 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
       <Form.TextField title="Name" {...itemProps.name} autoFocus />
       <Form.TextArea title="Description" {...itemProps.description} />
       {locations.length > 0 ? (
-        <Form.Dropdown title="Location" {...itemProps.locId} defaultValue="default" storeValue>
+        <Form.Dropdown title="Location" {...itemProps.locId} storeValue>
           <Form.Dropdown.Item title="My Computer" value="default" />
           {locations
             .filter((loc) => !loc.git)
             .map((location) => (
-              <Form.Dropdown.Item title={location.name} value={location.id} />
+              <Form.Dropdown.Item title={location.name} value={location.id} key={location.id} />
             ))}
         </Form.Dropdown>
       ) : (
@@ -74,7 +74,7 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
       {/* My type is more specific than just "string", this make the Form.Dropdown component happy */}
       <Form.Dropdown title="Type" {...(itemProps.type as ItemPropsType<string>)}>
         {(Object.keys(snippetTypesMap) as SnippetType[]).map((type) => (
-          <Form.Dropdown.Item title={snippetTypesMap[type]} value={type} />
+          <Form.Dropdown.Item title={snippetTypesMap[type]} value={type} key={type} />
         ))}
       </Form.Dropdown>
       <Form.Separator />

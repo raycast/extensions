@@ -71,7 +71,7 @@ import { useCallback, useState } from "react";
 
 type Formula = { name: string; desc?: string };
 
-export default function Main(): JSX.Element {
+export default function Main(): React.JSX.Element {
   const [searchText, setSearchText] = useState("");
 
   const formulaFilter = useCallback(
@@ -122,7 +122,7 @@ import { setTimeout } from "timers/promises";
 
 type Formula = { name: string; desc?: string };
 
-export default function Main(): JSX.Element {
+export default function Main(): React.JSX.Element {
   const [searchText, setSearchText] = useState("");
 
   const formulaFilter = useCallback(

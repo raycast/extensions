@@ -1,6 +1,6 @@
 import { Toast, closeMainWindow, open } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import { checkReflect, reflectDownload } from "./helpers/reflect";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export default async () => {
   const reflectInstalled = await checkReflect();
@@ -24,11 +24,14 @@ export default async () => {
   }
 
   await closeMainWindow();
-  const test = await runAppleScript(`
+
+  try {
+    await runAppleScript(`
     tell application "Reflect" to activate
     tell application "System Events" to tell process "Reflect" to ¬
     click menu item "Select Daily Note" of menu "Go" of menu bar 1
   `);
-
-  console.log(test);
+  } catch (error) {
+    showFailureToast(error, { title: "Could not run AppleScript" });
+  }
 };

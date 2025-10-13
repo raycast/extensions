@@ -20,6 +20,10 @@
     "google",
     "web"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-fonts",

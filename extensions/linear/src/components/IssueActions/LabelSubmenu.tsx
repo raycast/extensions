@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { IssueResult } from "../../api/getIssues";
 import { LabelResult } from "../../api/getLabels";
-
 import useLabels from "../../hooks/useLabels";
 
 import { UpdateIssueParams } from "./IssueActions";

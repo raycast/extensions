@@ -303,8 +303,8 @@ export default function DocCheckPage(props: DocCheckPageProps) {
 
   if (!isLoading && preferences.historyItemsNumber > 0) {
     let date_publish = "";
-    $(".has-gap-1").each((i, el) => {
-      date_publish = $(el).find(".is-black ").text().trim();
+    $("#last-edited").each((i, el) => {
+      date_publish = $(el).find(".is-gray.has-no-decoration").text().trim();
     });
     setHistoryItem({
       title: title ?? "",

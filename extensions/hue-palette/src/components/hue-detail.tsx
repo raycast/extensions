@@ -15,6 +15,17 @@ export default function HueDetail({
   tailwind_colors_name,
   tailwind_colors,
 }: HueDetailProps) {
+  function convertToV4(colors = {}) {
+    let cssVariables = "@theme {\n";
+    for (const [colorLevel, hex] of Object.entries(colors)) {
+      cssVariables += ` --color-${tailwind_colors_name}-${colorLevel}: ${hex};\n`;
+    }
+    cssVariables += "}";
+    return cssVariables;
+  }
+  const tailwindColorsV3 = tailwind_colors;
+  const tailwindColorsV4 = convertToV4(tailwindColorsV3);
+
   return (
     <Grid columns={5} filtering={false} isLoading={isLoading}>
       <Grid.Section title={name}>
@@ -31,15 +42,20 @@ export default function HueDetail({
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard
-                  title="Copy Hue Color to Clipboard"
+                  title="Copy Hue Color"
                   content={color}
                 />
                 <Action.CopyToClipboard
-                  title="Copy Tailwind Hue to Clipboard"
+                  title="Copy Hue Tailwind V4 Config Code"
+                  content={tailwindColorsV4}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Hue Tailwind V3 Config Code"
                   content={
                     `${tailwind_colors_name}:` +
-                    JSON.stringify(tailwind_colors, null, 4)
+                    JSON.stringify(tailwindColorsV3, null, 2)
                   }
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
                 />
                 {isGenerator ? (
                   <Action.OpenInBrowser

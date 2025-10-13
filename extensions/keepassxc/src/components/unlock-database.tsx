@@ -19,24 +19,22 @@ interface PasswordForm {
  *
  * @returns {JSX.Element} The form interface for unlocking the KeePass database.
  */
-export default function unlockDatabase({ setIsUnlocked }: { setIsUnlocked: (isUnlocked: boolean) => void }) {
+export default function UnlockDatabase({ setIsUnlocked }: { setIsUnlocked: (isUnlocked: boolean) => void }) {
   const { handleSubmit, itemProps } = useForm<PasswordForm>({
     onSubmit(value) {
       showToast({
         style: Toast.Style.Animated,
         title: "Unlocking Database...",
       });
-      KeePassLoader.checkCredentials(value.password, value.keyFile[0])
-        .then(() => {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Database Unlocked",
-          });
-          KeePassLoader.cacheCredentials(value.password, value.keyFile[0]);
-          KeePassLoader.setCredentials(value.password, value.keyFile[0]);
-          setIsUnlocked(true);
-        })
-        .catch(showToastCliErrors);
+      KeePassLoader.checkCredentials(value.password, value.keyFile[0]).then(() => {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Database Unlocked",
+        });
+        KeePassLoader.cacheCredentials(value.password, value.keyFile[0]);
+        KeePassLoader.setCredentials(value.password, value.keyFile[0]);
+        setIsUnlocked(true);
+      }, showToastCliErrors);
     },
     validation: {
       password: (value) => {
@@ -56,16 +54,10 @@ export default function unlockDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
       }
     >
       <Form.Description text={"Your KeePass database is currently locked. Insert your credentials to unlock it."} />
-      <Form.PasswordField
-        title="Database Password"
-        {...itemProps.password}
-        info="The password will be stored in your Raycast's local encrypted storage"
-      />
-      <Form.FilePicker
-        id="keyFile"
-        title="Key File"
-        allowMultipleSelection={false}
-        info="The key file path will be stored in your Raycast's local encrypted storage"
+      <Form.PasswordField title="Database Password" {...itemProps.password} />
+      <Form.FilePicker id="keyFile" title="Key File" allowMultipleSelection={false} />
+      <Form.Description
+        text={"ⓘ Your password and key file path will be stored in your Raycast's local encrypted storage."}
       />
     </Form>
   );

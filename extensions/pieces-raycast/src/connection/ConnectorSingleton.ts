@@ -88,6 +88,38 @@ export default class ConnectorSingleton {
     this.watchConfigFile();
     this.createApis();
   }
+  private _connectionPromise: Promise<Context | null> | null = null;
+
+  public async ensureConnection(): Promise<boolean> {
+    if (this.apiContext) {
+      return true; // already connected
+    }
+
+    if (!this._connectionPromise) {
+      this._connectionPromise = this.connectorApi
+        .connect({
+          seededConnectorConnection: this.seeded,
+        })
+        .then((response) => {
+          if (response) {
+            // set the context using existing setter
+            this.context = response;
+            return response;
+          }
+          return null;
+        })
+        .catch((error) => {
+          console.error("Failed to connect to Pieces OS:", error);
+          return null;
+        })
+        .finally(() => {
+          this._connectionPromise = null;
+        });
+    }
+
+    const result = await this._connectionPromise;
+    return !!result;
+  }
 
   private static set port(port: string | null) {
     if (port == ConnectorSingleton._port && port != null) return;
@@ -121,46 +153,82 @@ export default class ConnectorSingleton {
     });
   }
 
-  public static getHost(): string {
-    return "http://127.0.0.1:" + ConnectorSingleton.getPort();
+  public static async getHost(): Promise<string> {
+    return "http://127.0.0.1:" + (await ConnectorSingleton.getPort());
   }
 
-  public static getPort(): string {
+  public static async getPort(): Promise<string> {
     if (ConnectorSingleton.port !== "" && ConnectorSingleton.port !== null) {
       return ConnectorSingleton.port;
     }
     try {
       return ConnectorSingleton.loadConfigFile();
     } catch (error) {
-      return this.portScanning();
+      return await this.portScanning();
     }
   }
 
-  static portScanning(): string {
+  static async portScanning(): Promise<string> {
+    // Check the default port first (99% of the time it's 39300)
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 100);
+
+      const response = await fetch(
+        `http://localhost:39300/.well-known/health`,
+        {
+          signal: controller.signal,
+        },
+      );
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        ConnectorSingleton.port = "39300";
+        return "39300";
+      }
+    } catch {
+      // Nothing to do here
+    }
+
     const numPorts = 34;
-    const batchSize = 5; // Check 5 ports concurrently
+    const batchSize = 5;
     const ports = Array.from({ length: numPorts }, (_, i) => 39300 + i);
 
-    // Split ports into batches
     for (let i = 0; i < ports.length; i += batchSize) {
       const batch = ports.slice(i, i + batchSize);
-      const xhrRequests = batch.map((port) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", `http://localhost:${port}/.well-known/health`, false);
-        xhr.timeout = 100;
-        return { xhr, port };
-      });
 
-      // Execute batch concurrently
-      for (const { xhr, port } of xhrRequests) {
+      const fetchPromises = batch.map(async (port) => {
         try {
-          xhr.send();
-          if (xhr.status === 200) {
-            ConnectorSingleton.port = port.toString();
+          const controller = new AbortController(); // Every fetch should not take more than 100ms
+          const timeoutId = setTimeout(() => controller.abort(), 100);
+
+          const response = await fetch(
+            `http://localhost:${port}/.well-known/health`,
+            {
+              signal: controller.signal,
+            },
+          );
+
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
             return port.toString();
           }
         } catch {
-          continue;
+          // Nothing to do here
+        }
+        throw new Error(`Port ${port} failed`);
+      });
+
+      try {
+        const successfulPort = await Promise.any(fetchPromises);
+
+        ConnectorSingleton.port = successfulPort;
+        return successfulPort;
+      } catch {
+        if (i + batchSize >= ports.length) {
+          throw new Error("PiecesOS is not running");
         }
       }
     }
@@ -180,27 +248,77 @@ export default class ConnectorSingleton {
   public static getPortConfigFile(isDebug?: boolean) {
     const releaseMode = isDebug ? "debug" : "production";
 
+    let baseDir: string | undefined;
+
     switch (process.platform) {
       case "win32":
-        return `${process.env.HOME}/Documents/com.pieces.os/${releaseMode}/Config/.port.txt`;
+        baseDir = process.env.LOCALAPPDATA || process.env.USERPROFILE;
+        if (!baseDir) {
+          console.error(
+            "Windows environment variable LOCALAPPDATA or USERPROFILE is not set",
+          );
+          return null;
+        }
+        return path.join(
+          baseDir,
+          "Mesh Intelligent Technologies, Inc.",
+          "Pieces OS",
+          "com.pieces.os",
+          releaseMode,
+          "Config",
+          ".port.txt",
+        );
+
       case "linux":
-        return `${process.env.HOME}/Documents/com.pieces.os/${releaseMode}/Config/.port.txt`;
+        baseDir = process.env.HOME;
+        if (!baseDir) {
+          console.error("HOME environment variable is not set on Linux");
+          return null;
+        }
+        return path.join(
+          baseDir,
+          "Documents",
+          "com.pieces.os",
+          releaseMode,
+          "Config",
+          ".port.txt",
+        );
+
       case "darwin":
-        return `${process.env.HOME}/Library/com.pieces.os/${releaseMode}/Config/.port.txt`;
+        baseDir = process.env.HOME;
+        if (!baseDir) {
+          console.error("HOME environment variable is not set on macOS");
+          return null;
+        }
+        return path.join(
+          baseDir,
+          "Library",
+          "com.pieces.os",
+          releaseMode,
+          "Config",
+          ".port.txt",
+        );
+
       default:
         Notifications.getInstance().errorToast(
           `Pieces for Raycast extension does not support platform: ${process.platform}`,
-        ); // I think this should not happend
+        );
         return null;
     }
   }
 
   public get parameters(): ConfigurationParameters {
     let host;
-    try {
-      host = ConnectorSingleton.getHost();
-    } catch {
-      host = "http://localhost:39300";
+    // Use a synchronous fallback since getters can't be async
+    if (ConnectorSingleton.port !== "" && ConnectorSingleton.port !== null) {
+      host = "http://127.0.0.1:" + ConnectorSingleton.port;
+    } else {
+      try {
+        const port = ConnectorSingleton.loadConfigFile();
+        host = "http://127.0.0.1:" + port;
+      } catch {
+        host = "http://localhost:39300";
+      }
     }
     return {
       basePath: host,
@@ -261,7 +379,6 @@ export default class ConnectorSingleton {
     this.tagApi = new TagApi(coreConfig);
     this.websiteApi = new WebsiteApi(coreConfig);
   }
-
   set context(context: Context) {
     this.apiContext = context;
     this.addApplicationHeaders(context.application.id);
@@ -285,7 +402,8 @@ export default class ConnectorSingleton {
     notification?: boolean;
   }): Promise<boolean> {
     try {
-      await fetch(`${ConnectorSingleton.getHost()}/.well-known/health`);
+      const host = await ConnectorSingleton.getHost();
+      await fetch(`${host}/.well-known/health`);
       return true;
     } catch (e) {
       const notifications = Notifications.getInstance();

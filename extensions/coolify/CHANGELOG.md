@@ -1,5 +1,16 @@
 # Coolify Changelog
 
+## [View Environment Variable + Fix DB Deletion] - 2025-06-23
+
+- fix: Unable to delete Databases in `Resources`
+- view `Environment Variables` of **applications** and **services**
+- update some types to match latest endpoints
+
+## [Delete Resource Action + Support DBs in Resources] - 2025-03-07
+
+- In `Resources` you can _delete_ by also specifying what to delete and if you want to cleanup afterwards (similar to Coolify UI)
+- In `Resources` you can now perform `Action` (start, stop, restart) on Databases (Clickhouse, DragonFly, KeyDB, MariaDB, MongoDB, MySQL, PostgreSQL, Redis)
+
 ## [Enhancements] - 2025-01-02
 
 - In `Projects`:

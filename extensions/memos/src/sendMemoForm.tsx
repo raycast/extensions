@@ -1,8 +1,18 @@
 import { Form, Detail, ActionPanel, Action, showToast, Toast, open, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types";
-import { getOriginUrl, getRecentTags, getRequestUrl, postFile, postMemoResources, sendMemo } from "./api";
+import {
+  getMemoByName,
+  getOriginUrl,
+  getRecentTags,
+  getRequestUrl,
+  getAttachmentBinToBase64,
+  postFile,
+  postMemoAttachments,
+  sendMemo,
+} from "./api";
 import { VISIBILITY } from "./constant";
+import { showFailureToast } from "@raycast/utils";
 
 interface FormData {
   content: string;
@@ -18,6 +28,7 @@ export default function SendMemoFormCommand(): JSX.Element {
   const [createdUrl, setCreatedUrl] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [recentTags, setRecentTags] = useState<string[]>([]);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   useEffect(() => {
     getRecentTags()
@@ -36,27 +47,37 @@ export default function SendMemoFormCommand(): JSX.Element {
   }
 
   function computedCreatedUrl(data: MemoInfoResponse) {
-    const { uid } = data;
-    const url = getRequestUrl(`/m/${uid}`);
+    const { name } = data;
+    const url = getRequestUrl(`/${name}`);
 
     setCreatedUrl(url);
   }
 
-  function computedCreatedMarkdown(data: MemoInfoResponse) {
-    const { content, resources } = data;
-    let markdown = content;
+  async function computedCreatedMarkdown(data: MemoInfoResponse) {
+    setCreatedMarkdown(data.content);
+    setLoadingDetail(true);
 
-    resources.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/file/${resource.name}?thumbnail=1`);
+    try {
+      const memoData = await getMemoByName(data.name);
 
-      if (index === 0) {
-        markdown += "\n\n";
+      const { content, attachments } = memoData;
+      let markdown = content;
+
+      for (const resource of attachments) {
+        const resourceUrl = await getAttachmentBinToBase64(resource.name, resource.filename);
+        console.log("resourceUrl", resourceUrl);
+        markdown += `\n\n ![${resource.filename}](${resourceUrl})`;
       }
 
-      markdown += ` ![${resource.filename}](${resourceUrl})`;
-    });
+      setCreatedMarkdown(markdown);
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to fetch memo details" });
+    }
 
-    setCreatedMarkdown(markdown);
+    setLoadingDetail(false);
+    setTimeout(() => {
+      popToRoot({ clearSearchBar: true });
+    }, 5000);
   }
 
   const onSubmit = async (values: FormData) => {
@@ -80,18 +101,16 @@ export default function SendMemoFormCommand(): JSX.Element {
       showToast(Toast.Style.Failure, "Send Memo Failed");
     });
 
-    if (res?.uid) {
+    console.log("res", res);
+
+    if (res?.name) {
       if (files.length) {
         await setMemoResource(res, files);
       }
 
       showToast(Toast.Style.Success, "Send Memo Success");
-      computedCreatedMarkdown(res);
       computedCreatedUrl(res);
-
-      setTimeout(() => {
-        popToRoot({ clearSearchBar: true });
-      }, 5000);
+      computedCreatedMarkdown(res);
     }
   };
 
@@ -113,7 +132,7 @@ export default function SendMemoFormCommand(): JSX.Element {
       });
 
       if (uploadedFiles) {
-        await postMemoResources(memos.name, uploadedFiles).catch((err) => {
+        await postMemoAttachments(memos.name, uploadedFiles).catch((err) => {
           showToast(Toast.Style.Failure, `Upload Files Failed. ${err?.message}`);
           throw new Error(err);
         });
@@ -129,6 +148,7 @@ export default function SendMemoFormCommand(): JSX.Element {
   return createdMarkdown ? (
     <Detail
       markdown={createdMarkdown}
+      isLoading={loadingDetail}
       actions={
         createdUrl && (
           <ActionPanel>

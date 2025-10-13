@@ -1,12 +1,13 @@
+import { EntityStandardActionSections } from "@components/entity";
 import { KtoColorLike, RGB, RGBtoColorLike, miredToK } from "@lib/color";
 import { ha } from "@lib/common";
 import { lightRGBColors } from "@lib/constants";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon, Keyboard } from "@raycast/api";
-import { EntityStandardActionSections } from "../entity";
+import React from "react";
 import { ceilRound50, getLightBrightnessValues, getLightMinMaxK, hasLightBrightnessSupport } from "./utils";
 
-export function BrightnessControlAction(props: { state: State }): JSX.Element | null {
+export function BrightnessControlAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
 
   const handle = async (bvalue: number) => {
@@ -34,7 +35,7 @@ function BrightnessAddAction(props: {
   state: State;
   add: number;
   shortcut?: Keyboard.Shortcut | undefined;
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const state = props.state;
 
   const handle = async (bvalue: number) => {
@@ -63,15 +64,15 @@ function BrightnessAddAction(props: {
   return null;
 }
 
-export function BrightnessUpAction(props: { state: State }): JSX.Element | null {
+export function BrightnessUpAction(props: { state: State }): React.ReactElement | null {
   return <BrightnessAddAction state={props.state} add={1} shortcut={{ modifiers: ["cmd"], key: "+" }} />;
 }
 
-export function BrightnessDownAction(props: { state: State }): JSX.Element | null {
+export function BrightnessDownAction(props: { state: State }): React.ReactElement | null {
   return <BrightnessAddAction state={props.state} add={-1} shortcut={{ modifiers: ["cmd"], key: "-" }} />;
 }
 
-export function ColorTempControlAction(props: { state: State }): JSX.Element | null {
+export function ColorTempControlAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
 
@@ -128,7 +129,7 @@ function ColorTempControlAddAction(props: {
   state: State;
   add: number;
   shortcut?: Keyboard.Shortcut | undefined;
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
   const add = props.add;
@@ -172,19 +173,19 @@ function ColorTempControlAddAction(props: {
   return null;
 }
 
-export function ColorTempControlUpAction(props: { state: State }): JSX.Element | null {
+export function ColorTempControlUpAction(props: { state: State }): React.ReactElement | null {
   return (
     <ColorTempControlAddAction state={props.state} add={50} shortcut={{ modifiers: ["cmd", "shift"], key: "+" }} />
   );
 }
 
-export function ColorTempControlDownAction(props: { state: State }): JSX.Element | null {
+export function ColorTempControlDownAction(props: { state: State }): React.ReactElement | null {
   return (
     <ColorTempControlAddAction state={props.state} add={-50} shortcut={{ modifiers: ["cmd", "shift"], key: "-" }} />
   );
 }
 
-export function ColorRgbControlAction(props: { state: State }): JSX.Element | null {
+export function ColorRgbControlAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
 

@@ -1,11 +1,11 @@
 import { List } from "@raycast/api";
 
-import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
-import { Vault } from "./utils/interfaces";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 import { RandomNote } from "./components/RandomNote";
+import { useObsidianVaults } from "./utils/hooks";
+import { Vault } from "./api/vault/vault.types";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();

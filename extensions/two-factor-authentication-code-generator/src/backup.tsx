@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, showToast, Toast } from "@raycast/api";
-import { Algorithm, Digits, generateOtpUrl } from "./util/totp";
+import { generateOtpUrl } from "./util/totp";
 import fs from "fs";
 import { useApps } from "./util/hooks";
 
@@ -42,7 +42,7 @@ export default function BackupData() {
                 try {
                   fs.writeFileSync(target + "/" + filename, content);
                   showToast(Toast.Style.Success, `Backed up ${count} app${count > 1 ? "s" : ""}`);
-                } catch (e) {
+                } catch {
                   showToast(Toast.Style.Failure, "Unable to create backup");
                 }
               }

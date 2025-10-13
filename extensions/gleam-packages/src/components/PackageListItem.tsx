@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import DocsList from "./DocsList";
 import { Package } from "../types";
+import { JSX } from "react";
 
 type PackageListItemProps = {
   pkg: Package;
@@ -8,9 +9,11 @@ type PackageListItemProps = {
 };
 
 export default function PackageListItem({ pkg, refreshAction }: PackageListItemProps) {
+  const url = `https://hexdocs.pm/${pkg.name}/`;
+
   return (
     <List.Item
-      key={pkg.id}
+      key={pkg.name}
       title={pkg.name}
       subtitle={pkg.description}
       keywords={keywords(pkg.description)}
@@ -19,13 +22,13 @@ export default function PackageListItem({ pkg, refreshAction }: PackageListItemP
           <Action.Push
             title="Show Package"
             icon={Icon.AppWindowSidebarLeft}
-            target={<DocsList packageName={pkg.name} url={pkg.docs_url} />}
+            target={<DocsList packageName={pkg.name} url={url} />}
           />
-          <Action.OpenInBrowser title="Open in Browser" url={pkg.docs_url} />
+          <Action.OpenInBrowser title="Open in Browser" url={url} />
           <Action.CopyToClipboard
             title="Copy Link"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            content={pkg.docs_url}
+            content={url}
           />
           <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
         </ActionPanel>

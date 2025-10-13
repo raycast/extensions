@@ -1,20 +1,7 @@
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 
-import { getApiOptions, getApiUrl } from "@/utils/api";
-export interface SearchResult {
-  ns: number;
-  title: string;
-  pageid: number;
-  size: number;
-  wordcount: number;
-  snippet: string;
-  timestamp: string;
-}
-
-export interface Result {
-  query: { search: SearchResult[] };
-}
+import { getApiOptions, getApiUrl, type SearchResults, type SearchResult } from "@/utils/api";
 
 export default function useFindPagesByTitle(search: string, language: string) {
   const url = useMemo(() => {
@@ -24,7 +11,6 @@ export default function useFindPagesByTitle(search: string, language: string) {
     url.searchParams.set("format", "json");
     url.searchParams.set("srsearch", search);
     url.searchParams.set("srlimit", "9");
-
     return url.toString();
   }, [search, language]);
 
@@ -32,7 +18,7 @@ export default function useFindPagesByTitle(search: string, language: string) {
     headers: getApiOptions(language)?.headers,
     keepPreviousData: true,
     parseResponse: (response) =>
-      (response.json() as Promise<Result>)
+      (response.json() as Promise<SearchResults>)
         .then((data) => data?.query?.search || [])
         .then((data) => data.filter((page, index, self) => self.findIndex((p) => p.pageid === page.pageid) === index))
         .then((results) => ({ language, results })),

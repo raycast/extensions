@@ -4,31 +4,13 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { environment, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 import FormData from "form-data";
 import mime from "mime";
 import { Dispatch, SetStateAction } from "react";
 
-import { getTodoistApi, getTodoistRestApi } from "./helpers/withTodoistApi";
+import { getTodoistApi } from "./helpers/withTodoistApi";
 
-let sync_token = "*";
-
-type HandleErrorArgs = {
-  error: unknown;
-  title: string;
-};
-
-export function handleError({ error, title }: HandleErrorArgs) {
-  if (environment.commandMode === "menu-bar" && environment.launchType === LaunchType.UserInitiated) {
-    return showHUD(title);
-  }
-
-  return showToast({
-    style: Toast.Style.Failure,
-    title: title,
-    message: error instanceof Error ? error.message : "",
-  });
-}
+export let sync_token = "*";
 
 export type ProjectViewStyle = "list" | "board";
 
@@ -71,6 +53,19 @@ export type CachedDataParams = {
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
 };
 
+class SyncError extends Error {
+  code: number;
+  tag?: string;
+
+  constructor(message: string, code: number, tag?: string) {
+    super(message);
+    this.name = "SyncError";
+    this.code = code;
+    this.tag = tag;
+    Object.setPrototypeOf(this, SyncError.prototype);
+  }
+}
+
 export async function syncRequest(params: Record<string, unknown>) {
   const todoistApi = getTodoistApi();
   const { data } = await todoistApi.post<SyncData>("/sync", params);
@@ -78,27 +73,42 @@ export async function syncRequest(params: Record<string, unknown>) {
   if (data.sync_status) {
     const uuid = Object.keys(data.sync_status)[0];
     if (data.sync_status[uuid] !== "ok") {
-      const error = data.sync_status[uuid] as { error: string };
-      throw new Error(error.error);
+      const error = data.sync_status[uuid] as { error: string; error_code: number; error_tag?: string };
+      throw new SyncError(error.error, error.error_code, error.error_tag);
     }
   }
 
   sync_token = data.sync_token;
+
   return data;
 }
 
 export async function getFilterTasks(query: string) {
-  const todoistApi = getTodoistRestApi();
+  const todoistApi = getTodoistApi();
   try {
-    const { data } = await todoistApi.get<Task[]>("/tasks", { params: { filter: query } });
-    return data as Task[];
+    const { data } = await todoistApi.get<{ results: Task[] }>("/tasks/filter", { params: { query } });
+    return data.results;
   } catch (error) {
     throw new Error("Error fetching filter tasks:" + error);
   }
 }
 
 export async function initialSync() {
-  return syncRequest({ sync_token: "*", resource_types: ["all"] });
+  return syncRequest({
+    sync_token: "*",
+    resource_types: [
+      "user",
+      "projects",
+      "items",
+      "sections",
+      "labels",
+      "filters",
+      "collaborators",
+      "reminders",
+      "locations",
+      "notes",
+    ],
+  });
 }
 
 export type AddProjectArgs = {
@@ -208,12 +218,18 @@ export async function deleteProject(id: string, { data, setData }: CachedDataPar
   }
 }
 
-export type DueDate = {
+export type Date = {
   date: string;
   timezone: string | null;
   string: string;
   lang: "en" | "da" | "pl" | "zh" | "ko" | "de" | "pt" | "ja" | "it" | "fr" | "sv" | "ru" | "es" | "nl";
   is_recurring: boolean;
+};
+
+export type Deadline = {
+  date: string;
+  timezone: string | null;
+  lang: "en" | "da" | "pl" | "zh" | "ko" | "de" | "pt" | "ja" | "it" | "fr" | "sv" | "ru" | "es" | "nl";
 };
 
 export type Task = {
@@ -222,7 +238,8 @@ export type Task = {
   project_id: string;
   content: string;
   description: string;
-  due: DueDate | null;
+  due: Date | null;
+  deadline: Deadline | null;
   priority: number;
   parent_id: string | null;
   child_order: number;
@@ -250,17 +267,18 @@ type QuickAddTaskArgs = {
 
 export async function quickAddTask(args: QuickAddTaskArgs) {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.post<Task>("/quick/add", args);
+  const { data } = await todoistApi.post<Task>("/tasks/quick", args);
   return data;
 }
 
-type DateOrString = { date: string; string?: undefined } | { date?: undefined; string: string };
+export type DateOrString = { date: string; string?: undefined } | { date?: undefined; string: string };
 
 export type AddTaskArgs = {
   content: string;
   description?: string;
   project_id?: string;
   due?: DateOrString;
+  deadline?: DateOrString;
   duration?: {
     unit: "minute" | "day";
     amount: number;
@@ -312,6 +330,7 @@ export type UpdateTaskArgs = {
   content?: string;
   description?: string;
   due?: DateOrString;
+  deadline?: DateOrString;
   priority?: number;
   collapsed?: boolean;
   labels?: string[];
@@ -438,7 +457,7 @@ export type Reminder = {
   notify_uid: string;
   item_id: string;
   type: "relative" | "absolute" | "location";
-  due?: DueDate;
+  due?: Date;
   mm_offset?: number;
   name?: string;
   loc_lat?: string;
@@ -516,6 +535,42 @@ export type Label = {
   is_deleted: boolean;
   is_favorite: boolean;
 };
+
+type AddLabelArgs = {
+  name: string;
+  color?: string;
+  item_order?: number;
+  is_favorite?: boolean;
+};
+
+export async function addLabel(args: AddLabelArgs, { data, setData }: CachedDataParams) {
+  try {
+    const addedData = await syncRequest({
+      sync_token,
+      resource_types: ["labels"],
+      commands: [
+        {
+          type: "label_add",
+          temp_id: crypto.randomUUID(),
+          uuid: crypto.randomUUID(),
+          args,
+        },
+      ],
+    });
+
+    if (data) {
+      setData({
+        ...data,
+        labels: [...data.labels, addedData.labels[0]],
+      });
+    }
+  } catch (err) {
+    if (err instanceof SyncError && err.tag === "LABEL_ALREADY_EXISTS") {
+      return;
+    }
+    throw err;
+  }
+}
 
 type UpdateLabelArgs = {
   id: string;
@@ -758,6 +813,8 @@ export type User = {
   full_name: string;
   id: string;
   is_premium: boolean;
+  time_format: number;
+  premium_status: "not_premium" | "current_personal_plan" | "active_business_account" | "teams_business_account";
 };
 
 export type Event = {
@@ -772,9 +829,9 @@ export type Event = {
 
 export async function getActivity() {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.get<{ events: Event[] }>("/activity/get?event_type=completed");
+  const { data } = await todoistApi.get<{ results: Event[] }>("/activities", { params: { event_type: "completed" } });
 
-  return data.events;
+  return data.results;
 }
 
 type Day = {
@@ -789,7 +846,7 @@ export type Stats = {
 
 export async function getProductivityStats() {
   const todoistApi = getTodoistApi();
-  const { data } = await todoistApi.get<Stats>("/completed/get_stats");
+  const { data } = await todoistApi.get<Stats>("/tasks/completed/stats");
   return data;
 }
 
@@ -815,6 +872,18 @@ export async function uploadFile(filePath: string) {
   formData.append("file_type", mimeType);
   formData.append("file", stream);
 
-  const { data } = await todoistApi.post<File>("/uploads/add", formData);
+  const { data } = await todoistApi.post<File>("/uploads", formData);
+  return data;
+}
+
+export async function getTask(id: string) {
+  const todoistApi = getTodoistApi();
+  const { data } = await todoistApi.get<Task>(`/tasks/${id}`);
+  return data;
+}
+
+export async function getProject(id: string) {
+  const todoistApi = getTodoistApi();
+  const { data } = await todoistApi.get<Project>(`/projects/${id}`);
   return data;
 }

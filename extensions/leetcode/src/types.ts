@@ -13,6 +13,7 @@ export type Problem = {
   topicTags: {
     name: string;
   };
+  codeSnippets: CodeSnippet[];
 };
 
 export type ProblemStats = {
@@ -23,13 +24,19 @@ export type ProblemStats = {
 
 export type ProblemPreview = Pick<
   Problem,
-  'difficulty' | 'questionFrontendId' | 'title' | 'titleSlug' | 'isPaidOnly' | 'stats'
+  'difficulty' | 'questionFrontendId' | 'title' | 'titleSlug' | 'isPaidOnly' | 'stats' | 'codeSnippets'
 >;
 
 export type DailyChallenge = {
   date: string;
   link: string;
   problem: Problem;
+};
+
+export type CodeSnippet = {
+  lang: string;
+  langSlug: string;
+  code: string;
 };
 
 export type GraphQLResponse<T> = { data: T };
@@ -40,7 +47,8 @@ export type DailyChallengeResponse = GraphQLResponse<{
 
 export type SearchProblemResponse = GraphQLResponse<{
   problemsetQuestionList: {
-    problems: ProblemPreview[];
+    total: number;
+    data: ProblemPreview[];
   } | null;
 }>;
 

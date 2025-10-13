@@ -26,26 +26,34 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.10.1";
+  version = "2.11.0";
   buildNumber = 30;
-  versionDate = "2025-01-12";
+  versionDate = "2025-07-01";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 🐞 修复
+### ✨ 新功能
 
-- 更新有道翻译 API，修复翻译失败的问题。
-- 限制 Bing 重试次数为 3，避免过多重试。
+- 添加 DeepLX 翻译支持
+- 添加 Gemini 翻译支持
+
+### 💎 改进
+
+- 更新依赖并优化稳定性
 
 ---
 
-### 🐞 Fixed
+### ✨ New Features
 
-- Update Youdao translation API, fixed the problem that the translation failed. https://github.com/tisfeng/Raycast-Easydict/pull/65
-- Limit Bing retry count to 3, avoid too many retries. https://github.com/raycast/extensions/issues/16307
+- Add DeepLX support
+- Add support for Gemini translation
+
+### 💎 Improvement
+
+- Update dependencies and improve stability
 `;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;

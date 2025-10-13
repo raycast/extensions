@@ -68,11 +68,4 @@ export default [
       "seeds",
     ],
   },
-  {
-    name: "WPKirk",
-    title: "Complete Demo",
-    subtitle: "The complete demo for WP Bones",
-    icon: "box.svg",
-    keywords: ["demo", "routes"],
-  },
 ];

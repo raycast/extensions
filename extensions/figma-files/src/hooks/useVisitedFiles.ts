@@ -11,9 +11,8 @@ async function loadVisitedFiles() {
   if (item) {
     const parsed = JSON.parse(item) as File[];
     return parsed;
-  } else {
-    return [];
   }
+  return [];
 }
 
 async function saveVisitedFiles(file: File[]) {
@@ -41,5 +40,5 @@ export function useVisitedFiles() {
     await saveVisitedFiles(nextFiles);
   }
 
-  return { files, visitFile, isLoading: !files };
+  return { files, visitFile, isLoading: !files, revalidate: () => loadVisitedFiles().then(setFiles) };
 }

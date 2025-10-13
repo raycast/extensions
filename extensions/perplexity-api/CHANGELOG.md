@@ -1,5 +1,15 @@
 # Perplexity API Changelog
 
+## [Updated Models] - 2025-02-06
+
+- Added `Sonar Reasoning 128k` and `Sonar Reasoning Pro 128k`.
+
+## [Updated Models] - 2025-01-28
+
+- Added citations for the generated answer.
+- Added `Sonar 128k` and `Sonar Pro 200k`.
+- Removed deprecated models `Llama 3.3 70B`, `Sonar Small`, `Sonar Large`, and `Sonar Huge`.
+
 ## [Updated Models] - 2025-01-21
 
 - Added `Llama 3.3 70B`.

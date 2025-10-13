@@ -1,5 +1,18 @@
 # letterboxd Changelog
 
+## [Fix search movies not working] - 2025-09-15
+
+- Fix the issue with the search movies not working
+- Fix the issue with the movie details not displaying data
+
+## [Fix show movie details not working] - 2025-08-04
+
+- Fix the issue with the movie details not working
+
+## [Add movie runtime information] - 2025-04-10
+
+- Add runtime information to the movie details panel
+
 ## [Fix the issue with the emoji substring] - 2024-11-01
 
 - Fix the issue with the review content emoji substring that causes an error

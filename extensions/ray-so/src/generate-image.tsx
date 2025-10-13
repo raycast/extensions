@@ -1,6 +1,5 @@
-import { getSelectedText, showToast, showHUD, getPreferenceValues, Toast } from "@raycast/api";
-import { encodeURI } from "js-base64";
-import open from "open";
+import { getSelectedText, open, showToast, showHUD, getPreferenceValues, Toast } from "@raycast/api";
+import { encodeForRayso } from "./utils";
 
 interface Preferences {
   theme: string;
@@ -15,14 +14,14 @@ export default async () => {
   let selectedText;
   try {
     selectedText = await getSelectedText();
-  } catch (e) {
+  } catch {
     await showHUD(
       "❌ Screenshot generation failed. Please make sure you've selected the text you want to take a screenshot of.",
     );
     return;
   }
 
-  const base64Text = encodeURI(selectedText);
+  const base64Text = encodeForRayso(selectedText);
 
   await showToast({
     style: Toast.Style.Animated,
@@ -30,5 +29,5 @@ export default async () => {
   });
 
   const url = `https://ray.so/#theme=${preferences.theme}&background=${preferences.background}&darkMode=${preferences.darkMode}&padding=${preferences.padding}&code=${base64Text}`;
-  open(url);
+  await open(url);
 };

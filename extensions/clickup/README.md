@@ -1,16 +1,24 @@
-# ClickUp Tasks Explorer
+<p align="center">
+    <img src="./assets/logo-v3-clickup-dark.svg" width="300" height="150" />
+</p>
 
-Plugin for Raycast to explore your [ClickUpTasks](https://github.com/Ali-Parandeh/raycast-clickup-extension).
+# ClickUp - Tasks & Docs Explorer
 
-## How to obtain an API Token
+Extension for Raycast to explore your [ClickUp](https://clickup.com/) Tasks & Docs.
 
-- Go to [ClickUp](https://app.clickup.com/login)
-- Click on **USER SETTINGS**
-- Click on **APPS**
+## How to obtain an API Token (Personal)
+
+1. `Log in` to [ClickUp](https://app.clickup.com/).
+2. In the upper-right corner, `click` your avatar.
+3. `Select` Settings. 
 
 ![](./assets/obtain-api-token.png)
 
-- Generate an **API TOKEN**
+4. In the sidebar, `click` [Apps](https://app.clickup.com/settings/apps).
+5. Under API Token, `click` "Generate" or "Regenerate".
+6. `Click` Copy to copy the personal token to your clipboard.
+
+> ❗ Make sure to generate a "Personal Token". You do NOT need to create an "OAuth App" (token should begin with "pk_").
 
 ## Features (to be added as standalone commands or as a single command group)
 
@@ -41,16 +49,8 @@ Plugin for Raycast to explore your [ClickUpTasks](https://github.com/Ali-Parande
 
 ## Installing
 
-Make sure Raycast is installed and go to https://github.com/Ali-Parandeh/raycast-clickup-extension
+Make sure Raycast is installed and go to https://www.raycast.com/aparandeh/manage-clickup-tasks.
 
-## Running locally
+<a title="Install manage-clickup-tasks Raycast Extension" href="https://www.raycast.com/aparandeh/manage-clickup-tasks"><img src="https://www.raycast.com/aparandeh/manage-clickup-tasks/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
-```sh
-# nvm install (use node >=16.x)
-nvm --lts --latest-npm
-# make sure you have Raycast and Yarn / NPM installed
-npm i
-# Start local server
-npm run dev
-# Now open raycast. The dev tool should be the top item!
-```
+> ✨ AI Tools Supported!

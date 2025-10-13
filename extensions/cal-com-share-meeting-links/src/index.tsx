@@ -65,6 +65,11 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   url="https://app.cal.com"
                 />
+                <Action.OpenInBrowser
+                  title="Open Availability Troubleshooter"
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                  url={`https://app.cal.com/availability/troubleshoot?eventType=${item.slug}`}
+                />
                 <Action.CopyToClipboard
                   title="Copy My Link"
                   shortcut={{ modifiers: ["cmd"], key: "m" }}

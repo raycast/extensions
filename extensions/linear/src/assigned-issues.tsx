@@ -1,14 +1,12 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 
 import { getMyIssues } from "./api/getIssues";
-
-import useIssues from "./hooks/useIssues";
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-
-import StateIssueList from "./components/StateIssueList";
 import CreateIssueForm from "./components/CreateIssueForm";
+import StateIssueList from "./components/StateIssueList";
 import View from "./components/View";
+import useIssues from "./hooks/useIssues";
+import useMe from "./hooks/useMe";
+import usePriorities from "./hooks/usePriorities";
 
 function MyIssues() {
   const { issues, isLoadingIssues, mutateList } = useIssues(getMyIssues);

@@ -6,23 +6,19 @@ import {
   linear,
   notion,
   slack,
-  twitter,
+  x,
   youtube,
 } from '@/utils/icons'
 import { Action, getApplications, Icon, open } from '@raycast/api'
 import { useMemo } from 'react'
 
 const INTERNAL_URL = {
-  notion: 'notion://',
   discord: 'discord://',
   linear: 'linear://',
+  notion: 'notion://',
 }
 
 const ACTION_DATA = {
-  notion: {
-    title: 'Open URL in Notion',
-    icon: { source: notion },
-  },
   discord: {
     title: 'Open URL in Discord',
     icon: { source: discord },
@@ -30,14 +26,6 @@ const ACTION_DATA = {
   figma: {
     title: 'Open URL in Figma',
     icon: { source: figma },
-  },
-  slack: {
-    title: 'Open URL in Slack',
-    icon: { source: slack },
-  },
-  linear: {
-    title: 'Open URL in Linear',
-    icon: { source: linear },
   },
   github: {
     title: 'Open URL in GitHub',
@@ -47,13 +35,25 @@ const ACTION_DATA = {
     title: 'Open URL in GitLab',
     icon: { source: gitlab },
   },
+  linear: {
+    title: 'Open URL in Linear',
+    icon: { source: linear },
+  },
+  notion: {
+    title: 'Open URL in Notion',
+    icon: { source: notion },
+  },
+  slack: {
+    title: 'Open URL in Slack',
+    icon: { source: slack },
+  },
+  x: {
+    title: 'Open URL in X',
+    icon: { source: x },
+  },
   youtube: {
     title: 'Open URL in YouTube',
     icon: { source: youtube },
-  },
-  twitter: {
-    title: 'Open URL in Twitter',
-    icon: { source: twitter },
   },
 }
 

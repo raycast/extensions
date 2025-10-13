@@ -14,6 +14,7 @@ import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
 import { getSectionTitle } from "../utils/getSectionTitle";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function NavigationHistoryFull() {
   const {
@@ -24,7 +25,7 @@ export default function NavigationHistoryFull() {
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
+  const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -128,7 +129,7 @@ export default function NavigationHistoryFull() {
             >
               {sections[section].map((historyEntry) => {
                 const path = historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`;
-                const url = `${instanceUrl}${path}`;
+                const url = buildServiceNowUrl(instanceName, path);
                 const table = historyEntry.url.split(".do")[0];
                 const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
@@ -139,10 +140,7 @@ export default function NavigationHistoryFull() {
                 const accessories: List.Item.Accessory[] = [
                   {
                     icon: Icon.Calendar,
-                    tooltip: format(
-                      new Date(historyEntry.sys_created_on + " UTC") || "",
-                      "EEEE d MMMM yyyy 'at' HH:mm",
-                    ),
+                    tooltip: format(new Date(historyEntry.sys_created_on + " UTC"), "EEEE d MMMM yyyy 'at' HH:mm"),
                   },
                   {
                     icon: Icon.Link,
@@ -150,7 +148,7 @@ export default function NavigationHistoryFull() {
                   },
                 ];
 
-                const favoriteId = isUrlInFavorites(url);
+                const favoriteId = isInFavorites(path);
                 if (favoriteId) {
                   accessories.unshift({
                     icon: { source: Icon.Star, tintColor: Color.Yellow },
@@ -172,7 +170,7 @@ export default function NavigationHistoryFull() {
                       <ActionPanel>
                         <ActionPanel.Section title={historyEntry.title + (description ? ": " + description : "")}>
                           <Action.OpenInBrowser
-                            title="Open in Servicenow"
+                            title="Open in ServiceNow"
                             url={url}
                             icon={{ source: "servicenow.svg" }}
                           />

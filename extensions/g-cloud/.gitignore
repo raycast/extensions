@@ -1,0 +1,44 @@
+# Dependency directories
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+
+# macOS
+.DS_Store
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Raycast specific
+.raycast-debug.log
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+original_*.tsx
+DevScreen.tsx
+src/services/compute/README.md
+src/services/iam/README.md
+src/services/network/README.md
+src/services/servicehub/README.md
+src/services/storage/README.md
+helper_documentation

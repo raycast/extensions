@@ -1,11 +1,20 @@
 import { ActionPanel, Action, Color, getPreferenceValues, List, Icon } from "@raycast/api";
 import { useState } from "react";
 import { URL } from "node:url";
-import { useFetch } from "@raycast/utils";
+import { useFetch, showFailureToast } from "@raycast/utils";
 
 export default function Command() {
+  const { searchSize, branchName } = getPreferenceValues<Preferences>();
+
+  const [url, setUrl] = useState<string | undefined>(undefined);
+  if (!url) {
+    getSearchUrl({ branchName })
+      .then(setUrl)
+      .catch((error) => showFailureToast(error, { title: "Could not get search URL" }));
+  }
+
   const [searchText, setSearchText] = useState("");
-  const state = useSearch(searchText);
+  const state = useSearch({ url, searchText, searchSize: Math.trunc(+searchSize) });
 
   return (
     <List
@@ -106,8 +115,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-function useSearch(searchText: string) {
-  const { searchSize, branchName } = getPreferenceValues<Preferences>();
+function useSearch({ url, searchText, searchSize }: { url?: string; searchText: string; searchSize: number }) {
   const queryFields = [
     "package_attr_name^9",
     "package_attr_name.edge^9",
@@ -137,7 +145,7 @@ function useSearch(searchText: string) {
   const reversedSearchText = [...searchText].reverse().join("");
 
   const query = {
-    size: Math.trunc(+searchSize),
+    size: searchSize,
     sort: [{ _score: "desc" }, { package_attr_name: "desc" }, { package_pversion: "desc" }],
     query: {
       bool: {
@@ -178,87 +186,88 @@ function useSearch(searchText: string) {
     },
   };
 
-  const { isLoading, data } = useFetch(
-    `https://nixos-search-7-1733963800.us-east-1.bonsaisearch.net/latest-42-nixos-${branchName}/_search`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: "Basic YVdWU0FMWHBadjpYOGdQSG56TDUyd0ZFZWt1eHNmUTljU2g=",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(query),
-      async parseResponse(response) {
-        const json = (await response.json()) as
-          | {
+  const { isLoading, data } = useFetch(url!, {
+    method: "POST",
+    headers: {
+      Authorization: "Basic YVdWU0FMWHBadjpYOGdQSG56TDUyd0ZFZWt1eHNmUTljU2g=",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(query),
+    async parseResponse(response) {
+      const json = (await response.json()) as
+        | {
+            hits: {
               hits: {
-                hits: {
-                  _id: string;
-                  _source: {
-                    package_pname: string;
-                    package_attr_name: string;
-                    package_attr_set: string;
-                    package_outputs: string[];
-                    package_default_output: string | null;
-                    package_description: string | null;
-                    package_homepage: string[];
-                    package_pversion: string;
-                    package_platforms: string[];
-                    package_position: string;
-                    package_license: { fullName: string; url: string | null }[];
-                  };
-                }[];
-              };
+                _id: string;
+                _source: {
+                  package_pname: string;
+                  package_attr_name: string;
+                  package_attr_set: string;
+                  package_outputs: string[];
+                  package_default_output: string | null;
+                  package_description: string | null;
+                  package_homepage: string[];
+                  package_pversion: string;
+                  package_platforms: string[];
+                  package_position: string;
+                  package_license: { fullName: string; url: string | null }[];
+                };
+              }[];
+            };
+          }
+        | { error: { reason: string }; status: number }
+        | { code: string; message: string };
+
+      if ("code" in json) {
+        throw new Error(json.message);
+      } else if ("error" in json) {
+        throw new Error(json.error.reason);
+      } else if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      return json.hits.hits.map(({ _source: result, _id: id }) => {
+        return {
+          id,
+          name: result.package_pname,
+          attrName: result.package_attr_name,
+          description: result.package_description,
+          version: result.package_pversion,
+          homepage: result.package_homepage,
+          source:
+            result.package_position &&
+            `https://github.com/NixOS/nixpkgs/blob/nixos-unstable/${result.package_position.replace(/:([0-9]+)$/, "")}`,
+          outputs: result.package_outputs,
+          defaultOutput: result.package_default_output,
+          platforms: result.package_platforms.filter((platform) =>
+            ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(platform)
+          ),
+          licenses: result.package_license.map((license) => {
+            let url: string | null;
+            try {
+              url = license.url ?? new URL(license.fullName).href;
+            } catch {
+              url = null;
             }
-          | { error: { reason: string }; status: number }
-          | { code: string; message: string };
-
-        if ("code" in json) {
-          throw new Error(json.message);
-        } else if ("error" in json) {
-          throw new Error(json.error.reason);
-        } else if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-
-        return json.hits.hits.map(({ _source: result, _id: id }) => {
-          return {
-            id,
-            name: result.package_pname,
-            attrName: result.package_attr_name,
-            description: result.package_description,
-            version: result.package_pversion,
-            homepage: result.package_homepage,
-            source:
-              result.package_position &&
-              `https://github.com/NixOS/nixpkgs/blob/nixos-unstable/${result.package_position.replace(
-                /:([0-9]+)$/,
-                ""
-              )}`,
-            outputs: result.package_outputs,
-            defaultOutput: result.package_default_output,
-            platforms: result.package_platforms.filter((platform) =>
-              ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(platform)
-            ),
-            licenses: result.package_license.map((license) => {
-              let url: string | null;
-              try {
-                url = license.url ?? new URL(license.fullName).href;
-              } catch {
-                url = null;
-              }
-              return { name: license.fullName, url };
-            }),
-          };
-        });
-      },
-      initialData: [],
-      execute: searchText.length > 0,
-      failureToastOptions: {
-        title: "Could not perform search",
-      },
-    }
-  );
+            return { name: license.fullName, url };
+          }),
+        };
+      });
+    },
+    initialData: [],
+    execute: Boolean(url) && searchText.length > 0,
+    failureToastOptions: {
+      title: "Could not perform search",
+    },
+  });
   return { isLoading, results: !searchText.length ? [] : data };
+}
+
+async function getSearchUrl({ branchName }: { branchName: string }) {
+  const resp = await fetch("https://raw.githubusercontent.com/NixOS/nixos-search/main/VERSION");
+  if (!resp.ok) throw new Error("Cannot access GitHub");
+  const version = (await resp.text()).trim();
+  return `https://search.nixos.org/backend/latest-${version}-nixos-${branchName}/_search`;
 }
 
 interface SearchResult {

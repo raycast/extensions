@@ -8,7 +8,7 @@ import { isValidYoudaoWebTranslateLanguage } from "./utils";
 
 export async function requestYoudaoWebTranslate(
   queryWordInfo: QueryWordInfo,
-  queryType?: QueryType
+  queryType?: QueryType,
 ): Promise<QueryTypeResult> {
   console.log(`---> start requestYoudaoWebTranslate: ${queryWordInfo.word}`);
   const { fromLanguage, toLanguage, word } = queryWordInfo;
@@ -40,7 +40,7 @@ export async function requestYoudaoWebTranslate(
   try {
     const translateResponse = await webTranslate(word, fromLanguage, toLanguage, youdaoKey);
     const translations = translateResponse.translateResult.map((e: Array<{ tgt: string }>) =>
-      e.map((t) => t.tgt).join("")
+      e.map((t) => t.tgt).join(""),
     );
     console.log(`---> youdao web translate: ${translations}`);
 
@@ -108,7 +108,7 @@ async function webTranslate(
   text: string,
   from: string,
   to: string,
-  youdaoKey: YoudaoKey
+  youdaoKey: YoudaoKey,
 ): Promise<YoudaoTranslateResponse> {
   const { secretKey, aesKey, aesIv } = youdaoKey.data;
 

@@ -101,7 +101,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
                 text: file.name,
               }}
               title="Copy HTML Link"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "/" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           </ActionPanel.Section>
         </ActionPanel>

@@ -1,25 +1,38 @@
 export * from "./api";
 
-export function getDuration(seconds?: number | null) {
-  const getAmount = (rate: number, unit: string) => {
-    if (seconds == null) return "";
+/**
+ * A key-value object of the known time ranges for the Wakatime Summary.
+ * A `true` value means you can query for that range without a PRO subscription
+ */
+export const KNOWN_RANGES = {
+  Today: true,
+  Yesterday: true,
+  "Last 7 Days": true,
+  "Last 7 Days from Yesterday": true,
+  "Last 14 Days": false,
+  "Last 30 Days": false,
+  "This Week": false,
+  "Last Week": false,
+  "This Month": false,
+  "Last Month": false,
+} as const;
 
-    const num = Math.floor(seconds / rate);
-    seconds = Math.floor(seconds - num * rate);
-    return num === 0 ? "" : `${num} ${unit}`;
+export function getDuration(seconds: number | undefined | null) {
+  const getAmount = (rem: number, rate: number, unit: string) => {
+    const num = Math.floor(rem / rate);
+    return [num === 0 ? "" : `${num} ${unit}`, Math.floor(rem - num * rate)] as const;
   };
 
-  let duration = "0 sec";
+  let rem = seconds;
+  if (rem == null) return "0 sec";
 
-  if (seconds != null) {
-    const hours = getAmount(60 * 60, "hr");
-    const minutes = getAmount(60, "min");
-    const sec = getAmount(1, "sec");
+  let [hours, minutes, sec] = ["", "", ""];
 
-    duration = [hours, minutes, sec].filter(Boolean).join(" ");
-  }
+  [hours, rem] = getAmount(rem, 60 * 60, "hr");
+  [minutes, rem] = getAmount(rem, 60, "min");
+  [sec, rem] = getAmount(rem, 1, "sec");
 
-  return duration || "0 sec";
+  return [hours, minutes, sec].filter(Boolean).join(" ") || "0 sec";
 }
 
 /**
@@ -30,19 +43,22 @@ export function getDuration(seconds?: number | null) {
  */
 export function cumulateSummaryDuration(
   { data }: WakaTime.Summary,
-  key: keyof Omit<(typeof data)[0], "grand_total" | "range">
+  key: keyof Omit<(typeof data)[0], "grand_total" | "range">,
 ) {
   const obj = Object.entries(
     data
       .map((item) => item[key])
       .flat()
-      .reduce((acc, item) => {
-        const { name = "", total_seconds = 0 } = item ?? {};
-        return {
-          ...acc,
-          [name]: total_seconds + (acc[name] ?? 0),
-        };
-      }, {} as { [name: string]: number })
+      .reduce(
+        (acc, item) => {
+          const { name = "", total_seconds = 0 } = item ?? {};
+          return {
+            ...acc,
+            [name]: total_seconds + (acc[name] ?? 0),
+          };
+        },
+        {} as { [name: string]: number },
+      ),
   ).sort((a, b) => b[1] - a[1]);
 
   return obj.slice(0, 5);

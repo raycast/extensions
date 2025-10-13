@@ -3,9 +3,10 @@ import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 import { callAutomationTriggerService, callAutomationTurnOffService, callAutomationTurnOnService } from "./utils";
 
-export function AutomationTriggerAction(props: { state: State }): JSX.Element | null {
+export function AutomationTriggerAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("automation") || s.state === "off") {
     return null;
@@ -19,7 +20,7 @@ export function AutomationTriggerAction(props: { state: State }): JSX.Element | 
   );
 }
 
-export function AutomationTurnOnAction(props: { state: State }): JSX.Element | null {
+export function AutomationTurnOnAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (s.entity_id.startsWith("automation") && s.state === "off") {
     return (
@@ -33,7 +34,7 @@ export function AutomationTurnOnAction(props: { state: State }): JSX.Element | n
   return null;
 }
 
-export function AutomationTurnOffAction(props: { state: State }): JSX.Element | null {
+export function AutomationTurnOffAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (s.entity_id.startsWith("automation") && s.state === "on") {
     return (
@@ -47,7 +48,7 @@ export function AutomationTurnOffAction(props: { state: State }): JSX.Element | 
   return null;
 }
 
-export function AutomationEditInBrowserAction(props: { state: State }): JSX.Element | null {
+export function AutomationEditInBrowserAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (s.entity_id.startsWith("automation")) {
     const id = props.state.attributes.id as number | undefined;
@@ -61,7 +62,7 @@ export function AutomationEditInBrowserAction(props: { state: State }): JSX.Elem
   return null;
 }
 
-export function AutomationDebugInBrowserAction(props: { state: State }): JSX.Element | null {
+export function AutomationDebugInBrowserAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (s.entity_id.startsWith("automation")) {
     const id = props.state.attributes.id as number | undefined;

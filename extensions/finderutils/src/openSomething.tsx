@@ -34,7 +34,7 @@ export default async (props: LaunchProps<{ arguments: { thing: string; applicati
     } else {
       await showToast(Toast.Style.Success, "Done", result);
     }
-  } catch (err) {
+  } catch {
     await showToast(Toast.Style.Failure, "Something went wrong");
   }
 };

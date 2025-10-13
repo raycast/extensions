@@ -2,7 +2,7 @@
 
 ![screenshot](./metadata/font-awesome-2.png)
 
-The Font Awesome extension let's you search all the free and pro icons available in the latest Font Awesome v6.5.2 release.
+The Font Awesome extension let's you search all the free and pro icons available in the latest Font Awesome v6.7.2 release.
 
 ## Features
 

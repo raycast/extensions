@@ -29,7 +29,7 @@ import {
  * Format the Youdao original data for later use.
  */
 export function formatYoudaoDictionaryResult(
-  youdaoResult: YoudaoDictionaryResult
+  youdaoResult: YoudaoDictionaryResult,
 ): YoudaoDictionaryFormatResult | undefined {
   // when youdao request error, query is not exist.
   if (!youdaoResult.query) {
@@ -93,7 +93,7 @@ export function formatYoudaoDictionaryResult(
  * Update Youdao dictionary display result.
  */
 export function updateYoudaoDictionaryDisplay(
-  youdaoResult: YoudaoDictionaryFormatResult | undefined
+  youdaoResult: YoudaoDictionaryFormatResult | undefined,
 ): DisplaySection[] | undefined {
   if (!youdaoResult) {
     return;

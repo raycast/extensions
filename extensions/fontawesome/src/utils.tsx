@@ -40,27 +40,23 @@ export const familyStylesByPrefix: { [key: string]: string } = {
   fasl: 'Sharp, Light',
   fast: 'Sharp, Thin',
   fad: 'Duotone, Solid',
+  fadr: 'Duotone, Regular',
+  fadl: 'Duotone, Light',
+  fadt: 'Duotone, Thin',
   fas: 'Classic, Solid',
   far: 'Classic, Regular',
   fal: 'Classic, Light',
   fat: 'Classic, Thin',
   fab: 'Classic, Brands',
+  fasds: 'Sharp Duotone, Solid',
+  fasdr: 'Sharp Duotone, Regular',
+  fasdl: 'Sharp Duotone, Light',
+  fasdt: 'Sharp Duotone, Thin',
 };
 
+//these are for determining which icon to use in the family/style selection menu
 export function iconForStyle(prefix: string) {
-  if (prefix === 'fast' || prefix === 'fat') {
-    return 'thin.svg';
-  } else if (prefix === 'fasr' || prefix === 'far') {
-    return 'regular.svg';
-  } else if (prefix === 'fasl' || prefix === 'fal') {
-    return 'light.svg';
-  } else if (prefix === 'fass' || prefix === 'fas') {
-    return 'solid.svg';
-  } else if (prefix === 'fad') {
-    return 'duotone-new.svg';
-  } else {
-    return 'brand.svg';
-  }
+  return `${familyStylesByPrefix[prefix].replace(', ', '-').replace(' ', '-').toLowerCase()}.svg`;
 }
 
 export function iconActions(searchItem: SearchItem) {

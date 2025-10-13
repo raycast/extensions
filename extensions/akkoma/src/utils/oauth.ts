@@ -13,7 +13,7 @@ const requestAccessToken = async (
   clientId: string,
   clientSecret: string,
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> => {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
@@ -29,7 +29,7 @@ const requestAccessToken = async (
 const refreshToken = async (
   clientId: string,
   clientSecret: string,
-  refreshToken: string
+  refreshToken: string,
 ): Promise<OAuth.TokenResponse> => {
   const params = new URLSearchParams();
   params.append("client_id", clientId);

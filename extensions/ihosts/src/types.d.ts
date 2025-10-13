@@ -7,8 +7,10 @@ interface IHostCommon {
   name: string;
   state: State;
   isFolder: boolean;
+  isRemote: boolean;
   folderState?: State;
   content?: string;
+  url?: string;
   mode?: HostFolderMode;
   hosts?: IHostCommon[];
   ctime: number;
@@ -24,4 +26,5 @@ interface IUpsertHost {
   name: string;
   folder: string;
   content: string;
+  url?: string;
 }

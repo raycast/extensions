@@ -54,12 +54,15 @@ interface Zone {
 }
 
 interface DnsRecordItem {
+  id: string;
   name: string;
   type: string;
   content: string;
+  ttl: number;
 }
 
 interface DnsRecord {
+  id: string;
   name: string;
   type: string;
   content: string;
@@ -213,7 +216,7 @@ class Service {
       try {
         result = JSON.parse(this.cache.get(`zones-${id}`)!) as ZoneItem[];
         return result.map((item) => formatZone(item));
-      } catch (e) {
+      } catch {
         // Whenever the cache can't be parsed, clear it and fetch from API
         this.cache.remove(`zones-${id}`);
       }
@@ -246,9 +249,30 @@ class Service {
       `zones/${zoneId}/dns_records`,
     );
     return response.data.result.map((item) => {
-      const { name, type, content } = item;
-      return { name, type, content };
+      const { id, name, type, content } = item;
+      return { id, name, type, content };
     });
+  }
+
+  async createDnsRecord(
+    zoneId: string,
+    record: Omit<DnsRecordItem, 'id'>,
+  ): Promise<DnsRecordItem> {
+    const response = await this.client.post<Response<DnsRecordItem>>(
+      `zones/${zoneId}/dns_records`,
+      record,
+    );
+    return response.data.result;
+  }
+
+  async deleteDnsRecord(
+    zoneId: string,
+    recordId: string,
+  ): Promise<{ id: string }> {
+    const response = await this.client.delete<Response<{ id: string }>>(
+      `zones/${zoneId}/dns_records/${recordId}`,
+    );
+    return response.data.result;
   }
 
   async purgeFilesbyURL(

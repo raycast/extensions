@@ -6,6 +6,7 @@ import { sumProofs } from "@cashu/cashu-ts/dist/lib/es6/utils";
 import { showToast, Toast } from "@raycast/api";
 import { NostrWebLNProvider } from "@getalby/sdk/dist/webln";
 import Style = Toast.Style;
+import { Invoice } from "@getalby/lightning-tools";
 
 let nwc: NostrWebLNProvider;
 let mint: CashuMint;
@@ -21,21 +22,23 @@ const requestMeltQuote = async (token: Token) => {
   try {
     nwc = await connectWallet();
     mint = new CashuMint(token.mint);
-    wallet = new CashuWallet(mint);
+    wallet = new CashuWallet(mint, { unit: token.unit });
 
     if (!nwc) {
       throw new Error("Connection Error!");
     }
 
-    const totalAmount = sumProofs(token.proofs);
-    const invoice = await nwc.makeInvoice(totalAmount);
+    const amount = sumProofs(token.proofs);
+    const unitPrice = await getSatoshiRate(wallet);
+    const satoshiAmount = Math.floor(amount * unitPrice);
+    const invoice = await nwc.makeInvoice(satoshiAmount);
 
     console.debug("Generated Invoice:", invoice);
 
     const meltQuote = await wallet.createMeltQuote(invoice.paymentRequest);
 
     await showToast(Style.Success, "Successfully retrieved Melt Quote");
-    return meltQuote;
+    return { meltQuote, unitPrice };
   } catch (error) {
     console.error("Error requesting Melt Quote:", error);
     await showToast(Style.Failure, "Can't request Melt Quote from Mint!");
@@ -52,7 +55,7 @@ const meltToken = async (token: Token, amount: number) => {
 
   nwc = await connectWallet();
   mint = new CashuMint(token.mint);
-  wallet = new CashuWallet(mint);
+  wallet = new CashuWallet(mint, { unit: token.unit });
 
   if (!nwc) {
     throw new Error("Connection Error!");
@@ -87,4 +90,10 @@ const checkMeltQuote = async (meltQuote: MeltQuoteResponse) => {
   }
 };
 
-export { checkMeltQuote, meltToken, requestMeltQuote };
+const getSatoshiRate = async (wallet: CashuWallet) => {
+  const quote = await wallet.createMintQuote(1);
+  const inv = new Invoice({ pr: quote.request });
+  return inv.satoshi;
+};
+
+export { checkMeltQuote, meltToken, requestMeltQuote, getSatoshiRate };

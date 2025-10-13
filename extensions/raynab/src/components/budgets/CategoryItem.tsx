@@ -5,7 +5,7 @@ import { TransactionCreateForm } from '@components/transactions/transactionCreat
 import {
   assessGoalShape,
   displayGoalType,
-  formatToReadablePrice,
+  formatToReadableAmount,
   displayGoalColor,
   formatGoalCadenceAndFrequency,
   time,
@@ -41,13 +41,13 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
       tag: {
         value: isShowingProgress
           ? renderProgressTitle(category)
-          : formatToReadablePrice({ amount: category.balance, currency: currency }),
+          : formatToReadableAmount({ amount: category.balance, currency: currency }),
         color: goalColor,
       },
     },
   ];
 
-  const activityInCurrency = formatToReadablePrice({ amount: category.activity, currency: currency });
+  const activityInCurrency = formatToReadableAmount({ amount: category.activity, currency: currency });
   const hasGoal = !!category.goal_creation_month;
 
   return (
@@ -62,7 +62,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label
                 title="Balance"
-                text={formatToReadablePrice({ amount: category.balance, currency: currency })}
+                text={formatToReadableAmount({ amount: category.balance, currency: currency })}
               />
               <List.Item.Detail.Metadata.Label
                 title="Activity"
@@ -70,7 +70,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
               />
               <List.Item.Detail.Metadata.Label
                 title="Budgeted"
-                text={formatToReadablePrice({ amount: category.budgeted, currency })}
+                text={formatToReadableAmount({ amount: category.budgeted, currency })}
               />
               <List.Item.Detail.Metadata.Label title="Goal Target" text={formattedTarget} />
               <List.Item.Detail.Metadata.TagList title="Status">
@@ -107,7 +107,16 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
             <Action.Push
               title="Show Related Transactions"
               icon={Icon.MagnifyingGlass}
-              target={<TransactionView search={`category:${category.name.toLowerCase()}`} />}
+              target={
+                <TransactionView
+                  search={`category:${(() => {
+                    return category.name
+                      .replace(/[^\p{L}\p{N}\p{P}\p{Z}]/gu, '')
+                      .trim()
+                      .toLowerCase();
+                  })()}`}
+                />
+              }
               shortcut={Shortcuts.ShowTransactionsForCategory}
             />
             <OpenInYnabAction />

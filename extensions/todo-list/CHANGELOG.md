@@ -1,5 +1,23 @@
 # Todo List Changelog
 
+## [Added Tooltip to Title] - 2025-09-29
+
+- Added `tooltip` to to-do list items so longer titles easier to read (ref: [Issue #21807](https://github.com/raycast/extensions/issues/21807)).
+- Added `metadata` images.
+- Modernized to use latest Raycast config.
+
+## [Added Windows Support] - 2025-06-18
+
+## [Chore: Moved contributor] - 2025-03-18
+
+## [Chore: Moved contributor] - 2025-03-17
+
+## [Enhancements] - 2025-02-25
+
+- Added an action to set a due date for a todo item.
+- Added optional natural language parsing of items to extract due date and tags automatically.
+- Added configuration option to order tasks by title.
+
 ## [New Action] - 2024-07-28
 
 - Added an action to set a tag for a todo item.

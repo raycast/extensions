@@ -9,7 +9,7 @@ import { useCommitStatus } from "./commits/utils";
 import { getCIJobStatusIcon } from "./jobs";
 import { capitalizeFirstLetter, showErrorToast } from "../utils";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 function getIcon(merged: boolean): Image {
   if (merged) {
@@ -77,7 +77,7 @@ export function BranchList(props: { project: Project; navigationTitle?: string }
 
 export function useSearch(
   query: string | undefined,
-  project: Project
+  project: Project,
 ): {
   branches: any[];
   error?: string;

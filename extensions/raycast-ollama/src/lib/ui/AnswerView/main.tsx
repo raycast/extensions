@@ -7,12 +7,14 @@ import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel } from "../../oll
 import { EditModel } from "./form/EditModel";
 import { Creativity } from "../../enum";
 import { RaycastImage } from "../../types";
+import { OllamaApiModelCapability } from "../../ollama/enum";
 
 interface props {
   prompt: string;
   command?: CommandAnswer;
   server?: string;
   model?: string;
+  capabilities?: OllamaApiModelCapability[];
   creativity?: Creativity;
   keep_alive?: string;
 }
@@ -81,6 +83,7 @@ export function AnswerView(props: props): JSX.Element {
         command={props.command}
         setShow={setShowSelectModelForm}
         revalidate={RevalidateModel}
+        capabilities={props.capabilities}
         server={!IsLoadingModel && Model ? Model.server.name : undefined}
         model={!IsLoadingModel && Model ? Model.tag.name : undefined}
         keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}

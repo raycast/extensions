@@ -28,6 +28,10 @@ export type IconData = {
   aliases?: Aliases;
 };
 
+export type PackageJson = {
+  version: string;
+};
+
 export type JsDelivrNpmResponse = {
   type: string;
   name: string;
@@ -37,6 +41,13 @@ export type JsDelivrNpmResponse = {
     links: Record<string, string>;
   }>;
   links: Record<string, string>;
+};
+
+export type Release = {
+  name: string;
+  body: string;
+  tag_name: string;
+  created_at: string;
 };
 
 export type LaunchContext = {

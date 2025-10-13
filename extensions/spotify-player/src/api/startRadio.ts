@@ -20,7 +20,11 @@ export async function startRadio({ trackIds = [], artistIds = [] }: StartRadioPr
         await spotifyClient.putMePlayerPlay({ uris: tracks.flatMap((track) => track.uri as string) });
       } catch (err) {
         const error = getErrorMessage(err);
-        if (error?.toLocaleLowerCase().includes("no active device")) {
+        if (
+          error?.toLocaleLowerCase().includes("no active device") ||
+          error?.toLocaleLowerCase().includes("restricted device") ||
+          error?.toLocaleLowerCase().includes("premium required")
+        ) {
           const script = buildScriptEnsuringSpotifyIsRunning(`play track "${tracks[0].uri}"`);
           await runAppleScriptSilently(script);
         }

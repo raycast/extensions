@@ -1,9 +1,10 @@
-import { AppsV1Api, V1Deployment } from "@kubernetes/client-node";
-import { listDeployments } from "./api/appsV1";
-import { ResourceList } from "./components/resource-list";
+import { V1Deployment } from "@kubernetes/client-node";
+import { ResourceList } from "./components/ResourceList";
+import ReplicaSetList from "./components/resources/ReplicaSetList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
 import { kubernetesObjectAge } from "./utils/duration";
+import { labelSelectorToString } from "./utils/selector";
 
 export default function Command() {
   return (
@@ -11,12 +12,11 @@ export default function Command() {
       <KubernetesNamespaceProvider>
         <ResourceList
           apiVersion="apps/v1"
-          kind="Deployments"
+          kind="Deployment"
           namespaced={true}
-          apiClientType={AppsV1Api}
-          listResources={listDeployments}
           matchResource={matchDeployment}
           renderFields={renderDeploymentFields}
+          relatedResource={{ kind: "ReplicaSet", render: renderDeploymentRelatedResource }}
         />
       </KubernetesNamespaceProvider>
     </KubernetesContextProvider>
@@ -55,4 +55,13 @@ function deploymentAvailablePods(deployment: V1Deployment): string {
   const available = deployment.status?.availableReplicas ?? 0;
   const total = deployment.status?.replicas ?? 0;
   return `${available}/${total}`;
+}
+
+function renderDeploymentRelatedResource(deployment: V1Deployment) {
+  return (
+    <ReplicaSetList
+      namespace={deployment.metadata?.namespace}
+      labelSelector={labelSelectorToString(deployment.spec?.selector)}
+    />
+  );
 }

@@ -9,6 +9,7 @@ import {
   openExtensionPreferences,
   Icon,
 } from "@raycast/api";
+
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
@@ -40,7 +41,11 @@ function UnreadNotifications() {
     const applications = await getApplications();
     const linearApp = applications.find((app) => app.bundleId === "com.linear");
     const url = getNotificationURL(notification);
-    url ? await open(url, linearApp) : await openInbox();
+    if (url) {
+      await open(url, linearApp);
+    } else {
+      await openInbox();
+    }
     await markNotificationAsRead(notification);
   }
 

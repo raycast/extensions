@@ -141,6 +141,7 @@ export function DatabaseView(props: DatabaseViewProps) {
         color: option.color,
         name: option.name,
         id: option.id,
+        description: option.description,
       };
     });
 

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { getProgressIcon, useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { getProgressIcon, showFailureToast, useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { fetchTodoLists } from "../oauth/auth";
 import TodosList from "./TodosList";
 import { calculateCompletedRatio } from "../utils/math";
@@ -40,11 +40,7 @@ export default function TodoListsList({
         style: Toast.Style.Success,
       });
     } catch (error) {
-      console.error("Error setting default todo list", error);
-      await showToast({
-        title: "Error Setting Default Todo List",
-        style: Toast.Style.Failure,
-      });
+      showFailureToast(error, { title: "Error setting default todo list" });
     }
   };
 

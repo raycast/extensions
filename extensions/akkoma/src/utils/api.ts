@@ -27,7 +27,7 @@ const requestApi = async <T>(
   method: "GET" | "POST" | "PUT" = "GET",
   endpoint: string,
   body?: object,
-  isFormData?: boolean
+  isFormData?: boolean,
 ): Promise<T> => {
   const { instance }: Preferences = getPreferenceValues();
   if (!instance) {
@@ -44,6 +44,7 @@ const requestApi = async <T>(
   const response = await fetch(`https://${instance}/${endpoint}`, {
     method,
     headers,
+    // @ts-expect-error: To keep the original code
     body: isFormData ? body : JSON.stringify(body),
   });
 

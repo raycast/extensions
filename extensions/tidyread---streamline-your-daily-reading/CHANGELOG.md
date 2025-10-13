@@ -1,5 +1,9 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
+
 ## [Import sources by opml file] - 2024-03-15
 - feat: import sources by opml file
 - feat: Manage Sources Command add Show RSS Detail Action

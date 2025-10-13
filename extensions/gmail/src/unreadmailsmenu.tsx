@@ -37,7 +37,7 @@ function MessageMenubarItem(props: { message: gmail_v1.Schema$Message; onAction?
 }
 
 function UnreadMenuCommand() {
-  const query = generateQuery({ baseQuery: ["is:unread"] });
+  const query = generateQuery({ baseQuery: ["is:unread", "label:inbox"] });
   const { gmail } = getGMailClient();
   const { isLoading, data, error, mutate } = useCachedPromise(
     async (q: string) => {

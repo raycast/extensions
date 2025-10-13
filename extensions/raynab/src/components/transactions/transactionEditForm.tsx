@@ -2,17 +2,16 @@ import { updateTransaction } from '@lib/api';
 import {
   autoDistribute,
   easyGetColorFromId,
-  formatToReadablePrice,
+  formatToReadableAmount,
   formatToYnabAmount,
   getSubtransacionCategoryname,
-  isNumberLike,
   isSplitTransaction,
+  onSubtransactionAmountChangeHandler,
 } from '@lib/utils';
 import { TransactionClearedStatus, TransactionFlagColor } from 'ynab';
 import {
   Action,
   ActionPanel,
-  Alert,
   confirmAlert,
   Color,
   Form,
@@ -20,19 +19,16 @@ import {
   showToast,
   Toast,
   useNavigation,
-  getPreferenceValues,
+  captureException,
 } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useEffect, useState } from 'react';
-
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { usePayees } from '@hooks/usePayees';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
 import { Shortcuts } from '@constants';
-
-const preferences = getPreferenceValues<Preferences>();
 
 interface FormValues {
   date: Date | null;
@@ -52,7 +48,7 @@ interface TransactionEditFormProps {
   forApproval?: boolean;
 }
 
-export function TransactionEditForm({ transaction, forApproval = false }: TransactionEditFormProps) {
+export function TransactionEditForm({ transaction }: TransactionEditFormProps) {
   const { pop } = useNavigation();
 
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
@@ -60,28 +56,49 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
 
   const { mutate } = useTransactions(activeBudgetId, timeline);
-  const { data: payees, isLoading: isLoadingPayees } = usePayees(activeBudgetId);
-  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
-  const categories = categoryGroups?.flatMap((group) => group.categories);
+  const {
+    data: payees = [{ id: transaction.payee_id ?? '', name: transaction.payee_name ?? '' }],
+    isLoading: isLoadingPayees,
+  } = usePayees(activeBudgetId || '');
+  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId || '');
 
-  const [amount, setAmount] = useState(() => formatToReadablePrice({ amount: transaction.amount, locale: false }));
-  const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>(() => {
-    return transaction.subtransactions.map((s) => ({
-      ...s,
-      amount: formatToReadablePrice({ amount: s.amount, locale: false }),
-    }));
-  });
-  const [categoryList, setCategoryList] = useState(() => {
-    if (isSplitTransaction(transaction)) {
-      return subtransactions.map((s) => s.category_id ?? '');
-    }
+  const isLoading = isLoadingCategories || isLoadingPayees;
 
-    return [transaction.category_id ?? ''];
-  });
+  const categories = categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden);
 
-  // It can happen that the payee name is not in the list of payees
-  // creating a new payee require providing a name instead of an id
   const [selectOwnPayee, setselectOwnPayee] = useState(false);
+  const [isTransfer] = useState(false);
+  const [amount, setAmount] = useState(() =>
+    formatToReadableAmount({ amount: transaction.amount, currency: activeBudgetCurrency, includeSymbol: false }),
+  );
+
+  const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>(() => {
+    return (
+      transaction.subtransactions?.map((s) => ({
+        ...s,
+        amount: formatToReadableAmount({ amount: s.amount, currency: activeBudgetCurrency, includeSymbol: false }),
+      })) ?? []
+    );
+  });
+
+  const [categoryList, setCategoryList] = useState<string[]>(() => {
+    if (!categories) return [];
+    const initialCategories = transaction.subtransactions?.length
+      ? transaction.subtransactions.map((s) => s.category_id ?? '')
+      : [transaction.category_id ?? ''];
+
+    return initialCategories.filter((catId) => categories.some((cat) => cat.id === catId));
+  });
+
+  // Update categoryList when categories change
+  useEffect(() => {
+    if (categories) {
+      const validCategories = categoryList.filter((catId) => categories.some((cat) => cat.id === catId));
+      if (validCategories.length !== categoryList.length) {
+        setCategoryList(validCategories);
+      }
+    }
+  }, [categories]); // Only depend on categories
 
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
 
@@ -102,172 +119,86 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
       date: new Date(transaction.date),
-      amount: formatToReadablePrice({ amount: transaction.amount, locale: false }),
-      payee_id: transaction.payee_id ?? undefined,
+      amount: formatToReadableAmount({ amount: transaction.amount, locale: false }),
+      payee_id: transaction.payee_id ?? '',
       memo: transaction.memo ?? '',
       flag_color: transaction.flag_color?.toString() ?? undefined,
-      categoryList:
-        categoryList.length > 0 && !!categoryList[0] ? categoryList : subtransactions.map((s) => s.category_id ?? ''),
-    },
-    onSubmit: async (values) => {
-      const transactionData = {
-        ...transaction,
-        date: (values.date ?? new Date()).toISOString(),
-        flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
-        amount: formatToYnabAmount(values.amount),
-        payee_id: values.payee_id,
-        memo: values.memo || null,
-        category_id: values.categoryList?.[0] || undefined,
-        payee_name: values.payee_name || transaction.payee_name,
-        approved: true,
-      };
-
-      if (isReconciled) {
-        await showToast({ style: Toast.Style.Failure, title: 'Cannot edit reconciled transaction' });
-        return;
-      }
-
-      /**
-       * We need make sure the total of subtransactions is equal to the transaction.
-       * That validation makes sense to keep at this level
-       * */
-      if (subtransactions.length > 0) {
-        transactionData.category_id = undefined;
-
-        /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
-        transactionData.subtransactions = subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }));
-
-        const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
-        const difference = subtransactionsTotal - +values.amount;
-
-        if (difference !== 0) {
-          const options: Alert.Options = {
-            title: `Something Doesn't Add Up`,
-            message: `The total is ${
-              values.amount
-            }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-              2,
-            )}?`,
-            primaryAction: {
-              title: 'Auto-Distribute the amounts',
-              onAction: () => {
-                const distributedAmounts = autoDistribute(+amount, subtransactions.length).map((amount) =>
-                  amount.toString(),
-                );
-                setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
-              },
-            },
-            dismissAction: {
-              title: 'Adjust manually',
-            },
-          };
-          await confirmAlert(options);
-          return;
-        }
-      }
-
-      const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
-
-      mutate(
-        updateTransaction(activeBudgetId, transaction.id, {
-          ...transactionData,
-          payee_id: selectOwnPayee ? null : values.payee_id,
-        }),
-        {
-          optimisticUpdate(currentData) {
-            if (!currentData) return;
-
-            const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
-
-            if (transactionIdx < 0) return currentData;
-
-            const newData = [...currentData];
-
-            newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
-
-            return newData;
-          },
-          shouldRevalidateAfter: !preferences.quickRevalidate,
-        },
-      )
-        .then(() => {
-          toast.style = Toast.Style.Success;
-          toast.title = 'Transaction updated successfully';
-
-          if (forApproval) {
-            pop();
-          }
-        })
-        .catch(() => {
-          toast.style = Toast.Style.Failure;
-          toast.title = 'Failed to update transaction';
-        });
+      categoryList: categoryList, // Use the validated category list
     },
     validation: {
       date: FormValidation.Required,
-      amount: (value) => {
-        if (!value) return 'Please enter a valid amount';
-
-        if (isNumberLike(value) === false) return `${value} is not a valid number`;
-      },
+      amount: FormValidation.Required,
       payee_id: (value) => {
-        const errorMessage = 'Please select or enter a payee';
-
         if (!selectOwnPayee && !value) {
-          return errorMessage;
+          return 'Please select or enter a payee';
         }
       },
       categoryList: (value) => {
-        const errorMessage = 'Please add one or more categories to this transaction';
-        if (!value) {
-          return errorMessage;
+        if (!isTransfer && (!value || value.length === 0)) {
+          return 'Please add at least one category';
         }
-        if (value?.length === 0 && subtransactions.length === 0) return errorMessage;
       },
+    },
+    onSubmit: async (values) => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
+
+      try {
+        const transactionData = {
+          ...values,
+          date: (values.date ?? new Date()).toISOString(),
+          amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
+          approved: true,
+          category_id: isTransfer ? null : values.categoryList?.[0] || undefined,
+          payee_name: values.payee_id ? undefined : values.payee_name,
+          cleared: values.cleared ? TransactionClearedStatus.Cleared : TransactionClearedStatus.Uncleared,
+          flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
+          subtransactions:
+            subtransactions.length > 0
+              ? subtransactions.map((s) => ({
+                  ...s,
+                  amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
+                }))
+              : undefined,
+        };
+
+        await mutate(updateTransaction(activeBudgetId, transaction.id, transactionData));
+        toast.style = Toast.Style.Success;
+        toast.title = 'Transaction updated successfully';
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        captureException(error);
+        toast.title = 'Failed to update transaction';
+
+        if (error instanceof Error) {
+          toast.message = error.message;
+        }
+      }
     },
   });
 
-  const onSubcategoryAmountChange = (
-    sub: SaveSubTransactionWithReadableAmounts,
-  ): ((newValue: string) => void) | undefined => {
-    const eventHandler = (newAmount: string) => {
-      const oldList = [...subtransactions];
-      const previousSubtransactionIdx = oldList.findIndex((s) => s.category_id === sub.category_id);
-
-      if (previousSubtransactionIdx === -1) return;
-
-      const newSubtransaction = { ...oldList[previousSubtransactionIdx], amount: newAmount };
-      const newList = [...oldList];
-      newList[previousSubtransactionIdx] = newSubtransaction;
-
-      const isDualSplitTransaction = oldList.length === 2;
-      if (isDualSplitTransaction && preferences.liveDistribute) {
-        const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
-        const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
-        const otherAmount = +amount - +newAmount;
-
-        if (!Number.isNaN(otherAmount)) {
-          otherSubTransaction.amount = otherAmount.toString();
-          newList[otherSubTransactionIdx] = otherSubTransaction;
-        }
-      }
-
-      setSubtransactions(newList);
-    };
-
-    return eventHandler;
-  };
+  const onSubcategoryAmountChange = onSubtransactionAmountChangeHandler({
+    amount,
+    currency: activeBudgetCurrency,
+    subtransactions,
+    setSubtransactions,
+  });
 
   const isNewSplitTransaction = subtransactions.length > 0 && !isSplitTransaction(transaction);
   return (
     <Form
       navigationTitle="Edit Transaction"
-      isLoading={isLoadingCategories || isLoadingPayees}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           {subtransactions.length > 1 && !isSplitTransaction(transaction) ? (
-            <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
+            <AutoDistributeAction
+              amount={amount}
+              currency={activeBudgetCurrency}
+              categoryList={categoryList}
+              setSubtransactions={setSubtransactions}
+            />
           ) : null}
           <Action
             title={selectOwnPayee ? 'Show Payee Dropdown' : 'Show Payee Textfield'}
@@ -321,8 +252,11 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
           !isSplitTransaction(transaction)
             ? (newCategories) => {
                 if (newCategories.length > 1) {
-                  const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
-                    amount.toString(),
+                  const distributedAmounts = autoDistribute(
+                    formatToYnabAmount(amount, activeBudgetCurrency),
+                    newCategories.length,
+                  ).map((amount) =>
+                    formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
                   );
                   setCategoryList(newCategories);
                   setSubtransactions(

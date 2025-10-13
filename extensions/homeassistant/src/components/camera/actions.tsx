@@ -3,10 +3,11 @@ import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import fs from "fs";
+import React from "react";
 import { CameraImageDetail } from "./detail";
 import { getVideoStreamUrlFromCamera } from "./utils";
 
-export function CameraShowImageAction(props: { state: State }): JSX.Element | null {
+export function CameraShowImageAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const ep = s.attributes.entity_picture;
   if (!s.entity_id.startsWith("camera") || !ep) {
@@ -22,7 +23,7 @@ export function CameraShowImageAction(props: { state: State }): JSX.Element | nu
   );
 }
 
-export function CameraTurnOnAction(props: { state: State }): JSX.Element | null {
+export function CameraTurnOnAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("camera")) {
     return null;
@@ -40,7 +41,7 @@ export function CameraTurnOnAction(props: { state: State }): JSX.Element | null 
   );
 }
 
-export function CameraTurnOffAction(props: { state: State }): JSX.Element | null {
+export function CameraTurnOffAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("camera")) {
     return null;
@@ -58,7 +59,7 @@ export function CameraTurnOffAction(props: { state: State }): JSX.Element | null
   );
 }
 
-export function CameraOpenStreamInBrowserAction(props: { state: State }): JSX.Element | null {
+export function CameraOpenStreamInBrowserAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("camera")) {
     return null;
@@ -70,7 +71,7 @@ export function CameraOpenStreamInBrowserAction(props: { state: State }): JSX.El
   return <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: ["cmd"], key: "b" }} url={url} />;
 }
 
-export function CameraOpenStreamInVLCAction(props: { state: State }): JSX.Element | null {
+export function CameraOpenStreamInVLCAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("camera")) {
     return null;
@@ -95,7 +96,7 @@ export function CameraOpenStreamInVLCAction(props: { state: State }): JSX.Elemen
   );
 }
 
-export function CameraOpenStreamInIINAAction(props: { state: State }): JSX.Element | null {
+export function CameraOpenStreamInIINAAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("camera")) {
     return null;

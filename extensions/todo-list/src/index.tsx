@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { editingAtom, editingTagAtom, selectedTagAtom, searchBarTextAtom, searchModeAtom } from "./atoms";
+import { editingAtom, selectedTagAtom, searchBarTextAtom, searchModeAtom } from "./atoms";
 import { useAtom } from "jotai";
 import TodoSection from "./todo_section";
 import ListActions from "./list_actions";
@@ -9,13 +9,12 @@ export default function TodoList() {
   const [searchMode] = useAtom(searchModeAtom);
   const [searchBarText, setSearchBarText] = useAtom(searchBarTextAtom);
   const [editing] = useAtom(editingAtom);
-  const [editingTag] = useAtom(editingTagAtom);
   const [selectedTag] = useAtom(selectedTagAtom);
 
   return (
     <List
       actions={<ListActions />}
-      enableFiltering={searchMode}
+      filtering={searchMode}
       key={searchMode ? "search" : "nosearch"}
       navigationTitle={`Manage Todo List${editing !== false ? " • Editing" : searchMode ? " • Searching" : ""}`}
       onSearchTextChange={(text: string) => setSearchBarText(text)}

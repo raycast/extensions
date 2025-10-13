@@ -6,6 +6,8 @@ export class DealEntry {
   readonly url: string;
   readonly releaseDate: string;
   readonly genres: string;
+  readonly discount: string;
+  readonly platforms: string[];
 
   constructor(
     gameName: string,
@@ -14,7 +16,9 @@ export class DealEntry {
     priceKeyshop: string,
     url: string,
     releaseDate: string,
-    genres: string
+    genres: string,
+    discount: string,
+    platforms: string[]
   ) {
     this.gameName = gameName;
     this.imageUrl = imageUrl;
@@ -23,6 +27,8 @@ export class DealEntry {
     this.url = url;
     this.releaseDate = releaseDate;
     this.genres = genres;
+    this.discount = discount;
+    this.platforms = platforms;
   }
 }
 
@@ -54,6 +60,7 @@ export class DetailEntry {
   readonly pricesByPriceLabels: [string, string, string][];
   readonly pricesByTimeLabels: [string, string, string][];
   readonly editions: string[];
+  readonly platforms: string[];
 
   constructor(
     gameName: string,
@@ -63,7 +70,8 @@ export class DetailEntry {
     priceKeyshops: string,
     pricesByPriceLabels: [string, string, string][],
     pricesByTimeLabels: [string, string, string][],
-    editions: string[]
+    editions: string[],
+    platforms: string[]
   ) {
     this.gameName = gameName;
     this.imageUrl = imageUrl;
@@ -73,5 +81,6 @@ export class DetailEntry {
     this.pricesByPriceLabels = pricesByPriceLabels;
     this.pricesByTimeLabels = pricesByTimeLabels;
     this.editions = editions;
+    this.platforms = platforms;
   }
 }

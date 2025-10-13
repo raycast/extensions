@@ -1,5 +1,8 @@
 # Discord Timestamps Changelog
 
+## [AM/PM Fix] - 2025-01-26
+- Fixed a bug that showed AM instead of PM when the time was set to 12 PM
+
 ## [Quick Fix] - 2025-01-22
 - Fixed a bug that caused the Toast to show the wrong date when updating from a Snowflake
 

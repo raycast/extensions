@@ -22,6 +22,7 @@ export function FileItem(props: {
       icon={{ fileIcon: filePath }}
       quickLook={{ path: filePath, name: props.fileData.name }}
       subtitle={props.preferences.showFilePermissions ? props.fileData.permissions : ""}
+      keywords={props.preferences.searchByPermissions ? [props.fileData.permissions] : undefined}
       accessories={
         props.preferences.showFileSize
           ? [

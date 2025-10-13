@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "commit-issue-parser",
+  "title": "Commit Issue Parser",
+  "description": "Easily parse issue URLs to generate commit names and descriptions for use with Git",
+  "icon": "extension-icon.png",
+  "author": "julesjuul",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "parse-issue-url",
+      "title": "Parse Issue URL",
+      "description": "Parse the URL to get the id formatted for a commit message",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Set the default behavior when you select a commit name",
+      "type": "dropdown",
+      "required": false,
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste on Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy and Paste on Active App",
+          "value": "copy-and-paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    },
+    {
+      "name": "contentFormat",
+      "title": "Content Format",
+      "description": "Applied format when you select a commit name",
+      "type": "dropdown",
+      "required": false,
+      "default": "text",
+      "data": [
+        {
+          "title": "Text",
+          "value": "text"
+        },
+        {
+          "title": "Lazygit",
+          "value": "lazygit"
+        },
+        {
+          "title": "Git Command",
+          "value": "git"
+        }
+      ]
+    },
+    {
+      "name": "typeMode",
+      "title": "Type Mode",
+      "description": "Configure the mode of your commit types",
+      "type": "dropdown",
+      "required": false,
+      "default": "text",
+      "data": [
+        {
+          "title": "Text",
+          "value": "text"
+        },
+        {
+          "title": "Gitmoji",
+          "value": "gitmoji"
+        }
+      ]
+    },
+    {
+      "name": "commitFormat",
+      "title": "Commit Format",
+      "description": "Customizes the format of the commit. The available parameters are {type}, {scope}, and {message}. Use \\ to remove the following character when no scope is present. Leave blank to revert to the default format.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "{type}\\({scope}\\): {message}",
+      "default": "{type}\\({scope}\\): {message}"
+    },
+    {
+      "name": "bodyFormat",
+      "title": "Body Format",
+      "description": "Customizes the format of the body. The available parameters are {scope}, {body}. Leave blank to revert to the default format.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Issue: {scope}\\n\\n{body}",
+      "default": "Issue: {scope}\\n\\n{body}"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

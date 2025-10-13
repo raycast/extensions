@@ -12,7 +12,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
   const { commandName } = environment;
 
   const { selectedInstance } = useInstances();
-  const { isUrlInFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
+  const { isInFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
 
   const { alias = "", name: instanceName = "" } = selectedInstance || {};
 
@@ -24,7 +24,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
   markdown += `# ${result.metadata.title}\n\n`;
   markdown += `${result.metadata.description || ""}`;
 
-  const favoriteId = isUrlInFavorites(`${instanceUrl}${result.record_url}`);
+  const favoriteId = isInFavorites(result.record_url);
 
   return (
     <Detail

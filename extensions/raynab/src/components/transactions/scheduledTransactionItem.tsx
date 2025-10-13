@@ -2,7 +2,7 @@ import { Icon, List, ActionPanel, Color, Action } from '@raycast/api';
 
 import { ScheduledTransactionDetail } from '@srcTypes';
 import { useTransaction } from './transactionContext';
-import { easyGetColorFromId, formatToReadableFrequency, formatToReadablePrice, getFlagColor, time } from '@lib/utils';
+import { easyGetColorFromId, formatToReadableFrequency, formatToReadableAmount, getFlagColor, time } from '@lib/utils';
 
 import { OpenInYnabAction, ToggleFlagsAction } from '@components/actions';
 import { ToggleDetailsAction } from '@components/actions/toggleDetailsAction';
@@ -37,7 +37,7 @@ export function ScheduledTransactionItem({ transaction }: { transaction: Schedul
       icon={mainIcon}
       id={transaction.id}
       title={transaction.payee_name ?? transaction.id}
-      subtitle={formatToReadablePrice({ amount: transaction.amount, currency })}
+      subtitle={formatToReadableAmount({ amount: transaction.amount, currency })}
       accessories={
         /* Accessories should be absent when showing details @see https://developers.raycast.com/api-reference/user-interface/list#list.item.detail */
         !state.isShowingDetails
@@ -62,7 +62,7 @@ export function ScheduledTransactionItem({ transaction }: { transaction: Schedul
               <List.Item.Detail.Metadata.Label title="Account" text={transaction.account_name} />
               <List.Item.Detail.Metadata.Label
                 title="Amount"
-                text={formatToReadablePrice({ amount: transaction.amount, currency })}
+                text={formatToReadableAmount({ amount: transaction.amount, currency })}
               />
               <List.Item.Detail.Metadata.Label title="Frequency" text={frequency} />
               <List.Item.Detail.Metadata.Label title="Next Date" text={time(transaction.date_next).format('LL')} />

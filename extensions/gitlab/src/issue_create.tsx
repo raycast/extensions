@@ -1,9 +1,10 @@
 import { Action, showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel } from "@raycast/api";
-import { Project, User, Label, Milestone } from "./gitlabapi";
+import { Project } from "./gitlabapi";
 import { gitlab } from "./common";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getErrorMessage, projectIcon, showErrorToast, toFormValues } from "./utils";
 import { useCache } from "./cache";
+import { useProject, useMilestones } from "./hooks";
 
 interface IssueFormValues {
   project_id: number;
@@ -14,7 +15,7 @@ interface IssueFormValues {
   milestone_id: number;
 }
 
-export default function CreateIssueFormRoot(): JSX.Element {
+export default function CreateIssueFormRoot() {
   return <IssueForm />;
 }
 
@@ -23,7 +24,7 @@ async function submit(values: IssueFormValues) {
     if (values.title === "") {
       throw Error("Please enter a title");
     }
-    const val = toFormValues(values);
+    const val = toFormValues(values as unknown as Record<string, unknown>);
     console.log(val);
     await gitlab.createIssue(values.project_id, val);
     await showToast(Toast.Style.Success, "Issue created", "Issue creation successful");
@@ -47,13 +48,20 @@ function IssueForm() {
     },
     {
       deps: [],
-    }
+    },
   );
   const { projectinfo, errorProjectInfo, isLoadingProjectInfo } = useProject(selectedProject);
   const members = projectinfo?.members || [];
   const labels = projectinfo?.labels || [];
-  const isLoading = isLoadingProjects || isLoadingProjectInfo;
-  const error = errorProjects || errorProjectInfo;
+
+  let project: Project | undefined;
+  if (selectedProject) {
+    project = projects?.find((pro) => pro.id.toString() === selectedProject);
+  }
+  const { milestoneInfo, errorMilestoneInfo, isLoadingMilestoneInfo } = useMilestones(project?.group_id);
+
+  const isLoading = isLoadingProjects || isLoadingProjectInfo || isLoadingMilestoneInfo;
+  const error = errorProjects || errorProjectInfo || errorMilestoneInfo;
 
   if (error) {
     showErrorToast(error, "Cannot create Issue");
@@ -96,6 +104,9 @@ function IssueForm() {
         {projectinfo?.milestones?.map((m) => (
           <Form.Dropdown.Item key={m.id} value={m.id.toString()} title={m.title} />
         ))}
+        {milestoneInfo?.map((m) => (
+          <Form.Dropdown.Item key={m.id} value={m.id.toString()} title={m.title} />
+        ))}
       </Form.Dropdown>
     </Form>
   );
@@ -127,67 +138,4 @@ function ProjectDropdown(props: {
 function ProjectDropdownItem(props: { project: Project }) {
   const pro = props.project;
   return <Form.Dropdown.Item value={pro.id.toString()} title={pro.name_with_namespace} icon={projectIcon(pro)} />;
-}
-
-export function useProject(query?: string): {
-  projectinfo?: ProjectInfo;
-  errorProjectInfo?: string;
-  isLoadingProjectInfo: boolean;
-} {
-  const [projectinfo, setProjectInfo] = useState<ProjectInfo>();
-  const [errorProjectInfo, setError] = useState<string>();
-  const [isLoadingProjectInfo, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const proid = parseInt(query || "0");
-        if (proid > 0) {
-          console.log(`get projectinfo for project id '${proid}'`);
-          const members = await gitlab.getProjectMember(proid);
-          const labels = await gitlab.getProjectLabels(proid);
-          const milestones = await gitlab.getProjectMilestones(proid);
-
-          if (!didUnmount) {
-            setProjectInfo({ ...projectinfo, members: members, labels: labels, milestones: milestones });
-          }
-        } else {
-          console.log("no project selected");
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query]);
-
-  return { projectinfo, errorProjectInfo, isLoadingProjectInfo };
-}
-
-interface ProjectInfo {
-  members: User[];
-  labels: Label[];
-  milestones: Milestone[];
 }

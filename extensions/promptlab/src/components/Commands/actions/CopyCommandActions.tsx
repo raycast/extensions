@@ -10,14 +10,12 @@ import CopyIDAction from "../../actions/CopyIDAction";
 
 /**
  * Action panel section for actions related to copying command data to the clipboard.
- * @param props.command The command to copy data from.
- * @returns {JSX.Element} The action panel section component.
  */
 export const CopyCommandActionsSection = (props: {
   command: Command | StoreCommand;
   settings: typeof defaultAdvancedSettings;
   showTitle?: boolean;
-}): JSX.Element | null => {
+}) => {
   const { command, showTitle, settings } = props;
 
   if (
@@ -47,9 +45,8 @@ export const CopyCommandActionsSection = (props: {
 
 /**
  * Action to copy a JSON representation of all commands to the clipboard.
- * @returns {JSX.Element} The action component.
  */
-export const ExportAllCommandsAction = (): JSX.Element => {
+export const ExportAllCommandsAction = () => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   return (
     <Action

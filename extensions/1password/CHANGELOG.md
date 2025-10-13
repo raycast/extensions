@@ -1,5 +1,23 @@
 # 1Password Changelog
 
+## [Enhancements] - 2025-10-01
+
+- Added Paste actions for Login items: Paste Username, Paste Password, Paste One-time Password.
+- Paste actions now show the app's icon and name (e.g., "Paste Password to Safari").
+- Preferences updated to allow selecting Paste actions as Primary/Secondary actions.
+
+## [Enhancements] - 2025-08-25
+
+- Fixed "Enter Vault" misleading icon
+
+## [Moved contributor] - 2025-02-24
+
+## [Moved contributor] - 2025-02-03
+
+## [Enhancements] - 2025-02-12
+
+- Give a guid page when the user not install 1Password CLI
+
 ## [Maintenance] - 2025-01-19
 
 - Remove unused Bun lockfile

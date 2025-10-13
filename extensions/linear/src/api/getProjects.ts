@@ -1,9 +1,10 @@
-import { Project, ProjectUpdate, User } from "@linear/sdk";
+import { Project, ProjectStatus, ProjectUpdate, User } from "@linear/sdk";
+
 import { getLinearClient } from "../api/linearClient";
 
 export type ProjectResult = Pick<
   Project,
-  "id" | "name" | "description" | "icon" | "color" | "state" | "progress" | "url" | "targetDate"
+  "id" | "name" | "description" | "icon" | "color" | "progress" | "url" | "targetDate"
 > & {
   // Linear doesn't seem to expose the startDate property even though we can retrieve it
   startDate?: string;
@@ -13,6 +14,8 @@ export type ProjectResult = Pick<
   members: { nodes: { id: string }[] };
 } & {
   teams: { nodes: { id: string; key: string }[] };
+} & {
+  status: Pick<ProjectStatus, "id" | "name" | "type" | "color">;
 };
 
 type PageInfo = {
@@ -52,9 +55,14 @@ const projectFragment = `
   description
   icon
   color
-  state
   progress
   url
+  status {
+    id
+    name
+    type
+    color
+  }
   lead {
     id
     displayName

@@ -2,9 +2,9 @@ import { showHUD, confirmAlert, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { exec } from "child_process";
 import util from "util";
+import { getSavedDirectory, formatIdForFilename, getFileExtension } from "./utils";
 
 const execAsync = util.promisify(exec);
-
 interface SaveImageProps {
   url: string;
   id: string;
@@ -33,16 +33,14 @@ export const saveImage = async ({ url, id, mode }: SaveImageProps) => {
       return;
     }
 
-    // Proceed with the existing AppleScript if ImageMagick is installed
-    await showHUD("Please select a location to save the image...");
-
+    // Retrieve the saved directory path
+    const outputFolder = getSavedDirectory();
     const formattedId = formatIdForFilename(id || "image"); // Use a default if id is not provided
     const fileExtension = getFileExtension(url) || "jpg"; // Default to jpg if no extension found
     const quotedUrl = url.replace(/"/g, '\\"'); // Escape double quotes in the URL
 
     const appleScript = `
-      set outputFolder to choose folder with prompt "Please select an output folder:"
-      set temp_folder to (POSIX path of outputFolder) & "${formattedId}.${fileExtension}"
+      set temp_folder to "${outputFolder}/${formattedId}.${fileExtension}"
       set q_temp_folder to quoted form of temp_folder
 
       set cmd to "curl -o " & q_temp_folder & " \\"${quotedUrl}\\""
@@ -50,13 +48,13 @@ export const saveImage = async ({ url, id, mode }: SaveImageProps) => {
 
       if (do shell script "test -e " & q_temp_folder & " && echo true") is "true" then
         if "${mode}" is "original" then
-          set outputFile to (POSIX path of outputFolder) & "${formattedId}.${fileExtension}"
+          set outputFile to "${outputFolder}/${formattedId}.${fileExtension}"
           set resize_cmd to ""
         else if "${mode}" is "portrait" then
-          set outputFile to (POSIX path of outputFolder) & "${formattedId}_cropped.${fileExtension}"
+          set outputFile to "${outputFolder}/${formattedId}_cropped.${fileExtension}"
           set resize_cmd to "-resize 2160x3840^ -gravity center -crop 2160x3840+0+0 +repage"
         else if "${mode}" is "landscape" then
-          set outputFile to (POSIX path of outputFolder) & "${formattedId}_cropped.${fileExtension}"
+          set outputFile to "${outputFolder}/${formattedId}_cropped.${fileExtension}"
           set resize_cmd to "-resize 3840x2160^ -gravity center -crop 3840x2160+0+0 +repage"
         end if
 
@@ -81,21 +79,6 @@ export const saveImage = async ({ url, id, mode }: SaveImageProps) => {
     console.error(err);
     await showHUD("Couldn't save the image...");
   }
-};
-
-const formatIdForFilename = (id: string) => {
-  return id
-    .replace(/[<>:"/\\|?*]+/g, "-") // Replace invalid filename characters
-    .replace(/\s+/g, "-") // Replace spaces with dashes
-    .replace(/\.{2,}/g, ".") // Replace multiple dots with a single dot
-    .replace(/^-+|-+$/g, "") // Trim dashes from the start and end
-    .toLowerCase();
-};
-
-const getFileExtension = (url: string) => {
-  const urlParams = new URLSearchParams(url.split("?")[1]);
-  const format = urlParams.get("fm");
-  return format || "jpg"; // Default to 'jpg' if no format is specified
 };
 
 export default saveImage;

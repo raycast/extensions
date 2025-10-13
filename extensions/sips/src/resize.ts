@@ -11,14 +11,17 @@
 import { showToast, Toast } from "@raycast/api";
 
 import resize from "./operations/resizeOperation";
-import { getSelectedImages } from "./utilities/utils";
 import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
   const { width, height } = props.arguments;
 
   if (width == "" && height == "") {
-    await showToast({ title: "Must specify either width or height", style: Toast.Style.Failure });
+    await showToast({
+      title: "Must specify either width or height",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
@@ -26,10 +29,16 @@ export default async function Command(props: { arguments: { width: string; heigh
   const heightInt = height == "" ? -1 : parseInt(height);
 
   if (isNaN(widthInt)) {
-    await showToast({ title: "Width must be an integer", style: Toast.Style.Failure });
+    await showToast({
+      title: "Width must be an integer",
+      style: Toast.Style.Failure,
+    });
     return;
   } else if (isNaN(heightInt)) {
-    await showToast({ title: "Height must be an integer", style: Toast.Style.Failure });
+    await showToast({
+      title: "Height must be an integer",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 

@@ -1,15 +1,16 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
-import View from "./components/View";
-import { getUserIcon } from "./helpers/users";
+import { useCachedPromise } from "@raycast/utils";
+import { format } from "date-fns";
+import { ComponentProps } from "react";
+
+import { getFavorites } from "./api/favorites";
 import OpenInLinear from "./components/OpenInLinear";
-import { getProjectIcon } from "./helpers/projects";
-import { getStatusIcon } from "./helpers/states";
+import View from "./components/View";
 import { formatCycle } from "./helpers/cycles";
 import { getIcon } from "./helpers/icons";
-import { useCachedPromise } from "@raycast/utils";
-import { getFavorites } from "./api/favorites";
-import { ComponentProps } from "react";
-import { format } from "date-fns";
+import { getProjectIcon } from "./helpers/projects";
+import { getStatusIcon } from "./helpers/states";
+import { getUserIcon } from "./helpers/users";
 
 function Favorites() {
   const { data, isLoading } = useCachedPromise(getFavorites);

@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import ProjectsList from "./ProjectsList";
-import { useLocalStorage } from "@raycast/utils";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { ReactNode } from "react";
 
 interface Account {
   id: number;
@@ -10,9 +11,10 @@ interface Account {
 interface BasecampsListProps {
   accounts: Account[];
   isLoading: boolean;
+  actions?: ReactNode;
 }
 
-export function BasecampsList({ accounts, isLoading }: BasecampsListProps) {
+export function BasecampsList({ accounts, isLoading, actions }: BasecampsListProps) {
   const { value: defaultBasecampConfig, setValue, removeValue } = useLocalStorage<string>("defaultBasecampConfig", "");
 
   const setDefaultBasecamp = async (accountId: number, accountName: string) => {
@@ -21,8 +23,7 @@ export function BasecampsList({ accounts, isLoading }: BasecampsListProps) {
       await setValue(configValue);
       showToast({ title: "Default Basecamp Set", style: Toast.Style.Success });
     } catch (error) {
-      console.error("Error setting default basecamp:", error);
-      showToast({ title: "Error Setting Default Basecamp", style: Toast.Style.Failure });
+      showFailureToast(error, { title: "Error setting default basecamp" });
     }
   };
 
@@ -53,6 +54,7 @@ export function BasecampsList({ accounts, isLoading }: BasecampsListProps) {
               />
               <Action title="Set Default Basecamp" onAction={() => setDefaultBasecamp(account.id, account.name)} />
               {defaultBasecampId && <Action title="Remove Default Basecamp" onAction={() => removeDefaultBasecamp()} />}
+              {actions}
             </ActionPanel>
           }
         />

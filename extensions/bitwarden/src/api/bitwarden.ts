@@ -1,11 +1,11 @@
-import { Cache as RCCache, environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
-import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue, execaSync } from "execa";
+import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
+import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
 import { existsSync, unlinkSync, writeFileSync, accessSync, constants, chmodSync } from "fs";
 import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL, CACHE_KEYS } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
-import { Folder, Item } from "~/types/vault";
+import { Folder, Item, ItemType, Login } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import {
@@ -22,7 +22,6 @@ import {
 import { join } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
-import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
 import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
@@ -76,9 +75,17 @@ type ReceiveSendOptions = {
   password?: string;
 };
 
+type CreateLoginItemOptions = {
+  name: string;
+  username?: string;
+  password: string;
+  folderId: string | null;
+  uri?: string;
+};
+
 const { supportPath } = environment;
 
-const Δ = "2"; // changing this forces a new bin download for people that had a failed one
+const Δ = "4"; // changing this forces a new bin download for people that had a failed one
 const BinDownloadLogger = (() => {
   /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
    but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard. It uses files to keep it synchronous, as it's needed in the constructor.
@@ -93,8 +100,8 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2024.2.0",
-  sha256: "fd80ffefd4686e677d7c8720258b3c92559b65b890519b1327cd4bb45887dde8",
+  version: "2025.2.0",
+  sha256: "fade51012a46011c016a2e5aee2f2e534c1ed078e49d1178a69e2889d2812a96",
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
     arm64: "/opt/homebrew/bin/bw",
@@ -106,25 +113,6 @@ export const cliInfo = {
       return process.arch === "arm64" ? this.arm64 : this.x64;
     },
     get bin() {
-      // TODO: Remove this when the issue is resolved
-      // CLI bin download is off for arm64 until bitwarden releases arm binaries
-      // https://github.com/bitwarden/clients/pull/2976
-      // https://github.com/bitwarden/clients/pull/7338
-      if (process.arch === "arm64") {
-        const cache = new RCCache();
-        try {
-          if (!existsSync(this.downloadedBin)) throw new Error("No downloaded bin");
-          if (cache.get("downloadedBinWorks") === "true") return this.downloadedBin;
-
-          execaSync(this.downloadedBin, ["--version"]);
-          cache.set("downloadedBinWorks", "true");
-          return this.downloadedBin;
-        } catch {
-          cache.set("downloadedBinWorks", "false");
-          return this.installedBin;
-        }
-      }
-
       return !BinDownloadLogger.hasError() ? this.downloadedBin : this.installedBin;
     },
   },
@@ -132,10 +120,8 @@ export const cliInfo = {
     return `bw-${this.version}`;
   },
   get downloadUrl() {
-    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
-  },
-  checkHashMatchesFile: function (filePath: string) {
-    return getFileSha256(filePath) === this.sha256;
+    const archSuffix = process.arch === "arm64" ? "-arm64" : "";
+    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos${archSuffix}-${this.version}.zip`;
   },
 } as const;
 
@@ -165,7 +151,7 @@ export class Bitwarden {
 
     this.initPromise = (async (): Promise<void> => {
       await this.ensureCliBinary();
-      this.cacheCliVersion();
+      void this.retrieveAndCacheCliVersion();
       await this.checkServerUrl(serverUrl);
     })();
   }
@@ -190,20 +176,29 @@ export class Bitwarden {
     try {
       try {
         toast.message = "Downloading...";
-        await download(cliInfo.downloadUrl, zipPath, (percent) => (toast.message = `Downloading ${percent}%`));
-        if (!cliInfo.checkHashMatchesFile(zipPath)) throw new EnsureCliBinError("Binary hash does not match");
+        await download(cliInfo.downloadUrl, zipPath, {
+          onProgress: (percent) => (toast.message = `Downloading ${percent}%`),
+          sha256: cliInfo.sha256,
+        });
       } catch (downloadError) {
         toast.title = "Failed to download Bitwarden CLI";
         throw downloadError;
       }
+
       try {
         toast.message = "Extracting...";
         await decompressFile(zipPath, supportPath);
         const decompressedBinPath = join(supportPath, "bw");
-        await waitForFileAvailable(decompressedBinPath);
-        await rename(decompressedBinPath, this.cliPath);
+
+        // For some reason this rename started throwing an error after succeeding, so for now we're just
+        // catching it and checking if the file exists ¯\_(ツ)_/¯
+        await rename(decompressedBinPath, this.cliPath).catch(() => null);
+        await waitForFileAvailable(this.cliPath);
+
         await chmod(this.cliPath, "755");
         await rm(zipPath, { force: true });
+
+        Cache.set(CACHE_KEYS.CLI_VERSION, cliInfo.version);
         this.wasCliUpdated = true;
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
@@ -213,20 +208,24 @@ export class Bitwarden {
     } catch (error) {
       toast.message = error instanceof EnsureCliBinError ? error.message : "Please try again";
       toast.style = Toast.Style.Failure;
-      unlinkAllSync(zipPath, this.cliPath);
-      BinDownloadLogger.logError(error);
 
-      if (error instanceof Error) throw new EnsureCliBinError(`${error.name}: ${error.message}`, error.stack);
+      unlinkAllSync(zipPath, this.cliPath);
+
+      if (!environment.isDevelopment) BinDownloadLogger.logError(error);
+      if (error instanceof Error) throw new EnsureCliBinError(error.message, error.stack);
       throw error;
     } finally {
       await toast.restore();
     }
   }
 
-  private cacheCliVersion(): void {
-    void this.getVersion().then(({ error, result }) => {
+  private async retrieveAndCacheCliVersion(): Promise<void> {
+    try {
+      const { error, result } = await this.getVersion();
       if (!error) Cache.set(CACHE_KEYS.CLI_VERSION, result);
-    });
+    } catch (error) {
+      captureException("Failed to retrieve and cache cli version", error, { captureToRaycast: true });
+    }
   }
 
   private checkCliBinIsReady(filePath: string): boolean {
@@ -435,6 +434,42 @@ export class Bitwarden {
       return { result: items.filter((item: Item) => !!item.name) };
     } catch (execError) {
       captureException("Failed to list items", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async createLoginItem(options: CreateLoginItemOptions): Promise<MaybeError<Item>> {
+    try {
+      const { error: itemTemplateError, result: itemTemplate } = await this.getTemplate<Item>("item");
+      if (itemTemplateError) throw itemTemplateError;
+
+      const { error: loginTemplateError, result: loginTemplate } = await this.getTemplate<Login>("item.login");
+      if (loginTemplateError) throw loginTemplateError;
+
+      itemTemplate.name = options.name;
+      itemTemplate.type = ItemType.LOGIN;
+      itemTemplate.folderId = options.folderId || null;
+      itemTemplate.login = loginTemplate;
+      itemTemplate.notes = null;
+
+      loginTemplate.username = options.username || null;
+      loginTemplate.password = options.password;
+      loginTemplate.totp = null;
+      loginTemplate.fido2Credentials = undefined;
+
+      if (options.uri) {
+        loginTemplate.uris = [{ match: null, uri: options.uri }];
+      }
+
+      const { result: encodedItem, error: encodeError } = await this.encode(JSON.stringify(itemTemplate));
+      if (encodeError) throw encodeError;
+
+      const { stdout } = await this.exec(["create", "item", encodedItem], { resetVaultTimeout: true });
+      return { result: JSON.parse<Item>(stdout) };
+    } catch (execError) {
+      captureException("Failed to create login item", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };

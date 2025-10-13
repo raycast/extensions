@@ -1,5 +1,41 @@
 import { Configuration } from "./models/Configuration";
 import { BASE_URL } from "./api";
+import AdmZip from "adm-zip";
+
+import { exec } from "child_process";
+import { Application } from "@raycast/api";
+
+export type IDE = "intellij" | "vscode" | "vscodium";
+
+export function openInIDE(directoryPath: string, ide: Application) {
+  console.log(`Opening project with ${ide.name} from directory ${directoryPath}`);
+  const command = `open -a "${ide.path}" "${directoryPath}"`;
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error opening ${ide.name}: ${error.message}`);
+        reject(error);
+        return;
+      }
+      if (stderr) {
+        console.error(`${ide.name} stderr: ${stderr}`);
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+export function unzipFile(zipFilePath: string, destinationDir: string) {
+  try {
+    const zip = new AdmZip(zipFilePath);
+    zip.extractAllTo(destinationDir, true);
+    console.log("Extraction complete");
+    return true;
+  } catch (error) {
+    console.error(`Error extracting zip (${zipFilePath}):`, error);
+    return false;
+  }
+}
 
 export function getParams(config: Configuration): URLSearchParams {
   const params = new URLSearchParams();

@@ -1,0 +1,160 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "speech-to-text",
+  "title": "Speech to Text",
+  "description": "A simple extension that allows Speech to Text using your own Groq API.",
+  "icon": "extension-icon.png",
+  "author": "facundo_prieto",
+  "categories": ["Productivity", "Media", "Developer Tools", "Communication"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "record-transcription",
+      "title": "Record Transcription",
+      "subtitle": "Speech to Text",
+      "description": "Record an audio and transcribe it to text",
+      "mode": "view"
+    },
+    {
+      "name": "transcription-history",
+      "title": "Transcription History",
+      "subtitle": "Speech to Text",
+      "description": "View and manage your transcription history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Groq API Key",
+      "description": "Your Groq API key for speech-to-text transcription",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Transcription Model",
+      "description": "The Groq model to use for transcription",
+      "type": "dropdown",
+      "required": true,
+      "default": "whisper-large-v3",
+      "data": [
+        {
+          "title": "Whisper Large v3",
+          "value": "whisper-large-v3"
+        },
+        {
+          "title": "Whisper Large v3 Turbo",
+          "value": "whisper-large-v3-turbo"
+        },
+        {
+          "title": "Distil Whisper",
+          "value": "distil-whisper-large-v3-en"
+        }
+      ]
+    },
+    {
+      "name": "language",
+      "title": "Default Language",
+      "description": "Selecting a specific language can improve transcription accuracy",
+      "type": "dropdown",
+      "required": true,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect (default)",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        }
+      ]
+    },
+    {
+      "name": "promptText",
+      "title": "Default Prompt",
+      "description": "Default prompt text to guide the AI transcription",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Enter instructions for the AI transcription",
+      "default": "Maintain proper sentence structure, punctuation, and paragraphs. Format numbers, currency, and units appropriately. Preserve speaker transitions if multiple speakers are detected."
+    },
+    {
+      "name": "userTerms",
+      "title": "Custom Terms",
+      "description": "Comma-separated list of specialized terms, names, or jargon to help with transcription accuracy",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., React.js, TypeScript, GraphQL, <names>, etc."
+    },
+    {
+      "name": "enableContext",
+      "title": "Use Highlighted Text",
+      "label": "Use highlighted text as context",
+      "description": "Automatically use any text you have highlighted in other apps as context for transcription",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
+    "@types/fs-extra": "^11.0.4",
+    "fs-extra": "^11.3.0",
+    "groq-sdk": "^0.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

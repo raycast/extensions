@@ -70,6 +70,26 @@ export const ConnectorProviders: Record<ConnectorProvider, ConnectorProviderConf
     color: Color.Yellow,
     name: "Web Crawler",
   },
+  bigquery: {
+    icon: "icons/bigquery.svg",
+    color: Color.Blue,
+    name: "BigQuery",
+  },
+  salesforce: {
+    icon: "icons/salesforce.svg",
+    color: Color.Red,
+    name: "Salesforce",
+  },
+  gong: {
+    icon: "icons/gong.svg",
+    color: Color.Green,
+    name: "Gong",
+  },
+  slack_bot: {
+    icon: "icons/slack_bot.svg",
+    color: Color.Red,
+    name: "Slack Bot",
+  },
 };
 
 const GREETINGS = [
@@ -136,6 +156,8 @@ export function getAgentScopeConfig(scope: AgentConfigurationType["scope"]) {
       return { label: "Company", icon: Icon.Building, color: Color.Yellow };
     case "published":
       return { label: "Shared", icon: Icon.AddPerson, color: Color.Magenta };
+    default:
+      return { label: scope, icon: Icon.QuestionMark, color: Color.Red };
   }
 }
 

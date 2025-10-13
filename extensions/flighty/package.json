@@ -5,6 +5,9 @@
   "description": "Interact with the Flighty app.",
   "icon": "flighty.png",
   "author": "hrishabhn",
+  "contributors": [
+    "damian_duchnowski"
+  ],
   "license": "MIT",
   "commands": [
     {

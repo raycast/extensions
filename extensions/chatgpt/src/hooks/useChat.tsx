@@ -13,6 +13,7 @@ import { Stream } from "openai/streaming";
 
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [isAborted, setIsAborted] = useState<boolean>(false);
@@ -111,8 +112,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
                 toast.message = undefined;
                 setIsAborted(true);
               } else {
+                const message = `Couldn't stream message: ${error}`;
                 toast.title = "Error";
-                toast.message = `Couldn't stream message: ${error}`;
+                toast.message = message;
+                setErrorMsg(message);
               }
               toast.style = Toast.Style.Failure;
               setLoading(false);
@@ -159,11 +162,14 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           setIsAborted(true);
         } else if (err?.message) {
           if (err.message.includes("429")) {
-            toast.title = "You've reached your API limit";
-            toast.message = "Please upgrade to pay-as-you-go";
+            const message = "Rate limit reached for requests";
+            toast.title = "Error";
+            toast.message = message;
+            setErrorMsg(message);
           } else {
             toast.title = "Error";
             toast.message = err.message;
+            setErrorMsg(err.message);
           }
         }
         toast.style = Toast.Style.Failure;
@@ -184,6 +190,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   return useMemo(
     () => ({
       data,
+      errorMsg,
       setData,
       isLoading,
       setLoading,
@@ -198,6 +205,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     }),
     [
       data,
+      errorMsg,
       setData,
       isLoading,
       setLoading,

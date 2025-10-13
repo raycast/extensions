@@ -5,21 +5,22 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:16:12
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
 import path from "path";
+import fs from "fs";
 
+import { Direction } from "../utilities/enums";
 import {
   execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
+  expandTilde,
   flipPDF,
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-import { Direction } from "../utilities/enums";
 
 /**
  * Flips images vertically or horizontally, storing the results according to the user's preferences.
@@ -29,8 +30,9 @@ import { Direction } from "../utilities/enums";
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function flip(sourcePaths: string[], direction: Direction) {
-  const pathStrings = '"' + sourcePaths.join('" "') + '"';
-  const newPaths = await getDestinationPaths(sourcePaths);
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  const pathStrings = '"' + expandedPaths.join('" "') + '"';
+  const newPaths = await getDestinationPaths(expandedPaths);
   const directionString = direction == Direction.HORIZONTAL ? "horizontal" : "vertical";
 
   if (
@@ -41,7 +43,7 @@ export default async function flip(sourcePaths: string[], direction: Direction) 
   ) {
     // Special types present -- Handle each image individually
     const resultPaths = [];
-    for (const imgPath of sourcePaths) {
+    for (const imgPath of expandedPaths) {
       if (imgPath.toLowerCase().endsWith("webp")) {
         // Convert to PNG, flip and restore to WebP
         resultPaths.push(await execSIPSCommandOnWebP(`sips --flip ${directionString}`, imgPath));
@@ -56,12 +58,13 @@ export default async function flip(sourcePaths: string[], direction: Direction) 
         resultPaths.push(await execSIPSCommandOnAVIF(`sips --flip ${directionString}`, imgPath));
       } else {
         // Image is not a special format, so just flip it using SIPS
-        const newPath = newPaths[sourcePaths.indexOf(imgPath)];
+        const newPath = newPaths[expandedPaths.indexOf(imgPath)];
         resultPaths.push(newPath);
         execSync(`sips --flip ${directionString} -o "${newPath}" "${imgPath}"`);
       }
     }
     await moveImageResultsToFinalDestination(resultPaths);
+    return resultPaths;
   } else {
     // No special types -- Flip all images at once
     const outputLocation = newPaths.length == 1 ? newPaths[0] : path.join(path.dirname(newPaths[0]), "flipped");
@@ -69,6 +72,17 @@ export default async function flip(sourcePaths: string[], direction: Direction) 
     if (newPaths.length > 1) execSync(`mkdir -p "${outputLocation}"`);
 
     execSync(`sips --flip ${directionString} -o "${outputLocation}" ${pathStrings}`);
+
+    if (newPaths.length > 1) {
+      await Promise.all(
+        expandedPaths.map((imgPath, index) =>
+          fs.promises.rename(path.join(outputLocation, path.basename(imgPath)), newPaths[index]),
+        ),
+      );
+      await fs.promises.rm(outputLocation, { recursive: true, force: true });
+    }
+
     await moveImageResultsToFinalDestination(newPaths);
   }
+  return newPaths;
 }

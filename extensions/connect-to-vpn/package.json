@@ -9,10 +9,19 @@
     "sato11",
     "stonerl",
     "vyacheslav",
-    "yshmeel"
+    "yshmeel",
+    "borzov",
+    "andrei_hudalla"
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Last Used",
+      "subtitle": "VPN",
+      "description": "Toggle your Last Used VPN",
+      "mode": "no-view"
+    },
     {
       "name": "index",
       "title": "Show Network Services",
@@ -67,19 +76,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1"
+    "@raycast/api": "^1.94.0"
   },
   "devDependencies": {
-    "@types/node": "^20.14.8",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.3.2",
-    "react": "^18.3.1",
-    "react-devtools": "^5.2.0",
-    "typescript": "^5.5.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

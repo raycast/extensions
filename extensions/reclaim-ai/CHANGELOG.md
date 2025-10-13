@@ -1,5 +1,11 @@
 # reclaim Changelog
 
+## [Update] - 2025-06-04
+- Update to the package.json description to include Outlook as a valid calendar provider.
+
+## [Fixes] - 2025-04-02
+- Don't split surrogate pairs
+
 ## [Fixes] - 2024-10-25
 - Don't hardcode task category to "work"
 

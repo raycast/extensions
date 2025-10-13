@@ -1,6 +1,8 @@
-import { getLocalStorageItem, randomId } from "@raycast/api";
+// src/utils/handleResults.ts
+import { getLocalStorageItem, getPreferenceValues, randomId } from "@raycast/api";
 import { SearchResult } from "./types";
 import fetch from "node-fetch";
+import { TextDecoder } from "node:util";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
   const historyString = (await getLocalStorageItem("history")) as string;
@@ -16,7 +18,7 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
 export async function getSearchResults(
   searchText: string,
   token: string,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<SearchResult[]> {
   const response = await fetch(`https://kagi.com/api/autosuggest?q=${encodeURIComponent(searchText)}`, {
     method: "get",
@@ -35,22 +37,36 @@ export async function getSearchResults(
   const text = decoder.decode(buffer);
   const json = JSON.parse(text);
 
-  const results: SearchResult[] = [
-    {
-      id: randomId(),
-      query: searchText,
-      description: searchText,
-      url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(searchText)}`,
-    },
-  ];
+  const firstResult = {
+    id: randomId(),
+    query: searchText,
+    description: `Search Kagi for '${searchText}'`,
+    url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(searchText)}`,
+  };
 
-  json[1].map((item: string, i: number) => {
-    results[i + 1] = {
+  // Apply description changes based on conditions
+  if (searchText.includes("!")) {
+    firstResult.description = "Use a Kagi bang with: " + searchText;
+  } else if (searchText.includes("?") && getPreferenceValues()["fastGptShortcut"]) {
+    firstResult.description = "Ask FastGPT: " + searchText;
+  }
+
+  const results: SearchResult[] = [firstResult];
+
+  json[1].forEach((item: string, i: number) => {
+    const result = {
       id: randomId(),
       query: item,
-      description: item,
+      description: `Search Kagi for '${item}'`,
       url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(item)}`,
     };
+    // Apply the same conditional logic to the other results
+    if (result.query.includes("!")) {
+      result.description = "Use a Kagi bang with: " + item;
+    } else if (result.query.includes("?") && getPreferenceValues()["fastGptShortcut"]) {
+      result.description = "Ask FastGPT: " + item;
+    }
+    results[i + 1] = result;
   });
 
   return results;

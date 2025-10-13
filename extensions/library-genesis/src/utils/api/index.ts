@@ -21,26 +21,48 @@ export const getLibgenSearchResults = async (
 
   const { parse } = getMirror(libgenUrl);
 
-  const queryUrl =
-    searchType === SearchType.Fiction
-      ? libgenUrl +
-        `/fiction/?` +
-        new URLSearchParams({
-          q: searchContent,
-          criteria: "",
-          language: "",
-          format: "",
-        })
-      : libgenUrl +
-        "/search.php?" +
-        new URLSearchParams({
-          req: searchContent,
-          open: "0",
-          res: "100",
-          view: "detailed",
-          phrase: "1",
-          column: "def",
-        });
+  const fields = [
+    "t", // title
+    "a", // author(s)
+    "s", // series
+    "y", // year
+    "p", // publisher
+    "i", // isbn
+  ];
+  const objects = [
+    "f", // files
+    "e", // editions
+    "s", // series
+    "a", // authors
+    "p", // publishers
+    "w", // works
+  ];
+  const topics = {
+    fiction: [
+      "f", // fiction
+      "r", // fiction rus
+      "c", // comics
+    ],
+    nonfiction: [
+      "l", // libgen
+      "a", // scientific articles
+      "m", // magazines
+      "s", // standards
+    ],
+  };
+  const params = new URLSearchParams({
+    req: searchContent,
+    res: "100",
+    covers: "on",
+    filesuns: "all",
+  });
+  fields.forEach((column) => params.append("columns[]", column));
+  objects.forEach((object) => params.append("objects[]", object));
+  if (searchType === SearchType.Fiction) topics.fiction.forEach((topic) => params.append("topics[]", topic));
+  else if (searchType === SearchType.NonFiction) topics.nonfiction.forEach((topic) => params.append("topics[]", topic));
+  else [...topics.fiction, ...topics.nonfiction].forEach((topic) => params.append("topics[]", topic));
+
+  const queryUrl = libgenUrl + "/index.php?" + params.toString();
 
   console.log(`Libgen Query URL: ${queryUrl}`);
 
@@ -66,8 +88,12 @@ export const getUrlFromDownloadPage = async (
 
   const $ = load(data);
   console.log(downloadUrl);
-  const downloadLinks = $("#download").find("a");
+  const pathname = $("#main").find("a").first().attr("href");
+  const url = new URL(downloadUrl);
+  url.pathname = pathname || "";
+  return url.toString();
 
+  const downloadLinks = $("#download").find("a");
   const downloadLink = downloadLinks.eq(gateWay).attr("href");
   return downloadLink;
 };

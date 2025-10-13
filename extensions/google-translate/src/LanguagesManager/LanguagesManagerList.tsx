@@ -1,11 +1,9 @@
 import React from "react";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { LanguageCodeSet } from "../types";
 import { useAllLanguageSets, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 import { AddLanguageForm } from "./AddLanguageForm";
 import { isSameLanguageSet, formatLanguageSet, getLanguageSetObjects } from "../utils";
-import { getLanguageFlag } from "../languages";
 
 export function LanguagesManagerItem({
   languageSet,
@@ -21,13 +19,12 @@ export function LanguagesManagerItem({
   const { langFrom, langTo } = getLanguageSetObjects(languageSet);
 
   const langsTo = Array.isArray(langTo) ? langTo : [langTo];
-  const langsToFlags = langsTo.map((l) => getLanguageFlag(l)).join(" ");
   const langsToLabel = langsTo.map((l) => l.name).join(", ");
 
   return (
     <List.Item
-      subtitle={`${getLanguageFlag(langFrom)} -> ${langsToFlags}`}
-      title={`${langFrom.name} -> ${langsToLabel}`}
+      title={`${langFrom.name}   ->`}
+      subtitle={` ${langsToLabel}`}
       keywords={[langFrom.name, langFrom.code, ...langsTo.flatMap((l) => [l.name, l.code])]}
       icon={selected ? { tintColor: Color.Green, source: Icon.Checkmark } : undefined}
       actions={

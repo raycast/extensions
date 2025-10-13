@@ -49,48 +49,58 @@ const SearchComponents = () => {
     },
   );
 
+  const addedComponents: string[] = [];
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search components...">
       {components?.length &&
-        components?.map(({ name, url, component }) => (
-          <List.Item
-            title={name}
-            key={name}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action.OpenInBrowser title="Open in Browser" url={url} />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action.CopyToClipboard
-                    icon="npm-icon.png"
-                    title="Copy Add Command [Npm]"
-                    content={`npx shadcn-vue@latest add ${component}`}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  />
-                  <Action.CopyToClipboard
-                    icon="yarn-icon.png"
-                    title="Copy Add Command [Yarn]"
-                    content={`npx shadcn-vue@latest add ${component}`}
-                    shortcut={{ modifiers: ["cmd"], key: "y" }}
-                  />
-                  <Action.CopyToClipboard
-                    icon="pnpm-icon.png"
-                    title="Copy Add Command [Pnpm]"
-                    content={`pnpm dlx shadcn-vue@latest add ${component}`}
-                    shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
-                  />
-                  <Action.CopyToClipboard
-                    icon="bun-icon.png"
-                    title="Copy Add Command [Bun]"
-                    content={`bunx --bun shadcn-vue@latest add ${component}`}
-                    shortcut={{ modifiers: ["cmd"], key: "b" }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+        components?.map(({ name, url, component }) => {
+          if (addedComponents.includes(component)) {
+            return null;
+          }
+
+          addedComponents.push(component);
+
+          return (
+            <List.Item
+              title={name}
+              key={name}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.OpenInBrowser title="Open in Browser" url={url} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action.CopyToClipboard
+                      icon="npm-icon.png"
+                      title="Copy Add Command [Npm]"
+                      content={`npx shadcn-vue@latest add ${component}`}
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    />
+                    <Action.CopyToClipboard
+                      icon="yarn-icon.png"
+                      title="Copy Add Command [Yarn]"
+                      content={`npx shadcn-vue@latest add ${component}`}
+                      shortcut={{ modifiers: ["cmd"], key: "y" }}
+                    />
+                    <Action.CopyToClipboard
+                      icon="pnpm-icon.png"
+                      title="Copy Add Command [Pnpm]"
+                      content={`pnpm dlx shadcn-vue@latest add ${component}`}
+                      shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
+                    />
+                    <Action.CopyToClipboard
+                      icon="bun-icon.png"
+                      title="Copy Add Command [Bun]"
+                      content={`bunx --bun shadcn-vue@latest add ${component}`}
+                      shortcut={{ modifiers: ["cmd"], key: "b" }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 };

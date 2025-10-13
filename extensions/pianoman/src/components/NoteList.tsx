@@ -12,7 +12,7 @@ export default function NoteList({ noteNames, isLoading = false }: KeyListProps)
   return (
     <List isLoading={isLoading}>
       {noteNames
-        .filter((noteName, _index) => {
+        .filter((noteName) => {
           // FIXME: Some notes are missing
           return Boolean(getNote(noteName));
         })

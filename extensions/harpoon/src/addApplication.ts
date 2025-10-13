@@ -1,7 +1,7 @@
 import { closeMainWindow, getFrontmostApplication, showHUD } from "@raycast/api";
 import addItem from "./helpers/addItem";
 
-export default async function addApplication(position: "first" | "last") {
+export default async function addApplication(position: "first" | "last" | number) {
   const application = await getFrontmostApplication();
 
   if (!application) {

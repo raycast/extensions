@@ -9,7 +9,8 @@
   "license": "MIT",
   "author": "skydiver",
   "contributors": [
-    "kytta"
+    "kytta",
+    "emilshr"
   ],
   "scripts": {
     "build": "ray build",

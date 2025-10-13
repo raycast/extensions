@@ -5,5 +5,5 @@ import { handleTaskEitherError } from "./util/utils";
 
 export default pipe(
   music.player.togglePlay,
-  handleTaskEitherError("Failed to toggle play/pause", "Successfully played/paused")
+  handleTaskEitherError("Failed to toggle play/pause", "Successfully played/paused"),
 );

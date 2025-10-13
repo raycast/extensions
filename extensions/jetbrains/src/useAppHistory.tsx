@@ -153,7 +153,11 @@ export function allReducer(results: AppHistory[], hidden: string[]): recentEntry
       ],
       [] as recentEntry[]
     )
-    .sort((a, b) => b.opened - a.opened);
+    .sort((a, b) => {
+      const aOpened = isNaN(a.opened) ? -Infinity : a.opened;
+      const bOpened = isNaN(b.opened) ? -Infinity : b.opened;
+      return bOpened - aOpened;
+    });
 }
 
 export function myFavReducer(favourites: Favourite[], all: recentEntry[]): recentEntry[] {
@@ -241,17 +245,19 @@ export function useAppHistory(): appHistoryReturn {
         })
         .then((settings) => ({
           sortOrder: settings.ordering.installed,
-          projects: Object.keys(settings.projects).map((projectPath) => ({
-            projectPath,
-            config: settings.projects[projectPath],
-          })),
+          projects: settings.projects
+            ? Object.keys(settings.projects).map((projectPath) => ({
+                projectPath,
+                config: settings.projects?.[projectPath],
+              }))
+            : [],
         }))
         .then(({ sortOrder, projects }) => ({
           favourites: projects
-            .filter((project) => project.config.favorite ?? false)
-            .map((project) => ({ path: project.projectPath, appId: project.config.launchMethod })),
+            .filter((project) => project.config?.favorite ?? false)
+            .map((project) => ({ path: project.projectPath, appId: project.config?.launchMethod })),
           hidden: projects
-            .filter((project) => (project.config.hidden ?? false) !== false)
+            .filter((project) => (project.config?.hidden ?? false) !== false)
             .map((project) => project.projectPath),
           sortOrder,
         }))

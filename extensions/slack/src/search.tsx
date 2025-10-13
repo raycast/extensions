@@ -8,6 +8,7 @@ import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenI
 import { convertSlackEmojiToUnicode } from "./shared/utils";
 import { toZonedTime } from "date-fns-tz";
 import { differenceInMinutes } from "date-fns";
+import SendMessage from "./send-message";
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
@@ -82,6 +83,13 @@ function Search() {
                 <ActionPanel>
                   <OpenChatInSlack
                     {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
+                  />
+
+                  <Action.Push
+                    title="Send Message"
+                    icon={Icon.Message}
+                    target={<SendMessage recipient={userId} />}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   />
 
                   <Action.CreateQuicklink

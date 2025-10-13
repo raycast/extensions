@@ -48,6 +48,7 @@ For this Raycast extension, a **Read Only** token is sufficient and recommended.
 - View recent transactions
 - Filter transactions by type
 - Copy account and routing numbers
+- AI-driven financial analyses, summaries, and insights
 
 ## Feedback
 

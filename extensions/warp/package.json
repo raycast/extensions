@@ -2,13 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "warp",
   "title": "Warp",
-  "description": "Open Warp tabs/windows and launch configurations.",
-  "icon": "extension-icon.png",
+  "description": "Open Warp tabs/windows and Launch Configurations.",
+  "icon": "warp-icon.png",
   "author": "joetannenbaum",
   "contributors": [
     "theRubberDuckiee",
     "hakob_nersesian",
-    "kamil_drzastwa"
+    "kamil_drzastwa",
+    "chrismessina",
+    "pernielsentikaer"
   ],
   "pastContributors": [
     "danulqua"
@@ -52,6 +54,26 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "warpApp",
+      "default": "stable",
+      "required": false,
+      "title": "Warp Release",
+      "description": "Select which Warp release to use when opening a directory or launch configuration.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Warp",
+          "value": "stable"
+        },
+        {
+          "title": "Warp Preview",
+          "value": "preview"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.4.8",
@@ -75,5 +97,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

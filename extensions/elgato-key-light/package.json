@@ -5,24 +5,21 @@
   "description": "Control your Elgato Key Lights with ease",
   "icon": "icon.png",
   "author": "thomas",
-    "contributors": [
+  "contributors": [
     "omarshahine"
   ],
   "license": "MIT",
-  "preferences": [
-        {
-          "name": "keyLights_count",
-          "title": "Number of Key Lights",
-          "description": "Enter the number of Key Lights on your network that you wish to controll",
-          "type": "textfield",
-          "required": true,
-          "default": "1"
-        }
-      ],
   "commands": [
     {
+      "name": "discoverLights",
+      "title": "Discover Lights",
+      "subtitle": "Elgato Key Light",
+      "description": "Force a fresh discovery of Key Lights on your network",
+      "mode": "no-view"
+    },
+    {
       "name": "toggle",
-      "title": "Toggle On/Off",
+      "title": "Toggle Lights",
       "subtitle": "Elgato Key Light",
       "description": "Toggles all connected Key Lights on or off",
       "mode": "no-view"
@@ -43,36 +40,77 @@
     },
     {
       "name": "increaseTemperature",
-      "title": "Increase Color Temperature",
+      "title": "Warmer Color Temperature",
       "subtitle": "Elgato Key Light",
-      "description": "Increase color temperature of Key Light by 5%",
+      "description": "Make light color warmer (lower Kelvin)",
       "mode": "no-view"
     },
     {
       "name": "decreaseTemperature",
-      "title": "Decrease Color Temperature",
+      "title": "Cooler Color Temperature",
       "subtitle": "Elgato Key Light",
-      "description": "Decrease color temperature of Key Light by 5%",
+      "description": "Make light color cooler (higher Kelvin)",
       "mode": "no-view"
+    },
+    {
+      "name": "apply-preset",
+      "title": "Apply Preset",
+      "subtitle": "Elgato Key Light",
+      "description": "Create, edit, and activate presets for your Key Lights",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "apply-preset",
+      "title": "Apply Preset",
+      "description": "Apply a preset to your Elgato Key Lights"
+    },
+    {
+      "name": "create-preset",
+      "title": "Create Preset",
+      "description": "Create a new preset for your Elgato Key Lights"
+    },
+    {
+      "name": "get-presets",
+      "title": "Get Presets",
+      "description": "Get all presets for your Elgato Key Lights"
+    },
+    {
+      "name": "get-lights",
+      "title": "Get Lights",
+      "description": "Get information about your connected Elgato Key Lights"
+    },
+    {
+      "name": "turn-on",
+      "title": "Turn On",
+      "description": "Turn on your Elgato Key Lights"
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn Off",
+      "description": "Turn off your Elgato Key Lights"
+    },
+    {
+      "name": "update-settings",
+      "title": "Update Settings",
+      "description": "Update the settings of your Elgato Key Lights"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "axios": "^1.2.0",
-    "bonjour": "^3.5.0"
+    "@raycast/api": "1.95.0",
+    "@raycast/utils": "1.19.1",
+    "axios": "^1.6.2",
+    "bonjour-service": "^1.1.1"
   },
   "devDependencies": {
-    "@types/bonjour": "^3.5.9",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   }
 }

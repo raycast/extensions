@@ -85,6 +85,24 @@ export type BlacklistMonitor = {
   last_check: number;
 };
 
+export type ContactList = {
+  id: string;
+  name: string;
+  default: boolean;
+  email: string[];
+};
+
+export type StatusPage = {
+  id: string;
+  name: string;
+  type: "blacklist" | "uptime";
+  monitors: string[];
+  password_protected: boolean;
+  twitter_feed: boolean;
+  twitter_user: string;
+  twitter_pos: string;
+};
+
 export type SuccessResponse<T> = {
   meta: {
     total: number;

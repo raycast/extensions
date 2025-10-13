@@ -5,7 +5,6 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-18 18:45:28
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { showToast, Toast } from "@raycast/api";
@@ -23,23 +22,32 @@ import { cleanup, showErrorToast } from "../utilities/utils";
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function runOperation(params: {
-  operation: () => Promise<void>;
+  operation: () => Promise<string[]>;
   selectedImages: string[];
   inProgressMessage: string;
   successMessage: string;
   failureMessage: string;
 }) {
   if (params.selectedImages.length === 0 || (params.selectedImages.length === 1 && params.selectedImages[0] === "")) {
-    await showToast({ title: "No images selected", style: Toast.Style.Failure });
+    await showToast({
+      title: "No images selected",
+      message:
+        "No images found in your selection. Make sure the image(s) still exist on the disk. If using a third-party file manager, make sure the app's index is up to date.",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
-  const toast = await showToast({ title: params.inProgressMessage, style: Toast.Style.Animated });
+  const toast = await showToast({
+    title: params.inProgressMessage,
+    style: Toast.Style.Animated,
+  });
   const pluralized = `image${params.selectedImages.length === 1 ? "" : "s"}`;
   try {
-    await params.operation();
+    const resultPaths = await params.operation();
     toast.title = `${params.successMessage} ${params.selectedImages.length.toString()} ${pluralized}`;
     toast.style = Toast.Style.Success;
+    return resultPaths;
   } catch (error) {
     await showErrorToast(
       `${params.failureMessage} ${params.selectedImages.length.toString()} ${pluralized}`,

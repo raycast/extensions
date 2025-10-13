@@ -48,3 +48,35 @@ export type Group = {
   color: string;
   position: string;
 };
+
+export type BoardItemsReeponse = {
+  boards: Array<{
+    items_page: {
+      items: Item[];
+    };
+  }>;
+};
+export enum ItemState {
+  Active = "active",
+  All = "all",
+  Archived = "archived",
+  Deleted = "deleted",
+}
+export type Item = {
+  id: string;
+  name: string;
+  updated_at: string;
+  url: string;
+  state: ItemState;
+  group: {
+    title: string;
+  };
+  column_values: Array<{
+    column: {
+      title: string;
+    };
+    value: string;
+    text: string;
+    type: string;
+  }>;
+};

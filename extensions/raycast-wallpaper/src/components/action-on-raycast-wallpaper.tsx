@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Clipboard, Alert, confirmAlert, Icon, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Icon, open, showToast, Toast } from "@raycast/api";
 import { cache, deleteCache, downloadPicture } from "../utils/common-utils";
 import PreviewRaycastWallpaper from "../preview-raycast-wallpaper";
 import { CacheKey, RAYCAST_WALLPAPER } from "../utils/constants";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import React from "react";
-import { RaycastWallpaperWithInfo } from "../types/types";
+import { AppearancedWallpaper, RaycastWallpaperWithInfo } from "../types/types";
 import { setWallpaper } from "../utils/applescript-utils";
-import ActionStyle = Alert.ActionStyle;
 import { picturesDirectory } from "../types/preferences";
+import ActionStyle = Alert.ActionStyle;
 
 export function ActionOnRaycastWallpaper(props: {
   index: number;
@@ -16,21 +16,24 @@ export function ActionOnRaycastWallpaper(props: {
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const { index, raycastWallpapers, setRefresh, setSelectedItem } = props;
-  const raycastWallpaper = raycastWallpapers[index];
+  const wallpaper = raycastWallpapers[index];
+
+  const actionAppearanceIcon = wallpaper.appearance == "light" ? Icon.Moon : Icon.Moon;
+  const actionAppearanceTitle = wallpaper.appearance == "light" ? "Dark" : "Light";
   return (
     <ActionPanel>
       <Action
         icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
-          setWallpaper(raycastWallpaper).then(() => "");
+          setWallpaper(wallpaper).then(() => "");
         }}
       />
       <Action
         icon={Icon.Download}
         title={"Download Wallpaper"}
         onAction={async () => {
-          await downloadPicture(raycastWallpaper);
+          await downloadPicture(wallpaper);
         }}
       />
       <Action
@@ -48,7 +51,7 @@ export function ActionOnRaycastWallpaper(props: {
           title={"Copy Wallpaper URL"}
           shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
           onAction={async () => {
-            await Clipboard.copy(raycastWallpaper.url);
+            await Clipboard.copy(wallpaper.url);
             await showToast(Toast.Style.Success, "Copied URL to clipboard!");
           }}
         />
@@ -77,7 +80,29 @@ export function ActionOnRaycastWallpaper(props: {
             setWallpaper(randomImage).then(() => "");
           }}
         />
-        {!raycastWallpaper.exclude && (
+
+        <Action
+          icon={actionAppearanceIcon}
+          title={"Set to " + actionAppearanceTitle}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          onAction={() => {
+            const wallpaperAppearance: AppearancedWallpaper = {
+              title: wallpaper.title,
+              appearance: wallpaper.appearance === "light" ? "dark" : "light",
+            };
+            const _appearanceCache = cache.get(CacheKey.WALLPAPER_APPEARANCE);
+            const wallpapersList =
+              typeof _appearanceCache === "undefined" ? [] : (JSON.parse(_appearanceCache) as AppearancedWallpaper[]);
+            const _appearanceIndex = wallpapersList.findIndex((value) => value.title === wallpaper.title);
+            if (_appearanceIndex !== -1) {
+              wallpapersList.splice(_appearanceIndex, 1);
+            }
+            wallpapersList.push(wallpaperAppearance);
+            cache.set(CacheKey.WALLPAPER_APPEARANCE, JSON.stringify(wallpapersList));
+            setRefresh(Date.now());
+          }}
+        />
+        {!wallpaper.exclude && (
           <Action
             icon={Icon.XMarkTopRightSquare}
             title={"Exclude from Auto Switch"}
@@ -85,13 +110,13 @@ export function ActionOnRaycastWallpaper(props: {
             onAction={() => {
               const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
               const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
-              _excludeList.push(raycastWallpaper.url);
+              _excludeList.push(wallpaper.url);
               cache.set(CacheKey.EXCLUDE_LIST_CACHE, JSON.stringify(_excludeList));
               setRefresh(Date.now());
             }}
           />
         )}
-        {raycastWallpaper.exclude && (
+        {wallpaper.exclude && (
           <Action
             icon={Icon.PlusTopRightSquare}
             title={"Include in Auto Switch"}
@@ -99,7 +124,7 @@ export function ActionOnRaycastWallpaper(props: {
             onAction={() => {
               const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
               const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
-              _excludeList.splice(_excludeList.indexOf(raycastWallpaper.url), 1);
+              _excludeList.splice(_excludeList.indexOf(wallpaper.url), 1);
               cache.set(CacheKey.EXCLUDE_LIST_CACHE, JSON.stringify(_excludeList));
               setRefresh(Date.now());
             }}

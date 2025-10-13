@@ -1,18 +1,5 @@
-import {
-  Form,
-  Cache,
-  ActionPanel,
-  Action,
-  popToRoot,
-  closeMainWindow,
-  launchCommand,
-  LaunchType,
-  Icon,
-  LaunchProps,
-  Keyboard,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Form, Cache, ActionPanel, Action, Icon, LaunchProps, Keyboard } from "@raycast/api";
+import { removeTheThing, setTheThing } from "./utils";
 
 const cache = new Cache();
 
@@ -27,24 +14,6 @@ const placeholders = [
 ];
 
 const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
-
-function closeAndUpdate() {
-  launchCommand({ name: "show-one-thing", type: LaunchType.Background });
-  popToRoot();
-  closeMainWindow();
-}
-
-export async function removeTheThing() {
-  cache.remove("onething");
-  closeAndUpdate();
-  await showToast({ title: "Removed One Thing", style: Toast.Style.Success });
-}
-
-export async function setTheThing(text: string) {
-  cache.set("onething", text);
-  closeAndUpdate();
-  await showToast({ title: "Set One Thing", style: Toast.Style.Success });
-}
 
 export default function Command(
   props: LaunchProps<{ arguments?: Arguments.SetOneThing; launchContext: { oneThing: string } }>

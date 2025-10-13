@@ -99,12 +99,4 @@ export default [
     icon: { source: "Code" },
     keywords: ["typescript", "js", "javascript", "ts", "types"],
   },
-  {
-    slug: "deprecated",
-    name: "WPKirk",
-    title: "Complete Demo",
-    subtitle: "The complete demo for WP Bones",
-    icon: "box.svg",
-    keywords: ["demo", "routes"],
-  },
 ];

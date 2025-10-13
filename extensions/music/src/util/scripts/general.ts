@@ -15,7 +15,7 @@ export const activate = tell("Music", "activate");
  */
 export const setShuffle: RTE.ReaderTaskEither<boolean, ScriptError, string> = pipe(
   R.ask<boolean>(),
-  R.map((shuffle) => tell("Music", `set shuffle enabled to ${shuffle.toString()}`))
+  R.map((shuffle) => tell("Music", `set shuffle enabled to ${shuffle.toString()}`)),
 );
 
 export const getLibraryName = pipe(
@@ -24,5 +24,5 @@ export const getLibraryName = pipe(
     console.error(err);
     // fallback to "Library"
     return TE.right("Library");
-  })
+  }),
 );

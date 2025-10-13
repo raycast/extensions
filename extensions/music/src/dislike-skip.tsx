@@ -7,5 +7,5 @@ import { handleTaskEitherError } from "./util/utils";
 export default pipe(
   music.currentTrack.dislike,
   TE.chain(() => pipe(music.player.next)),
-  handleTaskEitherError("Failed to dislike/skip the track", "Disliked & skipped")
+  handleTaskEitherError("Failed to dislike/skip the track", "Disliked & skipped"),
 );

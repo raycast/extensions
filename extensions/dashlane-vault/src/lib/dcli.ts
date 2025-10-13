@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execa, execaCommand } from "execa";
+import { ExecaError, execa, execaCommand } from "execa";
+import PQueue from "p-queue";
 import { safeParse } from "valibot";
 
 import {
@@ -14,9 +15,10 @@ import {
   getErrorAction,
   getErrorString,
 } from "@/helper/error";
-import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
+import { Device, VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
 
 const preferences = getPreferenceValues<Preferences>();
+const cliQueue = new PQueue({ concurrency: 1 });
 
 const CLI_PATH = preferences.cliPath;
 const CLI_VERSION = getCLIVersion();
@@ -30,34 +32,51 @@ async function dcli(...args: string[]) {
     throw new CLIVersionNotSupportedError("Dashlane CLI version 6.2415.0 not supported");
   }
 
-  const { stdout } = await execa(CLI_PATH, args, {
-    timeout: 15_000,
-    ...(preferences.masterPassword && {
-      env: {
-        DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
-      },
-    }),
-  }).catch((error) => {
-    if (error.timedOut) {
-      if (error.stderr.includes("Please enter your master password")) {
-        throw new MasterPasswordMissingError(error.stack ?? error.message);
+  return cliQueue.add<string>(
+    async () => {
+      try {
+        const { stdout } = await execa(CLI_PATH, args, {
+          timeout: 15_000,
+          ...(preferences.masterPassword && {
+            env: {
+              DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
+            },
+          }),
+        });
+
+        if (preferences.biometrics) {
+          execaCommand("open -a Raycast.app");
+        }
+
+        return stdout;
+      } catch (error) {
+        if (error instanceof ExecaError) {
+          if (error.timedOut) {
+            const stderr = error.stderr as unknown as string;
+            if (stderr.includes("Please enter your master password")) {
+              throw new MasterPasswordMissingError(error.stack ?? error.message);
+            }
+
+            if (stderr.includes("Please enter your email address")) {
+              throw new CLINotLoggedInError(error.stack ?? error.message);
+            }
+
+            throw new TimeoutError(error.stack ?? error.message);
+          }
+
+          if (error.code === "ENOENT") {
+            throw new CLINotFoundError(
+              `CLI not found at path: ${CLI_PATH}. Please verify the path in preferences.`,
+              error.stack,
+            );
+          }
+        }
+
+        throw error;
       }
-
-      if (error.stderr.includes("Please enter your email address")) {
-        throw new CLINotLoggedInError(error.stack ?? error.message);
-      }
-
-      throw new TimeoutError(error.stack ?? error.message);
-    }
-
-    throw error;
-  });
-
-  if (preferences.biometrics) {
-    execaCommand("open -a Raycast.app");
-  }
-
-  return stdout;
+    },
+    { throwOnTimeout: true },
+  );
 }
 
 export async function syncVault() {
@@ -97,6 +116,32 @@ export async function getPassword(id: string) {
   try {
     const stdout = await dcli("read", `dl://${extractId(id)}/password`);
     return stdout.trim();
+  } catch (error) {
+    captureException(error);
+    throw error;
+  }
+}
+
+export async function getDevices() {
+  try {
+    const result = await dcli("devices", "list", "--json");
+    const devices = JSON.parse(result) as Device[];
+    devices.sort((a, b) => {
+      if (b.lastActivityDateUnix > a.lastActivityDateUnix) return 1;
+      if (b.lastActivityDateUnix < a.lastActivityDateUnix) return -1;
+      return 0;
+    });
+
+    return devices;
+  } catch (error) {
+    captureException(error);
+    throw error;
+  }
+}
+
+export async function removeDevice(id: string) {
+  try {
+    await dcli("devices", "remove", id);
   } catch (error) {
     captureException(error);
     throw error;

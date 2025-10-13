@@ -30,8 +30,23 @@ export type PickColorCommandLaunchProps = LaunchProps<{
   launchContext: {
     source?: "menu-bar" | "organize-colors";
     copyToClipboard?: boolean;
+    colorFormat?: string;
     callbackLaunchOptions?: LaunchOptions;
   };
 }>;
 
 export type SortType = "platform" | "proximity";
+
+export type ColorFormatType =
+  | "hex"
+  | "hex-lower-case"
+  | "hex-no-prefix"
+  | "rgb"
+  | "rgb-percentage"
+  | "rgba"
+  | "rgba-percentage"
+  | "hsla"
+  | "hsva"
+  | "oklch"
+  | "lch"
+  | "p3";

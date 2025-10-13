@@ -11,7 +11,7 @@ async function ClickUpClient<T>(
   method?: string,
   data?: Record<string, string | number>,
   headers?: AxiosRequestHeaders,
-  version?: 2 | 3
+  version?: 2 | 3,
 ): Promise<AxiosResponse<T>> {
   const v = version === 3 ? `v3` : `v2`;
   switch (method) {

@@ -2,7 +2,7 @@
 
 A great companion for Raycast users using the Messages app. 
 
-This extensions allows you to:
+This extension allows you to:
 
 - Send a message to one of your contacts
 - Browse through your messages
@@ -10,6 +10,19 @@ This extensions allows you to:
 - Open your recents chats in the Messages app
 - Check on your unread messages in the menu bar
 - And much more!
+
+## AI Extension
+
+The AI will use your latest messages to match your writing style. But you can improve its accuracy by adding custom instructions in your preferences. Here are a few ideas:
+
+- Names/Nicknames: How you refer to people.
+- Emoji Style: What emojis you like and how you use them.
+- Expressions: Common phrases you use.
+- Tone: How formal or casual you are.
+- Abbreviations: Any shorthand you prefer (e.g., "rn", "tbh").
+- Punctuation & Capitalization: Your style for both.
+- Language Varieties: US/UK English or slang.
+- Message Length: More detail or more concise.
 
 ## Known limitations
 
@@ -52,3 +65,7 @@ If you try to open the chat from Raycast, it'll actually open the following URL:
 ### Can you add support for deleting messages/pinning chats/other features?
 
 Same answer as above, Apple doesn't provide any API for these actions. It'd be awesome to have them, but we're quite limited with only a `.db` file to work with.
+
+### Can't send messages
+
+If you try to send a message from Raycast, and receive this error: "execution error: Not authorized to send Apple events to System Events" then you need to enable automation permissions for Raycast in your system settings. Particularily, you need to enable "System Events" in the "Privacy & Security" section for Raycast.

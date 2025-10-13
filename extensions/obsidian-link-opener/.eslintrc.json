@@ -1,0 +1,17 @@
+{
+  "root": true,
+  "extends": [
+    "@raycast"
+  ],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/naming-convention": "off",
+    "no-unused-vars": "off"
+  }
+}

@@ -26,7 +26,7 @@ export const ChatView = ({
     <ActionPanel>
       {question.length > 0 ? (
         <PrimaryAction title="Get Answer" onAction={() => use.chats.ask(question, [], conversation.model)} />
-      ) : selectedChat.answer && use.chats.selectedChatId === selectedChat.id ? (
+      ) : selectedChat.answer ? (
         <>
           <CopyActionSection answer={selectedChat.answer} question={selectedChat.question} />
           <SaveActionSection

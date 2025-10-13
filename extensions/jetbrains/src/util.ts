@@ -340,7 +340,7 @@ export const addFav = async (path: string, appId: string): Promise<void> => {
     return undefined;
   }
   const contents = (await getReadJsonFile(settingsFile.path)) as JetBrainsToolboxSettings;
-  const project = contents.projects[path] ?? {};
+  const project = contents.projects?.[path] ?? {};
   project.favorite = true;
   project.launchMethod = appId;
   await writeSettingsFile(settingsFile.path, {
@@ -358,7 +358,7 @@ export const hideProject = async (path: string): Promise<void> => {
     return undefined;
   }
   const contents = (await getReadJsonFile(settingsFile.path)) as JetBrainsToolboxSettings;
-  const project = contents.projects[path] ?? {};
+  const project = contents.projects?.[path] ?? {};
   project.hidden = new Date().toISOString();
   await writeSettingsFile(settingsFile.path, {
     ...contents,
@@ -376,10 +376,11 @@ export const rmFav = async (path: string): Promise<void> => {
   }
   const contents = (await getReadJsonFile(settingsFile.path)) as JetBrainsToolboxSettings;
   const projects = contents.projects;
-  if (contents.projects[path] !== undefined) {
-    projects[path]["favorite"] && delete projects[path]["favorite"];
-    projects[path]["launchMethod"] && delete projects[path]["launchMethod"];
-    if (Object.keys(projects[path]).length === 0) {
+  const project = projects?.[path];
+  if (projects && project !== undefined) {
+    project["favorite"] && delete project["favorite"];
+    project["launchMethod"] && delete project["launchMethod"];
+    if (Object.keys(project).length === 0) {
       delete projects[path];
     }
   }

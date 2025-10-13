@@ -47,6 +47,7 @@ export default function Command() {
       isShowingDetail={books.length !== 0}
       searchBarAccessory={
         <List.Dropdown tooltip="Type" onChange={(type) => setSearchType(Number(type))} storeValue>
+          <List.Dropdown.Item title="All" value="-1" />
           <List.Dropdown.Item title="Non-fiction" value="1" />
           <List.Dropdown.Item title="Fiction" value="0" />
         </List.Dropdown>

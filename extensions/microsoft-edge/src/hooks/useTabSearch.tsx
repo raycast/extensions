@@ -28,7 +28,7 @@ export function useTabSearch(query?: string): SearchResult<Tab> {
     (profileId: string) => {
       setProfile(profileId);
     },
-    [profile]
+    [profile],
   );
 
   useEffect(() => {

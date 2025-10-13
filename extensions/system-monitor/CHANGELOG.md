@@ -1,5 +1,25 @@
 # System Monitor Changelog
 
+## [New Additions] - 2025-08-05
+
+- Add a new preference option for the `Menubar System Monitor` command to customize the menu bar icon.
+
+## [Improvements] - 2025-06-04
+
+- Improve the script to ensure it waits for the Activity Monitor to open before clicking the radio button
+
+## [Improvements] - 2025-03-17
+
+- Improve the `onAction()` so it can open the Activity Monitor directly without selecting a tab
+
+## [New Additions] - 2025-03-11
+
+- Add a new menubar feature to display system monitor information in the menubar
+
+## [Update] - 2025-03-03
+
+- Update the action to open the corresponding tab in the System Monitor
+
 ## [Fix] - 2025-01-02
 
 - Fix issue when showing battery level on Intel-based Macs

@@ -1,11 +1,10 @@
-import { Application, getApplications, MenuBarExtra, open, Icon } from "@raycast/api";
+import { type Application, Icon, MenuBarExtra, getApplications, open } from "@raycast/api";
+import { useCachedPromise, withAccessToken } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { resolveAllFiles } from "./api";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
-import { useEffect, useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
-import { loadStarredFiles } from "./starFiles";
 import { figma } from "./oauth";
-import { withAccessToken } from "@raycast/utils";
+import { loadStarredFiles } from "./starFiles";
 
 function Command() {
   const { data, isLoading, error } = useCachedPromise(

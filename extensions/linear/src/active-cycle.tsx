@@ -2,17 +2,14 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 
 import { getActiveCycleIssues } from "./api/getIssues";
-
-import useIssues from "./hooks/useIssues";
-import useTeams from "./hooks/useTeams";
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-
-import { getTeamIcon } from "./helpers/teams";
-
-import StateIssueList from "./components/StateIssueList";
 import CreateIssueForm from "./components/CreateIssueForm";
+import StateIssueList from "./components/StateIssueList";
 import View from "./components/View";
+import { getTeamIcon } from "./helpers/teams";
+import useIssues from "./hooks/useIssues";
+import useMe from "./hooks/useMe";
+import usePriorities from "./hooks/usePriorities";
+import useTeams from "./hooks/useTeams";
 
 function ActiveCycle() {
   const [teamQuery, setTeamQuery] = useState<string>("");

@@ -3,7 +3,12 @@ import { NodeHtmlMarkdown } from 'node-html-markdown';
 import { Problem, ProblemStats } from './types';
 
 const html2markdown = new NodeHtmlMarkdown(
-  {},
+  {
+    textReplace: [
+      [/\\\[/g, '['],
+      [/\\\]/g, ']'],
+    ],
+  },
   {
     pre: {
       spaceIfRepeatingChar: true,

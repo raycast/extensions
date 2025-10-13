@@ -26,10 +26,10 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
       onError(await resp.json());
       return;
     }
-    const parser = createParser((event) => {
-      if (event.type === "event") {
+    const parser = createParser({
+      onEvent: (event) => {
         onMessage(event.data);
-      }
+      },
     });
     if (resp.body) {
       for await (const chunk of resp.body) {

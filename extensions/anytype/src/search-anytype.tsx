@@ -1,14 +1,20 @@
-import { Icon, List, showToast, Toast, Image } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
-import { useSpaces } from "./hooks/useSpaces";
-import { useSearch } from "./hooks/useSearch";
-import { getAllTypesFromSpaces } from "./helpers/types";
-import { SpaceObject } from "./helpers/schemas";
-import ObjectListItem from "./components/ObjectListItem";
-import EmptyView from "./components/EmptyView";
-import EnsureAuthenticated from "./components/EnsureAuthenticated";
-import { pluralize } from "./helpers/strings";
+import { Icon, Image, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useEffect, useMemo, useState } from "react";
+import { EmptyViewObject, EnsureAuthenticated, ObjectListItem, ViewType } from "./components";
+import { useGlobalSearch, usePinnedObjects, useSpaces } from "./hooks";
+import { SpaceObject } from "./models";
+import {
+  bundledTypeKeys,
+  defaultTintColor,
+  fetchTypeKeysForLists,
+  fetchTypeKeysForPages,
+  fetchTypesKeysForTasks,
+  getSectionTitle,
+  localStorageKeys,
+  pluralize,
+  processObject,
+} from "./utils";
 
 const searchBarPlaceholder = "Globally search objects across spaces...";
 
@@ -22,47 +28,25 @@ export default function Command() {
 
 function Search() {
   const [searchText, setSearchText] = useState("");
-  const [objectTypes, setObjectTypes] = useState<string[]>([]);
-  const [filteredItems, setFilteredItems] = useState<SpaceObject[]>([]);
-  const [spaceIcons, setSpaceIcons] = useState<{ [key: string]: string }>({});
-  const [filterType, setFilterType] = useState("all");
-  const [uniqueKeysForPages, setUniqueKeysForPages] = useState<string[]>([]);
-  const [uniqueKeysForTasks, setUniqueKeysForTasks] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
+  const [spaceIcons, setSpaceIcons] = useState<Map<string, Image.ImageLike>>(new Map());
+  const [currentView, setCurrentView] = useState<ViewType>(ViewType.objects);
+  const [typeKeysForPages, setTypeKeysForPages] = useState<string[]>([]);
+  const [typeKeysForTasks, setTypeKeysForTasks] = useState<string[]>([]);
+  const [typeKeysForLists, setTypeKeysForLists] = useState<string[]>([]);
 
-  const { objects, objectsError, isLoadingObjects, mutateObjects, objectsPagination } = useSearch(
+  const { objects, objectsError, isLoadingObjects, mutateObjects, objectsPagination } = useGlobalSearch(
     searchText,
-    objectTypes,
+    types,
   );
   const { spaces, spacesError, isLoadingSpaces } = useSpaces();
-  const viewType = filterType === "all" ? "object" : filterType.replace(/s$/, "");
-  const excludedKeysForPages = new Set([
-    // not shown anywhere
-    "ot-audio",
-    "ot-chat",
-    "ot-file",
-    "ot-image",
-    "ot-objectType",
-    "ot-tag",
-    "ot-template",
-    "ot-video",
-
-    // shown in other views
-    "ot-set",
-    "ot-collection",
-    "ot-bookmark",
-    "ot-participant",
-    ...uniqueKeysForTasks,
-  ]);
+  const { pinnedObjects, pinnedObjectsError, isLoadingPinnedObjects, mutatePinnedObjects } = usePinnedObjects(
+    localStorageKeys.suffixForGlobalSearch,
+  );
 
   useEffect(() => {
     if (spaces) {
-      const spaceIconMap = spaces.reduce(
-        (acc, space) => {
-          acc[space.id] = space.icon;
-          return acc;
-        },
-        {} as { [key: string]: string },
-      );
+      const spaceIconMap = new Map(spaces.map((space) => [space.id, space.icon]));
       setSpaceIcons(spaceIconMap);
     }
   }, [spaces]);
@@ -71,121 +55,202 @@ function Search() {
   useEffect(() => {
     const fetchTypesForPages = async () => {
       if (spaces) {
-        const allTypes = await getAllTypesFromSpaces(spaces);
-        const uniqueKeysSet = new Set(
-          allTypes.map((type) => type.unique_key).filter((key) => !excludedKeysForPages.has(key)),
-        );
-        setUniqueKeysForPages(Array.from(uniqueKeysSet));
+        const pagesTypes = await fetchTypeKeysForPages(spaces, typeKeysForTasks, typeKeysForLists);
+        setTypeKeysForPages(pagesTypes);
       }
     };
-
     fetchTypesForPages();
-  }, [spaces]);
+  }, [spaces, typeKeysForTasks, typeKeysForLists]);
 
   // Fetch unique keys for tasks view
   useEffect(() => {
     const fetchTypesForTasks = async () => {
       if (spaces) {
-        const tasksTypes = await getAllTypesFromSpaces(spaces);
-        const uniqueKeysSet = new Set(
-          tasksTypes.filter((type) => type.recommended_layout === "todo").map((type) => type.unique_key),
-        );
-        setUniqueKeysForTasks(Array.from(uniqueKeysSet));
+        const tasksTypes = await fetchTypesKeysForTasks(spaces);
+        setTypeKeysForTasks(tasksTypes);
       }
     };
     fetchTypesForTasks();
   }, [spaces]);
 
+  // Fetch unique keys for lists view
   useEffect(() => {
-    if (objects) {
-      const filteredObjects = objects.filter(
-        (object) =>
-          object.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          object.object_type.toLowerCase().includes(searchText.toLowerCase()),
-      );
-      setFilteredItems(filteredObjects);
-    }
-  }, [objects, searchText]);
-
-  useEffect(() => {
-    const objectTypeMap: { [key: string]: string[] } = {
-      all: [],
-      pages: uniqueKeysForPages,
-      tasks: uniqueKeysForTasks,
-      lists: ["ot-set", "ot-collection"],
-      bookmarks: ["ot-bookmark"],
-      members: ["ot-participant"],
+    const fetchTypesForLists = async () => {
+      if (spaces) {
+        const listTypes = await fetchTypeKeysForLists(spaces);
+        setTypeKeysForLists(listTypes);
+      }
     };
+    fetchTypesForLists();
+  }, [spaces]);
 
-    setObjectTypes(objectTypeMap[filterType] || []);
-  }, [filterType]);
+  // Set object types based on the selected filter
+  useEffect(() => {
+    const viewToType: Partial<Record<ViewType, string[]>> = {
+      [ViewType.objects]: [],
+      [ViewType.pages]: typeKeysForPages,
+      [ViewType.tasks]: typeKeysForTasks,
+      [ViewType.lists]: typeKeysForLists,
+      [ViewType.bookmarks]: [bundledTypeKeys.bookmark],
+    };
+    setTypes(viewToType[currentView] ?? []);
+  }, [currentView, typeKeysForPages, typeKeysForTasks, typeKeysForLists]);
 
   useEffect(() => {
-    if (objectsError || spacesError) {
-      showToast(Toast.Style.Failure, "Failed to fetch latest data", (objectsError || spacesError)?.message);
+    if (objectsError || spacesError || pinnedObjectsError) {
+      showFailureToast(objectsError || spacesError || pinnedObjectsError, {
+        title: "Failed to fetch latest data",
+      });
     }
-  }, [objectsError, spacesError]);
+  }, [objectsError, spacesError, pinnedObjectsError]);
+
+  const spaceById = useMemo(() => {
+    if (!spaces) return new Map<string, (typeof spaces)[number]>();
+    return new Map(spaces.map((space) => [space.id, space]));
+  }, [spaces]);
+
+  const processObjectWithSpaceIcon = (object: SpaceObject, isPinned: boolean) => {
+    const spaceIcon = spaceIcons.get(object.space_id) || Icon.BullsEye;
+    const processedObject = processObject(object, isPinned, mutateObjects, mutatePinnedObjects);
+
+    return {
+      ...processedObject,
+      accessories: [
+        ...processedObject.accessories,
+        {
+          icon: spaceIcon,
+          tooltip: `Space: ${spaces?.find((space) => space.id === object.space_id)?.name}`,
+        },
+      ],
+    };
+  };
+
+  // Helper to filter objects by the search term
+  const filterObjectsBySearchTerm = (objects: SpaceObject[], searchTerm: string) => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return objects.filter(
+      (object) =>
+        object.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+        object.snippet.toLowerCase().includes(lowerCaseSearchTerm),
+    );
+  };
+
+  // Process pinned objects and filter by search term
+  const processedPinnedObjects = pinnedObjects?.length
+    ? pinnedObjects
+        .filter((object) => types.length === 0 || types.includes(object.type.key))
+        .filter((object) => filterObjectsBySearchTerm([object], searchText).length > 0)
+        .map((object) => processObjectWithSpaceIcon(object, true))
+    : [];
+
+  // Process non-pinned objects
+  const processedRegularObjects = objects
+    .filter(
+      (object) => !pinnedObjects?.some((pinned) => pinned.id === object.id && pinned.space_id === object.space_id),
+    )
+    .map((object) => processObjectWithSpaceIcon(object, false));
 
   return (
     <List
-      isLoading={isLoadingSpaces || isLoadingObjects}
+      isLoading={isLoadingSpaces || isLoadingPinnedObjects || isLoadingObjects}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={searchBarPlaceholder}
       pagination={objectsPagination}
       throttle={true}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by kind or space" onChange={(newValue) => setFilterType(newValue)}>
-          <List.Dropdown.Item title="All" value="all" icon={Icon.MagnifyingGlass} />
-          <List.Dropdown.Item title="Pages" value="pages" icon={Icon.Document} />
-          <List.Dropdown.Item title="Tasks" value="tasks" icon={Icon.CheckCircle} />
-          <List.Dropdown.Item title="Lists" value="lists" icon={Icon.List} />
-          <List.Dropdown.Item title="Bookmarks" value="bookmarks" icon={Icon.Bookmark} />
-          <List.Dropdown.Item title="Members" value="members" icon={Icon.PersonCircle} />
+        <List.Dropdown
+          tooltip="Filter by kind"
+          onChange={(value) => setCurrentView(value as ViewType)}
+          value={currentView}
+        >
+          <List.Dropdown.Item
+            title="All"
+            value={ViewType.objects}
+            icon={{ source: "icons/type/search.svg", tintColor: defaultTintColor }}
+          />
+          <List.Dropdown.Section>
+            <List.Dropdown.Item
+              title="Pages"
+              value={ViewType.pages}
+              icon={{ source: "icons/type/document.svg", tintColor: defaultTintColor }}
+            />
+            <List.Dropdown.Item
+              title="Tasks"
+              value={ViewType.tasks}
+              icon={{ source: "icons/type/checkbox.svg", tintColor: defaultTintColor }}
+            />
+            <List.Dropdown.Item
+              title="Lists"
+              value={ViewType.lists}
+              icon={{ source: "icons/type/layers.svg", tintColor: defaultTintColor }}
+            />
+            <List.Dropdown.Item
+              title="Bookmarks"
+              value={ViewType.bookmarks}
+              icon={{ source: "icons/type/bookmark.svg", tintColor: defaultTintColor }}
+            />
+          </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
-      {filteredItems.length > 0 ? (
+      {processedPinnedObjects.length > 0 && (
         <List.Section
-          title={searchText ? "Search Results" : "Modified Recently"}
-          subtitle={`${pluralize(filteredItems.length, viewType, { withNumber: true })}`}
+          title="Pinned"
+          subtitle={pluralize(processedPinnedObjects.length, currentView, { withNumber: true })}
         >
-          {filteredItems.map((object) => (
+          {processedPinnedObjects.map((object, index) => (
             <ObjectListItem
-              key={object.id}
-              spaceId={object.space_id}
+              key={`${object.id}-${index}`}
+              space={spaceById.get(object.spaceId)!}
               objectId={object.id}
-              icon={{
-                source: object.icon,
-                mask:
-                  (object.layout === "participant" || object.layout === "profile") && object.icon != Icon.Document
-                    ? Image.Mask.Circle
-                    : Image.Mask.RoundedRectangle,
-              }}
-              title={object.name}
-              subtitle={{
-                value: object.object_type,
-                tooltip: `Object Type: ${object.object_type}`,
-              }}
-              accessories={[
-                {
-                  date: new Date(object.details[0]?.details.last_modified_date as string),
-                  tooltip: `Last Modified: ${format(new Date(object.details[0]?.details.last_modified_date as string), "EEEE d MMMM yyyy 'at' HH:mm")}`,
-                },
-                {
-                  icon: {
-                    source: spaceIcons[object.space_id],
-                    mask: Image.Mask.RoundedRectangle,
-                  },
-                  tooltip: `Space: ${spaces?.find((space) => space.id === object.space_id)?.name}`,
-                },
-              ]}
-              mutate={mutateObjects}
-              viewType={viewType}
+              icon={object.icon}
+              title={object.title}
+              subtitle={object.subtitle}
+              accessories={object.accessories}
+              mutate={[mutateObjects, mutatePinnedObjects]}
+              object={object.object}
+              layout={object.layout}
+              viewType={currentView}
+              isGlobalSearch={true}
+              isNoPinView={false}
+              isPinned={object.isPinned}
+              searchText={searchText}
+            />
+          ))}
+        </List.Section>
+      )}
+      {processedRegularObjects.length > 0 ? (
+        <List.Section
+          title={getSectionTitle(searchText)}
+          subtitle={pluralize(processedRegularObjects.length, currentView, { withNumber: true })}
+        >
+          {processedRegularObjects.map((object, index) => (
+            <ObjectListItem
+              key={`${object.id}-${index}`}
+              space={spaceById.get(object.spaceId)!}
+              objectId={object.id}
+              icon={object.icon}
+              title={object.title}
+              subtitle={object.subtitle}
+              accessories={object.accessories}
+              mutate={[mutateObjects, mutatePinnedObjects]}
+              object={object.object}
+              layout={object.layout}
+              viewType={currentView}
+              isGlobalSearch={true}
+              isNoPinView={false}
+              isPinned={object.isPinned}
+              searchText={searchText}
             />
           ))}
         </List.Section>
       ) : (
-        <EmptyView title="No Objects Found" />
+        <EmptyViewObject
+          title="No objects found"
+          contextValues={{
+            name: searchText,
+          }}
+        />
       )}
     </List>
   );

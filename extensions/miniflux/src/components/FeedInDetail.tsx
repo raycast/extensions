@@ -15,11 +15,11 @@ const FeedInDetail = ({ entry }: { entry: MinifluxEntry }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        showToast(Toast.Style.Animated, "Fetching origial article");
+        showToast(Toast.Style.Animated, "Fetching original article...");
         const origin = await apiServer.getOriginArticle(entry);
         setState({ origin, isLoading: false });
         showToast(Toast.Style.Success, "Original article has been loaded");
-        await apiServer.updateEntries(entry.id, "read");
+        await apiServer.updateEntry(entry.id, "read");
       } catch (error) {
         handleError(error as MinifluxApiError);
         setState((oldState) => ({ ...oldState, isLoading: false }));

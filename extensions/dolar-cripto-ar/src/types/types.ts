@@ -5,6 +5,7 @@ export type Dollar = { name: string };
 export type ApiResponse<T> = T | typeof CANCELED;
 
 export interface DollarResponse {
+  ahorro?: { ask: number; bid: number };
   blue?: { ask: number; bid: number };
   mep?: { al30: { "24hs": { price: number } } };
   ccl?: { al30: { "24hs": { price: number } } };

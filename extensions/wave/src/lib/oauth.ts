@@ -18,6 +18,6 @@ export const provider = new OAuthService({
     "https://oauth.raycast.com/v1/token/_wJ5kXg1rLhO75Pr62ge83y20RUwQ7SITWBOL86St6DKEY-FK1p9yWdFqDhcFE_SgHgaYril7-RoS3JfDNs5lVX8xQ2iEX2LAXmDQV8armzVls1lWJYKHVSw123e6h9d-C3JUkDzhYfBiWY6HaMrn2E03dhqiuiBN5SOLAfCqZKTgq1ULnvfJ7Nexi82FN54jsrn2gyHDspcz6d89jWStRIPvFSeVt3C3EEPmdnWbm7mKZNmxhuoFrOZ1B8N-KOObts8Bg",
   refreshTokenUrl:
     "https://oauth.raycast.com/v1/refresh-token/TQsitwYgPmfM2Tm6ZC5NMaBiOIztfOmzALSrh4UM0o4SdlSqRCvGuJ3i56HXpOkkuiwOc0TtKfxtfBKDy96nmDKMfewczvXkpNnH1afTexQYGUDTQOpUYBE8Cxo9XMRdqdJKC2OIUitHjCXZHEAQDLaGNo5AXMeWKO4Kkg6MLooZuy2Zuh16neM6-DCwJ8Qs1ZLPHdF6ps8vZRd-viNgscOto3NwUXa4iOVWLXsn8xrVD3tOcCcDvC3R-JOIzn-5ipsSZQ",
-  scope: "business:read customer:read invoice:read product:read user:read",
+  scope: "business:read customer:* invoice:read product:* user:read",
   personalAccessToken: ACCESS_TOKEN,
 });

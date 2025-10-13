@@ -1,7 +1,8 @@
 import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import { ActivityType, SportType } from "./api/types";
 import { createWriteStream } from "fs";
-import path from "path";
+import path, { resolve } from "path";
+import { homedir } from "os";
 
 export const formatDuration = (duration: number) => {
   return new Date(duration * 1000).toISOString().substring(11, 19);
@@ -79,19 +80,19 @@ export function getStartOfWeekUnix() {
   return Math.floor(weekStart.getTime() / 1000);
 }
 
-export function getSportTypesFromActivityTypes(
-  activityTypes: ActivityType[],
-  localized_sport_type: string,
-): SportType[] {
+export function getSportTypesFromActivityTypes(activityTypes: SportType[], localized_sport_type: string): SportType[] {
   const sportTypes: SportType[] = [];
-  if (activityTypes.includes(ActivityType.Ride)) {
+  if (activityTypes.includes(SportType.Ride)) {
     sportTypes.push(SportType.Ride);
     sportTypes.push(SportType.EBikeRide);
     sportTypes.push(SportType.EMountainBikeRide);
     sportTypes.push(SportType.VirtualRide);
     sportTypes.push(SportType.GravelRide);
+    sportTypes.push(SportType.Handcycle);
+    sportTypes.push(SportType.Wheelchair);
+    sportTypes.push(SportType.Velomobile);
   }
-  if (activityTypes.includes(ActivityType.Run)) {
+  if (activityTypes.includes(SportType.Run)) {
     sportTypes.push(SportType.Run);
     sportTypes.push(SportType.VirtualRun);
     sportTypes.push(SportType.TrailRun);
@@ -167,7 +168,7 @@ export const saveFileToDesktop = (
   fileStream: NodeJS.ReadableStream | null,
 ) => {
   if (fileStream) {
-    const desktopDir = process.env.HOME + "/Desktop";
+    const desktopDir = resolve(homedir(), "Desktop");
     const downloadPath = path.join(desktopDir, `${fileName}.${fileType}`);
     const writeStream = createWriteStream(downloadPath);
     fileStream.pipe(writeStream);

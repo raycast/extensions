@@ -13,7 +13,9 @@
   "pastContributors": [
     "pomdtr"
   ],
-  "categories": ["Documentation"],
+  "categories": [
+    "Documentation"
+  ],
   "keywords": [
     "API",
     "developer",
@@ -30,7 +32,9 @@
       "subtitle": "DevDocs",
       "description": "Search through DevDocs documentations from Raycast",
       "mode": "view",
-      "keywords": ["search docsets"]
+      "keywords": [
+        "search docsets"
+      ]
     },
     {
       "name": "search-entries",
@@ -68,7 +72,10 @@
           "title": "Open in browser",
           "value": "browser"
         },
-        { "title": "Open in DevDocs app", "value": "app" }
+        {
+          "title": "Open in DevDocs app",
+          "value": "app"
+        }
       ],
       "default": "browser"
     }
@@ -85,6 +92,7 @@
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.5.2",
     "typescript": "^4.3.5"
   },
   "scripts": {

@@ -4,13 +4,11 @@ Raycast makes it easy to lint your extensions using the CLI's lint command (`ray
 
 Raycast provides by default an [opinionated ESLint configuration](https://github.com/raycast/eslint-config/blob/main/index.js) that includes everything you need to lint your Raycast extensions. The default configuration is as simple as this:
 
-```json
-{ 
-  "root": true,
-  "extends": [
-    "@raycast"
-  ]
-}
+```js
+import { defineConfig } from "eslint/config";
+import raycastConfig from "@raycast/eslint-config";
+
+export default defineConfig([...raycastConfig]);
 ```
 
 It abstracts away the different ESLint dependencies used for Raycast extensions and includes different rule-sets.
@@ -23,18 +21,21 @@ You can check Raycast's ESLint plugin rules directly on the [repository document
 
 You're free to turn on/off rules or add new plugins as you see fit for your extensions. For example, you could add the rule [`@raycast/prefer-placeholders`](https://github.com/raycast/eslint-plugin/blob/main/docs/rules/prefer-placeholders.md) for your extension:
 
+```js
+import { defineConfig } from "eslint/config";
+import raycastConfig from "@raycast/eslint-config";
 
-```json
-{
-  "root": true,
-  "extends": [
-    "@raycast"
-  ],
-  "rules": {
-    "@raycast/prefer-placeholders": "warn"
-  }
-}
+export default defineConfig([
+  ...raycastConfig,
+  {
+    rules: {
+      "@raycast/prefer-placeholders": "warn",
+    },
+  },
+]);
 ```
+
+To keep the consistency of development experiences across extensions, we don't encourage adding too many personal ESLint preferences to an extension.
 
 ## Migration
 

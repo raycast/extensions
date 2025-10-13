@@ -13,6 +13,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { ExecaError } from "execa";
 import { join } from "path";
 import { useReducer, useRef } from "react";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -209,6 +210,7 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
           {(values.password || values.url) && (
             <Action title="Reset Fields" icon={{ source: Icon.Trash }} onAction={resetFields} />
           )}
+          <DebuggingBugReportingActionSection />
         </ActionPanel>
       }
     >

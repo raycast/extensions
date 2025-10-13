@@ -11,18 +11,20 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 import pad from "./operations/padOperation";
-import { getSelectedImages } from "./utilities/utils";
-import { PadPreferences } from "./utilities/preferences";
 import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
 
 export default async function Command(props: { arguments: { amount: string; hexcolor: string } }) {
   const { amount, hexcolor } = props.arguments;
   const selectedImages = await getSelectedImages();
-  const preferences = getPreferenceValues<PadPreferences>();
+  const preferences = getPreferenceValues<Preferences.Pad>();
 
   const padAmount = parseInt(amount);
   if (isNaN(padAmount) || padAmount < 0) {
-    await showToast({ title: "Padding amount must be a positive integer", style: Toast.Style.Failure });
+    await showToast({
+      title: "Padding amount must be a positive integer",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 

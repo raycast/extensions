@@ -22,6 +22,7 @@ import fs from "fs";
 import fetch from "node-fetch";
 import { fileTypeFromBuffer } from "file-type";
 import { OllamaApiTagsResponseModel } from "../ollama/types";
+import { UiModelDetails } from "./types";
 
 /**
  * Get Ollama Server Array.
@@ -84,19 +85,30 @@ export async function GetServerClass(): Promise<Map<string, Ollama>> {
  * Get Ollama Available Models.
  * @returns Map with All Available Model.
  */
-export async function GetModelsName(): Promise<Map<string, string[]>> {
-  const o = new Map();
+export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
+  const o = new Map<string, UiModelDetails[]>();
   const s = await GetServerClass();
   await Promise.all(
     [...s.entries()].map(async (s): Promise<void> => {
-      const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+      const tags = await s[1].OllamaApiTags().catch(async (e: Error) => {
         await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
         return undefined;
       });
-      if (tag)
+      if (tags)
         o.set(
           s[0],
-          tag.models.map((t) => t.name)
+          await Promise.all(
+            tags.models.map(async (tag): Promise<UiModelDetails> => {
+              const show = await s[1].OllamaApiShow(tag.name).catch(async (e: Error) => {
+                await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+                return undefined;
+              });
+              return {
+                name: tag.name,
+                capabilities: show && show.capabilities,
+              };
+            })
+          )
         );
     })
   );

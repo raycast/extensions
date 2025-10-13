@@ -4,7 +4,7 @@ import { runAppleScript } from "@raycast/utils";
 export default async function main(props: LaunchProps<{ arguments: Arguments.Capture }>) {
   const { content } = props.arguments;
 
-  const res = await runAppleScript(
+  await runAppleScript(
     `
 on run argv
   tell application "Drafts"

@@ -1,5 +1,18 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2025-04-23
+
+- Add preferences to select the history lookback window
+
+## [Enhancements] - 2025-03-17
+
+- Add preferences to show/hide clients, projects, tasks, and tags in the time entry form
+
+## [New Feature] - 2025-02-05
+
+- Add ability to update time entry start and stop date
+- Add ability to change the start time for a running time entry
+
 ## [New Feature] - 2025-12-12
 
 - Add shortcut to "Create Similar Time Entry"

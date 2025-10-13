@@ -9,12 +9,16 @@ import {
 import { environment, LaunchType, showHUD } from "@raycast/api";
 import { BingResponseData } from "./types/types";
 import { autoDownload, downloadSize, includeDownloadedWallpapers } from "./types/preferences";
+import { canRefresh, recordRefresh } from "./utils/refresh-record";
 
 export default async () => {
   if (environment.launchType === LaunchType.UserInitiated) {
     await showHUD("Downloading and setting wallpaper...");
   }
-  await getRandomWallpaper();
+  if (canRefresh()) {
+    recordRefresh();
+    await getRandomWallpaper();
+  }
 };
 
 export const getRandomWallpaper = async () => {

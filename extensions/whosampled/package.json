@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whosampled",
   "title": "WhoSampled",
-  "description": "Search WhoSampled.com from the currently playing song in Spotify",
+  "description": "Search WhoSampled.com from the currently playing song in Spotify, Apple Music, or search for a song and artists",
   "icon": "icon2.png",
-  "author": "andrewtruex",
+  "author": "truex",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "anirudh_subramanyam"
   ],
   "categories": [
     "Web",
@@ -20,6 +21,34 @@
       "title": "WhoSampled",
       "description": "Search WhoSampled.com from the currently playing song in Spotify",
       "mode": "no-view"
+    },
+    {
+      "name": "appleMusic",
+      "title": "WhoSampled Apple Music",
+      "description": "Search WhoSampled.com from the currently playing song in Apple Music",
+      "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "WhoSampled Search",
+      "description": "Search WhoSampled.com for a song and artists",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "song",
+          "placeholder": "Song Name",
+          "description": "The song to search for",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "artists",
+          "placeholder": "Artists",
+          "description": "The artist of the song",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -41,6 +70,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

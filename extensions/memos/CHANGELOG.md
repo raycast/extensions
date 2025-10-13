@@ -1,5 +1,13 @@
 # Send To Memos Changelog
 
+## [Update & Breaking Change] - 2025-09-03
+
+- support memos@0.25.0. 
+
+## [Update] - 2025-03-31
+
+- support memos@0.24.0.
+
 ## [Update] - 2024-12-23
 
 - support memos@0.23.0.
