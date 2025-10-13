@@ -169,16 +169,16 @@ _Agent selection happens before a chat session starts (via the Start Agent form 
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T069 [P] Performance optimization for large conversation histories stored in LocalStorage
-- [ ] T070 [P] Memory management and cleanup for agent connections
-- [ ] T071 [P] Enhanced error handling with user-friendly messages
-- [ ] T072 [P] Accessibility improvements for UI components
-- [ ] T073 [P] Add comprehensive logging for debugging
-- [ ] T074 [P] Security hardening for file access and agent communication
-- [ ] T075 [P] LocalStorage migration utilities for data model updates
-- [ ] T076 [P] Documentation updates in quickstart.md validation
-- [ ] T077 [P] Extension icon and branding assets
-- [ ] T078 [P] Final performance testing and optimization with Gemini CLI integration
+- [X] T069 [P] Performance optimization for large conversation histories stored in LocalStorage
+- [X] T070 [P] Memory management and cleanup for agent connections
+- [X] T071 [P] Enhanced error handling with user-friendly messages
+- [X] T072 [P] Accessibility improvements for UI components
+- [X] T073 [P] Add comprehensive logging for debugging
+- [X] T074 [P] Security hardening for file access and agent communication
+- [X] T075 [P] LocalStorage migration utilities for data model updates
+- [X] T076 [P] Documentation updates in quickstart.md validation
+- [X] T077 [P] Extension icon and branding assets
+- [X] T078 [P] Final performance testing and optimization with Gemini CLI integration
 
 ---
 

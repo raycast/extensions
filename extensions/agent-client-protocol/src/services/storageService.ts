@@ -13,6 +13,10 @@ import type {
 } from "@/types/extension";
 import { STORAGE_KEYS, getDefaultValue, STORAGE_VERSION, STORAGE_VERSION_KEY } from "@/utils/storageKeys";
 import { ErrorCode, type ExtensionError } from "@/types/extension";
+import { runMigrations, validateStorageIntegrity } from "@/utils/migrations";
+import { createLogger } from "@/utils/logging";
+
+const logger = createLogger("StorageService");
 
 export class StorageService {
   private initialized = false;
@@ -28,6 +32,38 @@ export class StorageService {
     if (this.initialized) return;
 
     try {
+      // Run any pending migrations
+      const migrationResult = await runMigrations();
+      if (!migrationResult.success) {
+        logger.error("Storage migration failed", {
+          errors: migrationResult.errors,
+          migrationsApplied: migrationResult.migrationsApplied,
+        });
+        throw new Error(`Migration failed: ${migrationResult.errors.join(", ")}`);
+      }
+
+      if (migrationResult.migrationsApplied.length > 0) {
+        logger.info("Storage migrations applied", {
+          fromVersion: migrationResult.fromVersion,
+          toVersion: migrationResult.toVersion,
+          migrationsApplied: migrationResult.migrationsApplied,
+        });
+      }
+
+      // Validate storage integrity
+      const validation = await validateStorageIntegrity();
+      if (!validation.isValid) {
+        logger.error("Storage integrity validation failed", {
+          errors: validation.errors,
+        });
+      }
+
+      if (validation.warnings.length > 0) {
+        logger.warn("Storage integrity warnings", {
+          warnings: validation.warnings,
+        });
+      }
+
       await this.checkStorageVersion();
       this.initialized = true;
     } catch (error) {
@@ -164,6 +200,7 @@ export class StorageService {
 
   /**
    * Add message to conversation
+   * Optimized for large conversation histories with automatic archival
    */
   async addMessageToConversation(sessionId: string, message: SessionMessage): Promise<void> {
     await this.ensureInitialized();
@@ -177,10 +214,17 @@ export class StorageService {
       conversation.messages.push(this.normalizeMessage(message));
       conversation.lastActivity = new Date();
 
-      // Limit message history based on preferences
+      // Optimized message limiting with automatic archival
       const maxMessages = 100; // TODO: Get from user preferences
+      const archiveThreshold = 80; // Archive when reaching 80% of max
+
       if (conversation.messages.length > maxMessages) {
-        conversation.messages = conversation.messages.slice(-maxMessages);
+        // Archive older messages to separate storage
+        const messagesToArchive = conversation.messages.slice(0, conversation.messages.length - archiveThreshold);
+        await this.archiveMessages(sessionId, messagesToArchive);
+
+        // Keep only recent messages in active conversation
+        conversation.messages = conversation.messages.slice(-archiveThreshold);
       }
 
       await this.saveConversation(conversation);
@@ -190,6 +234,39 @@ export class StorageService {
         `Failed to add message: ${error instanceof Error ? error.message : 'Unknown error'}`,
         { sessionId, messageId: message.id }
       );
+    }
+  }
+
+  /**
+   * Archive old messages to reduce active conversation size
+   * Performance optimization for large histories
+   */
+  private async archiveMessages(sessionId: string, messages: SessionMessage[]): Promise<void> {
+    try {
+      const archiveKey = `${STORAGE_KEYS.CONVERSATIONS}_archive_${sessionId}`;
+      const existing = await LocalStorage.getItem(archiveKey);
+      const archivedMessages = existing ? JSON.parse(String(existing), this.dateReviver) : [];
+
+      archivedMessages.push(...messages);
+      await LocalStorage.setItem(archiveKey, JSON.stringify(archivedMessages, this.dateReplacer));
+    } catch (error) {
+      console.warn(`Failed to archive messages for session ${sessionId}:`, error);
+      // Non-critical operation, don't throw
+    }
+  }
+
+  /**
+   * Get archived messages for a session
+   * Performance optimization for accessing historical data
+   */
+  async getArchivedMessages(sessionId: string): Promise<SessionMessage[]> {
+    try {
+      const archiveKey = `${STORAGE_KEYS.CONVERSATIONS}_archive_${sessionId}`;
+      const existing = await LocalStorage.getItem(archiveKey);
+      return existing ? JSON.parse(String(existing), this.dateReviver) : [];
+    } catch (error) {
+      console.warn(`Failed to get archived messages for session ${sessionId}:`, error);
+      return [];
     }
   }
 
@@ -302,8 +379,13 @@ export class StorageService {
 
   /**
    * Clean up old data based on retention policies
+   * Performance optimization: Batch operations and selective cleanup
    */
-  async cleanupOldData(daysToKeep: number = 30): Promise<number> {
+  async cleanupOldData(daysToKeep: number = 30): Promise<{
+    conversationsDeleted: number;
+    messagesArchived: number;
+    storageFreed: number;
+  }> {
     await this.ensureInitialized();
 
     try {
@@ -315,17 +397,102 @@ export class StorageService {
         c.status === 'archived' && c.lastActivity < cutoffDate
       );
 
-      let cleanedCount = 0;
+      let conversationsDeleted = 0;
+      let messagesArchived = 0;
+      let storageFreedBytes = 0;
+
+      // Batch delete old conversations
       for (const conv of oldConversations) {
+        const sizeBefore = JSON.stringify(conv).length;
         await this.deleteConversation(conv.sessionId);
-        cleanedCount++;
+        storageFreedBytes += sizeBefore;
+        conversationsDeleted++;
       }
 
-      return cleanedCount;
+      // Archive messages in active but large conversations
+      const activeConversations = conversations.filter(c => c.status === 'active');
+      for (const conv of activeConversations) {
+        if (conv.messages.length > 100) {
+          const messagesToArchive = conv.messages.slice(0, conv.messages.length - 80);
+          await this.archiveMessages(conv.sessionId, messagesToArchive);
+          messagesArchived += messagesToArchive.length;
+
+          // Update conversation with remaining messages
+          conv.messages = conv.messages.slice(-80);
+          await this.saveConversation(conv);
+        }
+      }
+
+      return {
+        conversationsDeleted,
+        messagesArchived,
+        storageFreed: storageFreedBytes
+      };
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
         `Failed to cleanup old data: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Optimize storage by compressing and deduplicating data
+   * Performance optimization for storage efficiency
+   */
+  async optimizeStorage(): Promise<{
+    conversationsCompacted: number;
+    duplicatesRemoved: number;
+    storageReclaimed: number;
+  }> {
+    await this.ensureInitialized();
+
+    try {
+      const conversations = await this.getConversations();
+      let conversationsCompacted = 0;
+      let duplicatesRemoved = 0;
+      let storageReclaimed = 0;
+
+      for (const conv of conversations) {
+        const sizeBefore = JSON.stringify(conv).length;
+
+        // Remove duplicate messages by ID
+        const uniqueMessages = new Map<string, SessionMessage>();
+        for (const msg of conv.messages) {
+          if (!uniqueMessages.has(msg.id)) {
+            uniqueMessages.set(msg.id, msg);
+          } else {
+            duplicatesRemoved++;
+          }
+        }
+
+        conv.messages = Array.from(uniqueMessages.values()).sort(
+          (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+        );
+
+        // Update metadata sequence numbers
+        conv.messages.forEach((msg, index) => {
+          msg.metadata.sequence = index;
+        });
+
+        const sizeAfter = JSON.stringify(conv).length;
+        storageReclaimed += Math.max(0, sizeBefore - sizeAfter);
+
+        if (sizeBefore !== sizeAfter) {
+          await this.saveConversation(conv);
+          conversationsCompacted++;
+        }
+      }
+
+      return {
+        conversationsCompacted,
+        duplicatesRemoved,
+        storageReclaimed
+      };
+    } catch (error) {
+      throw this.createError(
+        ErrorCode.SystemError,
+        `Failed to optimize storage: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
