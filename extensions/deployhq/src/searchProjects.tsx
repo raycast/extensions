@@ -30,7 +30,6 @@ export default function Command() {
       `https://${preferences.deployHQAccountName}.deployhq.com`,
       preferences.deployHQAPIKey,
       preferences.deployHQUsername,
-      preferences.deployHQAccountName,
     );
   }, [preferences.deployHQAccountName, preferences.deployHQAPIKey, preferences.deployHQUsername]);
 
