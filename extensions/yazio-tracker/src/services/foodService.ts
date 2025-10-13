@@ -7,15 +7,18 @@ export interface ProcessedFoodData {
 
 export async function processFoodData(
   consumedItemsData: { products: UserConsumedItem[]; recipe_portions: RecipePortion[] },
-  getProduct: (productId: string) => Promise<Product>,
+  getProduct: (productId: string) => Promise<Product | null>,
 ): Promise<ProcessedFoodData> {
   // Process products with their details
-  const productsWithDetails = await Promise.all(
-    consumedItemsData.products.map(async (item) => {
-      const productDetails = await getProduct(item.product_id);
-      return { ...item, productDetails, type: "product" as const };
-    }),
-  );
+  const productsWithDetails = (
+    await Promise.all(
+      consumedItemsData.products.map(async (item) => {
+        const productDetails = await getProduct(item.product_id);
+        if (!productDetails) return null; // skip missing products
+        return { ...item, productDetails, type: "product" as const };
+      }),
+    )
+  ).filter(Boolean) as Array<UserConsumedItem & { productDetails: Product; type: "product" }>;
 
   // Process recipes
   const formattedRecipes = consumedItemsData.recipe_portions.map(

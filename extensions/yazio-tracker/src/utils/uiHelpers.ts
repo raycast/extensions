@@ -1,33 +1,35 @@
-import { Image } from "@raycast/api";
+import { Image, Color } from "@raycast/api";
 import { getProgressIcon as getRaycastProgressIcon } from "@raycast/utils";
-import { PROGRESS_COLORS } from "../constants";
 
-export function getProgressIcon(progress: number, nutrientType: "calories" | "protein" | "carbs" | "fat"): Image.Asset {
+export function getProgressIcon(
+  progress: number,
+  nutrientType: "calories" | "protein" | "carbs" | "fat",
+): Image.ImageLike {
   const isOverLimit = progress > 1;
-  let color: string;
+  let tint: Color;
   if (isOverLimit) {
-    color = PROGRESS_COLORS.OVER_LIMIT;
+    tint = Color.Red;
   } else {
     switch (nutrientType) {
       case "calories":
-        color = PROGRESS_COLORS.NORMAL;
+        tint = Color.Blue;
         break;
       case "protein":
-        color = PROGRESS_COLORS.PROTEIN;
+        tint = Color.Purple;
         break;
       case "carbs":
-        color = PROGRESS_COLORS.CARBS;
+        tint = Color.Yellow;
         break;
       case "fat":
-        color = PROGRESS_COLORS.FAT;
+        tint = Color.Green;
         break;
       default:
-        color = PROGRESS_COLORS.NORMAL;
+        tint = Color.Blue;
         break;
     }
   }
 
-  return getRaycastProgressIcon(progress, color);
+  return getRaycastProgressIcon(progress, tint);
 }
 
 export function formatMealName(meal: string): string {

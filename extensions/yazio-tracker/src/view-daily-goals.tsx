@@ -1,6 +1,6 @@
 // Optimized daily goals view with extracted business logic
 import { List } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { yazio } from "./utils/yazio";
 import { DateDropdown } from "./components/DateDropdown";
 import { ErrorView } from "./components/ErrorView";
@@ -37,7 +37,7 @@ function DailyGoalsContent() {
   });
 
   // Calculate all goal-related metrics using the service
-  const calculations = data ? calculateDailyGoals(data.summary, data.goals) : null;
+  const calculations = useMemo(() => (data ? calculateDailyGoals(data.summary, data.goals) : null), [data]);
 
   return (
     <List

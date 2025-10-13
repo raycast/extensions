@@ -14,14 +14,6 @@ export const SAMPLE_FOODS = [
   { name: "Spinach Salad", producer: "Green Leaf Farms", calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
 ];
 
-export const PROGRESS_COLORS = {
-  NORMAL: "#007AFF", // Blue
-  OVER_LIMIT: "#FF6347", // Tomato Red
-  PROTEIN: "#9C27B0", // Purple
-  CARBS: "#FFC107", // Yellow
-  FAT: "#28A745", // Green
-} as const;
-
 export const NUTRIENT_KEYS = {
   ENERGY: "energy.energy",
   PROTEIN: "nutrient.protein",

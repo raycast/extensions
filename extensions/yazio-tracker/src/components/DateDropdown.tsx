@@ -21,9 +21,10 @@ export const DateDropdown = ({ selectedDate, setSelectedDate }: DateDropdownProp
 
   return (
     <List.Dropdown tooltip="Select a date" value={selectedDate} onChange={(newValue) => setSelectedDate(newValue)}>
-      {days.map((date, index) => (
-        <List.Dropdown.Item key={index} title={getDayTitle(date, index)} value={formatDate(date)} />
-      ))}
+      {days.map((date, index) => {
+        const value = formatDate(date);
+        return <List.Dropdown.Item key={value} title={getDayTitle(date, index)} value={value} />;
+      })}
     </List.Dropdown>
   );
 };

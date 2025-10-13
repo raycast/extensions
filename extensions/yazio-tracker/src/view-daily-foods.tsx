@@ -7,7 +7,9 @@ import { ErrorView } from "./components/ErrorView";
 import { formatDate } from "./utils/utils";
 import { DateDropdown } from "./components/DateDropdown";
 import { isDevelopment, mockConsumedItems, mockProducts } from "./utils/mockData";
-import type { UserConsumedItem, RecipePortion, ConsumedItem } from "./types";
+import { processFoodData, processMockFoodData } from "./services/foodService";
+import { MEAL_TYPES } from "./constants";
+import type { UserConsumedItem, RecipePortion } from "./types";
 export default function Command() {
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const isDevMode = isDevelopment(); // Cache the development state
@@ -18,34 +20,7 @@ export default function Command() {
         // Return mock data in development mode
         const consumedItemsData = mockConsumedItems;
 
-        const productsWithDetails = consumedItemsData.products.map((item) => {
-          const productDetails = mockProducts[item.product_id as keyof typeof mockProducts];
-          return { ...item, productDetails, type: "product" as const };
-        });
-
-        const formattedRecipes = consumedItemsData.recipe_portions.map(
-          (recipe): ConsumedItem => ({
-            ...recipe,
-            id: recipe.id,
-            name: recipe.name || "Recipe",
-            portion_count: recipe.portion_count,
-            type: "recipe" as const,
-          }),
-        );
-
-        const allConsumedItems: ConsumedItem[] = [...productsWithDetails, ...formattedRecipes];
-
-        const groupedByDaytime = allConsumedItems.reduce(
-          (acc, item) => {
-            const daytime = item.daytime;
-            if (!acc[daytime]) acc[daytime] = [];
-            acc[daytime].push(item);
-            return acc;
-          },
-          {} as Record<string, ConsumedItem[]>,
-        );
-
-        return groupedByDaytime;
+        return processMockFoodData(consumedItemsData, mockProducts).groupedByDaytime;
       }
 
       try {
@@ -57,29 +32,14 @@ export default function Command() {
             return { ...item, productDetails, type: "product" as const };
           }),
         );
-        const formattedRecipes = (consumedItemsData.recipe_portions as RecipePortion[]).map(
-          (recipe): ConsumedItem => ({
-            ...recipe,
-            id: recipe.id,
-            name: recipe.name || "Recipe",
-            portion_count: recipe.portion_count,
-            type: "recipe" as const,
-          }),
-        );
 
-        const allConsumedItems: ConsumedItem[] = [...productsWithDetails, ...formattedRecipes];
-
-        const groupedByDaytime = allConsumedItems.reduce(
-          (acc, item) => {
-            const daytime = item.daytime;
-            if (!acc[daytime]) acc[daytime] = [];
-            acc[daytime].push(item);
-            return acc;
+        return processFoodData(
+          {
+            products: productsWithDetails as unknown as UserConsumedItem[],
+            recipe_portions: consumedItemsData.recipe_portions as RecipePortion[],
           },
-          {} as Record<string, ConsumedItem[]>,
-        );
-
-        return groupedByDaytime;
+          async (productId) => yazio.products.get(productId),
+        ).then((res) => res.groupedByDaytime);
       } catch (error) {
         if (error instanceof Error && error.message.includes("oauth/token")) {
           throw new Error("Please check your Yazio credentials in extension preferences");
@@ -90,7 +50,7 @@ export default function Command() {
     [selectedDate],
   );
 
-  const mealOrder = ["breakfast", "lunch", "dinner", "snack"];
+  const mealOrder = [...MEAL_TYPES];
 
   return (
     <List
