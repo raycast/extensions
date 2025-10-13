@@ -2,19 +2,6 @@ import { List, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
 import React from "react";
 import { DOCS } from "./data/docs";
 
-interface Preferences {
-  peopleVersion: string;
-  webhooksVersion: string;
-  registrationsVersion: string;
-  publishingVersion: string;
-  groupsVersion: string;
-  apiVersion: string;
-  givingVersion: string;
-  checkInsVersion: string;
-  calendarVersion: string;
-  servicesVersion: string;
-}
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [appFilter, setAppFilter] = React.useState<string>("all");
