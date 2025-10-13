@@ -1,8 +1,10 @@
-import { PropsWithChildren } from "react";
-import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { PropsWithChildren, useState } from "react";
+import { Action, ActionPanel, Detail, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { SortBy } from "@/types";
 import { validInstanceUrl } from "@/utils";
 import { useWatches } from "@/hooks/use-watches";
 import CreateWatch from "@/screens/CreateWatch";
+import { SortingDropDown } from "@/components/SortingDropDown";
 import { WatchItem } from "@/components/WatchItem";
 
 const WithOptionalSection = ({ title, children }: PropsWithChildren<{ title: string | null }>) =>
@@ -22,14 +24,14 @@ const ListWatches = () => {
     );
   }
 
-  const { sort_by, sort_order } = getPreferenceValues<Preferences.ListWatches>();
-  const { isLoading, data, error, revalidate, mutate } = useWatches({ sortBy: sort_by, sortOrder: sort_order });
+  const [sortBy, setSortBy] = useState<SortBy>("none");
+  const { isLoading, data, error, revalidate, mutate } = useWatches({ sortBy });
 
   // If we only have one section, we don't need to use separate section titles
   const needsSection = data.unseen.length > 0 && data.seen.length > 0;
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarAccessory={<SortingDropDown setSortBy={setSortBy} />}>
       {!isLoading && !error && (
         <List.EmptyView
           title="No website watches configured."
