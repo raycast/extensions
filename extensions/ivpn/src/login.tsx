@@ -5,7 +5,7 @@ import { IvpnInvalidAccountIdError, IvpnNotLoggedInError } from "@/api/ivpn/erro
 import { isValidAccountId } from "@/api/ivpn/utils";
 import { withNoViewErrorHandler } from "@/utils/errorHandler";
 
-type Props = LaunchProps<{ arguments: { accountId: string } }>;
+type Props = LaunchProps<{ arguments: Arguments.Login }>;
 
 export default withNoViewErrorHandler(async ({ arguments: { accountId } }: Props) => {
   if (!isValidAccountId(accountId)) {
