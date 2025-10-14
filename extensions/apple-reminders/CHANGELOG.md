@@ -1,5 +1,11 @@
 # Apple Reminders Changelog
 
+## [Add ability to move reminders between lists] - {PR_MERGE_DATE}
+
+- Add list selection dropdown in the Edit Reminder form
+- Implement `moveToList` function to change reminder's list
+- Allow users to move reminders to different lists when editing
+
 ## [Add Creation Date option for sorting] - 2025-06-13
 
 - Retrieve the Creation Date from the EventKit API
