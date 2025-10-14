@@ -1,7 +1,6 @@
 import { ActionPanel, List, Action, getPreferenceValues, Grid, Clipboard, Icon, showHUD } from "@raycast/api";
 import { useState, useMemo, useCallback } from "react";
 import { lib } from "asciilib";
-import { nanoid } from "nanoid";
 import { useRecentKaomoji } from "./useRecentKaomoji";
 import { SearchResult } from "./types";
 import { usePromise } from "@raycast/utils";
@@ -206,7 +205,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
 
   return results.map((entry: AsciiLibEntry) => {
     return {
-      id: nanoid(),
+      id: `${entry.entry}-${entry.name}`,
       name: entry.entry,
       description: entry.name,
       category: entry.category,
