@@ -1,6 +1,6 @@
 import { useCachedState } from "@raycast/utils";
 import { useCallback } from "react";
-import { SearchResult } from "./types";
+import { SearchResult } from "../types";
 
 export function useRecentKaomoji() {
   const [recentKaomojis, setRecentKaomojis] = useCachedState<SearchResult[]>("recentKaomoji", []);
