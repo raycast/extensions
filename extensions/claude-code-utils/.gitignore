@@ -68,4 +68,5 @@ raycast-env.d.ts
 .yarn/install-state.gz
 .pnp.*
 
-.agents/
+.agents/.last-pr-sync
+.last-pr-sync
