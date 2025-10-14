@@ -14,20 +14,14 @@ import {
 } from "@raycast/api";
 import React from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { withEnvContext, ListContainer } from "./components";
-import { useStripeDashboard, useEnvContext } from "./hooks";
-import { STRIPE_API_VERSION } from "./enums";
-import { convertAmount, convertTimestampToDate } from "./utils";
+import { withProfileContext, ListContainer, ProfileSwitcherActions } from "@src/components";
+import { useStripeDashboard, useProfileContext } from "@src/hooks";
+import { STRIPE_API_VERSION } from "@src/enums";
+import { convertAmount, convertTimestampToDate } from "@src/utils";
 import Stripe from "stripe";
-
-const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
 
 // Constants
 const RESULTS_LIMIT = 10;
-
-// Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
 // Subscription Detail Component
 const SubscriptionDetailBase = ({ subscription }: { subscription: Stripe.Subscription }) => {
@@ -97,16 +91,17 @@ ${
   );
 };
 
-const SubscriptionDetail = withEnvContext(SubscriptionDetailBase);
+const SubscriptionDetail = SubscriptionDetailBase;
 
 interface SubscriptionListProps {
   customerId?: string;
 }
 
 function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
-  const { environment } = useEnvContext();
+  const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
+  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
   const { push } = useNavigation();
 
   const {
@@ -117,7 +112,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
   } = useCachedPromise(
     (customerIdParam: string | undefined) => async (options: { page: number; cursor?: string }) => {
       if (!stripe) {
-        throw new Error(`Stripe ${environment} API key is not configured`);
+        throw new Error(`Stripe ${activeEnvironment} API key is not configured`);
       }
 
       const params: Stripe.SubscriptionListParams = {
@@ -154,7 +149,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
     if (!stripe) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `Stripe ${environment} API key is not configured`,
+        title: `Stripe ${activeEnvironment} API key is not configured`,
       });
       return;
     }
@@ -200,7 +195,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
     if (!stripe) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `Stripe ${environment} API key is not configured`,
+        title: `Stripe ${activeEnvironment} API key is not configured`,
       });
       return;
     }
@@ -345,4 +340,4 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
   );
 }
 
-export default withEnvContext(SubscriptionList) as React.FC<SubscriptionListProps>;
+export default withProfileContext(SubscriptionList) as React.FC<SubscriptionListProps>;

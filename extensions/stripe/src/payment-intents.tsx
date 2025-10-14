@@ -1,24 +1,24 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type Stripe from "stripe";
-import { useStripeApi, useStripeDashboard } from "./hooks";
-import { 
-  convertTimestampToDate, 
-  titleCase, 
-  formatAmount, 
-  getCustomerId, 
-  getPaymentIntentIcon, 
-  getPaymentIntentStatusDescription, 
-  paymentIntentRequiresAction 
-} from "./utils";
-import { STRIPE_ENDPOINTS } from "./enums";
-import { ListContainer, withEnvContext } from "./components";
+import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks";
+import {
+  convertTimestampToDate,
+  titleCase,
+  formatAmount,
+  getCustomerId,
+  getPaymentIntentIcon,
+  getPaymentIntentStatusDescription,
+  paymentIntentRequiresAction,
+} from "@src/utils";
+import { STRIPE_ENDPOINTS } from "@src/enums";
+import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
-const PaymentIntentActions = ({ 
-  paymentIntent, 
-  dashboardUrl 
-}: { 
-  paymentIntent: Stripe.PaymentIntent; 
-  dashboardUrl: string; 
+const PaymentIntentActions = ({
+  paymentIntent,
+  dashboardUrl,
+}: {
+  paymentIntent: Stripe.PaymentIntent;
+  dashboardUrl: string;
 }) => {
   const customerId = getCustomerId(paymentIntent.customer);
 
@@ -94,10 +94,7 @@ const PaymentIntentDetail = ({ paymentIntent }: { paymentIntent: Stripe.PaymentI
               text={formatAmount(paymentIntent.amount_capturable, paymentIntent.currency)}
             />
           )}
-          <List.Item.Detail.Metadata.Label
-            title="Created"
-            text={convertTimestampToDate(paymentIntent.created)}
-          />
+          <List.Item.Detail.Metadata.Label title="Created" text={convertTimestampToDate(paymentIntent.created)} />
           {paymentIntent.canceled_at && (
             <List.Item.Detail.Metadata.Label
               title="Canceled At"
@@ -111,7 +108,11 @@ const PaymentIntentDetail = ({ paymentIntent }: { paymentIntent: Stripe.PaymentI
               <List.Item.Detail.Metadata.Label title="Payment Method" />
               <List.Item.Detail.Metadata.Label
                 title="Method ID"
-                text={typeof paymentIntent.payment_method === "string" ? paymentIntent.payment_method : paymentIntent.payment_method.id}
+                text={
+                  typeof paymentIntent.payment_method === "string"
+                    ? paymentIntent.payment_method
+                    : paymentIntent.payment_method.id
+                }
               />
             </>
           )}
@@ -144,12 +145,12 @@ const PaymentIntentDetail = ({ paymentIntent }: { paymentIntent: Stripe.PaymentI
   );
 };
 
-const PaymentIntentItem = ({ 
-  paymentIntent, 
-  dashboardUrl 
-}: { 
-  paymentIntent: Stripe.PaymentIntent; 
-  dashboardUrl: string; 
+const PaymentIntentItem = ({
+  paymentIntent,
+  dashboardUrl,
+}: {
+  paymentIntent: Stripe.PaymentIntent;
+  dashboardUrl: string;
 }) => {
   const { icon, color } = getPaymentIntentIcon(paymentIntent.status);
   const title = paymentIntent.description || getPaymentIntentStatusDescription(paymentIntent.status);
@@ -168,20 +169,21 @@ const PaymentIntentItem = ({
 };
 
 const PaymentIntents = () => {
-  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.PAYMENT_INTENTS, true);
+  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.PAYMENT_INTENTS, { isList: true });
   const { dashboardUrl } = useStripeDashboard();
   const paymentIntents = data as Stripe.PaymentIntent[];
 
   // Group by status
-  const actionRequired = paymentIntents.filter(pi => paymentIntentRequiresAction(pi.status));
-  const processing = paymentIntents.filter(pi => pi.status === "processing");
-  const succeeded = paymentIntents.filter(pi => pi.status === "succeeded");
-  const canceled = paymentIntents.filter(pi => pi.status === "canceled");
+  const actionRequired = paymentIntents.filter((pi) => paymentIntentRequiresAction(pi.status));
+  const processing = paymentIntents.filter((pi) => pi.status === "processing");
+  const succeeded = paymentIntents.filter((pi) => pi.status === "succeeded");
+  const canceled = paymentIntents.filter((pi) => pi.status === "canceled");
   const other = paymentIntents.filter(
-    pi => !paymentIntentRequiresAction(pi.status) && 
-         pi.status !== "processing" && 
-         pi.status !== "succeeded" && 
-         pi.status !== "canceled"
+    (pi) =>
+      !paymentIntentRequiresAction(pi.status) &&
+      pi.status !== "processing" &&
+      pi.status !== "succeeded" &&
+      pi.status !== "canceled",
   );
 
   return (
@@ -229,4 +231,4 @@ const PaymentIntents = () => {
   );
 };
 
-export default withEnvContext(PaymentIntents);
+export default withProfileContext(PaymentIntents);

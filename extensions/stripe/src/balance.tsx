@@ -1,20 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import capitalize from "lodash/capitalize";
 import type Stripe from "stripe";
-import { useStripeApi, useStripeDashboard } from "./hooks";
-import { formatAmount } from "./utils";
-import { STRIPE_ENDPOINTS } from "./enums";
-import { ListContainer, withEnvContext } from "./components";
+import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks";
+import { formatAmount } from "@src/utils";
+import { STRIPE_ENDPOINTS } from "@src/enums";
+import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
-const BalanceActions = ({ 
-  balance, 
-  dashboardUrl 
-}: { 
-  balance: Stripe.Balance.Available; 
-  dashboardUrl: string; 
-}) => {
+const BalanceActions = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Available; dashboardUrl: string }) => {
   const formattedAmount = formatAmount(balance.amount, balance.currency);
-  
+
   return (
     <ActionPanel>
       <Action.OpenInBrowser
@@ -27,13 +21,13 @@ const BalanceActions = ({
         url={`${dashboardUrl}/balance/transactions?currency=${balance.currency.toLowerCase()}`}
         icon={Icon.List}
       />
-      <Action.CopyToClipboard 
-        title="Copy Amount" 
+      <Action.CopyToClipboard
+        title="Copy Amount"
         content={formattedAmount}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
-      <Action.CopyToClipboard 
-        title="Copy Currency" 
+      <Action.CopyToClipboard
+        title="Copy Currency"
         content={balance.currency.toUpperCase()}
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       />
@@ -84,11 +78,11 @@ const BalanceItem = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Availa
 const Balance = () => {
   const { isLoading, data, error } = useStripeApi(STRIPE_ENDPOINTS.BALANCE);
   const { dashboardUrl } = useStripeDashboard();
-  
+
   const balanceData = data as Stripe.Balance | null;
-  const available = (error || !balanceData) ? [] : balanceData.available;
-  const pending = (error || !balanceData) ? [] : balanceData.pending;
-  const connectReserved = (error || !balanceData) ? [] : balanceData.connect_reserved ?? [];
+  const available = error || !balanceData ? [] : balanceData.available;
+  const pending = error || !balanceData ? [] : balanceData.pending;
+  const connectReserved = error || !balanceData ? [] : (balanceData.connect_reserved ?? []);
 
   return (
     <ListContainer isLoading={isLoading} isShowingDetail={!isLoading}>
@@ -111,4 +105,4 @@ const Balance = () => {
   );
 };
 
-export default withEnvContext(Balance);
+export default withProfileContext(Balance);

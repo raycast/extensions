@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type Stripe from "stripe";
-import { useStripeApi, useStripeDashboard } from "./hooks";
-import { convertTimestampToDate, titleCase, formatBillingAddress } from "./utils";
-import { STRIPE_ENDPOINTS } from "./enums";
-import { ListContainer, withEnvContext } from "./components";
+import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks";
+import { convertTimestampToDate, titleCase, formatBillingAddress } from "@src/utils";
+import { STRIPE_ENDPOINTS } from "@src/enums";
+import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
 const formatDateOfBirth = (dob?: { day: number | null; month: number | null; year: number | null }) => {
   if (!dob?.year || !dob?.month || !dob?.day) return "";
@@ -27,18 +27,15 @@ const AccountActions = ({ account, dashboardUrl }: { account: Stripe.Account; da
       url={`${dashboardUrl}/connect/accounts/${account.id}`}
       icon={Icon.Globe}
     />
-    <Action.CopyToClipboard
-      title="Copy Account ID"
-      content={account.id}
-      shortcut={{ modifiers: ["cmd"], key: "c" }}
-    />
+    <Action.CopyToClipboard title="Copy Account ID" content={account.id} shortcut={{ modifiers: ["cmd"], key: "c" }} />
     {account.email && (
       <Action.CopyToClipboard
         title="Copy Email"
         content={account.email}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       />
     )}
+    <ProfileSwitcherActions />
   </ActionPanel>
 );
 
@@ -54,37 +51,23 @@ const AccountDetail = ({ account }: { account: Stripe.Account }) => {
           <List.Item.Detail.Metadata.Label
             title="Status"
             text={account.charges_enabled && account.payouts_enabled ? "Fully Enabled" : "Limited"}
-            icon={{ source: icon, tintColor: color as Color.ColorLike }}
+            icon={{ source: icon, tintColor: color }}
           />
-          <List.Item.Detail.Metadata.Label
-            title="Type"
-            text={titleCase(account.type || "standard")}
-          />
+          <List.Item.Detail.Metadata.Label title="Type" text={titleCase(account.type || "standard")} />
 
           <List.Item.Detail.Metadata.Separator />
 
           <List.Item.Detail.Metadata.Label title="Capabilities" />
-          <List.Item.Detail.Metadata.Label
-            title="Charges"
-            text={account.charges_enabled ? "Enabled" : "Disabled"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Payouts"
-            text={account.payouts_enabled ? "Enabled" : "Disabled"}
-          />
+          <List.Item.Detail.Metadata.Label title="Charges" text={account.charges_enabled ? "Enabled" : "Disabled"} />
+          <List.Item.Detail.Metadata.Label title="Payouts" text={account.payouts_enabled ? "Enabled" : "Disabled"} />
           {account.capabilities && Object.keys(account.capabilities).length > 0 && (
-            <List.Item.Detail.Metadata.Label
-              title="Available"
-              text={Object.keys(account.capabilities).join(", ")}
-            />
+            <List.Item.Detail.Metadata.Label title="Available" text={Object.keys(account.capabilities).join(", ")} />
           )}
 
           {(account.individual || account.company) && (
             <>
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title={account.individual ? "Individual Details" : "Company Details"}
-              />
+              <List.Item.Detail.Metadata.Label title={account.individual ? "Individual Details" : "Company Details"} />
               {account.individual?.first_name && (
                 <List.Item.Detail.Metadata.Label
                   title="Name"
@@ -104,10 +87,7 @@ const AccountDetail = ({ account }: { account: Stripe.Account }) => {
 
           <List.Item.Detail.Metadata.Label title="Account Details" />
           {account.default_currency && (
-            <List.Item.Detail.Metadata.Label
-              title="Default Currency"
-              text={account.default_currency.toUpperCase()}
-            />
+            <List.Item.Detail.Metadata.Label title="Default Currency" text={account.default_currency.toUpperCase()} />
           )}
           {account.country && <List.Item.Detail.Metadata.Label title="Country" text={account.country} />}
           {account.created && (
@@ -138,7 +118,7 @@ const AccountItem = ({ account, dashboardUrl }: { account: Stripe.Account; dashb
       key={account.id}
       title={name}
       subtitle={subtitle}
-      icon={{ source: icon, tintColor: color as Color.ColorLike }}
+      icon={{ source: icon, tintColor: color }}
       actions={<AccountActions account={account} dashboardUrl={dashboardUrl} />}
       detail={<AccountDetail account={account} />}
     />
@@ -146,27 +126,36 @@ const AccountItem = ({ account, dashboardUrl }: { account: Stripe.Account; dashb
 };
 
 const ConnectedAccounts = () => {
-  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CONNECTED_ACCOUNTS, true);
+  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CONNECTED_ACCOUNTS, { isList: true });
   const { dashboardUrl } = useStripeDashboard();
+  const { activeProfile, activeEnvironment } = useProfileContext();
   const accounts = data as Stripe.Account[];
 
   // Group by status
-  const fullyEnabled = accounts.filter((a) => a.charges_enabled && a.payouts_enabled);
-  const limited = accounts.filter((a) => !a.charges_enabled || !a.payouts_enabled);
+  const fullyEnabledAccounts = accounts.filter((account) => account.charges_enabled && account.payouts_enabled);
+  const limitedAccounts = accounts.filter((account) => !account.charges_enabled || !account.payouts_enabled);
+
+  const profileLabel = activeProfile?.name ? ` - ${activeProfile.name}` : "";
+  const envLabel = activeEnvironment === "test" ? " (Test)" : " (Live)";
 
   return (
-    <ListContainer isLoading={isLoading} isShowingDetail={!isLoading}>
-      {fullyEnabled.length > 0 && (
-        <List.Section title={`✅ Fully Enabled (${fullyEnabled.length})`}>
-          {fullyEnabled.map((account) => (
+    <ListContainer
+      isLoading={isLoading}
+      isShowingDetail={!isLoading}
+      navigationTitle={`Connected Accounts${profileLabel}${envLabel}`}
+      searchBarPlaceholder="Search accounts..."
+    >
+      {fullyEnabledAccounts.length > 0 && (
+        <List.Section title={`Fully Enabled (${fullyEnabledAccounts.length})`}>
+          {fullyEnabledAccounts.map((account) => (
             <AccountItem key={account.id} account={account} dashboardUrl={dashboardUrl} />
           ))}
         </List.Section>
       )}
 
-      {limited.length > 0 && (
-        <List.Section title={`⚠️ Limited Access (${limited.length})`}>
-          {limited.map((account) => (
+      {limitedAccounts.length > 0 && (
+        <List.Section title={`Limited Access (${limitedAccounts.length})`}>
+          {limitedAccounts.map((account) => (
             <AccountItem key={account.id} account={account} dashboardUrl={dashboardUrl} />
           ))}
         </List.Section>
@@ -175,4 +164,4 @@ const ConnectedAccounts = () => {
   );
 };
 
-export default withEnvContext(ConnectedAccounts);
+export default withProfileContext(ConnectedAccounts);

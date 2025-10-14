@@ -1,75 +1,60 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type Stripe from "stripe";
-import { useStripeApi, useStripeDashboard } from "./hooks";
-import { STRIPE_ENDPOINTS } from "./enums";
-import { 
-  convertTimestampToDate, 
-  titleCase, 
-  formatAmount, 
-  formatBillingAddress, 
-  getPaymentIntentId, 
-  getCustomerId, 
-  getChargeIcon 
-} from "./utils";
-import { ListContainer, withEnvContext } from "./components";
+import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks";
+import { STRIPE_ENDPOINTS } from "@src/enums";
+import {
+  convertTimestampToDate,
+  titleCase,
+  formatAmount,
+  formatBillingAddress,
+  getPaymentIntentId,
+  getCustomerId,
+  getChargeIcon,
+} from "@src/utils";
+import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
-const ChargeActions = ({
-  charge,
-  dashboardUrl
-}: {
-  charge: Stripe.Charge;
-  dashboardUrl: string;
-}) => {
+const ChargeActions = ({ charge, dashboardUrl }: { charge: Stripe.Charge; dashboardUrl: string }) => {
   const paymentIntentId = getPaymentIntentId(charge.payment_intent);
   const customerId = getCustomerId(charge.customer);
 
   return (
     <ActionPanel>
       {paymentIntentId && (
-        <Action.OpenInBrowser 
-          title="View in Stripe Dashboard" 
+        <Action.OpenInBrowser
+          title="View in Stripe Dashboard"
           url={`${dashboardUrl}/payments/${paymentIntentId}`}
           icon={Icon.Globe}
         />
       )}
-      {charge.receipt_url && (
-        <Action.OpenInBrowser 
-          title="View Receipt" 
-          url={charge.receipt_url} 
-          icon={Icon.Receipt}
-        />
-      )}
+      {charge.receipt_url && <Action.OpenInBrowser title="View Receipt" url={charge.receipt_url} icon={Icon.Receipt} />}
       {customerId && (
-        <Action.OpenInBrowser 
-          title="View Customer" 
+        <Action.OpenInBrowser
+          title="View Customer"
           url={`${dashboardUrl}/customers/${customerId}`}
           icon={Icon.Person}
         />
       )}
-      <Action.CopyToClipboard 
-        title="Copy Charge ID" 
-        content={charge.id}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
-      />
+      <Action.CopyToClipboard title="Copy Charge ID" content={charge.id} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       {paymentIntentId && (
-        <Action.CopyToClipboard 
-          title="Copy Payment Intent ID" 
+        <Action.CopyToClipboard
+          title="Copy Payment Intent ID"
           content={paymentIntentId}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       )}
       {charge.billing_details.email && (
-        <Action.CopyToClipboard 
-          title="Copy Customer Email" 
+        <Action.CopyToClipboard
+          title="Copy Customer Email"
           content={charge.billing_details.email}
           shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
         />
       )}
-      <Action.CopyToClipboard 
-        title="Copy Amount" 
+      <Action.CopyToClipboard
+        title="Copy Amount"
         content={formatAmount(charge.amount, charge.currency)}
         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       />
+      <ProfileSwitcherActions />
     </ActionPanel>
   );
 };
@@ -84,99 +69,75 @@ const ChargeDetail = ({ charge }: { charge: Stripe.Charge }) => {
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label 
-            title="Status" 
+          <List.Item.Detail.Metadata.Label
+            title="Status"
             text={titleCase(charge.status)}
             icon={charge.status === "succeeded" ? Icon.CheckCircle : Icon.XMarkCircle}
           />
           {charge.disputed && (
-            <List.Item.Detail.Metadata.Label 
-              title="Disputed" 
+            <List.Item.Detail.Metadata.Label
+              title="Disputed"
               text="Yes"
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
             />
           )}
           {charge.refunded && (
-            <List.Item.Detail.Metadata.Label 
-              title="Refund Status" 
+            <List.Item.Detail.Metadata.Label
+              title="Refund Status"
               text="Fully Refunded"
               icon={{ source: Icon.ArrowUp, tintColor: Color.Red }}
             />
           )}
-          {charge.description && (
-            <List.Item.Detail.Metadata.Label title="Description" text={charge.description} />
-          )}
-          
+          {charge.description && <List.Item.Detail.Metadata.Label title="Description" text={charge.description} />}
+
           <List.Item.Detail.Metadata.Separator />
-          
+
           <List.Item.Detail.Metadata.Label title="Payment Details" />
-          <List.Item.Detail.Metadata.Label 
-            title="Amount" 
-            text={formatAmount(charge.amount, charge.currency)} 
-          />
+          <List.Item.Detail.Metadata.Label title="Amount" text={formatAmount(charge.amount, charge.currency)} />
           {charge.amount_refunded > 0 && (
-            <List.Item.Detail.Metadata.Label 
-              title="Refunded" 
-              text={formatAmount(charge.amount_refunded, charge.currency)} 
+            <List.Item.Detail.Metadata.Label
+              title="Refunded"
+              text={formatAmount(charge.amount_refunded, charge.currency)}
             />
           )}
           {charge.amount_captured < charge.amount && (
-            <List.Item.Detail.Metadata.Label 
-              title="Captured" 
-              text={formatAmount(charge.amount_captured, charge.currency)} 
+            <List.Item.Detail.Metadata.Label
+              title="Captured"
+              text={formatAmount(charge.amount_captured, charge.currency)}
             />
           )}
-          <List.Item.Detail.Metadata.Label 
-            title="Created" 
-            text={convertTimestampToDate(charge.created)} 
-          />
-          
+          <List.Item.Detail.Metadata.Label title="Created" text={convertTimestampToDate(charge.created)} />
+
           {card && (
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Payment Method" />
-              <List.Item.Detail.Metadata.Label 
-                title="Card" 
-                text={`${titleCase(card.brand ?? "")} •••• ${card.last4}`} 
+              <List.Item.Detail.Metadata.Label
+                title="Card"
+                text={`${titleCase(card.brand ?? "")} •••• ${card.last4}`}
               />
               {card.exp_month && card.exp_year && (
-                <List.Item.Detail.Metadata.Label 
-                  title="Expires" 
-                  text={`${card.exp_month}/${card.exp_year}`} 
-                />
+                <List.Item.Detail.Metadata.Label title="Expires" text={`${card.exp_month}/${card.exp_year}`} />
               )}
-              {card.country && (
-                <List.Item.Detail.Metadata.Label 
-                  title="Country" 
-                  text={card.country} 
-                />
-              )}
+              {card.country && <List.Item.Detail.Metadata.Label title="Country" text={card.country} />}
             </>
           )}
-          
+
           {(billing.name || billing.email || billingAddress) && (
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Billing Details" />
-              {billing.name && (
-                <List.Item.Detail.Metadata.Label title="Name" text={billing.name} />
-              )}
-              {billing.email && (
-                <List.Item.Detail.Metadata.Label title="Email" text={billing.email} />
-              )}
-              {billingAddress && (
-                <List.Item.Detail.Metadata.Label title="Address" text={billingAddress} />
-              )}
+              {billing.name && <List.Item.Detail.Metadata.Label title="Name" text={billing.name} />}
+              {billing.email && <List.Item.Detail.Metadata.Label title="Email" text={billing.email} />}
+              {billingAddress && <List.Item.Detail.Metadata.Label title="Address" text={billingAddress} />}
             </>
           )}
-          
+
           <List.Item.Detail.Metadata.Separator />
-          
+
           <List.Item.Detail.Metadata.Label title="Identifiers" />
           <List.Item.Detail.Metadata.Label title="Charge ID" text={charge.id} />
-          {paymentIntentId && (
-            <List.Item.Detail.Metadata.Label title="Payment Intent ID" text={paymentIntentId} />
-          )}
+          {paymentIntentId && <List.Item.Detail.Metadata.Label title="Payment Intent ID" text={paymentIntentId} />}
         </List.Item.Detail.Metadata>
       }
     />
@@ -187,19 +148,23 @@ const ChargeItem = ({ charge, dashboardUrl }: { charge: Stripe.Charge; dashboard
   const customerName = charge.billing_details.name || charge.billing_details.email;
   const title = charge.description || customerName || titleCase(charge.status);
   const { icon, color } = getChargeIcon(charge);
-  
+
   // Build subtitle with refund info if applicable
-  let subtitle = formatAmount(charge.amount, charge.currency);
-  if (charge.refunded) {
-    subtitle = `${subtitle} • Fully Refunded`;
-  } else if (charge.amount_refunded > 0) {
-    subtitle = `${subtitle} • Partially Refunded`;
-  }
-  
-  // Add dispute indicator
-  if (charge.disputed) {
-    subtitle = `⚠️ Disputed • ${subtitle}`;
-  }
+  const subtitle = (() => {
+    let result = formatAmount(charge.amount, charge.currency);
+    if (charge.refunded) {
+      result = `${result} • Fully Refunded`;
+    } else if (charge.amount_refunded > 0) {
+      result = `${result} • Partially Refunded`;
+    }
+
+    // Add dispute indicator
+    if (charge.disputed) {
+      result = `DISPUTED - ${result}`;
+    }
+
+    return result;
+  })();
 
   return (
     <List.Item
@@ -214,43 +179,54 @@ const ChargeItem = ({ charge, dashboardUrl }: { charge: Stripe.Charge; dashboard
 };
 
 const Charges = () => {
-  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CHARGES, true);
+  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CHARGES, { isList: true });
   const { dashboardUrl } = useStripeDashboard();
+  const { activeProfile, activeEnvironment } = useProfileContext();
   const charges = data as Stripe.Charge[];
 
   // Group charges by status for better organization
-  const disputed = charges.filter(c => c.disputed);
-  const failed = charges.filter(c => !c.disputed && c.status === "failed");
-  const succeeded = charges.filter(c => !c.disputed && c.status === "succeeded");
-  const other = charges.filter(c => !c.disputed && c.status !== "failed" && c.status !== "succeeded");
+  const disputedCharges = charges.filter((charge) => charge.disputed);
+  const failedCharges = charges.filter((charge) => !charge.disputed && charge.status === "failed");
+  const succeededCharges = charges.filter((charge) => !charge.disputed && charge.status === "succeeded");
+  const otherCharges = charges.filter(
+    (charge) => !charge.disputed && charge.status !== "failed" && charge.status !== "succeeded",
+  );
+
+  const profileLabel = activeProfile?.name ? ` - ${activeProfile.name}` : "";
+  const envLabel = activeEnvironment === "test" ? " (Test)" : " (Live)";
 
   return (
-    <ListContainer isLoading={isLoading} isShowingDetail={!isLoading}>
-      {disputed.length > 0 && (
-        <List.Section title={`⚠️ Disputed (${disputed.length})`}>
-          {disputed.map((charge) => (
+    <ListContainer
+      isLoading={isLoading}
+      isShowingDetail={!isLoading}
+      navigationTitle={`Charges${profileLabel}${envLabel}`}
+      searchBarPlaceholder="Search charges..."
+    >
+      {disputedCharges.length > 0 && (
+        <List.Section title={`Disputed (${disputedCharges.length})`}>
+          {disputedCharges.map((charge) => (
             <ChargeItem key={charge.id} charge={charge} dashboardUrl={dashboardUrl} />
           ))}
         </List.Section>
       )}
-      
-      {failed.length > 0 && (
-        <List.Section title={`Failed (${failed.length})`}>
-          {failed.map((charge) => (
+
+      {failedCharges.length > 0 && (
+        <List.Section title={`Failed (${failedCharges.length})`}>
+          {failedCharges.map((charge) => (
             <ChargeItem key={charge.id} charge={charge} dashboardUrl={dashboardUrl} />
           ))}
         </List.Section>
       )}
-      
-      <List.Section title={`Successful (${succeeded.length})`}>
-        {succeeded.map((charge) => (
+
+      <List.Section title={`Successful (${succeededCharges.length})`}>
+        {succeededCharges.map((charge) => (
           <ChargeItem key={charge.id} charge={charge} dashboardUrl={dashboardUrl} />
         ))}
       </List.Section>
-      
-      {other.length > 0 && (
-        <List.Section title={`Other (${other.length})`}>
-          {other.map((charge) => (
+
+      {otherCharges.length > 0 && (
+        <List.Section title={`Other (${otherCharges.length})`}>
+          {otherCharges.map((charge) => (
             <ChargeItem key={charge.id} charge={charge} dashboardUrl={dashboardUrl} />
           ))}
         </List.Section>
@@ -259,4 +235,4 @@ const Charges = () => {
   );
 };
 
-export default withEnvContext(Charges);
+export default withProfileContext(Charges);

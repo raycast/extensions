@@ -1,6 +1,6 @@
 import { Color, Icon } from "@raycast/api";
 import type Stripe from "stripe";
-import { convertAmount } from "./index";
+import { convertAmount } from "@src/utils/index";
 
 /**
  * Format amount with currency
@@ -24,9 +24,7 @@ export const formatAmountWithSign = (amount: number, currency: string): string =
  */
 export const formatBillingAddress = (address?: Stripe.Address | null): string => {
   if (!address) return "";
-  return [address.line1, address.city, address.state, address.postal_code, address.country]
-    .filter(Boolean)
-    .join(", ");
+  return [address.line1, address.city, address.state, address.postal_code, address.country].filter(Boolean).join(", ");
 };
 
 /**
@@ -50,18 +48,14 @@ export const getCustomerId = (
 /**
  * Extract payment intent ID from charge
  */
-export const getPaymentIntentId = (
-  paymentIntent: string | Stripe.PaymentIntent | null | undefined,
-): string => {
+export const getPaymentIntentId = (paymentIntent: string | Stripe.PaymentIntent | null | undefined): string => {
   return getStripeId(paymentIntent);
 };
 
 /**
  * Extract source ID from balance transaction
  */
-export const getSourceId = (
-  source: string | Stripe.BalanceTransaction.Source | null | undefined,
-): string => {
+export const getSourceId = (source: string | any | null | undefined): string => {
   return getStripeId(source);
 };
 
@@ -87,9 +81,7 @@ export const getChargeIcon = (charge: Stripe.Charge): { icon: Icon; color: Color
 /**
  * Get icon and color for payment intent status
  */
-export const getPaymentIntentIcon = (
-  status: Stripe.PaymentIntent.Status,
-): { icon: Icon; color: Color } => {
+export const getPaymentIntentIcon = (status: Stripe.PaymentIntent.Status): { icon: Icon; color: Color } => {
   const iconMap: Record<string, { icon: Icon; color: Color }> = {
     succeeded: { icon: Icon.CheckCircle, color: Color.Green },
     processing: { icon: Icon.CircleProgress, color: Color.Blue },
@@ -146,4 +138,3 @@ export const getPaymentIntentStatusDescription = (status: Stripe.PaymentIntent.S
 export const paymentIntentRequiresAction = (status: Stripe.PaymentIntent.Status): boolean => {
   return ["requires_payment_method", "requires_confirmation", "requires_action", "requires_capture"].includes(status);
 };
-

@@ -11,11 +11,11 @@ import {
   pinCards,
   refundedCards,
   secureCards,
-} from "./data/cards";
-import type { Card as CardType } from "./data/cards";
-import Card from "./components/card";
+} from "@src/data/cards";
+import type { Card as CardType } from "@src/data/cards";
+import Card from "@src/components/card";
 import { useFrecencySorting } from "@raycast/utils";
-import { createCardKey } from "./utils/cards";
+import { createCardKey } from "@src/utils/cards";
 
 const FillCheckout = () => {
   const {

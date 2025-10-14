@@ -1,4 +1,4 @@
-import type { Card } from "../data/cards";
+import type { Card } from "@src/data/cards";
 
 const createCardKey = (card: Card) => {
   const key = `${card.name}:${card.number}`;

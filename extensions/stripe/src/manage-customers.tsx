@@ -1,30 +1,25 @@
 import { Action, ActionPanel, Icon, List, Color, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { withEnvContext, ListContainer } from "./components";
-import { useStripeDashboard, useEnvContext } from "./hooks";
-import { STRIPE_API_VERSION } from "./enums";
-import SubscriptionList from "./manage-subscriptions";
-import CustomerPaymentsList from "./customer-payments";
+import { withProfileContext, ListContainer, ProfileSwitcherActions } from "@src/components";
+import { useStripeDashboard, useProfileContext } from "@src/hooks";
+import { STRIPE_API_VERSION } from "@src/enums";
+import SubscriptionList from "@src/manage-subscriptions";
+import CustomerPaymentsList from "@src/customer-payments";
 import Stripe from "stripe";
 
-const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
-
-// Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-
 function CustomerList() {
-  const { environment } = useEnvContext();
+  const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
+  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
   const [searchQuery, setSearchQuery] = useState("");
   const { push } = useNavigation();
 
   const { isLoading, data, pagination } = useCachedPromise(
     (query: string) => async (options: { page: number; cursor?: string }) => {
       if (!stripe) {
-        throw new Error(`Stripe ${environment} API key is not configured`);
+        throw new Error(`Stripe ${activeEnvironment} API key is not configured`);
       }
 
       // Use search if query is provided
@@ -162,4 +157,4 @@ function CustomerList() {
   );
 }
 
-export default withEnvContext(CustomerList);
+export default withProfileContext(CustomerList);

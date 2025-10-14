@@ -23,6 +23,13 @@
   ],
   "commands": [
     {
+      "name": "manage-profiles",
+      "title": "Manage Stripe Accounts",
+      "subtitle": "Stripe",
+      "description": "Add, edit, or switch between multiple Stripe accounts with different environments",
+      "mode": "view"
+    },
+    {
       "name": "fill-checkout",
       "title": "Fill Checkout",
       "subtitle": "Stripe",
@@ -138,20 +145,20 @@
   ],
   "preferences": [
     {
-      "name": "stripeLiveApiKey",
+      "name": "stripeLiveApiKey", 
       "type": "password",
       "required": false,
-      "title": "Live Env API Key",
-      "description": "API Key for Live Environment. This can be found in your Stripe Dashboard under Developers > API Keys > Secret key",
-      "placeholder": "Enter your Stripe Live API Key"
+      "title": "Default Profile - Live API Key",
+      "description": "API Key for Live Environment of the default profile. For multiple profiles, use the Profile Manager once you have added your default profile.",
+      "placeholder": "Enter the Live API Key for default profile"
     },
     {
       "name": "stripeTestApiKey",
       "type": "password",
       "required": false,
-      "title": "Test Env API Key",
-      "description": "API Key for Test Environment. This can be found in your Stripe Dashboard under Developers > API Keys > Secret key",
-      "placeholder": "Enter your Stripe Test API Key"
+      "title": "Default Profile - Test API Key",
+      "description": "API Key for Test Environment of the default profile. For multiple profiles, use the Profile Manager once you have added your default profile.",
+      "placeholder": "Enter the Test API Key for default profile" 
     }
   ],
   "dependencies": {

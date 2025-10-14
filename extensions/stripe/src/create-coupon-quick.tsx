@@ -1,15 +1,7 @@
-import {
-  LaunchProps,
-  showToast,
-  Toast,
-  Clipboard,
-  showHUD,
-  getPreferenceValues,
-  closeMainWindow,
-} from "@raycast/api";
+import { LaunchProps, showToast, Toast, Clipboard, showHUD, getPreferenceValues, closeMainWindow } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import Stripe from "stripe";
-import { STRIPE_API_VERSION } from "./enums";
+import { STRIPE_API_VERSION } from "@src/enums";
 
 const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
 
@@ -75,4 +67,3 @@ export default async function CreateCouponQuick(props: LaunchProps<{ arguments: 
     });
   }
 }
-

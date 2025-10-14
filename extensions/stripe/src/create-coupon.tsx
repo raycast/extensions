@@ -12,14 +12,9 @@ import {
 import { useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import Stripe from "stripe";
-import { withEnvContext } from "./components";
-import { useEnvContext } from "./hooks";
-import { STRIPE_API_VERSION } from "./enums";
-
-const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
-
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
+import { withProfileContext } from "@src/components";
+import { useProfileContext } from "@src/hooks";
+import { STRIPE_API_VERSION } from "@src/enums";
 
 interface CouponFormValues {
   id: string;
@@ -35,8 +30,9 @@ interface CouponFormValues {
 }
 
 function CreateCouponForm() {
-  const { environment } = useEnvContext();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const { activeProfile, activeEnvironment } = useProfileContext();
+  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
+  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
   const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
   const [duration, setDuration] = useState<"forever" | "once" | "repeating">("forever");
@@ -47,7 +43,7 @@ function CreateCouponForm() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: `Stripe ${environment} API key is not configured`,
+        message: `Stripe ${activeEnvironment} API key is not configured`,
       });
       return;
     }
@@ -137,25 +133,15 @@ function CreateCouponForm() {
       <Form.Separator />
 
       <Form.Dropdown id="discountType" title="Discount Type" value={discountType} onChange={setDiscountType as any}>
-        <Form.Dropdown.Item value="percentage" title="Percentage Off" icon={Icon.Percent} />
+        <Form.Dropdown.Item value="percentage" title="Percentage Off" icon={Icon.TwoArrowsClockwise} />
         <Form.Dropdown.Item value="fixed" title="Fixed Amount Off" icon={Icon.Coins} />
       </Form.Dropdown>
 
       {discountType === "percentage" ? (
-        <Form.TextField
-          id="percentOff"
-          title="Percent Off"
-          placeholder="e.g., 25"
-          info="Discount percentage (0-100)"
-        />
+        <Form.TextField id="percentOff" title="Percent Off" placeholder="e.g., 25" info="Discount percentage (0-100)" />
       ) : (
         <>
-          <Form.TextField
-            id="amountOff"
-            title="Amount Off"
-            placeholder="e.g., 10.00"
-            info="Fixed discount amount"
-          />
+          <Form.TextField id="amountOff" title="Amount Off" placeholder="e.g., 10.00" info="Fixed discount amount" />
           <Form.TextField id="currency" title="Currency" placeholder="USD" defaultValue="USD" />
         </>
       )}
@@ -163,7 +149,7 @@ function CreateCouponForm() {
       <Form.Separator />
 
       <Form.Dropdown id="duration" title="Duration" value={duration} onChange={setDuration as any}>
-        <Form.Dropdown.Item value="forever" title="Forever" icon={Icon.Infinity} />
+        <Form.Dropdown.Item value="forever" title="Forever" icon={Icon.Star} />
         <Form.Dropdown.Item value="once" title="Once" icon={Icon.Circle} />
         <Form.Dropdown.Item value="repeating" title="Repeating" icon={Icon.Repeat} />
       </Form.Dropdown>
@@ -196,5 +182,4 @@ function CreateCouponForm() {
   );
 }
 
-export default withEnvContext(CreateCouponForm);
-
+export default withProfileContext(CreateCouponForm);

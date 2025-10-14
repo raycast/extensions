@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Environment } from "../../types";
-import { EnvironmentContext } from "../../contexts";
+import { Environment } from "@src/types";
+import { EnvironmentContext } from "@src/contexts";
 
 export const withEnvContext = <P extends object>(Component: React.FC<P>) => {
   return (props: P) => {

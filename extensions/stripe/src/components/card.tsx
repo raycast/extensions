@@ -1,6 +1,6 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List } from "@raycast/api";
-import type { Card } from "../data/cards";
-import { createAppleScript } from "../utils/cards";
+import type { Card } from "@src/data/cards";
+import { createAppleScript } from "@src/utils/cards";
 import { runAppleScript } from "@raycast/utils";
 
 type CardProps = {

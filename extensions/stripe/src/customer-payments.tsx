@@ -1,36 +1,25 @@
 import { Action, ActionPanel, Icon, List, Color, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { withEnvContext } from "./components";
-import { useStripeDashboard, useEnvContext } from "./hooks";
-import { STRIPE_API_VERSION } from "./enums";
-import { 
-  formatAmount, 
-  getPaymentIntentId, 
-  getCustomerId, 
-  getChargeIcon, 
-  isRefundable 
-} from "./utils";
+import { withProfileContext, ProfileSwitcherActions } from "@src/components";
+import { useStripeDashboard, useProfileContext } from "@src/hooks";
+import { STRIPE_API_VERSION } from "@src/enums";
+import { formatAmount, getPaymentIntentId, getCustomerId, getChargeIcon, isRefundable } from "@src/utils";
 import Stripe from "stripe";
-import { getPreferenceValues } from "@raycast/api";
-
-const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
-
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
 interface CustomerPaymentsListProps {
   customerId: string;
 }
 
 function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
-  const { environment } = useEnvContext();
+  const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
+  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
   const { isLoading, data, revalidate } = useCachedPromise(
     async () => {
       if (!stripe) {
-        throw new Error(`Stripe ${environment} API key is not configured`);
+        throw new Error(`Stripe ${activeEnvironment} API key is not configured`);
       }
 
       // Fetch charges for this customer
@@ -52,7 +41,7 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: `Stripe ${environment} API key is not configured`,
+        message: `Stripe ${activeEnvironment} API key is not configured`,
       });
       return;
     }
@@ -230,4 +219,4 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
   );
 }
 
-export default withEnvContext(CustomerPaymentsList);
+export default withProfileContext(CustomerPaymentsList);

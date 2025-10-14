@@ -14,15 +14,10 @@ import {
 import { useState } from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import Stripe from "stripe";
-import { withEnvContext, ListContainer } from "./components";
-import { useEnvContext, useStripeDashboard } from "./hooks";
-import { STRIPE_API_VERSION } from "./enums";
-import { titleCase } from "./utils";
-
-const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
-
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
+import { withProfileContext, ListContainer, ProfileSwitcherActions } from "@src/components";
+import { useProfileContext, useStripeDashboard } from "@src/hooks";
+import { STRIPE_API_VERSION } from "@src/enums";
+import { titleCase } from "@src/utils";
 
 interface PaymentLinkFormValues {
   quantity?: string;
@@ -33,8 +28,9 @@ interface PaymentLinkFormValues {
 }
 
 function CreatePaymentLinkForm({ product, price }: { product: Stripe.Product; price: Stripe.Price }) {
-  const { environment } = useEnvContext();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const { activeProfile, activeEnvironment } = useProfileContext();
+  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
+  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
   const [isLoading, setIsLoading] = useState(false);
   const [afterCompletionType, setAfterCompletionType] = useState<"redirect" | "hosted_confirmation">(
     "hosted_confirmation",
@@ -45,7 +41,7 @@ function CreatePaymentLinkForm({ product, price }: { product: Stripe.Product; pr
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: `Stripe ${environment} API key is not configured`,
+        message: `Stripe ${activeEnvironment} API key is not configured`,
       });
       return;
     }
@@ -78,9 +74,7 @@ function CreatePaymentLinkForm({ product, price }: { product: Stripe.Product; pr
       } else {
         params.after_completion = {
           type: "hosted_confirmation",
-          hosted_confirmation: values.customMessage
-            ? { custom_message: values.customMessage }
-            : undefined,
+          hosted_confirmation: values.customMessage ? { custom_message: values.customMessage } : undefined,
         };
       }
 
@@ -230,15 +224,16 @@ function ProductListItem({
 }
 
 function ProductSelector() {
-  const { environment } = useEnvContext();
+  const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
+  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
   const { push } = useNavigation();
 
   const { isLoading, data } = useCachedPromise(
     async () => {
       if (!stripe) {
-        throw new Error(`Stripe ${environment} API key is not configured`);
+        throw new Error(`Stripe ${activeEnvironment} API key is not configured`);
       }
 
       // Fetch active products
@@ -268,7 +263,7 @@ function ProductSelector() {
   );
 
   const handleSelectPrice = (product: Stripe.Product, price: Stripe.Price) => {
-    push(<CreatePaymentLinkFormWrapped product={product} price={price} />);
+    push(<CreatePaymentLinkForm product={product} price={price} />);
   };
 
   // Group by product type if available
@@ -297,7 +292,4 @@ function ProductSelector() {
   );
 }
 
-const CreatePaymentLinkFormWrapped = withEnvContext(CreatePaymentLinkForm);
-
-export default withEnvContext(ProductSelector);
-
+export default withProfileContext(ProductSelector);

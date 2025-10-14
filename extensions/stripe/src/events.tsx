@@ -1,30 +1,15 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type Stripe from "stripe";
-import { useStripeApi, useStripeDashboard } from "./hooks";
-import { convertTimestampToDate, titleCase } from "./utils";
-import { STRIPE_ENDPOINTS } from "./enums";
-import { ListContainer, withEnvContext } from "./components";
+import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks";
+import { convertTimestampToDate, titleCase } from "@src/utils";
+import { STRIPE_ENDPOINTS } from "@src/enums";
+import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
 const EVENT_CATEGORIES: Record<string, string[]> = {
-  payment: [
-    "charge",
-    "payment_intent",
-    "payment_method",
-    "checkout",
-    "payment_link",
-  ],
+  payment: ["charge", "payment_intent", "payment_method", "checkout", "payment_link"],
   customer: ["customer"],
-  subscription: [
-    "subscription",
-    "subscription_schedule",
-    "invoice",
-    "invoiceitem",
-  ],
-  payout: [
-    "payout",
-    "transfer",
-    "topup",
-  ],
+  subscription: ["subscription", "subscription_schedule", "invoice", "invoiceitem"],
+  payout: ["payout", "transfer", "topup"],
   dispute: ["dispute", "charge_dispute"],
   refund: ["refund"],
   account: ["account", "account_external_account"],
@@ -74,14 +59,14 @@ const getEventDescription = (eventType: string, eventData: Record<string, unknow
     "charge.captured": "Payment Captured",
     "charge.refunded": "Payment Refunded",
     "charge.updated": "Payment Updated",
-    
+
     // Payment Intent events
     "payment_intent.succeeded": "Payment Completed",
     "payment_intent.payment_failed": "Payment Failed",
     "payment_intent.created": "Payment Started",
     "payment_intent.canceled": "Payment Canceled",
     "payment_intent.amount_capturable_updated": "Payment Ready to Capture",
-    
+
     // Customer events
     "customer.created": "New Customer",
     "customer.updated": "Customer Updated",
@@ -89,52 +74,52 @@ const getEventDescription = (eventType: string, eventData: Record<string, unknow
     "customer.subscription.created": "Subscription Started",
     "customer.subscription.updated": "Subscription Changed",
     "customer.subscription.deleted": "Subscription Ended",
-    
+
     // Invoice events
     "invoice.created": "Invoice Created",
     "invoice.finalized": "Invoice Finalized",
     "invoice.paid": "Invoice Paid",
     "invoice.payment_failed": "Invoice Payment Failed",
     "invoice.upcoming": "Upcoming Invoice",
-    
+
     // Subscription events
     "subscription.created": "Subscription Started",
     "subscription.updated": "Subscription Changed",
     "subscription.deleted": "Subscription Ended",
     "subscription.trial_will_end": "Trial Ending Soon",
-    
+
     // Payout events
     "payout.created": "Payout Scheduled",
     "payout.paid": "Payout Sent",
     "payout.failed": "Payout Failed",
     "payout.canceled": "Payout Canceled",
-    
+
     // Refund events
     "refund.created": "Refund Processed",
     "refund.updated": "Refund Updated",
     "refund.failed": "Refund Failed",
-    
+
     // Dispute events
     "charge.dispute.created": "Dispute Opened",
     "charge.dispute.updated": "Dispute Updated",
     "charge.dispute.closed": "Dispute Resolved",
-    
+
     // Product events
     "product.created": "Product Added",
     "product.updated": "Product Updated",
     "price.created": "Price Added",
     "price.updated": "Price Updated",
-    
+
     // Checkout events
     "checkout.session.completed": "Checkout Completed",
     "checkout.session.expired": "Checkout Expired",
-    
+
     // Payment method events
     "payment_method.attached": "Payment Method Added",
     "payment_method.detached": "Payment Method Removed",
     "payment_method.updated": "Payment Method Updated",
   };
-  
+
   return descriptions[eventType] || eventType.split(".").map(titleCase).join(" → ");
 };
 
@@ -144,51 +129,51 @@ const getActionRequired = (eventType: string): { required: boolean; reason?: str
     "charge.failed": "Payment failed - contact customer",
     "payment_intent.payment_failed": "Payment failed - retry needed",
     "invoice.payment_failed": "Invoice unpaid - follow up",
-    
+
     // Disputes
     "charge.dispute.created": "Respond to dispute by deadline",
     "charge.dispute.funds_withdrawn": "Funds held - respond urgently",
-    
+
     // Subscription issues
     "customer.subscription.deleted": "Customer churned - reach out",
     "subscription.trial_will_end": "Trial ending - convert customer",
-    
+
     // Payout issues
     "payout.failed": "Payout failed - update banking info",
     "payout.canceled": "Payout canceled - verify details",
-    
+
     // Account issues
     "account.updated": "Review account changes",
   };
-  
+
   if (eventType in actionableEvents) {
     return { required: true, reason: actionableEvents[eventType] };
   }
-  
+
   return { required: false };
 };
 
 const getEventSubtitle = (event: Stripe.Event): string => {
   const eventData = event.data.object as unknown as Record<string, unknown>;
   const parts: string[] = [];
-  
+
   // Check if action required first
   const actionInfo = getActionRequired(event.type);
   if (actionInfo.required && actionInfo.reason) {
     parts.push(`⚠️ ${actionInfo.reason}`);
   }
-  
+
   // Add amount if present
   if ("amount" in eventData && typeof eventData.amount === "number") {
     const currency = typeof eventData.currency === "string" ? eventData.currency.toUpperCase() : "";
     parts.push(`${(eventData.amount / 100).toFixed(2)} ${currency}`);
   }
-  
+
   // Add customer info if present (only if no action required, to avoid clutter)
   if (!actionInfo.required && "customer" in eventData && typeof eventData.customer === "string") {
     parts.push(`Customer: ${eventData.customer.slice(0, 18)}...`);
   }
-  
+
   // Add status if present and meaningful
   if ("status" in eventData && typeof eventData.status === "string") {
     const status = eventData.status;
@@ -196,14 +181,13 @@ const getEventSubtitle = (event: Stripe.Event): string => {
       parts.push(titleCase(status));
     }
   }
-  
+
   return parts.join(" • ");
 };
 
 const EventActions = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardUrl: string }) => {
-  const objectId = typeof event.data.object === "object" && "id" in event.data.object 
-    ? (event.data.object.id as string) 
-    : null;
+  const objectId =
+    typeof event.data.object === "object" && "id" in event.data.object ? (event.data.object.id as string) : null;
 
   return (
     <ActionPanel>
@@ -212,11 +196,7 @@ const EventActions = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardU
         url={`${dashboardUrl}/events/${event.id}`}
         icon={Icon.Globe}
       />
-      <Action.CopyToClipboard
-        title="Copy Event ID"
-        content={event.id}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
-      />
+      <Action.CopyToClipboard title="Copy Event ID" content={event.id} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       <Action.CopyToClipboard
         title="Copy Event Type"
         content={event.type}
@@ -242,33 +222,19 @@ const EventDetail = ({ event }: { event: Stripe.Event }) => {
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label 
-            title="Event" 
-            text={getEventDescription(event.type, eventData)} 
-          />
-          <List.Item.Detail.Metadata.Label 
-            title="Technical Type" 
-            text={event.type} 
-          />
-          <List.Item.Detail.Metadata.Label 
-            title="Created" 
-            text={convertTimestampToDate(event.created)} 
-          />
-          {event.request?.id && (
-            <List.Item.Detail.Metadata.Label 
-              title="Request ID" 
-              text={event.request.id} 
-            />
-          )}
-          
+          <List.Item.Detail.Metadata.Label title="Event" text={getEventDescription(event.type, eventData)} />
+          <List.Item.Detail.Metadata.Label title="Technical Type" text={event.type} />
+          <List.Item.Detail.Metadata.Label title="Created" text={convertTimestampToDate(event.created)} />
+          {event.request?.id && <List.Item.Detail.Metadata.Label title="Request ID" text={event.request.id} />}
+
           <List.Item.Detail.Metadata.Separator />
-          
+
           <List.Item.Detail.Metadata.Label title="Object Details" />
           <List.Item.Detail.Metadata.Label title="Object ID" text={objectId} />
           {"amount" in eventData && typeof eventData.amount === "number" && (
-            <List.Item.Detail.Metadata.Label 
-              title="Amount" 
-              text={`${(eventData.amount / 100).toFixed(2)} ${(eventData.currency as string)?.toUpperCase() || ""}`} 
+            <List.Item.Detail.Metadata.Label
+              title="Amount"
+              text={`${(eventData.amount / 100).toFixed(2)} ${(eventData.currency as string)?.toUpperCase() || ""}`}
             />
           )}
           {"status" in eventData && typeof eventData.status === "string" && (
@@ -277,7 +243,7 @@ const EventDetail = ({ event }: { event: Stripe.Event }) => {
           {"customer" in eventData && typeof eventData.customer === "string" && (
             <List.Item.Detail.Metadata.Label title="Customer" text={eventData.customer} />
           )}
-          
+
           {hasMetadata && (
             <>
               <List.Item.Detail.Metadata.Separator />
@@ -287,16 +253,13 @@ const EventDetail = ({ event }: { event: Stripe.Event }) => {
               ))}
             </>
           )}
-          
+
           <List.Item.Detail.Metadata.Separator />
-          
+
           <List.Item.Detail.Metadata.Label title="Identifiers" />
           <List.Item.Detail.Metadata.Label title="Event ID" text={event.id} />
           {event.livemode !== undefined && (
-            <List.Item.Detail.Metadata.Label 
-              title="Mode" 
-              text={event.livemode ? "Live" : "Test"} 
-            />
+            <List.Item.Detail.Metadata.Label title="Mode" text={event.livemode ? "Live" : "Test"} />
           )}
         </List.Item.Detail.Metadata>
       }
@@ -307,14 +270,14 @@ const EventDetail = ({ event }: { event: Stripe.Event }) => {
 const EventItem = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardUrl: string }) => {
   const actionInfo = getActionRequired(event.type);
   const eventData = event.data.object as unknown as Record<string, unknown>;
-  
+
   // Override icon for action-required events
   let { icon, color } = getEventIcon(event.type);
   if (actionInfo.required) {
     icon = Icon.ExclamationMark;
     color = Color.Orange;
   }
-  
+
   const title = getEventDescription(event.type, eventData);
   const subtitle = getEventSubtitle(event);
 
@@ -331,21 +294,24 @@ const EventItem = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardUrl:
 };
 
 const Events = () => {
-  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.EVENTS, true);
+  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.EVENTS, { isList: true });
   const { dashboardUrl } = useStripeDashboard();
   const events = data as Stripe.Event[];
 
   // Separate action-required events
-  const actionRequired = events.filter(e => getActionRequired(e.type).required);
-  const otherEvents = events.filter(e => !getActionRequired(e.type).required);
+  const actionRequired = events.filter((e) => getActionRequired(e.type).required);
+  const otherEvents = events.filter((e) => !getActionRequired(e.type).required);
 
   // Group other events by category
-  const groupedEvents = otherEvents.reduce((acc, event) => {
-    const category = getEventCategory(event.type);
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(event);
-    return acc;
-  }, {} as Record<string, Stripe.Event[]>);
+  const groupedEvents = otherEvents.reduce(
+    (acc, event) => {
+      const category = getEventCategory(event.type);
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(event);
+      return acc;
+    },
+    {} as Record<string, Stripe.Event[]>,
+  );
 
   const categoryTitles: Record<string, string> = {
     payment: "💳 Payments",
@@ -372,7 +338,7 @@ const Events = () => {
           ))}
         </List.Section>
       )}
-      
+
       {Object.entries(groupedEvents)
         .sort(([a], [b]) => {
           const order = [
@@ -403,4 +369,4 @@ const Events = () => {
   );
 };
 
-export default withEnvContext(Events);
+export default withProfileContext(Events);
