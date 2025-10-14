@@ -55,7 +55,7 @@ export const getPaymentIntentId = (paymentIntent: string | Stripe.PaymentIntent 
 /**
  * Extract source ID from balance transaction
  */
-export const getSourceId = (source: string | any | null | undefined): string => {
+export const getSourceId = (source: string | { id: string } | null | undefined): string => {
   return getStripeId(source);
 };
 

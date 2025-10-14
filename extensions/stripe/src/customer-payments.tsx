@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Icon, List, Color, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { withProfileContext, ProfileSwitcherActions } from "@src/components";
+import { withProfileContext } from "@src/components";
 import { useStripeDashboard, useProfileContext } from "@src/hooks";
 import { STRIPE_API_VERSION } from "@src/enums";
-import { formatAmount, getPaymentIntentId, getCustomerId, getChargeIcon, isRefundable } from "@src/utils";
 import Stripe from "stripe";
 
 /**

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type Stripe from "stripe";
-import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks";
+import { useStripeApi, useStripeDashboard } from "@src/hooks";
 import {
   convertTimestampToDate,
   titleCase,
@@ -11,7 +11,7 @@ import {
   paymentIntentRequiresAction,
 } from "@src/utils";
 import { STRIPE_ENDPOINTS } from "@src/enums";
-import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
+import { ListContainer, withProfileContext } from "@src/components";
 
 /**
  * Action panel for payment intent items.

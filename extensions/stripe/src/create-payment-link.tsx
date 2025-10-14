@@ -6,7 +6,6 @@ import {
   Toast,
   Clipboard,
   open,
-  getPreferenceValues,
   Icon,
   List,
   useNavigation,
@@ -14,10 +13,9 @@ import {
 import { useState } from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import Stripe from "stripe";
-import { withProfileContext, ListContainer, ProfileSwitcherActions } from "@src/components";
+import { withProfileContext, ListContainer } from "@src/components";
 import { useProfileContext, useStripeDashboard } from "@src/hooks";
 import { STRIPE_API_VERSION } from "@src/enums";
-import { titleCase } from "@src/utils";
 
 /**
  * Form values for creating a payment link.
@@ -156,7 +154,7 @@ function CreatePaymentLinkForm({ product, price }: { product: Stripe.Product; pr
         id="afterCompletionType"
         title="After Purchase"
         value={afterCompletionType}
-        onChange={setAfterCompletionType as any}
+        onChange={(value) => setAfterCompletionType(value as "redirect" | "hosted_confirmation")}
       >
         <Form.Dropdown.Item value="hosted_confirmation" title="Stripe Confirmation Page" icon={Icon.CheckCircle} />
         <Form.Dropdown.Item value="redirect" title="Redirect to URL" icon={Icon.Link} />
@@ -221,7 +219,7 @@ function ProductListItem({
               />
               {prices.length > 1 && (
                 <ActionPanel.Section title="All Prices">
-                  {prices.map((price, idx) => {
+                  {prices.map((price) => {
                     const amount = price.unit_amount ? (price.unit_amount / 100).toFixed(2) : "0.00";
                     const curr = price.currency?.toUpperCase() || "USD";
                     const interval = price.recurring?.interval ? ` / ${price.recurring.interval}` : "";

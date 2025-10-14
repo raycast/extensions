@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type Stripe from "stripe";
 import { convertTimestampToDate, titleCase, formatAmountWithSign, getTransactionIcon, getSourceId } from "@src/utils";
-import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks";
+import { useStripeApi, useStripeDashboard } from "@src/hooks";
 import { STRIPE_ENDPOINTS } from "@src/enums";
-import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
+import { ListContainer, withProfileContext } from "@src/components";
 
 /**
  * Action panel for balance transaction items.

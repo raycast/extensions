@@ -128,7 +128,12 @@ function CreateCouponForm() {
 
       <Form.Separator />
 
-      <Form.Dropdown id="discountType" title="Discount Type" value={discountType} onChange={setDiscountType as any}>
+      <Form.Dropdown
+        id="discountType"
+        title="Discount Type"
+        value={discountType}
+        onChange={(value) => setDiscountType(value as "percentage" | "fixed")}
+      >
         <Form.Dropdown.Item value="percentage" title="Percentage Off" icon={Icon.TwoArrowsClockwise} />
         <Form.Dropdown.Item value="fixed" title="Fixed Amount Off" icon={Icon.Coins} />
       </Form.Dropdown>
@@ -144,7 +149,12 @@ function CreateCouponForm() {
 
       <Form.Separator />
 
-      <Form.Dropdown id="duration" title="Duration" value={duration} onChange={setDuration as any}>
+      <Form.Dropdown
+        id="duration"
+        title="Duration"
+        value={duration}
+        onChange={(value) => setDuration(value as "forever" | "once" | "repeating")}
+      >
         <Form.Dropdown.Item value="forever" title="Forever" icon={Icon.Star} />
         <Form.Dropdown.Item value="once" title="Once" icon={Icon.Circle} />
         <Form.Dropdown.Item value="repeating" title="Repeating" icon={Icon.Repeat} />

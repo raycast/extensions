@@ -16,7 +16,7 @@ interface ProfileStatusBannerProps {
  * Component that displays the current profile and environment status
  * Use this in Detail or Form views where ListContainer isn't available
  */
-export const ProfileStatusBanner = ({ message, isError = false }: ProfileStatusBannerProps = {}) => {
+export const ProfileStatusBanner = ({ message }: ProfileStatusBannerProps = {}) => {
   const { activeProfile, activeEnvironment } = useProfileContext();
 
   const envText = activeEnvironment === "test" ? "Test Mode" : "Live Mode";

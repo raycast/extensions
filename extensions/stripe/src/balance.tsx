@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import capitalize from "lodash/capitalize";
 import type Stripe from "stripe";
-import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks";
+import { useStripeApi, useStripeDashboard } from "@src/hooks";
 import { formatAmount } from "@src/utils";
 import { STRIPE_ENDPOINTS } from "@src/enums";
-import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
+import { ListContainer, withProfileContext } from "@src/components";
 
 /**
  * Action panel for balance items.
@@ -98,7 +98,7 @@ const BalanceItem = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Availa
  * Each balance can be expanded to show breakdown by source type (card, bank, etc).
  */
 const Balance = () => {
-  const { isLoading, data, error } = useStripeApi(STRIPE_ENDPOINTS.BALANCE);
+  const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.BALANCE);
   const { dashboardUrl } = useStripeDashboard();
 
   const balanceData = (data as Stripe.Balance) || null;

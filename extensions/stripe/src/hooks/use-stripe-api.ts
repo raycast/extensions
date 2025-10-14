@@ -156,7 +156,7 @@ export const useStripeApi = (endpoint: string, options: UseStripeApiOptions = {}
           // Try to parse error response
           let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
           try {
-            const errorData: any = await response.json();
+            const errorData: { error?: { message?: string } } = await response.json();
             if (errorData?.error?.message) {
               errorMessage = errorData.error.message;
             }
