@@ -41,11 +41,7 @@ const AccountActions = ({ account, dashboardUrl }: { account: Stripe.Account; da
     />
     <Action.CopyToClipboard title="Copy Account ID" content={account.id} shortcut={SHORTCUTS.COPY_PRIMARY} />
     {account.email && (
-      <Action.CopyToClipboard
-        title="Copy Email"
-        content={account.email}
-        shortcut={SHORTCUTS.COPY_SECONDARY}
-      />
+      <Action.CopyToClipboard title="Copy Email" content={account.email} shortcut={SHORTCUTS.COPY_SECONDARY} />
     )}
     <ProfileSwitcherActions />
   </ActionPanel>

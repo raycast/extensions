@@ -52,11 +52,7 @@ const PaymentIntentActions = ({
         shortcut={SHORTCUTS.COPY_AMOUNT}
       />
       {customerId && (
-        <Action.CopyToClipboard
-          title="Copy Customer ID"
-          content={customerId}
-          shortcut={SHORTCUTS.COPY_CUSTOMER_ID}
-        />
+        <Action.CopyToClipboard title="Copy Customer ID" content={customerId} shortcut={SHORTCUTS.COPY_CUSTOMER_ID} />
       )}
     </ActionPanel>
   );

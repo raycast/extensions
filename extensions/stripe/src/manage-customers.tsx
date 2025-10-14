@@ -153,11 +153,7 @@ function CustomerList() {
                     shortcut={SHORTCUTS.COPY_SECONDARY}
                   />
                 )}
-                <Action.CopyToClipboard
-                  title="Copy Customer ID"
-                  content={customer.id}
-                  shortcut={SHORTCUTS.COPY_ID}
-                />
+                <Action.CopyToClipboard title="Copy Customer ID" content={customer.id} shortcut={SHORTCUTS.COPY_ID} />
               </ActionPanel>
             }
           />

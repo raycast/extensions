@@ -26,11 +26,7 @@ const BalanceActions = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Ava
         url={`${dashboardUrl}/balance/transactions?currency=${balance.currency.toLowerCase()}`}
         icon={Icon.List}
       />
-      <Action.CopyToClipboard
-        title="Copy Amount"
-        content={formattedAmount}
-        shortcut={SHORTCUTS.COPY_PRIMARY}
-      />
+      <Action.CopyToClipboard title="Copy Amount" content={formattedAmount} shortcut={SHORTCUTS.COPY_PRIMARY} />
       <Action.CopyToClipboard
         title="Copy Currency"
         content={balance.currency.toUpperCase()}

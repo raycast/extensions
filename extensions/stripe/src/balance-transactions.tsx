@@ -18,13 +18,7 @@ const TransactionActions = ({ id, source, dashboardUrl }: { id: string; source: 
       icon={Icon.Globe}
     />
     <Action.CopyToClipboard title="Copy Transaction ID" content={id} shortcut={SHORTCUTS.COPY_PRIMARY} />
-    {source && (
-      <Action.CopyToClipboard
-        title="Copy Source ID"
-        content={source}
-        shortcut={SHORTCUTS.COPY_SECONDARY}
-      />
-    )}
+    {source && <Action.CopyToClipboard title="Copy Source ID" content={source} shortcut={SHORTCUTS.COPY_SECONDARY} />}
   </ActionPanel>
 );
 
