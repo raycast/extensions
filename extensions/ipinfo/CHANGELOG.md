@@ -1,6 +1,6 @@
 # IPInfo Changelog
 
-## [Upgrades] - {PR_MERGE_DATE}
+## [Upgrades] - 2025-10-14
   
 - Released extension for Windows
 - Added support for IPv6
