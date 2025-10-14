@@ -74,28 +74,13 @@ Manage multiple Stripe accounts with different environments seamlessly from Rayc
 - **Keyboard**: `Cmd+Shift+E` → Toggle Test/Live
 - **Dropdown**: Use the environment dropdown
 
-## 💡 Use Cases
+## 💡 Use Case
 
 ### Multiple Businesses
 ```
 Profile 1: "Main Business" (Purple)
 Profile 2: "Side Project" (Blue)
 Profile 3: "Consulting Gig" (Green)
-```
-
-### Development Workflow
-```
-Profile 1: "Production" (Red) - Live data
-Profile 2: "Staging" (Yellow) - Pre-release testing
-Profile 3: "Development" (Blue) - Active development
-```
-
-### Agency/Freelancer
-```
-Profile 1: "Client: Acme Corp"
-Profile 2: "Client: Tech Startup"
-Profile 3: "Client: E-commerce Store"
-Profile 4: "Internal Tools"
 ```
 
 ## 🐛 Troubleshooting
@@ -123,17 +108,3 @@ Make sure you have multiple profiles created in **"Manage Stripe Accounts"**
 - Verify keys are copied correctly without extra spaces
 - Check keys haven't been revoked in Stripe Dashboard
 - Ensure keys have proper permissions
-
-## 📚 Full Setup Guide
-
-For detailed instructions, see [SETUP_GUIDE.md](./SETUP_GUIDE.md)
-
-## 🔗 Resources
-
-- [Stripe Dashboard](https://dashboard.stripe.com/)
-- [Stripe API Documentation](https://stripe.com/docs/api)
-- [Get API Keys](https://dashboard.stripe.com/apikeys)
-
----
-
-Made with ❤️ for the Raycast community
