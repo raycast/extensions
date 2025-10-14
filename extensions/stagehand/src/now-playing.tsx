@@ -66,7 +66,8 @@ export default function Command() {
                       await showToast({
                         style: Toast.Style.Failure,
                         title: "Video not ready",
-                        message: "Play video in browser first, then use Stagehand",
+                        message:
+                          "Play video in browser first, then use Stagehand",
                       });
                     } else {
                       await showToast({
