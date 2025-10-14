@@ -13,25 +13,13 @@ export const IVPN_STATUS_SIMPLIFY_MAP = {
   TCP_CONNECT: "CONNECTING",
   INITIALISED: "CONNECTING",
   EXITING: "ERROR",
-} as const satisfies Record<IvpnStatusType, IvpnStatusSimplified>;
+} as const;
 
 type SimplifyMap = typeof IVPN_STATUS_SIMPLIFY_MAP;
 
-export type IvpnStatusType =
-  | "CONNECTED"
-  | "DISCONNECTED"
-  | "CONNECTING"
-  | "WAIT"
-  | "AUTH"
-  | "GETCONFIG"
-  | "ASSIGNIP"
-  | "ADDROUTES"
-  | "RECONNECTING"
-  | "TCP_CONNECT"
-  | "INITIALISED"
-  | "EXITING";
+export type IvpnStatusType = keyof SimplifyMap;
 
-export type IvpnStatusSimplified = "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "ERROR";
+export type IvpnStatusSimplified = SimplifyMap[IvpnStatusType];
 
 type IvpnConnectionInfo = {
   vpnStatus: IvpnStatusType;
