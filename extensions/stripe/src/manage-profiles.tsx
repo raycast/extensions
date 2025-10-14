@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useProfileContext } from "@src/hooks";
 import { StripeProfile } from "@src/types";
 import { withProfileContext } from "@src/components";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
  * Predefined color options for profile visual identification.
@@ -284,7 +285,7 @@ const ManageProfiles = () => {
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteProfile(profile)}
-                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      shortcut={SHORTCUTS.DELETE}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

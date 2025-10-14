@@ -4,6 +4,7 @@ import { useStripeApi, useStripeDashboard } from "@src/hooks";
 import { convertTimestampToDate, titleCase } from "@src/utils";
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext } from "@src/components";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
  * Event category mappings for organizing Stripe events.
@@ -221,7 +222,7 @@ const EventActions = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardU
         url={`${dashboardUrl}/events/${event.id}`}
         icon={Icon.Globe}
       />
-      <Action.CopyToClipboard title="Copy Event ID" content={event.id} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      <Action.CopyToClipboard title="Copy Event ID" content={event.id} shortcut={SHORTCUTS.COPY_PRIMARY} />
       <Action.CopyToClipboard
         title="Copy Event Type"
         content={event.type}

@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { withProfileContext, ListContainer } from "@src/components";
 import { useStripeDashboard, useStripeClient } from "@src/hooks";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 import SubscriptionList from "@src/manage-subscriptions";
 import CustomerPaymentsList from "@src/customer-payments";
 import type Stripe from "stripe";
@@ -143,19 +144,19 @@ function CustomerList() {
                 <Action.OpenInBrowser
                   title="View in Stripe Dashboard"
                   url={`${dashboardUrl}/customers/${customer.id}`}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.OPEN_BROWSER}
                 />
                 {customer.email && (
                   <Action.CopyToClipboard
                     title="Copy Email"
                     content={customer.email}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={SHORTCUTS.COPY_SECONDARY}
                   />
                 )}
                 <Action.CopyToClipboard
                   title="Copy Customer ID"
                   content={customer.id}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                  shortcut={SHORTCUTS.COPY_ID}
                 />
               </ActionPanel>
             }

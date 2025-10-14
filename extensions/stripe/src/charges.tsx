@@ -12,6 +12,7 @@ import {
   getChargeIcon,
 } from "@src/utils";
 import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
  * Action panel for charge items.
@@ -38,25 +39,25 @@ const ChargeActions = ({ charge, dashboardUrl }: { charge: Stripe.Charge; dashbo
           icon={Icon.Person}
         />
       )}
-      <Action.CopyToClipboard title="Copy Charge ID" content={charge.id} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      <Action.CopyToClipboard title="Copy Charge ID" content={charge.id} shortcut={SHORTCUTS.COPY_PRIMARY} />
       {paymentIntentId && (
         <Action.CopyToClipboard
           title="Copy Payment Intent ID"
           content={paymentIntentId}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={SHORTCUTS.COPY_SECONDARY}
         />
       )}
       {charge.billing_details.email && (
         <Action.CopyToClipboard
           title="Copy Customer Email"
           content={charge.billing_details.email}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+          shortcut={SHORTCUTS.COPY_EMAIL}
         />
       )}
       <Action.CopyToClipboard
         title="Copy Amount"
         content={formatAmount(charge.amount, charge.currency)}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        shortcut={SHORTCUTS.COPY_AMOUNT}
       />
       <ProfileSwitcherActions />
     </ActionPanel>

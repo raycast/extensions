@@ -5,6 +5,7 @@ import { useStripeApi, useStripeDashboard } from "@src/hooks";
 import { formatAmount } from "@src/utils";
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext } from "@src/components";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
  * Action panel for balance items.
@@ -28,12 +29,12 @@ const BalanceActions = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Ava
       <Action.CopyToClipboard
         title="Copy Amount"
         content={formattedAmount}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={SHORTCUTS.COPY_PRIMARY}
       />
       <Action.CopyToClipboard
         title="Copy Currency"
         content={balance.currency.toUpperCase()}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={SHORTCUTS.COPY_SECONDARY}
       />
     </ActionPanel>
   );

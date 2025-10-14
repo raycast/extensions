@@ -3,6 +3,7 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { withProfileContext } from "@src/components";
 import { useStripeDashboard, useProfileContext } from "@src/hooks";
 import { STRIPE_API_VERSION } from "@src/enums";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 import Stripe from "stripe";
 
 /**
@@ -209,19 +210,19 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
                       icon={Icon.ArrowCounterClockwise}
                       style={Action.Style.Destructive}
                       onAction={() => handleRefund(charge)}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={SHORTCUTS.REFUND}
                     />
                   )}
                   <Action.CopyToClipboard
                     title="Copy Charge ID"
                     content={charge.id}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={SHORTCUTS.COPY_SECONDARY}
                   />
                   {charge.receipt_email && (
                     <Action.CopyToClipboard
                       title="Copy Receipt Email"
                       content={charge.receipt_email}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                      shortcut={SHORTCUTS.COPY_EMAIL}
                     />
                   )}
                   {charge.receipt_url && (

@@ -4,6 +4,7 @@ import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks"
 import { convertTimestampToDate, titleCase, formatBillingAddress } from "@src/utils";
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
  * Formats date of birth object into DD/MM/YYYY string.
@@ -38,12 +39,12 @@ const AccountActions = ({ account, dashboardUrl }: { account: Stripe.Account; da
       url={`${dashboardUrl}/connect/accounts/${account.id}`}
       icon={Icon.Globe}
     />
-    <Action.CopyToClipboard title="Copy Account ID" content={account.id} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+    <Action.CopyToClipboard title="Copy Account ID" content={account.id} shortcut={SHORTCUTS.COPY_PRIMARY} />
     {account.email && (
       <Action.CopyToClipboard
         title="Copy Email"
         content={account.email}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={SHORTCUTS.COPY_SECONDARY}
       />
     )}
     <ProfileSwitcherActions />

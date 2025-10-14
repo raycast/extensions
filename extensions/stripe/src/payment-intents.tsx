@@ -12,6 +12,7 @@ import {
 } from "@src/utils";
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext } from "@src/components";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
  * Action panel for payment intent items.
@@ -43,18 +44,18 @@ const PaymentIntentActions = ({
       <Action.CopyToClipboard
         title="Copy Payment Intent ID"
         content={paymentIntent.id}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={SHORTCUTS.COPY_PRIMARY}
       />
       <Action.CopyToClipboard
         title="Copy Amount"
         content={formatAmount(paymentIntent.amount, paymentIntent.currency)}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        shortcut={SHORTCUTS.COPY_AMOUNT}
       />
       {customerId && (
         <Action.CopyToClipboard
           title="Copy Customer ID"
           content={customerId}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+          shortcut={SHORTCUTS.COPY_CUSTOMER_ID}
         />
       )}
     </ActionPanel>

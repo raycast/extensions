@@ -3,6 +3,7 @@ import React from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { withProfileContext, ListContainer } from "@src/components";
 import { useStripeDashboard, useStripeClient } from "@src/hooks";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 import {
   convertAmount,
   convertTimestampToDate,
@@ -253,31 +254,31 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
                 <Action
                   title="Cancel Subscription"
                   icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  shortcut={SHORTCUTS.DELETE}
                   onAction={() => handleCancelSubscription(subscription)}
                 />
                 <Action
                   title="Refund Last Payment"
                   icon={{ source: Icon.Receipt, tintColor: Color.Orange }}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={SHORTCUTS.REFUND}
                   onAction={() => handleRefundLastPayment(subscription)}
                 />
                 <Action.OpenInBrowser
                   title="View in Stripe Dashboard"
                   url={`${dashboardUrl}/subscriptions/${subscription.id}`}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.OPEN_BROWSER}
                 />
                 {customer?.email && (
                   <Action.CopyToClipboard
                     title="Copy Email"
                     content={customer.email}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={SHORTCUTS.COPY_SECONDARY}
                   />
                 )}
                 <Action.CopyToClipboard
                   title="Copy Subscription ID"
                   content={subscription.id}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                  shortcut={SHORTCUTS.COPY_ID}
                 />
               </ActionPanel>
             }
