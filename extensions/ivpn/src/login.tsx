@@ -56,9 +56,7 @@ export default withNoViewErrorHandler(async ({ arguments: { accountId } }: Props
     }
 
     await IVPN.logout();
-  }
 
-  if (isAuthenticated) {
     showToast({ title: `Logging in under ${accountId}...`, style: Toast.Style.Animated });
   }
 
