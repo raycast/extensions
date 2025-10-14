@@ -1,6 +1,6 @@
 # Kaomoji Search Changelog
 
-## [Merge for PR] - 2025-10-07
+## [Chore: Added Windows as platform] - {PR_MERGE_DATE}
 
 ## [Windows Support + Modernize] - 2025-10-06
 
