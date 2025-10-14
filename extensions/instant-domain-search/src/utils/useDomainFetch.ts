@@ -7,8 +7,11 @@ import getUserAgent from "./getUserAgent";
 
 export default function useDomainFetch(query: string) {
   const regex = useMemo(() => {
-    const sortedTLDs = Array.from(ALL_TLDs).sort((a, b) => b.length - a.length);
-    return new RegExp(`^(?<domain>.+?)(\\.(?<tld>${sortedTLDs.join("|")}))?$`);
+    const tldsPattern = Array.from(ALL_TLDs)
+      .sort((a, b) => b.length - a.length)
+      .map((tld) => tld.replace(".", "\\."))
+      .join("|");
+    return new RegExp(`^(?<domain>.+?)(\\.(?<tld>${tldsPattern}))?$`);
   }, []);
   const parsedSearch = useMemo(() => {
     const trimmedQuery = query.trim();
