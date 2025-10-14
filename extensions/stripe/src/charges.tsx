@@ -13,6 +13,10 @@ import {
 } from "@src/utils";
 import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
+/**
+ * Action panel for charge items.
+ * Provides quick access to payment intent, receipt, customer details, and copy actions.
+ */
 const ChargeActions = ({ charge, dashboardUrl }: { charge: Stripe.Charge; dashboardUrl: string }) => {
   const paymentIntentId = getPaymentIntentId(charge.payment_intent);
   const customerId = getCustomerId(charge.customer);
@@ -59,6 +63,10 @@ const ChargeActions = ({ charge, dashboardUrl }: { charge: Stripe.Charge; dashbo
   );
 };
 
+/**
+ * Detailed view of a charge showing payment method, billing info, and status.
+ * Displays card details, refund status, disputes, and all relevant IDs.
+ */
 const ChargeDetail = ({ charge }: { charge: Stripe.Charge }) => {
   const card = charge.payment_method_details?.card;
   const billing = charge.billing_details;
@@ -144,6 +152,10 @@ const ChargeDetail = ({ charge }: { charge: Stripe.Charge }) => {
   );
 };
 
+/**
+ * List item for a single charge.
+ * Shows charge description/customer, amount, and visual indicators for disputes/refunds.
+ */
 const ChargeItem = ({ charge, dashboardUrl }: { charge: Stripe.Charge; dashboardUrl: string }) => {
   const customerName = charge.billing_details.name || charge.billing_details.email;
   const title = charge.description || customerName || titleCase(charge.status);
@@ -178,6 +190,17 @@ const ChargeItem = ({ charge, dashboardUrl }: { charge: Stripe.Charge; dashboard
   );
 };
 
+/**
+ * Charges View - Displays recent Stripe charges with filtering and search.
+ *
+ * Organizes charges into sections:
+ * - Disputed: Charges currently under dispute
+ * - Failed: Charges that failed to process
+ * - Successful: Completed charges
+ * - Other: Charges in other states (pending, etc)
+ *
+ * Each charge shows payment details, customer info, and refund status.
+ */
 const Charges = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CHARGES, { isList: true });
   const { dashboardUrl } = useStripeDashboard();

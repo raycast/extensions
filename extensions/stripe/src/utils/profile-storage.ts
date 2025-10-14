@@ -1,5 +1,5 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { StripeProfile } from "@src/types";
+import type { StripeProfile, Environment } from "@src/types";
 
 const STORAGE_KEY = "stripe-profiles";
 const ACTIVE_PROFILE_KEY = "stripe-active-profile-id";
@@ -22,12 +22,12 @@ export const saveActiveProfileId = async (profileId: string): Promise<void> => {
   await LocalStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
 };
 
-export const getActiveEnvironment = async (): Promise<"live" | "test"> => {
+export const getActiveEnvironment = async (): Promise<Environment> => {
   const env = await LocalStorage.getItem<string>(ACTIVE_ENVIRONMENT_KEY);
-  return (env === "test" ? "test" : "live") as "live" | "test";
+  return env === "test" ? "test" : "live";
 };
 
-export const saveActiveEnvironment = async (environment: "live" | "test"): Promise<void> => {
+export const saveActiveEnvironment = async (environment: Environment): Promise<void> => {
   await LocalStorage.setItem(ACTIVE_ENVIRONMENT_KEY, environment);
 };
 
@@ -78,6 +78,6 @@ export const initializeProfiles = async (): Promise<{
   return { profiles, activeProfileId };
 };
 
-export const validateProfile = (profile: StripeProfile, environment: "test" | "live"): boolean => {
+export const validateProfile = (profile: StripeProfile, environment: Environment): boolean => {
   return environment === "test" ? !!profile.testApiKey : !!profile.liveApiKey;
 };

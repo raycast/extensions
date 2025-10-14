@@ -12,10 +12,27 @@ const stripe = stripeTestApiKey
     ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION })
     : null;
 
+/**
+ * Arguments for the quick coupon creation command.
+ */
 interface QuickCouponArguments {
   percentage: string;
 }
 
+/**
+ * Create Coupon Quick Command - Rapidly create percentage-based coupons from anywhere.
+ *
+ * This is a no-UI quicklink command that:
+ * - Accepts a percentage argument (0-100)
+ * - Generates a random 8-character coupon code
+ * - Creates a "forever" duration coupon
+ * - Automatically copies coupon ID to clipboard
+ * - Shows success HUD notification
+ * - Uses preference-based API keys (defaults to test mode)
+ *
+ * Usage: Invoke from Raycast, enter percentage, get instant coupon.
+ * Perfect for rapid coupon generation during sales or customer support.
+ */
 export default async function CreateCouponQuick(props: LaunchProps<{ arguments: QuickCouponArguments }>) {
   const { percentage } = props.arguments;
 

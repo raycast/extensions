@@ -5,20 +5,22 @@ import {
   confirmAlert,
   Icon,
   List,
-  showToast,
-  Toast,
   Color,
-  getPreferenceValues,
   Detail,
   useNavigation,
 } from "@raycast/api";
 import React from "react";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { withProfileContext, ListContainer, ProfileSwitcherActions } from "@src/components";
-import { useStripeDashboard, useProfileContext } from "@src/hooks";
-import { STRIPE_API_VERSION } from "@src/enums";
-import { convertAmount, convertTimestampToDate } from "@src/utils";
-import Stripe from "stripe";
+import { useCachedPromise } from "@raycast/utils";
+import { withProfileContext, ListContainer } from "@src/components";
+import { useStripeDashboard, useStripeClient } from "@src/hooks";
+import {
+  convertAmount,
+  convertTimestampToDate,
+  getSubscriptionStatusColor,
+  showOperationToast,
+  handleStripeError,
+} from "@src/utils";
+import type Stripe from "stripe";
 
 // Constants
 const RESULTS_LIMIT = 10;
@@ -98,10 +100,8 @@ interface SubscriptionListProps {
 }
 
 function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
-  const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();
-  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
-  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
+  const stripe = useStripeClient();
   const { push } = useNavigation();
 
   const {
@@ -147,10 +147,6 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
 
   const handleCancelSubscription = async (subscription: Stripe.Subscription) => {
     if (!stripe) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Stripe ${activeEnvironment} API key is not configured`,
-      });
       return;
     }
 
@@ -169,34 +165,22 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
 
     if (confirmed) {
       try {
-        await showToast({
-          style: Toast.Style.Animated,
-          title: "Cancelling subscription...",
-        });
-
-        await stripe.subscriptions.cancel(subscription.id);
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Subscription cancelled successfully",
-        });
+        await showOperationToast(
+          "Cancelling subscription",
+          async () => await stripe.subscriptions.cancel(subscription.id),
+          "Subscription cancelled successfully"
+        );
 
         // Revalidate the list to remove the cancelled subscription
         revalidate();
       } catch (error) {
-        await showFailureToast(error, {
-          title: "Failed to cancel subscription",
-        });
+        await handleStripeError(error, "cancel subscription");
       }
     }
   };
 
   const handleRefundLastPayment = async (subscription: Stripe.Subscription) => {
     if (!stripe) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Stripe ${activeEnvironment} API key is not configured`,
-      });
       return;
     }
 
@@ -217,37 +201,28 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
 
     if (confirmed) {
       try {
-        await showToast({
-          style: Toast.Style.Animated,
-          title: "Processing refund...",
-        });
+        await showOperationToast(
+          "Processing refund",
+          async () => {
+            const latestInvoice = subscription.latest_invoice;
+            if (!latestInvoice) {
+              throw new Error("No invoice found for this subscription");
+            }
 
-        const latestInvoice = subscription.latest_invoice;
-        if (!latestInvoice) {
-          throw new Error("No invoice found for this subscription");
-        }
+            const invoiceId = typeof latestInvoice === "string" ? latestInvoice : latestInvoice.id;
+            const invoice = await stripe.invoices.retrieve(invoiceId);
 
-        const invoiceId = typeof latestInvoice === "string" ? latestInvoice : latestInvoice.id;
-        const invoice = await stripe.invoices.retrieve(invoiceId);
+            if (!invoice.charge) {
+              throw new Error("No charge found for the latest invoice");
+            }
 
-        if (!invoice.charge) {
-          throw new Error("No charge found for the latest invoice");
-        }
-
-        const chargeId = typeof invoice.charge === "string" ? invoice.charge : invoice.charge.id;
-        await stripe.refunds.create({
-          charge: chargeId,
-        });
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Refund processed successfully",
-          message: `${currency} ${convertAmount(amount)} refunded`,
-        });
+            const chargeId = typeof invoice.charge === "string" ? invoice.charge : invoice.charge.id;
+            return await stripe.refunds.create({ charge: chargeId });
+          },
+          `Refund processed successfully - ${currency} ${convertAmount(amount)} refunded`
+        );
       } catch (error) {
-        await showFailureToast(error, {
-          title: "Failed to process refund",
-        });
+        await handleStripeError(error, "process refund");
       }
     }
   };
@@ -274,24 +249,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
               {
                 tag: {
                   value: subscription.status.toUpperCase(),
-                  color:
-                    subscription.status === "active"
-                      ? Color.Green
-                      : subscription.status === "canceled"
-                        ? Color.Red
-                        : subscription.status === "past_due"
-                          ? Color.Orange
-                          : subscription.status === "unpaid"
-                            ? Color.Red
-                            : subscription.status === "incomplete"
-                              ? Color.Yellow
-                              : subscription.status === "incomplete_expired"
-                                ? Color.Red
-                                : subscription.status === "trialing"
-                                  ? Color.Blue
-                                  : subscription.status === "paused"
-                                    ? Color.SecondaryText
-                                    : Color.SecondaryText,
+                  color: getSubscriptionStatusColor(subscription.status),
                 },
               },
             ]}

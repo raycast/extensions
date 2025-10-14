@@ -6,10 +6,34 @@ import { STRIPE_API_VERSION } from "@src/enums";
 import { formatAmount, getPaymentIntentId, getCustomerId, getChargeIcon, isRefundable } from "@src/utils";
 import Stripe from "stripe";
 
+/**
+ * Props for the CustomerPaymentsList component.
+ */
 interface CustomerPaymentsListProps {
   customerId: string;
 }
 
+/**
+ * Customer Payments View - Displays all payments (charges) for a specific customer.
+ *
+ * Features:
+ * - Shows payment amount, date, description, and status
+ * - Displays refund status (fully refunded, partially refunded, refundable amount)
+ * - One-click refund action for eligible payments
+ * - Quick navigation to payment in Stripe Dashboard
+ * - Copy charge ID and receipt email
+ * - View receipt in browser
+ * - Auto-refreshes after refund operations
+ *
+ * Color-coded status indicators:
+ * - Green: Successful payment
+ * - Yellow: Partially refunded
+ * - Gray: Fully refunded
+ * - Red: Failed payment
+ * - Blue: Other statuses
+ *
+ * Useful for customer support when handling refund requests or reviewing payment history.
+ */
 function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
   const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();

@@ -1,25 +1,34 @@
-import { Action, ActionPanel, Icon, List, Color, getPreferenceValues, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { withProfileContext, ListContainer, ProfileSwitcherActions } from "@src/components";
-import { useStripeDashboard, useProfileContext } from "@src/hooks";
-import { STRIPE_API_VERSION } from "@src/enums";
+import { withProfileContext, ListContainer } from "@src/components";
+import { useStripeDashboard, useStripeClient } from "@src/hooks";
 import SubscriptionList from "@src/manage-subscriptions";
 import CustomerPaymentsList from "@src/customer-payments";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 
+/**
+ * Customer List View - Search and manage Stripe customers.
+ *
+ * Features:
+ * - Search customers by email
+ * - View customer subscriptions and payments
+ * - Navigate to customer detail in Stripe Dashboard
+ * - Copy customer email and ID
+ * - Shows subscription count badge for each customer
+ *
+ * Uses cursor-based pagination for efficient loading.
+ */
 function CustomerList() {
-  const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();
-  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
-  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
+  const stripe = useStripeClient();
   const [searchQuery, setSearchQuery] = useState("");
   const { push } = useNavigation();
 
   const { isLoading, data, pagination } = useCachedPromise(
     (query: string) => async (options: { page: number; cursor?: string }) => {
       if (!stripe) {
-        throw new Error(`Stripe ${activeEnvironment} API key is not configured`);
+        throw new Error("Stripe API key is not configured");
       }
 
       // Use search if query is provided

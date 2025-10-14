@@ -16,6 +16,9 @@ import { useProfileContext } from "@src/hooks";
 import { StripeProfile } from "@src/types";
 import { withProfileContext } from "@src/components";
 
+/**
+ * Predefined color options for profile visual identification.
+ */
 const PROFILE_COLORS = [
   { name: "Stripe Purple", value: "#635BFF" },
   { name: "Blue", value: "#0070F3" },
@@ -27,11 +30,24 @@ const PROFILE_COLORS = [
   { name: "Teal", value: "#14B8A6" },
 ];
 
+/**
+ * Props for the ProfileForm component.
+ */
 interface ProfileFormProps {
   profile?: StripeProfile;
   onSubmit: (profile: any) => Promise<void>;
 }
 
+/**
+ * ProfileForm - Form for creating or editing a Stripe profile.
+ *
+ * Features:
+ * - Profile name and optional account ID
+ * - Separate Test and Live API keys (password fields)
+ * - Color picker for visual identification
+ * - Validation and error handling
+ * - Automatic toast notifications on success/failure
+ */
 const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
@@ -144,6 +160,21 @@ const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
   );
 };
 
+/**
+ * Manage Profiles View - Create and manage multiple Stripe account profiles.
+ *
+ * Features:
+ * - View all configured Stripe profiles
+ * - Create, edit, and delete profiles
+ * - Switch between profiles
+ * - Color-coded profiles for easy identification
+ * - Shows which API keys (Test/Live) are configured
+ * - Indicates active profile with checkmark
+ * - Quick copy actions for API keys
+ * - Prevents deletion of last profile
+ *
+ * Useful for managing multiple Stripe accounts (e.g., different businesses, environments).
+ */
 const ManageProfiles = () => {
   const { profiles, activeProfile, addProfile, updateProfile, deleteProfile, setActiveProfile } = useProfileContext();
   const { push } = useNavigation();
@@ -243,7 +274,7 @@ const ManageProfiles = () => {
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteProfile(profile)}
-                      shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

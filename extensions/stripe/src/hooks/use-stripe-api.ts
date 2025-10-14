@@ -2,41 +2,11 @@ import { useEffect, useRef } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useProfileContext } from "@src/hooks/use-profile-context";
-import { Environment } from "@src/types";
-import { titleCase } from "@src/utils";
+import type { Environment } from "@src/types";
+import { titleCase, parseStripeError, getEnvironmentLabel } from "@src/utils";
 import get from "lodash/get";
 
 const BASE_URL = "https://api.stripe.com/v1/";
-
-/**
- * Parse Stripe API error and return user-friendly message
- */
-const parseStripeError = (error: any, env: Environment): string => {
-  // Handle network errors
-  if (error.message?.includes("fetch")) {
-    return "Network error. Check your internet connection.";
-  }
-
-  // Handle Stripe API errors
-  if (error.message?.includes("Invalid API Key")) {
-    return `Invalid ${env === "test" ? "Test" : "Live"} API key. Please check your configuration.`;
-  }
-
-  if (error.message?.includes("Unauthorized")) {
-    return "Authentication failed. Your API key may have been revoked.";
-  }
-
-  if (error.message?.includes("rate limit")) {
-    return "Too many requests. Please wait a moment and try again.";
-  }
-
-  // Return the original error message if it's user-friendly
-  if (error.message && !error.message.includes("HTTP")) {
-    return error.message;
-  }
-
-  return "Failed to load data from Stripe. Please try again.";
-};
 
 type ToastResolveProps = {
   isLoading: boolean;
@@ -49,6 +19,9 @@ type ToastResolveProps = {
   profileName?: string;
 };
 
+/**
+ * Determines the appropriate toast notification options based on API request state.
+ */
 const resolveToastOptions = ({
   isLoading,
   data,
@@ -63,69 +36,62 @@ const resolveToastOptions = ({
   title: string;
   message?: string;
 } => {
-  const { Animated, Failure, Success } = Toast.Style;
-  const envLabel = environment === "test" ? "Test" : "Live";
+  const envLabel = getEnvironmentLabel(environment);
   const profileLabel = profileName ? ` (${profileName})` : "";
+  const apiKey = environment === "test" ? testApiKey : liveApiKey;
 
-  if (environment === "test" && !testApiKey) {
+  // Check for missing API key
+  if (!apiKey) {
     return {
-      style: Failure,
+      style: Toast.Style.Failure,
       title: `${envLabel} API Key not configured${profileLabel}`,
-      message: "Please add a Test API key to this profile",
+      message: `Please add a ${envLabel} API key to this profile`,
     };
   }
 
-  if (environment === "live" && !liveApiKey) {
-    return {
-      style: Failure,
-      title: `${envLabel} API Key not configured${profileLabel}`,
-      message: "Please add a Live API key to this profile",
-    };
-  }
-
+  // Loading state
   if (isLoading) {
     return {
-      style: Animated,
+      style: Toast.Style.Animated,
       title: "Fetching...",
       message: `${titleCase(endpoint)} from ${envLabel}${profileLabel}`,
     };
   }
 
+  // Error state
   if (error) {
-    const errorMessage = error instanceof Error ? parseStripeError(error, environment) : "Unknown error occurred";
-
     return {
-      style: Failure,
+      style: Toast.Style.Failure,
       title: `Failed to load ${titleCase(endpoint)}`,
-      message: errorMessage,
+      message: error instanceof Error ? parseStripeError(error, environment) : "Unknown error occurred",
     };
   }
 
+  // Success state
   if (data) {
     return {
-      style: Success,
+      style: Toast.Style.Success,
       title: `${titleCase(endpoint)} Loaded`,
       message: `${envLabel}${profileLabel}`,
     };
   }
 
+  // Fallback
   return {
-    style: Failure,
+    style: Toast.Style.Failure,
     title: "Error",
     message: "Unknown error occurred",
   };
 };
 
-const resolveData = (data: unknown, error: unknown, isList: boolean) => {
-  // we don't want to show the data if it's a list and we have an error
-  if (isList && error) {
-    return [];
+/**
+ * Extracts data from Stripe API response.
+ * For list responses, extracts the `data` array; returns empty array on error.
+ */
+const resolveData = (data: unknown, error: unknown, isList: boolean): unknown => {
+  if (isList) {
+    return error ? [] : get(data, "data", []);
   }
-
-  if (isList && data) {
-    return get(data, "data", []);
-  }
-
   return data;
 };
 

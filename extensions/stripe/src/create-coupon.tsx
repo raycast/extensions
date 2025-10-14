@@ -2,20 +2,19 @@ import {
   Form,
   ActionPanel,
   Action,
-  showToast,
-  Toast,
   Clipboard,
   popToRoot,
-  getPreferenceValues,
   Icon,
 } from "@raycast/api";
 import { useState } from "react";
-import { showFailureToast } from "@raycast/utils";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { withProfileContext } from "@src/components";
-import { useProfileContext } from "@src/hooks";
-import { STRIPE_API_VERSION } from "@src/enums";
+import { useStripeClient } from "@src/hooks";
+import { showOperationToast, handleStripeError } from "@src/utils";
 
+/**
+ * Form values for creating a new Stripe coupon.
+ */
 interface CouponFormValues {
   id: string;
   name: string;
@@ -29,77 +28,74 @@ interface CouponFormValues {
   redeemBy?: Date;
 }
 
+/**
+ * Create Coupon Form - Interactive form to create discount coupons.
+ *
+ * Features:
+ * - Percentage-based or fixed-amount discounts
+ * - Duration options: forever, once, or repeating (with month count)
+ * - Optional redemption limits and expiration dates
+ * - Custom or auto-generated coupon codes
+ * - Automatically copies coupon ID to clipboard on creation
+ *
+ * Useful for quickly creating promotional codes for customers.
+ */
 function CreateCouponForm() {
-  const { activeProfile, activeEnvironment } = useProfileContext();
-  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
-  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-
+  const stripe = useStripeClient();
   const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
   const [duration, setDuration] = useState<"forever" | "once" | "repeating">("forever");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (values: CouponFormValues) => {
     if (!stripe) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: `Stripe ${activeEnvironment} API key is not configured`,
-      });
       return;
     }
 
     setIsLoading(true);
 
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Creating coupon...",
-      });
+      const coupon = await showOperationToast(
+        "Creating coupon",
+        async () => {
+          // Build coupon params
+          const couponParams: Stripe.CouponCreateParams = {
+            id: values.id || undefined,
+            name: values.name,
+            duration: values.duration,
+          };
 
-      // Build coupon params
-      const couponParams: Stripe.CouponCreateParams = {
-        id: values.id || undefined,
-        name: values.name,
-        duration: values.duration,
-      };
+          // Add discount amount based on type
+          if (values.discountType === "percentage") {
+            couponParams.percent_off = parseFloat(values.percentOff || "0");
+          } else {
+            couponParams.amount_off = Math.round(parseFloat(values.amountOff || "0") * 100);
+            couponParams.currency = values.currency?.toLowerCase() || "usd";
+          }
 
-      // Add discount amount based on type
-      if (values.discountType === "percentage") {
-        couponParams.percent_off = parseFloat(values.percentOff || "0");
-      } else {
-        couponParams.amount_off = Math.round(parseFloat(values.amountOff || "0") * 100);
-        couponParams.currency = values.currency?.toLowerCase() || "usd";
-      }
+          // Add optional fields
+          if (values.duration === "repeating" && values.durationInMonths) {
+            couponParams.duration_in_months = parseInt(values.durationInMonths);
+          }
 
-      // Add optional fields
-      if (values.duration === "repeating" && values.durationInMonths) {
-        couponParams.duration_in_months = parseInt(values.durationInMonths);
-      }
+          if (values.maxRedemptions) {
+            couponParams.max_redemptions = parseInt(values.maxRedemptions);
+          }
 
-      if (values.maxRedemptions) {
-        couponParams.max_redemptions = parseInt(values.maxRedemptions);
-      }
+          if (values.redeemBy) {
+            couponParams.redeem_by = Math.floor(values.redeemBy.getTime() / 1000);
+          }
 
-      if (values.redeemBy) {
-        couponParams.redeem_by = Math.floor(values.redeemBy.getTime() / 1000);
-      }
-
-      const coupon = await stripe.coupons.create(couponParams);
+          return await stripe.coupons.create(couponParams);
+        },
+        `Coupon created! ID "${values.id || 'auto-generated'}" copied to clipboard`
+      );
 
       // Copy coupon ID to clipboard
       await Clipboard.copy(coupon.id);
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Coupon created!",
-        message: `Coupon ID "${coupon.id}" copied to clipboard`,
-      });
-
       await popToRoot();
     } catch (error) {
-      await showFailureToast(error, {
-        title: "Failed to create coupon",
-      });
+      await handleStripeError(error, "create coupon");
     } finally {
       setIsLoading(false);
     }

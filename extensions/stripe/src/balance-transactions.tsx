@@ -5,6 +5,10 @@ import { useStripeApi, useStripeDashboard, useProfileContext } from "@src/hooks"
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
+/**
+ * Action panel for balance transaction items.
+ * Provides navigation to Stripe Dashboard and copy actions for transaction and source IDs.
+ */
 const TransactionActions = ({ id, source, dashboardUrl }: { id: string; source: string; dashboardUrl: string }) => (
   <ActionPanel>
     <Action.OpenInBrowser
@@ -23,6 +27,11 @@ const TransactionActions = ({ id, source, dashboardUrl }: { id: string; source: 
   </ActionPanel>
 );
 
+/**
+ * Detailed view of a balance transaction.
+ * Shows transaction type, status, description, financial details (amount, fee, net),
+ * timing (created, available on), and identifiers (transaction ID, source ID).
+ */
 const TransactionDetail = ({
   transaction,
   icon,
@@ -84,6 +93,10 @@ const TransactionDetail = ({
   );
 };
 
+/**
+ * List item for a single balance transaction.
+ * Displays transaction description/type, amount with sign, and icon indicating transaction type.
+ */
 const TransactionItem = ({
   transaction,
   dashboardUrl,
@@ -109,6 +122,17 @@ const TransactionItem = ({
   );
 };
 
+/**
+ * Balance Transactions View - Displays recent Stripe balance transactions.
+ *
+ * Shows all balance transactions with detailed information:
+ * - Transaction type (charge, refund, adjustment, payout, etc.)
+ * - Amount, fee, and net values with +/- indicators
+ * - Status and availability dates
+ * - Source IDs for tracking related objects
+ *
+ * Useful for understanding account balance changes and reconciliation.
+ */
 const BalanceTransactions = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.BALANCE_TRANSACTIONS, { isList: true });
   const { dashboardUrl } = useStripeDashboard();

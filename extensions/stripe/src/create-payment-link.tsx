@@ -19,6 +19,9 @@ import { useProfileContext, useStripeDashboard } from "@src/hooks";
 import { STRIPE_API_VERSION } from "@src/enums";
 import { titleCase } from "@src/utils";
 
+/**
+ * Form values for creating a payment link.
+ */
 interface PaymentLinkFormValues {
   quantity?: string;
   allowPromotionCodes: boolean;
@@ -27,6 +30,18 @@ interface PaymentLinkFormValues {
   customMessage?: string;
 }
 
+/**
+ * CreatePaymentLinkForm - Form for creating a Stripe payment link.
+ *
+ * Features:
+ * - Configure quantity and promotion codes
+ * - Choose after-completion behavior (redirect URL or hosted confirmation)
+ * - Custom message on confirmation page
+ * - Automatically copies payment link URL to clipboard
+ * - Option to open link in browser after creation
+ *
+ * Payment links are shareable URLs that customers can use to complete checkout.
+ */
 function CreatePaymentLinkForm({ product, price }: { product: Stripe.Product; price: Stripe.Price }) {
   const { activeProfile, activeEnvironment } = useProfileContext();
   const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
@@ -166,6 +181,12 @@ function CreatePaymentLinkForm({ product, price }: { product: Stripe.Product; pr
   );
 }
 
+/**
+ * ProductListItem - Displays a product with its prices and payment link creation actions.
+ *
+ * Shows product name, default price, status (active/inactive), and available price options.
+ * Allows selecting specific price for payment link creation.
+ */
 function ProductListItem({
   product,
   prices,
@@ -223,6 +244,17 @@ function ProductListItem({
   );
 }
 
+/**
+ * Product Selector View - Browse products and create payment links.
+ *
+ * Features:
+ * - Lists all active products with their prices
+ * - Shows product status and price count
+ * - Quick creation with default price or choose specific price
+ * - Empty state with link to create product in Stripe Dashboard
+ *
+ * Useful for quickly generating shareable payment links for existing products.
+ */
 function ProductSelector() {
   const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();

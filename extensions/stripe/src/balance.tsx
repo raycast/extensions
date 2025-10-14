@@ -6,6 +6,10 @@ import { formatAmount } from "@src/utils";
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
+/**
+ * Action panel for balance items.
+ * Provides actions to view balance details in Stripe Dashboard and copy values.
+ */
 const BalanceActions = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Available; dashboardUrl: string }) => {
   const formattedAmount = formatAmount(balance.amount, balance.currency);
 
@@ -35,6 +39,10 @@ const BalanceActions = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Ava
   );
 };
 
+/**
+ * Detail view showing breakdown of balance by source types (card, bank transfer, etc).
+ * Only shown when balance has source_types data.
+ */
 const BalanceDetail = ({ balance }: { balance: Stripe.Balance.Available }) => {
   if (!balance.source_types) return null;
 
@@ -60,6 +68,10 @@ const BalanceDetail = ({ balance }: { balance: Stripe.Balance.Available }) => {
   );
 };
 
+/**
+ * List item displaying a single currency balance.
+ * Shows amount and optional breakdown by source type.
+ */
 const BalanceItem = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Available; dashboardUrl: string }) => {
   const amount = formatAmount(balance.amount, balance.currency);
   const hasSourceTypes = balance.source_types && Object.keys(balance.source_types).length > 0;
@@ -75,14 +87,24 @@ const BalanceItem = ({ balance, dashboardUrl }: { balance: Stripe.Balance.Availa
   );
 };
 
+/**
+ * Balance View - Displays Stripe account balance across currencies.
+ *
+ * Shows three categories of balance:
+ * - Available: Funds available for payout
+ * - Pending: Funds not yet available (still processing)
+ * - Connect Reserved: Funds held in reserve for Stripe Connect accounts
+ *
+ * Each balance can be expanded to show breakdown by source type (card, bank, etc).
+ */
 const Balance = () => {
   const { isLoading, data, error } = useStripeApi(STRIPE_ENDPOINTS.BALANCE);
   const { dashboardUrl } = useStripeDashboard();
 
-  const balanceData = data as Stripe.Balance | null;
-  const available = error || !balanceData ? [] : balanceData.available;
-  const pending = error || !balanceData ? [] : balanceData.pending;
-  const connectReserved = error || !balanceData ? [] : (balanceData.connect_reserved ?? []);
+  const balanceData = (data as Stripe.Balance) || null;
+  const available = balanceData?.available ?? [];
+  const pending = balanceData?.pending ?? [];
+  const connectReserved = balanceData?.connect_reserved ?? [];
 
   return (
     <ListContainer isLoading={isLoading} isShowingDetail={!isLoading}>

@@ -5,11 +5,18 @@ import { convertTimestampToDate, titleCase, formatBillingAddress } from "@src/ut
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
+/**
+ * Formats date of birth object into DD/MM/YYYY string.
+ */
 const formatDateOfBirth = (dob?: { day: number | null; month: number | null; year: number | null }) => {
   if (!dob?.year || !dob?.month || !dob?.day) return "";
   return `${dob.day}/${dob.month}/${dob.year}`;
 };
 
+/**
+ * Returns icon and color based on account capabilities.
+ * Green check = fully enabled, yellow = charges only, orange = limited.
+ */
 const getAccountIcon = (account: Stripe.Account): { icon: Icon; color: Color } => {
   if (account.charges_enabled && account.payouts_enabled) {
     return { icon: Icon.CheckCircle, color: Color.Green };
@@ -20,6 +27,10 @@ const getAccountIcon = (account: Stripe.Account): { icon: Icon; color: Color } =
   return { icon: Icon.Circle, color: Color.Orange };
 };
 
+/**
+ * Action panel for connected account items.
+ * Provides navigation to Stripe Dashboard and copy actions for account ID and email.
+ */
 const AccountActions = ({ account, dashboardUrl }: { account: Stripe.Account; dashboardUrl: string }) => (
   <ActionPanel>
     <Action.OpenInBrowser
@@ -39,6 +50,10 @@ const AccountActions = ({ account, dashboardUrl }: { account: Stripe.Account; da
   </ActionPanel>
 );
 
+/**
+ * Detailed view of a connected account.
+ * Shows status, capabilities, individual/company details, and account settings.
+ */
 const AccountDetail = ({ account }: { account: Stripe.Account }) => {
   const { icon, color } = getAccountIcon(account);
   const companyAddress = formatBillingAddress(account.company?.address);
@@ -104,6 +119,10 @@ const AccountDetail = ({ account }: { account: Stripe.Account }) => {
   );
 };
 
+/**
+ * List item for a single connected account.
+ * Displays account name (individual or company), email/currency, and status indicator.
+ */
 const AccountItem = ({ account, dashboardUrl }: { account: Stripe.Account; dashboardUrl: string }) => {
   const { icon, color } = getAccountIcon(account);
   const name =
@@ -125,6 +144,16 @@ const AccountItem = ({ account, dashboardUrl }: { account: Stripe.Account; dashb
   );
 };
 
+/**
+ * Connected Accounts View - Displays Stripe Connect accounts.
+ *
+ * Organizes accounts into sections:
+ * - Fully Enabled: Accounts with both charges and payouts enabled
+ * - Limited Access: Accounts with restricted capabilities
+ *
+ * Shows account details, status, capabilities, individual/company info, and settings.
+ * Useful for managing Stripe Connect platform accounts and monitoring onboarding status.
+ */
 const ConnectedAccounts = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CONNECTED_ACCOUNTS, { isList: true });
   const { dashboardUrl } = useStripeDashboard();

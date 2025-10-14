@@ -13,6 +13,10 @@ import {
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
+/**
+ * Action panel for payment intent items.
+ * Provides navigation to Stripe Dashboard and copy actions for IDs and amounts.
+ */
 const PaymentIntentActions = ({
   paymentIntent,
   dashboardUrl,
@@ -57,6 +61,10 @@ const PaymentIntentActions = ({
   );
 };
 
+/**
+ * Detailed view of a payment intent.
+ * Shows status, amounts (total, received, capturable), payment method, customer, and metadata.
+ */
 const PaymentIntentDetail = ({ paymentIntent }: { paymentIntent: Stripe.PaymentIntent }) => {
   const { icon, color } = getPaymentIntentIcon(paymentIntent.status);
   const customerId = getCustomerId(paymentIntent.customer);
@@ -145,6 +153,10 @@ const PaymentIntentDetail = ({ paymentIntent }: { paymentIntent: Stripe.PaymentI
   );
 };
 
+/**
+ * List item for a single payment intent.
+ * Displays description/status, amount, and status icon with color coding.
+ */
 const PaymentIntentItem = ({
   paymentIntent,
   dashboardUrl,
@@ -168,6 +180,18 @@ const PaymentIntentItem = ({
   );
 };
 
+/**
+ * Payment Intents View - Displays Stripe payment intents organized by status.
+ *
+ * Sections:
+ * - Action Required: Intents needing user action (authentication, confirmation, etc)
+ * - Processing: Intents currently being processed
+ * - Completed: Successfully completed payments
+ * - Canceled: Canceled payment intents
+ * - Other: Intents in other states
+ *
+ * Useful for tracking payment lifecycle and identifying stuck payments.
+ */
 const PaymentIntents = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.PAYMENT_INTENTS, { isList: true });
   const { dashboardUrl } = useStripeDashboard();

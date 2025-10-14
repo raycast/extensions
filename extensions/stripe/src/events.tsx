@@ -5,6 +5,10 @@ import { convertTimestampToDate, titleCase } from "@src/utils";
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext, ProfileSwitcherActions } from "@src/components";
 
+/**
+ * Event category mappings for organizing Stripe events.
+ * Groups related event types together for better organization.
+ */
 const EVENT_CATEGORIES: Record<string, string[]> = {
   payment: ["charge", "payment_intent", "payment_method", "checkout", "payment_link"],
   customer: ["customer"],
@@ -20,6 +24,9 @@ const EVENT_CATEGORIES: Record<string, string[]> = {
   source: ["source"],
 };
 
+/**
+ * Determines the category of an event based on its type prefix.
+ */
 const getEventCategory = (eventType: string): string => {
   const baseType = eventType.split(".")[0];
   for (const [category, types] of Object.entries(EVENT_CATEGORIES)) {
@@ -30,6 +37,9 @@ const getEventCategory = (eventType: string): string => {
   return "other";
 };
 
+/**
+ * Returns icon and color for an event based on its category.
+ */
 const getEventIcon = (eventType: string) => {
   const category = getEventCategory(eventType);
   const iconMap: Record<string, { icon: Icon; color: Color }> = {
@@ -50,6 +60,10 @@ const getEventIcon = (eventType: string) => {
   return iconMap[category] || iconMap.other;
 };
 
+/**
+ * Returns a human-friendly description for a Stripe event type.
+ * Maps technical event names to user-friendly descriptions.
+ */
 const getEventDescription = (eventType: string, eventData: Record<string, unknown>): string => {
   // Common event type descriptions
   const descriptions: Record<string, string> = {
@@ -123,6 +137,10 @@ const getEventDescription = (eventType: string, eventData: Record<string, unknow
   return descriptions[eventType] || eventType.split(".").map(titleCase).join(" → ");
 };
 
+/**
+ * Determines if an event requires action and provides a reason.
+ * Helps identify critical events that need immediate attention.
+ */
 const getActionRequired = (eventType: string): { required: boolean; reason?: string } => {
   const actionableEvents: Record<string, string> = {
     // Payment issues
@@ -153,6 +171,9 @@ const getActionRequired = (eventType: string): { required: boolean; reason?: str
   return { required: false };
 };
 
+/**
+ * Generates a subtitle for an event showing action warnings, amounts, and status.
+ */
 const getEventSubtitle = (event: Stripe.Event): string => {
   const eventData = event.data.object as unknown as Record<string, unknown>;
   const parts: string[] = [];
@@ -185,6 +206,10 @@ const getEventSubtitle = (event: Stripe.Event): string => {
   return parts.join(" • ");
 };
 
+/**
+ * Action panel for event items.
+ * Provides navigation to Stripe Dashboard and copy actions for event and object IDs.
+ */
 const EventActions = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardUrl: string }) => {
   const objectId =
     typeof event.data.object === "object" && "id" in event.data.object ? (event.data.object.id as string) : null;
@@ -213,6 +238,10 @@ const EventActions = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardU
   );
 };
 
+/**
+ * Detailed view of a Stripe event.
+ * Shows event description, technical type, object details, metadata, and identifiers.
+ */
 const EventDetail = ({ event }: { event: Stripe.Event }) => {
   const eventData = event.data.object as unknown as Record<string, unknown>;
   const objectId = "id" in eventData ? (eventData.id as string) : "N/A";
@@ -267,6 +296,10 @@ const EventDetail = ({ event }: { event: Stripe.Event }) => {
   );
 };
 
+/**
+ * List item for a single Stripe event.
+ * Displays event description, subtitle with key details, and visual indicators for action-required events.
+ */
 const EventItem = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardUrl: string }) => {
   const actionInfo = getActionRequired(event.type);
   const eventData = event.data.object as unknown as Record<string, unknown>;
@@ -293,6 +326,18 @@ const EventItem = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardUrl:
   );
 };
 
+/**
+ * Events View - Displays recent Stripe webhook events organized by category.
+ *
+ * Features:
+ * - Action Required section highlighting critical events needing attention
+ * - Categorized events: Payments, Customers, Subscriptions, Payouts, Disputes, etc.
+ * - Human-friendly event descriptions with technical names
+ * - Event metadata and object details
+ * - Quick navigation to related objects in Stripe Dashboard
+ *
+ * Useful for monitoring webhook activity, debugging integrations, and tracking account events.
+ */
 const Events = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.EVENTS, { isList: true });
   const { dashboardUrl } = useStripeDashboard();
