@@ -179,11 +179,19 @@ const ManageProfiles = () => {
   const { profiles, activeProfile, addProfile, updateProfile, deleteProfile, setActiveProfile } = useProfileContext();
   const { push } = useNavigation();
 
-  const handleCreateProfile = async (profileData: Omit<StripeProfile, "id">) => {
+  const handleCreateProfile = async (profileData: Omit<StripeProfile, "id"> | ({ id: string } & Partial<StripeProfile>)) => {
+    // This handler only receives create data (without id), but we type it to match ProfileFormProps
+    if ('id' in profileData) {
+      throw new Error("Create handler received profile with id");
+    }
     await addProfile(profileData);
   };
 
-  const handleUpdateProfile = async (data: { id: string } & Partial<StripeProfile>) => {
+  const handleUpdateProfile = async (data: Omit<StripeProfile, "id"> | ({ id: string } & Partial<StripeProfile>)) => {
+    // This handler only receives update data (with id), but we type it to match ProfileFormProps
+    if (!('id' in data)) {
+      throw new Error("Update handler received profile without id");
+    }
     const { id, ...updates } = data;
     await updateProfile(id, updates);
   };
