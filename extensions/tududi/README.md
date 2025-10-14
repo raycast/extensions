@@ -4,11 +4,12 @@ An extension to access tududi features from Raycast
 
 ## Screenshots
 
-![Commands](screenshots/commands.png)
+![Commands](metadata/tududi-1.png)
 Screenshot showing the available commands in the Tududi extension.
 
-![Create Note](screenshots/create_note.png)
+![Create Task](metadata/tududi-2.png)
+Screenshot showing the interface for creating a new task.
+
+![Create Note](metadata/tududi-3.png)
 Screenshot demonstrating how to create a new note.
 
-![Create Task](screenshots/create_task.png)
-Screenshot showing the interface for creating a new task.
