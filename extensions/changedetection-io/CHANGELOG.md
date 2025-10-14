@@ -1,6 +1,6 @@
 # changedetection.io Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-10-14
 
 - Included link to Diff view of snapshot
 - Included action to mark as seen/unseen
