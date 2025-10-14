@@ -1,6 +1,6 @@
 # Kaomoji Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-10-14
 
 - Added support for pinning kaomojis
 
