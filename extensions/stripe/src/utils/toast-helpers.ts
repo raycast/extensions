@@ -27,7 +27,7 @@ import { showToast, Toast } from "@raycast/api";
 export const showOperationToast = async <T>(
   operation: string,
   action: () => Promise<T>,
-  successMessage: string
+  successMessage: string,
 ): Promise<T> => {
   await showToast({
     style: Toast.Style.Animated,

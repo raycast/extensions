@@ -64,7 +64,7 @@ const getEventIcon = (eventType: string) => {
  * Returns a human-friendly description for a Stripe event type.
  * Maps technical event names to user-friendly descriptions.
  */
-const getEventDescription = (eventType: string, eventData: Record<string, unknown>): string => {
+const getEventDescription = (eventType: string): string => {
   // Common event type descriptions
   const descriptions: Record<string, string> = {
     // Charge events

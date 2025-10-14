@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  List,
-  Color,
-  Detail,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, Color, Detail, useNavigation } from "@raycast/api";
 import React from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { withProfileContext, ListContainer } from "@src/components";
@@ -168,7 +158,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
         await showOperationToast(
           "Cancelling subscription",
           async () => await stripe.subscriptions.cancel(subscription.id),
-          "Subscription cancelled successfully"
+          "Subscription cancelled successfully",
         );
 
         // Revalidate the list to remove the cancelled subscription
@@ -219,7 +209,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
             const chargeId = typeof invoice.charge === "string" ? invoice.charge : invoice.charge.id;
             return await stripe.refunds.create({ charge: chargeId });
           },
-          `Refund processed successfully - ${currency} ${convertAmount(amount)} refunded`
+          `Refund processed successfully - ${currency} ${convertAmount(amount)} refunded`,
         );
       } catch (error) {
         await handleStripeError(error, "process refund");

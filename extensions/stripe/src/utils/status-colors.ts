@@ -19,9 +19,7 @@ import type Stripe from "stripe";
  * getSubscriptionStatusColor("past_due") // Color.Orange
  * ```
  */
-export const getSubscriptionStatusColor = (
-  status: Stripe.Subscription.Status
-): Color => {
+export const getSubscriptionStatusColor = (status: Stripe.Subscription.Status): Color => {
   const colorMap: Record<Stripe.Subscription.Status, Color> = {
     active: Color.Green,
     canceled: Color.Red,
@@ -58,9 +56,7 @@ export const getChargeStatusColor = (status: Stripe.Charge.Status): Color => {
  * @param status - The Stripe payment intent status
  * @returns Raycast Color for the status
  */
-export const getPaymentIntentStatusColor = (
-  status: Stripe.PaymentIntent.Status
-): Color => {
+export const getPaymentIntentStatusColor = (status: Stripe.PaymentIntent.Status): Color => {
   const colorMap: Record<Stripe.PaymentIntent.Status, Color> = {
     succeeded: Color.Green,
     processing: Color.Blue,
@@ -99,9 +95,7 @@ export const getTransactionTypeColor = (type: string): Color => {
  * @param status - The Stripe invoice status
  * @returns Raycast Color for the status
  */
-export const getInvoiceStatusColor = (
-  status: Stripe.Invoice.Status
-): Color => {
+export const getInvoiceStatusColor = (status: Stripe.Invoice.Status): Color => {
   const colorMap: Record<Stripe.Invoice.Status, Color> = {
     draft: Color.SecondaryText,
     open: Color.Yellow,

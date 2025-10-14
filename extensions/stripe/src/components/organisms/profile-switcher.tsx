@@ -14,11 +14,7 @@ export const ProfileSwitcherActions = () => {
     <>
       <ActionPanel.Section title="Account & Environment">
         {profiles.length > 1 && (
-          <ActionPanel.Submenu
-            title="Switch Account"
-            icon={Icon.Person}
-            shortcut={SHORTCUTS.SWITCH_PROFILE}
-          >
+          <ActionPanel.Submenu title="Switch Account" icon={Icon.Person} shortcut={SHORTCUTS.SWITCH_PROFILE}>
             {profiles.map((profile) => (
               <Action
                 key={profile.id}

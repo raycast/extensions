@@ -29,12 +29,7 @@ import { STRIPE_API_VERSION } from "@src/enums";
 export const useStripeClient = (): Stripe | null => {
   const { activeProfile, activeEnvironment } = useProfileContext();
 
-  const apiKey = activeEnvironment === "test"
-    ? activeProfile?.testApiKey
-    : activeProfile?.liveApiKey;
+  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
 
-  return useMemo(
-    () => apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null,
-    [apiKey]
-  );
+  return useMemo(() => (apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null), [apiKey]);
 };

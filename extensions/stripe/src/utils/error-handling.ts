@@ -71,11 +71,7 @@ export const parseStripeError = (error: unknown, env: Environment): string => {
  * }
  * ```
  */
-export const handleStripeError = async (
-  error: unknown,
-  context: string,
-  env?: Environment
-): Promise<void> => {
+export const handleStripeError = async (error: unknown, context: string, env?: Environment): Promise<void> => {
   const message = env ? parseStripeError(error, env) : undefined;
 
   await showFailureToast(error, {

@@ -1,15 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Clipboard,
-  open,
-  Icon,
-  List,
-  useNavigation,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Clipboard, open, Icon, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import Stripe from "stripe";

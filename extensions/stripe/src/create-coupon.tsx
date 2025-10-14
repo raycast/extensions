@@ -1,11 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  Clipboard,
-  popToRoot,
-  Icon,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, Clipboard, popToRoot, Icon } from "@raycast/api";
 import { useState } from "react";
 import type Stripe from "stripe";
 import { withProfileContext } from "@src/components";
@@ -87,7 +80,7 @@ function CreateCouponForm() {
 
           return await stripe.coupons.create(couponParams);
         },
-        `Coupon created! ID "${values.id || 'auto-generated'}" copied to clipboard`
+        `Coupon created! ID "${values.id || "auto-generated"}" copied to clipboard`,
       );
 
       // Copy coupon ID to clipboard
