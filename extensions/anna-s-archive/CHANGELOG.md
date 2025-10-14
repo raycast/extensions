@@ -4,9 +4,9 @@
 
 - Fix issue where search page was not properly parsed [#21844](https://github.com/raycast/extensions/issues/21844)
 - Update (dev) dependencies
-- Add Windows support.
+- Add Windows support
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2024-09-16
 
 - Update dependencies
 - Add mirrors for `.li` and `.se` domains
