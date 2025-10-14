@@ -1,6 +1,6 @@
 # Bible Search Changelog
 
-## [New option, bug fix] - {PR_MERGE_DATE}
+## [New option, bug fix] - 2025-10-14
 
 - Add option to show passages as separate list items
 - Clarify copyright option wording
