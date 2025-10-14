@@ -1,3 +1,5 @@
+import { LocalStorage } from "@raycast/api";
+
 export type Availability = "public" | "private" | string;
 
 export type Capabilities = Record<string, unknown>;
@@ -45,31 +47,34 @@ let cachedModels: Model[] | null = null;
 let cacheTimestamp = 0;
 const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
 
-// Load from localStorage on initialization
-function loadFromStorage(): { models: Model[] | null; timestamp: number } {
+// Load cached payload from Raycast LocalStorage. Returns null payload on failure.
+async function loadFromStorage(): Promise<{ models: Model[] | null; timestamp: number }> {
   try {
-    if (typeof localStorage !== "undefined") {
-      const stored = localStorage.getItem(CACHE_KEY);
-      const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-      if (stored && timestamp) {
-        return { models: JSON.parse(stored), timestamp: parseInt(timestamp, 10) };
+    const [stored, timestampValue] = await Promise.all([
+      LocalStorage.getItem<string>(CACHE_KEY),
+      LocalStorage.getItem<string>(CACHE_TIMESTAMP_KEY),
+    ]);
+    if (stored && timestampValue) {
+      const parsedTimestamp = Number.parseInt(timestampValue, 10);
+      if (!Number.isNaN(parsedTimestamp)) {
+        return { models: JSON.parse(stored), timestamp: parsedTimestamp };
       }
     }
   } catch (e) {
-    console.error("Failed to load from localStorage:", e);
+    console.error("Failed to load from LocalStorage:", e);
   }
   return { models: null, timestamp: 0 };
 }
 
-// Save to localStorage
-function saveToStorage(models: Model[], timestamp: number): void {
+// Persist cache payload to Raycast LocalStorage.
+async function saveToStorage(models: Model[], timestamp: number): Promise<void> {
   try {
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(models));
-      localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
-    }
+    await Promise.all([
+      LocalStorage.setItem(CACHE_KEY, JSON.stringify(models)),
+      LocalStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString()),
+    ]);
   } catch (e) {
-    console.error("Failed to save to localStorage:", e);
+    console.error("Failed to save to LocalStorage:", e);
   }
 }
 
@@ -79,9 +84,9 @@ export async function fetchModels({ force = false } = {}): Promise<Model[]> {
     return cachedModels;
   }
 
-  // Try localStorage cache if memory cache is empty
+  // Try LocalStorage cache if memory cache is empty
   if (!cachedModels) {
-    const stored = loadFromStorage();
+    const stored = await loadFromStorage();
     if (stored.models && Date.now() - stored.timestamp < CACHE_TTL) {
       cachedModels = stored.models;
       cacheTimestamp = stored.timestamp;
@@ -99,7 +104,7 @@ export async function fetchModels({ force = false } = {}): Promise<Model[]> {
 
   cachedModels = models;
   cacheTimestamp = Date.now();
-  saveToStorage(models, cacheTimestamp);
+  await saveToStorage(models, cacheTimestamp);
   return models;
 }
 
@@ -190,7 +195,12 @@ export function sortModels(models: Model[], by: SortBy, desc = true): Model[] {
   return arr;
 }
 
-export function clearCache(): void {
+export async function clearCache(): Promise<void> {
   cachedModels = null;
   cacheTimestamp = 0;
+  try {
+    await Promise.all([LocalStorage.removeItem(CACHE_KEY), LocalStorage.removeItem(CACHE_TIMESTAMP_KEY)]);
+  } catch (e) {
+    console.error("Failed to clear LocalStorage cache:", e);
+  }
 }
