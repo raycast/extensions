@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# Run Raycast linter with auto-fix
+echo "Running Raycast linter..."
+npm run fix-lint
+
+# Check if linting succeeded
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Please fix the issues and try again."
+  exit 1
+fi
+
+echo "✅ Linting passed!"

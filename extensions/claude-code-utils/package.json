@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-code-utils",
+  "title": "Claude Code Utils",
+  "description": "Browse your Claude Code sent/received messages, create snippets, easy access to your agents/commands, browse Claude Code changelog and see all Claude Code commands and shortcuts",
+  "icon": "icon.png",
+  "author": "marcospmail",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "claude",
+    "ai",
+    "code",
+    "messages",
+    "snippets",
+    "productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "create-snippet",
+      "title": "Create Snippet",
+      "description": "Create a new reusable code snippet",
+      "mode": "view"
+    },
+    {
+      "name": "browse-snippets",
+      "title": "Browse Snippets",
+      "description": "View, search, and manage your saved code snippets",
+      "mode": "view"
+    },
+    {
+      "name": "received-messages",
+      "title": "Received Messages",
+      "description": "Browse messages received from Claude with AI-powered search",
+      "mode": "view"
+    },
+    {
+      "name": "sent-messages",
+      "title": "Sent Messages",
+      "description": "Browse messages you sent to Claude",
+      "mode": "view"
+    },
+    {
+      "name": "cheatsheet",
+      "title": "Commands Cheat Sheet",
+      "description": "Quick reference for all Claude Code commands and keyboard shortcuts",
+      "mode": "view"
+    },
+    {
+      "name": "browse-agents",
+      "title": "Browse Agents",
+      "description": "View and manage your Claude Code agents from ~/.claude/agents",
+      "mode": "view"
+    },
+    {
+      "name": "browse-commands",
+      "title": "Browse Commands",
+      "description": "View and manage your Claude Code commands from ~/.claude/commands",
+      "mode": "view"
+    },
+    {
+      "name": "changelog",
+      "title": "Changelog",
+      "description": "View Claude Code changelog with latest updates and releases",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.1",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "husky": "^9.1.7",
+    "jest": "^30.1.3",
+    "jest-environment-jsdom": "^30.1.2",
+    "prettier": "^3.5.3",
+    "react-devtools": "^6.1.1",
+    "ts-jest": "^29.4.4",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "prepare": "husky"
+  }
+}
