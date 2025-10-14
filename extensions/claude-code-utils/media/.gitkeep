@@ -1,0 +1,11 @@
+# This folder contains screenshots for the Raycast Store
+#
+# Screenshots should be:
+# - PNG format
+# - Named: claude-code-utils-1.png, claude-code-utils-2.png, etc.
+# - Size: 2000x1250 pixels (16:10 aspect ratio) preferred
+# - Maximum: 6 screenshots
+# - Minimum: 3 screenshots recommended
+#
+# Use CMD+Shift+4 to capture screenshots, or use the Raycast Window Capture tool
+# Focus on showing the extension's key features within Raycast
