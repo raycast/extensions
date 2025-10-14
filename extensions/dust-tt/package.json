@@ -36,8 +36,8 @@
     {
       "name": "askClaude",
       "title": "Ask Claude",
-      "subtitle": "Ask @claude-3",
-      "description": "Query @claude-3 on Dust.tt",
+      "subtitle": "Ask @claude-4",
+      "description": "Query @claude-4 on Dust.tt",
       "mode": "view",
       "arguments": [
         {
@@ -51,8 +51,8 @@
     {
       "name": "askGpt",
       "title": "Ask GPT",
-      "subtitle": "Ask @gpt-4",
-      "description": "Query @gpt-4 on Dust.tt",
+      "subtitle": "Ask @gpt-5",
+      "description": "Query @gpt-5 on Dust.tt",
       "mode": "view",
       "arguments": [
         {
@@ -92,6 +92,7 @@
     "@raycast/utils": "^1.18.0",
     "date-fns": "^3.0.0-alpha.2",
     "eventsource-parser": "^1.1.1",
+    "jwt-decode": "^4.0.0",
     "undici": "^6.20.1"
   },
   "devDependencies": {

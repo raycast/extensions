@@ -13,7 +13,7 @@ global.Response = Response;
 import { Detail, OAuth, launchCommand, LaunchType } from "@raycast/api";
 import { withAccessToken, OAuthService, usePromise } from "@raycast/utils";
 import { DustAPI } from "@dust-tt/client";
-import { getUser, getWorkspaceId, setUser } from "../utils";
+import { getUser, getWorkspaceId, setUser, extractAndStoreRegion } from "../utils";
 import env from "./env";
 
 const client = new OAuth.PKCEClient({
@@ -69,6 +69,8 @@ export const provider = new OAuthService({
   async onAuthorize(params) {
     // Store the token for multi-region access
     currentToken = params.token;
+
+    await extractAndStoreRegion(params.token);
 
     // Use default US region initially, region will be determined when workspace is selected
     const apiUrl = await env.getDustDomain();

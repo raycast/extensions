@@ -28,6 +28,7 @@ export default withDustClient(function PickWorkspaceCommand() {
     let user: MeResponseType["user"] | undefined = undefined;
 
     const dustAPI = getDustClient();
+
     const me = await dustAPI.me();
     if (me.isOk()) {
       user = me.value;

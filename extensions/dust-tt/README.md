@@ -14,9 +14,9 @@ Raycast will automatically show a popup to sign in with Dust.
 
 ## Commands
 
-### Ask Dust / GPT-4 / Claude-3
+### Ask Dust / GPT-5 / Claude-4
 
-Directly ask something to the Dust, GPT-4 or Claude-3 assistants.
+Directly ask something to the Dust, GPT-5 or Claude-4 assistants.
 
 If you ask a question with the parameter, you will get a form to add one, auto-filled with the currently selected text.
 
