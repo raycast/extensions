@@ -103,6 +103,7 @@ export const WatchItem = ({ watch, mutate, revalidate }: WatchItemProps) => {
               })
             }
             shortcut={Keyboard.Shortcut.Common.Remove}
+            style={Action.Style.Destructive}
           />
           <Action.Push
             icon={Icon.Plus}
