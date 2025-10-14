@@ -2,7 +2,7 @@ import { URL, URLSearchParams } from "url";
 import * as cheerio from "cheerio";
 
 export interface ReferenceSearchResult {
-  url: string;
+  url: URL;
   passages: BiblePassage[];
   version: string;
   copyright: string;
@@ -24,7 +24,7 @@ export async function search(query: string, version: string): Promise<ReferenceS
   const result = await fetch(url, { headers: { accept: "text/html" } });
   const { passages, version: fullVersion, copyright } = parsePassagesFromHtml(await result.text());
   url.searchParams.delete("interface");
-  return { version: fullVersion, passages, copyright, url: url.toString() };
+  return { version: fullVersion, passages, copyright, url };
 }
 
 function parsePassagesFromHtml(html: string) {
