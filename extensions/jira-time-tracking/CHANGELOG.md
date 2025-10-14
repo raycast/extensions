@@ -1,6 +1,6 @@
 # Changelog
 
-## [Migration to Jira /jql API] - {PR_MERGE_DATE}
+## [Migration to Jira /jql API] - 2025-10-14
 
 - Migrated the issues search endpoint to `/jql`.
 
