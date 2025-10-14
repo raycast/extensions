@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2025-10-14
 
 - Adopt the latest available extension template
 - Fix lints
