@@ -9,8 +9,9 @@ export async function getPlaylistTracks(playlistId: string, limit: number, offse
   let currentOffset = offset ?? 0;
 
   try {
+    let response: PagingObject<any>;
     do {
-      const response: PagingObject<SimplifiedTrackObject> = await spotifyClient.getPlaylistsByPlaylistIdTracks(
+      response = await spotifyClient.getPlaylistsByPlaylistIdTracks(
         playlistId,
         {
           limit: Math.min(limit - tracks.length, 50),
@@ -29,7 +30,7 @@ export async function getPlaylistTracks(playlistId: string, limit: number, offse
 
       next = response.next;
       currentOffset += 50;
-    } while (next && tracks.length < limit);
+    } while (next && tracks.length < limit && response.items && response.items.length > 0);
 
     return { items: tracks };
   } catch (err) {
