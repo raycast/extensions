@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Improvements and Fix] - {PR_MERGE_DATE}
+## [Improvements and Fix] - 2025-10-14
 
 - Fix broken search link, implemented suggestion from [#21972](https://github.com/raycast/extensions/issues/21972)
 - Update dependencies to the latest
