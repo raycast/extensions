@@ -72,6 +72,7 @@ export const WatchItem = ({ watch, mutate, revalidate }: WatchItemProps) => {
               confirmAlert({
                 title: "Delete",
                 message: watch.url,
+                icon: Icon.Trash,
                 primaryAction: {
                   style: Alert.ActionStyle.Destructive,
                   title: "Delete Watch?",
