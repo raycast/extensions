@@ -44,44 +44,43 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   const { aiIsLoading, searchResult, setSearchString } = useSearch({ icons });
   const version = useVersion({ launchContext });
 
-  const fetchIcons = async (version: string) => {
-    setIsLoading(true);
-    setIcons([]);
-
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Loading Icons",
-    });
-
-    await cacheAssetPack(version).catch(async (error) => {
-      await showFailureToast(error, { title: "Failed to cache asset pack" });
-      await setTimeout(1200);
-    });
-    const json = await loadCachedJson(version).catch(() => {
-      return [];
-    });
-    const icons = json.map((icon) => ({
-      ...icon,
-      slug: getIconSlug(icon),
-    }));
-
-    setIcons(icons);
-    setIsLoading(false);
-
-    if (icons.length > 0) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: `${icons.length} icons loaded`,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Unable to load icons",
-      });
-    }
-  };
-
   useEffect(() => {
+    const fetchIcons = async (version: string) => {
+      setIsLoading(true);
+      setIcons([]);
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Icons",
+      });
+
+      await cacheAssetPack(version).catch(async (error) => {
+        await showFailureToast(error, { title: "Failed to cache asset pack" });
+        await setTimeout(1200);
+      });
+      const json = await loadCachedJson(version).catch(() => {
+        return [];
+      });
+      const icons = json.map((icon) => ({
+        ...icon,
+        slug: getIconSlug(icon),
+      }));
+
+      setIcons(icons);
+      setIsLoading(false);
+
+      if (icons.length > 0) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: `${icons.length} icons loaded`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Unable to load icons",
+        });
+      }
+    };
     if (version) {
       fetchIcons(version).catch((error) => {
         showFailureToast(error, { title: "Failed to fetch icons" });

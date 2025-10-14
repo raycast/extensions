@@ -1,5 +1,9 @@
 # Threads Changelog
 
+## [Update] - 2025-10-14
+
+- Add a fallback for retrieving media URLs in the `Download Threads Media` command.
+
 ## [Update] - 2025-04-28
 
 - Updated the `Download Threads Media` command to download media from Threads.

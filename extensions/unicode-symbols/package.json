@@ -109,8 +109,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.3",
     "@raycast/utils": "^2.2.1",
-    "fuse.js": "^6.6.2",
-    "js-base64": "^3.7.8"
+    "fuse.js": "^6.6.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

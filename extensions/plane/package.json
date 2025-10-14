@@ -7,6 +7,9 @@
   "author": "saurabhkmr98",
   "owner": "makeplane",
   "access": "public",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -25,12 +28,19 @@
       "subtitle": "Plane",
       "description": "Search work items across projects",
       "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Plane",
+      "description": "Search Projects",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@makeplane/plane-node-sdk": "^0.1.3",
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
     "date-fns": "^4.1.0",
     "marked": "^16.1.0",
     "turndown": "^7.2.0"
@@ -63,6 +73,7 @@
     {
       "title": "API Key",
       "name": "API_KEY",
+      "placeholder": "plane_api_xxx...xxxx",
       "type": "password",
       "required": false,
       "description": "Your Plane API key"
@@ -73,6 +84,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
