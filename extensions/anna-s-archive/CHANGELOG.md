@@ -6,7 +6,7 @@
 - Update (dev) dependencies
 - Add Windows support.
 
-## [Updates] - 2024-09-16
+## [Updates] - {PR_MERGE_DATE}
 
 - Update dependencies
 - Add mirrors for `.li` and `.se` domains
