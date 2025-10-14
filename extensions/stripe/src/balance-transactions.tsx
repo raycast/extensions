@@ -4,6 +4,7 @@ import { convertTimestampToDate, titleCase, formatAmountWithSign, getTransaction
 import { useStripeApi, useStripeDashboard } from "@src/hooks";
 import { STRIPE_ENDPOINTS } from "@src/enums";
 import { ListContainer, withProfileContext } from "@src/components";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
  * Action panel for balance transaction items.
@@ -16,12 +17,12 @@ const TransactionActions = ({ id, source, dashboardUrl }: { id: string; source: 
       url={`${dashboardUrl}/balance/transactions/${id}`}
       icon={Icon.Globe}
     />
-    <Action.CopyToClipboard title="Copy Transaction ID" content={id} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+    <Action.CopyToClipboard title="Copy Transaction ID" content={id} shortcut={SHORTCUTS.COPY_PRIMARY} />
     {source && (
       <Action.CopyToClipboard
         title="Copy Source ID"
         content={source}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={SHORTCUTS.COPY_SECONDARY}
       />
     )}
   </ActionPanel>
