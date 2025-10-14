@@ -254,7 +254,7 @@ export default function Command() {
       case 0:
         return Color.Blue;
       default:
-        return Color.Primary;
+        return Color.PrimaryText;
     }
   };
 

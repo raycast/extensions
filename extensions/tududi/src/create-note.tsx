@@ -80,7 +80,9 @@ export default function Command() {
         title,
         content,
         ...(selectedProjectObj ? { project_uid: selectedProjectObj.uid } : {}),
-        ...(selectedTagObjects.length > 0 ? { tags: selectedTagObjects.map((t) => t.name) } : {}),
+        ...(selectedTagObjects.length > 0
+          ? { tags: selectedTagObjects.filter((t) => t !== undefined).map((t) => t.name) }
+          : {}),
       };
       console.log("Create note body:", body);
       const response = await fetch(`${preferences.apiUrl}/api/note`, {
