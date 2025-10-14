@@ -31,6 +31,7 @@ interface UseChatSessionResult extends ChatSessionState {
   addDirectoryContexts: (paths: string[]) => Promise<ProjectContext[]>;
   removeContext: (contextId: string) => Promise<void>;
   refreshContexts: () => Promise<void>;
+  switchMode: (modeId: string) => Promise<void>;
 }
 
 const logger = createLogger("useChatSession");
@@ -446,6 +447,48 @@ export function useChatSession(): UseChatSessionResult {
     [sessionService, handleStreamingMessage, loadContextsForSession]
   );
 
+  const switchMode = useCallback(
+    async (modeId: string) => {
+      if (!conversation) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No Active Conversation",
+          message: "Start a conversation before switching modes."
+        });
+        return;
+      }
+
+      try {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Switching Mode",
+          message: "Changing agent mode..."
+        });
+
+        await sessionService.setSessionMode(conversation.sessionId, modeId);
+        await refreshConversation(conversation.sessionId);
+
+        const updatedSession = await sessionService.getSession(conversation.sessionId);
+        const modeName = updatedSession?.currentMode?.name ?? modeId;
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Mode Switched",
+          message: `Now in ${modeName} mode`
+        });
+
+        logger.info("Mode switched successfully", {
+          sessionId: conversation.sessionId,
+          modeId,
+          modeName
+        });
+      } catch (error) {
+        await ErrorHandler.handleError(error, "Switching agent mode");
+      }
+    },
+    [conversation, sessionService, refreshConversation]
+  );
+
   return useMemo(
     () => ({
       conversation,
@@ -462,7 +505,8 @@ export function useChatSession(): UseChatSessionResult {
       addFileContexts,
       addDirectoryContexts,
       removeContext,
-      refreshContexts
+      refreshContexts,
+      switchMode
     }),
     [
       conversation,
@@ -478,7 +522,8 @@ export function useChatSession(): UseChatSessionResult {
       addFileContexts,
       addDirectoryContexts,
       removeContext,
-      refreshContexts
+      refreshContexts,
+      switchMode
     ]
   );
 }

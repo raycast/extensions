@@ -153,6 +153,26 @@ export class SessionService implements SessionServiceInterface {
           }
         };
 
+        // Capture mode information if provided by the agent
+        if (acpSession.modes) {
+          const currentMode = acpSession.modes.availableModes.find(
+            m => m.id === acpSession.modes!.currentModeId
+          );
+
+          session.currentMode = currentMode ? {
+            id: currentMode.id,
+            name: currentMode.name
+          } : undefined;
+
+          session.availableModes = acpSession.modes.availableModes;
+
+          logger.info('Agent mode information captured', {
+            sessionId,
+            currentMode: session.currentMode,
+            availableModes: session.availableModes
+          });
+        }
+
         logger.info('Session created successfully', {
           sessionId,
           messageCount: session.messages.length
@@ -396,6 +416,19 @@ export class SessionService implements SessionServiceInterface {
               agentSessionId
             }
           };
+
+          // Capture mode information if provided
+          if (newAgentSession.modes) {
+            const currentMode = newAgentSession.modes.availableModes.find(
+              m => m.id === newAgentSession.modes!.currentModeId
+            );
+            session.currentMode = currentMode ? {
+              id: currentMode.id,
+              name: currentMode.name
+            } : undefined;
+            session.availableModes = newAgentSession.modes.availableModes;
+          }
+
           await this.storageService.saveConversation(session);
           await this.persistenceService.saveSessionSnapshot(session);
 
@@ -451,6 +484,18 @@ export class SessionService implements SessionServiceInterface {
               agentSessionId
             }
           };
+
+          // Capture mode information if provided
+          if (newAgentSession.modes) {
+            const currentMode = newAgentSession.modes.availableModes.find(
+              m => m.id === newAgentSession.modes!.currentModeId
+            );
+            session.currentMode = currentMode ? {
+              id: currentMode.id,
+              name: currentMode.name
+            } : undefined;
+            session.availableModes = newAgentSession.modes.availableModes;
+          }
 
           await this.storageService.saveConversation(session);
           await this.persistenceService.saveSessionSnapshot(session);
@@ -568,6 +613,108 @@ export class SessionService implements SessionServiceInterface {
       throw new ACPError(
         ErrorCode.SystemError,
         'Failed to retrieve session messages',
+        error instanceof Error ? error.message : 'Unknown error',
+        { sessionId }
+      );
+    }
+  }
+
+  /**
+   * Switch the mode for an active session
+   */
+  async setSessionMode(sessionId: string, modeId: string): Promise<void> {
+    try {
+      logger.info('Setting session mode', { sessionId, modeId });
+
+      const session = await this.getSession(sessionId);
+      if (!session) {
+        throw new ACPError(
+          ErrorCode.SessionNotFound,
+          `Session not found: ${sessionId}`,
+          'Cannot set mode for a session that does not exist',
+          { sessionId }
+        );
+      }
+
+      if (!session.agentSessionId) {
+        throw new ACPError(
+          ErrorCode.InvalidSession,
+          `Session has no agent session ID`,
+          'Cannot set mode for a session without an active agent connection',
+          { sessionId }
+        );
+      }
+
+      // Check if the mode is available
+      if (session.availableModes) {
+        const modeExists = session.availableModes.some(m => m.id === modeId);
+        if (!modeExists) {
+          throw new ACPError(
+            ErrorCode.InvalidConfiguration,
+            `Mode '${modeId}' is not available for this session`,
+            `Available modes: ${session.availableModes.map(m => m.id).join(', ')}`,
+            { sessionId, modeId, availableModes: session.availableModes }
+          );
+        }
+      }
+
+      // Call the ACP client to set the mode
+      await this.acpClient.setSessionMode({
+        sessionId: session.agentSessionId,
+        modeId
+      });
+
+      logger.info('Session mode change requested', { sessionId, modeId });
+      // Note: The actual mode update will come via current_mode_update notification
+
+    } catch (error) {
+      if (error instanceof ACPError) {
+        throw error;
+      }
+
+      logger.error('Failed to set session mode', { sessionId, modeId, error });
+
+      throw new ACPError(
+        ErrorCode.SystemError,
+        'Failed to set session mode',
+        error instanceof Error ? error.message : 'Unknown error',
+        { sessionId, modeId }
+      );
+    }
+  }
+
+  /**
+   * Get the current mode and available modes for a session
+   */
+  async getSessionMode(sessionId: string): Promise<{
+    currentMode?: { id: string; name: string };
+    availableModes?: Array<{ id: string; name: string; description?: string | null }>;
+  }> {
+    try {
+      const session = await this.getSession(sessionId);
+      if (!session) {
+        throw new ACPError(
+          ErrorCode.SessionNotFound,
+          `Session not found: ${sessionId}`,
+          'Cannot get mode for a session that does not exist',
+          { sessionId }
+        );
+      }
+
+      return {
+        currentMode: session.currentMode,
+        availableModes: session.availableModes
+      };
+    } catch (error) {
+      if (error instanceof ACPError) {
+        throw error;
+      }
+
+      logger.error('Failed to get session mode', { sessionId, error });
+
+      throw new ACPError(
+        ErrorCode.SystemError,
+        'Failed to get session mode',
         error instanceof Error ? error.message : 'Unknown error',
         { sessionId }
       );
@@ -1175,6 +1322,28 @@ export class SessionService implements SessionServiceInterface {
       updateData: JSON.stringify(update.update, null, 2)
     });
 
+    // Handle current_mode_update specially before loading the session
+    if (update.update?.sessionUpdate === 'current_mode_update') {
+      const modeChange = update.update as CurrentModeUpdate;
+      const session = await this.storageService.getConversation(sessionId);
+
+      if (session && session.availableModes) {
+        const newMode = session.availableModes.find(m => m.id === modeChange.currentModeId);
+        if (newMode) {
+          session.currentMode = {
+            id: newMode.id,
+            name: newMode.name
+          };
+          await this.storageService.saveConversation(session);
+
+          logger.info('Session mode updated', {
+            sessionId,
+            newMode: session.currentMode
+          });
+        }
+      }
+    }
+
     const session = await this.storageService.getConversation(sessionId);
     if (!session) {
       logger.warn('Session not found for update', {
@@ -1603,6 +1772,9 @@ export class SessionService implements SessionServiceInterface {
       }
       case 'current_mode_update': {
         const modeChange = payload as CurrentModeUpdate;
+
+        // The actual mode update happens in handleSessionUpdate before transforming
+        // This just creates a message to display in the conversation
         return {
           id: `mode-${Date.now()}`,
           role: 'system',

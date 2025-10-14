@@ -17,6 +17,7 @@ import { ErrorCode } from "@/types/extension";
 import { createLogger } from "@/utils/logging";
 import { ProcessTracker } from "./processTracker";
 import { PermissionService } from "./permissionService";
+import { TerminalManager } from "./terminalManager";
 
 const logger = createLogger("ACPClient");
 
@@ -188,10 +189,37 @@ export class ACPClient implements acp.Client {
       mcpServers: options?.mcpServers ?? []
     };
 
+    logger.info('Creating ACP session', {
+      cwd: request.cwd,
+      mcpServersCount: request.mcpServers?.length || 0,
+      mode: options?.mode
+    });
+
     try {
       const response = await this.connection!.newSession(request);
+
+      logger.info('ACP newSession response received', {
+        response: JSON.stringify(response, null, 2),
+        hasSessionId: !!response?.sessionId,
+        hasModes: !!response?.modes,
+        modesDetail: response?.modes ? {
+          currentModeId: response.modes.currentModeId,
+          availableModes: response.modes.availableModes?.map(m => ({
+            id: m.id,
+            name: m.name,
+            description: m.description
+          }))
+        } : 'none'
+      });
+
       return response;
     } catch (error) {
+      logger.error('Failed to create ACP session', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        request
+      });
+
       throw this.createError(
         ErrorCode.SessionNotFound,
         `Failed to create session: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -216,10 +244,31 @@ export class ACPClient implements acp.Client {
       ]
     };
 
+    logger.info('Sending prompt to agent', {
+      sessionId,
+      promptLength: text.length,
+      promptPreview: text.slice(0, 100)
+    });
+
     try {
       const response = await this.connection!.prompt(request);
+
+      logger.info('Prompt response received', {
+        sessionId,
+        stopReason: response.stopReason,
+        hasMessages: !!response.messages,
+        messageCount: response.messages?.length || 0,
+        response: JSON.stringify(response, null, 2)
+      });
+
       return response;
     } catch (error) {
+      logger.error('Failed to send prompt', {
+        sessionId,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+
       throw this.createError(
         ErrorCode.ProtocolError,
         `Failed to send prompt: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -464,7 +513,7 @@ export class ACPClient implements acp.Client {
         readTextFile: true,
         writeTextFile: true
       },
-      terminal: false
+      terminal: true
     };
 
     const request: acp.InitializeRequest = {
@@ -661,5 +710,239 @@ export class ACPClient implements acp.Client {
     // For now, we don't have explicit session management on the ACP side
     // This is a no-op that allows the session service to work
     logger.debug('endSession called', { sessionId });
+
+    // Clean up any terminals associated with this session
+    TerminalManager.cleanupSession(sessionId);
+  }
+
+  /**
+   * Set the mode for a session
+   */
+  async setSessionMode(params: acp.SetSessionModeRequest): Promise<acp.SetSessionModeResponse> {
+    this.ensureConnected();
+
+    logger.info('Setting session mode', {
+      sessionId: params.sessionId,
+      modeId: params.modeId
+    });
+
+    try {
+      // Call the ACP session/set_mode method
+      // The connection object handles the JSON-RPC call
+      const response = await (this.connection as any).sendRequest(
+        'session/set_mode',
+        params
+      ) as acp.SetSessionModeResponse;
+
+      logger.info('Session mode changed successfully', {
+        sessionId: params.sessionId,
+        modeId: params.modeId
+      });
+
+      return response || {};
+    } catch (error) {
+      logger.error('Failed to set session mode', {
+        sessionId: params.sessionId,
+        modeId: params.modeId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+
+      throw this.createError(
+        ErrorCode.ProtocolError,
+        `Failed to set session mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { sessionId: params.sessionId, modeId: params.modeId, originalError: error }
+      );
+    }
+  }
+
+  /**
+   * Create a new terminal and execute a command
+   */
+  async createTerminal(params: acp.CreateTerminalRequest): Promise<acp.CreateTerminalResponse> {
+    logger.info('Terminal creation request', {
+      sessionId: params.sessionId,
+      command: params.command,
+      args: params.args,
+      cwd: params.cwd
+    });
+
+    try {
+      const result = TerminalManager.createTerminal({
+        sessionId: params.sessionId,
+        command: params.command,
+        args: params.args,
+        env: params.env,
+        cwd: params.cwd ?? undefined,
+        outputByteLimit: params.outputByteLimit ?? undefined
+      });
+
+      logger.info('Terminal created successfully', {
+        sessionId: params.sessionId,
+        terminalId: result.terminalId
+      });
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to create terminal', {
+        sessionId: params.sessionId,
+        error: errorMessage
+      });
+
+      throw this.createError(
+        ErrorCode.SystemError,
+        `Failed to create terminal: ${errorMessage}`,
+        { originalError: error }
+      );
+    }
+  }
+
+  /**
+   * Get the current output and status of a terminal
+   */
+  async terminalOutput(params: acp.TerminalOutputRequest): Promise<acp.TerminalOutputResponse> {
+    logger.debug('Terminal output request', {
+      sessionId: params.sessionId,
+      terminalId: params.terminalId
+    });
+
+    try {
+      const result = TerminalManager.getTerminalOutput({
+        sessionId: params.sessionId,
+        terminalId: params.terminalId
+      });
+
+      return {
+        output: result.output,
+        truncated: result.truncated,
+        exitStatus: result.exitStatus || undefined
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to get terminal output', {
+        sessionId: params.sessionId,
+        terminalId: params.terminalId,
+        error: errorMessage
+      });
+
+      throw this.createError(
+        ErrorCode.SystemError,
+        `Failed to get terminal output: ${errorMessage}`,
+        { originalError: error }
+      );
+    }
+  }
+
+  /**
+   * Wait for a terminal command to exit
+   */
+  async waitForTerminalExit(params: acp.WaitForTerminalExitRequest): Promise<acp.WaitForTerminalExitResponse> {
+    logger.info('Waiting for terminal exit', {
+      sessionId: params.sessionId,
+      terminalId: params.terminalId
+    });
+
+    try {
+      const result = await TerminalManager.waitForTerminalExit({
+        sessionId: params.sessionId,
+        terminalId: params.terminalId
+      });
+
+      logger.info('Terminal exited', {
+        sessionId: params.sessionId,
+        terminalId: params.terminalId,
+        exitCode: result.exitCode,
+        signal: result.signal
+      });
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to wait for terminal exit', {
+        sessionId: params.sessionId,
+        terminalId: params.terminalId,
+        error: errorMessage
+      });
+
+      throw this.createError(
+        ErrorCode.SystemError,
+        `Failed to wait for terminal exit: ${errorMessage}`,
+        { originalError: error }
+      );
+    }
+  }
+
+  /**
+   * Kill a terminal command without releasing the terminal
+   */
+  async killTerminal(params: acp.KillTerminalCommandRequest): Promise<acp.KillTerminalResponse> {
+    logger.info('Kill terminal request', {
+      sessionId: params.sessionId,
+      terminalId: params.terminalId
+    });
+
+    try {
+      TerminalManager.killTerminal({
+        sessionId: params.sessionId,
+        terminalId: params.terminalId
+      });
+
+      logger.info('Terminal killed successfully', {
+        sessionId: params.sessionId,
+        terminalId: params.terminalId
+      });
+
+      return {};
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to kill terminal', {
+        sessionId: params.sessionId,
+        terminalId: params.terminalId,
+        error: errorMessage
+      });
+
+      throw this.createError(
+        ErrorCode.SystemError,
+        `Failed to kill terminal: ${errorMessage}`,
+        { originalError: error }
+      );
+    }
+  }
+
+  /**
+   * Release a terminal and free its resources
+   */
+  async releaseTerminal(params: acp.ReleaseTerminalRequest): Promise<acp.ReleaseTerminalResponse> {
+    logger.info('Release terminal request', {
+      sessionId: params.sessionId,
+      terminalId: params.terminalId
+    });
+
+    try {
+      TerminalManager.releaseTerminal({
+        sessionId: params.sessionId,
+        terminalId: params.terminalId
+      });
+
+      logger.info('Terminal released successfully', {
+        sessionId: params.sessionId,
+        terminalId: params.terminalId
+      });
+
+      return {};
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to release terminal', {
+        sessionId: params.sessionId,
+        terminalId: params.terminalId,
+        error: errorMessage
+      });
+
+      throw this.createError(
+        ErrorCode.SystemError,
+        `Failed to release terminal: ${errorMessage}`,
+        { originalError: error }
+      );
+    }
   }
 }

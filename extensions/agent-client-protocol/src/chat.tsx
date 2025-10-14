@@ -513,6 +513,9 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     if (selectedAgent) {
       parts.push(`Agent: ${selectedAgent.name}`);
     }
+    if (chat.conversation.currentMode) {
+      parts.push(`Mode: ${chat.conversation.currentMode.name}`);
+    }
     if (chat.conversation.context?.workingDirectory) {
       parts.push(`CWD: ${chat.conversation.context.workingDirectory}`);
     }
@@ -621,6 +624,20 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
               />
             )}
             {renderContextActions()}
+            {chat.conversation?.availableModes && chat.conversation.availableModes.length > 0 && (
+              <ActionPanel.Section title="Mode">
+                {chat.conversation.availableModes.map((mode) => (
+                  <Action
+                    key={mode.id}
+                    title={`Switch to ${mode.name}`}
+                    icon={chat.conversation?.currentMode?.id === mode.id ? Icon.CheckCircle : Icon.Circle}
+                    onAction={async () => {
+                      await chat.switchMode(mode.id);
+                    }}
+                  />
+                ))}
+              </ActionPanel.Section>
+            )}
             <ActionPanel.Section>
               <Action
                 title="Restart Conversation"
@@ -639,6 +656,26 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     );
   });
 
+  const modeDropdown = chat.conversation?.availableModes && chat.conversation.availableModes.length > 0 ? (
+    <List.Dropdown
+      tooltip="Switch Agent Mode"
+      value={chat.conversation.currentMode?.id ?? ""}
+      onChange={async (newModeId) => {
+        if (newModeId && newModeId !== chat.conversation?.currentMode?.id) {
+          await chat.switchMode(newModeId);
+        }
+      }}
+    >
+      {chat.conversation.availableModes.map((mode) => (
+        <List.Dropdown.Item
+          key={mode.id}
+          title={mode.name}
+          value={mode.id}
+        />
+      ))}
+    </List.Dropdown>
+  ) : undefined;
+
   return (
     <List
       isLoading={isLoadingAgents || isProcessing}
@@ -647,6 +684,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={selectedAgent ? `Chatting with ${selectedAgent.name} - Type a message and press Enter` : "Type a message and press Enter"}
+      searchBarAccessory={modeDropdown}
     >
       {chat.contexts.length > 0 && (
         <List.Section title="Shared Context" subtitle={`${chat.contexts.length} item${chat.contexts.length === 1 ? "" : "s"}`}>
@@ -672,6 +710,20 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
                   await handleSend(searchText);
                 }}
               />
+              {chat.conversation?.availableModes && chat.conversation.availableModes.length > 0 && (
+                <ActionPanel.Section title="Mode">
+                  {chat.conversation.availableModes.map((mode) => (
+                    <Action
+                      key={mode.id}
+                      title={`Switch to ${mode.name}`}
+                      icon={chat.conversation?.currentMode?.id === mode.id ? Icon.CheckCircle : Icon.Circle}
+                      onAction={async () => {
+                        await chat.switchMode(mode.id);
+                      }}
+                    />
+                  ))}
+                </ActionPanel.Section>
+              )}
               <Action
                 title="Restart Conversation"
                 icon={Icon.Repeat}

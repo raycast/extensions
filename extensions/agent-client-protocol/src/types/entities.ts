@@ -165,6 +165,24 @@ export interface ConversationSession {
     /** Additional context data */
     additionalContext?: Record<string, unknown>;
   };
+
+  /** Current agent mode */
+  currentMode?: {
+    /** Mode identifier */
+    id: string;
+    /** Human-readable mode name */
+    name: string;
+  };
+
+  /** Available modes for this agent session */
+  availableModes?: Array<{
+    /** Mode identifier */
+    id: string;
+    /** Human-readable mode name */
+    name: string;
+    /** Optional description of what this mode does */
+    description?: string | null;
+  }>;
 }
 
 /**

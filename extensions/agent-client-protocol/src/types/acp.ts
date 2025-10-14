@@ -65,6 +65,16 @@ export interface NewSessionRequest {
 
 export interface NewSessionResponse {
   sessionId: string;
+  modes?: {
+    currentModeId: string;
+    availableModes: SessionMode[];
+  };
+}
+
+export interface SessionMode {
+  id: string;
+  name: string;
+  description?: string | null;
 }
 
 export interface LoadSessionRequest {
@@ -74,6 +84,15 @@ export interface LoadSessionRequest {
 export interface LoadSessionResponse {
   sessionId: string;
   messages: SessionMessage[];
+}
+
+export interface SetSessionModeRequest {
+  sessionId: string;
+  modeId: string;
+}
+
+export interface SetSessionModeResponse {
+  // Empty response on success
 }
 
 export interface MCPServer {
