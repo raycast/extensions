@@ -1,6 +1,8 @@
 # Kaomoji Search Changelog
 
-## [Chore: Added Windows as platform] - {PR_MERGE_DATE}
+## [Update] - {PR_MERGE_DATE}
+
+- Added support for pinning kaomojis
 
 ## [Windows Support + Modernize] - 2025-10-06
 
