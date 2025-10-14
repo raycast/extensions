@@ -5,6 +5,10 @@
   "description": "Search the bible",
   "icon": "extension-icon.png",
   "author": "josmithua",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Data",
     "Productivity"
@@ -25,7 +29,7 @@
     {
       "name": "bibleSearch",
       "title": "Bible Search",
-      "description": "Search for, display, copy and paste bible passages. Configure whether to include verse numbers or show one verse per line.",
+      "description": "Search for bible passages by reference.",
       "mode": "view",
       "arguments": [
         {
@@ -43,14 +47,15 @@
       ],
       "preferences": [
         {
-          "name": "enterToSearch",
-          "label": "Press Enter to search",
-          "description": "Press Enter key to perform search, as opposed to searching while typing. Saves network calls.",
+          "name": "separatePassages",
+          "label": "Show passages as separate list items",
+          "description": "Display each passage as its own list item in the search results. Otherwise passages will be combined into one item.",
           "type": "checkbox",
           "required": false,
           "default": false
         },
         {
+          "title": "Formatting Options",
           "name": "includeVerseNumbers",
           "label": "Include verse numbers",
           "description": "Include individual verse numbers in the results.",
@@ -60,8 +65,8 @@
         },
         {
           "name": "includeCopyright",
-          "label": "Include copyright",
-          "description": "Add copyright to the results.",
+          "label": "Show copyright",
+          "description": "Add copyright information to the shown results. Always excluded from copied text.",
           "type": "checkbox",
           "required": false,
           "default": true
@@ -86,23 +91,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "axios": "^1.8.4",
-    "cheerio": "^1.0.0-rc.10",
-    "node-html-parser": "^6.1.4"
+    "@raycast/api": "^1.103.3",
+    "cheerio": "^1.1.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^8.29.0",
-    "eslint-plugin-react-hooks": "^4.4.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "npm run update-bible-versions && ray build -e dist",
+    "publish": "npx @raycast/api@latest publish",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

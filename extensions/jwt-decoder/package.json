@@ -6,7 +6,8 @@
   "icon": "jwt.png",
   "author": "gdsmith",
   "contributors": [
-    "zhhanging"
+    "zhhanging",
+    "joaogf.dev"
   ],
   "categories": [
     "Data",
@@ -50,6 +51,11 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

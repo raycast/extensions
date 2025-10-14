@@ -34,25 +34,25 @@ export const parseArchivePage = (text: string): ArchiveItem[] => {
     if (href) {
       const id = href.split("/").pop();
       if (id && !md5Map.has(id)) {
-        const title = $(el).find("h3").text();
-        const $img = $(el).find("img").first();
+        const title = $(el).text();
+        const $img = $(el).parent().parent().parent().find("img").first();
         const cover = $img?.attr("src") || null;
 
-        const author =
-          $(el)
-            .find(
-              "div[class='max-lg:line-clamp-[2] lg:truncate leading-[1.2] lg:leading-[1.35] max-lg:text-sm italic']",
-            )
-            .text() || "unknown";
-        const publisher =
-          $(el).find("div[class='truncate leading-[1.2] lg:leading-[1.35] max-lg:text-xs']").text() || "unknown";
-        const infoRaw = (
-          $(el).find("div[class='line-clamp-[2] leading-[1.2] text-[10px] lg:text-xs text-gray-500']").text() || ""
-        ).split(", ");
-        const info = infoRaw.map((s) => s.trim());
+        const author = $(el).next().text() || "unknown";
+        const publisher = $(el).next().next().text() || "unknown";
+        const $info = $(el)
+          .parent()
+          .parent()
+          .find("div[class='text-gray-800 dark:text-slate-400 font-semibold text-sm leading-[1.2] mt-2']");
+        const infoRaw = $info.text().split("TODO")[0].split(", ");
+        const info = infoRaw.flatMap((s) => s.trim().split("·")).map((s) => s.replace("📕 ", "").trim());
 
-        const ext = info.find((item) => !isEmpty(item) && fileTypes.includes(item)) || "unknown";
-        const type = info.find((item) => !isEmpty(item) && docTypes.includes(item)) || "unknown";
+        const ext = info.find((item) => !isEmpty(item) && fileTypes.includes(item.toLowerCase())) || "unknown";
+        const type =
+          info.find(
+            (item) => !isEmpty(item) && docTypes.find((type) => item.toLowerCase().includes(type.toLowerCase())),
+          ) || "unknown";
+
         const size =
           info
             .find((item) => item.endsWith("MB"))
@@ -60,10 +60,9 @@ export const parseArchivePage = (text: string): ArchiveItem[] => {
             .trim() || "<unknown>";
         const languageRaw = info.find((item) => !isEmpty(item) && languageStrings.includes(item)) || "unknown";
 
-        const restInfo = info.filter((s) => s !== ext && s !== type && s !== `${size}MB` && s !== languageRaw);
         const language = languageRaw.split("[").pop()?.replace("]", "") || "unknown";
 
-        const fileName = restInfo.length > 0 ? restInfo.join(", ") : null;
+        const fileName = $(el).prev().text() || null;
 
         md5Map.set(id, {
           id,

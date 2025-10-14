@@ -1,5 +1,11 @@
 # KeePassXC Extension Changelog
 
+## [1.7.1] - 2025-10-14
+
+### Fixed
+
+- Find KeePassXC app location using Raycast API for macOS (#22043).
+
 ## [1.7.0] - 2025-09-29
 
 ### Added
@@ -25,7 +31,7 @@
 
 ### Fixed
 
-- Use a raw.githubusercontent.com link for the KeePassXC image in the README.
+- Use a `raw.githubusercontent.com` link for the KeePassXC image in the README.
 
 ## [1.5.5] - 2025-03-12
 

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/plane-icon.png" width="150" height="150" />
+</p>
+
 # Plane Raycast Extension
 
 A powerful Raycast extension for managing work items in [Plane](https://plane.so), the open-source project management tool. This extension allows you to create, search, view, and manage work items directly from your macOS command palette.
@@ -8,7 +12,7 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 
 - **Create Work Item** - Create new work items with comprehensive details
 - **Search Work Items** - Search and filter work items across all projects
-- **My Work Items** - View your assigned work items (placeholder for future implementation)
+- **Search Projects** - View projects and their work items
 
 ### ✨ Work Item Management
 

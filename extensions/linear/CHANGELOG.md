@@ -1,5 +1,11 @@
 # Linear Changelog
 
+## [Schema deprecation and update SDK] - 2025-10-13
+
+- Bumped `@linear/sdk` to v60.0.0
+- Removed references to "roadmap" which was [deprecated](https://linear.app/changelog/2024-07-25-priority-for-projects-and-micro-adjust) July 2024
+- Corrected project list empty state message
+
 ## [Status Preference] - 2025-10-09
 
 - Added "Preferred Status" preference to "Create Issue for Myself" command to specify the initial status for new issues
