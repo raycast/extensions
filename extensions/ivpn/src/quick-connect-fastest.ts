@@ -1,9 +1,8 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 
 import { IVPN } from "@/api/ivpn";
+import { IvpnInfoMap } from "@/api/ivpn/types";
 import { withNoViewErrorHandler } from "@/utils/errorHandler";
-
-import { IvpnInfoMap } from "./api/ivpn/types";
 
 export default withNoViewErrorHandler(async () => {
   showToast({ title: "IVPN Connecting...", style: Toast.Style.Animated });
