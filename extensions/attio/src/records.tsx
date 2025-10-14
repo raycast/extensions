@@ -2,6 +2,7 @@ import { usePromise } from "@raycast/utils";
 import { AttributeValue } from "./types";
 import { queryRecords } from "./attio";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ObjectT } from "attio-js/dist/commonjs/models/components/object";
 
 function getValue(val: AttributeValue[]) {
     if (!val.length) return "-";
@@ -47,13 +48,13 @@ function buildMarkdown(values: {[attributeSlug: string]: AttributeValue[]}) {
 |-----|-----|
 ${Object.entries(values).map(([key, val]) => `| ${key} | ${getValue(val)} |`).join(`\n`)}`;
 }
-export default function Records({objectId}:{objectId: string}) {
-    const {isLoading,data:records=[]} = usePromise(async() => {
-        const { data } = await queryRecords({objectId});
+export default function Records({object}:{object: ObjectT}) {
+    const {isLoading,data:records=[], error} = usePromise(async() => {
+        const { data } = await queryRecords({objectId: object.id.objectId});
         return data;
     })
-    return <List isLoading={isLoading} isShowingDetail>
-{records.map((record, recordIndex) => <List.Item key={record.id.record_id} icon={Icon.Document} title={`${recordIndex+1}`} accessories={[{date: new Date(record.created_at)}]} detail={<List.Item.Detail markdown={buildMarkdown(record.values)} />} actions={<ActionPanel>
+    return <List isLoading={isLoading} isShowingDetail={!!records.length}>
+{!isLoading && !records.length && !error ? <List.EmptyView icon="empty/record.svg" title={`No ${object.singularNoun?.toLowerCase()} records`} description={`0 ${object.pluralNoun} records`} /> : records.map((record, recordIndex) => <List.Item key={record.id.record_id} icon={Icon.Document} title={`${recordIndex+1}`} accessories={[{date: new Date(record.created_at)}]} detail={<List.Item.Detail markdown={buildMarkdown(record.values)} />} actions={<ActionPanel>
     <Action.OpenInBrowser url={record.web_url}/>
 </ActionPanel>} />)}
     </List>

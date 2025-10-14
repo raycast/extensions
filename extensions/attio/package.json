@@ -21,15 +21,17 @@
       "type": "password",
       "required": true,
       "description": "Attio Access Token"
+    },
+    {
+      "name": "workspace_slug",
+      "title": "Workspace Slug",
+      "placeholder": "attio",
+      "type": "textfield",
+      "required": true,
+      "description": "Attio Workspace Slug"
     }
   ],
   "commands": [
-    {
-      "name": "members-and-teams",
-      "title": "Members and Teams",
-      "description": "Manage workspace members and teams, set access levels, and invite new users",
-      "mode": "view"
-    },
     {
       "name": "lists",
       "title": "Lists",
@@ -37,8 +39,32 @@
       "mode": "view"
     },
     {
+      "name": "members-and-teams",
+      "title": "Members and Teams",
+      "description": "Manage workspace members and teams, set access levels, and invite new users",
+      "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Notes",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "objects",
       "title": "Objects",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "tasks",
+      "title": "Tasks",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "webhooks",
+      "title": "Webhooks",
       "description": "",
       "mode": "view"
     }
