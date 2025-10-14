@@ -1,15 +1,9 @@
-import {
-  claudeCodeCommands,
-  getCommandsByCategory,
-  searchCommands,
-} from "../constants/commands-data";
+import { claudeCodeCommands, getCommandsByCategory, searchCommands } from "../constants/commands-data";
 
 describe("commands-data", () => {
   describe("claudeCodeCommands", () => {
     it("should contain all expected categories", () => {
-      const categories = [
-        ...new Set(claudeCodeCommands.map((cmd) => cmd.category)),
-      ];
+      const categories = [...new Set(claudeCodeCommands.map((cmd) => cmd.category))];
       expect(categories).toContain("Commands");
       expect(categories).toContain("Keyboard Shortcuts");
       expect(categories).toContain("Multiline Input");
@@ -40,16 +34,12 @@ describe("commands-data", () => {
     });
 
     it("should contain at least 26 commands", () => {
-      const commands = claudeCodeCommands.filter(
-        (cmd) => cmd.category === "Commands",
-      );
+      const commands = claudeCodeCommands.filter((cmd) => cmd.category === "Commands");
       expect(commands.length).toBeGreaterThanOrEqual(26);
     });
 
     it("should include key commands", () => {
-      const commandNames = claudeCodeCommands
-        .filter((cmd) => cmd.category === "Commands")
-        .map((cmd) => cmd.name);
+      const commandNames = claudeCodeCommands.filter((cmd) => cmd.category === "Commands").map((cmd) => cmd.name);
 
       expect(commandNames).toContain("/help");
       expect(commandNames).toContain("/clear");
@@ -99,10 +89,7 @@ describe("commands-data", () => {
 
     it("should include all commands in grouped result", () => {
       const grouped = getCommandsByCategory();
-      const totalCommands = grouped.reduce(
-        (sum, group) => sum + group.commands.length,
-        0,
-      );
+      const totalCommands = grouped.reduce((sum, group) => sum + group.commands.length, 0);
       expect(totalCommands).toBe(claudeCodeCommands.length);
     });
 
@@ -126,18 +113,14 @@ describe("commands-data", () => {
     it("should search by description", () => {
       const results = searchCommands("token");
       expect(results.length).toBeGreaterThan(0);
-      const hasTokenInDescription = results.every((cmd) =>
-        cmd.description.toLowerCase().includes("token"),
-      );
+      const hasTokenInDescription = results.every((cmd) => cmd.description.toLowerCase().includes("token"));
       expect(hasTokenInDescription).toBe(true);
     });
 
     it("should search by category", () => {
       const results = searchCommands("keyboard");
       expect(results.length).toBeGreaterThan(0);
-      const keyboardShortcuts = results.filter(
-        (cmd) => cmd.category === "Keyboard Shortcuts",
-      );
+      const keyboardShortcuts = results.filter((cmd) => cmd.category === "Keyboard Shortcuts");
       expect(keyboardShortcuts.length).toBeGreaterThan(0);
     });
 

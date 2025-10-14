@@ -4,9 +4,7 @@
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import CreateSnippet, {
-  CreateSnippetProps,
-} from "../commands/create-snippet/list";
+import CreateSnippet, { CreateSnippetProps } from "../commands/create-snippet/list";
 import { createSnippet, type Snippet } from "../utils/claude-message";
 import * as RaycastAPI from "@raycast/api";
 import { LaunchType } from "@raycast/api";
@@ -44,13 +42,7 @@ jest.mock("@raycast/api", () => ({
       </form>
     ),
     {
-      TextField: ({
-        id,
-        title,
-        placeholder,
-        value,
-        onChange,
-      }: MockFormFieldProps) => (
+      TextField: ({ id, title, placeholder, value, onChange }: MockFormFieldProps) => (
         <input
           data-testid={`form-textfield-${id}`}
           data-title={title}
@@ -59,13 +51,7 @@ jest.mock("@raycast/api", () => ({
           onChange={(e) => onChange(e.target.value)}
         />
       ),
-      TextArea: ({
-        id,
-        title,
-        placeholder,
-        value,
-        onChange,
-      }: MockFormFieldProps) => (
+      TextArea: ({ id, title, placeholder, value, onChange }: MockFormFieldProps) => (
         <textarea
           data-testid={`form-textarea-${id}`}
           data-title={title}
@@ -76,17 +62,10 @@ jest.mock("@raycast/api", () => ({
       ),
     },
   ),
-  ActionPanel: ({ children }: MockActionPanelProps) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: MockActionPanelProps) => <div data-testid="action-panel">{children}</div>,
   Action: {
     SubmitForm: ({ title, onSubmit }: MockSubmitFormProps) => (
-      <button
-        data-testid="action-submit-form"
-        data-title={title}
-        onClick={onSubmit}
-        type="submit"
-      >
+      <button data-testid="action-submit-form" data-title={title} onClick={onSubmit} type="submit">
         {title}
       </button>
     ),
@@ -112,15 +91,9 @@ jest.mock("../utils/claude-message", () => ({
   createSnippet: jest.fn(),
 }));
 
-const mockCreateSnippet = createSnippet as jest.MockedFunction<
-  typeof createSnippet
->;
-const mockShowToast = RaycastAPI.showToast as jest.MockedFunction<
-  typeof RaycastAPI.showToast
->;
-const mockLaunchCommand = RaycastAPI.launchCommand as jest.MockedFunction<
-  typeof RaycastAPI.launchCommand
->;
+const mockCreateSnippet = createSnippet as jest.MockedFunction<typeof createSnippet>;
+const mockShowToast = RaycastAPI.showToast as jest.MockedFunction<typeof RaycastAPI.showToast>;
+const mockLaunchCommand = RaycastAPI.launchCommand as jest.MockedFunction<typeof RaycastAPI.launchCommand>;
 
 describe("CreateSnippet", () => {
   beforeEach(() => {
@@ -142,19 +115,13 @@ describe("CreateSnippet", () => {
       const titleField = screen.getByTestId("form-textfield-title");
       expect(titleField).toBeInTheDocument();
       expect(titleField).toHaveAttribute("data-title", "Title (Optional)");
-      expect(titleField).toHaveAttribute(
-        "placeholder",
-        "Enter snippet title...",
-      );
+      expect(titleField).toHaveAttribute("placeholder", "Enter snippet title...");
 
       // Check if content field is rendered
       const contentField = screen.getByTestId("form-textarea-content");
       expect(contentField).toBeInTheDocument();
       expect(contentField).toHaveAttribute("data-title", "Content");
-      expect(contentField).toHaveAttribute(
-        "placeholder",
-        "Enter snippet content...",
-      );
+      expect(contentField).toHaveAttribute("placeholder", "Enter snippet content...");
 
       // Check if action panel is rendered
       expect(screen.getByTestId("action-panel")).toBeInTheDocument();
@@ -368,10 +335,7 @@ describe("CreateSnippet", () => {
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockCreateSnippet).toHaveBeenCalledWith(
-          "Test Title",
-          "Test Content",
-        );
+        expect(mockCreateSnippet).toHaveBeenCalledWith("Test Title", "Test Content");
       });
 
       expect(mockShowToast).toHaveBeenCalledWith({
@@ -445,10 +409,7 @@ describe("CreateSnippet", () => {
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockCreateSnippet).toHaveBeenCalledWith(
-          "Trimmed Title",
-          "Trimmed Content",
-        );
+        expect(mockCreateSnippet).toHaveBeenCalledWith("Trimmed Title", "Trimmed Content");
       });
     });
 
@@ -582,8 +543,7 @@ describe("CreateSnippet", () => {
 
     it("should handle special characters in title and content", async () => {
       const specialTitle = "Test 🎉 & <script>alert('xss')</script> Title";
-      const specialContent =
-        "Content with émojis 🚀 and spéciàl chars: @#$%^&*()";
+      const specialContent = "Content with émojis 🚀 and spéciàl chars: @#$%^&*()";
 
       mockCreateSnippet.mockResolvedValueOnce({
         id: "test-id",
@@ -604,10 +564,7 @@ describe("CreateSnippet", () => {
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockCreateSnippet).toHaveBeenCalledWith(
-          specialTitle,
-          specialContent,
-        );
+        expect(mockCreateSnippet).toHaveBeenCalledWith(specialTitle, specialContent);
       });
     });
 

@@ -1,10 +1,7 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { PasteAction } from "../../components/paste-action";
 import { CommandItem } from "../../constants/commands-data";
-import {
-  formatCodeBlock,
-  formatContentMarkdown,
-} from "../../utils/markdown-formatter";
+import { formatCodeBlock, formatContentMarkdown } from "../../utils/markdown-formatter";
 
 interface CommandDetailProps {
   command: CommandItem;

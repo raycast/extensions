@@ -5,60 +5,21 @@ import { ParsedMessage } from "../utils/claude-message";
 // Mock Raycast API
 jest.mock("@raycast/api", () => ({
   ...jest.requireActual("@raycast/api"),
-  Detail: ({
-    markdown,
-    actions,
-  }: {
-    markdown: string;
-    actions: React.ReactNode;
-  }) => (
+  Detail: ({ markdown, actions }: { markdown: string; actions: React.ReactNode }) => (
     <div data-testid="detail">
       <div data-testid="markdown">{markdown}</div>
       <div data-testid="actions">{actions as React.ReactNode}</div>
     </div>
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: {
-    Paste: ({
-      title,
-      content,
-    }: {
-      title: string;
-      content: string;
-      icon: unknown;
-      shortcut: unknown;
-    }) => (
-      <div
-        data-testid="paste-action"
-        data-title={title}
-        data-content={content}
-      />
+    Paste: ({ title, content }: { title: string; content: string; icon: unknown; shortcut: unknown }) => (
+      <div data-testid="paste-action" data-title={title} data-content={content} />
     ),
-    CopyToClipboard: ({
-      title,
-      content,
-    }: {
-      title: string;
-      content: string;
-      shortcut: unknown;
-    }) => (
-      <div
-        data-testid="copy-action"
-        data-title={title}
-        data-content={content}
-      />
+    CopyToClipboard: ({ title, content }: { title: string; content: string; shortcut: unknown }) => (
+      <div data-testid="copy-action" data-title={title} data-content={content} />
     ),
-    Push: ({
-      title,
-      target,
-    }: {
-      title: string;
-      icon: unknown;
-      target: React.ReactNode;
-      shortcut: unknown;
-    }) => (
+    Push: ({ title, target }: { title: string; icon: unknown; target: React.ReactNode; shortcut: unknown }) => (
       <div data-testid="push-action" data-title={title}>
         {target as React.ReactNode}
       </div>
@@ -157,9 +118,7 @@ describe("MessageDetail (Received Messages)", () => {
 
     const createSnippet = getByTestId("create-snippet");
     expect(createSnippet).toBeTruthy();
-    expect(createSnippet.getAttribute("data-content")).toBe(
-      mockMessage.content,
-    );
+    expect(createSnippet.getAttribute("data-content")).toBe(mockMessage.content);
   });
 
   it("should handle getFrontmostApplication success", async () => {

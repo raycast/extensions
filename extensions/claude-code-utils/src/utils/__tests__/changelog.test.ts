@@ -40,11 +40,7 @@ describe("changelog", () => {
       expect(versions).toHaveLength(3);
       expect(versions[0]).toEqual({
         version: "1.2.0",
-        changes: [
-          "Added new feature A",
-          "Fixed bug B",
-          "Updated documentation",
-        ],
+        changes: ["Added new feature A", "Fixed bug B", "Updated documentation"],
       });
       expect(versions[1]).toEqual({
         version: "1.1.0",
@@ -72,11 +68,7 @@ describe("changelog", () => {
       const versions = await fetchChangelog();
 
       expect(versions).toHaveLength(1);
-      expect(versions[0].changes).toEqual([
-        "Feature one",
-        "Feature two",
-        "Feature three",
-      ]);
+      expect(versions[0].changes).toEqual(["Feature one", "Feature two", "Feature three"]);
     });
 
     it("should handle mixed bullet styles", async () => {
@@ -94,11 +86,7 @@ describe("changelog", () => {
 
       const versions = await fetchChangelog();
 
-      expect(versions[0].changes).toEqual([
-        "Dash bullet",
-        "Asterisk bullet",
-        "Another dash",
-      ]);
+      expect(versions[0].changes).toEqual(["Dash bullet", "Asterisk bullet", "Another dash"]);
     });
 
     it("should skip empty lines and non-bullet content", async () => {
@@ -122,11 +110,7 @@ Some other text.
 
       const versions = await fetchChangelog();
 
-      expect(versions[0].changes).toEqual([
-        "Valid change 1",
-        "Valid change 2",
-        "Valid change 3",
-      ]);
+      expect(versions[0].changes).toEqual(["Valid change 1", "Valid change 2", "Valid change 3"]);
     });
 
     it("should handle versions without brackets", async () => {
@@ -184,9 +168,7 @@ Some other text.
         status: 404,
       } as Response);
 
-      await expect(fetchChangelog()).rejects.toThrow(
-        "Failed to fetch changelog: 404",
-      );
+      await expect(fetchChangelog()).rejects.toThrow("Failed to fetch changelog: 404");
     });
 
     it("should throw error when network error occurs", async () => {
@@ -230,10 +212,7 @@ Some other text.
 
       const versions = await fetchChangelog();
 
-      expect(versions[0].changes).toEqual([
-        "Change with extra spaces",
-        "Another with more spaces",
-      ]);
+      expect(versions[0].changes).toEqual(["Change with extra spaces", "Another with more spaces"]);
     });
 
     it("should fetch from correct URL", async () => {
@@ -271,11 +250,7 @@ Some other text.
       const versions = await fetchChangelog();
 
       expect(versions).toHaveLength(3);
-      expect(versions.map((v) => v.version)).toEqual([
-        "3.0.0",
-        "2.0.0",
-        "1.0.0",
-      ]);
+      expect(versions.map((v) => v.version)).toEqual(["3.0.0", "2.0.0", "1.0.0"]);
     });
 
     it("should ignore empty bullet items", async () => {
@@ -294,10 +269,7 @@ Some other text.
 
       const versions = await fetchChangelog();
 
-      expect(versions[0].changes).toEqual([
-        "Valid change",
-        "Another valid change",
-      ]);
+      expect(versions[0].changes).toEqual(["Valid change", "Another valid change"]);
     });
   });
 });

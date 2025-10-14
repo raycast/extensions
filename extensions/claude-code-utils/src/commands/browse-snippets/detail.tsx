@@ -8,29 +8,17 @@ interface SnippetDetailProps {
   onDelete: (snippet: Snippet) => void;
 }
 
-export default function SnippetDetail({
-  snippet,
-  onDelete,
-}: SnippetDetailProps) {
+export default function SnippetDetail({ snippet, onDelete }: SnippetDetailProps) {
   return (
     <Detail
       markdown={snippet.content}
       navigationTitle={snippet.title || "Untitled Snippet"}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Title"
-            text={snippet.title || "Untitled"}
-          />
+          <Detail.Metadata.Label title="Title" text={snippet.title || "Untitled"} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Created"
-            text={snippet.createdAt.toLocaleString()}
-          />
-          <Detail.Metadata.Label
-            title="Updated"
-            text={snippet.updatedAt.toLocaleString()}
-          />
+          <Detail.Metadata.Label title="Created" text={snippet.createdAt.toLocaleString()} />
+          <Detail.Metadata.Label title="Updated" text={snippet.updatedAt.toLocaleString()} />
         </Detail.Metadata>
       }
       actions={
@@ -46,10 +34,7 @@ export default function SnippetDetail({
             icon={Icon.CopyClipboard}
             shortcut={{ modifiers: ["cmd"], key: "d" }}
             target={
-              <CreateSnippet
-                title={snippet.title ? `${snippet.title} (Copy)` : "Copy"}
-                content={snippet.content}
-              />
+              <CreateSnippet title={snippet.title ? `${snippet.title} (Copy)` : "Copy"} content={snippet.content} />
             }
           />
           <Action

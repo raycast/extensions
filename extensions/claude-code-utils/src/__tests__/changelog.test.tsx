@@ -19,11 +19,7 @@ jest.mock("@raycast/api", () => ({
       isLoading: boolean;
       searchBarPlaceholder: string;
     }) => (
-      <div
-        data-testid="list"
-        data-loading={isLoading}
-        data-placeholder={searchBarPlaceholder}
-      >
+      <div data-testid="list" data-loading={isLoading} data-placeholder={searchBarPlaceholder}>
         {children}
       </div>
     ),
@@ -39,24 +35,11 @@ jest.mock("@raycast/api", () => ({
         accessories: Array<{ text?: string; tag?: string }>;
         actions: React.ReactNode;
       }) => (
-        <div
-          data-testid="list-item"
-          data-title={title}
-          data-icon={icon}
-          data-accessories={JSON.stringify(accessories)}
-        >
+        <div data-testid="list-item" data-title={title} data-icon={icon} data-accessories={JSON.stringify(accessories)}>
           {actions}
         </div>
       ),
-      EmptyView: ({
-        icon,
-        title,
-        description,
-      }: {
-        icon: string;
-        title: string;
-        description: string;
-      }) => (
+      EmptyView: ({ icon, title, description }: { icon: string; title: string; description: string }) => (
         <div data-testid="empty-view" data-icon={icon}>
           <div data-testid="empty-title">{title}</div>
           <div data-testid="empty-description">{description}</div>
@@ -64,9 +47,7 @@ jest.mock("@raycast/api", () => ({
       ),
     },
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: {
     Push: ({ title }: { title: string }) => (
       <button data-testid="action-push" data-title={title}>
@@ -111,9 +92,7 @@ jest.mock("../commands/changelog/detail", () => ({
 // Mock changelog utils
 jest.mock("../utils/changelog");
 
-const mockFetchChangelog = changelogUtils.fetchChangelog as jest.MockedFunction<
-  typeof changelogUtils.fetchChangelog
->;
+const mockFetchChangelog = changelogUtils.fetchChangelog as jest.MockedFunction<typeof changelogUtils.fetchChangelog>;
 
 describe("Changelog", () => {
   beforeEach(() => {
@@ -172,9 +151,7 @@ describe("Changelog", () => {
 
     await waitFor(() => {
       const item = screen.getByTestId("list-item");
-      const accessories = JSON.parse(
-        item.getAttribute("data-accessories") || "[]",
-      );
+      const accessories = JSON.parse(item.getAttribute("data-accessories") || "[]");
       expect(accessories).toEqual([{ text: "1 change" }]);
     });
   });
@@ -193,17 +170,13 @@ describe("Changelog", () => {
 
     await waitFor(() => {
       const item = screen.getByTestId("list-item");
-      const accessories = JSON.parse(
-        item.getAttribute("data-accessories") || "[]",
-      );
+      const accessories = JSON.parse(item.getAttribute("data-accessories") || "[]");
       expect(accessories).toEqual([{ text: "2 changes" }]);
     });
   });
 
   it("should show error view on failure", async () => {
-    mockFetchChangelog.mockRejectedValue(
-      new Error("Failed to fetch changelog"),
-    );
+    mockFetchChangelog.mockRejectedValue(new Error("Failed to fetch changelog"));
 
     render(<Changelog />);
 
@@ -211,12 +184,8 @@ describe("Changelog", () => {
       expect(screen.getByTestId("empty-view")).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId("empty-title")).toHaveTextContent(
-      "Failed to Load Changelog",
-    );
-    expect(screen.getByTestId("empty-description")).toHaveTextContent(
-      "Failed to fetch changelog",
-    );
+    expect(screen.getByTestId("empty-title")).toHaveTextContent("Failed to Load Changelog");
+    expect(screen.getByTestId("empty-description")).toHaveTextContent("Failed to fetch changelog");
   });
 
   it("should render actions for each version", async () => {
@@ -259,9 +228,7 @@ describe("Changelog", () => {
 
     await waitFor(() => {
       const item = screen.getByTestId("list-item");
-      const accessories = JSON.parse(
-        item.getAttribute("data-accessories") || "[]",
-      );
+      const accessories = JSON.parse(item.getAttribute("data-accessories") || "[]");
       expect(accessories).toEqual([{ text: "1 change" }]);
     });
   });
@@ -280,9 +247,7 @@ describe("Changelog", () => {
 
     await waitFor(() => {
       const item = screen.getByTestId("list-item");
-      const accessories = JSON.parse(
-        item.getAttribute("data-accessories") || "[]",
-      );
+      const accessories = JSON.parse(item.getAttribute("data-accessories") || "[]");
       expect(accessories).toEqual([{ text: "0 changes" }]);
     });
   });
@@ -311,10 +276,7 @@ describe("Changelog", () => {
     render(<Changelog />);
 
     const list = screen.getByTestId("list");
-    expect(list).toHaveAttribute(
-      "data-placeholder",
-      "Search changelog versions...",
-    );
+    expect(list).toHaveAttribute("data-placeholder", "Search changelog versions...");
   });
 
   it("should call fetchChangelog on mount", async () => {

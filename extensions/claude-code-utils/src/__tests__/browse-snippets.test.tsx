@@ -2,13 +2,7 @@
  * @jest-environment jsdom
  */
 
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import BrowseSnippets from "../commands/browse-snippets/list";
 import { Snippet } from "../utils/claude-message";
@@ -34,18 +28,12 @@ jest.mock("@raycast/api", () => ({
       actions?: React.ReactNode;
       searchBarAccessory?: React.ReactNode;
     }) => (
-      <div
-        data-testid="list"
-        data-placeholder={searchBarPlaceholder}
-        data-loading={isLoading}
-      >
+      <div data-testid="list" data-placeholder={searchBarPlaceholder} data-loading={isLoading}>
         <div data-testid="search-bar-accessory">{searchBarAccessory}</div>
         <div data-testid="list-actions">{actions}</div>
         <input
           data-testid="search-input"
-          onChange={(e) =>
-            onSearchTextChange && onSearchTextChange(e.target.value)
-          }
+          onChange={(e) => onSearchTextChange && onSearchTextChange(e.target.value)}
           placeholder={searchBarPlaceholder}
         />
         {children}
@@ -63,16 +51,10 @@ jest.mock("@raycast/api", () => ({
         accessories?: Array<{ text?: string; date?: Date }>;
         actions?: React.ReactNode;
       }) => (
-        <div
-          data-testid="list-item"
-          data-title={title}
-          data-subtitle={subtitle}
-        >
+        <div data-testid="list-item" data-title={title} data-subtitle={subtitle}>
           <div data-testid="item-title">{title}</div>
           <div data-testid="item-subtitle">{subtitle}</div>
-          <div data-testid="item-accessories">
-            {JSON.stringify(accessories)}
-          </div>
+          <div data-testid="item-accessories">{JSON.stringify(accessories)}</div>
           <div data-testid="item-actions">{actions}</div>
         </div>
       ),
@@ -87,11 +69,7 @@ jest.mock("@raycast/api", () => ({
         actions?: React.ReactNode;
         icon?: { source: string; tintColor?: string };
       }) => (
-        <div
-          data-testid="empty-view"
-          data-title={title}
-          data-description={description}
-        >
+        <div data-testid="empty-view" data-title={title} data-description={description}>
           <div data-testid="empty-view-icon">{JSON.stringify(icon)}</div>
           <div data-testid="empty-view-actions">{actions}</div>
         </div>
@@ -109,23 +87,14 @@ jest.mock("@raycast/api", () => ({
           tooltip?: string;
         }) => (
           <div data-testid="dropdown" data-value={value} data-tooltip={tooltip}>
-            <select
-              data-testid="dropdown-select"
-              value={value}
-              onChange={(e) => onChange && onChange(e.target.value)}
-            >
+            <select data-testid="dropdown-select" value={value} onChange={(e) => onChange && onChange(e.target.value)}>
               {children}
             </select>
           </div>
         ),
         {
           Item: ({ title, value }: { title: string; value: string }) => (
-            <option
-              data-testid="dropdown-item"
-              data-title={title}
-              data-value={value}
-              value={value}
-            >
+            <option data-testid="dropdown-item" data-title={title} data-value={value} value={value}>
               {title}
             </option>
           ),
@@ -145,36 +114,24 @@ jest.mock("@raycast/api", () => ({
       metadata?: React.ReactNode;
       actions?: React.ReactNode;
     }) => (
-      <div
-        data-testid="detail"
-        data-navigation-title={navigationTitle}
-        data-markdown={markdown}
-      >
+      <div data-testid="detail" data-navigation-title={navigationTitle} data-markdown={markdown}>
         <div data-testid="detail-metadata">{metadata}</div>
         <div data-testid="detail-actions">{actions}</div>
       </div>
     ),
     {
       Metadata: Object.assign(
-        ({ children }: { children?: React.ReactNode }) => (
-          <div data-testid="metadata">{children}</div>
-        ),
+        ({ children }: { children?: React.ReactNode }) => <div data-testid="metadata">{children}</div>,
         {
           Label: ({ title, text }: { title: string; text?: string }) => (
-            <div
-              data-testid="metadata-label"
-              data-title={title}
-              data-text={text}
-            />
+            <div data-testid="metadata-label" data-title={title} data-text={text} />
           ),
           Separator: () => <div data-testid="metadata-separator" />,
         },
       ),
     },
   ),
-  ActionPanel: ({ children }: { children?: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children?: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: Object.assign(
     ({
       title,
@@ -207,11 +164,7 @@ jest.mock("@raycast/api", () => ({
         target?: React.ReactNode;
         shortcut?: { modifiers?: string[]; key: string };
       }) => (
-        <button
-          data-testid="action-push"
-          data-title={title}
-          data-shortcut={JSON.stringify(shortcut)}
-        >
+        <button data-testid="action-push" data-title={title} data-shortcut={JSON.stringify(shortcut)}>
           {title}
           <div data-testid="push-target">{target}</div>
         </button>
@@ -229,11 +182,7 @@ jest.mock("@raycast/api", () => ({
           data-testid="action-copy"
           data-title={title}
           data-content={content}
-          data-shortcut={
-            shortcut
-              ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-              : undefined
-          }
+          data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
         >
           {title}
         </button>
@@ -251,11 +200,7 @@ jest.mock("@raycast/api", () => ({
           data-testid="action-paste"
           data-title={title}
           data-content={content}
-          data-shortcut={
-            shortcut
-              ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-              : undefined
-          }
+          data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
         >
           {title}
         </button>
@@ -307,16 +252,13 @@ jest.mock("@raycast/api", () => ({
 }));
 
 // Get access to the mocked functions
-const { showToast, showHUD, closeMainWindow, confirmAlert, Clipboard } =
-  jest.requireMock("@raycast/api");
+const { showToast, showHUD, closeMainWindow, confirmAlert, Clipboard } = jest.requireMock("@raycast/api");
 
 jest.mock("../utils/claude-message");
 jest.mock("../utils/ai-search");
 
 // Get mocked versions
-const { getSnippets, deleteSnippet } = jest.requireMock(
-  "../utils/claude-message",
-);
+const { getSnippets, deleteSnippet } = jest.requireMock("../utils/claude-message");
 const { normalSearchSnippets } = jest.requireMock("../utils/ai-search");
 
 // Mock CreateSnippet component
@@ -341,8 +283,7 @@ describe("BrowseSnippets", () => {
     {
       id: "2",
       title: "Test Snippet 2",
-      content:
-        "This is test content for snippet 2 with more text to test truncation functionality",
+      content: "This is test content for snippet 2 with more text to test truncation functionality",
       createdAt: new Date("2024-01-03T10:00:00Z"),
       updatedAt: new Date("2024-01-04T10:00:00Z"),
     },
@@ -358,13 +299,12 @@ describe("BrowseSnippets", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getSnippets.mockResolvedValue(mockSnippets);
-    normalSearchSnippets.mockImplementation(
-      (snippets: Snippet[], query: string) =>
-        snippets.filter(
-          (snippet: Snippet) =>
-            snippet.title.toLowerCase().includes(query.toLowerCase()) ||
-            snippet.content.toLowerCase().includes(query.toLowerCase()),
-        ),
+    normalSearchSnippets.mockImplementation((snippets: Snippet[], query: string) =>
+      snippets.filter(
+        (snippet: Snippet) =>
+          snippet.title.toLowerCase().includes(query.toLowerCase()) ||
+          snippet.content.toLowerCase().includes(query.toLowerCase()),
+      ),
     );
   });
 
@@ -404,10 +344,7 @@ describe("BrowseSnippets", () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       expect(screen.getByText("Test Snippet 1")).toBeInTheDocument();
@@ -473,10 +410,7 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const emptyView = screen.getByTestId("empty-view");
         expect(emptyView).toHaveAttribute("data-title", "No snippets yet");
-        expect(emptyView).toHaveAttribute(
-          "data-description",
-          "Create your first snippet to get started",
-        );
+        expect(emptyView).toHaveAttribute("data-description", "Create your first snippet to get started");
       });
     });
 
@@ -501,10 +435,7 @@ describe("BrowseSnippets", () => {
 
       await waitFor(() => {
         const list = screen.getByTestId("list");
-        expect(list).toHaveAttribute(
-          "data-placeholder",
-          "Search your snippets...",
-        );
+        expect(list).toHaveAttribute("data-placeholder", "Search your snippets...");
       });
     });
 
@@ -524,10 +455,7 @@ describe("BrowseSnippets", () => {
       });
 
       await waitFor(() => {
-        expect(normalSearchSnippets).toHaveBeenCalledWith(
-          mockSnippets,
-          "snippet 1",
-        );
+        expect(normalSearchSnippets).toHaveBeenCalledWith(mockSnippets, "snippet 1");
       });
     });
   });
@@ -581,9 +509,7 @@ describe("BrowseSnippets", () => {
         expect(accessories.length).toBeGreaterThan(0);
 
         // Parse the JSON string to check the date format
-        const parsedAccessories = JSON.parse(
-          accessories[0].textContent || "[]",
-        );
+        const parsedAccessories = JSON.parse(accessories[0].textContent || "[]");
         expect(parsedAccessories[0]).toHaveProperty("text");
         expect(parsedAccessories[0].text).toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/);
       });
@@ -601,10 +527,7 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const copyButton = screen
           .getAllByTestId("action")
-          .find(
-            (button) =>
-              button.getAttribute("data-title") === "Copy to Clipboard",
-          );
+          .find((button) => button.getAttribute("data-title") === "Copy to Clipboard");
         expect(copyButton).toBeInTheDocument();
 
         if (copyButton) {
@@ -629,10 +552,7 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const copyButton = screen
           .getAllByTestId("action")
-          .find(
-            (button) =>
-              button.getAttribute("data-title") === "Copy to Clipboard",
-          );
+          .find((button) => button.getAttribute("data-title") === "Copy to Clipboard");
 
         if (copyButton) {
           fireEvent.click(copyButton);
@@ -659,9 +579,7 @@ describe("BrowseSnippets", () => {
         // Get the View Snippet action to access SnippetDetail
         const viewButton = screen
           .getAllByTestId("action-push")
-          .find(
-            (button) => button.getAttribute("data-title") === "View Snippet",
-          );
+          .find((button) => button.getAttribute("data-title") === "View Snippet");
         expect(viewButton).toBeInTheDocument();
       });
     });
@@ -679,9 +597,7 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const deleteButton = screen
           .getAllByTestId("action")
-          .find(
-            (button) => button.getAttribute("data-title") === "Delete Snippet",
-          );
+          .find((button) => button.getAttribute("data-title") === "Delete Snippet");
         expect(deleteButton).toBeInTheDocument();
 
         if (deleteButton) {
@@ -717,9 +633,7 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const deleteButton = screen
           .getAllByTestId("action")
-          .find(
-            (button) => button.getAttribute("data-title") === "Delete Snippet",
-          );
+          .find((button) => button.getAttribute("data-title") === "Delete Snippet");
 
         if (deleteButton) {
           fireEvent.click(deleteButton);
@@ -743,9 +657,7 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const deleteButton = screen
           .getAllByTestId("action")
-          .find(
-            (button) => button.getAttribute("data-title") === "Delete Snippet",
-          );
+          .find((button) => button.getAttribute("data-title") === "Delete Snippet");
 
         if (deleteButton) {
           fireEvent.click(deleteButton);
@@ -771,20 +683,13 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const viewButton = screen
           .getAllByTestId("action-push")
-          .find(
-            (button) => button.getAttribute("data-title") === "View Snippet",
-          );
+          .find((button) => button.getAttribute("data-title") === "View Snippet");
         expect(viewButton).toBeInTheDocument();
 
         // Check the target detail component is rendered
-        const targetDetail = viewButton?.querySelector(
-          "[data-testid='detail']",
-        );
+        const targetDetail = viewButton?.querySelector("[data-testid='detail']");
         expect(targetDetail).toBeInTheDocument();
-        expect(targetDetail).toHaveAttribute(
-          "data-navigation-title",
-          "Untitled Snippet",
-        );
+        expect(targetDetail).toHaveAttribute("data-navigation-title", "Untitled Snippet");
       });
     });
 
@@ -795,9 +700,7 @@ describe("BrowseSnippets", () => {
 
       await waitFor(() => {
         const metadataLabels = screen.getAllByTestId("metadata-label");
-        const titleLabel = metadataLabels.find(
-          (label) => label.getAttribute("data-title") === "Title",
-        );
+        const titleLabel = metadataLabels.find((label) => label.getAttribute("data-title") === "Title");
         expect(titleLabel).toHaveAttribute("data-text", "Untitled");
       });
     });
@@ -809,12 +712,8 @@ describe("BrowseSnippets", () => {
 
       await waitFor(() => {
         const metadataLabels = screen.getAllByTestId("metadata-label");
-        const createdLabel = metadataLabels.find(
-          (label) => label.getAttribute("data-title") === "Created",
-        );
-        const updatedLabel = metadataLabels.find(
-          (label) => label.getAttribute("data-title") === "Updated",
-        );
+        const createdLabel = metadataLabels.find((label) => label.getAttribute("data-title") === "Created");
+        const updatedLabel = metadataLabels.find((label) => label.getAttribute("data-title") === "Updated");
 
         expect(createdLabel).toBeInTheDocument();
         expect(updatedLabel).toBeInTheDocument();
@@ -833,19 +732,14 @@ describe("BrowseSnippets", () => {
 
       await waitFor(() => {
         // Find copy action in detail component
-        const detailCopyActions = screen
-          .getAllByTestId("action-copy")
-          .filter((action) => {
-            const parent = action.closest("[data-testid='detail-actions']");
-            return parent !== null;
-          });
+        const detailCopyActions = screen.getAllByTestId("action-copy").filter((action) => {
+          const parent = action.closest("[data-testid='detail-actions']");
+          return parent !== null;
+        });
 
         // Verify the copy action exists in detail view with correct shortcut
         expect(detailCopyActions.length).toBeGreaterThan(0);
-        expect(detailCopyActions[0]).toHaveAttribute(
-          "data-shortcut",
-          "cmd-enter",
-        );
+        expect(detailCopyActions[0]).toHaveAttribute("data-shortcut", "cmd-enter");
       });
     });
   });
@@ -862,18 +756,12 @@ describe("BrowseSnippets", () => {
         const copyActionsWithShortcut = allActions.filter((action) => {
           const title = action.getAttribute("data-title");
           const shortcut = action.getAttribute("data-shortcut");
-          return (
-            title === "Copy to Clipboard" &&
-            shortcut === JSON.stringify({ modifiers: ["cmd"], key: "enter" })
-          );
+          return title === "Copy to Clipboard" && shortcut === JSON.stringify({ modifiers: ["cmd"], key: "enter" });
         });
         const deleteActionsWithShortcut = allActions.filter((action) => {
           const title = action.getAttribute("data-title");
           const shortcut = action.getAttribute("data-shortcut");
-          return (
-            title === "Delete Snippet" &&
-            shortcut === JSON.stringify({ modifiers: ["ctrl"], key: "x" })
-          );
+          return title === "Delete Snippet" && shortcut === JSON.stringify({ modifiers: ["ctrl"], key: "x" });
         });
 
         expect(copyActionsWithShortcut.length).toBeGreaterThan(0);
@@ -889,17 +777,11 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const createActions = screen
           .getAllByTestId("action-push")
-          .filter(
-            (button) =>
-              button.getAttribute("data-title") === "Create New Snippet",
-          );
+          .filter((button) => button.getAttribute("data-title") === "Create New Snippet");
         expect(createActions.length).toBeGreaterThan(0);
 
         createActions.forEach((action) => {
-          expect(action).toHaveAttribute(
-            "data-shortcut",
-            JSON.stringify({ modifiers: ["cmd"], key: "n" }),
-          );
+          expect(action).toHaveAttribute("data-shortcut", JSON.stringify({ modifiers: ["cmd"], key: "n" }));
         });
       });
     });
@@ -912,17 +794,11 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const duplicateActions = screen
           .getAllByTestId("action-push")
-          .filter(
-            (button) =>
-              button.getAttribute("data-title") === "Duplicate Snippet",
-          );
+          .filter((button) => button.getAttribute("data-title") === "Duplicate Snippet");
         expect(duplicateActions.length).toBeGreaterThan(0);
 
         duplicateActions.forEach((action) => {
-          expect(action).toHaveAttribute(
-            "data-shortcut",
-            JSON.stringify({ modifiers: ["cmd"], key: "d" }),
-          );
+          expect(action).toHaveAttribute("data-shortcut", JSON.stringify({ modifiers: ["cmd"], key: "d" }));
         });
       });
     });
@@ -937,21 +813,13 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const duplicateButtons = screen
           .getAllByTestId("action-push")
-          .filter(
-            (button) =>
-              button.getAttribute("data-title") === "Duplicate Snippet",
-          );
+          .filter((button) => button.getAttribute("data-title") === "Duplicate Snippet");
         expect(duplicateButtons.length).toBeGreaterThan(0);
 
         // Check that CreateSnippet component receives correct props for duplication
-        const createSnippet = duplicateButtons[0]?.querySelector(
-          "[data-testid='create-snippet']",
-        );
+        const createSnippet = duplicateButtons[0]?.querySelector("[data-testid='create-snippet']");
         expect(createSnippet).toHaveAttribute("data-title", "Copy");
-        expect(createSnippet).toHaveAttribute(
-          "data-content",
-          "Snippet without title",
-        );
+        expect(createSnippet).toHaveAttribute("data-content", "Snippet without title");
       });
     });
 
@@ -974,18 +842,10 @@ describe("BrowseSnippets", () => {
       await waitFor(() => {
         const duplicateButtons = screen
           .getAllByTestId("action-push")
-          .filter(
-            (button) =>
-              button.getAttribute("data-title") === "Duplicate Snippet",
-          );
+          .filter((button) => button.getAttribute("data-title") === "Duplicate Snippet");
 
-        const createSnippet = duplicateButtons[0]?.querySelector(
-          "[data-testid='create-snippet']",
-        );
-        expect(createSnippet).toHaveAttribute(
-          "data-title",
-          "My Snippet (Copy)",
-        );
+        const createSnippet = duplicateButtons[0]?.querySelector("[data-testid='create-snippet']");
+        expect(createSnippet).toHaveAttribute("data-title", "My Snippet (Copy)");
         expect(createSnippet).toHaveAttribute("data-content", "Content");
       });
     });
@@ -1046,14 +906,8 @@ describe("BrowseSnippets", () => {
 
       await waitFor(() => {
         const item = screen.getByTestId("list-item");
-        expect(item).toHaveAttribute(
-          "data-title",
-          "Snippet with <special> & characters",
-        );
-        expect(item).toHaveAttribute(
-          "data-subtitle",
-          "Content with \"quotes\" and 'apostrophes'",
-        );
+        expect(item).toHaveAttribute("data-title", "Snippet with <special> & characters");
+        expect(item).toHaveAttribute("data-subtitle", "Content with \"quotes\" and 'apostrophes'");
       });
     });
 

@@ -19,11 +19,7 @@ jest.mock("@raycast/api", () => ({
       isLoading: boolean;
       searchBarPlaceholder: string;
     }) => (
-      <div
-        data-testid="list"
-        data-loading={isLoading}
-        data-placeholder={searchBarPlaceholder}
-      >
+      <div data-testid="list" data-loading={isLoading} data-placeholder={searchBarPlaceholder}>
         {children}
       </div>
     ),
@@ -39,22 +35,11 @@ jest.mock("@raycast/api", () => ({
         accessories: Array<{ text: string }>;
         actions: React.ReactNode;
       }) => (
-        <div
-          data-testid="list-item"
-          data-title={title}
-          data-icon={icon}
-          data-accessories={JSON.stringify(accessories)}
-        >
+        <div data-testid="list-item" data-title={title} data-icon={icon} data-accessories={JSON.stringify(accessories)}>
           {actions}
         </div>
       ),
-      EmptyView: ({
-        title,
-        description,
-      }: {
-        title: string;
-        description: string;
-      }) => (
+      EmptyView: ({ title, description }: { title: string; description: string }) => (
         <div data-testid="empty-view">
           <div data-testid="empty-title">{title}</div>
           <div data-testid="empty-description">{description}</div>
@@ -62,9 +47,7 @@ jest.mock("@raycast/api", () => ({
       ),
     },
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: {
     Push: ({ title }: { title: string }) => (
       <button data-testid="action-push" data-title={title}>
@@ -91,18 +74,15 @@ jest.mock("@raycast/api", () => ({
 // Mock slash-command-detail component
 jest.mock("../commands/browse-commands/detail", () => ({
   __esModule: true,
-  default: () => (
-    <div data-testid="slash-command-detail">Slash Command Detail</div>
-  ),
+  default: () => <div data-testid="slash-command-detail">Slash Command Detail</div>,
 }));
 
 // Mock slashCommands utils
 jest.mock("../utils/command");
 
-const mockGetSlashCommands =
-  slashCommandsUtils.getSlashCommands as jest.MockedFunction<
-    typeof slashCommandsUtils.getSlashCommands
-  >;
+const mockGetSlashCommands = slashCommandsUtils.getSlashCommands as jest.MockedFunction<
+  typeof slashCommandsUtils.getSlashCommands
+>;
 
 describe("BrowseCommands", () => {
   beforeEach(() => {
@@ -160,18 +140,12 @@ describe("BrowseCommands", () => {
       expect(screen.getByTestId("empty-view")).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId("empty-title")).toHaveTextContent(
-      "No Commands Found",
-    );
-    expect(screen.getByTestId("empty-description")).toHaveTextContent(
-      "No command files found in ~/.claude/commands",
-    );
+    expect(screen.getByTestId("empty-title")).toHaveTextContent("No Commands Found");
+    expect(screen.getByTestId("empty-description")).toHaveTextContent("No command files found in ~/.claude/commands");
   });
 
   it("should show error view on failure", async () => {
-    mockGetSlashCommands.mockRejectedValue(
-      new Error("Failed to read directory"),
-    );
+    mockGetSlashCommands.mockRejectedValue(new Error("Failed to read directory"));
 
     render(<BrowseCommands />);
 
@@ -179,12 +153,8 @@ describe("BrowseCommands", () => {
       expect(screen.getByTestId("empty-view")).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId("empty-title")).toHaveTextContent(
-      "Error Loading Commands",
-    );
-    expect(screen.getByTestId("empty-description")).toHaveTextContent(
-      "Failed to read directory",
-    );
+    expect(screen.getByTestId("empty-title")).toHaveTextContent("Error Loading Commands");
+    expect(screen.getByTestId("empty-description")).toHaveTextContent("Failed to read directory");
   });
 
   it("should render actions for each command", async () => {
@@ -230,9 +200,7 @@ describe("BrowseCommands", () => {
 
     await waitFor(() => {
       const item = screen.getByTestId("list-item");
-      const accessories = JSON.parse(
-        item.getAttribute("data-accessories") || "[]",
-      );
+      const accessories = JSON.parse(item.getAttribute("data-accessories") || "[]");
       expect(accessories).toEqual([{ text: "test-command.md" }]);
     });
   });

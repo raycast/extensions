@@ -23,14 +23,8 @@ export default function AgentDetail({ agent }: AgentDetailProps) {
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
           />
-          <Action.ShowInFinder
-            path={agent.filePath}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          />
-          <Action.OpenWith
-            path={agent.filePath}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-          />
+          <Action.ShowInFinder path={agent.filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+          <Action.OpenWith path={agent.filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
         </ActionPanel>
       }
     />

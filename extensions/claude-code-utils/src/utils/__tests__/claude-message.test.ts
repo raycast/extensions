@@ -58,12 +58,8 @@ const mockedReaddir = readdir as jest.MockedFunction<typeof readdir>;
 const mockedStat = stat as jest.MockedFunction<typeof stat>;
 const mockedHomedir = homedir as jest.MockedFunction<typeof homedir>;
 const mockedJoin = join as jest.MockedFunction<typeof join>;
-const mockedCreateReadStream = createReadStream as jest.MockedFunction<
-  typeof createReadStream
->;
-const mockedCreateInterface = createInterface as jest.MockedFunction<
-  typeof createInterface
->;
+const mockedCreateReadStream = createReadStream as jest.MockedFunction<typeof createReadStream>;
+const mockedCreateInterface = createInterface as jest.MockedFunction<typeof createInterface>;
 const mockedLocalStorage = LocalStorage as jest.Mocked<typeof LocalStorage>;
 
 // Mock readline interface
@@ -472,14 +468,7 @@ describe("claudeMessages", () => {
 
     it("should limit to 5 projects and 5 files per project", async () => {
       // Mock 6 projects (more than limit of 5)
-      const projects = [
-        "project1",
-        "project2",
-        "project3",
-        "project4",
-        "project5",
-        "project6",
-      ];
+      const projects = ["project1", "project2", "project3", "project4", "project5", "project6"];
       mockedReaddir.mockResolvedValueOnce(projects as any);
 
       const mockProjectStat = {
@@ -489,9 +478,7 @@ describe("claudeMessages", () => {
 
       // Mock stats for all 6 projects to determine which have most recent files
       for (let i = 0; i < 6; i++) {
-        mockedStat.mockResolvedValueOnce(
-          mockProjectStat as unknown as fs.Stats,
-        );
+        mockedStat.mockResolvedValueOnce(mockProjectStat as unknown as fs.Stats);
         // Mock file listing to determine most recent file time
         mockedReaddir.mockResolvedValueOnce(["session1.jsonl"] as any);
         const mockFileStat = { mtime: new Date(`2023-01-${i + 2}`) };
@@ -513,14 +500,10 @@ describe("claudeMessages", () => {
         const mockFileStream = new MockFileStream();
         readlineInterfaces.push(mockReadlineInterface);
         mockedCreateReadStream.mockReturnValueOnce(
-          mockFileStream as unknown as ReturnType<
-            typeof mockedCreateReadStream
-          >,
+          mockFileStream as unknown as ReturnType<typeof mockedCreateReadStream>,
         );
         mockedCreateInterface.mockReturnValueOnce(
-          mockReadlineInterface as unknown as ReturnType<
-            typeof mockedCreateInterface
-          >,
+          mockReadlineInterface as unknown as ReturnType<typeof mockedCreateInterface>,
         );
       }
 
@@ -924,9 +907,7 @@ describe("claudeMessages", () => {
         const result = await getSnippets();
 
         expect(result).toEqual([]);
-        expect(mockedLocalStorage.getItem).toHaveBeenCalledWith(
-          "claude-messages-snippets",
-        );
+        expect(mockedLocalStorage.getItem).toHaveBeenCalledWith("claude-messages-snippets");
       });
 
       it("should parse and return snippets with Date objects", async () => {
@@ -998,9 +979,7 @@ describe("claudeMessages", () => {
 
         await createSnippet("New Title", "New Content");
 
-        const savedData = JSON.parse(
-          (mockedLocalStorage.setItem as jest.Mock).mock.calls[0][1],
-        );
+        const savedData = JSON.parse((mockedLocalStorage.setItem as jest.Mock).mock.calls[0][1]);
         expect(savedData).toHaveLength(2);
         expect(savedData[1]).toMatchObject({
           title: "New Title",
@@ -1009,13 +988,9 @@ describe("claudeMessages", () => {
       });
 
       it("should handle storage errors", async () => {
-        mockedLocalStorage.getItem.mockRejectedValue(
-          new Error("Storage error"),
-        );
+        mockedLocalStorage.getItem.mockRejectedValue(new Error("Storage error"));
 
-        await expect(createSnippet("Title", "Content")).rejects.toThrow(
-          "Failed to create snippet",
-        );
+        await expect(createSnippet("Title", "Content")).rejects.toThrow("Failed to create snippet");
       });
 
       it("should handle JSON parse errors in existing data", async () => {
@@ -1080,21 +1055,15 @@ describe("claudeMessages", () => {
       });
 
       it("should handle storage errors", async () => {
-        mockedLocalStorage.getItem.mockRejectedValue(
-          new Error("Storage error"),
-        );
+        mockedLocalStorage.getItem.mockRejectedValue(new Error("Storage error"));
 
-        await expect(deleteSnippet("snippet-1")).rejects.toThrow(
-          "Failed to delete snippet",
-        );
+        await expect(deleteSnippet("snippet-1")).rejects.toThrow("Failed to delete snippet");
       });
 
       it("should handle JSON parse errors", async () => {
         mockedLocalStorage.getItem.mockResolvedValue("invalid json");
 
-        await expect(deleteSnippet("snippet-1")).rejects.toThrow(
-          "Failed to delete snippet",
-        );
+        await expect(deleteSnippet("snippet-1")).rejects.toThrow("Failed to delete snippet");
       });
     });
   });
@@ -1522,9 +1491,7 @@ describe("claudeMessages", () => {
       mockedStat.mockResolvedValueOnce(mockProjectStat as unknown as fs.Stats);
 
       // Mock readdir to fail when getting files in project
-      mockedReaddir.mockRejectedValueOnce(
-        new Error("Cannot read project files"),
-      );
+      mockedReaddir.mockRejectedValueOnce(new Error("Cannot read project files"));
 
       const result = await getAllClaudeMessages();
 
@@ -1561,27 +1528,11 @@ describe("claudeMessages", () => {
       const mockFileStream2 = new MockFileStream();
 
       mockedCreateReadStream
-        .mockReturnValueOnce(
-          mockFileStream1 as unknown as ReturnType<
-            typeof mockedCreateReadStream
-          >,
-        )
-        .mockReturnValueOnce(
-          mockFileStream2 as unknown as ReturnType<
-            typeof mockedCreateReadStream
-          >,
-        );
+        .mockReturnValueOnce(mockFileStream1 as unknown as ReturnType<typeof mockedCreateReadStream>)
+        .mockReturnValueOnce(mockFileStream2 as unknown as ReturnType<typeof mockedCreateReadStream>);
       mockedCreateInterface
-        .mockReturnValueOnce(
-          mockReadlineInterface1 as unknown as ReturnType<
-            typeof mockedCreateInterface
-          >,
-        )
-        .mockReturnValueOnce(
-          mockReadlineInterface2 as unknown as ReturnType<
-            typeof mockedCreateInterface
-          >,
-        );
+        .mockReturnValueOnce(mockReadlineInterface1 as unknown as ReturnType<typeof mockedCreateInterface>)
+        .mockReturnValueOnce(mockReadlineInterface2 as unknown as ReturnType<typeof mockedCreateInterface>);
 
       const resultPromise = getAllClaudeMessages();
 

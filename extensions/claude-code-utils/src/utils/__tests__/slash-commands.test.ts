@@ -19,15 +19,11 @@ describe("slashCommands", () => {
 
   describe("getSlashCommands", () => {
     it("should return all command files from ~/.claude/commands", async () => {
-      mockReaddir.mockResolvedValue([
-        "test-command.md",
-        "another-command.md",
-        "not-markdown.txt",
-      ] as unknown as Awaited<ReturnType<typeof readdir>>);
+      mockReaddir.mockResolvedValue(["test-command.md", "another-command.md", "not-markdown.txt"] as unknown as Awaited<
+        ReturnType<typeof readdir>
+      >);
 
-      mockReadFile
-        .mockResolvedValueOnce("# Test Command Content")
-        .mockResolvedValueOnce("# Another Command Content");
+      mockReadFile.mockResolvedValueOnce("# Test Command Content").mockResolvedValueOnce("# Another Command Content");
 
       const commands = await getSlashCommands();
 
@@ -36,12 +32,7 @@ describe("slashCommands", () => {
         id: "another-command",
         name: "another-command",
         content: "# Another Command Content",
-        filePath: join(
-          "/home/user",
-          ".claude",
-          "commands",
-          "another-command.md",
-        ),
+        filePath: join("/home/user", ".claude", "commands", "another-command.md"),
       });
       expect(commands[1]).toEqual({
         id: "test-command",
@@ -52,11 +43,9 @@ describe("slashCommands", () => {
     });
 
     it("should filter out non-markdown files", async () => {
-      mockReaddir.mockResolvedValue([
-        "command.md",
-        "file.txt",
-        "another.pdf",
-      ] as unknown as Awaited<ReturnType<typeof readdir>>);
+      mockReaddir.mockResolvedValue(["command.md", "file.txt", "another.pdf"] as unknown as Awaited<
+        ReturnType<typeof readdir>
+      >);
 
       mockReadFile.mockResolvedValueOnce("# Command Content");
 
@@ -82,16 +71,11 @@ describe("slashCommands", () => {
     });
 
     it("should sort commands by name alphabetically", async () => {
-      mockReaddir.mockResolvedValue([
-        "zebra-command.md",
-        "apple-command.md",
-        "middle-command.md",
-      ] as unknown as Awaited<ReturnType<typeof readdir>>);
+      mockReaddir.mockResolvedValue(["zebra-command.md", "apple-command.md", "middle-command.md"] as unknown as Awaited<
+        ReturnType<typeof readdir>
+      >);
 
-      mockReadFile
-        .mockResolvedValueOnce("# Zebra")
-        .mockResolvedValueOnce("# Apple")
-        .mockResolvedValueOnce("# Middle");
+      mockReadFile.mockResolvedValueOnce("# Zebra").mockResolvedValueOnce("# Apple").mockResolvedValueOnce("# Middle");
 
       const commands = await getSlashCommands();
 
@@ -101,14 +85,11 @@ describe("slashCommands", () => {
     });
 
     it("should keep command names in kebab-case", async () => {
-      mockReaddir.mockResolvedValue([
-        "multi-word-command-name.md",
-        "single.md",
-      ] as unknown as Awaited<ReturnType<typeof readdir>>);
+      mockReaddir.mockResolvedValue(["multi-word-command-name.md", "single.md"] as unknown as Awaited<
+        ReturnType<typeof readdir>
+      >);
 
-      mockReadFile
-        .mockResolvedValueOnce("# Content 1")
-        .mockResolvedValueOnce("# Content 2");
+      mockReadFile.mockResolvedValueOnce("# Content 1").mockResolvedValueOnce("# Content 2");
 
       const commands = await getSlashCommands();
 
@@ -117,9 +98,7 @@ describe("slashCommands", () => {
     });
 
     it("should handle empty directory", async () => {
-      mockReaddir.mockResolvedValue(
-        [] as unknown as Awaited<ReturnType<typeof readdir>>,
-      );
+      mockReaddir.mockResolvedValue([] as unknown as Awaited<ReturnType<typeof readdir>>);
 
       const commands = await getSlashCommands();
 
@@ -127,16 +106,12 @@ describe("slashCommands", () => {
     });
 
     it("should include file paths in results", async () => {
-      mockReaddir.mockResolvedValue(["test.md"] as unknown as Awaited<
-        ReturnType<typeof readdir>
-      >);
+      mockReaddir.mockResolvedValue(["test.md"] as unknown as Awaited<ReturnType<typeof readdir>>);
       mockReadFile.mockResolvedValueOnce("# Content");
 
       const commands = await getSlashCommands();
 
-      expect(commands[0].filePath).toBe(
-        join("/home/user", ".claude", "commands", "test.md"),
-      );
+      expect(commands[0].filePath).toBe(join("/home/user", ".claude", "commands", "test.md"));
     });
   });
 });

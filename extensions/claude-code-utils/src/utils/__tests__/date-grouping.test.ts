@@ -2,10 +2,7 @@ import { groupMessagesByDate, formatSectionTitle } from "../date-grouping";
 import { ParsedMessage } from "../claude-message";
 
 // Helper function to create test messages
-function createMessage(
-  timestamp: Date,
-  content = "Test message",
-): ParsedMessage {
+function createMessage(timestamp: Date, content = "Test message"): ParsedMessage {
   return {
     id: `msg-${timestamp.getTime()}`,
     role: "user" as const,
@@ -76,9 +73,7 @@ describe("dateGrouping", () => {
       ]);
 
       // First group should have lowest sortKey
-      expect(groups[0].sortKey).toBeLessThanOrEqual(
-        groups[1]?.sortKey || Infinity,
-      );
+      expect(groups[0].sortKey).toBeLessThanOrEqual(groups[1]?.sortKey || Infinity);
       if (groups.length > 2) {
         expect(groups[1].sortKey).toBeLessThanOrEqual(groups[2].sortKey);
       }

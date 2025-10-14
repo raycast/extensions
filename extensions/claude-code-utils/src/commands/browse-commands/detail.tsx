@@ -23,14 +23,8 @@ export default function CommandDetail({ command }: SlashCommandDetailProps) {
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
           />
-          <Action.ShowInFinder
-            path={command.filePath}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          />
-          <Action.OpenWith
-            path={command.filePath}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-          />
+          <Action.ShowInFinder path={command.filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+          <Action.OpenWith path={command.filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
         </ActionPanel>
       }
     />

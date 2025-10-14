@@ -5,8 +5,7 @@ export interface ChangelogVersion {
   changes: string[];
 }
 
-const CHANGELOG_URL =
-  "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md";
+const CHANGELOG_URL = "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md";
 
 function parseChangelog(markdown: string): ChangelogVersion[] {
   const versions: ChangelogVersion[] = [];
@@ -64,8 +63,6 @@ export async function fetchChangelog(): Promise<ChangelogVersion[]> {
   });
 }
 
-export function formatChangelogVersionChanges(
-  version: ChangelogVersion,
-): string {
+export function formatChangelogVersionChanges(version: ChangelogVersion): string {
   return version.changes.map((change) => `- ${change}`).join("\n");
 }

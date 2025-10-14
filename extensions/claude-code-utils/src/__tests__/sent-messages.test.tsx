@@ -3,13 +3,7 @@
  */
 
 import "@testing-library/jest-dom";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import SentMessages from "../commands/sent-messages/list";
 import { ParsedMessage } from "../utils/claude-message";
@@ -47,13 +41,7 @@ jest.mock("@raycast/api", () => ({
       </div>
     ),
     {
-      Section: ({
-        children,
-        title,
-      }: {
-        children: React.ReactNode;
-        title: string;
-      }) => (
+      Section: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="list-section" title={title}>
           {children}
         </div>
@@ -93,11 +81,7 @@ jest.mock("@raycast/api", () => ({
         icon?: { source: string; tintColor: string };
         actions: React.ReactNode;
       }) => (
-        <div
-          data-testid="empty-view"
-          data-title={title}
-          data-description={description}
-        >
+        <div data-testid="empty-view" data-title={title} data-description={description}>
           {icon && (
             <div data-testid="empty-icon" data-color={icon.tintColor}>
               {icon.source}
@@ -119,18 +103,12 @@ jest.mock("@raycast/api", () => ({
     metadata: React.ReactNode;
     actions: React.ReactNode;
   }) => (
-    <div
-      data-testid="detail"
-      data-markdown={markdown}
-      data-title={navigationTitle}
-    >
+    <div data-testid="detail" data-markdown={markdown} data-title={navigationTitle}>
       {metadata}
       {actions}
     </div>
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: Object.assign(
     ({
       title,
@@ -145,31 +123,17 @@ jest.mock("@raycast/api", () => ({
         data-testid={`action-${title.toLowerCase().replace(/\s+/g, "-")}`}
         data-title={title}
         onClick={onAction}
-        data-shortcut={
-          shortcut
-            ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-            : undefined
-        }
+        data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
       >
         {title}
       </button>
     ),
     {
-      Push: ({
-        title,
-        shortcut,
-      }: {
-        title: string;
-        shortcut?: { modifiers: string[]; key: string };
-      }) => (
+      Push: ({ title, shortcut }: { title: string; shortcut?: { modifiers: string[]; key: string } }) => (
         <button
           data-testid={`action-push-${title.toLowerCase().replace(/\s+/g, "-")}`}
           data-title={title}
-          data-shortcut={
-            shortcut
-              ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-              : undefined
-          }
+          data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
         >
           {title}
         </button>
@@ -187,11 +151,7 @@ jest.mock("@raycast/api", () => ({
           data-testid="action-copy-to-clipboard"
           data-title={title}
           data-content={content}
-          data-shortcut={
-            shortcut
-              ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-              : undefined
-          }
+          data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
         >
           {title}
         </button>
@@ -209,11 +169,7 @@ jest.mock("@raycast/api", () => ({
           data-testid="action-paste"
           data-title={title}
           data-content={content}
-          data-shortcut={
-            shortcut
-              ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-              : undefined
-          }
+          data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
         >
           {title}
         </button>
@@ -303,16 +259,10 @@ describe("SentMessages", () => {
     },
   ];
 
-  const getSentMessages = jest.mocked(
-    jest.requireMock("../utils/claude-message").getSentMessages,
-  );
-  const normalSearchMessages = jest.mocked(
-    jest.requireMock("../utils/ai-search").normalSearchMessages,
-  );
+  const getSentMessages = jest.mocked(jest.requireMock("../utils/claude-message").getSentMessages);
+  const normalSearchMessages = jest.mocked(jest.requireMock("../utils/ai-search").normalSearchMessages);
   const Clipboard = jest.mocked(jest.requireMock("@raycast/api").Clipboard);
-  const closeMainWindow = jest.mocked(
-    jest.requireMock("@raycast/api").closeMainWindow,
-  );
+  const closeMainWindow = jest.mocked(jest.requireMock("@raycast/api").closeMainWindow);
   const showHUD = jest.mocked(jest.requireMock("@raycast/api").showHUD);
   const showToast = jest.mocked(jest.requireMock("@raycast/api").showToast);
 
@@ -322,16 +272,14 @@ describe("SentMessages", () => {
     // Ensure getSentMessages resolves immediately in tests
     getSentMessages.mockResolvedValue(mockMessages);
 
-    normalSearchMessages.mockImplementation(
-      (messages: ParsedMessage[], query: string) => {
-        if (!query.trim()) return messages;
-        return messages.filter(
-          (msg) =>
-            msg.content.toLowerCase().includes(query.toLowerCase()) ||
-            msg.preview.toLowerCase().includes(query.toLowerCase()),
-        );
-      },
-    );
+    normalSearchMessages.mockImplementation((messages: ParsedMessage[], query: string) => {
+      if (!query.trim()) return messages;
+      return messages.filter(
+        (msg) =>
+          msg.content.toLowerCase().includes(query.toLowerCase()) ||
+          msg.preview.toLowerCase().includes(query.toLowerCase()),
+      );
+    });
     Clipboard.copy.mockResolvedValue(undefined);
     closeMainWindow.mockResolvedValue(undefined);
     showHUD.mockResolvedValue(undefined);
@@ -346,20 +294,14 @@ describe("SentMessages", () => {
 
     it("should show loading state initially", () => {
       render(<SentMessages />);
-      expect(screen.getByTestId("list")).toHaveAttribute(
-        "data-loading",
-        "true",
-      );
+      expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "true");
     });
 
     it("should have correct search placeholder", async () => {
       render(<SentMessages />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-placeholder",
-          "Browse sent messages...",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-placeholder", "Browse sent messages...");
       });
     });
 
@@ -382,10 +324,7 @@ describe("SentMessages", () => {
       render(<SentMessages />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       const messages = screen.getAllByTestId("list-item");
@@ -397,18 +336,9 @@ describe("SentMessages", () => {
 
       await waitFor(() => {
         const messages = screen.getAllByTestId("list-item");
-        expect(messages[0]).toHaveAttribute(
-          "title",
-          "What are the best practices...",
-        );
-        expect(messages[1]).toHaveAttribute(
-          "title",
-          "Can you help me optimize...",
-        );
-        expect(messages[2]).toHaveAttribute(
-          "title",
-          "How can I implement authentication...",
-        );
+        expect(messages[0]).toHaveAttribute("title", "What are the best practices...");
+        expect(messages[1]).toHaveAttribute("title", "Can you help me optimize...");
+        expect(messages[2]).toHaveAttribute("title", "How can I implement authentication...");
       });
     });
 
@@ -434,10 +364,7 @@ describe("SentMessages", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("empty-view")).toBeInTheDocument();
-        expect(screen.getByTestId("empty-view")).toHaveAttribute(
-          "data-title",
-          "No messages found",
-        );
+        expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "No messages found");
         expect(screen.getByTestId("empty-view")).toHaveAttribute(
           "data-description",
           "No sent messages found in your Claude history",
@@ -469,22 +396,15 @@ describe("SentMessages", () => {
       render(<SentMessages />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       const listItems = screen.queryAllByTestId("list-item");
       expect(listItems).toHaveLength(3);
       // Check by attribute since the text is in the title attribute
-      expect(
-        listItems.some((item) =>
-          item
-            .getAttribute("title")
-            ?.includes("How can I implement authentication"),
-        ),
-      ).toBe(true);
+      expect(listItems.some((item) => item.getAttribute("title")?.includes("How can I implement authentication"))).toBe(
+        true,
+      );
     });
 
     it("should display formatted timestamp as accessory", async () => {
@@ -505,18 +425,13 @@ describe("SentMessages", () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       // Check for specific action buttons using test IDs
       expect(screen.getAllByTestId("action-push-view-message")).toHaveLength(3);
       expect(screen.getAllByTestId("action-copy-to-clipboard")).toHaveLength(3);
-      expect(
-        screen.getAllByTestId("action-push-create-snippet-from-message"),
-      ).toHaveLength(3);
+      expect(screen.getAllByTestId("action-push-create-snippet-from-message")).toHaveLength(3);
     });
   });
 
@@ -526,10 +441,7 @@ describe("SentMessages", () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       const viewActions = screen.getAllByTestId("action-push-view-message");
@@ -542,10 +454,7 @@ describe("SentMessages", () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       const copyActions = screen.getAllByTestId("action-copy-to-clipboard");
@@ -558,15 +467,10 @@ describe("SentMessages", () => {
       render(<SentMessages />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
-      const snippetActions = screen.getAllByTestId(
-        "action-push-create-snippet-from-message",
-      );
+      const snippetActions = screen.getAllByTestId("action-push-create-snippet-from-message");
       expect(snippetActions.length).toBeGreaterThan(0);
       expect(snippetActions[0]).toBeInTheDocument();
       expect(snippetActions[0]).toHaveAttribute("data-shortcut", "cmd-s");
@@ -589,10 +493,7 @@ describe("SentMessages", () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       const copyAction = screen.getAllByTestId("action-copy-to-clipboard")[0];
@@ -612,10 +513,7 @@ describe("SentMessages", () => {
       render(<SentMessages />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       const copyAction = screen.getAllByTestId("action-copy-to-clipboard")[0];
@@ -659,13 +557,9 @@ describe("SentMessages", () => {
         const MessageDetail = ({ message }: { message: ParsedMessage }) => (
           <div data-testid="detail" data-markdown={message.content}>
             <div data-testid="detail-metadata">
-              <div data-testid="timestamp">
-                {message.timestamp.toLocaleString()}
-              </div>
+              <div data-testid="timestamp">{message.timestamp.toLocaleString()}</div>
               <div data-testid="session-id">{message.sessionId}</div>
-              <div data-testid="project">
-                {message.projectPath?.split("/").pop() || "Unknown"}
-              </div>
+              <div data-testid="project">{message.projectPath?.split("/").pop() || "Unknown"}</div>
             </div>
           </div>
         );
@@ -676,10 +570,7 @@ describe("SentMessages", () => {
       render(<TestMessageDetail />);
 
       expect(screen.getByTestId("detail")).toBeInTheDocument();
-      expect(screen.getByTestId("detail")).toHaveAttribute(
-        "data-markdown",
-        message.content,
-      );
+      expect(screen.getByTestId("detail")).toHaveAttribute("data-markdown", message.content);
     });
 
     it("should show metadata in detail view", () => {
@@ -697,13 +588,9 @@ describe("SentMessages", () => {
         return (
           <div data-testid="detail" data-markdown={message.content}>
             <div data-testid="detail-metadata">
-              <div data-testid="timestamp">
-                {message.timestamp.toLocaleString()}
-              </div>
+              <div data-testid="timestamp">{message.timestamp.toLocaleString()}</div>
               <div data-testid="session-id">{message.sessionId}</div>
-              <div data-testid="project">
-                {message.projectPath?.split("/").pop() || "Unknown"}
-              </div>
+              <div data-testid="project">{message.projectPath?.split("/").pop() || "Unknown"}</div>
             </div>
           </div>
         );
@@ -711,12 +598,8 @@ describe("SentMessages", () => {
 
       render(<TestMessageDetail />);
 
-      expect(screen.getByTestId("timestamp")).toHaveTextContent(
-        message.timestamp.toLocaleString(),
-      );
-      expect(screen.getByTestId("session-id")).toHaveTextContent(
-        message.sessionId,
-      );
+      expect(screen.getByTestId("timestamp")).toHaveTextContent(message.timestamp.toLocaleString());
+      expect(screen.getByTestId("session-id")).toHaveTextContent(message.sessionId);
       expect(screen.getByTestId("project")).toHaveTextContent("project1");
     });
 
@@ -730,11 +613,7 @@ describe("SentMessages", () => {
         const projectPath = messageWithoutProject.projectPath;
         return (
           <div data-testid="detail">
-            <div data-testid="project">
-              {projectPath
-                ? projectPath.split("/").pop() || projectPath
-                : "Unknown"}
-            </div>
+            <div data-testid="project">{projectPath ? projectPath.split("/").pop() || projectPath : "Unknown"}</div>
           </div>
         );
       };
@@ -751,10 +630,7 @@ describe("SentMessages", () => {
 
       // Wait for initial load to complete
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       expect(getSentMessages).toHaveBeenCalledTimes(1);
@@ -779,10 +655,7 @@ describe("SentMessages", () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       expect(getSentMessages).toHaveBeenCalled();
@@ -800,10 +673,7 @@ describe("SentMessages", () => {
     it("should copy content without closing window", async () => {
       // Create a test component that calls copyContent with closeWindow=false
       const TestCopyComponent = () => {
-        const copyContent = async (
-          message: ParsedMessage,
-          closeWindow = false,
-        ) => {
+        const copyContent = async (message: ParsedMessage, closeWindow = false) => {
           try {
             await Clipboard.copy(message.content);
             if (closeWindow) {
@@ -827,10 +697,7 @@ describe("SentMessages", () => {
         };
 
         return (
-          <button
-            onClick={() => copyContent(mockMessages[0], false)}
-            data-testid="copy-no-close"
-          >
+          <button onClick={() => copyContent(mockMessages[0], false)} data-testid="copy-no-close">
             Copy No Close
           </button>
         );
@@ -860,10 +727,7 @@ describe("SentMessages", () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       expect(getSentMessages).toHaveBeenCalled();
@@ -897,14 +761,10 @@ describe("SentMessages", () => {
       const TestMessageDetail = ({ message }: { message: ParsedMessage }) => (
         <div data-testid="detail" data-markdown={message.content}>
           <div data-testid="metadata">
-            <div data-testid="time-label">
-              {message.timestamp.toLocaleString()}
-            </div>
+            <div data-testid="time-label">{message.timestamp.toLocaleString()}</div>
             <div data-testid="session-label">{message.sessionId}</div>
             <div data-testid="project-label">
-              {message.projectPath?.split("/").pop() ||
-                message.projectPath ||
-                "Unknown"}
+              {message.projectPath?.split("/").pop() || message.projectPath || "Unknown"}
             </div>
           </div>
         </div>
@@ -912,16 +772,9 @@ describe("SentMessages", () => {
 
       render(<TestMessageDetail message={message} />);
 
-      expect(screen.getByTestId("detail")).toHaveAttribute(
-        "data-markdown",
-        message.content,
-      );
-      expect(screen.getByTestId("time-label")).toHaveTextContent(
-        message.timestamp.toLocaleString(),
-      );
-      expect(screen.getByTestId("session-label")).toHaveTextContent(
-        message.sessionId,
-      );
+      expect(screen.getByTestId("detail")).toHaveAttribute("data-markdown", message.content);
+      expect(screen.getByTestId("time-label")).toHaveTextContent(message.timestamp.toLocaleString());
+      expect(screen.getByTestId("session-label")).toHaveTextContent(message.sessionId);
       expect(screen.getByTestId("project-label")).toHaveTextContent("project1");
     });
 
@@ -933,9 +786,7 @@ describe("SentMessages", () => {
 
       const TestMessageDetail = ({ message }: { message: ParsedMessage }) => (
         <div data-testid="project-label">
-          {message.projectPath?.split("/").pop() ||
-            message.projectPath ||
-            "Unknown"}
+          {message.projectPath?.split("/").pop() || message.projectPath || "Unknown"}
         </div>
       );
 
@@ -952,9 +803,7 @@ describe("SentMessages", () => {
 
       const TestMessageDetail = ({ message }: { message: ParsedMessage }) => (
         <div data-testid="project-label">
-          {message.projectPath?.split("/").pop() ||
-            message.projectPath ||
-            "Unknown"}
+          {message.projectPath?.split("/").pop() || message.projectPath || "Unknown"}
         </div>
       );
 
@@ -997,10 +846,7 @@ describe("SentMessages", () => {
       render(<SentMessages />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       // Initial messages should be loaded
@@ -1022,10 +868,7 @@ describe("SentMessages", () => {
       render(<SentMessages />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       const listItems = screen.queryAllByTestId("list-item");
@@ -1048,18 +891,12 @@ describe("SentMessages", () => {
       render(<SentMessages />);
 
       await waitFor(() => {
-        expect(screen.getByTestId("list")).toHaveAttribute(
-          "data-loading",
-          "false",
-        );
+        expect(screen.getByTestId("list")).toHaveAttribute("data-loading", "false");
       });
 
       const listItems = screen.queryAllByTestId("list-item");
       expect(listItems).toHaveLength(1);
-      expect(listItems[0]).toHaveAttribute(
-        "title",
-        "Message with émojis 🚀...",
-      );
+      expect(listItems[0]).toHaveAttribute("title", "Message with émojis 🚀...");
     });
   });
 });

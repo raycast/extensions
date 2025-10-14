@@ -12,14 +12,11 @@ export interface NetworkSimulationConfig {
 }
 
 const config: NetworkSimulationConfig = {
-  enabled:
-    environment.isDevelopment && process.env.SIMULATE_SLOW_NETWORK === "true",
+  enabled: environment.isDevelopment && process.env.SIMULATE_SLOW_NETWORK === "true",
   delayMs: parseInt(process.env.NETWORK_DELAY_MS || "5000"),
 };
 
-export async function simulateNetworkDelay<T>(
-  operation: () => Promise<T>,
-): Promise<T> {
+export async function simulateNetworkDelay<T>(operation: () => Promise<T>): Promise<T> {
   if (config.enabled) {
     await new Promise((resolve) => setTimeout(resolve, config.delayMs));
   }

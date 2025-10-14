@@ -19,62 +19,32 @@ jest.mock("@raycast/api", () => ({
       searchBarPlaceholder?: string;
       filtering?: boolean;
     }) => (
-      <div
-        data-testid="list"
-        data-filtering={filtering}
-        data-placeholder={searchBarPlaceholder}
-      >
+      <div data-testid="list" data-filtering={filtering} data-placeholder={searchBarPlaceholder}>
         {children}
       </div>
     ),
     {
-      Section: ({
-        children,
-        title,
-      }: {
-        children: React.ReactNode;
-        title: string;
-      }) => (
+      Section: ({ children, title }: { children: React.ReactNode; title: string }) => (
         <div data-testid="list-section" title={title}>
           {children}
         </div>
       ),
-      Item: ({
-        title,
-        subtitle,
-        actions,
-      }: {
-        title: string;
-        subtitle?: string;
-        actions?: React.ReactNode;
-      }) => (
+      Item: ({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) => (
         <div data-testid="list-item" title={title} data-subtitle={subtitle}>
           {actions}
         </div>
       ),
     },
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: {
     Push: ({ title }: { title: string }) => (
       <button data-testid="action-push" data-title={title}>
         {title}
       </button>
     ),
-    CopyToClipboard: ({
-      title,
-      content,
-    }: {
-      title: string;
-      content: string;
-    }) => (
-      <button
-        data-testid="action-copy"
-        data-title={title}
-        data-content={content}
-      >
+    CopyToClipboard: ({ title, content }: { title: string; content: string }) => (
+      <button data-testid="action-copy" data-title={title} data-content={content}>
         {title}
       </button>
     ),
@@ -178,9 +148,7 @@ describe("BrowseCommandsCheatsheet", () => {
     });
 
     it("should return Flag icon for CLI Flags", () => {
-      const getCommandsByCategory = jest.mocked(
-        jest.requireMock("../constants/commands-data").getCommandsByCategory,
-      );
+      const getCommandsByCategory = jest.mocked(jest.requireMock("../constants/commands-data").getCommandsByCategory);
       getCommandsByCategory.mockReturnValueOnce([
         {
           category: "CLI Flags",
@@ -201,9 +169,7 @@ describe("BrowseCommandsCheatsheet", () => {
     });
 
     it("should return Stars icon for Special Keywords", () => {
-      const getCommandsByCategory = jest.mocked(
-        jest.requireMock("../constants/commands-data").getCommandsByCategory,
-      );
+      const getCommandsByCategory = jest.mocked(jest.requireMock("../constants/commands-data").getCommandsByCategory);
       getCommandsByCategory.mockReturnValueOnce([
         {
           category: "Special Keywords",
@@ -224,9 +190,7 @@ describe("BrowseCommandsCheatsheet", () => {
     });
 
     it("should return Code icon for other categories", () => {
-      const getCommandsByCategory = jest.mocked(
-        jest.requireMock("../constants/commands-data").getCommandsByCategory,
-      );
+      const getCommandsByCategory = jest.mocked(jest.requireMock("../constants/commands-data").getCommandsByCategory);
       getCommandsByCategory.mockReturnValueOnce([
         {
           category: "Unknown Category",
@@ -256,10 +220,7 @@ describe("BrowseCommandsCheatsheet", () => {
   it("should have correct search bar placeholder", () => {
     const { getByTestId } = render(<BrowseCommandsCheatsheet />);
     const list = getByTestId("list");
-    expect(list).toHaveAttribute(
-      "data-placeholder",
-      "Browse Claude Code cheat sheet...",
-    );
+    expect(list).toHaveAttribute("data-placeholder", "Browse Claude Code cheat sheet...");
   });
 
   it("should have filtering disabled", () => {
@@ -270,24 +231,18 @@ describe("BrowseCommandsCheatsheet", () => {
 
   it("should render List.Section components for categories", () => {
     const { container } = render(<BrowseCommandsCheatsheet />);
-    const sections = container.querySelectorAll(
-      '[title*="Commands"], [title*="Keyboard Shortcuts"]',
-    );
+    const sections = container.querySelectorAll('[title*="Commands"], [title*="Keyboard Shortcuts"]');
     expect(sections.length).toBeGreaterThan(0);
   });
 
   it("should render List.Item components for commands", () => {
     const { container } = render(<BrowseCommandsCheatsheet />);
-    const items = container.querySelectorAll(
-      '[title="/help"], [title="/clear"], [title="Ctrl+C"]',
-    );
+    const items = container.querySelectorAll('[title="/help"], [title="/clear"], [title="Ctrl+C"]');
     expect(items.length).toBeGreaterThan(0);
   });
 
   it("should group commands by category when no search text", () => {
-    const getCommandsByCategory = jest.mocked(
-      jest.requireMock("../constants/commands-data").getCommandsByCategory,
-    );
+    const getCommandsByCategory = jest.mocked(jest.requireMock("../constants/commands-data").getCommandsByCategory);
     render(<BrowseCommandsCheatsheet />);
     expect(getCommandsByCategory).toHaveBeenCalled();
   });
@@ -295,18 +250,14 @@ describe("BrowseCommandsCheatsheet", () => {
   it("should render View Details action for each command", () => {
     const { container } = render(<BrowseCommandsCheatsheet />);
 
-    const viewDetailsButtons = container.querySelectorAll(
-      '[data-title="View Details"]',
-    );
+    const viewDetailsButtons = container.querySelectorAll('[data-title="View Details"]');
 
     // Should have View Details buttons for all commands
     expect(viewDetailsButtons.length).toBeGreaterThan(0);
   });
 
   it("should test command with accessories in category view", () => {
-    const getCommandsByCategory = jest.mocked(
-      jest.requireMock("../constants/commands-data").getCommandsByCategory,
-    );
+    const getCommandsByCategory = jest.mocked(jest.requireMock("../constants/commands-data").getCommandsByCategory);
     getCommandsByCategory.mockReturnValueOnce([
       {
         category: "Test Category",
@@ -327,9 +278,7 @@ describe("BrowseCommandsCheatsheet", () => {
     expect(listItems.length).toBeGreaterThan(0);
 
     // Test that View Details action is available
-    const viewDetailsButton = container.querySelector(
-      '[data-title="View Details"]',
-    );
+    const viewDetailsButton = container.querySelector('[data-title="View Details"]');
     expect(viewDetailsButton).toBeTruthy();
   });
 });

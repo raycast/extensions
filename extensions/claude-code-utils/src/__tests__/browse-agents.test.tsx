@@ -19,11 +19,7 @@ jest.mock("@raycast/api", () => ({
       isLoading: boolean;
       searchBarPlaceholder: string;
     }) => (
-      <div
-        data-testid="list"
-        data-loading={isLoading}
-        data-placeholder={searchBarPlaceholder}
-      >
+      <div data-testid="list" data-loading={isLoading} data-placeholder={searchBarPlaceholder}>
         {children}
       </div>
     ),
@@ -39,22 +35,11 @@ jest.mock("@raycast/api", () => ({
         accessories: Array<{ text: string }>;
         actions: React.ReactNode;
       }) => (
-        <div
-          data-testid="list-item"
-          data-title={title}
-          data-icon={icon}
-          data-accessories={JSON.stringify(accessories)}
-        >
+        <div data-testid="list-item" data-title={title} data-icon={icon} data-accessories={JSON.stringify(accessories)}>
           {actions}
         </div>
       ),
-      EmptyView: ({
-        title,
-        description,
-      }: {
-        title: string;
-        description: string;
-      }) => (
+      EmptyView: ({ title, description }: { title: string; description: string }) => (
         <div data-testid="empty-view">
           <div data-testid="empty-title">{title}</div>
           <div data-testid="empty-description">{description}</div>
@@ -62,9 +47,7 @@ jest.mock("@raycast/api", () => ({
       ),
     },
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: {
     Push: ({ title }: { title: string }) => (
       <button data-testid="action-push" data-title={title}>
@@ -97,9 +80,7 @@ jest.mock("../commands/browse-agents/detail", () => ({
 // Mock agents utils
 jest.mock("../utils/agent");
 
-const mockGetAgents = agentsUtils.getAgents as jest.MockedFunction<
-  typeof agentsUtils.getAgents
->;
+const mockGetAgents = agentsUtils.getAgents as jest.MockedFunction<typeof agentsUtils.getAgents>;
 
 describe("BrowseAgents", () => {
   beforeEach(() => {
@@ -157,12 +138,8 @@ describe("BrowseAgents", () => {
       expect(screen.getByTestId("empty-view")).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId("empty-title")).toHaveTextContent(
-      "No Agents Found",
-    );
-    expect(screen.getByTestId("empty-description")).toHaveTextContent(
-      "No agent files found in ~/.claude/agents",
-    );
+    expect(screen.getByTestId("empty-title")).toHaveTextContent("No Agents Found");
+    expect(screen.getByTestId("empty-description")).toHaveTextContent("No agent files found in ~/.claude/agents");
   });
 
   it("should show error view on failure", async () => {
@@ -174,12 +151,8 @@ describe("BrowseAgents", () => {
       expect(screen.getByTestId("empty-view")).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId("empty-title")).toHaveTextContent(
-      "Error Loading Agents",
-    );
-    expect(screen.getByTestId("empty-description")).toHaveTextContent(
-      "Failed to read directory",
-    );
+    expect(screen.getByTestId("empty-title")).toHaveTextContent("Error Loading Agents");
+    expect(screen.getByTestId("empty-description")).toHaveTextContent("Failed to read directory");
   });
 
   it("should render actions for each agent", async () => {
@@ -225,9 +198,7 @@ describe("BrowseAgents", () => {
 
     await waitFor(() => {
       const item = screen.getByTestId("list-item");
-      const accessories = JSON.parse(
-        item.getAttribute("data-accessories") || "[]",
-      );
+      const accessories = JSON.parse(item.getAttribute("data-accessories") || "[]");
       expect(accessories).toEqual([{ text: "test-agent.md" }]);
     });
   });

@@ -1,9 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  getSlashCommands as getCommands,
-  SlashCommand,
-} from "../../utils/command";
+import { getSlashCommands as getCommands, SlashCommand } from "../../utils/command";
 import CommandDetail from "./detail";
 
 export default function BrowseCommands() {
@@ -17,9 +14,7 @@ export default function BrowseCommands() {
         const loadedCommands = await getCommands();
         setCommands(loadedCommands);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load commands",
-        );
+        setError(err instanceof Error ? err.message : "Failed to load commands");
       } finally {
         setIsLoading(false);
       }
@@ -31,11 +26,7 @@ export default function BrowseCommands() {
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Error Loading Commands"
-          description={error}
-        />
+        <List.EmptyView icon={Icon.ExclamationMark} title="Error Loading Commands" description={error} />
       </List>
     );
   }
@@ -68,14 +59,8 @@ export default function BrowseCommands() {
                   icon={Icon.Clipboard}
                   shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 />
-                <Action.ShowInFinder
-                  path={command.filePath}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                />
-                <Action.OpenWith
-                  path={command.filePath}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                />
+                <Action.ShowInFinder path={command.filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                <Action.OpenWith path={command.filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
               </ActionPanel>
             }
           />

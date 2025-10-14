@@ -1,21 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  closeMainWindow,
-  Icon,
-  List,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { normalSearch } from "../../utils/ai-search";
 import { getSentMessages, ParsedMessage } from "../../utils/claude-message";
-import {
-  formatSectionTitle,
-  groupMessagesByDate,
-} from "../../utils/date-grouping";
+import { formatSectionTitle, groupMessagesByDate } from "../../utils/date-grouping";
 import CreateSnippet from "../create-snippet/list";
 import MessageDetail from "./detail";
 
@@ -32,9 +19,7 @@ export default function SentMessages() {
     try {
       const sentMessages = await getSentMessages();
       // Sort by timestamp (newest first)
-      const sortedMessages = sentMessages.sort(
-        (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
-      );
+      const sortedMessages = sentMessages.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
       setMessages(sortedMessages);
     } catch (error) {
       showToast({
@@ -94,11 +79,7 @@ export default function SentMessages() {
       onSearchTextChange={setSearchText}
       actions={
         <ActionPanel>
-          <Action
-            title="Refresh Messages"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={loadMessages}
-          />
+          <Action title="Refresh Messages" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={loadMessages} />
         </ActionPanel>
       }
     >
@@ -108,20 +89,13 @@ export default function SentMessages() {
           description="No sent messages found in your Claude history"
           actions={
             <ActionPanel>
-              <Action
-                title="Refresh Messages"
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={loadMessages}
-              />
+              <Action title="Refresh Messages" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={loadMessages} />
             </ActionPanel>
           }
         />
       )}
       {messageGroups.map((group) => (
-        <List.Section
-          key={group.category}
-          title={formatSectionTitle(group.category, group.messages.length)}
-        >
+        <List.Section key={group.category} title={formatSectionTitle(group.category, group.messages.length)}>
           {group.messages.map((message) => (
             <List.Item
               key={message.id}
@@ -138,11 +112,7 @@ export default function SentMessages() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    title="View Message"
-                    icon={Icon.Eye}
-                    target={<MessageDetail message={message} />}
-                  />
+                  <Action.Push title="View Message" icon={Icon.Eye} target={<MessageDetail message={message} />} />
                   <Action
                     title="Copy to Clipboard"
                     icon={Icon.Clipboard}

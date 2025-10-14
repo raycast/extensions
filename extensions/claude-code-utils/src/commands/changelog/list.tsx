@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ChangelogVersion, fetchChangelog } from "../../utils/changelog";
 import ChangelogDetail from "./detail";
@@ -23,8 +16,7 @@ export default function Changelog() {
         setVersions(data);
         setError(null);
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch changelog";
+        const errorMessage = err instanceof Error ? err.message : "Failed to fetch changelog";
         setError(errorMessage);
         showToast({
           style: Toast.Style.Failure,
@@ -42,20 +34,13 @@ export default function Changelog() {
   if (error && !isLoading) {
     return (
       <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Failed to Load Changelog"
-          description={error}
-        />
+        <List.EmptyView icon={Icon.ExclamationMark} title="Failed to Load Changelog" description={error} />
       </List>
     );
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search changelog versions..."
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search changelog versions...">
       {versions.map((version) => (
         <List.Item
           key={version.version}
@@ -68,16 +53,10 @@ export default function Changelog() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Changes"
-                target={<ChangelogDetail version={version} />}
-                icon={Icon.Eye}
-              />
+              <Action.Push title="View Changes" target={<ChangelogDetail version={version} />} icon={Icon.Eye} />
               <Action.CopyToClipboard
                 title="Copy to Clipboard"
-                content={version.changes
-                  .map((change) => `- ${change}`)
-                  .join("\n")}
+                content={version.changes.map((change) => `- ${change}`).join("\n")}
                 icon={Icon.Clipboard}
               />
               <Action.OpenInBrowser

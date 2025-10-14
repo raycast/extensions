@@ -19,15 +19,11 @@ describe("agents", () => {
 
   describe("getAgents", () => {
     it("should return all agent files from ~/.claude/agents", async () => {
-      mockReaddir.mockResolvedValue([
-        "test-agent.md",
-        "another-agent.md",
-        "not-markdown.txt",
-      ] as unknown as Awaited<ReturnType<typeof readdir>>);
+      mockReaddir.mockResolvedValue(["test-agent.md", "another-agent.md", "not-markdown.txt"] as unknown as Awaited<
+        ReturnType<typeof readdir>
+      >);
 
-      mockReadFile
-        .mockResolvedValueOnce("# Test Agent Content")
-        .mockResolvedValueOnce("# Another Agent Content");
+      mockReadFile.mockResolvedValueOnce("# Test Agent Content").mockResolvedValueOnce("# Another Agent Content");
 
       const agents = await getAgents();
 
@@ -47,11 +43,9 @@ describe("agents", () => {
     });
 
     it("should filter out non-markdown files", async () => {
-      mockReaddir.mockResolvedValue([
-        "agent.md",
-        "file.txt",
-        "another.pdf",
-      ] as unknown as Awaited<ReturnType<typeof readdir>>);
+      mockReaddir.mockResolvedValue(["agent.md", "file.txt", "another.pdf"] as unknown as Awaited<
+        ReturnType<typeof readdir>
+      >);
 
       mockReadFile.mockResolvedValueOnce("# Agent Content");
 
@@ -77,16 +71,11 @@ describe("agents", () => {
     });
 
     it("should sort agents by name alphabetically", async () => {
-      mockReaddir.mockResolvedValue([
-        "zebra-agent.md",
-        "apple-agent.md",
-        "middle-agent.md",
-      ] as unknown as Awaited<ReturnType<typeof readdir>>);
+      mockReaddir.mockResolvedValue(["zebra-agent.md", "apple-agent.md", "middle-agent.md"] as unknown as Awaited<
+        ReturnType<typeof readdir>
+      >);
 
-      mockReadFile
-        .mockResolvedValueOnce("# Zebra")
-        .mockResolvedValueOnce("# Apple")
-        .mockResolvedValueOnce("# Middle");
+      mockReadFile.mockResolvedValueOnce("# Zebra").mockResolvedValueOnce("# Apple").mockResolvedValueOnce("# Middle");
 
       const agents = await getAgents();
 
@@ -96,14 +85,11 @@ describe("agents", () => {
     });
 
     it("should keep agent names in kebab-case", async () => {
-      mockReaddir.mockResolvedValue([
-        "multi-word-agent-name.md",
-        "single.md",
-      ] as unknown as Awaited<ReturnType<typeof readdir>>);
+      mockReaddir.mockResolvedValue(["multi-word-agent-name.md", "single.md"] as unknown as Awaited<
+        ReturnType<typeof readdir>
+      >);
 
-      mockReadFile
-        .mockResolvedValueOnce("# Content 1")
-        .mockResolvedValueOnce("# Content 2");
+      mockReadFile.mockResolvedValueOnce("# Content 1").mockResolvedValueOnce("# Content 2");
 
       const agents = await getAgents();
 
@@ -112,9 +98,7 @@ describe("agents", () => {
     });
 
     it("should handle empty directory", async () => {
-      mockReaddir.mockResolvedValue(
-        [] as unknown as Awaited<ReturnType<typeof readdir>>,
-      );
+      mockReaddir.mockResolvedValue([] as unknown as Awaited<ReturnType<typeof readdir>>);
 
       const agents = await getAgents();
 
@@ -122,16 +106,12 @@ describe("agents", () => {
     });
 
     it("should include file paths in results", async () => {
-      mockReaddir.mockResolvedValue(["test.md"] as unknown as Awaited<
-        ReturnType<typeof readdir>
-      >);
+      mockReaddir.mockResolvedValue(["test.md"] as unknown as Awaited<ReturnType<typeof readdir>>);
       mockReadFile.mockResolvedValueOnce("# Content");
 
       const agents = await getAgents();
 
-      expect(agents[0].filePath).toBe(
-        join("/home/user", ".claude", "agents", "test.md"),
-      );
+      expect(agents[0].filePath).toBe(join("/home/user", ".claude", "agents", "test.md"));
     });
   });
 });

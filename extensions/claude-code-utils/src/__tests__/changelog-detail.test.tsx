@@ -21,24 +21,14 @@ jest.mock("@raycast/api", () => ({
     navigationTitle: string;
     actions: React.ReactNode;
   }) => (
-    <div
-      data-testid="detail"
-      data-markdown={markdown}
-      data-navigation-title={navigationTitle}
-    >
+    <div data-testid="detail" data-markdown={markdown} data-navigation-title={navigationTitle}>
       {actions}
     </div>
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: {
     Paste: ({ title, content }: { title: string; content: string }) => (
-      <button
-        data-testid="action-paste"
-        data-title={title}
-        data-content={content}
-      >
+      <button data-testid="action-paste" data-title={title} data-content={content}>
         {title}
       </button>
     ),
@@ -159,20 +149,13 @@ describe("ChangelogDetail", () => {
     render(<ChangelogDetail version={specialVersion} />);
 
     const detail = screen.getByTestId("detail");
-    expect(detail).toHaveAttribute(
-      "data-navigation-title",
-      "Version 2.0.0-beta.1",
-    );
+    expect(detail).toHaveAttribute("data-navigation-title", "Version 2.0.0-beta.1");
   });
 
   it("should handle changes with special characters", () => {
     const specialChangesVersion: ChangelogVersion = {
       version: "1.5.0",
-      changes: [
-        "Fixed `code` formatting",
-        "Updated <component> rendering",
-        "Added $variable support",
-      ],
+      changes: ["Fixed `code` formatting", "Updated <component> rendering", "Added $variable support"],
     };
 
     render(<ChangelogDetail version={specialChangesVersion} />);

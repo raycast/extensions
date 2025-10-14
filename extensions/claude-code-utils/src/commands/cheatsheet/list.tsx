@@ -1,10 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import {
-  CommandItem,
-  getCommandsByCategory,
-  searchCommands,
-} from "../../constants/commands-data";
+import { CommandItem, getCommandsByCategory, searchCommands } from "../../constants/commands-data";
 import CommandDetail from "./detail";
 
 export default function BrowseCommandsCheatsheet() {
@@ -44,11 +40,7 @@ export default function BrowseCommandsCheatsheet() {
               accessories={[{ text: command.category }]}
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    title="View Details"
-                    target={<CommandDetail command={command} />}
-                    icon={Icon.Eye}
-                  />
+                  <Action.Push title="View Details" target={<CommandDetail command={command} />} icon={Icon.Eye} />
                 </ActionPanel>
               }
             />
@@ -56,10 +48,7 @@ export default function BrowseCommandsCheatsheet() {
         </List.Section>
       ) : (
         commandsByCategory.map(({ category, commands }) => (
-          <List.Section
-            key={category}
-            title={`${category} (${commands.length})`}
-          >
+          <List.Section key={category} title={`${category} (${commands.length})`}>
             {commands.map((command) => (
               <List.Item
                 key={command.id}
@@ -68,11 +57,7 @@ export default function BrowseCommandsCheatsheet() {
                 icon={getIconForCommand(command)}
                 actions={
                   <ActionPanel>
-                    <Action.Push
-                      title="View Details"
-                      target={<CommandDetail command={command} />}
-                      icon={Icon.Eye}
-                    />
+                    <Action.Push title="View Details" target={<CommandDetail command={command} />} icon={Icon.Eye} />
                   </ActionPanel>
                 }
               />

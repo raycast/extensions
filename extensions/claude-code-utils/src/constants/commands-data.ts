@@ -184,8 +184,7 @@ export const claudeCodeCommands: CommandItem[] = [
   {
     id: "rewind",
     name: "/rewind",
-    description:
-      "Open rewind menu to restore previous conversation and/or code state (alternative to Esc + Esc)",
+    description: "Open rewind menu to restore previous conversation and/or code state (alternative to Esc + Esc)",
     category: "Commands",
     usage: "/rewind",
   },
@@ -313,8 +312,7 @@ export const claudeCodeCommands: CommandItem[] = [
   {
     id: "esc-esc",
     name: "Esc + Esc",
-    description:
-      "Open rewind menu to restore previous conversation and/or code state (alternative to /rewind)",
+    description: "Open rewind menu to restore previous conversation and/or code state (alternative to /rewind)",
     category: "Keyboard Shortcuts",
     usage: "Esc Esc",
   },
@@ -553,8 +551,7 @@ export const claudeCodeCommands: CommandItem[] = [
   {
     id: "double-escape",
     name: "Double-tap Escape",
-    description:
-      "Open rewind menu to restore previous conversation and/or code state (alternative to /rewind)",
+    description: "Open rewind menu to restore previous conversation and/or code state (alternative to /rewind)",
     category: "Special Keywords",
     usage: "Esc Esc (quickly)",
   },
@@ -573,9 +570,7 @@ export const claudeCodeCommands: CommandItem[] = [
     description: "Set configuration values",
     category: "Configuration Commands",
     usage: "claude config set <key> <value>",
-    examples: [
-      "claude config set --global preferredNotifChannel terminal_bell",
-    ],
+    examples: ["claude config set --global preferredNotifChannel terminal_bell"],
   },
   {
     id: "config-get",
@@ -655,9 +650,7 @@ export const claudeCodeCommands: CommandItem[] = [
 ];
 
 export const getCommandsByCategory = () => {
-  const categories = [
-    ...new Set(claudeCodeCommands.map((cmd) => cmd.category)),
-  ];
+  const categories = [...new Set(claudeCodeCommands.map((cmd) => cmd.category))];
   return categories.map((category) => ({
     category,
     commands: claudeCodeCommands.filter((cmd) => cmd.category === category),

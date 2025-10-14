@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showToast,
-  Toast,
-  launchCommand,
-  LaunchType,
-  LaunchProps,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, launchCommand, LaunchType, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import { createSnippet } from "../../utils/claude-message";
 
@@ -16,16 +7,10 @@ export interface CreateSnippetProps {
   title?: string;
 }
 
-export default function CreateSnippet(
-  props?:
-    | LaunchProps<{ launchContext: CreateSnippetProps }>
-    | CreateSnippetProps,
-) {
+export default function CreateSnippet(props?: LaunchProps<{ launchContext: CreateSnippetProps }> | CreateSnippetProps) {
   // Handle both LaunchProps and direct props
   const initialProps =
-    props && "launchContext" in props
-      ? props.launchContext
-      : (props as CreateSnippetProps | undefined);
+    props && "launchContext" in props ? props.launchContext : (props as CreateSnippetProps | undefined);
 
   const [title, setTitle] = useState(initialProps?.title || "");
   const [content, setContent] = useState(initialProps?.content || "");
@@ -48,9 +33,7 @@ export default function CreateSnippet(
       showToast({
         style: Toast.Style.Success,
         title: "Snippet created",
-        message: snippetTitle
-          ? `"${snippetTitle}" has been saved`
-          : "Snippet has been saved",
+        message: snippetTitle ? `"${snippetTitle}" has been saved` : "Snippet has been saved",
       });
       // Navigate to browse-snippets command
       await launchCommand({

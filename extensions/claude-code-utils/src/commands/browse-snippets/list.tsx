@@ -12,11 +12,7 @@ import {
   Icon,
 } from "@raycast/api";
 import { useCallback, useEffect, useState, useMemo } from "react";
-import {
-  getSnippets,
-  deleteSnippet,
-  Snippet,
-} from "../../utils/claude-message";
+import { getSnippets, deleteSnippet, Snippet } from "../../utils/claude-message";
 import { normalSearchSnippets } from "../../utils/ai-search";
 import CreateSnippet from "../create-snippet/list";
 import SnippetDetail from "./detail";
@@ -31,9 +27,7 @@ export default function BrowseSnippets() {
     try {
       const allSnippets = await getSnippets();
       // Sort by most recently updated first
-      const sortedSnippets = allSnippets.sort(
-        (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
-      );
+      const sortedSnippets = allSnippets.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
       setSnippets(sortedSnippets);
     } catch (error) {
       showToast({
@@ -143,10 +137,7 @@ export default function BrowseSnippets() {
         <List.Item
           key={snippet.id}
           title={snippet.title}
-          subtitle={
-            snippet.content.substring(0, 100) +
-            (snippet.content.length > 100 ? "..." : "")
-          }
+          subtitle={snippet.content.substring(0, 100) + (snippet.content.length > 100 ? "..." : "")}
           accessories={[
             {
               text: snippet.updatedAt.toLocaleDateString(),
@@ -157,9 +148,7 @@ export default function BrowseSnippets() {
               <Action.Push
                 title="View Snippet"
                 icon={Icon.Eye}
-                target={
-                  <SnippetDetail snippet={snippet} onDelete={handleDelete} />
-                }
+                target={<SnippetDetail snippet={snippet} onDelete={handleDelete} />}
               />
               <Action
                 title="Copy to Clipboard"
@@ -172,10 +161,7 @@ export default function BrowseSnippets() {
                 icon={Icon.CopyClipboard}
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
                 target={
-                  <CreateSnippet
-                    title={snippet.title ? `${snippet.title} (Copy)` : "Copy"}
-                    content={snippet.content}
-                  />
+                  <CreateSnippet title={snippet.title ? `${snippet.title} (Copy)` : "Copy"} content={snippet.content} />
                 }
               />
               <Action.Push

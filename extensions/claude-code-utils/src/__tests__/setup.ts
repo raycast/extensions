@@ -5,8 +5,7 @@ import { configure } from "@testing-library/react";
 configure({ testIdAttribute: "data-testid" });
 
 // Configure global test environment
-(global as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
-  true;
+(global as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 // Set up proper act() environment for concurrent React features
 const originalError = console.error;
@@ -14,9 +13,7 @@ beforeAll(() => {
   console.error = (...args: unknown[]) => {
     if (
       typeof args[0] === "string" &&
-      (args[0].includes(
-        "current testing environment is not configured to support act",
-      ) ||
+      (args[0].includes("current testing environment is not configured to support act") ||
         args[0].includes("An update to") ||
         args[0].includes("You called act(async") ||
         args[0].includes("wrapped in act"))

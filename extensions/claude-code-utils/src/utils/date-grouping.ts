@@ -3,13 +3,7 @@ import { ParsedMessage } from "./claude-message";
 /**
  * Date category for message grouping
  */
-export type DateCategory =
-  | "Today"
-  | "Yesterday"
-  | "This Week"
-  | "This Month"
-  | "This Year"
-  | string; // Year numbers like "2024"
+export type DateCategory = "Today" | "Yesterday" | "This Week" | "This Month" | "This Year" | string; // Year numbers like "2024"
 
 /**
  * Grouped messages by date category
@@ -27,20 +21,13 @@ export interface MessageGroup {
  * @param now - Current date (defaults to new Date(), injectable for testing)
  * @returns Category string ("Today", "Yesterday", "2023", etc.)
  */
-function getDateCategory(
-  messageDate: Date,
-  now: Date = new Date(),
-): DateCategory {
+function getDateCategory(messageDate: Date, now: Date = new Date()): DateCategory {
   // Normalize dates to midnight for day-level comparison
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  const msgDate = new Date(
-    messageDate.getFullYear(),
-    messageDate.getMonth(),
-    messageDate.getDate(),
-  );
+  const msgDate = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate());
 
   // Today check
   if (msgDate.getTime() === today.getTime()) {
@@ -83,13 +70,7 @@ function getDateCategory(
 /**
  * Section display order (newest to oldest)
  */
-const SECTION_ORDER: DateCategory[] = [
-  "Today",
-  "Yesterday",
-  "This Week",
-  "This Month",
-  "This Year",
-];
+const SECTION_ORDER: DateCategory[] = ["Today", "Yesterday", "This Week", "This Month", "This Year"];
 
 /**
  * Calculate sort key for section ordering
@@ -116,10 +97,7 @@ function getSectionSortKey(category: DateCategory): number {
  * @param now - Current date (defaults to new Date(), injectable for testing)
  * @returns Array of message groups, sorted by section order
  */
-export function groupMessagesByDate(
-  messages: ParsedMessage[],
-  now: Date = new Date(),
-): MessageGroup[] {
+export function groupMessagesByDate(messages: ParsedMessage[], now: Date = new Date()): MessageGroup[] {
   // Group messages by category
   const groups = new Map<DateCategory, ParsedMessage[]>();
 
@@ -134,13 +112,11 @@ export function groupMessagesByDate(
   }
 
   // Convert to array and sort by section order
-  const groupArray: MessageGroup[] = Array.from(groups.entries()).map(
-    ([category, messages]) => ({
-      category,
-      messages,
-      sortKey: getSectionSortKey(category),
-    }),
-  );
+  const groupArray: MessageGroup[] = Array.from(groups.entries()).map(([category, messages]) => ({
+    category,
+    messages,
+    sortKey: getSectionSortKey(category),
+  }));
 
   return groupArray.sort((a, b) => a.sortKey - b.sortKey);
 }
@@ -152,9 +128,6 @@ export function groupMessagesByDate(
  * @param count - Number of messages in section
  * @returns Formatted title like "Today (5)" or "2023 (12)"
  */
-export function formatSectionTitle(
-  category: DateCategory,
-  count: number,
-): string {
+export function formatSectionTitle(category: DateCategory, count: number): string {
   return `${category} (${count})`;
 }

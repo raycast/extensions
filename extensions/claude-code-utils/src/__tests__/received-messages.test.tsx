@@ -2,13 +2,7 @@
  * @jest-environment jsdom
  */
 
-import {
-  Clipboard,
-  Toast,
-  closeMainWindow,
-  showHUD,
-  showToast,
-} from "@raycast/api";
+import { Clipboard, Toast, closeMainWindow, showHUD, showToast } from "@raycast/api";
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
@@ -34,20 +28,14 @@ jest.mock("@raycast/api", () => ({
       isLoading: boolean;
       onSearchTextChange?: (text: string) => void;
     }) => (
-      <div
-        data-testid="list"
-        data-placeholder={searchBarPlaceholder}
-        data-loading={String(isLoading)}
-      >
+      <div data-testid="list" data-placeholder={searchBarPlaceholder} data-loading={String(isLoading)}>
         <input
           data-testid="search-input"
           type="text"
           placeholder={searchBarPlaceholder}
           onChange={(e) => onSearchTextChange?.(e.target.value)}
         />
-        {searchBarAccessory && (
-          <div data-testid="search-bar-accessory">{searchBarAccessory}</div>
-        )}
+        {searchBarAccessory && <div data-testid="search-bar-accessory">{searchBarAccessory}</div>}
         {actions && <div data-testid="list-actions">{actions}</div>}
         {children}
       </div>
@@ -64,18 +52,8 @@ jest.mock("@raycast/api", () => ({
         icon?: { source: string; tintColor: string };
         actions?: React.ReactNode;
       }) => (
-        <div
-          data-testid="empty-view"
-          data-title={title}
-          data-description={description}
-        >
-          {icon && (
-            <div
-              data-testid="empty-view-icon"
-              data-icon={icon.source}
-              data-tint={icon.tintColor}
-            />
-          )}
+        <div data-testid="empty-view" data-title={title} data-description={description}>
+          {icon && <div data-testid="empty-view-icon" data-icon={icon.source} data-tint={icon.tintColor} />}
           {actions && <div data-testid="empty-view-actions">{actions}</div>}
         </div>
       ),
@@ -89,11 +67,7 @@ jest.mock("@raycast/api", () => ({
         actions?: React.ReactNode;
       }) => (
         <div data-testid="list-item" data-title={title}>
-          {accessories && (
-            <div data-testid="item-accessories">
-              {JSON.stringify(accessories)}
-            </div>
-          )}
+          {accessories && <div data-testid="item-accessories">{JSON.stringify(accessories)}</div>}
           {actions && <div data-testid="item-actions">{actions}</div>}
         </div>
       ),
@@ -121,52 +95,27 @@ jest.mock("@raycast/api", () => ({
             return child;
           });
           return (
-            <div
-              data-testid="dropdown"
-              data-tooltip={tooltip}
-              data-value={value}
-            >
+            <div data-testid="dropdown" data-tooltip={tooltip} data-value={value}>
               {childrenWithProps}
             </div>
           );
         },
         {
-          Item: ({
-            title,
-            value,
-            onChange,
-          }: {
-            title: string;
-            value: string;
-            onChange?: (value: string) => void;
-          }) => (
-            <div
-              data-testid="dropdown-item"
-              data-title={title}
-              data-value={value}
-              onClick={() => onChange?.(value)}
-            >
+          Item: ({ title, value, onChange }: { title: string; value: string; onChange?: (value: string) => void }) => (
+            <div data-testid="dropdown-item" data-title={title} data-value={value} onClick={() => onChange?.(value)}>
               {title}
             </div>
           ),
         },
       ),
-      Section: ({
-        title,
-        children,
-      }: {
-        title: string;
-        children: React.ReactNode;
-      }) => (
+      Section: ({ title, children }: { title: string; children: React.ReactNode }) => (
         <div data-testid="list-section" data-title={title}>
           {children}
         </div>
       ),
     },
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: Object.assign(
     ({
       title,
@@ -181,31 +130,17 @@ jest.mock("@raycast/api", () => ({
         data-testid="action"
         data-title={title}
         onClick={onAction}
-        data-shortcut={
-          shortcut
-            ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-            : undefined
-        }
+        data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
       >
         {title}
       </button>
     ),
     {
-      Push: ({
-        title,
-        shortcut,
-      }: {
-        title: string;
-        shortcut?: { modifiers: string[]; key: string };
-      }) => (
+      Push: ({ title, shortcut }: { title: string; shortcut?: { modifiers: string[]; key: string } }) => (
         <button
           data-testid="action-push"
           data-title={title}
-          data-shortcut={
-            shortcut
-              ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-              : undefined
-          }
+          data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
         >
           {title}
         </button>
@@ -223,11 +158,7 @@ jest.mock("@raycast/api", () => ({
           data-testid="action-copy"
           data-title={title}
           data-content={content}
-          data-shortcut={
-            shortcut
-              ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-              : undefined
-          }
+          data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
         >
           {title}
         </button>
@@ -246,11 +177,7 @@ jest.mock("@raycast/api", () => ({
           data-testid="action-paste"
           data-title={title}
           data-content={content}
-          data-shortcut={
-            shortcut
-              ? `${shortcut.modifiers.join("+")}-${shortcut.key}`
-              : undefined
-          }
+          data-shortcut={shortcut ? `${shortcut.modifiers.join("+")}-${shortcut.key}` : undefined}
         >
           {title}
         </button>
@@ -277,16 +204,10 @@ jest.mock("@raycast/api", () => ({
     ),
     {
       Metadata: Object.assign(
-        ({ children }: { children: React.ReactNode }) => (
-          <div data-testid="metadata">{children}</div>
-        ),
+        ({ children }: { children: React.ReactNode }) => <div data-testid="metadata">{children}</div>,
         {
           Label: ({ title, text }: { title: string; text: string }) => (
-            <div
-              data-testid="metadata-label"
-              data-title={title}
-              data-text={text}
-            />
+            <div data-testid="metadata-label" data-title={title} data-text={text} />
           ),
           Separator: () => <div data-testid="metadata-separator" />,
         },
@@ -381,10 +302,8 @@ describe("ReceivedMessages", () => {
       },
       {
         id: "3",
-        content:
-          "Here's how you can fix the TypeScript error: you need to properly type your props interface.",
-        preview:
-          "Here's how you can fix the TypeScript error: you need to properly type your props interface.",
+        content: "Here's how you can fix the TypeScript error: you need to properly type your props interface.",
+        preview: "Here's how you can fix the TypeScript error: you need to properly type your props interface.",
         timestamp: new Date("2024-01-01T10:00:00Z"),
         role: "assistant",
         sessionId: "session-2",
@@ -393,9 +312,7 @@ describe("ReceivedMessages", () => {
     ];
 
     // Get fresh references to mocks for each test
-    mockGetReceivedMessages = jest.requireMock(
-      "../utils/claude-message",
-    ).getReceivedMessages;
+    mockGetReceivedMessages = jest.requireMock("../utils/claude-message").getReceivedMessages;
     mockNormalSearch = jest.requireMock("../utils/ai-search").normalSearch;
     mockShowToast = jest.requireMock("@raycast/api").showToast;
     mockShowHUD = jest.requireMock("@raycast/api").showHUD;
@@ -404,13 +321,12 @@ describe("ReceivedMessages", () => {
 
     // Default mocks
     mockGetReceivedMessages.mockResolvedValue(mockMessages);
-    mockNormalSearch.mockImplementation(
-      (messages: ParsedMessage[], query: string) =>
-        messages.filter(
-          (m) =>
-            m.content.toLowerCase().includes(query.toLowerCase()) ||
-            m.preview.toLowerCase().includes(query.toLowerCase()),
-        ),
+    mockNormalSearch.mockImplementation((messages: ParsedMessage[], query: string) =>
+      messages.filter(
+        (m) =>
+          m.content.toLowerCase().includes(query.toLowerCase()) ||
+          m.preview.toLowerCase().includes(query.toLowerCase()),
+      ),
     );
     mockClipboardCopy.mockResolvedValue(undefined);
     mockShowToast.mockResolvedValue({} as Toast);
@@ -446,10 +362,7 @@ describe("ReceivedMessages", () => {
       // Should display messages sorted by timestamp (newest first)
       const listItems = container.querySelectorAll('[data-testid="list-item"]');
       expect(listItems).toHaveLength(3);
-      expect(listItems[0]).toHaveAttribute(
-        "data-title",
-        "Hello, how can I help you with your React application?",
-      );
+      expect(listItems[0]).toHaveAttribute("data-title", "Hello, how can I help you with your React application?");
     });
 
     it("should sort messages by timestamp (newest first)", async () => {
@@ -461,14 +374,8 @@ describe("ReceivedMessages", () => {
       });
 
       const listItems = container.querySelectorAll('[data-testid="list-item"]');
-      expect(listItems[0]).toHaveAttribute(
-        "data-title",
-        "Hello, how can I help you with your React application?",
-      );
-      expect(listItems[1]).toHaveAttribute(
-        "data-title",
-        "I need help debugging a TypeScript error in my component.",
-      );
+      expect(listItems[0]).toHaveAttribute("data-title", "Hello, how can I help you with your React application?");
+      expect(listItems[1]).toHaveAttribute("data-title", "I need help debugging a TypeScript error in my component.");
       expect(listItems[2]).toHaveAttribute(
         "data-title",
         "Here's how you can fix the TypeScript error: you need to properly type your props interface.",
@@ -484,9 +391,7 @@ describe("ReceivedMessages", () => {
       });
 
       const listItems = container.querySelectorAll('[data-testid="list-item"]');
-      const accessories = listItems[0].querySelector(
-        '[data-testid="item-accessories"]',
-      );
+      const accessories = listItems[0].querySelector('[data-testid="item-accessories"]');
       expect(accessories?.textContent).toContain("text");
     });
 
@@ -514,10 +419,7 @@ describe("ReceivedMessages", () => {
         expect(mockGetReceivedMessages).toHaveBeenCalled();
       });
 
-      expect(getByTestId("list")).toHaveAttribute(
-        "data-placeholder",
-        "Browse received messages...",
-      );
+      expect(getByTestId("list")).toHaveAttribute("data-placeholder", "Browse received messages...");
     });
 
     it("should perform normal search immediately", async () => {
@@ -543,9 +445,7 @@ describe("ReceivedMessages", () => {
       });
 
       // Verify copy action button exists
-      const copyButton = container.querySelector(
-        '[data-title="Copy to Clipboard"]',
-      );
+      const copyButton = container.querySelector('[data-title="Copy to Clipboard"]');
       expect(copyButton).toBeInTheDocument();
     });
 
@@ -558,9 +458,7 @@ describe("ReceivedMessages", () => {
       });
 
       // Verify error handling is implemented
-      const copyButton = container.querySelector(
-        '[data-title="Copy to Clipboard"]',
-      );
+      const copyButton = container.querySelector('[data-title="Copy to Clipboard"]');
       expect(copyButton).toBeInTheDocument();
     });
 
@@ -574,9 +472,7 @@ describe("ReceivedMessages", () => {
       // Clear the mock to verify it's called again
       mockGetReceivedMessages.mockClear();
 
-      const refreshButton = container.querySelector(
-        '[data-title="Refresh Messages"]',
-      );
+      const refreshButton = container.querySelector('[data-title="Refresh Messages"]');
       if (refreshButton) {
         fireEvent.click(refreshButton);
       }
@@ -594,9 +490,7 @@ describe("ReceivedMessages", () => {
       });
 
       // Verify refresh button exists for loading prevention testing
-      const refreshButton = container.querySelector(
-        '[data-title="Refresh Messages"]',
-      );
+      const refreshButton = container.querySelector('[data-title="Refresh Messages"]');
       expect(refreshButton).toBeInTheDocument();
     });
   });
@@ -661,10 +555,7 @@ describe("ReceivedMessages", () => {
 
       const emptyView = getByTestId("empty-view");
       expect(emptyView).toHaveAttribute("data-title", "No messages found");
-      expect(emptyView).toHaveAttribute(
-        "data-description",
-        "No received messages found in your Claude history",
-      );
+      expect(emptyView).toHaveAttribute("data-description", "No received messages found in your Claude history");
     });
   });
 
@@ -703,9 +594,7 @@ describe("ReceivedMessages", () => {
       expect(listItems).toHaveLength(3);
 
       // Test copy action
-      const copyButton = container.querySelector(
-        '[data-title="Copy to Clipboard"]',
-      );
+      const copyButton = container.querySelector('[data-title="Copy to Clipboard"]');
       if (copyButton) {
         fireEvent.click(copyButton);
       }
@@ -774,10 +663,7 @@ describe("ReceivedMessages", () => {
 
     it("should test copy content function with different scenarios", async () => {
       const TestCopyComponent = () => {
-        const copyContent = async (
-          message: ParsedMessage,
-          closeWindow = false,
-        ) => {
+        const copyContent = async (message: ParsedMessage, closeWindow = false) => {
           try {
             await mockClipboardCopy(message.content);
             if (closeWindow) {
@@ -802,16 +688,10 @@ describe("ReceivedMessages", () => {
 
         return (
           <div>
-            <button
-              onClick={() => copyContent(mockMessages[0], false)}
-              data-testid="copy-no-close"
-            >
+            <button onClick={() => copyContent(mockMessages[0], false)} data-testid="copy-no-close">
               Copy Without Close
             </button>
-            <button
-              onClick={() => copyContent(mockMessages[0], true)}
-              data-testid="copy-with-close"
-            >
+            <button onClick={() => copyContent(mockMessages[0], true)} data-testid="copy-with-close">
               Copy With Close
             </button>
           </div>
@@ -858,14 +738,10 @@ describe("ReceivedMessages", () => {
         return (
           <div data-testid="detail" data-markdown={message.content}>
             <div data-testid="metadata">
-              <div data-testid="time-label">
-                {message.timestamp.toLocaleString()}
-              </div>
+              <div data-testid="time-label">{message.timestamp.toLocaleString()}</div>
               <div data-testid="session-label">{message.sessionId}</div>
               <div data-testid="project-label">
-                {message.projectPath?.split("/").pop() ||
-                  message.projectPath ||
-                  "Unknown"}
+                {message.projectPath?.split("/").pop() || message.projectPath || "Unknown"}
               </div>
             </div>
             <div data-testid="actions">
@@ -890,14 +766,9 @@ describe("ReceivedMessages", () => {
         projectPath: "/path/to/project/folder",
       };
 
-      const { getByTestId, rerender } = render(
-        <TestMessageDetail message={messageWithPath} />,
-      );
+      const { getByTestId, rerender } = render(<TestMessageDetail message={messageWithPath} />);
 
-      expect(getByTestId("detail")).toHaveAttribute(
-        "data-markdown",
-        messageWithPath.content,
-      );
+      expect(getByTestId("detail")).toHaveAttribute("data-markdown", messageWithPath.content);
       expect(getByTestId("project-label")).toHaveTextContent("folder");
 
       // Test with no project path
@@ -926,9 +797,7 @@ describe("ReceivedMessages", () => {
       });
 
       // Get copy button and verify it exists
-      const copyButton = container.querySelector(
-        '[data-title="Copy to Clipboard"]',
-      );
+      const copyButton = container.querySelector('[data-title="Copy to Clipboard"]');
       expect(copyButton).toBeInTheDocument();
     });
 
@@ -941,9 +810,7 @@ describe("ReceivedMessages", () => {
       });
 
       // Check for Create Snippet action
-      const createSnippetButton = container.querySelector(
-        '[data-title="Create Snippet from Message"]',
-      );
+      const createSnippetButton = container.querySelector('[data-title="Create Snippet from Message"]');
       expect(createSnippetButton).toBeInTheDocument();
     });
   });
@@ -955,14 +822,10 @@ describe("ReceivedMessages", () => {
       const TestMessageDetail = ({ message }: { message: ParsedMessage }) => (
         <div data-testid="detail" data-markdown={message.content}>
           <div data-testid="metadata">
-            <div data-testid="time-label">
-              {message.timestamp.toLocaleString()}
-            </div>
+            <div data-testid="time-label">{message.timestamp.toLocaleString()}</div>
             <div data-testid="session-label">{message.sessionId}</div>
             <div data-testid="project-label">
-              {message.projectPath?.split("/").pop() ||
-                message.projectPath ||
-                "Unknown"}
+              {message.projectPath?.split("/").pop() || message.projectPath || "Unknown"}
             </div>
           </div>
         </div>
@@ -970,16 +833,9 @@ describe("ReceivedMessages", () => {
 
       render(<TestMessageDetail message={message} />);
 
-      expect(screen.getByTestId("detail")).toHaveAttribute(
-        "data-markdown",
-        message.content,
-      );
-      expect(screen.getByTestId("time-label")).toHaveTextContent(
-        message.timestamp.toLocaleString(),
-      );
-      expect(screen.getByTestId("session-label")).toHaveTextContent(
-        message.sessionId,
-      );
+      expect(screen.getByTestId("detail")).toHaveAttribute("data-markdown", message.content);
+      expect(screen.getByTestId("time-label")).toHaveTextContent(message.timestamp.toLocaleString());
+      expect(screen.getByTestId("session-label")).toHaveTextContent(message.sessionId);
       expect(screen.getByTestId("project-label")).toHaveTextContent("project");
     });
 
@@ -991,9 +847,7 @@ describe("ReceivedMessages", () => {
 
       const TestMessageDetail = ({ message }: { message: ParsedMessage }) => (
         <div data-testid="project-label">
-          {message.projectPath?.split("/").pop() ||
-            message.projectPath ||
-            "Unknown"}
+          {message.projectPath?.split("/").pop() || message.projectPath || "Unknown"}
         </div>
       );
 
@@ -1010,9 +864,7 @@ describe("ReceivedMessages", () => {
 
       const TestMessageDetail = ({ message }: { message: ParsedMessage }) => (
         <div data-testid="project-label">
-          {message.projectPath?.split("/").pop() ||
-            message.projectPath ||
-            "Unknown"}
+          {message.projectPath?.split("/").pop() || message.projectPath || "Unknown"}
         </div>
       );
 

@@ -18,24 +18,14 @@ jest.mock("@raycast/api", () => ({
     navigationTitle: string;
     actions: React.ReactNode;
   }) => (
-    <div
-      data-testid="detail"
-      data-markdown={markdown}
-      data-navigation-title={navigationTitle}
-    >
+    <div data-testid="detail" data-markdown={markdown} data-navigation-title={navigationTitle}>
       {actions}
     </div>
   ),
-  ActionPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="action-panel">{children}</div>
-  ),
+  ActionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="action-panel">{children}</div>,
   Action: {
     Paste: ({ title, content }: { title: string; content: string }) => (
-      <button
-        data-testid="action-paste"
-        data-title={title}
-        data-content={content}
-      >
+      <button data-testid="action-paste" data-title={title} data-content={content}>
         {title}
       </button>
     ),

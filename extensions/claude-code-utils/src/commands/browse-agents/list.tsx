@@ -26,11 +26,7 @@ export default function BrowseAgents() {
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Error Loading Agents"
-          description={error}
-        />
+        <List.EmptyView icon={Icon.ExclamationMark} title="Error Loading Agents" description={error} />
       </List>
     );
   }
@@ -52,25 +48,15 @@ export default function BrowseAgents() {
             accessories={[{ text: `${agent.id}.md` }]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View Agent Details"
-                  icon={Icon.Eye}
-                  target={<AgentDetail agent={agent} />}
-                />
+                <Action.Push title="View Agent Details" icon={Icon.Eye} target={<AgentDetail agent={agent} />} />
                 <Action.CopyToClipboard
                   title="Copy to Clipboard"
                   content={agent.content}
                   icon={Icon.Clipboard}
                   shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 />
-                <Action.ShowInFinder
-                  path={agent.filePath}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                />
-                <Action.OpenWith
-                  path={agent.filePath}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                />
+                <Action.ShowInFinder path={agent.filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                <Action.OpenWith path={agent.filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
               </ActionPanel>
             }
           />

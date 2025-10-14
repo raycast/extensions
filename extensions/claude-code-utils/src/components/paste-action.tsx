@@ -24,11 +24,7 @@ export function PasteAction({ content }: PasteActionProps) {
 
   return (
     <Action.Paste
-      title={
-        frontmostApp?.name
-          ? `Paste to ${frontmostApp.name}`
-          : "Paste to Active App"
-      }
+      title={frontmostApp?.name ? `Paste to ${frontmostApp.name}` : "Paste to Active App"}
       content={content}
       {...(frontmostApp?.path && {
         icon: { fileIcon: frontmostApp.path },

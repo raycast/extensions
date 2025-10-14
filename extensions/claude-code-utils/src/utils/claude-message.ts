@@ -53,9 +53,7 @@ function parseTimestamp(timestamp: string | number | undefined): Date {
 
   if (typeof timestamp === "number") {
     // If timestamp is in seconds (< threshold), convert to milliseconds
-    return new Date(
-      timestamp < UNIX_TIMESTAMP_THRESHOLD ? timestamp * 1000 : timestamp,
-    );
+    return new Date(timestamp < UNIX_TIMESTAMP_THRESHOLD ? timestamp * 1000 : timestamp);
   }
 
   // String timestamp - let Date constructor handle it
@@ -353,11 +351,7 @@ export async function getAllClaudeMessages(): Promise<Message[]> {
             const sessionId = file.name.replace(".jsonl", "");
 
             // Use streaming parser for memory efficiency
-            const messages = await parseAssistantMessagesOnlyStreaming(
-              file.path,
-              sessionId,
-              project.path,
-            );
+            const messages = await parseAssistantMessagesOnlyStreaming(file.path, sessionId, project.path);
             allMessages.push(...messages);
           } catch {
             continue;
@@ -471,11 +465,7 @@ export async function getSentMessages(): Promise<ParsedMessage[]> {
 
             // Stream through the file line-by-line to extract user messages
             // This avoids loading huge files into memory all at once
-            const userMessages = await parseUserMessagesOnlyStreaming(
-              file.path,
-              sessionId,
-              project.path,
-            );
+            const userMessages = await parseUserMessagesOnlyStreaming(file.path, sessionId, project.path);
 
             // Add all user messages from this file to our collection
             topUserMessages.push(...userMessages);
@@ -491,16 +481,13 @@ export async function getSentMessages(): Promise<ParsedMessage[]> {
     // STEP 6: Final sorting across ALL projects
     // Now we have user messages from multiple projects/conversations
     // Sort them globally by timestamp to get the most recent messages overall
-    const finalMessages = topUserMessages.sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
-    ); // Newest messages first across ALL projects
+    const finalMessages = topUserMessages.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()); // Newest messages first across ALL projects
 
     // STEP 7: Format messages for Raycast display
     return finalMessages.map((msg, index) => ({
       ...msg,
       id: `sent-${index}`, // Unique ID for Raycast
-      preview:
-        msg.content.slice(0, 100) + (msg.content.length > 100 ? "..." : ""), // Preview text for list
+      preview: msg.content.slice(0, 100) + (msg.content.length > 100 ? "..." : ""), // Preview text for list
     }));
   } catch {
     return [];
@@ -510,9 +497,7 @@ export async function getSentMessages(): Promise<ParsedMessage[]> {
 export async function getReceivedMessages(): Promise<ParsedMessage[]> {
   const allMessages = await getAllClaudeMessages();
 
-  const assistantMessages = allMessages.filter(
-    (msg) => msg.role === "assistant",
-  );
+  const assistantMessages = allMessages.filter((msg) => msg.role === "assistant");
 
   const parsedMessages = assistantMessages.map((msg, index) => {
     const preview = msg.content
@@ -522,8 +507,7 @@ export async function getReceivedMessages(): Promise<ParsedMessage[]> {
       ...msg,
       id: `received-${index}`,
       preview: preview,
-      timestamp:
-        msg.timestamp instanceof Date ? msg.timestamp : new Date(msg.timestamp),
+      timestamp: msg.timestamp instanceof Date ? msg.timestamp : new Date(msg.timestamp),
     };
   });
 
@@ -560,10 +544,7 @@ export async function getSnippets(): Promise<Snippet[]> {
 /**
  * Create a new snippet
  */
-export async function createSnippet(
-  title: string,
-  content: string,
-): Promise<Snippet> {
+export async function createSnippet(title: string, content: string): Promise<Snippet> {
   try {
     const snippetsData = await LocalStorage.getItem<string>(SNIPPETS_KEY);
     let snippets: Snippet[] = [];
@@ -578,9 +559,7 @@ export async function createSnippet(
     }
 
     const newSnippet: Snippet = {
-      id: createHash("md5")
-        .update(`${title}-${content}-${Date.now()}`)
-        .digest("hex"),
+      id: createHash("md5").update(`${title}-${content}-${Date.now()}`).digest("hex"),
       title,
       content,
       createdAt: new Date(),
