@@ -35,7 +35,7 @@ const PROFILE_COLORS = [
  */
 interface ProfileFormProps {
   profile?: StripeProfile;
-  onSubmit: (profile: Partial<StripeProfile> & { id?: string }) => Promise<void>;
+  onSubmit: (profile: (Omit<StripeProfile, "id"> | ({ id: string } & Partial<StripeProfile>))) => Promise<void>;
 }
 
 /**

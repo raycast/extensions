@@ -110,11 +110,11 @@ export const isError = (error: unknown): error is Error => {
  */
 export const getErrorMessage = (error: unknown): string => {
   if (isError(error)) {
-    return error.message;
+    return error.message || "Unknown error occurred";
   }
 
   if (isStripeError(error)) {
-    return error.message;
+    return error.message || "Unknown error occurred";
   }
 
   if (typeof error === "string") {

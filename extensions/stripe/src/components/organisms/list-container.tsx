@@ -2,6 +2,7 @@ import { List, Action, ActionPanel, openExtensionPreferences } from "@raycast/ap
 import { useProfileContext } from "@src/hooks";
 import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 import { getEnvironmentLabel, getOppositeEnvironment } from "@src/utils";
+import { Environment } from "@src/types";
 
 /**
  * ListContainer - Wrapper component for Stripe data list views.

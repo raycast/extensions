@@ -251,7 +251,7 @@ const EventDetail = ({ event }: { event: Stripe.Event }) => {
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Event" text={getEventDescription(event.type, eventData)} />
+          <List.Item.Detail.Metadata.Label title="Event" text={getEventDescription(event.type)} />
           <List.Item.Detail.Metadata.Label title="Technical Type" text={event.type} />
           <List.Item.Detail.Metadata.Label title="Created" text={convertTimestampToDate(event.created)} />
           {event.request?.id && <List.Item.Detail.Metadata.Label title="Request ID" text={event.request.id} />}
@@ -311,7 +311,7 @@ const EventItem = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardUrl:
     color = Color.Orange;
   }
 
-  const title = getEventDescription(event.type, eventData);
+  const title = getEventDescription(event.type);
   const subtitle = getEventSubtitle(event);
 
   return (

@@ -1,4 +1,4 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, Keyboard } from "@raycast/api";
 import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
@@ -105,5 +105,5 @@ export const OpenUrlAction = ({
   url: string;
   title: string;
   icon?: Icon;
-  shortcut?: { modifiers: string[]; key: string };
+  shortcut?: Keyboard.Shortcut;
 }) => <Action.OpenInBrowser title={title} url={url} icon={icon} shortcut={shortcut} />;

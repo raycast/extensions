@@ -102,7 +102,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
   } = useCachedPromise(
     (customerIdParam: string | undefined) => async (options: { page: number; cursor?: string }) => {
       if (!stripe) {
-        throw new Error(`Stripe ${activeEnvironment} API key is not configured`);
+        throw new Error(`Stripe API key is not configured`);
       }
 
       const params: Stripe.SubscriptionListParams = {
