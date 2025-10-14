@@ -302,7 +302,6 @@ const EventDetail = ({ event }: { event: Stripe.Event }) => {
  */
 const EventItem = ({ event, dashboardUrl }: { event: Stripe.Event; dashboardUrl: string }) => {
   const actionInfo = getActionRequired(event.type);
-  const eventData = event.data.object as unknown as Record<string, unknown>;
 
   // Override icon for action-required events
   let { icon, color } = getEventIcon(event.type);
