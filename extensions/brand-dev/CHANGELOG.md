@@ -1,6 +1,6 @@
 # Brand.dev Changelog
 
-## [Retrieve Styleguide + Take Screenshots] - {PR_MERGE_DATE}
+## [Retrieve Styleguide + Take Screenshots] - 2025-10-14
 
 ### Retrieve Styleguide
 
