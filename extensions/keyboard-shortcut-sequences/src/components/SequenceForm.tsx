@@ -159,6 +159,7 @@ export default function SequenceForm(props: {
           title="shift down"
           icon={{ source: Icon.Circle, tintColor: Color.Yellow }}
         />
+        <Form.TagPicker.Item value="fn down" title="fn down" icon={{ source: Icon.Circle, tintColor: Color.Purple }} />
       </Form.TagPicker>
     );
   }
@@ -175,14 +176,15 @@ export default function SequenceForm(props: {
                 return;
               }
 
-              const shortcuts = shortcutKeys.map((keys, index) => {
-                return {
-                  keystrokes: keys,
-                  modifiers: shortcutModifiers[index],
-                  specials: shortcutSpecials[index],
+              const shortcuts = [];
+              for (let index = 0; index < shortcutCount; index++) {
+                shortcuts.push({
+                  keystrokes: shortcutKeys[index] || "",
+                  modifiers: shortcutModifiers[index] || [],
+                  specials: shortcutSpecials[index] || [],
                   delay: shortcutDelays[index],
-                };
-              });
+                });
+              }
 
               const newSequence = {
                 name: values.sequenceNameField,
@@ -259,11 +261,13 @@ export default function SequenceForm(props: {
             setShortcutKeys([...shortcutKeys, ""]);
             setShortcutModifiers([...shortcutModifiers, []]);
             setShortcutSpecials([...shortcutSpecials, []]);
+            setShortcutDelays([...shortcutDelays, undefined]);
           } else if (value === "remove" && shortcutCount > 1) {
             setShortcutCount(shortcutCount - 1);
             setShortcutKeys(shortcutKeys.slice(0, -1));
             setShortcutModifiers(shortcutModifiers.slice(0, -1));
             setShortcutSpecials(shortcutSpecials.slice(0, -1));
+            setShortcutDelays(shortcutDelays.slice(0, -1));
           }
         }}
       >

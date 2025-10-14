@@ -6,6 +6,19 @@ export interface Sequence {
 }
 
 export const specialKeys = {
+  // Navigation - Arrow Keys
+  UpArrow: "126",
+  DownArrow: "125",
+  LeftArrow: "123",
+  RightArrow: "124",
+
+  // Navigation - Page/Position
+  Home: "115",
+  End: "119",
+  PageUp: "116",
+  PageDown: "121",
+
+  // Text Editing
   Delete: "51",
   ForwardDelete: "117",
   Return: "36",
@@ -13,14 +26,8 @@ export const specialKeys = {
   Tab: "48",
   Space: "49",
   Escape: "53",
-  UpArrow: "126",
-  DownArrow: "125",
-  LeftArrow: "123",
-  RightArrow: "124",
-  Home: "115",
-  End: "119",
-  PageUp: "116",
-  PageDown: "121",
+
+  // Function Keys F1-F12
   F1: "122",
   F2: "120",
   F3: "99",
@@ -33,31 +40,23 @@ export const specialKeys = {
   F10: "109",
   F11: "103",
   F12: "111",
-  F13: "105",
-  F14: "107",
-  F15: "113",
-  F16: "106",
-  F17: "64",
-  F18: "79",
-  F19: "80",
-  F20: "90",
+
+  // Media Controls
   VolumeUp: "72",
   VolumeDown: "73",
   Mute: "74",
-  Help: "114",
-  Power: "96",
-  Eject: "14",
-  CapsLock: "57",
-  NumLock: "71",
+
+  // System Controls
   BrightnessUp: "113",
   BrightnessDown: "107",
-  PrintScreen: "105",
-  Insert: "114",
+
+  // Special Keys
+  CapsLock: "57",
 };
 
 export interface Shortcut {
   keystrokes: string;
-  modifiers: ("command down" | "control down" | "option down" | "shift down")[];
+  modifiers: ("command down" | "control down" | "option down" | "shift down" | "fn down")[];
   specials: (keyof typeof specialKeys)[];
   delay: number | undefined;
 }
