@@ -2399,7 +2399,7 @@ export const others = [
   { name: "Sigma", codepoint: "03A3", unicodeDescription: "GREEK CAPITAL LETTER SIGMA", glyph: "Σ" },
   { name: "Phi", codepoint: "03A6", unicodeDescription: "GREEK CAPITAL LETTER PHI", glyph: "Φ" },
   { name: "Psi", codepoint: "03A8", unicodeDescription: "GREEK CAPITAL LETTER PSI", glyph: "Ψ" },
-  { name: "Omega", codepoint: "2126", unicodeDescription: "OHM SIGN", glyph: "Ω" },
+  { name: "Omega", codepoint: "03A9", unicodeDescription: "GREEK CAPITAL LETTER OMEGA", glyph: "Ω" },
   { name: "uni1FFB", codepoint: "1FFB", unicodeDescription: "GREEK CAPITAL LETTER OMEGA WITH OXIA", glyph: "Ώ" },
   { name: "Omegatonos", codepoint: "038F", unicodeDescription: "GREEK CAPITAL LETTER OMEGA WITH TONOS", glyph: "Ώ" },
   { name: "uni1F68", codepoint: "1F68", unicodeDescription: "GREEK CAPITAL LETTER OMEGA WITH PSILI", glyph: "Ὠ" },

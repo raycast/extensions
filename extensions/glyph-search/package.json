@@ -7,6 +7,9 @@
   "author": "gbgk",
   "license": "MIT",
   "categories": ["Productivity"],
+  "contributors": [
+    "0xdhrv"
+  ],
   "commands": [
     {
       "name": "index",
