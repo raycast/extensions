@@ -77,7 +77,7 @@ const PaymentIntentDetail = ({ paymentIntent }: { paymentIntent: Stripe.PaymentI
           <List.Item.Detail.Metadata.Label
             title="Status"
             text={getPaymentIntentStatusDescription(paymentIntent.status)}
-            icon={{ source: icon, tintColor: color as Color.ColorLike }}
+            icon={{ source: icon, tintColor: color }}
           />
           {paymentIntent.description && (
             <List.Item.Detail.Metadata.Label title="Description" text={paymentIntent.description} />
