@@ -1,6 +1,5 @@
-import { List, Action, ActionPanel, openExtensionPreferences, useNavigation } from "@raycast/api";
+import { List, Action, ActionPanel, openExtensionPreferences } from "@raycast/api";
 import { useProfileContext } from "@src/hooks";
-import { WelcomeScreen } from "@src/components/organisms/welcome-screen";
 import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 import { getEnvironmentLabel, getOppositeEnvironment } from "@src/utils";
 
@@ -25,7 +24,6 @@ import { getEnvironmentLabel, getOppositeEnvironment } from "@src/utils";
  */
 export function ListContainer({ children, ...listProps }: List.Props) {
   const { activeProfile, activeEnvironment, setActiveEnvironment } = useProfileContext();
-  const { push } = useNavigation();
 
   // Check if current profile has the required API key for the selected environment
   const currentApiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
@@ -65,30 +63,24 @@ export function ListContainer({ children, ...listProps }: List.Props) {
           }
           actions={
             <ActionPanel>
-              {hasNoKeys ? (
-                <>
-                  <Action title="Setup Stripe Account" onAction={() => push(<WelcomeScreen onComplete={() => {}} />)} />
-                  <Action.OpenInBrowser
-                    title="Get Api Keys from Stripe"
-                    url="https://dashboard.stripe.com/apikeys"
-                    shortcut={SHORTCUTS.OPEN_BROWSER}
-                  />
-                </>
-              ) : (
-                <>
-                  <Action title="Add Api Keys" onAction={() => push(<WelcomeScreen onComplete={() => {}} />)} />
-                  <Action
-                    title={`Switch to ${oppositeEnvLabel} Mode`}
-                    onAction={() => setActiveEnvironment(oppositeEnv)}
-                    shortcut={SHORTCUTS.SWITCH_ENVIRONMENT}
-                  />
-                </>
-              )}
               <Action
                 title="Open Extension Preferences"
                 onAction={openExtensionPreferences}
                 shortcut={SHORTCUTS.OPEN_PREFERENCES}
               />
+              {hasNoKeys ? (
+                <Action.OpenInBrowser
+                  title="Get Api Keys from Stripe"
+                  url="https://dashboard.stripe.com/apikeys"
+                  shortcut={SHORTCUTS.OPEN_BROWSER}
+                />
+              ) : (
+                <Action
+                  title={`Switch to ${oppositeEnvLabel} Mode`}
+                  onAction={() => setActiveEnvironment(oppositeEnv)}
+                  shortcut={SHORTCUTS.SWITCH_ENVIRONMENT}
+                />
+              )}
             </ActionPanel>
           }
         />

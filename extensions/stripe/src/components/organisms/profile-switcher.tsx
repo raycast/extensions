@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { useProfileContext } from "@src/hooks";
 import { Environment } from "@src/types";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 
 /**
  * Profile and Environment switcher action panel section
@@ -16,7 +17,7 @@ export const ProfileSwitcherActions = () => {
           <ActionPanel.Submenu
             title="Switch Account"
             icon={Icon.Person}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            shortcut={SHORTCUTS.SWITCH_PROFILE}
           >
             {profiles.map((profile) => (
               <Action
@@ -36,7 +37,7 @@ export const ProfileSwitcherActions = () => {
         <ActionPanel.Submenu
           title={`Environment: ${activeEnvironment === "test" ? "Test" : "Live"}`}
           icon={Icon.Globe}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+          shortcut={SHORTCUTS.SWITCH_ENVIRONMENT}
         >
           <Action
             title="Test Mode"
