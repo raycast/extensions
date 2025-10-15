@@ -53,10 +53,7 @@ function migrateCache() {
         return;
       }
 
-      const legacyEntries = JSON.parse(cached) as Record<
-        string,
-        LegacyPinnedEntry
-      >;
+      const legacyEntries = JSON.parse(cached) as Record<string, LegacyPinnedEntry>;
       const pinnedEntries: PinnedEntries = {};
 
       for (const [key, value] of Object.entries(legacyEntries)) {
@@ -83,15 +80,11 @@ function migrateCache() {
 migrateCache();
 
 export function usePinnedEntries() {
-  const [entries, setEntries] = useCachedState<PinnedEntries>(
-    "pinnedEntries",
-    {}
-  );
+  const [entries, setEntries] = useCachedState<PinnedEntries>(PINNED_ENTRIES_CACHE_KEY, {});
 
   return {
     pinnedEntries: entries,
-    pinEntry: (entry: Entry) =>
-      setEntries((s) => toDict([entry, ...toArray(s)])),
+    pinEntry: (entry: Entry) => setEntries((s) => toDict([entry, ...toArray(s)])),
     unpinEntry: (entry: Pick<PinnedEntry, "uri">) =>
       setEntries((s) => toDict(toArray(s).filter((e) => e.uri !== entry.uri))),
     unpinAllEntries: () => setEntries({}),
