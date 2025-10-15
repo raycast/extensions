@@ -1,4 +1,17 @@
-import { AttributeTypeCheckbox, AttributeTypeCurrency, AttributeTypeDate, AttributeTypeDomain, AttributeTypeEmailAddress, AttributeTypeNumber, AttributeTypePersonalName, AttributeTypePhoneNumber, AttributeTypeRating, AttributeTypeSelect1, AttributeTypeText, AttributeTypeTimestamp } from "attio-js/dist/commonjs/models/components/outputvalue";
+import {
+  AttributeTypeCheckbox,
+  AttributeTypeCurrency,
+  AttributeTypeDate,
+  AttributeTypeDomain,
+  AttributeTypeEmailAddress,
+  AttributeTypeNumber,
+  AttributeTypePersonalName,
+  AttributeTypePhoneNumber,
+  AttributeTypeRating,
+  AttributeTypeSelect1,
+  AttributeTypeText,
+  AttributeTypeTimestamp,
+} from "attio-js/dist/commonjs/models/components/outputvalue";
 
 export type QueryRecordsResponse = {
   data: Array<{
@@ -51,7 +64,7 @@ type PersonalNameValue = {
 
 type PhoneNumberValue = {
   phone_number: string;
-  attribute_type: AttributeTypePhoneNumber
+  attribute_type: AttributeTypePhoneNumber;
 };
 
 type StatusValue = {
@@ -61,11 +74,11 @@ type StatusValue = {
 
 type RatingValue = {
   value: number;
-  attribute_type: AttributeTypeRating
+  attribute_type: AttributeTypeRating;
 };
 
 type SelectValue = {
-  option: unknown
+  option: unknown;
   attribute_type: AttributeTypeSelect1;
 };
 
