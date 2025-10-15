@@ -1,5 +1,10 @@
 # Claude Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Feature: Added [Claude Sonnet 4.5](https://www.anthropic.com/news/claude-sonnet-4-5) and other missing models.
+- Fix: Removed [retired models](https://docs.claude.com/en/docs/about-claude/model-deprecations#2025-01-21%3A-claude-2%2C-claude-2-1%2C-and-claude-sonnet-3-models).
+
 ## [Update] - 2025-05-23
 
 - Feature: Added new [Claude Sonnet 4](https://www.anthropic.com/news/claude-4)

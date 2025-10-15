@@ -44,11 +44,26 @@ Got the answer that you wanted? Great.
 
 # Models available
 
-## Claude 4
+## Claude Sonnet 4.5
 
+- `claude-sonnet-4-5`
+- `claude-sonnet-4-5-20250929`
+
+## Claude Sonnet 4.0
+
+- `claude-sonnet-4-0`
 - `claude-sonnet-4-20250514`
 
-## Claude 3.7
+## Claude Opus 4.1
+
+- `claude-opus-4-1`
+- `claude-opus-4-1-20250805`
+
+## Claude Opus 4.0
+- `claude-opus-4-0`
+- `claude-opus-4-20250514`
+
+## Claude Sonnet 3.7
 
 - `claude-3-7-sonnet-latest`
 - `claude-3-7-sonnet-20250219`
@@ -64,14 +79,7 @@ Got the answer that you wanted? Great.
 ## Claude 3
 
 - `claude-3-haiku-20240307`
-- `claude-3-sonnet-20240229`
 - `claude-3-opus-20240229`
-
-
-## Claude 2
-
-- `claude-2.0`
-- `claude-2.1`
 
 # How to use
 
