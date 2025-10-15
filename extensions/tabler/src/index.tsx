@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Grid, Color, showToast, Toast, showInFinder } from "@raycast/api";
 import { useFetch, showFailureToast } from "@raycast/utils";
+import { useState, useCallback } from "react";
 import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
@@ -42,96 +43,154 @@ const downloadSVG = async (svgContent: string, name: string) => {
   }
 };
 
+type StyleFilter = "all" | "outline" | "filled";
+
+type FetchResult = {
+  icons: TablerIcon[];
+  pagination: { hasNextPage: boolean; totalIcons: number };
+};
+
 export default function Command() {
-  const { isLoading, data } = useFetch("https://tabler.io/api/icons", {
-    mapResult(result: { icons: TablerIcon[] }) {
-      return {
-        data: result.icons,
-      };
+  const [searchText, setSearchText] = useState("");
+  const [styleFilter, setStyleFilter] = useState<StyleFilter>("all");
+  const [page, setPage] = useState(1);
+  const [allIcons, setAllIcons] = useState<TablerIcon[]>([]);
+
+  const buildUrl = useCallback(() => {
+    const params = new URLSearchParams();
+    if (searchText) {
+      params.append("search", searchText);
+    }
+    if (styleFilter !== "all") {
+      params.append("style", styleFilter);
+    }
+    params.append("page", page.toString());
+    return `https://tabler.io/api/icons?${params.toString()}`;
+  }, [searchText, styleFilter, page]);
+
+  const { isLoading, data } = useFetch<FetchResult>(buildUrl(), {
+    keepPreviousData: true,
+    execute: true,
+    onData(newData) {
+      setAllIcons((prev) => (page === 1 ? newData.icons : [...prev, ...newData.icons]));
     },
-    keepPreviousData: false,
-    initialData: [],
   });
 
+  const onSearchTextChange = useCallback((text: string) => {
+    setSearchText(text);
+    setPage(1);
+    setAllIcons([]);
+  }, []);
+
+  const onStyleFilterChange = useCallback((value: string) => {
+    setStyleFilter(value as StyleFilter);
+    setPage(1);
+    setAllIcons([]);
+  }, []);
+
+  const loadMore = useCallback(() => {
+    if (data?.pagination.hasNextPage && !isLoading) {
+      setPage((prev) => prev + 1);
+    }
+  }, [data?.pagination.hasNextPage, isLoading]);
+
   return (
-    <Grid isLoading={isLoading} inset={Grid.Inset.Large}>
-      {!isLoading &&
-        data.map((tablerIcon) => {
-          const outline = tablerIcon.styles?.outline?.svg;
-          const filled = tablerIcon.styles?.filled?.svg;
-          return (
-            <Grid.Item
-              key={tablerIcon.name}
-              title={tablerIcon.name}
-              content={Outline + tablerIcon.name + ".svg"}
-              accessory={
-                filled
-                  ? {
-                      tooltip: "Filled Version Available",
-                      icon: {
-                        source: Filled + tablerIcon.name + ".svg",
-                        tintColor: {
-                          light: Color.SecondaryText,
-                          dark: Color.SecondaryText,
-                        },
+    <Grid
+      isLoading={isLoading}
+      inset={Grid.Inset.Large}
+      onSearchTextChange={onSearchTextChange}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Filter by Style" value={styleFilter} onChange={onStyleFilterChange}>
+          <Grid.Dropdown.Item title="All Styles" value="all" />
+          <Grid.Dropdown.Item title="Outline" value="outline" />
+          <Grid.Dropdown.Item title="Filled" value="filled" />
+        </Grid.Dropdown>
+      }
+      pagination={{
+        pageSize: 106,
+        hasMore: data?.pagination.hasNextPage ?? false,
+        onLoadMore: loadMore,
+      }}
+    >
+      {allIcons.map((tablerIcon) => {
+        const outline = tablerIcon.styles?.outline?.svg;
+        const filled = tablerIcon.styles?.filled?.svg;
+        return (
+          <Grid.Item
+            key={tablerIcon.name}
+            title={tablerIcon.name}
+            content={Outline + tablerIcon.name + ".svg"}
+            accessory={
+              filled
+                ? {
+                    tooltip: "Filled Version Available",
+                    icon: {
+                      source: Filled + tablerIcon.name + ".svg",
+                      tintColor: {
+                        light: Color.SecondaryText,
+                        dark: Color.SecondaryText,
                       },
-                    }
-                  : undefined
-              }
-              actions={
-                <ActionPanel>
-                  {outline && (
-                    <Action.CopyToClipboard
-                      title="Copy Outline SVG"
-                      content={outline}
-                      icon={Outline + tablerIcon.name + ".svg"}
-                    />
-                  )}
-                  {outline && (
-                    <Action
-                      title="Download Outline SVG"
-                      icon={Outline + tablerIcon.name + ".svg"}
-                      onAction={() => downloadSVG(outline, tablerIcon.name)}
-                    />
-                  )}
-                  {filled && (
-                    <Action.CopyToClipboard
-                      title="Copy Filled SVG"
-                      content={filled}
-                      icon={Filled + tablerIcon.name + ".svg"}
-                      shortcut={{ modifiers: ["opt"], key: "return" }}
-                    />
-                  )}
-                  {filled && (
-                    <Action
-                      title="Download Filled SVG"
-                      icon={Filled + tablerIcon.name + ".svg"}
-                      onAction={() => downloadSVG(filled, tablerIcon.name)}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "return" }}
-                    />
-                  )}
+                    },
+                  }
+                : undefined
+            }
+            actions={
+              <ActionPanel>
+                {outline && (
                   <Action.CopyToClipboard
-                    title="Copy Name"
-                    content={tablerIcon.name}
-                    shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                    title="Copy Outline SVG"
+                    content={outline}
+                    icon={Outline + tablerIcon.name + ".svg"}
                   />
-                  {tablerIcon.styles?.outline?.unicode && (
-                    <Action.CopyToClipboard
-                      title="Copy Outline HTML Char"
-                      content={`&#x${tablerIcon.styles.outline.unicode};`}
-                    />
-                  )}
-                  {tablerIcon.styles?.filled?.unicode && (
-                    <Action.CopyToClipboard
-                      title="Copy Filled HTML Char"
-                      content={`&#x${tablerIcon.styles.filled.unicode};`}
-                    />
-                  )}
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+                )}
+                {outline && (
+                  <Action
+                    title="Download Outline SVG"
+                    icon={Outline + tablerIcon.name + ".svg"}
+                    onAction={() => downloadSVG(outline, tablerIcon.name)}
+                  />
+                )}
+                {filled && (
+                  <Action.CopyToClipboard
+                    title="Copy Filled SVG"
+                    content={filled}
+                    icon={Filled + tablerIcon.name + ".svg"}
+                    shortcut={{ modifiers: ["opt"], key: "return" }}
+                  />
+                )}
+                {filled && (
+                  <Action
+                    title="Download Filled SVG"
+                    icon={Filled + tablerIcon.name + ".svg"}
+                    onAction={() => downloadSVG(filled, tablerIcon.name)}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "return" }}
+                  />
+                )}
+                <Action.CopyToClipboard
+                  title="Copy Name"
+                  content={tablerIcon.name}
+                  shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                />
+                {tablerIcon.styles?.outline?.unicode && (
+                  <Action.CopyToClipboard
+                    title="Copy Outline HTML Char"
+                    content={`&#x${tablerIcon.styles.outline.unicode};`}
+                  />
+                )}
+                {tablerIcon.styles?.filled?.unicode && (
+                  <Action.CopyToClipboard
+                    title="Copy Filled HTML Char"
+                    content={`&#x${tablerIcon.styles.filled.unicode};`}
+                  />
+                )}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+      {!isLoading && allIcons.length === 0 && (
+        <Grid.EmptyView title="No Icons Found" description="Try a different search term" />
+      )}
     </Grid>
   );
 }
