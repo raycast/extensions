@@ -85,15 +85,20 @@ export default function ListKeys({ apiInfo }: KeysProps) {
               key={key.keyId}
               title={key.name || `${key.keyId.slice(0, 8)}...${key.keyId.slice(-4)}`}
               accessories={[
-                key.enabled
+                !key.enabled
                   ? {
-                      icon: { source: Icon.CheckCircle, tintColor: Color.Green },
-                      tooltip: "The key is operating normally.",
-                    }
-                  : {
                       icon: Icon.XMarkCircle,
                       tooltip: "This key has been manually disabled and cannot be used for any requests.",
-                    },
+                    }
+                  : key.credits?.remaining === 0
+                    ? {
+                        icon: { source: Icon.Play, tintColor: Color.Orange },
+                        tooltip: "This key has a low credit balance. Top it off to prevent disruptions.",
+                      }
+                    : {
+                        icon: { source: Icon.CheckCircle, tintColor: Color.Green },
+                        tooltip: "The key is operating normally.",
+                      },
                 { tag: new Date(key.createdAt) },
               ]}
               actions={
@@ -132,14 +137,20 @@ export default function ListKeys({ apiInfo }: KeysProps) {
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="ID" text={key.keyId} />
                       <List.Item.Detail.Metadata.TagList title="">
-                        {key.enabled ? (
+                        {!key.enabled ? (
+                          <List.Item.Detail.Metadata.TagList.Item icon={Icon.XMarkCircle} text="Disabled" />
+                        ) : key.credits?.remaining === 0 ? (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            icon={Icon.Play}
+                            text="Low Credits"
+                            color={Color.Orange}
+                          />
+                        ) : (
                           <List.Item.Detail.Metadata.TagList.Item
                             icon={Icon.CheckCircle}
                             text="Operational"
                             color={Color.Green}
                           />
-                        ) : (
-                          <List.Item.Detail.Metadata.TagList.Item icon={Icon.XMarkCircle} text="Disabled" />
                         )}
                       </List.Item.Detail.Metadata.TagList>
                       <List.Item.Detail.Metadata.Label title="API ID" text={apiId} />
