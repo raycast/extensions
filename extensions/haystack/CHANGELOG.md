@@ -1,5 +1,5 @@
 # Haystack Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-10-15
 
 Added initial version of Haystack extension.
