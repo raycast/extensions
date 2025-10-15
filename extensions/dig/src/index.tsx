@@ -33,17 +33,29 @@ export default function DigSearchResultsList() {
         };
       }
 
-      const result = await digByQuery(query, abortable.current?.signal);
-      return {
-        result,
-        validDomain: true,
-      };
+      return digByQuery(query, abortable.current?.signal)
+        .then((result) => ({
+          result,
+          validDomain: true,
+        }))
+        .catch(() => {
+          return {
+            result: [],
+            validDomain: false,
+          };
+        });
     },
     [query],
     {
       initialData: { result: [], validDomain: true },
       keepPreviousData: true,
       abortable,
+      onError(error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+        throw error;
+      },
     },
   );
 

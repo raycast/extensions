@@ -1,5 +1,7 @@
 # dig Changelog
 
+- Update error handling to catch AbortError (ref: [#21193](https://github.com/raycast/extensions/issues/21193))
+
 ## [Updates] - 2024-03-18
 
 - Updated dependencies to latest versions

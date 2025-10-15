@@ -60,7 +60,7 @@ export async function digByQuery(query: string, signal?: AbortSignal): Promise<R
     }
 
     return output;
-  } catch (e) {
+  } catch {
     return Promise.resolve([]);
   }
 }
