@@ -16,7 +16,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { siyuanAPI } from "./api/siyuan";
 import { SiYuanBlock } from "./types";
 
-// 漫游类型
+// Roaming types
 type RoamingType =
   | "random_doc"
   | "random_block"
@@ -24,13 +24,13 @@ type RoamingType =
   | "tag_docs"
   | "doc_blocks";
 
-// 随机漫游参数接口
+// Random roaming parameters interface
 interface RandomRoamingParams {
   type: "random_doc" | "random_block";
   count: number;
 }
 
-// 年老笔记参数接口
+// Old notes parameters interface
 interface OldNotesParams {
   type: "old_notes";
   timeType: "months" | "years";
@@ -38,14 +38,14 @@ interface OldNotesParams {
   count: number;
 }
 
-// 标签漫游参数接口
+// Tag roaming parameters interface
 interface TagRoamingParams {
   type: "tag_docs";
   tag: string;
   count: number;
 }
 
-// 文档内漫游参数接口
+// Document blocks parameters interface
 interface DocBlocksParams {
   type: "doc_blocks";
   docId: string;
@@ -58,7 +58,7 @@ type RoamingParams =
   | TagRoamingParams
   | DocBlocksParams;
 
-// 漫游配置表单组件
+// Roaming configuration form component
 function RoamingConfigForm({
   onSubmit,
 }: {
@@ -71,13 +71,13 @@ function RoamingConfigForm({
   const [tag, setTag] = useState<string>("");
   const [docId, setDocId] = useState<string>("");
 
-  // 获取所有标签
+  // Get all tags
   const { data: tags = [] } = useCachedPromise(
     async () => {
       try {
         return await siyuanAPI.getAllTags();
       } catch (error) {
-        console.error("获取标签失败:", error);
+        console.error("Failed to get tags:", error);
         return [];
       }
     },
@@ -108,7 +108,7 @@ function RoamingConfigForm({
         if (!tag.trim()) {
           showToast({
             style: Toast.Style.Failure,
-            title: "请输入标签",
+            title: "Please Enter Tag",
           });
           return;
         }
@@ -122,7 +122,7 @@ function RoamingConfigForm({
         if (!docId.trim()) {
           showToast({
             style: Toast.Style.Failure,
-            title: "请输入文档ID",
+            title: "Please Enter Document ID",
           });
           return;
         }
@@ -140,7 +140,7 @@ function RoamingConfigForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="开始漫游"
+            title="Start Roaming"
             icon={Icon.Play}
             onSubmit={handleSubmit}
           />
@@ -149,36 +149,36 @@ function RoamingConfigForm({
     >
       <Form.Dropdown
         id="roamingType"
-        title="漫游类型"
+        title="Roaming Type"
         value={roamingType}
         onChange={(value) => setRoamingType(value as RoamingType)}
       >
-        <Form.Dropdown.Section title="完全随机漫游">
+        <Form.Dropdown.Section title="Random Roaming">
           <Form.Dropdown.Item
             value="random_doc"
-            title="随机文档漫游"
+            title="Random Document Roaming"
             icon={Icon.Document}
           />
           <Form.Dropdown.Item
             value="random_block"
-            title="随机块漫游"
+            title="Random Block Roaming"
             icon={Icon.TextCursor}
           />
           <Form.Dropdown.Item
             value="old_notes"
-            title="年老笔记回顾"
+            title="Old Notes Review"
             icon={Icon.Calendar}
           />
         </Form.Dropdown.Section>
-        <Form.Dropdown.Section title="主题漫游">
+        <Form.Dropdown.Section title="Themed Roaming">
           <Form.Dropdown.Item
             value="tag_docs"
-            title="标签文档漫游"
+            title="Tag Document Roaming"
             icon={Icon.Tag}
           />
           <Form.Dropdown.Item
             value="doc_blocks"
-            title="文档内块漫游"
+            title="Document Block Roaming"
             icon={Icon.Sidebar}
           />
         </Form.Dropdown.Section>
@@ -186,31 +186,31 @@ function RoamingConfigForm({
 
       <Form.TextField
         id="count"
-        title="数量"
-        placeholder="输入要获取的数量"
+        title="Count"
+        placeholder="Enter count to retrieve"
         value={count}
         onChange={setCount}
-        info="要获取的文档或块的数量"
+        info="Number of documents or blocks to retrieve"
       />
 
       {roamingType === "old_notes" && (
         <>
           <Form.Dropdown
             id="timeType"
-            title="时间单位"
+            title="Time Unit"
             value={timeType}
             onChange={(value) => setTimeType(value as "months" | "years")}
           >
-            <Form.Dropdown.Item value="months" title="月" />
-            <Form.Dropdown.Item value="years" title="年" />
+            <Form.Dropdown.Item value="months" title="Months" />
+            <Form.Dropdown.Item value="years" title="Years" />
           </Form.Dropdown>
           <Form.TextField
             id="timeValue"
-            title="时间值"
-            placeholder={`输入${timeType === "months" ? "月" : "年"}数`}
+            title="Time Value"
+            placeholder={`Enter number of ${timeType === "months" ? "months" : "years"}`}
             value={timeValue}
             onChange={setTimeValue}
-            info={`查看多少${timeType === "months" ? "个月" : "年"}前的笔记`}
+            info={`View notes from how many ${timeType === "months" ? "months" : "years"} ago`}
           />
         </>
       )}
@@ -218,8 +218,8 @@ function RoamingConfigForm({
       {roamingType === "tag_docs" && (
         <Form.Dropdown
           id="tag"
-          title="选择标签"
-          placeholder="选择一个标签"
+          title="Select Tag"
+          placeholder="Choose a tag"
           value={tag}
           onChange={setTag}
         >
@@ -237,18 +237,18 @@ function RoamingConfigForm({
       {roamingType === "doc_blocks" && (
         <Form.TextField
           id="docId"
-          title="文档ID"
-          placeholder="输入文档ID"
+          title="Document ID"
+          placeholder="Enter document ID"
           value={docId}
           onChange={setDocId}
-          info="可以从其他笔记查看界面复制文档ID"
+          info="You can copy document ID from other note viewing interfaces"
         />
       )}
     </Form>
   );
 }
 
-// 漫游结果显示组件
+// Roaming results display component
 function RoamingResults({
   params,
   onBack,
@@ -262,7 +262,7 @@ function RoamingResults({
   >({});
   const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
 
-  // 获取漫游数据
+  // Get roaming data
   const {
     isLoading,
     data: results = [],
@@ -292,11 +292,11 @@ function RoamingResults({
             return [];
         }
       } catch (error) {
-        console.error("漫游数据获取失败:", error);
+        console.error("Failed to get roaming data:", error);
         showToast({
           style: Toast.Style.Failure,
-          title: "漫游失败",
-          message: error instanceof Error ? error.message : "未知错误",
+          title: "Roaming Failed",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
         return [];
       }
@@ -305,7 +305,7 @@ function RoamingResults({
     { keepPreviousData: false },
   );
 
-  // 加载特定项目的详情内容
+  // Load specific item details
   const loadItemDetail = useCallback(
     async (item: SiYuanBlock) => {
       if (detailContentMap[item.id] || loadingItems.has(item.id)) {
@@ -317,11 +317,11 @@ function RoamingResults({
       try {
         let content = "";
         if (item.isDocument) {
-          // 文档类型，获取完整内容
+          // Document type, get complete content
           content = await siyuanAPI.getDocumentContent(item.id);
         } else {
-          // 块类型，使用现有内容
-          content = item.markdown || item.content || "无内容";
+          // Block type, use existing content
+          content = item.markdown || item.content || "No content";
         }
 
         setDetailContentMap((prev) => ({
@@ -329,11 +329,11 @@ function RoamingResults({
           [item.id]: content,
         }));
       } catch (error) {
-        console.error("加载详情失败:", error);
+        console.error("Failed to load details:", error);
         showToast({
           style: Toast.Style.Failure,
-          title: "加载详情失败",
-          message: error instanceof Error ? error.message : "未知错误",
+          title: "Failed to Load Details",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setLoadingItems((prev) => {
@@ -346,7 +346,7 @@ function RoamingResults({
     [detailContentMap, loadingItems],
   );
 
-  // 当选择改变时，自动加载详情
+  // Auto-load details when selection changes
   React.useEffect(() => {
     if (selectedItemId && results.length > 0) {
       const selectedItem = results.find((item) => item.id === selectedItemId);
@@ -363,24 +363,24 @@ function RoamingResults({
   const getRoamingTitle = () => {
     switch (params.type) {
       case "random_doc":
-        return `随机文档漫游 (${params.count}个)`;
+        return `Random Document Roaming (${params.count} items)`;
       case "random_block":
-        return `随机块漫游 (${params.count}个)`;
+        return `Random Block Roaming (${params.count} items)`;
       case "old_notes":
-        return `年老笔记回顾 (${params.timeValue}${params.timeType === "months" ? "个月" : "年"}前)`;
+        return `Old Notes Review (${params.timeValue} ${params.timeType === "months" ? "months" : "years"} ago)`;
       case "tag_docs":
-        return `标签文档漫游 (${params.tag})`;
+        return `Tag Document Roaming (${params.tag})`;
       case "doc_blocks":
-        return `文档内块漫游`;
+        return `Document Block Roaming`;
       default:
-        return "笔记漫游";
+        return "Note Roaming";
     }
   };
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="搜索漫游结果..."
+      searchBarPlaceholder="Search roaming results..."
       selectedItemId={selectedItemId}
       onSelectionChange={setSelectedItemId}
       isShowingDetail
@@ -404,14 +404,14 @@ function RoamingResults({
                   icon: Icon.Book,
                 },
                 {
-                  text: item.isDocument ? "文档" : "块",
+                  text: item.isDocument ? "Document" : "Block",
                   icon: item.isDocument ? Icon.Document : Icon.TextCursor,
-                  tooltip: item.isDocument ? "文档" : "内容块",
+                  tooltip: item.isDocument ? "Document" : "Content Block",
                 },
                 {
                   text: new Date(
                     parseInt(item.updated) * 1000,
-                  ).toLocaleDateString("zh-CN"),
+                  ).toLocaleDateString("en-US"),
                   icon: Icon.Calendar,
                 },
               ]}
@@ -422,32 +422,32 @@ function RoamingResults({
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
-                        title="类型"
-                        text={item.isDocument ? "文档" : "内容块"}
+                        title="Type"
+                        text={item.isDocument ? "Document" : "Content Block"}
                         icon={item.isDocument ? Icon.Document : Icon.TextCursor}
                       />
                       <List.Item.Detail.Metadata.Label
-                        title="笔记本"
-                        text={item.notebook_name || "未知"}
+                        title="Notebook"
+                        text={item.notebook_name || "Unknown"}
                         icon={Icon.Book}
                       />
                       <List.Item.Detail.Metadata.Label
-                        title="路径"
-                        text={item.hpath || item.doc_path || "无路径"}
+                        title="Path"
+                        text={item.hpath || item.doc_path || "No Path"}
                       />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
-                        title="创建时间"
+                        title="Created"
                         text={new Date(
                           parseInt(item.created) * 1000,
-                        ).toLocaleString("zh-CN")}
+                        ).toLocaleString("en-US")}
                         icon={Icon.Plus}
                       />
                       <List.Item.Detail.Metadata.Label
-                        title="修改时间"
+                        title="Modified"
                         text={new Date(
                           parseInt(item.updated) * 1000,
-                        ).toLocaleString("zh-CN")}
+                        ).toLocaleString("en-US")}
                         icon={Icon.Pencil}
                       />
                       <List.Item.Detail.Metadata.Separator />
@@ -461,39 +461,39 @@ function RoamingResults({
               }
               actions={
                 <ActionPanel>
-                  <ActionPanel.Section title="查看操作">
+                  <ActionPanel.Section title="View Actions">
                     <Action.OpenInBrowser
-                      title="在思源中打开"
+                      title="Open in Siyuan"
                       url={siyuanAPI.getDocUrl(
                         item.isDocument ? item.id : item.root_id || item.rootID,
                       )}
                     />
                   </ActionPanel.Section>
 
-                  <ActionPanel.Section title="复制操作">
+                  <ActionPanel.Section title="Copy Actions">
                     <Action.CopyToClipboard
-                      title="复制标题"
+                      title="Copy Title"
                       content={
                         item.isDocument ? item.content : item.doc_title || ""
                       }
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                     <Action.CopyToClipboard
-                      title="复制内容"
+                      title="Copy Content"
                       content={item.markdown || item.content || ""}
                     />
-                    <Action.CopyToClipboard title="复制id" content={item.id} />
+                    <Action.CopyToClipboard title="Copy Id" content={item.id} />
                   </ActionPanel.Section>
 
-                  <ActionPanel.Section title="漫游操作">
+                  <ActionPanel.Section title="Roaming Actions">
                     <Action
-                      title="重新漫游"
+                      title="Roam Again"
                       icon={Icon.ArrowClockwise}
                       onAction={revalidate}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
                     <Action
-                      title="返回配置"
+                      title="Back to Config"
                       icon={Icon.ArrowLeft}
                       onAction={onBack}
                       shortcut={{ modifiers: ["cmd"], key: "b" }}
@@ -508,13 +508,13 @@ function RoamingResults({
 
       {results.length === 0 && !isLoading && (
         <List.EmptyView
-          title="没有找到内容"
-          description="请尝试调整漫游参数或检查思源笔记连接"
+          title="No Content Found"
+          description="Please try adjusting roaming parameters or check SiYuan connection"
           icon={Icon.MagnifyingGlass}
           actions={
             <ActionPanel>
               <Action
-                title="返回配置"
+                title="Back to Config"
                 icon={Icon.ArrowLeft}
                 onAction={onBack}
               />
@@ -526,7 +526,7 @@ function RoamingResults({
   );
 }
 
-// 主组件
+// Main component
 export default function NoteRoaming() {
   const { push, pop } = useNavigation();
   const [roamingParams, setRoamingParams] = useState<RoamingParams | null>(

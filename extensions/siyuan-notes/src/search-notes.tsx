@@ -84,11 +84,11 @@ export default function SearchNotes(
     {
       keepPreviousData: true,
       onError: (error) => {
-        console.error("搜索失败:", error);
+        console.error("Search failed:", error);
         showToast({
           style: Toast.Style.Failure,
-          title: "搜索失败",
-          message: error instanceof Error ? error.message : "未知错误",
+          title: "Search Failed",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       },
     },
@@ -155,8 +155,8 @@ export default function SearchNotes(
         [item.id]: hasRefs,
       }));
     } catch (error) {
-      console.error("加载详情失败:", error);
-      const errorContent = `# 加载失败\n\n${error instanceof Error ? error.message : "未知错误"}`;
+      console.error("Failed to load details:", error);
+      const errorContent = `# Loading Failed\n\n${error instanceof Error ? error.message : "Unknown error"}`;
       setDetailContentMap((prev) => ({
         ...prev,
         [item.id]: errorContent,
@@ -170,28 +170,28 @@ export default function SearchNotes(
     }
   };
 
-  // 测试连接
+  // Test connection
   const testConnection = async () => {
     try {
       const isConnected = await siyuanAPI.testConnection();
       if (isConnected) {
         showToast({
           style: Toast.Style.Success,
-          title: "连接成功",
-          message: "SiYuan 服务器连接正常",
+          title: "Connection Successful",
+          message: "SiYuan server connection is working",
         });
       } else {
         showToast({
           style: Toast.Style.Failure,
-          title: "连接失败",
-          message: "无法连接到 SiYuan 服务器",
+          title: "Connection Failed",
+          message: "Unable to connect to SiYuan server",
         });
       }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "连接测试失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Connection Test Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -201,81 +201,83 @@ export default function SearchNotes(
       await Clipboard.copy(content);
       showToast({
         style: Toast.Style.Success,
-        title: "已复制到剪贴板",
+        title: "Copied to Clipboard",
       });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "复制失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Copy Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
-  // 智能粘贴函数 - 记录引用信息并粘贴内容
+  // Smart paste function - record reference and paste content
   const smartPaste = async (block: SiYuanBlock) => {
     try {
-      // 获取当前活跃的应用程序信息
+      // Get current active application info
       const frontmostApp = await getFrontmostApplication();
-      const appName = frontmostApp.name || "未知应用";
+      const appName = frontmostApp.name || "Unknown App";
 
-      // 获取用于粘贴的内容
+      // Get content to paste
       const contentToPaste =
         pasteContentMap[block.id] || block.markdown || block.content;
 
       if (!contentToPaste) {
         showToast({
           style: Toast.Style.Failure,
-          title: "粘贴失败",
-          message: "内容为空",
+          title: "Paste Failed",
+          message: "Content is empty",
         });
         return;
       }
 
-      // 先粘贴内容
+      // Paste content first
       await Clipboard.paste(contentToPaste);
 
-      // 记录引用信息（异步进行，不阻塞粘贴操作）
+      // Record reference info (async, non-blocking)
       recordReference(block, appName)
         .then(() => {
-          // 更新引用状态
+          // Update reference status
           setReferenceStatusMap((prev) => ({
             ...prev,
             [block.id]: true,
           }));
         })
         .catch((error) => {
-          console.error("记录引用信息失败:", error);
-          // 不显示错误Toast，避免干扰用户体验
+          console.error("Failed to record reference:", error);
+          // Don't show error toast to avoid disrupting user experience
         });
 
       showToast({
         style: Toast.Style.Success,
-        title: "已粘贴到当前应用",
-        message: `引用已记录到 ${appName}`,
+        title: "Pasted to Current App",
+        message: `Reference recorded in ${appName}`,
       });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "粘贴失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Paste Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
-  // 记录引用信息的函数
+  // Record reference info
   const recordReference = async (block: SiYuanBlock, appName: string) => {
     try {
-      // 使用新的API添加引用记录
+      // Add reference record using API
       await siyuanAPI.addReferenceRecord(block.id, appName);
-      console.log(`成功为块 ${block.id} 记录引用信息到 ${appName}`);
+      console.log(
+        `Successfully recorded reference for block ${block.id} in ${appName}`,
+      );
     } catch (error) {
-      console.error("记录引用信息失败:", error);
+      console.error("Failed to record reference:", error);
       throw error;
     }
   };
 
-  // 查看引用详情的函数
+  // View reference details
   const viewReferenceDetails = async (block: SiYuanBlock) => {
     try {
       const [references, stats] = await Promise.all([
@@ -283,23 +285,23 @@ export default function SearchNotes(
         siyuanAPI.getReferenceStats(block.id),
       ]);
 
-      let detailsText = `# 引用详情 - ${block.isDocument ? "文档" : "块"}\n\n`;
-      detailsText += `**标题**: ${block.content.substring(0, 50)}${block.content.length > 50 ? "..." : ""}\n\n`;
+      let detailsText = `# Reference Details - ${block.isDocument ? "Document" : "Block"}\n\n`;
+      detailsText += `**Title**: ${block.content.substring(0, 50)}${block.content.length > 50 ? "..." : ""}\n\n`;
 
       if (stats.totalReferences === 0) {
-        detailsText += `暂无引用记录`;
+        detailsText += `No reference records`;
       } else {
-        detailsText += `## 统计信息\n\n`;
-        detailsText += `- **总引用次数**: ${stats.totalReferences}\n`;
-        detailsText += `- **引用应用数**: ${stats.uniqueApps}\n`;
-        detailsText += `- **最后引用时间**: ${stats.lastReferenceTime || "未知"}\n\n`;
+        detailsText += `## Statistics\n\n`;
+        detailsText += `- **Total References**: ${stats.totalReferences}\n`;
+        detailsText += `- **Unique Apps**: ${stats.uniqueApps}\n`;
+        detailsText += `- **Last Reference Time**: ${stats.lastReferenceTime || "Unknown"}\n\n`;
 
-        detailsText += `## 应用引用次数\n\n`;
+        detailsText += `## References by App\n\n`;
         Object.entries(stats.appCounts).forEach(([app, count]) => {
-          detailsText += `- **${app}**: ${count} 次\n`;
+          detailsText += `- **${app}**: ${count} times\n`;
         });
 
-        detailsText += `\n## 详细记录\n\n`;
+        detailsText += `\n## Detailed Records\n\n`;
         references.forEach((ref, index) => {
           detailsText += `${index + 1}. **${ref.app}** - ${ref.timestamp}\n`;
         });
@@ -308,14 +310,14 @@ export default function SearchNotes(
       await copyContent(detailsText);
       showToast({
         style: Toast.Style.Success,
-        title: "引用详情已复制",
-        message: `包含 ${stats.totalReferences} 条引用记录`,
+        title: "Reference Details Copied",
+        message: `Contains ${stats.totalReferences} reference records`,
       });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "获取引用详情失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Failed to Get Reference Details",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -392,21 +394,21 @@ export default function SearchNotes(
   const getAccessories = (block: SiYuanBlock) => {
     const accessories: Array<{ text?: string; tooltip?: string }> = [];
 
-    // 如果块有引用记录，显示引用标识
+    // Show reference indicator if block has reference records
     if (referenceStatusMap[block.id]) {
       accessories.push({
         text: "🔖",
-        tooltip: "此内容已被其他应用引用",
+        tooltip: "This content has been referenced in other apps",
       });
     }
 
-    // 不显示时间，保持界面简洁
+    // Don't show time to keep interface clean
     return accessories;
   };
 
-  // 筛选结果 - 现在只需要按类型筛选，笔记本筛选已经在API层处理
+  // Filter results - now only filter by type, notebook filtering is handled at API layer
   const filteredResults = results.filter((item) => {
-    // 按类型筛选
+    // Filter by type
     let typeMatch = true;
     if (filterType === "documents") typeMatch = Boolean(item.isDocument);
     else if (filterType === "blocks") typeMatch = !item.isDocument;
@@ -421,22 +423,22 @@ export default function SearchNotes(
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={
         selectedPath && (matchedPaths.length > 0 || matchedNotebooks.length > 0)
-          ? `在 ${matchedNotebooks.length} 个笔记本、${matchedPaths.length} 个路径中搜索...`
+          ? `Searching in ${matchedNotebooks.length} notebooks, ${matchedPaths.length} paths...`
           : selectedPath
-            ? `筛选关键词 "${selectedPath}"...`
-            : "搜索笔记内容、标题或标签..."
+            ? `Filter keyword "${selectedPath}"...`
+            : "Search note content, titles or tags..."
       }
       throttle
       isShowingDetail={filteredResults.length > 0}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="按类型筛选搜索结果"
+          tooltip="Filter search results by type"
           storeValue={true}
           onChange={setFilterType}
         >
-          <List.Dropdown.Item title="全部类型" value="all" />
-          <List.Dropdown.Item title="文档" value="documents" />
-          <List.Dropdown.Item title="块" value="blocks" />
+          <List.Dropdown.Item title="All Types" value="all" />
+          <List.Dropdown.Item title="Documents" value="documents" />
+          <List.Dropdown.Item title="Blocks" value="blocks" />
         </List.Dropdown>
       }
     >
@@ -448,27 +450,27 @@ export default function SearchNotes(
             matchedPaths.length === 0 &&
             matchedNotebooks.length === 0 &&
             searchText
-              ? "未找到匹配的笔记本或路径"
+              ? "No Matching Notebooks or Paths Found"
               : searchText
-                ? "未找到相关笔记"
-                : "开始搜索"
+                ? "No Related Notes Found"
+                : "Start Searching"
           }
           description={
             selectedPath &&
             matchedPaths.length === 0 &&
             matchedNotebooks.length === 0 &&
             searchText
-              ? `关键词 "${selectedPath}" 未匹配到任何笔记本或文档路径`
+              ? `Keyword "${selectedPath}" did not match any notebooks or document paths`
               : searchText
                 ? selectedPath
-                  ? `在筛选条件下未找到包含 "${searchText}" 的笔记`
-                  : "尝试使用不同的关键词搜索"
-                : "输入关键词来搜索您的笔记"
+                  ? `No notes containing "${searchText}" found under current filter`
+                  : "Try searching with different keywords"
+                : "Enter keywords to search your notes"
           }
           actions={
             <ActionPanel>
               <Action
-                title="测试连接"
+                title="Test Connection"
                 icon={Icon.Wifi}
                 onAction={testConnection}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
@@ -478,11 +480,11 @@ export default function SearchNotes(
         />
       ) : (
         filteredResults.map((block) => {
-          // 当这个item可能被选中时，预加载内容
+          // Preload content when item might be selected
           const isLoading = loadingItems.has(block.id);
-          const content = detailContentMap[block.id] || "加载中...";
+          const content = detailContentMap[block.id] || "Loading...";
 
-          // 如果还没有内容且不在加载中，启动加载
+          // Start loading if content not available and not already loading
           if (!detailContentMap[block.id] && !isLoading) {
             loadItemDetail(block);
           }
@@ -496,7 +498,7 @@ export default function SearchNotes(
                   ? block.content
                   : block.content.substring(0, 80)
               }
-              subtitle={`${block.notebook_name || "未知笔记本"} · ${block.hpath || block.doc_path || "未知路径"}`}
+              subtitle={`${block.notebook_name || "Unknown Notebook"} · ${block.hpath || block.doc_path || "Unknown Path"}`}
               accessories={getAccessories(block)}
               detail={
                 <List.Item.Detail isLoading={isLoading} markdown={content} />
@@ -504,7 +506,7 @@ export default function SearchNotes(
               actions={
                 <ActionPanel>
                   <Action
-                    title="粘贴到当前应用"
+                    title="Paste to Current App"
                     icon={Icon.Document}
                     shortcut={{ modifiers: ["cmd"], key: "v" }}
                     onAction={() => smartPaste(block)}
@@ -515,20 +517,20 @@ export default function SearchNotes(
                         ? block.id
                         : block.rootID || block.root_id || block.id,
                     )}
-                    title="在思源笔记中打开"
+                    title="Open in Siyuan"
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
 
-                  {/* 添加文件打开动作 */}
+                  {/* Add file open actions */}
                   {filePathsMap[block.id]?.length > 0 && (
-                    <ActionPanel.Section title="打开文件">
+                    <ActionPanel.Section title="Open Files">
                       {filePathsMap[block.id]
                         .map((file, index) => {
                           const localPath = siyuanAPI.getLocalFilePath(
                             file.path,
                           );
 
-                          // 只保留用默认应用打开的选项
+                          // Only keep open with default app option
                           if (localPath) {
                             return (
                               <FileAction
@@ -545,9 +547,9 @@ export default function SearchNotes(
                     </ActionPanel.Section>
                   )}
 
-                  <ActionPanel.Section title="其他操作">
+                  <ActionPanel.Section title="Other Actions">
                     <Action
-                      title="复制内容"
+                      title="Copy Content"
                       icon={Icon.Clipboard}
                       onAction={() =>
                         copyContent(block.markdown || block.content)
@@ -555,7 +557,7 @@ export default function SearchNotes(
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                     <Action
-                      title="复制链接"
+                      title="Copy Link"
                       icon={Icon.Link}
                       onAction={() =>
                         copyContent(`siyuan://blocks/${block.id}`)
@@ -564,14 +566,14 @@ export default function SearchNotes(
                     />
                     {referenceStatusMap[block.id] && (
                       <Action
-                        title="查看引用详情"
+                        title="View Reference Details"
                         icon={Icon.List}
                         onAction={() => viewReferenceDetails(block)}
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
                       />
                     )}
                     <Action
-                      title="测试连接"
+                      title="Test Connection"
                       icon={Icon.Wifi}
                       onAction={testConnection}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}

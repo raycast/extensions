@@ -27,11 +27,11 @@ interface Arguments {
   content?: string;
 }
 
-// 文档选择组件
+// Document selector component
 function DocumentSelector({ onSelect }: { onSelect: (docId: string) => void }) {
   const [recentNotes, setRecentNotes] = useState<SiYuanBlock[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [searchText, setSearchText] = useState("");
+  const [searchText] = useState("");
 
   useEffect(() => {
     loadRecentNotes();
@@ -42,11 +42,11 @@ function DocumentSelector({ onSelect }: { onSelect: (docId: string) => void }) {
       const notes = await siyuanAPI.getRecentDocs();
       setRecentNotes(notes);
     } catch (error) {
-      console.error("获取最近文档失败:", error);
+      console.error("Failed to get recent documents:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "获取最近文档失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Failed to Get Recent Documents",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setLoading(false);
@@ -62,15 +62,15 @@ function DocumentSelector({ onSelect }: { onSelect: (docId: string) => void }) {
     try {
       setLoading(true);
       const searchResults = await siyuanAPI.searchNotes(query);
-      // 只显示文档类型的结果
+      // Only show document type results
       const docs = searchResults.blocks.filter((block) => block.isDocument);
       setRecentNotes(docs);
     } catch (error) {
-      console.error("搜索文档失败:", error);
+      console.error("Failed to search documents:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "搜索失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Search Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setLoading(false);
@@ -78,7 +78,7 @@ function DocumentSelector({ onSelect }: { onSelect: (docId: string) => void }) {
   };
 
   const formatDate = (timestamp: string): string => {
-    if (!timestamp || timestamp.length !== 14) return "无效时间";
+    if (!timestamp || timestamp.length !== 14) return "Invalid time";
 
     try {
       const year = timestamp.substring(0, 4);
@@ -94,13 +94,13 @@ function DocumentSelector({ onSelect }: { onSelect: (docId: string) => void }) {
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-      if (diffMins < 1) return "刚刚";
-      if (diffMins < 60) return `${diffMins}分钟前`;
-      if (diffHours < 24) return `${diffHours}小时前`;
-      if (diffDays < 7) return `${diffDays}天前`;
-      return date.toLocaleDateString("zh-CN");
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins} min ago`;
+      if (diffHours < 24) return `${diffHours} hr ago`;
+      if (diffDays < 7) return `${diffDays} days ago`;
+      return date.toLocaleDateString("en-US");
     } catch (error) {
-      return "无效时间";
+      return "Invalid time";
     }
   };
 
@@ -109,10 +109,10 @@ function DocumentSelector({ onSelect }: { onSelect: (docId: string) => void }) {
       isLoading={loading}
       onSearchTextChange={handleSearch}
       searchText={searchText}
-      searchBarPlaceholder="搜索文档或查看最近修改的文档..."
-      navigationTitle="选择目标文档"
+      searchBarPlaceholder="Search documents or view recently modified documents..."
+      navigationTitle="Select Target Document"
     >
-      <List.Section title="文档列表">
+      <List.Section title="Documents List">
         {recentNotes.map((note, index) => (
           <List.Item
             key={note.id}
@@ -120,23 +120,23 @@ function DocumentSelector({ onSelect }: { onSelect: (docId: string) => void }) {
               source: Icon.Document,
               tintColor: index < 3 ? "#007AFF" : "#8E8E93",
             }}
-            title={note.content || "无标题"}
-            subtitle={`${note.notebook_name || "未知笔记本"} • ${note.hpath || "未知路径"}`}
+            title={note.content || "Untitled"}
+            subtitle={`${note.notebook_name || "Unknown Notebook"} • ${note.hpath || "Unknown Path"}`}
             accessories={[
               {
                 text: formatDate(note.updated),
-                tooltip: `最后更新: ${formatDate(note.updated)}`,
+                tooltip: `Last updated: ${formatDate(note.updated)}`,
               },
             ]}
             actions={
               <ActionPanel>
                 <Action
-                  title="选择此文档"
+                  title="Select This Document"
                   icon={Icon.Check}
                   onAction={() => onSelect(note.id)}
                 />
                 <Action.OpenInBrowser
-                  title="在思源笔记中打开"
+                  title="Open in Siyuan"
                   url={siyuanAPI.getDocUrl(note.id)}
                 />
               </ActionPanel>
@@ -148,9 +148,11 @@ function DocumentSelector({ onSelect }: { onSelect: (docId: string) => void }) {
       {recentNotes.length === 0 && !loading && (
         <List.EmptyView
           icon={Icon.Document}
-          title="未找到文档"
+          title="No Documents Found"
           description={
-            searchText ? "尝试使用不同的关键词搜索" : "暂无最近访问的文档"
+            searchText
+              ? "Try searching with different keywords"
+              : "No recently accessed documents"
           }
         />
       )}
@@ -162,28 +164,24 @@ export default function QuickAddNote(
   props: LaunchProps<{ arguments: Arguments }>,
 ) {
   const { content: initialContent } = props.arguments;
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [content, setContent] = useState<string>("");
-  const [targetDocument, setTargetDocument] = useState<string>("");
-  const [targetDocTitle, setTargetDocTitle] = useState<string>("");
   const [showDocumentSelector, setShowDocumentSelector] =
     useState<boolean>(false);
 
-  // 使用 localStorage 保持时间戳设置，默认为 false
+  // Use localStorage to persist timestamp setting, default to false
   const { value: addTimestamp, setValue: setAddTimestamp } = useLocalStorage(
     "quick-add-timestamp",
     false,
   );
 
-  // 使用ref防止React Strict Mode下的重复执行
+  // Use ref to prevent duplicate execution in React Strict Mode
   const hasExecutedRef = useRef<boolean>(false);
   const hasLoadedClipboardRef = useRef<boolean>(false);
-  const hasAutoSelectedDocRef = useRef<boolean>(false);
 
-  // 检查是否为快速添加模式（有内容参数时自动添加到最近文档）
+  // Check if in quick add mode (auto-add to recent document when content parameter provided)
   const isQuickMode = Boolean(initialContent && initialContent.trim());
 
-  // 自动加载剪贴板内容
+  // Auto-load clipboard content
   const loadClipboardContent = useCallback(async () => {
     if (hasLoadedClipboardRef.current) return;
     hasLoadedClipboardRef.current = true;
@@ -194,30 +192,30 @@ export default function QuickAddNote(
         setContent(clipboardText);
       }
     } catch (error) {
-      console.error("读取剪贴板失败:", error);
+      console.error("Failed to read clipboard:", error);
     }
   }, []);
 
-  // 获取文档标题
+  // Get document title
   const getDocumentTitle = useCallback(async (docId: string) => {
     try {
       const blockInfo = await siyuanAPI.getBlockInfo(docId);
-      return blockInfo.content || "未知文档";
+      return blockInfo.content || "Unknown document";
     } catch (error) {
-      console.error("获取文档信息失败:", error);
-      return "未知文档";
+      console.error("Failed to get document info:", error);
+      return "Unknown document";
     }
   }, []);
 
-  // 选择最近编辑的文档并直接添加内容
+  // Select recently edited document and add content directly
   const handleSelectRecentDocument = useCallback(async () => {
     try {
-      // 检查是否有内容要添加
+      // Check if there is content to add
       const contentToAdd = content.trim();
       if (!contentToAdd) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "请输入要添加的内容",
+          title: "Please Enter Content to Add",
         });
         return;
       }
@@ -228,11 +226,11 @@ export default function QuickAddNote(
 
         const toast = await showToast({
           style: Toast.Style.Animated,
-          title: "正在添加到最近编辑的文档...",
+          title: "Adding to Recently Edited Document...",
           message: title,
         });
 
-        // 直接添加内容到最近的文档
+        // Add content directly to recent document
         await siyuanAPI.addToDocument(
           mostRecentDocId,
           contentToAdd,
@@ -240,10 +238,10 @@ export default function QuickAddNote(
         );
 
         toast.style = Toast.Style.Success;
-        toast.title = "✅ 已添加到最近编辑的文档";
+        toast.title = "✅ Added to Recently Edited Document";
         toast.message = title;
 
-        // 关闭主窗口
+        // Close main window
         await closeMainWindow({
           clearRootSearch: true,
           popToRootType: PopToRootType.Immediate,
@@ -251,27 +249,27 @@ export default function QuickAddNote(
       } else {
         await showToast({
           style: Toast.Style.Failure,
-          title: "未找到最近的文档",
+          title: "No Recent Document Found",
         });
       }
     } catch (error) {
-      console.error("获取最近文档失败:", error);
+      console.error("Failed to get recent document:", error);
       await showToast({
         style: Toast.Style.Failure,
-        title: "添加失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Add Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }, [getDocumentTitle, content, addTimestamp]);
 
-  // 快速添加功能 - 自动选择最近文档
+  // Quick add feature - auto-select recent document
   const handleQuickAdd = useCallback(
     async (content: string) => {
       try {
-        // 获取最近编辑的文档
+        // Get recently edited document
         const mostRecentDocId = await siyuanAPI.getMostRecentDocumentId();
         if (!mostRecentDocId) {
-          await showHUD("❌ 未找到最近的文档");
+          await showHUD("❌ No Recent Document Found");
           await closeMainWindow({
             clearRootSearch: true,
             popToRootType: PopToRootType.Immediate,
@@ -283,14 +281,14 @@ export default function QuickAddNote(
           mostRecentDocId,
           content,
           addTimestamp || false,
-        ); // 使用用户设置的时间戳选项
+        ); // Use user's timestamp setting
 
         await closeMainWindow({
           clearRootSearch: true,
           popToRootType: PopToRootType.Immediate,
         });
 
-        await showHUD("✅ 已添加到最近编辑的文档");
+        await showHUD("✅ Added to Recently Edited Document");
       } catch (error) {
         await closeMainWindow({
           clearRootSearch: true,
@@ -298,14 +296,14 @@ export default function QuickAddNote(
         });
 
         await showHUD(
-          `❌ 添加失败: ${error instanceof Error ? error.message : "未知错误"}`,
+          `❌ Add Failed: ${error instanceof Error ? error.message : "Unknown error"}`,
         );
       }
     },
     [addTimestamp],
   );
 
-  // 如果是快速模式，立即执行添加操作
+  // Execute add operation immediately if in quick mode
   useEffect(() => {
     if (isQuickMode && !hasExecutedRef.current) {
       hasExecutedRef.current = true;
@@ -313,7 +311,7 @@ export default function QuickAddNote(
     }
   }, [isQuickMode, initialContent, handleQuickAdd]);
 
-  // 初始化时加载剪贴板内容
+  // Load clipboard content on initialization
   useEffect(() => {
     if (!isQuickMode && !initialContent) {
       loadClipboardContent();
@@ -326,67 +324,66 @@ export default function QuickAddNote(
     try {
       const title = await getDocumentTitle(docId);
 
-      // 检查是否有内容要添加
+      // Check if there is content to add
       const contentToAdd = content.trim();
       if (!contentToAdd) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "请输入要添加的内容",
+          title: "Please Enter Content to Add",
         });
         return;
       }
 
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "正在添加到文档...",
+        title: "Adding to Document...",
         message: title,
       });
 
-      // 直接添加内容到选中的文档
+      // Add content directly to selected document
       await siyuanAPI.addToDocument(docId, contentToAdd, addTimestamp || false);
 
       toast.style = Toast.Style.Success;
-      toast.title = "✅ 已添加到文档";
+      toast.title = "✅ Added to Document";
       toast.message = title;
 
-      // 关闭主窗口
+      // Close main window
       await closeMainWindow({
         clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,
       });
     } catch (error) {
-      console.error("选择文档失败:", error);
+      console.error("Failed to select document:", error);
       await showToast({
         style: Toast.Style.Failure,
-        title: "添加失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Add Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
-  // 如果是快速模式，返回null避免UI闪现
+  // Return null in quick mode to avoid UI flashing
   if (isQuickMode) {
     return null;
   }
 
-  // 如果正在显示文档选择器
+  // If document selector is being displayed
   if (showDocumentSelector) {
     return <DocumentSelector onSelect={handleDocumentSelect} />;
   }
 
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action
-              title="选择目标文档"
+              title="Select Target Document"
               icon={Icon.List}
               onAction={() => setShowDocumentSelector(true)}
             />
             <Action
-              title="使用最近编辑的文档"
+              title="Use Recently Edited Document"
               icon={Icon.Clock}
               onAction={handleSelectRecentDocument}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -396,14 +393,14 @@ export default function QuickAddNote(
       }
     >
       <Form.Description
-        title="快速添加"
-        text="将内容快速添加到指定的思源笔记文档中"
+        title="Quick Add"
+        text="Quickly add content to specified SiYuan note document"
       />
 
       <Form.TextArea
         id="content"
-        title="内容"
-        placeholder="输入要添加的内容...支持 Markdown 格式"
+        title="Content"
+        placeholder="Enter content to add... Supports Markdown format"
         value={content}
         onChange={setContent}
         enableMarkdown
@@ -412,8 +409,8 @@ export default function QuickAddNote(
 
       <Form.Checkbox
         id="addTimestamp"
-        title="选项"
-        label="添加时间戳"
+        title="Options"
+        label="Add Timestamp"
         value={addTimestamp || false}
         onChange={async (value) => {
           await setAddTimestamp(value);
@@ -423,12 +420,12 @@ export default function QuickAddNote(
       <Form.Separator />
 
       <Form.Description
-        title="使用说明"
-        text="• 内容会自动从剪贴板读取
-• 使用 Cmd+Enter 选择要添加到的文档
-• 使用 Cmd+R 快速选择最近编辑的文档
-• 支持 Markdown 格式
-• 支持粘贴到当前应用"
+        title="Instructions"
+        text="• Content auto-loads from clipboard
+• Use Cmd+Enter to select document to add to
+• Use Cmd+R to quickly select recently edited document
+• Supports Markdown format
+• Supports pasting to current app"
       />
     </Form>
   );

@@ -40,23 +40,26 @@ export default function CreateNote(
 
   const loadData = async () => {
     try {
-      // 优先加载笔记本，模板可选
+      // Load notebooks first, templates are optional
       const notebooksData = await siyuanAPI.getNotebooks();
       setNotebooks(notebooksData.filter((nb) => !nb.closed));
 
-      // 尝试加载模板，但不影响主要功能
+      // Try to load templates, but don't affect main functionality
       try {
         const templatesData = await siyuanAPI.getTemplates();
         setTemplates(templatesData);
       } catch (templateError) {
-        console.log("模板加载失败，但不影响创建笔记功能:", templateError);
+        console.log(
+          "Template loading failed, but doesn't affect note creation:",
+          templateError,
+        );
         setTemplates([]);
       }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "加载笔记本失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Failed to Load Notebooks",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setLoading(false);
@@ -67,7 +70,7 @@ export default function CreateNote(
     if (!values.title.trim()) {
       showToast({
         style: Toast.Style.Failure,
-        title: "请输入笔记标题",
+        title: "Please Enter Note Title",
       });
       return;
     }
@@ -75,7 +78,7 @@ export default function CreateNote(
     if (!values.notebook) {
       showToast({
         style: Toast.Style.Failure,
-        title: "请选择笔记本",
+        title: "Please Select Notebook",
       });
       return;
     }
@@ -83,7 +86,7 @@ export default function CreateNote(
     try {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "正在创建笔记...",
+        title: "Creating Note...",
       });
 
       let docId: string;
@@ -108,18 +111,18 @@ export default function CreateNote(
       }
 
       toast.style = Toast.Style.Success;
-      toast.title = "笔记创建成功";
+      toast.title = "Note Created Successfully";
       toast.message = `ID: ${docId}`;
 
-      // 创建成功后不自动打开，用户可以通过搜索功能查看
-      // 避免使用window.open，因为在Raycast环境中不可用
+      // Don't auto-open after creation, user can view via search
+      // Avoid using window.open as it's not available in Raycast environment
 
       popToRoot();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "创建笔记失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Failed to Create Note",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -130,7 +133,7 @@ export default function CreateNote(
         isLoading={true}
         actions={
           <ActionPanel>
-            <Action title="加载中…" />
+            <Action title="Loading…" />
           </ActionPanel>
         }
       />
@@ -143,7 +146,7 @@ export default function CreateNote(
         <ActionPanel>
           <Action.SubmitForm
             icon={Icon.Plus}
-            title="创建笔记"
+            title="Create Note"
             onSubmit={handleSubmit}
           />
         </ActionPanel>
@@ -151,15 +154,15 @@ export default function CreateNote(
     >
       <Form.TextField
         id="title"
-        title="标题"
-        placeholder="输入笔记标题"
+        title="Title"
+        placeholder="Enter note title"
         defaultValue={initialTitle || ""}
       />
 
       <Form.Dropdown
         id="notebook"
-        title="笔记本"
-        placeholder="选择笔记本"
+        title="Notebook"
+        placeholder="Select notebook"
         defaultValue={notebooks[0]?.id}
         storeValue
       >
@@ -175,18 +178,18 @@ export default function CreateNote(
 
       <Form.TextField
         id="path"
-        title="路径"
-        placeholder="可选：自定义文档路径 (如: /folder/filename)"
-        info="留空将使用标题作为文件名"
+        title="Path"
+        placeholder="Optional: Custom document path (e.g., /folder/filename)"
+        info="Leave empty to use title as filename"
       />
 
       {templates.length > 0 && (
         <Form.Dropdown
           id="template"
-          title="模板"
-          placeholder="选择模板（可选）"
+          title="Template"
+          placeholder="Select template (optional)"
         >
-          <Form.Dropdown.Item value="" title="无模板" />
+          <Form.Dropdown.Item value="" title="No Template" />
           {templates.map((template) => (
             <Form.Dropdown.Item
               key={template.id}
@@ -199,8 +202,8 @@ export default function CreateNote(
 
       <Form.TextArea
         id="content"
-        title="内容"
-        placeholder="输入笔记内容（Markdown格式）"
+        title="Content"
+        placeholder="Enter note content (Markdown format)"
         defaultValue={initialContent || ""}
         enableMarkdown
       />

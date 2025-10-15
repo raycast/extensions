@@ -1,141 +1,136 @@
 # SiYuan Notes Raycast Extension
 
-思源笔记 Raycast 扩展，让您可以在 Raycast 中快速搜索、创建和管理思源笔记。
+A Raycast extension for SiYuan Notes, allowing you to quickly search, create, and manage SiYuan notes within Raycast.
 
 ![SiYuan Notes Extension](./icon.png)
 
-## 功能特性
+## Features
 
-- 🔍 **笔记搜索**: 快速搜索文档和块内容
-- 📝 **创建笔记**: 在指定笔记本中创建新文档  
-- 📅 **每日笔记**: 快速添加内容到今日笔记
-- 📋 **最近笔记**: 查看和访问最近修改的文档
-- 🧭 **笔记漫游**: 随机发现笔记内容，支持多种漫游模式
-- 📎 **资产文件查找**: 快速查找和管理 SiYuan assets 文件夹中的附件文件
-- ⚡ **快速添加笔记**: 快速添加剪贴板内容到最近编辑的文档
-- 📎 **文件链接支持**: 直接打开笔记中的附件和本地文件
+- 🔍 **Search Notes**: Quickly search documents and block content
+- 📝 **Create Notes**: Create new documents in specified notebooks
+- 📅 **Daily Notes**: Quickly add content to today's daily note
+- 📋 **Recent Notes**: View and access recently modified documents
+- 🧭 **Note Roaming**: Randomly discover note content with multiple roaming modes
+- 📎 **Find Assets**: Quickly find and manage attachment files in SiYuan assets folder
+- ⚡ **Quick Add Note**: Quickly add clipboard content to recently edited documents
+- 📎 **File Link Support**: Directly open attachments and local files in notes
 
-## 安装和配置
+## Installation and Configuration
 
-1. 安装扩展到 Raycast
-2. 配置以下设置：
-   - **SiYuan Server URL**: 思源笔记服务器地址 (默认: http://127.0.0.1:6806)
-   - **API Token**: API访问令牌 (如果启用了认证)
-   - **Default Notebook ID**: 默认笔记本ID
-   - **Daily Note Path**: 每日笔记路径模板 (默认: 收集箱/daily note/{{year}}/{{month}}/{{date}})
-     * 格式：`笔记本名称/文档路径`
-     * 笔记本名称：在SiYuan中已存在的笔记本名称（如："收集箱"）
-     * 文档路径：在该笔记本内的路径（如：`daily note/{{year}}/{{month}}/{{date}}`）
-     * 支持变量：`{{year}}`、`{{month}}`、`{{day}}`、`{{date}}`（YYYY-MM-DD格式）
-   - **Workspace Path**: 思源笔记工作空间目录路径 (例如: /Users/username/Documents/SiYuan)
+1. Install the extension in Raycast
+2. Configure the following settings:
+   - **SiYuan Server URL**: SiYuan server address (default: http://127.0.0.1:6806)
+   - **API Token**: API access token (if authentication is enabled)
+   - **Default Notebook ID**: Default notebook ID
+   - **Daily Note Path**: Daily note path template (default: Inbox/daily note/{{year}}/{{month}}/{{date}})
+     * Format: `NotebookName/DocumentPath`
+     * Notebook Name: An existing notebook name in SiYuan (e.g., "Inbox")
+     * Document Path: Path within that notebook (e.g., `daily note/{{year}}/{{month}}/{{date}}`)
+     * Supported variables: `{{year}}`, `{{month}}`, `{{day}}`, `{{date}}` (YYYY-MM-DD format)
+   - **Workspace Path**: SiYuan workspace directory path (e.g., /Users/username/Documents/SiYuan)
 
-## 工作空间路径配置
+## Workspace Path Configuration
 
-为了正确打开笔记中的文件链接和附件，请配置 **Workspace Path** 设置：
+To correctly open file links and attachments in notes, please configure the **Workspace Path** setting:
 
-1. 找到你的思源笔记工作空间目录
-2. 在扩展设置中输入完整路径，例如：
+1. Find your SiYuan workspace directory
+2. Enter the full path in the extension settings, for example:
    - macOS: `/Users/yourname/Documents/SiYuan`
    - Windows: `C:\Users\yourname\Documents\SiYuan`
    - Linux: `/home/yourname/SiYuan`
 
-配置正确后，扩展能够：
-- 直接用系统默认程序打开附件文件
-- 在Finder/文件管理器中显示文件位置
-- 正确处理相对路径文件链接
+Once configured correctly, the extension can:
+- Open attachment files directly with the default system app
+- Show file location in Finder/file manager
+- Properly handle relative path file links
 
-## 使用方法
+## Usage
 
-### 搜索笔记
-- 使用 `Search Notes` 命令
-- 输入关键词搜索文档标题和内容
-- 支持按路径筛选
-- 在详情页面查看完整内容
+### Search Notes
+- Use the `Search Notes` command
+- Enter keywords to search document titles and content
+- Support filtering by path
+- View complete content in the details page
 
-### 每日笔记
-- 使用 `Add to Daily Note` 命令快速添加内容到今日笔记
-- **快速添加模式**: 直接在 Raycast 中输入 `add to daily note`，按 Tab 键，然后输入内容快速添加
-- 支持多种快速模板：想法、待办、链接、学习、工作等
-- 自动添加时间戳（可选）
-- 如果今日笔记不存在，会自动创建
-- 支持 Markdown 格式
+### Daily Notes
+- Use the `Add to Daily Note` command to quickly add content to today's note
+- **Quick add mode**: Directly type `add to daily note` in Raycast, press Tab, then enter content for quick addition
+- Support multiple quick templates: Ideas, Tasks, Links, Learning, Work, etc.
+- Auto-add timestamp (optional)
+- Daily note will be auto-created if it doesn't exist
+- Supports Markdown format
 
-### 文件链接支持
+### File Link Support
 
-#### 直接点击链接打开文件
-在笔记详情页面的Markdown内容中：
-- 文件链接会显示为 `[文件名 📎](file://路径)` 格式
-- **直接点击链接**可能在某些环境下用默认程序打开文件
-- 如果直接点击不工作，请使用下面的ActionPanel方式
+#### Click Links Directly to Open Files
+In the note details page Markdown content:
+- File links will display as `[Filename 📎](file://path)` format
+- **Click links directly** may open files with the default app in some environments
+- If direct clicking doesn't work, use the ActionPanel method below
 
-#### 通过ActionPanel打开文件
-如果笔记包含文件链接，可以使用快捷键：
-- **Cmd+Alt+数字**: 用默认程序打开文件（主要方式）
-- **Cmd+Shift+Opt+数字**: 使用file://协议打开（备用方式）
-- **Cmd+Opt+Shift+数字**: 在Finder中显示文件
-- **Cmd+Shift+数字**: 在浏览器中打开(仅限assets)
+#### Open Files via ActionPanel
+If notes contain file links, you can use shortcuts:
+- **Cmd+Alt+Number**: Open file with default app (primary method)
+- **Cmd+Shift+Opt+Number**: Open using file:// protocol (alternative method)
+- **Cmd+Opt+Shift+Number**: Show file in Finder
+- **Cmd+Shift+Number**: Open in browser (assets only)
 
-### 调试文件打开问题
-如果文件无法打开，请：
-1. 检查开发者控制台的调试日志
-2. 确认工作空间路径配置正确
-3. 首先尝试直接点击Markdown中的文件链接
-4. 如果不工作，使用ActionPanel中的打开选项
-5. 使用"在Finder中显示"验证文件是否存在
+### Debugging File Opening Issues
+If files can't be opened, please:
+1. Check developer console debug logs
+2. Confirm workspace path is configured correctly
+3. First try clicking file links directly in Markdown
+4. If that doesn't work, use open options in ActionPanel
+5. Use "Show in Finder" to verify file exists
 
-### 创建笔记
-- 使用 `Create Note` 命令
-- 选择笔记本和输入标题
-- 可选择使用模板
+### Create Notes
+- Use the `Create Note` command
+- Select notebook and enter title
+- Optionally use templates
 
-### 每日笔记
-- 使用 `Add to Daily Note` 命令
-- 快速添加内容到今日笔记
-- 自动创建每日笔记(如不存在)
+### Recent Notes
+- Use the `Recent Notes` command
+- View recently accessed documents
+- Quick access and view details
 
-### 最近笔记
-- 使用 `Recent Notes` 命令
-- 查看最近访问的文档
-- 快速访问和查看详情
+### Note Roaming
+- Use the `Note Roaming` command to start your note exploration journey
+- **Random Document Roaming**: Randomly discover your document content
+- **Random Block Roaming**: Randomly browse block-level content, discover forgotten fragments
+- **Old Notes Review**: Rediscover past notes
+  - Support filtering by month or year (e.g., 6 months ago, 1 year ago notes)
+  - Help review and organize historical content
+- **Tag Theme Roaming**: Explore related content by specific tags
+- **Document Block Roaming**: Randomly browse block content within specified documents
 
-### 笔记漫游
-- 使用 `Note Roaming` 命令开启笔记探索之旅
-- **随机文档漫游**: 随机发现您的文档内容
-- **随机块漫游**: 随机浏览块级内容，发现被遗忘的片段
-- **年老笔记回顾**: 重新发现过往笔记
-  - 支持按月或年筛选（如 6 个月前、1 年前的笔记）
-  - 帮助回顾和整理历史内容
-- **标签主题漫游**: 按特定标签探索相关内容
-- **文档内漫游**: 在指定文档内随机浏览块内容
+### Find Assets
+- Use the `Find Assets` command to quickly find attachment files
+- **File Search**: Quickly search files in the assets folder by filename
+- **Type Filter**: Filter by file type (images, documents, audio, video, etc.)
+- **File Operations**:
+  - Open file with default app
+  - Show file location in Finder
+  - Copy file path to clipboard
+- **Real-time Search**: Filter results in real-time as you type for efficient searching
 
-### 资产文件查找
-- 使用 `Find Assets` 命令快速查找附件文件
-- **文件搜索**: 按文件名快速搜索 assets 文件夹中的文件
-- **类型筛选**: 支持按文件类型筛选（图片、文档、音频、视频等）
-- **文件操作**: 
-  - 用默认程序打开文件
-  - 在 Finder 中显示文件位置
-  - 复制文件路径到剪贴板
-- **实时搜索**: 输入时实时筛选结果，提升查找效率
+### Quick Add Note
+- Use the `Quick Add Note` command to quickly add content
+- **Auto Clipboard**: Automatically get clipboard content as default input
+- **Document Selection**: Choose from recently edited documents
+- **Timestamp Option**: Optional timestamp addition
+- **Quick Mode**: Support passing content parameter directly, suitable for script calls
 
-### 快速添加笔记
-- 使用 `Quick Add Note` 命令快速添加内容
-- **自动剪贴板**: 自动获取剪贴板内容作为默认输入
-- **文档选择**: 从最近编辑的文档中选择目标文档
-- **时间戳选项**: 可选择是否添加时间戳
-- **快速模式**: 支持直接传递内容参数，适合脚本调用
+## Troubleshooting
 
-## 故障排除
+If you encounter issues, please check:
 
-如果遇到问题，请检查：
+1. Is SiYuan running
+2. Is the API address correct
+3. Is the workspace path configured correctly
+4. Is the network connection normal
 
-1. 思源笔记是否正在运行
-2. API地址是否正确
-3. 工作空间路径是否配置正确
-4. 网络连接是否正常
+You can use the "Test Connection" feature in the search page to verify configuration.
 
-可以使用搜索页面中的"测试连接"功能验证配置。
+## Technical Support
 
-## 技术支持
-
-如需帮助或报告问题，请查看项目文档或联系开发者。
+For help or to report issues, please check the project documentation or contact the developer.

@@ -44,7 +44,7 @@ export default function AddToDailyNote(
     if (!content.trim()) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "内容不能为空",
+        title: "Content Cannot Be Empty",
       });
       await closeMainWindow({
         clearRootSearch: true,
@@ -54,31 +54,31 @@ export default function AddToDailyNote(
     }
 
     try {
-      await siyuanAPI.addToDailyNote(content, true); // 默认添加时间戳
+      await siyuanAPI.addToDailyNote(content, true); // Add timestamp by default
 
-      // 关闭窗口并清除状态返回根视图
+      // Close window and return to root view
       await closeMainWindow({
         clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,
       });
 
-      // 使用HUD显示成功消息，因为窗口已关闭
-      await showHUD("✅ 已添加到每日笔记");
+      // Show success message via HUD as window is closed
+      await showHUD("✅ Added to Daily Note");
     } catch (error) {
-      // 出错时关闭窗口
+      // Close window on error
       await closeMainWindow({
         clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,
       });
 
-      // 使用HUD显示错误消息
+      // Show error message via HUD
       await showHUD(
-        `❌ 添加失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `❌ Add Failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
-  }, []); // useCallback确保函数引用稳定
+  }, []); // useCallback ensures stable function reference
 
-  // 如果是快速模式，立即执行添加操作（防止重复执行）
+  // If in quick mode, execute add operation immediately (prevent duplicate execution)
   useEffect(() => {
     if (isQuickMode && !hasExecutedRef.current) {
       hasExecutedRef.current = true;
@@ -91,7 +91,7 @@ export default function AddToDailyNote(
     if (!contentToSubmit) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "请输入要添加的内容",
+        title: "Please Enter Content to Add",
       });
       return;
     }
@@ -101,27 +101,27 @@ export default function AddToDailyNote(
     try {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "正在添加到每日笔记...",
+        title: "Adding to Daily Note...",
       });
 
-      // 使用state中的content和表单中的时间戳选项
+      // Use content from state and timestamp option from form
       await siyuanAPI.addToDailyNote(contentToSubmit, values.addTimestamp);
 
       toast.style = Toast.Style.Success;
-      toast.title = "✅ 已添加到每日笔记";
+      toast.title = "✅ Added to Daily Note";
       toast.message =
         contentToSubmit.length > 50
           ? contentToSubmit.substring(0, 50) + "..."
           : contentToSubmit;
 
-      // 重置表单状态
+      // Reset form state
       setContent("");
 
-      // 使用 Raycast 表单字段的 reset 方法
+      // Use Raycast form field reset method
       textAreaRef.current?.reset();
       checkboxRef.current?.reset();
 
-      // 关闭主窗口并清除状态返回根视图
+      // Close main window and return to root view
       await closeMainWindow({
         clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,
@@ -129,8 +129,8 @@ export default function AddToDailyNote(
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "添加失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Add Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -138,20 +138,36 @@ export default function AddToDailyNote(
   };
 
   const quickActions = [
-    { title: "💡 想法", prefix: "💡 ", placeholder: "记录一个灵感或想法..." },
-    { title: "📝 待办", prefix: "- [ ] ", placeholder: "添加一个新的任务..." },
-    { title: "🔗 链接", prefix: "🔗 ", placeholder: "保存有用的链接..." },
-    { title: "📚 学习", prefix: "📚 ", placeholder: "学习笔记或心得..." },
-    { title: "💼 工作", prefix: "💼 ", placeholder: "工作相关的记录..." },
-    { title: "🎉 成就", prefix: "🎉 ", placeholder: "分享一个成就或里程碑..." },
-    { title: "🚀 目标", prefix: "🚀 ", placeholder: "设定一个新目标..." },
-    { title: "📊 总结", prefix: "📊 ", placeholder: "总结今天的收获..." },
+    {
+      title: "💡 Idea",
+      prefix: "💡 ",
+      placeholder: "Record an inspiration or idea...",
+    },
+    { title: "📝 Task", prefix: "- [ ] ", placeholder: "Add a new task..." },
+    { title: "🔗 Link", prefix: "🔗 ", placeholder: "Save a useful link..." },
+    {
+      title: "📚 Learning",
+      prefix: "📚 ",
+      placeholder: "Learning notes or insights...",
+    },
+    { title: "💼 Work", prefix: "💼 ", placeholder: "Work-related records..." },
+    {
+      title: "🎉 Achievement",
+      prefix: "🎉 ",
+      placeholder: "Share an achievement or milestone...",
+    },
+    { title: "🚀 Goal", prefix: "🚀 ", placeholder: "Set a new goal..." },
+    {
+      title: "📊 Summary",
+      prefix: "📊 ",
+      placeholder: "Summarize today's gains...",
+    },
   ];
 
-  // 应用快速模板的函数
+  // Apply quick template function
   const applyTemplate = (action: (typeof quickActions)[0]) => {
-    // 如果当前内容为空或者是其他模板内容，直接替换
-    // 如果有用户输入的内容，则将模板内容添加到末尾
+    // If current content is empty or is another template content, replace directly
+    // If there is user input content, add template content to the end
     const currentContent = content.trim();
     let newContent: string;
 
@@ -159,18 +175,18 @@ export default function AddToDailyNote(
       !currentContent ||
       quickActions.some((qa) => currentContent.startsWith(qa.prefix))
     ) {
-      // 直接替换模板
+      // Replace template directly
       newContent = action.prefix + action.placeholder;
     } else {
-      // 在现有内容后添加新模板
+      // Add new template after existing content
       newContent = currentContent + "\n" + action.prefix + action.placeholder;
     }
 
     setContent(newContent);
   };
 
-  // 如果是快速模式，返回null以避免任何UI闪现
-  // 快速添加操作会在useEffect中执行并关闭窗口
+  // If in quick mode, return null to avoid UI flashing
+  // Quick add operation will execute in useEffect and close window
   if (isQuickMode) {
     return null;
   }
@@ -183,12 +199,12 @@ export default function AddToDailyNote(
           <ActionPanel.Section>
             <Action.SubmitForm
               icon={Icon.Plus}
-              title="添加到每日笔记"
+              title="Add to Daily Note"
               onSubmit={handleSubmit}
             />
           </ActionPanel.Section>
 
-          <ActionPanel.Section title="快速模板">
+          <ActionPanel.Section title="Quick Templates">
             {quickActions.map((action) => (
               <Action
                 key={action.title}
@@ -202,15 +218,15 @@ export default function AddToDailyNote(
       }
     >
       <Form.Description
-        title="每日笔记"
-        text={`将内容快速添加到今天的每日笔记中 (${new Date().toLocaleDateString("zh-CN")})`}
+        title="Daily Note"
+        text={`Quickly add content to today's daily note (${new Date().toLocaleDateString("en-US")})`}
       />
 
       <Form.TextArea
         ref={textAreaRef}
         id="content"
-        title="内容"
-        placeholder="输入要添加到每日笔记的内容...支持 Markdown 格式"
+        title="Content"
+        placeholder="Enter content to add to daily note... Supports Markdown format"
         value={content}
         onChange={setContent}
         enableMarkdown
@@ -220,16 +236,16 @@ export default function AddToDailyNote(
       <Form.Checkbox
         ref={checkboxRef}
         id="addTimestamp"
-        title="选项"
-        label="添加时间戳"
+        title="Options"
+        label="Add Timestamp"
         defaultValue={true}
       />
 
       <Form.Separator />
 
       <Form.Description
-        title="提示"
-        text="支持 Markdown 格式。如果今日笔记不存在，会自动创建。"
+        title="Tips"
+        text="Supports Markdown format. Daily note will be auto-created if it doesn't exist."
       />
     </Form>
   );

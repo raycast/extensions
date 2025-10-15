@@ -13,14 +13,14 @@ import {
 import { siyuanAPI } from "./api/siyuan";
 import { SiYuanBlock } from "./types";
 
-// 解析SiYuan时间戳为Date对象 (格式: "20250730224544")
+// Parse SiYuan timestamp to Date object (format: "20250730224544")
 function parseSiYuanTime(timestamp: string): Date | null {
   if (!timestamp || timestamp.length !== 14) {
     return null;
   }
 
   try {
-    // 解析格式: YYYYMMDDHHMMSS
+    // Parse format: YYYYMMDDHHMMSS
     const year = timestamp.substring(0, 4);
     const month = timestamp.substring(4, 6);
     const day = timestamp.substring(6, 8);
@@ -42,16 +42,16 @@ function parseSiYuanTime(timestamp: string): Date | null {
   }
 }
 
-// 格式化SiYuan时间戳 (格式: "20250730224544")
+// Format SiYuan timestamp (format: "20250730224544")
 function formatSiYuanTime(timestamp: string): string {
   const date = parseSiYuanTime(timestamp);
   if (!date) {
-    return "无效时间";
+    return "Invalid time";
   }
-  return date.toLocaleString("zh-CN");
+  return date.toLocaleString("en-US");
 }
 
-// 笔记详情组件 - 显示完整文档内容
+// Note detail component - display complete document content
 function NoteDetail({ block }: { block: SiYuanBlock }) {
   const [documentContent, setDocumentContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
@@ -63,27 +63,27 @@ function NoteDetail({ block }: { block: SiYuanBlock }) {
     const loadDocumentContent = async () => {
       try {
         setLoading(true);
-        console.log(`开始加载文档内容: ${block.id}`);
+        console.log(`Starting to load document content: ${block.id}`);
 
-        // 获取完整的文档内容
+        // Get complete document content
         const content = await siyuanAPI.getDocumentContent(block.id);
-        console.log(`获取到的文档内容: ${content}`);
+        console.log(`Fetched document content: ${content}`);
 
         if (content && content.trim()) {
           setDocumentContent(content);
-          // 提取文件路径
+          // Extract file paths
           const extractedPaths = siyuanAPI.extractLocalFilePaths(content);
           setFilePaths(extractedPaths);
         } else {
-          // 如果获取不到内容，显示基本信息
+          // Show basic info if unable to get content
           setDocumentContent(
-            `# ${block.content || "无标题"}\n\n暂无内容或无法获取文档内容`,
+            `# ${block.content || "Untitled"}\n\nNo content or unable to fetch document content`,
           );
         }
       } catch (error) {
-        console.error("获取文档内容失败:", error);
+        console.error("Failed to fetch document content:", error);
         setDocumentContent(
-          `# ${block.content || "无标题"}\n\n获取内容时发生错误: ${error instanceof Error ? error.message : "未知错误"}`,
+          `# ${block.content || "Untitled"}\n\nError occurred while fetching content: ${error instanceof Error ? error.message : "Unknown error"}`,
         );
       } finally {
         setLoading(false);
@@ -93,14 +93,14 @@ function NoteDetail({ block }: { block: SiYuanBlock }) {
     loadDocumentContent();
   }, [block.id]);
 
-  // 构建笔记的markdown内容 - 显示完整的文档内容
+  // Build note markdown content - display complete document content
   const markdown = loading
-    ? "加载中..."
-    : documentContent || block.markdown || block.content || "无内容";
+    ? "Loading..."
+    : documentContent || block.markdown || block.content || "No content";
 
-  // processLocalFileLinks已经将文件链接转换为file://协议，可以直接点击在Finder中显示
+  // processLocalFileLinks has already converted file links to file:// protocol, can be clicked directly to show in Finder
 
-  // 文件动作组件 - 使用Raycast的Action.Open组件
+  // File action component - using Raycast's Action.Open component
   const FileAction = ({
     file,
     index,
@@ -155,37 +155,37 @@ function NoteDetail({ block }: { block: SiYuanBlock }) {
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={block.content || "文档详情"}
+      navigationTitle={block.content || "Document Details"}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="文档ID" text={block.id} />
+          <Detail.Metadata.Label title="Document ID" text={block.id} />
           <Detail.Metadata.Label
-            title="笔记本"
-            text={block.notebook_name || "未知笔记本"}
+            title="Notebook"
+            text={block.notebook_name || "Unknown Notebook"}
           />
           <Detail.Metadata.Label
-            title="路径"
-            text={`${block.notebook_name || "未知笔记本"}${block.hpath || "未知路径"}`}
+            title="Path"
+            text={`${block.notebook_name || "Unknown Notebook"}${block.hpath || "Unknown Path"}`}
           />
           <Detail.Metadata.Label
-            title="创建时间"
+            title="Created"
             text={formatSiYuanTime(block.created)}
           />
           <Detail.Metadata.Label
-            title="更新时间"
+            title="Updated"
             text={formatSiYuanTime(block.updated)}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
-            title="字符数"
-            text={`${block.length || documentContent.length} 字符`}
+            title="Characters"
+            text={`${block.length || documentContent.length} characters`}
           />
           <Detail.Metadata.Label
-            title="类型"
-            text={block.type === "d" ? "文档" : "块"}
+            title="Type"
+            text={block.type === "d" ? "Document" : "Block"}
           />
           {block.tag && (
-            <Detail.Metadata.TagList title="标签">
+            <Detail.Metadata.TagList title="Tags">
               <Detail.Metadata.TagList.Item text={block.tag} />
             </Detail.Metadata.TagList>
           )}
@@ -194,18 +194,18 @@ function NoteDetail({ block }: { block: SiYuanBlock }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="在思源笔记中打开"
+            title="Open in Siyuan"
             url={siyuanAPI.getDocUrl(block.id)}
           />
 
-          {/* 添加文件打开动作 */}
+          {/* Add file open actions */}
           {filePaths.length > 0 && (
-            <ActionPanel.Section title="打开文件">
+            <ActionPanel.Section title="Open Files">
               {filePaths
                 .map((file, index) => {
                   const localPath = siyuanAPI.getLocalFilePath(file.path);
 
-                  // 只保留用默认应用打开的选项
+                  // Only keep open with default app option
                   if (localPath) {
                     return (
                       <FileAction
@@ -222,12 +222,15 @@ function NoteDetail({ block }: { block: SiYuanBlock }) {
             </ActionPanel.Section>
           )}
 
-          <ActionPanel.Section title="其他操作">
+          <ActionPanel.Section title="Other Actions">
             <Action.CopyToClipboard
-              title="复制文档内容"
+              title="Copy Document Content"
               content={documentContent || block.markdown || block.content || ""}
             />
-            <Action.CopyToClipboard title="复制文档id" content={block.id} />
+            <Action.CopyToClipboard
+              title="Copy Document Id"
+              content={block.id}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -248,11 +251,11 @@ export default function RecentNotes() {
       const notes = await siyuanAPI.getRecentDocs();
       setRecentNotes(notes);
     } catch (error) {
-      console.error("获取最近文档失败:", error);
+      console.error("Failed to get recent documents:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "获取最近文档失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Failed to Get Recent Documents",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setLoading(false);
@@ -264,13 +267,13 @@ export default function RecentNotes() {
       await Clipboard.copy(content);
       showToast({
         style: Toast.Style.Success,
-        title: "已复制到剪贴板",
+        title: "Copied to Clipboard",
       });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "复制失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Copy Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -283,7 +286,7 @@ export default function RecentNotes() {
   const getTimeAgo = (timestamp: string) => {
     try {
       const noteTime = parseSiYuanTime(timestamp);
-      if (!noteTime) return "无效时间";
+      if (!noteTime) return "Invalid time";
 
       const now = new Date();
       const diffMs = now.getTime() - noteTime.getTime();
@@ -291,24 +294,24 @@ export default function RecentNotes() {
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-      if (diffMins < 1) return "刚刚";
-      if (diffMins < 60) return `${diffMins}分钟前`;
-      if (diffHours < 24) return `${diffHours}小时前`;
-      if (diffDays < 7) return `${diffDays}天前`;
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins} min ago`;
+      if (diffHours < 24) return `${diffHours} hr ago`;
+      if (diffDays < 7) return `${diffDays} days ago`;
 
-      return noteTime.toLocaleDateString("zh-CN");
+      return noteTime.toLocaleDateString("en-US");
     } catch (error) {
-      return "无效时间";
+      return "Invalid time";
     }
   };
 
   const getAccessories = (note: SiYuanBlock) => {
     const accessories = [];
 
-    // 添加最后访问时间
+    // Add last access time
     accessories.push({
       text: getTimeAgo(note.updated),
-      tooltip: `最后更新: ${formatSiYuanTime(note.updated)}`,
+      tooltip: `Last updated: ${formatSiYuanTime(note.updated)}`,
     });
 
     return accessories;
@@ -317,11 +320,11 @@ export default function RecentNotes() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder="搜索最近访问的笔记..."
+      searchBarPlaceholder="Search recent notes..."
       actions={
         <ActionPanel>
           <Action
-            title="刷新列表"
+            title="Refresh List"
             icon={Icon.ArrowClockwise}
             onAction={refreshList}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -332,12 +335,12 @@ export default function RecentNotes() {
       {recentNotes.length === 0 ? (
         <List.EmptyView
           icon={Icon.Clock}
-          title="暂无最近访问的笔记"
-          description="在思源中打开文档后，会在这里显示"
+          title="No Recent Notes"
+          description="Open documents in SiYuan and they will appear here"
           actions={
             <ActionPanel>
               <Action
-                title="刷新列表"
+                title="Refresh List"
                 icon={Icon.ArrowClockwise}
                 onAction={refreshList}
               />
@@ -353,35 +356,35 @@ export default function RecentNotes() {
               tintColor: index < 3 ? Color.Blue : Color.SecondaryText,
             }}
             title={note.name || note.content.substring(0, 50)}
-            subtitle={`${note.notebook_name || "未知笔记本"} · ${note.hpath || note.path || "未知路径"}`}
+            subtitle={`${note.notebook_name || "Unknown Notebook"} · ${note.hpath || note.path || "Unknown Path"}`}
             accessories={getAccessories(note)}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="查看详情"
+                  title="View Details"
                   icon={Icon.Eye}
                   target={<NoteDetail block={note} />}
                 />
                 <Action
-                  title="复制内容"
+                  title="Copy Content"
                   icon={Icon.Clipboard}
                   onAction={() => copyLink(note.markdown || note.content)}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
                 <Action
-                  title="复制链接"
+                  title="Copy Link"
                   icon={Icon.Link}
                   onAction={() => copyLink(`siyuan://blocks/${note.id}`)}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
                 <Action.OpenInBrowser
                   url={siyuanAPI.getDocUrl(note.rootID || note.id)}
-                  title="在思源笔记中打开"
+                  title="Open in Siyuan"
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
                 <ActionPanel.Section>
                   <Action
-                    title="刷新列表"
+                    title="Refresh List"
                     icon={Icon.ArrowClockwise}
                     onAction={refreshList}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}

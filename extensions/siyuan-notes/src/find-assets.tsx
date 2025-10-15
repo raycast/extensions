@@ -43,7 +43,7 @@ export default function FindAssets() {
     };
   }, [searchText]);
 
-  // 检查工作空间配置
+  // Check workspace configuration
   const checkWorkspaceConfig = () => {
     if (!preferences.workspacePath || preferences.workspacePath.trim() === "") {
       return false;
@@ -51,24 +51,24 @@ export default function FindAssets() {
     return true;
   };
 
-  // 搜索 assets 文件（使用防抖后的搜索文本）
+  // Search assets files (using debounced search text)
   const { isLoading, data: rawAssets = [] } = useCachedPromise(
     async (query: string, type: string) => {
       try {
-        // 检查工作空间配置
+        // Check workspace configuration
         if (!checkWorkspaceConfig()) {
-          throw new Error("请先配置 SiYuan 工作空间路径");
+          throw new Error("Please configure SiYuan workspace path first");
         }
 
         const fileType =
           type === "all" ? undefined : (type as AssetFile["type"]);
         return await siyuanAPI.searchAssets(query, fileType);
       } catch (error) {
-        console.error("搜索 assets 文件失败:", error);
+        console.error("Failed to search assets files:", error);
         showToast({
           style: Toast.Style.Failure,
-          title: "搜索失败",
-          message: error instanceof Error ? error.message : "未知错误",
+          title: "Search Failed",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
         return [];
       }
@@ -76,24 +76,24 @@ export default function FindAssets() {
     [debouncedSearchText, filterType],
     {
       keepPreviousData: true,
-      execute: checkWorkspaceConfig(), // 只在配置正确时执行
+      execute: checkWorkspaceConfig(), // Execute only when config is correct
     },
   );
 
-  // 排序后的文件列表（按名称排序）- 使用 useMemo 避免频繁重新计算
+  // Sorted file list (sorted by name) - use useMemo to avoid frequent recalculation
   const assets = useMemo(() => {
     return [...rawAssets].sort((a, b) => {
-      return a.name.localeCompare(b.name, "zh-CN");
+      return a.name.localeCompare(b.name, "en-US");
     });
   }, [rawAssets]);
 
-  // 限制同时显示的文件数量，避免渲染过多项目
+  // Limit number of files displayed simultaneously to avoid rendering too many items
   const maxDisplayItems = 100;
   const displayAssets = useMemo(() => {
     return assets.slice(0, maxDisplayItems);
-  }, [assets, maxDisplayItems]);
+  }, [assets]);
 
-  // 统计信息 - 使用 useMemo 避免频繁重新计算
+  // Statistics - use useMemo to avoid frequent recalculation
   const { totalFiles, totalSize } = useMemo(() => {
     return {
       totalFiles: assets.length,
@@ -101,7 +101,7 @@ export default function FindAssets() {
     };
   }, [assets]);
 
-  // 格式化文件大小
+  // Format file size
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 B";
     const k = 1024;
@@ -110,9 +110,9 @@ export default function FindAssets() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
   };
 
-  // 格式化时间为日期（不显示具体时间）
+  // Format time as date (without specific time)
   const formatDate = (timeStr: string): string => {
-    if (!timeStr) return "未知日期";
+    if (!timeStr) return "Unknown date";
     try {
       // SiYuan 时间格式: YYYYMMDDHHMMSS
       if (timeStr.length === 14) {
@@ -142,7 +142,7 @@ export default function FindAssets() {
     }
   };
 
-  // 引用信息缓存
+  // Reference information cache
   const [referenceCache, setReferenceCache] = useState<
     Record<
       string,
@@ -159,21 +159,21 @@ export default function FindAssets() {
   );
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
 
-  // 限制并发请求数量
+  // Limit concurrent request count
   const maxConcurrentRequests = 3;
   const [requestQueue, setRequestQueue] = useState<string[]>([]);
   const [activeRequests, setActiveRequests] = useState(0);
 
-  // 懒加载引用信息 - 优化版本
+  // Lazy load reference information - optimized version
   const loadReferenceInfo = async (fileName: string) => {
     if (
       referenceCache[fileName] !== undefined ||
       loadingReferences.has(fileName)
     ) {
-      return; // 已加载或正在加载
+      return; // Already loaded or loading
     }
 
-    // 如果达到最大并发数，将请求加入队列
+    // Add to queue if max concurrent limit reached
     if (activeRequests >= maxConcurrentRequests) {
       setRequestQueue((prev) => [...prev, fileName]);
       return;
@@ -189,8 +189,8 @@ export default function FindAssets() {
         [fileName]: reference,
       }));
     } catch (error) {
-      console.error("加载引用信息失败:", error);
-      // 失败时也要记录到缓存中，避免重复请求
+      console.error("Failed to load reference info:", error);
+      // Record to cache even on failure to avoid repeated requests
       setReferenceCache((prev) => ({
         ...prev,
         [fileName]: null,
@@ -203,7 +203,7 @@ export default function FindAssets() {
       });
       setActiveRequests((prev) => prev - 1);
 
-      // 处理队列中的下一个请求
+      // Process next request in queue
       setRequestQueue((queue) => {
         if (queue.length > 0) {
           const nextFileName = queue[0];
@@ -216,32 +216,32 @@ export default function FindAssets() {
     }
   };
 
-  // 当项目变为可见时才加载引用信息
+  // Load reference info only when item becomes visible
   const handleItemVisible = (fileName: string) => {
     if (!visibleItems.has(fileName)) {
       setVisibleItems((prev) => new Set(prev).add(fileName));
-      // 延迟加载，避免同时触发大量请求
+      // Delayed loading to avoid triggering too many requests simultaneously
       setTimeout(() => loadReferenceInfo(fileName), Math.random() * 1000 + 200);
     }
   };
 
-  // 获取文件的引用信息文本
+  // Get file reference info text
   const getFileSubtitle = (file: AssetFile): string => {
     const cachedReference = referenceCache[file.name];
     if (cachedReference) {
       const refDate = formatDate(cachedReference.updated);
-      return `被引用于: ${cachedReference.doc_title} • ${refDate}`;
+      return `Referenced in: ${cachedReference.doc_title} • ${refDate}`;
     }
-    return `文件大小: ${formatFileSize(file.size)} • 修改日期: ${formatDate(file.modTime)}`;
+    return `File size: ${formatFileSize(file.size)} • Modified: ${formatDate(file.modTime)}`;
   };
 
-  // 获取引用文档的跳转URL
+  // Get reference document jump URL
   const getReferenceUrl = (fileName: string): string | null => {
     const cachedReference = referenceCache[fileName];
     return cachedReference ? siyuanAPI.getDocUrl(cachedReference.doc_id) : null;
   };
 
-  // 获取文件图标
+  // Get file icon
   const getFileIcon = (file: AssetFile) => {
     switch (file.type) {
       case "image":
@@ -259,7 +259,7 @@ export default function FindAssets() {
     }
   };
 
-  // 复制内容到剪贴板
+  // Copy content to clipboard
   const copyToClipboard = async (content: string, message: string) => {
     try {
       await Clipboard.copy(content);
@@ -270,29 +270,29 @@ export default function FindAssets() {
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "复制失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Copy Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
-  // 复制文件到桌面
+  // Copy file to desktop
   const copyFileToDesktop = async (file: AssetFile) => {
     try {
       if (!file.fullPath) {
-        throw new Error("无法获取文件路径");
+        throw new Error("Unable to get file path");
       }
 
       const desktopPath = path.join(process.env.HOME || "", "Desktop");
       const destinationPath = path.join(desktopPath, file.name);
 
-      // 使用 fs 模块复制文件
+      // Use fs module to copy file
       const fs = await import("fs/promises");
 
-      // 检查目标文件是否已存在
+      // Check if target file already exists
       try {
         await fs.access(destinationPath);
-        // 如果文件已存在，生成新的文件名
+        // If file exists, generate new filename
         const nameWithoutExt = path.parse(file.name).name;
         const ext = path.parse(file.name).ext;
         const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -302,50 +302,50 @@ export default function FindAssets() {
 
         showToast({
           style: Toast.Style.Success,
-          title: "文件已复制到桌面",
-          message: `已重命名为: ${newName}`,
+          title: "File Copied to Desktop",
+          message: `Renamed to: ${newName}`,
         });
       } catch {
-        // 文件不存在，直接复制
+        // File doesn't exist, copy directly
         await fs.copyFile(file.fullPath, destinationPath);
 
         showToast({
           style: Toast.Style.Success,
-          title: "文件已复制到桌面",
+          title: "File Copied to Desktop",
           message: file.name,
         });
       }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "复制文件失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Failed to Copy File",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
-  // 测试连接
+  // Test connection
   const testConnection = async () => {
     try {
       const isConnected = await siyuanAPI.testConnection();
       if (isConnected) {
         showToast({
           style: Toast.Style.Success,
-          title: "连接成功",
-          message: "SiYuan 服务器连接正常",
+          title: "Connection Successful",
+          message: "SiYuan server connection is working",
         });
       } else {
         showToast({
           style: Toast.Style.Failure,
-          title: "连接失败",
-          message: "无法连接到 SiYuan 服务器",
+          title: "Connection Failed",
+          message: "Unable to connect to SiYuan server",
         });
       }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "连接测试失败",
-        message: error instanceof Error ? error.message : "未知错误",
+        title: "Connection Test Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -355,20 +355,20 @@ export default function FindAssets() {
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={handleSearchTextChange}
-      searchBarPlaceholder={`搜索 assets 附件文件... (共 ${totalFiles} 个文件，显示前 ${Math.min(maxDisplayItems, totalFiles)} 个，${formatFileSize(totalSize)})`}
+      searchBarPlaceholder={`Search assets files... (${totalFiles} files total, showing first ${Math.min(maxDisplayItems, totalFiles)}, ${formatFileSize(totalSize)})`}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="按文件类型筛选"
+          tooltip="Filter by file type"
           storeValue={true}
           onChange={setFilterType}
         >
-          <List.Dropdown.Item title="全部文件" value="all" />
-          <List.Dropdown.Item title="图片" value="image" />
-          <List.Dropdown.Item title="文档" value="document" />
-          <List.Dropdown.Item title="压缩包" value="archive" />
-          <List.Dropdown.Item title="视频" value="video" />
-          <List.Dropdown.Item title="音频" value="audio" />
-          <List.Dropdown.Item title="其他" value="other" />
+          <List.Dropdown.Item title="All Files" value="all" />
+          <List.Dropdown.Item title="Images" value="image" />
+          <List.Dropdown.Item title="Documents" value="document" />
+          <List.Dropdown.Item title="Archives" value="archive" />
+          <List.Dropdown.Item title="Videos" value="video" />
+          <List.Dropdown.Item title="Audio" value="audio" />
+          <List.Dropdown.Item title="Other" value="other" />
         </List.Dropdown>
       }
     >
@@ -377,30 +377,30 @@ export default function FindAssets() {
           icon={Icon.Folder}
           title={
             !checkWorkspaceConfig()
-              ? "需要配置工作空间路径"
+              ? "Workspace Path Configuration Required"
               : searchText
-                ? "未找到匹配的文件"
-                : "开始搜索"
+                ? "No Matching Files Found"
+                : "Start Searching"
           }
           description={
             !checkWorkspaceConfig()
-              ? "请在扩展设置中配置 SiYuan 工作空间路径，才能搜索 assets 文件"
+              ? "Please configure SiYuan workspace path in extension settings to search assets files"
               : searchText
-                ? `未找到包含 "${searchText}" 的文件`
-                : "输入关键词来搜索 assets 文件夹中的附件"
+                ? `No files found containing "${searchText}"`
+                : "Enter keywords to search attachment files in assets folder"
           }
           actions={
             <ActionPanel>
               {!checkWorkspaceConfig() ? (
                 <Action
-                  title="打开扩展设置"
+                  title="Open Extension Settings"
                   icon={Icon.Gear}
                   onAction={openExtensionPreferences}
                   shortcut={{ modifiers: ["cmd"], key: "comma" }}
                 />
               ) : null}
               <Action
-                title="测试连接"
+                title="Test Connection"
                 icon={Icon.Wifi}
                 onAction={testConnection}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
@@ -424,21 +424,21 @@ export default function FindAssets() {
             ]}
             actions={
               <ActionPanel>
-                <ActionPanel.Section title="文件操作">
+                <ActionPanel.Section title="File Operations">
                   <Action.Open
-                    title="打开文件"
+                    title="Open File"
                     icon={Icon.ArrowNe}
                     target={file.fullPath}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
                   {(() => {
-                    // 当用户查看Action面板时才触发懒加载
+                    // Trigger lazy loading only when user views Action panel
                     handleItemVisible(file.name);
 
                     const referenceUrl = getReferenceUrl(file.name);
                     return referenceUrl ? (
                       <Action.OpenInBrowser
-                        title="在 Siyuan 中打开引用文档"
+                        title="Open Referenced Document in Siyuan"
                         icon={Icon.Document}
                         url={referenceUrl}
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -446,49 +446,51 @@ export default function FindAssets() {
                     ) : null;
                   })()}
                   <Action.ShowInFinder
-                    title="在 Finder 中显示"
+                    title="Show in Finder"
                     path={file.fullPath}
                     shortcut={{ modifiers: ["cmd"], key: "f" }}
                   />
                   <Action
-                    title="复制到桌面"
+                    title="Copy to Desktop"
                     icon={Icon.Desktop}
                     onAction={() => copyFileToDesktop(file)}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                   />
                 </ActionPanel.Section>
 
-                <ActionPanel.Section title="复制信息">
+                <ActionPanel.Section title="Copy Information">
                   <Action
-                    title="复制文件路径"
+                    title="Copy File Path"
                     icon={Icon.Clipboard}
                     onAction={() =>
-                      copyToClipboard(file.fullPath, "文件路径已复制")
+                      copyToClipboard(file.fullPath, "File path copied")
                     }
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
                   <Action
-                    title="复制文件名"
+                    title="Copy File Name"
                     icon={Icon.Text}
-                    onAction={() => copyToClipboard(file.name, "文件名已复制")}
+                    onAction={() =>
+                      copyToClipboard(file.name, "File name copied")
+                    }
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                   <Action
-                    title="复制相对路径"
+                    title="Copy Relative Path"
                     icon={Icon.Link}
                     onAction={() =>
                       copyToClipboard(
                         `assets/${file.name}`,
-                        "相对路径已复制（可用于 SiYuan 引用）",
+                        "Relative path copied (for SiYuan reference)",
                       )
                     }
                     shortcut={{ modifiers: ["cmd", "alt"], key: "c" }}
                   />
                 </ActionPanel.Section>
 
-                <ActionPanel.Section title="其他操作">
+                <ActionPanel.Section title="Other Actions">
                   <Action
-                    title="测试连接"
+                    title="Test Connection"
                     icon={Icon.Wifi}
                     onAction={testConnection}
                     shortcut={{ modifiers: ["cmd"], key: "t" }}
@@ -501,8 +503,8 @@ export default function FindAssets() {
       )}
       {assets.length > maxDisplayItems && (
         <List.Item
-          title={`还有 ${assets.length - maxDisplayItems} 个文件未显示`}
-          subtitle="请使用搜索功能缩小范围"
+          title={`${assets.length - maxDisplayItems} more files not displayed`}
+          subtitle="Please use search to narrow down results"
           icon={{ source: Icon.Info, tintColor: Color.Orange }}
         />
       )}
