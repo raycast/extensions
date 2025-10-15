@@ -29,7 +29,7 @@ export default function UpdateKey({ apiKey, onKeyUpdated }: UpdateKeyProps) {
       setIsLoading(true);
 
       const req: V2KeysUpdateKeyRequestBody = {
-        keyId: "apiKey.keyId",
+        keyId: apiKey.keyId,
         externalId: values.externalId || null,
         meta: values.meta ? JSON.parse(values.meta) : null,
         expires: values.expires ? values.expires.valueOf() : null,
