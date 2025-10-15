@@ -14,7 +14,7 @@ export const useProfiles = () => {
 
   useEffect(() => {
     getHistory_();
-  }, []);
+  }, [getHistory_]);
 
   return { profiles, isLoading, refresh: getHistory_ };
 };
