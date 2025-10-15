@@ -11,7 +11,11 @@ import { ServerSubmenu } from "./components/ServerSubmenu";
 import { DocumentationSection } from "./components/DocumentationSection";
 import { NoServersSection } from "./components/NoServersSection";
 
+export const platform = process.platform === "darwin" ? "macos" : "windows";
+
 export default function Command() {
+  if (platform !== "macos") return;
+
   const { processes, processDetails, isLoading, revalidate } = useNuxtProcesses();
 
   const hasServersRunning = processes.length > 0;
