@@ -21,5 +21,4 @@ export const TLDs: string[] = [
   "tech",
   "icu",
   "life",
-  "space",
 ];

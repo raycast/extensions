@@ -34,21 +34,21 @@ export default function Command() {
       {/* results */}
       {data?.type === "success" && (
         <>
-          {(category === "all" || category === "extensions") && (
+          {(category === "all" || category === "extensions") && data.data.alternate_extensions && (
             <List.Section title="Extensions">
               {data.data.alternate_extensions.map((result) => (
                 <DomainItem key={`extensions-${result.domain}`} result={result} />
               ))}
             </List.Section>
           )}
-          {(category === "all" || category === "generator") && (
+          {(category === "all" || category === "generator") && data.data.suggestions && (
             <List.Section title="Generator">
               {data.data.suggestions.map((result) => (
                 <DomainItem key={`generator-${result.domain}`} result={result} />
               ))}
             </List.Section>
           )}
-          {(category === "all" || category === "premium") && (
+          {(category === "all" || category === "premium") && data.data.aftermarket_domains && (
             <List.Section title="Premium">
               {data.data.aftermarket_domains.map((result) => (
                 <DomainItem

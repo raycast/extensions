@@ -5,6 +5,9 @@
   "description": "Find domains, check availability, search popular extensions, and buy premium domains.",
   "icon": "extension-icon.png",
   "author": "instantdomainsearch",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -132,7 +135,8 @@
   },
   "dependencies": {
     "@raycast/api": "^1.103.1",
-    "@raycast/utils": "^2.0.1"
+    "@raycast/utils": "^2.0.1",
+    "global-tld-list": "^1.22.47"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
