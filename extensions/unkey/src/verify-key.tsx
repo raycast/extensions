@@ -68,15 +68,15 @@ export default function VerifyKey() {
             </Detail.Metadata.TagList>
           )}
           <Detail.Metadata.Separator />
-          {/* {verifyKeyResponse.ratelimit ? (
+          {verifyKeyResponse.ratelimits?.length ? (
             <Detail.Metadata.TagList title="Rate Limit">
-              {Object.entries(verifyKeyResponse.ratelimit).map(([key, val]) => (
+              {Object.entries(verifyKeyResponse.ratelimits[0]).map(([key, val]) => (
                 <Detail.Metadata.TagList.Item key={key} text={`${key}: ${val}`} />
               ))}
             </Detail.Metadata.TagList>
           ) : (
             <Detail.Metadata.Label title="Rate Limit" icon={Icon.Minus} />
-          )} */}
+          )}
         </Detail.Metadata>
       }
     />

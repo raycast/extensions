@@ -1,7 +1,6 @@
 import { confirmAlert, Icon, Color, Alert, showToast, Toast, List, ActionPanel, Action, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { KeyResponseData } from "@unkey/api/dist/commonjs/models/components";
-// import OpenInUnkey from "../components/OpenInUnkey";
 import { unkey } from "../unkey";
 import { GetApiInfoResponse } from "../utils/types";
 import CreateKey from "./CreateKey";
@@ -120,7 +119,6 @@ export default function ListKeys({ apiInfo }: KeysProps) {
                       onAction={() => confirmAndDelete(key)}
                     />
                   )}
-                  {/* <OpenInUnkey route={`${WORKSPACE_ID}/apis/${apiId}/keys/${key.keyId}`} /> */}
                   <ActionPanel.Section>
                     <Action.Push
                       title="Create New Key"
