@@ -1,6 +1,6 @@
 #  Zed Recent Projects Changelog
 
-## [Fixes] - 2025-10-15
+## [Fixes] - {PR_MERGE_DATE}
 
 - Fix projects loading if user has custom configuration in ~/.sqliterc.
 
