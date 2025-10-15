@@ -3,7 +3,6 @@
 ## [2.1.1] - 2025-10-15
 
 - **Fixed**: Added Windows support
-- **Refactored**: Update Nuxt Dev Server command name (MacOS only)
 
 ## [2.1.0] - 2025-10-15
 
