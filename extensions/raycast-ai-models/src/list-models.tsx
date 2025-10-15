@@ -1,12 +1,122 @@
 import { ActionPanel, Detail, List, Action, Icon, showToast, Toast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
-import { fetchModels, Model, sortModels, SortBy } from "./api";
-import { getFavicon } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import { API_URL, Model, sortModels, SortBy } from "./api";
+import { getFavicon, useFetch } from "@raycast/utils";
+
+function ModelDetailView({ model }: { model: Model }) {
+  const markdown = `
+# ${model.name}
+
+${model.description || "No description available"}
+
+---
+
+## Basic Information
+
+- **Model ID**: \`${model.id}\`
+- **Provider**: ${model.provider_name || model.provider}
+- **Status**: ${model.status || "N/A"}
+- **Availability**: ${model.availability || "N/A"}
+- **Requires Better AI**: ${model.requires_better_ai ? "Yes" : "No"}
+${model.in_better_ai_subscription !== undefined ? `- **In Better AI Subscription**: ${model.in_better_ai_subscription ? "Yes" : "No"}` : ""}
+
+## Performance Metrics
+
+- **Intelligence**: ${model.intelligence || "N/A"}
+- **Speed**: ${model.speed || "N/A"} ${model.speed ? "(lower is faster)" : ""}
+- **Context Window**: ${model.context ? `${model.context}k tokens` : "N/A"}
+
+## Features
+
+${model.features && model.features.length > 0 ? model.features.map((f) => `- ${f}`).join("\n") : "No features listed"}
+
+${model.suggestions && model.suggestions.length > 0 ? `\n## Suggestions\n\n${model.suggestions.map((s) => `- ${s}`).join("\n")}` : ""}
+
+## Capabilities
+
+${
+  model.capabilities && Object.keys(model.capabilities).length > 0
+    ? Object.entries(model.capabilities)
+        .map(([key, value]) => `- **${key}**: ${value}`)
+        .join("\n")
+    : "No capabilities listed"
+}
+
+## Abilities
+
+${
+  model.abilities
+    ? `
+### Web Search
+${model.abilities.web_search ? `- Toggleable: ${model.abilities.web_search.toggleable ? "Yes" : "No"}\n- Native: ${model.abilities.web_search.native ? "Yes" : "No"}` : "Not supported"}
+
+### Image Generation
+${model.abilities.image_generation ? `- Model: \`${model.abilities.image_generation.model || "N/A"}\`` : "Not supported"}
+
+### Vision
+${model.abilities.vision ? `- Supported formats: ${model.abilities.vision.formats?.join(", ") || "N/A"}` : "Not supported"}
+
+### System Message
+${model.abilities.system_message ? `- Supported: ${model.abilities.system_message.supported ? "Yes" : "No"}` : "Not supported"}
+
+### Temperature
+${model.abilities.temperature ? `- Supported: ${model.abilities.temperature.supported ? "Yes" : "No"}` : "Not supported"}
+
+### Tools
+${model.abilities.tools ? `- Supported: ${model.abilities.tools.supported ? "Yes" : "No"}\n- Limit: ${model.abilities.tools.limit || "N/A"}` : "Not supported"}
+
+### Reasoning Effort
+${model.abilities.reasoning_effort ? `- Supported: ${model.abilities.reasoning_effort.supported ? "Yes" : "No"}\n- Options: ${model.abilities.reasoning_effort.options?.join(", ") || "N/A"}\n- Default: ${model.abilities.reasoning_effort.default || "N/A"}` : "Not supported"}
+
+### Streaming
+${model.abilities.streaming ? `- Supported: ${model.abilities.streaming.supported ? "Yes" : "No"}` : "Not supported"}
+
+### Thinking
+${model.abilities.thinking ? `- Supported: ${model.abilities.thinking.supported ? "Yes" : "No"}` : "Not supported"}
+`
+    : "No abilities information available"
+}
+`;
+
+  return (
+    <Detail
+      markdown={markdown}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Model ID" text={model.id} />
+          <Detail.Metadata.Label title="Name" text={model.name} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Provider" text={model.provider_name || model.provider || "N/A"} />
+          <Detail.Metadata.Label title="Status" text={model.status || "N/A"} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Intelligence" text={String(model.intelligence || "N/A")} />
+          <Detail.Metadata.Label title="Speed" text={String(model.speed || "N/A")} />
+          {model.context && <Detail.Metadata.Label title="Context" text={`${model.context}k tokens`} />}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.TagList title="Features">
+            {model.features && model.features.length > 0 ? (
+              model.features.map((feature) => <Detail.Metadata.TagList.Item key={feature} text={feature} />)
+            ) : (
+              <Detail.Metadata.TagList.Item text="None" />
+            )}
+          </Detail.Metadata.TagList>
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Model ID" content={model.id} />
+          <Action.CopyToClipboard
+            title="Copy Full JSON"
+            content={JSON.stringify(model, null, 2)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export default function Command() {
-  const [models, setModels] = useState<Model[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<string>("intelligence_desc");
 
   const { sortBy, desc } = useMemo(() => {
@@ -16,53 +126,41 @@ export default function Command() {
     return { sortBy: sortType, desc: isDesc };
   }, [sortConfig]);
 
-  useEffect(() => {
-    let mounted = true;
-
-    // Immediately try to load cached data first (show stale data fast)
-    fetchModels()
-      .then((ms) => {
-        if (!mounted) return;
-        setModels(ms);
-        setLoading(false);
-      })
-      .catch((e) => {
-        if (!mounted) return;
-        setError(String(e));
-        showToast({ style: Toast.Style.Failure, title: "Failed to load models", message: String(e) });
-        setLoading(false);
-      });
-
-    // Then fetch fresh data in the background (revalidate)
-    const revalidate = async () => {
-      try {
-        const fresh = await fetchModels({ force: true });
-        if (mounted) {
-          setModels(fresh);
-        }
-      } catch (e) {
-        // Silent fail for background refresh
-        console.error("Background refresh failed:", e);
+  const {
+    isLoading,
+    data: models = [],
+    revalidate,
+  } = useFetch(API_URL, {
+    headers: { Accept: "application/json" },
+    parseResponse: async (response: Response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
       }
-    };
-
-    // Start background refresh after a short delay to avoid blocking UI
-    const timer = setTimeout(revalidate, 100);
-
-    return () => {
-      mounted = false;
-      clearTimeout(timer);
-    };
-  }, []);
+      return (await response.json()) as { models: Model[] } | Model[];
+    },
+    mapResult: (result: { models: Model[] } | Model[]) => {
+      const modelsList = Array.isArray(result) ? result : result.models;
+      return { data: modelsList };
+    },
+    initialData: [],
+    keepPreviousData: true,
+    onError: (error: Error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load models",
+        message: error.message,
+      });
+    },
+  });
 
   const sorted = useMemo(() => {
-    if (!models) return [] as Model[];
+    if (!models || models.length === 0) return [] as Model[];
     return sortModels(models, sortBy, desc);
   }, [models, sortBy, desc]);
 
   // Memoize favicon URLs to avoid recomputation
   const modelIcons = useMemo(() => {
-    if (!models) return new Map<string, string>();
+    if (!models || models.length === 0) return new Map<string, string>();
     return new Map(
       models.map((m) => [
         m.id,
@@ -73,20 +171,9 @@ export default function Command() {
     );
   }, [models]);
 
-  if (loading) {
-    return <List isLoading={true} />;
-  }
-
-  if (error) {
-    return (
-      <List>
-        <List.EmptyView title="Error" description={error} />
-      </List>
-    );
-  }
-
   return (
     <List
+      isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown value={sortConfig} tooltip="Sort by" onChange={(v: string) => setSortConfig(v)}>
           <List.Dropdown.Item title="Intelligence (Desc)" value="intelligence_desc" />
@@ -112,40 +199,26 @@ export default function Command() {
             accessories={[{ text: `Intelligence ${m.intelligence}` }, { text: `Speed ${m.speed}` }]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Show Details"
-                  target={<Detail markdown={`# ${m.name}\n\n${m.description ?? ""}`} />}
-                />
+                <Action.Push title="Show Details" icon={Icon.Info} target={<ModelDetailView model={m} />} />
                 <Action.CopyToClipboard title="Copy Model ID" content={m.id} />
+                <Action.CopyToClipboard
+                  title="Copy Full JSON"
+                  content={JSON.stringify(m, null, 2)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+                <Action
+                  title="Refresh Models"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={async () => {
+                    await revalidate();
+                    showToast({ style: Toast.Style.Success, title: "Models refreshed" });
+                  }}
+                />
               </ActionPanel>
             }
           />
         ))}
-      </List.Section>
-      <List.Section title="Controls">
-        <List.Item
-          title="Refresh Models"
-          icon={Icon.ArrowClockwise}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Refresh"
-                onAction={async () => {
-                  setLoading(true);
-                  try {
-                    const ms = await fetchModels({ force: true });
-                    setModels(ms);
-                    showToast({ style: Toast.Style.Success, title: "Models refreshed" });
-                  } catch (e) {
-                    showToast({ style: Toast.Style.Failure, title: "Refresh failed", message: String(e) });
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-              />
-            </ActionPanel>
-          }
-        />
       </List.Section>
     </List>
   );

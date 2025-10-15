@@ -39,7 +39,7 @@ export type Model = {
   [key: string]: unknown;
 };
 
-const API_URL = "https://www.raycast.com/api/web-ai/models";
+export const API_URL = "https://www.raycast.com/api/web-ai/models";
 const CACHE_KEY = "raycast-models-cache";
 const CACHE_TIMESTAMP_KEY = "raycast-models-cache-timestamp";
 
