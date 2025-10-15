@@ -1,6 +1,6 @@
 # macOSIcons.com Changelog
 
-## [Enhanced Error Handling] - {PR_MERGE_DATE}
+## [Enhanced Error Handling] - 2025-10-15
 
 - Fix response body consumption bug preventing proper error messages
 - Add validation for API response structure to prevent crashes
