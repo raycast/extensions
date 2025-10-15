@@ -49,7 +49,10 @@ export default function SearchIconsCommand() {
         markdown={`# Error Loading Icons\n\n${errorMessage}`}
         actions={
           <ActionPanel>
-            <Action title="Open Preferences" onAction={openCommandPreferences} />
+            <Action
+              title="Open Preferences"
+              onAction={openCommandPreferences}
+            />
           </ActionPanel>
         }
       />
