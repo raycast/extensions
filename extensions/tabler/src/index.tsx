@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid, Color, showToast, Toast, showInFinder } from "@raycast/api";
 import { useFetch, showFailureToast } from "@raycast/utils";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
@@ -53,66 +53,50 @@ type FetchResult = {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [styleFilter, setStyleFilter] = useState<StyleFilter>("all");
-  const [page, setPage] = useState(1);
-  const [allIcons, setAllIcons] = useState<TablerIcon[]>([]);
 
-  const buildUrl = useCallback(() => {
-    const params = new URLSearchParams();
-    if (searchText) {
-      params.append("search", searchText);
-    }
-    if (styleFilter !== "all") {
-      params.append("style", styleFilter);
-    }
-    params.append("page", page.toString());
-    return `https://tabler.io/api/icons?${params.toString()}`;
-  }, [searchText, styleFilter, page]);
-
-  const { isLoading, data } = useFetch<FetchResult>(buildUrl(), {
-    keepPreviousData: true,
-    execute: true,
-    onData(newData) {
-      setAllIcons((prev) => (page === 1 ? newData.icons : [...prev, ...newData.icons]));
+  const { isLoading, data, pagination } = useFetch(
+    (options) => {
+      const params = new URLSearchParams();
+      if (searchText) {
+        params.append("search", searchText);
+      }
+      if (styleFilter !== "all") {
+        params.append("style", styleFilter);
+      }
+      params.append("page", String(options.page + 1));
+      return `https://tabler.io/api/icons?${params.toString()}`;
     },
-  });
-
-  const onSearchTextChange = useCallback((text: string) => {
-    setSearchText(text);
-    setPage(1);
-    setAllIcons([]);
-  }, []);
-
-  const onStyleFilterChange = useCallback((value: string) => {
-    setStyleFilter(value as StyleFilter);
-    setPage(1);
-    setAllIcons([]);
-  }, []);
-
-  const loadMore = useCallback(() => {
-    if (data?.pagination.hasNextPage && !isLoading) {
-      setPage((prev) => prev + 1);
-    }
-  }, [data?.pagination.hasNextPage, isLoading]);
+    {
+      keepPreviousData: true,
+      initialData: [],
+      mapResult(result: FetchResult) {
+        return {
+          data: result.icons,
+          hasMore: result.pagination.hasNextPage,
+        };
+      },
+    },
+  );
 
   return (
     <Grid
       isLoading={isLoading}
       inset={Grid.Inset.Large}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Filter by Style" value={styleFilter} onChange={onStyleFilterChange}>
+        <Grid.Dropdown
+          tooltip="Filter by Style"
+          value={styleFilter}
+          onChange={(value) => setStyleFilter(value as StyleFilter)}
+        >
           <Grid.Dropdown.Item title="All Styles" value="all" />
           <Grid.Dropdown.Item title="Outline" value="outline" />
           <Grid.Dropdown.Item title="Filled" value="filled" />
         </Grid.Dropdown>
       }
-      pagination={{
-        pageSize: 106,
-        hasMore: data?.pagination.hasNextPage ?? false,
-        onLoadMore: loadMore,
-      }}
+      pagination={pagination}
     >
-      {allIcons.map((tablerIcon) => {
+      {data.map((tablerIcon) => {
         const outline = tablerIcon.styles?.outline?.svg;
         const filled = tablerIcon.styles?.filled?.svg;
         return (
@@ -188,7 +172,7 @@ export default function Command() {
           />
         );
       })}
-      {!isLoading && allIcons.length === 0 && (
+      {!isLoading && data.length === 0 && (
         <Grid.EmptyView title="No Icons Found" description="Try a different search term" />
       )}
     </Grid>
