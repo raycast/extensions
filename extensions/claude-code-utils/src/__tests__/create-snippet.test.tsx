@@ -78,7 +78,7 @@ jest.mock("@raycast/api", () => ({
       Animated: "animated",
     },
   },
-  launchCommand: jest.fn(),
+  popToRoot: jest.fn(),
   LaunchType: {
     UserInitiated: "userInitiated",
     Background: "background",
@@ -93,7 +93,7 @@ jest.mock("../utils/claude-message", () => ({
 
 const mockCreateSnippet = createSnippet as jest.MockedFunction<typeof createSnippet>;
 const mockShowToast = RaycastAPI.showToast as jest.MockedFunction<typeof RaycastAPI.showToast>;
-const mockLaunchCommand = RaycastAPI.launchCommand as jest.MockedFunction<typeof RaycastAPI.launchCommand>;
+const mockPopToRoot = RaycastAPI.popToRoot as jest.MockedFunction<typeof RaycastAPI.popToRoot>;
 
 describe("CreateSnippet", () => {
   beforeEach(() => {
@@ -101,7 +101,7 @@ describe("CreateSnippet", () => {
     // Reset all mocks before each test
     mockCreateSnippet.mockReset();
     mockShowToast.mockReset();
-    mockLaunchCommand.mockReset();
+    mockPopToRoot.mockReset();
   });
 
   describe("Component Rendering", () => {
@@ -266,7 +266,7 @@ describe("CreateSnippet", () => {
       });
 
       expect(mockCreateSnippet).not.toHaveBeenCalled();
-      expect(mockLaunchCommand).not.toHaveBeenCalled();
+      expect(mockPopToRoot).not.toHaveBeenCalled();
     });
 
     it("should show error toast when content is only whitespace", async () => {
@@ -344,10 +344,7 @@ describe("CreateSnippet", () => {
         message: '"Test Title" has been saved',
       });
 
-      expect(mockLaunchCommand).toHaveBeenCalledWith({
-        name: "browse-snippets",
-        type: "userInitiated",
-      });
+      expect(mockPopToRoot).toHaveBeenCalled();
     });
 
     it("should create snippet with only content (no title)", async () => {
@@ -379,10 +376,7 @@ describe("CreateSnippet", () => {
         message: "Snippet has been saved",
       });
 
-      expect(mockLaunchCommand).toHaveBeenCalledWith({
-        name: "browse-snippets",
-        type: "userInitiated",
-      });
+      expect(mockPopToRoot).toHaveBeenCalled();
     });
 
     it("should trim whitespace from title and content", async () => {
@@ -469,7 +463,7 @@ describe("CreateSnippet", () => {
         });
       });
 
-      expect(mockLaunchCommand).not.toHaveBeenCalled();
+      expect(mockPopToRoot).not.toHaveBeenCalled();
     });
 
     it("should handle non-Error exceptions", async () => {

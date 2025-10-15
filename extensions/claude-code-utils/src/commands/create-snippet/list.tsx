@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, launchCommand, LaunchType, LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, LaunchProps, popToRoot } from "@raycast/api";
 import { useState } from "react";
 import { createSnippet } from "../../utils/claude-message";
 
@@ -35,11 +35,8 @@ export default function CreateSnippet(props?: LaunchProps<{ launchContext: Creat
         title: "Snippet created",
         message: snippetTitle ? `"${snippetTitle}" has been saved` : "Snippet has been saved",
       });
-      // Navigate to browse-snippets command
-      await launchCommand({
-        name: "browse-snippets",
-        type: LaunchType.UserInitiated,
-      });
+      // Pop back to the previous view (browse-snippets list)
+      popToRoot();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
