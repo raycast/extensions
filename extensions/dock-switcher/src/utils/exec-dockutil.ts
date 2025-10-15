@@ -11,7 +11,8 @@ export const execDockutil = (command: string, options?: ExecSyncOptionsWithBuffe
       title: "dockutil not found",
       message: "Please install dockutil using: brew install dockutil",
     });
-    return "";
+
+    throw new Error("dockutil not found");
   }
 
   try {

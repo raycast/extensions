@@ -9,6 +9,7 @@ const getDockUtilPath = () => {
   const commandFolderPath = execSync(`
   locations=(
 	/opt/homebrew/bin/dockutil
+        /usr/local/bin/dockutil
   )
   
   for location in "\${locations[@]}"

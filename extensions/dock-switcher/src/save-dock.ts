@@ -31,6 +31,15 @@ export default async function Command(props: LaunchProps<{ arguments: SaveDockAr
 
     const output = execDockutil("--list");
 
+    if (!output) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No dock items found",
+        message: "Your dock appears to be empty",
+      });
+      return;
+    }
+
     // Parse the output to get dock items
     // dockutil --list format: <name>\t<path>\t<type>\t<plist>\t<bundle_id>
     const dockItems = output

@@ -4,6 +4,7 @@ import { useProfiles } from "./hooks/useProfiles";
 import { execDockutil } from "./utils/exec-dockutil";
 import { ProfileDetail } from "./components/ProfileDetail";
 import { removeFromHistory } from "./utils/history";
+import { EmptyProfiles } from "./components/EmptyProfiles";
 
 export default function Command() {
   const { profiles, isLoading, refresh } = useProfiles();
@@ -93,10 +94,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search profiles..." isShowingDetail>
       {profiles.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No Profiles Found"
-          description="Save a dock profile first using the 'Save Dock' command"
-        />
+        <EmptyProfiles />
       ) : (
         profiles.map((entry) => (
           <List.Item
