@@ -9,10 +9,6 @@ export type MeetingExportFormat = "txt" | "md" | "json";
 export type MeetingExportType = "transcript" | "summary";
 export type TeamExportFormat = "csv" | "vcf" | "json";
 
-interface Preferences {
-  exportDirectory?: string;
-}
-
 /**
  * Build a clean, readable filename for exports
  * Format: fathom-{type}-YYYY-MM-DD-{short-id}.{ext}

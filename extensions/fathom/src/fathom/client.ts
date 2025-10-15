@@ -1,10 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Fathom } from "fathom-typescript";
 
-type Preferences = {
-  fathomApiKey: string;
-};
-
 let cachedClient: Fathom | null = null;
 
 /**
