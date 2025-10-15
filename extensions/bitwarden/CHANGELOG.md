@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Added support for Windows] - {PR_MERGE_DATE}
+## [Added support for Windows] - 2025-10-15
 
 ## [New Command] - 2025-10-07
 
