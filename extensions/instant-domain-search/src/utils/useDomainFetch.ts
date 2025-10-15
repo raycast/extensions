@@ -2,7 +2,7 @@ import { useFetch, useLocalStorage } from "@raycast/utils";
 import type { DomainSearchResponse } from "./types";
 import { useMemo } from "react";
 import { randomUUID } from "node:crypto";
-import { ANONYMOUS_USER_ID_KEY, ROOT_URL, TLDs } from "./config";
+import { ANONYMOUS_USER_ID_KEY, ROOT_URL, POPULAR_TLDs, ALL_TLDs } from "./config";
 import getUserAgent from "./getUserAgent";
 import { TLDs as GlobalTLDs } from "global-tld-list";
 

@@ -35,7 +35,10 @@ function PasteTotpAction() {
       title={currentApplicationName ? `Paste TOTP into ${currentApplicationName}` : "Paste TOTP"}
       icon={Icon.Window}
       onAction={pasteTotp}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      shortcut={{
+        macOS: { key: "t", modifiers: ["opt", "shift"] },
+        windows: { key: "t", modifiers: ["alt", "shift"] },
+      }}
       repromptDescription={`Pasting the TOTP of <${selectedItem.name}>`}
     />
   );

@@ -1,5 +1,7 @@
 # Bitwarden Changelog
 
+## [Added support for Windows] - 2025-10-15
+
 ## [New Command] - 2025-10-07
 
 - Add Create Login command to create new login items
