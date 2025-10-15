@@ -1,64 +1,14 @@
-import { useState, useEffect } from "react";
-import { Icon, MenuBarExtra, openCommandPreferences, getPreferenceValues, Cache } from "@raycast/api";
-
-interface EtherscanResponse {
-  jsonrpc: string;
-  id: number;
-  result: string;
-}
-
-const cache = new Cache();
-const PRICE_CACHE_KEY = "base-gas-price";
-
-async function fetchGasPrice(apiKey: string): Promise<number> {
-  const response = await fetch(
-    `https://api.etherscan.io/v2/api?chainid=8453&module=proxy&action=eth_gasPrice&apikey=${apiKey}`,
-  );
-
-  const data = (await response.json()) as EtherscanResponse;
-
-  if (!data.result) {
-    throw new Error("Invalid response");
-  }
-
-  const priceInWei = Number.parseInt(data.result.substring(2), 16);
-  const finalPrice = priceInWei / 1e6;
-
-  return finalPrice;
-}
+import { Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+import { useGasPrice } from "./hook/useGasPrice";
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | undefined>();
-  const { apiKey } = getPreferenceValues<Preferences>();
-  const [displayPrice, setDisplayPrice] = useState(() => cache.get(PRICE_CACHE_KEY) || "");
-
-  useEffect(() => {
-    const updatePrice = async () => {
-      try {
-        const newPrice = await fetchGasPrice(apiKey);
-        const newPriceString = `${newPrice.toFixed(0)}`;
-
-        if (newPriceString !== cache.get(PRICE_CACHE_KEY)) {
-          cache.set(PRICE_CACHE_KEY, newPriceString);
-          setDisplayPrice(newPriceString);
-        }
-        setError(undefined);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch gas price");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void updatePrice();
-  }, [apiKey]);
+  const { data, isLoading, error } = useGasPrice({ includeUnit: false });
 
   return (
     <MenuBarExtra
       icon={error ? Icon.ExclamationMark : "base.png"}
-      title={displayPrice}
-      tooltip={error}
+      title={data || ""}
+      tooltip={error?.message}
       isLoading={isLoading}
     >
       <MenuBarExtra.Item
