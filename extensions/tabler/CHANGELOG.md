@@ -1,6 +1,6 @@
 # tabler Changelog
 
-## [Fix Pagination & Add Search] - {PR_MERGE_DATE}
+## [Fix Pagination & Add Search] - 2025-10-15
 
 - Fixed pagination issue where only icons starting with 'A' were displayed
 - Added search functionality to find icons by name or keyword
