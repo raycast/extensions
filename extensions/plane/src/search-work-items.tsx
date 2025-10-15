@@ -14,7 +14,7 @@ function SearchWorkItems() {
   const { projects } = useProjects({});
   const { isLoading, workItems, mutate } = useWorkItems(query, projectId);
 
-  const numberOfIssues = workItems?.length === 1 ? "1 issue" : `${workItems?.length} issues`;
+  const numberOfIssues = workItems?.length === 1 ? "1 work item" : `${workItems?.length} work items`;
 
   return (
     <List
