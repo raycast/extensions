@@ -5,8 +5,6 @@ import { unkey } from "./unkey";
 import { V2KeysVerifyKeyRequestBody, V2KeysVerifyKeyResponseData } from "@unkey/api/dist/commonjs/models/components";
 
 export default function VerifyKey() {
-  // const { push } = useNavigation();
-
   const [verifyKeyResponse, setVerifyKeyResponse] = useState<V2KeysVerifyKeyResponseData>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -14,11 +12,10 @@ export default function VerifyKey() {
     async onSubmit(values) {
       setIsLoading(true);
       try {
-        const {data} = await unkey.keys.verifyKey({key: values.key});
-        setVerifyKeyResponse(data)
+        const { data } = await unkey.keys.verifyKey({ key: values.key });
+        setVerifyKeyResponse(data);
       } catch (error) {
         await showFailureToast(error);
-        // push(<ErrorComponent errorResponse={error} />);
       } finally {
         setIsLoading(false);
       }

@@ -1,5 +1,5 @@
 export type GetApiInfoResponse = {
-    id: string;
-    name: string;
-    workspaceId: string;
-}
+  id: string;
+  name: string;
+  workspaceId?: string;
+};

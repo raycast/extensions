@@ -12,18 +12,18 @@ type UpdateKeyProps = {
 export default function UpdateKey({ apiKey, onKeyUpdated }: UpdateKeyProps) {
   const { pop, push } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  
-  const {data: identities=[]} = useCachedPromise(async()=>{
-    const {result} = await unkey.identities.listIdentities({});
+
+  const { data: identities = [] } = useCachedPromise(async () => {
+    const { result } = await unkey.identities.listIdentities({});
     return result.data;
-  })
+  });
 
   type FormValues = {
     externalId: string;
     creditsRemaining?: string;
     expires: Date | null;
     meta: string;
-  }
+  };
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
       setIsLoading(true);
@@ -34,8 +34,8 @@ export default function UpdateKey({ apiKey, onKeyUpdated }: UpdateKeyProps) {
         meta: values.meta ? JSON.parse(values.meta) : null,
         expires: values.expires ? values.expires.valueOf() : null,
         credits: {
-          remaining: values.creditsRemaining ? +values.creditsRemaining : null
-        }
+          remaining: values.creditsRemaining ? +values.creditsRemaining : null,
+        },
       };
 
       try {
@@ -52,7 +52,6 @@ export default function UpdateKey({ apiKey, onKeyUpdated }: UpdateKeyProps) {
       } finally {
         setIsLoading(false);
       }
-
     },
     validation: {
       meta(value) {
@@ -83,9 +82,20 @@ export default function UpdateKey({ apiKey, onKeyUpdated }: UpdateKeyProps) {
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="External ID" info="ID of the user/workspace in your system for key attribution." {...itemProps.externalId}>
+      <Form.Dropdown
+        title="External ID"
+        info="ID of the user/workspace in your system for key attribution."
+        {...itemProps.externalId}
+      >
         <Form.Dropdown.Item title="Select External ID" value="" />
-        {identities.map(identity => <Form.Dropdown.Item key={identity.id} icon={Icon.Person} title={identity.externalId} value={identity.externalId} />)}
+        {identities.map((identity) => (
+          <Form.Dropdown.Item
+            key={identity.id}
+            icon={Icon.Person}
+            title={identity.externalId}
+            value={identity.externalId}
+          />
+        ))}
       </Form.Dropdown>
 
       <Form.Separator />
@@ -104,7 +114,7 @@ export default function UpdateKey({ apiKey, onKeyUpdated }: UpdateKeyProps) {
         info="The key will be automatically disabled at the specified date and time (UTC)."
         {...itemProps.expires}
       />
-      
+
       <Form.Separator />
       <Form.TextArea
         title="Custom Metadata"

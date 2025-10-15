@@ -1,6 +1,7 @@
+import { getPreferenceValues } from "@raycast/api";
 import { Unkey } from "@unkey/api";
-import { ACCESS_TOKEN } from "./utils/constants";
 
+const { access_token } = getPreferenceValues<Preferences>();
 export const unkey = new Unkey({
-    rootKey: ACCESS_TOKEN
-})
+  rootKey: access_token,
+});

@@ -1,4 +1,14 @@
-import { useNavigation, showToast, Toast, confirmAlert, Form, ActionPanel, Action, Icon, Clipboard } from "@raycast/api";
+import {
+  useNavigation,
+  showToast,
+  Toast,
+  confirmAlert,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  Clipboard,
+} from "@raycast/api";
 import { useCachedPromise, useForm, showFailureToast } from "@raycast/utils";
 import { V2KeysCreateKeyRequestBody } from "@unkey/api/dist/commonjs/models/components";
 import { useState } from "react";
@@ -12,31 +22,26 @@ type CreateKeyProps = {
 export default function CreateKey({ apiInfo, onKeyCreated }: CreateKeyProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [enableRatelimiting, setEnableRatelimiting] = useState(false);
-  
-  const {data: identities=[]} = useCachedPromise(async()=>{
-    const {result} = await unkey.identities.listIdentities({});
+
+  const { data: identities = [] } = useCachedPromise(async () => {
+    const { result } = await unkey.identities.listIdentities({});
     return result.data;
-  })
-  
-  // type FormValues = Omit<V2KeysCreateKeyRequestBody, "byteLength" | "expires" | "meta"> & {
+  });
+
   type FormValues = {
     apiId: string;
-    // 
     name?: string;
     prefix?: string;
     externalId?: string;
     byteLength?: string;
-    // 
     creditsRemaining?: string;
-    // 
     expires: Date | null;
     ratelimitLimit: string;
     ratelimitRefillInterval: string;
-    // 
     meta?: string;
-  }
+  };
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
       setIsLoading(true);
@@ -46,23 +51,22 @@ export default function CreateKey({ apiInfo, onKeyCreated }: CreateKeyProps) {
       if (values.prefix) req.prefix = values.prefix;
       if (values.externalId) req.externalId = values.externalId;
       if (values.byteLength) req.byteLength = +values.byteLength;
-      // 
       if (values.creditsRemaining) req.credits = { remaining: +values.creditsRemaining };
-      // 
       if (values.expires) req.expires = values.expires.valueOf();
-      // 
       if (values.meta) req.meta = JSON.parse(values.meta);
 
       if (enableRatelimiting) {
-        req.ratelimits = [{
-          name: "",
-          limit: +values.ratelimitLimit,
-          duration: +values.ratelimitRefillInterval
-        }]
+        req.ratelimits = [
+          {
+            name: "",
+            limit: +values.ratelimitLimit,
+            duration: +values.ratelimitRefillInterval,
+          },
+        ];
       }
 
       try {
-        const {data} = await unkey.keys.createKey(req);
+        const { data } = await unkey.keys.createKey(req);
         showToast(Toast.Style.Success, "Created API Key", data.key);
         if (
           await confirmAlert({
@@ -76,7 +80,7 @@ export default function CreateKey({ apiInfo, onKeyCreated }: CreateKeyProps) {
         onKeyCreated();
         pop();
       } catch (error) {
-       await showFailureToast(error);
+        await showFailureToast(error);
       }
       setIsLoading(false);
     },
@@ -150,9 +154,20 @@ export default function CreateKey({ apiInfo, onKeyCreated }: CreateKeyProps) {
         info="Prefix to distinguish between different APIs (we'll add the underscore)."
         {...itemProps.prefix}
       />
-      <Form.Dropdown title="External ID" info="ID of the user/workspace in your system for key attribution." {...itemProps.externalId}>
+      <Form.Dropdown
+        title="External ID"
+        info="ID of the user/workspace in your system for key attribution."
+        {...itemProps.externalId}
+      >
         <Form.Dropdown.Item title="Select External ID" value="" />
-        {identities.map(identity => <Form.Dropdown.Item key={identity.id} icon={Icon.Person} title={identity.externalId} value={identity.externalId} />)}
+        {identities.map((identity) => (
+          <Form.Dropdown.Item
+            key={identity.id}
+            icon={Icon.Person}
+            title={identity.externalId}
+            value={identity.externalId}
+          />
+        ))}
       </Form.Dropdown>
       <Form.TextField
         title="Byte Length"
@@ -224,4 +239,3 @@ export default function CreateKey({ apiInfo, onKeyCreated }: CreateKeyProps) {
     </Form>
   );
 }
-
