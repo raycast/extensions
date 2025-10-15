@@ -1,5 +1,12 @@
 # tabler Changelog
 
+## [Fix Pagination & Add Search] - {PR_MERGE_DATE}
+
+- Fixed pagination issue where only icons starting with 'A' were displayed
+- Added search functionality to find icons by name or keyword
+- Added style filter dropdown to filter by outline/filled icons
+- Implemented automatic pagination on scroll to access full icon library
+
 ## [Add Download Actions] - 2025-08-13
 
 - Add download actions for outline and filled SVG icons to `~/Downloads`
