@@ -15,7 +15,6 @@ import {
 } from "@raycast/api";
 import { showFailureToast, usePromise, useStreamJSON } from "@raycast/utils";
 
-import { CaptureDetails } from "./components/capture-details";
 import { FILE_NAMES } from "./constants";
 import { CaptureSchema } from "./schemas";
 import type { Capture } from "./types";
@@ -211,7 +210,6 @@ export default function Main(): React.JSX.Element {
               }
               actions={
                 <ActionPanel>
-                  <Action.Push title="See Details" icon={Icon.List} target={<CaptureDetails capture={capture} />} />
                   <Action.ToggleQuickLook />
                   <Action
                     title="Delete Capture"
