@@ -1,5 +1,12 @@
 # Raycast Zoxide Changelog
 
+## [Added Additional Path Directories Preference] - {PR_MERGE_DATE}
+
+- Added preference to allow additional directories to be prepended to PATH when executing commands
+- Added path-helper utility functions to handle default paths and clean path generation
+- Converted all instances where we set a PATH to use new utility functions
+- Updated to latest versions of dependency packages
+
 ## [Added support for Intel Macs] - 2025-08-05
 
 - Fixed compatibility with `zoxide` and `fzf` installed via Homebrew on Intel Macs
