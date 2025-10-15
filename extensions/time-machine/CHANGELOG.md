@@ -1,6 +1,6 @@
 # Time Machine Changelog
 
-## [Version 1.1] - {PR_MERGE_DATE}
+## [Version 1.1] - 2025-10-15
 
 ### Added
 - Added "Show Status" command to print information about the current status of Time Machine or the most recent backup. Full disk access is required for the most recent status.
