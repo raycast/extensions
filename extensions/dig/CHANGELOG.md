@@ -1,5 +1,7 @@
 # dig Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
 - Update error handling to catch AbortError (ref: [#21193](https://github.com/raycast/extensions/issues/21193))
 - Rewritten to use useExec hook from `@raycast/utils`
 - Updated dependencies to latest versions
