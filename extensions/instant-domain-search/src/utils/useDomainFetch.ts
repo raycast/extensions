@@ -4,59 +4,38 @@ import { useMemo } from "react";
 import { randomUUID } from "node:crypto";
 import { ANONYMOUS_USER_ID_KEY, ROOT_URL, POPULAR_TLDs, ALL_TLDs } from "./config";
 import getUserAgent from "./getUserAgent";
-import { TLDs as GlobalTLDs } from "global-tld-list";
 
 export default function useDomainFetch(query: string) {
+  const regex = useMemo(() => {
+    const tldsPattern = Array.from(ALL_TLDs)
+      .sort((a, b) => b.length - a.length)
+      .map((tld) => tld.replace(".", "\\."))
+      .join("|");
+    return new RegExp(`^(?<domain>.+?)(\\.(?<tld>${tldsPattern}))?$`);
+  }, []);
+
+  const parsedSearch = useMemo(() => {
+    const trimmedQuery = query.trim();
+    const match = trimmedQuery.match(regex);
+    const domain = match?.groups?.domain ?? trimmedQuery;
+    const tld = match?.groups?.tld ?? "com";
+    return { domain, tld };
+  }, [query, regex]);
+
   const { value: anonymousUserID, isLoading: isAnonymousUserIDLoading } = useLocalStorage(
     ANONYMOUS_USER_ID_KEY,
     randomUUID(),
   );
 
-  const parsedSearch = useMemo(() => {
-    const trimmedText = query.trim();
-
-    if (!trimmedText) {
-      return { query: "", tld: ".com" };
-    }
-
-    const dotIndex = trimmedText.indexOf(".");
-
-    if (dotIndex > 0) {
-      const queryPart = trimmedText.substring(0, dotIndex);
-      const tldWithDot = trimmedText.substring(dotIndex);
-      const tldWithoutDot = tldWithDot.substring(1);
-
-      if (!tldWithoutDot) {
-        return { query: queryPart, tld: ".com" };
-      }
-
-      if (GlobalTLDs.isValid(tldWithoutDot)) {
-        return { query: queryPart, tld: tldWithDot };
-      } else {
-        return { query: trimmedText, tld: ".com" };
-      }
-    } else {
-      return { query: trimmedText, tld: ".com" };
-    }
-  }, [query]);
-
   const searchParams = useMemo(() => {
-    const tldWithoutDot = parsedSearch.tld.substring(1);
-
-    const tldsList = TLDs.includes(tldWithoutDot) ? TLDs : [tldWithoutDot, ...TLDs];
-
-    const params = new URLSearchParams({
+    return new URLSearchParams({
       index: "semantic",
-      tlds: tldsList.join(","),
+      tlds: [...new Set([parsedSearch.tld, ...POPULAR_TLDs])].slice(0, POPULAR_TLDs.length).join(","),
     });
-    return params;
   }, [parsedSearch.tld]);
 
-  const url = `${ROOT_URL}/api/v1/domain/${parsedSearch.query}${parsedSearch.tld}?${searchParams.toString()}`;
-  const shouldExecute = query.length >= 2 && anonymousUserID !== undefined && !isAnonymousUserIDLoading;
-
-  return useFetch(url, {
-    execute: shouldExecute,
+  return useFetch(`${ROOT_URL}/api/v1/domain/${parsedSearch.domain}.${parsedSearch.tld}?${searchParams.toString()}`, {
+    execute: query.length >= 2 && anonymousUserID !== undefined && !isAnonymousUserIDLoading,
     keepPreviousData: true,
     headers: {
       "User-Agent": getUserAgent(),

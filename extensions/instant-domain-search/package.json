@@ -136,8 +136,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.103.1",
-    "@raycast/utils": "^2.0.1",
-    "global-tld-list": "^1.22.47"
+    "@raycast/utils": "^2.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
