@@ -42,7 +42,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
                 if (reminder.id === r.id) {
                   return {
                     ...r,
-                    list: lists.find((l) => l.id === values.listId) || null,
+                    list: data.lists.find((l) => l.id === values.listId) || null,
                   };
                 }
                 return r;
