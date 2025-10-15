@@ -80,7 +80,3 @@ export type EdgeBookmarkFile = {
   };
 };
 
-export interface Preferences {
-  newBlankTabURL: string;
-  newTabURL: string;
-}
