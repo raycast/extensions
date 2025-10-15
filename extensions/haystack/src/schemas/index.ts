@@ -31,7 +31,7 @@ export const StackInputSchema = z.object({
 
 export const StackSchema = StackInputSchema.merge(MetadataSchema).extend({
   fields: z.array(StackFieldSchema),
-  version: z.number().int().positive(),
+  version: z.number().int().nonnegative(),
 });
 
 export const CaptureDataSchema = z.record(z.string(), z.object({ value: z.string(), type: StackFieldTypeSchema }));
@@ -39,7 +39,7 @@ export const CaptureDataSchema = z.record(z.string(), z.object({ value: z.string
 export const CaptureStackSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  version: z.number().int().positive(),
+  version: z.number().int().nonnegative(),
 });
 
 export const CaptureSchema = z.object({

@@ -63,7 +63,7 @@ export const NewStackFieldForm = ({ stackId, onAdd }: { stackId: string; onAdd: 
       <Form.Description text="Add a new field to your stack" />
       <Form.TextField title="Label" placeholder="Name" {...itemProps.label} />
       <Form.TextArea
-        title="Stack description"
+        title="Field description"
         placeholder="Provide a detailed description of your field"
         {...itemProps.description}
       />

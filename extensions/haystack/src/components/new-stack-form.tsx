@@ -14,7 +14,8 @@ import { APICallError } from "ai";
 import type { StackInput } from "../types";
 import { generateStackFields } from "../utils/generate-stack-fields";
 import { slugify } from "../utils/slugify";
-import { addFieldsToStack, createStack } from "../utils/stacks";
+import { createStackWithFields } from "../utils/stacks";
+import { useState } from "react";
 
 type Values = {
   name: string;
@@ -24,8 +25,12 @@ type Values = {
 };
 
 export const NewStackForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { handleSubmit, itemProps } = useForm<Values>({
     async onSubmit(values) {
+      if (isLoading) return;
+
+      setIsLoading(true);
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: `Creating a stack for "${values.name}"`,
@@ -43,9 +48,7 @@ export const NewStackForm = () => {
           description: values.description.trim(),
         };
 
-        const stack = await createStack(newStack);
-
-        await addFieldsToStack(stack.id, fields);
+        await createStackWithFields(newStack, fields);
 
         toast.style = Toast.Style.Success;
         toast.title = `"${values.name}" stack created`;
@@ -70,6 +73,8 @@ export const NewStackForm = () => {
           toast.style = Toast.Style.Failure;
           toast.title = "Could not create stack";
         }
+      } finally {
+        setIsLoading(false);
       }
     },
     validation: {
@@ -82,6 +87,7 @@ export const NewStackForm = () => {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Stack" onSubmit={handleSubmit} />

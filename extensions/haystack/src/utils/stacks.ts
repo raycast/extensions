@@ -78,6 +78,38 @@ export const createStack = async (input: StackInput) => {
   }
 };
 
+export const createStackWithFields = async (input: StackInput, fieldInputs: StackFieldInput[]) => {
+  try {
+    StackInputSchema.parse(input);
+    const validatedFields = fieldInputs.map((field) => StackFieldInputSchema.parse(field));
+
+    const id = nanoid();
+    const timestamp = getCurrentTimestamp();
+
+    const fields: StackField[] = validatedFields.map((field) => ({
+      ...field,
+      id: nanoid(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }));
+
+    const stack: Stack = {
+      ...input,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      fields,
+      version: 0,
+    };
+
+    await LocalStorage.setItem(getStackKey(id), JSON.stringify(stack));
+    return stack;
+  } catch (error) {
+    captureException(new Error("Failed to create stack with fields", { cause: error }));
+    throw error;
+  }
+};
+
 export const updateStack = async (id: string, input: Partial<StackInput>) => {
   try {
     const stack = await getStackById(id);

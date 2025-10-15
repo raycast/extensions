@@ -170,6 +170,12 @@ export const createCapture = async (
     const validated = CaptureSchema.parse(newCapture);
 
     await atomicUpdate(async (captures) => {
+      // Check if capture with this ID already exists
+      const existingIndex = captures.findIndex((c) => c.id === id);
+      if (existingIndex !== -1) {
+        throw new Error(`Capture with id ${id} already exists`);
+      }
+
       captures.push(validated);
       return { captures, result: validated };
     });

@@ -1,4 +1,15 @@
-import { Action, ActionPanel, captureException, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  captureException,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import type { StackField, StackFieldType } from "../types";
 import { deleteFieldFromStack, getStackFields } from "../utils/stacks";
@@ -40,9 +51,20 @@ export const StackFieldsList = ({ stackId }: { stackId: string }) => {
     return data.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, []);
 
-  const handleDelete = async (stackId: string, labelKey: string) => {
+  const handleDelete = async (stackId: string, fieldId: string, fieldName: string) => {
+    const confirmed = await confirmAlert({
+      title: "Remove Field",
+      message: `Are you sure you want to remove "${fieldName}" from this stack? This action cannot be undone.`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (!confirmed) return;
+
     try {
-      await deleteFieldFromStack(stackId, labelKey);
+      await deleteFieldFromStack(stackId, fieldId);
       revalidate();
     } catch (error) {
       captureException(error);
@@ -87,8 +109,8 @@ export const StackFieldsList = ({ stackId }: { stackId: string }) => {
                 title="Remove Field"
                 style={Action.Style.Destructive}
                 icon={Icon.Trash}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-                onAction={() => handleDelete(stackId, label.key)}
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                onAction={() => handleDelete(stackId, id, label.value)}
               />
             </ActionPanel>
           }

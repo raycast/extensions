@@ -1,4 +1,15 @@
-import { Action, ActionPanel, captureException, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  captureException,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  List,
+} from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { EditStackForm } from "./components/edit-stack-form";
 import { NewStackFieldForm } from "./components/new-stack-field-form";
@@ -14,24 +25,61 @@ export default function Command() {
       data = await getStacks();
     } catch (error) {
       captureException(error);
-      await showFailureToast("Could not load stacks");
+      await showFailureToast(error, { title: "Could not load stacks" });
     }
 
     return data.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, name: string) => {
+    const confirmed = await confirmAlert({
+      title: "Delete Stack",
+      message: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (!confirmed) return;
+
     try {
       await deleteStack(id);
       revalidate();
     } catch (error) {
       captureException(error);
-      await showFailureToast("Could not delete stack");
+      await showFailureToast(error, { title: "Could not delete stack" });
+    }
+  };
+
+  const handleCreateStack = async () => {
+    try {
+      await launchCommand({ name: "create-new-stack", type: LaunchType.UserInitiated });
+    } catch (error) {
+      captureException(error);
+      await showFailureToast(error, { title: "Could not open Create New Stack command" });
     }
   };
 
   return (
     <List isLoading={isLoading}>
+      {!data?.length && (
+        <List.EmptyView
+          icon={Icon.Box}
+          title="No Stacks Found"
+          description="Create your first stack to start organizing your captures"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Create New Stack"
+                icon={Icon.PlusSquare}
+                onAction={handleCreateStack}
+                shortcut={Keyboard.Shortcut.Common.New}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {data?.map(({ id, name, icon, description, fields }) => {
         return (
           <List.Item
@@ -51,7 +99,7 @@ export default function Command() {
                 <Action.Push
                   title="Edit Stack"
                   icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                   target={
                     <EditStackForm
                       name={name.value}
@@ -65,7 +113,7 @@ export default function Command() {
                 <Action.Push
                   title="Add New Field"
                   icon={Icon.PlusSquare}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   target={<NewStackFieldForm onAdd={revalidate} stackId={id} />}
                 />
 
@@ -73,8 +121,8 @@ export default function Command() {
                   title="Delete Stack"
                   style={Action.Style.Destructive}
                   icon={Icon.Trash}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  onAction={() => handleDelete(id)}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={() => handleDelete(id, name.value)}
                 />
               </ActionPanel>
             }
