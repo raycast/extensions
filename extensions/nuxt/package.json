@@ -51,7 +51,7 @@
     },
     {
       "name": "nuxt-dev-server",
-      "title": "Nuxt Dev Server (macOS only)",
+      "title": "Nuxt Dev Server",
       "description": "Monitor and control running Nuxt development servers",
       "mode": "menu-bar",
       "interval": "30s"
