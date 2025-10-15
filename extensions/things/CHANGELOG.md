@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Fix Timeout on macOS Tahoe] - {PR_MERGE_DATE}
+## [Fix Timeout on macOS Tahoe] - 2025-10-15
 
 - Fixed timeout errors when opening "Add New To-Do" command on macOS Tahoe (26.x)
 - Consolidated concurrent JXA queries into single execution to prevent race conditions
