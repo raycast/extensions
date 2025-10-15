@@ -1,0 +1,19 @@
+meta {
+  name: Discard Timer
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{domain}}/projects/34572/timer
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-NokoToken: {{x_noko_token}}
+}
+
+settings {
+  encodeUrl: true
+}

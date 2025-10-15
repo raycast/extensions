@@ -1,0 +1,27 @@
+meta {
+  name: Log Timer
+  type: http
+  seq: 10
+}
+
+put {
+  url: {{domain}}/projects/34581/timer/log
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-NokoToken: {{x_noko_token}}
+}
+
+body:json {
+  {
+    "entry_date": "2025-09-19",
+    "minutes": 15,
+    "description": "Working on Noko-for-Raycast #learning"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Current User Entries
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{domain}}/current_user/entries
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-NokoToken: {{x_noko_token}}
+}
+
+settings {
+  encodeUrl: true
+}

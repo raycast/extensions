@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "noko",
+  "title": "Noko",
+  "description": "This is the easiest way to track your time in the Noko Time Tracking platform.",
+  "icon": "extension-icon.png",
+  "author": "juanvqz",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "timers",
+      "title": "Timers",
+      "description": "Manage your Noko timers and entries",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "The Noko's personal access token",
+      "link": "https://help.nokotime.com/article/103-connecting-to-the-freckle-api",
+      "placeholder": "Your Noko's personal access token"
+    },
+    {
+      "name": "timezone",
+      "type": "dropdown",
+      "required": true,
+      "title": "Timezone",
+      "description": "Select your timezone.",
+      "default": "America/Mexico_City",
+      "data": [
+        {
+          "title": "System Timezone",
+          "value": ""
+        },
+        {
+          "title": "America/Mexico_City (Central)",
+          "value": "America/Mexico_City"
+        },
+        {
+          "title": "America/New_York (Eastern)",
+          "value": "America/New_York"
+        },
+        {
+          "title": "America/Denver (Mountain)",
+          "value": "America/Denver"
+        },
+        {
+          "title": "America/Los_Angeles (Pacific)",
+          "value": "America/Los_Angeles"
+        },
+        {
+          "title": "Europe/London (GMT/BST)",
+          "value": "Europe/London"
+        },
+        {
+          "title": "Europe/Paris (CET/CEST)",
+          "value": "Europe/Paris"
+        },
+        {
+          "title": "Europe/Berlin (CET/CEST)",
+          "value": "Europe/Berlin"
+        },
+        {
+          "title": "Asia/Tokyo (JST)",
+          "value": "Asia/Tokyo"
+        },
+        {
+          "title": "Asia/Shanghai (CST)",
+          "value": "Asia/Shanghai"
+        },
+        {
+          "title": "Australia/Sydney (AEST/AEDT)",
+          "value": "Australia/Sydney"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@testing-library/react": "^13.4.0",
+    "@types/jest": "^29.5.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/react-test-renderer": "^18.0.0",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.3.3",
+    "react-dom": "^18.3.1",
+    "react-test-renderer": "^18.2.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "commit": "git-cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "version": "0.3.0"
+}

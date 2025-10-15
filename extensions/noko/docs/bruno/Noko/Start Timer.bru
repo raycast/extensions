@@ -1,0 +1,19 @@
+meta {
+  name: Start Timer
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{domain}}/projects/34581/timer/start
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-NokoToken: {{x_noko_token}}
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Pause Timer
+  type: http
+  seq: 9
+}
+
+put {
+  url: {{domain}}/projects/34581/timer/pause
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-NokoToken: {{x_noko_token}}
+}
+
+settings {
+  encodeUrl: true
+}

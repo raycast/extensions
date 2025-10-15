@@ -1,0 +1,19 @@
+meta {
+  name: Timer
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{domain}}/projects/34573/timer
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-NokoToken: {{x_noko_token}}
+}
+
+settings {
+  encodeUrl: true
+}

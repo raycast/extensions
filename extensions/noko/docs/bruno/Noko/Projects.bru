@@ -1,0 +1,23 @@
+meta {
+  name: Projects
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{domain}}/projects?enabled=true
+  body: none
+  auth: inherit
+}
+
+params:query {
+  enabled: true
+}
+
+headers {
+  X-NokoToken: {{x_noko_token}}
+}
+
+settings {
+  encodeUrl: true
+}

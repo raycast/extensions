@@ -1,0 +1,41 @@
+# Cursor Rules for Noko Raycast Extension
+
+## Development Context
+- This is a Raycast extension built with TypeScript and React
+- You are an experienced TypeScript/JavaScript developer with deep knowledge of modern web development
+- Focus on writing clean, maintainable, and performant code
+- Leverage TypeScript's type system for better code quality and developer experience
+- Use modern React patterns and best practices
+
+## Debugging Guidelines
+- When debugging issues, feel free to add console.log statements to help understand what's happening
+- Add logs for API responses, state changes, and error conditions
+- Include relevant context in log messages (e.g., "Stop timer response - Status:", "Parsed JSON successfully")
+- Remove or comment out debug logs before finalizing features, but keep them during development
+
+## Code Style
+- Use TypeScript with strict typing
+- Follow React best practices with hooks
+- Use functional components with proper memoization when needed
+- Handle errors gracefully with try-catch blocks and user-friendly error messages
+- Always run the linter after making changes and fix any issues that arise
+- Ensure code passes all linting checks before considering changes complete
+
+## API Integration
+- Always handle empty responses and non-JSON responses from APIs
+- Check response status and content-type before parsing
+- Provide meaningful error messages for API failures
+- Use proper HTTP methods (GET, POST, PUT, DELETE) for different operations
+
+## Raycast Extension Specific
+- Use Raycast's built-in components (List, ActionPanel, Form, etc.)
+- Follow Raycast's design patterns and user experience guidelines
+- Handle loading states and provide feedback to users
+- Use toast notifications for user feedback on actions
+
+## File Organization
+- Keep components in src/components/
+- Keep custom hooks in src/hooks/
+- Keep types and interfaces in src/types.ts
+- Keep utility functions in src/utils.ts
+- Use index.tsx files for clean exports

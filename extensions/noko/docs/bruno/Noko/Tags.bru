@@ -1,0 +1,19 @@
+meta {
+  name: Tags
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{domain}}/tags
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-NokoToken: {{x_noko_token}}
+}
+
+settings {
+  encodeUrl: true
+}
