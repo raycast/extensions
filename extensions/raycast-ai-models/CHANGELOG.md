@@ -1,6 +1,6 @@
 # Raycast AI Models Changelog
 
-## [Initial Version] - 2025-10-15
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of the Raycast AI Models extension.
 - Features:
