@@ -4,5 +4,5 @@
 
 ## [Bug Fixes] - {PR_MERGE_DATE}
 
-### Changed
-- instant-domain-search: Updated files related to the extension (5 files changed). This change includes fixes and improvements across platforms (macOS and Windows)
+### Fixed
+- Fixed crash when searching domains containing periods
