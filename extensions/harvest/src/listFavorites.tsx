@@ -12,9 +12,10 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { useFrecencySorting } from "@raycast/utils";
 import { formatHours, newTimeEntry, stopTimer, useCompany } from "./services/harvest";
 import dayjs from "dayjs";
-import { AddFavoriteAction } from "./addFavoriteForm";
+import { AddFavoriteAction, EditFavoriteAction } from "./addFavoriteForm";
 import ListTimeEntries from "./listTimeEntries";
 
 // Favorite interface
@@ -37,6 +38,16 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const { data: company } = useCompany();
 
+  // Use frecency sorting to rank favorites by usage
+  const {
+    data: sortedFavorites,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(favorites, {
+    namespace: "harvest-favorites",
+    key: (item) => item.id,
+  });
+
   // Load favorites from LocalStorage on mount
   useEffect(() => {
     async function loadFavorites() {
@@ -58,6 +69,25 @@ export default function Command() {
   async function updateFavorites(newFavorites: Favorite[]) {
     setFavorites(newFavorites);
     await LocalStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(newFavorites));
+  }
+
+  // Upsert function: adds new favorite or updates existing one
+  async function upsertFavorite(favorite: Favorite) {
+    const existingIndex = favorites.findIndex((f) => f.id === favorite.id);
+
+    let newFavorites: Favorite[];
+    if (existingIndex >= 0) {
+      // Update existing favorite
+      newFavorites = [...favorites];
+      newFavorites[existingIndex] = favorite;
+      await showToast({ style: Toast.Style.Success, title: "Favorite Updated" });
+    } else {
+      // Add new favorite
+      newFavorites = [...favorites, favorite];
+      await showToast({ style: Toast.Style.Success, title: "Favorite Added" });
+    }
+
+    await updateFavorites(newFavorites);
   }
 
   async function deleteFavorite(favorite: Favorite) {
@@ -114,6 +144,10 @@ export default function Command() {
       }
 
       const timeEntry = await newTimeEntry(param);
+
+      // Update frecency ranking when a favorite is used
+      await visitItem(favorite);
+
       await toast.hide();
 
       if (!hasDuration) {
@@ -140,18 +174,14 @@ export default function Command() {
       actions={
         !hasFavorites ? (
           <ActionPanel>
-            <AddFavoriteAction onSave={(newFavorite: Favorite) => updateFavorites([...favorites, newFavorite])} />
+            <AddFavoriteAction onSave={upsertFavorite} />
           </ActionPanel>
         ) : undefined
       }
     >
       {hasFavorites ? (
         <List.Section title="Your Favorites">
-          {favorites.map((favorite) => {
-            const subtitle = [favorite.notes, favorite.hours ? formatHours(favorite.hours, company) : null]
-              .filter(Boolean)
-              .join(" | ");
-
+          {sortedFavorites.map((favorite) => {
             const hasDuration = !!favorite.hours;
             const actionTitle = hasDuration ? "Create Time Entry" : "Start Timer";
 
@@ -159,10 +189,13 @@ export default function Command() {
               <List.Item
                 key={favorite.id}
                 title={favorite.projectName}
-                accessoryTitle={`${favorite.clientName}${favorite.clientName && favorite.taskName ? " | " : ""}${
-                  favorite.taskName
-                }`}
-                subtitle={subtitle || undefined}
+                keywords={favorite.notes?.split(" ")}
+                accessories={[
+                  ...(hasDuration ? [{ tag: formatHours(favorite.hours, company), icon: Icon.Clock }] : []),
+
+                  { text: `${favorite.clientName} | ${favorite.taskName}` },
+                ]}
+                subtitle={favorite.notes}
                 icon={{ source: Icon.Star, tintColor: Color.Yellow }}
                 actions={
                   <ActionPanel>
@@ -181,6 +214,20 @@ export default function Command() {
                           onAction={() => startTimerOrCreateEntry(favorite)}
                         />
                       )}
+                      <EditFavoriteAction favorite={favorite} onSave={upsertFavorite} />
+                      <Action
+                        title="Reset Ranking"
+                        icon={Icon.ArrowCounterClockwise}
+                        shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                        onAction={async () => {
+                          await resetRanking(favorite);
+                          await showToast({
+                            style: Toast.Style.Success,
+                            title: "Ranking Reset",
+                            message: "Favorite ranking has been reset",
+                          });
+                        }}
+                      />
                       <Action
                         title="Delete Favorite"
                         icon={Icon.Trash}
@@ -190,9 +237,7 @@ export default function Command() {
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Manage Favorites">
-                      <AddFavoriteAction
-                        onSave={(newFavorite: Favorite) => updateFavorites([...favorites, newFavorite])}
-                      />
+                      <AddFavoriteAction onSave={upsertFavorite} />
                     </ActionPanel.Section>
                   </ActionPanel>
                 }

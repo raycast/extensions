@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useCompany, useMyProjects } from "./services/harvest";
-import { HarvestProjectAssignment } from "./services/responseTypes";
-import { Dictionary, find, groupBy, reduce } from "lodash";
-import { Favorite } from "./favorites";
+import { find } from "es-toolkit/compat";
+import { groupBy } from "es-toolkit";
+import { Favorite } from "./listFavorites";
 
 export function AddFavoriteAction({ onSave }: { onSave: (favorite: Favorite) => Promise<void> }) {
   return (
     <Action.Push
-      target={<AddFavoriteForm onSave={onSave} />}
+      target={<FavoriteForm onSave={onSave} />}
       title="Add New Favorite"
       shortcut={{ key: "n", modifiers: ["cmd"] }}
       icon={Icon.Plus}
@@ -16,27 +16,38 @@ export function AddFavoriteAction({ onSave }: { onSave: (favorite: Favorite) => 
   );
 }
 
-function AddFavoriteForm({ onSave }: { onSave: (favorite: Favorite) => Promise<void> }) {
+export function EditFavoriteAction({
+  favorite,
+  onSave,
+}: {
+  favorite: Favorite;
+  onSave: (favorite: Favorite) => Promise<void>;
+}) {
+  return (
+    <Action.Push
+      target={<FavoriteForm favorite={favorite} onSave={onSave} />}
+      title="Edit Favorite"
+      shortcut={{ key: "e", modifiers: ["cmd"] }}
+      icon={Icon.Pencil}
+    />
+  );
+}
+
+function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favorite: Favorite) => Promise<void> }) {
   const { pop } = useNavigation();
   const { data: company } = useCompany();
   const { data: projects } = useMyProjects();
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [taskId, setTaskId] = useState<string | null>(null);
-  const [notes, setNotes] = useState<string>("");
-  const [hours, setHours] = useState<string>("");
+  const isEditing = !!favorite;
+
+  // Initialize with favorite values if editing, otherwise null/empty
+  const [projectId, setProjectId] = useState<string | null>(favorite?.projectId.toString() ?? null);
+  const [taskId, setTaskId] = useState<string | null>(favorite?.taskId.toString() ?? null);
+  const [notes, setNotes] = useState<string>(favorite?.notes ?? "");
+  const [hours, setHours] = useState<string>(favorite?.hours ?? "");
 
   const groupedProjects = useMemo(() => {
-    return reduce<
-      Dictionary<[HarvestProjectAssignment, ...HarvestProjectAssignment[]]>,
-      Array<Array<HarvestProjectAssignment>>
-    >(
-      groupBy(projects, (o) => o.client.id),
-      (result, value) => {
-        result.push(value);
-        return result;
-      },
-      []
-    );
+    const grouped = groupBy(projects, (o) => o.client.id);
+    return Object.values(grouped);
   }, [projects]);
 
   const tasks = useMemo(() => {
@@ -113,8 +124,8 @@ function AddFavoriteForm({ onSave }: { onSave: (favorite: Favorite) => Promise<v
       return;
     }
 
-    const favorite: Favorite = {
-      id: Date.now().toString(),
+    const updatedFavorite: Favorite = {
+      id: favorite?.id ?? Date.now().toString(), // Reuse existing ID if editing, otherwise create new
       projectId: selectedProject.project.id,
       projectName: selectedProject.project.name,
       taskId: selectedTask.task.id,
@@ -125,16 +136,16 @@ function AddFavoriteForm({ onSave }: { onSave: (favorite: Favorite) => Promise<v
       hours: hours || undefined,
     };
 
-    await onSave(favorite);
+    await onSave(updatedFavorite);
     pop();
   }
 
   return (
     <Form
-      navigationTitle="Add New Favorite"
+      navigationTitle={isEditing ? "Edit Favorite" : "Add New Favorite"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Add Favorite" />
+          <Action.SubmitForm onSubmit={handleSubmit} title={isEditing ? "Save Changes" : "Add Favorite"} />
         </ActionPanel>
       }
     >
