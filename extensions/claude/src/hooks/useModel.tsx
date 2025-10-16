@@ -6,15 +6,25 @@ export const DEFAULT_MODEL: Model = {
   id: "default",
   updated_at: new Date().toISOString(),
   created_at: new Date().toISOString(),
-  name: "Haiku 3.5",
+  name: "Haiku 4.5",
   prompt: "You are a helpful assistant.",
-  option: "claude-3-5-haiku-latest",
+  option: "claude-haiku-4-5",
   temperature: "1",
   max_tokens: "4096",
   pinned: false,
 };
 
+
 const option: Model["option"][] = [
+  "claude-haiku-4-5",
+  "claude-haiku-4-5-20251001",
+  "claude-sonnet-4-5",
+  "claude-sonnet-4-5-20250929",
+  "claude-sonnet-4-0",
+  "claude-opus-4-1",
+  "claude-opus-4-1-20250805",
+  "claude-opus-4-0",
+  "claude-opus-4-20250514",
   "claude-sonnet-4-20250514",
   "claude-3-7-sonnet-latest",
   "claude-3-7-sonnet-20250219",
@@ -29,6 +39,7 @@ const option: Model["option"][] = [
   "claude-2.1",
   "claude-2.0",
 ];
+
 
 async function getStoredModels(): Promise<Model[]> {
   const storedModels = await LocalStorage.getItem<string>("models");

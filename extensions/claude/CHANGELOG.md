@@ -1,5 +1,13 @@
 # Claude Changelog
 
+## [Update] - 2025-10-16
+
+- Feature: Add new Anthropic models:
+  - [Claude Haiku 4.5](https://www.anthropic.com/news/claude-haiku-4-5)
+  - [Claude Sonnet 4.5](https://www.anthropic.com/news/claude-sonnet-4-5)
+  - [Claude Opus 4.1](https://www.anthropic.com/news/claude-opus-4-1)
+  - [Claude Opus 4](https://www.anthropic.com/news/claude-4)
+
 ## [Update] - 2025-05-23
 
 - Feature: Added new [Claude Sonnet 4](https://www.anthropic.com/news/claude-4)
