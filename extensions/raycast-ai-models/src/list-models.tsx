@@ -118,6 +118,7 @@ ${model.abilities.thinking ? `- Supported: ${model.abilities.thinking.supported 
 
 export default function Command() {
   const [sortConfig, setSortConfig] = useState<string>("intelligence_desc");
+  const [fetchError, setFetchError] = useState<Error | null>(null);
 
   const { sortBy, desc } = useMemo(() => {
     const parts = sortConfig.split("_");
@@ -145,11 +146,8 @@ export default function Command() {
     initialData: [],
     keepPreviousData: true,
     onError: (error: Error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load models",
-        message: error.message,
-      });
+      setFetchError(error);
+      showToast({ style: Toast.Style.Failure, title: "Failed to load models", message: error.message });
     },
   });
 
@@ -158,18 +156,55 @@ export default function Command() {
     return sortModels(models, sortBy, desc);
   }, [models, sortBy, desc]);
 
-  // Memoize favicon URLs to avoid recomputation
+  // Memoize favicon URLs to avoid recomputation. Be defensive when building domains.
   const modelIcons = useMemo(() => {
     if (!models || models.length === 0) return new Map<string, string>();
+
+    const safeDomain = (candidate?: string | null) => {
+      if (!candidate) return undefined;
+      // simple validation: allow alphanum, dashes and dots
+      const cleaned = String(candidate).trim().toLowerCase();
+      if (/^[a-z0-9-.]+$/.test(cleaned)) return `https://${cleaned}.com`;
+      return undefined;
+    };
+
     return new Map(
-      models.map((m) => [
-        m.id,
-        getFavicon(`https://${m.provider_name ?? m.provider}.com`, {
-          fallback: `https://${m.provider_brand}.com`,
-        }),
-      ]),
+      models.map((m) => {
+        const primary = safeDomain(m.provider_name ?? m.provider);
+        const fallback = safeDomain(m.provider_brand);
+        try {
+          const icon = primary ? getFavicon(primary, { fallback }) : fallback ? getFavicon(fallback) : undefined;
+          return [m.id, icon];
+        } catch (e) {
+          // fallback to undefined so the List will use a default icon
+          console.warn(`Failed to get favicon for model ${m.id}:`, e);
+          return [m.id, undefined];
+        }
+      }),
     );
   }, [models]);
+
+  // If there was a fetch error and no models, show a friendly fallback UI
+  if (fetchError && (!models || models.length === 0)) {
+    return (
+      <Detail
+        markdown={`# Failed to load models\n\n${fetchError.message}`}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Retry"
+              icon={Icon.ArrowClockwise}
+              onAction={async () => {
+                setFetchError(null);
+                await revalidate();
+                showToast({ style: Toast.Style.Success, title: "Retry triggered" });
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   return (
     <List

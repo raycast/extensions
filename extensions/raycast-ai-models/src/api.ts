@@ -17,14 +17,21 @@ export type Abilities = {
   [key: string]: unknown;
 };
 
-export type Model = {
+// Split Model into required base fields and optional extension fields to improve type safety
+export type ModelBase = {
   id: string;
   name: string;
+  // keep description nullable to mirror API
   description: string | null;
-  status: string | null;
+  // features list may be empty but present
   features: string[];
-  suggestions?: string[];
+  // core capabilities object
   capabilities: Capabilities;
+};
+
+export type ModelOptional = {
+  status?: string | null;
+  suggestions?: string[];
   in_better_ai_subscription?: boolean;
   model?: string;
   provider?: string;
@@ -39,13 +46,23 @@ export type Model = {
   [key: string]: unknown;
 };
 
+export type Model = ModelBase & Partial<ModelOptional>;
+
 export const API_URL = "https://www.raycast.com/api/web-ai/models";
 const CACHE_KEY = "raycast-models-cache";
 const CACHE_TIMESTAMP_KEY = "raycast-models-cache-timestamp";
 
 let cachedModels: Model[] | null = null;
 let cacheTimestamp = 0;
-const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+// Tunable constants (exported so they can be imported and tested)
+export const INTELLIGENCE_WEIGHT = 0.6;
+export const SPEED_WEIGHT = 0.4;
+export const DEFAULT_CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+export const RETRY_COUNT = 2; // number of retries on transient failures
+export const RETRY_BASE_DELAY_MS = 300; // base delay for exponential backoff
+
+const CACHE_TTL = DEFAULT_CACHE_TTL;
 
 // Load cached payload from Raycast LocalStorage. Returns null payload on failure.
 async function loadFromStorage(): Promise<{ models: Model[] | null; timestamp: number }> {
@@ -94,18 +111,45 @@ export async function fetchModels({ force = false } = {}): Promise<Model[]> {
     }
   }
 
-  const res = await fetch(API_URL, { headers: { Accept: "application/json" } });
-  if (!res.ok) {
-    throw new Error(`Failed to fetch models: ${res.status} ${res.statusText}`);
+  // Fetch with basic retry/backoff for transient errors
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt <= RETRY_COUNT; attempt++) {
+    try {
+      const res = await fetch(API_URL, { headers: { Accept: "application/json" } });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch models: ${res.status} ${res.statusText}`);
+      }
+
+      const data = await res.json();
+
+      // Validate response shape: either Model[] or { models: Model[] }
+      let models: Model[] | undefined;
+      const looksLikeModelsObject = (v: unknown): v is { models: unknown } =>
+        !!v && typeof v === "object" && Array.isArray((v as { models?: unknown }).models);
+
+      if (Array.isArray(data)) {
+        models = data as Model[];
+      } else if (looksLikeModelsObject(data)) {
+        models = (data as { models: Model[] }).models;
+      } else {
+        throw new Error("Unexpected API response structure: expected an array or { models: Model[] }");
+      }
+
+      cachedModels = models;
+      cacheTimestamp = Date.now();
+      await saveToStorage(models, cacheTimestamp);
+      return models;
+    } catch (e) {
+      lastError = e as Error;
+      // if last attempt, rethrow
+      if (attempt === RETRY_COUNT) break;
+      // exponential backoff
+      const delay = RETRY_BASE_DELAY_MS * 2 ** attempt;
+      await new Promise((r) => setTimeout(r, delay));
+    }
   }
 
-  const data = (await res.json()) as { models: Model[] } | Model[];
-  const models = Array.isArray(data) ? (data as Model[]) : data.models;
-
-  cachedModels = models;
-  cacheTimestamp = Date.now();
-  await saveToStorage(models, cacheTimestamp);
-  return models;
+  throw lastError ?? new Error("Unknown error while fetching models");
 }
 
 export type SortBy =
@@ -181,8 +225,8 @@ export function sortModels(models: Model[], by: SortBy, desc = true): Model[] {
     const invSpeeds = speeds.map((s) => -s);
     const nInt = normalize(ints);
     const nSpeed = normalize(invSpeeds);
-    // weight intelligence 0.6, speed 0.4 (tunable)
-    const weights = arr.map((_, i) => 0.6 * nInt[i] + 0.4 * nSpeed[i]);
+    // weighted sum using named constants (tunable)
+    const weights = arr.map((_, i) => INTELLIGENCE_WEIGHT * nInt[i] + SPEED_WEIGHT * nSpeed[i]);
     // precompute weight map for O(1) lookup instead of O(n) indexOf
     const weightMap = new Map(arr.map((m, i) => [m.id, weights[i]]));
     return arr.sort((a, b) => {
