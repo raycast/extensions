@@ -1,6 +1,6 @@
 # String Formatter - Raycast Extension
 
-![String Formatter Demo](metadata/show.png)
+![String Formatter Demo](metadata/string-formatter-1.png)
 
 A powerful string formatting Raycast extension with intelligent separator detection, character removal, custom decorators, and output formatting.
 
