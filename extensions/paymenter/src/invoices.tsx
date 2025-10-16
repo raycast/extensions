@@ -22,6 +22,7 @@ export default function Invoices() {
           key={invoice.id}
           icon={Icon.Receipt}
           title={invoice.id}
+          accessories={[{ tag: invoice.attributes.status }]}
           actions={
             <ActionPanel>
               <OpenInPaymenter route={`invoice/invoices/${invoice.id}/edit`} />

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paymenter",
   "title": "Paymenter",
-  "description": "",
+  "description": "Open-Source Billing, Built for Hosting",
   "icon": "paymenter.png",
   "author": "xmok",
   "platforms": [
@@ -20,7 +20,7 @@
       "type": "textfield",
       "required": true,
       "placeholder": "https://demo.paymenter.org/",
-      "description": ""
+      "description": "Paymenter URL"
     },
     {
       "name": "api_key",
@@ -28,32 +28,32 @@
       "type": "password",
       "required": true,
       "placeholder": "PAYM...XXX",
-      "description": ""
+      "description": "Paymenter API Key"
     }
   ],
   "commands": [
     {
       "name": "invoices",
-      "title": "Invoices",
-      "description": "",
+      "title": "Search Invoices",
+      "description": "Search Invoices",
       "mode": "view"
     },
     {
       "name": "tickets",
-      "title": "Tickets",
-      "description": "",
+      "title": "Search Tickets",
+      "description": "Search Tickets",
       "mode": "view"
     },
     {
       "name": "users",
-      "title": "Users",
-      "description": "",
+      "title": "Search Users",
+      "description": "Search Users",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

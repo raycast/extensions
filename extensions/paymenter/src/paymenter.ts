@@ -1,11 +1,10 @@
-import { Invoice, Result, Ticket, TicketMessage, User } from "./types";
+import { Invoice, Result, Ticket, User } from "./types";
 
 export class Paymenter {
   private url: string;
   private token: string;
   public invoices: InvoicesService;
   public tickets: TicketsService;
-  public ticketMessages: TicketMessagesService;
   public users: UsersService;
 
   constructor(url: string, token: string) {
@@ -13,7 +12,6 @@ export class Paymenter {
     this.token = token;
     this.invoices = new InvoicesService(this);
     this.tickets = new TicketsService(this);
-    this.ticketMessages = new TicketMessagesService(this);
     this.users = new UsersService(this);
   }
 
@@ -48,12 +46,7 @@ class TicketsService {
     return this.client.request<Ticket[]>("tickets");
   }
 }
-class TicketMessagesService {
-  constructor(private client: Paymenter) {}
-  async list(ticketId: string) {
-    return this.client.request<TicketMessage[]>(`ticket-messages?filter[id]=${ticketId}`);
-  }
-}
+
 class UsersService {
   constructor(private client: Paymenter) {}
   async create(user: Partial<User["attributes"]>) {

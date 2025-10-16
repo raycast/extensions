@@ -73,7 +73,7 @@ function NewUser() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.AddPerson} title="Create" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

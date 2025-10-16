@@ -24,6 +24,6 @@ export type User = Entity<{
   last_name: string | null;
   email: string;
 }>;
-export interface Result<T> {
+export type Result<T> = {
   data: T;
-}
+};
