@@ -1,6 +1,6 @@
 # Obsidian Tasks Changelog
 
-## [Append priority instead of prepend] - {PR_MERGE_DATE}
+## [Append priority instead of prepend] - 2025-10-16
 - Update taskFormatter to append priority icon instead of prepending it. Prepending causes Obsidian to treat it
   as part of the description rather than as the priority. Appending it resolves this, allowing for searching
   and sorting using Dataview. 
