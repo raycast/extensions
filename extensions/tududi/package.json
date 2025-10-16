@@ -23,7 +23,7 @@
     },
     {
       "name": "email",
-      "type": "password",
+      "type": "textfield",
       "required": true,
       "title": "Email",
       "description": "Your Tududi email"
