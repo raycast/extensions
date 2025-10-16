@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prism-launcher",
+  "title": "Prism Launcher",
+  "description": "Launch and manage your Minecraft Prism Launcher instances straight from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "lockieluke3389",
+  "contributors": [
+    "tomjpeg",
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Launch Instance",
+      "subtitle": "Prism Launcher",
+      "description": "Action for launching a Prism Launcher instance",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.0",
+    "@types/fs-extra": "^11.0.4",
+    "config-ini-parser": "^1.6.1",
+    "fs-extra": "^11.2.0",
+    "modern-async": "^2.0.0",
+    "react-if": "^4.1.5",
+    "use-async-effect": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

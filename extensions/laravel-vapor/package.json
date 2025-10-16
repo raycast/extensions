@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-vapor",
+  "title": "Laravel Vapor",
+  "description": "Interacts with Laravel Vapor API",
+  "icon": "vapor.png",
+  "author": "tcampbPPU",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-team",
+      "title": "Switch Team",
+      "description": "Switch Active Team",
+      "mode": "view"
+    },
+    {
+      "name": "list-projects",
+      "title": "Search Projects",
+      "subtitle": "Laravel Vapor",
+      "description": "List projects for the current team",
+      "mode": "view"
+    },
+    {
+      "name": "list-databases",
+      "title": "Search Databases",
+      "subtitle": "Laravel Vapor",
+      "description": "List databases for the current team",
+      "mode": "view"
+    },
+    {
+      "name": "list-networks",
+      "title": "Search Networks",
+      "subtitle": "Laravel Vapor",
+      "description": "List networks for the current team",
+      "mode": "view"
+    },
+    {
+      "name": "list-domains",
+      "title": "Search Domains",
+      "subtitle": "Laravel Vapor",
+      "description": "List domains for the current team",
+      "mode": "view"
+    },
+    {
+      "name": "list-caches",
+      "title": "Search Caches",
+      "subtitle": "Laravel Vapor",
+      "description": "List caches for the current team",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vapor_token",
+      "type": "password",
+      "required": true,
+      "title": "Vapor Token",
+      "description": "In Vapor go to My Profile > API > Generate API Token > Add",
+      "placeholder": "token_123",
+      "link": "https://vapor.laravel.com/ap/account/api-tokens"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

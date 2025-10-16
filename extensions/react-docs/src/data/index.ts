@@ -1,0 +1,117 @@
+export const REACT_DOCS = [
+  {
+    id: "1",
+    type: "API's",
+    title: "createContext",
+    url: "https://beta.reactjs.org/reference/react/createContext",
+  },
+  {
+    id: "2",
+    type: "API's",
+    title: "forwardRef",
+    url: "https://beta.reactjs.org/reference/react/forwardRef",
+  },
+  {
+    id: "3",
+    type: "API's",
+    title: "lazy",
+    url: "https://beta.reactjs.org/reference/react/lazy",
+  },
+  {
+    id: "4",
+    type: "API's",
+    title: "memo",
+    url: "https://beta.reactjs.org/reference/react/memo",
+  },
+  {
+    id: "5",
+    type: "API's",
+    title: "startTransition",
+    url: "https://beta.reactjs.org/reference/react/startTransition",
+  },
+  {
+    id: "6",
+    type: "hooks",
+    title: "useCallback",
+    url: "https://beta.reactjs.org/reference/react/useCallback",
+  },
+  {
+    id: "7",
+    type: "hooks",
+    title: "useContext",
+    url: "https://beta.reactjs.org/reference/react/useContext",
+  },
+  {
+    id: "8",
+    type: "hooks",
+    title: "useDebugValue",
+    url: "https://beta.reactjs.org/reference/react/useDebugValue",
+  },
+  {
+    id: "9",
+    type: "hooks",
+    title: "useDeferredValue",
+    url: "https://beta.reactjs.org/reference/react/useDeferredValue",
+  },
+  {
+    id: "10",
+    type: "hooks",
+    title: "useEffect",
+    url: "https://beta.reactjs.org/reference/react/useEffect",
+  },
+  {
+    id: "11",
+    type: "hooks",
+    title: "useImperativeHandle",
+    url: "https://beta.reactjs.org/reference/react/useImperativeHandle",
+  },
+  {
+    id: "12",
+    type: "hooks",
+    title: "useLayoutEffect",
+    url: "https://beta.reactjs.org/reference/react/useLayoutEffect",
+  },
+  {
+    id: "13",
+    type: "hooks",
+    title: "useMemo",
+    url: "https://beta.reactjs.org/reference/react/useMemo",
+  },
+  {
+    id: "14",
+    type: "hooks",
+    title: "useReducer",
+
+    url: "https://beta.reactjs.org/reference/react/useReducer",
+  },
+  {
+    id: "15",
+    type: "hooks",
+    title: "useRef",
+    url: "https://beta.reactjs.org/reference/react/useRef",
+  },
+  {
+    id: "16",
+    type: "hooks",
+    title: "useState",
+    url: "https://beta.reactjs.org/reference/react/useState",
+  },
+  {
+    id: "17",
+    type: "hooks",
+    title: "useTransition",
+    url: "https://beta.reactjs.org/reference/react/useTransition",
+  },
+  {
+    id: "18",
+    type: "hooks",
+    title: "useSyncExternalStore",
+    url: "https://beta.reactjs.org/reference/react/useSyncExternalStore",
+  },
+  {
+    id: "19",
+    type: "hooks",
+    title: "useId",
+    url: "https://beta.reactjs.org/reference/react/useId",
+  },
+];

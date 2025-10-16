@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cardpointers",
+  "title": "CardPointers",
+  "description": "Search for any credit card details or Amex/Chase offer from the CardPointers database.",
+  "icon": "cp-icon.png",
+  "author": "emcro",
+  "categories": [
+    "Finance",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-cards",
+      "title": "Search Cards",
+      "subtitle": "CardPointers",
+      "description": "Find all of the details for any credit card in an instant.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "cardName",
+          "placeholder": "Card Name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "top-cards",
+      "title": "View Top 10 Cards",
+      "subtitle": "CardPointers",
+      "description": "View this month's top 10 credit cards.",
+      "mode": "view"
+    },
+    {
+      "name": "search-offers",
+      "title": "Search Offers",
+      "subtitle": "CardPointers",
+      "description": "Find all of the details for any Amex or Chase offer in an instant.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "offerName",
+          "placeholder": "Offer/Store Name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "top-offers",
+      "title": "View Newest Offers",
+      "subtitle": "CardPointers",
+      "description": "View today's top Amex/Chase Offers.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.3",
+    "@raycast/utils": "^1.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

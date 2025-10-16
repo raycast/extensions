@@ -1,0 +1,309 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ratingsdb",
+  "title": "RatingsDB",
+  "description": "Seamlessly search movie and tv show ratings and find where you can watch them!",
+  "icon": "extension-icon.png",
+  "author": "krod12",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-ratings",
+      "title": "Search Ratings",
+      "subtitle": "RatingsDB",
+      "description": "Search movies and tv shows",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search Query",
+          "placeholder": "Search by title..."
+        }
+      ]
+    },
+    {
+      "name": "view-watchlist",
+      "title": "View Watchlist",
+      "subtitle": "RatingsDB",
+      "description": "View your watchlist",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-ratings",
+      "title": "Search Movie/Tv Shows Information",
+      "description": "This tool allows to search movies/Tv shows and return the ratings for those movies/Tv shows.\nIt can also return more details like runtime, box office earnings, and streaming options."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "omdbToken",
+      "type": "password",
+      "required": true,
+      "title": "OMDb API Token",
+      "description": "Register for a free token at https://omdbapi.com/",
+      "placeholder": "Please enter your API token here"
+    },
+    {
+      "name": "watchModeApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Watch Mode API Key",
+      "description": "Register for a free token at https://api.watchmode.com",
+      "placeholder": "Please enter your API key here"
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": false,
+      "title": "Choose your region",
+      "description": "Choose your region to get the most accurate streaming options. This setting will affect the results for the search command. If you don't set this, the extension will default to the United States.",
+      "data": [
+        {
+          "title": "United States",
+          "value": "US"
+        },
+        {
+          "title": "Canada",
+          "value": "CA"
+        },
+        {
+          "title": "Great Britain",
+          "value": "GB"
+        },
+        {
+          "title": "Australia",
+          "value": "AU"
+        },
+        {
+          "title": "Brazil",
+          "value": "BR"
+        },
+        {
+          "title": "Spain",
+          "value": "ES"
+        },
+        {
+          "title": "India",
+          "value": "IN"
+        },
+        {
+          "title": "United Arab Emirates",
+          "value": "AE"
+        },
+        {
+          "title": "Austria",
+          "value": "AT"
+        },
+        {
+          "title": "Italy",
+          "value": "IT"
+        },
+        {
+          "title": "Argentina",
+          "value": "AR"
+        },
+        {
+          "title": "Belgium",
+          "value": "BE"
+        },
+        {
+          "title": "Bulgaria",
+          "value": "BG"
+        },
+        {
+          "title": "Chile",
+          "value": "CL"
+        },
+        {
+          "title": "Colombia",
+          "value": "CO"
+        },
+        {
+          "title": "Croatia",
+          "value": "HR"
+        },
+        {
+          "title": "Czech Republic",
+          "value": "CZ"
+        },
+        {
+          "title": "Denmark",
+          "value": "DK"
+        },
+        {
+          "title": "Ecuador",
+          "value": "EC"
+        },
+        {
+          "title": "Estonia",
+          "value": "EE"
+        },
+        {
+          "title": "Finland",
+          "value": "FI"
+        },
+        {
+          "title": "France",
+          "value": "FR"
+        },
+        {
+          "title": "Germany",
+          "value": "DE"
+        },
+        {
+          "title": "Greece",
+          "value": "GR"
+        },
+        {
+          "title": "Hong Kong",
+          "value": "HK"
+        },
+        {
+          "title": "Hungary",
+          "value": "HU"
+        },
+        {
+          "title": "Iceland",
+          "value": "IS"
+        },
+        {
+          "title": "Indonesia",
+          "value": "ID"
+        },
+        {
+          "title": "Ireland",
+          "value": "IE"
+        },
+        {
+          "title": "Israel",
+          "value": "IL"
+        },
+        {
+          "title": "Japan",
+          "value": "JP"
+        },
+        {
+          "title": "Lithuania",
+          "value": "LT"
+        },
+        {
+          "title": "Malaysia",
+          "value": "MY"
+        },
+        {
+          "title": "Mexico",
+          "value": "MX"
+        },
+        {
+          "title": "Netherlands",
+          "value": "NL"
+        },
+        {
+          "title": "New Zealand",
+          "value": "NZ"
+        },
+        {
+          "title": "Norway",
+          "value": "NO"
+        },
+        {
+          "title": "Panama",
+          "value": "PA"
+        },
+        {
+          "title": "Peru",
+          "value": "PE"
+        },
+        {
+          "title": "Philippines",
+          "value": "PH"
+        },
+        {
+          "title": "Poland",
+          "value": "PL"
+        },
+        {
+          "title": "Portugal",
+          "value": "PT"
+        },
+        {
+          "title": "Romania",
+          "value": "RO"
+        },
+        {
+          "title": "Russia",
+          "value": "RU"
+        },
+        {
+          "title": "Serbia",
+          "value": "RS"
+        },
+        {
+          "title": "Singapore",
+          "value": "SG"
+        },
+        {
+          "title": "South Africa",
+          "value": "ZA"
+        },
+        {
+          "title": "South Korea",
+          "value": "KR"
+        },
+        {
+          "title": "Sweden",
+          "value": "SE"
+        },
+        {
+          "title": "Switzerland",
+          "value": "CH"
+        },
+        {
+          "title": "Thailand",
+          "value": "TH"
+        },
+        {
+          "title": "Turkey",
+          "value": "TR"
+        },
+        {
+          "title": "Ukraine",
+          "value": "UA"
+        },
+        {
+          "title": "Vietnam",
+          "value": "VN"
+        }
+      ],
+      "default": "US"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.3",
+    "@raycast/utils": "^1.16.3",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "set": {
+    "strict": true,
+    "key": "set",
+    "title": "Update Config with key and value.",
+    "subtitle": "set [key] [value]",
+    "options": {
+      "primary_language": {
+        "key": "primary_language",
+        "title": "Default language",
+        "defaultOptName": "English",
+        "optionsFunc": "langOptions",
+        "default": "en"
+      },
+      "fallback_language": {
+        "key": "fallback_language",
+        "title": "Fallback language",
+        "optionsFunc": "langOptions"
+      },
+      "engine": {
+        "key": "engine",
+        "title": "Dictionary Engine",
+        "defaultOptName": "Google Translation",
+        "default": "googl",
+        "options": {
+          "googl": {
+            "key": "googl",
+            "title": "Google Translation"
+          },
+          "urban": {
+            "key": "urban",
+            "title": "Urban Dictionary"
+          },
+          "googlapi": {
+            "key": "googlapi",
+            "title": "Google Translation API"
+          },
+          "youdaoapi": {
+            "key": "youdaoapi",
+            "title": "Youdao API"
+          }
+        }
+      }
+    }
+  },
+  "config": {
+    "strict": true,
+    "key": "config",
+    "title": "View the Configuration"
+  }
+}

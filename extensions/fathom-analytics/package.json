@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fathom-analytics",
+  "title": "Fathom Analytics",
+  "description": "Gain quick insights into your Fathom Analytics sites, check stats and open a browser directly to the dashboard or site.",
+  "icon": "icon.png",
+  "author": "danielferguson",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-sites",
+      "title": "Check Website Stats",
+      "subtitle": "Fathom Analytics",
+      "description": "Check website statistics and quickly open a browser to view more details.",
+      "mode": "view"
+    },
+    {
+      "name": "create-site",
+      "title": "Create Site",
+      "subtitle": "Fathom Analytics",
+      "description": "Create a site and get a site ID.",
+      "mode": "view"
+    },
+    {
+      "name": "delete-site",
+      "title": "Delete Site",
+      "subtitle": "Fathom Analytics",
+      "description": "Delete a site.",
+      "mode": "view"
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "subtitle": "Fathom Analytics",
+      "description": "Open Fathom Analytics.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "description": "API token for Fathom Analytics.",
+      "placeholder": "Enter your API token from Fathom Analytics.",
+      "type": "password",
+      "required": true,
+      "title": "API Token"
+    }
+  ],
+  "keywords": [
+    "website",
+    "analytics",
+    "fathom",
+    "stats",
+    "users",
+    "views"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "got": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

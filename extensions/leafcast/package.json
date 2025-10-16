@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "leafcast",
+  "title": "Leafcast",
+  "description": "Control your Nanoleaf panels with Raycast! Unofficial extension.",
+  "icon": "command-icon.png",
+  "author": "syropian",
+  "categories": [
+    "Applications",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pair-device",
+      "title": "Pair Device",
+      "subtitle": "Leafcast",
+      "description": "Pairs your Nanoleaf device with Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "control-lights",
+      "title": "Control Lights",
+      "subtitle": "Leafcast",
+      "description": "Control various aspects of your Nanoleaf light panels",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "axios": "^1.8.4",
+    "tinycolor2": "^1.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/tinycolor2": "^1.4.4",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "deviceAddress",
+      "description": "The IP address of your Nanoleaf device",
+      "placeholder": "(Optional)",
+      "type": "textfield",
+      "title": "Device IP",
+      "required": false
+    },
+    {
+      "name": "maintainBrightnessOnColorChange",
+      "description": "Maintains brightness when setting the panels to a solid color. Useful for having a consistent brightness level on camera.",
+      "type": "checkbox",
+      "label": "Maintain brightness when changing colors",
+      "required": false,
+      "default": true
+    }
+  ]
+}

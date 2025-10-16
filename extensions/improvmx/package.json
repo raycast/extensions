@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "improvmx",
+  "title": "ImprovMX",
+  "description": "Interact with ImprovMX with the help of Raycast",
+  "icon": "improvmx.png",
+  "author": "ImprovMX",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "ImprovMX API Token",
+      "description": "Before you can start using this command, you'll need to add your API key. You can find this at https://app.improvmx.com/api",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-masked-email-address",
+      "title": "Create Masked Email Address",
+      "subtitle": "ImprovMX",
+      "description": "Generate a new masked email address",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "default_domain",
+          "title": "Default Domain",
+          "description": "The default domain to use when creating aliases",
+          "type": "textfield",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "add-domain",
+      "title": "Add Domain",
+      "subtitle": "ImprovMX",
+      "description": "Add a new domain to your ImprovMX account",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "DOMAIN",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-alias",
+      "title": "Create Alias",
+      "subtitle": "ImprovMX",
+      "description": "Create a new alias for a domain",
+      "mode": "view"
+    },
+    {
+      "name": "create-smtp-credentials",
+      "title": "Create SMTP Credentials",
+      "subtitle": "ImprovMX",
+      "description": "Create SMTP credentials for a domain",
+      "mode": "view"
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "subtitle": "ImprovMX",
+      "description": "Open the ImprovMX dashboard to manage domains and aliases",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-domain-and-aliases",
+      "title": "Manage Domain and Aliases",
+      "subtitle": "ImprovMX",
+      "description": "Manage a domain and its aliases",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

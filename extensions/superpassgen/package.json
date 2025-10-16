@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "supergenpass",
+  "title": "SuperGenPass",
+  "description": "Tool to generate passwords from master password",
+  "icon": "command-icon.png",
+  "author": "evilhex",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "superpassgen",
+      "title": "SuperPassGen",
+      "subtitle": "Generate password",
+      "description": "Generates passwords using master password",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hashRounds",
+      "description": "Minimum number of rounds to hash the input",
+      "type": "textfield",
+      "default": "10",
+      "required": false,
+      "title": "Hash rounds"
+    },
+    {
+      "name": "length",
+      "description": "Length of the generated password. Valid lengths are integers between 4 and 24 inclusive. Note that 23- and 24-character MD5-based passwords provide no additional entropy",
+      "type": "textfield",
+      "default": "10",
+      "required": true,
+      "title": "Length password"
+    },
+    {
+      "name": "method",
+      "description": "A string specifying the requested hash function. The only supported string values are 'md5' or 'sha512'",
+      "type": "dropdown",
+      "default": "md5",
+      "required": true,
+      "title": "Hashing algorithm",
+      "data": [
+        {
+          "title": "MD5",
+          "value": "md5"
+        },
+        {
+          "title": "SHA",
+          "value": "sha512"
+        }
+      ]
+    },
+    {
+      "name": "passthrough",
+      "description": "A boolean value directing whether or not to use the url as is without validation or changes",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "title": "Passthrough",
+      "label": "Use the url as is without validation or changes"
+    },
+    {
+      "name": "removeSubdomains",
+      "description": "A boolean value directing whether or not to remove subdomains from the hostname before generating the password",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "title": "Remove subdomains",
+      "label": "Remove subdomains from the hostname before generating the password"
+    },
+    {
+      "name": "secret",
+      "description": "This option is provided for convenience, as the same output can be produced by manually concatenating the master and secret passwords",
+      "type": "password",
+      "default": "",
+      "required": false,
+      "title": "Secret",
+      "label": "A secret password to be appended to the master password before generating the password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.39.3",
+    "supergenpass-lib": "3.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.0.20",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "2.7.1",
+    "typescript": "4.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

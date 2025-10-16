@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chatgo",
+  "title": "ChatGo",
+  "description": "A chatGPT AI Tool",
+  "icon": "command-icon.png",
+  "author": "DDDDesign",
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "Productivity",
+    "Fun",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Question",
+      "subtitle": "ChatGo",
+      "description": "Ask ChatGo via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "conversation",
+      "title": "Conversations",
+      "subtitle": "ChatGo",
+      "description": "Collection of your recent conversation",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "ChatGo",
+      "description": "Collection of your recent answer",
+      "mode": "view"
+    },
+    {
+      "name": "draw",
+      "title": "Draw",
+      "subtitle": "ChatGo",
+      "description": "Draw a Picture with AI",
+      "mode": "view"
+    },
+    {
+      "name": "store",
+      "title": "Template Store",
+      "subtitle": "ChatGo",
+      "description": "Choose you favorite template",
+      "mode": "view"
+    },
+    {
+      "name": "mine",
+      "title": "Mine",
+      "subtitle": "ChatGo",
+      "description": "User center of chatGo",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Enter your personal email for ChatGo",
+      "placeholder": "Enter your personal email for ChatGo",
+      "name": "email",
+      "required": true,
+      "title": "Email",
+      "type": "textfield"
+    },
+    {
+      "description": "Enter your personal password for ChatGo",
+      "placeholder": "Enter your personal password for ChatGo",
+      "name": "password",
+      "required": true,
+      "title": "Password",
+      "type": "password"
+    },
+    {
+      "name": "isAutoSaveConversation",
+      "label": "Enable auto-save conversation",
+      "description": "Auto-save every conversation that you had with the model",
+      "type": "checkbox",
+      "title": "Auto-save Conversation",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "isAutoLoadText",
+      "label": "Enable auto-load selected text",
+      "description": "Load selected text from your frontmost application to the question bar automatically",
+      "type": "checkbox",
+      "title": "Auto-load Text",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.1",
+    "@raycast/utils": "^1.8.0",
+    "axios": "^1.8.4",
+    "cross-fetch": "^3.1.5",
+    "lodash": "^4.17.21",
+    "say": "^0.16.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.194",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/uuid": "^9.0.1",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

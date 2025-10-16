@@ -1,0 +1,71 @@
+{
+  "name": "password-store",
+  "title": "Password Store",
+  "description": "A Raycast Extension for managing passwordstore.org passwords",
+  "icon": "password-store.png",
+  "author": "afok",
+  "contributors": [
+    "tim.shilov"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pass",
+      "title": "Password Store",
+      "description": "Search for passwords",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "PASSWORDS_PATH",
+      "title": "Password Store Location",
+      "description": "The full path to your password store",
+      "type": "directory",
+      "default": "~/.password-store/",
+      "required": true
+    },
+    {
+      "name": "GPG_KEY",
+      "title": "GPG decryption password",
+      "description": "Your password for your GPG key",
+      "type": "password",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "ADDITIONAL_PATH",
+      "title": "Additional paths to append to PATH",
+      "description": "If your 'pass' or 'gpg' executables are located in a non-standard location, you can add it here. To specify multiple paths, separate them with ':'",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.15.0",
+    "glob": "^10.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.12.0",
+    "@typescript-eslint/parser": "^7.12.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
+  }
+}

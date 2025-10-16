@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "roam-research",
+  "title": "Roam Research",
+  "description": "Your Roam graphs at your fingertips! Quickly search, capture and navigate your Roam graphs.",
+  "icon": "icon.png",
+  "author": "roamresearch",
+  "contributors": [
+    "dive2Pro",
+    "baibhavbista"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Roam Research Index Command",
+      "description": "Index Command which you can use to explore other commands or uninstall graphs from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "random",
+      "title": "Random Note",
+      "description": "View a random note from your graph/graphs",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Note",
+      "description": "Search across all your Roam graphs",
+      "mode": "view"
+    },
+    {
+      "name": "new-graph",
+      "title": "Add Graph",
+      "description": "Install a new Roam graph into this Raycast extension",
+      "mode": "view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Quickly append notes to your Roam graph",
+      "mode": "view"
+    },
+    {
+      "name": "create-graph-quicklink",
+      "title": "Create Graph Quicklink",
+      "description": "Create a Raycast Quicklink for a Roam graph or a specific page in that graph",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openIn",
+      "type": "dropdown",
+      "title": "Open in...",
+      "required": false,
+      "default": "web",
+      "data": [
+        {
+          "title": "Default Browser",
+          "value": "web"
+        },
+        {
+          "title": "Roam Desktop App",
+          "value": "desktop-app"
+        }
+      ],
+      "description": "Choose where to open Roam pages/blocks."
+    },
+    {
+      "name": "hideCodeBlocksInSearch",
+      "type": "checkbox",
+      "title": "Search",
+      "label": "Hide code blocks in search?",
+      "required": false,
+      "default": false,
+      "description": "Check if you want to hide code blocks in the search command"
+    },
+    {
+      "name": "quickCaptureTemplate",
+      "type": "textfield",
+      "title": "Default template for Quick Capture",
+      "label": "Default template for Quick Capture",
+      "required": false,
+      "default": "- from [[Raycast]] at {date} \n - {content}",
+      "description": "{date} supports {date: HH:mm:ss} (by default), \n                           {date: YYYY-MM-DD HH:mm:ss}, \n                           all formats in dayjs\nYou can have multiple lines for multiple blocks. For those, use a single space for indentation"
+    },
+    {
+      "name": "quickCaptureTagTodayDnp",
+      "type": "checkbox",
+      "title": "Tag Quick Capture with Today's Daily Note",
+      "label": "When sending to a non daily notes page",
+      "required": false,
+      "default": true,
+      "description": "Check if you want to append your quick captures with something like #[[August 1, 2023]]"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.1",
+    "@raycast/utils": "^1.4.11",
+    "@roam-research/roam-api-sdk": "^0.10.0",
+    "cross-fetch": "^4.0.0",
+    "dayjs": "^1.11.6",
+    "debounce": "^1.2.1",
+    "querystring": "^0.2.1",
+    "raycast-toolkit": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/debounce": "^1.2.1",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,15 @@
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+
+# misc
+.DS_Store
+
+# VS Code configuration files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

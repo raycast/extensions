@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "plex",
+  "title": "Plex",
+  "description": "View the media in your Plex Media Server",
+  "icon": "command-icon-plex.png",
+  "author": "mSarheed",
+  "contributors": [
+    "AndersDigital",
+    "xmok"
+  ],
+  "categories": [
+    "Media",
+    "Fun",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Plex Library",
+      "subtitle": "View all media in your Plex Media Server",
+      "description": "Show all media in your Plex Media Server",
+      "mode": "view"
+    },
+    {
+      "name": "sessions",
+      "title": "Active Sessions",
+      "subtitle": "View all active sessions in your Plex Media Server",
+      "description": "Show all active sessions in your Plex Media Server",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "plexBaseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Plex Media Server URL",
+      "description": "The URL of your Plex Media Server with the port number",
+      "placeholder": "http(s)://yourdomain.com or http(s)://192.168.1.5:324000"
+    },
+    {
+      "name": "plexToken",
+      "type": "password",
+      "required": true,
+      "title": "Plex Media X-Token",
+      "description": "The X-token for your Plex Media Server",
+      "placeholder": "See description for how to get the token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.15.0",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

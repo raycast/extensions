@@ -1,0 +1,169 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "radarr",
+  "title": "Radarr",
+  "description": "Manage your Radarr movie collection with powerful search, monitoring, and download management capabilities",
+  "icon": "radarr.png",
+  "author": "xjo_nd",
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryInstanceName",
+      "type": "textfield",
+      "required": true,
+      "title": "Instance Name",
+      "description": "A friendly name for your Radarr instance",
+      "placeholder": "Main Server",
+      "default": "Main"
+    },
+    {
+      "name": "primaryInstanceUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Radarr URL",
+      "description": "The full URL to your Radarr instance",
+      "placeholder": "http://localhost:7878"
+    },
+    {
+      "name": "primaryInstanceApiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Radarr API key (found in Settings > General)",
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "enableSecondaryInstance",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Second Instance",
+      "description": "Add a second Radarr instance",
+      "default": false,
+      "label": "Enable second Radarr instance"
+    },
+    {
+      "name": "secondaryInstanceName",
+      "type": "textfield",
+      "required": false,
+      "title": "Second Instance Name",
+      "description": "Name for your second Radarr instance",
+      "placeholder": "Remote Server"
+    },
+    {
+      "name": "secondaryInstanceUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Second Instance URL",
+      "description": "URL for your second Radarr instance",
+      "placeholder": "https://radarr.example.com"
+    },
+    {
+      "name": "secondaryInstanceApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Second Instance API Key",
+      "description": "API key for your second Radarr instance",
+      "placeholder": "Enter second API key"
+    },
+    {
+      "name": "activeInstance",
+      "type": "dropdown",
+      "required": false,
+      "title": "Active Instance",
+      "description": "Choose which Radarr instance to use by default",
+      "default": "primary",
+      "data": [
+        {
+          "title": "Primary Instance",
+          "value": "primary"
+        },
+        {
+          "title": "Secondary Instance",
+          "value": "secondary"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-movies",
+      "title": "Search Movies",
+      "description": "Search and add movies to Radarr",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Movie name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "upcoming-releases",
+      "title": "Upcoming Releases",
+      "description": "View upcoming movie releases",
+      "mode": "view"
+    },
+    {
+      "name": "download-queue",
+      "title": "Download Queue",
+      "description": "Manage active downloads",
+      "mode": "view"
+    },
+    {
+      "name": "movie-library",
+      "title": "Movie Library",
+      "description": "Browse your movie collection",
+      "mode": "view"
+    },
+    {
+      "name": "missing-movies",
+      "title": "Missing Movies",
+      "description": "View missing or wanted movies",
+      "mode": "view"
+    },
+    {
+      "name": "unmonitored-movies",
+      "title": "Unmonitored Movies",
+      "description": "View movies that are not being monitored",
+      "mode": "view"
+    },
+    {
+      "name": "instance-status",
+      "title": "Instance Status",
+      "description": "Monitor Radarr instance connection status",
+      "mode": "view"
+    },
+    {
+      "name": "system-status",
+      "title": "System Status",
+      "description": "Check Radarr system health",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

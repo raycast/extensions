@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remove-paywall",
+  "title": "Remove Paywall",
+  "description": "Remove the paywall from the selected or clipboard URL.",
+  "icon": "command-icon.png",
+  "author": "tegola",
+  "contributors": [
+    "Whitespace",
+    "DannySeidel",
+    "artivilla",
+    "maxoliinyk"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "remove-paywall",
+      "title": "Remove Paywall",
+      "description": "Remove the paywall from the selected or clipboard URL.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (or selection/clipboard)",
+          "required": false
+        },
+        {
+          "name": "service",
+          "type": "dropdown",
+          "placeholder": "Service",
+          "required": false,
+          "data": [
+            {
+              "title": "12ft.io",
+              "value": "https://12ft.io"
+            },
+            {
+              "title": "archive.is",
+              "value": "https://archive.is"
+            },
+            {
+              "title": "removepaywall.com",
+              "value": "https://www.removepaywall.com"
+            },
+            {
+              "title": "freedium.cfd",
+              "value": "https://freedium.cfd"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "remove-paywall-current-tab",
+      "title": "Remove Paywall from Current Tab",
+      "description": "Remove the paywall from the URL in your active browser tab.",
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-paywall-clipboard",
+      "title": "Remove Paywall from Clipboard",
+      "description": "Remove the paywall from a clipboard URL.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "service",
+      "title": "Service",
+      "description": "The default service to use to remove the paywall.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "12ft (12ft.io)",
+          "value": "https://12ft.io"
+        },
+        {
+          "title": "Archive (archive.is)",
+          "value": "https://archive.is"
+        },
+        {
+          "title": "RemovePaywall (removepaywall.com)",
+          "value": "https://www.removepaywall.com"
+        },
+        {
+          "title": "Freedium (freedium.cfd)",
+          "value": "https://freedium.cfd"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^7.32.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lifx",
+  "title": "LIFX",
+  "description": "Control your LIFX lights directly from Raycast",
+  "icon": "lifx-extension-icon.png",
+  "author": "felixb1010",
+  "categories": [
+    "Fun",
+    "Applications",
+    "Other",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Lights",
+      "subtitle": "LIFX",
+      "description": "Toggle lights on and off",
+      "mode": "view"
+    },
+    {
+      "name": "viewScenes",
+      "title": "Set Scene",
+      "subtitle": "LIFX",
+      "description": "Set the chosen scene",
+      "mode": "view"
+    },
+    {
+      "name": "viewEffects",
+      "title": "Set Effect",
+      "subtitle": "LIFX",
+      "description": "Set the chosen effect",
+      "mode": "view"
+    },
+    {
+      "name": "turnOnAllLights",
+      "title": "Turn On All Lights",
+      "subtitle": "LIFX",
+      "description": "Turn on your lifx lights",
+      "mode": "no-view"
+    },
+    {
+      "name": "turnOffAllLights",
+      "title": "Turn Off All Lights",
+      "subtitle": "LIFX",
+      "description": "Turn off your lifx lights",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lifx_token",
+      "title": "LIFX Token",
+      "description": "Your LIFX token",
+      "type": "textfield",
+      "placeholder": "23141342344273647",
+      "required": true
+    },
+    {
+      "name": "move_effect_period",
+      "title": "Move Effect Period",
+      "description": "The time in seconds for one cycle of the effect",
+      "type": "textfield",
+      "default": "3",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "@raycast/utils": "^1.1.0",
+    "axios": "^0.27.2",
+    "hex-to-hsl": "^1.0.2",
+    "hsl-to-hex": "^1.0.0",
+    "kelvin-to-rgb": "^1.0.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tasklink",
+  "title": "Tasklink",
+  "description": "Converts issue tracker Ids into clickable links",
+  "icon": "command-icon.png",
+  "author": "jrodalo",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "issue_id_to_html_link",
+      "title": "Convert Issue Ids into Clickable HTML Links",
+      "description": "Converts issue tracker IDs into HTML links",
+      "mode": "no-view"
+    },
+    {
+      "name": "issue_id_to_markdown_link",
+      "title": "Convert Issue Ids into Clickable Markdown Links",
+      "description": "Converts issue tracker IDs into Markdown links",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Issue Details URL",
+      "name": "url",
+      "type": "textfield",
+      "description": "The URL address of your issue tracking system. Use $1 to insert the Issue Id",
+      "placeholder": "https://<mytracker>/issue/$1",
+      "required": true
+    },
+    {
+      "title": "Issue Id Format",
+      "name": "format",
+      "type": "dropdown",
+      "description": "The pattern that matches your issue Id format",
+      "required": true,
+      "data": [
+        {
+          "title": "RAY-123 (eg. JIRA, YouTrack)",
+          "value": "JIRA_STYLE"
+        },
+        {
+          "title": "#1234 (eg. GitHub, Targetprocess)",
+          "value": "GITHUB_STYLE"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.12",
+    "@types/react": "19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "test": "vitest",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fantasy-premier-league-rankings",
+  "title": "Fantasy Premier League",
+  "description": "See where you rank amongst in your league rivals in Fantasy Premier League within Raycast.",
+  "icon": "icon.png",
+  "author": "hwb",
+  "contributors": [
+    "niall-maloney"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rankings",
+      "title": "View My Rankings",
+      "subtitle": "Fantasy Premier League FPL",
+      "description": "View your live ranking across all your leagues in Fantasy Premier League.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "userTeamId",
+      "title": "Your Team ID",
+      "description": "The ID of your team, found on the URL of your team page. You can get it from the URL of your team page, e.g. https://fantasy.premierleague.com/entry/1234567/event/1",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Enter your team ID"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.0",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.2",
+    "react": "^18.2.0",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

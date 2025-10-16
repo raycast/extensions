@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lipsum",
+  "title": "Japanese Lorem Ipsum Generator",
+  "description": "Generate Japanese / English dummy text",
+  "icon": "extension-icon.png",
+  "author": "seita1996",
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "dummy",
+    "text",
+    "generator",
+    "lipsum"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-dummy-text",
+      "title": "Generate Dummy Text",
+      "description": "Generates Japanese or English dummy text.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfChars",
+          "required": false,
+          "type": "text",
+          "description": "Number of characters to generate",
+          "placeholder": "Number of characters"
+        },
+        {
+          "name": "language",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Select Language",
+          "data": [
+            { "title": "Japanese", "value": "ja" },
+            { "title": "English", "value": "en" }
+          ],
+          "description": "Language of the dummy text"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultLanguage",
+      "title": "Default Language",
+      "description": "Default language for dummy text generation",
+      "type": "dropdown",
+      "required": false,
+      "default": "ja",
+      "data": [
+        { "title": "Japanese", "value": "ja" },
+        { "title": "English", "value": "en" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.97.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.3",
+    "@types/react": "19.1.3",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

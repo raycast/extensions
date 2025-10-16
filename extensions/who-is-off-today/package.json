@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "who-is-off-today",
+  "title": "Who Is off Today?",
+  "description": "See who is off today from remote.com",
+  "icon": "remote.png",
+  "author": "pejman_yaghmaie",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "icon": "remote.svg",
+      "name": "who-is-off",
+      "title": "Who Is off Today?",
+      "subtitle": "Remote.com",
+      "description": "Displays a list of employees who are not at work today",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "API Key",
+      "description": "Get you API Key from 'Integrations' in Remote.com's dashboard",
+      "placeholder": "ra_live_xxxxxxxxxxxxxxxx",
+      "name": "apiKey",
+      "required": true,
+      "type": "textfield"
+    },
+    {
+      "label": "Sandbox",
+      "title": "Is Sandbox?",
+      "description": "Will use remote-sandbox.com when checked",
+      "name": "isSandbox",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.1",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/jest": "^29.5.12",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "jest": "^29.7.0",
+    "moq.ts": "^10.0.8",
+    "prettier": "^3.0.3",
+    "ts-jest": "^29.1.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "test": "jest",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

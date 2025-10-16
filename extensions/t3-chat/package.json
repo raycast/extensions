@@ -1,0 +1,207 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "t3-chat",
+  "title": "T3 Chat",
+  "description": "Query T3 Chat directly from Raycast",
+  "icon": "raycast-t3-chat.png",
+  "author": "Lermatroid",
+  "contributors": [
+    "Sclafus",
+    "effektsvk",
+    "wxiaoyun"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-t3-chat",
+      "title": "Ask T3 Chat",
+      "description": "Quickly ask T3 Chat anything",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": true,
+          "placeholder": "Query"
+        },
+        {
+          "name": "search",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Search Grounding",
+          "description": "Enable search grounding for models that support it",
+          "data": [
+            {
+              "title": "Enabled",
+              "value": "true"
+            },
+            {
+              "title": "Disabled",
+              "value": "false"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "title": "Model",
+          "description": "The model to use for the chat",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Claude 3.5",
+              "value": "claude-3.5"
+            },
+            {
+              "title": "Claude 3.7",
+              "value": "claude-3.7"
+            },
+            {
+              "title": "Claude 3.7 Reasoning",
+              "value": "claude-3.7-reasoning"
+            },
+            {
+              "title": "DeepSeek R1 (Llama Distilled)",
+              "value": "deepseek-r1-groq"
+            },
+            {
+              "title": "DeepSeek R1 (OpenRouter)",
+              "value": "deepseek-r1-openrouter"
+            },
+            {
+              "title": "DeepSeek R1 (Qwen Distilled)",
+              "value": "deepseek-r1-distill-qwen-32b-groq"
+            },
+            {
+              "title": "DeepSeek v3 (0324)",
+              "value": "deepseek-v3-0324"
+            },
+            {
+              "title": "DeepSeek v3 (Fireworks)",
+              "value": "deepseek-v3-fireworks"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Lite Preview",
+              "value": "gemini-2.0-flash-lite-preview-02-05"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Flash (Thinking)",
+              "value": "gemini-2.5-flash-thinking"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            },
+            {
+              "title": "GPT ImageGen",
+              "value": "gpt-image-1"
+            },
+            {
+              "title": "GPT-4.1",
+              "value": "gpt-4.1"
+            },
+            {
+              "title": "GPT-4.1 Mini",
+              "value": "gpt-4.1-mini"
+            },
+            {
+              "title": "GPT-4.1 Nano",
+              "value": "gpt-4.1-nano"
+            },
+            {
+              "title": "GPT-4.5",
+              "value": "gpt-4.5"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o Mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-o3 Mini",
+              "value": "gpt-o3-mini"
+            },
+            {
+              "title": "GPT-o4 Mini",
+              "value": "gpt-o4-mini"
+            },
+            {
+              "title": "Grok 3",
+              "value": "grok-v3"
+            },
+            {
+              "title": "Grok 3 Mini",
+              "value": "grok-v3-mini"
+            },
+            {
+              "title": "Llama 3.3 70B",
+              "value": "llama-3.3-70b-groq"
+            },
+            {
+              "title": "Llama 4 Maverick",
+              "value": "llama-4-maverick"
+            },
+            {
+              "title": "Llama 4 Scout",
+              "value": "llama-4-scout"
+            },
+            {
+              "title": "Qwen 2.5 32B",
+              "value": "qwen-2.5-32b"
+            },
+            {
+              "title": "Qwen qwq 32B",
+              "value": "qwq-32b"
+            }
+          ]
+        },
+        {
+          "name": "useBeta",
+          "title": "Beta Features",
+          "label": "Use Beta",
+          "description": "Use the beta version of t3.chat (beta.t3.chat)",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

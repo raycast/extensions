@@ -1,0 +1,216 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "united-nations",
+  "title": "United Nations",
+  "type": "module",
+  "description": "Peace, dignity and equality on a healthy planet.",
+  "icon": "united-nations-icon.png",
+  "author": "litomore",
+  "crossExtensions": [
+    "litomore/say"
+  ],
+  "categories": [
+    "Data",
+    "Media",
+    "News",
+    "Web"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "un-documents",
+      "title": "UN Documents",
+      "description": "Documents by the United Nations' General Assembly, Security Council, Human Rights Council, and Economic and Social Council issued at UNHQ.",
+      "mode": "view"
+    },
+    {
+      "name": "un-news",
+      "title": "UN News",
+      "description": "Global perspective Human stories.",
+      "mode": "view"
+    },
+    {
+      "name": "un-photos",
+      "title": "UN Photos",
+      "description": "United Nations Photo Gallery.",
+      "mode": "view"
+    },
+    {
+      "name": "un-press",
+      "title": "UN Press",
+      "description": "Meetings Coverage and Press Releases",
+      "mode": "view"
+    },
+    {
+      "name": "un-site-index",
+      "title": "UN Site Index",
+      "description": "Site Index of United Nations.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "dropdown",
+      "title": "UN News Language",
+      "name": "newsLanguageCode",
+      "description": "Display launage for UN News.",
+      "required": true,
+      "default": "en",
+      "data": [
+        {
+          "value": "ar",
+          "title": "العربية"
+        },
+        {
+          "value": "zh",
+          "title": "中文"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "ru",
+          "title": "Русский"
+        },
+        {
+          "value": "es",
+          "title": "Español"
+        },
+        {
+          "value": "pt",
+          "title": "Português"
+        },
+        {
+          "value": "sw",
+          "title": "Kiswahili"
+        },
+        {
+          "value": "hi",
+          "title": "Hindi हिंदी"
+        },
+        {
+          "value": "ur",
+          "title": "Urdu اردو"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Site Index Language",
+      "name": "siteIndexLanguageCode",
+      "description": "Display launage for UN Site Index.",
+      "required": true,
+      "default": "en",
+      "data": [
+        {
+          "value": "ar",
+          "title": "العربية"
+        },
+        {
+          "value": "zh",
+          "title": "中文"
+        },
+        {
+          "value": "en",
+          "title": "English"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "ru",
+          "title": "Русский"
+        },
+        {
+          "value": "es",
+          "title": "Español"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "title": "[Raycast Pro] UN News AI-summerize length",
+      "name": "newsSummerizeLength",
+      "description": "AI-summerize word length for UN News. (Raycast Pro required)",
+      "required": false,
+      "default": "100",
+      "data": [
+        {
+          "value": "50",
+          "title": "50 words"
+        },
+        {
+          "value": "100",
+          "title": "100 words"
+        },
+        {
+          "value": "200",
+          "title": "200 words"
+        },
+        {
+          "value": "300",
+          "title": "300 words"
+        },
+        {
+          "value": "400",
+          "title": "400 words"
+        },
+        {
+          "value": "500",
+          "title": "500 words"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "title": "Detect System Voice Settings for Text-to-Speech",
+      "label": "Enable",
+      "name": "detechSystemVoiceSettings",
+      "description": "Enable this option to detect available voices on your system for text-to-speech. (Siri voices are not included)",
+      "required": false,
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "title": "Hide Unsupported Raycast Pro Features",
+      "label": "Enable",
+      "name": "hideUnsupportedProFeatures",
+      "description": "Enable this option to hide unsupported Raycast Pro features.",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "cheerio": "^1.1.2",
+    "fast-xml-parser": "^5.2.5",
+    "got": "^14.4.7",
+    "mac-say": "^0.3.3",
+    "pinyin-pro": "^3.27.0",
+    "raycast-cross-extension": "^0.2.3",
+    "turndown": "^7.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}

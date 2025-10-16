@@ -1,0 +1,79 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "power-management",
+    "title": "Power Management",
+    "description": "Change Power Management Settings of the system",
+    "icon": "command-icon.png",
+    "author": "sasivarnan",
+    "contributors": [
+        "erics118",
+        "bbatsche",
+        "iamyeizi"
+    ],
+    "categories": [
+        "System"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "title": "Low Power Mode Settings",
+            "name": "low-power-mode-settings",
+            "description": "Get detailed low power mode settings",
+            "mode": "view"
+        },
+        {
+            "title": "Toggle Low Power Mode",
+            "name": "toggle-low-power-mode",
+            "description": "Toggle low power mode",
+            "mode": "no-view"
+        },
+        {
+            "title": "Enable Low Power Mode",
+            "name": "enable-low-power-mode",
+            "description": "Enable low power mode",
+            "mode": "no-view"
+        },
+        {
+            "title": "Disable Low Power Mode",
+            "name": "disable-low-power-mode",
+            "description": "Disable low power mode",
+            "mode": "no-view"
+        },
+        {
+            "name": "lowpower-menubar",
+            "title": "Low Power Mode Menu Bar",
+            "description": "See status of low power mode in the menubar",
+            "mode": "menu-bar",
+            "interval": "10m",
+            "preferences": [
+              {
+                "name": "hideIconWhenDisabled",
+                "description": "Hide the icon in the menubar when low power mode is disabled",
+                "type": "checkbox",
+                "label": "Hide icon when disabled",
+                "default": false,
+                "required": false
+              }
+            ]
+          }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.67.1",
+        "@raycast/utils": "^1.12.4"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.8",
+        "@types/node": "20.11.17",
+        "@types/react": "18.2.55",
+        "eslint": "^8.56.0",
+        "prettier": "^3.2.5",
+        "typescript": "^5.3.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

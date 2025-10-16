@@ -1,0 +1,38 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "debank",
+  "title": "debank",
+  "description": "A Raycast Extension to query DeBank data with its OpenAPI",
+  "icon": "debank.png",
+  "author": "Yukai",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Account Balances",
+      "subtitle": "DeBank",
+      "description": "Show Account Balances with DeBank API",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "axios": "^0.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@yukaii/debank-types": "^1.0.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

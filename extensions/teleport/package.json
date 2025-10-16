@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "teleport",
+  "title": "Teleport",
+  "description": "Interact with teleport, the open infrastructure access platform",
+  "icon": "icon.png",
+  "author": "lamberttraccard",
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "login",
+      "title": "Login",
+      "subtitle": "Teleport",
+      "description": "Login to teleport",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "otp",
+          "type": "password",
+          "placeholder": "One Time Password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "logout",
+      "title": "Logout",
+      "subtitle": "Teleport",
+      "description": "Logout of teleport",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-databases",
+      "title": "List Databases",
+      "subtitle": "Teleport",
+      "description": "List all databases available in teleport",
+      "mode": "view"
+    },
+    {
+      "name": "list-servers",
+      "title": "List Servers",
+      "subtitle": "Teleport",
+      "description": "List all servers available in teleport",
+      "mode": "view"
+    },
+    {
+      "name": "list-applications",
+      "title": "List Applications",
+      "subtitle": "Teleport",
+      "description": "List all applications available in teleport",
+      "mode": "view"
+    },
+    {
+      "name": "list-kubernetes-clusters",
+      "title": "List Kubernetes Clusters",
+      "subtitle": "Teleport",
+      "description": "List all kubernetes clusters available in teleport",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "description": "The username use to login to teleport",
+      "type": "textfield",
+      "required": true,
+      "title": "Username"
+    },
+    {
+      "name": "password",
+      "description": "The password use to login to teleport",
+      "type": "password",
+      "required": true,
+      "title": "Password"
+    },
+    {
+      "name": "proxy",
+      "description": "The proxy use to login to teleport",
+      "type": "textfield",
+      "required": true,
+      "title": "Proxy"
+    },
+    {
+      "name": "terminal",
+      "description": "The application to use to open a terminal",
+      "type": "appPicker",
+      "required": true,
+      "title": "Terminal"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.0",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.8",
+    "@types/react": "^18.2.31",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

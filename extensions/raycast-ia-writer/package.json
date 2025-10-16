@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-ia-writer",
+  "title": "iA Writer",
+  "description": "Create or search notes with Raycast",
+  "icon": "logo.png",
+  "author": "xvvhang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "preferences": [
+    {
+      "name": "authToken",
+      "description": "Auth Token is required to run Quick Note command.",
+      "type": "textfield",
+      "required": false,
+      "title": "Auth Token",
+      "placeholder": "iA Writer's Auth Token"
+    },
+    {
+      "name": "timeBased",
+      "description": "Specify if you want to use time-based filenames.",
+      "type": "checkbox",
+      "required": false,
+      "title": "Time Based",
+      "label": "Use time-based filenames",
+      "default": true
+    },
+    {
+      "name": "dateFormat",
+      "description": "Specify the date format of time-based filenames. Only work when you use time-based filenames.",
+      "type": "textfield",
+      "required": false,
+      "title": "Date Format",
+      "placeholder": "Date format of time-based filenames",
+      "default": "YYYYMMDDHHmmss"
+    }
+  ],
+  "commands": [
+    {
+      "name": "daily-note",
+      "title": "Daily Note",
+      "description": "Create or open daily notes in library",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-note",
+      "title": "Quick Note",
+      "subtitle": "iA Writer",
+      "description": "Create quick notes in library",
+      "mode": "view"
+    },
+    {
+      "name": "quick-search",
+      "title": "Quick Search",
+      "subtitle": "iA Writer",
+      "description": "Open Quick Search with queries",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.2",
+    "dayjs": "^1.11.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

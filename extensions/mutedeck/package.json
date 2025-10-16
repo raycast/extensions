@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mutedeck",
+  "title": "MuteDeck",
+  "description": "Control MuteDeck from Raycast",
+  "icon": "icon.png",
+  "author": "chad_walters",
+  "categories": [
+    "Applications",
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-status",
+      "title": "Show Status",
+      "subtitle": "MuteDeck",
+      "description": "Show MuteDeck status and controls",
+      "mode": "view",
+      "icon": "info.png"
+    },
+    {
+      "name": "toggle-microphone",
+      "title": "Toggle Microphone",
+      "subtitle": "MuteDeck",
+      "description": "Toggle microphone mute/unmute",
+      "mode": "no-view",
+      "icon": "microphone.png"
+    },
+    {
+      "name": "toggle-video",
+      "title": "Toggle Video",
+      "subtitle": "MuteDeck",
+      "description": "Toggle camera on/off",
+      "mode": "no-view",
+      "icon": "camera.png"
+    },
+    {
+      "name": "leave-meeting",
+      "title": "Leave Meeting",
+      "subtitle": "MuteDeck",
+      "description": "Leave current meeting",
+      "mode": "no-view",
+      "icon": "door.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiEndpoint",
+      "type": "textfield",
+      "required": true,
+      "title": "API Endpoint",
+      "description": "The MuteDeck API endpoint (default: http://localhost:3491)",
+      "default": "http://localhost:3491"
+    },
+    {
+      "name": "statusRefreshInterval",
+      "type": "textfield",
+      "required": true,
+      "title": "Status Refresh Interval",
+      "description": "How often to refresh the status display (in seconds)",
+      "default": "1"
+    },
+    {
+      "name": "apiTimeout",
+      "type": "textfield",
+      "required": false,
+      "title": "API Timeout",
+      "description": "Timeout for API requests in milliseconds",
+      "default": "5000"
+    },
+    {
+      "name": "confirmLeave",
+      "type": "checkbox",
+      "required": false,
+      "title": "Confirm Leave Meeting",
+      "description": "Show confirmation dialog before leaving a meeting",
+      "default": true,
+      "label": "Show confirmation dialog"
+    },
+    {
+      "name": "confirmMuteInPresentation",
+      "type": "checkbox",
+      "required": false,
+      "title": "Confirm Mute While Presenting",
+      "description": "Show confirmation dialog before toggling microphone while presenting or recording",
+      "default": true,
+      "label": "Show confirmation dialog"
+    },
+    {
+      "name": "confirmVideoInPresentation",
+      "type": "checkbox",
+      "required": false,
+      "title": "Confirm Video While Presenting",
+      "description": "Show confirmation dialog before toggling camera while presenting or recording",
+      "default": true,
+      "label": "Show confirmation dialog"
+    },
+    {
+      "name": "showToasts",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Toast Notifications",
+      "description": "Show toast notifications for command feedback",
+      "default": true,
+      "label": "Show notifications"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "8.57.1",
+    "prettier": "3.5.1",
+    "typescript": "5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

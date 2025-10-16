@@ -1,0 +1,1069 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "groq",
+  "title": "Groq",
+  "description": "Use the powerful models via Groq from the comfort of Raycast.",
+  "icon": "groq.png",
+  "author": "ilian",
+  "contributors": [
+    "dez_dezsson",
+    "g3ge"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "description": "Chat with Groq",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "model_chat",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_summarize",
+          "title": "Summarize Prompt",
+          "description": "The prompt for the summarize command.",
+          "type": "textfield",
+          "default": "Summarize all relevant aspects from the following selected_text concisely.",
+          "required": false
+        },
+        {
+          "name": "model_summarize",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Grammar and Spelling",
+      "description": "Fix spelling and grammar of selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_grammar",
+          "title": "Prompt",
+          "description": "The prompt for the grammar command.",
+          "type": "textfield",
+          "default": "Fix spelling, grammar, and punctuation of the selected_text. Only write the corrected version without explanations and without wrapping it in quotation marks.",
+          "required": false
+        },
+        {
+          "name": "model_grammar",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "description": "Make selected text shorter.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_shorter",
+          "title": "Make Shorter Prompt",
+          "description": "The prompt for the shorter command.",
+          "type": "textfield",
+          "default": "Make the following selected_text shorter with the following instructions: Use the same style and tone of voice, reduce repetition, keep key information.",
+          "required": false
+        },
+        {
+          "name": "model_shorter",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "description": "Make selected text longer.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_longer",
+          "title": "Make Longer Prompt",
+          "description": "The prompt for the longer command.",
+          "type": "textfield",
+          "default": "Act as a world class content writer. Expand the selected_text with the following instructions: Use the same style and tone of voice, expand the key information and concepts, avoid repetition, stay factual close to the provided selected_text.",
+          "required": false
+        },
+        {
+          "name": "model_longer",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "improve",
+      "title": "Improve Text",
+      "description": "Improve selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_improve",
+          "title": "Improve Text Prompt",
+          "description": "The prompt for the improve command.",
+          "type": "textfield",
+          "default": "You are an expert in writing charismatic texts. Improve the selected_text by following these instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same. Only write the corrected version without explanations and without wrapping it in quotation marks.",
+          "required": false
+        },
+        {
+          "name": "model_improve",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask AI",
+      "description": "Ask AI and use selected text.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "ask_sys_prompt",
+          "title": "System Prompt",
+          "description": "System prompt for asking AI.",
+          "type": "textfield",
+          "default": "You are a helpful assistant.",
+          "required": false
+        },
+        {
+          "name": "ask_default_question",
+          "title": "Default Question",
+          "description": "Default question for selected text if none provided.",
+          "type": "textfield",
+          "default": "Explain the selected_text as concise and simple as possible.",
+          "required": false
+        },
+        {
+          "name": "model_ask",
+          "description": "Override the global model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "coding",
+      "title": "Coding Assistant",
+      "description": "Coding Assistant considering selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "coding_sys_prompt",
+          "title": "System Prompt",
+          "description": "System prompt for coding assistant.",
+          "type": "textfield",
+          "default": "You are a world class software engineer with deep understanding of any programming language.",
+          "required": false
+        },
+        {
+          "name": "coding_default_question",
+          "title": "Default Question",
+          "description": "Default question for selected text if none provided.",
+          "type": "textfield",
+          "default": "Explain the following code in detail. Start with a high-level overview.",
+          "required": false
+        },
+        {
+          "name": "model_coding",
+          "description": "Override the global model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "codellama-70b-instruct",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "casual",
+      "title": "Change Tone to Casual",
+      "description": "Change tone of selected text to casual.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_casual",
+          "title": "Change Tone Prompt",
+          "description": "The prompt for the casual command.",
+          "type": "textfield",
+          "default": "Rewrite the selected_text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_casual",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "synonyms",
+      "title": "Find Synonyms",
+      "description": "Find synonyms of selected word.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_synonyms",
+          "title": "Synonyms Prompt",
+          "description": "The prompt for the synonyms command.",
+          "type": "textfield",
+          "default": "Find synonyms for the given word in selected_text and format the output as a markdown list. Do NOT write any explanations. Do NOT include the original word in the list. The list should not have any duplicates.",
+          "required": false
+        },
+        {
+          "name": "model_synonyms",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "description": "Change tone of selected text to professional.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_professional",
+          "title": "Change Tone Prompt",
+          "description": "The prompt for the professional command.",
+          "type": "textfield",
+          "default": "Rewrite the selected_text using a professional tone of voice, formal language, concise phrasing, meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_professional",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Custom action based on selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_custom",
+          "title": "Custom Prompt",
+          "description": "The prompt for the custom action command.",
+          "type": "textfield",
+          "default": "Write a custom prompt here.",
+          "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate Text",
+      "description": "Translate selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_translate",
+          "title": "Language-defining Translation Prompt.",
+          "description": "The prompt for the translate command.",
+          "type": "textfield",
+          "default": "Act as translator and translate the selected_text. If English, to German. If German, to English. Maintain tone. Start with: '### Translated from .. to .. :'",
+          "required": false
+        },
+        {
+          "name": "model_translate",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "taskBreakdown",
+      "title": "Task Generator",
+      "description": "Break down a project into tasks.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_task",
+          "title": "Generator Prompt",
+          "description": "The prompt for generating tasks.",
+          "type": "textfield",
+          "default": "Turn the following project title or project description in selected_text into a concise list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Write a summary of the project.'",
+          "required": false
+        },
+        {
+          "name": "model_task",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.1-8b-instant",
+              "title": "Llama 3.1 8B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Groq API Key",
+      "name": "apikey",
+      "required": true,
+      "title": "Groq API Key",
+      "type": "password",
+      "placeholder": "gsk-XXX"
+    },
+    {
+      "name": "model",
+      "title": "Select a global model",
+      "description": "LLM model to use for all your commands.",
+      "type": "dropdown",
+      "required": true,
+      "default": "llama-3.3-70b-versatile",
+      "data": [
+        {
+          "value": "openai/gpt-oss-120b",
+          "title": "GPT OSS 120B 131k"
+        },
+        {
+          "value": "openai/gpt-oss-20b",
+          "title": "GPT OSS 20B 131k"
+        },
+        {
+          "value": "moonshotai/kimi-k2-instruct",
+          "title": "Kimi K2 Instruct 131k"
+        },
+        {
+          "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+          "title": "Llama 4 Maverick 131k"
+        },
+        {
+          "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "title": "Llama 4 Scout 131k"
+        },
+        {
+          "value": "llama-3.3-70b-versatile",
+          "title": "Llama 3.3 70B 128k"
+        },
+        {
+          "value": "llama-3.1-8b-instant",
+          "title": "Llama 3.1 8B 128k"
+        },
+        {
+          "value": "deepseek-r1-distill-llama-70b",
+          "title": "DeepSeek R1 70B 128k"
+        },
+        {
+          "value": "qwen/qwen3-32b",
+          "title": "Qwen 3 32B 128K"
+        }
+      ]
+    },
+    {
+      "name": "enableStreaming",
+      "title": "Response Streaming",
+      "label": "Enabled",
+      "description": "This will allow you to see the response as it's being generated. If disabled, the response will be shown once it's fully generated.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showMetadata",
+      "title": "Show metadata",
+      "label": "Enabled",
+      "description": "This will show the metadata of the response, including the model used, price, the token count, and the time taken to generate the response.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "gpt-tokenizer": "^2.2.1",
+    "openai": "^4.28.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

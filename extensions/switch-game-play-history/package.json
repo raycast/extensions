@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "switch-game-play-history",
+  "title": "Switch Game Play History",
+  "description": "Browse your Nintendo Switch gameplay history. Including information such as first played time, last played time, and total playtime for each game.",
+  "icon": "extension_icon.png",
+  "author": "kvdo2",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "playHistories",
+      "title": "Browse All",
+      "description": "Browse all play history.",
+      "mode": "view"
+    },
+    {
+      "name": "recentPlayHistories",
+      "title": "Browse Recent",
+      "description": "Browse play history from the past week.",
+      "mode": "view"
+    },
+    {
+      "name": "getSessionToken",
+      "title": "Get Session Token",
+      "description": "Get Nintendo's session token.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "NINTENDO_SESSION_TOKEN",
+      "title": "Nintendo Session Token",
+      "description": "It is used to fetch the game history. Please run `Get Session Token` command for the first time.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "GAME_TITLE_LANGUAGE_CODE",
+      "title": "Game Title Language (Beta)",
+      "description": "Game title language depends on your Nintendo accout region. If you choose English, the English game title will be displayed as much as possible. For games that cannot be obtained, the original title is displayed.",
+      "type": "dropdown",
+      "default": "original",
+      "required": false,
+      "data": [
+        {
+          "value": "ORIG",
+          "title": "Original"
+        },
+        {
+          "value": "US",
+          "title": "English"
+        }
+      ]
+    },
+    {
+      "name": "SYNC_TO_NOTION",
+      "title": "Sync to Notion (Beta)",
+      "description": "Sync your play history to Notion.If you want to use this feature, please set `Notion API Key` and `Notion Database ID`.",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "NOTION_API_KEY",
+      "title": "Notion API Key",
+      "description": "Internal Integration Token",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "NOTION_DATABASE_ID",
+      "title": "Notion Database ID",
+      "description": "It is used to store play history data.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^2.2.4",
+    "@raycast/api": "^1.50.0",
+    "@raycast/utils": "^1.5.2",
+    "base64url": "^3.0.1",
+    "cheerio": "^1.0.0-rc.12",
+    "crypto": "^1.0.1",
+    "dayjs": "^1.11.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

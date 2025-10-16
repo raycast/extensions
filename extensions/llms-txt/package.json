@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "llms-txt",
+  "title": "LLMs Txt",
+  "description": "Search and access llms.txt files from various websites. llms.txt is a proposed standard file that defines how AI models and LLMs should interact with website content. The llms-full.txt variant provides more detailed rules and guidelines.",
+  "icon": "extension-icon.png",
+  "author": "thedaviddias",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web",
+    "Documentation",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-websites",
+      "title": "Search llms.txt",
+      "description": "Search through a curated list of websites that implement the proposed llms.txt standard.",
+      "mode": "view"
+    },
+    {
+      "name": "view-history",
+      "title": "View History",
+      "description": "View your recently accessed llms.txt files and interactions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Choose which action appears first in the menu when selecting a website. This action will be the most prominent and easily accessible.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy_llms",
+      "data": [
+        {
+          "title": "View llms.txt - Opens the website's AI interaction rules in browser",
+          "value": "view_llms"
+        },
+        {
+          "title": "Copy llms.txt URL - Copy the policy URL to clipboard",
+          "value": "copy_llms"
+        },
+        {
+          "title": "View llms-full.txt - Opens detailed AI guidelines (falls back to llms.txt)",
+          "value": "view_llms_full"
+        },
+        {
+          "title": "Copy llms-full.txt URL - Copy full policy URL (falls back to llms.txt)",
+          "value": "copy_llms_full"
+        }
+      ]
+    },
+    {
+      "name": "defaultCategory",
+      "title": "Default Category Filter",
+      "description": "Which category to show by default when opening the search",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All Categories",
+          "value": "all"
+        },
+        {
+          "title": "AI & Machine Learning",
+          "value": "ai-ml"
+        },
+        {
+          "title": "Data & Analytics",
+          "value": "data-analytics"
+        },
+        {
+          "title": "Developer Tools",
+          "value": "developer-tools"
+        },
+        {
+          "title": "Infrastructure & Cloud",
+          "value": "infrastructure-cloud"
+        },
+        {
+          "title": "Integration & Automation",
+          "value": "integration-automation"
+        },
+        {
+          "title": "Security & Identity",
+          "value": "security-identity"
+        },
+        {
+          "title": "Other",
+          "value": "other"
+        }
+      ]
+    },
+    {
+      "name": "showDescriptions",
+      "title": "Show Descriptions",
+      "description": "Show website descriptions in the search results",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show website descriptions"
+    },
+    {
+      "name": "historySize",
+      "title": "History: Maximum Size",
+      "description": "Maximum number of entries to keep in the history",
+      "type": "textfield",
+      "required": false,
+      "default": "50",
+      "placeholder": "50"
+    },
+    {
+      "name": "historyRetention",
+      "title": "History: Retention Period",
+      "description": "Automatically remove history entries older than this many days (0 to keep forever)",
+      "type": "textfield",
+      "required": false,
+      "default": "30",
+      "placeholder": "Number of Days"
+    },
+    {
+      "name": "cacheDuration",
+      "title": "Cache: Duration",
+      "description": "How long to cache the website data before fetching fresh data (in hours)",
+      "type": "textfield",
+      "required": false,
+      "default": "24",
+      "placeholder": "Number of Hours"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^2.6.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

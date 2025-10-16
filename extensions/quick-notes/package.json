@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-notes",
+  "title": "Quick Notes",
+  "description": "Create simple markdown notes in Raycast and sync to a folder locally. No integrations required!",
+  "icon": "icon.png",
+  "author": "biknandy",
+  "contributors": [
+    "dead_hikikomori"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View Notes",
+      "description": "Create, view, and manage your quick notes.",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create Note",
+      "description": "Create a quick note.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text"
+        },
+        {
+          "name": "note",
+          "placeholder": "Note",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "tag",
+      "title": "Create Tag",
+      "description": "Create a new tag to categorize your notes.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "tag",
+          "placeholder": "Tag",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Search Notes",
+      "description": "Search notes by title, body, or tag",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Search",
+          "type": "text"
+        },
+        {
+          "name": "tag",
+          "placeholder": "Tag",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "export",
+      "title": "Export Notes",
+      "description": "Export all notes to a directory.",
+      "mode": "view"
+    },
+    {
+      "name": "sync",
+      "title": "Sync with Folder",
+      "description": "2-way sync existing markdown files from the auto save directory.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "interval": "10m"
+    }
+  ],
+  "keywords": [
+    "notes",
+    "markdown",
+    "quick"
+  ],
+  "preferences": [
+    {
+      "name": "fileLocation",
+      "title": "Auto Save Location",
+      "description": "Set where to save markdown files",
+      "type": "directory",
+      "required": false,
+      "label": "File Location"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^3.6.0",
+    "jotai": "^2.12.2",
+    "lodash": "^4.17.21",
+    "marked": "^12.0.2",
+    "slugify": "^1.6.6",
+    "striptags": "^3.2.0",
+    "update": "^0.7.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

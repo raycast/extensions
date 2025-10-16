@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snippetslab",
+  "title": "SnippetsLab",
+  "description": "Search and view contents in your SnippetsLab library.",
+  "icon": "extension-icon.png",
+  "author": "renfei_song",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search SnippetsLab Library",
+      "description": "Search and view contents in your SnippetsLab library.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "persistSearchFilter",
+      "title": "General",
+      "label": "Save Last Search Filter",
+      "description": "Automatically apply the last used search filter when reopening the extension.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showSearchContext",
+      "title": "Search Result",
+      "label": "Search Context",
+      "description": "Show a preview of the matching contents around the search keyword.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showFolder",
+      "label": "Folder",
+      "description": "Show folders in snippets list.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showTags",
+      "label": "Tags",
+      "description": "Show tags in snippets list.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showLanguages",
+      "label": "Languages",
+      "description": "Show languages in snippets list.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "name": "primaryAction",
+      "title": "Snippet Action: Primary",
+      "description": "The first Snippet action shown in the action menu.",
+      "data": [
+        {
+          "title": "Show Snippet Details",
+          "value": "push"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Open in SnippetsLab",
+          "value": "open"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ],
+      "default": "push",
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "name": "secondaryAction",
+      "title": "Snippet Action: Secondary",
+      "description": "The second Snippet action shown in the action menu.",
+      "data": [
+        {
+          "title": "Show Snippet Details",
+          "value": "push"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Open in SnippetsLab",
+          "value": "open"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ],
+      "default": "copy",
+      "required": false
+    },
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Absolute path for the `lab` command-line utility used to communicates with SnippetsLab.app. The extension should be able to locate it automatically, but you can provide an override as needed.",
+      "placeholder": "Detect automatically",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "execa": "^9.3.0",
+    "p-queue": "^8.0.1",
+    "plist": "^3.1.0",
+    "semver": "^7.6.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/plist": "^3.0.5",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

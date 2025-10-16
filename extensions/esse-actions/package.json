@@ -1,0 +1,40 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "esse-actions",
+	"title": "Esse Actions",
+	"description": "Uses the Esse app, which must already be installed, to perform operations on the passed text",
+	"icon": "esse-icon.png",
+	"author": "bert",
+	"categories": [
+		"Applications",
+		"Developer Tools"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "command",
+			"title": "Transform Text With Esse",
+			"description": "Uses the Esse app, which must already be installed, to perform operations on the passed text",
+			"mode": "view"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.41.1"
+	},
+	"devDependencies": {
+		"@types/node": "^18.8.5",
+		"@types/react": "^18.0.21",
+		"@typescript-eslint/eslint-plugin": "^5.40.0",
+		"@typescript-eslint/parser": "^5.40.0",
+		"eslint": "^8.25.0",
+		"eslint-config-prettier": "^8.5.0",
+		"prettier": "^2.7.1",
+		"typescript": "^4.8.4"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint"
+	}
+}

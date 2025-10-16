@@ -1,0 +1,4 @@
+{
+  "root": true,
+  "extends": ["plugin:react-hooks/recommended", "@raycast"]
+}

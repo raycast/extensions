@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "monitor-mate",
+  "title": "MonitorMate",
+  "description": "MonitorMate is a simple monitoring tool that helps you keep track of your resources uptime and downtime. It allows you to add resources to monitor and check their status. It also provides a dashboard to see the status of all your monitoring resources.",
+  "icon": "ikun.png",
+  "author": "MuhaddiMu",
+  "keywords": [
+    "monitoring",
+    "uptime",
+    "downtime",
+    "dashboard",
+    "resources"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "System",
+    "Applications",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "label": "Play sound when a resource is down",
+      "default": false,
+      "required": false,
+      "name": "alertSound",
+      "title": "Alert Sound",
+      "type": "checkbox",
+      "description": "Play a sound when a resource is down"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Dashboard",
+      "subtitle": "MonitorMate",
+      "subtitle": "See your Monitoring dashboard",
+      "description": "See the status of all your monitoring resources",
+      "mode": "view"
+    },
+    {
+      "name": "add-resource",
+      "title": "Add Resource",
+      "subtitle": "MonitorMate",
+      "subtitle": "Add a new resource to monitor",
+      "description": "Add a new resource to monitor",
+      "mode": "view"
+    },
+    {
+      "name": "check-status",
+      "title": "Check Status",
+      "subtitle": "MonitorMate",
+      "subtitle": "Check the status of a monitoring resources",
+      "description": "Check the status of a monitoring resources",
+      "mode": "no-view",
+      "interval": "2m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

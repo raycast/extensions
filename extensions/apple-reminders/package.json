@@ -1,0 +1,599 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-reminders",
+  "title": "Apple Reminders",
+  "description": "Manage Apple Reminders.",
+  "icon": "icon.png",
+  "author": "thomaslombart",
+  "contributors": [
+    "tm.wrnr",
+    "ir4n",
+    "jondelgado",
+    "phil_s",
+    "michalzuch",
+    "ridemountainpig",
+    "maxnyby",
+    "vmrjnvc"
+  ],
+  "owner": "raycast",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-reminders",
+      "title": "My Reminders",
+      "subtitle": "Apple Reminders",
+      "description": "View and complete your reminders.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "displayCompletionDate",
+          "type": "checkbox",
+          "required": false,
+          "label": "Display Completion Date",
+          "description": "When enabled, the completion date will be displayed as a list item accessory.",
+          "default": false
+        },
+        {
+          "name": "useTimeOfDayGrouping",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Time of Day Grouping",
+          "description": "When enabled, today's reminders will be grouped by the time of day they are due.",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "create-reminder",
+      "title": "Create Reminder",
+      "subtitle": "Apple Reminders",
+      "description": "Create and prioritize new reminders.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "selectDefaultList",
+          "type": "checkbox",
+          "label": "Initially select the default list",
+          "description": "When enabled, the Reminders's default list will be initially selected instead of the last used list.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "selectTodayAsDefault",
+          "type": "checkbox",
+          "label": "Initially select \"Today\" for new reminders",
+          "description": "When enabled, \"Today\" will be initially selected for new reminders instead of no due date.",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Reminders",
+      "icon": "icon.png",
+      "subtitle": "Apple Reminders",
+      "description": "Manage your reminders in the menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "titleType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Nothing",
+              "value": "nothing"
+            },
+            {
+              "title": "Count",
+              "value": "count"
+            },
+            {
+              "title": "First Reminder",
+              "value": "firstReminder"
+            }
+          ],
+          "default": "count",
+          "required": false,
+          "title": "Title",
+          "description": "Choose what you want to see next to the menu bar icon."
+        },
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "View",
+          "description": "Choose which view you want to see in your menu bar."
+        },
+        {
+          "name": "countType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Count",
+          "description": "Choose which count you want to see in your menu bar."
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
+          "type": "checkbox",
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "sortMenuBarRemindersByDueDate",
+          "type": "checkbox",
+          "label": "Sort menu bar reminders by time",
+          "description": "When enabled, the reminders in the menu bar will be sorted by time.",
+          "default": false,
+          "required": false,
+          "title": "Sort"
+        },
+        {
+          "name": "displayListTitleForMenuBarReminders",
+          "type": "checkbox",
+          "label": "Display the name of the list",
+          "description": "When enabled, the name of the list from which the reminder originates will be displayed in the menu bar next to the reminder’s name.",
+          "default": false,
+          "required": false,
+          "title": "Extra"
+        }
+      ],
+      "interval": "10m"
+    },
+    {
+      "name": "quick-add-reminder",
+      "title": "Quick Add Reminder",
+      "subtitle": "Apple Reminders",
+      "description": "Quickly add a reminder in Reminders.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "dontUseAI",
+          "type": "checkbox",
+          "label": "Don't use the AI",
+          "description": "When enabled, the reminder is simply added to your default list with the input as the title.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": true,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Reminder",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "notes",
+          "placeholder": "Notes",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Locations",
+      "subtitle": "Apple Reminders",
+      "description": "Manage your saved locations.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-reminder",
+      "title": "Create Reminder",
+      "description": "Create a new reminder in Apple Reminders."
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Lists",
+      "description": "Get all Apple Reminders lists."
+    },
+    {
+      "name": "get-reminders",
+      "title": "Get Reminders",
+      "description": "Get all reminders from Apple Reminders."
+    },
+    {
+      "name": "update-reminder",
+      "title": "Update Reminder",
+      "description": "Update an existing reminder in Apple Reminders."
+    },
+    {
+      "name": "delete-reminder",
+      "title": "Delete Reminder",
+      "description": "Delete a reminder from Apple Reminders."
+    },
+    {
+      "name": "get-locations",
+      "title": "Get Locations",
+      "description": "Get all saved locations."
+    },
+    {
+      "name": "create-location",
+      "title": "Create Location",
+      "description": "Save a new location for location-based reminders."
+    },
+    {
+      "name": "get-completed-reminders",
+      "title": "Get Completed Reminders",
+      "description": "Get all completed reminders from Apple Reminders."
+    }
+  ],
+  "ai": {
+    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
+    "evals": [
+      {
+        "input": "@apple-reminders Walk the dog tomorrow at 8am",
+        "mocks": {
+          "create-reminder": {
+            "openUrl": "x-apple-reminderkit://REMCDReminder/reminder-id",
+            "title": "Walk the dog",
+            "id": "reminder-id",
+            "isCompleted": false,
+            "dueDate": "2025-01-21T08:00:00+01:00"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-reminder"
+          },
+          {
+            "meetsCriteria": "The reminder is created with the correct title and due date."
+          },
+          {
+            "meetsCriteria": "The answer includes a markdown link to the created reminder."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders Fix website bug in work list",
+        "mocks": {
+          "create-reminder": {
+            "openUrl": "x-apple-reminderkit://REMCDReminder/website-bug",
+            "title": "Fix website bug",
+            "id": "website-bug",
+            "list": {
+              "id": "work",
+              "title": "Work"
+            }
+          },
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders"
+            },
+            {
+              "id": "fitness",
+              "title": "Fitness"
+            },
+            {
+              "id": "meetings",
+              "title": "Meetings"
+            },
+            {
+              "id": "work",
+              "title": "Work"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-lists"
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "listId": "work",
+                "title": "Fix website bug"
+              },
+              "name": "create-reminder"
+            }
+          },
+          {
+            "meetsCriteria": "The reminder is added to the work list."
+          },
+          {
+            "meetsCriteria": "The answer includes a markdown link to the created reminder."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders Remind me to call mom every sunday at 10",
+        "mocks": {
+          "create-reminder": {
+            "openUrl": "x-apple-reminderkit://REMCDReminder/reminder-id",
+            "isRecurring": true,
+            "id": "reminder-id",
+            "title": "Call mom",
+            "recurrenceRule": "Repeats Every Week",
+            "dueDate": "2025-01-26T09:00:00.000Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-reminder"
+          },
+          {
+            "meetsCriteria": "The reminder is created with a recurrence rule."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders What should I do today?",
+        "mocks": {
+          "get-reminders": [
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/website-bug",
+              "id": "website-bug",
+              "title": "Fix website bug",
+              "dueDate": "2025-01-21",
+              "list": {
+                "id": "work",
+                "title": "Work"
+              }
+            },
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/walk-the-dog",
+              "id": "walk-the-dog",
+              "title": "Walk the dog",
+              "dueDate": "2025-01-21T12:00:00.000Z",
+              "list": {
+                "id": "reminders",
+                "title": "Reminders"
+              }
+            },
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/take-vitamins",
+              "id": "take-vitamins",
+              "title": "Take vitamins",
+              "dueDate": "2025-01-21T18:00:00.000Z",
+              "list": {
+                "id": "reminders",
+                "title": "Reminders"
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-reminders"
+          },
+          {
+            "meetsCriteria": "The answer includes a list of reminders with the correct title, and details if they have a due date or list."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders What have I done last week?",
+        "mocks": {
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders"
+            },
+            {
+              "id": "fitness",
+              "title": "Fitness"
+            },
+            {
+              "id": "work",
+              "title": "Work"
+            },
+            {
+              "id": "home",
+              "title": "Home"
+            }
+          ],
+          "get-completed-reminders": [
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/walk-the-dog",
+              "id": "walk-the-dog",
+              "completionDate": "2025-01-19T10:08:46.595Z",
+              "title": "Walk the dog",
+              "isCompleted": true,
+              "dueDate": "2025-01-21T17:00:00.000Z",
+              "list": {
+                "id": "reminders",
+                "title": "Reminders"
+              }
+            },
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/buy-a-robot-vacuum-cleaner",
+              "id": "buy-a-robot-vacuum-cleaner",
+              "completionDate": "2025-01-17T10:47:01.119Z",
+              "title": "Buy a robot vacuum cleaner",
+              "isCompleted": true,
+              "dueDate": "",
+              "list": {
+                "id": "home",
+                "title": "Home"
+              }
+            },
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/fix-website-bug",
+              "completionDate": "2025-01-16T10:47:01.119Z",
+              "title": "Fix website bug",
+              "id": "fix-website-bug",
+              "isCompleted": true,
+              "list": {
+                "id": "work",
+                "title": "Work"
+              }
+            },
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/workout-at-gym",
+              "id": "workout-at-gym",
+              "completionDate": "2025-01-19T13:41:04.602Z",
+              "title": "Workout at gym",
+              "isCompleted": true,
+              "dueDate": "",
+              "list": {
+                "id": "fitness",
+                "title": "Fitness"
+              }
+            },
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/annual-review",
+              "completionDate": "2024-12-30T18:30:40.642Z",
+              "title": "Annual review",
+              "isCompleted": true,
+              "id": "annual-review",
+              "dueDate": "2024-12-30",
+              "list": {
+                "id": "reminders",
+                "title": "Reminders"
+              }
+            },
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/ship-important-feature",
+              "id": "ship-important-feature",
+              "title": "Ship important feature",
+              "isCompleted": true,
+              "completionDate": "2025-01-21T10:47:09.211Z",
+              "list": {
+                "id": "work",
+                "title": "Work"
+              }
+            },
+            {
+              "openUrl": "x-apple-reminderkit://REMCDReminder/take-vitamins",
+              "completionDate": "2025-01-21T10:47:02.241Z",
+              "title": "Take vitamins",
+              "id": "take-vitamins",
+              "isCompleted": true,
+              "dueDate": "2025-01-21T18:00:00.000Z",
+              "list": {
+                "id": "reminders",
+                "title": "Reminders"
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-completed-reminders"
+          },
+          {
+            "meetsCriteria": "The answer includes a list of completed reminders with the correct title, and when they were completed."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders Remind me to fix the faucet when I come back Home",
+        "mocks": {
+          "get-locations": [
+            {
+              "radius": "100",
+              "id": "home-location",
+              "icon": "house-16",
+              "name": "Home",
+              "proximity": "enter",
+              "address": "123 Main St, Anytown, USA"
+            }
+          ],
+          "create-reminder": {
+            "openUrl": "x-apple-reminderkit://REMCDReminder/fix-the-faucet",
+            "id": "fix-the-faucet",
+            "title": "Fix the faucet",
+            "location": {
+              "address": "123 Main St, Anytown, USA",
+              "radius": 100,
+              "proximity": "enter"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-locations"
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "address": "123 Main St, Anytown, USA",
+                "title": "Fix the faucet",
+                "proximity": "enter"
+              },
+              "name": "create-reminder"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@date-fns/utc": "^1.2.0",
+    "@raycast/api": "^1.96.1",
+    "@raycast/utils": "^1.18.1",
+    "chrono-node": "^2.8.2",
+    "date-fns": "^3.6.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

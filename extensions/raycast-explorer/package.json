@@ -1,0 +1,210 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-explorer",
+  "title": "Raycast Explorer",
+  "description": "Explore snippets, prompts, and custom themes from within Raycast.",
+  "categories": [
+    "Applications"
+  ],
+  "contributors": [
+    "EvanZhouDev",
+    "mil3na",
+    "xilopaint",
+    "samuelkraft",
+    "abnershang",
+    "zayadur"
+  ],
+  "icon": "extension-icon.png",
+  "owner": "raycast",
+  "access": "public",
+  "author": "thomaslombart",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "explore-prompts",
+      "title": "Explore Prompts",
+      "icon": "prompts-icon.png",
+      "description": "Find some inspiration in our AI prompts base.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-presets",
+      "title": "Explore Presets",
+      "icon": "presets-icon.png",
+      "description": "Find some inspiration in our AI Presets base.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-quicklinks",
+      "title": "Explore Quicklinks",
+      "icon": "quicklinks-icon.png",
+      "description": "Browse quicklinks",
+      "mode": "view"
+    },
+    {
+      "name": "explore-themes",
+      "title": "Explore Themes",
+      "icon": "themes-icon.png",
+      "description": "Find some inspiration in our themes base.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-snippets",
+      "title": "Explore Snippets",
+      "icon": "snippets-icon.png",
+      "description": "Find some inspiration in our snippets base.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "startModifier",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "!",
+              "value": "!"
+            },
+            {
+              "title": ":",
+              "value": ":"
+            },
+            {
+              "title": "_",
+              "value": "_"
+            },
+            {
+              "title": "__",
+              "value": "__"
+            },
+            {
+              "title": "-",
+              "value": "-"
+            },
+            {
+              "title": "@",
+              "value": "@"
+            },
+            {
+              "title": "@@",
+              "value": "@@"
+            },
+            {
+              "title": "$",
+              "value": "$"
+            },
+            {
+              "title": ";",
+              "value": ";"
+            },
+            {
+              "title": ";;",
+              "value": ";;"
+            },
+            {
+              "title": "/",
+              "value": "/"
+            },
+            {
+              "title": "//",
+              "value": "//"
+            },
+            {
+              "title": "none",
+              "value": "none"
+            }
+          ],
+          "default": "!",
+          "required": false,
+          "title": "Start Modifier",
+          "description": "This modifiers is used as prefix for your snippets' keyword."
+        },
+        {
+          "name": "endModifier",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "!",
+              "value": "!"
+            },
+            {
+              "title": ":",
+              "value": ":"
+            },
+            {
+              "title": "_",
+              "value": "_"
+            },
+            {
+              "title": "__",
+              "value": "__"
+            },
+            {
+              "title": "-",
+              "value": "-"
+            },
+            {
+              "title": "@",
+              "value": "@"
+            },
+            {
+              "title": "@@",
+              "value": "@@"
+            },
+            {
+              "title": "$",
+              "value": "$"
+            },
+            {
+              "title": ";",
+              "value": ";"
+            },
+            {
+              "title": ";;",
+              "value": ";;"
+            },
+            {
+              "title": "/",
+              "value": "/"
+            },
+            {
+              "title": "//",
+              "value": "//"
+            },
+            {
+              "title": "none",
+              "value": "none"
+            }
+          ],
+          "default": "none",
+          "required": false,
+          "title": "End Modifier",
+          "description": "This modifiers is used as suffix for your snippets' keyword."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4",
+    "@raycast/utils": "^1.14.0",
+    "axios": "^1.8.4",
+    "node-fetch": "^3.3.2",
+    "remove-markdown": "^0.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

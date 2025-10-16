@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "r-pkg-search",
+  "title": "Search R Packages",
+  "description": "Search and lookup information about R packages using r-pkg.org.",
+  "subtitle": "r-pkg.org",
+  "icon": "r-pkg.png",
+  "author": "grrrck",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search R Packages",
+      "subtitle": "r-pkg",
+      "description": "Search for R packages on r-pkg.org",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCopyAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Base R with install.packages()",
+          "value": "base"
+        },
+        {
+          "title": "Alternate Package Installation Method",
+          "value": "alt"
+        }
+      ],
+      "title": "Default Package Installation Method",
+      "description": "The package installation method to use by default",
+      "required": false,
+      "default": "base",
+      "value": "base"
+    },
+    {
+      "name": "defaultAlternateInstall",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "{pak}",
+          "value": "pak"
+        },
+        {
+          "title": "{remotes}",
+          "value": "remotes"
+        },
+        {
+          "title": "{devtools}",
+          "value": "devtools"
+        },
+        {
+          "title": "{pacman}",
+          "value": "pacman"
+        }
+      ],
+      "title": "Alternate Package Manager",
+      "description": "The package manager to use for the alternate package installation method.",
+      "required": false,
+      "default": "base",
+      "value": "base"
+    },
+    {
+      "name": "defaultOpenAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Open on r-pkg.org",
+          "value": "openRpkg"
+        },
+        {
+          "title": "Open on CRAN",
+          "value": "openCRAN"
+        },
+        {
+          "title": "Open Homepage",
+          "value": "openURL"
+        },
+        {
+          "title": "Open Bug Report",
+          "value": "openBug"
+        }
+      ],
+      "title": "Default Open Action",
+      "description": "How to open the selected package when Enter is pressed",
+      "required": false,
+      "default": "openURL",
+      "value": "openURL"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.0",
+    "node-fetch": "^3.3.0",
+    "parse-github-url": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/parse-github-url": "^1.0.0",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^1.19.1",
+    "react": "^18.2.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

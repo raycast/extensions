@@ -1,0 +1,381 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "workouts",
+  "title": "Workouts",
+  "description": "Stay on top of your workouts from Strava",
+  "tags": [
+    "strava",
+    "activities",
+    "log",
+    "workout",
+    "exercise"
+  ],
+  "icon": "icon.png",
+  "author": "samuelkraft",
+  "contributors": [
+    "yvysunu",
+    "pernielsentikaer",
+    "dianne_mcewan",
+    "stphstph"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "workouts",
+      "title": "Search Workouts",
+      "description": "See your recent workouts from Strava",
+      "mode": "view",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "createActivity",
+      "title": "Create Activity",
+      "description": "Create a manual activity on Strava",
+      "mode": "view",
+      "icon": "create.png",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "leaderboard",
+      "title": "Weekly Leaderboard",
+      "description": "See your club's weekly leaderboard",
+      "mode": "view",
+      "icon": "leaderboard-icon.png",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "routes",
+      "title": "Search Routes",
+      "description": "See your routes from Strava",
+      "icon": "routes-icon.png",
+      "mode": "view",
+      "keywords": [
+        "strava",
+        "routes",
+        "exercise"
+      ]
+    },
+    {
+      "name": "menubar-totals",
+      "title": "Workouts Totals",
+      "description": "See your total distance and time for your workouts",
+      "mode": "menu-bar",
+      "interval": "12h",
+      "icon": "stats-icon.png",
+      "preferences": [
+        {
+          "name": "primary_sport",
+          "title": "Primary Sport",
+          "description": "The sport you want to see totals for in the menu bar",
+          "type": "dropdown",
+          "default": "Run",
+          "required": true,
+          "data": [
+            {
+              "value": "Run",
+              "title": "Run"
+            },
+            {
+              "value": "Ride",
+              "title": "Ride"
+            },
+            {
+              "value": "Swim",
+              "title": "Swim"
+            }
+          ]
+        },
+        {
+          "name": "primary_stat",
+          "title": "Primary Stat",
+          "description": "The stat you want to see in the menu bar",
+          "type": "dropdown",
+          "default": "recent",
+          "required": true,
+          "data": [
+            {
+              "value": "week",
+              "title": "This week"
+            },
+            {
+              "value": "recent",
+              "title": "Last 4 weeks"
+            },
+            {
+              "value": "year",
+              "title": "This Year"
+            },
+            {
+              "value": "all",
+              "title": "All time"
+            }
+          ]
+        }
+      ],
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "calculator",
+      "title": "Calculate Time or Pace",
+      "description": "Calculate the time or pace for a workout",
+      "icon": "calculator.png",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-activities",
+      "title": "Get Workouts",
+      "description": "Get the workouts from Strava for the current user"
+    },
+    {
+      "name": "get-latest-activity",
+      "title": "Get Latest Workout",
+      "description": "Get the latest workout from Strava for the current user"
+    },
+    {
+      "name": "get-clubs",
+      "title": "Get Clubs",
+      "description": "Returns all Strava clubs that the current user is part of"
+    },
+    {
+      "name": "get-club-leaderboard",
+      "title": "Get Club Leaderboard",
+      "description": "Get this weeks leaderboard for a Strava club"
+    },
+    {
+      "name": "get-routes",
+      "title": "Get Routes",
+      "description": "Get the routes from Strava for the current user"
+    },
+    {
+      "name": "get-totals",
+      "title": "Get Totals",
+      "description": "Get a brief summary of your stats from Strava for the current user. Returns the distance & time for the last week, month, year and all time."
+    }
+  ],
+  "ai": {
+    "instructions": "When displaying club leaderboards, don't include the activities in the response and respond with a numbered list of athletes and their stats. Only use get-totals when asked about stats over a long period of time, prefer get-activities for recent stats.",
+    "evals": [
+      {
+        "input": "@workouts analyze my last workout",
+        "mocks": {
+          "get-latest-activity": {
+            "distance": 10000,
+            "type": "Run",
+            "start_date_local": "2025-01-19T10:00:00Z",
+            "elapsed_time": 4000,
+            "moving_time": 3600,
+            "name": "Morning Run"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-latest-activity"
+          }
+        ]
+      },
+      {
+        "input": "@workouts recommend a good 10k route near me",
+        "mocks": {
+          "get-routes": [
+            {
+              "description": "",
+              "id": 3303308444891685400,
+              "id_str": "3303308444891685164",
+              "elevation_gain": 114.49093864974512,
+              "estimated_moving_time": 4208,
+              "map_urls": {
+                "dark_url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/2QLZ2P6T4V6VXTMV6OWMJ55BNI7QLNG7F6XEHD5YXWBS6VR3DA2U643FCL3TXPEOYC2ZWMBIF5SITBXHMMOG3TTZIRYDMOJOVHGZWXQ=",
+                "url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/WVFSUXECL2WK3XRRQXSDZPRVPJ33EL5WFYIIR36DGFC2ZG3IYXFXTISA6DLUYPWOGBWVYDEWHCH7RKK7HH2UZ2W5VIGD2V4SHCG5FJQ=",
+                "retina_url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/ZW7IJNOURWCVZC4RPPL3WTG6RA2W2YE7DNQQP6UAI7MG7JMMA6MLQLDCGLXUDNQ5D36Z26NP2INEER7JF5BRP2O2ZBI2ZZG3ABFDZ3Q=",
+                "light_url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/ZW7IJNOURWCVZC4RPPL3WTG6RA2W2YE7DNQQP6UAI7MG7JMMA6MLQLDCGLXUDNQ5D36Z26NP2INEER7JF5BRP2O2ZBI2ZZG3ABFDZ3Q="
+              },
+              "distance": 11054.677216926659,
+              "name": "My route"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-routes"
+          }
+        ]
+      },
+      {
+        "input": "@workouts how was my training this week?",
+        "mocks": {
+          "get-activities": [
+            {
+              "distance": 10000,
+              "type": "Run",
+              "start_date_local": "2025-01-19T10:00:00Z",
+              "elapsed_time": 4000,
+              "moving_time": 3600,
+              "name": "Morning Run"
+            },
+            {
+              "distance": 10000,
+              "type": "Run",
+              "start_date_local": "2025-01-19T10:00:00Z",
+              "elapsed_time": 4000,
+              "moving_time": 3600,
+              "name": "Morning Run 2"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-activities"
+          }
+        ]
+      },
+      {
+        "input": "@workouts who is leading the club this week?",
+        "mocks": {
+          "get-clubs": [
+            {
+              "id": 123456,
+              "name": "My club"
+            }
+          ],
+          "get-club-leaderboard": {
+            "user 1": {
+              "moving_time": 3600,
+              "name": "user 1.",
+              "distance": 5000,
+              "elapsed_time": 3600,
+              "activities": [
+                {
+                  "moving_time": 3600,
+                  "distance": 5000,
+                  "total_elevation_gain": 0,
+                  "elapsed_time": 3600,
+                  "sport_type": "Ride",
+                  "name": "Workout"
+                }
+              ]
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-clubs"
+          },
+          {
+            "callsTool": "get-club-leaderboard"
+          }
+        ]
+      },
+      {
+        "input": "@workouts how have my workouts changed over the last few weeks?",
+        "mocks": {
+          "get-activities": [
+            {
+              "distance": 10000,
+              "type": "Run",
+              "start_date_local": "2025-01-19T10:00:00Z",
+              "elapsed_time": 4000,
+              "moving_time": 3600,
+              "name": "Morning Run"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-activities"
+          }
+        ]
+      },
+      {
+        "input": "@workouts how much have I run in total all time?",
+        "mocks": {
+          "get-totals": {
+            "ytdSwimTotal": "0.0 km",
+            "allRideTotal": "1000 km",
+            "allSwimTotal": "100 km",
+            "allRunTotal": "1000 km",
+            "recentRideTotal": "0.0 km",
+            "ytdRunTotal": "0.0 km",
+            "recentSwimTotal": "10.0 km",
+            "ytdRideTotal": "100.0 km",
+            "recentRunTotal": "100.0 km",
+            "weekSwimTotal": "2.0 km",
+            "weekRunTotal": "3.0 km",
+            "weekRideTotal": "5.0 km"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-totals"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "distance_unit",
+      "title": "Distance Unit",
+      "description": "Choose unit for displaying distance",
+      "type": "dropdown",
+      "default": "km",
+      "data": [
+        {
+          "value": "km",
+          "title": "Kilometers"
+        },
+        {
+          "value": "mi",
+          "title": "Miles"
+        }
+      ],
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.0",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

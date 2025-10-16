@@ -1,0 +1,12 @@
+# Ignore system files
+.DS_Store
+
+# Ignore all .DS_Store files in subdirectories
+**/.DS_Store
+
+# Ignore node modules
+node_modules/
+
+# Ignore Raycast specific file
+raycast-env.d.ts
+

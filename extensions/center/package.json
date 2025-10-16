@@ -1,0 +1,116 @@
+{
+  "version": "0.0.3",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "center",
+  "title": "Center",
+  "description": "Interact with NFTs in any blockchain, right in your command bar.",
+  "icon": "command-icon.png",
+  "author": "enesozturk",
+  "categories": [
+    "Media",
+    "Productivity",
+    "Fun"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Center API key.",
+      "placeholder": "See center.app/api/"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Collection or Asset",
+      "subtitle": "Center NFTs",
+      "description": "Search NFT collections or assets with name, description, or address.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search query...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-contracts-of-owner",
+      "title": "Assets of Owner",
+      "subtitle": "Center NFTs",
+      "description": "Get NFTs of owner with ENS or contract address.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "address",
+          "placeholder": "ENS or contract address",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-asset",
+      "title": "Asset Details",
+      "subtitle": "Center NFTs",
+      "description": "Get NFT asset in the blockchain in milliseconds.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "address",
+          "placeholder": "Contract Address",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "tokenId",
+          "placeholder": "Token ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-collection",
+      "title": "Collection Details",
+      "subtitle": "Center NFTs",
+      "description": "Get NFT collection in the blockchain in milliseconds.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "address",
+          "placeholder": "Contract Address",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.50.2",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "4.24.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "publish:extension": "ray publish"
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anki",
+  "title": "Anki",
+  "description": "Anki extension for Raycast",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Other"
+  ],
+  "keywords": [
+    "memory",
+    "flashcards",
+    "study"
+  ],
+  "author": "anton-suprun",
+  "preferences": [
+    {
+      "name": "port",
+      "type": "textfield",
+      "required": false,
+      "title": "anki-connect port",
+      "description": "Port that anki-connect uses. (Default: 8765)"
+    },
+    {
+      "name": "allow_dup_cards",
+      "type": "checkbox",
+      "label": "Allow Duplicate Cards",
+      "required": false,
+      "description": "If selected, duplicate cards can be created"
+    },
+    {
+      "name": "dup_scope",
+      "type": "dropdown",
+      "title": "Duplicate Scope",
+      "data": [
+        {
+          "title": "Deck",
+          "value": "deck"
+        },
+        {
+          "title": "Entire Collection",
+          "value": "collection"
+        }
+      ],
+      "default": "deck",
+      "required": false,
+      "description": "Can be used to specify the scope for which duplicates are checked"
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "decks",
+      "title": "Decks",
+      "subtitle": "Anki",
+      "description": "Lists all Anki decks",
+      "mode": "view"
+    },
+    {
+      "name": "browseCards",
+      "title": "Browse Cards",
+      "subtitle": "Anki",
+      "description": "Browse all cards in Anki",
+      "mode": "view"
+    },
+    {
+      "name": "addCard",
+      "title": "Add Card",
+      "subtitle": "Anki",
+      "description": "Add a card to a deck in Anki",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "allow_empty_card_fields",
+          "type": "checkbox",
+          "label": "Allow empty card fields",
+          "required": false,
+          "description": "Enabling this will allow you to create cards with empty fields"
+        }
+      ]
+    },
+    {
+      "name": "viewStats",
+      "title": "View Stats",
+      "subtitle": "Anki",
+      "description": "View Anki collection statistics",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@eslint/config-array": "latest",
+    "@eslint/object-schema": "latest",
+    "@raycast/api": "^1.87.4",
+    "@raycast/utils": "^1.17.0",
+    "@types/showdown": "^2.0.6",
+    "@types/turndown": "^5.0.4",
+    "axios": "^1.8.4",
+    "glob": "^10.0.0",
+    "npm-check-updates": "^16.14.20",
+    "rimraf": "^5.0.0",
+    "rss-parser": "^3.13.0",
+    "showdown": "^2.1.0",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.14.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
