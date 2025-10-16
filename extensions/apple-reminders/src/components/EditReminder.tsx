@@ -17,39 +17,44 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
   const { itemProps, handleSubmit } = useForm<{ title: string; notes: string; listId: string }>({
     async onSubmit(values) {
       try {
-        await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: values.notes }), {
-          optimisticUpdate(data) {
-            if (!data) return;
+        const titleOrNotesChanged = values.title !== reminder.title || values.notes !== reminder.notes;
+        const listChanged = values.listId !== (reminder.list?.id || "");
 
-            return {
-              ...data,
-              reminders: data.reminders.map((r) => {
-                if (reminder.id === r.id) {
-                  return { ...r, title: values.title, notes: values.notes };
-                }
-                return r;
-              }),
-            };
-          },
-        });
-        await mutate(moveToList({ reminderId: reminder.id, listId: values.listId }), {
-          optimisticUpdate(data) {
-            if (!data) return;
+        titleOrNotesChanged &&
+          (await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: values.notes }), {
+            optimisticUpdate(data) {
+              if (!data) return;
 
-            return {
-              ...data,
-              reminders: data.reminders.map((r) => {
-                if (reminder.id === r.id) {
-                  return {
-                    ...r,
-                    list: data.lists.find((l) => l.id === values.listId) || null,
-                  };
-                }
-                return r;
-              }),
-            };
-          },
-        });
+              return {
+                ...data,
+                reminders: data.reminders.map((r) => {
+                  if (reminder.id === r.id) {
+                    return { ...r, title: values.title, notes: values.notes };
+                  }
+                  return r;
+                }),
+              };
+            },
+          }));
+        listChanged &&
+          (await mutate(moveToList({ reminderId: reminder.id, listId: values.listId }), {
+            optimisticUpdate(data) {
+              if (!data) return;
+
+              return {
+                ...data,
+                reminders: data.reminders.map((r) => {
+                  if (reminder.id === r.id) {
+                    return {
+                      ...r,
+                      list: data.lists.find((l) => l.id === values.listId) || null,
+                    };
+                  }
+                  return r;
+                }),
+              };
+            },
+          }));
 
         pop();
       } catch (error) {
