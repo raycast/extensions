@@ -65,15 +65,9 @@ export const LaunchActions = ({ name = "", appid = 0 }) => {
   return (
     <ActionPanel.Section>
       <Action.OpenInBrowser title="View in Browser" url={`https://store.steampowered.com/app/${appid}`} />
-      <Action.OpenInBrowser
-        icon={Icon.Binoculars}
-        // eslint-disable-next-line @raycast/prefer-title-case
-        title="View on SteamDB"
-        url={`https://steamdb.info/app/${appid}`}
-      />
+      <Action.OpenInBrowser icon={Icon.Binoculars} title="View on SteamDB" url={`https://steamdb.info/app/${appid}`} />
       <Action
         icon={Icon.Image}
-        // eslint-disable-next-line @raycast/prefer-title-case
         title="Browse SteamGridDB Images"
         onAction={() => {
           crossLaunchCommand({
@@ -91,7 +85,6 @@ export const LaunchActions = ({ name = "", appid = 0 }) => {
       />
       <Action
         icon={Icon.StarCircle}
-        // eslint-disable-next-line @raycast/prefer-title-case
         title="View ProtonDB Scroe"
         onAction={() => {
           crossLaunchCommand({
