@@ -26,7 +26,7 @@ export default function Users() {
           key={user.id}
           icon={Icon.Person}
           title={user.attributes.email}
-          subtitle={`${user.attributes.first_name || ""} ${user.attributes.last_name || ""}`}
+          subtitle={[user.attributes.first_name, user.attributes.last_name].filter(Boolean).join(" ")}
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.AddPerson} title="New User" target={<NewUser />} onPop={mutate} />
