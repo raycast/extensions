@@ -45,6 +45,12 @@ export const frecencySorting = Boolean(preferences["frecencySorting"]);
 const CHANNEL_GLOB = resolve(toolsSupportDir, "channels/*.json");
 const SETTINGS_GLOB = resolve(toolsSupportDir, ".settings.json");
 
+const isSupportedToolboxVersion = (version: string): boolean => {
+  const majorPart = version.trim().split(".")[0];
+  const majorVersion = Number.parseInt(majorPart, 10);
+  return Number.isInteger(majorVersion) && majorVersion >= 2;
+};
+
 export interface file {
   title: string;
   icon: Image.ImageLike;
@@ -86,7 +92,7 @@ export interface AppHistory {
 
 export interface ToolboxApp extends Application {
   version: string;
-  isV2: boolean;
+  isSupportedVersion: boolean;
 }
 
 async function getFile(path: string) {
@@ -224,7 +230,7 @@ export const getJetBrainsToolboxApp = async (): Promise<ToolboxApp | undefined> 
   return {
     ...jb,
     version,
-    isV2: Boolean(version.match(/^2\./)),
+    isSupportedVersion: isSupportedToolboxVersion(version),
   };
 };
 

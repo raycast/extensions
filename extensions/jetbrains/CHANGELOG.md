@@ -1,5 +1,8 @@
 # Jetbrains Changelog
 
+## [Bugfix] - 2025-10-16
+- Allow JetBrains Toolbox version 3.x by relaxing the version check ([#22215](https://github.com/raycast/extensions/issues/22215))
+
 ## [Bugfix] - 2025-04-14
 - Fix sorting projects which doesn't have a opened value
 - Fix crashing when `projects` field in `settings.json` is not present
