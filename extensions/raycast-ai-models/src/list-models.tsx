@@ -15,7 +15,7 @@ ${model.description || "No description available"}
 
 - **Model ID**: \`${model.id}\`
 - **Provider**: ${model.provider_name || model.provider}
-- **Status**: ${model.status || "N/A"}
+- **Status**: ${model.status === null ? "Available" : model.status || "N/A"}
 - **Availability**: ${model.availability || "N/A"}
 - **Requires Better AI**: ${model.requires_better_ai ? "Yes" : "No"}
 ${model.in_better_ai_subscription !== undefined ? `- **In Better AI Subscription**: ${model.in_better_ai_subscription ? "Yes" : "No"}` : ""}
@@ -87,7 +87,10 @@ ${model.abilities.thinking ? `- Supported: ${model.abilities.thinking.supported 
           <Detail.Metadata.Label title="Name" text={model.name} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Provider" text={model.provider_name || model.provider || "N/A"} />
-          <Detail.Metadata.Label title="Status" text={model.status || "N/A"} />
+          <Detail.Metadata.Label
+            title="Status"
+            text={model.status === null ? "Available" : String(model.status || "N/A")}
+          />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Intelligence" text={String(model.intelligence || "N/A")} />
           <Detail.Metadata.Label title="Speed" text={String(model.speed || "N/A")} />
@@ -175,9 +178,9 @@ export default function Command() {
         try {
           const icon = primary ? getFavicon(primary, { fallback }) : fallback ? getFavicon(fallback) : undefined;
           return [m.id, icon];
-        } catch (e) {
+        } catch {
           // fallback to undefined so the List will use a default icon
-          console.warn(`Failed to get favicon for model ${m.id}:`, e);
+          console.warn(`Failed to get favicon for model ${m.id}`);
           return [m.id, undefined];
         }
       }),
@@ -196,8 +199,14 @@ export default function Command() {
               icon={Icon.ArrowClockwise}
               onAction={async () => {
                 setFetchError(null);
-                await revalidate();
-                showToast({ style: Toast.Style.Success, title: "Retry triggered" });
+                try {
+                  await revalidate();
+                  showToast({ style: Toast.Style.Success, title: "Models refreshed" });
+                } catch (e) {
+                  const err = e as Error;
+                  setFetchError(err);
+                  showToast({ style: Toast.Style.Failure, title: "Retry failed", message: err.message });
+                }
               }}
             />
           </ActionPanel>
@@ -225,35 +234,66 @@ export default function Command() {
       }
     >
       <List.Section title={`Models (${sorted.length})`} subtitle={`sorted by ${sortBy} ${desc ? "desc" : "asc"}`}>
-        {sorted.map((m) => (
-          <List.Item
-            key={m.id}
-            icon={modelIcons.get(m.id)}
-            title={m.name}
-            subtitle={m.provider_name ?? m.provider}
-            accessories={[{ text: `Intelligence ${m.intelligence}` }, { text: `Speed ${m.speed}` }]}
-            actions={
-              <ActionPanel>
-                <Action.Push title="Show Details" icon={Icon.Info} target={<ModelDetailView model={m} />} />
-                <Action.CopyToClipboard title="Copy Model ID" content={m.id} />
-                <Action.CopyToClipboard
-                  title="Copy Full JSON"
-                  content={JSON.stringify(m, null, 2)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-                <Action
-                  title="Refresh Models"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={async () => {
-                    await revalidate();
-                    showToast({ style: Toast.Style.Success, title: "Models refreshed" });
-                  }}
-                />
-              </ActionPanel>
+        {sorted.map((m) => {
+          const providerLabel = m.provider_name ?? m.provider;
+          const keywords = [providerLabel, ...(m.features ?? []), ...(m.suggestions ?? [])].filter(Boolean) as string[];
+
+          // derive a best-effort provider URL from provider name/brand
+          const resolveProviderUrl = (candidate?: string | null) => {
+            if (!candidate) return undefined;
+            const cleaned = String(candidate).trim();
+            try {
+              const lower = cleaned.toLowerCase();
+              if (lower.startsWith("http://") || lower.startsWith("https://")) return cleaned;
+              // if it contains a dot, treat it as a domain
+              if (/[a-z0-9-]+\.[a-z.]{2,}/i.test(lower)) return `https://${lower}`;
+              // otherwise append .com as a best-effort guess
+              if (/^[a-z0-9-.]+$/i.test(lower)) return `https://${lower}.com`;
+            } catch {
+              // ignore and return undefined
             }
-          />
-        ))}
+            return undefined;
+          };
+
+          const providerUrl = resolveProviderUrl(m.provider_brand ?? m.provider_name ?? m.provider);
+
+          return (
+            <List.Item
+              key={m.id}
+              icon={modelIcons.get(m.id)}
+              title={m.name}
+              subtitle={providerLabel}
+              accessories={[{ text: `Intelligence ${m.intelligence}` }, { text: `Speed ${m.speed}` }]}
+              keywords={keywords}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="Show Details" icon={Icon.Info} target={<ModelDetailView model={m} />} />
+                  <Action.CopyToClipboard title="Copy Model ID" content={m.id} />
+                  <Action.CopyToClipboard
+                    title="Copy Full JSON"
+                    content={JSON.stringify(m, null, 2)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                  {providerUrl && <Action.OpenInBrowser title="Open Provider Website" url={providerUrl} />}
+                  <Action
+                    title="Refresh Models"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={async () => {
+                      try {
+                        await revalidate();
+                        showToast({ style: Toast.Style.Success, title: "Models refreshed" });
+                      } catch (e) {
+                        const err = e as Error;
+                        showToast({ style: Toast.Style.Failure, title: "Refresh failed", message: err.message });
+                      }
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );
