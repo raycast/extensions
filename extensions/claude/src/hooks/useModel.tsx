@@ -40,7 +40,6 @@ const option: Model["option"][] = [
   "claude-2.0",
 ];
 
-
 async function getStoredModels(): Promise<Model[]> {
   const storedModels = await LocalStorage.getItem<string>("models");
   if (!storedModels) {
