@@ -82,6 +82,13 @@ export const claudeCodeCommands: CommandItem[] = [
     usage: "/doctor",
   },
   {
+    id: "export",
+    name: "/export",
+    description: "Export the current conversation to a file or clipboard",
+    category: "Commands",
+    usage: "/export",
+  },
+  {
     id: "help",
     name: "/help",
     description: "Get usage help and list available commands",
