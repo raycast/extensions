@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelHook, CSVPrompt } from "../../type";
@@ -8,7 +8,10 @@ import { parse } from "csv-parse/sync";
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
   const { pop } = useNavigation();
-  const [selectedModel, setSelectedModel] = useState(model?.option ?? "claude-3-5-haiku-latest");
+
+  // Use first available model as default if no model is provided
+  const defaultModelOption = model?.option ?? (use.models.option[0] || "claude-3-5-haiku-20241022");
+  const [selectedModel, setSelectedModel] = useState(defaultModelOption);
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
@@ -91,16 +94,46 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       },
     },
     initialValues: {
-      name: model?.name ?? "",
+      name: model?.name ?? (use.models.availableModels.length > 0
+        ? (use.models.availableModels.find(m => m.id === defaultModelOption)?.display_name || "")
+        : ""),
       temperature: model?.temperature.toString() ?? "1",
       max_tokens: model?.max_tokens ?? "4096",
-      option: model?.option ?? "claude-3-5-haiku-latest",
-      prompt: model?.prompt ?? "",
+      option: defaultModelOption,
+      prompt: model?.prompt ?? "You are a useful assistant",
       pinned: model?.pinned ?? false,
     },
   });
 
   const MODEL_OPTIONS = use.models.option;
+  const AVAILABLE_MODELS = use.models.availableModels;
+
+  // Helper to get display name for a model ID
+  const getDisplayName = useCallback((modelId: string): string => {
+    const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
+    return model?.display_name || modelId;
+  }, [AVAILABLE_MODELS]);
+
+  // Helper to check if current name is a model display name
+  const isNameAModelDisplayName = useCallback((name: string): boolean => {
+    return AVAILABLE_MODELS.some(m => m.display_name === name);
+  }, [AVAILABLE_MODELS]);
+
+  // Handle model selection
+  const handleModelChange = useCallback((newValue: string) => {
+    setSelectedModel(newValue);
+    setValue("option", newValue);
+
+    // Get current name field value
+    const currentName = itemProps.name.value;
+
+    // Only update name if it's currently set to a model's display name (not custom)
+    // This means: if user typed a custom name, we keep it. If it's auto-populated, we update it.
+    if (isNameAModelDisplayName(currentName) || currentName === "") {
+      const newDisplayName = getDisplayName(newValue);
+      setValue("name", newDisplayName);
+    }
+  }, [setValue, getDisplayName, isNameAModelDisplayName, itemProps.name]);
 
   const { isLoading, data } = useFetch<CSVPrompt[]>(
     "https://gist.githubusercontent.com/florisdobber/35f702f0bab6816ac847b182be6f4903/raw/2f6a8296dc5818d76ed594b318e064f9983e0715/prompts.csv",
@@ -135,7 +168,29 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         </ActionPanel>
       }
     >
-      <Form.TextField title="Name" placeholder="Name your model" {...itemProps.name} />
+      <Form.Dropdown
+        title="Model"
+        placeholder="Choose model option"
+        {...itemProps.option}
+        onChange={handleModelChange}
+      >
+        {MODEL_OPTIONS.map((option) => {
+          const displayName = getDisplayName(option);
+          return (
+            <Form.Dropdown.Item
+              value={option}
+              title={`${displayName} (${option})`}
+              key={option}
+            />
+          );
+        })}
+      </Form.Dropdown>
+      <Form.TextField
+        id="name"
+        title="Name"
+        placeholder="Name your model"
+        {...itemProps.name}
+      />
       {showAnthropicPrompts && (
         <Form.Dropdown
           id="template"
@@ -163,19 +218,6 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         })`}
         {...itemProps.max_tokens}
       />
-      <Form.Dropdown
-        title="Model"
-        placeholder="Choose model option"
-        {...itemProps.option}
-        onChange={(newValue) => {
-          setSelectedModel(newValue);
-          setValue("option", newValue);
-        }}
-      >
-        {MODEL_OPTIONS.map((option) => (
-          <Form.Dropdown.Item value={option} title={option} key={option} />
-        ))}
-      </Form.Dropdown>
       {model?.id !== "default" && <Form.Checkbox title="Pinned" label="Pin model" {...itemProps.pinned} />}
     </Form>
   );
