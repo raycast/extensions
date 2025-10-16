@@ -1,6 +1,6 @@
 # Cheatsheet Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-10-16
 
 - Removed `axios` in favor of `useFetch`
 - Updated dependencies
