@@ -5,6 +5,7 @@
 - Add list selection dropdown in the Edit Reminder form
 - Implement `moveToList` function to change reminder's list
 - Allow users to move reminders to different lists when editing
+- Added logic to only update title/notes and list if they have changed
 
 ## [Add Creation Date option for sorting] - 2025-06-13
 
