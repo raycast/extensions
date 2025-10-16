@@ -1,6 +1,6 @@
 # Raycast Zoxide Changelog
 
-## [Added Additional Path Directories Preference] - {PR_MERGE_DATE}
+## [Added Additional Path Directories Preference] - 2025-10-16
 
 - Added preference to allow additional directories to be prepended to PATH when executing commands
 - Added path-helper utility functions to handle default paths and clean path generation
