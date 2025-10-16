@@ -138,7 +138,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
 
       // Only update name if it's currently set to a model's display name (not custom)
       // This means: if user typed a custom name, we keep it. If it's auto-populated, we update it.
-      if (isNameAModelDisplayName(currentName) || currentName === "") {
+      if (currentName && (isNameAModelDisplayName(currentName) || currentName === "")) {
         const newDisplayName = getDisplayName(newValue);
         setValue("name", newDisplayName);
       }
@@ -185,7 +185,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           return <Form.Dropdown.Item value={option} title={`${displayName} (${option})`} key={option} />;
         })}
       </Form.Dropdown>
-      <Form.TextField id="name" title="Name" placeholder="Name your model" {...itemProps.name} />
+      <Form.TextField title="Name" placeholder="Name your model" {...itemProps.name} />
       {showAnthropicPrompts && (
         <Form.Dropdown
           id="template"
