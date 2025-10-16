@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Keyboard } from "@raycast/api";
 
 interface GameActionsProps {
   onMainAction: () => void;
@@ -29,7 +29,7 @@ export const GameActions = React.memo<GameActionsProps>(
               key={key}
               title={title}
               onAction={() => onToggleSelection(value)}
-              shortcut={{ key: key as any, modifiers: ["shift"] }}
+              shortcut={{ key: key as Keyboard.KeyEquivalent, modifiers: ["shift"] }}
             />
           ))}
           <Action title="Reset Game" onAction={onResetGame} shortcut={{ key: "r", modifiers: ["shift"] }} />

@@ -11,7 +11,6 @@ interface UseGameActionsProps {
   setLastRoll: (roll: number[]) => void;
   selected: number[];
   setSelected: (selected: number[]) => void;
-  message: string;
   setMessage: (message: string) => void;
   gameOver: boolean;
   setGameOver: (gameOver: boolean) => void;
@@ -31,7 +30,6 @@ export const useGameActions = ({
   setLastRoll,
   selected,
   setSelected,
-  message,
   setMessage,
   gameOver,
   setGameOver,
@@ -52,7 +50,7 @@ export const useGameActions = ({
   const validateSelectionHandler = useCallback(async () => {
     if (!lastRoll.length || gameOver) return;
 
-    const { isValid, diceSum, selectedSum } = validateSelection(lastRoll, selected, tiles);
+    const { isValid, diceSum, selectedSum } = validateSelection(lastRoll, selected);
 
     if (isValid) {
       setTiles((t) => t.filter((x) => !selected.includes(x)));

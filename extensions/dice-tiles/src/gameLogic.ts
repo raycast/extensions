@@ -32,7 +32,6 @@ export const generateRandomLifePattern = (): string[] => {
 export const validateSelection = (
   lastRoll: number[],
   selected: number[],
-  tiles: number[],
 ): { isValid: boolean; diceSum: number; selectedSum: number } => {
   const diceSum = lastRoll.reduce((a, b) => a + b, 0);
   const selectedSum = selected.reduce((a, b) => a + b, 0);
