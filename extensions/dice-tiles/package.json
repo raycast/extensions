@@ -5,6 +5,9 @@
   "description": "A minimalist dice-and-tiles elimination game. Roll dice, eliminate tiles matching their sum, and climb through reward tiers while tracking victories and defeats.",
   "icon": "dice-tiles.png",
   "author": "julien_minniti",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "repository": "https://github.com/Jumitti/dice-tiles",
   "categories": [
@@ -24,27 +27,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
-    "react": "^18.2.0"
+    "@raycast/api": "^1.103.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.37.0",
-    "@eslint/json": "^0.13.2",
-    "@raycast/eslint-config": "^1.0.4",
-    "@types/node": "^18.16.0",
-    "@types/react": "^18.2.7",
-    "@typescript-eslint/eslint-plugin": "^8.46.0",
-    "@typescript-eslint/parser": "^8.46.0",
-    "eslint": "^8.57.1",
-    "eslint-define-config": "^2.1.0",
-    "eslint-plugin-json": "^4.0.1",
-    "eslint-plugin-jsonc": "^2.21.0",
-    "eslint-plugin-react": "^7.37.5",
-    "globals": "^16.4.0",
-    "jsonc-eslint-parser": "^2.4.1",
-    "prettier": "^3.2.5",
-    "typescript": "^4.4.3",
-    "typescript-eslint": "^8.46.0"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

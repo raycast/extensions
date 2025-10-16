@@ -6,7 +6,7 @@
 
 Dice Tiles is a fun and challenging game you can play directly in [Raycast](https://www.raycast.com). Roll dice, select tiles to match the sum, and clear all tiles to win. Earn victories to unlock new rewards, see your life bar evolve, and reach higher achievement tiers.
 
-![Screenshot](img/screen_base.png)
+![Screenshot](metadata/dice-tiles-1.png)
 
 ## Gameplay
 
