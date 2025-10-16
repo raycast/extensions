@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-ticket-ms-teams",
+  "title": "Jira to MS Teams",
+  "description": "Fetches a Jira ticket by number and converts it to a formatted rich text link for pasting into Microsoft Teams.",
+  "icon": "jira.png",
+  "author": "danielvanzeijst",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "jira-ticket",
+      "title": "Fetch Jira Ticket Info",
+      "description": "Fetches a Jira ticket by number and converts it to a formatted rich text link.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jiraBaseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "JIRA Base URL",
+      "description": "Your JIRA instance URL (e.g., https://yourcompany.atlassian.net)",
+      "placeholder": "https://yourcompany.atlassian.net"
+    },
+    {
+      "name": "jiraUsername",
+      "type": "textfield",
+      "required": true,
+      "title": "JIRA Username",
+      "description": "Your JIRA email address",
+      "placeholder": "user@example.com"
+    },
+    {
+      "name": "jiraApiToken",
+      "type": "password",
+      "required": true,
+      "title": "JIRA API Token",
+      "description": "Your JIRA API token (create at https://id.atlassian.com/manage/api-tokens)"
+    },
+    {
+      "name": "jiraProjectKey",
+      "type": "textfield",
+      "required": true,
+      "title": "JIRA Project Key",
+      "description": "The project key prefix for your tickets (e.g., SO)",
+      "placeholder": "SO"
+    }
+  ],
+  "dependencies": {
+    "@contentful/rich-text-from-markdown": "^15.18.1",
+    "@contentful/rich-text-html-renderer": "^16.6.1",
+    "@contentful/rich-text-plain-text-renderer": "^16.2.1",
+    "@raycast/api": "^1.77.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
