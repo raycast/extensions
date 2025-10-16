@@ -1,6 +1,6 @@
 # Tududi Changelog
 
-## [1.6.0] - 2025-10-08
+## [1.6.0] - {PR_MERGE_DATE}
 
 ### Features
 - **Today Flag in Task Creation**: Added a "today" checkbox to the create task form, defaulting to checked, which is included as a boolean in the POST request body.
@@ -81,9 +81,3 @@
   - Checked circles for completed tasks
 - **Form Reset**: Create task form automatically clears after successful submission
 - **API Integration**: Full integration with Tududi API including authentication and real-time updates
-
-### Technical Improvements
-- Proper handling of numeric status codes as per API specification
-- Client-side filtering with server-side data fetching
-- Controlled form components for better UX
-- TypeScript interfaces for type safety Error handling and user feedback via toast notifications
