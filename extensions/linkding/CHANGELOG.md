@@ -1,5 +1,9 @@
 # Linkding Changelog
 
+## [Dependency Upgrades] - {PR_MERGE_DATE}
+
+- chore: upgrade dependencies
+
 ## [Fixes] - 2025-06-26
 
 - fix!: use server-side filtering to handle large bookmark counts
