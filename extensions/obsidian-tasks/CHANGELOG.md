@@ -5,6 +5,7 @@
   as part of the description rather than as the priority. Appending it resolves this, allowing for searching
   and sorting using Dataview. 
 - Ref [Issue #20725](https://github.com/raycast/extensions/issues/20725)
+
 ## [Show description in details] - 2025-06-30
 
 - Add preference to show description in markdown (ref: [Issue #20035](https://github.com/raycast/extensions/issues/20035))
