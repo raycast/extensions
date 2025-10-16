@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] - 2025-10-16
+## [Update] - {PR_MERGE_DATE}
 
 - Feature: Add new Anthropic models:
   - [Claude Haiku 4.5](https://www.anthropic.com/news/claude-haiku-4-5)
