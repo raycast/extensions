@@ -39,10 +39,7 @@ export function useModel(): ModelHook {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([
-      getStoredModels(),
-      fetchAvailableModels()
-    ])
+    Promise.all([getStoredModels(), fetchAvailableModels()])
       .then(([models, availableModelsData]) => {
         // Extract model IDs from the fetched available models
         const modelOptions = availableModelsData.map((m) => m.id as Model["option"]);

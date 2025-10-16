@@ -94,9 +94,11 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       },
     },
     initialValues: {
-      name: model?.name ?? (use.models.availableModels.length > 0
-        ? (use.models.availableModels.find(m => m.id === defaultModelOption)?.display_name || "")
-        : ""),
+      name:
+        model?.name ??
+        (use.models.availableModels.length > 0
+          ? use.models.availableModels.find((m) => m.id === defaultModelOption)?.display_name || ""
+          : ""),
       temperature: model?.temperature.toString() ?? "1",
       max_tokens: model?.max_tokens ?? "4096",
       option: defaultModelOption,
@@ -109,31 +111,40 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
   const AVAILABLE_MODELS = use.models.availableModels;
 
   // Helper to get display name for a model ID
-  const getDisplayName = useCallback((modelId: string): string => {
-    const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
-    return model?.display_name || modelId;
-  }, [AVAILABLE_MODELS]);
+  const getDisplayName = useCallback(
+    (modelId: string): string => {
+      const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
+      return model?.display_name || modelId;
+    },
+    [AVAILABLE_MODELS]
+  );
 
   // Helper to check if current name is a model display name
-  const isNameAModelDisplayName = useCallback((name: string): boolean => {
-    return AVAILABLE_MODELS.some(m => m.display_name === name);
-  }, [AVAILABLE_MODELS]);
+  const isNameAModelDisplayName = useCallback(
+    (name: string): boolean => {
+      return AVAILABLE_MODELS.some((m) => m.display_name === name);
+    },
+    [AVAILABLE_MODELS]
+  );
 
   // Handle model selection
-  const handleModelChange = useCallback((newValue: string) => {
-    setSelectedModel(newValue);
-    setValue("option", newValue);
+  const handleModelChange = useCallback(
+    (newValue: string) => {
+      setSelectedModel(newValue);
+      setValue("option", newValue);
 
-    // Get current name field value
-    const currentName = itemProps.name.value;
+      // Get current name field value
+      const currentName = itemProps.name.value;
 
-    // Only update name if it's currently set to a model's display name (not custom)
-    // This means: if user typed a custom name, we keep it. If it's auto-populated, we update it.
-    if (isNameAModelDisplayName(currentName) || currentName === "") {
-      const newDisplayName = getDisplayName(newValue);
-      setValue("name", newDisplayName);
-    }
-  }, [setValue, getDisplayName, isNameAModelDisplayName, itemProps.name]);
+      // Only update name if it's currently set to a model's display name (not custom)
+      // This means: if user typed a custom name, we keep it. If it's auto-populated, we update it.
+      if (isNameAModelDisplayName(currentName) || currentName === "") {
+        const newDisplayName = getDisplayName(newValue);
+        setValue("name", newDisplayName);
+      }
+    },
+    [setValue, getDisplayName, isNameAModelDisplayName, itemProps.name]
+  );
 
   const { isLoading, data } = useFetch<CSVPrompt[]>(
     "https://gist.githubusercontent.com/florisdobber/35f702f0bab6816ac847b182be6f4903/raw/2f6a8296dc5818d76ed594b318e064f9983e0715/prompts.csv",
@@ -168,29 +179,13 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        title="Model"
-        placeholder="Choose model option"
-        {...itemProps.option}
-        onChange={handleModelChange}
-      >
+      <Form.Dropdown title="Model" placeholder="Choose model option" {...itemProps.option} onChange={handleModelChange}>
         {MODEL_OPTIONS.map((option) => {
           const displayName = getDisplayName(option);
-          return (
-            <Form.Dropdown.Item
-              value={option}
-              title={`${displayName} (${option})`}
-              key={option}
-            />
-          );
+          return <Form.Dropdown.Item value={option} title={`${displayName} (${option})`} key={option} />;
         })}
       </Form.Dropdown>
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Name your model"
-        {...itemProps.name}
-      />
+      <Form.TextField id="name" title="Name" placeholder="Name your model" {...itemProps.name} />
       {showAnthropicPrompts && (
         <Form.Dropdown
           id="template"
