@@ -2,7 +2,7 @@
 // It provides a Raycast command interface for users to input a YouTube video ID,
 // retrieves the video's transcript, processes it, and saves it to a local file.
 // The script uses the YouTube Data API and handles user preferences for download locations.
-import { showToast, Toast, getPreferenceValues, open } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, open, Clipboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils"; // <-- CHANGED: Added new import
 import { promises as fs } from "fs";
 import * as fsSync from "fs";
@@ -242,8 +242,8 @@ function sanitizeFilename(filename: string): string {
 }
 
 // Main command function
-export default async function Command(props: { arguments: { videoUrl: string } }) {
-  const { videoUrl } = props.arguments;
+export default async function Command(props: { arguments: { videoUrl: string; action: string } }) {
+  const { videoUrl, action } = props.arguments;
 
   if (!videoUrl) {
     // <-- CHANGED: Using showFailureToast for a simpler error message.
@@ -267,29 +267,37 @@ export default async function Command(props: { arguments: { videoUrl: string } }
     // Get transcript
     const { transcript, title } = await getVideoTranscript(videoId);
 
-    // Get download location
-    const { defaultDownloadFolder } = getPreferenceValues<ExtensionPreferences>();
-    const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
+    if (action === "save") {
+      // Get download location
+      const { defaultDownloadFolder } = getPreferenceValues<ExtensionPreferences>();
+      const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
 
-    // Create filename and save
-    const sanitizedTitle = sanitizeFilename(title);
-    const filename = path.join(downloadsFolder, `${sanitizedTitle}_transcript.txt`);
-    await fs.writeFile(filename, transcript);
+      // Create filename and save
+      const sanitizedTitle = sanitizeFilename(title);
+      const filename = path.join(downloadsFolder, `${sanitizedTitle}_transcript.txt`);
+      await fs.writeFile(filename, transcript);
 
-    // Show success toast with actions
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Transcript fetched and saved",
-      message: `Saved to: ${filename}`,
-      primaryAction: {
-        title: "Open File",
-        onAction: () => open(filename),
-      },
-      secondaryAction: {
-        title: "Open Folder",
-        onAction: () => open(downloadsFolder),
-      },
-    });
+      // Show success toast with actions
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Transcript fetched and saved",
+        message: `Saved to: ${filename}`,
+        primaryAction: {
+          title: "Open File",
+          onAction: () => open(filename),
+        },
+        secondaryAction: {
+          title: "Open Folder",
+          onAction: () => open(downloadsFolder),
+        },
+      });
+    } else if (action === "copy") {
+      await Clipboard.copy(transcript);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Transcript copied to clipboard",
+      });
+    }
   } catch (error) {
     // <-- CHANGED: Using showFailureToast to handle the error object correctly.
     await showFailureToast(error, { title: "Error" });
