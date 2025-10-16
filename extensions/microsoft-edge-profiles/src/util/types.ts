@@ -55,28 +55,4 @@ export type Profile = {
   };
 };
 
-type EdgeBookmark = EdgeBookmarkFolder | EdgeBookmarkURL;
-
-export interface EdgeBookmarkURL extends EdgeBookmarkBase {
-  type: "url";
-  url: string;
-}
-
-export interface EdgeBookmarkFolder extends EdgeBookmarkBase {
-  type: "folder";
-  children: [EdgeBookmark];
-}
-
-interface EdgeBookmarkBase {
-  name: string;
-  date_added: number;
-}
-
-export type EdgeBookmarkFile = {
-  roots: {
-    bookmark_bar: EdgeBookmarkFolder;
-    other: EdgeBookmarkFolder;
-    synced: EdgeBookmarkFolder;
-  };
-};
 

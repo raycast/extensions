@@ -96,4 +96,4 @@ const extractProfileFromInfoCache =
 
 const sortAlphabetically = (a: Profile, b: Profile) => a.name.localeCompare(b.name);
 
-// (Bookmarks functionality removed as requested)
+//
