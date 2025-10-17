@@ -36,7 +36,11 @@ export async function moveDock(direction: "up" | "down" | "left" | "right"): Pro
     const stdout: string = Buffer.isBuffer(result.stdout)
       ? result.stdout.toString().trim()
       : (result.stdout || "").toString().trim();
-    console.error(`Command 'move ${direction}' failed`, { exitCode, stdout, stderr });
+    console.error(`Command 'move ${direction}' failed`, {
+      exitCode: String(exitCode),
+      stdout: String(stdout),
+      stderr: String(stderr),
+    });
     showFailureToast("", { title: `Failed to move Dock ${direction}` });
   }
 }
