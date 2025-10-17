@@ -1,5 +1,12 @@
 # Parcel Changelog
 
+## [Improved Add Delivery] - {PR_MERGE_DATE}
+
+- Add Delivery now works on both Mac and Windows without requiring the Parcel Mac app to be installed by using Parcel's Add Delivery API
+- The Add Delivery form now prevents leaving required form fields empty
+- Deliveries added from the extension will automatically use your system's language in Parcel
+- Replaced the success toast with a cleaner Raycast HUD notification
+
 ## [Detail View Refactor, Metadata, UX] - 2025-09-19
 
 - Refactored "My Deliveries" command UI to only show tracking events in the markdown section (all other details are now displayed in the metadata panel for improved clarity and structure)

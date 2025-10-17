@@ -1,62 +1,47 @@
-import { Action, ActionPanel, closeMainWindow, Form, Icon, open, PopToRootType, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useState } from "react";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
+import { showFailureToast, useForm, FormValidation } from "@raycast/utils";
+import { useCarriers } from "./hooks/useCarriers";
+import { addDelivery, getUserLanguage } from "./api";
 
 interface FormValues {
   trackingNumber: string;
+  carrierCode: string;
   description: string;
 }
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(false);
+  const { carriers, isLoading: carriersLoading } = useCarriers();
 
-  async function handleSubmit(values: FormValues) {
-    if (!values.trackingNumber.trim()) {
-      await showFailureToast({
-        title: "Tracking Number Required",
-        message: "Please enter a tracking number",
-      });
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit: async (values) => {
+      try {
+        // Trim whitespace from inputs
+        const trackingNumber = values.trackingNumber.trim();
+        const description = values.description.trim();
+        const language = getUserLanguage();
 
-    try {
-      setIsLoading(true);
+        // Use the API to add delivery
+        await addDelivery(trackingNumber, values.carrierCode, description, language);
 
-      // Trim whitespace from tracking number
-      const trackingNumber = values.trackingNumber.trim();
-      const description = values.description.trim();
-
-      // Choose the appropriate protocol based on whether a description is provided
-      let url = "";
-      if (description) {
-        // Use labeled protocol when description is provided
-        url = `parcel://automaticwithlabel/${encodeURIComponent(description)}/?${encodeURIComponent(trackingNumber)}`;
-      } else {
-        // Use automatic protocol when no description is provided
-        url = `parcel://automatic/?${encodeURIComponent(trackingNumber)}`;
+        // Show a success HUD
+        await showHUD(`📦 Delivery Added`, {
+          popToRootType: PopToRootType.Immediate,
+        });
+      } catch (error) {
+        console.error("Error adding delivery:", error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        await showFailureToast({
+          title: "Failed to Add Delivery",
+          message: errorMessage,
+        });
       }
-
-      // Open the URL with the appropriate protocol
-      await open(url);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Delivery Added",
-        message: description || trackingNumber,
-      });
-
-      // Always close the window after adding a package
-      await closeMainWindow({ popToRootType: PopToRootType.Immediate });
-    } catch (error) {
-      console.error("Error adding delivery:", error);
-      await showFailureToast({
-        title: "Failed to Add Delivery",
-        message: String(error),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    },
+    validation: {
+      trackingNumber: FormValidation.Required,
+      carrierCode: FormValidation.Required,
+      description: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -65,13 +50,23 @@ export default function Command() {
           <Action.SubmitForm title="Add Delivery" icon={Icon.Plus} onSubmit={handleSubmit} />
         </ActionPanel>
       }
-      isLoading={isLoading}
+      isLoading={carriersLoading}
     >
-      <Form.TextField id="trackingNumber" title="Tracking Number" placeholder="Enter the tracking number" autoFocus />
       <Form.TextField
-        id="description"
+        title="Tracking Number"
+        placeholder="Enter the tracking number"
+        autoFocus
+        {...itemProps.trackingNumber}
+      />
+      <Form.Dropdown title="Carrier" placeholder="Select a carrier" {...itemProps.carrierCode}>
+        {carriers.map((carrier) => (
+          <Form.Dropdown.Item key={carrier.code} value={carrier.code} title={carrier.name} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextField
         title="Description"
-        placeholder="Enter a description for this package (optional)"
+        placeholder="Enter a description for this package"
+        {...itemProps.description}
       />
     </Form>
   );
