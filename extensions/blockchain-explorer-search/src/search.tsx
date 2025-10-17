@@ -186,7 +186,7 @@ async function checkRoutescan(query: string): Promise<RoutescanResponse | null> 
       return null;
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as RoutescanResponse;
     const totalTime = Date.now() - startTime;
 
     console.log(
@@ -196,7 +196,7 @@ async function checkRoutescan(query: string): Promise<RoutescanResponse | null> 
     // Cache the successful response
     routescanCache.set(query.toLowerCase(), { data, timestamp: Date.now() });
 
-    return data as RoutescanResponse;
+    return data;
   } catch (err) {
     const totalTime = Date.now() - startTime;
     console.error(`[Routescan] Error after ${totalTime}ms:`, err);
@@ -703,19 +703,19 @@ export default function Command() {
                       <Action.OpenInBrowser
                         url={`https://${chainExplorer.baseUrl}/tx/${tx.hash}`}
                         title="Open in Explorer"
-                        onOpen={() => handleItemAction(tx.hash)}
+                        onOpen={() => handleItemAction()}
                       />
                     ) : (
                       <Action.OpenInBrowser
                         url={`https://routescan.io/transaction/${tx.hash}?chainId=${tx.chainId}`}
                         title="Open in Routescan"
-                        onOpen={() => handleItemAction(tx.hash)}
+                        onOpen={() => handleItemAction()}
                       />
                     )}
                     <Action.CopyToClipboard
                       content={tx.hash}
                       title="Copy Hash"
-                      onCopy={() => handleItemAction(tx.hash)}
+                      onCopy={() => handleItemAction()}
                     />
                     {chainExplorer && selectedExplorer?.chainId !== parseInt(tx.chainId, 10) && (
                       <Action
@@ -723,7 +723,7 @@ export default function Command() {
                         icon={Icon.Switch}
                         onAction={() => {
                           handleExplorerChange(chainExplorer);
-                          handleItemAction(tx.hash);
+                          handleItemAction();
                         }}
                       />
                     )}
@@ -822,19 +822,19 @@ export default function Command() {
                       <Action.OpenInBrowser
                         url={`https://${chainExplorer.baseUrl}/token/${token.address}`}
                         title="Open in Explorer"
-                        onOpen={() => handleItemAction(token.address)}
+                        onOpen={() => handleItemAction()}
                       />
                     ) : (
                       <Action.OpenInBrowser
                         url={`https://routescan.io/token/${token.address}?chainId=${token.chainId}`}
                         title="Open in Routescan"
-                        onOpen={() => handleItemAction(token.address)}
+                        onOpen={() => handleItemAction()}
                       />
                     )}
                     <Action.CopyToClipboard
                       content={token.address}
                       title="Copy Address"
-                      onCopy={() => handleItemAction(token.address)}
+                      onCopy={() => handleItemAction()}
                     />
                     <Action
                       title={savedAddressesMap.has(token.address.toLowerCase()) ? "Edit Saved Token" : "Save Token"}
@@ -871,7 +871,7 @@ export default function Command() {
                         icon={Icon.Switch}
                         onAction={() => {
                           handleExplorerChange(chainExplorer);
-                          handleItemAction(token.address);
+                          handleItemAction();
                         }}
                       />
                     )}
@@ -890,7 +890,7 @@ export default function Command() {
                             key={idx}
                             url={link.value}
                             title={`Open ${link.type.charAt(0).toUpperCase() + link.type.slice(1)}`}
-                            onOpen={() => handleItemAction(token.address)}
+                            onOpen={() => handleItemAction()}
                           />
                         );
                       }
@@ -932,7 +932,7 @@ export default function Command() {
                         url={match.path}
                         title="Open in Explorer"
                         onOpen={() => {
-                          handleItemAction(match.parsedSearch);
+                          handleItemAction();
                           trackSearch(match.parsedSearch, match.matchType, match.path);
                         }}
                       />
@@ -1107,19 +1107,19 @@ export default function Command() {
                       <Action.OpenInBrowser
                         url={`https://${chainExplorer.baseUrl}/address/${address.address}`}
                         title="Open in Explorer"
-                        onOpen={() => handleItemAction(address.address)}
+                        onOpen={() => handleItemAction()}
                       />
                     ) : (
                       <Action.OpenInBrowser
                         url={`https://routescan.io/address/${address.address}?chainId=${address.chainId}`}
                         title="Open in Routescan"
-                        onOpen={() => handleItemAction(address.address)}
+                        onOpen={() => handleItemAction()}
                       />
                     )}
                     <Action.CopyToClipboard
                       content={address.address}
                       title="Copy Address"
-                      onCopy={() => handleItemAction(address.address)}
+                      onCopy={() => handleItemAction()}
                     />
                     {chainExplorer && selectedExplorer?.chainId !== parseInt(address.chainId, 10) && (
                       <Action
@@ -1127,7 +1127,7 @@ export default function Command() {
                         icon={Icon.Switch}
                         onAction={() => {
                           handleExplorerChange(chainExplorer);
-                          handleItemAction(address.address);
+                          handleItemAction();
                         }}
                       />
                     )}
