@@ -1,6 +1,6 @@
 # NHL Changelog
 
-## [Version 1.0.2] - {PR_MERGE_DATE}
+## [Version 1.0.2] - 2025-10-17
 
 - Add translation for faceoff wins
 - Add support for Windows platform
