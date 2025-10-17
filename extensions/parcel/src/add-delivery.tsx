@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
 import { showFailureToast, useForm, FormValidation } from "@raycast/utils";
 import { useCarriers } from "./hooks/useCarriers";
-import { addDelivery, getUserLanguage } from "./api";
+import { addDelivery } from "./api";
 
 interface FormValues {
   trackingNumber: string;
@@ -18,10 +18,9 @@ export default function Command() {
         // Trim whitespace from inputs
         const trackingNumber = values.trackingNumber.trim();
         const description = values.description.trim();
-        const language = getUserLanguage();
 
         // Use the API to add delivery
-        await addDelivery(trackingNumber, values.carrierCode, description, language);
+        await addDelivery(trackingNumber, values.carrierCode, description);
 
         // Show a success HUD
         await showHUD(`📦 Delivery Added`, {

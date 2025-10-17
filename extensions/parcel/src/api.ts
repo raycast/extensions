@@ -80,12 +80,6 @@ export function getApiKey(): string {
   return preferences.apiKey;
 }
 
-export function getUserLanguage(): string {
-  const preferences = getPreferenceValues<Preferences & { locale?: string }>();
-  const locale = preferences.locale || "en";
-  return locale.split("-")[0]; // Extract language code (e.g., "en" from "en-US")
-}
-
 export function getDeliveriesUrl(filterMode: FilterMode): string {
   return `https://api.parcel.app/external/deliveries/?filter_mode=${filterMode}`;
 }
@@ -133,12 +127,7 @@ export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[
   return data.deliveries;
 }
 
-export async function addDelivery(
-  trackingNumber: string,
-  carrierCode: string,
-  description: string,
-  language?: string,
-): Promise<void> {
+export async function addDelivery(trackingNumber: string, carrierCode: string, description: string): Promise<void> {
   const url = "https://api.parcel.app/external/add-delivery/";
   const response = await fetch(url, {
     headers: {
@@ -150,7 +139,7 @@ export async function addDelivery(
       tracking_number: trackingNumber,
       carrier_code: carrierCode,
       description: description,
-      ...(language && { language }),
+      language: "en",
     }),
   });
 
