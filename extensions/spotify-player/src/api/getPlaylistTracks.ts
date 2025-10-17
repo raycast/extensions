@@ -1,5 +1,5 @@
 import { getErrorMessage } from "../helpers/getError";
-import { PagingObject, PlaylistTrackObject, SimplifiedTrackObject } from "../helpers/spotify.api";
+import { PagingPlaylistTrackObject, PlaylistTrackObject, SimplifiedTrackObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 export async function getPlaylistTracks(playlistId: string, limit: number, offset?: number) {
@@ -9,7 +9,7 @@ export async function getPlaylistTracks(playlistId: string, limit: number, offse
   let currentOffset = offset ?? 0;
 
   try {
-    let response: PagingObject<PlaylistTrackObject>;
+    let response: PagingPlaylistTrackObject;
     do {
       response = await spotifyClient.getPlaylistsByPlaylistIdTracks(playlistId, {
         limit: Math.min(limit - tracks.length, 50),
@@ -17,7 +17,7 @@ export async function getPlaylistTracks(playlistId: string, limit: number, offse
       });
 
       if (response.items) {
-        const normalizedTracks = (response?.items ?? []).map((trackItem) => {
+        const normalizedTracks = (response?.items ?? []).map((trackItem: PlaylistTrackObject) => {
           return {
             ...(trackItem.track || {}),
           };
