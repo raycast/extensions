@@ -48,7 +48,6 @@ export default function Command() {
   const { data: items, isLoading, revalidate } = useMyTimeEntries(viewDate);
 
   const [navigationTitle, setNavigationTitle] = useState("Today's Timesheet");
-  const [navSubtitle, setNavSubtitle] = useState("");
   const { data: company } = useCompany();
 
   const timeEntries = useMemo(() => {
@@ -97,15 +96,12 @@ export default function Command() {
     return timeEntries;
   }, [items]);
 
-  useEffect(() => {
-    const dayTotal = sumBy(timeEntries, (o) => o.hours)?.toFixed(2) ?? "";
-    setNavSubtitle(formatHours(dayTotal, company));
-  }, [timeEntries, company]);
+  const navSubtitle = useMemo(() => {
+    const dayTotal = sumBy(items, (o) => o.hours)?.toFixed(2) ?? "";
+    return formatHours(dayTotal, company);
+  }, [items, company]);
 
   async function changeViewDate(date: Date) {
-    // const relative = dayjs(date).fromNow();
-    setNavSubtitle("");
-    // setIsLoading(true);
     if (dayjs(date).isToday()) {
       setNavigationTitle("Today's Timesheet");
     } else if (dayjs(date).isTomorrow()) {
@@ -246,19 +242,29 @@ export default function Command() {
             <List.Item
               id={entry.id.toString()}
               key={entry.id}
-              title={entry.project.name}
-              accessoryTitle={`${entry.client.name}${entry.client.name && entry.task.name ? " | " : ""}${
-                entry.task.name
-              } | ${formatHours(entry.hours.toFixed(2), company)}`}
-              accessoryIcon={
-                entry.external_reference ? { source: entry.external_reference.service_icon_url } : undefined
-              }
+              title={entry.task.name}
               subtitle={entry.notes}
-              keywords={entry.notes
-                ?.split(" ")
-                .concat(entry.client?.name?.split(" "))
-                .concat(entry.task?.name?.split(" "))}
-              icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
+              keywords={[
+                ...(entry.notes?.split(" ") ?? []),
+                ...(entry.client?.name?.split(" ") ?? []),
+                ...(entry.project?.name?.split(" ") ?? []),
+              ]}
+              accessories={[
+                { text: entry.project.name, icon: Icon.Folder },
+                {
+                  text: entry.client.name,
+                  icon: entry.external_reference
+                    ? { source: entry.external_reference.service_icon_url }
+                    : Icon.Building,
+                },
+                {
+                  icon: entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined,
+                  tag: {
+                    value: formatHours(entry.hours.toFixed(2), company),
+                    color: entry.is_running ? Color.Orange : Color.SecondaryText,
+                  },
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title={`${entry.project.name} | ${entry.client.name}`}>

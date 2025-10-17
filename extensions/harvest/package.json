@@ -6,7 +6,8 @@
   "icon": "harvest-logo-icon.png",
   "author": "eluce2",
   "contributors": [
-    "bchopson"
+    "bchopson",
+    "mrpunkin"
   ],
   "categories": [
     "Productivity"
@@ -166,7 +167,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.1",
-    "axios": "^0.23.0",
+    "axios": "^1.12.2",
     "dayjs": "^1.11.11",
     "es-toolkit": "^1.40.0"
   },

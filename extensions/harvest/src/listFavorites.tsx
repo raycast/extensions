@@ -128,7 +128,7 @@ export default function Command() {
         task_id: number;
         spent_date: string;
         notes?: string;
-        hours?: string;
+        hours?: number;
       } = {
         project_id: favorite.projectId,
         task_id: favorite.taskId,
@@ -140,7 +140,7 @@ export default function Command() {
       }
 
       if (favorite.hours) {
-        param.hours = favorite.hours;
+        param.hours = parseFloat(favorite.hours);
       }
 
       const timeEntry = await newTimeEntry(param);
@@ -188,12 +188,12 @@ export default function Command() {
             return (
               <List.Item
                 key={favorite.id}
-                title={favorite.projectName}
+                title={favorite.taskName}
                 keywords={favorite.notes?.split(" ")}
                 accessories={[
+                  { text: favorite.projectName, icon: Icon.Folder },
+                  { text: favorite.clientName, icon: Icon.Building },
                   ...(hasDuration ? [{ tag: formatHours(favorite.hours, company), icon: Icon.Clock }] : []),
-
-                  { text: `${favorite.clientName} | ${favorite.taskName}` },
                 ]}
                 subtitle={favorite.notes}
                 icon={{ source: Icon.Star, tintColor: Color.Yellow }}
