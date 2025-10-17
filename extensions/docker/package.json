@@ -64,7 +64,7 @@
     "node-fetch": "^3.0.0"
   },
   "overrides": {
-    "tar-fs": ">=3.0.9"
+    "tar-fs": ">=3.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
