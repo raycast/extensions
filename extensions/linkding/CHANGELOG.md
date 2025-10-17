@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Dependency Upgrades] - {PR_MERGE_DATE}
+## [Dependency Upgrades] - 2025-10-17
 
 - chore: upgrade dependencies
 
