@@ -459,7 +459,7 @@ export default function Command() {
   // Note: Removed redundant API calls here to reduce request spam
   // The main useEffect hook with debouncing handles all API calls
   // This prevents duplicate requests and respects rate limits
-  const handleItemAction = (..._args: unknown[]) => {
+  const handleItemAction = () => {
     // Intentionally empty - kept for backwards compatibility
   };
 
