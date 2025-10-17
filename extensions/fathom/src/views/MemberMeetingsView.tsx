@@ -1,8 +1,8 @@
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { listMeetings } from "./fathom/api";
-import { MeetingListItem } from "./components/MeetingListItem";
+import { listMeetings } from "../fathom/api";
+import { MeetingListItem } from "../components/MeetingListItem";
 
 interface MemberMeetingsProps {
   email: string;

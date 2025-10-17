@@ -8,6 +8,13 @@ import type { Team as SDKTeam } from "fathom-typescript/models/team";
 import type { TeamMember as SDKTeamMember } from "fathom-typescript/models/teammember";
 
 /**
+ * Extended SDK TeamMember type that includes undocumented API response fields
+ */
+type SDKTeamMemberWithExtras = SDKTeamMember & {
+  team?: string;
+};
+
+/**
  * Convert SDK Meeting to internal Meeting type
  */
 export function convertSDKMeeting(m: SDKMeeting): Meeting {
@@ -47,12 +54,11 @@ export function convertSDKTeam(t: SDKTeam): Team {
 /**
  * Convert SDK TeamMember to internal TeamMember type
  */
-export function convertSDKTeamMember(tm: SDKTeamMember, teamName?: string): TeamMember {
+export function convertSDKTeamMember(tm: SDKTeamMemberWithExtras, teamName?: string): TeamMember {
   const emailDomain = tm.email && tm.email.includes("@") ? tm.email.split("@")[1] : undefined;
 
   // Extract team from SDK response if available (not in SDK types but present in API response)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const teamFromSDK = (tm as any).team || undefined;
+  const teamFromSDK = tm.team || undefined;
 
   return {
     id: tm.email,

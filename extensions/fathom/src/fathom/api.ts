@@ -45,6 +45,10 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
     throw new Error("Fathom API Key is not set. Please configure it in Extension Preferences.");
   }
 
+  // Log every API call with stack trace to identify caller
+  const caller = new Error().stack?.split("\n")[2]?.trim() || "unknown";
+  console.log(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) - Called from: ${caller}`);
+
   const res = await fetch(`${BASE}${path}`, {
     method: "GET",
     headers: {
@@ -62,11 +66,15 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
     if (res.status === 429) {
       if (retryCount < MAX_RETRIES) {
         const retryDelay = getRetryDelay(retryCount);
-        console.log(`Rate limited. Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+        console.log(
+          `[API] ⚠️  RATE LIMITED on ${path} - Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})\n` +
+            `      Called from: ${caller}`,
+        );
         await sleep(retryDelay);
         return authGet<T>(path, retryCount + 1);
       }
       // After max retries, throw a more informative error
+      console.error(`[API] ❌ RATE LIMIT EXCEEDED on ${path} after ${MAX_RETRIES} retries`);
       throw new Error(
         "Rate limit exceeded after multiple retries. The Fathom API is temporarily unavailable. Please try again in a few moments.",
       );
@@ -76,11 +84,14 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
   }
 
   const data = (await res.json()) as unknown;
+  console.log(`[API] ✅ Success ${path}`);
   return data as T;
 }
 
 // API functions
 export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Meeting>> {
+  console.log(`[API] 📋 listMeetings called with filter:`, filter);
+  console.log(`[API] 🔵 Calling Fathom SDK client.listMeetings()...`);
   try {
     const client = getFathomClient();
 
@@ -337,6 +348,7 @@ export async function listRecentRecordings(
 }
 
 export async function getMeetingSummary(recordingId: string): Promise<Summary> {
+  console.log(`[API] 📝 getMeetingSummary called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/summary`);
 
   if (typeof resp !== "object" || resp === null) {
@@ -359,6 +371,7 @@ export async function getMeetingSummary(recordingId: string): Promise<Summary> {
 }
 
 export async function getMeetingTranscript(recordingId: string): Promise<Transcript> {
+  console.log(`[API] 📄 getMeetingTranscript called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/transcript`);
 
   if (typeof resp !== "object" || resp === null) {
@@ -409,6 +422,8 @@ export async function getMeetingTranscript(recordingId: string): Promise<Transcr
 export async function listTeams(
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<Team>> {
+  console.log(`[API] 👥 listTeams called with args:`, args);
+  console.log(`[API] 🔵 Calling Fathom SDK client.listTeams()...`);
   try {
     const client = getFathomClient();
 
@@ -434,6 +449,7 @@ export async function listTeams(
 async function listTeamsHTTP(
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<Team>> {
+  console.log(`[API] 👥 listTeamsHTTP called with args:`, args);
   const params: string[] = [];
   if (args.cursor) params.push(`cursor=${encodeURIComponent(args.cursor)}`);
 
@@ -474,6 +490,8 @@ export async function listTeamMembers(
   teamId?: string,
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<TeamMember>> {
+  console.log(`[API] 👤 listTeamMembers called for teamId: ${teamId} with args:`, args);
+  console.log(`[API] 🔵 Calling Fathom SDK client.listTeamMembers()...`);
   try {
     const client = getFathomClient();
 

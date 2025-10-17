@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, showToast, Toast, environment } from "@raycast/api";
 import type { TeamMember } from "../types/Types";
 import { exportAsVCard, exportTeamMembers } from "../utils/export";
-import MemberMeetingsView from "../search-member-meetings";
+import MemberMeetingsView from "../views/MemberMeetingsView";
 import path from "path";
 import fs from "fs";
 

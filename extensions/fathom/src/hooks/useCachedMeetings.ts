@@ -1,17 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { listMeetings } from "../fathom/api";
 import type { MeetingFilter, Meeting, ActionItem } from "../types/Types";
-import {
-  cacheMeeting,
-  getAllCachedMeetings,
-  pruneCache,
-  searchCachedMeetings,
-  type CachedMeetingData,
-} from "../utils/cache";
-
-const CACHE_SIZE = 50; // Keep most recent 50 meetings
+import { searchCachedMeetings, type CachedMeetingData } from "../utils/cache";
+import { cacheManager } from "../utils/cacheManager";
 
 interface UseCachedMeetingsOptions {
   filter?: MeetingFilter;
@@ -39,136 +29,54 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
   const { filter = {}, enableCache = true } = options;
 
   const [cachedMeetings, setCachedMeetings] = useState<CachedMeetingData[]>([]);
-  const [isCacheLoaded, setIsCacheLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | undefined>();
 
-  // Load meetings from API (with summaries and transcripts included)
-  const {
-    data: apiMeetingsData,
-    isLoading: isApiLoading,
-    error: apiError,
-    mutate: refreshApi,
-  } = useCachedPromise(
-    async (currentFilter: MeetingFilter) => {
-      console.log("[API] Fetching meetings from API with filter:", currentFilter);
-      const result = await listMeetings(currentFilter);
-      console.log(`[API] Received ${result.items.length} meetings from API`);
-      return result;
-    },
-    [filter],
-    {
-      keepPreviousData: false,
-      execute: enableCache, // Only fetch from API if caching is enabled
-    },
-  );
-
-  // Load cached meetings on mount
+  // Subscribe to cache manager updates
   useEffect(() => {
     if (!enableCache) {
-      console.log("[Cache] Cache disabled, skipping load");
-      setIsCacheLoaded(true);
+      setIsLoading(false);
       return;
     }
 
-    (async () => {
-      try {
-        console.log("[Cache] Loading cached meetings from storage...");
-        const cached = await getAllCachedMeetings();
-        console.log(`[Cache] Loaded ${cached.length} cached meetings`);
-        setCachedMeetings(cached);
-        setIsCacheLoaded(true);
-      } catch (error) {
-        console.error("[Cache] Error loading cached meetings:", error);
-        setIsCacheLoaded(true);
-      }
-    })();
-  }, [enableCache]);
+    console.log("[useCachedMeetings] Subscribing to cache manager");
 
-  // Cache new meetings when API data arrives
-  useEffect(() => {
-    console.log("[Cache] Cache effect triggered", {
-      enableCache,
-      hasApiData: !!apiMeetingsData?.items,
-      apiDataCount: apiMeetingsData?.items?.length || 0,
-      isCacheLoaded,
-      cachedCount: cachedMeetings.length,
+    // Subscribe to cache updates
+    const unsubscribe = cacheManager.subscribe((meetings) => {
+      console.log(`[useCachedMeetings] Received cache update: ${meetings.length} meetings`);
+      setCachedMeetings(meetings);
+      setIsLoading(false);
     });
 
-    if (!enableCache || !apiMeetingsData?.items || !isCacheLoaded) {
-      console.log("[Cache] Skipping cache effect - conditions not met");
-      return;
-    }
-
+    // Load cache on mount
     (async () => {
-      const meetings = apiMeetingsData.items;
-      const totalMeetings = meetings.length;
-
-      console.log(`[Cache] Processing ${totalMeetings} meetings from API`);
-
-      // Only show progress toast if cache was empty and we have meetings to cache
-      const shouldShowProgress = cachedMeetings.length === 0 && totalMeetings > 0;
-      console.log(
-        `[Cache] Should show progress toast: ${shouldShowProgress} (cache empty: ${cachedMeetings.length === 0})`,
-      );
-
-      let progressToast: Toast | undefined;
-
       try {
-        if (shouldShowProgress) {
-          console.log("[Cache] Creating progress toast...");
-          progressToast = await showToast({
-            style: Toast.Style.Animated,
-            title: `Caching 1 of ${totalMeetings} meetings`,
-          });
-          console.log("[Cache] Progress toast created");
-        }
-
-        // Cache each meeting with its embedded summary and transcript
-        for (let i = 0; i < meetings.length; i++) {
-          const meeting = meetings[i];
-
-          await cacheMeeting(
-            meeting.recordingId,
-            meeting,
-            meeting.summaryText,
-            meeting.transcriptText,
-            meeting.actionItems,
-          );
-
-          // Update progress toast
-          if (progressToast) {
-            const current = i + 1;
-            progressToast.title = `Caching ${current} of ${totalMeetings} meetings`;
-          }
-        }
-
-        console.log(`[Cache] Finished caching ${totalMeetings} meetings`);
-
-        // Prune old entries to maintain cache size
-        await pruneCache(CACHE_SIZE);
-
-        // Reload cached meetings
-        const cached = await getAllCachedMeetings();
-        console.log(`[Cache] Reloaded cache, now have ${cached.length} meetings`);
+        setIsLoading(true);
+        const cached = await cacheManager.loadCache();
         setCachedMeetings(cached);
 
-        // Show success toast
-        if (progressToast) {
-          progressToast.style = Toast.Style.Success;
-          progressToast.title = `Cached ${totalMeetings} meetings`;
-          progressToast.message = "Full-text search now available";
-          console.log("[Cache] Updated toast to success");
+        // Only fetch from API if cache is empty or stale
+        if (cached.length === 0) {
+          console.log("[useCachedMeetings] Cache empty, fetching from API");
+          await cacheManager.fetchAndCache(filter);
+        } else {
+          console.log(`[useCachedMeetings] Using cached data (${cached.length} meetings)`);
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error("[Cache] Error caching meetings:", error);
-
-        if (progressToast) {
-          progressToast.style = Toast.Style.Failure;
-          progressToast.title = "Failed to cache meetings";
-          progressToast.message = error instanceof Error ? error.message : String(error);
-        }
+      } catch (err) {
+        console.error("[useCachedMeetings] Error loading cache:", err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+      } finally {
+        setIsLoading(false);
       }
     })();
-  }, [apiMeetingsData, enableCache, isCacheLoaded, cachedMeetings.length]);
+
+    // Cleanup: unsubscribe on unmount
+    return () => {
+      console.log("[useCachedMeetings] Unsubscribing from cache manager");
+      unsubscribe();
+    };
+  }, [filter, enableCache]);
 
   // Convert cached data to Meeting array
   const meetings: Meeting[] = cachedMeetings.map((cached) => {
@@ -209,32 +117,17 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
     if (!enableCache) return;
 
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Refreshing meetings...",
-      });
-
-      await refreshApi();
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Meetings refreshed",
-      });
+      await cacheManager.refreshCache(filter);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to refresh meetings",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      console.error("[useCachedMeetings] Error refreshing cache:", error);
+      setError(error instanceof Error ? error : new Error(String(error)));
     }
-  }, [enableCache, refreshApi]);
-
-  const isLoading = !isCacheLoaded || (isApiLoading && cachedMeetings.length === 0);
+  }, [enableCache, filter]);
 
   return {
     meetings,
     isLoading,
-    error: apiError,
+    error,
     searchMeetings,
     refreshCache,
   };

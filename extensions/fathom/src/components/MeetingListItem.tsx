@@ -7,6 +7,8 @@ import { useTeamColor } from "../hooks/useTeamColor";
 export function MeetingListItem({ meeting }: { meeting: Meeting }) {
   const createdDate = meeting.createdAt ? formatDate(meeting.createdAt) : "";
   const duration = meeting.durationSeconds ? formatDuration(meeting.durationSeconds) : "";
+
+  // Hash-based team colors - no API calls, instant and deterministic
   const teamColor = useTeamColor(meeting.recordedByTeam);
 
   return (

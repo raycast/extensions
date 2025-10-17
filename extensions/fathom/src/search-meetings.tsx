@@ -45,11 +45,8 @@ export default function Command() {
 
   // Filter and search meetings
   const { thisWeekMeetings, lastWeekMeetings, previousMonthMeetings, allFilteredMeetings } = useMemo(() => {
-    console.log(`[UI] Starting filter/search with ${cachedMeetings.length} cached meetings`);
-
     // Apply full-text search first
     let allMeetings = searchText ? searchMeetings(searchText) : cachedMeetings;
-    console.log(`[UI] After search: ${allMeetings.length} meetings`);
 
     // Then apply team filter
     if (filterType.startsWith("team:")) {
@@ -57,20 +54,15 @@ export default function Command() {
       allMeetings = allMeetings.filter(
         (meeting) => meeting.recordedByTeam === teamName || meeting.teamName === teamName,
       );
-      console.log(`[UI] After team filter (${teamName}): ${allMeetings.length} meetings`);
     }
 
     // Apply date filter for "all" view (for DISPLAY only, not for caching)
     if (filterType === "all") {
-      const beforeDateFilter = allMeetings.length;
       allMeetings = allMeetings.filter((meeting) => {
         const meetingDate = new Date(meeting.createdAt || meeting.startTimeISO);
         const meetingTime = meetingDate.getTime();
         return meetingTime >= ranges.previousMonth.start.getTime() && meetingTime <= ranges.thisWeek.end.getTime();
       });
-      console.log(
-        `[UI] After date filter: ${allMeetings.length} meetings (filtered out ${beforeDateFilter - allMeetings.length})`,
-      );
     }
 
     // If filtering is active, return all meetings sorted by date (newest first)
