@@ -712,11 +712,7 @@ export default function Command() {
                         onOpen={() => handleItemAction()}
                       />
                     )}
-                    <Action.CopyToClipboard
-                      content={tx.hash}
-                      title="Copy Hash"
-                      onCopy={() => handleItemAction()}
-                    />
+                    <Action.CopyToClipboard content={tx.hash} title="Copy Hash" onCopy={() => handleItemAction()} />
                     {chainExplorer && selectedExplorer?.chainId !== parseInt(tx.chainId, 10) && (
                       <Action
                         title={`Switch to ${chainExplorer.chainName}`}
