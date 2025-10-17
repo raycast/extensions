@@ -1,6 +1,6 @@
 # YouTube Changelog
 
-## [Chore: Updated README] - {PR_MERGE_DATE}
+## [Chore: Updated README] - 2025-10-17
 
 ## [Fix] - 2025-05-20
 
