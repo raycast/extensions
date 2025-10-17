@@ -129,7 +129,7 @@ const languages = {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const lang = preferences.language || "zh";
+  const lang = preferences.language || "en";
   const t = languages[lang as keyof typeof languages] || languages.zh;
 
   const [inputString, setInputString] = useState<string>("");
