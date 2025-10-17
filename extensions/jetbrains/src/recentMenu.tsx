@@ -25,10 +25,10 @@ export default function ProjectList(): React.JSX.Element {
         />
       </MenuBarExtra>
     );
-  } else if (!toolboxApp.isV2) {
+  } else if (!toolboxApp.isSupportedVersion) {
     return (
       <MenuBarExtra isLoading={isLoading} icon={menuIcon}>
-        <MenuBarExtra.Item title={"Wrong Jetbrains Toolbox version, please use V2"} />
+        <MenuBarExtra.Item title={"JetBrains Toolbox version 2.0 or higher required"} />
         <MenuBarExtra.Item title={`Current ToolBox version: ${toolboxApp.version}`} />
       </MenuBarExtra>
     );
