@@ -9,7 +9,7 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Default Model",
   prompt: "You are a useful assistant",
-  option: "claude-4-5-haiku-20251001",
+  option: "claude-haiku-4-5-20251001",
   temperature: "1",
   max_tokens: "4096",
   pinned: false,
@@ -17,7 +17,7 @@ export const DEFAULT_MODEL: Model = {
 
 // Fallback models in case API fetch fails
 const FALLBACK_OPTIONS: Model["option"][] = [
-  "claude-4-5-haiku-20251001",
+  "claude-haiku-4-5-20251001",
   "claude-sonnet-4-5-20250929",
   "claude-opus-4-1-20250805",
 ];

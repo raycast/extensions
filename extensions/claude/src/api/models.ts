@@ -22,9 +22,9 @@ const MODELS_CACHE_KEY = "available_models_cache";
 
 // Hardcoded fallback list in case API and cache both fail
 const FALLBACK_MODELS: AvailableModel[] = [
+  { id: "claude-haiku-4-5-20251001", display_name: "Claude Haiku 4.5", created_at: "2025-10-15T00:00:00Z" },
   { id: "claude-sonnet-4-5-20250929", display_name: "Claude Sonnet 4.5", created_at: "2025-09-29T00:00:00Z" },
   { id: "claude-opus-4-1-20250805", display_name: "Claude Opus 4.1", created_at: "2025-08-05T00:00:00Z" },
-  { id: "claude-3-5-haiku-20241022", display_name: "Claude Haiku 3.5", created_at: "2024-10-22T00:00:00Z" },
 ];
 
 /**
