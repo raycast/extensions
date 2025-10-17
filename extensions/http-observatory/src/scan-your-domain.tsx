@@ -13,12 +13,12 @@ import {
 } from "@raycast/api";
 
 import { useData } from "@/hooks/useData";
-import { useDomain } from "@/hooks/useDomain";
+import { extractDomain } from "@/hooks/useDomain";
 
 import { getReportMarkdown } from "@/lib";
 
 const Command = (props: LaunchProps<{ arguments: { url: string } }>) => {
-  const domain = useDomain(props.arguments.url);
+  const domain = extractDomain(props.arguments.url);
   const { data, error, isLoading, revalidate } = useData(domain);
 
   if (!domain) {
