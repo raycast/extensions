@@ -39,7 +39,7 @@ export default function Command() {
       await showToast(Toast.Style.Success, `Dock Control Mode set to: ${modeTitle}`);
       await closeMainWindow();
     } else {
-      console.error("Command failed:", { exitCode, stdout, stderr });
+      console.error("Command failed:", { exitCode: String(exitCode), stdout, stderr });
       await showFailureToast(stderr || "Unknown error", { title: `Failed with exit code ${exitCode}` });
       await closeMainWindow();
     }

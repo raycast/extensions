@@ -59,7 +59,7 @@ export default function Command() {
       const stdout = result.stdout?.toString().trim() ?? "";
       const stderr = result.stderr?.toString().trim() ?? "no stderr";
 
-      console.error(`Command 'move "${displayName}"' failed`, { exitCode, stdout, stderr });
+      console.error(`Command 'move "${displayName}"' failed`, { exitCode: String(exitCode), stdout, stderr });
       await showFailureToast(stderr, { title: `Failed to move Dock (exit code ${exitCode})` });
     }
   }

@@ -60,7 +60,11 @@ export default function Command() {
       const exitCode = result.status;
       const stdout = (result.stdout ?? "").toString().trim();
       const stderr = (result.stderr ?? "").toString().trim();
-      console.error(`Command 'allow --display "${displayName}" off' failed`, { exitCode, stdout, stderr });
+      console.error(`Command 'allow --display "${displayName}" off' failed`, {
+        exitCode: String(exitCode),
+        stdout,
+        stderr,
+      });
       await showFailureToast(stderr, { title: `Failed to disallow Dock (exit code ${exitCode})` });
     }
   }

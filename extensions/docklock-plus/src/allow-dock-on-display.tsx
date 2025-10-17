@@ -66,7 +66,7 @@ export default function Command() {
       const stderr = result.stderr?.trim() || "Unknown error";
       const exitCode = result.status ?? "unknown";
       console.error(`Command 'allow --display "${displayName}" on' failed`, {
-        exitCode,
+        exitCode: String(exitCode),
         stdout: result.stdout?.trim(),
         stderr,
       });
