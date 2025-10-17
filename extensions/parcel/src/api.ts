@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
 
 interface Preferences {
   apiKey: string;
@@ -57,18 +57,21 @@ export function getStatusDescription(statusCode: number): string {
   return STATUS_DESCRIPTIONS[statusCode] || "Unknown Status";
 }
 
-// Map status codes to icons
-export const STATUS_ICONS: Record<number, string> = {
-  0: "✅",
-  1: "❄️",
-  2: "🚚",
-  3: "📦",
-  4: "🚚",
-  5: "❓",
-  6: "⚠️",
-  7: "⛔️",
-  8: "ℹ️",
+const STATUS_ICONS: Record<number, Icon> = {
+  0: Icon.CheckCircle,
+  1: Icon.Snowflake,
+  2: Icon.Lorry,
+  3: Icon.Box,
+  4: Icon.Lorry,
+  5: Icon.QuestionMark,
+  6: Icon.Warning,
+  7: Icon.ExclamationMark,
+  8: Icon.Dot,
 };
+
+export function getStatusIcon(statusCode: number): Icon {
+  return STATUS_ICONS[statusCode] || Icon.QuestionMark;
+}
 
 export function getApiKey(): string {
   const preferences = getPreferenceValues<Preferences>();
@@ -78,6 +81,30 @@ export function getApiKey(): string {
   }
 
   return preferences.apiKey;
+}
+
+function getSystemLanguage(): string {
+  try {
+    const locale = new Intl.DateTimeFormat().resolvedOptions().locale;
+    const languageCode = locale.split("-")[0].toLowerCase();
+    if (languageCode && languageCode.length >= 2) {
+      return languageCode;
+    }
+  } catch {
+    // Could not get language from Intl.DateTimeFormat().resolvedOptions().locale
+  }
+
+  // Fallback to LC_ALL environment variable
+  const langVar = process.env.LC_ALL;
+  if (langVar) {
+    const languageCode = langVar.split(".")[0].split("_")[0].toLowerCase();
+    if (languageCode && languageCode.length >= 2) {
+      return languageCode;
+    }
+  }
+
+  // Final fallback to English
+  return "en";
 }
 
 export function getDeliveriesUrl(filterMode: FilterMode): string {
@@ -139,7 +166,7 @@ export async function addDelivery(trackingNumber: string, carrierCode: string, d
       tracking_number: trackingNumber,
       carrier_code: carrierCode,
       description: description,
-      language: "en",
+      language: getSystemLanguage(),
     }),
   });
 
