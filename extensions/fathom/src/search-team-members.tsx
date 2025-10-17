@@ -82,7 +82,11 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Person}
           title="No Team Members Found"
-          description={query ? `No team members match "${query}"` : "Your team members will appear here"}
+          description={
+            query
+              ? `No team members match "${query}"`
+              : "You may not be on a team, or your organization may not have teams set up."
+          }
         />
       ) : (
         Array.from(groupedMembers.entries()).map(([teamName, members]) => (

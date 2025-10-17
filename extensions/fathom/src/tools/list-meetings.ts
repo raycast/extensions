@@ -1,6 +1,7 @@
 import { listMeetings } from "../fathom/api";
-import { getAllCachedMeetings, searchCachedMeetings } from "../utils/cache";
+import { searchCachedMeetings, getAllCachedMeetings } from "../utils/cache";
 import type { Meeting } from "../types/Types";
+import { logger } from "../utils/logger";
 
 type Input = {
   /**
@@ -175,7 +176,7 @@ export default async function tool(input: Input = {}) {
       url: meeting.url,
     }));
   } catch (error) {
-    console.error("Error listing meetings:", error);
+    logger.error("Error listing meetings:", error);
     throw new Error(`Failed to list meetings: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

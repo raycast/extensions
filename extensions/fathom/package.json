@@ -80,6 +80,15 @@
       "title": "Export Directory",
       "description": "Directory for exported summaries and transcripts",
       "default": "~/Downloads"
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Verbose Logging",
+      "description": "Enable detailed console logging for debugging purposes",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
     }
   ]
 }

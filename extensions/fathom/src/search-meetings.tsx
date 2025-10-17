@@ -1,12 +1,13 @@
-import { List, Icon, Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Detail, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
-import { listTeams, getMeetingSummary, getMeetingTranscript } from "./fathom/api";
+import { useState, useMemo } from "react";
 import type { Meeting } from "./types/Types";
+import { getMeetingSummary, getMeetingTranscript, listTeams } from "./fathom/api";
 import { MeetingDetailActions } from "./actions/MeetingActions";
+import { useCachedMeetings } from "./hooks/useCachedMeetings";
+import { getUserFriendlyError } from "./utils/errorHandling";
 import { MeetingListItem } from "./components/MeetingListItem";
 import { getDateRanges } from "./utils/dates";
-import { useCachedMeetings } from "./hooks/useCachedMeetings";
 
 export default function Command() {
   const [filterType, setFilterType] = useState<string>("all");
@@ -237,10 +238,11 @@ export function MeetingSummaryDetail({ meeting, recordingId }: { meeting: Meetin
     error,
   } = useCachedPromise(async (id: string) => getMeetingSummary(id), [recordingId], {
     onError: (err) => {
+      const { message } = getUserFriendlyError(err);
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load summary",
-        message: err instanceof Error ? err.message : String(err),
+        title: "Failed to Load Summary",
+        message: message,
       });
     },
   });
@@ -304,10 +306,11 @@ export function MeetingTranscriptDetail({ meeting, recordingId }: { meeting: Mee
     error,
   } = useCachedPromise(async (id: string) => getMeetingTranscript(id), [recordingId], {
     onError: (err) => {
+      const { message } = getUserFriendlyError(err);
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load transcript",
-        message: err instanceof Error ? err.message : String(err),
+        title: "Failed to Load Transcript",
+        message: message,
       });
     },
   });

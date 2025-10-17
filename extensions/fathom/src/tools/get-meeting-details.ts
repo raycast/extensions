@@ -1,6 +1,7 @@
 import { getMeetingSummary, getMeetingTranscript, listMeetings } from "../fathom/api";
 import { getCachedMeeting, cacheMeeting } from "../utils/cache";
 import type { Meeting } from "../types/Types";
+import { logger } from "../utils/logger";
 
 type Input = {
   /**
@@ -91,7 +92,7 @@ export default async function tool(input: Input) {
         const summaryResult = await getMeetingSummary(meetingId);
         summary = summaryResult.text;
       } catch (error) {
-        console.warn("Could not fetch summary:", error);
+        logger.warn("Could not fetch summary:", error);
       }
 
       // Fetch transcript if requested
@@ -100,7 +101,7 @@ export default async function tool(input: Input) {
           const transcriptResult = await getMeetingTranscript(meetingId);
           transcript = transcriptResult.text;
         } catch (error) {
-          console.warn("Could not fetch transcript:", error);
+          logger.warn("Could not fetch transcript:", error);
         }
       }
 
@@ -143,7 +144,7 @@ export default async function tool(input: Input) {
 
     return response;
   } catch (error) {
-    console.error("Error getting meeting details:", error);
+    logger.error("Error getting meeting details:", error);
     throw new Error(`Failed to get meeting details: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

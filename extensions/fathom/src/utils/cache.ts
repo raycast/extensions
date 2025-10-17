@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import crypto from "crypto";
+import { logger } from "./logger";
 
 /**
  * Cache configuration for different data types
@@ -110,7 +111,7 @@ export async function getCachedMeeting(meetingId: string): Promise<CachedMeeting
 
     return data;
   } catch (error) {
-    console.error("Error reading cached meeting:", error);
+    logger.error("Error reading cached meeting:", error);
     return null;
   }
 }
@@ -129,7 +130,7 @@ async function updateMeetingIndex(meetingId: string): Promise<void> {
       await LocalStorage.setItem(CACHE_CONFIG.MEETINGS.INDEX_KEY, JSON.stringify(index));
     }
   } catch (error) {
-    console.error("Error updating meeting index:", error);
+    logger.error("Error updating meeting index:", error);
   }
 }
 
@@ -144,7 +145,7 @@ export async function getCachedMeetingIds(): Promise<string[]> {
     const index: CachedMeetingIndex = JSON.parse(indexData);
     return index.meetingIds;
   } catch (error) {
-    console.error("Error reading meeting index:", error);
+    logger.error("Error reading meeting index:", error);
     return [];
   }
 }
@@ -204,7 +205,7 @@ export async function pruneCache(keepCount: number = 50): Promise<void> {
     index.lastUpdated = Date.now();
     await LocalStorage.setItem(CACHE_CONFIG.MEETINGS.INDEX_KEY, JSON.stringify(index));
   } catch (error) {
-    console.error("Error pruning cache:", error);
+    logger.error("Error pruning cache:", error);
   }
 }
 
@@ -230,7 +231,7 @@ export async function updateCacheMetadata(): Promise<void> {
 
     await LocalStorage.setItem(CACHE_CONFIG.METADATA.KEY, JSON.stringify(metadata));
   } catch (error) {
-    console.error("Error updating cache metadata:", error);
+    logger.error("Error updating cache metadata:", error);
   }
 }
 
@@ -242,7 +243,7 @@ export async function getCacheMetadata(): Promise<CacheMetadata | null> {
     const data = await LocalStorage.getItem<string>(CACHE_CONFIG.METADATA.KEY);
     return data ? JSON.parse(data) : null;
   } catch (error) {
-    console.error("Error reading cache metadata:", error);
+    logger.error("Error reading cache metadata:", error);
     return null;
   }
 }
@@ -261,7 +262,7 @@ export async function clearAllCache(): Promise<void> {
     await LocalStorage.removeItem(CACHE_CONFIG.MEETINGS.INDEX_KEY);
     await LocalStorage.removeItem(CACHE_CONFIG.METADATA.KEY);
   } catch (error) {
-    console.error("Error clearing cache:", error);
+    logger.error("Error clearing cache:", error);
   }
 }
 

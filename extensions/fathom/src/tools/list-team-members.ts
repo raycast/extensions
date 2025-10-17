@@ -1,5 +1,6 @@
 import { listTeamMembers, listTeams } from "../fathom/api";
 import type { TeamMember } from "../types/Types";
+import { logger } from "../utils/logger";
 
 type Input = {
   /**
@@ -79,7 +80,7 @@ export default async function tool(input: Input = {}) {
       nextCursor: result.nextCursor,
     };
   } catch (error) {
-    console.error("Error listing team members:", error);
+    logger.error("Error listing team members:", error);
     throw new Error(`Failed to list team members: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

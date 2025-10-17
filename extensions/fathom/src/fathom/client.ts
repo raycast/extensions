@@ -19,7 +19,7 @@ export function getFathomClient(): Fathom {
   const { fathomApiKey } = getPreferenceValues<Preferences>();
 
   if (!fathomApiKey || fathomApiKey.trim() === "") {
-    throw new Error("Fathom API Key is not set. Please configure it in Extension Preferences.");
+    throw new Error("API_KEY_MISSING: Fathom API Key is not set. Please configure it in Extension Preferences.");
   }
 
   cachedClient = new Fathom({
@@ -45,7 +45,7 @@ export function getApiKey(): string {
   const { fathomApiKey } = getPreferenceValues<Preferences>();
 
   if (!fathomApiKey || fathomApiKey.trim() === "") {
-    throw new Error("Fathom API Key is not set. Please configure it in Extension Preferences.");
+    throw new Error("API_KEY_MISSING: Fathom API Key is not set. Please configure it in Extension Preferences.");
   }
 
   return fathomApiKey;

@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Icon, LaunchType, launchCommand, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import type { Team, TeamMember } from "../types/Types";
 import { exportTeamMembers } from "../utils/export";
+import { showContextualError } from "../utils/errorHandling";
 
 /**
  * Displays an action panel with various actions related to the given team.
@@ -53,10 +54,9 @@ export function TeamActions(props: {
         },
       );
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to open meetings",
-        message: error instanceof Error ? error.message : String(error),
+      await showContextualError(error, {
+        action: "open meetings",
+        fallbackTitle: "Failed to Open Meetings",
       });
     }
   };

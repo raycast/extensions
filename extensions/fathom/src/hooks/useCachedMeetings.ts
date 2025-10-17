@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { MeetingFilter, Meeting, ActionItem } from "../types/Types";
 import { searchCachedMeetings, type CachedMeetingData } from "../utils/cache";
 import { cacheManager } from "../utils/cacheManager";
+import { logger } from "../utils/logger";
 
 interface UseCachedMeetingsOptions {
   filter?: MeetingFilter;
@@ -39,11 +40,11 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       return;
     }
 
-    console.log("[useCachedMeetings] Subscribing to cache manager");
+    logger.debug("[useCachedMeetings] Subscribing to cache manager");
 
     // Subscribe to cache updates
     const unsubscribe = cacheManager.subscribe((meetings) => {
-      console.log(`[useCachedMeetings] Received cache update: ${meetings.length} meetings`);
+      logger.debug(`[useCachedMeetings] Received cache update: ${meetings.length} meetings`);
       setCachedMeetings(meetings);
       setIsLoading(false);
     });
@@ -57,14 +58,14 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
         // Only fetch from API if cache is empty or stale
         if (cached.length === 0) {
-          console.log("[useCachedMeetings] Cache empty, fetching from API");
+          logger.debug("[useCachedMeetings] Cache empty, fetching from API");
           await cacheManager.fetchAndCache(filter);
         } else {
-          console.log(`[useCachedMeetings] Using cached data (${cached.length} meetings)`);
+          logger.debug(`[useCachedMeetings] Using cached data (${cached.length} meetings`);
           setIsLoading(false);
         }
       } catch (err) {
-        console.error("[useCachedMeetings] Error loading cache:", err);
+        logger.error("[useCachedMeetings] Error loading cache:", err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
@@ -73,7 +74,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
     // Cleanup: unsubscribe on unmount
     return () => {
-      console.log("[useCachedMeetings] Unsubscribing from cache manager");
+      logger.debug("[useCachedMeetings] Unsubscribing from cache manager");
       unsubscribe();
     };
   }, [filter, enableCache]);
@@ -119,7 +120,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
     try {
       await cacheManager.refreshCache(filter);
     } catch (error) {
-      console.error("[useCachedMeetings] Error refreshing cache:", error);
+      logger.error("[useCachedMeetings] Error refreshing cache:", error);
       setError(error instanceof Error ? error : new Error(String(error)));
     }
   }, [enableCache, filter]);

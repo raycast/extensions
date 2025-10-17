@@ -13,6 +13,8 @@ import { listMeetings } from "../fathom/api";
 import type { MeetingFilter, Meeting } from "../types/Types";
 import { cacheMeeting, getAllCachedMeetings, pruneCache, type CachedMeetingData } from "./cache";
 import { globalQueue } from "./requestQueue";
+import { showContextualError } from "./errorHandling";
+import { logger } from "./logger";
 
 const CACHE_SIZE = 50; // Keep most recent 50 meetings
 
@@ -33,7 +35,7 @@ class CacheManager {
    */
   subscribe(listener: CacheListener): () => void {
     this.listeners.add(listener);
-    console.log(`[CacheManager] Subscriber added (total: ${this.listeners.size})`);
+    logger.debug(`[CacheManager] Subscriber added (total: ${this.listeners.size})`);
 
     // Immediately notify with current data if loaded
     if (this.isLoaded) {
@@ -43,7 +45,7 @@ class CacheManager {
     // Return unsubscribe function
     return () => {
       this.listeners.delete(listener);
-      console.log(`[CacheManager] Subscriber removed (total: ${this.listeners.size})`);
+      logger.debug(`[CacheManager] Subscriber removed (total: ${this.listeners.size})`);
     };
   }
 
@@ -51,7 +53,7 @@ class CacheManager {
    * Notify all listeners of cache updates
    */
   private notifyListeners(): void {
-    console.log(`[CacheManager] Notifying ${this.listeners.size} listeners`);
+    logger.debug(`[CacheManager] Notifying ${this.listeners.size} listeners`);
     this.listeners.forEach((listener) => listener(this.cachedMeetings));
   }
 
@@ -60,13 +62,13 @@ class CacheManager {
    */
   async loadCache(): Promise<CachedMeetingData[]> {
     if (this.isLoaded) {
-      console.log(`[CacheManager] Cache already loaded (${this.cachedMeetings.length} meetings)`);
+      logger.debug(`[CacheManager] Cache already loaded (${this.cachedMeetings.length} meetings)`);
       return this.cachedMeetings;
     }
 
     // Prevent concurrent loads
     if (this.isLoading) {
-      console.log("[CacheManager] Cache load already in progress, waiting...");
+      logger.debug("[CacheManager] Cache load already in progress, waiting...");
       // Wait for the current load to complete
       while (this.isLoading) {
         await new Promise((resolve) => setTimeout(resolve, 50));
@@ -77,15 +79,15 @@ class CacheManager {
     this.isLoading = true;
 
     try {
-      console.log("[CacheManager] Loading cache from storage...");
+      logger.debug("[CacheManager] Loading cache from storage...");
       const cached = await getAllCachedMeetings();
       this.cachedMeetings = cached;
       this.isLoaded = true;
-      console.log(`[CacheManager] Loaded ${cached.length} cached meetings`);
+      logger.debug(`[CacheManager] Loaded ${cached.length} cached meetings`);
       this.notifyListeners();
       return cached;
     } catch (error) {
-      console.error("[CacheManager] Error loading cache:", error);
+      logger.error("[CacheManager] Error loading cache:", error);
       this.isLoaded = true;
       return [];
     } finally {
@@ -102,7 +104,7 @@ class CacheManager {
     const timeSinceLastFetch = now - this.lastFetchTime;
 
     if (timeSinceLastFetch < this.FETCH_COOLDOWN) {
-      console.log(
+      logger.debug(
         `[CacheManager] Fetch cooldown active (${Math.round((this.FETCH_COOLDOWN - timeSinceLastFetch) / 1000)}s remaining), using cached data`,
       );
       return this.cachedMeetings.map((cached) => cached.meeting as Meeting);
@@ -112,7 +114,7 @@ class CacheManager {
     const filterKey = JSON.stringify(filter);
     const requestKey = `fetch-meetings:${filterKey}`;
 
-    console.log(`[CacheManager] Fetch request for filter: ${filterKey}`);
+    logger.debug(`[CacheManager] Fetch request for filter: ${filterKey}`);
 
     // Update last fetch time
     this.lastFetchTime = now;
@@ -121,7 +123,7 @@ class CacheManager {
     const result = await globalQueue.enqueue(
       requestKey,
       async () => {
-        console.log(`[CacheManager] Executing API call for: ${filterKey}`);
+        logger.debug(`[CacheManager] Executing API call for: ${filterKey}`);
         const apiResult = await listMeetings(filter);
 
         // Cache the results
@@ -146,12 +148,12 @@ class CacheManager {
       .join(",");
 
     if (this.lastApiDataHash === dataHash) {
-      console.log("[CacheManager] Skipping cache - same data already processed");
+      logger.debug("[CacheManager] Skipping cache - same data already processed");
       return;
     }
 
     if (this.isCaching) {
-      console.log("[CacheManager] Skipping cache - already caching");
+      logger.debug("[CacheManager] Skipping cache - already caching");
       return;
     }
 
@@ -160,7 +162,7 @@ class CacheManager {
 
     try {
       const totalMeetings = meetings.length;
-      console.log(`[CacheManager] Caching ${totalMeetings} meetings`);
+      logger.debug(`[CacheManager] Caching ${totalMeetings} meetings`);
 
       // Only show progress toast if cache was empty and we have meetings to cache
       const shouldShowProgress = this.cachedMeetings.length === 0 && totalMeetings > 0;
@@ -198,7 +200,7 @@ class CacheManager {
       // Reload cached meetings
       const cached = await getAllCachedMeetings();
       this.cachedMeetings = cached;
-      console.log(`[CacheManager] Cache updated, now have ${cached.length} meetings`);
+      logger.debug(`[CacheManager] Cache updated, now have ${cached.length} meetings`);
 
       // Notify all subscribers
       this.notifyListeners();
@@ -210,7 +212,7 @@ class CacheManager {
         progressToast.message = "Full-text search now available";
       }
     } catch (error) {
-      console.error("[CacheManager] Error caching meetings:", error);
+      logger.error("[CacheManager] Error caching meetings:", error);
       throw error;
     } finally {
       this.isCaching = false;
@@ -237,10 +239,9 @@ class CacheManager {
         title: "Meetings refreshed",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to refresh meetings",
-        message: error instanceof Error ? error.message : String(error),
+      await showContextualError(error, {
+        action: "refresh meetings",
+        fallbackTitle: "Failed to Refresh Meetings",
       });
       throw error;
     }

@@ -13,6 +13,7 @@ import { isNumber, toStringOrUndefined } from "../utils/typeGuards";
 import { convertSDKMeeting, convertSDKTeam, convertSDKTeamMember, mapRecordingFromMeeting } from "../utils/converters";
 import { formatTranscriptToMarkdown } from "../utils/formatting";
 import { parseTimestamp } from "../utils/dates";
+import { logger } from "../utils/logger";
 
 const BASE = "https://api.fathom.ai/external/v1";
 
@@ -42,12 +43,12 @@ function getRetryDelay(attempt: number): number {
 async function authGet<T>(path: string, retryCount = 0): Promise<T> {
   const apiKey = getApiKey();
   if (!apiKey || apiKey.trim() === "") {
-    throw new Error("Fathom API Key is not set. Please configure it in Extension Preferences.");
+    throw new Error("API_KEY_MISSING: Fathom API Key is not set. Please configure it in Extension Preferences.");
   }
 
   // Log every API call with stack trace to identify caller
   const caller = new Error().stack?.split("\n")[2]?.trim() || "unknown";
-  console.log(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) - Called from: ${caller}`);
+  logger.debug(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) - Called from: ${caller}`);
 
   const res = await fetch(`${BASE}${path}`, {
     method: "GET",
@@ -59,14 +60,14 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
 
   if (!res.ok) {
     if (res.status === 401) {
-      throw new Error("Invalid API Key. Please check your Fathom API Key in Extension Preferences.");
+      throw new Error("API_KEY_INVALID: Invalid API Key. Please check your Fathom API Key in Extension Preferences.");
     }
 
     // Handle rate limiting with exponential backoff
     if (res.status === 429) {
       if (retryCount < MAX_RETRIES) {
         const retryDelay = getRetryDelay(retryCount);
-        console.log(
+        logger.warn(
           `[API] ⚠️  RATE LIMITED on ${path} - Retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})\n` +
             `      Called from: ${caller}`,
         );
@@ -74,24 +75,34 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
         return authGet<T>(path, retryCount + 1);
       }
       // After max retries, throw a more informative error
-      console.error(`[API] ❌ RATE LIMIT EXCEEDED on ${path} after ${MAX_RETRIES} retries`);
+      logger.error(`[API] ❌ RATE LIMIT EXCEEDED on ${path} after ${MAX_RETRIES} retries`);
       throw new Error(
-        "Rate limit exceeded after multiple retries. The Fathom API is temporarily unavailable. Please try again in a few moments.",
+        "RATE_LIMIT: Rate limit exceeded after multiple retries. The Fathom API is temporarily unavailable. Please try again in a few moments.",
       );
     }
 
-    throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    // Handle other HTTP errors with user-friendly messages
+    if (res.status === 404) {
+      throw new Error(`NOT_FOUND: The requested resource was not found.`);
+    }
+    if (res.status === 403) {
+      throw new Error(`PERMISSION: You don't have permission to access this resource.`);
+    }
+    if (res.status >= 500) {
+      throw new Error(`NETWORK: Fathom service is temporarily unavailable. Please try again later.`);
+    }
+    throw new Error(`NETWORK: Unable to connect to Fathom (HTTP ${res.status}).`);
   }
 
   const data = (await res.json()) as unknown;
-  console.log(`[API] ✅ Success ${path}`);
+  logger.debug(`[API] ✅ Success ${path}`);
   return data as T;
 }
 
 // API functions
 export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Meeting>> {
-  console.log(`[API] 📋 listMeetings called with filter:`, filter);
-  console.log(`[API] 🔵 Calling Fathom SDK client.listMeetings()...`);
+  logger.debug(`[API] 📋 listMeetings called with filter:`, filter);
+  logger.debug(`[API] 🔵 Calling Fathom SDK client.listMeetings()...`);
   try {
     const client = getFathomClient();
 
@@ -120,7 +131,7 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
       return await listMeetingsHTTP(filter);
     }
     // For other errors, log and fallback
-    console.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
+    logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listMeetingsHTTP(filter);
   }
 }
@@ -348,7 +359,7 @@ export async function listRecentRecordings(
 }
 
 export async function getMeetingSummary(recordingId: string): Promise<Summary> {
-  console.log(`[API] 📝 getMeetingSummary called for recordingId: ${recordingId}`);
+  logger.debug(`[API] 📝 getMeetingSummary called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/summary`);
 
   if (typeof resp !== "object" || resp === null) {
@@ -371,7 +382,7 @@ export async function getMeetingSummary(recordingId: string): Promise<Summary> {
 }
 
 export async function getMeetingTranscript(recordingId: string): Promise<Transcript> {
-  console.log(`[API] 📄 getMeetingTranscript called for recordingId: ${recordingId}`);
+  logger.debug(`[API] 📄 getMeetingTranscript called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/transcript`);
 
   if (typeof resp !== "object" || resp === null) {
@@ -422,8 +433,8 @@ export async function getMeetingTranscript(recordingId: string): Promise<Transcr
 export async function listTeams(
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<Team>> {
-  console.log(`[API] 👥 listTeams called with args:`, args);
-  console.log(`[API] 🔵 Calling Fathom SDK client.listTeams()...`);
+  logger.debug(`[API] 👥 listTeams called with args:`, args);
+  logger.debug(`[API] 🔵 Calling Fathom SDK client.listTeams()...`);
   try {
     const client = getFathomClient();
 
@@ -440,7 +451,7 @@ export async function listTeams(
     if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
       return await listTeamsHTTP(args);
     }
-    console.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
+    logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listTeamsHTTP(args);
   }
 }
@@ -449,7 +460,7 @@ export async function listTeams(
 async function listTeamsHTTP(
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<Team>> {
-  console.log(`[API] 👥 listTeamsHTTP called with args:`, args);
+  logger.debug(`[API] 👥 listTeamsHTTP called with args:`, args);
   const params: string[] = [];
   if (args.cursor) params.push(`cursor=${encodeURIComponent(args.cursor)}`);
 
@@ -490,15 +501,20 @@ export async function listTeamMembers(
   teamId?: string,
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<TeamMember>> {
-  console.log(`[API] 👤 listTeamMembers called for teamId: ${teamId} with args:`, args);
-  console.log(`[API] 🔵 Calling Fathom SDK client.listTeamMembers()...`);
+  logger.debug(`[API] 👤 listTeamMembers called for teamId: ${teamId} with args:`, args);
+  logger.debug(`[API] 🔵 Calling Fathom SDK client.listTeamMembers()...`);
   try {
     const client = getFathomClient();
 
-    const response = await client.listTeamMembers({
+    // Build request params, only include team if it's defined
+    const requestParams: { cursor?: string; team?: string } = {
       cursor: args.cursor,
-      team: teamId,
-    });
+    };
+    if (teamId) {
+      requestParams.team = teamId;
+    }
+
+    const response = await client.listTeamMembers(requestParams);
 
     const items = response.items.map((tm) => convertSDKTeamMember(tm, teamId));
     const nextCursor = response.nextCursor || undefined;
@@ -509,7 +525,7 @@ export async function listTeamMembers(
     if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
       return await listTeamMembersHTTP(teamId, args);
     }
-    console.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
+    logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listTeamMembersHTTP(teamId, args);
   }
 }

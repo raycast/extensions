@@ -8,6 +8,8 @@
  * - Request prioritization
  */
 
+import { logger } from "./logger";
+
 interface QueuedRequest<T> {
   key: string;
   priority: number;
@@ -35,7 +37,7 @@ class RequestQueue {
     // Check if request is already in flight
     const existing = this.inFlight.get(key);
     if (existing) {
-      console.log(`[Queue] Deduplicating request: ${key}`);
+      logger.debug(`[Queue] Deduplicating request: ${key}`);
       return existing.promise as Promise<T>;
     }
 
@@ -53,7 +55,7 @@ class RequestQueue {
       this.queue.push(request as QueuedRequest<unknown>);
       this.queue.sort((a, b) => b.priority - a.priority);
 
-      console.log(`[Queue] Enqueued request: ${key} (priority: ${priority}, queue size: ${this.queue.length})`);
+      logger.debug(`[Queue] Enqueued request: ${key} (priority: ${priority}, queue size: ${this.queue.length})`);
 
       // Start processing if not already running
       this.processQueue();
@@ -97,17 +99,17 @@ class RequestQueue {
   private executeRequest<T>(request: QueuedRequest<T>): void {
     const { key, execute, resolve, reject } = request;
 
-    console.log(`[Queue] Executing request: ${key} (in-flight: ${this.inFlight.size}/${this.maxConcurrent})`);
+    logger.debug(`[Queue] Executing request: ${key} (in-flight: ${this.inFlight.size}/${this.maxConcurrent})`);
 
     const promise = execute()
       .then((result) => {
-        console.log(`[Queue] Completed request: ${key}`);
+        logger.debug(`[Queue] Completed request: ${key}`);
         this.inFlight.delete(key);
         resolve(result);
         return result;
       })
       .catch((error) => {
-        console.error(`[Queue] Failed request: ${key}`, error);
+        logger.error(`[Queue] Failed request: ${key}`, error);
         this.inFlight.delete(key);
         reject(error);
         throw error;
@@ -124,7 +126,7 @@ class RequestQueue {
    * Clear all pending requests (useful for cleanup)
    */
   clear(): void {
-    console.log(`[Queue] Clearing queue (${this.queue.length} pending, ${this.inFlight.size} in-flight)`);
+    logger.debug(`[Queue] Clearing queue (${this.queue.length} pending, ${this.inFlight.size} in-flight)`);
     this.queue = [];
     // Don't clear in-flight requests - let them complete
   }
@@ -145,7 +147,7 @@ class RequestQueue {
    */
   setMaxConcurrent(max: number): void {
     this.maxConcurrent = Math.max(1, max);
-    console.log(`[Queue] Max concurrent requests set to: ${this.maxConcurrent}`);
+    logger.debug(`[Queue] Max concurrent requests set to: ${this.maxConcurrent}`);
   }
 }
 

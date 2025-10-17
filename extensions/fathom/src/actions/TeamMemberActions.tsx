@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, showToast, Toast, environment } from "@rayca
 import type { TeamMember } from "../types/Types";
 import { exportAsVCard, exportTeamMembers } from "../utils/export";
 import MemberMeetingsView from "../views/MemberMeetingsView";
+import { showContextualError } from "../utils/errorHandling";
 import path from "path";
 import fs from "fs";
 
@@ -32,10 +33,9 @@ export function TeamMemberActions(props: {
         message: `Saved ${filename}`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Export Failed",
-        message: error instanceof Error ? error.message : String(error),
+      await showContextualError(error, {
+        action: "export member details",
+        fallbackTitle: "Export Failed",
       });
     }
   };
@@ -60,10 +60,9 @@ export function TeamMemberActions(props: {
         message: `Saved ${filename}`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Export Failed",
-        message: error instanceof Error ? error.message : String(error),
+      await showContextualError(error, {
+        action: "export member details",
+        fallbackTitle: "Export Failed",
       });
     }
   };

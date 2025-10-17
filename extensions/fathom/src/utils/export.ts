@@ -4,6 +4,8 @@ import os from "os";
 import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { getMeetingSummary, getMeetingTranscript } from "../fathom/api";
 import type { Meeting } from "../types/Types";
+import { showContextualError } from "./errorHandling";
+import { logger } from "./logger";
 
 export type MeetingExportFormat = "txt" | "md" | "json";
 export type MeetingExportType = "transcript" | "summary";
@@ -27,18 +29,36 @@ export function buildFilename(opts: {
 
 /**
  * Get the export directory from preferences or use default
+ * Validates path to prevent directory traversal attacks
  */
 function getExportDirectory(): string {
   const preferences = getPreferenceValues<Preferences>();
-  const exportDir = preferences.exportDirectory;
+  let exportDir = preferences.exportDirectory;
 
-  if (exportDir) {
-    // Expand ~ to home directory
-    return exportDir.startsWith("~") ? path.join(os.homedir(), exportDir.slice(1)) : exportDir;
+  if (!exportDir) {
+    return path.join(os.homedir(), "Downloads");
   }
 
-  // Default to ~/Downloads
-  return path.join(os.homedir(), "Downloads");
+  // Expand ~ to home directory
+  if (exportDir.startsWith("~")) {
+    exportDir = path.join(os.homedir(), exportDir.slice(1));
+  }
+
+  // Normalize and validate path is safe
+  const normalizedPath = path.normalize(exportDir);
+  const resolvedPath = path.resolve(normalizedPath);
+  const homeDir = os.homedir();
+
+  // Ensure path is within safe locations
+  const safeLocations = [homeDir, "/tmp", "/var/tmp"];
+  const isPathSafe = safeLocations.some((safe) => resolvedPath.startsWith(path.resolve(safe)));
+
+  if (!isPathSafe) {
+    logger.warn(`Unsafe export directory: ${resolvedPath}, using default`);
+    return path.join(homeDir, "Downloads");
+  }
+
+  return resolvedPath;
 }
 
 /**
@@ -225,10 +245,9 @@ export async function exportMeeting(args: {
       },
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Export Failed",
-      message: error instanceof Error ? error.message : String(error),
+    await showContextualError(error, {
+      action: "export meeting",
+      fallbackTitle: "Export Failed",
     });
   }
 }
@@ -328,10 +347,9 @@ export async function exportTeamMembers(args: {
       },
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Export Failed",
-      message: error instanceof Error ? error.message : String(error),
+    await showContextualError(error, {
+      action: "export team members",
+      fallbackTitle: "Export Failed",
     });
   }
 }
