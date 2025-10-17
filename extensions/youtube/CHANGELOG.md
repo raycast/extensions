@@ -1,5 +1,7 @@
 # YouTube Changelog
 
+## [Chore: Updated README] - {PR_MERGE_DATE}
+
 ## [Fix] - 2025-05-20
 
 - Fixed missing call to add recent video when opening with IINA from video details
