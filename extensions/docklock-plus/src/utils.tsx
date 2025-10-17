@@ -58,12 +58,8 @@ export async function getStatus(): Promise<DockLockStatus | null> {
 }
 
 export function isDockLockPlusInstalled(): boolean {
-  try {
-    spawnSync("open", ["-Ra", "DockLock Plus"]);
-    return true;
-  } catch {
-    return false;
-  }
+  const result = spawnSync("open", ["-Ra", "DockLock Plus"]);
+  return result.status === 0;
 }
 
 export async function isDockMovable(): Promise<boolean> {
