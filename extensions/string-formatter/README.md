@@ -1,8 +1,8 @@
 # String Formatter - Raycast Extension
 
-![String Formatter Demo](assets/show.png)
+![String Formatter Demo](metadata/string-formatter-1.png)
 
-A powerful string formatting Raycast extension with intelligent separator detection, character removal, custom decorators, and output formatting. Supports both Chinese and English interfaces.
+A powerful string formatting Raycast extension with intelligent separator detection, character removal, custom decorators, and output formatting.
 
 ## 🚀 Features
 
@@ -20,7 +20,6 @@ A powerful string formatting Raycast extension with intelligent separator detect
 - 📋 **One-click Copy**: Quick copy of formatted results to clipboard
 
 ### User Experience
-- 🌐 **Multi-language Support**: Chinese and English interfaces
 - 🎯 **Smart Interface**: Clear separation between input and output areas with dividers
 - ⚠️ **Error Handling**: Friendly error messages and exception handling
 - ⌨️ **Keyboard Shortcuts**: Convenient keyboard operations
@@ -64,15 +63,6 @@ A powerful string formatting Raycast extension with intelligent separator detect
 **Deduplication**: ✅ Enabled
 **Output**: `"apple","banana","cherry"`
 
-## 🌐 Language Support
-
-The extension supports both Chinese and English interfaces:
-
-1. Open Raycast preferences
-2. Navigate to Extensions → String Formatter
-3. Select your preferred language:
-   - **中文 (Chinese)**: Default Chinese interface
-   - **English**: English interface
 
 ## ⌨️ Keyboard Shortcuts
 
@@ -106,55 +96,3 @@ npm run fix-lint
 
 MIT License
 
----
-
-# String Formatter - Raycast插件
-
-一个功能强大的字符串格式化Raycast插件，支持智能分隔符检测、字符移除、自定义修饰符和输出格式。支持中英文界面。
-
-## 🚀 功能特性
-
-### 输入处理
-- 🔤 **字符串输入**：支持多行字符串输入
-- 🗑️ **字符移除**：支持移除指定的字符或字符串
-- 🔍 **智能分隔符检测**：自动检测输入字符串中的分隔符
-- ⚙️ **手动分隔符选择**：支持逗号、分号、空格、竖线、制表符、换行符等
-
-### 输出格式化
-- 🎨 **修饰符选择**：支持单引号、双引号、反引号、方括号、圆括号、花括号
-- 📤 **自定义输出分隔符**：可设置输出结果的分隔符
-- 🔄 **去重功能**：可选择是否移除重复的元素（默认开启）
-- 👀 **实时预览**：输入内容后立即显示格式化结果
-- 📋 **一键复制**：快速复制格式化结果到剪贴板
-
-### 用户体验
-- 🌐 **多语言支持**：中英文界面切换
-- 🎯 **智能界面**：输入和输出区域用分隔线清晰区分
-- ⚠️ **错误处理**：友好的错误提示和异常处理
-- ⌨️ **快捷键支持**：便捷的键盘操作
-
-## 🌐 语言支持
-
-插件支持中英文界面切换：
-
-1. 打开Raycast偏好设置
-2. 导航到扩展 → String Formatter
-3. 选择您的首选语言：
-   - **中文 (Chinese)**：默认中文界面
-   - **English**：英文界面
-
-## ⌨️ 快捷键
-
-- `Cmd + C`：复制格式化结果
-- `Cmd + R`：重置表单
-
-## 🛠️ 安装
-
-1. 确保已安装 [Raycast](https://raycast.com/)
-2. 在项目目录运行：`npm install`
-3. 开发模式：`npm run dev`
-4. 构建：`npm run build`
-
-## 📄 许可证
-
-MIT License

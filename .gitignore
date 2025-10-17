@@ -26,6 +26,10 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+## Build generated
+build/
+DerivedData/
+
 ### Node ###
 # Logs
 logs
@@ -48,7 +52,7 @@ pids
 lib-cov
 
 # Coverage directory used by tools like istanbul
-coverage/
+coverage
 *.lcov
 
 # nyc test coverage
@@ -71,9 +75,7 @@ node_modules/
 jspm_packages/
 
 # Build directories
-build/
 dist/
-DerivedData/
 
 # TypeScript v1 declaration files
 typings/
@@ -106,7 +108,6 @@ typings/
 .env
 .env.test
 .env.json
-.env.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -116,9 +117,13 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
+dist
 
 # Gatsby files
 .cache/
+# Comment in the public line in if your project uses Gatsby and not Next.js
+# https://nextjs.org/blog/next-9-1#public-directory-support
+# public
 
 # vuepress build output
 .vuepress/dist
