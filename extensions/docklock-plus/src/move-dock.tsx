@@ -23,23 +23,39 @@ export async function moveDock(direction: "up" | "down" | "left" | "right"): Pro
     },
   );
 
-  const success: boolean = result.status === 0 && !/^Failed/.test(result.stdout);
+  const stdoutString: string =
+    typeof result.stdout === "string"
+      ? result.stdout
+      : Buffer.isBuffer(result.stdout)
+        ? result.stdout.toString("utf8")
+        : "";
+
+  const success: boolean = result.status === 0 && !/^Failed/.test(stdoutString);
 
   if (success) {
     showToast(Toast.Style.Success, `Dock moved ${direction} successfully`);
     closeMainWindow();
   } else {
-    const exitCode: number | string = result.status ?? "unknown";
-    const stderr: string = Buffer.isBuffer(result.stderr)
-      ? result.stderr.toString().trim()
-      : (result.stderr || "").toString().trim();
-    const stdout: string = Buffer.isBuffer(result.stdout)
-      ? result.stdout.toString().trim()
-      : (result.stdout || "").toString().trim();
+    const exitCode = result.status ?? "unknown";
+
+    const stdout: string =
+      typeof result.stdout === "string"
+        ? result.stdout.trim()
+        : Buffer.isBuffer(result.stdout)
+          ? result.stdout.toString("utf8").trim()
+          : "";
+
+    const stderr: string =
+      typeof result.stderr === "string"
+        ? result.stderr.trim()
+        : Buffer.isBuffer(result.stderr)
+          ? result.stderr.toString("utf8").trim()
+          : "";
+
     console.error(`Command 'move ${direction}' failed`, {
-      exitCode: String(exitCode),
-      stdout: String(stdout),
-      stderr: String(stderr),
+      exitCode,
+      stdout,
+      stderr,
     });
     showFailureToast("", { title: `Failed to move Dock ${direction}` });
   }
