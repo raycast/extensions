@@ -5,3 +5,7 @@
 
 # misc
 .DS_Store
+
+# compiled output
+src/**/*.js
+raycast-env.d.ts
