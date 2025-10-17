@@ -83,6 +83,11 @@ export default function Command({
     }
   }, [entry, lastProject]);
 
+  // Watch for changes to projectId to reset taskId unless the change is related to lastProject being loaded
+  useEffect(() => {
+    if (lastProject && lastProject.projectId !== projectId) setTaskId(null);
+  }, [projectId]);
+
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
       showToast({
@@ -150,12 +155,7 @@ export default function Command({
     const project = find(projects, (o) => {
       return o.project.id === parseInt(projectId ?? "0");
     });
-    if (!project) return [];
-
-    // If the currently selected task is not in the new project's tasks, clear it to prevent errors
-    if (!project.task_assignments.some((t) => t.task.id === parseInt(taskId ?? "0"))) setTaskId(null);
-
-    return project.task_assignments;
+    return project ? project.task_assignments : [];
   }, [projects, projectId]);
 
   function setTimeFormat(value?: string) {
@@ -236,7 +236,7 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" value={taskId ?? ""} onChange={() => {}}>
+      <Form.Dropdown id="task_id" title="Task" value={taskId ?? ""} onChange={onSave}>
         {tasks?.map((task) => {
           return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
