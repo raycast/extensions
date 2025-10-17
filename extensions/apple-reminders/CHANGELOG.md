@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Add ability to move reminders between lists] - {PR_MERGE_DATE}
+## [Add ability to move reminders between lists] - 2025-10-17
 
 - Add list selection dropdown in the Edit Reminder form
 - Implement `moveToList` function to change reminder's list
