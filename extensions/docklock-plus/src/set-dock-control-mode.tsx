@@ -56,7 +56,6 @@ export default function Command() {
               <Action
                 title={`Set Dock Control Mode: ${mode.title}`}
                 onAction={() => setDockControlMode(mode.token, mode.title)}
-                closeOnAction={true}
               />
             </ActionPanel>
           }

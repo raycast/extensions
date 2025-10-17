@@ -2,7 +2,7 @@ import { showFailureToast } from "@raycast/utils";
 import { List, ActionPanel, Action, showToast, Toast, closeMainWindow } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { spawnSync } from "child_process";
-import { getDisplays, isDockLockPlusInstalled } from "./utils";
+import { getDisplays, isDockLockPlusInstalled, isDockMovable } from "./utils";
 
 interface DisplayInfo {
   name: string;

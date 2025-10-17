@@ -30,8 +30,12 @@ export async function moveDock(direction: "up" | "down" | "left" | "right"): Pro
     closeMainWindow();
   } else {
     const exitCode: number | string = result.status ?? "unknown";
-    const stderr: string = result.stderr?.toString().trim() || "no stderr";
-    const stdout: string = result.stdout?.toString().trim() || "";
+    const stderr: string = Buffer.isBuffer(result.stderr)
+      ? result.stderr.toString().trim()
+      : (result.stderr || "").toString().trim();
+    const stdout: string = Buffer.isBuffer(result.stdout)
+      ? result.stdout.toString().trim()
+      : (result.stdout || "").toString().trim();
     console.error(`Command 'move ${direction}' failed`, { exitCode, stdout, stderr });
     showFailureToast("", { title: `Failed to move Dock ${direction}` });
   }
