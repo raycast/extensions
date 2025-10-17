@@ -8,7 +8,7 @@
     YouTube
   </h1>
 
-Raycast extension to create, search and modify issues, manage merge requests, projects and more.
+Raycast extension to search videos and channels, and view and search popular videos on YouTube.
 
   <p>
     <a href="https://www.raycast.com/tonka3000/youtube">
