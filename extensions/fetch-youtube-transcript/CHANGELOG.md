@@ -1,6 +1,6 @@
 # Fetch Youtube Transcript Changelog
 
-## [2.0.2] - {PR_MERGE_DATE}
+## [2.0.2] - 2025-10-17
 
 ### 2.0.2 Added
 
