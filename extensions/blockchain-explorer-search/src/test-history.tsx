@@ -1,4 +1,4 @@
-import { List, showToast } from "@raycast/api";
+import { List, showToast, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getSearchHistory, SearchHistoryItem, addToHistory } from "./utils/storage";
 
@@ -46,7 +46,11 @@ export default function Command() {
       <List.Item
         title="Add Test History Item"
         subtitle="Click to add a test item"
-        actions={<List.Item.Action title="Add Test" onAction={addTestItem} />}
+        actions={
+          <ActionPanel>
+            <Action title="Add Test" onAction={addTestItem} />
+          </ActionPanel>
+        }
       />
       {history.map((item) => (
         <List.Item
