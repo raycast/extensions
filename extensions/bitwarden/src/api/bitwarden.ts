@@ -1,7 +1,6 @@
 import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
 import { existsSync, unlinkSync, writeFileSync, accessSync, constants, chmodSync } from "fs";
-import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL, CACHE_KEYS } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
@@ -19,7 +18,7 @@ import {
   tryExec,
   VaultIsLockedError,
 } from "~/utils/errors";
-import { join } from "path";
+import { join, dirname } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { download } from "~/utils/network";
@@ -27,6 +26,7 @@ import { captureException } from "~/utils/development";
 import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
 import { Cache } from "~/utils/cache";
+import { platform } from "~/utils/platform";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -101,27 +101,38 @@ const BinDownloadLogger = (() => {
 
 export const cliInfo = {
   version: "2025.2.0",
-  sha256: "fade51012a46011c016a2e5aee2f2e534c1ed078e49d1178a69e2889d2812a96",
+  get sha256() {
+    if (platform === "windows") return "33a131017ac9c99d721e430a86e929383314d3f91c9f2fbf413d872565654c18";
+    return "fade51012a46011c016a2e5aee2f2e534c1ed078e49d1178a69e2889d2812a96";
+  },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
-    arm64: "/opt/homebrew/bin/bw",
-    x64: "/usr/local/bin/bw",
     get downloadedBin() {
-      return join(supportPath, cliInfo.binFilename);
+      return join(supportPath, cliInfo.binFilenameVersioned);
     },
     get installedBin() {
-      return process.arch === "arm64" ? this.arm64 : this.x64;
+      // We assume that it was installed using Chocolatey, if not, it's hard to make a good guess.
+      if (platform === "windows") return "C:\\ProgramData\\chocolatey\\bin\\bw.exe";
+      return process.arch === "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw";
     },
     get bin() {
       return !BinDownloadLogger.hasError() ? this.downloadedBin : this.installedBin;
     },
   },
   get binFilename() {
-    return `bw-${this.version}`;
+    return platform === "windows" ? "bw.exe" : "bw";
+  },
+  get binFilenameVersioned() {
+    const name = `bw-${this.version}`;
+    return platform === "windows" ? `${name}.exe` : `${name}`;
   },
   get downloadUrl() {
-    const archSuffix = process.arch === "arm64" ? "-arm64" : "";
-    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos${archSuffix}-${this.version}.zip`;
+    let archSuffix = "";
+    if (platform === "macos") {
+      archSuffix = process.arch === "arm64" ? "-arm64" : "";
+    }
+
+    return `${this.downloadPage}/download/cli-v${this.version}/bw-${platform}${archSuffix}-${this.version}.zip`;
   },
 } as const;
 
@@ -188,7 +199,7 @@ export class Bitwarden {
       try {
         toast.message = "Extracting...";
         await decompressFile(zipPath, supportPath);
-        const decompressedBinPath = join(supportPath, "bw");
+        const decompressedBinPath = join(supportPath, cliInfo.binFilename);
 
         // For some reason this rename started throwing an error after succeeding, so for now we're just
         // catching it and checking if the file exists ¯\_(ツ)_/¯
@@ -260,10 +271,10 @@ export class Bitwarden {
     return this;
   }
 
-  async checkServerUrl(serverUrl: string): Promise<void> {
+  async checkServerUrl(serverUrl: string | undefined): Promise<void> {
     // Check the CLI has been configured to use the preference Url
-    const cliServer = (await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL)) || "";
-    if (cliServer === serverUrl) return;
+    const storedServer = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL);
+    if (!serverUrl || storedServer === serverUrl) return;
 
     // Update the server Url
     const toast = await this.showToast({

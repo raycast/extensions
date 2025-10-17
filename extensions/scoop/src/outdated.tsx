@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
-import { scoopStatus, scoopUpdate, OutdatedScoopPackage } from "./scoop";
+import { useScoop } from "./hooks/scoopHooks";
 import { withToast } from "./utils";
+import { OutdatedScoopPackage } from "./types/index.types";
 
 export default function OutdatedCommand() {
   const [packages, setPackages] = useState<OutdatedScoopPackage[]>([]);
+  const scoop = useScoop();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    scoopStatus().then((pkgs) => {
+    scoop.status().then((pkgs) => {
       setPackages(pkgs);
       setIsLoading(false);
     });
@@ -18,8 +20,8 @@ export default function OutdatedCommand() {
     await withToast(
       async () => {
         setIsLoading(true);
-        await scoopUpdate(packageName);
-        const updatedPackages = await scoopStatus();
+        await scoop.update(packageName);
+        const updatedPackages = await scoop.status();
         setPackages(updatedPackages);
         setIsLoading(false);
       },

@@ -1,6 +1,7 @@
 import { Color, Icon, Image, LocalStorage } from "@raycast/api";
 import Asset = Image.Asset;
 import { ConnectorProvider, GetAgentConfigurationsResponseType, MeResponseType } from "@dust-tt/client";
+import { jwtDecode } from "jwt-decode";
 
 export interface AgentType {
   sId: string;
@@ -179,4 +180,18 @@ export async function setWorkspaceId(workspaceId: string) {
 
 export async function getWorkspaceId(): Promise<string | undefined> {
   return await LocalStorage.getItem("workspaceId");
+}
+
+export async function extractAndStoreRegion(token: string) {
+  try {
+    const decoded = jwtDecode<{ [key: string]: string }>(token);
+    const region = decoded["https://dust.tt/region"];
+    if (region) {
+      await LocalStorage.setItem("selectedRegion", region);
+      return region;
+    }
+  } catch (error) {
+    console.error("Failed to decode JWT or extract region:", error);
+  }
+  return null;
 }

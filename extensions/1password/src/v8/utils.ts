@@ -4,8 +4,8 @@ import { execSync } from "node:child_process";
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 
-import { Category, CategoryName, Item, User, Vault } from "./types";
 import { useExec } from "@raycast/utils";
+import { Category, CategoryName, Item, User, Vault } from "./types";
 
 export type ActionID = string;
 
@@ -118,7 +118,7 @@ export const getSignInStatus = () => {
   try {
     execSync(`${getCliPath()} whoami`);
     return true;
-  } catch (stderr) {
+  } catch {
     return false;
   }
 };

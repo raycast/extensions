@@ -14,64 +14,9 @@ import {
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useFetch, useForm, useLocalStorage } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { API_HEADERS, API_URL, capitalize, parseBrandDevResponse } from "./common";
+import { Brand } from "./types/brand";
 
-type Color = {
-  hex: string;
-  name: string;
-};
-type Resolution = {
-  width: number;
-  height: number;
-};
-type Logo = {
-  url: string;
-  mode: "dark" | "light";
-  group: number;
-  colors: Color[];
-  resolution: Resolution;
-};
-type Backdrop = {
-  url: string;
-  colors: Color[];
-  resolution: Resolution;
-};
-type Social = {
-  type: string;
-  url: string;
-};
-type Address = {
-  street?: string;
-  city?: string;
-  country?: string;
-  country_code?: string;
-  state_province?: string;
-  state_code?: string;
-  postal_code?: string;
-  additional_info?: string;
-};
-type Stock = {
-  ticker: string;
-  exchange: string;
-};
-type Font = {
-  usage: string;
-  name: string;
-};
-type Brand = {
-  domain: string;
-  title: string | null;
-  description: string | null;
-  slogan: string | null;
-  colors: Color[];
-  logos: Logo[];
-  backdrops: Backdrop[];
-  socials: Social[];
-  address: Address | null;
-  stock: Stock | null;
-  fonts: Font[];
-  email: string | null;
-  phone: string | null;
-};
 type Response = {
   status: "ok";
   brand: Brand;
@@ -80,7 +25,6 @@ type BrandInStorage = Brand & {
   created_on: string;
   updated_on: string;
 };
-const { api_key } = getPreferenceValues<Preferences>();
 
 export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.RetrieveBrands }>) {
   const { push } = useNavigation();
@@ -134,11 +78,14 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
         description={!searchText ? "Search for a brand to get started" : `Search for "${searchText}"`}
         actions={
           <ActionPanel>
-            <Action.Push
-              icon={Icon.MagnifyingGlass}
-              title={!searchText ? "Search Brand" : `Search "${searchText}"`}
-              target={<SearchBrand search={searchText} onSearched={updateBrands} />}
-            />
+            {["Domain", "Ticker", "Name"].map((by) => (
+              <Action.Push
+                key={by}
+                icon={Icon.MagnifyingGlass}
+                title={`Search ${searchText || "Brand"} by ${by}`}
+                target={<SearchBrand search={searchText} by={by} onSearched={updateBrands} />}
+              />
+            ))}
           </ActionPanel>
         }
       />
@@ -197,38 +144,39 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
 
 type SearchBrandProps = {
   search?: string;
+  by?: string;
   onSearched: (brand: BrandInStorage) => void;
 };
-function SearchBrand({ search, onSearched }: SearchBrandProps) {
+type FormValues = { value: string; by: string };
+function SearchBrand({ search, onSearched, by = "Domain" }: SearchBrandProps) {
   const { pop } = useNavigation();
   const [execute, setExecute] = useState(false);
 
   useEffect(() => {
-    if (search) handleSubmit({ domain: search });
+    if (search) handleSubmit({ value: search, by });
   }, []);
 
-  const { itemProps, handleSubmit, values } = useForm<{ domain: string }>({
+  const { itemProps, handleSubmit, values } = useForm<FormValues>({
     onSubmit() {
       setExecute(true);
     },
     initialValues: {
-      domain: search,
+      value: search,
+      by,
     },
     validation: {
-      domain: FormValidation.Required,
+      value: FormValidation.Required,
     },
   });
 
-  const { isLoading } = useFetch<Response>(`https://api.brand.dev/v1/brand/retrieve?domain=${values.domain}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${api_key}`,
-    },
+  const { isLoading } = useFetch(API_URL + `/retrieve?${values.by.toLowerCase()}=${values.value}`, {
+    headers: API_HEADERS,
     async onWillExecute() {
-      await showToast(Toast.Style.Animated, "Retrieving Brand", values.domain);
+      await showToast(Toast.Style.Animated, `Retrieving Brand by ${values.by}`, values.value);
     },
+    parseResponse: parseBrandDevResponse<Response>,
     async onData(data) {
-      await showToast(Toast.Style.Success, "Retrieved Brand!", values.domain);
+      await showToast(Toast.Style.Success, "Retrieved Brand!", values.value);
       const newBrand: BrandInStorage = {
         ...data.brand,
         created_on: new Date().toISOString(),
@@ -238,6 +186,9 @@ function SearchBrand({ search, onSearched }: SearchBrandProps) {
       pop();
     },
     execute,
+    failureToastOptions: {
+      title: "Failed",
+    },
   });
 
   return (
@@ -250,7 +201,22 @@ function SearchBrand({ search, onSearched }: SearchBrandProps) {
       }
     >
       <Form.Description text="Search Brand" />
-      <Form.TextField title="Domain" placeholder="brand.dev" {...itemProps.domain} />
+      <Form.TextField
+        title={values.by}
+        placeholder={
+          values.by === "Domain"
+            ? "Enter domain (e.g. apple.com)"
+            : values.by === "Ticker"
+              ? "Enter stock ticker (e.g. AAPL)"
+              : "Enter brand name (e.g. Apple)"
+        }
+        {...itemProps.value}
+      />
+      <Form.Dropdown title="" {...itemProps.by}>
+        <Form.Dropdown.Item title="By Domain" value="Domain" />
+        <Form.Dropdown.Item title="By Ticker" value="Ticker" />
+        <Form.Dropdown.Item title="By Name" value="Name" />
+      </Form.Dropdown>
     </Form>
   );
 }
@@ -337,6 +303,37 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
           ) : (
             <Detail.Metadata.Label title="Phone" text="N/A" />
           )}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label
+            title="Content Rating"
+            text={brand.is_nsfw === undefined ? "N/A" : brand.is_nsfw ? "Not Safe for Work" : "Safe for Work"}
+          />
+          <Detail.Metadata.Separator />
+          {brand.industries?.eic?.length ? (
+            <>
+              <Detail.Metadata.Label title="Industries" icon={Icon.EllipsisVertical} />
+              {brand.industries.eic.map((e, eIndex) => (
+                <Detail.Metadata.Label key={e.industry + eIndex} title={e.industry} text={e.subindustry} />
+              ))}
+            </>
+          ) : (
+            <Detail.Metadata.Label title="Industries" text="N/A" />
+          )}
+          <Detail.Metadata.Separator />
+          {brand.links ? (
+            <>
+              <Detail.Metadata.Label title="Links" icon={Icon.EllipsisVertical} />
+              {Object.entries(brand.links).map(([key, val]) =>
+                val ? (
+                  <Detail.Metadata.Link key={key} title={key} text={val} target={val} />
+                ) : (
+                  <Detail.Metadata.Label key={key} title={key} text="N/A" />
+                ),
+              )}
+            </>
+          ) : (
+            <Detail.Metadata.Label title="Links" text="N/A" />
+          )}
         </Detail.Metadata>
       }
       actions={
@@ -357,10 +354,6 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
       }
     />
   );
-}
-
-function capitalize(txt: string) {
-  return txt.charAt(0).toUpperCase() + txt.slice(1);
 }
 
 function formatSocialType(type: string) {

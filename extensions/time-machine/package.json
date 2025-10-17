@@ -5,6 +5,9 @@
   "description": "This extension is built to integrate MacOS system backup utility \"TimeMachine\" with Raycast. With the help of tmutil CLI Utility, it offers users the ability to control their backups with ease.",
   "icon": "command-icon.png",
   "author": "SuoweiHu",
+  "contributors": [
+    "gheorghiuradu"
+  ],
   "categories": [
     "System"
   ],
@@ -27,12 +30,19 @@
       "title": "List Backup",
       "description": "Print information about destinations currently configured for use with Time Machine.",
       "mode": "view"
+    },
+    {
+      "name": "cmd-show-status",
+      "title": "Show Status",
+      "description": "Print information about the current status of Time Machine, or the status of the most recent backup. In order to get the most recent status, full disk access is required.",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.78.1",
     "@raycast/utils": "^1.16.1",
-    "xml2js": "^0.6.2"
+    "xml2js": "^0.6.2",
+    "@yaireo/relative-time": "^1.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

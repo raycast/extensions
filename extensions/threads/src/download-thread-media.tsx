@@ -15,10 +15,11 @@ export default async function Command({
   const { mediaDownloadPath } = await getPreferenceValues();
   const downloadFolder = mediaDownloadPath || `${homedir()}/Downloads`;
 
-  if (
-    !threadsUrl.includes("threads.net") &&
-    !threadsUrl.includes("threads.com")
-  ) {
+  const threadsUrlPattern =
+    /(?:threads\.net|threads\.com)\/@[\w.]+\/post\/([A-Za-z0-9_-]+)/;
+  const match = threadsUrl.match(threadsUrlPattern);
+
+  if (!match || !match[1]) {
     await showToast({
       title: "Error",
       message: "Invalid URL provided. Please provide a valid threads URL",
@@ -33,7 +34,7 @@ export default async function Command({
       style: Toast.Style.Animated,
     });
 
-    const threadMedias = await getThreadsMediaURL(threadsUrl);
+    const threadMedias = await getThreadsMediaURL(threadsUrl, match[1]);
     if (
       !threadMedias ||
       (threadMedias?.images.length === 0 && threadMedias?.videos.length === 0)
@@ -42,13 +43,13 @@ export default async function Command({
     }
 
     const mediaFiles = [
-      ...threadMedias.images.map((image: string[]) => ({
+      ...threadMedias.images.map((image: string) => ({
         url: image,
         type: "image",
         extension: "jpg",
       })),
-      ...threadMedias.videos.map((video: { download_url: string }) => ({
-        url: video["download_url"],
+      ...threadMedias.videos.map((video: string) => ({
+        url: video,
         type: "video",
         extension: "mp4",
       })),

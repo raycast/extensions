@@ -63,6 +63,14 @@
       "mode": "view"
     },
     {
+      "name": "listFavorites",
+      "icon": "favorite.png",
+      "title": "Favorites",
+      "subtitle": "Harvest",
+      "description": "Quick access to favorite time entries",
+      "mode": "view"
+    },
+    {
       "name": "stopTimer",
       "icon": "stop.png",
       "title": "Stop Timer",
@@ -156,25 +164,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
-    "@raycast/utils": "^1.3.1",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
     "axios": "^0.23.0",
     "dayjs": "^1.11.11",
-    "lodash": "^4.17.21"
+    "es-toolkit": "^1.40.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.175",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "eslint": "^7.32.0",
     "prettier": "^2.8.7",
-    "react": "^18.2.0",
+    "react": "19.0.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

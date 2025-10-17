@@ -23,6 +23,10 @@
     "pomdtr"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "keywords": [
     "bitwarden",
     "secrets",
@@ -288,7 +292,7 @@
       "type": "textfield",
       "required": false,
       "title": "Bitwarden CLI Path",
-      "description": "If you wish to use your own CLI, type here the location of your local installation. The typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs.",
+      "description": "If you would like to use your own CLI, please enter the path to your local installation here. For macOS, the typical installation locations are '/usr/local/bin/bw' for Intel-based Macs and '/opt/homebrew/bin/bw' for M1/Apple Silicon Macs. On Windows, if you installed via Chocolatey, the usual path is 'C:\\ProgramData\\chocolatey\bin\\bw.exe'. You can find the path by executing 'where bw' in your terminal.",
       "placeholder": "CLI Path"
     },
     {
@@ -370,11 +374,11 @@
           "value": "86400000"
         },
         {
-          "title": "On system lock (experimental)",
+          "title": "On system lock (experimental & macOS only)",
           "value": "-2"
         },
         {
-          "title": "On system sleep (experimental)",
+          "title": "On system sleep (experimental & macOS only)",
           "value": "-3"
         },
         {
@@ -416,8 +420,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
     "execa": "^7.0.0",
     "fast-fuzzy": "^1.12.0",
     "node-stream-zip": "^1.15.0",
@@ -426,8 +430,8 @@
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@types/jest": "^29.5.0",
-    "@types/node": "~22.14.0",
-    "@types/react": "^18.0.28",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",
     "eslint": "^8.56.0",
@@ -437,9 +441,10 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.5.0",
     "prettier": "^2.8.4",
+    "react-devtools": "^6.1.1",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.5.4"
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -448,9 +453,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "jest --verbose",
-    "test:watch": "jest --watch"
-  },
-  "platforms": [
-    "macOS"
-  ]
+    "test:watch": "jest --watch",
+    "tsc:watch": "tsc --noEmit --watch"
+  }
 }

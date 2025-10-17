@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useState } from "react";
+import { createContext, PropsWithChildren, ReactNode, useContext, useState } from "react";
 import { Bitwarden } from "~/api/bitwarden";
 import { LoadingFallback } from "~/components/LoadingFallback";
 import TroubleshootingGuide from "~/components/TroubleshootingGuide";
@@ -8,7 +8,7 @@ import useOnceEffect from "~/utils/hooks/useOnceEffect";
 const BitwardenContext = createContext<Bitwarden | null>(null);
 
 export type BitwardenProviderProps = PropsWithChildren<{
-  loadingFallback?: JSX.Element;
+  loadingFallback?: ReactNode;
 }>;
 
 export const BitwardenProvider = ({ children, loadingFallback = <LoadingFallback /> }: BitwardenProviderProps) => {

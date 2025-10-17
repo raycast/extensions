@@ -1,5 +1,11 @@
 # MapleStory.gg
 
+## [Routine Maintenance] - 2025-10-13
+
+- Add support for Windows
+- Fix useEffect dependencies
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-09-01
 
 - Handle HTTP request errors gracefully

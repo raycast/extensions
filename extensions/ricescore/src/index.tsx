@@ -15,7 +15,7 @@ function getMarkdown(
   impact: string | undefined,
   confidence: string | undefined,
   effort: string | undefined,
-  score: string
+  score: string,
 ): string {
   const getOrDefault = (num: string | undefined): string => {
     if (num) {
@@ -30,7 +30,7 @@ function getMarkdown(
       ["Reach", "Impact", "Confidence", "Effort", "RICE score"],
       [getOrDefault(reach), getOrDefault(impact), getOrDefault(confidence), getOrDefault(effort), score],
     ],
-    { align: ["c", "c", "c", "c", "c"] }
+    { align: ["c", "c", "c", "c", "c"] },
   );
 }
 

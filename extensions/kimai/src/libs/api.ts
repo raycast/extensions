@@ -6,7 +6,7 @@ import { z } from "zod";
 
 interface TimesheetPayload {
   begin: string; // Date
-  end: string; // Date
+  end: string | null; // Date
   project: number;
   activity: number;
   description: string;
@@ -18,9 +18,9 @@ const timesheetSchema = z.object({
   user: z.number(),
   id: z.number(),
   begin: z.string(), // Date
-  end: z.string(), // Date
+  end: z.string().nullable(), // Date
   duration: z.number(), // in seconds
-  description: z.string(),
+  description: z.string().nullable(), // Can be null
   rate: z.number(), // total sum
   internalRate: z.number(),
   exported: z.boolean(),

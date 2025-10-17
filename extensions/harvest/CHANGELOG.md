@@ -1,5 +1,9 @@
 # Harvest Changelog
 
+## [Favorites Command] - 2025-10-15
+
+- Added: New command to manage favorites
+  You can now add, edit, and delete favorites to quickly start timers or create time entries from a preset.
 
 ## [Fixes] - 2024-06-07
 

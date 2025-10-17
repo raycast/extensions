@@ -14,7 +14,8 @@
     "clemb8",
     "stelo",
     "fil",
-    "joeb"
+    "joeb",
+    "itsmingjie"
   ],
   "pastContributors": [
     "mathieudutour",
@@ -162,6 +163,14 @@
           "title": "Preferred Team",
           "placeholder": "RAY",
           "description": "Specify the Key (e.g. RAY) of the preferred team. If not specified, the first team is used.",
+          "required": false
+        },
+        {
+          "name": "preferredStatusName",
+          "type": "textfield",
+          "title": "Preferred Status",
+          "placeholder": "Todo",
+          "description": "Specify the name of the preferred status for new issues (e.g. Todo, Backlog). If not specified, uses Linear's default.",
           "required": false
         },
         {
@@ -1578,7 +1587,7 @@
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^39.0.0",
+    "@linear/sdk": "^60.0.0",
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.0.0",
     "date-fns": "^4.1.0",

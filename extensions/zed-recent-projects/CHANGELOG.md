@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - 2025-10-15
+
+- Fix projects loading if user has custom configuration in ~/.sqliterc.
+
 ## [Fixes] - 2025-09-16
 
 - Fix broken pinned entries cache.

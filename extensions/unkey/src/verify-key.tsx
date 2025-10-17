@@ -1,24 +1,24 @@
-import { Action, ActionPanel, Detail, Form, Icon, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Form, Icon } from "@raycast/api";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { useState } from "react";
-import { VerifyKeyRequest, VerifyKeyResponse } from "./utils/types";
-import { verifyKey } from "./utils/api";
-import ErrorComponent from "./components/ErrorComponent";
+import { unkey } from "./unkey";
+import { V2KeysVerifyKeyRequestBody, V2KeysVerifyKeyResponseData } from "@unkey/api/dist/commonjs/models/components";
 
 export default function VerifyKey() {
-  const { push } = useNavigation();
-
-  const [verifyKeyResponse, setVerifyKeyResponse] = useState<VerifyKeyResponse>();
+  const [verifyKeyResponse, setVerifyKeyResponse] = useState<V2KeysVerifyKeyResponseData>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { handleSubmit, itemProps } = useForm<VerifyKeyRequest>({
+  const { handleSubmit, itemProps } = useForm<V2KeysVerifyKeyRequestBody>({
     async onSubmit(values) {
       setIsLoading(true);
-      const response = await verifyKey(values.key);
-
-      if (!("valid" in response)) push(<ErrorComponent errorResponse={response} />);
-      else setVerifyKeyResponse(response);
-      setIsLoading(false);
+      try {
+        const { data } = await unkey.keys.verifyKey({ key: values.key });
+        setVerifyKeyResponse(data);
+      } catch (error) {
+        await showFailureToast(error);
+      } finally {
+        setIsLoading(false);
+      }
     },
     validation: {
       key: FormValidation.Required,
@@ -49,13 +49,13 @@ export default function VerifyKey() {
           <Detail.Metadata.Label title="Valid" icon={verifyKeyResponse.valid ? Icon.Check : Icon.Multiply} />
           <Detail.Metadata.Label
             title="Owner ID"
-            text={verifyKeyResponse.ownerId || undefined}
-            icon={!verifyKeyResponse.ownerId ? Icon.Minus : undefined}
+            text={verifyKeyResponse.identity?.externalId || undefined}
+            icon={!verifyKeyResponse.identity?.externalId ? Icon.Minus : undefined}
           />
           <Detail.Metadata.Label
             title="Remaining"
-            text={verifyKeyResponse.remaining?.toString() || undefined}
-            icon={!("remaining" in verifyKeyResponse) ? Icon.Minus : undefined}
+            text={verifyKeyResponse.credits?.toString() || undefined}
+            icon={!("credits" in verifyKeyResponse) ? Icon.Minus : undefined}
           />
           <Detail.Metadata.Separator />
           {!verifyKeyResponse.meta ? (
@@ -68,9 +68,9 @@ export default function VerifyKey() {
             </Detail.Metadata.TagList>
           )}
           <Detail.Metadata.Separator />
-          {verifyKeyResponse.ratelimit ? (
+          {verifyKeyResponse.ratelimits?.length ? (
             <Detail.Metadata.TagList title="Rate Limit">
-              {Object.entries(verifyKeyResponse.ratelimit).map(([key, val]) => (
+              {Object.entries(verifyKeyResponse.ratelimits[0]).map(([key, val]) => (
                 <Detail.Metadata.TagList.Item key={key} text={`${key}: ${val}`} />
               ))}
             </Detail.Metadata.TagList>
