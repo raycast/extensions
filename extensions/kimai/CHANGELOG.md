@@ -1,6 +1,6 @@
 # Kimai Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-10-17
 
 - Allow logging time without a duration to start active/running timesheets
 - Fix issue with Total logged hours for today not showing on Menubar

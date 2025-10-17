@@ -108,5 +108,8 @@
     "lint": "ray lint",
     "pull": "npx @raycast/api@latest pull-contributions",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
