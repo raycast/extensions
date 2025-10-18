@@ -1,6 +1,6 @@
 import React from "react";
 import { ActionPanel, List } from "@raycast/api";
-import { bin, recentEntry, toolsInstall, useUrl } from "./util";
+import { bin, recentEntry, toolsInstall, useUrl, supportedMajorVersions, githubIssueUrl } from "./util";
 import { HelpTextDetail, tbUrl } from "./components/HelpTextDetail";
 import { OpenJetBrainsToolbox } from "./components/OpenJetBrainsToolbox";
 import { RecentProject } from "./components/RecentProject";
@@ -33,12 +33,16 @@ export default function ProjectList(): React.JSX.Element {
       `Please check that you have installed [JetBrains Toolbox](${tbUrl})`,
     ];
     return <HelpTextDetail message={message} toolbox={undefined} />;
-  } else if (!toolboxApp.isV2) {
+  } else if (!toolboxApp.isSupported) {
+    const supportedVersionsText = supportedMajorVersions.map((v) => `V${v}`).join(", ");
+
     const message = [
-      `# Unsupported Version of JetBrains Toolbox: ${toolboxApp.version}`,
-      "This extension only support version 2 of JetBrains Toolbox",
-      `Please check that you have installed the latest [JetBrains Toolbox](${tbUrl})`,
+      `# Unsupported JetBrains Toolbox Version: ${toolboxApp.version}`,
+      `This extension supports the following versions: ${supportedVersionsText}.`,
+      `Please use one of the supported versions, or create an issue on the [extension’s GitHub page](${githubIssueUrl}) if you believe your version should be supported.`,
+      `You can also download the supported version(s) of [JetBrains Toolbox](${tbUrl}).`,
     ];
+
     return <HelpTextDetail message={message} toolbox={toolboxApp} />;
   } else if (appHistory.length === 0) {
     const message = [

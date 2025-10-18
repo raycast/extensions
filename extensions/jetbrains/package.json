@@ -9,7 +9,8 @@
     "adrienbaron",
     "dima-m711",
     "dgrzedzielski",
-    "perasite"
+    "perasite",
+    "hemang_kinra"
   ],
   "license": "MIT",
   "commands": [
@@ -104,7 +105,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
+    "publish": "npx @raycast/api@latest publish",
     "pull-contributions": "ray pull-contributions",
     "migrate": "ray migrate"
   }
