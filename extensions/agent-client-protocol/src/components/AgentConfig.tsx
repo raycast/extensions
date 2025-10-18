@@ -36,6 +36,7 @@ interface AgentFormValues {
   args?: string;
   endpoint?: string;
   environmentVariables?: string;
+  appendToPath?: string;
 }
 
 const configService = new ConfigService();
@@ -67,6 +68,7 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             .map(([key, value]) => `${key}=${value}`)
             .join("\n")
         : "",
+      appendToPath: existingConfig?.appendToPath?.join("\n") ?? "",
     };
   }, [existingConfig]);
 
@@ -101,6 +103,8 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
         return;
       }
 
+      const appendToPath = parsePathEntries(values.appendToPath);
+
       const config: AgentConfig = existingConfig
         ? {
             ...existingConfig,
@@ -111,6 +115,7 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             args: values.type === "subprocess" ? (combinedArgs.length > 0 ? combinedArgs : undefined) : undefined,
             endpoint: values.type === "remote" ? values.endpoint?.trim() : undefined,
             environmentVariables: environmentVariables ?? undefined,
+            appendToPath: values.type === "subprocess" ? appendToPath : undefined,
           }
         : {
             id: generateAgentId(values.name),
@@ -121,6 +126,7 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             args: values.type === "subprocess" ? (combinedArgs.length > 0 ? combinedArgs : undefined) : undefined,
             endpoint: values.type === "remote" ? values.endpoint?.trim() : undefined,
             environmentVariables: environmentVariables ?? undefined,
+            appendToPath: values.type === "subprocess" ? appendToPath : undefined,
             isBuiltIn: false,
             createdAt: new Date(),
             lastUsed: undefined,
@@ -230,6 +236,16 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
         placeholder="KEY=value (one per line)"
         defaultValue={defaultValues.environmentVariables}
       />
+
+      {agentType === "subprocess" && (
+        <Form.TextArea
+          id="appendToPath"
+          title="Additional PATH Directories"
+          placeholder="/Users/username/.bun/bin (one per line)"
+          info="Add directories to PATH for finding the command binary. Use this if the command is installed in a non-standard location."
+          defaultValue={defaultValues.appendToPath}
+        />
+      )}
     </Form>
   );
 }
@@ -269,6 +285,19 @@ function parseEnvironmentVariables(input?: string): Record<string, string> | und
   }
 
   return Object.keys(env).length > 0 ? env : undefined;
+}
+
+function parsePathEntries(input?: string): string[] | undefined {
+  if (!input || !input.trim()) {
+    return undefined;
+  }
+
+  const paths = input
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return paths.length > 0 ? paths : undefined;
 }
 
 function splitCommandLine(input: string): string[] {
