@@ -7,16 +7,19 @@ const MAX_RESULTS = 100;
 
 export async function run(argv: string[]): Promise<Entry[]> {
   try {
-    const { execSource, wasmBinary, execPath } = await ensureBinaryAvailable();
+    const binaryInfo = await ensureBinaryAvailable();
 
-    if (execSource === "wasm") {
-      return runWasm(wasmBinary, argv);
+    if (binaryInfo.execSource === "wasm") {
+      return runWasm(binaryInfo.wasmBinary, argv);
     } else if (
-      execSource === "bundled" ||
-      execSource === "path" ||
-      execSource === "custom"
+      binaryInfo.execSource === "bundled" ||
+      binaryInfo.execSource === "path" ||
+      binaryInfo.execSource === "custom"
     ) {
-      if (execSource === "path" || execSource === "custom") {
+      if (
+        binaryInfo.execSource === "path" ||
+        binaryInfo.execSource === "custom"
+      ) {
         // -l is a custom argument that limits results, which may not be supported in user-provided binaries
         const index = argv.indexOf("-l");
         if (index !== -1) {
@@ -25,7 +28,7 @@ export async function run(argv: string[]): Promise<Entry[]> {
       }
 
       return new Promise<Entry[]>((resolve, reject) => {
-        const child = spawn(execPath, argv.slice(1));
+        const child = spawn(binaryInfo.execPath, argv.slice(1));
         let stdout = "";
         let stderr = "";
 
