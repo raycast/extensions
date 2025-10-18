@@ -6,6 +6,10 @@ export type Label = {
           "createdAt": string;
           "updatedAt": string;
 }
+export type CreateLabelRequest = {
+    name: string;
+    description: string;
+}
 export type Item = {
     id: string;
     assetId: string;
@@ -18,6 +22,13 @@ export type Item = {
     "updatedAt": string
     "purchasePrice": number
     labels: Label[]
+}
+export type CreateItemRequest = {
+    locationId: string;
+    name: string;
+    quantity: number
+    description: string;
+    labelIds: string[]
 }
 
 export type Location = {

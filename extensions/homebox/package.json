@@ -42,6 +42,18 @@
       "title": "Search Items",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "search-labels",
+      "title": "Search Labels",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "search-locations",
+      "title": "Search Locations",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {

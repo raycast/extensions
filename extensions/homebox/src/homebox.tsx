@@ -1,40 +1,82 @@
-import { Detail, getPreferenceValues } from "@raycast/api";
-import { useFetch, useLocalStorage } from "@raycast/utils";
-import React, { useContext } from "react";
-import { createContext } from "react";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { CreateItemRequest, CreateLabelRequest, Item, Label, Location } from "./types";
 
 const { url, username, password } = getPreferenceValues<Preferences>();
 
 export function buildUrl(endpoint: string) {
   return new URL(`api/v1/${endpoint}`, url).toString();
 }
-
-const HomeBoxProviderContext = createContext<{token: string}>({} as {token: string});
-export function useToken() {
-  return useContext(HomeBoxProviderContext);
+function buildHeaders(token?: string) {
+  return {
+    Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `${token?.replaceAll("\"", "")}`
+  }
 }
-export function HomeBoxProvider({children}: {children: React.ReactNode}) {
-  const {isLoading: isLoadingToken, value: token = "", setValue: setToken} = useLocalStorage<string>("HOMEBOX-TOKEN");
-  const {isLoading: isLoggingIn} = useFetch(buildUrl("users/login"), {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      username,
-      password,
-      stayLoggedIn: true
+async function parseResponse<T>(response: Response) {
+  if (response.status===204) return undefined as unknown as T;
+  if (!response.headers.get("Content-Type")?.includes("application/json")) throw new Error(response.statusText);
+  const result = await response.json();
+  if (!response.ok) {
+    const err = result as {error: string; fields?: {[field:string]: string}};
+    if (err.fields) throw new Error(Object.values(err.fields)[0])
+    throw new Error(err.error);
+  }
+  return result as T;
+}
+async function makeRequest<T>(endpoint: string, options?: RequestInit) {
+  let token = await LocalStorage.getItem<string>("HOMEBOX-TOKEN");
+  if (!token) {
+    const loginResponse = await homebox.users.login();
+    const loginResult = await parseResponse<{token: string}>(loginResponse);
+    await LocalStorage.setItem("HOMEBOX-TOKEN", loginResult.token);
+    token = loginResult.token;
+  }
+  const response = await fetch(buildUrl(endpoint), {
+    ...options,
+    headers: buildHeaders(token)
+  });
+  try {
+    const result = await parseResponse<T>(response);
+    return result;
+  } catch (error) {
+    // invalidate the token
+    if (token && (error as Error).message==="valid authorization token is required") await LocalStorage.removeItem("HOMEBOX-TOKEN");
+    throw error;
+  }
+}
+export const homebox = {
+  items: {
+    create: (body: CreateItemRequest) => makeRequest<Item>("items", {
+      method: "POST",
+      body: JSON.stringify(body)
     }),
-    async onData(data: {token: string}) {
-      await setToken(data.token);
+    delete: (id: string) => makeRequest(`items/${id}`, {method: "DELETE"}),
+    search: (options: {query:string, page: number}) => makeRequest<{"page": number,
+      "pageSize": number,
+      "total": number,
+      "items": Item[]}>(`items?q=${options.query}&page=${options.page}&pageSize=20`),
     },
-    execute: !isLoadingToken && !token
-  })
-
-  return (isLoadingToken || isLoggingIn) ? <Detail isLoading /> :
-
-  <HomeBoxProviderContext.Provider value={{token}}>
-    {children}
-  </HomeBoxProviderContext.Provider>
-}
+    labels: {
+      create: (body: CreateLabelRequest) => makeRequest<Label>("labels", {method: "POST",body: JSON.stringify(body)}),
+      delete: (id: string) => makeRequest(`labels/${id}`, {method: "DELETE"}),
+    list: () => makeRequest<Label[]>("labels")
+  },
+  locations: {
+    list: () => makeRequest<Location[]>("locations")
+  },
+  users: {
+    login: () => fetch(buildUrl("users/login"), {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+        stayLoggedIn: true
+      })
+    })
+  }
+};
