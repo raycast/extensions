@@ -45,7 +45,8 @@ async function RefreshBlocking() {
             loadingToast.message = "Closing all blocked website tabs...";
             await (0, browserRefresher_1.closeBlockedTabs)(blockedDomains);
             await new Promise((resolve) => setTimeout(resolve, 500));
-            loadingToast.message = "Enabling 100% guaranteed blocking (all methods)...";
+            loadingToast.message =
+                "Enabling 100% guaranteed blocking (all methods)...";
             loadingToast.message = "Please enter password when prompted";
             const result = await (0, guaranteed100PercentBlocking_1.enable100PercentBlocking)(blockedDomains);
             if (result.success) {

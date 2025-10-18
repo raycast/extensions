@@ -265,9 +265,17 @@ async function forceBrowserDNSFlush() {
   end tell
   `;
     const browserProcesses = [
-        { name: "Google Chrome", process: "Google Chrome", script: chromeFlushScript },
+        {
+            name: "Google Chrome",
+            process: "Google Chrome",
+            script: chromeFlushScript,
+        },
         { name: "Arc", process: "Arc", script: arcFlushScript },
-        { name: "Microsoft Edge", process: "Microsoft Edge", script: edgeFlushScript },
+        {
+            name: "Microsoft Edge",
+            process: "Microsoft Edge",
+            script: edgeFlushScript,
+        },
         { name: "Brave", process: "Brave Browser", script: "" },
         { name: "Opera", process: "Opera", script: "" },
         { name: "Vivaldi", process: "Vivaldi", script: "" },

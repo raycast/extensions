@@ -85,9 +85,7 @@ async function resolveDomains(domains) {
     for (const domain of domains) {
         try {
             const { stdout } = await execAsync(`dig +short ${domain} A ${domain} AAAA 2>/dev/null || true`);
-            const resolvedIPs = stdout
-                .split("\n")
-                .filter((line) => {
+            const resolvedIPs = stdout.split("\n").filter((line) => {
                 const trimmed = line.trim();
                 return (trimmed &&
                     !trimmed.endsWith(".") &&
