@@ -306,7 +306,16 @@ export class StorageService {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.PROJECT_CONTEXTS);
       const contextsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.PROJECT_CONTEXTS);
 
-      const contexts = JSON.parse(contextsJson, this.dateReviver) as ProjectContext[];
+      const contexts = JSON.parse(contextsJson, this.dateReviver);
+
+      // Ensure contexts is always an array
+      if (!Array.isArray(contexts)) {
+        logger.warn('Project contexts is not an array, resetting to empty array', {
+          type: typeof contexts,
+          value: contexts
+        });
+        return [];
+      }
 
       if (sessionId) {
         return contexts.filter(c => c.sessionId === sessionId);
@@ -501,10 +510,15 @@ export class StorageService {
    * Private: Delete project contexts by session ID
    */
   private async deleteProjectContextsBySession(sessionId: string): Promise<void> {
-    const contexts = await this.getProjectContexts();
-    const filteredContexts = contexts.filter(c => c.sessionId !== sessionId);
+    try {
+      const contexts = await this.getProjectContexts();
+      const filteredContexts = contexts.filter(c => c.sessionId !== sessionId);
 
-    await LocalStorage.setItem(STORAGE_KEYS.PROJECT_CONTEXTS, JSON.stringify(filteredContexts, this.dateReplacer));
+      await LocalStorage.setItem(STORAGE_KEYS.PROJECT_CONTEXTS, JSON.stringify(filteredContexts, this.dateReplacer));
+    } catch (error) {
+      logger.error('Failed to delete project contexts by session', { sessionId, error });
+      // Don't throw - this is a cleanup operation and shouldn't prevent conversation deletion
+    }
   }
 
   /**
