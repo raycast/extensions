@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, Clipboard, showHUD } from "@raycast/api";
 
 interface FormValues {
@@ -123,7 +123,7 @@ const languages = {
   },
 };
 
-export default function Command() {
+export default function Command(): JSX.Element {
   const lang = "en";
   const t = languages[lang as keyof typeof languages] || languages.zh;
 
