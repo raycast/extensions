@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, Clipboard, showHUD } from "@raycast/api";
 
-interface FormValues {
-  inputString: string;
-  removeChars: string;
-  separator: string;
-  decorator: string;
-  outputSeparator: string;
-}
-
 // 语言配置
 const languages = {
   zh: {
@@ -160,9 +152,9 @@ export default function Command() {
     dec: string,
     outSep: string,
     dedup: boolean,
-  ): string => {
+  ): { result: string; detectedSep: string } => {
     if (!input.trim()) {
-      return "";
+      return { result: "", detectedSep: "" };
     }
 
     try {
@@ -177,26 +169,27 @@ export default function Command() {
 
       // 确定使用的分隔符
       let actualSeparator = sep;
+      let detectedSep = "";
       if (!actualSeparator) {
         actualSeparator = detectSeparator(processedInput);
-        setDetectedSeparator(actualSeparator);
+        detectedSep = actualSeparator;
       }
 
       if (!actualSeparator) {
         // 如果没有检测到分隔符，将整个字符串作为单个元素
         const trimmed = processedInput.trim();
-        if (!trimmed) return "";
+        if (!trimmed) return { result: "", detectedSep };
 
         if (dec === "[]") {
-          return `[${trimmed}]`;
+          return { result: `[${trimmed}]`, detectedSep };
         } else if (dec === "()") {
-          return `(${trimmed})`;
+          return { result: `(${trimmed})`, detectedSep };
         } else if (dec === "{}") {
-          return `{${trimmed}}`;
+          return { result: `{${trimmed}}`, detectedSep };
         } else if (dec === "") {
-          return trimmed;
+          return { result: trimmed, detectedSep };
         } else {
-          return `${dec}${trimmed}${dec}`;
+          return { result: `${dec}${trimmed}${dec}`, detectedSep };
         }
       }
 
@@ -210,7 +203,7 @@ export default function Command() {
         .filter((part) => part.length > 0);
 
       if (parts.length === 0) {
-        return "";
+        return { result: "", detectedSep };
       }
 
       // 去重处理
@@ -235,7 +228,7 @@ export default function Command() {
 
       // 使用指定的输出分隔符
       const finalOutputSeparator = outSep === "\\t" ? "\t" : outSep === "\\n" ? "\n" : outSep;
-      return decoratedParts.join(finalOutputSeparator);
+      return { result: decoratedParts.join(finalOutputSeparator), detectedSep };
     } catch (err) {
       throw new Error(t.labels.formatError);
     }
@@ -245,13 +238,14 @@ export default function Command() {
   useEffect(() => {
     try {
       setError("");
-      const result = formatString(inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates);
+      const { result, detectedSep } = formatString(inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates);
       setFormattedResult(result);
+      setDetectedSeparator(detectedSep);
     } catch (err) {
       setError(err instanceof Error ? err.message : t.labels.formatError);
       setFormattedResult("");
     }
-  }, [inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates]);
+  }, [inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates, t]);
 
   // 复制到剪贴板
   const copyToClipboard = async () => {
