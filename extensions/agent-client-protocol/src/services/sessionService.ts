@@ -547,7 +547,12 @@ export class SessionService implements SessionServiceInterface {
         agentMessageIds: agentMessages.map(msg => msg.id)
       });
 
-      await this.persistenceService.saveSessionSnapshot(session);
+      const latestSession = await this.storageService.getConversation(sessionId);
+      if (latestSession) {
+        await this.persistenceService.saveSessionSnapshot(latestSession);
+      } else {
+        await this.persistenceService.saveSessionSnapshot(session);
+      }
 
       PerformanceLogger.end(operationId, {
         success: true,
@@ -879,8 +884,12 @@ export class SessionService implements SessionServiceInterface {
       }
     }
 
+    const text = parts.length > 1
+      ? parts.join('\n\n')
+      : parts[0] ?? '';
+
     return {
-      text: parts.join('\n\n').trim(),
+      text,
       messageType
     };
   }
