@@ -543,7 +543,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
 
     // Wrap assistant messages in a code block
     if (message.role === "assistant") {
-      return `\`\`\`\n${message.content}\n\`\`\``;
+      return `${message.content}`;
     }
 
     return message.content;
