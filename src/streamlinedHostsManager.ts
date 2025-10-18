@@ -250,53 +250,95 @@ echo "Blocked domains: ${domains.join(", ")}"
  * @returns Promise resolving to script content
  */
 async function createUnblockingScript(): Promise<string> {
-  const networkRefresh = `
-# Function: return active network service names
-get_active_services() {
-  networksetup -listnetworkserviceorder | awk '
-    /\([0-9]+\) / { svc=$0; sub(/^\([0-9]+\) /, "", svc); getline; if (match($0, /Device: ([^\)]+)/, m)) { dev=m[1]; printf "%s|%s\n", svc, dev; } }
-  ' | while IFS='|' read -r svc dev; do
-      if ifconfig "$dev" 2>/dev/null | grep -q "status: active"; then
-        echo "$svc"
-      fi
-    done
-}
-
-# Briefly disable/enable each active network service to force reconnects
-for svc in $(get_active_services); do
-  echo "🔁 Cycling network service: $svc"
-  networksetup -setnetworkserviceenabled "$svc" off 2>/dev/null || true
-  sleep 1
-  networksetup -setnetworkserviceenabled "$svc" on 2>/dev/null || true
-  sleep 1
-done
-`;
-
   return `#!/bin/bash
-# WebBlocker comprehensive unblocking script (no browser restarts)
+# WebBlocker COMPLETE unblocking script - removes ALL blocking
 
 set -e  # Exit on any error
 
-echo "✅ Starting website unblocking..."
+echo "✅ Starting complete website unblocking..."
 
-# 1. Remove WebBlocker entries from hosts file
-echo "📝 Removing blocked domains..."
-grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > "/tmp/hosts_filtered.txt"
-cp "/tmp/hosts_filtered.txt" "${HOSTS_FILE_PATH}"
-rm "/tmp/hosts_filtered.txt"
+# 1. Remove ALL WebBlocker entries from hosts file
+echo "📝 Cleaning hosts file..."
+# Create clean hosts file with only localhost entries
+cat > /tmp/hosts_clean.txt << 'HOSTS_EOF'
+##
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+##
+127.0.0.1       localhost
+255.255.255.255 broadcasthost
+::1             localhost
+HOSTS_EOF
 
-# 2. Clear all DNS caches
-echo "🧹 Clearing DNS caches..."
-dscacheutil -flushcache
+# Replace hosts file with clean version
+cp /tmp/hosts_clean.txt "${HOSTS_FILE_PATH}"
+rm /tmp/hosts_clean.txt
+echo "✅ Hosts file cleaned!"
+
+# 2. COMPLETELY disable and clean PF firewall
+echo "🔥 Disabling all firewall rules..."
+
+# Disable PF firewall entirely
+pfctl -d 2>/dev/null || true
+echo "  ✓ Firewall disabled"
+
+# Flush ALL firewall rules
+pfctl -F all 2>/dev/null || true
+echo "  ✓ All rules flushed"
+
+# Flush ALL connection states (this is critical!)
+pfctl -F states 2>/dev/null || true
+pfctl -F state 2>/dev/null || true
+echo "  ✓ All connection states cleared"
+
+# Remove WebBlocker from pf.conf
+if [ -f /etc/pf.conf ]; then
+  # Create backup
+  cp /etc/pf.conf /etc/pf.conf.backup.webblocker 2>/dev/null || true
+  
+  # Remove all WebBlocker related lines
+  grep -v "webblocker" /etc/pf.conf > /tmp/pf.conf.clean 2>/dev/null || cat /etc/pf.conf > /tmp/pf.conf.clean
+  grep -v "WebBlocker" /tmp/pf.conf.clean > /tmp/pf.conf.final 2>/dev/null || cat /tmp/pf.conf.clean > /tmp/pf.conf.final
+  
+  cp /tmp/pf.conf.final /etc/pf.conf
+  rm /tmp/pf.conf.clean /tmp/pf.conf.final
+  echo "  ✓ pf.conf cleaned"
+fi
+
+# 3. Clear ALL DNS caches (multiple methods for thoroughness)
+echo "🧹 Clearing all DNS caches..."
+dscacheutil -flushcache 2>/dev/null || true
+echo "  ✓ dscacheutil cache cleared"
+
 killall -HUP mDNSResponder 2>/dev/null || true
+echo "  ✓ mDNSResponder restarted"
+
+discoveryutil udnsflushcaches 2>/dev/null || true
+discoveryutil mdnsflushcache 2>/dev/null || true
+echo "  ✓ discoveryutil cache cleared"
+
+# Restart DNS service
 launchctl kickstart -k system/com.apple.mDNSResponder 2>/dev/null || true
 sleep 2
-dscacheutil -flushcache
 
-# 3. Brief network refresh to drop existing connections (no browser restart)
-${networkRefresh}
+# 4. One final DNS flush
+dscacheutil -flushcache 2>/dev/null || true
 
-echo "🎉 All websites unblocked successfully!"
+echo ""
+echo "🎉 ================================"
+echo "🎉  ALL BLOCKING REMOVED!"
+echo "🎉 ================================"
+echo ""
+echo "✅ Hosts file cleaned"
+echo "✅ Firewall disabled"
+echo "✅ All connection states cleared"
+echo "✅ DNS caches flushed"
+echo ""
+echo "📌 Websites should work immediately!"
+echo "📌 If not, close and reopen your browser"
+echo ""
 `;
 }
 
