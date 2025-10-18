@@ -7,7 +7,7 @@ import { getCachedImagePath, setCachedImagePath } from "./cache";
 import { DEFAULT_RETRIES, DEFAULT_SLEEP, HEADERS, ImageLayouts, ImageLicenses } from "./consts";
 import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
 
-import { Clipboard, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
 import path from "path";
 
@@ -169,12 +169,8 @@ export async function saveImage(image: DuckDuckGoImage) {
     const filename = `${cleanTitle || "duckduckgo_image"}_${image.image_token}${extension}`;
 
     // Get save directory from preferences (with fallback to ~/Downloads)
-    const allPreferences = getPreferenceValues<Preferences>();
+    const allPreferences = getPreferenceValues<Preferences.SearchImage>();
     const saveDirectory = expandTildePath(allPreferences.saveDirectory || "~/Downloads");
-    if (!saveDirectory) {
-      // noinspection ExceptionCaughtLocallyJS
-      throw new Error("Save directory is not set");
-    }
 
     // Ensure the save directory exists
     await fs.promises.mkdir(saveDirectory, { recursive: true });
