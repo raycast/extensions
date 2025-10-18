@@ -530,11 +530,10 @@ function ColorWheel({ device, onUpdate }: { device: WLEDDevice; onUpdate: () => 
     pop();
   }
 
-  async function applyPresetColor(r: number, g: number, b: number, name: string) {
+  async function applyPresetColor(r: number, g: number, b: number) {
     setRed(String(r));
     setGreen(String(g));
     setBlue(String(b));
-    console.log("Applying preset color:", name, r, g, b);
     setHexInput(rgbToHex(r, g, b));
   }
 
@@ -547,37 +546,37 @@ function ColorWheel({ device, onUpdate }: { device: WLEDDevice; onUpdate: () => 
             <Action
               title="Red"
               icon={{ source: Icon.CircleFilled, tintColor: Color.Red }}
-              onAction={() => applyPresetColor(255, 0, 0, "Red")}
+              onAction={() => applyPresetColor(255, 0, 0)}
             />
             <Action
               title="Green"
               icon={{ source: Icon.CircleFilled, tintColor: Color.Green }}
-              onAction={() => applyPresetColor(0, 255, 0, "Green")}
+              onAction={() => applyPresetColor(0, 255, 0)}
             />
             <Action
               title="Blue"
               icon={{ source: Icon.CircleFilled, tintColor: Color.Blue }}
-              onAction={() => applyPresetColor(0, 0, 255, "Blue")}
+              onAction={() => applyPresetColor(0, 0, 255)}
             />
             <Action
               title="Yellow"
               icon={{ source: Icon.CircleFilled, tintColor: Color.Yellow }}
-              onAction={() => applyPresetColor(255, 255, 0, "Yellow")}
+              onAction={() => applyPresetColor(255, 255, 0)}
             />
             <Action
               title="Cyan"
               icon={{ source: Icon.CircleFilled, tintColor: Color.Blue }}
-              onAction={() => applyPresetColor(0, 255, 255, "Cyan")}
+              onAction={() => applyPresetColor(0, 255, 255)}
             />
             <Action
               title="Magenta"
               icon={{ source: Icon.CircleFilled, tintColor: Color.Magenta }}
-              onAction={() => applyPresetColor(255, 0, 255, "Magenta")}
+              onAction={() => applyPresetColor(255, 0, 255)}
             />
             <Action
               title="White"
               icon={{ source: Icon.CircleFilled, tintColor: Color.PrimaryText }}
-              onAction={() => applyPresetColor(255, 255, 255, "White")}
+              onAction={() => applyPresetColor(255, 255, 255)}
             />
           </ActionPanel.Section>
         </ActionPanel>
