@@ -3,6 +3,7 @@
   "schemaVersion": 1,
   "name": "web-blocker",
   "title": "Webblocker",
+  "version": "1.0.0",
   "description": "Stay focused and block distracting websites instantly. Works in all browsers, blocks even open tabs, and can't be easily bypassed.",
   "icon": "icon.png",
   "author": "ahmad_bulbul",
@@ -10,7 +11,7 @@
     "Productivity"
   ],
   "license": "MIT",
-  "version": "1.0.0",
+  "access": "public",
   "commands": [
     {
       "name": "add-website",
@@ -92,5 +93,8 @@
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.4",
     "typescript": "^5.9.3"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
