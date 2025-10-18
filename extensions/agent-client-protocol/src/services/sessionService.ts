@@ -47,7 +47,7 @@ export class SessionService implements SessionServiceInterface {
 
   private persistenceService: PersistenceService;
 
-  private activeStreamingMessages: Map<string, { assistant?: string; user?: string }> = new Map();
+  private activeStreamingMessages: Map<string, Partial<Record<'assistant' | 'user', { id: string; content: string }>>> = new Map();
 
   constructor(
     private storageService: StorageService,
@@ -943,7 +943,7 @@ export class SessionService implements SessionServiceInterface {
       : `${previousContent}${incomingContent}`;
   }
 
-  private getStreamingState(sessionId: string): { assistant?: string; user?: string } {
+  private getStreamingState(sessionId: string): Partial<Record<'assistant' | 'user', { id: string; content: string }>> {
     let state = this.activeStreamingMessages.get(sessionId);
     if (!state) {
       state = {};
@@ -958,17 +958,21 @@ export class SessionService implements SessionServiceInterface {
       return;
     }
 
-    const activeId = state[role];
-    if (!activeId) {
+    const entry = state[role];
+    if (!entry) {
       return;
     }
 
-    const target = session.messages.find((message) => message.id === activeId);
+    const target = session.messages.find((message) => message.id === entry.id);
     if (target) {
       target.metadata.isStreaming = false;
     }
 
     delete state[role];
+
+    if (!state.assistant && !state.user) {
+      this.activeStreamingMessages.delete(session.sessionId);
+    }
   }
 
   private flattenToolCallContent(contents?: ToolCallContent[] | null): string {
@@ -1518,6 +1522,9 @@ export class SessionService implements SessionServiceInterface {
     let messageUpdated = false;
     let forceFullSave = false;
     const streamingState = this.getStreamingState(sessionId);
+    const roleKey = message.role === 'assistant' || message.role === 'user'
+      ? message.role
+      : null;
 
     // For tool calls, update existing message by tool call ID
     if (message.role === 'tool' && message.toolCall?.callId) {
@@ -1565,12 +1572,18 @@ export class SessionService implements SessionServiceInterface {
     // For streaming text messages, merge content with the most recent streaming message of same role
     if (!messageUpdated && message.metadata.isStreaming) {
       let streamingIndex = -1;
-      if (message.role === 'assistant' || message.role === 'user') {
-        const activeId = streamingState[message.role];
-        if (activeId) {
-          streamingIndex = session.messages.findIndex((candidate) => candidate.id === activeId);
+      let existingEntryContent: string | undefined;
+      if (roleKey) {
+        const entry = streamingState[roleKey];
+        if (entry) {
+          streamingIndex = session.messages.findIndex((candidate) => candidate.id === entry.id);
           if (streamingIndex < 0) {
-            delete streamingState[message.role];
+            delete streamingState[roleKey];
+            if (!streamingState.assistant && !streamingState.user) {
+              this.activeStreamingMessages.delete(sessionId);
+            }
+          } else {
+            existingEntryContent = entry.content;
           }
         }
       }
@@ -1607,15 +1620,20 @@ export class SessionService implements SessionServiceInterface {
         });
 
         // Merge the latest chunk with the existing streaming content, supporting both cumulative and delta payloads
-        lastMessage.content = this.mergeStreamingContent(
-          lastMessage.content ?? "",
+        const previousContent = existingEntryContent ?? lastMessage.content ?? "";
+        const mergedContent = this.mergeStreamingContent(
+          previousContent,
           message.content ?? ""
         );
+        lastMessage.content = mergedContent;
         lastMessage.timestamp = message.timestamp;
         notificationTarget = lastMessage;
         messageUpdated = true;
-        if (lastMessage.role === 'assistant' || lastMessage.role === 'user') {
-          streamingState[lastMessage.role] = lastMessage.id;
+        if (roleKey) {
+          streamingState[roleKey] = {
+            id: lastMessage.id,
+            content: mergedContent
+          };
         }
 
         logger.info('After replacement', {
@@ -1623,14 +1641,14 @@ export class SessionService implements SessionServiceInterface {
           totalLength: lastMessage.content.length,
           lastSection: lastMessage.content.slice(-100)
         });
-      } else if (message.role === 'assistant' || message.role === 'user') {
-        this.markStreamingComplete(session, message.role);
+      } else if (roleKey) {
+        this.markStreamingComplete(session, roleKey);
         forceFullSave = true;
       }
     }
 
-    if (!notificationTarget.metadata?.isStreaming && (notificationTarget.role === 'assistant' || notificationTarget.role === 'user')) {
-      this.markStreamingComplete(session, notificationTarget.role);
+    if (!notificationTarget.metadata?.isStreaming && roleKey) {
+      this.markStreamingComplete(session, roleKey);
     }
 
     // If no existing message was updated, add as new message
@@ -1643,8 +1661,11 @@ export class SessionService implements SessionServiceInterface {
       });
 
       session.messages.push(message);
-      if (message.metadata.isStreaming && (message.role === 'assistant' || message.role === 'user')) {
-        streamingState[message.role] = message.id;
+      if (message.metadata.isStreaming && roleKey) {
+        streamingState[roleKey] = {
+          id: message.id,
+          content: message.content ?? ""
+        };
       }
     }
 
