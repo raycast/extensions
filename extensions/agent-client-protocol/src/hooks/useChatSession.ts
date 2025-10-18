@@ -367,6 +367,15 @@ export function useChatSession(): UseChatSessionResult {
     }
   }, [status, conversation, activeAgent, sessionService, startSession, refreshConversation, connection, acpClient]);
 
+  const runSlashCommand = useCallback(
+    async (commandName: string, input?: string) => {
+      const trimmedInput = input?.trim();
+      const payload = trimmedInput ? `/${commandName} ${trimmedInput}` : `/${commandName}`;
+      await sendMessage(payload);
+    },
+    [sendMessage]
+  );
+
   const resetSession = useCallback(async () => {
     try {
       if (conversation) {
@@ -550,7 +559,8 @@ export function useChatSession(): UseChatSessionResult {
       addDirectoryContexts,
       removeContext,
       refreshContexts,
-      switchMode
+      switchMode,
+      runSlashCommand
     }),
     [
       conversation,
@@ -568,7 +578,8 @@ export function useChatSession(): UseChatSessionResult {
       addDirectoryContexts,
       removeContext,
       refreshContexts,
-      switchMode
+      switchMode,
+      runSlashCommand
     ]
   );
 }

@@ -10,6 +10,7 @@ import {
   ActionPanel,
   Alert,
   Color,
+  Form,
   Icon,
   List,
   confirmAlert,
@@ -377,6 +378,49 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     );
   }
 
+  function renderSlashCommandActions() {
+    const commands = chat.conversation?.availableCommands ?? [];
+    if (commands.length === 0) {
+      return null;
+    }
+
+    return (
+      <ActionPanel.Section title="Slash Commands">
+        <ActionPanel.Submenu title="Run Slash Command" icon={Icon.Bolt}>
+          {commands.map((command) =>
+            command.input?.hint ? (
+              <Action.SubmitForm
+                key={command.name}
+                title={`/${command.name}`}
+                icon={Icon.Bolt}
+                onSubmit={async ({ argument }: { argument?: string }) => {
+                  await chat.runSlashCommand(command.name, argument);
+                }}
+              >
+                <Form.Description text={command.description} />
+                <Form.TextField
+                  id="argument"
+                  title="Input"
+                  placeholder={command.input?.hint ?? ""}
+                  autoFocus
+                />
+              </Action.SubmitForm>
+            ) : (
+              <Action
+                key={command.name}
+                title={`/${command.name}`}
+                icon={Icon.Bolt}
+                onAction={async () => {
+                  await chat.runSlashCommand(command.name);
+                }}
+              />
+            )
+          )}
+        </ActionPanel.Submenu>
+      </ActionPanel.Section>
+    );
+  }
+
   async function handleSend(message: string) {
     if (chat.status === "connecting") {
       await showToast({
@@ -633,6 +677,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
                 }}
               />
             )}
+            {renderSlashCommandActions()}
             {message.content && (
               <Action.CopyToClipboard
                 title="Copy Message"
@@ -641,20 +686,6 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
               />
             )}
             {renderContextActions()}
-            {chat.conversation?.availableModes && chat.conversation.availableModes.length > 0 && (
-              <ActionPanel.Section title="Mode">
-                {chat.conversation.availableModes.map((mode) => (
-                  <Action
-                    key={mode.id}
-                    title={`Switch to ${mode.name}`}
-                    icon={chat.conversation?.currentMode?.id === mode.id ? Icon.CheckCircle : Icon.Circle}
-                    onAction={async () => {
-                      await chat.switchMode(mode.id);
-                    }}
-                  />
-                ))}
-              </ActionPanel.Section>
-            )}
             <ActionPanel.Section>
               <Action
                 title="Restart Conversation"
@@ -739,20 +770,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
                   }}
                 />
               )}
-              {chat.conversation?.availableModes && chat.conversation.availableModes.length > 0 && (
-                <ActionPanel.Section title="Mode">
-                  {chat.conversation.availableModes.map((mode) => (
-                    <Action
-                      key={mode.id}
-                      title={`Switch to ${mode.name}`}
-                      icon={chat.conversation?.currentMode?.id === mode.id ? Icon.CheckCircle : Icon.Circle}
-                      onAction={async () => {
-                        await chat.switchMode(mode.id);
-                      }}
-                    />
-                  ))}
-                </ActionPanel.Section>
-              )}
+              {renderSlashCommandActions()}
               <Action
                 title="Restart Conversation"
                 icon={Icon.Repeat}

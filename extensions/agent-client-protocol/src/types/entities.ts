@@ -1,3 +1,5 @@
+import type { AvailableCommand } from "./acp";
+
 /**
  * Core Entity Models for Agent Client Protocol Extension
  *
@@ -183,6 +185,9 @@ export interface ConversationSession {
     /** Optional description of what this mode does */
     description?: string | null;
   }>;
+
+  /** Available slash commands advertised by the agent */
+  availableCommands?: AvailableCommand[];
 }
 
 /**

@@ -1484,6 +1484,7 @@ export class SessionService implements SessionServiceInterface {
 
     let notificationTarget: SessionMessage = message;
     let messageUpdated = false;
+    let forceFullSave = false;
 
     // For tool calls, update existing message by tool call ID
     if (message.role === 'tool' && message.toolCall?.callId) {
@@ -1515,6 +1516,17 @@ export class SessionService implements SessionServiceInterface {
         notificationTarget = session.messages[existingIndex];
         messageUpdated = true;
       }
+    }
+
+    if (update.update?.sessionUpdate === 'available_commands_update') {
+      const commandsUpdate = update.update as AvailableCommandsUpdate;
+      session.availableCommands = commandsUpdate.availableCommands;
+      forceFullSave = true;
+
+      logger.info('Available commands updated for session', {
+        sessionId,
+        commandCount: commandsUpdate.availableCommands.length
+      });
     }
 
     // For streaming text messages, merge content with the last streaming message of same role
@@ -1566,7 +1578,7 @@ export class SessionService implements SessionServiceInterface {
     }
 
     session.lastActivity = new Date();
-    if (messageUpdated) {
+    if (messageUpdated || forceFullSave) {
       await this.storageService.saveConversation(session);
       await this.persistenceService.saveSessionSnapshot(session);
     } else {
