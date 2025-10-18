@@ -9,10 +9,6 @@ interface FormValues {
   outputSeparator: string;
 }
 
-interface Preferences {
-  language: string;
-}
-
 // 语言配置
 const languages = {
   zh: {
@@ -128,8 +124,7 @@ const languages = {
 };
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const lang = preferences.language || "en";
+  const lang = "en";
   const t = languages[lang as keyof typeof languages] || languages.zh;
 
   const [inputString, setInputString] = useState<string>("");
