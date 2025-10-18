@@ -1,6 +1,6 @@
 # Search Unicode
 
-Search Unicode is a set of Raycast plugins to lookup and reverse lookup Unicode characters and emoji with their names. This is a port of [Search Unicode for Alfred] workflows and [Search Unicode for Flow Launcher] plugin.
+Search Unicode is a Raycast extension to lookup and reverse lookup Unicode characters with their names. This is a port of [Search Unicode for Alfred] workflows and [Search Unicode for Flow Launcher] plugin.
 
 [Search Unicode for Alfred]: https://github.com/blueset/alfred-search-unicode/
 [Search Unicode for Flow Launcher]: https://github.com/blueset/flow-search-unicode/
