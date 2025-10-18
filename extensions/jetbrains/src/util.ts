@@ -221,10 +221,13 @@ export const getJetBrainsToolboxApp = async (): Promise<ToolboxApp | undefined> 
   const version = await execPromise(`defaults read "${jb.path}/Contents/Info.plist" CFBundleShortVersionString`).then(
     ({ stdout }) => stdout.trim()
   );
+  const majorVersion = parseInt(version.split(".")[0], 10);
+  const isSupportedVersion = !isNaN(majorVersion) && majorVersion >= 2;
+
   return {
     ...jb,
     version,
-    isSupportedVersion: Boolean(version.match(/^[2-9]\./)),
+    isSupportedVersion,
   };
 };
 

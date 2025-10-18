@@ -14,8 +14,8 @@ type ExtensionPreferences = {
   "toolsInstall": string,
   /** Use protocol urls if missing shell scripts - Try to use the jetbrain://app-name protocol url to open projects if tools are not installed (not recommended) */
   "fallback": boolean,
-  /** Use historic project files - Add projects from previous app installs */
-  "historic": boolean
+  /** Use Frecency sorting for projects - Use Raycast's built in frecency sorting to order the list of projects */
+  "frecencySorting": boolean
 }
 
 /** Preferences accessible in all the extension's commands */
@@ -35,12 +35,3 @@ declare namespace Arguments {
   export type RecentMenu = {}
 }
 
-
-declare module "swift:*" {
-  function run<T = unknown, U = any>(command: string, input?: U): Promise<T>;
-  export default run;
-	export class SwiftError extends Error {
-    stderr: string;
-    stdout: string;
-  }
-}
