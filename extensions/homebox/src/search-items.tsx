@@ -2,8 +2,8 @@ import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, showToast, 
 import { useForm } from "@raycast/utils";
 import { CreateItemRequest } from "./types";
 import { useState } from "react";
-import { homebox } from "./homebox";
-import { useItems, useLabels, useLocations } from "./hooks";
+import { buildUrl, homebox } from "./homebox";
+import { useItem, useItems, useLabels, useLocations, useToken } from "./hooks";
 
 export default function SearchItems() {
   const [query, setQuery] = useState("");
@@ -17,7 +17,8 @@ export default function SearchItems() {
       {text: item.purchasePrice.toString(), tooltip: "Purchase Price"},
       {icon: Icon.Tag, text: item.labels.length.toString(), tooltip: "Labels"}
     ]} actions={<ActionPanel>
-      <Action.Push icon={Icon.Box} title="Create Item / Asset" target={<CreateItem />} onPop={mutate} />
+      <Action.Push icon={Icon.Box} title="View Item" target={<ViewItem itemId={item.id} />} />
+      <Action.Push icon={Icon.Plus} title="Create Item / Asset" target={<CreateItem />} onPop={mutate} />
     <Action icon={Icon.Trash} title="Delete" onAction={() => confirmAlert({
       title: "Confirm",
       message: "Are you sure you want to delete this item?",
@@ -46,6 +47,26 @@ export default function SearchItems() {
       }
     })} style={Action.Style.Destructive} />
     </ActionPanel>} />)}
+  </List>
+}
+
+function ViewItem({itemId}:{itemId:string}) {
+  // const {isLoadingToken, token} = useToken();
+  // console.log(token)
+  const {isLoading,item} = useItem(itemId);
+  // const markdown = (item?.attachments.length && !!token) ? `![](${buildUrl(`items/${itemId}/attachments/${item.attachments[0].id}?access_token=${token}`)}` : "";
+  const markdown = ""
+  return <List isLoading={isLoading} isShowingDetail>
+    <List.Item title="Details" detail={<List.Item.Detail markdown={markdown} metadata={item && <List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.Label title="Quantity" text={item.quantity.toString()} />
+      <List.Item.Detail.Metadata.Label title="Serial Number" text={item.serialNumber} />
+      <List.Item.Detail.Metadata.Label title="Model Number" text={item.modelNumber} />
+      <List.Item.Detail.Metadata.Label title="Manufacturer" text={item.manufacturer} />
+      <List.Item.Detail.Metadata.Label title="Insured" text={item.insured ? "Yes" : "No"} />
+      <List.Item.Detail.Metadata.Label title="Archived" text={item.archived ? "Yes" : "No"} />
+      <List.Item.Detail.Metadata.Label title="Notes" text={item.notes} />
+      <List.Item.Detail.Metadata.Label title="Asset ID" text={item.assetId} />
+    </List.Item.Detail.Metadata>} />} />
   </List>
 }
 
@@ -88,17 +109,17 @@ function CreateItem() {
     }
   })
   return <Form isLoading={isLoadingLocations || isLoadingLabels} actions={<ActionPanel>
-    <Action.SubmitForm icon={Icon.Box} title="Create" onSubmit={handleSubmit} />
+    <Action.SubmitForm icon={Icon.Plus} title="Create" onSubmit={handleSubmit} />
   </ActionPanel>}>
     <Form.Dropdown title="Parent Location" {...itemProps.locationId}>
       <Form.Dropdown.Item title="Select a Location" value="" />
-      {locations.map(location => <Form.Dropdown.Item key={location.id} title={location.name} value={location.id} />)}
+      {locations.map(location => <Form.Dropdown.Item key={location.id} icon={Icon.Pin} title={location.name} value={location.id} />)}
     </Form.Dropdown>
 <Form.TextField title="Item Name" {...itemProps.name} />
 <Form.TextField title="Item Quantity" {...itemProps.quantity} />
 <Form.TextArea title="Item Description" {...itemProps.description} />
 <Form.TagPicker title="Labels" placeholder="Select Labels" {...itemProps.labelIds}>
-  {labels.map(label => <Form.TagPicker.Item key={label.id} title={label.name} value={label.id} />)}
+  {labels.map(label => <Form.TagPicker.Item key={label.id} icon={Icon.Tag} title={label.name} value={label.id} />)}
 </Form.TagPicker>
   </Form>
 }

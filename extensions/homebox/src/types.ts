@@ -23,6 +23,26 @@ export type Item = {
     "purchasePrice": number
     labels: Label[]
 }
+type Attachment = {
+    id: string
+}
+export type DetailedItem = Item & {
+        "serialNumber": string;
+        "modelNumber": string;
+        "manufacturer": string;
+        "lifetimeWarranty": boolean
+        "warrantyExpires": string
+        "warrantyDetails": string
+        "purchaseTime": string
+        "purchaseFrom": string
+        "soldTime": string
+        "soldTo": string
+        "soldPrice": number
+        "soldNotes":string
+        "notes":string
+        "attachments": Attachment[],
+        // "fields": []
+}
 export type CreateItemRequest = {
     locationId: string;
     name: string;
@@ -38,4 +58,13 @@ export type Location = {
     "createdAt": string
     "updatedAt": string
     "itemCount": number
+}
+
+export type GroupStatistics = {
+  "totalUsers": number
+  "totalItems": number
+  "totalLocations": number
+  "totalLabels": number
+  "totalItemPrice": number
+  "totalWithWarranty": number
 }

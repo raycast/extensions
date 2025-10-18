@@ -38,6 +38,12 @@
   ],
   "commands": [
     {
+      "name": "home",
+      "title": "Home",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "search-items",
       "title": "Search Items",
       "description": "",

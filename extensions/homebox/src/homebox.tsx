@@ -1,5 +1,5 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { CreateItemRequest, CreateLabelRequest, Item, Label, Location } from "./types";
+import { CreateItemRequest, CreateLabelRequest, DetailedItem, GroupStatistics, Item, Label, Location } from "./types";
 
 const { url, username, password } = getPreferenceValues<Preferences>();
 
@@ -46,12 +46,14 @@ async function makeRequest<T>(endpoint: string, options?: RequestInit) {
   }
 }
 export const homebox = {
+  getGroupStatistics: () => makeRequest<GroupStatistics>("groups/statistics"),
   items: {
     create: (body: CreateItemRequest) => makeRequest<Item>("items", {
       method: "POST",
       body: JSON.stringify(body)
     }),
     delete: (id: string) => makeRequest(`items/${id}`, {method: "DELETE"}),
+    get: (id: string) => makeRequest<DetailedItem>(`items/${id}`),
     search: (options: {query:string, page: number}) => makeRequest<{"page": number,
       "pageSize": number,
       "total": number,
