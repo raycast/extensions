@@ -47,6 +47,8 @@ export class SessionService implements SessionServiceInterface {
 
   private persistenceService: PersistenceService;
 
+  private activeStreamingMessages: Map<string, { assistant?: string; user?: string }> = new Map();
+
   constructor(
     private storageService: StorageService,
     private acpClient: ACPClient,
@@ -361,6 +363,8 @@ export class SessionService implements SessionServiceInterface {
           { sessionId, expectedAgent: session.agentConfigId, providedAgent: agentConfig.id }
         );
       }
+
+      this.markStreamingComplete(session, 'assistant');
 
       if (session.status !== 'active') {
         throw new ACPError(
@@ -939,6 +943,34 @@ export class SessionService implements SessionServiceInterface {
       : `${previousContent}${incomingContent}`;
   }
 
+  private getStreamingState(sessionId: string): { assistant?: string; user?: string } {
+    let state = this.activeStreamingMessages.get(sessionId);
+    if (!state) {
+      state = {};
+      this.activeStreamingMessages.set(sessionId, state);
+    }
+    return state;
+  }
+
+  private markStreamingComplete(session: ConversationSession, role: 'assistant' | 'user'): void {
+    const state = this.activeStreamingMessages.get(session.sessionId);
+    if (!state) {
+      return;
+    }
+
+    const activeId = state[role];
+    if (!activeId) {
+      return;
+    }
+
+    const target = session.messages.find((message) => message.id === activeId);
+    if (target) {
+      target.metadata.isStreaming = false;
+    }
+
+    delete state[role];
+  }
+
   private flattenToolCallContent(contents?: ToolCallContent[] | null): string {
     logger.debug('flattenToolCallContent called', {
       contentsNull: contents === null,
@@ -1485,6 +1517,7 @@ export class SessionService implements SessionServiceInterface {
     let notificationTarget: SessionMessage = message;
     let messageUpdated = false;
     let forceFullSave = false;
+    const streamingState = this.getStreamingState(sessionId);
 
     // For tool calls, update existing message by tool call ID
     if (message.role === 'tool' && message.toolCall?.callId) {
@@ -1529,19 +1562,44 @@ export class SessionService implements SessionServiceInterface {
       });
     }
 
-    // For streaming text messages, merge content with the last streaming message of same role
+    // For streaming text messages, merge content with the most recent streaming message of same role
     if (!messageUpdated && message.metadata.isStreaming) {
-      const lastMessage = session.messages[session.messages.length - 1];
+      let streamingIndex = -1;
+      if (message.role === 'assistant' || message.role === 'user') {
+        const activeId = streamingState[message.role];
+        if (activeId) {
+          streamingIndex = session.messages.findIndex((candidate) => candidate.id === activeId);
+          if (streamingIndex < 0) {
+            delete streamingState[message.role];
+          }
+        }
+      }
 
-      if (
-        lastMessage &&
-        lastMessage.metadata?.isStreaming &&
-        lastMessage.role === message.role &&
-        lastMessage.role !== 'tool' // Don't merge tool messages this way
-      ) {
+      if (streamingIndex < 0) {
+        for (let i = session.messages.length - 1; i >= 0; i--) {
+          const candidate = session.messages[i];
+
+          if (candidate.role === message.role) {
+            if (candidate.metadata?.isStreaming && candidate.role !== 'tool') {
+              streamingIndex = i;
+            }
+            break;
+          }
+
+          if (candidate.role === 'system') {
+            continue;
+          }
+
+          break;
+        }
+      }
+
+      if (streamingIndex >= 0) {
+        const lastMessage = session.messages[streamingIndex];
+
         logger.info('Replacing streaming message content', {
           sessionId,
-          existingMessageId: lastMessage.id,
+          existingMessageId: lastMessage?.id,
           existingContentLength: lastMessage.content?.length || 0,
           newContentLength: message.content?.length || 0,
           existingContentPreview: (lastMessage.content ?? "").slice(-50),
@@ -1556,13 +1614,23 @@ export class SessionService implements SessionServiceInterface {
         lastMessage.timestamp = message.timestamp;
         notificationTarget = lastMessage;
         messageUpdated = true;
+        if (lastMessage.role === 'assistant' || lastMessage.role === 'user') {
+          streamingState[lastMessage.role] = lastMessage.id;
+        }
 
         logger.info('After replacement', {
           sessionId,
           totalLength: lastMessage.content.length,
           lastSection: lastMessage.content.slice(-100)
         });
+      } else if (message.role === 'assistant' || message.role === 'user') {
+        this.markStreamingComplete(session, message.role);
+        forceFullSave = true;
       }
+    }
+
+    if (!notificationTarget.metadata?.isStreaming && (notificationTarget.role === 'assistant' || notificationTarget.role === 'user')) {
+      this.markStreamingComplete(session, notificationTarget.role);
     }
 
     // If no existing message was updated, add as new message
@@ -1575,6 +1643,9 @@ export class SessionService implements SessionServiceInterface {
       });
 
       session.messages.push(message);
+      if (message.metadata.isStreaming && (message.role === 'assistant' || message.role === 'user')) {
+        streamingState[message.role] = message.id;
+      }
     }
 
     session.lastActivity = new Date();
