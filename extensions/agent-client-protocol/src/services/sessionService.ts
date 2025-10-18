@@ -1463,7 +1463,8 @@ export class SessionService implements SessionServiceInterface {
       }
     }
 
-    // For streaming text messages, append content to the last streaming message of same role
+    // For streaming text messages, replace content in the last streaming message of same role
+    // ACP sends cumulative chunks (full text so far), not deltas
     if (!messageUpdated && message.metadata.isStreaming) {
       const lastMessage = session.messages[session.messages.length - 1];
 
@@ -1473,17 +1474,27 @@ export class SessionService implements SessionServiceInterface {
         lastMessage.role === message.role &&
         lastMessage.role !== 'tool' // Don't merge tool messages this way
       ) {
-        logger.debug('Appending to streaming message', {
+        logger.info('Replacing streaming message content', {
           sessionId,
           existingMessageId: lastMessage.id,
           existingContentLength: lastMessage.content?.length || 0,
-          newChunkLength: message.content?.length || 0
+          newContentLength: message.content?.length || 0,
+          existingContentPreview: (lastMessage.content ?? "").slice(-50),
+          newContentPreview: (message.content ?? "").slice(-50)
         });
 
-        lastMessage.content = `${lastMessage.content ?? ""}${message.content ?? ""}`;
+        // Replace content with new cumulative chunk
+        // The agent sends the full message text so far with each update, not just deltas
+        lastMessage.content = message.content ?? "";
         lastMessage.timestamp = message.timestamp;
         notificationTarget = lastMessage;
         messageUpdated = true;
+
+        logger.info('After replacement', {
+          sessionId,
+          totalLength: lastMessage.content.length,
+          lastSection: lastMessage.content.slice(-100)
+        });
       }
     }
 
@@ -1525,7 +1536,7 @@ export class SessionService implements SessionServiceInterface {
       case 'user_message_chunk': {
         const role = payload.sessionUpdate === 'user_message_chunk' ? 'user' : 'assistant';
 
-        logger.debug('Processing streaming chunk', {
+        logger.info('Processing streaming chunk', {
           sessionId: update.sessionId,
           updateType: payload.sessionUpdate,
           payloadContent: JSON.stringify(payload.content, null, 2),
@@ -1534,13 +1545,21 @@ export class SessionService implements SessionServiceInterface {
 
         const { text, messageType } = this.flattenAcpContent([payload.content]);
 
-        logger.debug('Streaming chunk processed', {
+        logger.info('Streaming chunk processed', {
           sessionId: update.sessionId,
           role,
           messageType,
           textLength: text.length,
-          textSnippet: text.slice(0, 120),
-          fullText: text
+          textPreview: text.slice(0, 120),
+          fullText: text,
+          textCharCodes: Array.from(text).map((char, idx) => ({
+            idx,
+            char,
+            code: char.charCodeAt(0),
+            isSpace: char === ' ',
+            isNewline: char === '\n',
+            isTab: char === '\t'
+          })).slice(0, 50)
         });
 
         return {
