@@ -44,7 +44,7 @@ export const BUILT_IN_AGENTS: readonly AgentConfig[] = [
     name: "Goose",
     type: "subprocess",
     command: "goose",
-    args: ["session", "start", "--acp"],
+    args: ["acp"],
     workingDirectory: process.cwd(),
     environmentVariables: {},
     isBuiltIn: true,
