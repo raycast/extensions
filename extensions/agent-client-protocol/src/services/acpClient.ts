@@ -533,6 +533,62 @@ export class ACPClient implements acp.Client {
   }
 
   /**
+   * Wrap a WritableStream to catch and suppress AbortErrors
+   */
+  private wrapWritableStreamWithErrorHandling(stream: WritableStream): WritableStream {
+    const originalAbort = stream.abort.bind(stream);
+    const originalClose = stream.close.bind(stream);
+
+    return new WritableStream({
+      async write(chunk) {
+        try {
+          const writer = stream.getWriter();
+          await writer.write(chunk);
+          writer.releaseLock();
+        } catch (error) {
+          // Suppress AbortError and ERR_STREAM_PREMATURE_CLOSE errors
+          if (
+            error instanceof Error &&
+            (error.name === "AbortError" || ("code" in error && error.code === "ABORT_ERR"))
+          ) {
+            logger.debug("Stream write aborted (process likely exited)", {
+              error: error.message,
+              name: error.name,
+              code: "code" in error ? error.code : undefined,
+            });
+            return; // Suppress the error
+          }
+          throw error;
+        }
+      },
+      async close() {
+        try {
+          await originalClose();
+        } catch (error) {
+          // Suppress close errors if the stream is already closed
+          if (
+            error instanceof Error &&
+            (error.name === "AbortError" || ("code" in error && error.code === "ABORT_ERR"))
+          ) {
+            logger.debug("Stream close aborted (already closed)", { error: error.message });
+            return;
+          }
+          throw error;
+        }
+      },
+      async abort(reason) {
+        try {
+          await originalAbort(reason);
+        } catch (error) {
+          logger.debug("Stream abort error (ignored)", {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      },
+    });
+  }
+
+  /**
    * Private: Create subprocess connection for local agents
    */
   private async createSubprocessConnection(config: AgentConfig): Promise<Stream> {
@@ -614,14 +670,38 @@ export class ACPClient implements acp.Client {
     this.agentProcess.on("exit", (code, signal) => {
       logger.info("Agent process exited", { code, signal });
       this.isConnected = false;
+      this.connection = null;
       ProcessTracker.unregisterProcess(config.id);
     });
 
-    // Create streams for ACP communication
-    const input = Writable.toWeb(this.agentProcess.stdin);
-    const output = Readable.toWeb(this.agentProcess.stdout) as ReadableStream<Uint8Array>;
+    // Handle unexpected process closure
+    this.agentProcess.on("close", (code, signal) => {
+      logger.debug("Agent process closed", { code, signal });
+      this.isConnected = false;
+      this.connection = null;
+    });
 
-    return acp.ndJsonStream(input, output);
+    // Create streams for ACP communication
+    const stdinStream = this.agentProcess.stdin;
+    const stdoutStream = this.agentProcess.stdout;
+
+    // Add error handling for stream closures
+    stdinStream.on("error", (error) => {
+      logger.debug("Agent stdin stream error", { error: error.message });
+      // Don't throw here as this is expected when the process exits
+    });
+
+    stdoutStream.on("error", (error) => {
+      logger.debug("Agent stdout stream error", { error: error.message });
+    });
+
+    const input = Writable.toWeb(stdinStream);
+    const output = Readable.toWeb(stdoutStream) as ReadableStream<Uint8Array>;
+
+    // Wrap the input stream to handle AbortErrors gracefully
+    const wrappedInput = this.wrapWritableStreamWithErrorHandling(input);
+
+    return acp.ndJsonStream(wrappedInput, output);
   }
 
   /**
