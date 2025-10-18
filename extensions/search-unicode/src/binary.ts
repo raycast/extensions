@@ -4,7 +4,6 @@ import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import { gunzipSync } from "node:zlib";
 import { environment, getPreferenceValues } from "@raycast/api";
-import type { PreferenceValues } from "./types";
 
 const BINARIES: Record<
   string,
@@ -52,13 +51,11 @@ const BINARIES: Record<
 export type BinaryInfo =
   | {
       execSource: "wasm";
-      execPath: undefined;
       wasmBinary: Buffer<ArrayBufferLike>;
     }
   | {
       execSource: "bundled" | "path" | "custom";
       execPath: string;
-      wasmBinary: undefined;
     };
 
 // Mutex lock for ensuring single execution
@@ -72,7 +69,7 @@ export async function ensureBinaryAvailable(): Promise<BinaryInfo> {
 
   ensureBinaryPromise = (async () => {
     // 1. Decide execSource
-    const preferences = getPreferenceValues<PreferenceValues>();
+    const preferences = getPreferenceValues<Preferences>();
     let execSource = preferences.execSource;
 
     const platform = os.platform();

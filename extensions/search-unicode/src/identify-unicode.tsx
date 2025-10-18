@@ -20,8 +20,8 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [data, setData] = useState<Entry[]>([]);
-  const showEncodingsPref = getPreferenceValues<{ showEncodings: boolean }>()
-    .showEncodings;
+  const showEncodingsPref =
+    getPreferenceValues<Preferences.IdentifyUnicode>().showEncodings;
 
   useEffect(() => {
     if (timerRef.current) {
@@ -75,7 +75,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle
     >
-      {data.length === 0 && !isLoading && searchText.length == 0 && (
+      {data.length === 0 && !isLoading && searchText.length === 0 && (
         <List.EmptyView title="Type something to identify Unicode codepoints" />
       )}
       {data?.length > 0 && showEncodingsPref && (

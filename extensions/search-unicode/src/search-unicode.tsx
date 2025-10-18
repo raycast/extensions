@@ -111,7 +111,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {data.length === 0 && !isLoading && searchText.length == 0 && (
+      {data.length === 0 && !isLoading && searchText.length === 0 && (
         <Grid.EmptyView title="Type something to search Unicode" />
       )}
       {data.map((item) => (

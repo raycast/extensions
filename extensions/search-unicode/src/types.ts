@@ -25,9 +25,3 @@ export interface Entry {
   width: string;
   xml: string;
 }
-
-export interface PreferenceValues {
-  execSource: "wasm" | "bundled" | "path" | "custom";
-  execPath: string;
-  showEncodings?: boolean;
-}
