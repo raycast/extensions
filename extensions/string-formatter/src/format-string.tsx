@@ -238,7 +238,14 @@ export default function Command() {
   useEffect(() => {
     try {
       setError("");
-      const { result, detectedSep } = formatString(inputString, removeChars, separator, decorator, outputSeparator, removeDuplicates);
+      const { result, detectedSep } = formatString(
+        inputString,
+        removeChars,
+        separator,
+        decorator,
+        outputSeparator,
+        removeDuplicates,
+      );
       setFormattedResult(result);
       setDetectedSeparator(detectedSep);
     } catch (err) {
