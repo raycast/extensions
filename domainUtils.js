@@ -9,18 +9,18 @@ const DOMAIN_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA
 const PROTOCOL_REGEX = /^https?:\/\//i;
 const TRAILING_SLASH_REGEX = /\/.*$/;
 function sanitizeDomain(input) {
-    if (!input || typeof input !== 'string') {
-        return '';
+    if (!input || typeof input !== "string") {
+        return "";
     }
     let domain = input.trim().toLowerCase();
-    domain = domain.replace(PROTOCOL_REGEX, '');
-    domain = domain.replace(/^www\./, '');
-    domain = domain.replace(TRAILING_SLASH_REGEX, '');
-    domain = domain.replace(/:\d+$/, '');
+    domain = domain.replace(PROTOCOL_REGEX, "");
+    domain = domain.replace(/^www\./, "");
+    domain = domain.replace(TRAILING_SLASH_REGEX, "");
+    domain = domain.replace(/:\d+$/, "");
     return domain;
 }
 function isValidDomain(domain) {
-    if (!domain || typeof domain !== 'string') {
+    if (!domain || typeof domain !== "string") {
         return false;
     }
     const cleanDomain = domain.trim();
@@ -30,13 +30,13 @@ function isValidDomain(domain) {
     if (!DOMAIN_REGEX.test(cleanDomain)) {
         return false;
     }
-    if (cleanDomain.startsWith('.') || cleanDomain.endsWith('.')) {
+    if (cleanDomain.startsWith(".") || cleanDomain.endsWith(".")) {
         return false;
     }
-    if (cleanDomain.includes('..')) {
+    if (cleanDomain.includes("..")) {
         return false;
     }
-    if (!cleanDomain.includes('.')) {
+    if (!cleanDomain.includes(".")) {
         return false;
     }
     return true;
@@ -45,9 +45,9 @@ function processDomainInput(input) {
     const sanitized = sanitizeDomain(input);
     if (!sanitized) {
         return {
-            domain: '',
+            domain: "",
             isValid: false,
-            error: 'Please enter a domain name'
+            error: "Please enter a domain name",
         };
     }
     const isValid = isValidDomain(sanitized);
@@ -55,12 +55,12 @@ function processDomainInput(input) {
         return {
             domain: sanitized,
             isValid: false,
-            error: 'Please enter a valid domain name (e.g., example.com)'
+            error: "Please enter a valid domain name (e.g., example.com)",
         };
     }
     return {
         domain: sanitized,
-        isValid: true
+        isValid: true,
     };
 }
 function isDuplicateDomain(domain, existingDomains) {
@@ -68,11 +68,11 @@ function isDuplicateDomain(domain, existingDomains) {
         return false;
     }
     const normalizedDomain = domain.toLowerCase().trim();
-    return existingDomains.some(existing => existing.toLowerCase().trim() === normalizedDomain);
+    return existingDomains.some((existing) => existing.toLowerCase().trim() === normalizedDomain);
 }
 function formatDomainForDisplay(domain) {
     if (!domain)
-        return '';
+        return "";
     return domain.trim().toLowerCase();
 }
 //# sourceMappingURL=domainUtils.js.map
