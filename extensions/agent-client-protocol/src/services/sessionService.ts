@@ -885,6 +885,51 @@ export class SessionService implements SessionServiceInterface {
     };
   }
 
+  private mergeStreamingContent(previousContent: string, incomingContent: string): string {
+    if (!previousContent) {
+      return incomingContent;
+    }
+
+    if (!incomingContent) {
+      return previousContent;
+    }
+
+    if (incomingContent === previousContent) {
+      return previousContent;
+    }
+
+    if (incomingContent.startsWith(previousContent)) {
+      return incomingContent;
+    }
+
+    if (previousContent.endsWith(incomingContent)) {
+      return previousContent;
+    }
+
+    const maxOverlap = Math.min(previousContent.length, incomingContent.length);
+    for (let overlap = maxOverlap; overlap > 0; overlap--) {
+      if (previousContent.endsWith(incomingContent.slice(0, overlap))) {
+        return previousContent + incomingContent.slice(overlap);
+      }
+    }
+
+    const previousLastChar = previousContent.slice(-1);
+    const incomingFirstChar = incomingContent[0];
+
+    const needsSpace =
+      !!previousLastChar &&
+      !!incomingFirstChar &&
+      !/\s/.test(previousLastChar) &&
+      !/\s/.test(incomingFirstChar) &&
+      !previousContent.endsWith('\n') &&
+      /[.!?:;,)\]]/.test(previousLastChar) &&
+      /[A-Za-z0-9]/.test(incomingFirstChar);
+
+    return needsSpace
+      ? `${previousContent} ${incomingContent}`
+      : `${previousContent}${incomingContent}`;
+  }
+
   private flattenToolCallContent(contents?: ToolCallContent[] | null): string {
     logger.debug('flattenToolCallContent called', {
       contentsNull: contents === null,
@@ -1463,8 +1508,7 @@ export class SessionService implements SessionServiceInterface {
       }
     }
 
-    // For streaming text messages, replace content in the last streaming message of same role
-    // ACP sends cumulative chunks (full text so far), not deltas
+    // For streaming text messages, merge content with the last streaming message of same role
     if (!messageUpdated && message.metadata.isStreaming) {
       const lastMessage = session.messages[session.messages.length - 1];
 
@@ -1483,9 +1527,11 @@ export class SessionService implements SessionServiceInterface {
           newContentPreview: (message.content ?? "").slice(-50)
         });
 
-        // Replace content with new cumulative chunk
-        // The agent sends the full message text so far with each update, not just deltas
-        lastMessage.content = message.content ?? "";
+        // Merge the latest chunk with the existing streaming content, supporting both cumulative and delta payloads
+        lastMessage.content = this.mergeStreamingContent(
+          lastMessage.content ?? "",
+          message.content ?? ""
+        );
         lastMessage.timestamp = message.timestamp;
         notificationTarget = lastMessage;
         messageUpdated = true;
