@@ -18,7 +18,7 @@ Search Unicode is a Raycast extension to lookup and reverse lookup Unicode chara
 In “Search Unicode”, type your query (ex. `subscript`) to get a list of characters
 matching the keyword.
 
-Press <kbd>Enter</kbd> to paste the character to your active input (ex. `₀`), press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> (or <kbd>Cmd</kbd> + <kbd>Enter</kbd>) to copy the character. Press <kbd>Ctrl</kbd> + <kbd>D</kbd> to see more information about the character.
+Press <kbd>Enter</kbd> to paste the character to your active input (ex. `₀`), press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> (or <kbd>Cmd</kbd> + <kbd>Enter</kbd>) to copy the character. Press <kbd>Ctrl</kbd> + <kbd>D</kbd> (or <kbd>Cmd</kbd> + <kbd>D</kbd>) to see more information about the character.
 
 ![Screenshot for details of character �](images/u_details.png)
 
