@@ -6,6 +6,7 @@ import {
   Grid,
   Icon,
   Image,
+  Keyboard,
   PopToRootType,
   showHUD,
 } from "@raycast/api";
@@ -39,43 +40,47 @@ function getExampleQuery(): string {
   return QUERY_EXAMPLES[Math.floor(Math.random() * QUERY_EXAMPLES.length)];
 }
 
-interface Preferences {
-  primaryAction: "quicklook" | "browser";
+function PrimaryAction({ item }: { item: DuckDuckGoImage }) {
+  const preferences = getPreferenceValues<Preferences.SearchImage>();
+  const isPrimaryQuickLook = preferences.primaryAction === "quicklook";
+
+  const modifer: Keyboard.Shortcut = {
+    macOS: {
+      modifiers: ["cmd"],
+      key: "enter",
+    },
+    windows: {
+      modifiers: ["ctrl"],
+      key: "enter",
+    },
+  };
+
+  const quickLook = (
+    <Action
+      title="Quick Look"
+      icon={Icon.Eye}
+      onAction={() => quickLookImage(item)}
+      shortcut={isPrimaryQuickLook ? undefined : modifer}
+    />
+  );
+
+  const openInBrowser = (
+    <Action.OpenInBrowser
+      title="Open Image in Browser"
+      url={item.image}
+      shortcut={isPrimaryQuickLook ? modifer : undefined}
+    />
+  );
+
+  return <>{isPrimaryQuickLook ? [quickLook, openInBrowser] : [openInBrowser, quickLook]}</>;
 }
 
 function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
-  const preferences = getPreferenceValues<Preferences>();
-  const isPrimaryQuickLook = preferences.primaryAction === "quicklook";
-
   return (
     <ActionPanel>
-      {isPrimaryQuickLook ? (
-        <>
-          <Action title="Quick Look" icon={Icon.Eye} onAction={() => quickLookImage(item)} />
-          <Action.OpenInBrowser
-            title="Open Image in Browser"
-            url={item.image}
-            shortcut={{
-              modifiers: ["cmd"],
-              key: "enter",
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <Action.OpenInBrowser title="Open Image in Browser" url={item.image} />
-          <Action
-            title="Quick Look"
-            icon={Icon.Eye}
-            onAction={() => quickLookImage(item)}
-            shortcut={{
-              modifiers: ["cmd"],
-              key: "enter",
-            }}
-          />
-        </>
-      )}
+      <PrimaryAction item={item} />
       <Action.OpenWith title="Open With" path={item.image} />
+
       <Action
         title="Paste Image"
         shortcut={{
