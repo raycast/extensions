@@ -209,7 +209,7 @@ export async function quickLookImage(image: DuckDuckGoImage) {
     const tempFilePath = await downloadImage(image, false);
 
     // Open the image with Preview app
-    await open(tempFilePath, "Preview");
+    await open(tempFilePath);
 
     await showToast({
       title: "Image Opened!",
