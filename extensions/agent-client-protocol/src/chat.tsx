@@ -24,6 +24,7 @@ import { createLogger } from "@/utils/logging";
 import { ErrorHandler } from "@/utils/errors";
 import type { AgentConfig } from "@/types/extension";
 import type { SessionMessage, ProjectContext } from "@/types/entities";
+import type { AvailableCommand } from "@/types/acp";
 import { useChatSession } from "@/hooks/useChatSession";
 import { pickDirectories, pickFiles } from "@/utils/filePicker";
 import * as path from "path";
@@ -384,27 +385,67 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       return null;
     }
 
+    const requiresCommandInput = (command: AvailableCommand): boolean => {
+      return typeof command.input === "object" && command.input !== null;
+    };
+
+    const getCommandInputHint = (command: AvailableCommand): string | undefined => {
+      if (typeof command.input !== "object" || command.input === null) {
+        return undefined;
+      }
+
+      const hint = (command.input as { hint?: unknown }).hint;
+      return typeof hint === "string" ? hint : undefined;
+    };
+
+    function SlashCommandForm({
+      command,
+      onSubmit
+    }: {
+      command: AvailableCommand;
+      onSubmit: (argument?: string) => Promise<void>;
+    }) {
+      const placeholder = getCommandInputHint(command) ?? "";
+
+      return (
+        <Form
+          navigationTitle={`/${command.name}`}
+          actions={
+            <ActionPanel>
+              <Action.SubmitForm
+                title={`Run /${command.name}`}
+                icon={Icon.Bolt}
+                onSubmit={async ({ argument }: { argument?: string }) => {
+                  await onSubmit(argument);
+                }}
+              />
+            </ActionPanel>
+          }
+        >
+          {command.description ? <Form.Description text={command.description} /> : null}
+          <Form.TextField id="argument" title="Input" placeholder={placeholder} autoFocus />
+        </Form>
+      );
+    }
+
     return (
       <ActionPanel.Section title="Slash Commands">
         <ActionPanel.Submenu title="Run Slash Command" icon={Icon.Bolt}>
           {commands.map((command) =>
-            command.input?.hint ? (
-              <Action.SubmitForm
+            requiresCommandInput(command) ? (
+              <Action.Push
                 key={command.name}
                 title={`/${command.name}`}
                 icon={Icon.Bolt}
-                onSubmit={async ({ argument }: { argument?: string }) => {
-                  await chat.runSlashCommand(command.name, argument);
-                }}
-              >
-                <Form.Description text={command.description} />
-                <Form.TextField
-                  id="argument"
-                  title="Input"
-                  placeholder={command.input?.hint ?? ""}
-                  autoFocus
-                />
-              </Action.SubmitForm>
+                target={
+                  <SlashCommandForm
+                    command={command}
+                    onSubmit={async (argument) => {
+                      await chat.runSlashCommand(command.name, argument);
+                    }}
+                  />
+                }
+              />
             ) : (
               <Action
                 key={command.name}

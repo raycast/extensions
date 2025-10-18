@@ -33,6 +33,7 @@ interface UseChatSessionResult extends ChatSessionState {
   removeContext: (contextId: string) => Promise<void>;
   refreshContexts: () => Promise<void>;
   switchMode: (modeId: string) => Promise<void>;
+  runSlashCommand: (commandName: string, input?: string) => Promise<void>;
 }
 
 const logger = createLogger("useChatSession");
