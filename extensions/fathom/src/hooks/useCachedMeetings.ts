@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { MeetingFilter, Meeting, ActionItem } from "../types/Types";
 import { searchCachedMeetings, type CachedMeetingData } from "../utils/cache";
 import { cacheManager } from "../utils/cacheManager";
-import { logger } from "../utils/logger";
+import { logger } from "@chrismessina/raycast-logger";
 
 interface UseCachedMeetingsOptions {
   filter?: MeetingFilter;
@@ -40,11 +40,11 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       return;
     }
 
-    logger.debug("[useCachedMeetings] Subscribing to cache manager");
+    logger.log("[useCachedMeetings] Subscribing to cache manager");
 
     // Subscribe to cache updates
     const unsubscribe = cacheManager.subscribe((meetings) => {
-      logger.debug(`[useCachedMeetings] Received cache update: ${meetings.length} meetings`);
+      logger.log(`[useCachedMeetings] Received cache update: ${meetings.length} meetings`);
       setCachedMeetings(meetings);
       setIsLoading(false);
     });
@@ -58,10 +58,10 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
         // Only fetch from API if cache is empty or stale
         if (cached.length === 0) {
-          logger.debug("[useCachedMeetings] Cache empty, fetching from API");
+          logger.log("[useCachedMeetings] Cache empty, fetching from API");
           await cacheManager.fetchAndCache(filter);
         } else {
-          logger.debug(`[useCachedMeetings] Using cached data (${cached.length} meetings`);
+          logger.log(`[useCachedMeetings] Using cached data (${cached.length} meetings`);
           setIsLoading(false);
         }
       } catch (err) {
@@ -74,7 +74,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
     // Cleanup: unsubscribe on unmount
     return () => {
-      logger.debug("[useCachedMeetings] Unsubscribing from cache manager");
+      logger.log("[useCachedMeetings] Unsubscribing from cache manager");
       unsubscribe();
     };
   }, [filter, enableCache]);

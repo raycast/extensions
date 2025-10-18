@@ -14,7 +14,7 @@ import type { MeetingFilter, Meeting } from "../types/Types";
 import { cacheMeeting, getAllCachedMeetings, pruneCache, type CachedMeetingData } from "./cache";
 import { globalQueue } from "./requestQueue";
 import { showContextualError } from "./errorHandling";
-import { logger } from "./logger";
+import { logger } from "@chrismessina/raycast-logger";
 
 const CACHE_SIZE = 50; // Keep most recent 50 meetings
 
@@ -35,7 +35,7 @@ class CacheManager {
    */
   subscribe(listener: CacheListener): () => void {
     this.listeners.add(listener);
-    logger.debug(`[CacheManager] Subscriber added (total: ${this.listeners.size})`);
+    logger.log(`[CacheManager] Subscriber added (total: ${this.listeners.size})`);
 
     // Immediately notify with current data if loaded
     if (this.isLoaded) {
@@ -45,7 +45,7 @@ class CacheManager {
     // Return unsubscribe function
     return () => {
       this.listeners.delete(listener);
-      logger.debug(`[CacheManager] Subscriber removed (total: ${this.listeners.size})`);
+      logger.log(`[CacheManager] Subscriber removed (total: ${this.listeners.size})`);
     };
   }
 
@@ -53,7 +53,7 @@ class CacheManager {
    * Notify all listeners of cache updates
    */
   private notifyListeners(): void {
-    logger.debug(`[CacheManager] Notifying ${this.listeners.size} listeners`);
+    logger.log(`[CacheManager] Notifying ${this.listeners.size} listeners`);
     this.listeners.forEach((listener) => listener(this.cachedMeetings));
   }
 
@@ -62,13 +62,13 @@ class CacheManager {
    */
   async loadCache(): Promise<CachedMeetingData[]> {
     if (this.isLoaded) {
-      logger.debug(`[CacheManager] Cache already loaded (${this.cachedMeetings.length} meetings)`);
+      logger.log(`[CacheManager] Cache already loaded (${this.cachedMeetings.length} meetings)`);
       return this.cachedMeetings;
     }
 
     // Prevent concurrent loads
     if (this.isLoading) {
-      logger.debug("[CacheManager] Cache load already in progress, waiting...");
+      logger.log("[CacheManager] Cache load already in progress, waiting...");
       // Wait for the current load to complete
       while (this.isLoading) {
         await new Promise((resolve) => setTimeout(resolve, 50));
@@ -79,11 +79,11 @@ class CacheManager {
     this.isLoading = true;
 
     try {
-      logger.debug("[CacheManager] Loading cache from storage...");
+      logger.log("[CacheManager] Loading cache from storage...");
       const cached = await getAllCachedMeetings();
       this.cachedMeetings = cached;
       this.isLoaded = true;
-      logger.debug(`[CacheManager] Loaded ${cached.length} cached meetings`);
+      logger.log(`[CacheManager] Loaded ${cached.length} cached meetings`);
       this.notifyListeners();
       return cached;
     } catch (error) {
@@ -104,7 +104,7 @@ class CacheManager {
     const timeSinceLastFetch = now - this.lastFetchTime;
 
     if (timeSinceLastFetch < this.FETCH_COOLDOWN) {
-      logger.debug(
+      logger.log(
         `[CacheManager] Fetch cooldown active (${Math.round((this.FETCH_COOLDOWN - timeSinceLastFetch) / 1000)}s remaining), using cached data`,
       );
       return this.cachedMeetings.map((cached) => cached.meeting as Meeting);
@@ -114,7 +114,7 @@ class CacheManager {
     const filterKey = JSON.stringify(filter);
     const requestKey = `fetch-meetings:${filterKey}`;
 
-    logger.debug(`[CacheManager] Fetch request for filter: ${filterKey}`);
+    logger.log(`[CacheManager] Fetch request for filter: ${filterKey}`);
 
     // Update last fetch time
     this.lastFetchTime = now;
@@ -123,7 +123,7 @@ class CacheManager {
     const result = await globalQueue.enqueue(
       requestKey,
       async () => {
-        logger.debug(`[CacheManager] Executing API call for: ${filterKey}`);
+        logger.log(`[CacheManager] Executing API call for: ${filterKey}`);
         const apiResult = await listMeetings(filter);
 
         // Cache the results
@@ -148,12 +148,12 @@ class CacheManager {
       .join(",");
 
     if (this.lastApiDataHash === dataHash) {
-      logger.debug("[CacheManager] Skipping cache - same data already processed");
+      logger.log("[CacheManager] Skipping cache - same data already processed");
       return;
     }
 
     if (this.isCaching) {
-      logger.debug("[CacheManager] Skipping cache - already caching");
+      logger.log("[CacheManager] Skipping cache - already caching");
       return;
     }
 
@@ -162,7 +162,7 @@ class CacheManager {
 
     try {
       const totalMeetings = meetings.length;
-      logger.debug(`[CacheManager] Caching ${totalMeetings} meetings`);
+      logger.log(`[CacheManager] Caching ${totalMeetings} meetings`);
 
       // Only show progress toast if cache was empty and we have meetings to cache
       const shouldShowProgress = this.cachedMeetings.length === 0 && totalMeetings > 0;
@@ -200,7 +200,7 @@ class CacheManager {
       // Reload cached meetings
       const cached = await getAllCachedMeetings();
       this.cachedMeetings = cached;
-      logger.debug(`[CacheManager] Cache updated, now have ${cached.length} meetings`);
+      logger.log(`[CacheManager] Cache updated, now have ${cached.length} meetings`);
 
       // Notify all subscribers
       this.notifyListeners();

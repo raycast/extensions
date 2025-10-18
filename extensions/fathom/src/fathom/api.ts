@@ -13,7 +13,7 @@ import { isNumber, toStringOrUndefined } from "../utils/typeGuards";
 import { convertSDKMeeting, convertSDKTeam, convertSDKTeamMember, mapRecordingFromMeeting } from "../utils/converters";
 import { formatTranscriptToMarkdown } from "../utils/formatting";
 import { parseTimestamp } from "../utils/dates";
-import { logger } from "../utils/logger";
+import { logger } from "@chrismessina/raycast-logger";
 
 const BASE = "https://api.fathom.ai/external/v1";
 
@@ -48,7 +48,7 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
 
   // Log every API call with stack trace to identify caller
   const caller = new Error().stack?.split("\n")[2]?.trim() || "unknown";
-  logger.debug(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) - Called from: ${caller}`);
+  logger.log(`[API] 🌐 HTTP GET ${path} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) - Called from: ${caller}`);
 
   const res = await fetch(`${BASE}${path}`, {
     method: "GET",
@@ -95,14 +95,14 @@ async function authGet<T>(path: string, retryCount = 0): Promise<T> {
   }
 
   const data = (await res.json()) as unknown;
-  logger.debug(`[API] ✅ Success ${path}`);
+  logger.log(`[API] ✅ Success ${path}`);
   return data as T;
 }
 
 // API functions
 export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Meeting>> {
-  logger.debug(`[API] 📋 listMeetings called with filter:`, filter);
-  logger.debug(`[API] 🔵 Calling Fathom SDK client.listMeetings()...`);
+  logger.log(`[API] 📋 listMeetings called with filter:`, filter);
+  logger.log(`[API] 🔵 Calling Fathom SDK client.listMeetings()...`);
   try {
     const client = getFathomClient();
 
@@ -359,7 +359,7 @@ export async function listRecentRecordings(
 }
 
 export async function getMeetingSummary(recordingId: string): Promise<Summary> {
-  logger.debug(`[API] 📝 getMeetingSummary called for recordingId: ${recordingId}`);
+  logger.log(`[API] 📝 getMeetingSummary called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/summary`);
 
   if (typeof resp !== "object" || resp === null) {
@@ -382,7 +382,7 @@ export async function getMeetingSummary(recordingId: string): Promise<Summary> {
 }
 
 export async function getMeetingTranscript(recordingId: string): Promise<Transcript> {
-  logger.debug(`[API] 📄 getMeetingTranscript called for recordingId: ${recordingId}`);
+  logger.log(`[API] 📄 getMeetingTranscript called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/transcript`);
 
   if (typeof resp !== "object" || resp === null) {
@@ -433,8 +433,8 @@ export async function getMeetingTranscript(recordingId: string): Promise<Transcr
 export async function listTeams(
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<Team>> {
-  logger.debug(`[API] 👥 listTeams called with args:`, args);
-  logger.debug(`[API] 🔵 Calling Fathom SDK client.listTeams()...`);
+  logger.log(`[API] 👥 listTeams called with args:`, args);
+  logger.log(`[API] 🔵 Calling Fathom SDK client.listTeams()...`);
   try {
     const client = getFathomClient();
 
@@ -460,7 +460,7 @@ export async function listTeams(
 async function listTeamsHTTP(
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<Team>> {
-  logger.debug(`[API] 👥 listTeamsHTTP called with args:`, args);
+  logger.log(`[API] 👥 listTeamsHTTP called with args:`, args);
   const params: string[] = [];
   if (args.cursor) params.push(`cursor=${encodeURIComponent(args.cursor)}`);
 
@@ -501,8 +501,8 @@ export async function listTeamMembers(
   teamId?: string,
   args: { pageSize?: number; cursor?: string; query?: string } = {},
 ): Promise<Paginated<TeamMember>> {
-  logger.debug(`[API] 👤 listTeamMembers called for teamId: ${teamId} with args:`, args);
-  logger.debug(`[API] 🔵 Calling Fathom SDK client.listTeamMembers()...`);
+  logger.log(`[API] 👤 listTeamMembers called for teamId: ${teamId} with args:`, args);
+  logger.log(`[API] 🔵 Calling Fathom SDK client.listTeamMembers()...`);
   try {
     const client = getFathomClient();
 

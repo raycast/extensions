@@ -8,7 +8,7 @@
  * - Request prioritization
  */
 
-import { logger } from "./logger";
+import { logger } from "@chrismessina/raycast-logger";
 
 interface QueuedRequest<T> {
   key: string;
@@ -37,7 +37,7 @@ class RequestQueue {
     // Check if request is already in flight
     const existing = this.inFlight.get(key);
     if (existing) {
-      logger.debug(`[Queue] Deduplicating request: ${key}`);
+      logger.log(`[Queue] Deduplicating request: ${key}`);
       return existing.promise as Promise<T>;
     }
 
@@ -55,7 +55,7 @@ class RequestQueue {
       this.queue.push(request as QueuedRequest<unknown>);
       this.queue.sort((a, b) => b.priority - a.priority);
 
-      logger.debug(`[Queue] Enqueued request: ${key} (priority: ${priority}, queue size: ${this.queue.length})`);
+      logger.log(`[Queue] Enqueued request: ${key} (priority: ${priority}, queue size: ${this.queue.length})`);
 
       // Start processing if not already running
       this.processQueue();
@@ -99,11 +99,11 @@ class RequestQueue {
   private executeRequest<T>(request: QueuedRequest<T>): void {
     const { key, execute, resolve, reject } = request;
 
-    logger.debug(`[Queue] Executing request: ${key} (in-flight: ${this.inFlight.size}/${this.maxConcurrent})`);
+    logger.log(`[Queue] Executing request: ${key} (in-flight: ${this.inFlight.size}/${this.maxConcurrent})`);
 
     const promise = execute()
       .then((result) => {
-        logger.debug(`[Queue] Completed request: ${key}`);
+        logger.log(`[Queue] Completed request: ${key}`);
         this.inFlight.delete(key);
         resolve(result);
         return result;
@@ -126,7 +126,7 @@ class RequestQueue {
    * Clear all pending requests (useful for cleanup)
    */
   clear(): void {
-    logger.debug(`[Queue] Clearing queue (${this.queue.length} pending, ${this.inFlight.size} in-flight)`);
+    logger.log(`[Queue] Clearing queue (${this.queue.length} pending, ${this.inFlight.size} in-flight)`);
     this.queue = [];
     // Don't clear in-flight requests - let them complete
   }
@@ -147,7 +147,7 @@ class RequestQueue {
    */
   setMaxConcurrent(max: number): void {
     this.maxConcurrent = Math.max(1, max);
-    logger.debug(`[Queue] Max concurrent requests set to: ${this.maxConcurrent}`);
+    logger.log(`[Queue] Max concurrent requests set to: ${this.maxConcurrent}`);
   }
 }
 

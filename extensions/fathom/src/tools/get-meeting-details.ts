@@ -1,7 +1,7 @@
 import { getMeetingSummary, getMeetingTranscript, listMeetings } from "../fathom/api";
 import { getCachedMeeting, cacheMeeting } from "../utils/cache";
 import type { Meeting } from "../types/Types";
-import { logger } from "../utils/logger";
+import { logger } from "@chrismessina/raycast-logger";
 
 type Input = {
   /**
