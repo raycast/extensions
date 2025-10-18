@@ -1,5 +1,9 @@
 # Jetbrains Changelog
 
+## [Improvement] - 2025-10-18
+
+- Improve JetBrains Toolbox version validation to properly support version 2.0 and above
+
 ## [Bugfix] - 2025-04-14
 - Fix sorting projects which doesn't have a opened value
 - Fix crashing when `projects` field in `settings.json` is not present
