@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Clipboard, showHUD } from "@raycast/api";
 
 interface FormValues {
   inputString: string;
