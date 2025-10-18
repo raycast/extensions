@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "homebox",
   "title": "HomeBox",
-  "description": "",
+  "description": "A simple home inventory management software",
   "icon": "homebox.png",
   "author": "xmok",
   "platforms": [
@@ -40,25 +40,25 @@
     {
       "name": "home",
       "title": "Home",
-      "description": "",
+      "description": "Quick Statistics",
       "mode": "view"
     },
     {
       "name": "search-items",
       "title": "Search Items",
-      "description": "",
+      "description": "Search and Create Items",
       "mode": "view"
     },
     {
       "name": "search-labels",
       "title": "Search Labels",
-      "description": "",
+      "description": "Search and Create Labels",
       "mode": "view"
     },
     {
       "name": "search-locations",
       "title": "Search Locations",
-      "description": "",
+      "description": "Search and Create Locations",
       "mode": "view"
     }
   ],
