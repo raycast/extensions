@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [New Features] - {PR_MERGE_DATE}
+
+- Added `Search Space Tabs` command to search and select tabs in the current space only.
+
 ## [Update] - 2025-09-29
 
 - Added support for Zen Browser, Dia, and Perplexity Comet as browser options in the `Open in Other Browser` command.
@@ -23,7 +27,7 @@
 
 ## [Suggest opening URL] - 2025-03-31
 
-When searching for a URL, offer to open the URL 
+When searching for a URL, offer to open the URL
 
 ## [✨ AI Enhancements] - 2025-02-21
 
