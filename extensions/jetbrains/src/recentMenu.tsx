@@ -26,7 +26,6 @@ export default function ProjectList(): React.JSX.Element {
       </MenuBarExtra>
     );
   } else if (!toolboxApp.isSupported) {
-    const latestSupportedVersion = supportedMajorVersions.at(-1);
     const supportedVersionsText = supportedMajorVersions.map((v) => `V${v}`).join(", ");
 
     return (
