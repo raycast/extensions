@@ -569,69 +569,46 @@ test("should not leak stack traces in production", () => {
 
 #### Issue 10.1: Console Logging in Production
 **Severity:** MEDIUM  
-**Files:** Multiple  
-**Lines:** Various
+**Status:** ✅ **RESOLVED**
 
 **Problem:**
 Extensive `console.log()` and `console.error()` statements found throughout the codebase. While useful for debugging, these should be removed or gated for production.
 
-**Affected Files:**
-- `src/search-meetings.tsx` (4 console.log statements)
-- `src/hooks/useCachedMeetings.ts` (13 console.log statements)
-- `src/utils/cache.ts` (7 console.error statements)
-- `src/utils/teamColors.ts` (1 console.error statement)
-- `src/tools/*.ts` (4 console.error statements)
-- `src/fathom/api.ts` (1 console.warn statement)
+**Resolution:**
+Migrated to `@chrismessina/raycast-logger` npm package which provides:
+- ✅ Preference-driven logging (respects `verboseLogging` preference)
+- ✅ Automatic redaction of sensitive data (passwords, tokens, API keys, emails)
+- ✅ Production-safe error logging
+- ✅ Type-safe TypeScript support
 
-**Examples:**
+**Implementation:**
 ```typescript
-// src/search-meetings.tsx:48
-console.log(`[UI] Starting filter/search with ${cachedMeetings.length} cached meetings`);
+// All files now import from the npm package
+import { logger } from "@chrismessina/raycast-logger";
 
-// src/hooks/useCachedMeetings.ts:52
-console.log("[API] Fetching meetings from API with filter:", currentFilter);
+// Verbose logs (only shown when verboseLogging preference is enabled)
+logger.log(`[UI] Starting filter/search with ${cachedMeetings.length} cached meetings`);
 
-// src/utils/cache.ts:113
-console.error("Error reading cached meeting:", error);
+// Always shown for errors and warnings
+logger.error("Error reading cached meeting:", error);
+logger.warn("Rate limit approaching", { remaining: 10 });
 ```
 
-**Recommended Fix:**
+**Files Updated:**
+- `src/fathom/api.ts` - All `logger.debug()` → `logger.log()`
+- `src/hooks/useCachedMeetings.ts` - All `logger.debug()` → `logger.log()`
+- `src/utils/cache.ts` - Direct import from npm package
+- `src/utils/cacheManager.ts` - All `logger.debug()` → `logger.log()`
+- `src/utils/requestQueue.ts` - All `logger.debug()` → `logger.log()`
+- `src/utils/export.ts` - Direct import from npm package
+- `src/utils/errorHandling.ts` - Direct import from npm package
+- `src/tools/*.ts` - Direct import from npm package
 
-Create a logging utility:
-```typescript
-// src/utils/logger.ts
-const isDevelopment = process.env.NODE_ENV === "development";
-
-export const logger = {
-  debug: (...args: unknown[]) => {
-    if (isDevelopment) {
-      console.log(...args);
-    }
-  },
-  warn: (...args: unknown[]) => {
-    if (isDevelopment) {
-      console.warn(...args);
-    }
-  },
-  error: (message: string, error?: unknown) => {
-    // Always log errors, but sanitize in production
-    if (isDevelopment) {
-      console.error(message, error);
-    } else {
-      console.error(message); // Don't log error object in production
-    }
-  },
-};
-```
-
-Then replace all console statements:
-```typescript
-// Before
-console.log(`[UI] Starting filter/search with ${cachedMeetings.length} cached meetings`);
-
-// After
-logger.debug(`[UI] Starting filter/search with ${cachedMeetings.length} cached meetings`);
-```
+**Security Benefits:**
+- Automatic redaction of passwords, tokens, API keys
+- Email addresses partially masked (e.g., `u***@example.com`)
+- Long hex strings and Base64 encoded secrets redacted
+- User-controlled verbose logging via preference
 
 #### Issue 10.2: Title Case Compliance
 **Severity:** LOW  
@@ -713,13 +690,13 @@ None found.
 ### High Severity Issues (0)
 None found.
 
-### Medium Severity Issues (3)
+### Medium Severity Issues (2 remaining, 1 resolved)
 
 | # | Issue | File | Severity | Status |
 |---|-------|------|----------|--------|
 | 2.1 | Insufficient path traversal protection | `src/utils/export.ts` | MEDIUM | Open |
 | 5.1 | Minimal README content | `README.md` | MEDIUM | Open |
-| 10.1 | Console logging in production | Multiple files | MEDIUM | Open |
+| 10.1 | Console logging in production | Multiple files | MEDIUM | ✅ **Resolved** |
 
 ### Low Severity Issues (4)
 
@@ -755,7 +732,7 @@ None found.
 - [x] Prettier configured and passing
 - [x] TypeScript strict mode enabled
 - [x] No unused imports
-- [ ] Console logs removed/gated for production
+- [x] Console logs removed/gated for production (using @chrismessina/raycast-logger)
 
 ### Raycast Store
 - [x] MIT License
@@ -780,10 +757,10 @@ None found.
 
 ### Phase 1: Critical Fixes (Before Store Submission)
 1. ✅ Fix Prettier formatting issues (COMPLETED)
-2. ⚠️ Implement path traversal protection in `export.ts`
-3. ⚠️ Create comprehensive README
-4. ⚠️ Update CHANGELOG with actual date
-5. ⚠️ Remove or gate console.log statements for production
+2. ✅ Remove or gate console.log statements for production (COMPLETED - using @chrismessina/raycast-logger)
+3. ⚠️ Implement path traversal protection in `export.ts`
+4. ⚠️ Create comprehensive README
+5. ⚠️ Update CHANGELOG with actual date
 
 ### Phase 2: Store Preparation
 1. Add metadata directory
@@ -802,17 +779,20 @@ None found.
 
 ## Conclusion
 
-The Raycast Fathom Extension demonstrates **solid security practices** with no critical vulnerabilities. The main areas requiring attention are:
+The Raycast Fathom Extension demonstrates **solid security practices** with no critical vulnerabilities. Recent improvements include:
+
+✅ **Production logging resolved** - Migrated to `@chrismessina/raycast-logger` with automatic sensitive data redaction
+
+The remaining areas requiring attention are:
 
 1. **Path safety improvements** - Add validation to prevent directory traversal
-2. **Production readiness** - Remove debug logging for production builds
-3. **Store compliance** - Enhance README and add metadata/screenshots
+2. **Store compliance** - Enhance README and add metadata/screenshots
 
 With these improvements, the extension will be **ready for Raycast Store submission** and meet all security and compliance requirements.
 
-**Estimated Time to Address Issues:** 4-6 hours
+**Estimated Time to Address Remaining Issues:** 2-4 hours
 
-**Recommended Priority:** Address Medium severity issues before store submission.
+**Recommended Priority:** Address remaining Medium severity issues before store submission.
 
 ---
 

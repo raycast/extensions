@@ -5,7 +5,7 @@ import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { getMeetingSummary, getMeetingTranscript } from "../fathom/api";
 import type { Meeting } from "../types/Types";
 import { showContextualError } from "./errorHandling";
-import { logger } from "./logger";
+import { logger } from "@chrismessina/raycast-logger";
 
 export type MeetingExportFormat = "txt" | "md" | "json";
 export type MeetingExportType = "transcript" | "summary";
