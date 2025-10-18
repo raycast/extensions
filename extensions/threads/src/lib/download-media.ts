@@ -25,15 +25,10 @@ const requestConfig = {
 };
 
 async function getMediaFromThreadsPhotoDownloader(threadsUrl: string) {
-  const response = await axios.get(
-    `https://api.threadsphotodownloader.com/v2/media?url=${threadsUrl}`,
-    requestConfig,
-  );
+  const response = await axios.get(`https://api.threadsphotodownloader.com/v2/media?url=${threadsUrl}`, requestConfig);
 
-  const imageUrls =
-    (response.data as ThreadsPhotoDownloaderResponse)["image_urls"] || [];
-  const rawVideoUrls =
-    (response.data as ThreadsPhotoDownloaderResponse)["video_urls"] || [];
+  const imageUrls = (response.data as ThreadsPhotoDownloaderResponse)["image_urls"] || [];
+  const rawVideoUrls = (response.data as ThreadsPhotoDownloaderResponse)["video_urls"] || [];
   const videoUrls = rawVideoUrls.map((item) => item.download_url);
 
   if (imageUrls.length === 0 && videoUrls.length === 0) {
@@ -52,8 +47,7 @@ async function getMediaFromDolphinRadar(threadsPostId: string) {
     requestConfig,
   );
 
-  const mediaList = (response.data as ThreadsDolphinRadarResponse).data
-    .post_detail.media_list;
+  const mediaList = (response.data as ThreadsDolphinRadarResponse).data.post_detail.media_list;
 
   if (!mediaList || mediaList.length === 0) {
     return null;
@@ -77,10 +71,7 @@ async function getMediaFromDolphinRadar(threadsPostId: string) {
   return { images, videos };
 }
 
-export async function getThreadsMediaURL(
-  threadsUrl: string,
-  threadsPostId: string,
-) {
+export async function getThreadsMediaURL(threadsUrl: string, threadsPostId: string) {
   try {
     const result = await getMediaFromThreadsPhotoDownloader(threadsUrl);
     return result;
@@ -93,12 +84,7 @@ export async function getThreadsMediaURL(
   }
 }
 
-export async function handleDownload(
-  mediaUrl: string,
-  mediaId: string,
-  downloadFolder: string,
-  fileExtension: string,
-) {
+export async function handleDownload(mediaUrl: string, mediaId: string, downloadFolder: string, fileExtension: string) {
   let filePath = `${downloadFolder}/${mediaId.substring(0, 100)}.${fileExtension}`;
   let counter = 1;
 
@@ -147,8 +133,7 @@ export async function handleDownload(
   } catch (error) {
     await showToast({
       title: "Error While Downloading Media",
-      message:
-        error instanceof Error ? error.message : "Unknown error occurred",
+      message: error instanceof Error ? error.message : "Unknown error occurred",
       style: Toast.Style.Failure,
     });
   }

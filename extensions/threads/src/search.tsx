@@ -1,8 +1,6 @@
 import { LaunchProps, closeMainWindow, open } from "@raycast/api";
 
-export default async function Command(
-  props: LaunchProps<{ arguments: Arguments.Search }>,
-) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
   const url = "https://www.threads.net/search";
   const params = new URLSearchParams();
   const { query, sort } = props.arguments;

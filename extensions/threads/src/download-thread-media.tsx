@@ -1,9 +1,4 @@
-import {
-  LaunchProps,
-  Toast,
-  showToast,
-  getPreferenceValues,
-} from "@raycast/api";
+import { LaunchProps, Toast, showToast, getPreferenceValues } from "@raycast/api";
 import { getThreadsMediaURL, handleDownload } from "./lib/download-media";
 import { homedir } from "os";
 
@@ -15,8 +10,7 @@ export default async function Command({
   const { mediaDownloadPath } = await getPreferenceValues();
   const downloadFolder = mediaDownloadPath || `${homedir()}/Downloads`;
 
-  const threadsUrlPattern =
-    /(?:threads\.net|threads\.com)\/@[\w.]+\/post\/([A-Za-z0-9_-]+)/;
+  const threadsUrlPattern = /(?:threads\.net|threads\.com)\/@[\w.]+\/post\/([A-Za-z0-9_-]+)/;
   const match = threadsUrl.match(threadsUrlPattern);
 
   if (!match || !match[1]) {
@@ -35,10 +29,7 @@ export default async function Command({
     });
 
     const threadMedias = await getThreadsMediaURL(threadsUrl, match[1]);
-    if (
-      !threadMedias ||
-      (threadMedias?.images.length === 0 && threadMedias?.videos.length === 0)
-    ) {
+    if (!threadMedias || (threadMedias?.images.length === 0 && threadMedias?.videos.length === 0)) {
       throw new Error("No medias found at the provided URL");
     }
 
@@ -66,8 +57,7 @@ export default async function Command({
   } catch (error) {
     await showToast({
       title: "Error",
-      message:
-        error instanceof Error ? error.message : "Unknown error occurred",
+      message: error instanceof Error ? error.message : "Unknown error occurred",
       style: Toast.Style.Failure,
     });
   }
