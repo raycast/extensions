@@ -256,8 +256,6 @@ export class ACPClient implements acp.Client {
       logger.info('Prompt response received', {
         sessionId,
         stopReason: response.stopReason,
-        hasMessages: !!response.messages,
-        messageCount: response.messages?.length || 0,
         response: JSON.stringify(response, null, 2)
       });
 
