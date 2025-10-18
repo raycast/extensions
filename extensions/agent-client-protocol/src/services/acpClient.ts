@@ -19,6 +19,11 @@ import { TerminalManager } from "./terminalManager";
 
 const logger = createLogger("ACPClient");
 
+type RpcConnection = {
+  sendNotification<TParams>(method: string, params?: TParams): Promise<void>;
+  sendRequest<TParams, TResponse>(method: string, params?: TParams): Promise<TResponse>;
+};
+
 export class ACPClient implements acp.Client {
   private connection: acp.ClientSideConnection | null = null;
   private agentProcess: ChildProcess | null = null;
@@ -640,6 +645,11 @@ export class ACPClient implements acp.Client {
     }
   }
 
+  private getActiveRpcConnection(): RpcConnection {
+    this.ensureConnected();
+    return this.connection as unknown as RpcConnection;
+  }
+
   /**
    * Private: Create standardized error objects
    */
@@ -718,15 +728,10 @@ export class ACPClient implements acp.Client {
    * The agent should abort all ongoing operations and respond with a cancelled stop reason.
    */
   async cancelSession(sessionId: string): Promise<void> {
-    this.ensureConnected();
-
     logger.info("Cancelling session", { sessionId });
 
     try {
-      const connection = this.connection;
-      if (!connection) {
-        throw this.createError(ErrorCode.AgentUnavailable, "Connection became unavailable during cancellation");
-      }
+      const connection = this.getActiveRpcConnection();
       // Send session/cancel notification
       // This is a notification (one-way message), not a request
       await connection.sendNotification("session/cancel", {
@@ -752,18 +757,13 @@ export class ACPClient implements acp.Client {
    * Set the mode for a session
    */
   async setSessionMode(params: acp.SetSessionModeRequest): Promise<acp.SetSessionModeResponse> {
-    this.ensureConnected();
-
     logger.info("Setting session mode", {
       sessionId: params.sessionId,
       modeId: params.modeId,
     });
 
     try {
-      const connection = this.connection;
-      if (!connection) {
-        throw this.createError(ErrorCode.AgentUnavailable, "Connection became unavailable while setting session mode");
-      }
+      const connection = this.getActiveRpcConnection();
       // Call the ACP session/set_mode method
       // The connection object handles the JSON-RPC call
       const response = await connection.sendRequest<acp.SetSessionModeRequest, acp.SetSessionModeResponse>(
