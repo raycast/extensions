@@ -3,7 +3,7 @@
   "schemaVersion": 1,
   "name": "web-blocker",
   "title": "Webblocker",
-  "description": "Stay focused and block distracting websites instantly. Works in all browsers, blocks even open tabs, and can't be easily bypassed. 100% effective system-level blocking.",
+  "description": "Stay focused and block distracting websites instantly. Works in all browsers, blocks even open tabs, and can't be easily bypassed.",
   "icon": "icon.png",
   "author": "ahmad_bulbul",
   "categories": [
