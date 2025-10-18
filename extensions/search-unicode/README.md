@@ -13,30 +13,30 @@ Search Unicode is a set of Raycast plugins to lookup and reverse lookup Unicode 
 
 ### Search character by description
 
-![Screenshot for search Unicode keyword subscript](metadata/u_subscript.png)
+![Screenshot for search Unicode keyword subscript](images/u_subscript.png)
 
 In “Search Unicode”, type your query (ex. `subscript`) to get a list of characters
 matching the keyword.
 
 Press <kbd>Enter</kbd> to paste the character to your active input (ex. `₀`), press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> (or <kbd>Cmd</kbd> + <kbd>Enter</kbd>) to copy the character. Press <kbd>Ctrl</kbd> + <kbd>D</kbd> to see more information about the character.
 
-![Screenshot for details of character �](metadata/u_details.png)
+![Screenshot for details of character �](images/u_details.png)
 
 ### Search character by code point
 
-![Screenshot for searching Unicode codepoints ff10 fffd](metadata/u_ff10_fffd.png)
+![Screenshot for searching Unicode codepoints ff10 fffd](images/u_ff10_fffd.png)
 
 Type a sequence of hexadecimal codepoints (ex. `ff10 fffd`) to look up characters by their codepoints.
 
 ### Identify characters in a string
 
-![Screenshot for identifying lenny face](metadata/uid_lenny.png)
+![Screenshot for identifying lenny face](images/uid_lenny.png)
 
 In “Identify Unicode”, type any string (ex. `( ͡° ͜ʖ ͡°)`) to identify characters in a string.
 
 Press <kbd>Enter</kbd> to show details about the character, or press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> (or <kbd>Cmd</kbd> + <kbd>Enter</kbd>) to have details shown in a side bar.
 
-![Screenshot for identifying lenny face with details](metadata/uid_lenny_details.png)
+![Screenshot for identifying lenny face with details](images/uid_lenny_details.png)
 
 ### Footnotes
 
