@@ -42,13 +42,13 @@ export class TerminalManager {
   }): { terminalId: string } {
     const terminalId = `term_${Date.now()}_${++this.terminalIdCounter}`;
 
-    logger.info('Creating terminal', {
+    logger.info("Creating terminal", {
       terminalId,
       sessionId: params.sessionId,
       command: params.command,
       args: params.args,
       cwd: params.cwd,
-      env: params.env
+      env: params.env,
     });
 
     // Build environment variables
@@ -59,40 +59,40 @@ export class TerminalManager {
       }
     }
 
-    logger.debug('Spawn environment', {
+    logger.debug("Spawn environment", {
       terminalId,
       PATH: env.PATH,
       SHELL: env.SHELL,
-      envKeys: Object.keys(env)
+      envKeys: Object.keys(env),
     });
 
     // Spawn the process using shell if no args provided (likely a shell command string)
     const useShell = !params.args || params.args.length === 0;
-    const spawnOptions: import('child_process').SpawnOptions = {
+    const spawnOptions: import("child_process").SpawnOptions = {
       cwd: params.cwd || process.cwd(),
       env,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: useShell
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: useShell,
     };
 
-    logger.debug('Spawning process', {
+    logger.debug("Spawning process", {
       terminalId,
       command: params.command,
       args: params.args,
       useShell,
       spawnOptions: {
         cwd: spawnOptions.cwd,
-        shell: spawnOptions.shell
-      }
+        shell: spawnOptions.shell,
+      },
     });
 
     const childProcess = spawn(params.command, params.args || [], spawnOptions);
 
     if (!childProcess.stdout || !childProcess.stderr) {
-      throw new Error('Failed to create terminal process streams');
+      throw new Error("Failed to create terminal process streams");
     }
 
-    let output = '';
+    let output = "";
     let hasExited = false;
     let exitCode: number | null = null;
     let signal: string | null = null;
@@ -100,16 +100,16 @@ export class TerminalManager {
 
     // Create exit promise
     const exitPromise = new Promise<{ exitCode: number | null; signal: string | null }>((resolve) => {
-      childProcess.on('exit', (code: number | null, sig: string | null) => {
+      childProcess.on("exit", (code: number | null, sig: string | null) => {
         hasExited = true;
         exitCode = code;
         signal = sig;
 
-        logger.info('Terminal process exited', {
+        logger.info("Terminal process exited", {
           terminalId,
           exitCode: code,
           signal: sig,
-          outputLength: output.length
+          outputLength: output.length,
         });
 
         resolve({ exitCode: code, signal: sig });
@@ -118,9 +118,9 @@ export class TerminalManager {
 
     // Helper to truncate output from the beginning
     const truncateOutput = (newOutput: string) => {
-      if (outputByteLimit && Buffer.byteLength(newOutput, 'utf-8') > outputByteLimit) {
+      if (outputByteLimit && Buffer.byteLength(newOutput, "utf-8") > outputByteLimit) {
         // Truncate from beginning, ensuring we stay within byte limit
-        let bytes = Buffer.from(newOutput, 'utf-8');
+        let bytes = Buffer.from(newOutput, "utf-8");
         if (bytes.length > outputByteLimit) {
           // Keep only the last outputByteLimit bytes
           bytes = bytes.slice(bytes.length - outputByteLimit);
@@ -129,14 +129,14 @@ export class TerminalManager {
           let startIndex = 0;
           while (startIndex < bytes.length) {
             try {
-              const testStr = bytes.slice(startIndex).toString('utf-8');
+              const testStr = bytes.slice(startIndex).toString("utf-8");
               // If no error thrown, we found a valid boundary
               return testStr;
             } catch {
               startIndex++;
             }
           }
-          return bytes.slice(startIndex).toString('utf-8');
+          return bytes.slice(startIndex).toString("utf-8");
         }
         return newOutput;
       }
@@ -144,20 +144,20 @@ export class TerminalManager {
     };
 
     // Capture stdout
-    childProcess.stdout.on('data', (data: Buffer) => {
+    childProcess.stdout.on("data", (data: Buffer) => {
       output += data.toString();
       output = truncateOutput(output);
     });
 
     // Capture stderr
-    childProcess.stderr.on('data', (data: Buffer) => {
+    childProcess.stderr.on("data", (data: Buffer) => {
       output += data.toString();
       output = truncateOutput(output);
     });
 
     // Handle process errors
-    childProcess.on('error', (error: Error) => {
-      logger.error('Terminal process error', {
+    childProcess.on("error", (error: Error) => {
+      logger.error("Terminal process error", {
         terminalId,
         command: params.command,
         args: params.args,
@@ -166,7 +166,7 @@ export class TerminalManager {
         error: error.message,
         errorCode: (error as NodeJS.ErrnoException).code,
         errorStack: error.stack,
-        PATH: env.PATH
+        PATH: env.PATH,
       });
       output += `\nProcess error: ${error.message}\n`;
       output = truncateOutput(output);
@@ -193,12 +193,12 @@ export class TerminalManager {
         return hasExited;
       },
       exitPromise,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.terminals.set(terminalId, terminalInfo);
 
-    logger.info('Terminal created successfully', { terminalId, pid: childProcess.pid });
+    logger.info("Terminal created successfully", { terminalId, pid: childProcess.pid });
 
     return { terminalId };
   }
@@ -206,10 +206,7 @@ export class TerminalManager {
   /**
    * Get the current output and status of a terminal
    */
-  static getTerminalOutput(params: {
-    sessionId: string;
-    terminalId: string;
-  }): {
+  static getTerminalOutput(params: { sessionId: string; terminalId: string }): {
     output: string;
     truncated: boolean;
     exitStatus?: { exitCode: number | null; signal: string | null } | null;
@@ -224,15 +221,13 @@ export class TerminalManager {
       throw new Error(`Terminal ${params.terminalId} does not belong to session ${params.sessionId}`);
     }
 
-    const wasTruncated = terminal.outputByteLimit !== undefined &&
-      Buffer.byteLength(terminal.output, 'utf-8') >= terminal.outputByteLimit;
+    const wasTruncated =
+      terminal.outputByteLimit !== undefined && Buffer.byteLength(terminal.output, "utf-8") >= terminal.outputByteLimit;
 
     return {
       output: terminal.output,
       truncated: wasTruncated,
-      exitStatus: terminal.hasExited
-        ? { exitCode: terminal.exitCode, signal: terminal.signal }
-        : null
+      exitStatus: terminal.hasExited ? { exitCode: terminal.exitCode, signal: terminal.signal } : null,
     };
   }
 
@@ -253,7 +248,7 @@ export class TerminalManager {
       throw new Error(`Terminal ${params.terminalId} does not belong to session ${params.sessionId}`);
     }
 
-    logger.info('Waiting for terminal to exit', { terminalId: params.terminalId });
+    logger.info("Waiting for terminal to exit", { terminalId: params.terminalId });
 
     return await terminal.exitPromise;
   }
@@ -261,10 +256,7 @@ export class TerminalManager {
   /**
    * Kill a terminal command without releasing it
    */
-  static killTerminal(params: {
-    sessionId: string;
-    terminalId: string;
-  }): void {
+  static killTerminal(params: { sessionId: string; terminalId: string }): void {
     const terminal = this.terminals.get(params.terminalId);
 
     if (!terminal) {
@@ -276,23 +268,20 @@ export class TerminalManager {
     }
 
     if (!terminal.hasExited) {
-      logger.info('Killing terminal process', {
+      logger.info("Killing terminal process", {
         terminalId: params.terminalId,
-        pid: terminal.process.pid
+        pid: terminal.process.pid,
       });
       terminal.process.kill();
     } else {
-      logger.info('Terminal already exited', { terminalId: params.terminalId });
+      logger.info("Terminal already exited", { terminalId: params.terminalId });
     }
   }
 
   /**
    * Release a terminal and free its resources
    */
-  static releaseTerminal(params: {
-    sessionId: string;
-    terminalId: string;
-  }): void {
+  static releaseTerminal(params: { sessionId: string; terminalId: string }): void {
     const terminal = this.terminals.get(params.terminalId);
 
     if (!terminal) {
@@ -303,9 +292,9 @@ export class TerminalManager {
       throw new Error(`Terminal ${params.terminalId} does not belong to session ${params.sessionId}`);
     }
 
-    logger.info('Releasing terminal', {
+    logger.info("Releasing terminal", {
       terminalId: params.terminalId,
-      hasExited: terminal.hasExited
+      hasExited: terminal.hasExited,
     });
 
     // Kill the process if still running
@@ -316,14 +305,14 @@ export class TerminalManager {
     // Remove from tracking
     this.terminals.delete(params.terminalId);
 
-    logger.info('Terminal released', { terminalId: params.terminalId });
+    logger.info("Terminal released", { terminalId: params.terminalId });
   }
 
   /**
    * Clean up terminals for a specific session
    */
   static cleanupSession(sessionId: string): void {
-    logger.info('Cleaning up terminals for session', { sessionId });
+    logger.info("Cleaning up terminals for session", { sessionId });
 
     const terminalsToRelease: string[] = [];
 
@@ -337,16 +326,16 @@ export class TerminalManager {
       try {
         this.releaseTerminal({ sessionId, terminalId });
       } catch (error) {
-        logger.error('Failed to release terminal during cleanup', {
+        logger.error("Failed to release terminal during cleanup", {
           terminalId,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
 
-    logger.info('Session cleanup complete', {
+    logger.info("Session cleanup complete", {
       sessionId,
-      terminalsReleased: terminalsToRelease.length
+      terminalsReleased: terminalsToRelease.length,
     });
   }
 
@@ -359,11 +348,11 @@ export class TerminalManager {
     command: string;
     hasExited: boolean;
   }> {
-    return Array.from(this.terminals.values()).map(t => ({
+    return Array.from(this.terminals.values()).map((t) => ({
       terminalId: t.terminalId,
       sessionId: t.sessionId,
       command: t.command,
-      hasExited: t.hasExited
+      hasExited: t.hasExited,
     }));
   }
 }

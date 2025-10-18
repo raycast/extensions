@@ -5,17 +5,7 @@
  * set default agents, and manage built-in agent settings.
  */
 
-import {
-  Action,
-  ActionPanel,
-  List,
-  showToast,
-  Toast,
-  confirmAlert,
-  Alert,
-  Icon,
-  Clipboard
-} from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, confirmAlert, Alert, Icon, Clipboard } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { ConfigService } from "@/services/configService";
 import { AgentConfigService } from "@/services/agentConfigService";
@@ -50,7 +40,7 @@ export default function ConfigureAgentsCommand() {
         agentConfigService.getAllAgentHealth().catch((error) => {
           logger.warn("Failed to load agent health records", { error });
           return [] as AgentHealthRecord[];
-        })
+        }),
       ]);
 
       setAgents(agentConfigs);
@@ -66,14 +56,14 @@ export default function ConfigureAgentsCommand() {
   }
 
   async function deleteAgent(agentId: string) {
-    const agent = agents.find(a => a.id === agentId);
+    const agent = agents.find((a) => a.id === agentId);
     if (!agent) return;
 
     if (agent.isBuiltIn) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Cannot Delete",
-        message: "Built-in agents cannot be deleted"
+        message: "Built-in agents cannot be deleted",
       });
       return;
     }
@@ -105,7 +95,7 @@ export default function ConfigureAgentsCommand() {
       await showToast({
         style: Toast.Style.Success,
         title: "Agent Duplicated",
-        message: `${duplicate.name} created`
+        message: `${duplicate.name} created`,
       });
     } catch (error) {
       await ErrorHandler.handleError(error, "Duplicating agent configuration");
@@ -119,7 +109,7 @@ export default function ConfigureAgentsCommand() {
       await showToast({
         style: Toast.Style.Success,
         title: "Template Added",
-        message: `${created.name} ready to configure`
+        message: `${created.name} ready to configure`,
       });
     } catch (error) {
       await ErrorHandler.handleError(error, "Creating agent from template");
@@ -133,7 +123,7 @@ export default function ConfigureAgentsCommand() {
       await showToast({
         style: Toast.Style.Success,
         title: "Configurations Copied",
-        message: "Agent configurations copied to clipboard"
+        message: "Agent configurations copied to clipboard",
       });
     } catch (error) {
       await ErrorHandler.handleError(error, "Exporting agent configurations");
@@ -147,7 +137,7 @@ export default function ConfigureAgentsCommand() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Clipboard Empty",
-          message: "Copy exported agent configurations before importing"
+          message: "Copy exported agent configurations before importing",
         });
         return;
       }
@@ -156,7 +146,7 @@ export default function ConfigureAgentsCommand() {
       await loadAgents();
       await showToast({
         style: Toast.Style.Success,
-        title: "Configurations Imported"
+        title: "Configurations Imported",
       });
     } catch (error) {
       await ErrorHandler.handleError(error, "Importing agent configurations");
@@ -183,13 +173,13 @@ export default function ConfigureAgentsCommand() {
         await showToast({
           style: Toast.Style.Success,
           title: "Agent Available",
-          message: latencyText ? `${agent.name} • ${latencyText}` : `${agent.name} is ready to use`
+          message: latencyText ? `${agent.name} • ${latencyText}` : `${agent.name} is ready to use`,
         });
       } else {
         await showToast({
           style: Toast.Style.Failure,
           title: "Agent Unavailable",
-          message: record.error ?? "Agent command not found"
+          message: record.error ?? "Agent command not found",
         });
       }
     } catch (error) {
@@ -247,11 +237,7 @@ export default function ConfigureAgentsCommand() {
         description="Add your first AI agent configuration to get started."
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Add Agent"
-              icon={Icon.Plus}
-              target={<AddAgentForm onSave={loadAgents} />}
-            />
+            <Action.Push title="Add Agent" icon={Icon.Plus} target={<AddAgentForm onSave={loadAgents} />} />
           </ActionPanel>
         }
       />
@@ -266,22 +252,14 @@ export default function ConfigureAgentsCommand() {
           actions={
             <ActionPanel>
               <ActionPanel.Section title="Agent Actions">
-                <Action
-                  title="Test Connection"
-                  icon={Icon.Link}
-                  onAction={() => checkAvailability(agent)}
-                />
+                <Action title="Test Connection" icon={Icon.Link} onAction={() => checkAvailability(agent)} />
                 <Action.Push
                   title="Edit Configuration"
                   icon={Icon.Pencil}
                   target={<EditAgentForm existingConfig={agent} onSave={loadAgents} />}
                 />
                 {agent.id !== defaultAgent && (
-                  <Action
-                    title="Set as Default"
-                    icon={Icon.Star}
-                    onAction={() => setAsDefault(agent.id)}
-                  />
+                  <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(agent.id)} />
                 )}
                 {!agent.isBuiltIn && (
                   <Action
@@ -303,7 +281,7 @@ export default function ConfigureAgentsCommand() {
                         showToast({
                           style: Toast.Style.Success,
                           title: guide.name,
-                          message: guide.description
+                          message: guide.description,
                         });
                       }
                     }}
@@ -318,10 +296,7 @@ export default function ConfigureAgentsCommand() {
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   target={<AddAgentForm onSave={loadAgents} />}
                 />
-                <ActionPanel.Submenu
-                  title="Add From Template"
-                  icon={Icon.TextDocument}
-                >
+                <ActionPanel.Submenu title="Add from Template" icon={Icon.TextDocument}>
                   {AGENT_TEMPLATES.filter((template) => Boolean(template.name)).map((template) => (
                     <Action
                       key={template.name}

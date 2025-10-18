@@ -91,9 +91,7 @@ export interface SetSessionModeRequest {
   modeId: string;
 }
 
-export interface SetSessionModeResponse {
-  // Empty response on success
-}
+export type SetSessionModeResponse = Record<string, never>;
 
 export interface MCPServer {
   name: string;
@@ -109,7 +107,15 @@ export interface PromptRequest {
 }
 
 export interface PromptResponse {
-  stopReason: "completed" | "cancelled" | "error" | "user_requested" | "end_turn" | "max_tokens" | "max_turn_requests" | "refusal";
+  stopReason:
+    | "completed"
+    | "cancelled"
+    | "error"
+    | "user_requested"
+    | "end_turn"
+    | "max_tokens"
+    | "max_turn_requests"
+    | "refusal";
   messages?: SessionMessage[];
 }
 
@@ -166,12 +172,26 @@ export type ContentWrapper =
   | { type: "diff"; path: string; newText: string; oldText?: string | null; _meta?: Record<string, unknown> }
   | { type: "terminal"; terminalId: string; _meta?: Record<string, unknown> };
 
-export type MessageContent = ContentBlock | LegacyMessageContent | ContentWrapper | { type: string; [key: string]: unknown };
+export type MessageContent =
+  | ContentBlock
+  | LegacyMessageContent
+  | ContentWrapper
+  | { type: string; [key: string]: unknown };
 
 // Tool Calls
 export type ToolCallStatus = "pending" | "in_progress" | "completed" | "failed";
 
-export type ToolKind = "read" | "edit" | "delete" | "move" | "search" | "execute" | "think" | "fetch" | "switch_mode" | "other";
+export type ToolKind =
+  | "read"
+  | "edit"
+  | "delete"
+  | "move"
+  | "search"
+  | "execute"
+  | "think"
+  | "fetch"
+  | "switch_mode"
+  | "other";
 
 export type ContentBlock =
   | {
@@ -335,9 +355,7 @@ export interface WriteTextFileRequest {
   content: string;
 }
 
-export interface WriteTextFileResponse {
-  // Empty response on success
-}
+export type WriteTextFileResponse = Record<string, never>;
 
 // Session Messages
 export interface SessionMessage {

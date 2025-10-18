@@ -19,14 +19,9 @@ export class ACPError extends Error {
   public readonly timestamp: Date;
   public readonly context?: Record<string, unknown>;
 
-  constructor(
-    code: ErrorCode,
-    message: string,
-    details = '',
-    context?: Record<string, unknown>
-  ) {
+  constructor(code: ErrorCode, message: string, details = "", context?: Record<string, unknown>) {
     super(message);
-    this.name = 'ACPError';
+    this.name = "ACPError";
     this.code = code;
     this.details = details;
     this.timestamp = new Date();
@@ -47,7 +42,7 @@ export class ACPError extends Error {
       message: this.message,
       details: this.details,
       timestamp: this.timestamp,
-      context: this.context
+      context: this.context,
     };
   }
 
@@ -60,20 +55,12 @@ export class ACPError extends Error {
     }
 
     if (error instanceof Error) {
-      return new ACPError(
-        code,
-        error.message,
-        error.stack || '',
-        { originalError: error.name }
-      );
+      return new ACPError(code, error.message, error.stack || "", { originalError: error.name });
     }
 
-    return new ACPError(
-      code,
-      typeof error === 'string' ? error : 'An unknown error occurred',
-      '',
-      { originalValue: error }
-    );
+    return new ACPError(code, typeof error === "string" ? error : "An unknown error occurred", "", {
+      originalValue: error,
+    });
   }
 }
 
@@ -201,11 +188,7 @@ export class ErrorHandler {
    * Check if error is recoverable
    */
   static isRecoverable(error: ExtensionError): boolean {
-    const recoverableErrors = [
-      ErrorCode.NetworkError,
-      ErrorCode.AgentUnavailable,
-      ErrorCode.SessionExpired
-    ];
+    const recoverableErrors = [ErrorCode.NetworkError, ErrorCode.AgentUnavailable, ErrorCode.SessionExpired];
 
     return recoverableErrors.includes(error.code as ErrorCode);
   }
@@ -219,43 +202,23 @@ export class ErrorHandler {
         return [
           "Check your agent configuration",
           "Verify the agent is installed and accessible",
-          "Try a different agent"
+          "Try a different agent",
         ];
 
       case ErrorCode.AgentUnavailable:
-        return [
-          "Wait a moment and try again",
-          "Check if the agent process is running",
-          "Restart the agent"
-        ];
+        return ["Wait a moment and try again", "Check if the agent process is running", "Restart the agent"];
 
       case ErrorCode.NetworkError:
-        return [
-          "Check your internet connection",
-          "Try again in a few moments",
-          "Check firewall settings"
-        ];
+        return ["Check your internet connection", "Try again in a few moments", "Check firewall settings"];
 
       case ErrorCode.FileAccessDenied:
-        return [
-          "Check file permissions",
-          "Enable file access in settings",
-          "Try a different file"
-        ];
+        return ["Check file permissions", "Enable file access in settings", "Try a different file"];
 
       case ErrorCode.InvalidConfiguration:
-        return [
-          "Review your agent configuration",
-          "Reset to default settings",
-          "Check the configuration guide"
-        ];
+        return ["Review your agent configuration", "Reset to default settings", "Check the configuration guide"];
 
       default:
-        return [
-          "Try again",
-          "Restart the extension",
-          "Check the extension logs"
-        ];
+        return ["Try again", "Restart the extension", "Check the extension logs"];
     }
   }
 
@@ -275,9 +238,9 @@ export class ErrorHandler {
     console.error(logMessage, logDetails);
 
     // In development, show more details
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Error stack:', error.details);
-      console.error('Error context:', error.context);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error stack:", error.details);
+      console.error("Error context:", error.context);
     }
   }
 
@@ -316,7 +279,7 @@ export class ErrorHandler {
     recent: number;
   } {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const recentErrors = this.errors.filter(e => e.timestamp > oneHourAgo);
+    const recentErrors = this.errors.filter((e) => e.timestamp > oneHourAgo);
 
     const byCode: Record<string, number> = {};
     for (const error of this.errors) {
@@ -326,7 +289,7 @@ export class ErrorHandler {
     return {
       total: this.errors.length,
       byCode,
-      recent: recentErrors.length
+      recent: recentErrors.length,
     };
   }
 }
@@ -338,10 +301,7 @@ export class ErrorHandler {
 /**
  * Wrap async function with error handling
  */
-export function withErrorHandling<T extends unknown[], R>(
-  fn: (...args: T) => Promise<R>,
-  context?: string
-) {
+export function withErrorHandling<T extends unknown[], R>(fn: (...args: T) => Promise<R>, context?: string) {
   return async (...args: T): Promise<R | undefined> => {
     try {
       return await fn(...args);
@@ -355,11 +315,7 @@ export function withErrorHandling<T extends unknown[], R>(
 /**
  * Retry function with exponential backoff
  */
-export async function retryWithBackoff<T>(
-  fn: () => Promise<T>,
-  maxRetries = 3,
-  baseDelay = 1000
-): Promise<T> {
+export async function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries = 3, baseDelay = 1000): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -374,7 +330,7 @@ export async function retryWithBackoff<T>(
 
       // Exponential backoff: 1s, 2s, 4s
       const delay = baseDelay * Math.pow(2, attempt);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 

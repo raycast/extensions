@@ -13,12 +13,12 @@
  * We rely on frequent extension restarts to keep processes under control.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { environment } from '@raycast/api';
-import { createLogger } from '@/utils/logging';
+import * as fs from "fs";
+import * as path from "path";
+import { environment } from "@raycast/api";
+import { createLogger } from "@/utils/logging";
 
-const logger = createLogger('ProcessTracker');
+const logger = createLogger("ProcessTracker");
 
 interface ProcessInfo {
   pid: number;
@@ -35,7 +35,7 @@ export class ProcessTracker {
   // Use Raycast's support directory for stable, extension-specific storage
   // Lazy getter to avoid accessing environment at module load time (for testing)
   private static get PROCESS_DIR(): string {
-    return path.join(environment.supportPath, 'processes');
+    return path.join(environment.supportPath, "processes");
   }
 
   /**
@@ -50,7 +50,7 @@ export class ProcessTracker {
       // Create process directory if it doesn't exist
       if (!fs.existsSync(this.PROCESS_DIR)) {
         fs.mkdirSync(this.PROCESS_DIR, { recursive: true, mode: 0o755 });
-        logger.info('Created process tracking directory', { dir: this.PROCESS_DIR });
+        logger.info("Created process tracking directory", { dir: this.PROCESS_DIR });
       }
 
       // Clean up stale PID files and orphaned processes
@@ -58,9 +58,9 @@ export class ProcessTracker {
       await this.cleanupOrphanedProcesses();
 
       this.initialized = true;
-      logger.info('Process tracker initialized');
+      logger.info("Process tracker initialized");
     } catch (error) {
-      logger.error('Failed to initialize process tracker', { error });
+      logger.error("Failed to initialize process tracker", { error });
       throw error;
     }
   }
@@ -81,15 +81,15 @@ export class ProcessTracker {
         pid,
         agentId,
         command,
-        startedAt: Date.now()
+        startedAt: Date.now(),
       };
 
       const pidFile = this.getPidFilePath(agentId);
       fs.writeFileSync(pidFile, JSON.stringify(processInfo, null, 2), { mode: 0o644 });
 
-      logger.info('Registered process', { agentId, pid, pidFile });
+      logger.info("Registered process", { agentId, pid, pidFile });
     } catch (error) {
-      logger.error('Failed to register process', { agentId, pid, error });
+      logger.error("Failed to register process", { agentId, pid, error });
     }
   }
 
@@ -101,10 +101,10 @@ export class ProcessTracker {
       const pidFile = this.getPidFilePath(agentId);
       if (fs.existsSync(pidFile)) {
         fs.unlinkSync(pidFile);
-        logger.info('Unregistered process', { agentId, pidFile });
+        logger.info("Unregistered process", { agentId, pidFile });
       }
     } catch (error) {
-      logger.error('Failed to unregister process', { agentId, error });
+      logger.error("Failed to unregister process", { agentId, error });
     }
   }
 
@@ -118,7 +118,7 @@ export class ProcessTracker {
         return null;
       }
 
-      const content = fs.readFileSync(pidFile, 'utf-8');
+      const content = fs.readFileSync(pidFile, "utf-8");
       const processInfo: ProcessInfo = JSON.parse(content);
 
       // Verify process is still running
@@ -126,12 +126,12 @@ export class ProcessTracker {
         return processInfo.pid;
       } else {
         // Process died, clean up stale PID file
-        logger.info('Found stale PID file, cleaning up', { agentId, pid: processInfo.pid });
+        logger.info("Found stale PID file, cleaning up", { agentId, pid: processInfo.pid });
         this.unregisterProcess(agentId);
         return null;
       }
     } catch (error) {
-      logger.warn('Failed to get process PID', { agentId, error });
+      logger.warn("Failed to get process PID", { agentId, error });
       return null;
     }
   }
@@ -143,36 +143,36 @@ export class ProcessTracker {
     try {
       const pid = this.getProcessPid(agentId);
       if (!pid) {
-        logger.debug('No process to kill', { agentId });
+        logger.debug("No process to kill", { agentId });
         return false;
       }
 
-      logger.info('Killing process', { agentId, pid });
+      logger.info("Killing process", { agentId, pid });
 
       // Try graceful termination first (SIGTERM)
       try {
-        process.kill(pid, 'SIGTERM');
-        logger.info('Sent SIGTERM to process', { agentId, pid });
+        process.kill(pid, "SIGTERM");
+        logger.info("Sent SIGTERM to process", { agentId, pid });
 
         // Unregister immediately - process will die soon
         this.unregisterProcess(agentId);
         return true;
       } catch (error) {
         // Process might already be dead
-        if ((error as NodeJS.ErrnoException).code === 'ESRCH') {
-          logger.info('Process already dead', { agentId, pid });
+        if ((error as NodeJS.ErrnoException).code === "ESRCH") {
+          logger.info("Process already dead", { agentId, pid });
           this.unregisterProcess(agentId);
           return true;
         }
 
         // If SIGTERM fails for other reason, try SIGKILL
-        logger.warn('SIGTERM failed, trying SIGKILL', { agentId, pid, error });
+        logger.warn("SIGTERM failed, trying SIGKILL", { agentId, pid, error });
         try {
-          process.kill(pid, 'SIGKILL');
+          process.kill(pid, "SIGKILL");
           this.unregisterProcess(agentId);
           return true;
         } catch (killError) {
-          if ((killError as NodeJS.ErrnoException).code === 'ESRCH') {
+          if ((killError as NodeJS.ErrnoException).code === "ESRCH") {
             this.unregisterProcess(agentId);
             return true;
           }
@@ -180,7 +180,7 @@ export class ProcessTracker {
         }
       }
     } catch (error) {
-      logger.error('Failed to kill process', { agentId, error });
+      logger.error("Failed to kill process", { agentId, error });
       return false;
     }
   }
@@ -196,9 +196,9 @@ export class ProcessTracker {
       }
 
       const files = fs.readdirSync(this.PROCESS_DIR);
-      const pidFiles = files.filter(f => f.endsWith('.pid'));
+      const pidFiles = files.filter((f) => f.endsWith(".pid"));
 
-      logger.info('Checking for orphaned processes', { count: pidFiles.length });
+      logger.info("Checking for orphaned processes", { count: pidFiles.length });
 
       let cleaned = 0;
       let killed = 0;
@@ -207,7 +207,7 @@ export class ProcessTracker {
       for (const file of pidFiles) {
         try {
           const pidFile = path.join(this.PROCESS_DIR, file);
-          const content = fs.readFileSync(pidFile, 'utf-8');
+          const content = fs.readFileSync(pidFile, "utf-8");
           const processInfo: ProcessInfo = JSON.parse(content);
 
           const processAge = Date.now() - processInfo.startedAt;
@@ -216,10 +216,10 @@ export class ProcessTracker {
           if (this.isProcessRunning(processInfo.pid)) {
             // Safety check: never kill the current process or its parent
             if (processInfo.pid === process.pid || processInfo.pid === process.ppid) {
-              logger.warn('Skipping current/parent process', {
+              logger.warn("Skipping current/parent process", {
                 pid: processInfo.pid,
                 currentPid: process.pid,
-                parentPid: process.ppid
+                parentPid: process.ppid,
               });
               // Don't remove the PID file for current process
               continue;
@@ -227,28 +227,28 @@ export class ProcessTracker {
 
             // Process is still running - kill it if orphaned or expired
             if (isExpired) {
-              logger.info('Found expired process, killing', {
+              logger.info("Found expired process, killing", {
                 agentId: processInfo.agentId,
                 pid: processInfo.pid,
-                ageHours: (processAge / (60 * 60 * 1000)).toFixed(2)
+                ageHours: (processAge / (60 * 60 * 1000)).toFixed(2),
               });
               expired++;
             } else {
-              logger.info('Found orphaned process, killing', {
+              logger.info("Found orphaned process, killing", {
                 agentId: processInfo.agentId,
                 pid: processInfo.pid,
-                ageMinutes: (processAge / (60 * 1000)).toFixed(2)
+                ageMinutes: (processAge / (60 * 1000)).toFixed(2),
               });
             }
 
             try {
-              process.kill(processInfo.pid, 'SIGTERM');
+              process.kill(processInfo.pid, "SIGTERM");
               killed++;
             } catch (error) {
-              if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
-                logger.warn('Failed to kill process', {
+              if ((error as NodeJS.ErrnoException).code !== "ESRCH") {
+                logger.warn("Failed to kill process", {
                   pid: processInfo.pid,
-                  error
+                  error,
                 });
               }
             }
@@ -258,13 +258,13 @@ export class ProcessTracker {
           fs.unlinkSync(pidFile);
           cleaned++;
         } catch (error) {
-          logger.warn('Failed to process PID file', { file, error });
+          logger.warn("Failed to process PID file", { file, error });
         }
       }
 
-      logger.info('Orphaned process cleanup complete', { cleaned, killed, expired });
+      logger.info("Orphaned process cleanup complete", { cleaned, killed, expired });
     } catch (error) {
-      logger.error('Failed to cleanup orphaned processes', { error });
+      logger.error("Failed to cleanup orphaned processes", { error });
     }
   }
 
@@ -276,7 +276,7 @@ export class ProcessTracker {
       // Sending signal 0 checks if process exists without killing it
       process.kill(pid, 0);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -286,7 +286,7 @@ export class ProcessTracker {
    */
   private static getPidFilePath(agentId: string): string {
     // Sanitize agent ID for use in filename
-    const sanitized = agentId.replace(/[^a-zA-Z0-9-_]/g, '_');
+    const sanitized = agentId.replace(/[^a-zA-Z0-9-_]/g, "_");
     return path.join(this.PROCESS_DIR, `${sanitized}.pid`);
   }
 
@@ -301,13 +301,13 @@ export class ProcessTracker {
       }
 
       const files = fs.readdirSync(this.PROCESS_DIR);
-      const pidFiles = files.filter(f => f.endsWith('.pid'));
+      const pidFiles = files.filter((f) => f.endsWith(".pid"));
 
       const processes: ProcessInfo[] = [];
       for (const file of pidFiles) {
         try {
           const pidFile = path.join(this.PROCESS_DIR, file);
-          const content = fs.readFileSync(pidFile, 'utf-8');
+          const content = fs.readFileSync(pidFile, "utf-8");
           const processInfo: ProcessInfo = JSON.parse(content);
 
           const processAge = Date.now() - processInfo.startedAt;
@@ -315,15 +315,15 @@ export class ProcessTracker {
 
           // Clean up expired processes opportunistically
           if (isExpired && this.isProcessRunning(processInfo.pid)) {
-            logger.info('Killing expired process during scan', {
+            logger.info("Killing expired process during scan", {
               agentId: processInfo.agentId,
               pid: processInfo.pid,
-              ageHours: (processAge / (60 * 60 * 1000)).toFixed(2)
+              ageHours: (processAge / (60 * 60 * 1000)).toFixed(2),
             });
             try {
-              process.kill(processInfo.pid, 'SIGTERM');
+              process.kill(processInfo.pid, "SIGTERM");
             } catch (error) {
-              logger.warn('Failed to kill expired process', { pid: processInfo.pid, error });
+              logger.warn("Failed to kill expired process", { pid: processInfo.pid, error });
             }
             // Remove PID file
             fs.unlinkSync(pidFile);
@@ -338,13 +338,13 @@ export class ProcessTracker {
             fs.unlinkSync(pidFile);
           }
         } catch (error) {
-          logger.warn('Failed to read PID file', { file, error });
+          logger.warn("Failed to read PID file", { file, error });
         }
       }
 
       return processes;
     } catch (error) {
-      logger.error('Failed to get all processes', { error });
+      logger.error("Failed to get all processes", { error });
       return [];
     }
   }

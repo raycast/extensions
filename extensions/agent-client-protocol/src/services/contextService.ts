@@ -82,7 +82,9 @@ export class ContextService {
               ? {
                   ...ctx.metadata,
                   lastModified:
-                    ctx.metadata.lastModified instanceof Date ? ctx.metadata.lastModified.toISOString() : ctx.metadata.lastModified,
+                    ctx.metadata.lastModified instanceof Date
+                      ? ctx.metadata.lastModified.toISOString()
+                      : ctx.metadata.lastModified,
                 }
               : undefined,
           })),
@@ -116,7 +118,8 @@ export class ContextService {
     try {
       fileStat = await stat(sanitizedPath);
     } catch (error) {
-      throw new Error(`Unable to access file: ${sanitizedPath}`);
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new Error(`Unable to access file: ${sanitizedPath} (${reason})`);
     }
 
     if (!fileStat.isFile()) {

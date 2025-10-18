@@ -106,7 +106,7 @@ export class HistoryService {
       metadata: {
         sessionCount: selected.length,
         totalMessages: selected.reduce((sum, session) => sum + session.messages.length, 0),
-        includeContexts
+        includeContexts,
       },
       sessions: selected.map((session) => ({
         sessionId: session.sessionId,
@@ -121,9 +121,9 @@ export class HistoryService {
           role: message.role,
           content: message.content,
           timestamp: message.timestamp.toISOString(),
-          metadata: message.metadata
-        }))
-      }))
+          metadata: message.metadata,
+        })),
+      })),
     };
 
     if (includeContexts && typeof this.storageService.getProjectContexts === "function") {
@@ -145,10 +145,7 @@ export class HistoryService {
     return JSON.stringify(payload, null, 2);
   }
 
-  private applyFilters<T extends ConversationSession>(
-    sessions: T[],
-    options: ConversationSummaryOptions
-  ): T[] {
+  private applyFilters<T extends ConversationSession>(sessions: T[], options: ConversationSummaryOptions): T[] {
     return sessions.filter((session) => {
       const matchesAgent = options.agentIds?.length ? options.agentIds.includes(session.agentConfigId) : true;
       const matchesStatus = options.statuses?.length ? options.statuses.includes(session.status) : true;
@@ -169,7 +166,7 @@ export class HistoryService {
       messageCount: session.messages.length,
       preview: this.truncate(previewSource?.content ?? "", 160),
       title: session.metadata?.title,
-      tags: session.metadata?.tags
+      tags: session.metadata?.tags,
     };
   }
 

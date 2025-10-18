@@ -6,7 +6,9 @@ export function getAgentSubtitle(agent: AgentConfig): string {
   const parts: string[] = [];
 
   if (agent.type === "subprocess") {
-    const commandTokens = [agent.command, ...(agent.args ?? [])].filter((token): token is string => Boolean(token && token.trim()));
+    const commandTokens = [agent.command, ...(agent.args ?? [])].filter((token): token is string =>
+      Boolean(token && token.trim()),
+    );
     if (commandTokens.length > 0) {
       parts.push(`Command: ${commandTokens.join(" ")}`);
     }
@@ -40,27 +42,19 @@ export function getAgentHealthAccessory(health?: AgentHealthRecord): List.Item.A
     return {
       text: "Healthy",
       icon: { source: Icon.Checkmark, tintColor: Color.Green },
-      tooltip: basics.join(" • ")
+      tooltip: basics.join(" • "),
     };
   }
 
   return {
     text: "Unhealthy",
     icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
-    tooltip: basics.join(" • ")
+    tooltip: basics.join(" • "),
   };
 }
 
 export default function AgentSelector(props: AgentSelectorProps) {
-  const {
-    agents,
-    selectedAgentId,
-    onSelectAgent,
-    onConfigureAgent,
-    onTestAgent,
-    isLoading,
-    healthMap
-  } = props;
+  const { agents, selectedAgentId, onSelectAgent, onConfigureAgent, onTestAgent, isLoading, healthMap } = props;
 
   const { pop } = useNavigation();
 
@@ -86,11 +80,7 @@ export default function AgentSelector(props: AgentSelectorProps) {
         description="Add an agent configuration to start chatting."
         actions={
           <ActionPanel>
-            <Action
-              title="Open Agent Settings"
-              icon={Icon.Gear}
-              onAction={onConfigureAgent}
-            />
+            <Action title="Open Agent Settings" icon={Icon.Gear} onAction={onConfigureAgent} />
           </ActionPanel>
         }
       />
@@ -129,22 +119,14 @@ export default function AgentSelector(props: AgentSelectorProps) {
                       // Popping inside try/catch to avoid navigation errors in root context
                       try {
                         pop();
-                      } catch (error) {
+                      } catch {
                         // noop when pop not available
                       }
                     }}
                   />
-                  <Action
-                    title="Configure Agents"
-                    icon={Icon.Gear}
-                    onAction={onConfigureAgent}
-                  />
+                  <Action title="Configure Agents" icon={Icon.Gear} onAction={onConfigureAgent} />
                   {onTestAgent && (
-                    <Action
-                      title="Test Connection"
-                      icon={Icon.Link}
-                      onAction={() => onTestAgent(agent.id)}
-                    />
+                    <Action title="Test Connection" icon={Icon.Link} onAction={() => onTestAgent(agent.id)} />
                   )}
                 </ActionPanel>
               }

@@ -50,7 +50,7 @@ export const BUILT_IN_AGENTS: readonly AgentConfig[] = [
     isBuiltIn: true,
     description: "Block's Goose AI agent with ACP support. Requires Goose to be installed.",
     createdAt: new Date("2025-01-01T00:00:00Z"),
-  }
+  },
 ] as const;
 
 /**
@@ -78,83 +78,74 @@ export const AGENT_TEMPLATES: readonly Partial<AgentConfig>[] = [
     args: ["run", "-i", "--rm", "your-agent-image", "--acp"],
     workingDirectory: process.cwd(),
     description: "Template for running an ACP agent in a Docker container",
-  }
+  },
 ] as const;
 
 /**
  * Agent installation guides
  */
-export const INSTALLATION_GUIDES: Record<string, {
-  name: string;
-  description: string;
-  installCommand?: string;
-  installUrl?: string;
-  requirements: string[];
-  verifyCommand?: string;
-}> = {
+export const INSTALLATION_GUIDES: Record<
+  string,
+  {
+    name: string;
+    description: string;
+    installCommand?: string;
+    installUrl?: string;
+    requirements: string[];
+    verifyCommand?: string;
+  }
+> = {
   "gemini-cli": {
     name: "Gemini CLI",
     description: "Install Google's Gemini CLI for AI assistance",
     installCommand: "npm install -g @google-ai/generativelanguage-cli",
     installUrl: "https://github.com/google-gemini/gemini-cli",
-    requirements: [
-      "Node.js 18+",
-      "Google AI API key",
-      "Internet connection"
-    ],
-    verifyCommand: "gemini --version"
+    requirements: ["Node.js 18+", "Google AI API key", "Internet connection"],
+    verifyCommand: "gemini --version",
   },
   "claude-code": {
     name: "Claude Code",
     description: "Install Anthropic's Claude Code via Zed's ACP adapter",
     installUrl: "https://github.com/zed-industries/claude-code-acp",
-    requirements: [
-      "Anthropic API key",
-      "Zed editor or standalone installation",
-      "Internet connection"
-    ],
-    verifyCommand: "claude-code --version"
+    requirements: ["Anthropic API key", "Zed editor or standalone installation", "Internet connection"],
+    verifyCommand: "claude-code --version",
   },
-  "goose": {
+  goose: {
     name: "Goose",
     description: "Install Block's Goose AI agent",
     installCommand: "pip install goose-ai",
     installUrl: "https://block.github.io/goose/",
-    requirements: [
-      "Python 3.8+",
-      "OpenAI or other AI provider API key",
-      "Internet connection"
-    ],
-    verifyCommand: "goose --version"
-  }
+    requirements: ["Python 3.8+", "OpenAI or other AI provider API key", "Internet connection"],
+    verifyCommand: "goose --version",
+  },
 } as const;
 
 /**
  * Check if an agent is built-in
  */
 export function isBuiltInAgent(agentId: string): boolean {
-  return BUILT_IN_AGENTS.some(agent => agent.id === agentId);
+  return BUILT_IN_AGENTS.some((agent) => agent.id === agentId);
 }
 
 /**
  * Get built-in agent by ID
  */
 export function getBuiltInAgent(agentId: string): AgentConfig | undefined {
-  return BUILT_IN_AGENTS.find(agent => agent.id === agentId);
+  return BUILT_IN_AGENTS.find((agent) => agent.id === agentId);
 }
 
 /**
  * Get all built-in agent IDs
  */
 export function getBuiltInAgentIds(): string[] {
-  return BUILT_IN_AGENTS.map(agent => agent.id);
+  return BUILT_IN_AGENTS.map((agent) => agent.id);
 }
 
 /**
  * Get agent template by name
  */
 export function getAgentTemplate(name: string): Partial<AgentConfig> | undefined {
-  return AGENT_TEMPLATES.find(template => template.name === name);
+  return AGENT_TEMPLATES.find((template) => template.name === name);
 }
 
 /**
@@ -162,8 +153,8 @@ export function getAgentTemplate(name: string): Partial<AgentConfig> | undefined
  */
 export function createAgentFromTemplate(
   templateName: string,
-  customizations: Partial<AgentConfig>
-): Omit<AgentConfig, 'id' | 'createdAt'> {
+  customizations: Partial<AgentConfig>,
+): Omit<AgentConfig, "id" | "createdAt"> {
   const template = getAgentTemplate(templateName);
   if (!template) {
     throw new Error(`Template not found: ${templateName}`);
@@ -173,7 +164,7 @@ export function createAgentFromTemplate(
     ...template,
     ...customizations,
     isBuiltIn: false,
-  } as Omit<AgentConfig, 'id' | 'createdAt'>;
+  } as Omit<AgentConfig, "id" | "createdAt">;
 }
 
 /**
@@ -223,7 +214,7 @@ export function validateAgentConfig(config: Partial<AgentConfig>): {
   }
 
   if (config.appendToPath) {
-    const invalidSegments = config.appendToPath.filter(segment => !segment?.trim());
+    const invalidSegments = config.appendToPath.filter((segment) => !segment?.trim());
     if (invalidSegments.length > 0) {
       errors.push("Append to PATH entries must be non-empty");
     }
@@ -231,7 +222,7 @@ export function validateAgentConfig(config: Partial<AgentConfig>): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -255,15 +246,13 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
     const mergedEnv: NodeJS.ProcessEnv = { ...baseEnv, ...(config.environmentVariables ?? {}) };
 
     if (config.appendToPath?.length) {
-      const currentPath =
-        mergedEnv.PATH ??
-        mergedEnv.Path ??
-        mergedEnv.path ??
-        process.env.PATH ??
-        "";
+      const currentPath = mergedEnv.PATH ?? mergedEnv.Path ?? mergedEnv.path ?? process.env.PATH ?? "";
 
       const pathSegments = currentPath
-        ? currentPath.split(":").map(segment => segment.trim()).filter(Boolean)
+        ? currentPath
+            .split(":")
+            .map((segment) => segment.trim())
+            .filter(Boolean)
         : [];
 
       for (const segment of config.appendToPath) {
@@ -281,14 +270,14 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
     }
 
     const args = config.args && config.args.length > 0 ? [...config.args] : ["--version"];
-    const isLongRunningCheck = args.some(arg => arg !== "--version");
+    const isLongRunningCheck = args.some((arg) => arg !== "--version");
 
     logger.info("Checking agent availability", {
       agentId: config.id,
       command: config.command,
       args,
       cwd: config.workingDirectory || process.cwd(),
-      path: mergedEnv.PATH
+      path: mergedEnv.PATH,
     });
 
     return new Promise((resolve) => {
@@ -297,7 +286,7 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
         stdio: ["ignore", "pipe", "pipe"],
         timeout: 0,
         cwd: config.workingDirectory || process.cwd(),
-        env: mergedEnv
+        env: mergedEnv,
       });
 
       let resolved = false;
@@ -336,7 +325,7 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
             agentId: config.id,
             command: config.command,
             args,
-            path: mergedEnv.PATH
+            path: mergedEnv.PATH,
           });
           finalize({ isAvailable: true });
           child.kill();
@@ -344,22 +333,25 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
         }, 3000);
       }
 
-      timeoutTimer = setTimeout(() => {
-        if (!resolved) {
-          logger.warn("Agent availability check timed out", {
-            agentId: config.id,
-            command: config.command,
-            args,
-            path: mergedEnv.PATH
-          });
-          child.kill();
-          setTimeout(() => child.kill("SIGKILL"), 1000);
-          finalize({
-            isAvailable: false,
-            error: "Command check timed out"
-          });
-        }
-      }, isLongRunningCheck ? 10000 : 5000);
+      timeoutTimer = setTimeout(
+        () => {
+          if (!resolved) {
+            logger.warn("Agent availability check timed out", {
+              agentId: config.id,
+              command: config.command,
+              args,
+              path: mergedEnv.PATH,
+            });
+            child.kill();
+            setTimeout(() => child.kill("SIGKILL"), 1000);
+            finalize({
+              isAvailable: false,
+              error: "Command check timed out",
+            });
+          }
+        },
+        isLongRunningCheck ? 10000 : 5000,
+      );
 
       child.on("error", (error) => {
         if (resolved) {
@@ -369,12 +361,12 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
           agentId: config.id,
           command: config.command,
           error: error.message,
-          path: mergedEnv.PATH
+          path: mergedEnv.PATH,
         });
         finalize({
           isAvailable: false,
           error: `Command not found: ${config.command}`,
-          details: error.message
+          details: error.message,
         });
       });
 
@@ -387,9 +379,8 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
           return;
         }
 
-        const message = code !== null
-          ? `Command exited with code ${code}`
-          : `Command terminated by signal ${signal ?? "unknown"}`;
+        const message =
+          code !== null ? `Command exited with code ${code}` : `Command terminated by signal ${signal ?? "unknown"}`;
 
         logger.warn("Agent availability command exited with error", {
           agentId: config.id,
@@ -398,13 +389,13 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
           signal,
           stderr: stderr.trim(),
           stdout: stdout.trim(),
-          path: mergedEnv.PATH
+          path: mergedEnv.PATH,
         });
 
         finalize({
           isAvailable: false,
           error: message,
-          details: stderr.trim() || stdout.trim() || undefined
+          details: stderr.trim() || stdout.trim() || undefined,
         });
       });
 
@@ -414,7 +405,7 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
   } catch (error) {
     return {
       isAvailable: false,
-      error: `Failed to check availability: ${error instanceof Error ? error.message : 'Unknown error'}`
+      error: `Failed to check availability: ${error instanceof Error ? error.message : "Unknown error"}`,
     };
   }
 }
@@ -422,7 +413,7 @@ export async function checkAgentAvailability(config: AgentConfig): Promise<{
 /**
  * Get installation guide for agent
  */
-export function getInstallationGuide(agentId: string): typeof INSTALLATION_GUIDES[string] | undefined {
+export function getInstallationGuide(agentId: string): (typeof INSTALLATION_GUIDES)[string] | undefined {
   return INSTALLATION_GUIDES[agentId];
 }
 
@@ -432,9 +423,9 @@ export function getInstallationGuide(agentId: string): typeof INSTALLATION_GUIDE
 export function generateAgentId(name: string): string {
   const sanitized = name
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/[^a-z0-9]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 
   const timestamp = Date.now().toString(36);
   return `${sanitized}-${timestamp}`;

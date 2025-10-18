@@ -66,7 +66,7 @@ export function useChatSession(): UseChatSessionResult {
       storageServiceRef.current,
       acpClientRef.current,
       contextServiceRef.current,
-      persistenceServiceRef.current
+      persistenceServiceRef.current,
     );
   }
 
@@ -99,7 +99,7 @@ export function useChatSession(): UseChatSessionResult {
         setContexts([]);
       }
     },
-    [contextService]
+    [contextService],
   );
 
   const refreshContexts = useCallback(async () => {
@@ -129,7 +129,7 @@ export function useChatSession(): UseChatSessionResult {
         throw error;
       }
     },
-    [conversation, contextService, loadContextsForSession]
+    [conversation, contextService, loadContextsForSession],
   );
 
   const addDirectoryContexts = useCallback(
@@ -155,7 +155,7 @@ export function useChatSession(): UseChatSessionResult {
         throw error;
       }
     },
-    [conversation, contextService, loadContextsForSession]
+    [conversation, contextService, loadContextsForSession],
   );
 
   const removeContext = useCallback(
@@ -172,7 +172,7 @@ export function useChatSession(): UseChatSessionResult {
         throw error;
       }
     },
-    [contextService, conversation, loadContextsForSession]
+    [contextService, conversation, loadContextsForSession],
   );
 
   const refreshConversation = useCallback(
@@ -183,19 +183,16 @@ export function useChatSession(): UseChatSessionResult {
         setMessages(latest.messages);
       }
     },
-    [sessionService]
+    [sessionService],
   );
 
-  const handleStreamingMessage = useCallback(
-    (_message: SessionMessage) => {
-      const currentId = activeSessionIdRef.current;
-      if (!currentId) {
-        return;
-      }
-      void refreshConversation(currentId);
-    },
-    [refreshConversation]
-  );
+  const handleStreamingMessage = useCallback(() => {
+    const currentId = activeSessionIdRef.current;
+    if (!currentId) {
+      return;
+    }
+    void refreshConversation(currentId);
+  }, [refreshConversation]);
 
   useEffect(() => {
     async function initStorage() {
@@ -209,164 +206,170 @@ export function useChatSession(): UseChatSessionResult {
     initStorage();
   }, [storageService]);
 
-  const startSession = useCallback(async (agent: AgentConfig, prompt: string) => {
-    if (!prompt.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Enter a prompt",
-        message: "Please provide a message to start the conversation."
-      });
-      return;
-    }
-
-    try {
-      setStatus("connecting");
-      setActiveAgent(agent);
-
-      logger.info("Starting new session", {
-        agentId: agent.id,
-        workingDirectory: agent.workingDirectory,
-        agentName: agent.name
-      });
-
-      const userMessage: SessionMessage = {
-        id: `local-${Date.now()}`,
-        role: "user",
-        content: prompt,
-        timestamp: new Date(),
-        metadata: {
-          source: "user",
-          messageType: "text",
-          sequence: 0
-        }
-      };
-      setMessages([userMessage]);
-
-      // Reuse existing connection if it's for the same agent
-      let agentConnection = connection;
-      if (!agentConnection || agentConnection.agentId !== agent.id) {
-        logger.info("Creating new agent connection", {
-          agentId: agent.id,
-          previousAgentId: agentConnection?.agentId
+  const startSession = useCallback(
+    async (agent: AgentConfig, prompt: string) => {
+      if (!prompt.trim()) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Enter a prompt",
+          message: "Please provide a message to start the conversation.",
         });
-        agentConnection = await acpClient.connect(agent);
-        setConnection(agentConnection);
-      } else {
-        logger.info("Reusing existing agent connection", {
-          agentId: agent.id,
-          connectionId: agentConnection.id
-        });
+        return;
       }
 
-      const sessionWorkingDirectory = agent.workingDirectory ?? process.cwd();
-      logger.info("Creating session with working directory", {
-        workingDirectory: sessionWorkingDirectory,
-        agentConfiguredDir: agent.workingDirectory,
-        fallbackDir: process.cwd()
-      });
+      try {
+        setStatus("connecting");
+        setActiveAgent(agent);
 
-      const session = await sessionService.createSession({
-        agentConnectionId: agentConnection.id,
-        agentConfigId: agent.id,
-        prompt,
-        context: {
+        logger.info("Starting new session", {
+          agentId: agent.id,
+          workingDirectory: agent.workingDirectory,
+          agentName: agent.name,
+        });
+
+        const userMessage: SessionMessage = {
+          id: `local-${Date.now()}`,
+          role: "user",
+          content: prompt,
+          timestamp: new Date(),
+          metadata: {
+            source: "user",
+            messageType: "text",
+            sequence: 0,
+          },
+        };
+        setMessages([userMessage]);
+
+        // Reuse existing connection if it's for the same agent
+        let agentConnection = connection;
+        if (!agentConnection || agentConnection.agentId !== agent.id) {
+          logger.info("Creating new agent connection", {
+            agentId: agent.id,
+            previousAgentId: agentConnection?.agentId,
+          });
+          agentConnection = await acpClient.connect(agent);
+          setConnection(agentConnection);
+        } else {
+          logger.info("Reusing existing agent connection", {
+            agentId: agent.id,
+            connectionId: agentConnection.id,
+          });
+        }
+
+        const sessionWorkingDirectory = agent.workingDirectory ?? process.cwd();
+        logger.info("Creating session with working directory", {
           workingDirectory: sessionWorkingDirectory,
-          files: [],
-          additionalContext: {}
-        },
-        metadata: {
-          title: prompt.slice(0, 60)
+          agentConfiguredDir: agent.workingDirectory,
+          fallbackDir: process.cwd(),
+        });
+
+        const session = await sessionService.createSession({
+          agentConnectionId: agentConnection.id,
+          agentConfigId: agent.id,
+          prompt,
+          context: {
+            workingDirectory: sessionWorkingDirectory,
+            files: [],
+            additionalContext: {},
+          },
+          metadata: {
+            title: prompt.slice(0, 60),
+          },
+        });
+
+        setConversation(session);
+        setMessages(session.messages);
+        if (activeSessionIdRef.current) {
+          sessionService.offSessionMessage(activeSessionIdRef.current);
         }
-      });
+        activeSessionIdRef.current = session.sessionId;
+        sessionService.onSessionMessage(session.sessionId, handleStreamingMessage);
 
-      setConversation(session);
-      setMessages(session.messages);
-      if (activeSessionIdRef.current) {
-        sessionService.offSessionMessage(activeSessionIdRef.current);
-      }
-      activeSessionIdRef.current = session.sessionId;
-      sessionService.onSessionMessage(session.sessionId, handleStreamingMessage);
+        // Refresh conversation to ensure any streaming messages are captured
+        await refreshConversation(session.sessionId);
+        await loadContextsForSession(session.sessionId);
 
-      // Refresh conversation to ensure any streaming messages are captured
-      await refreshConversation(session.sessionId);
-      await loadContextsForSession(session.sessionId);
-
-      setStatus("ready");
-
-      logger.info("Session initialized", { sessionId: session.sessionId });
-    } catch (error) {
-      setStatus("idle");
-      await ErrorHandler.handleError(error, "Starting chat session");
-    }
-  }, [acpClient, sessionService, handleStreamingMessage, connection, refreshConversation, loadContextsForSession]);
-
-  const sendMessage = useCallback(async (message: string) => {
-    if (status === "processing" || status === "connecting") {
-      return;
-    }
-
-    if (!conversation) {
-      if (!activeAgent) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Select an agent",
-          message: "Choose an agent before sending a message."
-        });
-        return;
-      }
-
-      await startSession(activeAgent, message);
-      return;
-    }
-
-    if (!message.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Enter a message",
-        message: "Please enter a message to send."
-      });
-      return;
-    }
-
-    try {
-      setStatus("processing");
-
-      logger.info("Sending follow-up message", {
-        sessionId: conversation.sessionId,
-        length: message.length
-      });
-
-      if (!activeAgent) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Agent Not Selected",
-          message: "Select an agent before continuing the conversation."
-        });
         setStatus("ready");
+
+        logger.info("Session initialized", { sessionId: session.sessionId });
+      } catch (error) {
+        setStatus("idle");
+        await ErrorHandler.handleError(error, "Starting chat session");
+      }
+    },
+    [acpClient, sessionService, handleStreamingMessage, connection, refreshConversation, loadContextsForSession],
+  );
+
+  const sendMessage = useCallback(
+    async (message: string) => {
+      if (status === "processing" || status === "connecting") {
         return;
       }
 
-      // Lazily connect to agent if not already connected
-      let agentConnection = connection;
-      if (!agentConnection || agentConnection.agentId !== activeAgent.id) {
-        logger.info("Connecting to agent for message", {
-          agentId: activeAgent.id,
-          sessionId: conversation.sessionId
-        });
-        agentConnection = await acpClient.connect(activeAgent);
-        setConnection(agentConnection);
+      if (!conversation) {
+        if (!activeAgent) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Select an agent",
+            message: "Choose an agent before sending a message.",
+          });
+          return;
+        }
+
+        await startSession(activeAgent, message);
+        return;
       }
 
-      await sessionService.sendMessage(conversation.sessionId, message, activeAgent);
+      if (!message.trim()) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Enter a message",
+          message: "Please enter a message to send.",
+        });
+        return;
+      }
 
-      await refreshConversation(conversation.sessionId);
+      try {
+        setStatus("processing");
 
-      setStatus("ready");
-    } catch (error) {
-      setStatus("ready");
-      await ErrorHandler.handleError(error, "Sending message to agent");
-    }
-  }, [status, conversation, activeAgent, sessionService, startSession, refreshConversation, connection, acpClient]);
+        logger.info("Sending follow-up message", {
+          sessionId: conversation.sessionId,
+          length: message.length,
+        });
+
+        if (!activeAgent) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Agent Not Selected",
+            message: "Select an agent before continuing the conversation.",
+          });
+          setStatus("ready");
+          return;
+        }
+
+        // Lazily connect to agent if not already connected
+        let agentConnection = connection;
+        if (!agentConnection || agentConnection.agentId !== activeAgent.id) {
+          logger.info("Connecting to agent for message", {
+            agentId: activeAgent.id,
+            sessionId: conversation.sessionId,
+          });
+          agentConnection = await acpClient.connect(activeAgent);
+          setConnection(agentConnection);
+        }
+
+        await sessionService.sendMessage(conversation.sessionId, message, activeAgent);
+
+        await refreshConversation(conversation.sessionId);
+
+        setStatus("ready");
+      } catch (error) {
+        setStatus("ready");
+        await ErrorHandler.handleError(error, "Sending message to agent");
+      }
+    },
+    [status, conversation, activeAgent, sessionService, startSession, refreshConversation, connection, acpClient],
+  );
 
   const runSlashCommand = useCallback(
     async (commandName: string, input?: string) => {
@@ -374,7 +377,7 @@ export function useChatSession(): UseChatSessionResult {
       const payload = trimmedInput ? `/${commandName} ${trimmedInput}` : `/${commandName}`;
       await sendMessage(payload);
     },
-    [sendMessage]
+    [sendMessage],
   );
 
   const resetSession = useCallback(async () => {
@@ -389,7 +392,7 @@ export function useChatSession(): UseChatSessionResult {
     } catch (error) {
       logger.warn("Failed to disconnect session during reset", {
         sessionId: conversation?.sessionId,
-        error
+        error,
       });
     } finally {
       if (activeSessionIdRef.current) {
@@ -406,7 +409,6 @@ export function useChatSession(): UseChatSessionResult {
 
   const loadConversation = useCallback(
     async (sessionId: string, agent: AgentConfig) => {
-
       if (isLoadingConversationRef.current) {
         return;
       }
@@ -417,7 +419,7 @@ export function useChatSession(): UseChatSessionResult {
 
         logger.info("Loading conversation", {
           sessionId,
-          agentId: agent.id
+          agentId: agent.id,
         });
 
         const existing = await sessionService.getSession(sessionId);
@@ -425,7 +427,7 @@ export function useChatSession(): UseChatSessionResult {
           await showToast({
             style: Toast.Style.Failure,
             title: "Conversation Not Found",
-            message: "The selected conversation could not be loaded."
+            message: "The selected conversation could not be loaded.",
           });
           setContexts([]);
           setStatus("idle");
@@ -446,7 +448,7 @@ export function useChatSession(): UseChatSessionResult {
 
         logger.info("Conversation loaded successfully", {
           sessionId,
-          messageCount: existing.messages.length
+          messageCount: existing.messages.length,
         });
       } catch (error) {
         setStatus("idle");
@@ -455,7 +457,7 @@ export function useChatSession(): UseChatSessionResult {
         isLoadingConversationRef.current = false;
       }
     },
-    [sessionService, handleStreamingMessage, loadContextsForSession]
+    [sessionService, handleStreamingMessage, loadContextsForSession],
   );
 
   const cancelMessage = useCallback(async () => {
@@ -475,7 +477,7 @@ export function useChatSession(): UseChatSessionResult {
       await showToast({
         style: Toast.Style.Animated,
         title: "Cancelling...",
-        message: "Stopping the agent"
+        message: "Stopping the agent",
       });
 
       // Send cancellation notification to the agent
@@ -487,7 +489,7 @@ export function useChatSession(): UseChatSessionResult {
       await showToast({
         style: Toast.Style.Success,
         title: "Cancelled",
-        message: "Agent stopped processing"
+        message: "Agent stopped processing",
       });
 
       // Refresh conversation to get any final updates
@@ -506,7 +508,7 @@ export function useChatSession(): UseChatSessionResult {
         await showToast({
           style: Toast.Style.Failure,
           title: "No Active Conversation",
-          message: "Start a conversation before switching modes."
+          message: "Start a conversation before switching modes.",
         });
         return;
       }
@@ -515,7 +517,7 @@ export function useChatSession(): UseChatSessionResult {
         await showToast({
           style: Toast.Style.Animated,
           title: "Switching Mode",
-          message: "Changing agent mode..."
+          message: "Changing agent mode...",
         });
 
         await sessionService.setSessionMode(conversation.sessionId, modeId);
@@ -527,19 +529,19 @@ export function useChatSession(): UseChatSessionResult {
         await showToast({
           style: Toast.Style.Success,
           title: "Mode Switched",
-          message: `Now in ${modeName} mode`
+          message: `Now in ${modeName} mode`,
         });
 
         logger.info("Mode switched successfully", {
           sessionId: conversation.sessionId,
           modeId,
-          modeName
+          modeName,
         });
       } catch (error) {
         await ErrorHandler.handleError(error, "Switching agent mode");
       }
     },
-    [conversation, sessionService, refreshConversation]
+    [conversation, sessionService, refreshConversation],
   );
 
   return useMemo(
@@ -561,7 +563,7 @@ export function useChatSession(): UseChatSessionResult {
       removeContext,
       refreshContexts,
       switchMode,
-      runSlashCommand
+      runSlashCommand,
     }),
     [
       conversation,
@@ -580,7 +582,7 @@ export function useChatSession(): UseChatSessionResult {
       removeContext,
       refreshContexts,
       switchMode,
-      runSlashCommand
-    ]
+      runSlashCommand,
+    ],
   );
 }

@@ -70,10 +70,7 @@ const SENSITIVE_FILE_PATTERNS = [
 /**
  * Validate file path for security
  */
-export function validateFilePath(
-  filePath: string,
-  options: PathSecurityOptions = {}
-): SecurityValidationResult {
+export function validateFilePath(filePath: string, options: PathSecurityOptions = {}): SecurityValidationResult {
   try {
     // Normalize and resolve path
     const normalizedPath = path.normalize(filePath);
@@ -109,10 +106,7 @@ export function validateFilePath(
     }
 
     // Check against blocked directories
-    const blockedDirs = [
-      ...DEFAULT_BLOCKED_DIRECTORIES,
-      ...(options.blockedDirectories ?? []),
-    ];
+    const blockedDirs = [...DEFAULT_BLOCKED_DIRECTORIES, ...(options.blockedDirectories ?? [])];
 
     for (const blockedDir of blockedDirs) {
       if (resolvedPath.startsWith(blockedDir)) {
@@ -145,9 +139,7 @@ export function validateFilePath(
 
     // Check allowed directories if specified
     if (options.allowedDirectories && options.allowedDirectories.length > 0) {
-      const isAllowed = options.allowedDirectories.some((allowedDir) =>
-        resolvedPath.startsWith(allowedDir)
-      );
+      const isAllowed = options.allowedDirectories.some((allowedDir) => resolvedPath.startsWith(allowedDir));
 
       if (!isAllowed) {
         return {
@@ -182,11 +174,23 @@ export function sanitizeInput(input: string, maxLength: number = 10000): string 
     sanitized = sanitized.substring(0, maxLength);
   }
 
-  // Remove null bytes (potential injection vector)
-  sanitized = sanitized.replace(/\0/g, "");
+  // Remove null bytes and disallowed control characters
+  sanitized = sanitized
+    .split("")
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      if (code === 0) {
+        return false;
+      }
 
-  // Remove control characters except newlines and tabs
-  sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, "");
+      if (code < 32 || code === 127) {
+        // Allow newline, carriage return, and tab
+        return code === 10 || code === 13 || code === 9;
+      }
+
+      return true;
+    })
+    .join("");
 
   return sanitized;
 }
@@ -252,10 +256,7 @@ export function validateAgentConfig(config: {
       }
 
       // Block localhost connections to non-standard ports in production
-      if (
-        (url.hostname === "localhost" || url.hostname === "127.0.0.1") &&
-        process.env.NODE_ENV === "production"
-      ) {
+      if ((url.hostname === "localhost" || url.hostname === "127.0.0.1") && process.env.NODE_ENV === "production") {
         const port = parseInt(url.port);
         const standardPorts = [80, 443, 8080, 3000];
         if (port && !standardPorts.includes(port)) {
@@ -281,12 +282,7 @@ export function validateAgentConfig(config: {
   if (config.environmentVariables) {
     for (const [key, value] of Object.entries(config.environmentVariables)) {
       // Block sensitive environment variables
-      const sensitiveKeys = [
-        "PATH",
-        "LD_LIBRARY_PATH",
-        "DYLD_LIBRARY_PATH",
-        "LD_PRELOAD",
-      ];
+      const sensitiveKeys = ["PATH", "LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH", "LD_PRELOAD"];
 
       if (sensitiveKeys.includes(key.toUpperCase())) {
         logger.warn("Sensitive environment variable blocked", { key });
@@ -317,7 +313,7 @@ export class RateLimiter {
 
   constructor(
     private maxRequests: number = 100,
-    private windowMs: number = 60000
+    private windowMs: number = 60000,
   ) {}
 
   /**
@@ -384,7 +380,7 @@ export function scanContentForSecrets(content: string): {
 } {
   const secretPatterns = [
     // API Keys
-    /api[_-]?key[_-]?[:=]\s*["']?([a-zA-Z0-9_\-]{20,})["']?/gi,
+    /api[_-]?key[_-]?[:=]\s*["']?([a-zA-Z0-9_-]{20,})["']?/gi,
     // Private keys
     /-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----/gi,
     // AWS Keys
@@ -392,7 +388,7 @@ export function scanContentForSecrets(content: string): {
     // Passwords in code
     /password[_-]?[:=]\s*["']([^"']{8,})["']/gi,
     // Bearer tokens
-    /bearer\s+[a-zA-Z0-9_\-\.]{20,}/gi,
+    /bearer\s+[a-zA-Z0-9_.-]{20,}/gi,
     // Database URLs with passwords
     /(?:postgresql|mysql|mongodb):\/\/[^:]+:([^@]+)@/gi,
   ];
@@ -421,10 +417,7 @@ export function scanContentForSecrets(content: string): {
 /**
  * Validate file size before reading
  */
-export function validateFileSize(
-  sizeBytes: number,
-  maxSizeMB: number = 10
-): SecurityValidationResult {
+export function validateFileSize(sizeBytes: number, maxSizeMB: number = 10): SecurityValidationResult {
   const maxBytes = maxSizeMB * 1024 * 1024;
 
   if (sizeBytes > maxBytes) {

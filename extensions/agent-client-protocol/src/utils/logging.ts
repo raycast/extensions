@@ -76,6 +76,9 @@ export class Logger {
       this.consoleLoggingEnabled = false;
       this.currentLevel = LogLevel.INFO;
       this.initialized = true;
+      console.debug("Logger preferences unavailable, using defaults", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   }
 
@@ -103,42 +106,42 @@ export class Logger {
   /**
    * Debug level logging
    */
-  debug(message: string, data?: Record<string, unknown>, context?: LogEntry['context']): void {
+  debug(message: string, data?: Record<string, unknown>, context?: LogEntry["context"]): void {
     this.log(LogLevel.DEBUG, message, data, context);
   }
 
   /**
    * Info level logging
    */
-  info(message: string, data?: Record<string, unknown>, context?: LogEntry['context']): void {
+  info(message: string, data?: Record<string, unknown>, context?: LogEntry["context"]): void {
     this.log(LogLevel.INFO, message, data, context);
   }
 
   /**
    * Warning level logging
    */
-  warn(message: string, data?: Record<string, unknown>, context?: LogEntry['context']): void {
+  warn(message: string, data?: Record<string, unknown>, context?: LogEntry["context"]): void {
     this.log(LogLevel.WARN, message, data, context);
   }
 
   /**
    * Error level logging
    */
-  error(message: string, data?: Record<string, unknown>, context?: LogEntry['context']): void {
+  error(message: string, data?: Record<string, unknown>, context?: LogEntry["context"]): void {
     this.log(LogLevel.ERROR, message, data, context);
   }
 
   /**
    * Log ACP protocol messages
    */
-  protocol(direction: 'sent' | 'received', method: string, data?: Record<string, unknown>): void {
+  protocol(direction: "sent" | "received", method: string, data?: Record<string, unknown>): void {
     this.debug(`ACP ${direction}: ${method}`, data, { agentId: data?.agentId as string });
   }
 
   /**
    * Log user actions
    */
-  userAction(action: string, data?: Record<string, unknown>, context?: LogEntry['context']): void {
+  userAction(action: string, data?: Record<string, unknown>, context?: LogEntry["context"]): void {
     this.info(`User action: ${action}`, data, context);
   }
 
@@ -152,12 +155,7 @@ export class Logger {
   /**
    * Core logging method
    */
-  private log(
-    level: LogLevel,
-    message: string,
-    data?: Record<string, unknown>,
-    context?: LogEntry['context']
-  ): void {
+  private log(level: LogLevel, message: string, data?: Record<string, unknown>, context?: LogEntry["context"]): void {
     // Check if we should log this level
     if (level < Logger.currentLevel) {
       return;
@@ -169,7 +167,7 @@ export class Logger {
       category: this.category,
       message,
       data,
-      context
+      context,
     };
 
     // Console output
@@ -238,12 +236,12 @@ export class Logger {
     try {
       // Get existing logs
       const stored = await LocalStorage.getItem(STORAGE_KEYS.DEBUG_LOG);
-      const logs = stored && typeof stored === 'string' ? JSON.parse(stored) : [];
+      const logs = stored && typeof stored === "string" ? JSON.parse(stored) : [];
 
       // Add new log
       logs.unshift({
         ...entry,
-        timestamp: entry.timestamp.toISOString() // Serialize date
+        timestamp: entry.timestamp.toISOString(), // Serialize date
       });
 
       // Keep only recent logs
@@ -255,7 +253,7 @@ export class Logger {
       // Save back to storage
       await LocalStorage.setItem(STORAGE_KEYS.DEBUG_LOG, JSON.stringify(logs));
     } catch (error) {
-      console.error('Failed to persist log:', error);
+      console.error("Failed to persist log:", error);
     }
   }
 
@@ -266,7 +264,7 @@ export class Logger {
     let filteredLogs = this.logs;
 
     if (level !== undefined) {
-      filteredLogs = this.logs.filter(log => log.level >= level);
+      filteredLogs = this.logs.filter((log) => log.level >= level);
     }
 
     return filteredLogs.slice(0, count);
@@ -276,9 +274,7 @@ export class Logger {
    * Get logs by category
    */
   static getLogsByCategory(category: string, count = 50): LogEntry[] {
-    return this.logs
-      .filter(log => log.category === category)
-      .slice(0, count);
+    return this.logs.filter((log) => log.category === category).slice(0, count);
   }
 
   /**
@@ -287,9 +283,8 @@ export class Logger {
   static searchLogs(query: string, count = 50): LogEntry[] {
     const lowerQuery = query.toLowerCase();
     return this.logs
-      .filter(log =>
-        log.message.toLowerCase().includes(lowerQuery) ||
-        log.category.toLowerCase().includes(lowerQuery)
+      .filter(
+        (log) => log.message.toLowerCase().includes(lowerQuery) || log.category.toLowerCase().includes(lowerQuery),
       )
       .slice(0, count);
   }
@@ -303,7 +298,7 @@ export class Logger {
     try {
       await LocalStorage.removeItem(STORAGE_KEYS.DEBUG_LOG);
     } catch (error) {
-      console.error('Failed to clear persisted logs:', error);
+      console.error("Failed to clear persisted logs:", error);
     }
   }
 
@@ -311,11 +306,15 @@ export class Logger {
    * Export logs as JSON
    */
   static exportLogs(): string {
-    return JSON.stringify({
-      exported: new Date().toISOString(),
-      count: this.logs.length,
-      logs: this.logs
-    }, null, 2);
+    return JSON.stringify(
+      {
+        exported: new Date().toISOString(),
+        count: this.logs.length,
+        logs: this.logs,
+      },
+      null,
+      2,
+    );
   }
 
   /**
@@ -328,7 +327,7 @@ export class Logger {
     recent: number;
   } {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const recentLogs = this.logs.filter(log => log.timestamp > oneHourAgo);
+    const recentLogs = this.logs.filter((log) => log.timestamp > oneHourAgo);
 
     const byLevel: Record<string, number> = {};
     const byCategory: Record<string, number> = {};
@@ -343,7 +342,7 @@ export class Logger {
       total: this.logs.length,
       byLevel,
       byCategory,
-      recent: recentLogs.length
+      recent: recentLogs.length,
     };
   }
 }
@@ -360,7 +359,7 @@ export function createLogger(category: string): Logger {
  */
 export class PerformanceLogger {
   private static measurements: Map<string, number> = new Map();
-  private static logger = new Logger('Performance');
+  private static logger = new Logger("Performance");
 
   /**
    * Start timing an operation
@@ -389,18 +388,14 @@ export class PerformanceLogger {
   /**
    * Measure async function execution time
    */
-  static async measure<T>(
-    operation: string,
-    fn: () => Promise<T>,
-    data?: Record<string, unknown>
-  ): Promise<T> {
+  static async measure<T>(operation: string, fn: () => Promise<T>, data?: Record<string, unknown>): Promise<T> {
     this.start(operation);
     try {
       const result = await fn();
       this.end(operation, { ...data, success: true });
       return result;
     } catch (error) {
-      this.end(operation, { ...data, success: false, error: error instanceof Error ? error.message : 'Unknown error' });
+      this.end(operation, { ...data, success: false, error: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -412,13 +407,13 @@ export class PerformanceLogger {
     averages: Record<string, number>;
     counts: Record<string, number>;
   } {
-    const logs = Logger.getLogsByCategory('Performance');
+    const logs = Logger.getLogsByCategory("Performance");
     const averages: Record<string, number> = {};
     const counts: Record<string, number> = {};
 
     for (const log of logs) {
-      if (log.data?.duration && typeof log.data.duration === 'number') {
-        const operation = log.message.split(' took ')[0].replace('Performance: ', '');
+      if (log.data?.duration && typeof log.data.duration === "number") {
+        const operation = log.message.split(" took ")[0].replace("Performance: ", "");
         const duration = log.data.duration;
 
         if (!averages[operation]) {
@@ -436,8 +431,8 @@ export class PerformanceLogger {
 }
 
 // Create commonly used loggers
-export const mainLogger = createLogger('Main');
-export const acpLogger = createLogger('ACP');
-export const uiLogger = createLogger('UI');
-export const storageLogger = createLogger('Storage');
-export const configLogger = createLogger('Config');
+export const mainLogger = createLogger("Main");
+export const acpLogger = createLogger("ACP");
+export const uiLogger = createLogger("UI");
+export const storageLogger = createLogger("Storage");
+export const configLogger = createLogger("Config");

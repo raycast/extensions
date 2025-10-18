@@ -1,12 +1,7 @@
 import type { AgentConfig, AgentHealthRecord } from "@/types/extension";
 import { ConfigService } from "@/services/configService";
 import { HealthService } from "@/services/healthService";
-import {
-  generateAgentId,
-  getAgentTemplate,
-  validateAgentConfig,
-  checkAgentAvailability
-} from "@/utils/builtInAgents";
+import { generateAgentId, getAgentTemplate, validateAgentConfig, checkAgentAvailability } from "@/utils/builtInAgents";
 
 export interface AgentConfigServiceDependencies {
   configService?: ConfigService;
@@ -57,7 +52,7 @@ export class AgentConfigService {
       description: input.description?.trim() || undefined,
       isBuiltIn: false,
       createdAt,
-      lastUsed: undefined
+      lastUsed: undefined,
     };
 
     const validation = validateAgentConfig(config);
@@ -81,7 +76,8 @@ export class AgentConfigService {
     const id = generateAgentId(copyName);
 
     const duplicateArgs = source.args && source.args.length > 0 ? [...source.args] : undefined;
-    const duplicateAppendToPath = source.appendToPath && source.appendToPath.length > 0 ? [...source.appendToPath] : undefined;
+    const duplicateAppendToPath =
+      source.appendToPath && source.appendToPath.length > 0 ? [...source.appendToPath] : undefined;
     const duplicateEnv = source.environmentVariables ? { ...source.environmentVariables } : undefined;
 
     const duplicate: AgentConfig = {
@@ -97,7 +93,7 @@ export class AgentConfigService {
       description: source.description,
       isBuiltIn: false,
       createdAt: new Date(Date.now()),
-      lastUsed: undefined
+      lastUsed: undefined,
     };
 
     await this.configService.saveAgentConfig(duplicate);
@@ -114,9 +110,7 @@ export class AgentConfigService {
     const type = overrides.type ?? template.type ?? "subprocess";
     const id = generateAgentId(name);
 
-    const argsCandidate = type === "subprocess"
-      ? (overrides.args ?? template.args ?? undefined)
-      : undefined;
+    const argsCandidate = type === "subprocess" ? (overrides.args ?? template.args ?? undefined) : undefined;
 
     const appendCandidate = overrides.appendToPath ?? template.appendToPath ?? undefined;
     const envCandidate = overrides.environmentVariables ?? template.environmentVariables ?? undefined;
@@ -125,18 +119,17 @@ export class AgentConfigService {
       id,
       name,
       type,
-      command: type === "subprocess" ? (overrides.command ?? template.command) ?? undefined : undefined,
+      command: type === "subprocess" ? (overrides.command ?? template.command ?? undefined) : undefined,
       args: type === "subprocess" && argsCandidate && argsCandidate.length > 0 ? [...argsCandidate] : undefined,
-      endpoint: type === "remote" ? (overrides.endpoint ?? template.endpoint) ?? undefined : undefined,
-      workingDirectory: type === "subprocess"
-        ? (overrides.workingDirectory ?? template.workingDirectory) ?? undefined
-        : undefined,
+      endpoint: type === "remote" ? (overrides.endpoint ?? template.endpoint ?? undefined) : undefined,
+      workingDirectory:
+        type === "subprocess" ? (overrides.workingDirectory ?? template.workingDirectory ?? undefined) : undefined,
       environmentVariables: envCandidate ? { ...envCandidate } : undefined,
       appendToPath: appendCandidate && appendCandidate.length > 0 ? [...appendCandidate] : undefined,
       description: overrides.description ?? template.description,
       isBuiltIn: false,
       createdAt: new Date(Date.now()),
-      lastUsed: undefined
+      lastUsed: undefined,
     };
 
     const validation = validateAgentConfig(config);

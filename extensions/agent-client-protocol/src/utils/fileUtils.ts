@@ -160,7 +160,6 @@ export function validateFilePath(filePath: string): void {
 
   // Additional security checks for suspicious patterns
   const suspiciousPatterns = [
-    /\x00/, // Null bytes
     /\|/, // Pipe characters
     /;/, // Command separators
     /`/, // Backticks for command substitution

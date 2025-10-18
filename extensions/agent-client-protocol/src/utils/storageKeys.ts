@@ -40,11 +40,11 @@ export const STORAGE_KEYS = {
   // Feature Flags and Settings
   FEATURE_FLAGS: "acp.features",
   ONBOARDING_STATE: "acp.onboarding",
-  EXTENSION_VERSION: "acp.version"
+  EXTENSION_VERSION: "acp.version",
 } as const;
 
 // Type-safe storage key type
-export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];
+export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
 
 // Storage key validation
 export function isValidStorageKey(key: string): key is StorageKey {
@@ -57,25 +57,21 @@ export const STORAGE_CATEGORIES = {
     STORAGE_KEYS.AGENT_CONFIGS,
     STORAGE_KEYS.DEFAULT_AGENT,
     STORAGE_KEYS.AGENT_HEALTH,
-    STORAGE_KEYS.LAST_USED_AGENT
+    STORAGE_KEYS.LAST_USED_AGENT,
   ],
-  SESSION: [
-    STORAGE_KEYS.CONVERSATIONS,
-    STORAGE_KEYS.ACTIVE_SESSIONS,
-    STORAGE_KEYS.SESSION_HISTORY
-  ],
+  SESSION: [STORAGE_KEYS.CONVERSATIONS, STORAGE_KEYS.ACTIVE_SESSIONS, STORAGE_KEYS.SESSION_HISTORY],
   USER: [
     STORAGE_KEYS.PREFERENCES,
     STORAGE_KEYS.UI_STATE,
     STORAGE_KEYS.SECURITY_SETTINGS,
-    STORAGE_KEYS.LAST_CHAT_CONFIG
+    STORAGE_KEYS.LAST_CHAT_CONFIG,
   ],
   CONTEXT: [
     STORAGE_KEYS.PROJECT_CONTEXTS,
     STORAGE_KEYS.FILE_CACHE,
     STORAGE_KEYS.RECENT_FILES,
     STORAGE_KEYS.FILE_PERMISSIONS,
-    STORAGE_KEYS.ALLOWED_DIRECTORIES
+    STORAGE_KEYS.ALLOWED_DIRECTORIES,
   ],
   SYSTEM: [
     STORAGE_KEYS.ERROR_LOG,
@@ -83,8 +79,8 @@ export const STORAGE_CATEGORIES = {
     STORAGE_KEYS.PERFORMANCE_METRICS,
     STORAGE_KEYS.FEATURE_FLAGS,
     STORAGE_KEYS.ONBOARDING_STATE,
-    STORAGE_KEYS.EXTENSION_VERSION
-  ]
+    STORAGE_KEYS.EXTENSION_VERSION,
+  ],
 } as const;
 
 // Default values for storage keys
@@ -99,7 +95,7 @@ export const DEFAULT_VALUES = {
     showTypingIndicator: true,
     theme: "auto",
     copyCodeBlocks: true,
-    enableNotifications: true
+    enableNotifications: true,
   }),
   [STORAGE_KEYS.SECURITY_SETTINGS]: JSON.stringify({
     allowFileAccess: false,
@@ -107,11 +103,11 @@ export const DEFAULT_VALUES = {
     requirePermissionForTools: true,
     enableLogging: false,
     trustedTools: [],
-    trustedPaths: []
+    trustedPaths: [],
   }),
   [STORAGE_KEYS.PROJECT_CONTEXTS]: "[]",
   [STORAGE_KEYS.ERROR_LOG]: "[]",
-  [STORAGE_KEYS.FEATURE_FLAGS]: "{}"
+  [STORAGE_KEYS.FEATURE_FLAGS]: "{}",
 } as const;
 
 // Storage migration version tracking
@@ -131,5 +127,5 @@ export function getDefaultValue(key: StorageKey): string {
  */
 export function isKeyInCategory(key: StorageKey, category: keyof typeof STORAGE_CATEGORIES): boolean {
   const categoryKeys = STORAGE_CATEGORIES[category] as readonly string[];
-  return categoryKeys.some(k => k === key);
+  return categoryKeys.some((k) => k === key);
 }

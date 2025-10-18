@@ -1,29 +1,15 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Clipboard,
-  Color,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  showToast
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Clipboard, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { HistoryService, type ConversationSummary } from "@/services/historyService";
 import { PersistenceService, type ActiveSessionRecord } from "@/services/persistenceService";
 import { StorageService } from "@/services/storageService";
 import { ConfigService } from "@/services/configService";
 import { ErrorHandler } from "@/utils/errors";
-import { createLogger } from "@/utils/logging";
 import ChatCommand from "@/chat";
 import type { ConversationSession } from "@/types/entities";
 import type { AgentConfig } from "@/types/extension";
 
 type StatusFilter = ConversationSession["status"] | "all";
-
-const logger = createLogger("ConversationList");
 
 function formatTimestamp(date: Date): string {
   return date.toLocaleString();
@@ -55,7 +41,7 @@ const INITIAL_STATE: ConversationListState = {
   summaries: [],
   recoverable: [],
   agentConfigs: [],
-  agentMap: {}
+  agentMap: {},
 };
 
 export function ConversationList(): React.ReactElement {
@@ -77,7 +63,7 @@ export function ConversationList(): React.ReactElement {
           ? undefined
           : {
               agentIds: agentId !== "all" ? [agentId] : undefined,
-              statuses: status !== "all" ? [status] : undefined
+              statuses: status !== "all" ? [status] : undefined,
             };
 
       try {
@@ -88,7 +74,7 @@ export function ConversationList(): React.ReactElement {
             ? historyService.searchConversations(query, filterOptions ?? {})
             : historyService.getConversationSummaries(filterOptions ?? {}),
           persistenceService.getRecoverableSessions(),
-          configService.getAgentConfigs()
+          configService.getAgentConfigs(),
         ]);
 
         const agentMap = agentConfigs.reduce<Record<string, string>>((acc, config) => {
@@ -100,7 +86,7 @@ export function ConversationList(): React.ReactElement {
           summaries,
           recoverable,
           agentConfigs,
-          agentMap
+          agentMap,
         });
       } catch (error) {
         await ErrorHandler.handleError(error, "Loading conversations");
@@ -108,7 +94,7 @@ export function ConversationList(): React.ReactElement {
         setIsLoading(false);
       }
     },
-    [configService, historyService, persistenceService]
+    [configService, historyService, persistenceService],
   );
 
   useEffect(() => {
@@ -138,8 +124,8 @@ export function ConversationList(): React.ReactElement {
       message: "This action cannot be undone.",
       primaryAction: {
         title: "Delete",
-        style: Alert.ActionStyle.Destructive
-      }
+        style: Alert.ActionStyle.Destructive,
+      },
     });
 
     if (!confirmed) {
@@ -160,7 +146,7 @@ export function ConversationList(): React.ReactElement {
     try {
       const payload = await historyService.exportConversations({
         sessionIds: [sessionId],
-        includeContexts: true
+        includeContexts: true,
       });
       await Clipboard.copy(payload);
       await showToast(Toast.Style.Success, "Conversation copied", "JSON export copied to clipboard");
@@ -172,7 +158,7 @@ export function ConversationList(): React.ReactElement {
   async function handleExportAll() {
     try {
       const payload = await historyService.exportConversations({
-        includeContexts: true
+        includeContexts: true,
       });
       await Clipboard.copy(payload);
       await showToast(Toast.Style.Success, "All conversations copied", "Full history copied to clipboard");
@@ -196,10 +182,7 @@ export function ConversationList(): React.ReactElement {
         icon={statusIcon(summary.status)}
         title={title}
         subtitle={detail}
-        accessories={[
-          { tag: { value: agentName, color: Color.PrimaryText } },
-          { date: summary.lastActivity }
-        ]}
+        accessories={[{ tag: { value: agentName, color: Color.PrimaryText } }, { date: summary.lastActivity }]}
         actions={
           <ActionPanel>
             <Action.Push
@@ -213,11 +196,7 @@ export function ConversationList(): React.ReactElement {
                 />
               }
             />
-            <Action
-              title="Archive Conversation"
-              icon={Icon.Box}
-              onAction={() => handleArchive(summary.sessionId)}
-            />
+            <Action title="Archive Conversation" icon={Icon.Box} onAction={() => handleArchive(summary.sessionId)} />
             <Action
               title="Delete Conversation"
               icon={Icon.Trash}
@@ -237,11 +216,7 @@ export function ConversationList(): React.ReactElement {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={() => reload(searchText, agentFilter, statusFilter)}
             />
-            <Action
-              title="Export All Conversations"
-              icon={Icon.Download}
-              onAction={handleExportAll}
-            />
+            <Action title="Export All Conversations" icon={Icon.Download} onAction={handleExportAll} />
           </ActionPanel>
         }
       />
@@ -259,10 +234,7 @@ export function ConversationList(): React.ReactElement {
         icon={Icon.ArrowClockwise}
         title={title}
         subtitle={`Last activity ${lastActivity}`}
-        accessories={[
-          { tag: { value: agentName, color: Color.Blue } },
-          { text: `${record.messageCount} messages` }
-        ]}
+        accessories={[{ tag: { value: agentName, color: Color.Blue } }, { text: `${record.messageCount} messages` }]}
         actions={
           <ActionPanel>
             <Action.Push
@@ -284,7 +256,7 @@ export function ConversationList(): React.ReactElement {
                   await persistenceService.markSessionCompleted(record.sessionId);
                   setState((prev) => ({
                     ...prev,
-                    recoverable: prev.recoverable.filter((item) => item.sessionId !== record.sessionId)
+                    recoverable: prev.recoverable.filter((item) => item.sessionId !== record.sessionId),
                   }));
                 } catch (error) {
                   await ErrorHandler.handleError(error, "Dismissing recovery entry");
@@ -312,18 +284,10 @@ export function ConversationList(): React.ReactElement {
   );
 
   const agentDropdown = (
-    <List.Dropdown
-      tooltip="Filter by agent"
-      onChange={setAgentFilter}
-      value={agentFilter}
-    >
+    <List.Dropdown tooltip="Filter by agent" onChange={setAgentFilter} value={agentFilter}>
       <List.Dropdown.Item title="All Agents" value="all" />
       {availableAgents.map((agentId) => (
-        <List.Dropdown.Item
-          key={agentId}
-          title={state.agentMap[agentId] ?? agentId}
-          value={agentId}
-        />
+        <List.Dropdown.Item key={agentId} title={state.agentMap[agentId] ?? agentId} value={agentId} />
       ))}
     </List.Dropdown>
   );
@@ -334,12 +298,15 @@ export function ConversationList(): React.ReactElement {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search conversations..."
-      searchBarAccessory={statusDropdown}
+      searchBarAccessory={
+        <>
+          {statusDropdown}
+          {agentDropdown}
+        </>
+      }
     >
       {state.recoverable.length > 0 && (
-        <List.Section title="Resume Recent Sessions">
-          {state.recoverable.map(renderRecoverableItem)}
-        </List.Section>
+        <List.Section title="Resume Recent Sessions">{state.recoverable.map(renderRecoverableItem)}</List.Section>
       )}
 
       {state.summaries.length === 0 ? (
@@ -362,9 +329,7 @@ export function ConversationList(): React.ReactElement {
           }
         />
       ) : (
-        <List.Section title="Conversation History">
-          {state.summaries.map(renderSummaryItem)}
-        </List.Section>
+        <List.Section title="Conversation History">{state.summaries.map(renderSummaryItem)}</List.Section>
       )}
     </List>
   );

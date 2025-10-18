@@ -5,7 +5,6 @@
  * and Raycast UI components for the ACP extension.
  */
 
-import type { AgentCapabilities } from "./acp";
 import type {
   AgentConnection as BaseAgentConnection,
   ConversationSession as BaseConversationSession,
@@ -16,7 +15,7 @@ import type {
   MessageRole as BaseMessageRole,
   SessionStatistics,
   MessagePagination,
-  PaginatedMessages
+  PaginatedMessages,
 } from "./entities";
 
 // Re-export entity types with proper aliases
@@ -31,36 +30,36 @@ export type {
   ConnectionHealth,
   SessionStatistics,
   MessagePagination,
-  PaginatedMessages
+  PaginatedMessages,
 };
 
 // Error codes for consistent error handling
 export enum ErrorCode {
   // Agent-related errors
-  AgentUnavailable = 'AGENT_UNAVAILABLE',
-  AgentConnectionFailed = 'AGENT_CONNECTION_FAILED',
+  AgentUnavailable = "AGENT_UNAVAILABLE",
+  AgentConnectionFailed = "AGENT_CONNECTION_FAILED",
 
   // Protocol-related errors
-  ProtocolError = 'PROTOCOL_ERROR',
+  ProtocolError = "PROTOCOL_ERROR",
 
   // Session-related errors
-  SessionNotFound = 'SESSION_NOT_FOUND',
-  InvalidSession = 'INVALID_SESSION',
-  SessionExpired = 'SESSION_EXPIRED',
+  SessionNotFound = "SESSION_NOT_FOUND",
+  InvalidSession = "INVALID_SESSION",
+  SessionExpired = "SESSION_EXPIRED",
 
   // File-related errors
-  FileNotFound = 'FILE_NOT_FOUND',
-  FileAccessDenied = 'FILE_ACCESS_DENIED',
-  InvalidFilePath = 'INVALID_FILE_PATH',
+  FileNotFound = "FILE_NOT_FOUND",
+  FileAccessDenied = "FILE_ACCESS_DENIED",
+  InvalidFilePath = "INVALID_FILE_PATH",
 
   // Configuration errors
-  InvalidConfiguration = 'INVALID_CONFIGURATION',
-  MissingConfiguration = 'MISSING_CONFIGURATION',
+  InvalidConfiguration = "INVALID_CONFIGURATION",
+  MissingConfiguration = "MISSING_CONFIGURATION",
 
   // System errors
-  NetworkError = 'NETWORK_ERROR',
-  SystemError = 'SYSTEM_ERROR',
-  UnknownError = 'UNKNOWN_ERROR'
+  NetworkError = "NETWORK_ERROR",
+  SystemError = "SYSTEM_ERROR",
+  UnknownError = "UNKNOWN_ERROR",
 }
 
 // Extension error interface
@@ -100,7 +99,7 @@ export interface AgentServiceInterface {
 export interface AgentConfig {
   id: string;
   name: string;
-  type: 'subprocess' | 'remote';
+  type: "subprocess" | "remote";
   command?: string;
   args?: string[];
   endpoint?: string;
@@ -121,7 +120,12 @@ export interface SessionServiceInterface {
   endSession(sessionId: string): Promise<void>;
 
   // Message management
-  sendMessage(sessionId: string, content: string, agent: AgentConfig, context?: MessageRequest['context']): Promise<SessionMessage>;
+  sendMessage(
+    sessionId: string,
+    content: string,
+    agent: AgentConfig,
+    context?: MessageRequest["context"],
+  ): Promise<SessionMessage>;
   getSessionMessages(sessionId: string, offset: number, limit: number): Promise<SessionMessage[]>;
 
   // Session validation
@@ -133,7 +137,7 @@ export interface SessionServiceInterface {
 }
 
 export interface MessageContent {
-  type: 'text' | 'code' | 'file' | 'error';
+  type: "text" | "code" | "file" | "error";
   content: string;
   language?: string; // For code content
   filename?: string; // For file content
@@ -142,14 +146,14 @@ export interface MessageContent {
 export interface ToolCallInfo {
   id: string;
   title: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: "pending" | "running" | "completed" | "failed";
   description?: string;
 }
 
 export interface ProjectContext {
   id: string;
   sessionId: string;
-  type: 'file' | 'directory' | 'selection';
+  type: "file" | "directory" | "selection";
   path: string;
   content?: string;
   language?: string;
@@ -159,7 +163,7 @@ export interface ProjectContext {
 
 export interface AgentHealthRecord {
   agentId: string;
-  status: 'healthy' | 'unhealthy';
+  status: "healthy" | "unhealthy";
   lastChecked: Date;
   latencyMs?: number;
   error?: string;
@@ -193,7 +197,7 @@ export interface UserPreferences {
   maxMessageHistory: number;
   autoSaveConversations: boolean;
   showTypingIndicator: boolean;
-  theme: 'auto' | 'light' | 'dark';
+  theme: "auto" | "light" | "dark";
   copyCodeBlocks: boolean;
   enableNotifications: boolean;
 }
@@ -243,27 +247,26 @@ export interface MessageItemProps {
   isStreaming?: boolean;
 }
 
-
 // Event Types for Service Communication
 export interface ServiceEvents {
   // Agent events
-  'agent:connected': { connectionId: string };
-  'agent:disconnected': { connectionId: string };
-  'agent:error': { connectionId: string; error: ExtensionError };
+  "agent:connected": { connectionId: string };
+  "agent:disconnected": { connectionId: string };
+  "agent:error": { connectionId: string; error: ExtensionError };
 
   // Session events
-  'session:created': { sessionId: string };
-  'session:updated': { sessionId: string };
-  'session:deleted': { sessionId: string };
+  "session:created": { sessionId: string };
+  "session:updated": { sessionId: string };
+  "session:deleted": { sessionId: string };
 
   // Message events
-  'message:sent': { sessionId: string; messageId: string };
-  'message:received': { sessionId: string; messageId: string };
-  'message:streaming': { sessionId: string; messageId: string; chunk: string };
+  "message:sent": { sessionId: string; messageId: string };
+  "message:received": { sessionId: string; messageId: string };
+  "message:streaming": { sessionId: string; messageId: string; chunk: string };
 
   // Context events
-  'context:added': { sessionId: string; contextId: string };
-  'context:removed': { sessionId: string; contextId: string };
+  "context:added": { sessionId: string; contextId: string };
+  "context:removed": { sessionId: string; contextId: string };
 }
 
 // Utility Types
@@ -279,6 +282,6 @@ export interface SearchOptions {
   query: string;
   limit?: number;
   offset?: number;
-  sortBy?: 'relevance' | 'date';
+  sortBy?: "relevance" | "date";
   filters?: Record<string, unknown>;
 }

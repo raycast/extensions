@@ -8,7 +8,7 @@
 import { LocalStorage } from "@raycast/api";
 import { STORAGE_VERSION, STORAGE_VERSION_KEY, STORAGE_KEYS } from "./storageKeys";
 import { createLogger } from "./logging";
-import type { ConversationSession, SessionMessage } from "@/types/entities";
+import type { ConversationSession } from "@/types/entities";
 
 const logger = createLogger("Migrations");
 
@@ -164,7 +164,7 @@ async function restoreBackup(version: string): Promise<boolean> {
     // Find most recent backup for this version
     const allItems = await LocalStorage.allItems();
     const backupKeys = Object.keys(allItems).filter((key) =>
-      key.startsWith(`${STORAGE_VERSION_KEY}_backup_${version}_`)
+      key.startsWith(`${STORAGE_VERSION_KEY}_backup_${version}_`),
     );
 
     if (backupKeys.length === 0) {
@@ -257,8 +257,7 @@ async function migration_1_2_0(): Promise<void> {
       if (!conversation.agentConfigId && conversation.agentConnectionId) {
         conversation.agentConfigId = conversation.agentConnectionId;
         // Remove old property
-        const { agentConnectionId, ...rest } = conversation;
-        Object.assign(conversation, rest);
+        delete (conversation as { agentConnectionId?: string }).agentConnectionId;
       }
     }
 
@@ -335,13 +334,18 @@ export async function validateStorageIntegrity(): Promise<{
               result.isValid = false;
             }
             if (conv.messages.length > 200) {
-              result.warnings.push(`Conversation ${conv.sessionId} has ${conv.messages.length} messages (consider archiving)`);
+              result.warnings.push(
+                `Conversation ${conv.sessionId} has ${conv.messages.length} messages (consider archiving)`,
+              );
             }
           }
         }
       } catch (error) {
         result.errors.push("Failed to parse conversations JSON");
         result.isValid = false;
+        logger.error("Failed to parse conversations JSON during validation", {
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
 
@@ -355,6 +359,7 @@ export async function validateStorageIntegrity(): Promise<{
   } catch (error) {
     result.errors.push(error instanceof Error ? error.message : "Unknown validation error");
     result.isValid = false;
+    logger.error("Storage validation failed", { error });
   }
 
   return result;

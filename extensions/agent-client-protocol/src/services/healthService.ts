@@ -15,7 +15,7 @@ export class HealthService {
       agentId,
       status: "healthy",
       lastChecked: new Date(Date.now()),
-      latencyMs
+      latencyMs,
     };
 
     await this.upsert(record);
@@ -27,7 +27,7 @@ export class HealthService {
       agentId,
       status: "unhealthy",
       lastChecked: new Date(Date.now()),
-      error
+      error,
     };
 
     await this.upsert(record);
@@ -75,7 +75,7 @@ export class HealthService {
       return parsed
         .map((item) => ({
           ...item,
-          lastChecked: item.lastChecked ? new Date(item.lastChecked) : new Date(0)
+          lastChecked: item.lastChecked ? new Date(item.lastChecked) : new Date(0),
         }))
         .filter((item) => item.agentId);
     } catch (error) {
@@ -87,7 +87,7 @@ export class HealthService {
   private async save(records: AgentHealthRecord[]): Promise<void> {
     const serializable: StoredAgentHealthRecord[] = records.map((item) => ({
       ...item,
-      lastChecked: item.lastChecked.toISOString()
+      lastChecked: item.lastChecked.toISOString(),
     }));
 
     await LocalStorage.setItem(STORAGE_KEYS.AGENT_HEALTH, JSON.stringify(serializable));

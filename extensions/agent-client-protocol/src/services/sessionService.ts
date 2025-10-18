@@ -8,22 +8,21 @@
  * - Session validation and recovery
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { ACPError, ErrorCode } from '@/utils/errors';
-import { createLogger, PerformanceLogger } from '@/utils/logging';
+import { v4 as uuidv4 } from "uuid";
+import { ACPError, ErrorCode } from "@/utils/errors";
+import { createLogger, PerformanceLogger } from "@/utils/logging";
 import type {
   ConversationSession,
   SessionMessage,
   SessionRequest,
   MessageRequest,
   MessageRole,
-  ProjectContext
-} from '@/types/entities';
+  ProjectContext,
+} from "@/types/entities";
 import type {
   SessionMessage as ACPSessionMessage,
   MessageContent as ACPMessageContent,
   PromptResponse,
-  SessionUpdate,
   SessionUpdateNotification,
   ToolCall,
   ToolCallUpdate,
@@ -32,33 +31,34 @@ import type {
   CurrentModeUpdate,
   ToolCallContent,
   ContentBlock,
-  ToolCallStatus
-} from '@/types/acp';
-import type { AgentConfig, SessionServiceInterface } from '@/types/extension';
-import type { StorageService } from './storageService';
-import type { ACPClient } from './acpClient';
-import { ContextService } from './contextService';
-import { PersistenceService } from './persistenceService';
+  ToolCallStatus,
+} from "@/types/acp";
+import type { AgentConfig, SessionServiceInterface } from "@/types/extension";
+import type { StorageService } from "./storageService";
+import type { ACPClient } from "./acpClient";
+import { ContextService } from "./contextService";
+import { PersistenceService } from "./persistenceService";
 
-const logger = createLogger('SessionService');
+const logger = createLogger("SessionService");
 
 export class SessionService implements SessionServiceInterface {
   private contextService: ContextService;
 
   private persistenceService: PersistenceService;
 
-  private activeStreamingMessages: Map<string, Partial<Record<'assistant' | 'user', { id: string; content: string }>>> = new Map();
+  private activeStreamingMessages: Map<string, Partial<Record<"assistant" | "user", { id: string; content: string }>>> =
+    new Map();
 
   constructor(
     private storageService: StorageService,
     private acpClient: ACPClient,
     contextService?: ContextService,
-    persistenceService?: PersistenceService
+    persistenceService?: PersistenceService,
   ) {
     this.contextService = contextService ?? new ContextService();
     this.persistenceService = persistenceService ?? new PersistenceService(this.storageService);
 
-    if (typeof this.acpClient.registerSessionUpdateListener === 'function') {
+    if (typeof this.acpClient.registerSessionUpdateListener === "function") {
       this.acpClient.registerSessionUpdateListener((update) => {
         return this.handleSessionUpdate(update);
       });
@@ -87,14 +87,14 @@ export class SessionService implements SessionServiceInterface {
       if (!request.agentConfigId) {
         throw new ACPError(
           ErrorCode.InvalidConfiguration,
-          'Agent configuration ID is required to create a session',
-          'No agent configuration was provided for session creation'
+          "Agent configuration ID is required to create a session",
+          "No agent configuration was provided for session creation",
         );
       }
 
-      logger.info('Creating new session', {
+      logger.info("Creating new session", {
         agentConnectionId: request.agentConnectionId,
-        promptLength: request.prompt.length
+        promptLength: request.prompt.length,
       });
 
       // Generate session ID
@@ -103,14 +103,14 @@ export class SessionService implements SessionServiceInterface {
       // Create initial user message
       const userMessage: SessionMessage = {
         id: uuidv4(),
-        role: 'user',
+        role: "user",
         content: request.prompt,
         timestamp: new Date(),
         metadata: {
-          source: 'user',
-          messageType: 'text',
-          sequence: 0
-        }
+          source: "user",
+          messageType: "text",
+          sequence: 0,
+        },
       };
 
       // Create session object
@@ -118,27 +118,27 @@ export class SessionService implements SessionServiceInterface {
         sessionId,
         agentConnectionId: request.agentConnectionId,
         agentConfigId: request.agentConfigId,
-        status: 'active',
+        status: "active",
         createdAt: new Date(),
         lastActivity: new Date(),
         messages: [userMessage],
         metadata: {
           title: this.generateSessionTitle(request.prompt),
           tags: request.metadata?.tags || [],
-          priority: request.metadata?.priority || 'normal'
+          priority: request.metadata?.priority || "normal",
         },
         context: {
           ...request.context,
           additionalContext: {
-            ...(request.context?.additionalContext ?? {})
-          }
-        }
+            ...(request.context?.additionalContext ?? {}),
+          },
+        },
       };
 
       // Send initial prompt to agent via ACP
       try {
         const acpSession = await this.acpClient.createSession({
-          cwd: request.context?.workingDirectory ?? process.cwd()
+          cwd: request.context?.workingDirectory ?? process.cwd(),
         });
 
         await this.acpClient.sendPrompt(acpSession.sessionId, request.prompt);
@@ -151,47 +151,46 @@ export class SessionService implements SessionServiceInterface {
           ...session.context,
           additionalContext: {
             ...(session.context?.additionalContext ?? {}),
-            agentSessionId: acpSession.sessionId
-          }
+            agentSessionId: acpSession.sessionId,
+          },
         };
 
         // Capture mode information if provided by the agent
         if (acpSession.modes) {
-          const currentMode = acpSession.modes.availableModes.find(
-            m => m.id === acpSession.modes!.currentModeId
-          );
+          const currentMode = acpSession.modes.availableModes.find((m) => m.id === acpSession.modes!.currentModeId);
 
-          session.currentMode = currentMode ? {
-            id: currentMode.id,
-            name: currentMode.name
-          } : undefined;
+          session.currentMode = currentMode
+            ? {
+                id: currentMode.id,
+                name: currentMode.name,
+              }
+            : undefined;
 
           session.availableModes = acpSession.modes.availableModes;
 
-          logger.info('Agent mode information captured', {
+          logger.info("Agent mode information captured", {
             sessionId,
             currentMode: session.currentMode,
-            availableModes: session.availableModes
+            availableModes: session.availableModes,
           });
         }
 
-        logger.info('Session created successfully', {
+        logger.info("Session created successfully", {
           sessionId,
-          messageCount: session.messages.length
+          messageCount: session.messages.length,
         });
-
       } catch (error) {
-        logger.error('Failed to create ACP session', {
+        logger.error("Failed to create ACP session", {
           sessionId,
           agentConnectionId: request.agentConnectionId,
-          error
+          error,
         });
 
         throw new ACPError(
           ErrorCode.ProtocolError,
-          'Failed to create session with agent',
-          error instanceof Error ? error.message : 'Unknown ACP error',
-          { sessionId, agentConnectionId: request.agentConnectionId }
+          "Failed to create session with agent",
+          error instanceof Error ? error.message : "Unknown ACP error",
+          { sessionId, agentConnectionId: request.agentConnectionId },
         );
       }
 
@@ -201,7 +200,7 @@ export class SessionService implements SessionServiceInterface {
         await this.storageService.saveConversation(session);
         await this.persistenceService.saveSessionSnapshot(session);
 
-        logger.info('Session saved to storage', { sessionId });
+        logger.info("Session saved to storage", { sessionId });
 
         // Process any buffered updates that arrived while session was being created
         // Now that the session is saved, these updates can be properly applied
@@ -210,26 +209,24 @@ export class SessionService implements SessionServiceInterface {
         PerformanceLogger.end(operationId, {
           success: true,
           sessionId,
-          messageCount: session.messages.length
+          messageCount: session.messages.length,
         });
 
         return session;
-
       } catch (error) {
-        logger.error('Failed to save session to storage', { sessionId, error });
+        logger.error("Failed to save session to storage", { sessionId, error });
 
         throw new ACPError(
           ErrorCode.SystemError,
-          'Failed to save session',
-          error instanceof Error ? error.message : 'Storage error',
-          { sessionId }
+          "Failed to save session",
+          error instanceof Error ? error.message : "Storage error",
+          { sessionId },
         );
       }
-
     } catch (error) {
       PerformanceLogger.end(operationId, {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -240,30 +237,29 @@ export class SessionService implements SessionServiceInterface {
    */
   async getSession(sessionId: string): Promise<ConversationSession | null> {
     try {
-      logger.debug('Retrieving session', { sessionId });
+      logger.debug("Retrieving session", { sessionId });
 
       const session = await this.storageService.getConversation(sessionId);
 
       if (session) {
-        logger.debug('Session retrieved successfully', {
+        logger.debug("Session retrieved successfully", {
           sessionId,
           messageCount: session.messages.length,
-          status: session.status
+          status: session.status,
         });
       } else {
-        logger.debug('Session not found', { sessionId });
+        logger.debug("Session not found", { sessionId });
       }
 
       return session;
-
     } catch (error) {
-      logger.error('Failed to retrieve session', { sessionId, error });
+      logger.error("Failed to retrieve session", { sessionId, error });
 
       throw new ACPError(
         ErrorCode.SystemError,
-        'Failed to retrieve session',
-        error instanceof Error ? error.message : 'Storage error',
-        { sessionId }
+        "Failed to retrieve session",
+        error instanceof Error ? error.message : "Storage error",
+        { sessionId },
       );
     }
   }
@@ -273,7 +269,7 @@ export class SessionService implements SessionServiceInterface {
    */
   async endSession(sessionId: string): Promise<void> {
     try {
-      logger.info('Ending session', { sessionId });
+      logger.info("Ending session", { sessionId });
 
       // Get existing session
       const session = await this.getSession(sessionId);
@@ -281,42 +277,41 @@ export class SessionService implements SessionServiceInterface {
         throw new ACPError(
           ErrorCode.SessionNotFound,
           `Session not found: ${sessionId}`,
-          'Cannot end a session that does not exist',
-          { sessionId }
+          "Cannot end a session that does not exist",
+          { sessionId },
         );
       }
 
       // End session via ACP
       try {
         await this.acpClient.endSession(sessionId);
-        logger.debug('ACP session ended', { sessionId });
+        logger.debug("ACP session ended", { sessionId });
       } catch (error) {
-        logger.warn('Failed to end ACP session', { sessionId, error });
+        logger.warn("Failed to end ACP session", { sessionId, error });
         // Continue with local cleanup even if ACP fails
       }
 
       // Update session status
-      session.status = 'completed';
+      session.status = "completed";
       session.lastActivity = new Date();
 
       // Save updated session and clear active tracking
       await this.storageService.saveConversation(session);
       await this.persistenceService.markSessionCompleted(sessionId);
 
-      logger.info('Session ended successfully', { sessionId });
-
+      logger.info("Session ended successfully", { sessionId });
     } catch (error) {
       if (error instanceof ACPError) {
         throw error;
       }
 
-      logger.error('Failed to end session', { sessionId, error });
+      logger.error("Failed to end session", { sessionId, error });
 
       throw new ACPError(
         ErrorCode.SystemError,
-        'Failed to end session',
-        error instanceof Error ? error.message : 'Unknown error',
-        { sessionId }
+        "Failed to end session",
+        error instanceof Error ? error.message : "Unknown error",
+        { sessionId },
       );
     }
   }
@@ -328,16 +323,16 @@ export class SessionService implements SessionServiceInterface {
     sessionId: string,
     content: string,
     agentConfig: AgentConfig,
-    context?: MessageRequest['context']
+    context?: MessageRequest["context"],
   ): Promise<SessionMessage> {
     const operationId = `sendMessage-${sessionId}`;
     PerformanceLogger.start(operationId);
 
     try {
-      logger.info('Sending message', {
+      logger.info("Sending message", {
         sessionId,
         contentLength: content.length,
-        hasContext: !!context
+        hasContext: !!context,
       });
 
       // Get and validate session
@@ -346,8 +341,8 @@ export class SessionService implements SessionServiceInterface {
         throw new ACPError(
           ErrorCode.SessionNotFound,
           `Session not found: ${sessionId}`,
-          'Cannot send message to a session that does not exist',
-          { sessionId }
+          "Cannot send message to a session that does not exist",
+          { sessionId },
         );
       }
 
@@ -359,33 +354,33 @@ export class SessionService implements SessionServiceInterface {
         throw new ACPError(
           ErrorCode.InvalidConfiguration,
           `Session is associated with a different agent configuration (${session.agentConfigId})`,
-          'Please reopen the conversation using the original agent',
-          { sessionId, expectedAgent: session.agentConfigId, providedAgent: agentConfig.id }
+          "Please reopen the conversation using the original agent",
+          { sessionId, expectedAgent: session.agentConfigId, providedAgent: agentConfig.id },
         );
       }
 
-      this.markStreamingComplete(session, 'assistant');
+      this.markStreamingComplete(session, "assistant");
 
-      if (session.status !== 'active') {
+      if (session.status !== "active") {
         throw new ACPError(
           ErrorCode.InvalidSession,
           `Session is not active: ${session.status}`,
-          'Cannot send messages to inactive sessions',
-          { sessionId, status: session.status }
+          "Cannot send messages to inactive sessions",
+          { sessionId, status: session.status },
         );
       }
 
       // Create user message
       const userMessage: SessionMessage = {
         id: uuidv4(),
-        role: 'user',
+        role: "user",
         content,
         timestamp: new Date(),
         metadata: {
-          source: 'user',
-          messageType: 'text',
-          sequence: session.messages.length
-        }
+          source: "user",
+          messageType: "text",
+          sequence: session.messages.length,
+        },
       };
 
       // Add user message to session
@@ -409,7 +404,7 @@ export class SessionService implements SessionServiceInterface {
 
         if (!agentSessionId) {
           const newAgentSession = await this.acpClient.createSession({
-            cwd: session.context?.workingDirectory ?? process.cwd()
+            cwd: session.context?.workingDirectory ?? process.cwd(),
           });
           agentSessionId = newAgentSession.sessionId;
           session.agentSessionId = agentSessionId;
@@ -417,19 +412,21 @@ export class SessionService implements SessionServiceInterface {
             ...session.context,
             additionalContext: {
               ...(session.context?.additionalContext ?? {}),
-              agentSessionId
-            }
+              agentSessionId,
+            },
           };
 
           // Capture mode information if provided
           if (newAgentSession.modes) {
             const currentMode = newAgentSession.modes.availableModes.find(
-              m => m.id === newAgentSession.modes!.currentModeId
+              (m) => m.id === newAgentSession.modes!.currentModeId,
             );
-            session.currentMode = currentMode ? {
-              id: currentMode.id,
-              name: currentMode.name
-            } : undefined;
+            session.currentMode = currentMode
+              ? {
+                  id: currentMode.id,
+                  name: currentMode.name,
+                }
+              : undefined;
             session.availableModes = newAgentSession.modes.availableModes;
           }
 
@@ -442,41 +439,41 @@ export class SessionService implements SessionServiceInterface {
         const promptPayload = this.buildPromptPayload({
           history: includeHistoryInPrompt ? historyBeforeNewMessage : undefined,
           message: content,
-          contexts
+          contexts,
         });
 
         promptResponse = await this.acpClient.sendPrompt(agentSessionId, promptPayload);
 
-        logger.debug('Prompt response received', {
+        logger.debug("Prompt response received", {
           sessionId,
           stopReason: promptResponse.stopReason,
-          fullPromptResponse: JSON.stringify(promptResponse, null, 2)
+          fullPromptResponse: JSON.stringify(promptResponse, null, 2),
         });
 
         // Note: Agent responses come via sessionUpdate callbacks, not in the prompt response
         // We'll receive updates through the streaming mechanism
         agentMessages = [];
 
-        logger.info('Prompt sent successfully, waiting for streaming updates', {
+        logger.info("Prompt sent successfully, waiting for streaming updates", {
           sessionId,
-          stopReason: promptResponse.stopReason
+          stopReason: promptResponse.stopReason,
         });
-
       } catch (error) {
-        const details = typeof error === 'object' && error !== null && 'details' in (error as Record<string, unknown>)
-          ? String((error as Record<string, unknown>).details)
-          : '';
+        const details =
+          typeof error === "object" && error !== null && "details" in (error as Record<string, unknown>)
+            ? String((error as Record<string, unknown>).details)
+            : "";
 
-        const sessionNotFound = details.includes('Session not found');
+        const sessionNotFound = details.includes("Session not found");
 
         if (sessionNotFound && !retriedWithNewSession) {
-          logger.warn('Agent session missing, creating new ACP session', {
+          logger.warn("Agent session missing, creating new ACP session", {
             sessionId,
-            agentConfigId: agentConfig.id
+            agentConfigId: agentConfig.id,
           });
 
           const newAgentSession = await this.acpClient.createSession({
-            cwd: session.context?.workingDirectory ?? process.cwd()
+            cwd: session.context?.workingDirectory ?? process.cwd(),
           });
 
           agentSessionId = newAgentSession.sessionId;
@@ -485,19 +482,21 @@ export class SessionService implements SessionServiceInterface {
             ...session.context,
             additionalContext: {
               ...(session.context?.additionalContext ?? {}),
-              agentSessionId
-            }
+              agentSessionId,
+            },
           };
 
           // Capture mode information if provided
           if (newAgentSession.modes) {
             const currentMode = newAgentSession.modes.availableModes.find(
-              m => m.id === newAgentSession.modes!.currentModeId
+              (m) => m.id === newAgentSession.modes!.currentModeId,
             );
-            session.currentMode = currentMode ? {
-              id: currentMode.id,
-              name: currentMode.name
-            } : undefined;
+            session.currentMode = currentMode
+              ? {
+                  id: currentMode.id,
+                  name: currentMode.name,
+                }
+              : undefined;
             session.availableModes = newAgentSession.modes.availableModes;
           }
 
@@ -509,7 +508,7 @@ export class SessionService implements SessionServiceInterface {
           const retryPrompt = this.buildPromptPayload({
             history: historyBeforeNewMessage,
             message: content,
-            contexts
+            contexts,
           });
           promptResponse = await this.acpClient.sendPrompt(agentSessionId, retryPrompt);
 
@@ -517,25 +516,24 @@ export class SessionService implements SessionServiceInterface {
           agentMessages = [];
           retriedWithNewSession = true;
 
-        logger.info('Prompt sent after session renewal, waiting for updates', {
-          sessionId
-        });
-
+          logger.info("Prompt sent after session renewal, waiting for updates", {
+            sessionId,
+          });
         } else {
-          logger.error('Failed to send message to agent', { sessionId, error });
+          logger.error("Failed to send message to agent", { sessionId, error });
 
           throw new ACPError(
             ErrorCode.ProtocolError,
-            'Failed to send message to agent',
-            error instanceof Error ? error.message : 'ACP communication error',
-            { sessionId, messageId: userMessage.id }
+            "Failed to send message to agent",
+            error instanceof Error ? error.message : "ACP communication error",
+            { sessionId, messageId: userMessage.id },
           );
         }
       }
 
       // Add agent response to session
       if (agentMessages.length === 0) {
-        logger.info('No synchronous agent messages returned; awaiting streaming updates', { sessionId });
+        logger.info("No synchronous agent messages returned; awaiting streaming updates", { sessionId });
       } else {
         for (const agentMessage of agentMessages) {
           agentMessage.metadata.sequence = session.messages.length;
@@ -545,10 +543,10 @@ export class SessionService implements SessionServiceInterface {
         }
       }
 
-      logger.info('Message exchange completed', {
+      logger.info("Message exchange completed", {
         sessionId,
         userMessageId: userMessage.id,
-        agentMessageIds: agentMessages.map(msg => msg.id)
+        agentMessageIds: agentMessages.map((msg) => msg.id),
       });
 
       const latestSession = await this.storageService.getConversation(sessionId);
@@ -562,15 +560,14 @@ export class SessionService implements SessionServiceInterface {
         success: true,
         sessionId,
         messageCount: session.messages.length,
-        responseTime: agentMessages.at(-1)?.metadata.processingTime
+        responseTime: agentMessages.at(-1)?.metadata.processingTime,
       });
 
       return agentMessages.at(-1)!;
-
     } catch (error) {
       PerformanceLogger.end(operationId, {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -579,21 +576,17 @@ export class SessionService implements SessionServiceInterface {
   /**
    * Get messages from a session with pagination
    */
-  async getSessionMessages(
-    sessionId: string,
-    offset: number,
-    limit: number
-  ): Promise<SessionMessage[]> {
+  async getSessionMessages(sessionId: string, offset: number, limit: number): Promise<SessionMessage[]> {
     try {
-      logger.debug('Getting session messages', { sessionId, offset, limit });
+      logger.debug("Getting session messages", { sessionId, offset, limit });
 
       const session = await this.getSession(sessionId);
       if (!session) {
         throw new ACPError(
           ErrorCode.SessionNotFound,
           `Session not found: ${sessionId}`,
-          'Cannot retrieve messages from a session that does not exist',
-          { sessionId }
+          "Cannot retrieve messages from a session that does not exist",
+          { sessionId },
         );
       }
 
@@ -602,28 +595,27 @@ export class SessionService implements SessionServiceInterface {
       const endIndex = Math.min(session.messages.length, startIndex + limit);
       const messages = session.messages.slice(startIndex, endIndex);
 
-      logger.debug('Session messages retrieved', {
+      logger.debug("Session messages retrieved", {
         sessionId,
         totalMessages: session.messages.length,
         returnedMessages: messages.length,
         offset,
-        limit
+        limit,
       });
 
       return messages;
-
     } catch (error) {
       if (error instanceof ACPError) {
         throw error;
       }
 
-      logger.error('Failed to get session messages', { sessionId, error });
+      logger.error("Failed to get session messages", { sessionId, error });
 
       throw new ACPError(
         ErrorCode.SystemError,
-        'Failed to retrieve session messages',
-        error instanceof Error ? error.message : 'Unknown error',
-        { sessionId }
+        "Failed to retrieve session messages",
+        error instanceof Error ? error.message : "Unknown error",
+        { sessionId },
       );
     }
   }
@@ -633,15 +625,15 @@ export class SessionService implements SessionServiceInterface {
    */
   async setSessionMode(sessionId: string, modeId: string): Promise<void> {
     try {
-      logger.info('Setting session mode', { sessionId, modeId });
+      logger.info("Setting session mode", { sessionId, modeId });
 
       const session = await this.getSession(sessionId);
       if (!session) {
         throw new ACPError(
           ErrorCode.SessionNotFound,
           `Session not found: ${sessionId}`,
-          'Cannot set mode for a session that does not exist',
-          { sessionId }
+          "Cannot set mode for a session that does not exist",
+          { sessionId },
         );
       }
 
@@ -649,20 +641,20 @@ export class SessionService implements SessionServiceInterface {
         throw new ACPError(
           ErrorCode.InvalidSession,
           `Session has no agent session ID`,
-          'Cannot set mode for a session without an active agent connection',
-          { sessionId }
+          "Cannot set mode for a session without an active agent connection",
+          { sessionId },
         );
       }
 
       // Check if the mode is available
       if (session.availableModes) {
-        const modeExists = session.availableModes.some(m => m.id === modeId);
+        const modeExists = session.availableModes.some((m) => m.id === modeId);
         if (!modeExists) {
           throw new ACPError(
             ErrorCode.InvalidConfiguration,
             `Mode '${modeId}' is not available for this session`,
-            `Available modes: ${session.availableModes.map(m => m.id).join(', ')}`,
-            { sessionId, modeId, availableModes: session.availableModes }
+            `Available modes: ${session.availableModes.map((m) => m.id).join(", ")}`,
+            { sessionId, modeId, availableModes: session.availableModes },
           );
         }
       }
@@ -670,24 +662,23 @@ export class SessionService implements SessionServiceInterface {
       // Call the ACP client to set the mode
       await this.acpClient.setSessionMode({
         sessionId: session.agentSessionId,
-        modeId
+        modeId,
       });
 
-      logger.info('Session mode change requested', { sessionId, modeId });
+      logger.info("Session mode change requested", { sessionId, modeId });
       // Note: The actual mode update will come via current_mode_update notification
-
     } catch (error) {
       if (error instanceof ACPError) {
         throw error;
       }
 
-      logger.error('Failed to set session mode', { sessionId, modeId, error });
+      logger.error("Failed to set session mode", { sessionId, modeId, error });
 
       throw new ACPError(
         ErrorCode.SystemError,
-        'Failed to set session mode',
-        error instanceof Error ? error.message : 'Unknown error',
-        { sessionId, modeId }
+        "Failed to set session mode",
+        error instanceof Error ? error.message : "Unknown error",
+        { sessionId, modeId },
       );
     }
   }
@@ -705,27 +696,27 @@ export class SessionService implements SessionServiceInterface {
         throw new ACPError(
           ErrorCode.SessionNotFound,
           `Session not found: ${sessionId}`,
-          'Cannot get mode for a session that does not exist',
-          { sessionId }
+          "Cannot get mode for a session that does not exist",
+          { sessionId },
         );
       }
 
       return {
         currentMode: session.currentMode,
-        availableModes: session.availableModes
+        availableModes: session.availableModes,
       };
     } catch (error) {
       if (error instanceof ACPError) {
         throw error;
       }
 
-      logger.error('Failed to get session mode', { sessionId, error });
+      logger.error("Failed to get session mode", { sessionId, error });
 
       throw new ACPError(
         ErrorCode.SystemError,
-        'Failed to get session mode',
-        error instanceof Error ? error.message : 'Unknown error',
-        { sessionId }
+        "Failed to get session mode",
+        error instanceof Error ? error.message : "Unknown error",
+        { sessionId },
       );
     }
   }
@@ -735,49 +726,46 @@ export class SessionService implements SessionServiceInterface {
    */
   async validateSession(sessionId: string): Promise<boolean> {
     try {
-      logger.debug('Validating session', { sessionId });
+      logger.debug("Validating session", { sessionId });
 
       // Check if session exists locally
       const session = await this.getSession(sessionId);
       if (!session) {
-        logger.debug('Session validation failed: not found', { sessionId });
+        logger.debug("Session validation failed: not found", { sessionId });
         return false;
       }
 
-      if (session.status !== 'active') {
-        logger.debug('Session validation failed: not active', {
+      if (session.status !== "active") {
+        logger.debug("Session validation failed: not active", {
           sessionId,
-          status: session.status
+          status: session.status,
         });
         return false;
       }
 
       // Check if the underlying connection is still healthy
       try {
-        const isConnectionHealthy = await this.acpClient.checkConnection(
-          session.agentConnectionId
-        );
+        const isConnectionHealthy = await this.acpClient.checkConnection(session.agentConnectionId);
 
         if (!isConnectionHealthy) {
-          logger.debug('Session validation failed: connection unhealthy', {
+          logger.debug("Session validation failed: connection unhealthy", {
             sessionId,
-            agentConnectionId: session.agentConnectionId
+            agentConnectionId: session.agentConnectionId,
           });
           return false;
         }
       } catch (error) {
-        logger.debug('Session validation failed: connection check error', {
+        logger.debug("Session validation failed: connection check error", {
           sessionId,
-          error
+          error,
         });
         return false;
       }
 
-      logger.debug('Session validation successful', { sessionId });
+      logger.debug("Session validation successful", { sessionId });
       return true;
-
     } catch (error) {
-      logger.warn('Session validation error', { sessionId, error });
+      logger.warn("Session validation error", { sessionId, error });
       return false;
     }
   }
@@ -790,16 +778,16 @@ export class SessionService implements SessionServiceInterface {
     let title = prompt.trim().substring(0, 50);
 
     // Remove newlines and extra spaces
-    title = title.replace(/\s+/g, ' ');
+    title = title.replace(/\s+/g, " ");
 
     // Add ellipsis if truncated
     if (prompt.length > 50) {
-      title += '...';
+      title += "...";
     }
 
     // Fallback if empty
     if (!title.trim()) {
-      title = 'New Conversation';
+      title = "New Conversation";
     }
 
     return title;
@@ -819,15 +807,16 @@ export class SessionService implements SessionServiceInterface {
         sequence,
         tokenCount: message.metadata?.tokensUsed,
         processingTime: message.metadata?.processingTime,
-        isStreaming: false
-      }
+        isStreaming: false,
+      },
     };
   }
 
-  private flattenAcpContent(
-    contents: Array<ACPMessageContent | ContentBlock | null | undefined>
-  ): { text: string; messageType: SessionMessage['metadata']['messageType'] } {
-    let messageType: SessionMessage['metadata']['messageType'] = 'text';
+  private flattenAcpContent(contents: Array<ACPMessageContent | ContentBlock | null | undefined>): {
+    text: string;
+    messageType: SessionMessage["metadata"]["messageType"];
+  } {
+    let messageType: SessionMessage["metadata"]["messageType"] = "text";
     const parts: string[] = [];
 
     for (const rawContent of contents) {
@@ -855,26 +844,37 @@ export class SessionService implements SessionServiceInterface {
 
       const content = rawContent as ACPMessageContent;
       switch (content.type) {
-        case 'text':
-          if (typeof content.text === 'string') {
+        case "text":
+          if (typeof content.text === "string") {
             parts.push(content.text);
           }
           break;
-        case 'code':
-          if ('code' in content && typeof content.code === 'string') {
+        case "code":
+          if ("code" in content && typeof content.code === "string") {
             parts.push(content.code);
-            messageType = messageType === 'text' ? 'code' : messageType;
+            messageType = messageType === "text" ? "code" : messageType;
           }
           break;
-        case 'file': {
-          const label = content.filename ?? (typeof (content as any).path === 'string' ? (content as any).path : 'File');
-          const body = content.content ?? (typeof (content as any).text === 'string' ? (content as any).text : '');
+        case "file": {
+          const fileRecord = content as Record<string, unknown>;
+          const label =
+            typeof content.filename === "string"
+              ? content.filename
+              : typeof fileRecord.path === "string"
+                ? (fileRecord.path as string)
+                : "File";
+          const body =
+            typeof content.content === "string"
+              ? content.content
+              : typeof fileRecord.text === "string"
+                ? (fileRecord.text as string)
+                : "";
           parts.push(`${label}: ${body}`.trim());
-          messageType = messageType === 'text' ? 'file' : messageType;
+          messageType = messageType === "text" ? "file" : messageType;
           break;
         }
-        case 'error':
-          if ('error' in content && typeof content.error === 'string') {
+        case "error":
+          if ("error" in content && typeof content.error === "string") {
             parts.push(`Error: ${content.error}`);
           }
           break;
@@ -888,13 +888,11 @@ export class SessionService implements SessionServiceInterface {
       }
     }
 
-    const text = parts.length > 1
-      ? parts.join('\n\n')
-      : parts[0] ?? '';
+    const text = parts.length > 1 ? parts.join("\n\n") : (parts[0] ?? "");
 
     return {
       text,
-      messageType
+      messageType,
     };
   }
 
@@ -934,16 +932,14 @@ export class SessionService implements SessionServiceInterface {
       !!incomingFirstChar &&
       !/\s/.test(previousLastChar) &&
       !/\s/.test(incomingFirstChar) &&
-      !previousContent.endsWith('\n') &&
+      !previousContent.endsWith("\n") &&
       /[.!?:;,)\]]/.test(previousLastChar) &&
       /[A-Za-z0-9]/.test(incomingFirstChar);
 
-    return needsSpace
-      ? `${previousContent} ${incomingContent}`
-      : `${previousContent}${incomingContent}`;
+    return needsSpace ? `${previousContent} ${incomingContent}` : `${previousContent}${incomingContent}`;
   }
 
-  private getStreamingState(sessionId: string): Partial<Record<'assistant' | 'user', { id: string; content: string }>> {
+  private getStreamingState(sessionId: string): Partial<Record<"assistant" | "user", { id: string; content: string }>> {
     let state = this.activeStreamingMessages.get(sessionId);
     if (!state) {
       state = {};
@@ -952,7 +948,7 @@ export class SessionService implements SessionServiceInterface {
     return state;
   }
 
-  private markStreamingComplete(session: ConversationSession, role: 'assistant' | 'user'): void {
+  private markStreamingComplete(session: ConversationSession, role: "assistant" | "user"): void {
     const state = this.activeStreamingMessages.get(session.sessionId);
     if (!state) {
       return;
@@ -976,96 +972,101 @@ export class SessionService implements SessionServiceInterface {
   }
 
   private flattenToolCallContent(contents?: ToolCallContent[] | null): string {
-    logger.debug('flattenToolCallContent called', {
+    logger.debug("flattenToolCallContent called", {
       contentsNull: contents === null,
       contentsUndefined: contents === undefined,
       contentsLength: contents?.length || 0,
-      contents: JSON.stringify(contents, null, 2)
+      contents: JSON.stringify(contents, null, 2),
     });
 
     if (!contents || contents.length === 0) {
-      logger.debug('flattenToolCallContent returning empty - no contents');
-      return '';
+      logger.debug("flattenToolCallContent returning empty - no contents");
+      return "";
     }
 
     const parts: string[] = [];
 
     for (const item of contents) {
-      logger.debug('Processing tool call content item', {
+      logger.debug("Processing tool call content item", {
         itemType: item.type,
-        item: JSON.stringify(item, null, 2)
+        item: JSON.stringify(item, null, 2),
       });
 
       switch (item.type) {
-        case 'content':
+        case "content": {
           const renderedContent = this.renderContentBlock(item.content);
-          logger.debug('Rendered content block', {
+          logger.debug("Rendered content block", {
             contentType: item.content.type,
             renderedLength: renderedContent.length,
-            rendered: renderedContent
+            rendered: renderedContent,
           });
           parts.push(renderedContent);
           break;
-        case 'diff':
+        }
+        case "diff": {
           const diffContent = `Diff (${item.path}):\n${item.newText}`;
-          logger.debug('Rendered diff content', {
+          logger.debug("Rendered diff content", {
             path: item.path,
             newTextLength: item.newText?.length || 0,
             diffContentLength: diffContent.length,
-            diffContent
+            diffContent,
           });
           parts.push(diffContent);
           break;
-        case 'terminal':
+        }
+        case "terminal": {
           const terminalContent = `Terminal output available (id: ${item.terminalId})`;
-          logger.debug('Rendered terminal content', {
+          logger.debug("Rendered terminal content", {
             terminalId: item.terminalId,
-            terminalContent
+            terminalContent,
           });
           parts.push(terminalContent);
           break;
-        default:
-          logger.debug('Unknown tool call content type', {
-            type: (item as any).type,
-            item: JSON.stringify(item, null, 2)
+        }
+        default: {
+          const unknownItem = item as { type?: unknown };
+          logger.debug("Unknown tool call content type", {
+            type: typeof unknownItem.type === "string" ? unknownItem.type : "unknown",
+            item: JSON.stringify(item, null, 2),
           });
           break;
+        }
       }
     }
 
-    const result = parts.join('\n\n').trim();
-    logger.debug('flattenToolCallContent result', {
+    const result = parts.join("\n\n").trim();
+    logger.debug("flattenToolCallContent result", {
       partsCount: parts.length,
       resultLength: result.length,
-      result
+      result,
     });
 
     return result;
   }
 
   private renderContentBlock(block: ContentBlock): string {
-    if (!block || typeof block !== 'object') {
-      return '';
+    if (!block || typeof block !== "object") {
+      return "";
     }
 
     switch (block.type) {
-      case 'text':
-        return typeof block.text === 'string' ? block.text : '';
-      case 'image': {
-        const uriPart = typeof block.uri === 'string' && block.uri.length > 0 ? ` (${block.uri})` : '';
+      case "text":
+        return typeof block.text === "string" ? block.text : "";
+      case "image": {
+        const uriPart = typeof block.uri === "string" && block.uri.length > 0 ? ` (${block.uri})` : "";
         return `[Image ${block.mimeType}${uriPart}]`;
       }
-      case 'audio':
+      case "audio":
         return `[Audio ${block.mimeType}]`;
-      case 'resource_link': {
-        const name = 'name' in block && typeof block.name === 'string' ? block.name : 'Resource';
+      case "resource_link": {
+        const name = "name" in block && typeof block.name === "string" ? block.name : "Resource";
         return `[Resource Link] ${name} → ${block.uri}`;
       }
-      case 'resource': {
+      case "resource": {
         try {
           return JSON.stringify(block.resource);
         } catch {
-          return '[Resource]';
+          return "[Resource]";
         }
       }
       default: {
@@ -1073,9 +1074,9 @@ export class SessionService implements SessionServiceInterface {
         const blockRecord = block as Record<string, unknown>;
 
         // Common content fields to check
-        const contentFields = ['text', 'content', 'output', 'result', 'message', 'data'];
+        const contentFields = ["text", "content", "output", "result", "message", "data"];
         for (const field of contentFields) {
-          if (field in blockRecord && typeof blockRecord[field] === 'string' && blockRecord[field]) {
+          if (field in blockRecord && typeof blockRecord[field] === "string" && blockRecord[field]) {
             return blockRecord[field] as string;
           }
         }
@@ -1084,56 +1085,56 @@ export class SessionService implements SessionServiceInterface {
         try {
           const jsonStr = JSON.stringify(block, null, 2);
           // Don't show empty objects or just type fields
-          if (jsonStr !== '{}' && !jsonStr.match(/^\s*\{\s*"type"\s*:\s*"[^"]*"\s*\}\s*$/)) {
+          if (jsonStr !== "{}" && !jsonStr.match(/^\s*\{\s*"type"\s*:\s*"[^"]*"\s*\}\s*$/)) {
             return jsonStr;
           }
         } catch {
           // ignore
         }
 
-        return `[${block.type || 'Unknown'} content]`;
+        return `[${block.type || "Unknown"} content]`;
       }
     }
   }
 
   private formatToolStatus(status?: ToolCallStatus | null): string {
     if (!status) {
-      return '';
+      return "";
     }
-    return status.replace(/_/g, ' ');
+    return status.replace(/_/g, " ");
   }
 
   private isContentBlock(value: unknown): value is ContentBlock {
-    if (!value || typeof value !== 'object') {
+    if (!value || typeof value !== "object") {
       return false;
     }
     const type = (value as { type?: unknown }).type;
-    if (typeof type !== 'string') {
+    if (typeof type !== "string") {
       return false;
     }
-    return ['text', 'image', 'audio', 'resource_link', 'resource'].includes(type);
+    return ["text", "image", "audio", "resource_link", "resource"].includes(type);
   }
 
-  private isContentWrapper(value: unknown): value is { type: 'content'; content: ContentBlock } {
-    if (!value || typeof value !== 'object') {
+  private isContentWrapper(value: unknown): value is { type: "content"; content: ContentBlock } {
+    if (!value || typeof value !== "object") {
       return false;
     }
     const record = value as { type?: unknown; content?: unknown };
-    return record.type === 'content' && this.isContentBlock(record.content);
+    return record.type === "content" && this.isContentBlock(record.content);
   }
 
   private deriveMessageTypeFromBlock(
     block: ContentBlock,
-    current: SessionMessage['metadata']['messageType']
-  ): SessionMessage['metadata']['messageType'] {
+    current: SessionMessage["metadata"]["messageType"],
+  ): SessionMessage["metadata"]["messageType"] {
     switch (block.type) {
-      case 'text':
+      case "text":
         return current;
-      case 'image':
-      case 'audio':
-      case 'resource':
-      case 'resource_link':
-        return current === 'text' ? 'file' : current;
+      case "image":
+      case "audio":
+      case "resource":
+      case "resource_link":
+        return current === "text" ? "file" : current;
       default:
         return current;
     }
@@ -1143,7 +1144,7 @@ export class SessionService implements SessionServiceInterface {
     try {
       return JSON.stringify(content);
     } catch {
-      return '';
+      return "";
     }
   }
 
@@ -1152,11 +1153,11 @@ export class SessionService implements SessionServiceInterface {
       return null;
     }
 
-    if (typeof raw === 'string') {
+    if (typeof raw === "string") {
       return raw.trim() || null;
     }
 
-    if (typeof raw === 'number' || typeof raw === 'boolean') {
+    if (typeof raw === "number" || typeof raw === "boolean") {
       return String(raw);
     }
 
@@ -1171,38 +1172,36 @@ export class SessionService implements SessionServiceInterface {
         return null;
       }
       try {
-        return raw.map(item =>
-          typeof item === 'string' ? item : JSON.stringify(item)
-        ).join('\n');
+        return raw.map((item) => (typeof item === "string" ? item : JSON.stringify(item))).join("\n");
       } catch {
         return String(raw);
       }
     }
 
     // Handle objects
-    if (typeof raw === 'object') {
+    if (typeof raw === "object") {
       // Check for error-like objects first
-      if ('message' in raw && typeof raw.message === 'string') {
+      if ("message" in raw && typeof raw.message === "string") {
         return raw.message.trim() || null;
       }
-      if ('error' in raw && typeof raw.error === 'string') {
+      if ("error" in raw && typeof raw.error === "string") {
         return raw.error.trim() || null;
       }
-      if ('details' in raw && typeof raw.details === 'string') {
+      if ("details" in raw && typeof raw.details === "string") {
         return raw.details.trim() || null;
       }
 
       // Check for common output patterns
-      if ('output' in raw && typeof raw.output === 'string') {
+      if ("output" in raw && typeof raw.output === "string") {
         return raw.output.trim() || null;
       }
-      if ('result' in raw && typeof raw.result === 'string') {
+      if ("result" in raw && typeof raw.result === "string") {
         return raw.result.trim() || null;
       }
-      if ('content' in raw && typeof raw.content === 'string') {
+      if ("content" in raw && typeof raw.content === "string") {
         return raw.content.trim() || null;
       }
-      if ('text' in raw && typeof raw.text === 'string') {
+      if ("text" in raw && typeof raw.text === "string") {
         return raw.text.trim() || null;
       }
 
@@ -1213,84 +1212,95 @@ export class SessionService implements SessionServiceInterface {
 
       try {
         // Use a replacer function to handle circular references and other issues
-        const jsonString = JSON.stringify(raw, (key, value) => {
-          // Handle circular references
-          if (typeof value === 'object' && value !== null) {
-            if (value instanceof Error) {
-              return {
-                name: value.name,
-                message: value.message,
-                stack: value.stack
-              };
+        const jsonString = JSON.stringify(
+          raw,
+          (key, value) => {
+            // Handle circular references
+            if (typeof value === "object" && value !== null) {
+              if (value instanceof Error) {
+                return {
+                  name: value.name,
+                  message: value.message,
+                  stack: value.stack,
+                };
+              }
+              // Handle other special object types
+              if (value.constructor && value.constructor.name !== "Object") {
+                return `[${value.constructor.name}]`;
+              }
             }
-            // Handle other special object types
-            if (value.constructor && value.constructor.name !== 'Object') {
-              return `[${value.constructor.name}]`;
-            }
-          }
-          return value;
-        }, 2);
-        return jsonString === '{}' ? null : jsonString;
+            return value;
+          },
+          2,
+        );
+        return jsonString === "{}" ? null : jsonString;
       } catch (error) {
+        logger.debug("JSON stringification failed, falling back to toString", {
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
         // Fallback to toString or a descriptive message
         try {
           return raw.toString();
         } catch {
-          return '[Complex Object]';
+          return "[Complex Object]";
         }
       }
     }
 
     try {
-      return JSON.stringify(raw, (key, value) => {
-        if (typeof value === 'object' && value !== null) {
-          if (value instanceof Error) {
-            return {
-              name: value.name,
-              message: value.message,
-              stack: value.stack
-            };
+      return JSON.stringify(
+        raw,
+        (key, value) => {
+          if (typeof value === "object" && value !== null) {
+            if (value instanceof Error) {
+              return {
+                name: value.name,
+                message: value.message,
+                stack: value.stack,
+              };
+            }
           }
-        }
-        return value;
-      }, 2);
+          return value;
+        },
+        2,
+      );
     } catch {
       try {
         return String(raw);
       } catch {
-        return '[Unstringifiable Object]';
+        return "[Unstringifiable Object]";
       }
     }
   }
 
-  private mapAcpRole(role: ACPSessionMessage['type']): MessageRole {
+  private mapAcpRole(role: ACPSessionMessage["type"]): MessageRole {
     switch (role) {
-      case 'user':
-        return 'user';
-      case 'agent':
-        return 'assistant';
-      case 'system':
-        return 'system';
+      case "user":
+        return "user";
+      case "agent":
+        return "assistant";
+      case "system":
+        return "system";
       default:
-        return 'system';
+        return "system";
     }
   }
 
-  private mapAcpSource(role: ACPSessionMessage['type']): SessionMessage['metadata']['source'] {
+  private mapAcpSource(role: ACPSessionMessage["type"]): SessionMessage["metadata"]["source"] {
     switch (role) {
-      case 'user':
-        return 'user';
-      case 'agent':
-        return 'agent';
+      case "user":
+        return "user";
+      case "agent":
+        return "agent";
       default:
-        return 'system';
+        return "system";
     }
   }
 
   private buildPromptPayload({
     history,
     message,
-    contexts
+    contexts,
   }: {
     history?: SessionMessage[];
     message: string;
@@ -1301,13 +1311,10 @@ export class SessionService implements SessionServiceInterface {
     if (history && history.length > 0) {
       const historyLines = history
         .map((entry) => {
-          const sender =
-            entry.role === 'user' ? 'User' :
-            entry.role === 'assistant' ? 'Assistant' :
-            'System';
+          const sender = entry.role === "user" ? "User" : entry.role === "assistant" ? "Assistant" : "System";
           return `${sender}: ${entry.content}`;
         })
-        .join('\n');
+        .join("\n");
 
       sections.push(`Conversation history:\n${historyLines}`);
     }
@@ -1318,18 +1325,18 @@ export class SessionService implements SessionServiceInterface {
 
     sections.push(`User: ${message}`);
 
-    return sections.filter(Boolean).join('\n\n');
+    return sections.filter(Boolean).join("\n\n");
   }
 
   private formatContextsForPrompt(contexts: ProjectContext[]): string {
-    const lines: string[] = ['Shared project context:'];
+    const lines: string[] = ["Shared project context:"];
 
     contexts.forEach((ctx, index) => {
       const contextLines: string[] = [];
 
       contextLines.push(
         `Context ${index + 1}: ${ctx.path}`,
-        `Type: ${ctx.type}${ctx.language ? ` | Language: ${ctx.language}` : ''}`,
+        `Type: ${ctx.type}${ctx.language ? ` | Language: ${ctx.language}` : ""}`,
       );
 
       if (ctx.metadata?.lineRange) {
@@ -1337,19 +1344,19 @@ export class SessionService implements SessionServiceInterface {
       }
 
       if (ctx.metadata?.isTruncated) {
-        contextLines.push('Note: Content truncated for size limits.');
+        contextLines.push("Note: Content truncated for size limits.");
       }
 
       if (ctx.content) {
         contextLines.push(ctx.content);
       } else {
-        contextLines.push('(no content provided)');
+        contextLines.push("(no content provided)");
       }
 
-      lines.push(contextLines.join('\n'), '');
+      lines.push(contextLines.join("\n"), "");
     });
 
-    return lines.join('\n').trimEnd();
+    return lines.join("\n").trimEnd();
   }
 
   /**
@@ -1361,10 +1368,10 @@ export class SessionService implements SessionServiceInterface {
       return;
     }
 
-    logger.info('Processing buffered session updates', {
+    logger.info("Processing buffered session updates", {
       agentSessionId,
       conversationSessionId,
-      updateCount: bufferedUpdates.length
+      updateCount: bufferedUpdates.length,
     });
 
     // Remove from buffer
@@ -1374,13 +1381,13 @@ export class SessionService implements SessionServiceInterface {
     for (const update of bufferedUpdates) {
       const correctedUpdate: SessionUpdateNotification = {
         ...update,
-        sessionId: conversationSessionId
+        sessionId: conversationSessionId,
       };
 
-      logger.debug('Processing buffered update', {
+      logger.debug("Processing buffered update", {
         originalSessionId: update.sessionId,
         correctedSessionId: conversationSessionId,
-        updateType: update.update?.sessionUpdate
+        updateType: update.update?.sessionUpdate,
       });
 
       await this.handleSessionUpdate(correctedUpdate);
@@ -1389,9 +1396,9 @@ export class SessionService implements SessionServiceInterface {
     // Notify observers that buffered updates have been processed
     const observer = this.sessionObservers.get(conversationSessionId);
     if (observer && bufferedUpdates.length > 0) {
-      logger.debug('Notifying observer after processing buffered updates', {
+      logger.debug("Notifying observer after processing buffered updates", {
         conversationSessionId,
-        updateCount: bufferedUpdates.length
+        updateCount: bufferedUpdates.length,
       });
 
       // Get the last processed message to trigger UI refresh
@@ -1406,29 +1413,29 @@ export class SessionService implements SessionServiceInterface {
   private async handleSessionUpdate(update: SessionUpdateNotification): Promise<void> {
     const sessionId = update.sessionId;
 
-    logger.debug('Session update received', {
+    logger.debug("Session update received", {
       sessionId,
       updateType: update.update?.sessionUpdate,
-      updateData: JSON.stringify(update.update, null, 2)
+      updateData: JSON.stringify(update.update, null, 2),
     });
 
     // Handle current_mode_update specially before loading the session
-    if (update.update?.sessionUpdate === 'current_mode_update') {
+    if (update.update?.sessionUpdate === "current_mode_update") {
       const modeChange = update.update as CurrentModeUpdate;
       const session = await this.storageService.getConversation(sessionId);
 
       if (session && session.availableModes) {
-        const newMode = session.availableModes.find(m => m.id === modeChange.currentModeId);
+        const newMode = session.availableModes.find((m) => m.id === modeChange.currentModeId);
         if (newMode) {
           session.currentMode = {
             id: newMode.id,
-            name: newMode.name
+            name: newMode.name,
           };
           await this.storageService.saveConversation(session);
 
-          logger.info('Session mode updated', {
+          logger.info("Session mode updated", {
             sessionId,
-            newMode: session.currentMode
+            newMode: session.currentMode,
           });
         }
       }
@@ -1436,37 +1443,37 @@ export class SessionService implements SessionServiceInterface {
 
     const session = await this.storageService.getConversation(sessionId);
     if (!session) {
-      logger.warn('Session not found for update', {
+      logger.warn("Session not found for update", {
         sessionId,
-        updateType: update.update?.sessionUpdate
+        updateType: update.update?.sessionUpdate,
       });
 
       // Try to find any session that might match - sometimes session IDs don't match exactly
       const allConversations = await this.storageService.getConversations();
-      logger.debug('Available sessions when update failed', {
+      logger.debug("Available sessions when update failed", {
         requestedSessionId: sessionId,
-        availableSessions: allConversations.map(conv => ({
+        availableSessions: allConversations.map((conv) => ({
           sessionId: conv.sessionId,
           agentSessionId: conv.agentSessionId,
           status: conv.status,
-          messageCount: conv.messages.length
-        }))
+          messageCount: conv.messages.length,
+        })),
       });
 
       // Try to match by agent session ID for any session update type
       if (update.update?.sessionUpdate) {
         for (const conv of allConversations) {
           if (conv.agentSessionId === sessionId || conv.context?.additionalContext?.agentSessionId === sessionId) {
-            logger.info('Found matching session by agent session ID', {
+            logger.info("Found matching session by agent session ID", {
               originalSessionId: sessionId,
               matchedConversationId: conv.sessionId,
-              updateType: update.update.sessionUpdate
+              updateType: update.update.sessionUpdate,
             });
 
             // Recursively call with correct session ID
             const correctedUpdate: SessionUpdateNotification = {
               ...update,
-              sessionId: conv.sessionId
+              sessionId: conv.sessionId,
             };
             await this.handleSessionUpdate(correctedUpdate);
             return;
@@ -1475,9 +1482,9 @@ export class SessionService implements SessionServiceInterface {
       }
 
       // Buffer the update for later processing when session becomes available
-      logger.info('Buffering session update for later processing', {
+      logger.info("Buffering session update for later processing", {
         agentSessionId: sessionId,
-        updateType: update.update?.sessionUpdate
+        updateType: update.update?.sessionUpdate,
       });
 
       if (!this.pendingUpdates.has(sessionId)) {
@@ -1489,7 +1496,7 @@ export class SessionService implements SessionServiceInterface {
       setTimeout(() => {
         const buffer = this.pendingUpdates.get(sessionId);
         if (buffer) {
-          const remainingUpdates = buffer.filter(u => u !== update);
+          const remainingUpdates = buffer.filter((u) => u !== update);
           if (remainingUpdates.length === 0) {
             this.pendingUpdates.delete(sessionId);
           } else {
@@ -1503,41 +1510,39 @@ export class SessionService implements SessionServiceInterface {
 
     const message = this.transformSessionUpdate(update, session.messages.length);
     if (!message) {
-      logger.debug('No message produced from session update', {
+      logger.debug("No message produced from session update", {
         sessionId,
-        updateType: update.update?.sessionUpdate
+        updateType: update.update?.sessionUpdate,
       });
       return;
     }
 
-    logger.debug('Session update transformed to message', {
+    logger.debug("Session update transformed to message", {
       sessionId,
       messageId: message.id,
       messageRole: message.role,
       contentLength: message.content?.length || 0,
-      contentPreview: message.content?.slice(0, 200) || 'empty'
+      contentPreview: message.content?.slice(0, 200) || "empty",
     });
 
     let notificationTarget: SessionMessage = message;
     let messageUpdated = false;
     let forceFullSave = false;
     const streamingState = this.getStreamingState(sessionId);
-    const roleKey = message.role === 'assistant' || message.role === 'user'
-      ? message.role
-      : null;
+    const roleKey = message.role === "assistant" || message.role === "user" ? message.role : null;
 
     // For tool calls, update existing message by tool call ID
-    if (message.role === 'tool' && message.toolCall?.callId) {
+    if (message.role === "tool" && message.toolCall?.callId) {
       const existingIndex = session.messages.findIndex(
-        m => m.role === 'tool' && m.toolCall?.callId === message.toolCall!.callId
+        (m) => m.role === "tool" && m.toolCall?.callId === message.toolCall!.callId,
       );
 
       if (existingIndex >= 0) {
-        logger.debug('Updating existing tool call message', {
+        logger.debug("Updating existing tool call message", {
           sessionId,
           toolCallId: message.toolCall.callId,
           existingMessageId: session.messages[existingIndex].id,
-          newContentLength: message.content.length
+          newContentLength: message.content.length,
         });
 
         // Update the existing tool call message
@@ -1547,10 +1552,10 @@ export class SessionService implements SessionServiceInterface {
           timestamp: message.timestamp,
           metadata: {
             ...session.messages[existingIndex].metadata,
-            ...message.metadata
+            ...message.metadata,
           },
           toolCall: message.toolCall,
-          toolResult: message.toolResult
+          toolResult: message.toolResult,
         };
 
         notificationTarget = session.messages[existingIndex];
@@ -1558,14 +1563,14 @@ export class SessionService implements SessionServiceInterface {
       }
     }
 
-    if (update.update?.sessionUpdate === 'available_commands_update') {
+    if (update.update?.sessionUpdate === "available_commands_update") {
       const commandsUpdate = update.update as AvailableCommandsUpdate;
       session.availableCommands = commandsUpdate.availableCommands;
       forceFullSave = true;
 
-      logger.info('Available commands updated for session', {
+      logger.info("Available commands updated for session", {
         sessionId,
-        commandCount: commandsUpdate.availableCommands.length
+        commandCount: commandsUpdate.availableCommands.length,
       });
     }
 
@@ -1593,13 +1598,13 @@ export class SessionService implements SessionServiceInterface {
           const candidate = session.messages[i];
 
           if (candidate.role === message.role) {
-            if (candidate.metadata?.isStreaming && candidate.role !== 'tool') {
+            if (candidate.metadata?.isStreaming && candidate.role !== "tool") {
               streamingIndex = i;
             }
             break;
           }
 
-          if (candidate.role === 'system') {
+          if (candidate.role === "system") {
             continue;
           }
 
@@ -1610,21 +1615,18 @@ export class SessionService implements SessionServiceInterface {
       if (streamingIndex >= 0) {
         const lastMessage = session.messages[streamingIndex];
 
-        logger.info('Replacing streaming message content', {
+        logger.info("Replacing streaming message content", {
           sessionId,
           existingMessageId: lastMessage?.id,
           existingContentLength: lastMessage.content?.length || 0,
           newContentLength: message.content?.length || 0,
           existingContentPreview: (lastMessage.content ?? "").slice(-50),
-          newContentPreview: (message.content ?? "").slice(-50)
+          newContentPreview: (message.content ?? "").slice(-50),
         });
 
         // Merge the latest chunk with the existing streaming content, supporting both cumulative and delta payloads
         const previousContent = existingEntryContent ?? lastMessage.content ?? "";
-        const mergedContent = this.mergeStreamingContent(
-          previousContent,
-          message.content ?? ""
-        );
+        const mergedContent = this.mergeStreamingContent(previousContent, message.content ?? "");
         lastMessage.content = mergedContent;
         lastMessage.timestamp = message.timestamp;
         notificationTarget = lastMessage;
@@ -1632,14 +1634,14 @@ export class SessionService implements SessionServiceInterface {
         if (roleKey) {
           streamingState[roleKey] = {
             id: lastMessage.id,
-            content: mergedContent
+            content: mergedContent,
           };
         }
 
-        logger.info('After replacement', {
+        logger.info("After replacement", {
           sessionId,
           totalLength: lastMessage.content.length,
-          lastSection: lastMessage.content.slice(-100)
+          lastSection: lastMessage.content.slice(-100),
         });
       } else if (roleKey) {
         this.markStreamingComplete(session, roleKey);
@@ -1653,18 +1655,18 @@ export class SessionService implements SessionServiceInterface {
 
     // If no existing message was updated, add as new message
     if (!messageUpdated) {
-      logger.debug('Adding new message to session', {
+      logger.debug("Adding new message to session", {
         sessionId,
         messageId: message.id,
         messageRole: message.role,
-        contentLength: message.content?.length || 0
+        contentLength: message.content?.length || 0,
       });
 
       session.messages.push(message);
       if (message.metadata.isStreaming && roleKey) {
         streamingState[roleKey] = {
           id: message.id,
-          content: message.content ?? ""
+          content: message.content ?? "",
         };
       }
     }
@@ -1691,34 +1693,36 @@ export class SessionService implements SessionServiceInterface {
     }
 
     switch (payload.sessionUpdate) {
-      case 'agent_message_chunk':
-      case 'user_message_chunk': {
-        const role = payload.sessionUpdate === 'user_message_chunk' ? 'user' : 'assistant';
+      case "agent_message_chunk":
+      case "user_message_chunk": {
+        const role = payload.sessionUpdate === "user_message_chunk" ? "user" : "assistant";
 
-        logger.info('Processing streaming chunk', {
+        logger.info("Processing streaming chunk", {
           sessionId: update.sessionId,
           updateType: payload.sessionUpdate,
           payloadContent: JSON.stringify(payload.content, null, 2),
-          fullPayload: JSON.stringify(payload, null, 2)
+          fullPayload: JSON.stringify(payload, null, 2),
         });
 
         const { text, messageType } = this.flattenAcpContent([payload.content]);
 
-        logger.info('Streaming chunk processed', {
+        logger.info("Streaming chunk processed", {
           sessionId: update.sessionId,
           role,
           messageType,
           textLength: text.length,
           textPreview: text.slice(0, 120),
           fullText: text,
-          textCharCodes: Array.from(text).map((char, idx) => ({
-            idx,
-            char,
-            code: char.charCodeAt(0),
-            isSpace: char === ' ',
-            isNewline: char === '\n',
-            isTab: char === '\t'
-          })).slice(0, 50)
+          textCharCodes: Array.from(text)
+            .map((char, idx) => ({
+              idx,
+              char,
+              code: char.charCodeAt(0),
+              isSpace: char === " ",
+              isNewline: char === "\n",
+              isTab: char === "\t",
+            }))
+            .slice(0, 50),
         });
 
         return {
@@ -1727,25 +1731,25 @@ export class SessionService implements SessionServiceInterface {
           content: text,
           timestamp: new Date(),
           metadata: {
-            source: role === 'user' ? 'user' : 'agent',
+            source: role === "user" ? "user" : "agent",
             messageType,
             sequence,
-            isStreaming: true
-          }
+            isStreaming: true,
+          },
         };
       }
-      case 'agent_thought_chunk': {
+      case "agent_thought_chunk": {
         // Filter out internal agent thoughts - these should not be displayed to the user
-        logger.debug('Filtering out agent thought chunk', {
+        logger.debug("Filtering out agent thought chunk", {
           sessionId: update.sessionId,
-          thoughtContent: JSON.stringify(payload.content, null, 2)
+          thoughtContent: JSON.stringify(payload.content, null, 2),
         });
         return null;
       }
-      case 'tool_call': {
+      case "tool_call": {
         const toolCall = payload as ToolCall;
 
-        logger.debug('Processing tool_call', {
+        logger.debug("Processing tool_call", {
           toolCallId: toolCall.toolCallId,
           title: toolCall.title,
           status: toolCall.status,
@@ -1753,57 +1757,57 @@ export class SessionService implements SessionServiceInterface {
           contentLength: toolCall.content?.length || 0,
           rawInput: JSON.stringify(toolCall.rawInput, null, 2),
           rawOutput: JSON.stringify(toolCall.rawOutput, null, 2),
-          fullToolCall: JSON.stringify(toolCall, null, 2)
+          fullToolCall: JSON.stringify(toolCall, null, 2),
         });
 
         const statusText = this.formatToolStatus(toolCall.status);
         const detailText = this.flattenToolCallContent(toolCall.content);
         const rawOutputText = this.stringifyRawOutput(toolCall.rawOutput);
 
-        logger.debug('Tool call content processing', {
+        logger.debug("Tool call content processing", {
           toolCallId: toolCall.toolCallId,
           statusText,
           detailTextLength: detailText?.length || 0,
-          detailText: detailText || 'empty',
+          detailText: detailText || "empty",
           rawOutputTextLength: rawOutputText?.length || 0,
-          rawOutputText: rawOutputText || 'empty'
+          rawOutputText: rawOutputText || "empty",
         });
 
         const sections = [
-          [toolCall.title ?? toolCall.toolCallId, statusText].filter(Boolean).join(' - '),
-          detailText || rawOutputText || 'Tool call executed'
+          [toolCall.title ?? toolCall.toolCallId, statusText].filter(Boolean).join(" - "),
+          detailText || rawOutputText || "Tool call executed",
         ].filter((section) => section && section.trim().length > 0);
 
-        const finalContent = sections.join('\n\n').trim() || `Tool call: ${toolCall.title ?? toolCall.toolCallId}`;
+        const finalContent = sections.join("\n\n").trim() || `Tool call: ${toolCall.title ?? toolCall.toolCallId}`;
 
-        logger.debug('Tool call final content', {
+        logger.debug("Tool call final content", {
           toolCallId: toolCall.toolCallId,
           sectionsCount: sections.length,
           finalContentLength: finalContent.length,
-          finalContent
+          finalContent,
         });
 
         return {
           id: toolCall.toolCallId,
-          role: 'tool',
+          role: "tool",
           content: finalContent,
           timestamp: new Date(),
           metadata: {
-            source: 'agent',
-            messageType: 'tool_call',
-            sequence
+            source: "agent",
+            messageType: "tool_call",
+            sequence,
           },
           toolCall: {
             name: toolCall.title ?? toolCall.toolCallId,
             arguments: toolCall.rawInput ?? {},
-            callId: toolCall.toolCallId
-          }
+            callId: toolCall.toolCallId,
+          },
         };
       }
-      case 'tool_call_update': {
+      case "tool_call_update": {
         const toolUpdate = payload as ToolCallUpdate;
 
-        logger.debug('Processing tool_call_update', {
+        logger.debug("Processing tool_call_update", {
           toolCallId: toolUpdate.toolCallId,
           title: toolUpdate.title,
           status: toolUpdate.status,
@@ -1811,7 +1815,7 @@ export class SessionService implements SessionServiceInterface {
           contentLength: toolUpdate.content?.length || 0,
           rawInput: JSON.stringify(toolUpdate.rawInput, null, 2),
           rawOutput: JSON.stringify(toolUpdate.rawOutput, null, 2),
-          fullToolUpdate: JSON.stringify(toolUpdate, null, 2)
+          fullToolUpdate: JSON.stringify(toolUpdate, null, 2),
         });
 
         const status = toolUpdate.status ?? null;
@@ -1819,77 +1823,77 @@ export class SessionService implements SessionServiceInterface {
         const contentText = this.flattenToolCallContent(toolUpdate.content ?? undefined);
         const rawOutputText = this.stringifyRawOutput(toolUpdate.rawOutput);
 
-        logger.debug('Tool call update content processing', {
+        logger.debug("Tool call update content processing", {
           toolCallId: toolUpdate.toolCallId,
           status,
           statusText,
           contentTextLength: contentText?.length || 0,
-          contentText: contentText || 'empty',
+          contentText: contentText || "empty",
           rawOutputTextLength: rawOutputText?.length || 0,
-          rawOutputText: rawOutputText || 'empty',
+          rawOutputText: rawOutputText || "empty",
           rawOutputType: typeof toolUpdate.rawOutput,
-          rawOutputDebug: toolUpdate.rawOutput ? JSON.stringify(toolUpdate.rawOutput, null, 2) : 'null'
+          rawOutputDebug: toolUpdate.rawOutput ? JSON.stringify(toolUpdate.rawOutput, null, 2) : "null",
         });
 
         const bodySections = [
           [toolUpdate.title ?? toolUpdate.toolCallId, statusText ? `Status: ${statusText}` : null]
             .filter(Boolean)
-            .join(' - '),
-          contentText || rawOutputText || 'Tool update received'
+            .join(" - "),
+          contentText || rawOutputText || "Tool update received",
         ].filter((section) => section && section.trim().length > 0);
 
-        const renderedText = bodySections.join('\n\n').trim() || `Tool update${statusText ? ` (${statusText})` : ''}`;
-        const isTerminal = status === 'completed' || status === 'failed';
+        const renderedText = bodySections.join("\n\n").trim() || `Tool update${statusText ? ` (${statusText})` : ""}`;
+        const isTerminal = status === "completed" || status === "failed";
 
-        logger.debug('Tool call update final content', {
+        logger.debug("Tool call update final content", {
           toolCallId: toolUpdate.toolCallId,
           bodySectionsCount: bodySections.length,
           renderedTextLength: renderedText.length,
           renderedText,
-          isTerminal
+          isTerminal,
         });
 
         return {
           id: toolUpdate.toolCallId,
-          role: 'tool',
+          role: "tool",
           content: renderedText,
           timestamp: new Date(),
           metadata: {
-            source: 'agent',
-            messageType: isTerminal ? 'tool_result' : 'tool_call',
-            sequence
+            source: "agent",
+            messageType: isTerminal ? "tool_result" : "tool_call",
+            sequence,
           },
           toolCall: {
             name: toolUpdate.title ?? toolUpdate.toolCallId,
             arguments: toolUpdate.rawInput ?? {},
-            callId: toolUpdate.toolCallId
+            callId: toolUpdate.toolCallId,
           },
           toolResult: isTerminal
             ? {
                 callId: toolUpdate.toolCallId,
                 result: toolUpdate.rawOutput ?? (contentText || rawOutputText || null),
-                success: status === 'completed',
-                error: status === 'failed' ? (rawOutputText ?? 'Tool call failed') : undefined
+                success: status === "completed",
+                error: status === "failed" ? (rawOutputText ?? "Tool call failed") : undefined,
               }
-            : undefined
+            : undefined,
         };
       }
-      case 'plan': {
+      case "plan": {
         const planUpdate = payload as PlanUpdate;
         const planEntries = Array.isArray(planUpdate.entries)
           ? planUpdate.entries.map((entry, index) => {
-              const statusSymbol = entry.status === 'completed'
-                ? 'x'
-                : entry.status === 'in_progress'
-                  ? '~'
-                  : ' ';
+              const statusSymbol = entry.status === "completed" ? "x" : entry.status === "in_progress" ? "~" : " ";
               return `${index + 1}. [${statusSymbol}] ${entry.content} (${entry.priority})`;
             })
           : [];
 
-        const legacyPlan = (planUpdate as unknown as { plan?: { title?: string; description?: string; steps?: { title: string; status?: string }[] } }).plan;
+        const legacyPlan = (
+          planUpdate as unknown as {
+            plan?: { title?: string; description?: string; steps?: { title: string; status?: string }[] };
+          }
+        ).plan;
 
-        const lines: string[] = ['Plan update:'];
+        const lines: string[] = ["Plan update:"];
 
         if (planEntries.length > 0) {
           lines.push(...planEntries);
@@ -1903,66 +1907,62 @@ export class SessionService implements SessionServiceInterface {
           if (Array.isArray(legacyPlan.steps)) {
             lines.push(
               ...legacyPlan.steps.map((step, index) => {
-                const statusSymbol = step.status === 'completed'
-                  ? 'x'
-                  : step.status === 'running'
-                    ? '~'
-                    : ' ';
+                const statusSymbol = step.status === "completed" ? "x" : step.status === "running" ? "~" : " ";
                 return `${index + 1}. [${statusSymbol}] ${step.title}`;
-              })
+              }),
             );
           }
         } else {
-          lines.push('No plan details provided.');
+          lines.push("No plan details provided.");
         }
 
-        const planText = lines.join('\n');
+        const planText = lines.join("\n");
 
         return {
           id: `plan-${Date.now()}`,
-          role: 'system',
+          role: "system",
           content: planText,
           timestamp: new Date(),
           metadata: {
-            source: 'agent',
-            messageType: 'text',
-            sequence
-          }
+            source: "agent",
+            messageType: "text",
+            sequence,
+          },
         };
       }
-      case 'available_commands_update': {
+      case "available_commands_update": {
         const commandsUpdate = payload as AvailableCommandsUpdate;
         const commandText = commandsUpdate.availableCommands
-          .map((command) => `- ${command.name}${command.description ? `: ${command.description}` : ''}`)
-          .join('\n');
+          .map((command) => `- ${command.name}${command.description ? `: ${command.description}` : ""}`)
+          .join("\n");
 
         return {
           id: `commands-${Date.now()}`,
-          role: 'system',
+          role: "system",
           content: `Available Commands:\n${commandText}`,
           timestamp: new Date(),
           metadata: {
-            source: 'agent',
-            messageType: 'text',
-            sequence
-          }
+            source: "agent",
+            messageType: "text",
+            sequence,
+          },
         };
       }
-      case 'current_mode_update': {
+      case "current_mode_update": {
         const modeChange = payload as CurrentModeUpdate;
 
         // The actual mode update happens in handleSessionUpdate before transforming
         // This just creates a message to display in the conversation
         return {
           id: `mode-${Date.now()}`,
-          role: 'system',
+          role: "system",
           content: `Agent switched to mode: ${modeChange.currentModeId}`,
           timestamp: new Date(),
           metadata: {
-            source: 'agent',
-            messageType: 'text',
-            sequence
-          }
+            source: "agent",
+            messageType: "text",
+            sequence,
+          },
         };
       }
       default:

@@ -6,11 +6,7 @@
  */
 
 import { LocalStorage } from "@raycast/api";
-import type {
-  ConversationSession,
-  SessionMessage,
-  ProjectContext
-} from "@/types/extension";
+import type { ConversationSession, SessionMessage, ProjectContext } from "@/types/extension";
 import { STORAGE_KEYS, getDefaultValue, STORAGE_VERSION, STORAGE_VERSION_KEY } from "@/utils/storageKeys";
 import { ErrorCode, type ExtensionError } from "@/types/extension";
 import { runMigrations, validateStorageIntegrity } from "@/utils/migrations";
@@ -69,7 +65,7 @@ export class StorageService {
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to initialize storage: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to initialize storage: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -82,7 +78,7 @@ export class StorageService {
 
     try {
       const conversations = await this.getConversations();
-      const existingIndex = conversations.findIndex(c => c.sessionId === session.sessionId);
+      const existingIndex = conversations.findIndex((c) => c.sessionId === session.sessionId);
 
       const normalized = this.normalizeConversation(session);
 
@@ -99,8 +95,8 @@ export class StorageService {
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to save conversation: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId: session.sessionId }
+        `Failed to save conversation: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId: session.sessionId },
       );
     }
   }
@@ -113,12 +109,12 @@ export class StorageService {
 
     try {
       const conversations = await this.getConversations();
-      return conversations.find(c => c.sessionId === sessionId) || null;
+      return conversations.find((c) => c.sessionId === sessionId) || null;
     } catch (error) {
       throw this.createError(
         ErrorCode.SessionNotFound,
-        `Failed to get conversation: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId }
+        `Failed to get conversation: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId },
       );
     }
   }
@@ -131,21 +127,22 @@ export class StorageService {
 
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.CONVERSATIONS);
-      const conversationsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.CONVERSATIONS);
+      const conversationsJson = typeof stored === "string" ? stored : getDefaultValue(STORAGE_KEYS.CONVERSATIONS);
 
-      const conversations = (JSON.parse(conversationsJson, this.dateReviver) as ConversationSession[])
-        .map(session => this.normalizeConversation(session));
+      const conversations = (JSON.parse(conversationsJson, this.dateReviver) as ConversationSession[]).map((session) =>
+        this.normalizeConversation(session),
+      );
 
       if (agentId) {
-        return conversations.filter(c => c.agentConnectionId === agentId);
+        return conversations.filter((c) => c.agentConnectionId === agentId);
       }
 
       return conversations;
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to get conversations: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { agentId }
+        `Failed to get conversations: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { agentId },
       );
     }
   }
@@ -158,7 +155,7 @@ export class StorageService {
 
     try {
       const conversations = await this.getConversations();
-      const filteredConversations = conversations.filter(c => c.sessionId !== sessionId);
+      const filteredConversations = conversations.filter((c) => c.sessionId !== sessionId);
 
       await LocalStorage.setItem(STORAGE_KEYS.CONVERSATIONS, JSON.stringify(filteredConversations, this.dateReplacer));
 
@@ -167,8 +164,8 @@ export class StorageService {
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to delete conversation: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId }
+        `Failed to delete conversation: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId },
       );
     }
   }
@@ -181,19 +178,19 @@ export class StorageService {
 
     try {
       const conversations = await this.getConversations();
-      const conversation = conversations.find(c => c.sessionId === sessionId);
+      const conversation = conversations.find((c) => c.sessionId === sessionId);
 
       if (!conversation) {
         throw this.createError(ErrorCode.SessionNotFound, `Conversation not found: ${sessionId}`);
       }
 
-      conversation.status = 'archived';
+      conversation.status = "archived";
       await this.saveConversation(conversation);
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to archive conversation: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId }
+        `Failed to archive conversation: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId },
       );
     }
   }
@@ -231,8 +228,8 @@ export class StorageService {
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to add message: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId, messageId: message.id }
+        `Failed to add message: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId, messageId: message.id },
       );
     }
   }
@@ -278,7 +275,7 @@ export class StorageService {
 
     try {
       const contexts = await this.getProjectContexts();
-      const existingIndex = contexts.findIndex(c => c.id === context.id);
+      const existingIndex = contexts.findIndex((c) => c.id === context.id);
 
       if (existingIndex >= 0) {
         contexts[existingIndex] = context;
@@ -290,8 +287,8 @@ export class StorageService {
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to save project context: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { contextId: context.id, sessionId: context.sessionId }
+        `Failed to save project context: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { contextId: context.id, sessionId: context.sessionId },
       );
     }
   }
@@ -304,29 +301,29 @@ export class StorageService {
 
     try {
       const stored = await LocalStorage.getItem(STORAGE_KEYS.PROJECT_CONTEXTS);
-      const contextsJson = typeof stored === 'string' ? stored : getDefaultValue(STORAGE_KEYS.PROJECT_CONTEXTS);
+      const contextsJson = typeof stored === "string" ? stored : getDefaultValue(STORAGE_KEYS.PROJECT_CONTEXTS);
 
       const contexts = JSON.parse(contextsJson, this.dateReviver);
 
       // Ensure contexts is always an array
       if (!Array.isArray(contexts)) {
-        logger.warn('Project contexts is not an array, resetting to empty array', {
+        logger.warn("Project contexts is not an array, resetting to empty array", {
           type: typeof contexts,
-          value: contexts
+          value: contexts,
         });
         return [];
       }
 
       if (sessionId) {
-        return contexts.filter(c => c.sessionId === sessionId);
+        return contexts.filter((c) => c.sessionId === sessionId);
       }
 
       return contexts;
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to get project contexts: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId }
+        `Failed to get project contexts: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId },
       );
     }
   }
@@ -339,14 +336,14 @@ export class StorageService {
 
     try {
       const contexts = await this.getProjectContexts();
-      const filteredContexts = contexts.filter(c => c.id !== contextId);
+      const filteredContexts = contexts.filter((c) => c.id !== contextId);
 
       await LocalStorage.setItem(STORAGE_KEYS.PROJECT_CONTEXTS, JSON.stringify(filteredContexts, this.dateReplacer));
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to delete project context: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { contextId }
+        `Failed to delete project context: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { contextId },
       );
     }
   }
@@ -376,12 +373,12 @@ export class StorageService {
         conversations: conversations.length,
         messages: totalMessages,
         contexts: contexts.length,
-        totalSize: conversationsSize + contextsSize
+        totalSize: conversationsSize + contextsSize,
       };
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to get storage stats: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to get storage stats: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -402,9 +399,7 @@ export class StorageService {
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
 
       const conversations = await this.getConversations();
-      const oldConversations = conversations.filter(c =>
-        c.status === 'archived' && c.lastActivity < cutoffDate
-      );
+      const oldConversations = conversations.filter((c) => c.status === "archived" && c.lastActivity < cutoffDate);
 
       let conversationsDeleted = 0;
       let messagesArchived = 0;
@@ -419,7 +414,7 @@ export class StorageService {
       }
 
       // Archive messages in active but large conversations
-      const activeConversations = conversations.filter(c => c.status === 'active');
+      const activeConversations = conversations.filter((c) => c.status === "active");
       for (const conv of activeConversations) {
         if (conv.messages.length > 100) {
           const messagesToArchive = conv.messages.slice(0, conv.messages.length - 80);
@@ -435,12 +430,12 @@ export class StorageService {
       return {
         conversationsDeleted,
         messagesArchived,
-        storageFreed: storageFreedBytes
+        storageFreed: storageFreedBytes,
       };
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to cleanup old data: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to cleanup old data: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -476,7 +471,7 @@ export class StorageService {
         }
 
         conv.messages = Array.from(uniqueMessages.values()).sort(
-          (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+          (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
         );
 
         // Update metadata sequence numbers
@@ -496,12 +491,12 @@ export class StorageService {
       return {
         conversationsCompacted,
         duplicatesRemoved,
-        storageReclaimed
+        storageReclaimed,
       };
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Failed to optimize storage: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to optimize storage: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -512,11 +507,11 @@ export class StorageService {
   private async deleteProjectContextsBySession(sessionId: string): Promise<void> {
     try {
       const contexts = await this.getProjectContexts();
-      const filteredContexts = contexts.filter(c => c.sessionId !== sessionId);
+      const filteredContexts = contexts.filter((c) => c.sessionId !== sessionId);
 
       await LocalStorage.setItem(STORAGE_KEYS.PROJECT_CONTEXTS, JSON.stringify(filteredContexts, this.dateReplacer));
     } catch (error) {
-      logger.error('Failed to delete project contexts by session', { sessionId, error });
+      logger.error("Failed to delete project contexts by session", { sessionId, error });
       // Don't throw - this is a cleanup operation and shouldn't prevent conversation deletion
     }
   }
@@ -535,7 +530,7 @@ export class StorageService {
 
     if (storedVersion !== STORAGE_VERSION) {
       // TODO: Implement migration logic for different versions
-      logger.info('Storage migration needed', { from: storedVersion, to: STORAGE_VERSION });
+      logger.info("Storage migration needed", { from: storedVersion, to: STORAGE_VERSION });
       await LocalStorage.setItem(STORAGE_VERSION_KEY, STORAGE_VERSION);
     }
   }
@@ -554,7 +549,7 @@ export class StorageService {
       ...session,
       createdAt: this.toDate(session.createdAt),
       lastActivity: this.toDate(session.lastActivity),
-      agentConfigId: session.agentConfigId ?? 'unknown-agent',
+      agentConfigId: session.agentConfigId ?? "unknown-agent",
       messages: session.messages.map((message, index) => {
         const normalized = this.normalizeMessage(message);
         if (normalized.metadata.sequence === undefined) {
@@ -565,9 +560,9 @@ export class StorageService {
       context: session.context
         ? {
             ...session.context,
-            additionalContext: session.context.additionalContext
+            additionalContext: session.context.additionalContext,
           }
-        : session.context
+        : session.context,
     };
   }
 
@@ -578,8 +573,8 @@ export class StorageService {
       metadata: {
         ...message.metadata,
         isStreaming: Boolean(message.metadata.isStreaming),
-        sequence: message.metadata.sequence
-      }
+        sequence: message.metadata.sequence,
+      },
     };
   }
 
@@ -587,7 +582,7 @@ export class StorageService {
     if (value instanceof Date) {
       return value;
     }
-    if (typeof value === 'string' || typeof value === 'number') {
+    if (typeof value === "string" || typeof value === "number") {
       const parsed = new Date(value);
       if (!Number.isNaN(parsed.getTime())) {
         return parsed;
@@ -601,7 +596,7 @@ export class StorageService {
    */
   private dateReplacer(key: string, value: unknown): unknown {
     if (value instanceof Date) {
-      return { __type: 'Date', value: value.toISOString() };
+      return { __type: "Date", value: value.toISOString() };
     }
     return value;
   }
@@ -611,11 +606,15 @@ export class StorageService {
    */
   private dateReviver(key: string, value: unknown): unknown {
     if (
-      typeof value === 'object' &&
+      typeof value === "object" &&
       value !== null &&
-      (value as any).__type === 'Date'
+      "__type" in value &&
+      (value as { __type?: unknown }).__type === "Date"
     ) {
-      return new Date((value as any).value);
+      const dateValue = (value as { value?: unknown }).value;
+      if (typeof dateValue === "string") {
+        return new Date(dateValue);
+      }
     }
     return value;
   }
@@ -627,9 +626,9 @@ export class StorageService {
     return {
       code,
       message,
-      details: context ? JSON.stringify(context, null, 2) : '',
+      details: context ? JSON.stringify(context, null, 2) : "",
       timestamp: new Date(),
-      context
+      context,
     };
   }
 }

@@ -5,17 +5,7 @@
  * before launching the chat interface.
  */
 
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  LocalStorage,
-  open,
-  getPreferenceValues
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, LocalStorage, open } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ConfigService } from "@/services/configService";
 import { ErrorHandler } from "@/utils/errors";
@@ -77,7 +67,7 @@ export default function StartChatForm() {
         configService.getDefaultAgent(),
         loadFavorites(),
         loadRecentDirectories(),
-        loadLastChatConfig()
+        loadLastChatConfig(),
       ]);
 
       setAgents(agentConfigs);
@@ -90,17 +80,17 @@ export default function StartChatForm() {
 
       if (lastChatConfig) {
         // Verify the agent from last config still exists
-        const agentExists = agentConfigs.some(a => a.id === lastChatConfig.agentId);
+        const agentExists = agentConfigs.some((a) => a.id === lastChatConfig.agentId);
         if (agentExists) {
           preferredAgentId = lastChatConfig.agentId;
           preferredWorkingDirectory = lastChatConfig.workingDirectory || "";
           logger.info("Loaded last chat configuration", {
             agentId: preferredAgentId,
-            workingDirectory: preferredWorkingDirectory
+            workingDirectory: preferredWorkingDirectory,
           });
         } else {
           logger.warn("Last used agent no longer exists, falling back to default", {
-            lastAgentId: lastChatConfig.agentId
+            lastAgentId: lastChatConfig.agentId,
           });
         }
       }
@@ -117,7 +107,7 @@ export default function StartChatForm() {
         agentsCount: agentConfigs.length,
         favoritesCount: savedFavorites.length,
         recentDirsCount: recentDirs.length,
-        hasLastConfig: !!lastChatConfig
+        hasLastConfig: !!lastChatConfig,
       });
     } catch (error) {
       await ErrorHandler.handleError(error, "Loading initial data");
@@ -131,10 +121,10 @@ export default function StartChatForm() {
       const data = await LocalStorage.getItem<string>(FAVORITES_KEY);
       if (!data) return [];
 
-      const parsed = JSON.parse(data);
-      return parsed.map((fav: any) => ({
+      const parsed = JSON.parse(data) as Array<Omit<ChatFavorite, "createdAt"> & { createdAt: string }>;
+      return parsed.map((fav) => ({
         ...fav,
-        createdAt: new Date(fav.createdAt)
+        createdAt: new Date(fav.createdAt),
       }));
     } catch (error) {
       logger.error("Failed to load favorites", { error });
@@ -169,7 +159,7 @@ export default function StartChatForm() {
       const config: LastChatConfig = {
         agentId,
         workingDirectory,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       await LocalStorage.setItem(STORAGE_KEYS.LAST_CHAT_CONFIG, JSON.stringify(config));
       logger.info("Last chat config saved", { agentId, workingDirectory });
@@ -185,7 +175,7 @@ export default function StartChatForm() {
         name,
         agentId,
         workingDirectory: workingDirectory || undefined,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       const updated = [...favorites, newFavorite];
@@ -202,7 +192,7 @@ export default function StartChatForm() {
     if (!directory) return;
 
     try {
-      const updated = [directory, ...recentDirectories.filter(d => d !== directory)].slice(0, 10);
+      const updated = [directory, ...recentDirectories.filter((d) => d !== directory)].slice(0, 10);
       await LocalStorage.setItem(RECENT_CWD_KEY, JSON.stringify(updated));
       setRecentDirectories(updated);
     } catch (error) {
@@ -219,17 +209,17 @@ export default function StartChatForm() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Agent Required",
-          message: "Please select an agent to start the conversation."
+          message: "Please select an agent to start the conversation.",
         });
         return;
       }
 
-      const agent = agents.find(a => a.id === agentId);
+      const agent = agents.find((a) => a.id === agentId);
       if (!agent) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Agent Not Found",
-          message: "The selected agent configuration was not found."
+          message: "The selected agent configuration was not found.",
         });
         return;
       }
@@ -237,7 +227,7 @@ export default function StartChatForm() {
       // Create a modified agent config with the working directory if provided
       const agentWithCwd: AgentConfig = {
         ...agent,
-        workingDirectory: cwd || agent.workingDirectory
+        workingDirectory: cwd || agent.workingDirectory,
       };
 
       logger.info("Starting chat with configuration", {
@@ -245,7 +235,7 @@ export default function StartChatForm() {
         agentName: agent.name,
         originalWorkingDirectory: agent.workingDirectory,
         userSpecifiedCwd: cwd,
-        finalWorkingDirectory: agentWithCwd.workingDirectory
+        finalWorkingDirectory: agentWithCwd.workingDirectory,
       });
 
       // Save favorite if requested
@@ -267,7 +257,7 @@ export default function StartChatForm() {
       await showToast({
         style: Toast.Style.Success,
         title: "Starting Chat",
-        message: `Connected to ${agent.name}`
+        message: `Connected to ${agent.name}`,
       });
     } catch (error) {
       await ErrorHandler.handleError(error, "Starting chat");
@@ -279,7 +269,7 @@ export default function StartChatForm() {
 
     if (!favoriteId) return;
 
-    const favorite = favorites.find(f => f.id === favoriteId);
+    const favorite = favorites.find((f) => f.id === favoriteId);
     if (favorite) {
       setSelectedAgentId(favorite.agentId);
       setWorkingDirectory(favorite.workingDirectory || "");
@@ -288,7 +278,7 @@ export default function StartChatForm() {
 
   async function deleteFavorite(favoriteId: string) {
     try {
-      const updated = favorites.filter(f => f.id !== favoriteId);
+      const updated = favorites.filter((f) => f.id !== favoriteId);
       await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
       setFavorites(updated);
 
@@ -298,14 +288,14 @@ export default function StartChatForm() {
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Favorite Deleted"
+        title: "Favorite Deleted",
       });
     } catch (error) {
       await ErrorHandler.handleError(error, "Deleting favorite");
     }
   }
 
-  const selectedAgent = agents.find(a => a.id === selectedAgentId);
+  const selectedAgent = agents.find((a) => a.id === selectedAgentId);
 
   return (
     <Form
@@ -313,11 +303,7 @@ export default function StartChatForm() {
       navigationTitle="Start New Chat"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Start Chat"
-            icon={Icon.Message}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Start Chat" icon={Icon.Message} onSubmit={handleSubmit} />
           <ActionPanel.Section>
             <Action
               title="Configure Agents"
@@ -350,7 +336,7 @@ export default function StartChatForm() {
         >
           <Form.Dropdown.Item value="" title="None (Configure Manually)" />
           {favorites.map((fav) => {
-            const agent = agents.find(a => a.id === fav.agentId);
+            const agent = agents.find((a) => a.id === fav.agentId);
             return (
               <Form.Dropdown.Item
                 key={fav.id}
@@ -387,9 +373,7 @@ export default function StartChatForm() {
         )}
       </Form.Dropdown>
 
-      {selectedAgent && selectedAgent.description && (
-        <Form.Description text={selectedAgent.description} />
-      )}
+      {selectedAgent && selectedAgent.description && <Form.Description text={selectedAgent.description} />}
 
       {/* Working Directory */}
       <Form.TextField

@@ -9,9 +9,7 @@ import { spawn, ChildProcess } from "child_process";
 import { Writable, Readable } from "stream";
 import * as acp from "@zed-industries/agent-client-protocol";
 import type { Stream } from "@zed-industries/agent-client-protocol";
-import type {
-  SessionUpdateNotification
-} from "@/types/acp";
+import type { SessionUpdateNotification } from "@/types/acp";
 import type { AgentConfig, AgentConnection, ExtensionError } from "@/types/extension";
 import { ErrorCode } from "@/types/extension";
 import { createLogger } from "@/utils/logging";
@@ -34,8 +32,8 @@ export class ACPClient implements acp.Client {
 
   constructor() {
     // Initialize process tracker on first instantiation
-    ProcessTracker.initialize().catch(error => {
-      logger.error('Failed to initialize process tracker', { error });
+    ProcessTracker.initialize().catch((error) => {
+      logger.error("Failed to initialize process tracker", { error });
     });
   }
 
@@ -51,20 +49,20 @@ export class ACPClient implements acp.Client {
     if (this.isConnected && this.config?.id === config.id) {
       logger.info("Reusing existing agent connection", {
         agentId: config.id,
-        connectionId: this.connectionId
+        connectionId: this.connectionId,
       });
 
       return {
         id: this.connectionId!,
         agentId: config.id,
-        status: 'connected',
+        status: "connected",
         connectedAt: new Date(), // We don't track original connection time
         lastActivity: new Date(),
         sessionCount: 0,
         metadata: {
           endpoint: config.endpoint,
-          capabilities: []
-        }
+          capabilities: [],
+        },
       };
     }
 
@@ -72,7 +70,7 @@ export class ACPClient implements acp.Client {
     if (this.isConnected) {
       logger.info("Disconnecting from previous agent", {
         previousAgentId: this.config?.id,
-        newAgentId: config.id
+        newAgentId: config.id,
       });
       await this.disconnect();
     }
@@ -84,7 +82,7 @@ export class ACPClient implements acp.Client {
     try {
       let stream: Stream;
 
-      if (config.type === 'subprocess') {
+      if (config.type === "subprocess") {
         stream = await this.createSubprocessConnection(config);
       } else {
         stream = await this.createRemoteConnection(config);
@@ -102,7 +100,7 @@ export class ACPClient implements acp.Client {
       const agentConnection: AgentConnection = {
         id: this.connectionId,
         agentId: config.id,
-        status: 'connected',
+        status: "connected",
         connectedAt,
         lastActivity: connectedAt,
         sessionCount: 0,
@@ -112,8 +110,8 @@ export class ACPClient implements acp.Client {
             ? Object.entries(initResult.agentCapabilities)
                 .filter(([, value]) => value)
                 .map(([key]) => key)
-            : []
-        }
+            : [],
+        },
       };
 
       this.isConnected = true;
@@ -121,15 +119,14 @@ export class ACPClient implements acp.Client {
       this.lastError = null;
 
       return agentConnection;
-
     } catch (error) {
       this.isConnecting = false;
       this.isConnected = false;
 
       const extensionError = this.createError(
         ErrorCode.AgentConnectionFailed,
-        `Failed to connect to agent: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { originalError: error }
+        `Failed to connect to agent: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { originalError: error },
       );
 
       this.lastError = extensionError;
@@ -140,7 +137,14 @@ export class ACPClient implements acp.Client {
   /**
    * Disconnect from the current agent
    */
-  async disconnect(_connectionId?: string): Promise<void> {
+  async disconnect(connectionId?: string): Promise<void> {
+    if (connectionId && this.connectionId && connectionId !== this.connectionId) {
+      logger.debug("Disconnect called with mismatched connection ID", {
+        requestedId: connectionId,
+        currentId: this.connectionId,
+      });
+    }
+
     if (this.config?.id) {
       // Kill tracked process using ProcessTracker
       ProcessTracker.killProcess(this.config.id);
@@ -167,11 +171,11 @@ export class ACPClient implements acp.Client {
   /**
    * Get current connection status
    */
-  getConnectionStatus(): AgentConnection['status'] {
-    if (this.isConnecting) return 'connecting';
-    if (this.isConnected) return 'connected';
-    if (this.lastError) return 'error';
-    return 'disconnected';
+  getConnectionStatus(): AgentConnection["status"] {
+    if (this.isConnecting) return "connecting";
+    if (this.isConnected) return "connected";
+    if (this.lastError) return "error";
+    return "disconnected";
   }
 
   /**
@@ -186,44 +190,46 @@ export class ACPClient implements acp.Client {
 
     const request: acp.NewSessionRequest = {
       cwd: options?.cwd ?? process.cwd(),
-      mcpServers: options?.mcpServers ?? []
+      mcpServers: options?.mcpServers ?? [],
     };
 
-    logger.info('Creating ACP session', {
+    logger.info("Creating ACP session", {
       cwd: request.cwd,
       mcpServersCount: request.mcpServers?.length || 0,
-      mode: options?.mode
+      mode: options?.mode,
     });
 
     try {
       const response = await this.connection!.newSession(request);
 
-      logger.info('ACP newSession response received', {
+      logger.info("ACP newSession response received", {
         response: JSON.stringify(response, null, 2),
         hasSessionId: !!response?.sessionId,
         hasModes: !!response?.modes,
-        modesDetail: response?.modes ? {
-          currentModeId: response.modes.currentModeId,
-          availableModes: response.modes.availableModes?.map(m => ({
-            id: m.id,
-            name: m.name,
-            description: m.description
-          }))
-        } : 'none'
+        modesDetail: response?.modes
+          ? {
+              currentModeId: response.modes.currentModeId,
+              availableModes: response.modes.availableModes?.map((m) => ({
+                id: m.id,
+                name: m.name,
+                description: m.description,
+              })),
+            }
+          : "none",
       });
 
       return response;
     } catch (error) {
-      logger.error('Failed to create ACP session', {
+      logger.error("Failed to create ACP session", {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        request
+        request,
       });
 
       throw this.createError(
         ErrorCode.SessionNotFound,
-        `Failed to create session: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { request, originalError: error }
+        `Failed to create session: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { request, originalError: error },
       );
     }
   }
@@ -239,38 +245,38 @@ export class ACPClient implements acp.Client {
       prompt: [
         {
           type: "text",
-          text
-        }
-      ]
+          text,
+        },
+      ],
     };
 
-    logger.info('Sending prompt to agent', {
+    logger.info("Sending prompt to agent", {
       sessionId,
       promptLength: text.length,
-      promptPreview: text.slice(0, 100)
+      promptPreview: text.slice(0, 100),
     });
 
     try {
       const response = await this.connection!.prompt(request);
 
-      logger.info('Prompt response received', {
+      logger.info("Prompt response received", {
         sessionId,
         stopReason: response.stopReason,
-        response: JSON.stringify(response, null, 2)
+        response: JSON.stringify(response, null, 2),
       });
 
       return response;
     } catch (error) {
-      logger.error('Failed to send prompt', {
+      logger.error("Failed to send prompt", {
         sessionId,
         error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
       });
 
       throw this.createError(
         ErrorCode.ProtocolError,
-        `Failed to send prompt: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId, prompt: text, originalError: error }
+        `Failed to send prompt: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId, prompt: text, originalError: error },
       );
     }
   }
@@ -279,17 +285,17 @@ export class ACPClient implements acp.Client {
    * Handle session updates from the agent (streaming responses)
    */
   async sessionUpdate(params: acp.SessionNotification): Promise<void> {
-    logger.debug('ACP session update received from agent', {
+    logger.debug("ACP session update received from agent", {
       sessionId: params.sessionId,
       updateType: params.update?.sessionUpdate,
-      fullUpdate: JSON.stringify(params, null, 2)
+      fullUpdate: JSON.stringify(params, null, 2),
     });
 
     for (const listener of this.updateListeners) {
       try {
         listener(params as SessionUpdateNotification);
       } catch (error) {
-        logger.warn('Session update listener failed', { error });
+        logger.warn("Session update listener failed", { error });
       }
     }
   }
@@ -298,9 +304,9 @@ export class ACPClient implements acp.Client {
    * Handle permission requests from the agent
    */
   async requestPermission(params: acp.RequestPermissionRequest): Promise<acp.RequestPermissionResponse> {
-    logger.info('Permission request received from agent', {
+    logger.info("Permission request received from agent", {
       sessionId: params.sessionId,
-      toolTitle: params.toolCall.title
+      toolTitle: params.toolCall.title,
     });
 
     return this.permissionService.handlePermissionRequest(params);
@@ -310,19 +316,19 @@ export class ACPClient implements acp.Client {
    * Read text file (if agent requests file access)
    */
   async readTextFile(params: acp.ReadTextFileRequest): Promise<acp.ReadTextFileResponse> {
-    logger.info('File read request', {
+    logger.info("File read request", {
       path: params.path,
-      sessionId: params.sessionId
+      sessionId: params.sessionId,
     });
 
     try {
       // Import fs dynamically to avoid issues in browser environments
-      const fs = await import('fs');
-      const path = await import('path');
+      const fs = await import("fs");
+      const path = await import("path");
 
       // Validate the path
-      if (!params.path || typeof params.path !== 'string') {
-        throw new Error('Invalid file path provided');
+      if (!params.path || typeof params.path !== "string") {
+        throw new Error("Invalid file path provided");
       }
 
       // Security check - prevent access to sensitive files
@@ -331,70 +337,65 @@ export class ACPClient implements acp.Client {
 
       // Block access to sensitive files
       const blockedPatterns = [
-        /^\.env/, /\.key$/, /\.pem$/, /\.p12$/, /\.password$/,
-        /^id_rsa/, /^id_dsa/, /^id_ecdsa/, /^id_ed25519/,
-        /\.ssh/, /\.aws/, /\.gcp/, /password/i, /secret/i
+        /^\.env/,
+        /\.key$/,
+        /\.pem$/,
+        /\.p12$/,
+        /\.password$/,
+        /^id_rsa/,
+        /^id_dsa/,
+        /^id_ecdsa/,
+        /^id_ed25519/,
+        /\.ssh/,
+        /\.aws/,
+        /\.gcp/,
+        /password/i,
+        /secret/i,
       ];
 
-      if (blockedPatterns.some(pattern => pattern.test(fileName))) {
-        logger.warn('Blocked access to sensitive file', { path: params.path });
-        throw this.createError(
-          ErrorCode.FileAccessDenied,
-          'Access to sensitive files is not allowed'
-        );
+      if (blockedPatterns.some((pattern) => pattern.test(fileName))) {
+        logger.warn("Blocked access to sensitive file", { path: params.path });
+        throw this.createError(ErrorCode.FileAccessDenied, "Access to sensitive files is not allowed");
       }
 
       // Check if file exists and is readable
       if (!fs.existsSync(normalizedPath)) {
-        throw this.createError(
-          ErrorCode.FileNotFound,
-          `File not found: ${params.path}`
-        );
+        throw this.createError(ErrorCode.FileNotFound, `File not found: ${params.path}`);
       }
 
       const stats = fs.statSync(normalizedPath);
       if (!stats.isFile()) {
-        throw this.createError(
-          ErrorCode.FileNotFound,
-          `Path is not a file: ${params.path}`
-        );
+        throw this.createError(ErrorCode.FileNotFound, `Path is not a file: ${params.path}`);
       }
 
       // Check file size (limit to 10MB)
       const maxSize = 10 * 1024 * 1024; // 10MB
       if (stats.size > maxSize) {
-        throw this.createError(
-          ErrorCode.FileAccessDenied,
-          `File too large (max 10MB): ${params.path}`
-        );
+        throw this.createError(ErrorCode.FileAccessDenied, `File too large (max 10MB): ${params.path}`);
       }
 
       // Read the file
-      const content = fs.readFileSync(normalizedPath, 'utf-8');
+      const content = fs.readFileSync(normalizedPath, "utf-8");
 
-      logger.info('File read successful', {
+      logger.info("File read successful", {
         path: params.path,
-        size: content.length
+        size: content.length,
       });
 
       return { content };
-
     } catch (error) {
-      if (error instanceof Error && 'code' in error) {
+      if (error instanceof Error && "code" in error) {
         // Re-throw our custom errors
         throw error;
       }
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('File read failed', {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error("File read failed", {
         path: params.path,
-        error: errorMessage
+        error: errorMessage,
       });
 
-      throw this.createError(
-        ErrorCode.SystemError,
-        `Failed to read file: ${errorMessage}`
-      );
+      throw this.createError(ErrorCode.SystemError, `Failed to read file: ${errorMessage}`);
     }
   }
 
@@ -402,24 +403,24 @@ export class ACPClient implements acp.Client {
    * Write text file (if agent requests file write)
    */
   async writeTextFile(params: acp.WriteTextFileRequest): Promise<acp.WriteTextFileResponse> {
-    logger.info('File write request', {
+    logger.info("File write request", {
       path: params.path,
       contentLength: params.content?.length || 0,
-      sessionId: params.sessionId
+      sessionId: params.sessionId,
     });
 
     try {
       // Import fs dynamically to avoid issues in browser environments
-      const fs = await import('fs');
-      const path = await import('path');
+      const fs = await import("fs");
+      const path = await import("path");
 
       // Validate the path and content
-      if (!params.path || typeof params.path !== 'string') {
-        throw new Error('Invalid file path provided');
+      if (!params.path || typeof params.path !== "string") {
+        throw new Error("Invalid file path provided");
       }
 
-      if (typeof params.content !== 'string') {
-        throw new Error('Invalid content provided');
+      if (typeof params.content !== "string") {
+        throw new Error("Invalid content provided");
       }
 
       // Security checks
@@ -429,39 +430,38 @@ export class ACPClient implements acp.Client {
 
       // Block access to sensitive files and directories
       const blockedPatterns = [
-        /^\.env/, /\.key$/, /\.pem$/, /\.p12$/, /\.password$/,
-        /^id_rsa/, /^id_dsa/, /^id_ecdsa/, /^id_ed25519/,
-        /\.ssh/, /\.aws/, /\.gcp/, /password/i, /secret/i
+        /^\.env/,
+        /\.key$/,
+        /\.pem$/,
+        /\.p12$/,
+        /\.password$/,
+        /^id_rsa/,
+        /^id_dsa/,
+        /^id_ecdsa/,
+        /^id_ed25519/,
+        /\.ssh/,
+        /\.aws/,
+        /\.gcp/,
+        /password/i,
+        /secret/i,
       ];
 
-      const blockedDirs = [
-        '/etc', '/usr', '/bin', '/sbin', '/var', '/root',
-        '/System', '/Library', '/Applications'
-      ];
+      const blockedDirs = ["/etc", "/usr", "/bin", "/sbin", "/var", "/root", "/System", "/Library", "/Applications"];
 
-      if (blockedPatterns.some(pattern => pattern.test(fileName))) {
-        logger.warn('Blocked write to sensitive file', { path: params.path });
-        throw this.createError(
-          ErrorCode.FileAccessDenied,
-          'Writing to sensitive files is not allowed'
-        );
+      if (blockedPatterns.some((pattern) => pattern.test(fileName))) {
+        logger.warn("Blocked write to sensitive file", { path: params.path });
+        throw this.createError(ErrorCode.FileAccessDenied, "Writing to sensitive files is not allowed");
       }
 
-      if (blockedDirs.some(dir => normalizedPath.startsWith(dir))) {
-        logger.warn('Blocked write to system directory', { path: params.path });
-        throw this.createError(
-          ErrorCode.FileAccessDenied,
-          'Writing to system directories is not allowed'
-        );
+      if (blockedDirs.some((dir) => normalizedPath.startsWith(dir))) {
+        logger.warn("Blocked write to system directory", { path: params.path });
+        throw this.createError(ErrorCode.FileAccessDenied, "Writing to system directories is not allowed");
       }
 
       // Check content size (limit to 10MB)
       const maxSize = 10 * 1024 * 1024; // 10MB
       if (params.content.length > maxSize) {
-        throw this.createError(
-          ErrorCode.FileAccessDenied,
-          'Content too large (max 10MB)'
-        );
+        throw this.createError(ErrorCode.FileAccessDenied, "Content too large (max 10MB)");
       }
 
       // Ensure directory exists
@@ -470,31 +470,27 @@ export class ACPClient implements acp.Client {
       }
 
       // Write the file
-      fs.writeFileSync(normalizedPath, params.content, 'utf-8');
+      fs.writeFileSync(normalizedPath, params.content, "utf-8");
 
-      logger.info('File write successful', {
+      logger.info("File write successful", {
         path: params.path,
-        size: params.content.length
+        size: params.content.length,
       });
 
       return {}; // Empty response on success per ACP spec
-
     } catch (error) {
-      if (error instanceof Error && 'code' in error) {
+      if (error instanceof Error && "code" in error) {
         // Re-throw our custom errors
         throw error;
       }
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('File write failed', {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error("File write failed", {
         path: params.path,
-        error: errorMessage
+        error: errorMessage,
       });
 
-      throw this.createError(
-        ErrorCode.SystemError,
-        `Failed to write file: ${errorMessage}`
-      );
+      throw this.createError(ErrorCode.SystemError, `Failed to write file: ${errorMessage}`);
     }
   }
 
@@ -509,14 +505,14 @@ export class ACPClient implements acp.Client {
     const clientCapabilities: acp.ClientCapabilities = {
       fs: {
         readTextFile: true,
-        writeTextFile: true
+        writeTextFile: true,
       },
-      terminal: true
+      terminal: true,
     };
 
     const request: acp.InitializeRequest = {
       protocolVersion: acp.PROTOCOL_VERSION,
-      clientCapabilities
+      clientCapabilities,
     };
 
     try {
@@ -525,8 +521,8 @@ export class ACPClient implements acp.Client {
     } catch (error) {
       throw this.createError(
         ErrorCode.SystemError,
-        `Agent initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { request, originalError: error }
+        `Agent initialization failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { request, originalError: error },
       );
     }
   }
@@ -543,15 +539,13 @@ export class ACPClient implements acp.Client {
     const mergedEnv: NodeJS.ProcessEnv = { ...baseEnv, ...(config.environmentVariables ?? {}) };
 
     if (config.appendToPath?.length) {
-      const existingPath =
-        mergedEnv.PATH ??
-        mergedEnv.Path ??
-        mergedEnv.path ??
-        process.env.PATH ??
-        "";
+      const existingPath = mergedEnv.PATH ?? mergedEnv.Path ?? mergedEnv.path ?? process.env.PATH ?? "";
 
       const currentSegments = existingPath
-        ? existingPath.split(":").map((segment) => segment.trim()).filter(Boolean)
+        ? existingPath
+            .split(":")
+            .map((segment) => segment.trim())
+            .filter(Boolean)
         : [];
 
       const appendSegments = config.appendToPath.filter(Boolean);
@@ -572,7 +566,7 @@ export class ACPClient implements acp.Client {
       command: config.command,
       args: config.args,
       cwd: config.workingDirectory || process.cwd(),
-      path: mergedEnv.PATH ?? process.env.PATH ?? ""
+      path: mergedEnv.PATH ?? process.env.PATH ?? "",
     });
 
     // Check if there's already a running process for this agent
@@ -580,16 +574,16 @@ export class ACPClient implements acp.Client {
     if (existingPid) {
       logger.info("Found existing agent process, killing it first", {
         agentId: config.id,
-        existingPid
+        existingPid,
       });
       ProcessTracker.killProcess(config.id);
     }
 
     // Spawn the agent process
     this.agentProcess = spawn(config.command, config.args || [], {
-      stdio: ['pipe', 'pipe', 'inherit'],
+      stdio: ["pipe", "pipe", "inherit"],
       cwd: config.workingDirectory || process.cwd(),
-      env: mergedEnv
+      env: mergedEnv,
     });
 
     if (!this.agentProcess.stdin || !this.agentProcess.stdout) {
@@ -601,19 +595,19 @@ export class ACPClient implements acp.Client {
       ProcessTracker.registerProcess(config.id, this.agentProcess.pid, config.command);
       logger.info("Registered agent process with tracker", {
         agentId: config.id,
-        pid: this.agentProcess.pid
+        pid: this.agentProcess.pid,
       });
     }
 
     // Handle process errors
-    this.agentProcess.on('error', (error) => {
-      logger.error('Agent process error', { error: error.message });
+    this.agentProcess.on("error", (error) => {
+      logger.error("Agent process error", { error: error.message });
       this.lastError = this.createError(ErrorCode.AgentUnavailable, `Agent process error: ${error.message}`);
       ProcessTracker.unregisterProcess(config.id);
     });
 
-    this.agentProcess.on('exit', (code, signal) => {
-      logger.info('Agent process exited', { code, signal });
+    this.agentProcess.on("exit", (code, signal) => {
+      logger.info("Agent process exited", { code, signal });
       this.isConnected = false;
       ProcessTracker.unregisterProcess(config.id);
     });
@@ -630,7 +624,11 @@ export class ACPClient implements acp.Client {
    */
   private async createRemoteConnection(config: AgentConfig): Promise<Stream> {
     // TODO: Implement WebSocket or HTTP connection for remote agents
-    throw this.createError(ErrorCode.SystemError, "Remote agent connections not implemented yet");
+    throw this.createError(ErrorCode.SystemError, "Remote agent connections not implemented yet", {
+      agentId: config.id,
+      endpoint: config.endpoint,
+      type: config.type,
+    });
   }
 
   /**
@@ -649,9 +647,9 @@ export class ACPClient implements acp.Client {
     return {
       code,
       message,
-      details: context ? JSON.stringify(context, null, 2) : '',
+      details: context ? JSON.stringify(context, null, 2) : "",
       timestamp: new Date(),
-      context
+      context,
     };
   }
 
@@ -676,8 +674,8 @@ export class ACPClient implements acp.Client {
         lastActivity: new Date(),
         sessionCount: 0,
         metadata: {
-          endpoint: this.config.endpoint
-        }
+          endpoint: this.config.endpoint,
+        },
       };
     }
     return null;
@@ -687,7 +685,7 @@ export class ACPClient implements acp.Client {
    * Get all active connections
    */
   async getActiveConnections(): Promise<AgentConnection[]> {
-    const connection = await this.getConnection(this.connectionId || '');
+    const connection = await this.getConnection(this.connectionId || "");
     return connection ? [connection] : [];
   }
 
@@ -707,7 +705,7 @@ export class ACPClient implements acp.Client {
   async endSession(sessionId: string): Promise<void> {
     // For now, we don't have explicit session management on the ACP side
     // This is a no-op that allows the session service to work
-    logger.debug('endSession called', { sessionId });
+    logger.debug("endSession called", { sessionId });
 
     // Clean up any terminals associated with this session
     TerminalManager.cleanupSession(sessionId);
@@ -722,26 +720,30 @@ export class ACPClient implements acp.Client {
   async cancelSession(sessionId: string): Promise<void> {
     this.ensureConnected();
 
-    logger.info('Cancelling session', { sessionId });
+    logger.info("Cancelling session", { sessionId });
 
     try {
+      const connection = this.connection;
+      if (!connection) {
+        throw this.createError(ErrorCode.AgentUnavailable, "Connection became unavailable during cancellation");
+      }
       // Send session/cancel notification
       // This is a notification (one-way message), not a request
-      await (this.connection as any).sendNotification('session/cancel', {
-        sessionId
+      await connection.sendNotification("session/cancel", {
+        sessionId,
       });
 
-      logger.info('Session cancel notification sent', { sessionId });
+      logger.info("Session cancel notification sent", { sessionId });
     } catch (error) {
-      logger.error('Failed to send cancel notification', {
+      logger.error("Failed to send cancel notification", {
         sessionId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
 
       throw this.createError(
         ErrorCode.ProtocolError,
-        `Failed to cancel session: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId, originalError: error }
+        `Failed to cancel session: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId, originalError: error },
       );
     }
   }
@@ -752,36 +754,40 @@ export class ACPClient implements acp.Client {
   async setSessionMode(params: acp.SetSessionModeRequest): Promise<acp.SetSessionModeResponse> {
     this.ensureConnected();
 
-    logger.info('Setting session mode', {
+    logger.info("Setting session mode", {
       sessionId: params.sessionId,
-      modeId: params.modeId
+      modeId: params.modeId,
     });
 
     try {
+      const connection = this.connection;
+      if (!connection) {
+        throw this.createError(ErrorCode.AgentUnavailable, "Connection became unavailable while setting session mode");
+      }
       // Call the ACP session/set_mode method
       // The connection object handles the JSON-RPC call
-      const response = await (this.connection as any).sendRequest(
-        'session/set_mode',
-        params
-      ) as acp.SetSessionModeResponse;
+      const response = await connection.sendRequest<acp.SetSessionModeRequest, acp.SetSessionModeResponse>(
+        "session/set_mode",
+        params,
+      );
 
-      logger.info('Session mode changed successfully', {
+      logger.info("Session mode changed successfully", {
         sessionId: params.sessionId,
-        modeId: params.modeId
+        modeId: params.modeId,
       });
 
       return response || {};
     } catch (error) {
-      logger.error('Failed to set session mode', {
+      logger.error("Failed to set session mode", {
         sessionId: params.sessionId,
         modeId: params.modeId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
 
       throw this.createError(
         ErrorCode.ProtocolError,
-        `Failed to set session mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { sessionId: params.sessionId, modeId: params.modeId, originalError: error }
+        `Failed to set session mode: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { sessionId: params.sessionId, modeId: params.modeId, originalError: error },
       );
     }
   }
@@ -790,11 +796,11 @@ export class ACPClient implements acp.Client {
    * Create a new terminal and execute a command
    */
   async createTerminal(params: acp.CreateTerminalRequest): Promise<acp.CreateTerminalResponse> {
-    logger.info('Terminal creation request', {
+    logger.info("Terminal creation request", {
       sessionId: params.sessionId,
       command: params.command,
       args: params.args,
-      cwd: params.cwd
+      cwd: params.cwd,
     });
 
     try {
@@ -804,27 +810,25 @@ export class ACPClient implements acp.Client {
         args: params.args,
         env: params.env,
         cwd: params.cwd ?? undefined,
-        outputByteLimit: params.outputByteLimit ?? undefined
+        outputByteLimit: params.outputByteLimit ?? undefined,
       });
 
-      logger.info('Terminal created successfully', {
+      logger.info("Terminal created successfully", {
         sessionId: params.sessionId,
-        terminalId: result.terminalId
+        terminalId: result.terminalId,
       });
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to create terminal', {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error("Failed to create terminal", {
         sessionId: params.sessionId,
-        error: errorMessage
+        error: errorMessage,
       });
 
-      throw this.createError(
-        ErrorCode.SystemError,
-        `Failed to create terminal: ${errorMessage}`,
-        { originalError: error }
-      );
+      throw this.createError(ErrorCode.SystemError, `Failed to create terminal: ${errorMessage}`, {
+        originalError: error,
+      });
     }
   }
 
@@ -832,35 +836,33 @@ export class ACPClient implements acp.Client {
    * Get the current output and status of a terminal
    */
   async terminalOutput(params: acp.TerminalOutputRequest): Promise<acp.TerminalOutputResponse> {
-    logger.debug('Terminal output request', {
+    logger.debug("Terminal output request", {
       sessionId: params.sessionId,
-      terminalId: params.terminalId
+      terminalId: params.terminalId,
     });
 
     try {
       const result = TerminalManager.getTerminalOutput({
         sessionId: params.sessionId,
-        terminalId: params.terminalId
+        terminalId: params.terminalId,
       });
 
       return {
         output: result.output,
         truncated: result.truncated,
-        exitStatus: result.exitStatus || undefined
+        exitStatus: result.exitStatus || undefined,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to get terminal output', {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error("Failed to get terminal output", {
         sessionId: params.sessionId,
         terminalId: params.terminalId,
-        error: errorMessage
+        error: errorMessage,
       });
 
-      throw this.createError(
-        ErrorCode.SystemError,
-        `Failed to get terminal output: ${errorMessage}`,
-        { originalError: error }
-      );
+      throw this.createError(ErrorCode.SystemError, `Failed to get terminal output: ${errorMessage}`, {
+        originalError: error,
+      });
     }
   }
 
@@ -868,38 +870,36 @@ export class ACPClient implements acp.Client {
    * Wait for a terminal command to exit
    */
   async waitForTerminalExit(params: acp.WaitForTerminalExitRequest): Promise<acp.WaitForTerminalExitResponse> {
-    logger.info('Waiting for terminal exit', {
+    logger.info("Waiting for terminal exit", {
       sessionId: params.sessionId,
-      terminalId: params.terminalId
+      terminalId: params.terminalId,
     });
 
     try {
       const result = await TerminalManager.waitForTerminalExit({
         sessionId: params.sessionId,
-        terminalId: params.terminalId
+        terminalId: params.terminalId,
       });
 
-      logger.info('Terminal exited', {
+      logger.info("Terminal exited", {
         sessionId: params.sessionId,
         terminalId: params.terminalId,
         exitCode: result.exitCode,
-        signal: result.signal
+        signal: result.signal,
       });
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to wait for terminal exit', {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error("Failed to wait for terminal exit", {
         sessionId: params.sessionId,
         terminalId: params.terminalId,
-        error: errorMessage
+        error: errorMessage,
       });
 
-      throw this.createError(
-        ErrorCode.SystemError,
-        `Failed to wait for terminal exit: ${errorMessage}`,
-        { originalError: error }
-      );
+      throw this.createError(ErrorCode.SystemError, `Failed to wait for terminal exit: ${errorMessage}`, {
+        originalError: error,
+      });
     }
   }
 
@@ -907,36 +907,34 @@ export class ACPClient implements acp.Client {
    * Kill a terminal command without releasing the terminal
    */
   async killTerminal(params: acp.KillTerminalCommandRequest): Promise<acp.KillTerminalResponse> {
-    logger.info('Kill terminal request', {
+    logger.info("Kill terminal request", {
       sessionId: params.sessionId,
-      terminalId: params.terminalId
+      terminalId: params.terminalId,
     });
 
     try {
       TerminalManager.killTerminal({
         sessionId: params.sessionId,
-        terminalId: params.terminalId
+        terminalId: params.terminalId,
       });
 
-      logger.info('Terminal killed successfully', {
+      logger.info("Terminal killed successfully", {
         sessionId: params.sessionId,
-        terminalId: params.terminalId
+        terminalId: params.terminalId,
       });
 
       return {};
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to kill terminal', {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error("Failed to kill terminal", {
         sessionId: params.sessionId,
         terminalId: params.terminalId,
-        error: errorMessage
+        error: errorMessage,
       });
 
-      throw this.createError(
-        ErrorCode.SystemError,
-        `Failed to kill terminal: ${errorMessage}`,
-        { originalError: error }
-      );
+      throw this.createError(ErrorCode.SystemError, `Failed to kill terminal: ${errorMessage}`, {
+        originalError: error,
+      });
     }
   }
 
@@ -944,36 +942,34 @@ export class ACPClient implements acp.Client {
    * Release a terminal and free its resources
    */
   async releaseTerminal(params: acp.ReleaseTerminalRequest): Promise<acp.ReleaseTerminalResponse> {
-    logger.info('Release terminal request', {
+    logger.info("Release terminal request", {
       sessionId: params.sessionId,
-      terminalId: params.terminalId
+      terminalId: params.terminalId,
     });
 
     try {
       TerminalManager.releaseTerminal({
         sessionId: params.sessionId,
-        terminalId: params.terminalId
+        terminalId: params.terminalId,
       });
 
-      logger.info('Terminal released successfully', {
+      logger.info("Terminal released successfully", {
         sessionId: params.sessionId,
-        terminalId: params.terminalId
+        terminalId: params.terminalId,
       });
 
       return {};
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to release terminal', {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error("Failed to release terminal", {
         sessionId: params.sessionId,
         terminalId: params.terminalId,
-        error: errorMessage
+        error: errorMessage,
       });
 
-      throw this.createError(
-        ErrorCode.SystemError,
-        `Failed to release terminal: ${errorMessage}`,
-        { originalError: error }
-      );
+      throw this.createError(ErrorCode.SystemError, `Failed to release terminal: ${errorMessage}`, {
+        originalError: error,
+      });
     }
   }
 }

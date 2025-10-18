@@ -5,18 +5,7 @@
  * message history, follow-up prompts, and long-lived sessions.
  */
 
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  Form,
-  Icon,
-  List,
-  confirmAlert,
-  showToast,
-  Toast
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Form, Icon, List, confirmAlert, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { ConfigService } from "@/services/configService";
 import { StorageService } from "@/services/storageService";
@@ -111,7 +100,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
         setIsLoadingAgents(true);
         const [agentConfigs, defaultAgentId] = await Promise.all([
           configService.getAgentConfigs(),
-          configService.getDefaultAgent()
+          configService.getDefaultAgent(),
         ]);
 
         setAgents(agentConfigs);
@@ -120,7 +109,10 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
         if (initialAgent) {
           setSelectedAgentId(initialAgent.id);
           chat.setActiveAgent(initialAgent);
-          logger.info("Using initial agent configuration", { agentId: initialAgent.id, workingDirectory: initialAgent.workingDirectory });
+          logger.info("Using initial agent configuration", {
+            agentId: initialAgent.id,
+            workingDirectory: initialAgent.workingDirectory,
+          });
         } else {
           const preferredAgentId = initialAgentId ?? defaultAgentId ?? agentConfigs[0]?.id;
           setSelectedAgentId(preferredAgentId ?? undefined);
@@ -136,7 +128,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
         logger.info("Agents loaded successfully", {
           count: agentConfigs.length,
           defaultAgent: defaultAgentId,
-          hasInitialAgent: !!initialAgent
+          hasInitialAgent: !!initialAgent,
         });
       } catch (error) {
         await ErrorHandler.handleError(error, "Loading agents");
@@ -182,7 +174,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           await showToast({
             style: Toast.Style.Failure,
             title: "Conversation Not Found",
-            message: "Unable to locate the selected conversation."
+            message: "Unable to locate the selected conversation.",
           });
           return;
         }
@@ -192,7 +184,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           await showToast({
             style: Toast.Style.Failure,
             title: "Agent Not Available",
-            message: "No agent configuration is available for this conversation."
+            message: "No agent configuration is available for this conversation.",
           });
           return;
         }
@@ -202,7 +194,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           await showToast({
             style: Toast.Style.Failure,
             title: "Agent Not Found",
-            message: "Please recreate the agent configuration before continuing the conversation."
+            message: "Please recreate the agent configuration before continuing the conversation.",
           });
           return;
         }
@@ -219,7 +211,16 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     }
 
     loadInitialConversation();
-  }, [initialSessionId, initialAgentId, initialLoadComplete, isLoadingAgents, agents, storageService, chat.loadConversation, selectedAgentId]);
+  }, [
+    initialSessionId,
+    initialAgentId,
+    initialLoadComplete,
+    isLoadingAgents,
+    agents,
+    storageService,
+    chat.loadConversation,
+    selectedAgentId,
+  ]);
 
   const isProcessing = chat.status === "connecting" || chat.status === "processing";
   const selectedAgent = selectedAgentId ? agents.find((agent) => agent.id === selectedAgentId) : null;
@@ -229,9 +230,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     const accessories: List.Item.Accessory[] = [];
     const typeLabel = context.type === "file" ? "File" : context.type === "directory" ? "Directory" : "Selection";
     const typeColor =
-      context.type === "directory" ? Color.Orange :
-      context.type === "selection" ? Color.Blue :
-      Color.Green;
+      context.type === "directory" ? Color.Orange : context.type === "selection" ? Color.Blue : Color.Green;
 
     accessories.push({ tag: { value: typeLabel, color: typeColor } });
 
@@ -251,7 +250,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
   async function handleAddFileContext() {
     const paths = await pickFiles({
       allowMultiple: true,
-      prompt: "Select files to share with the agent"
+      prompt: "Select files to share with the agent",
     });
 
     if (paths.length === 0) {
@@ -260,15 +259,12 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
 
     try {
       const added = await chat.addFileContexts(paths);
-      const message =
-        added.length === 1
-          ? getContextTitle(added[0])
-          : `${added.length} files shared`;
+      const message = added.length === 1 ? getContextTitle(added[0]) : `${added.length} files shared`;
 
       await showToast({
         style: Toast.Style.Success,
         title: "Context Shared",
-        message
+        message,
       });
     } catch (error) {
       logger.warn("Failed to add file context", { error });
@@ -278,7 +274,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
   async function handleAddDirectoryContext() {
     const paths = await pickDirectories({
       allowMultiple: true,
-      prompt: "Select directories to summarize for the agent"
+      prompt: "Select directories to summarize for the agent",
     });
 
     if (paths.length === 0) {
@@ -287,15 +283,12 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
 
     try {
       const added = await chat.addDirectoryContexts(paths);
-      const message =
-        added.length === 1
-          ? getContextTitle(added[0])
-          : `${added.length} directories shared`;
+      const message = added.length === 1 ? getContextTitle(added[0]) : `${added.length} directories shared`;
 
       await showToast({
         style: Toast.Style.Success,
         title: "Context Shared",
-        message
+        message,
       });
     } catch (error) {
       logger.warn("Failed to add directory context", { error });
@@ -307,7 +300,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       await showToast({
         style: Toast.Style.Failure,
         title: "No Conversation",
-        message: "Create or load a conversation before refreshing context."
+        message: "Create or load a conversation before refreshing context.",
       });
       return;
     }
@@ -316,7 +309,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       await chat.refreshContexts();
       await showToast({
         style: Toast.Style.Success,
-        title: "Contexts Refreshed"
+        title: "Contexts Refreshed",
       });
     } catch (error) {
       logger.warn("Failed to refresh contexts", { error });
@@ -329,12 +322,12 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       message: `Stop sharing:\n${context.path}`,
       primaryAction: {
         title: "Remove",
-        style: Alert.ActionStyle.Destructive
+        style: Alert.ActionStyle.Destructive,
       },
       dismissAction: {
         title: "Cancel",
-        style: Alert.ActionStyle.Cancel
-      }
+        style: Alert.ActionStyle.Cancel,
+      },
     });
 
     if (!confirmed) {
@@ -346,7 +339,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       await showToast({
         style: Toast.Style.Success,
         title: "Context Removed",
-        message: getContextTitle(context)
+        message: getContextTitle(context),
       });
     } catch (error) {
       logger.warn("Failed to remove context", { error });
@@ -369,11 +362,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           onAction={handleAddDirectoryContext}
         />
         {chat.contexts.length > 0 && (
-          <Action
-            title="Refresh Contexts"
-            icon={Icon.ArrowClockwise}
-            onAction={handleRefreshContexts}
-          />
+          <Action title="Refresh Contexts" icon={Icon.ArrowClockwise} onAction={handleRefreshContexts} />
         )}
       </ActionPanel.Section>
     );
@@ -400,7 +389,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
 
     function SlashCommandForm({
       command,
-      onSubmit
+      onSubmit,
     }: {
       command: AvailableCommand;
       onSubmit: (argument?: string) => Promise<void>;
@@ -455,7 +444,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
                   await chat.runSlashCommand(command.name);
                 }}
               />
-            )
+            ),
           )}
         </ActionPanel.Submenu>
       </ActionPanel.Section>
@@ -467,7 +456,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       await showToast({
         style: Toast.Style.Animated,
         title: "Connecting to agent",
-        message: "Please wait for the connection to establish."
+        message: "Please wait for the connection to establish.",
       });
       return;
     }
@@ -476,7 +465,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       await showToast({
         style: Toast.Style.Animated,
         title: "Agent is thinking",
-        message: "Wait for the current response to finish before sending another message."
+        message: "Wait for the current response to finish before sending another message.",
       });
       return;
     }
@@ -485,7 +474,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       await showToast({
         style: Toast.Style.Failure,
         title: "Enter a message",
-        message: "Please provide a message to send."
+        message: "Please provide a message to send.",
       });
       return;
     }
@@ -494,7 +483,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       await showToast({
         style: Toast.Style.Failure,
         title: "Select an agent",
-        message: "Choose an agent before sending a message."
+        message: "Choose an agent before sending a message.",
       });
       return;
     }
@@ -506,17 +495,16 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
   // Remove handleSearchSubmit - we'll use Enter key via actions instead
 
   function getMessageAccessory(message: SessionMessage) {
-    const time = message.timestamp instanceof Date
-      ? message.timestamp.toLocaleTimeString()
-      : "";
+    const time = message.timestamp instanceof Date ? message.timestamp.toLocaleTimeString() : "";
 
     return [
       {
-        text: message.role === "user" ? "You" : message.role === "assistant" ? selectedAgent?.name ?? "Agent" : "System"
+        text:
+          message.role === "user" ? "You" : message.role === "assistant" ? (selectedAgent?.name ?? "Agent") : "System",
       },
       {
-        text: time
-      }
+        text: time,
+      },
     ];
   }
 
@@ -554,7 +542,9 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           if (message.toolResult.success) {
             parts.push(`**Status:** ✅ Completed`);
             if (message.toolResult.result) {
-              parts.push(`**Result:**\n\`\`\`\n${typeof message.toolResult.result === 'string' ? message.toolResult.result : JSON.stringify(message.toolResult.result, null, 2)}\n\`\`\``);
+              parts.push(
+                `**Result:**\n\`\`\`\n${typeof message.toolResult.result === "string" ? message.toolResult.result : JSON.stringify(message.toolResult.result, null, 2)}\n\`\`\``,
+              );
             }
           } else {
             parts.push(`**Status:** ❌ Failed`);
@@ -567,7 +557,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           parts.push(`**Status:** ⏳ In progress`);
         }
 
-        return parts.join('\n\n');
+        return parts.join("\n\n");
       }
 
       // Fallback for tool messages with no info
@@ -591,7 +581,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
   }
 
   const conversationTitle = chat.conversation
-    ? chat.conversation.metadata?.title ?? chat.conversation.sessionId
+    ? (chat.conversation.metadata?.title ?? chat.conversation.sessionId)
     : "New Conversation";
 
   const conversationSubtitle = (() => {
@@ -671,13 +661,14 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
   });
 
   const messageItems = chat.messages.map((message, index) => {
-    const speakerLabel = message.role === "user"
-      ? "You"
-      : message.role === "assistant"
-        ? selectedAgent?.name ?? "Agent"
-        : message.role === "tool"
-          ? "Tool"
-          : "System";
+    const speakerLabel =
+      message.role === "user"
+        ? "You"
+        : message.role === "assistant"
+          ? (selectedAgent?.name ?? "Agent")
+          : message.role === "tool"
+            ? "Tool"
+            : "System";
 
     const firstLine = message.content?.split("\n")[0] ?? "";
     const itemTitle = firstLine ? `${speakerLabel}: ${firstLine}` : speakerLabel;
@@ -710,7 +701,7 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
                     await showToast({
                       style: Toast.Style.Failure,
                       title: "Enter a message",
-                      message: "Type your message in the search bar first."
+                      message: "Type your message in the search bar first.",
                     });
                     return;
                   }
@@ -745,25 +736,22 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     );
   });
 
-  const modeDropdown = chat.conversation?.availableModes && chat.conversation.availableModes.length > 0 ? (
-    <List.Dropdown
-      tooltip="Switch Agent Mode"
-      value={chat.conversation.currentMode?.id ?? ""}
-      onChange={async (newModeId) => {
-        if (newModeId && newModeId !== chat.conversation?.currentMode?.id) {
-          await chat.switchMode(newModeId);
-        }
-      }}
-    >
-      {chat.conversation.availableModes.map((mode) => (
-        <List.Dropdown.Item
-          key={mode.id}
-          title={mode.name}
-          value={mode.id}
-        />
-      ))}
-    </List.Dropdown>
-  ) : undefined;
+  const modeDropdown =
+    chat.conversation?.availableModes && chat.conversation.availableModes.length > 0 ? (
+      <List.Dropdown
+        tooltip="Switch Agent Mode"
+        value={chat.conversation.currentMode?.id ?? ""}
+        onChange={async (newModeId) => {
+          if (newModeId && newModeId !== chat.conversation?.currentMode?.id) {
+            await chat.switchMode(newModeId);
+          }
+        }}
+      >
+        {chat.conversation.availableModes.map((mode) => (
+          <List.Dropdown.Item key={mode.id} title={mode.name} value={mode.id} />
+        ))}
+      </List.Dropdown>
+    ) : undefined;
 
   return (
     <List
@@ -772,11 +760,18 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder={selectedAgent ? `Chatting with ${selectedAgent.name} - Type a message and press Enter` : "Type a message and press Enter"}
+      searchBarPlaceholder={
+        selectedAgent
+          ? `Chatting with ${selectedAgent.name} - Type a message and press Enter`
+          : "Type a message and press Enter"
+      }
       searchBarAccessory={modeDropdown}
     >
       {chat.contexts.length > 0 && (
-        <List.Section title="Shared Context" subtitle={`${chat.contexts.length} item${chat.contexts.length === 1 ? "" : "s"}`}>
+        <List.Section
+          title="Shared Context"
+          subtitle={`${chat.contexts.length} item${chat.contexts.length === 1 ? "" : "s"}`}
+        >
           {contextItems}
         </List.Section>
       )}

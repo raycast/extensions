@@ -73,11 +73,13 @@ async function runPickerScript(script: string, isWindows = false): Promise<strin
     if (error instanceof Error) {
       const errorMessage = error.message.toLowerCase();
       // Handle both English and Japanese cancellation messages, and Windows cancellation
-      if (errorMessage.includes("user canceled") ||
-          errorMessage.includes("user cancelled") ||
-          errorMessage.includes("キャンセル") ||
-          errorMessage.includes("-128") ||
-          errorMessage.includes("cancelled by the user")) {
+      if (
+        errorMessage.includes("user canceled") ||
+        errorMessage.includes("user cancelled") ||
+        errorMessage.includes("キャンセル") ||
+        errorMessage.includes("-128") ||
+        errorMessage.includes("cancelled by the user")
+      ) {
         return [];
       }
     }
@@ -100,9 +102,7 @@ export async function pickFiles(options: FilePickerOptions = {}): Promise<string
  */
 async function pickFilesMacOS(options: FilePickerOptions = {}): Promise<string[]> {
   const prompt = escapeAppleScriptString(options.prompt ?? "Select files to share");
-  const initialDirectory = options.initialDirectory
-    ? escapeAppleScriptString(options.initialDirectory)
-    : undefined;
+  const initialDirectory = options.initialDirectory ? escapeAppleScriptString(options.initialDirectory) : undefined;
   const allowMultiple = Boolean(options.allowMultiple);
 
   const defaultLocationClause = initialDirectory ? ` default location POSIX file "${initialDirectory}"` : "";
@@ -167,9 +167,7 @@ export async function pickDirectories(options: FilePickerOptions = {}): Promise<
  */
 async function pickDirectoriesMacOS(options: FilePickerOptions = {}): Promise<string[]> {
   const prompt = escapeAppleScriptString(options.prompt ?? "Select directories to share");
-  const initialDirectory = options.initialDirectory
-    ? escapeAppleScriptString(options.initialDirectory)
-    : undefined;
+  const initialDirectory = options.initialDirectory ? escapeAppleScriptString(options.initialDirectory) : undefined;
   const allowMultiple = Boolean(options.allowMultiple);
 
   const defaultLocationClause = initialDirectory ? ` default location POSIX file "${initialDirectory}"` : "";

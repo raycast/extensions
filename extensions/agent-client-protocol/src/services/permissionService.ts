@@ -8,7 +8,11 @@ import { Alert, confirmAlert, showToast, Toast } from "@raycast/api";
 import { createLogger } from "@/utils/logging";
 import { ConfigService } from "./configService";
 import type { SecuritySettings } from "@/types/extension";
-import type { RequestPermissionRequest, RequestPermissionResponse, PermissionOption } from "@zed-industries/agent-client-protocol/dist/schema";
+import type {
+  RequestPermissionRequest,
+  RequestPermissionResponse,
+  PermissionOption,
+} from "@zed-industries/agent-client-protocol/dist/schema";
 
 const logger = createLogger("PermissionService");
 
@@ -35,7 +39,7 @@ export class PermissionService {
 
       const allowAlwaysOption = this.findAllowAlwaysOption(request.options);
       if (allowAlwaysOption) {
-        const always = await this.promptAlwaysAllow(request, settings);
+        const always = await this.promptAlwaysAllow(request);
         if (always) {
           await this.persistTrustedTool(descriptor, settings);
           return this.buildResponse(allowAlwaysOption);
@@ -59,20 +63,20 @@ export class PermissionService {
       await showToast({
         style: Toast.Style.Failure,
         title: "Permission Error",
-        message: error instanceof Error ? error.message : "Unknown permission error"
+        message: error instanceof Error ? error.message : "Unknown permission error",
       });
       return { outcome: { outcome: "cancelled" } };
     }
   }
 
-  private async promptAlwaysAllow(request: RequestPermissionRequest, settings: SecuritySettings): Promise<boolean> {
+  private async promptAlwaysAllow(request: RequestPermissionRequest): Promise<boolean> {
     const primaryPath = this.getPrimaryPath(request);
 
     const messageParts = [
       request.toolCall.title ?? "Agent action request",
       primaryPath ? `Path: ${primaryPath}` : null,
       "",
-      "Always allow this action for future requests?"
+      "Always allow this action for future requests?",
     ].filter(Boolean);
 
     const allowAlways = await confirmAlert({
@@ -80,19 +84,19 @@ export class PermissionService {
       message: messageParts.join("\n"),
       primaryAction: {
         title: "Always Allow",
-        style: Alert.ActionStyle.Default
+        style: Alert.ActionStyle.Default,
       },
       dismissAction: {
         title: "Not Now",
-        style: Alert.ActionStyle.Cancel
-      }
+        style: Alert.ActionStyle.Cancel,
+      },
     });
 
     if (allowAlways) {
       await showToast({
         style: Toast.Style.Success,
         title: "Always Allow Enabled",
-        message: primaryPath ?? request.toolCall.title ?? undefined
+        message: primaryPath ?? request.toolCall.title ?? undefined,
       });
     }
 
@@ -108,7 +112,7 @@ export class PermissionService {
       primaryPath ? `Path: ${primaryPath}` : null,
       description ? `Details: ${description}` : null,
       "",
-      "Allow this action?"
+      "Allow this action?",
     ].filter(Boolean);
 
     const allow = await confirmAlert({
@@ -116,25 +120,25 @@ export class PermissionService {
       message: messageParts.join("\n"),
       primaryAction: {
         title: "Allow",
-        style: Alert.ActionStyle.Default
+        style: Alert.ActionStyle.Default,
       },
       dismissAction: {
         title: "Cancel",
-        style: Alert.ActionStyle.Cancel
-      }
+        style: Alert.ActionStyle.Cancel,
+      },
     });
 
     if (allow) {
       await showToast({
         style: Toast.Style.Success,
         title: "Permission Granted",
-        message: primaryPath ?? request.toolCall.title ?? undefined
+        message: primaryPath ?? request.toolCall.title ?? undefined,
       });
     } else {
       await showToast({
         style: Toast.Style.Animated,
         title: "Permission Denied",
-        message: primaryPath ?? request.toolCall.title ?? undefined
+        message: primaryPath ?? request.toolCall.title ?? undefined,
       });
     }
 
@@ -161,8 +165,8 @@ export class PermissionService {
     return {
       outcome: {
         outcome: "selected",
-        optionId: option.optionId
-      }
+        optionId: option.optionId,
+      },
     };
   }
 
@@ -178,13 +182,16 @@ export class PermissionService {
     const primaryPath = this.getPrimaryPath(request);
     return JSON.stringify({
       title: request.toolCall.title,
-      path: primaryPath
+      path: primaryPath,
     });
   }
 
   private getPrimaryPath(request: RequestPermissionRequest): string | undefined {
     // Try to extract path from the tool call locations or raw input
-    const toolCall = request.toolCall as unknown as { rawInput?: Record<string, unknown>; locations?: Array<Record<string, unknown>> };
+    const toolCall = request.toolCall as unknown as {
+      rawInput?: Record<string, unknown>;
+      locations?: Array<Record<string, unknown>>;
+    };
 
     // Check locations first
     if (toolCall.locations) {
@@ -212,7 +219,7 @@ export class PermissionService {
     const updated = new Set(settings.trustedTools ?? []);
     updated.add(descriptor);
     await this.configService.updateSecuritySettings({
-      trustedTools: Array.from(updated)
+      trustedTools: Array.from(updated),
     });
   }
 }

@@ -5,15 +5,7 @@
  * support for built-in agents that can now be customized.
  */
 
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  Toast,
-  showToast,
-  useNavigation
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { ConfigService } from "@/services/configService";
 import { ErrorHandler } from "@/utils/errors";
@@ -49,10 +41,7 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
   const defaultValues = useMemo<AgentFormValues>(() => {
     const commandTokens = existingConfig?.command ? splitCommandLine(existingConfig.command) : [];
     const argsFromCommand = commandTokens.length > 1 ? commandTokens.slice(1) : [];
-    const combinedArgs = [
-      ...argsFromCommand,
-      ...(existingConfig?.args ?? [])
-    ]
+    const combinedArgs = [...argsFromCommand, ...(existingConfig?.args ?? [])]
       .map((value) => value.trim())
       .filter(Boolean);
 
@@ -86,10 +75,7 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
         commandValue = values.command.trim();
       }
 
-      const combinedArgs = [
-        ...(commandTokens.length > 1 ? commandTokens.slice(1) : []),
-        ...(args ?? [])
-      ];
+      const combinedArgs = [...(commandTokens.length > 1 ? commandTokens.slice(1) : []), ...(args ?? [])];
       let environmentVariables: Record<string, string> | undefined;
 
       try {
@@ -152,7 +138,10 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
       await onSave?.();
       pop();
     } catch (error) {
-      await ErrorHandler.handleError(error, mode === "create" ? "Creating agent configuration" : "Updating agent configuration");
+      await ErrorHandler.handleError(
+        error,
+        mode === "create" ? "Creating agent configuration" : "Updating agent configuration",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -169,22 +158,13 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             icon={Icon.Checkmark}
             onSubmit={handleSubmit}
           />
-          <Action
-            title="Cancel"
-            icon={Icon.XMarkCircle}
-            onAction={() => pop()}
-          />
+          <Action title="Cancel" icon={Icon.XMarkCircle} onAction={() => pop()} />
         </ActionPanel>
       }
     >
       <Form.Description text="Configure how Raycast connects to your Agent Client Protocol compatible agent." />
 
-      <Form.TextField
-        id="name"
-        title="Agent Name"
-        placeholder="Gemini CLI"
-        defaultValue={defaultValues.name}
-      />
+      <Form.TextField id="name" title="Agent Name" placeholder="Gemini CLI" defaultValue={defaultValues.name} />
 
       <Form.TextArea
         id="description"
@@ -212,12 +192,7 @@ export function AgentConfigForm({ mode, existingConfig, onSave }: AgentConfigFor
             defaultValue={defaultValues.command}
           />
 
-          <Form.TextField
-            id="args"
-            title="Arguments"
-            placeholder="--acp --verbose"
-            defaultValue={defaultValues.args}
-          />
+          <Form.TextField id="args" title="Arguments" placeholder="--acp --verbose" defaultValue={defaultValues.args} />
         </>
       )}
 

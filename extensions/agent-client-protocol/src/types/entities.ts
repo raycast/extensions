@@ -20,7 +20,7 @@ export interface AgentConnection {
   agentId: string;
 
   /** Current status of the connection */
-  status: 'connecting' | 'connected' | 'disconnected' | 'error';
+  status: "connecting" | "connected" | "disconnected" | "error";
 
   /** When the connection was established */
   connectedAt: Date;
@@ -112,7 +112,7 @@ export interface SessionRequest {
     /** Tags for categorization */
     tags?: string[];
     /** Priority level */
-    priority?: 'low' | 'normal' | 'high';
+    priority?: "low" | "normal" | "high";
   };
 }
 
@@ -133,7 +133,7 @@ export interface ConversationSession {
   agentSessionId?: string;
 
   /** Current status of the session */
-  status: 'active' | 'completed' | 'archived' | 'error';
+  status: "active" | "completed" | "archived" | "error";
 
   /** When the session was created */
   createdAt: Date;
@@ -151,7 +151,7 @@ export interface ConversationSession {
     /** Tags for categorization */
     tags?: string[];
     /** Priority level */
-    priority?: 'low' | 'normal' | 'high';
+    priority?: "low" | "normal" | "high";
     /** Total token count (if available) */
     tokenCount?: number;
     /** Estimated cost (if available) */
@@ -193,7 +193,7 @@ export interface ConversationSession {
 /**
  * Message role types
  */
-export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
+export type MessageRole = "user" | "assistant" | "system" | "tool";
 
 /**
  * Represents a single message in a conversation
@@ -214,9 +214,9 @@ export interface SessionMessage {
   /** Message metadata */
   metadata: {
     /** Source of the message */
-    source: 'user' | 'agent' | 'system';
+    source: "user" | "agent" | "system";
     /** Type of message content */
-    messageType: 'text' | 'code' | 'file' | 'tool_call' | 'tool_result';
+    messageType: "text" | "code" | "file" | "tool_call" | "tool_result";
     /** Agent ID if from agent */
     agentId?: string;
     /** Token count for this message */
@@ -272,10 +272,10 @@ export interface MessageRequest {
   content: string;
 
   /** Optional message metadata */
-  metadata?: Partial<SessionMessage['metadata']>;
+  metadata?: Partial<SessionMessage["metadata"]>;
 
   /** Optional file attachments */
-  attachments?: SessionMessage['attachments'];
+  attachments?: SessionMessage["attachments"];
 
   /** Context for this specific message */
   context?: {
@@ -294,7 +294,7 @@ export interface SessionUpdate {
   sessionId: string;
 
   /** Type of update */
-  type: 'message_added' | 'message_updated' | 'status_changed' | 'metadata_updated';
+  type: "message_added" | "message_updated" | "status_changed" | "metadata_updated";
 
   /** Update payload */
   payload: {
@@ -303,9 +303,9 @@ export interface SessionUpdate {
     /** Updated message if type is message_updated */
     updatedMessage?: SessionMessage;
     /** New status if type is status_changed */
-    status?: ConversationSession['status'];
+    status?: ConversationSession["status"];
     /** Updated metadata if type is metadata_updated */
-    metadata?: ConversationSession['metadata'];
+    metadata?: ConversationSession["metadata"];
   };
 
   /** When the update occurred */
@@ -357,13 +357,13 @@ export interface MessagePagination {
   limit: number;
 
   /** Sort order */
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
 
   /** Filter by role */
   roleFilter?: MessageRole[];
 
   /** Filter by message type */
-  typeFilter?: SessionMessage['metadata']['messageType'][];
+  typeFilter?: SessionMessage["metadata"]["messageType"][];
 }
 
 /**
@@ -389,7 +389,7 @@ export interface PaginatedMessages {
 /**
  * Type of project context
  */
-export type ProjectContextType = 'file' | 'directory' | 'selection';
+export type ProjectContextType = "file" | "directory" | "selection";
 
 /**
  * Represents project context shared with an agent

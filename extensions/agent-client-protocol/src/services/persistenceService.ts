@@ -68,7 +68,7 @@ export class PersistenceService {
       const sessionSnapshot: ConversationSession = {
         ...session,
         messages,
-        lastActivity: message.timestamp
+        lastActivity: message.timestamp,
       };
 
       await this.storageService.saveConversation(sessionSnapshot);
@@ -88,7 +88,7 @@ export class PersistenceService {
         ...existing,
         lastActivity: new Date().toISOString(),
         messageCount: existing.messageCount + 1,
-        status: "active"
+        status: "active",
       };
     }
 
@@ -154,7 +154,7 @@ export class PersistenceService {
       lastActivity: session.lastActivity.toISOString(),
       status: session.status === "completed" ? "completed" : "active",
       messageCount: session.messages.length,
-      title: session.metadata?.title
+      title: session.metadata?.title,
     };
   }
 
