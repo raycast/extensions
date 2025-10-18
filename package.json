@@ -10,8 +10,8 @@
     "Productivity"
   ],
   "license": "MIT",
-  "version": "1.0.0",
   "platforms": ["macos"],
+  "version": "1.0.0",
   "commands": [
     {
       "name": "add-website",
