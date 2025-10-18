@@ -11,6 +11,7 @@
   ],
   "license": "MIT",
   "version": "1.0.0",
+  "platforms": ["macos"],
   "commands": [
     {
       "name": "add-website",

@@ -6,11 +6,19 @@ npm-debug.log*
 dist/
 *.tsbuildinfo
 
-# Compiled TypeScript files (build artifacts) - but keep the main JS files for Raycast
-# *.js (commented out - Raycast needs these)
+# Compiled TypeScript files (build artifacts)
+*.js
 *.js.map
 *.d.ts
 *.d.ts.map
+
+# Development and testing files
+*.sh
+!build-extension.sh
+*.md
+!README.md
+!CHANGELOG.md
+metadata/
 
 # Environment
 .env

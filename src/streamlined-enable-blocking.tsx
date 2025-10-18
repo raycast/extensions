@@ -1,16 +1,6 @@
 /**
  * Streamlined Enable Blocking Command
- * Single password prompt, smart browser dete        // Show success feedback
-        await showToast({
-          style: Toast.Style.Success,
-          title: "✅ 100% GUARANTEED Blocking Enabled!",
-          message: result.message,
-        });
-
-        // Additional success info
-        await showLongHUD(
-          "✅ 100% Guaranteed blocking active! Hosts + Firewall + Connection killing!",
-        );rehensive blocking
+ * Single password prompt, smart browser detection, comprehensive blocking
  */
 
 import { showToast, Toast, showHUD, confirmAlert, Alert } from "@raycast/api";
