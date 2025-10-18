@@ -714,6 +714,39 @@ export class ACPClient implements acp.Client {
   }
 
   /**
+   * Cancel an ongoing prompt turn
+   *
+   * Sends a session/cancel notification to the agent to stop processing.
+   * The agent should abort all ongoing operations and respond with a cancelled stop reason.
+   */
+  async cancelSession(sessionId: string): Promise<void> {
+    this.ensureConnected();
+
+    logger.info('Cancelling session', { sessionId });
+
+    try {
+      // Send session/cancel notification
+      // This is a notification (one-way message), not a request
+      await (this.connection as any).sendNotification('session/cancel', {
+        sessionId
+      });
+
+      logger.info('Session cancel notification sent', { sessionId });
+    } catch (error) {
+      logger.error('Failed to send cancel notification', {
+        sessionId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+
+      throw this.createError(
+        ErrorCode.ProtocolError,
+        `Failed to cancel session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { sessionId, originalError: error }
+      );
+    }
+  }
+
+  /**
    * Set the mode for a session
    */
   async setSessionMode(params: acp.SetSessionModeRequest): Promise<acp.SetSessionModeResponse> {

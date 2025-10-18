@@ -601,21 +601,33 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
         detail={<List.Item.Detail markdown={formatMessageMarkdown(message)} />}
         actions={
           <ActionPanel>
-            <Action
-              title={chat.conversation ? "Send Follow-Up Message" : "Send Message"}
-              icon={Icon.Envelope}
-              onAction={async () => {
-                if (!searchText.trim()) {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "Enter a message",
-                    message: "Type your message in the search bar first."
-                  });
-                  return;
-                }
-              await handleSend(searchText);
-            }}
-          />
+            {isProcessing ? (
+              <Action
+                title="Cancel Message"
+                icon={Icon.XMarkCircle}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd"], key: "." }}
+                onAction={async () => {
+                  await chat.cancelMessage();
+                }}
+              />
+            ) : (
+              <Action
+                title={chat.conversation ? "Send Follow-Up Message" : "Send Message"}
+                icon={Icon.Envelope}
+                onAction={async () => {
+                  if (!searchText.trim()) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Enter a message",
+                      message: "Type your message in the search bar first."
+                    });
+                    return;
+                  }
+                  await handleSend(searchText);
+                }}
+              />
+            )}
             {message.content && (
               <Action.CopyToClipboard
                 title="Copy Message"
@@ -702,14 +714,26 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
           description="Select an agent, type your question above, and press Enter to begin."
           actions={
             <ActionPanel>
-            <Action
-              title="Send Message"
-              icon={Icon.Envelope}
-              shortcut={{ modifiers: [], key: "return" }}
-              onAction={async () => {
-                  await handleSend(searchText);
-                }}
-              />
+              {isProcessing ? (
+                <Action
+                  title="Cancel Message"
+                  icon={Icon.XMarkCircle}
+                  style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  onAction={async () => {
+                    await chat.cancelMessage();
+                  }}
+                />
+              ) : (
+                <Action
+                  title="Send Message"
+                  icon={Icon.Envelope}
+                  shortcut={{ modifiers: [], key: "return" }}
+                  onAction={async () => {
+                    await handleSend(searchText);
+                  }}
+                />
+              )}
               {chat.conversation?.availableModes && chat.conversation.availableModes.length > 0 && (
                 <ActionPanel.Section title="Mode">
                   {chat.conversation.availableModes.map((mode) => (

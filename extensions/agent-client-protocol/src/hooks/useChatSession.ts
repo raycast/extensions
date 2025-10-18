@@ -23,6 +23,7 @@ interface ChatSessionState {
 interface UseChatSessionResult extends ChatSessionState {
   startSession: (agent: AgentConfig, prompt: string) => Promise<void>;
   sendMessage: (message: string) => Promise<void>;
+  cancelMessage: () => Promise<void>;
   resetSession: () => Promise<void>;
   setActiveAgent: (agent: AgentConfig | null) => void;
   activeAgent: AgentConfig | null;
@@ -447,6 +448,48 @@ export function useChatSession(): UseChatSessionResult {
     [sessionService, handleStreamingMessage, loadContextsForSession]
   );
 
+  const cancelMessage = useCallback(async () => {
+    if (status !== "processing") {
+      logger.warn("Attempted to cancel message when not processing", { status });
+      return;
+    }
+
+    if (!conversation) {
+      logger.warn("Attempted to cancel message without active conversation");
+      return;
+    }
+
+    try {
+      logger.info("Cancelling message", { sessionId: conversation.sessionId });
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Cancelling...",
+        message: "Stopping the agent"
+      });
+
+      // Send cancellation notification to the agent
+      await acpClient.cancelSession(conversation.sessionId);
+
+      // Update status
+      setStatus("ready");
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Cancelled",
+        message: "Agent stopped processing"
+      });
+
+      // Refresh conversation to get any final updates
+      await refreshConversation(conversation.sessionId);
+
+      logger.info("Message cancelled successfully", { sessionId: conversation.sessionId });
+    } catch (error) {
+      setStatus("ready");
+      await ErrorHandler.handleError(error, "Cancelling message");
+    }
+  }, [status, conversation, acpClient, refreshConversation]);
+
   const switchMode = useCallback(
     async (modeId: string) => {
       if (!conversation) {
@@ -498,6 +541,7 @@ export function useChatSession(): UseChatSessionResult {
       contexts,
       startSession,
       sendMessage,
+      cancelMessage,
       resetSession,
       setActiveAgent,
       activeAgent,
@@ -517,6 +561,7 @@ export function useChatSession(): UseChatSessionResult {
       activeAgent,
       startSession,
       sendMessage,
+      cancelMessage,
       resetSession,
       loadConversation,
       addFileContexts,

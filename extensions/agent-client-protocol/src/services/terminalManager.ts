@@ -47,7 +47,8 @@ export class TerminalManager {
       sessionId: params.sessionId,
       command: params.command,
       args: params.args,
-      cwd: params.cwd
+      cwd: params.cwd,
+      env: params.env
     });
 
     // Build environment variables
@@ -58,12 +59,34 @@ export class TerminalManager {
       }
     }
 
-    // Spawn the process
-    const childProcess = spawn(params.command, params.args || [], {
+    logger.debug('Spawn environment', {
+      terminalId,
+      PATH: env.PATH,
+      SHELL: env.SHELL,
+      envKeys: Object.keys(env)
+    });
+
+    // Spawn the process using shell if no args provided (likely a shell command string)
+    const useShell = !params.args || params.args.length === 0;
+    const spawnOptions: import('child_process').SpawnOptions = {
       cwd: params.cwd || process.cwd(),
       env,
-      stdio: ['ignore', 'pipe', 'pipe']
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: useShell
+    };
+
+    logger.debug('Spawning process', {
+      terminalId,
+      command: params.command,
+      args: params.args,
+      useShell,
+      spawnOptions: {
+        cwd: spawnOptions.cwd,
+        shell: spawnOptions.shell
+      }
     });
+
+    const childProcess = spawn(params.command, params.args || [], spawnOptions);
 
     if (!childProcess.stdout || !childProcess.stderr) {
       throw new Error('Failed to create terminal process streams');
@@ -77,7 +100,7 @@ export class TerminalManager {
 
     // Create exit promise
     const exitPromise = new Promise<{ exitCode: number | null; signal: string | null }>((resolve) => {
-      childProcess.on('exit', (code, sig) => {
+      childProcess.on('exit', (code: number | null, sig: string | null) => {
         hasExited = true;
         exitCode = code;
         signal = sig;
@@ -133,10 +156,17 @@ export class TerminalManager {
     });
 
     // Handle process errors
-    childProcess.on('error', (error) => {
+    childProcess.on('error', (error: Error) => {
       logger.error('Terminal process error', {
         terminalId,
-        error: error.message
+        command: params.command,
+        args: params.args,
+        cwd: spawnOptions.cwd,
+        useShell: useShell,
+        error: error.message,
+        errorCode: (error as NodeJS.ErrnoException).code,
+        errorStack: error.stack,
+        PATH: env.PATH
       });
       output += `\nProcess error: ${error.message}\n`;
       output = truncateOutput(output);
