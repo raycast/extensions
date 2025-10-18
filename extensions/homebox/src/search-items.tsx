@@ -132,8 +132,8 @@ ${maintenance.map((m) => `| ${m.name} | ${m.completedDate} | ${m.scheduledDate} 
 
 function CreateItem() {
   const { pop } = useNavigation();
-  const { isLoading: isLoadingLocations, labels } = useLabels();
-  const { isLoading: isLoadingLabels, locations } = useLocations();
+  const { isLoading: isLoadingLabels, labels } = useLabels();
+  const { isLoading: isLoadingLocations, locations } = useLocations();
   type FormValues = Omit<CreateItemRequest, "quantity"> & {
     quantity: string;
   };
@@ -161,7 +161,7 @@ function CreateItem() {
         if (value.length > 255) return "Name is too long";
       },
       quantity(value) {
-        if (value && !Number(value)) return "The item must be a number";
+        if (value && isNaN(+value)) return "The item must be a number";
       },
       description(value) {
         if (value && value.length > 1000) return "Description is too long";
