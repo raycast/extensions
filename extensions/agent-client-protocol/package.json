@@ -3,7 +3,7 @@
   "name": "agent-client-protocol",
   "title": "Agent Client Protocol",
   "description": "Connect to AI agents via Agent Client Protocol for coding assistance",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "Yukai",
   "platforms": [
     "macOS",
