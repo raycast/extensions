@@ -123,7 +123,7 @@ const languages = {
   },
 };
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const lang = "en";
   const t = languages[lang as keyof typeof languages] || languages.zh;
 
