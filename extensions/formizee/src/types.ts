@@ -12,7 +12,6 @@ export type Endpoint = {
 };
 export type CreateEndpointRequest = {
   slug: string;
-
   name: string;
 };
 export type Key = {

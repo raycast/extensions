@@ -16,7 +16,7 @@ import {
 import { CreateKeyRequest, Key } from "./types";
 import { formatDate } from "./utils";
 
-export default function SearchForms() {
+export default function SearchKeys() {
   const {
     isLoading,
     data: keys,

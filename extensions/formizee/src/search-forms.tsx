@@ -122,7 +122,6 @@ function NewForm() {
       slug(value) {
         if (!value || value.length < 4 || value.length > 64) return "The slug must be between 4 and 64 characters long";
       },
-      // targetEmails: FormValidation.Required
     },
   });
   return (
