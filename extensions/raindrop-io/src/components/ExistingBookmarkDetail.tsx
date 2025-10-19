@@ -36,11 +36,7 @@ export function ExistingBookmarkDetail(props: ExistingBookmarkDetailProps) {
         <ActionPanel>
           <Action.OpenInBrowser url={bookmark.link} />
           <Action.CopyToClipboard title="Copy URL" content={bookmark.link} />
-          <Action
-            title="Edit Bookmark"
-            icon={Icon.Pencil}
-            onAction={() => onEdit(bookmark)}
-          />
+          <Action title="Edit Bookmark" icon={Icon.Pencil} onAction={() => onEdit(bookmark)} />
         </ActionPanel>
       }
       metadata={

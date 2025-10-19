@@ -4,8 +4,6 @@ import {
   Form,
   getPreferenceValues,
   Icon,
-  openCommandPreferences,
-  showHUD,
   Toast,
   showToast,
 } from "@raycast/api";
@@ -81,19 +79,23 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
   const [showingExistingData, setShowingExistingData] = useState(mode === "edit");
   const linkRef = useRef<string>(props.defaultValues?.link ?? "");
   const originalValues = useRef<FormValues | null>(null);
-  const { handleSubmit, itemProps, setValue, reset, focus } = useForm<FormValues>({ /* ... */ });
+  const { handleSubmit, itemProps, setValue, reset, focus } = useForm<FormValues>({
+    /* ... */
+  });
 
   const handleEditBookmark = (bookmark: Bookmark) => {
-    push(<BookmarkForm
-      mode="edit"
-      bookmarkId={bookmark._id}
-      defaultValues={{
-        link: bookmark.link,
-        title: bookmark.title,
-        collection: bookmark.collection?.$id?.toString() ?? "-1",
-        tags: bookmark.tags,
-      }}
-    />);
+    push(
+      <BookmarkForm
+        mode="edit"
+        bookmarkId={bookmark._id}
+        defaultValues={{
+          link: bookmark.link,
+          title: bookmark.title,
+          collection: bookmark.collection?.$id?.toString() ?? "-1",
+          tags: bookmark.tags,
+        }}
+      />,
+    );
   };
 
   useEffect(() => {
@@ -303,7 +305,6 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
               }}
             />
           )}
-
         </ActionPanel>
       }
     >

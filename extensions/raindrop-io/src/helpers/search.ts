@@ -8,7 +8,7 @@ export type SearchResult = {
 
 export async function searchForExistingBookmark(link: string): Promise<SearchResult> {
   const preferences = getPreferenceValues<Preferences>();
-  
+
   // Extract domain from the link
   let domain = "";
   try {
@@ -47,7 +47,7 @@ export async function searchForExistingBookmark(link: string): Promise<SearchRes
 
 async function searchBookmarks(query: string): Promise<Bookmark[]> {
   const preferences = getPreferenceValues<Preferences>();
-  
+
   const url = new URL("https://api.raindrop.io/rest/v1/raindrops/0"); // Search all collections
   url.searchParams.set("search", query);
   url.searchParams.set("perpage", "10"); // Limit to 10 results to avoid unnecessary data
@@ -77,7 +77,7 @@ function extractTitleFromUrl(url: string): string {
     const urlObj = new URL(url);
     const hostname = urlObj.hostname.replace("www.", "");
     // Extract potential title from the path
-    const pathParts = urlObj.pathname.split("/").filter(part => part.length > 0);
+    const pathParts = urlObj.pathname.split("/").filter((part) => part.length > 0);
     if (pathParts.length > 0) {
       // Use the last path segment as potential title
       return pathParts[pathParts.length - 1].replace(/[-_]/g, " ");
