@@ -9,12 +9,25 @@ export enum AccountType {
     "initial-balance"="initial-balance",
     reconciliation="reconciliation",
 }
+export enum AccountRole {
+    defaultAsset="defaultAsset",
+    sharedAsset="sharedAsset",
+    savingAsset="savingAsset",
+    ccAsset="ccAsset",
+    cashWalletAsset="cashWalletAsset"
+}
 export type Account = {
     type: "accounts";
     id: string;
     attributes: {
+        active: string;
         name: string;
         type: AccountType;
+        account_role: AccountRole | null;
+        currency_symbol: string;
+        current_balance: string;
+        account_number: string | null;
+        iban: string | null;
     }
 }
 
@@ -23,7 +36,7 @@ export enum TransactionType {
     deposit = "deposit",
     transfer = "transfer",
     reconciliation = "reconciliation",
-    "opening balance" = "        -balance",
+    "opening balance" = "opening balance",
 }
 type TransactionSplit = {
     type: TransactionType
