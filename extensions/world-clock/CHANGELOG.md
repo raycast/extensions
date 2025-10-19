@@ -1,5 +1,10 @@
 # World Clock Changelog
 
+## [Windows Support and Bugfixes] - {PR_MERGE_DATE}
+
+- Added Windows support for the World Clock extension.
+- Fixed a bug where time zone copying did not work as expected in grid layout.
+
 ## [Bugfix & Maintenance] - 2025-07-16
 
 - Avoid accessing the `.map` function on possibly undefined data
