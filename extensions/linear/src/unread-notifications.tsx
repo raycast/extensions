@@ -2,18 +2,21 @@ import {
   getApplications,
   MenuBarExtra,
   open,
-  openCommandPreferences,
   launchCommand,
   LaunchType,
   getPreferenceValues,
-  openExtensionPreferences,
   Icon,
 } from "@raycast/api";
 
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
-import { getNotificationMenuBarTitle, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
+import {
+  getNotificationMenuBarTitle,
+  getNotificationTitle,
+  getNotificationSubtitle,
+  getNotificationURL,
+} from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
@@ -55,6 +58,30 @@ function UnreadNotifications() {
     await open(`https://linear.app/${urlKey}/inbox`, linearApp);
   }
 
+  async function markAllAsRead() {
+    if (unreadNotifications.length === 0) {
+      return;
+    }
+
+    const readAt = new Date();
+
+    await mutateNotifications(
+      Promise.all(unreadNotifications.map((notification) => updateNotification({ id: notification.id, readAt }))),
+      {
+        optimisticUpdate(data) {
+          if (!data) {
+            return data;
+          }
+          return {
+            ...data,
+            notifications: data?.notifications?.map((x) => (x.readAt ? x : { ...x, readAt })),
+          };
+        },
+        shouldRevalidateAfter: true,
+      },
+    );
+  }
+
   const truncate = (text: string, maxLength: number) => {
     const ellipsis = text.length > maxLength ? "…" : "";
     return text.substring(0, maxLength).trim() + ellipsis;
@@ -72,26 +99,32 @@ function UnreadNotifications() {
     >
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title="Open Inbox"
+          title="Open inbox"
           icon="linear-app-icon.png"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={openInbox}
         />
+        {unreadNotifications.length > 0 ? (
+          <MenuBarExtra.Item
+            title="Mark all as read"
+            icon={Icon.CheckCircle}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+            onAction={markAllAsRead}
+          />
+        ) : null}
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={unreadNotifications.length !== 0 ? "Unread Notifications" : "No Unread Notifications"}
+          title={unreadNotifications.length !== 0 ? "Unread notifications" : "No unread notifications"}
         />
 
         {unreadNotifications.map((notification) => {
-          const title = `${getNotificationTitle(notification)} by ${
-            notification.actor ? notification.actor.displayName : "Linear"
-          }`;
-
+          // Use Linear API's title and subtitle fields for consistent notification display
+          const title = truncate(getNotificationSubtitle(notification), 30);
           const icon = notification.actor ? getUserIcon(notification.actor) : "linear-app-icon.png";
-          const subtitle = notification.issue?.title ? truncate(notification.issue.title, 20) : "";
-          const tooltip = `${notification.issue?.identifier}: ${notification.issue?.title}`;
+          const subtitle = truncate(getNotificationTitle(notification), 20);
+          const tooltip = `${getNotificationSubtitle(notification)}: ${getNotificationTitle(notification)}`;
 
           return (
             <MenuBarExtra.Item
@@ -118,17 +151,8 @@ function UnreadNotifications() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           icon={Icon.Eye}
-          title="View All Notifications"
+          title="View all notifications"
           onAction={() => launchCommand({ name: "notifications", type: LaunchType.UserInitiated })}
-        />
-        <MenuBarExtra.Item
-          title="Configure Command"
-          icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          onAction={() => openCommandPreferences()}
-          alternate={
-            <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          }
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

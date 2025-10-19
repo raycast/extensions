@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Notification improvements] - 2025-10-19
+
+- Improved notification display to support all notification types by reading directly from the API
+- Added "Mark all as read" action to notifications command and menu bar extension
+
 ## [Schema deprecation and update SDK] - 2025-10-13
 
 - Bumped `@linear/sdk` to v60.0.0
