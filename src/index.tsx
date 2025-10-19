@@ -8,7 +8,6 @@ import {
   showToast,
   Toast,
   LocalStorage,
-  environment,
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { exec } from "child_process";
@@ -16,12 +15,18 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-// Detect system language
+// Detect system language from system preferences
 const getLocale = (): "en" | "ko" | "ja" => {
-  const locale = environment.locale || "en-US";
-  if (locale.startsWith("ko")) return "ko";
-  if (locale.startsWith("ja")) return "ja";
-  return "en";
+  try {
+    // Use Intl API to detect system language
+    const systemLocale =
+      Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
+    if (systemLocale.startsWith("ko")) return "ko";
+    if (systemLocale.startsWith("ja")) return "ja";
+    return "en";
+  } catch {
+    return "en";
+  }
 };
 
 // Multilingual translations
