@@ -9,12 +9,7 @@ import OpenInLinear from "./components/OpenInLinear";
 import View from "./components/View";
 import { getBotIcon } from "./helpers/bots";
 import { getErrorMessage } from "./helpers/errors";
-import {
-  getNotificationIcon,
-  getNotificationTitle,
-  getNotificationSubtitle,
-  getNotificationURL,
-} from "./helpers/notifications";
+import { getNotificationIcon, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useMe from "./hooks/useMe";
 import useNotifications from "./hooks/useNotifications";
@@ -253,8 +248,8 @@ function Notifications() {
                 return text.substring(0, maxLength).trim() + ellipsis;
               };
 
-              const notificationTitle = truncate(getNotificationTitle(notification), 60);
-              const notificationSubtitle = truncate(getNotificationSubtitle(notification), 80);
+              const notificationTitle = truncate(notification.title, 60);
+              const notificationSubtitle = truncate(notification.subtitle, 80);
 
               return (
                 <List.Item

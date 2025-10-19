@@ -5,18 +5,6 @@ import { NotificationResult } from "../api/getNotifications";
 
 import { getStatusIcon } from "./states";
 
-export function getNotificationTitle(notification: NotificationResult): string {
-  // Use the title provided by the Linear API, which handles all notification types
-  // including future ones we haven't explicitly coded for
-  return notification.title;
-}
-
-export function getNotificationSubtitle(notification: NotificationResult): string {
-  // Use the subtitle provided by the Linear API, which contains the actor name
-  // and action description (e.g., "John Doe marked as completed")
-  return notification.subtitle;
-}
-
 export function getNotificationIcon(notification: NotificationResult): Image.ImageLike {
   const type = notification.type;
 

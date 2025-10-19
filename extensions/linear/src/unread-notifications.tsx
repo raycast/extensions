@@ -11,12 +11,7 @@ import {
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
-import {
-  getNotificationMenuBarTitle,
-  getNotificationTitle,
-  getNotificationSubtitle,
-  getNotificationURL,
-} from "./helpers/notifications";
+import { getNotificationMenuBarTitle, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
@@ -121,10 +116,10 @@ function UnreadNotifications() {
 
         {unreadNotifications.map((notification) => {
           // Use Linear API's title and subtitle fields for consistent notification display
-          const title = truncate(getNotificationSubtitle(notification), 30);
+          const title = truncate(notification.subtitle, 30);
           const icon = notification.actor ? getUserIcon(notification.actor) : "linear-app-icon.png";
-          const subtitle = truncate(getNotificationTitle(notification), 20);
-          const tooltip = `${getNotificationSubtitle(notification)}: ${getNotificationTitle(notification)}`;
+          const subtitle = truncate(notification.title, 20);
+          const tooltip = `${notification.subtitle}: ${notification.title}`;
 
           return (
             <MenuBarExtra.Item
