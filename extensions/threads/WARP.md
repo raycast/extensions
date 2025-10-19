@@ -3,10 +3,12 @@
 This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
 ## Overview and prerequisites
+
 - Raycast extension for Threads: open feeds and activity, search, post via intent URLs, quick follow, and download media from a Threads post URL.
 - macOS-only per manifest. Requires the Raycast app and Raycast CLI (ray) on PATH.
 
 ## Commands
+
 - npm install or npm ci — install dependencies
 - npm run dev — develop the extension (ray develop)
 - npm run build — build the extension (ray build -e dist)
@@ -16,6 +18,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 - Tests: none configured (no test framework or scripts present).
 
 ## Architecture (big picture)
+
 - Manifest-driven: package.json uses the Raycast extension schema; commands there map 1:1 to TSX files in src/.
 - Commands in src/:
   - feed.tsx, activity.tsx: close Raycast main window, open threads.net URLs based on dropdown args.
@@ -32,9 +35,15 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 - Notable deps: threads-ts and @chrismessina/raycast-logger are present but not yet used.
 - Raycast constraint: avoid any types.
 
+## Extending the extension
+
+- Add a new command by declaring it in package.json (commands array) and creating a matching src/<name>.tsx module; wire arguments and preferences in the manifest and consume them via LaunchProps/getPreferenceValues.
+
 ## Repo facts
+
 - README: “Quickly post to Threads and follow users.”
 - TODO.md (highlights): centralized logger; verbose logging toggle; OAuth sign-in/out via Raycast OAuth; adopt threads-ts; posting with attachments; user search + follow/unfollow; liked/saved views; recent posts views; post stats; welcome screen tips.
 
 ## Running a single command during development
+
 - Start dev mode with npm run dev; then launch commands from the Raycast app UI under this extension.

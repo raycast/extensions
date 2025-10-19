@@ -68,7 +68,7 @@ export default function ComposeThread() {
           }
         }}
       />
-      <Form.TextField id="attachment" title="Link" placeholder="https://threads.net" />
+      <Form.TextField id="attachment" title="Link" placeholder="Add a link" />
     </Form>
   );
 }

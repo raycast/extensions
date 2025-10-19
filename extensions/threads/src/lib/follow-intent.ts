@@ -1,4 +1,6 @@
-const baseUrl = "https://www.threads.net/intent/";
+import { THREADS_INTENT_URL } from "./constants";
+
+const baseUrl = `${THREADS_INTENT_URL}/`;
 
 interface FollowIntentParams {
   username: string;
