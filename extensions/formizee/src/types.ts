@@ -11,9 +11,9 @@ export type Endpoint = {
   color: string;
 };
 export type CreateEndpointRequest = {
-    slug: string;
+  slug: string;
 
-    name: string;
+  name: string;
 };
 export type Key = {
   id: string;

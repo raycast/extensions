@@ -18,6 +18,10 @@ This is a **Raycast** extension for [Formizee](https://formizee.com/) - _The Ope
 
     c. `Copy` and `Paste` in Preferences
 
+## 🗒️ Note
+
+- At the moment, `DELETE form` return a **404**
+
 ## ➕ More
 
 Looking for more form extensions? Try these:

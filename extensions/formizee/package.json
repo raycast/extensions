@@ -27,13 +27,13 @@
     {
       "name": "search-forms",
       "title": "Search Forms",
-      "description": "",
+      "description": "Manage Forms and View Submissions",
       "mode": "view"
     },
     {
       "name": "search-keys",
       "title": "Search Keys",
-      "description": "",
+      "description": "Manage API Keys",
       "mode": "view"
     }
   ],
