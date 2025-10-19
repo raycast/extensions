@@ -20,6 +20,18 @@ For this extension we need a test access token, for this you need to create an a
 
 Install the extension and the first time you run any command it will ask you for your new token.
 
+### AI-Powered Suggestions (via Gemini)
+
+This extension now includes a powerful AI feature to automatically suggest a title, description, collection, and tags for the links you save.
+
+1.  When adding a new bookmark, use the action `Use AI Tagging` (or the shortcut `⌘+⇧+A`).
+2.  The AI will analyze the link's content and suggest relevant metadata.
+
+To enable this feature, you need a Google AI API key:
+
+1.  Go to [Google AI Studio](https://aistudio.google.com/app/apikey) and create an API key.
+2.  Open the extension preferences in Raycast and paste your key into the `Gemini API Key` field.
+
 ### Browser Extension (Recommended)
 
 For enhanced functionality when capturing URLs and titles, we recommend installing the [Raycast Browser Extension](https://www.raycast.com/browser-extension). This extension provides better integration with your browser for a smoother experience.

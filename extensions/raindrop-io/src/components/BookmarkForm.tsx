@@ -1,11 +1,24 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getPreferenceValues,
+  Icon,
+  openCommandPreferences,
+  showHUD,
+  Toast,
+  showToast,
+} from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
-import { FormValues } from "../types";
+import { FormValues, Bookmark } from "../types";
 
 import { useRequest } from "../hooks/useRequest";
 import { useTags } from "../hooks/useTags";
+import { useGemini } from "../hooks/useGemini";
 import { createCollection, createBookmark, getLinkTitle } from "../helpers/utils";
+import { SearchResult, searchForExistingBookmark } from "../helpers/search";
+import { ExistingBookmarkDetail } from "./ExistingBookmarkDetail";
 
 async function updateBookmark({
   preferences,
@@ -59,63 +72,50 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
   const preferences = getPreferenceValues<Preferences>();
   const [collection] = useCachedState("selected-collection", "0");
   const { collections } = useRequest({ collection });
+  const { suggestAndApply, newlyCreatedTags } = useGemini();
   const { data: tags } = useTags();
   const [dropdownValue, setDropdownValue] = useState(props.defaultValues?.collection ?? "-1");
   const [showCollectionCreation, setShowCollectionCreation] = useState(false);
+  const [existingBookmark, setExistingBookmark] = useState<SearchResult>(null);
+  const [searching, setSearching] = useState(false);
+  const [showingExistingData, setShowingExistingData] = useState(mode === "edit");
   const linkRef = useRef<string>(props.defaultValues?.link ?? "");
-  const { handleSubmit, itemProps, setValue, reset, focus } = useForm<FormValues>({
-    async onSubmit(values) {
-      props.onWillSave?.();
+  const originalValues = useRef<FormValues | null>(null);
+  const { handleSubmit, itemProps, setValue, reset, focus } = useForm<FormValues>({ /* ... */ });
 
-      try {
-        const response =
-          mode === "edit" && props.bookmarkId
-            ? await updateBookmark({
-                preferences,
-                values,
-                bookmarkId: props.bookmarkId,
-                showCollectionCreation,
-              })
-            : await createBookmark({
-                preferences,
-                values,
-                showCollectionCreation,
-              });
-
-        if (response.status === 200) {
-          if (mode !== "edit") {
-            reset({ link: "", collection: "-1", tags: [] });
-            focus("link");
-          }
-          props.onSaved?.();
-        } else {
-          throw new Error(response.statusText);
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          props.onError?.(error);
-        }
-      }
-    },
-    validation: {
-      link: FormValidation.Required,
-      newCollection: (value) => {
-        if (showCollectionCreation && value === "") {
-          return "This field is required";
-        }
-      },
-    },
-    initialValues: {
-      link: props.defaultLink ?? "",
-      title: undefined,
-      collection: "-1",
-      ...props.defaultValues,
-    },
-  });
+  const handleEditBookmark = (bookmark: Bookmark) => {
+    push(<BookmarkForm
+      mode="edit"
+      bookmarkId={bookmark._id}
+      defaultValues={{
+        link: bookmark.link,
+        title: bookmark.title,
+        collection: bookmark.collection?.$id?.toString() ?? "-1",
+        tags: bookmark.tags,
+      }}
+    />);
+  };
 
   useEffect(() => {
     if (props.defaultLink) {
       setValue("link", props.defaultLink);
+      // Also trigger a search when defaultLink is set
+      const searchExistingBookmark = async () => {
+        setSearching(true);
+        try {
+          const result = await searchForExistingBookmark(props.defaultLink);
+          setExistingBookmark(result);
+        } catch (error) {
+          console.error("Error searching for existing bookmark:", error);
+          setExistingBookmark(null);
+        } finally {
+          setSearching(false);
+        }
+      };
+
+      if (props.defaultLink.trim() !== "") {
+        searchExistingBookmark();
+      }
     }
   }, [props.defaultLink, setValue]);
 
@@ -127,16 +127,183 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
     }
   }, [props.defaultLink]);
 
+  // Search for existing bookmark when link value changes
+  useEffect(() => {
+    const link = itemProps.link.value;
+    if (link) {
+      const searchExistingBookmark = async () => {
+        setSearching(true);
+        try {
+          const result = await searchForExistingBookmark(link);
+          setExistingBookmark(result);
+        } catch (error) {
+          console.error("Error searching for existing bookmark:", error);
+          setExistingBookmark(null);
+        } finally {
+          setSearching(false);
+        }
+      };
+
+      if (link.trim() !== "") {
+        // Use a timeout to debounce the search
+        const timeoutId = setTimeout(searchExistingBookmark, 500);
+        // Update the ref after the timeout to avoid immediate re-search
+        linkRef.current = link;
+        return () => clearTimeout(timeoutId);
+      } else {
+        setExistingBookmark(null);
+        linkRef.current = link;
+      }
+    }
+  }, [itemProps.link.value]);
+
   return (
     <Form
       isLoading={props.isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={mode === "edit" ? "Update Bookmark" : "Add Bookmark"}
-            icon={mode === "edit" ? Icon.Pencil : Icon.PlusCircle}
-            onSubmit={handleSubmit}
-          />
+          {existingBookmark ? (
+            showingExistingData ? (
+              // When showing existing data, show "Save Update" and "Cancel Update"
+              <>
+                <Action.SubmitForm
+                  title="Save Update"
+                  icon={Icon.Pencil}
+                  onSubmit={async (values) => {
+                    props.onWillSave?.();
+
+                    try {
+                      const response = await updateBookmark({
+                        preferences,
+                        values,
+                        bookmarkId: existingBookmark.bookmark._id,
+                        showCollectionCreation,
+                      });
+
+                      if (response.status === 200) {
+                        reset({ link: "", collection: "-1", tags: [] });
+                        focus("link");
+                        props.onSaved?.();
+                      } else {
+                        throw new Error(response.statusText);
+                      }
+                    } catch (error) {
+                      if (error instanceof Error) {
+                        props.onError?.(error);
+                      }
+                    }
+                  }}
+                />
+                <Action
+                  title="Cancel Update"
+                  icon={Icon.XmarkCircle}
+                  onAction={() => {
+                    // Revert back to the original values
+                    if (originalValues.current) {
+                      setValue("link", originalValues.current.link || "");
+                      setValue("title", originalValues.current.title);
+                      setValue("collection", originalValues.current.collection || "-1");
+                      setValue("tags", originalValues.current.tags || []);
+                    }
+
+                    // Update the UI state back to the original state
+                    setShowingExistingData(false);
+                  }}
+                />
+              </>
+            ) : (
+              // When NOT showing existing data, show "Update Existing" and "Add Bookmark Anyway"
+              <>
+                <Action.Push
+                  title="Show Existing Bookmark Details"
+                  icon={Icon.Sidebar}
+                  target={<ExistingBookmarkDetail bookmark={existingBookmark.bookmark} onEdit={handleEditBookmark} />}
+                />
+                <Action
+                  title="Update Existing Bookmark"
+                  icon={Icon.Pencil}
+                  onAction={async () => {
+                    // Store the original values to be able to cancel later
+                    originalValues.current = {
+                      link: itemProps.link.value,
+                      title: itemProps.title.value,
+                      collection: itemProps.collection.value,
+                      tags: itemProps.tags.value || [],
+                      newCollection: itemProps.newCollection?.value,
+                    };
+
+                    // Populate the form with the existing bookmark data
+                    setValue("link", existingBookmark.bookmark.link);
+                    setValue("title", existingBookmark.bookmark.title);
+                    const collectionValue = existingBookmark.bookmark.collection?.$id.toString() || "-1";
+                    setValue("collection", collectionValue);
+                    setDropdownValue(collectionValue); // Update the dropdown state as well
+                    setValue("tags", existingBookmark.bookmark.tags || []);
+
+                    // Update the UI state to show we're now editing the existing data
+                    setShowingExistingData(true);
+                  }}
+                />
+                <Action
+                  title="Add Bookmark Anyway"
+                  icon={Icon.PlusCircle}
+                  onAction={async () => {
+                    // Get the current form values and submit as a new bookmark
+                    const values = {
+                      link: itemProps.link.value,
+                      title: itemProps.title.value,
+                      collection: itemProps.collection.value,
+                      tags: itemProps.tags.value || [],
+                      newCollection: itemProps.newCollection?.value,
+                    };
+
+                    props.onWillSave?.();
+
+                    try {
+                      const response = await createBookmark({
+                        preferences,
+                        values,
+                        showCollectionCreation,
+                      });
+
+                      if (response.status === 200) {
+                        reset({ link: "", collection: "-1", tags: [] });
+                        focus("link");
+                        props.onSaved?.();
+                      } else {
+                        throw new Error(response.statusText);
+                      }
+                    } catch (error) {
+                      if (error instanceof Error) {
+                        props.onError?.(error);
+                      }
+                    }
+                  }}
+                />
+              </>
+            )
+          ) : (
+            // When no existing bookmark, normal "Add Bookmark" action
+            <Action.SubmitForm title="Add Bookmark" icon={Icon.PlusCircle} onSubmit={handleSubmit} />
+          )}
+          {mode === "create" && (
+            <Action
+              title="Use AI Tagging"
+              icon={Icon.Stars}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              onAction={async () => {
+                await suggestAndApply({
+                  link: (itemProps.link.value as string) || "",
+                  collections: collections.map((c) => ({ _id: c.value, title: c.name })),
+                  tags,
+                  currentTags: (itemProps.tags.value as string[]) || [],
+                  setValue,
+                  setDropdownValue,
+                });
+              }}
+            />
+          )}
+
         </ActionPanel>
       }
     >
@@ -184,10 +351,20 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         <Form.TextField {...itemProps.newCollection} title="New Collection" placeholder="Name" />
       )}
       <Form.TagPicker {...itemProps.tags} title="Tags">
-        {tags?.items?.map(({ _id }) => (
+        {(tags?.items || []).map(({ _id }) => (
           <Form.TagPicker.Item key={_id} value={_id} title={_id} />
         ))}
+        {newlyCreatedTags.map((tag) => {
+          if (!tags?.items?.some((item) => item._id === tag)) {
+            return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
+          }
+          return null;
+        })}
       </Form.TagPicker>
+
+      {existingBookmark && showingExistingData && !searching && (
+        <Form.Description text={`Editing existing bookmark: ${existingBookmark.bookmark.title}`} />
+      )}
     </Form>
   );
 };

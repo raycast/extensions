@@ -2,12 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raindrop-io",
   "title": "Raindrop.io",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Search your Raindrop.io bookmarks",
   "icon": "raindrop-icon-big.png",
   "author": "lardissone",
   "contributors": [
-    "shubham",
+    "ShubhamJ010",
     "pernielsentikaer",
     "tdkn",
     "j3lte",
@@ -218,14 +218,15 @@
       "default": "1"
     },
     {
-      "name": "secondaryBrowser",
-      "title": "Secondary Browser",
-      "type": "appPicker",
-      "required": false,
-      "description": "Specify a secondary browser to use for opening bookmarks"
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Your Google AI Studio API key for suggestions",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@raycast/api": "^1.102.6",
     "@raycast/utils": "^1.19.1"
   },
