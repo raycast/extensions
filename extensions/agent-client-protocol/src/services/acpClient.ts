@@ -601,10 +601,12 @@ export class ACPClient implements acp.Client {
 
     if (config.appendToPath?.length) {
       const existingPath = mergedEnv.PATH ?? mergedEnv.Path ?? mergedEnv.path ?? process.env.PATH ?? "";
+      // Use platform-specific PATH separator (: for Unix, ; for Windows)
+      const pathSeparator = process.platform === "win32" ? ";" : ":";
 
       const currentSegments = existingPath
         ? existingPath
-            .split(":")
+            .split(pathSeparator)
             .map((segment) => segment.trim())
             .filter(Boolean)
         : [];
@@ -617,7 +619,7 @@ export class ACPClient implements acp.Client {
       }
 
       if (currentSegments.length > 0) {
-        mergedEnv.PATH = currentSegments.join(":");
+        mergedEnv.PATH = currentSegments.join(pathSeparator);
         mergedEnv.Path = mergedEnv.PATH;
         mergedEnv.path = mergedEnv.PATH;
       }

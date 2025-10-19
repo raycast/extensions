@@ -8,11 +8,6 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { STORAGE_KEYS } from "./storageKeys";
 
-interface Preferences {
-  enableLogging: boolean;
-  logLevel: "debug" | "info" | "warn" | "error";
-}
-
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
