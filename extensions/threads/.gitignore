@@ -8,5 +8,3 @@ build/
 
 # misc
 .DS_Store
-/docs/eslint-9-upgrade-guide.md
-/docs/WARP.md

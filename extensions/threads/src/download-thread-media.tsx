@@ -15,8 +15,8 @@ export default async function Command({
 
   if (!match || !match[1]) {
     await showToast({
-      title: "Error",
-      message: "Invalid URL provided. Please provide a valid threads URL",
+      title: "Invalid Threads URL",
+      message: "Please provide a valid Threads post URL (e.g., threads.com/@username/post/ABC123)",
       style: Toast.Style.Failure,
     });
     return;
@@ -30,7 +30,7 @@ export default async function Command({
 
     const threadMedias = await getThreadsMediaURL(threadsUrl, match[1]);
     if (!threadMedias || (threadMedias?.images.length === 0 && threadMedias?.videos.length === 0)) {
-      throw new Error("No medias found at the provided URL");
+      throw new Error("No images or videos found in this Threads post");
     }
 
     const mediaFiles = [
@@ -49,15 +49,15 @@ export default async function Command({
     for (const media of mediaFiles) {
       const fileId = media.url.split("/").pop();
       if (!fileId) {
-        throw new Error(`Unable to parse ${media.type} ID`);
+        throw new Error(`Failed to extract filename from ${media.type} URL. The media format may not be supported.`);
       }
 
       await handleDownload(media.url, fileId, downloadFolder, media.extension);
     }
   } catch (error) {
     await showToast({
-      title: "Error",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
+      title: "Download Failed",
+      message: error instanceof Error ? error.message : "An unexpected error occurred while downloading media",
       style: Toast.Style.Failure,
     });
   }

@@ -1,6 +1,13 @@
 import axios from "axios";
 import { createWriteStream, existsSync } from "fs";
 import { showToast, Toast, showInFinder } from "@raycast/api";
+import {
+  THREADS_PHOTO_DOWNLOADER_API,
+  DOLPHIN_RADAR_API,
+  IMAGE_EXTENSION,
+  VIDEO_EXTENSION,
+  DEFAULT_USER_AGENT,
+} from "./constants";
 
 type ThreadsDolphinRadarResponse = {
   data: {
@@ -19,13 +26,12 @@ type ThreadsPhotoDownloaderResponse = {
 
 const requestConfig = {
   headers: {
-    "User-Agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    "User-Agent": DEFAULT_USER_AGENT,
   },
 };
 
 async function getMediaFromThreadsPhotoDownloader(threadsUrl: string) {
-  const response = await axios.get(`https://api.threadsphotodownloader.com/v2/media?url=${threadsUrl}`, requestConfig);
+  const response = await axios.get(`${THREADS_PHOTO_DOWNLOADER_API}?url=${threadsUrl}`, requestConfig);
 
   const imageUrls = (response.data as ThreadsPhotoDownloaderResponse)["image_urls"] || [];
   const rawVideoUrls = (response.data as ThreadsPhotoDownloaderResponse)["video_urls"] || [];
@@ -42,10 +48,7 @@ async function getMediaFromThreadsPhotoDownloader(threadsUrl: string) {
 }
 
 async function getMediaFromDolphinRadar(threadsPostId: string) {
-  const response = await axios.get(
-    `https://www.dolphinradar.com/api/threads/post_detail/${threadsPostId}`,
-    requestConfig,
-  );
+  const response = await axios.get(`${DOLPHIN_RADAR_API}/${threadsPostId}`, requestConfig);
 
   const mediaList = (response.data as ThreadsDolphinRadarResponse).data.post_detail.media_list;
 
@@ -58,9 +61,9 @@ async function getMediaFromDolphinRadar(threadsPostId: string) {
     videos: string[];
   }>(
     (acc, media) => {
-      if (media.url.includes(".jpg")) {
+      if (media.url.includes(`.${IMAGE_EXTENSION}`)) {
         acc.images.push(media.url);
-      } else if (media.url.includes(".mp4")) {
+      } else if (media.url.includes(`.${VIDEO_EXTENSION}`)) {
         acc.videos.push(media.url);
       }
       return acc;

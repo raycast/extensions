@@ -5,7 +5,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 ## Overview and prerequisites
 
 - Raycast extension for Threads: open feeds and activity, search, post via intent URLs, quick follow, and download media from a Threads post URL.
-- macOS-only per manifest. Requires the Raycast app and Raycast CLI (ray) on PATH.
+- macOS and Windows compatible per manifest. Requires the Raycast app and Raycast CLI (ray) on PATH.
 
 ## Commands
 
