@@ -533,7 +533,6 @@ export default function Command() {
                 content={{ fileIcon: app.path }}
                 title={app.name}
                 subtitle={usageCount > 0 ? `${usageCount}${t.usageCount}` : ""}
-                tooltip={app.name}
                 actions={
                   <ActionPanel>
                     <Action
