@@ -39,7 +39,7 @@ export default function Command() {
       setData(results);
       setIsLoading(false);
     })();
-  }, [searchText]);
+  }, [searchText, Number(maxResults)]);
 
   if (isGridView) {
     return (

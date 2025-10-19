@@ -5,7 +5,6 @@
   "description": "Search KnowYourMeme.com memes directly from Raycast and get details!",
   "icon": "extension-icon.png",
   "license": "MIT",
-  "type": "module",
   "commands": [
     {
       "name": "search",
