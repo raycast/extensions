@@ -1,0 +1,81 @@
+{
+  "name": "battery-status",
+  "title": "Battery Status",
+  "description": "View battery status and information",
+  "icon": "icon.png",
+  "author": "dominion525",
+  "license": "MIT",
+  "version": "1.0.0",
+  "homepage": "https://dominion525.com/",
+  "keywords": [
+    "battery",
+    "status",
+    "power",
+    "macOS",
+    "system"
+  ],
+  "categories": [
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "battery-status",
+      "title": "Battery Status",
+      "description": "Display battery status and information",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "description": "Select display language",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect (System)",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "日本語 (Japanese)",
+          "value": "ja"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.10.0",
+    "@types/react": "^19.2.2",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "react": "^19.2.0",
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  }
+}
