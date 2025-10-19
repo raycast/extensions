@@ -211,7 +211,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
               // When NOT showing existing data, show "Update Existing" and "Add Bookmark Anyway"
               <>
                 <Action.Push
-                  title="Show Existing Bookmark Details"
+                  title={`Show ${existingBookmark.matchType==="exact"? 'Existing':'Similar'} Bookmark Details`}
                   icon={Icon.Sidebar}
                   target={<ExistingBookmarkDetail bookmark={existingBookmark.bookmark} onEdit={handleEditBookmark} />}
                 />

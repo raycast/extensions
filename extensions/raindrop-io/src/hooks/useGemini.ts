@@ -11,6 +11,7 @@ type Collection = {
 
 type SuggestAndApplyProps = {
   link: string;
+  title: string;
   collections: Collection[];
   tags: { items: { _id: string }[] } | undefined;
   currentTags: string[];
@@ -26,6 +27,7 @@ export const useGemini = () => {
 
   const suggestAndApply = async ({
     link,
+    title,
     collections,
     tags,
     currentTags,
@@ -77,10 +79,11 @@ Analyze the following link and context. Suggest:
 1. The most relevant "collectionId" from the given list (must match exactly one from Collections).
 2. Up to 5 concise single-word "tags" (reuse from existing tags if possible; only invent new if necessary).
 3. A short "description" of the link.
-4. A concise "title" for it.
+4. A concise "title" for it, derived from the provided title.
 
 Input:
 Link: ${link}
+Title: ${title}
 
 Collections:
 ${collectionsText}
