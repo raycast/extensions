@@ -103,7 +103,9 @@ export function download(url: string, path: string, options?: DownloadOptions): 
 
 function waitForHashToMatch(path: string, sha256: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (getFileSha256(path) === sha256) return resolve();
+    const fileSha = getFileSha256(path);
+    if (!fileSha) return reject(new Error(`Could not generate hash for file ${path}.`));
+    if (fileSha === sha256) return resolve();
 
     const interval = setInterval(() => {
       if (getFileSha256(path) === sha256) {
@@ -114,7 +116,7 @@ function waitForHashToMatch(path: string, sha256: string): Promise<void> {
 
     setTimeout(() => {
       clearInterval(interval);
-      reject(new Error(`Hash did not match, expected ${sha256.substring(0, 7)}.`));
+      reject(new Error(`Hash did not match, expected ${sha256.substring(0, 7)}, got ${fileSha.substring(0, 7)}.`));
     }, 5000);
   });
 }

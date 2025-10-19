@@ -1,5 +1,27 @@
 # Fetch Youtube Transcript Changelog
 
+## [2.0.2] - 2025-10-17
+
+### 2.0.2 Added
+
+- Added the second argument to the command to choose the action (save to txt file or copy to clipboard) - You can set the default action in preferences.
+
+## [2.0.1] - 2025-10-01
+
+### 2.0.1 Breaking Changes
+
+- Switched the core transcript fetching mechanism from JavaScript libraries to the external `yt-dlp` command-line tool. Users are now required to install `yt-dlp` for the extension to function.
+- Removed `youtube-transcript-scraper` and `ytdl-core` as dependencies.
+
+### 2.0.1 Added
+
+- Added `@raycast/utils` as a dependency for improved UI components.
+
+### 2.0.1 Fixed
+
+- Refactored `yt-dlp` path resolution to occur at runtime within the command, preventing the extension from crashing on load if `yt-dlp` is not installed.
+- Simplified error notifications by using the `showFailureToast` utility for a more consistent user experience.
+
 ## [1.1.5] - 2024-12-18
 
 ### Fixed
@@ -31,7 +53,7 @@
 
 ## [1.1.3] - 2024-12-10
 
-### Fixed
+### 1.1.3 Fixed
 
 - Fixed issue due to ytdl-core
 
@@ -47,7 +69,7 @@
 
 ## [1.1.1] - 2024-11-26
 
-### Added
+### 1.1.1 Added
 
 - Initial project setup
 - Basic functionality for fetching YouTube transcripts

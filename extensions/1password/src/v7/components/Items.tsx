@@ -3,10 +3,10 @@ import { useCachedState } from "@raycast/utils";
 
 import crypto from "crypto";
 
-import { Categories, DEFAULT_CATEGORY } from "./Categories";
-import { CategoryName } from "../types";
-import { getV7Items, getV7CategoryIcon } from "../utils";
 import resetCache from "../../reset-cache";
+import { CategoryName } from "../types";
+import { getV7CategoryIcon, getV7Items } from "../utils";
+import { Categories, DEFAULT_CATEGORY } from "./Categories";
 
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
@@ -19,7 +19,7 @@ export function Items() {
       : categoriesObj && [categoriesObj[category]];
 
   const onCategoryChange = (newCategory: string) => {
-    category !== newCategory && setCategory(newCategory);
+    if (category !== newCategory) setCategory(newCategory);
   };
 
   return (
@@ -58,13 +58,11 @@ export function Items() {
                       />
                     )}
                     <Action.Open
-                      // eslint-disable-next-line @raycast/prefer-title-case
                       title="Open in 1Password"
                       target={`onepassword7://view/${item.vaultUUID}/${item.uuid}`}
                       application="com.agilebits.onepassword7"
                     />
                     <Action.Open
-                      // eslint-disable-next-line @raycast/prefer-title-case
                       title="Edit in 1Password"
                       target={`onepassword7://edit/${item.vaultUUID}/${item.uuid}`}
                       application="com.agilebits.onepassword7"

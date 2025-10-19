@@ -14,10 +14,11 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { formatHours, isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
-import { HarvestProjectAssignment, HarvestTimeEntry } from "./services/responseTypes";
+import { HarvestTimeEntry } from "./services/responseTypes";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
-import { Dictionary, find, groupBy, isDate, isEmpty, omitBy, reduce } from "lodash";
+import { find, groupBy, isDate, isEmpty, omitBy } from "es-toolkit/compat";
+
 dayjs.extend(isToday);
 
 export default function Command({
@@ -61,17 +62,8 @@ export default function Command({
 
   const groupedProjects = useMemo(() => {
     // return an array of arrays thats grouped by client to easily group them via a map function
-    return reduce<
-      Dictionary<[HarvestProjectAssignment, ...HarvestProjectAssignment[]]>,
-      Array<Array<HarvestProjectAssignment>>
-    >(
-      groupBy(projects, (o) => o.client.id),
-      (result, value) => {
-        result.push(value);
-        return result;
-      },
-      []
-    );
+    const grouped = groupBy(projects, (o) => o.client.id);
+    return Object.values(grouped);
   }, [projects]);
 
   useEffect(() => {

@@ -341,7 +341,6 @@
     "eslint": "^8.57.0",
     "prettier": "^3.5.3",
     "react": "^18.2.0",
-    "react-devtools": "^6.1.1",
     "typescript": "^4.4.3"
   },
   "scripts": {

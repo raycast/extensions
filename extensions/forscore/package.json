@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "forscore",
+  "title": "forScore",
+  "description": "Manage forScore directly from Raycast",
+  "icon": "icon.png",
+  "author": "pernielsentikaer",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "next-page",
+      "title": "Next Page",
+      "subtitle": "forScore",
+      "description": "Navigates to next page",
+      "mode": "no-view"
+    },
+    {
+      "name": "prev-page",
+      "title": "Previous Page",
+      "subtitle": "forScore",
+      "description": "Navigates to previous page",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-page",
+      "title": "Go to Page",
+      "subtitle": "forScore",
+      "description": "Jump to a specific page number",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "page",
+          "placeholder": "Page Number",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "next-item",
+      "title": "Next Score in Setlist",
+      "subtitle": "forScore",
+      "description": "Navigates to next score in setlist",
+      "mode": "no-view"
+    },
+    {
+      "name": "prev-item",
+      "title": "Previous Score in Setlist",
+      "subtitle": "forScore",
+      "description": "Navigates to previous score in setlist",
+      "mode": "no-view"
+    },
+    {
+      "name": "browse-scores",
+      "title": "Browse Scores",
+      "subtitle": "forScore",
+      "description": "Browse and search your forScore library",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "csvPath",
+      "type": "file",
+      "required": false,
+      "title": "CSV Backup File",
+      "description": "Select the CSV file exported from forScore (Tools → Backup → Export CSV)",
+      "placeholder": "Select CSV file..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.0.1",
+    "csv-parse": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

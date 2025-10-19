@@ -3,7 +3,7 @@ import {
   ActionPanel,
   getPreferenceValues,
   getSelectedText,
-  Icon,
+  Keyboard,
   LaunchProps,
   List,
   showToast,
@@ -14,78 +14,120 @@ import { versions as bibleVersions } from "../assets/bible-versions.json";
 import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 
 type Preferences = Preferences.BibleSearch;
+type FormattingOptions = Pick<
+  Preferences,
+  "includeVerseNumbers" | "includeReferences" | "includeCopyright" | "oneVersePerLine"
+>;
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.BibleSearch }>) {
-  const prefs = getPreferenceValues<Preferences>();
-  const { ref = "", version = prefs.defaultBibleVersion } = props.arguments;
+  const {
+    defaultBibleVersion,
+    includeCopyright,
+    includeVerseNumbers,
+    includeReferences,
+    oneVersePerLine,
+    separatePassages,
+  } = getPreferenceValues<Preferences>();
+  const { ref, version = defaultBibleVersion } = props.arguments;
   const [query, setQuery] = React.useState({ search: ref, version: version.trim().toUpperCase() });
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
+  const { data: searchResult, isLoading, error } = useBibleSearch(query);
 
   React.useEffect(() => {
-    async function setSelectedTextAsQuery() {
-      try {
-        const selectedText = await getSelectedText();
-        if (selectedText) {
-          const { ref, version } = parseReference(selectedText);
-          setQuery((old) => ({ ...old, search: ref, version: version || old.version }));
-        }
-      } catch (error) {
-        /* empty */
-      }
-    }
-
-    const isArgsEmpty =
-      Object.keys(props.arguments).length === 0 || (props.arguments.ref === "" && props.arguments.version === "");
-    if (isArgsEmpty) {
-      setSelectedTextAsQuery();
+    // If opened with a hotkey, the arguments object will be empty (despite the types not reflecting this!)
+    const isHotkeyLaunch = Object.keys(props.arguments).length === 0;
+    // If not launched with a hotkey, but provided no arguments (user triggers command without typing anything),
+    // the arguments will be empty strings
+    const launchedWithNoArguments = props.arguments.ref === "" && props.arguments.version === "";
+    // In either of these cases, try to get the selected text and use that as the search query
+    if (isHotkeyLaunch || launchedWithNoArguments) {
+      getSelectedText()
+        .then((selectedText) => {
+          if (selectedText.trim()) {
+            const { ref, version } = parseReference(selectedText);
+            setQuery((old) => ({ search: ref, version: version || old.version }));
+          }
+        })
+        .catch(() => {
+          // No text is selected – do nothing
+        });
     }
   }, []);
 
-  const performSearch = React.useCallback(async () => {
-    if (query.search === "") {
-      setSearchResult(undefined);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await search(query.search, query.version, { includeVerseNumbers: prefs.includeVerseNumbers });
-      setSearchResult(result);
-    } catch (error) {
-      if (error instanceof Error) {
-        showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [prefs.includeVerseNumbers, query.search, query.version]);
-
   React.useEffect(() => {
-    // Don't search when query changes if the user only wants to search when they press enter.
-    if (!prefs.enterToSearch) {
-      performSearch();
+    if (error) {
+      showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
     }
-  }, [performSearch, prefs.enterToSearch]);
+  }, [error]);
 
-  const detailContent = React.useMemo(() => {
-    if (!searchResult?.passages.length) return null;
-    return { markdown: createMarkdown(prefs, searchResult), clipboardText: createClipboardText(prefs, searchResult) };
-  }, [prefs, searchResult]);
-
-  function getEmptyViewText() {
-    if (isLoading) {
-      return "Searching...";
-    } else if (prefs.enterToSearch && searchResult === undefined) {
-      return "Press Enter to Search";
-    } else if (query.search === "") {
-      return "Start Typing to Search";
-    } else {
-      return "No Results";
+  function renderSearchResults() {
+    if (!searchResult || searchResult.passages.length === 0) {
+      return (
+        <List.EmptyView
+          title={isLoading ? "Searching..." : query.search === "" ? "Start Typing to Search" : "No Results"}
+          icon="../assets/extension-icon-64.png"
+        />
+      );
     }
+    const formattingOptions: FormattingOptions = {
+      includeCopyright,
+      includeVerseNumbers,
+      includeReferences,
+      oneVersePerLine,
+    };
+    const copyShortcut: Keyboard.Shortcut = {
+      macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+      windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+    };
+    if (!separatePassages) {
+      const markdown = createMarkdown(formattingOptions, searchResult);
+      const clipboardText = createClipboardText(formattingOptions, searchResult);
+      return (
+        <List.Item
+          title={searchResult.passages.map((p) => p.reference).join("; ")}
+          detail={<List.Item.Detail markdown={markdown} />}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard content={clipboardText} />
+              <Action.Paste content={clipboardText} shortcut={copyShortcut} />
+              <Action.OpenInBrowser
+                title="Open at BibleGateway.com"
+                url={searchResult.url.toString()}
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
+            </ActionPanel>
+          }
+        />
+      );
+    }
+    return searchResult.passages.map((passage) => {
+      // Create a temporary search result with just this passage
+      const passageUrl = new URL(searchResult.url);
+      passageUrl.searchParams.set("search", passage.reference);
+      const passageResult = { ...searchResult, passages: [passage], url: passageUrl };
+
+      const markdown = createMarkdown(formattingOptions, passageResult);
+      const clipboardText = createClipboardText(formattingOptions, passageResult);
+      return (
+        <List.Item
+          key={passage.reference}
+          title={passage.reference}
+          detail={<List.Item.Detail markdown={markdown} />}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard content={clipboardText} />
+              <Action.Paste content={clipboardText} shortcut={copyShortcut} />
+              <Action.OpenInBrowser
+                title="Open at BibleGateway.com"
+                url={passageResult.url.toString()}
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
+            </ActionPanel>
+          }
+        />
+      );
+    });
   }
 
-  const searchAction = <Action title="Search" icon={Icon.Binoculars} onAction={performSearch} />;
   return (
     <List
       isLoading={isLoading}
@@ -97,82 +139,99 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.BibleS
           tooltip="Select Bible Version"
           onChange={(version) => setQuery((old) => ({ ...old, version }))}
           value={query.version || undefined}
-          defaultValue={prefs.defaultBibleVersion}
+          defaultValue={defaultBibleVersion}
         >
           {bibleVersions.map(([name, abbreviation]) => (
             <List.Dropdown.Item title={name} value={abbreviation} key={abbreviation} />
           ))}
         </List.Dropdown>
       }
-      onSearchTextChange={(newQuery) => setQuery((old) => ({ ...old, search: newQuery }))}
+      onSearchTextChange={(search) => setQuery((old) => ({ ...old, search }))}
     >
-      {searchResult && searchResult.passages.length > 0 && detailContent ? (
-        <List.Item
-          title={createReferenceList(searchResult)}
-          detail={<List.Item.Detail markdown={detailContent.markdown} />}
-          actions={
-            <ActionPanel>
-              {prefs.enterToSearch && searchAction}
-              <Action.CopyToClipboard content={detailContent.clipboardText} />
-              <Action.Paste
-                content={detailContent.clipboardText}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              />
-              <Action.OpenInBrowser
-                title="Open at BibleGateway.com"
-                url={searchResult.url}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.EmptyView
-          title={getEmptyViewText()}
-          icon="../assets/extension-icon-64.png"
-          actions={<ActionPanel>{prefs.enterToSearch && searchAction}</ActionPanel>}
-        />
-      )}
+      {renderSearchResults()}
     </List>
   );
 }
 
-function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult) {
-  const copyright = prefs.includeCopyright ? `\n\n---\n\n*${searchResult.copyright}*` : "";
+function useBibleSearch(query: { search: string; version: string }) {
+  const [data, setData] = React.useState<ReferenceSearchResult | undefined>(undefined);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<Error | null>(null);
+  React.useEffect(() => {
+    if (!query.search) {
+      setData(undefined);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
 
-  return (
-    searchResult.passages
-      .map((p) => {
-        const passageText = p.verses.join(prefs.oneVersePerLine ? "  \n" : " ");
-        const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        const reference = prefs.includeReferences ? `  \n${p.reference} (${versionAbbr})` : "";
-
-        return passageText + reference;
+    let ignore = false;
+    setIsLoading(true);
+    search(query.search, query.version)
+      .then((result) => {
+        if (!ignore) {
+          setData(result);
+          setError(null);
+        }
       })
-      .join("\n\n") + copyright
-  );
+      .catch((err) => {
+        if (!ignore) {
+          setData(undefined);
+          setError(err);
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [query.search, query.version]);
+  return { data, error, isLoading };
 }
 
-function createClipboardText(prefs: Preferences, searchResult: ReferenceSearchResult) {
-  const copyright = prefs.includeCopyright ? `\n\n${searchResult.copyright}` : "";
+function createMarkdown(prefs: FormattingOptions, searchResult: ReferenceSearchResult) {
+  const { includeCopyright, includeReferences, includeVerseNumbers, oneVersePerLine } = prefs;
 
-  return (
-    searchResult.passages
-      .map((p) => {
-        const passageText = p.verses.join(prefs.oneVersePerLine ? "\n" : " ");
-        const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        const reference = prefs.includeReferences ? `\n${p.reference} (${versionAbbr})` : "";
+  const formattedPassages = searchResult.passages
+    .map((passage) => {
+      const verses = passage.verses
+        .map((v) => (includeVerseNumbers ? `[${v.verse}] ${v.text}` : v.text))
+        .join(oneVersePerLine ? "  \n" : " ");
+      if (includeReferences) {
+        const reference = `${passage.reference} (${getContentsOfLastParenthesis(searchResult.version)})`;
+        return `${verses}  \n${reference}`;
+      }
+      return verses;
+    })
+    .join("\n\n");
 
-        return passageText + reference;
-      })
-      .join("\n\n") + copyright
-  );
+  if (includeCopyright) {
+    return `${formattedPassages}\n\n---\n\n*${searchResult.copyright}*`;
+  }
+  return formattedPassages.trim();
 }
 
-function createReferenceList(searchResult: ReferenceSearchResult) {
-  const refList = searchResult.passages.map((p) => p.reference).join("; ");
-  const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-  return `${refList} (${versionAbbr})`;
+function createClipboardText(prefs: FormattingOptions, searchResult: ReferenceSearchResult) {
+  const { includeReferences, includeVerseNumbers, oneVersePerLine } = prefs;
+
+  const formattedPassages = searchResult.passages
+    .map((p) => {
+      const verses = p.verses
+        .map((v) => (includeVerseNumbers ? `[${v.verse}] ${v.text}` : v.text))
+        .join(oneVersePerLine ? "\n" : " ");
+      if (includeReferences) {
+        const reference = `${p.reference} (${getContentsOfLastParenthesis(searchResult.version)})`;
+        return `${verses}\n${reference}`;
+      }
+      return verses;
+    })
+    .join("\n\n");
+
+  return formattedPassages.trim();
 }
 
 /**

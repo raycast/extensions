@@ -1,10 +1,17 @@
 # Apple Reminders Changelog
 
-## [Add List Management] - 2025-09-30
+## [Add List Management] - 2025-10-19
 
 - Add commands to create, view, edit, and delete reminder lists
 - Add AI tool integration for list management
 - Support 9 color options matching Apple Reminders' color palette
+
+## [Add ability to move reminders between lists] - 2025-10-17
+
+- Add list selection dropdown in the Edit Reminder form
+- Implement `moveToList` function to change reminder's list
+- Allow users to move reminders to different lists when editing
+- Added logic to only update title/notes and list if they have changed
 
 ## [Add Creation Date option for sorting] - 2025-06-13
 

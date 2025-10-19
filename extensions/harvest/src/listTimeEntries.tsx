@@ -27,7 +27,7 @@ import { HarvestTimeEntry } from "./services/responseTypes";
 import New from "./new";
 import { execSync } from "child_process";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./services/requestTypes";
-import { sumBy } from "lodash";
+import { sumBy } from "es-toolkit";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -98,7 +98,7 @@ export default function Command() {
   }, [items]);
 
   useEffect(() => {
-    const dayTotal = sumBy(timeEntries, "hours")?.toFixed(2) ?? "";
+    const dayTotal = sumBy(timeEntries, (o) => o.hours)?.toFixed(2) ?? "";
     setNavSubtitle(formatHours(dayTotal, company));
   }, [timeEntries, company]);
 

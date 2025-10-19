@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -31,7 +31,6 @@ export const RemoveFromFavoritesAction = ({
 }) => (
   <Action
     icon={Icon.RemovePerson}
-    // eslint-disable-next-line @raycast/prefer-title-case
     title="Remove from Favorites"
     style={Action.Style.Destructive}
     onAction={async () => {
@@ -61,19 +60,20 @@ export const SaveCharacterToFavorites = ({
 }) => {
   const [hasCharacter, setHasCharacter] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const hasCharacter = await hasCharacterInFavorites(characterData);
     setHasCharacter(hasCharacter);
-  };
+  }, [characterData]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   return hasCharacter ? (
     <>
       {environment.commandName === "lookup" && (
         <Action
+          icon={Icon.Star}
           title="View in Favorites"
           onAction={() => {
             launchCommand({ name: "favorites", type: LaunchType.UserInitiated });
@@ -124,27 +124,26 @@ export const CharacterDetail = ({
     setTotalExpChart(totalExpChart);
   };
 
-  const loadLatestCharacterData = async () => {
-    if (!checkLatest) return;
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "",
-      message: "Loading latest character data...",
-    });
-    try {
-      const characterData = await lookupCharacter(character.Region, character.Name);
-      setCharacter(characterData);
-      saveCharacterToFavorites(characterData);
-    } catch {
-      // Handle error gracefully
-    } finally {
-      toast.hide();
-    }
-  };
-
   useEffect(() => {
+    const loadLatestCharacterData = async () => {
+      if (!checkLatest) return;
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "",
+        message: "Loading latest character data...",
+      });
+      try {
+        const characterData = await lookupCharacter(character.Region, character.Name);
+        setCharacter(characterData);
+        saveCharacterToFavorites(characterData);
+      } catch {
+        // Handle error gracefully
+      } finally {
+        toast.hide();
+      }
+    };
     loadLatestCharacterData();
-  }, []);
+  }, [character.Region, character.Name, checkLatest]);
 
   useEffect(() => {
     loadCharts(character);

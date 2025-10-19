@@ -1,51 +1,14 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 
 import type { Result } from "./lib/query";
-import { digByQuery } from "./lib/query";
+import { useDigByQuery } from "./lib/query";
 
 export default function DigSearchResultsList() {
   const [query, setQuery] = useState<string | null>(null);
   const { push } = useNavigation();
-  const abortable = useRef<AbortController | null>(null);
-
-  const { isLoading, data } = useCachedPromise(
-    async (query: string | null) => {
-      if (!query) {
-        return {
-          result: [],
-          validDomain: true,
-        };
-      }
-
-      // Only run if domain is found
-      const queryArr = query.split(" ");
-      const domainMatch = queryArr[0].match(
-        /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,16}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi,
-      );
-
-      if (!domainMatch) {
-        return {
-          result: [],
-          validDomain: false,
-        };
-      }
-
-      const result = await digByQuery(query, abortable.current?.signal);
-      return {
-        result,
-        validDomain: true,
-      };
-    },
-    [query],
-    {
-      initialData: { result: [], validDomain: true },
-      keepPreviousData: true,
-      abortable,
-    },
-  );
+  const { isLoading, data, revalidate } = useDigByQuery(query);
 
   return (
     <List
@@ -72,6 +35,12 @@ export default function DigSearchResultsList() {
                 icon={Icon.Sidebar}
                 onAction={() => push(<Details {...result} />)}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
+              />
+              <Action
+                title="Refresh"
+                icon={Icon.Repeat}
+                onAction={() => revalidate()}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
             </ActionPanel>
           }

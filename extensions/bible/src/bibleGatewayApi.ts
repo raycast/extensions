@@ -1,67 +1,88 @@
 import { URL, URLSearchParams } from "url";
-import axios from "axios";
 import * as cheerio from "cheerio";
 
 export interface ReferenceSearchResult {
-  url: string;
+  url: URL;
   passages: BiblePassage[];
   version: string;
   copyright: string;
 }
 
 interface BiblePassage {
-  verses: string[];
+  verses: Verse[];
   reference: string;
 }
 
-interface SearchOptions {
-  includeVerseNumbers?: boolean;
+interface Verse {
+  chapter: number;
+  verse: number;
+  text: string;
 }
 
-export async function search(
-  query: string,
-  version: string,
-  options?: SearchOptions,
-  signal?: AbortSignal
-): Promise<ReferenceSearchResult> {
+export async function search(query: string, version: string): Promise<ReferenceSearchResult> {
   const url = createSearchUrl(query, version);
-  const result = await axios.get(url.toString(), { signal });
-  const { passages, version: fullVersion, copyright } = parsePassagesFromHtml(result.data, options);
+  const result = await fetch(url, { headers: { accept: "text/html" } });
+  const { passages, version: fullVersion, copyright } = parsePassagesFromHtml(await result.text());
   url.searchParams.delete("interface");
-  return { version: fullVersion, passages, copyright, url: url.toString() };
+  return { version: fullVersion, passages, copyright, url };
 }
 
-function parsePassagesFromHtml(html: string, options?: SearchOptions) {
+function parsePassagesFromHtml(html: string) {
   const $ = cheerio.load(html);
   const version = $(".publisher-info-bottom strong").text();
   const copyright = $(".publisher-info-bottom p").first().text();
-  const passages = $(".passage-cols")
+  const passages: BiblePassage[] = $(".passage-table")
     .map((_, passageEl) => {
       const reference = $(".bcv", passageEl).text();
+      let lastVerse = NaN;
+      let lastChapter = NaN;
       const verses = $("p .text", passageEl)
-        .map((_, textClassEl) => {
-          const verseNum = $("sup.versenum", textClassEl);
-          const chapternum = $("span.chapternum", textClassEl);
-          if (options?.includeVerseNumbers) {
-            verseNum.replaceWith(`[${verseNum.text().trim()}] `);
-            chapternum.replaceWith("[1] "); // chapter number replaces first verse number
-          } else {
-            verseNum.remove();
-            chapternum.remove();
-          }
-          $("sup", textClassEl).remove(); // remove remaining sups like .footnotes and .crossreferences
-          return $(textClassEl).text();
+        .map((_, textClassEl): Verse => {
+          // Chapter is only specified at the start of a new chapter,
+          // and only for some versions.
+          const chapterEl = $("span.chapternum", textClassEl);
+          let chapter = parseInt(chapterEl.text());
+          if (chapter) lastVerse = 1; // reset verse number for new chapter
+          chapter = chapter || lastChapter; // use last chapter if chapter number is missing
+          lastChapter = chapter;
+
+          // Verse won't be present for every verse (e.g. poetry, or first verse of chapter)
+          const verseEl = $("sup.versenum", textClassEl);
+          const verse = parseInt(verseEl.text()) || lastVerse;
+          lastVerse = verse;
+
+          // Remove everything that is not part of the verse text before getting the text
+          chapterEl.remove();
+          verseEl.remove();
+          $("sup", textClassEl).remove();
+
+          const text = $(textClassEl).text().trim();
+          return { chapter, verse, text };
         })
         .toArray();
-      return { verses, reference, version };
+
+      // The `verses` array might have multiple entries that belong to the same verse.
+      // We need to combine consecutive verse entries that have the same verse number.
+      const combinedVerses: Verse[] = [];
+      for (const verse of verses) {
+        const lastCombinedVerse = combinedVerses[combinedVerses.length - 1];
+        if (lastCombinedVerse && lastCombinedVerse.verse === verse.verse) {
+          lastCombinedVerse.text += ` ${verse.text}`;
+        } else {
+          combinedVerses.push(verse);
+        }
+      }
+
+      return { verses: combinedVerses, reference, version };
     })
     .toArray()
-    .reduce((acc, passage) => {
+    .reduce((acc: BiblePassage[], passage: BiblePassage) => {
+      // Deduplicate passages by reference
       if (!acc.some((p) => p.reference === passage.reference)) {
         acc.push(passage);
       }
       return acc;
-    }, [] as BiblePassage[]);
+    }, []);
   return { passages, version, copyright };
 }
 

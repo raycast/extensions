@@ -2,10 +2,7 @@ import { LaunchProps, Toast, getSelectedText, showToast, getPreferenceValues } f
 import { openDocumentation, sanitizeComponentName, getComponentInfo } from "./utils/components";
 import { handleCommandError } from "./utils/commands";
 
-/**
- * Main function to handle component theme search
- */
-export default async function SearchComponentTheme(props: LaunchProps<{ arguments: Arguments.SearchComponentTheme }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.SearchComponentTheme }>) {
   try {
     const { prefix } = getPreferenceValues();
     const name = props.arguments?.componentName ?? (await getSelectedText()) ?? "";
@@ -15,7 +12,6 @@ export default async function SearchComponentTheme(props: LaunchProps<{ argument
       return;
     }
 
-    // Create a temporary component item to use with our utility functions
     const hasProsePrefix = name.startsWith("Prose") || name.startsWith("prose");
     const sanitizedName = sanitizeComponentName(name, prefix ?? "U");
     const componentInfo = getComponentInfo(sanitizedName);

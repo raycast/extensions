@@ -1,5 +1,10 @@
 # Installed Extensions Changelog
 
+## [Enhancement] - 2025-10-08
+
+- Add support for Windows
+- Bump all dependencies to the latest
+
 ## [Maintenance] - 2025-08-28
 
 - Use the Raycast built-in `Action.CopyToClipboard` instead of manually copying to clipboard and showing HUD

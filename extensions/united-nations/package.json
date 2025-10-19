@@ -9,6 +9,10 @@
   "crossExtensions": [
     "litomore/say"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Data",
     "Media",
@@ -176,7 +180,7 @@
     },
     {
       "type": "checkbox",
-      "title": "Detect System Voice Settings for Text-to-Speech",
+      "title": "Detect System Voice Settings for TTS (macOS only)",
       "label": "Enable",
       "name": "detechSystemVoiceSettings",
       "description": "Enable this option to detect available voices on your system for text-to-speech. (Siri voices are not included)",
@@ -194,23 +198,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.5",
+    "@raycast/api": "^1.103.3",
     "@raycast/utils": "^2.2.1",
     "cheerio": "^1.1.2",
-    "fast-xml-parser": "^5.2.5",
-    "got": "^14.4.7",
+    "fast-xml-parser": "^5.3.0",
+    "got": "^14.4.9",
     "mac-say": "^0.3.3",
     "pinyin-pro": "^3.27.0",
     "raycast-cross-extension": "^0.2.3",
     "turndown": "^7.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.3.0",
-    "@types/react": "^19.1.10",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.7.0",
+    "@types/react": "^19.2.2",
     "@types/turndown": "^5.0.5",
-    "eslint": "^9.33.0",
+    "eslint": "^9.37.0",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }

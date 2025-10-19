@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs/promises");
 const path = require("path");
-const axios = require("axios");
 const cheerio = require("cheerio");
 
 /**
@@ -9,8 +8,8 @@ const cheerio = require("cheerio");
  * @returns {Promise<[string, string][]>} An array of [version full name, version abbreviation] tuples
  */
 async function versions() {
-  const response = await axios.get("https://biblegateway.com/passage?interface=print");
-  const $ = cheerio.load(response.data);
+  const response = await fetch("https://biblegateway.com/passage?interface=print");
+  const $ = cheerio.load(await response.text());
   const versions = $("select.search-dropdown")
     .children("option:not(.lang):not(.spacer)")
     .map((_, el) => {

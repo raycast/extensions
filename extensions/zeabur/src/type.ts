@@ -183,3 +183,15 @@ export interface RedeployService {
     redeployService: boolean;
   };
 }
+
+export interface ProjectUsage {
+  data: {
+    projectUsage: {
+      usages: {
+        entity: string;
+        usage: number;
+      }[];
+      budget: number;
+    };
+  };
+}

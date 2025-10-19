@@ -38,11 +38,31 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
       throw Error("No team found");
     }
 
+    let stateId: string | undefined;
+
+    if (preferences.preferredStatusName) {
+      const states = await linearClient.workflowStates({
+        filter: {
+          team: { id: { eq: teamId } },
+          name: { eq: preferences.preferredStatusName },
+        },
+      });
+
+      const state = states.nodes[0];
+
+      if (!state) {
+        throw Error(`Status "${preferences.preferredStatusName}" not found`);
+      }
+
+      stateId = state.id;
+    }
+
     const payload = await linearClient.createIssue({
       teamId: teamId,
       title: props.arguments.title,
       description: props.arguments.description,
       assigneeId: viewer.id,
+      stateId: stateId,
     });
 
     const issue = await payload.issue;

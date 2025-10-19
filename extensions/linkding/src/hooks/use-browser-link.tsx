@@ -40,6 +40,6 @@ export const useBrowserLink = ({ ignoreErrors }: Props = {}) => {
       onError: (error) => {
         if (!ignoreErrors) showFailureToast(error.message);
       },
-    }
+    },
   );
 };

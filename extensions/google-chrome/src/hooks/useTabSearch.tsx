@@ -1,9 +1,10 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { getOpenTabs } from "../actions";
 import { Preferences, SearchResult, Tab } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
+import { usePromise } from "@raycast/utils";
 
 /**
  * @name useTabSearch
@@ -19,30 +20,35 @@ import { NotInstalledError, UnknownError } from "../components";
  */
 export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullable<Tab[]> } {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
-  const [data, setData] = useState<Tab[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [errorView, setErrorView] = useState<ReactNode | undefined>();
-  const queryParts = query.toLowerCase().split(/\s+/);
 
-  useEffect(() => {
-    getOpenTabs(useOriginalFavicon)
-      .then((tabs) =>
-        tabs
+  const [errorView, setErrorView] = useState<ReactNode | undefined>();
+  const [isEmpty, setIsEmpty] = useState<boolean>(false);
+
+  const { isLoading, data: tabData } = usePromise(
+    (useOriginalFavicon: boolean, query: string) => {
+      return getOpenTabs(useOriginalFavicon).then((tabs) => {
+        const queryParts = query.toLowerCase().split(/\s+/);
+        setErrorView(undefined);
+        setIsEmpty(tabs.length === 0);
+        return tabs
           .map((tab): [Tab, string] => [tab, `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`])
           .filter(([, searchable]) => queryParts.reduce((isMatch, part) => isMatch && searchable.includes(part), true))
-          .map(([tab]) => tab),
-      )
-      .then(setData)
-      .then(() => setIsLoading(false))
-      .catch((e) => {
-        if (e.message === NOT_INSTALLED_MESSAGE) {
+          .map(([tab]) => tab);
+      });
+    },
+    [useOriginalFavicon, query],
+    {
+      onError(error) {
+        if (error.message === NOT_INSTALLED_MESSAGE) {
           setErrorView(<NotInstalledError />);
         } else {
           setErrorView(<UnknownError />);
         }
-        setIsLoading(false);
-      });
-  }, [query]);
+      },
+    },
+  );
+
+  const data = isEmpty ? [] : tabData || [];
 
   return { data, isLoading, errorView };
 }

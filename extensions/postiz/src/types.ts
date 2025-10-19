@@ -8,7 +8,7 @@ export enum Identifier {
   "instagram-standalone" = "instagram-standalone",
   Instagram = "instagram",
   Lemmy = "lemmy",
-  "linkedin-page" = "linkedin-page",
+  "LinkedIn Page" = "linkedin-page",
   LinkedIn = "linkedin",
   "mastodon-custom" = "mastodon-custom",
   Mastodon = "mastodon",

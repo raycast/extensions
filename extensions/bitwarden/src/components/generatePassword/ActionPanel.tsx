@@ -25,20 +25,27 @@ const GeneratePasswordActionPanel = (props: GeneratePasswordActionPanelProps) =>
             title="Copy Password"
             icon={Icon.Clipboard}
             onAction={handleCopy(password)}
-            shortcut={{ key: "enter", modifiers: ["cmd"] }}
+            shortcut={{ macOS: { key: "enter", modifiers: ["opt"] }, windows: { key: "enter", modifiers: ["alt"] } }}
           />
           <Action.Paste
             title="Paste Password to Active App"
             icon={Icon.Text}
             content={password}
-            shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
+            shortcut={{
+              key: "enter",
+              macOS: { key: "enter", modifiers: ["opt", "shift"] },
+              windows: { key: "enter", modifiers: ["alt", "shift"] },
+            }}
           />
         </>
       )}
       <Action
         title="Regenerate Password"
         icon={Icon.ArrowClockwise}
-        shortcut={{ key: "backspace", modifiers: ["cmd"] }}
+        shortcut={{
+          macOS: { key: "backspace", modifiers: ["opt"] },
+          windows: { key: "backspace", modifiers: ["alt"] },
+        }}
         /* avoid passing a reference to onAction because, for some reason, a string
         is passed to it, even though the type says otherwise 🤔 */
         onAction={() => regeneratePassword()}
