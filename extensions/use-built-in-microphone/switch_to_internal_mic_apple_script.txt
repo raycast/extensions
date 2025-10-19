@@ -1,0 +1,31 @@
+tell application "System Settings"
+	activate
+	
+end tell
+
+tell application "System Events"
+	tell process "System Settings"
+		-- Navigate to Sound settings
+		click menu item "Sound" of menu "View" of menu bar 1
+		
+		-- Click on the Input radio button (the second radio button in the tab group)
+		click radio button 2 of tab group 1 of group 2 of scroll area 1 of group 1 of group 2 of splitter group 1 of group 1 of window "Sound"
+		
+		
+		-- Find and select the MacBook Pro Microphone by searching for it
+		set microphoneRows to rows of outline 1 of scroll area 1 of group 2 of scroll area 1 of group 1 of group 2 of splitter group 1 of group 1 of window "Sound"
+		
+		repeat with aRow in microphoneRows
+			try
+				-- Get the device name from the first static text in the row
+				set deviceName to value of static text 1 of group 1 of UI element 1 of aRow
+				if deviceName contains "MacBook" and deviceName contains "Microphone" then
+					select aRow
+					exit repeat
+				end if
+			on error errMsg
+				-- Skip rows that don't match the expected structure
+			end try
+		end repeat
+	end tell
+end tell
