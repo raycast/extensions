@@ -1,12 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  Icon,
-  Toast,
-  showToast,
-} from "@raycast/api";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, Toast, showToast } from "@raycast/api";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { FormValues, Bookmark } from "../types";

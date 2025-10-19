@@ -9,6 +9,7 @@ import { useRequest } from "./hooks/useRequest";
 import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
 
 export default function Main(): ReactElement {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const preferences = getPreferenceValues();
   const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>("last-used-collection", "0");
 
