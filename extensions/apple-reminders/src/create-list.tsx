@@ -46,11 +46,8 @@ export function CreateListForm({ draftValues }: CreateListFormProps) {
       try {
         const payload: NewList = {
           title: values.title,
+          color: values.color,
         };
-
-        if (values.color) {
-          payload.color = values.color;
-        }
 
         const list = await createList(payload);
 
