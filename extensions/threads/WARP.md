@@ -37,7 +37,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Extending the extension
 
-- Add a new command by declaring it in package.json (commands array) and creating a matching src/<name>.tsx module; wire arguments and preferences in the manifest and consume them via LaunchProps/getPreferenceValues.
+- Add a new command by declaring it in package.json (commands array) and creating a matching src/command.tsx module; wire arguments and preferences in the manifest and consume them via LaunchProps/getPreferenceValues.
 
 ## Repo facts
 
