@@ -57,7 +57,7 @@ export function openInApp(
     }
     showHUD(`Opening ${recent ? recent.title : tool.title}`)
       .then(() => visit && recent && visit(recent, tool))
-      .then(() => recent !== null && execPromise(cmd) && null)
+      .then(() => (recent !== null ? execPromise(cmd) : null))
       .then(() => popToRoot())
       .catch((err) => showToast(Toast.Style.Failure, "Failed", err.message).then(() => captureException(err)));
   };
