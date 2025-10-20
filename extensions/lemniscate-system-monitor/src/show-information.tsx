@@ -105,7 +105,8 @@ export default function Command() {
 }
 
 async function killProcess(pid: number) {
-  const command = process.platform === "win32" ? `taskkill /F /PID ${pid}` : `kill -9 ${pid}`;
+  const command =
+    process.platform === "win32" ? `taskkill /F /PID ${pid}` : `kill -9 ${pid}`;
   exec(command, (err) => {
     if (err) {
       showToast({
