@@ -1,10 +1,6 @@
 import { runAppleScript } from "@raycast/utils";
 import { open, getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  enableSpaceSwitching: boolean;
-}
-
 /**
  * Switch to a specific tab in Helium browser by its URL
  *
@@ -58,7 +54,6 @@ async function switchToHeliumTabSimple(escapedUrl: string): Promise<boolean> {
         repeat with t in tabs of w
           if URL of t is "${escapedUrl}" then
             set active tab index of w to tabIndex
-            set index of w to 1
             activate
             set foundTab to true
             exit repeat
@@ -157,7 +152,6 @@ async function switchToHeliumTabWithSpaceSwitching(escapedUrl: string): Promise<
         repeat with t in tabs of w
           if URL of t is "${escapedUrl}" then
             set active tab index of w to tabIndex
-            set index of w to 1
             set foundTab to true
             exit repeat
           end if
