@@ -16,7 +16,7 @@
 	"screenshots": [
 		{
 			"title": "Search Roblox Documentation",
-			"url": "screenshot.png"
+			"url": "metadata/screenshot.png"
 		}
 	],
 	"commands": [
@@ -28,8 +28,7 @@
 		}
 	],
 	"dependencies": {
-		"@raycast/api": "^1.103.3",
-		"@raycast/utils": "^2.2.1"
+		"@raycast/api": "^1.103.3"
 	},
 	"devDependencies": {
 		"@raycast/eslint-config": "^2.0.4",
