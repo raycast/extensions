@@ -83,9 +83,15 @@ import { t } from "./i18n";
 const text = t("batteryStatus"); // 日本語: "バッテリー状態", 英語: "Battery Status"
 ```
 
+**型定義**:
+- `package.json`の`preferences`設定から`raycast-env.d.ts`が自動生成される
+- グローバル型`Preferences`が自動的に定義されるため、手動定義は不要
+- `tsconfig.json`の`include`に`raycast-env.d.ts`を追加する必要がある
+
 **注意事項**:
 - 言語変更はエクステンション再起動時に反映される
 - リアルタイム切り替えは非対応（シンプルさ優先）
+- Preferences型は手動で定義せず、必ず自動生成された型を使用すること
 
 ### テスト
 
@@ -93,8 +99,8 @@ const text = t("batteryStatus"); // 日本語: "バッテリー状態", 英語: 
 
 **テストファイル**:
 - `battery-status.test.ts` - UIコンポーネントとバッテリー情報パース
-- `helpers.test.ts` - ヘルパー関数（29テスト）
-- `i18n.test.ts` - 多言語対応とエラーハンドリング（9テスト）
+- `helpers.test.ts` - ヘルパー関数のテスト
+- `i18n.test.ts` - 多言語対応とエラーハンドリングのテスト
 
 **モック**:
 - `@raycast/api` - Raycast APIのモック

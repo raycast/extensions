@@ -1,6 +1,6 @@
 # Battery Status Changelog
 
-## [Initial Version] - 2025-10-18
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 

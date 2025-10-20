@@ -1,12 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { execSync } from "child_process";
 
-export type Language = "en" | "ja" | "auto";
-
-export interface Preferences {
-  language: Language;
-}
-
 interface Translations {
   // Section titles
   batteryStatus: string;
