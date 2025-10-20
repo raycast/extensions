@@ -61,25 +61,17 @@ export default function CreateTaskForm(props: {
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
         };
 
+        // Use memberships to atomically set project and section together
         if (values.projects && values.projects.length > 0) {
-          taskPayload.projects = values.projects;
+          if (values.section && values.projects.length === 1) {
+            // Use memberships API for atomic project + section assignment
+            taskPayload.memberships = [{ project: values.projects[0], section: values.section }];
+          } else {
+            taskPayload.projects = values.projects;
+          }
         }
 
         const task = await createTask(taskPayload);
-
-        if (values.section && values.projects.length === 1) {
-          try {
-            const { addTaskToSection } = await import("../api/projects");
-            await addTaskToSection(task.gid, values.section);
-          } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Task created but failed to assign section",
-              message: getErrorMessage(error),
-            });
-            return;
-          }
-        }
 
         if (shouldCloseMainWindow) {
           await closeMainWindow();

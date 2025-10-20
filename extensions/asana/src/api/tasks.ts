@@ -93,6 +93,7 @@ export type TaskPayload = {
   start_on: string;
   assignee: string;
   custom_fields: Record<string, string>;
+  html_notes: string;
   memberships: { project: string; section?: string }[];
 }>;
 
