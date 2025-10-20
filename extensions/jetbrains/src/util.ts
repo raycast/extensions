@@ -146,7 +146,7 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
               // convert xmlJson object to array of recentEntries
               (recentEntry: xmlJson): recentEntry => {
                 const projectOpenTimestamp = (recentEntry.value[0].RecentProjectMetaInfo[0].option ?? []).find(
-                  (recentOption: xmlJson) => recentOption._attr.name === "projectOpenTimestamp"
+                  (recentOption: xmlJson) => recentOption._attr.name === "projectOpenTimestamp",
                 );
                 const path = recentEntry._attr.key.replace("$USER_HOME$", homedir());
                 return {
@@ -154,14 +154,14 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
                   icon: app.icon ?? JetBrainsIcon,
                   path: path,
                   dirname: dirname(path).replace(homedir(), "~").replace("/Volumes", ""),
-                  opened: Number(projectOpenTimestamp?._attr.value) ?? 0,
+                  opened: Number(projectOpenTimestamp?._attr.value || 0),
                   parts: path.substr(1).split("/").reverse().slice(1).join(" ← "),
                   appName: app.title,
                   app,
                   id: `${path}.${app.title}`,
                   xmlFile,
                 };
-              }
+              },
             )
             // check if the file actually exists to prevent breaking open with actions
             .map(async (recent: recentEntry) => {
@@ -173,7 +173,7 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
               } as recentEntry;
             })
         );
-      })
+      }),
     )
     .catch((err) => {
       captureException(err);
@@ -194,13 +194,13 @@ export const loadAppEntries = async (apps: AppHistory[]): Promise<AppHistory[]> 
           app.entries = [...(app.entries ?? []), ...entries];
         }
         return app;
-      })
+      }),
     )
   ).map((app) => ({
     ...app,
     entries: createUniqueArray<recentEntry>(
       "path",
-      (app.entries ?? []).sort((a, b) => b.opened - a.opened)
+      (app.entries ?? []).sort((a, b) => b.opened - a.opened),
     ),
     // entries: app.entries
   }));
@@ -222,7 +222,7 @@ export const getJetBrainsToolboxApp = async (): Promise<ToolboxApp | undefined> 
     return jb;
   }
   const version = await execPromise(`defaults read "${jb.path}/Contents/Info.plist" CFBundleShortVersionString`).then(
-    ({ stdout }) => stdout.trim()
+    ({ stdout }) => stdout.trim(),
   );
   return {
     ...jb,
@@ -240,7 +240,7 @@ const globFromChannel = async (tool: Tool, channel: ChannelDetail) => {
   const recentProjectsFilenames = build?.tool?.intelliJProperties?.recentProjectsFilenames ?? [];
   if (directoryPatterns.length === 0 || recentProjectsFilenames.length === 0) {
     const defaults = (tool?.extensions ?? []).find(
-      (extension: Extension) => extension?.defaultConfigDirectories ?? false
+      (extension: Extension) => extension?.defaultConfigDirectories ?? false,
     );
     if (defaults?.defaultConfigDirectories === undefined) {
       return ["Space Desktop", "Fleet", "dotTrace"].includes(tool.toolName)
@@ -273,7 +273,7 @@ const getReadFile = async (filePath: string) => {
     return String(await readFile(filePath));
   } catch (err) {
     showToast(Toast.Style.Failure, `Read file for ${filePath} failed with error \n\n ${err}`).catch(() =>
-      captureException(err)
+      captureException(err),
     );
     return null;
   }
@@ -284,7 +284,7 @@ const getReadJsonFile = async (filePath: string) => {
     return JSON.parse((await getReadFile(filePath)) ?? "{}");
   } catch (err) {
     showToast(Toast.Style.Failure, `History lookup for ${filePath} failed with error \n\n ${err}`).catch(() =>
-      captureException(err)
+      captureException(err),
     );
     return {};
   }
@@ -299,7 +299,7 @@ const doWriteFile = async (filePath: string, contents: string) => {
     }
   } catch (err) {
     showToast(Toast.Style.Failure, `Write to ${filePath} failed with error \n\n ${err}`).catch(() =>
-      captureException(err)
+      captureException(err),
     );
   }
 };
@@ -312,7 +312,7 @@ const writeSettingsFile = async (filePath: string, settings: JetBrainsToolboxSet
     await doWriteFile(filePath, JSON.stringify(settings));
   } catch (err) {
     showToast(Toast.Style.Failure, `Write ${filePath} failed with error \n\n ${err}`).catch(() =>
-      captureException(err)
+      captureException(err),
     );
   }
 };
@@ -333,8 +333,8 @@ export const getChannels = async (): Promise<(Channel | undefined)[]> =>
         : {
             ...((await getReadJsonFile(file.path)) as Channel),
             channelId: file.path.replace(removePathRegex, "$1"),
-          }
-    )
+          },
+    ),
   );
 
 export const addFav = async (path: string, appId: string): Promise<void> => {
@@ -381,8 +381,8 @@ export const rmFav = async (path: string): Promise<void> => {
   const projects = contents.projects;
   const project = projects?.[path];
   if (projects && project !== undefined) {
-    project["favorite"] && delete project["favorite"];
-    project["launchMethod"] && delete project["launchMethod"];
+    if (project["favorite"]) delete project["favorite"];
+    if (project["launchMethod"]) delete project["launchMethod"];
     if (Object.keys(project).length === 0) {
       delete projects[path];
     }
@@ -414,9 +414,7 @@ export const getHistory = async (): Promise<AppHistory[]> => {
   const scriptDir = (await getSettings())?.shell_scripts.location.replace("~", homedir()) ?? bin;
   return (
     await Promise.all(
-      (
-        await getChannels()
-      ).map(async (channelContent) => {
+      (await getChannels()).map(async (channelContent) => {
         const { channel, tool: tool, channelId } = channelContent ?? {};
         if (channel === undefined || tool === undefined) {
           return null;
@@ -436,11 +434,11 @@ export const getHistory = async (): Promise<AppHistory[]> => {
           app: await getFile(channel.installationDirectory),
           icon,
           xmlFiles: (await getRecent(await globFromChannel(tool, channel), icon)).sort(
-            (a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime()
+            (a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime(),
           ),
           channelId,
         } as AppHistory;
-      })
+      }),
     )
   ).filter((entry): entry is AppHistory => Boolean(entry));
 };

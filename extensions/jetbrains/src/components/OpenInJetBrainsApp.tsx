@@ -12,7 +12,7 @@ interface OpenInJetBrainsAppActionProps {
 export function openInApp(
   tool: AppHistory,
   recent: recentEntry | null,
-  visit: entryAppAction | null
+  visit: entryAppAction | null,
 ): () => Promise<Toast | undefined> {
   const cmd = tool.tool ? `"${tool.tool}" "${recent?.path ?? ""}"` : `open ${tool.url}${recent?.title ?? ""}`;
   const toOpen = tool.app?.path ?? "";

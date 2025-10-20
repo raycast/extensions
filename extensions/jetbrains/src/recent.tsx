@@ -64,7 +64,7 @@ export default function ProjectList(): React.JSX.Element {
       `If you have set a custom path for your shell scripts (in JetBrains Toolbox), you must also set that in the settings for this extension. This is currently set to \`${bin}\`.`,
       missingTools.length > 0
         ? `The missing ${plural ? "scripts" : "script"} ${plural ? "are" : "is"} \`${missingTools.join(
-            "`, `"
+            "`, `",
           )}\` please check ${plural ? "they are" : "it is"} available using ${plural ? "e.g." : ""} \`which ${
             missingTools[0]
           }\` from a Terminal window`
@@ -115,7 +115,7 @@ export default function ProjectList(): React.JSX.Element {
         <List.Section title={"Recent"} subtitle={screenshotMode ? "⌘+F to add to favorites" : undefined}>
           {(recent ?? [])
             .filter(
-              (entry) => myFavs.find((fav) => fav.path === entry.path && fav.appName === entry.appName) === undefined
+              (entry) => myFavs.find((fav) => fav.path === entry.path && fav.appName === entry.appName) === undefined,
             )
             .slice(0, filter === "recent" ? recent.length : 10)
             .map((recent) => (
@@ -148,7 +148,7 @@ export default function ProjectList(): React.JSX.Element {
               .filter(
                 (entry) =>
                   filter === "" ||
-                  myFavs.find((fav) => fav.path === entry.path && fav.app.name === entry.app.name) === undefined
+                  myFavs.find((fav) => fav.path === entry.path && fav.app.name === entry.app.name) === undefined,
               )
               .map((recent: recentEntry) => (
                 <RecentProject

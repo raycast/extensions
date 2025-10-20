@@ -61,7 +61,11 @@ export function SortTools({
 
   const save = useCallback(async () => {
     await saveSortOrder(order);
-    pop ? pop() : popToRoot().then(() => showToast(Toast.Style.Success, "Saved"));
+    if (pop) {
+      pop();
+    } else {
+      await popToRoot().then(() => showToast(Toast.Style.Success, "Saved"));
+    }
   }, [saveSortOrder, pop, order]);
   if (tools.length === 0) {
     return <List navigationTitle="Choose Application Sort Order" isLoading />;
@@ -108,7 +112,7 @@ export function SortTools({
                   />
                 )}
                 <Action
-                  title="Move Up"
+                  title="Move up"
                   icon={Icon.ChevronUp}
                   shortcut={{ key: "arrowUp", modifiers: ["cmd", "shift"] }}
                   onAction={() => setOrder(move(id, "UP", order))}
@@ -122,7 +126,7 @@ export function SortTools({
                 {toggleScreenshotMode && (
                   <Action
                     icon={Icon.Window}
-                    title={screenshotMode ? "Toggle Screenshot Mode Off" : "Toggle Screenshot Mode On"}
+                    title={screenshotMode ? "Toggle Screenshot Mode off" : "Toggle Screenshot Mode on"}
                     onAction={toggleScreenshotMode}
                   />
                 )}

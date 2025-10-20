@@ -65,7 +65,7 @@ export default function ProjectList(): React.JSX.Element {
                   onAction={openInApp(
                     appHistory.find((history) => history.title === fav.appName) || appHistory[0],
                     fav,
-                    visitActions.visit
+                    visitActions.visit,
                   )}
                 />
               ))}
@@ -90,7 +90,7 @@ export default function ProjectList(): React.JSX.Element {
                   onAction={openInApp(
                     appHistory.find((history) => history.title === recent.appName) || appHistory[0],
                     recent,
-                    visitActions.visit
+                    visitActions.visit,
                   )}
                 />
               ))}
@@ -134,7 +134,7 @@ export default function ProjectList(): React.JSX.Element {
                                 onAction={openInApp(app, recent, visitActions.visit)}
                               />
                             )
-                          ) : null
+                          ) : null,
                         )
                     : null}
                 </MenuBarExtra.Section>
