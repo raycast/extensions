@@ -9,7 +9,7 @@ export interface Suggestion {
   type: "search" | "url";
 }
 
-interface SearchWebPreferences {
+interface HeliumPreferences {
   searchEngine: string;
 }
 
@@ -39,6 +39,14 @@ const SEARCH_ENGINES: Record<string, SearchEngineConfig> = {
   duckduckgo: {
     name: "DuckDuckGo",
     searchUrl: "https://duckduckgo.com/?q=",
+    suggestionsUrl: "https://duckduckgo.com/ac/?q=",
+    suggestionsParser: (json: SuggestionApiResponse) => {
+      // DuckDuckGo returns: [{"phrase": "suggestion"}]
+      if (Array.isArray(json)) {
+        return json.map((item: { phrase?: string }) => item.phrase).filter((phrase): phrase is string => !!phrase);
+      }
+      return [];
+    },
   },
   bing: {
     name: "Bing",
@@ -66,7 +74,7 @@ const SEARCH_ENGINES: Record<string, SearchEngineConfig> = {
  * Get the current search engine configuration
  */
 function getSearchEngineConfig(): SearchEngineConfig {
-  const preferences = getPreferenceValues<SearchWebPreferences>();
+  const preferences = getPreferenceValues<HeliumPreferences>();
   const engineKey = preferences.searchEngine || "google";
   return SEARCH_ENGINES[engineKey] || SEARCH_ENGINES.google;
 }
@@ -101,22 +109,35 @@ async function fetchSuggestions(searchText: string): Promise<Suggestion[]> {
     type: "search",
   });
 
-  // Fetch suggestions from API if available
-  if (config.suggestionsUrl && config.suggestionsParser) {
+  // Determine which suggestions API to use
+  // Use the search engine's own API if available, otherwise fall back to DuckDuckGo (more reliable than Google)
+  const suggestionsUrl = config.suggestionsUrl || SEARCH_ENGINES.duckduckgo.suggestionsUrl;
+  const suggestionsParser = config.suggestionsParser || SEARCH_ENGINES.duckduckgo.suggestionsParser;
+
+  // Fetch suggestions from API (always available now with DuckDuckGo fallback)
+  if (suggestionsUrl && suggestionsParser) {
     try {
-      const url = `${config.suggestionsUrl}${encodeURIComponent(searchText)}`;
+      const url = `${suggestionsUrl}${encodeURIComponent(searchText)}`;
+
       const response = await fetch(url, {
+        method: "GET",
         headers: {
-          "Content-Type": "text/plain; charset=UTF-8",
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "*/*",
+          "Accept-Language": "en-US,en;q=0.9",
         },
         signal: AbortSignal.timeout(3000), // 3 second timeout
       });
 
       if (response.ok) {
-        const json = await response.json();
-        const suggestions = config.suggestionsParser(json);
+        const text = await response.text();
 
-        // Add parsed suggestions
+        const json = JSON.parse(text);
+
+        const suggestions = suggestionsParser(json);
+
+        // Add parsed suggestions using the selected search engine's URL
         suggestions.slice(0, 8).forEach((suggestion: string, index: number) => {
           // Skip if it's the same as the search text
           if (suggestion.toLowerCase() === searchText.toLowerCase()) {
@@ -130,10 +151,12 @@ async function fetchSuggestions(searchText: string): Promise<Suggestion[]> {
             type: "search",
           });
         });
+      } else {
+        console.error(`[Suggestions] Response not ok: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       // Silently fail - we still have the default search suggestion
-      console.error("Failed to fetch suggestions:", error);
+      console.error("[Suggestions] Failed to fetch suggestions:", error);
     }
   }
 

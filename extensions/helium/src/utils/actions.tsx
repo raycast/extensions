@@ -269,3 +269,23 @@ export function CopyBookmarkAsMarkdownAction({ bookmark }: BookmarkActionProps) 
     />
   );
 }
+
+// ============ Universal Quicklink Action ============
+
+interface QuicklinkActionProps {
+  url: string;
+  name: string;
+}
+
+/**
+ * Action to create a Raycast Quicklink for any URL
+ * Works with tabs, bookmarks, history entries, and suggestions
+ */
+export function CreateQuicklinkAction({ url, name }: QuicklinkActionProps) {
+  return (
+    <Action.CreateQuicklink
+      quicklink={{ link: url, name: name }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+    />
+  );
+}

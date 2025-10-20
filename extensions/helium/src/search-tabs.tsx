@@ -9,6 +9,7 @@ import {
   OpenInNewTabAction,
   CopyUrlAction,
   CopyTitleAction,
+  CreateQuicklinkAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 
@@ -70,6 +71,7 @@ export default function SearchTabs() {
               <OpenInNewTabAction tab={tab} />
               <CopyUrlAction tab={tab} />
               <CopyTitleAction tab={tab} />
+              <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
             </ActionPanel>
           }
         />

@@ -2,12 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "helium",
   "title": "Helium",
-  "description": "Search and quickly navigate Helium's open tabs",
+  "description": "Navigate open tabs, bookmarks, and the web in Helium browser",
   "icon": "icon.png",
   "author": "islamtayeb",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Applications",
@@ -15,6 +14,38 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "searchEngine",
+      "title": "Search Engine",
+      "description": "Choose your preferred search engine for suggestions and searches",
+      "type": "dropdown",
+      "required": false,
+      "default": "google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
+        },
+        {
+          "title": "Yahoo",
+          "value": "yahoo"
+        },
+        {
+          "title": "Ecosia",
+          "value": "ecosia"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "search-tabs",
@@ -26,39 +57,7 @@
       "name": "search-web",
       "title": "Search Web",
       "description": "Search the web with Helium browser",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "searchEngine",
-          "title": "Search Engine",
-          "description": "Choose your preferred search engine for suggestions and searches",
-          "type": "dropdown",
-          "required": false,
-          "default": "google",
-          "data": [
-            {
-              "title": "Google",
-              "value": "google"
-            },
-            {
-              "title": "DuckDuckGo",
-              "value": "duckduckgo"
-            },
-            {
-              "title": "Bing",
-              "value": "bing"
-            },
-            {
-              "title": "Yahoo",
-              "value": "yahoo"
-            },
-            {
-              "title": "Ecosia",
-              "value": "ecosia"
-            }
-          ]
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "search-bookmarks",

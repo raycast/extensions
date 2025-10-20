@@ -13,6 +13,7 @@ import {
   OpenInNewTabAction,
   CopyUrlAction,
   CopyAsMarkdownAction,
+  CreateQuicklinkAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 
@@ -148,6 +149,7 @@ function TabListItem({
           <OpenInNewTabAction tab={tab} />
           <CopyUrlAction tab={tab} />
           <CopyAsMarkdownAction tab={tab} />
+          <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
         </ActionPanel>
       }
     />
@@ -176,6 +178,7 @@ function HistoryListItem({ entry }: { entry: HistoryEntry }) {
             content={`[${entry.title}](${entry.url})`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
+          <CreateQuicklinkAction url={entry.url} name={entry.title} />
         </ActionPanel>
       }
     />
@@ -214,6 +217,7 @@ function SuggestionListItem({ suggestion }: { suggestion: Suggestion }) {
             content={suggestion.query}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
+          <CreateQuicklinkAction url={suggestion.url} name={suggestion.query} />
         </ActionPanel>
       }
     />

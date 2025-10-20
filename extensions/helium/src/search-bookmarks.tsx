@@ -9,6 +9,7 @@ import {
   CopyBookmarkUrlAction,
   CopyBookmarkTitleAction,
   CopyBookmarkAsMarkdownAction,
+  CreateQuicklinkAction,
 } from "./utils/actions";
 import { Bookmark } from "./types";
 import { filterSearchable } from "./utils/search";
@@ -85,6 +86,7 @@ function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revali
             <CopyBookmarkUrlAction bookmark={bookmark} />
             <CopyBookmarkTitleAction bookmark={bookmark} />
             <CopyBookmarkAsMarkdownAction bookmark={bookmark} />
+            <CreateQuicklinkAction url={bookmark.url} name={bookmark.title || "Untitled"} />
             <Action.Open
               title="Open in Default Browser"
               target={bookmark.url}
