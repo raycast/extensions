@@ -7,6 +7,7 @@
   "icon": "raindrop-icon-big.png",
   "author": "lardissone",
   "contributors": [
+    "shubham",
     "ShubhamJ010",
     "pernielsentikaer",
     "tdkn",
@@ -218,8 +219,26 @@
       "default": "1"
     },
     {
+      "name": "aiProvider",
+      "title": "AI Provider",
+      "description": "Choose the AI provider for suggestions.",
+      "type": "dropdown",
+      "required": false,
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast AI",
+          "value": "raycast"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        }
+      ]
+    },
+    {
       "name": "geminiApiKey",
-      "title": "Gemini API Key",
+      "title": "Gemini API Key(Optional if using Gemini)",
       "description": "Your Google AI Studio API key for suggestions",
       "type": "password",
       "required": false

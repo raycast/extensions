@@ -113,3 +113,18 @@ export interface FormValues {
   tags: string[];
   newCollection?: string;
 }
+
+export type AiCollection = {
+  _id: number;
+  title: string;
+};
+
+export type SuggestAndApplyProps = {
+  link: string;
+  title: string;
+  collections: AiCollection[];
+  tags: { items: { _id: string }[] } | undefined;
+  currentTags: string[];
+  setValue: (name: keyof FormValues, value: unknown) => void;
+  setDropdownValue: (value: string) => void;
+};

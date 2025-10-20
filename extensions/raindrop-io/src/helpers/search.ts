@@ -7,14 +7,12 @@ export type SearchResult = {
 } | null;
 
 export async function searchForExistingBookmark(link: string): Promise<SearchResult> {
-  const preferences = getPreferenceValues<Preferences>();
-
   // Extract domain from the link
   let domain = "";
   try {
     const url = new URL(link);
     domain = url.hostname;
-  } catch (e) {
+  } catch {
     console.error("Invalid URL provided:", link);
     return null;
   }
@@ -83,7 +81,7 @@ function extractTitleFromUrl(url: string): string {
       return pathParts[pathParts.length - 1].replace(/[-_]/g, " ");
     }
     return hostname;
-  } catch (e) {
+  } catch {
     return "";
   }
 }

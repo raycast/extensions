@@ -1,12 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, Toast, showToast } from "@raycast/api";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, useNavigation, closeMainWindow } from "@raycast/api";
+import { useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { FormValues, Bookmark } from "../types";
 
 import { useRequest } from "../hooks/useRequest";
 import { useTags } from "../hooks/useTags";
+import { useRaycastAi } from "../hooks/useRaycastAi";
 import { useGemini } from "../hooks/useGemini";
 import { createCollection, createBookmark, getLinkTitle } from "../helpers/utils";
 import { SearchResult, searchForExistingBookmark } from "../helpers/search";
@@ -60,11 +59,14 @@ type BookmarkFormProps = {
 };
 
 export const BookmarkForm = (props: BookmarkFormProps) => {
+  const { push } = useNavigation();
   const mode = props.bookmarkId ? "edit" : "create";
   const preferences = getPreferenceValues<Preferences>();
   const [collection] = useCachedState("selected-collection", "0");
   const { collections } = useRequest({ collection });
-  const { suggestAndApply, newlyCreatedTags } = useGemini();
+  const { suggestAndApply: suggestWithGemini, newlyCreatedTags: geminiTags } = useGemini();
+  const { suggestAndApply: suggestWithRaycast, newlyCreatedTags: raycastTags } = useRaycastAi();
+  const newlyCreatedTags = [...new Set([...geminiTags, ...raycastTags])];
   const { data: tags } = useTags();
   const [dropdownValue, setDropdownValue] = useState(props.defaultValues?.collection ?? "-1");
   const [showCollectionCreation, setShowCollectionCreation] = useState(false);
@@ -74,7 +76,41 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
   const linkRef = useRef<string>(props.defaultValues?.link ?? "");
   const originalValues = useRef<FormValues | null>(null);
   const { handleSubmit, itemProps, setValue, reset, focus } = useForm<FormValues>({
-    /* ... */
+    onSubmit: async (values) => {
+      props.onWillSave?.();
+      try {
+        const response = await createBookmark({
+          preferences,
+          values,
+          showCollectionCreation,
+        });
+
+        if (response.status === 200) {
+          reset({ link: "", collection: "-1", tags: [] });
+          focus("link");
+          props.onSaved?.();
+        } else {
+          throw new Error(response.statusText);
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          props.onError?.(error);
+        }
+      }
+    },
+    initialValues: props.defaultValues,
+    validation: {
+      link: (value) => {
+        if (!value || value.trim().length === 0) {
+          return "Link is required";
+        }
+        try {
+          new URL(value);
+        } catch {
+          return "Invalid URL";
+        }
+      },
+    },
   });
 
   const handleEditBookmark = (bookmark: Bookmark) => {
@@ -155,7 +191,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
 
   return (
     <Form
-      isLoading={props.isLoading}
+      isLoading={props.isLoading || searching}
       actions={
         <ActionPanel>
           {existingBookmark ? (
@@ -177,9 +213,8 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
                       });
 
                       if (response.status === 200) {
-                        reset({ link: "", collection: "-1", tags: [] });
-                        focus("link");
                         props.onSaved?.();
+                        closeMainWindow();
                       } else {
                         throw new Error(response.statusText);
                       }
@@ -211,7 +246,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
               // When NOT showing existing data, show "Update Existing" and "Add Bookmark Anyway"
               <>
                 <Action.Push
-                  title={`Show ${existingBookmark.matchType==="exact"? 'Existing':'Similar'} Bookmark Details`}
+                  title={`Show ${existingBookmark.matchType === "exact" ? "Existing" : "Similar"} Bookmark Details`}
                   icon={Icon.Sidebar}
                   target={<ExistingBookmarkDetail bookmark={existingBookmark.bookmark} onEdit={handleEditBookmark} />}
                 />
@@ -288,9 +323,11 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
               icon={Icon.Stars}
               shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
               onAction={async () => {
-                await suggestAndApply({
+                const suggestFn = preferences.aiProvider === "gemini" ? suggestWithGemini : suggestWithRaycast;
+                await suggestFn({
                   link: (itemProps.link.value as string) || "",
-                  collections: collections.map((c) => ({ _id: c.value, title: c.name })),
+                  title: (itemProps.title.value as string) || "",
+                  collections: collections.map((c) => ({ _id: c.value as number, title: c.name as string })),
                   tags,
                   currentTags: (itemProps.tags.value as string[]) || [],
                   setValue,
@@ -356,10 +393,6 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
           return null;
         })}
       </Form.TagPicker>
-
-      {existingBookmark && showingExistingData && !searching && (
-        <Form.Description text={`Editing existing bookmark: ${existingBookmark.bookmark.title}`} />
-      )}
     </Form>
   );
 };

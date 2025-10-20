@@ -1,12 +1,8 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { SuggestAndApplyProps } from "../types";
+import { AI, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
+import { SuggestAndApplyProps } from "../types";
 
-export const useGemini = () => {
-  const preferences = getPreferenceValues<Preferences>();
-  const apiKey = preferences.geminiApiKey;
-  const isConfigured = !!apiKey;
+export const useRaycastAi = () => {
   const [newlyCreatedTags, setNewlyCreatedTags] = useState<string[]>([]);
 
   const suggestAndApply = async ({
@@ -18,15 +14,6 @@ export const useGemini = () => {
     setValue,
     setDropdownValue,
   }: SuggestAndApplyProps) => {
-    if (!isConfigured) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Missing Gemini API Key",
-        message: "Please set your Gemini API key in the extension preferences.",
-      });
-      return;
-    }
-
     if (!link) {
       showToast({
         style: Toast.Style.Failure,
@@ -36,18 +23,7 @@ export const useGemini = () => {
       return;
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-lite-preview-06-17",
-
-      generationConfig: {
-        responseMimeType: "application/json",
-      },
-    });
-
     const collectionsText = collections.map((c) => `${c.title} (ID: ${c._id})`).join("\n");
-
     const existingTagsText = tags?.items?.map((t) => t._id).join(", ") || "No existing tags.";
 
     const prompt = `Analyze the content of the webpage at the given URL and the provided context.
@@ -69,26 +45,20 @@ The output must be a JSON object with the following schema:
   "description": "string"
 }`;
 
-    console.log("Gemini Prompt:", prompt);
-
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Asking Gemini for suggestions..." });
+      await showToast({ style: Toast.Style.Animated, title: "Asking Raycast AI for suggestions..." });
 
-      const result = await model.generateContent(prompt);
+      const result = await AI.ask(prompt);
 
-      const response = await result.response;
+      const jsonString = result.match(/```json\n([\s\S]*?)\n```/)?.[1] || result;
 
-      const text = response.text();
-
-      console.log("Gemini Response:", text);
-
-      const suggestions = JSON.parse(text) as {
+      const suggestions = JSON.parse(jsonString) as {
         collectionId: string;
         tags: string[];
         description: string;
       };
 
-      await showToast({ style: Toast.Style.Success, title: "Got suggestions from Gemini!" });
+      await showToast({ style: Toast.Style.Success, title: "Got suggestions from Raycast AI!" });
 
       if (suggestions) {
         if (suggestions.collectionId) {
@@ -97,14 +67,14 @@ The output must be a JSON object with the following schema:
             setValue("collection", suggestions.collectionId);
             setDropdownValue(suggestions.collectionId);
           } else {
-            console.log("Invalid collectionId from Gemini:", suggestions.collectionId);
+            console.log("Invalid collectionId from Raycast AI:", suggestions.collectionId);
             showToast({
               style: Toast.Style.Failure,
               title: "AI returned an invalid collection",
             });
           }
         } else {
-          console.log("collectionId missing from Gemini response");
+          console.log("collectionId missing from Raycast AI response");
         }
 
         if (suggestions.tags && suggestions.tags.length > 0) {
@@ -122,8 +92,8 @@ The output must be a JSON object with the following schema:
         }
       }
     } catch (error) {
-      console.error("Error getting suggestions from Gemini:", error);
-      await showToast({ style: Toast.Style.Failure, title: "Couldn't get suggestions from Gemini" });
+      console.error("Error getting suggestions from Raycast AI:", error);
+      await showToast({ style: Toast.Style.Failure, title: "Couldn't get suggestions from Raycast AI" });
     }
   };
 
