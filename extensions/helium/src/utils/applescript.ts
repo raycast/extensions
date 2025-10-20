@@ -1,51 +1,181 @@
 import { runAppleScript } from "@raycast/utils";
+import { open, getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
+  enableSpaceSwitching: boolean;
+}
 
 /**
  * Switch to a specific tab in Helium browser by its URL
+ *
+ * WORKAROUND FOR SPACE SWITCHING:
+ * External AppleScript cannot reliably force macOS Space switching. The only method that
+ * consistently works is Raycast's open() API with the bundle ID. We exploit this by:
+ * 1. Opening a temporary new tab (forces Space switch via Raycast's open() API)
+ * 2. Polling until the temp tab is ready (checking its URL)
+ * 3. Closing that temporary tab
+ * 4. Switching to the actual target tab
+ *
+ * This avoids race conditions by actively polling rather than using arbitrary delays.
+ * Arc doesn't need this workaround because their 'select' command handles Space switching
+ * internally in their application code.
+ *
  * @param tabUrl - The URL of the tab to switch to
  * @returns true if tab was found and switched to, false otherwise
  */
 export async function switchToHeliumTab(tabUrl: string): Promise<boolean> {
   try {
-    // Escape quotes in URL for AppleScript
+    const preferences = getPreferenceValues<Preferences>();
     const escapedUrl = tabUrl.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-    const script = `
-      tell application "Helium"
-        if not running then
-          return "not_running"
-        end if
-
-        set foundTab to false
-        repeat with w in windows
-          set tabIndex to 1
-          repeat with t in tabs of w
-            if URL of t is "${escapedUrl}" then
-              set active tab index of w to tabIndex
-              set index of w to 1
-              activate
-              set foundTab to true
-              exit repeat
-            end if
-            set tabIndex to tabIndex + 1
-          end repeat
-          if foundTab then exit repeat
-        end repeat
-
-        if foundTab then
-          return "success"
-        else
-          return "not_found"
-        end if
-      end tell
-    `;
-
-    const result = await runAppleScript(script);
-    return result.trim() === "success";
+    // Check if experimental Space switching is enabled
+    if (preferences.enableSpaceSwitching) {
+      // EXPERIMENTAL WORKAROUND: Open-then-close method to force Space switching
+      return await switchToHeliumTabWithSpaceSwitching(escapedUrl);
+    } else {
+      // DEFAULT: Simple tab switching (only works within current Space)
+      return await switchToHeliumTabSimple(escapedUrl);
+    }
   } catch (error) {
     console.error("AppleScript error:", error);
     return false;
   }
+}
+
+/**
+ * Simple tab switching without Space switching workaround (default behavior)
+ */
+async function switchToHeliumTabSimple(escapedUrl: string): Promise<boolean> {
+  const script = `
+    tell application "Helium"
+      if not running then
+        return "not_running"
+      end if
+
+      set foundTab to false
+      repeat with w in windows
+        set tabIndex to 1
+        repeat with t in tabs of w
+          if URL of t is "${escapedUrl}" then
+            set active tab index of w to tabIndex
+            set index of w to 1
+            activate
+            set foundTab to true
+            exit repeat
+          end if
+          set tabIndex to tabIndex + 1
+        end repeat
+        if foundTab then exit repeat
+      end repeat
+
+      if foundTab then
+        return "success"
+      else
+        return "not_found"
+      end if
+    end tell
+  `;
+
+  const result = await runAppleScript(script);
+  return result.trim() === "success";
+}
+
+/**
+ * Experimental tab switching with Space switching workaround
+ * Opens a temporary tab to force Space switch, then closes it and switches to target
+ */
+async function switchToHeliumTabWithSpaceSwitching(escapedUrl: string): Promise<boolean> {
+  // STEP 1: Verify the target tab exists
+  const findScript = `
+    tell application "Helium"
+      if not running then
+        return "not_running"
+      end if
+
+      set foundTab to false
+      repeat with w in windows
+        repeat with t in tabs of w
+          if URL of t is "${escapedUrl}" then
+            set foundTab to true
+            exit repeat
+          end if
+        end repeat
+        if foundTab then exit repeat
+      end repeat
+
+      if foundTab then
+        return "found"
+      else
+        return "not_found"
+      end if
+    end tell
+  `;
+
+  const findResult = await runAppleScript(findScript);
+  if (findResult.trim() === "not_running" || findResult.trim() === "not_found") {
+    return false;
+  }
+
+  // STEP 2: Open temporary new tab using Raycast's open() API
+  // This is THE ONLY reliable way to force macOS to switch Spaces to Helium
+  await open("chrome://new-tab-page/", "net.imput.helium");
+
+  // STEP 3: Wait for temp tab, close it, and switch to target - all in AppleScript
+  // AppleScript is synchronous and will wait for operations to complete naturally
+  const switchScript = `
+    tell application "Helium"
+      -- Wait for the new tab to appear (polling with timeout)
+      set maxAttempts to 20
+      set attemptCount to 0
+      set tempTabReady to false
+
+      repeat while attemptCount < maxAttempts
+        try
+          -- Check if window 1 exists and has an active tab with chrome://new-tab-page
+          if (count of windows) > 0 then
+            set activeTabURL to URL of active tab of window 1
+            if activeTabURL contains "chrome://new-tab-page" then
+              set tempTabReady to true
+              exit repeat
+            end if
+          end if
+        end try
+        set attemptCount to attemptCount + 1
+      end repeat
+
+      -- Close the temporary tab if we found it
+      if tempTabReady then
+        try
+          close active tab of window 1
+        end try
+      end if
+
+      -- Find and switch to the target tab
+      set foundTab to false
+      repeat with w in windows
+        set tabIndex to 1
+        repeat with t in tabs of w
+          if URL of t is "${escapedUrl}" then
+            set active tab index of w to tabIndex
+            set index of w to 1
+            set foundTab to true
+            exit repeat
+          end if
+          set tabIndex to tabIndex + 1
+        end repeat
+        if foundTab then exit repeat
+      end repeat
+
+      if foundTab then
+        return "success"
+      else
+        return "not_found"
+      end if
+    end tell
+  `;
+
+  const result = await runAppleScript(switchScript);
+  return result.trim() === "success";
 }
 
 /**
