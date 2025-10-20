@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Folder back part -->
+  <path d="M64 96C64 78.3269 78.3269 64 96 64H192L224 96H416C433.673 96 448 110.327 448 128V416C448 433.673 433.673 448 416 448H96C78.3269 448 64 433.673 64 416V96Z" fill="#FDB84B"/>
+  
+  <!-- Folder tab -->
+  <path d="M64 96C64 78.3269 78.3269 64 96 64H192L224 96H96C78.3269 96 64 110.327 64 128V96Z" fill="#FDCB6E"/>
+  
+  <!-- Folder front -->
+  <path d="M80 144C80 131.849 89.8497 122 102 122H410C422.15 122 432 131.849 432 144V400C432 412.15 422.15 422 410 422H102C89.8497 422 80 412.15 80 400V144Z" fill="#FDC830"/>
+  
+  <!-- Folder shadow/depth -->
+  <path d="M64 416C64 433.673 78.3269 448 96 448H416C433.673 448 448 433.673 448 416V426C448 443.673 433.673 458 416 458H96C78.3269 458 64 443.673 64 426V416Z" fill="#E5A623" opacity="0.5"/>
+  
+  <!-- Download arrow circle background -->
+  <circle cx="256" cy="290" r="90" fill="#3B82F6"/>
+  <circle cx="256" cy="290" r="85" fill="#60A5FA"/>
+  
+  <!-- Download arrow -->
+  <path d="M256 210V340M256 340L216 300M256 340L296 300" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Arrow base/line -->
+  <rect x="236" y="350" width="40" height="15" rx="4" fill="white"/>
+</svg>
+

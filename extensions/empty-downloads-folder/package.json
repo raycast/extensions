@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "empty-downloads-folder",
+  "title": "Downloads Manager",
+  "description": "Manage your Downloads folder",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "folderPath",
+      "type": "textfield",
+      "title": "Downloads Folder Path",
+      "description": "Custom path to your Downloads folder (leave empty to auto-detect)",
+      "placeholder": "C:\\Users\\YourUsername\\Downloads",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "empty-downloads-folder",
+      "title": "Empty Downloads Folder",
+      "description": "Moves the contents of your downloads folder to the recycle bin",
+      "mode": "no-view",
+      "subtitle": "Trash it"
+    },
+    {
+      "name": "copy-latest-download",
+      "title": "Copy Latest Download",
+      "description": "Copy the most recently downloaded file to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-latest-download",
+      "title": "Open Latest Download",
+      "description": "Open the most recently downloaded file",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "trash": "^8.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "owendavidprice",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}
