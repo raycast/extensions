@@ -36,5 +36,7 @@ When submitting changes, add yourself to contributors in `package.json` and upda
 
 ## Planned Features
 
+- Find better workarounds for Space switching
+  - Might look into pushing a PR to Helium directly if necessary
 - !bang integration for search
 - Tab groups visualization
