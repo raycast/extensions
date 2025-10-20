@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { autumn } from "./autumn";
 import { CreateProductParams } from "autumn-js";
@@ -8,7 +8,7 @@ export default function ManageProducts() {
     isLoading,
     data: products,
     error,
-    revalidate,
+    mutate,
   } = useCachedPromise(
     async () => {
       const { data, error } = await autumn.products.list();
@@ -28,7 +28,7 @@ export default function ManageProducts() {
           description="Each product defines features your customers get access to and how much they cost. Create separate products for any free plans, paid plans and any add-on or top up products ☝️"
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} onPop={revalidate} />
+              <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} onPop={mutate} />
             </ActionPanel>
           }
         />
@@ -40,7 +40,36 @@ export default function ManageProducts() {
             title={product.name}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} onPop={revalidate} />
+                <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} onPop={mutate} />
+                <Action icon={Icon.Trash} title="Delete Product" onAction={() => confirmAlert({
+                                  title: "Delete Product",
+                                  message: "Are you sure you want to delete this plan? This action cannot be undone.",
+                                  primaryAction: {
+                                    style: Alert.ActionStyle.Destructive,
+                                    title: "Delete",
+                                    async onAction() {
+                                        const toast = await showToast(Toast.Style.Animated, "Deleting", product.id);
+                                        try {
+                                          await mutate(
+                                            autumn.products.delete(product.id).then(({error}) => {
+                                                if (error) throw new Error(error.message);
+                                            }), {
+                                              optimisticUpdate(data) {
+                                                return data.filter(p => p.id!==product.id)
+                                              },
+                                              shouldRevalidateAfter: false
+                                            }
+                                          )
+                                          toast.style = Toast.Style.Success;
+                                          toast.title = "Deleted";
+                                        } catch (error) {
+                                          toast.style = Toast.Style.Failure;
+                                          toast.title = "Failed";
+                                          toast.message = `${error}`;
+                                        }
+                                    }
+                                  }
+                                })} style={Action.Style.Destructive} />
               </ActionPanel>
             }
           />
