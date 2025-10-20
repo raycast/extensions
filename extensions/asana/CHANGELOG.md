@@ -1,6 +1,6 @@
 # Asana Changelog
 
-## [Add support for Asana sections] - 2025-10-01
+## [Add support for Asana sections] - {PR_MERGE_DATE}
 
 - Added option for assigning a section when creating a task. User can select from a list of existing sections.
 - Added action on tasks returned from My Tasks allowing user to move a task to another section
