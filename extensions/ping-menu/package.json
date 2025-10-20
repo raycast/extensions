@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ping-menu",
+  "title": "Ping Menu",
+  "description": "Monitor ping latency in the menu bar",
+  "icon": "icon.png",
+  "author": "domonkos_nagy",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ping-monitor",
+      "title": "Ping Monitor",
+      "description": "Shows ping latency in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.10.0",
+    "@types/react": "18.2.79",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
