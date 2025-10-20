@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, useNavigation, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, useNavigation } from "@raycast/api";
 import { useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { FormValues, Bookmark } from "../types";
@@ -124,6 +124,9 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
           collection: bookmark.collection?.$id?.toString() ?? "-1",
           tags: bookmark.tags,
         }}
+        onSaved={props.onSaved}
+        onWillSave={props.onWillSave}
+        onError={props.onError}
       />,
     );
   };
@@ -214,7 +217,6 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
 
                       if (response.status === 200) {
                         props.onSaved?.();
-                        closeMainWindow();
                       } else {
                         throw new Error(response.statusText);
                       }
@@ -256,7 +258,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
                   onAction={async () => {
                     // Store the original values to be able to cancel later
                     originalValues.current = {
-                      link: itemProps.link.value,
+                      link: itemProps.link.value || "",
                       title: itemProps.title.value,
                       collection: itemProps.collection.value,
                       tags: itemProps.tags.value || [],
@@ -281,7 +283,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
                   onAction={async () => {
                     // Get the current form values and submit as a new bookmark
                     const values = {
-                      link: itemProps.link.value,
+                      link: itemProps.link.value || "",
                       title: itemProps.title.value,
                       collection: itemProps.collection.value,
                       tags: itemProps.tags.value || [],

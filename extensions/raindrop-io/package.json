@@ -242,6 +242,13 @@
       "description": "Your Google AI Studio API key for suggestions",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "secondaryBrowser",
+      "title": "Secondary Browser",
+      "description": "Specify a secondary browser to use for opening bookmarks",
+      "type": "appPicker",
+      "required": false
     }
   ],
   "dependencies": {

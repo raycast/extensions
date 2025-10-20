@@ -1,3 +1,5 @@
+import { SetStateAction } from "react";
+
 type Highlight = {
   text: string;
   note: string;
@@ -125,6 +127,23 @@ export type SuggestAndApplyProps = {
   collections: AiCollection[];
   tags: { items: { _id: string }[] } | undefined;
   currentTags: string[];
-  setValue: (name: keyof FormValues, value: unknown) => void;
+  setValue: <K extends keyof FormValues>(name: K, value: SetStateAction<FormValues[K]>) => void;
   setDropdownValue: (value: string) => void;
 };
+
+export interface Preferences {
+  token: string;
+  titleOnly: boolean;
+  fetchAllResults: boolean;
+  sortBy: string;
+  useLastCollection: boolean;
+  additionalItemToDisplayInList: string;
+  displayDate: string;
+  tagsDisplay: string;
+  aiProvider: string;
+  geminiApiKey: string;
+  secondaryBrowser: {
+    name: string;
+    path: string;
+  };
+}
