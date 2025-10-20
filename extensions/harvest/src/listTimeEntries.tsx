@@ -247,7 +247,7 @@ export default function Command() {
               keywords={[
                 ...(entry.notes?.split(" ") ?? []),
                 ...(entry.client?.name?.split(" ") ?? []),
-                ...(entry.project?.name?.split(" ") ?? []),
+                ...((titleDisplay === "task" ? entry.project?.name : entry.task?.name)?.split(" ") ?? []),
               ]}
               accessories={[
                 {

@@ -7,6 +7,7 @@
 - Fix: Time entry caching now only persists today's entries to prevent unlimited cache growth; utilizing cached promise data for other dates should work fine for most
 - Fix: Favorites now store hours in decimal format internally to prevent display inconsistencies
 - Fix: Improved precision when converting H:mm time format to decimal to prevent rounding errors
+- Fix: Added keywords to favorites to match filtering options used in Today's Timesheet
 - Changed: UI updates across list views
   - Added preference to select which field to use as primary title; other field becomes accessory
   - Converted project and client to accessories with icons

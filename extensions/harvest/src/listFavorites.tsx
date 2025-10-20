@@ -195,7 +195,11 @@ export default function Command() {
               <List.Item
                 key={favorite.id}
                 title={titleDisplay === "task" ? favorite.taskName : favorite.projectName}
-                keywords={favorite.notes?.split(" ")}
+                keywords={[
+                  ...(favorite.notes?.split(" ") ?? []),
+                  ...(favorite.clientName?.split(" ") ?? []),
+                  ...((titleDisplay === "task" ? favorite.projectName : favorite.taskName)?.split(" ") ?? []),
+                ]}
                 accessories={[
                   {
                     text: titleDisplay === "task" ? favorite.projectName : favorite.taskName,
