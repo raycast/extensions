@@ -282,7 +282,8 @@ function ProductSelector() {
   );
 
   const handleSelectPrice = (product: Stripe.Product, price: Stripe.Price) => {
-    push(<CreatePaymentLinkForm product={product} price={price} />);
+    const WrappedForm = withProfileContext(() => <CreatePaymentLinkForm product={product} price={price} />);
+    push(<WrappedForm />);
   };
 
   // Group by product type if available
