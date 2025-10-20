@@ -95,8 +95,8 @@ export function useActiveClients() {
 async function fetchProjects() {
   let project_assignments: HarvestProjectAssignment[] = [];
   let pageParams = {};
-
-  while (pageParams) {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
     const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
       url: "/users/me/project_assignments",
       params: { is_active: true, ...pageParams },
@@ -152,8 +152,8 @@ export async function getMyTimeEntries(date_string: string): Promise<HarvestTime
   const id = await getMyId();
   let time_entries: HarvestTimeEntry[] = [];
   let pageParams = {};
-
-  while (pageParams) {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
     const resp = await harvestAPI<HarvestTimeEntriesResponse>({
       url: "/time_entries",
       params: {

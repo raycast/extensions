@@ -162,6 +162,24 @@
           "value": "decimal"
         }
       ]
+    },
+    {
+      "name": "titleDisplay",
+      "title": "Title Field",
+      "required": false,
+      "description": "What field to display as the title in a list of tasks. The other field will be shown as an accessory.",
+      "type": "dropdown",
+      "default": "project",
+      "data": [
+        {
+          "title": "Project Name",
+          "value": "project"
+        },
+        {
+          "title": "Task Name",
+          "value": "task"
+        }
+      ]
     }
   ],
   "dependencies": {

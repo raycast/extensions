@@ -41,6 +41,7 @@ dayjs.extend(relativeTime);
 
 export interface Preferences {
   sortBy: "updated-desc" | "updated-asc" | "created-desc" | "created-asc" | "none";
+  titleDisplay: "task" | "project";
 }
 
 export default function Command() {
@@ -49,11 +50,10 @@ export default function Command() {
 
   const [navigationTitle, setNavigationTitle] = useState("Today's Timesheet");
   const { data: company } = useCompany();
+  const { sortBy, titleDisplay }: Preferences = getPreferenceValues();
 
   const timeEntries = useMemo(() => {
     const timeEntries: HarvestTimeEntry[] = items;
-
-    const { sortBy }: Preferences = getPreferenceValues();
     switch (sortBy) {
       case "updated-desc": {
         timeEntries.sort((a, b) => {
@@ -242,7 +242,7 @@ export default function Command() {
             <List.Item
               id={entry.id.toString()}
               key={entry.id}
-              title={entry.task.name}
+              title={titleDisplay === "task" ? entry.task.name : entry.project.name}
               subtitle={entry.notes}
               keywords={[
                 ...(entry.notes?.split(" ") ?? []),
@@ -250,7 +250,10 @@ export default function Command() {
                 ...(entry.project?.name?.split(" ") ?? []),
               ]}
               accessories={[
-                { text: entry.project.name, icon: Icon.Folder },
+                {
+                  text: titleDisplay === "task" ? entry.project.name : entry.task.name,
+                  icon: Icon.Tag,
+                },
                 {
                   text: entry.client.name,
                   icon: entry.external_reference

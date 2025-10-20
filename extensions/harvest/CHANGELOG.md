@@ -8,7 +8,7 @@
 - Fix: Favorites now store hours in decimal format internally to prevent display inconsistencies
 - Fix: Improved precision when converting H:mm time format to decimal to prevent rounding errors
 - Changed: UI updates across list views
-  - Swapped project and task names (task is now the primary title)
+  - Added preference to select which field to use as primary title; other field becomes accessory
   - Converted project and client to accessories with icons
   - Converted duration to tag accessory
   - Moved running timer icon into the duration tag with orange highlight
