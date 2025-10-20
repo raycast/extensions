@@ -86,7 +86,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         });
 
         if (response.status === 200) {
-          reset({ link: "", collection: "-1", tags: [] });
+          reset({ link: "", collection: "-1", tags: [] } as Partial<FormValues>);
           focus("link");
           props.onSaved?.();
         } else {
@@ -155,7 +155,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
   }, [props.defaultLink, setValue]);
 
   useEffect(() => {
-    if (props.defaultLink) {
+    if (props.defaultLink && typeof props.defaultLink === "string") {
       getLinkTitle(props.defaultLink).then((title) => {
         setValue("title", title);
       });
@@ -165,7 +165,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
   // Search for existing bookmark when link value changes
   useEffect(() => {
     const link = itemProps.link.value;
-    if (link) {
+    if (typeof link === "string" && link) {
       const searchExistingBookmark = async () => {
         setSearching(true);
         try {

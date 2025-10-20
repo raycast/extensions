@@ -1,3 +1,4 @@
+import { BookmarkForm } from "./components/BookmarkForm";
 import { showToast, Toast, LaunchProps, closeMainWindow } from "@raycast/api";
 
 function AddBookmarks(props: LaunchProps<{ launchContext?: { url?: string; title?: string } }>) {
