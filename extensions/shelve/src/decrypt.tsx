@@ -22,7 +22,7 @@ ${data.decryptedValue}
 **Remaining reads:** ${data.reads}
 **Time to live:** ${data.ttl}
 
-The decrypted value has been automatically copied to your clipboard for security.
+The decrypted value has been automatically copied to your clipboard.
   `;
 
   return (
