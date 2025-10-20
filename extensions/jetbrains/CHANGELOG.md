@@ -1,6 +1,6 @@
 # Jetbrains Changelog
 
-## [Bugfix] - 2025-10-18
+## [Bugfix] - {PR_MERGE_DATE}
 
 - Added support for JetBrains Toolbox version 3 and improved handling of unsupported versions.
 - Updated extension messages for clarity and easier future version upgrades.
