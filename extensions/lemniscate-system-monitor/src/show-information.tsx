@@ -18,11 +18,7 @@ export default function Command() {
 
   useEffect(() => {
     async function load() {
-      const [cpu, mem, procs] = await Promise.all([
-        si.currentLoad(),
-        si.mem(),
-        si.processes(),
-      ]);
+      const [cpu, mem, procs] = await Promise.all([si.currentLoad(), si.mem(), si.processes()]);
 
       const cores = cpu.cpus.map((c, i) => ({
         name: `CPU${i}`,
@@ -53,10 +49,7 @@ export default function Command() {
 
   return (
     <List isShowingDetail>
-      <List.Item
-        title="System Stats"
-        detail={<List.Item.Detail markdown={stats.markdown} />}
-      />
+      <List.Item title="System Stats" detail={<List.Item.Detail markdown={stats.markdown} />} />
 
       <List.Section title="Top Processes">
         {stats.procs.map((p) => (
@@ -68,33 +61,17 @@ export default function Command() {
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="PID"
-                      text={p.pid.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="CPU"
-                      text={`${p.cpu.toFixed(1)} %`}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Memory"
-                      text={`${p.mem.toFixed(1)} %`}
-                    />
+                    <List.Item.Detail.Metadata.Label title="PID" text={p.pid.toString()} />
+                    <List.Item.Detail.Metadata.Label title="CPU" text={`${p.cpu.toFixed(1)} %`} />
+                    <List.Item.Detail.Metadata.Label title="Memory" text={`${p.mem.toFixed(1)} %`} />
                   </List.Item.Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Kill Process"
-                  style={Action.Style.Destructive}
-                  onAction={() => killProcess(p.pid)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy PID"
-                  content={p.pid.toString()}
-                />
+                <Action title="Kill Process" style={Action.Style.Destructive} onAction={() => killProcess(p.pid)} />
+                <Action.CopyToClipboard title="Copy PID" content={p.pid.toString()} />
               </ActionPanel>
             }
           />
@@ -105,8 +82,7 @@ export default function Command() {
 }
 
 async function killProcess(pid: number) {
-  const command =
-    process.platform === "win32" ? `taskkill /F /PID ${pid}` : `kill -9 ${pid}`;
+  const command = process.platform === "win32" ? `taskkill /F /PID ${pid}` : `kill -9 ${pid}`;
   exec(command, (err) => {
     if (err) {
       showToast({
