@@ -2,6 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["src/**/*", "raycast-env.d.ts", "eslint.config.mjs"],
   "compilerOptions": {
+    "types": ["node", "react", "react-dom"],
     "lib": ["ES2023"],
     "module": "commonjs",
     "target": "ES2022",

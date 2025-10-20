@@ -10,6 +10,15 @@ export default async function Command({
   const { mediaDownloadPath } = await getPreferenceValues();
   const downloadFolder = mediaDownloadPath || `${homedir()}/Downloads`;
 
+  if (!threadsUrl) {
+    await showToast({
+      title: "Missing URL",
+      message: "Please provide a Threads post URL",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
   const threadsUrlPattern = /(?:threads\.net|threads\.com)\/@[\w.]+\/post\/([A-Za-z0-9_-]+)/;
   const match = threadsUrl.match(threadsUrlPattern);
 
