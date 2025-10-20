@@ -1,6 +1,6 @@
 # YouTube Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-10-20
 
 - Added new `Search Live Streams` command to search for live YouTube broadcasts
 - Improved empty view messages with more engaging copy for `Search Videos` and `Search Channels` commands
