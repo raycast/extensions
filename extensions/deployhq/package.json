@@ -60,14 +60,6 @@
           "value": "visit-repository"
         }
       ]
-    },
-    {
-      "name": "logPath",
-      "title": "Log Path",
-      "description": "Path to where Winston will save the logs",
-      "type": "textfield",
-      "required": false,
-      "default": ""
     }
   ],
   "dependencies": {
