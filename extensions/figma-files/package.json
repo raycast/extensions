@@ -54,7 +54,7 @@
     "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.18.6",
     "@types/react": "^19.1.13",
     "eslint": "^9.36.0",
