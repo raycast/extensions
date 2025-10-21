@@ -27,6 +27,13 @@ export const BROWSER_BRAVE: Browser = {
   appName: "Brave Browser",
 };
 
+export const BROWSER_CHATGPT_ATLAS: Browser = {
+  key: "atlas",
+  title: "ChatGPT Atlas",
+  scheme: "atlas://",
+  appName: "ChatGPT Atlas",
+};
+
 export const BROWSER_DIA: Browser = {
   key: "dia",
   title: "Dia",
@@ -72,6 +79,7 @@ export const BROWSER_VIVALDI: Browser = {
 export const SUPPORTED_BROWSERS: Browser[] = [
   BROWSER_ARC,
   BROWSER_BRAVE,
+  BROWSER_CHATGPT_ATLAS,
   BROWSER_CHROME,
   BROWSER_DIA,
   BROWSER_EDGE,
