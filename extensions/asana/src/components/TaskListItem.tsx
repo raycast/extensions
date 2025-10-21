@@ -16,7 +16,7 @@ export default function TaskListItem({ task, workspace, mutateList }: TaskListIt
   // Add section name and individual words from section name as keywords for better filtering
   const sectionWords = task.assignee_section.name
     .toLowerCase()
-    .split(/[\s\[\]\(\)\-_]+/)
+    .split(/[\s[\]()\-_]+/)
     .filter(Boolean);
 
   const keywords = [task.assignee_section.name, ...sectionWords];
@@ -28,7 +28,7 @@ export default function TaskListItem({ task, workspace, mutateList }: TaskListIt
         keywords.push(membership.section.name);
         const projectSectionWords = membership.section.name
           .toLowerCase()
-          .split(/[\s\[\]\(\)\-_]+/)
+          .split(/[\s[\]()\-_]+/)
           .filter(Boolean);
         keywords.push(...projectSectionWords);
       }

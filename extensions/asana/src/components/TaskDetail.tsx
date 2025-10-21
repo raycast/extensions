@@ -47,10 +47,7 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
               {task.memberships
                 .filter((membership) => membership.section)
                 .map((membership) => (
-                  <Detail.Metadata.TagList.Item
-                    key={membership.section!.gid}
-                    text={membership.section!.name}
-                  />
+                  <Detail.Metadata.TagList.Item key={membership.section!.gid} text={membership.section!.name} />
                 ))}
             </Detail.Metadata.TagList>
           ) : null}

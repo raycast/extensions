@@ -170,7 +170,9 @@ export default function CreateTaskForm(props: {
         </ActionPanel>
       }
       enableDrafts={!props.fromEmptyView}
-      isLoading={isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe || isLoadingSections || isLoadingTags}
+      isLoading={
+        isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe || isLoadingSections || isLoadingTags
+      }
     >
       <Form.Dropdown title="Workspace" storeValue {...itemProps.workspace}>
         {workspaces?.map((workspace) => {
