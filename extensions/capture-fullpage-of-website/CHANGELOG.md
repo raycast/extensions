@@ -1,5 +1,9 @@
 # Capture Fullpage of Website Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Improve error handling for Chrome/Chromium installation issues
+
 ## [Updates] - 2024-06-07
 
 - Update dependencies & make sure chromium is installed (`npm postinstall`) (fix [#11870](https://github.com/raycast/extensions/issues/11870))

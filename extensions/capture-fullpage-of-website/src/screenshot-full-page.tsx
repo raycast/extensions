@@ -60,7 +60,12 @@ export default function Command() {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed taking screenshot of website";
-        toast.message = String(error);
+        if (error instanceof Error && error.message.includes("Failed to launch")) {
+          toast.message =
+            "Chrome/Chromium is not installed. Please install Chrome or try running `npx -y @puppeteer/browsers install chrome` in your terminal.";
+        } else {
+          toast.message = String(error);
+        }
       }
     }
 
