@@ -154,7 +154,7 @@ function IvpnMetadata({ info, status }: { info: IvpnInfoParsed; status: IvpnStat
   const firewallDetails = (
     <Detail.Metadata.TagList title="Firewall">
       <Detail.Metadata.TagList.Item
-        text={info.firewall.enabled ? "Enabled" : "Disbabled"}
+        text={info.firewall.enabled ? "Enabled" : "Disabled"}
         color={info.firewall.enabled ? Color.Green : Color.Red}
       />
       <Detail.Metadata.TagList.Item
