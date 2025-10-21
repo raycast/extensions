@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zshrc-manager",
+  "title": "Zshrc Manager",
+  "description": "View and manage your ~/.zshrc from Raycast",
+  "icon": "extension-icon.png",
+  "author": "TurboCoder13",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TurboCoder13/raycast-extensions.git",
+    "directory": "zshrc-manager"
+  },
+  "homepage": "https://github.com/TurboCoder13/raycast-extensions/tree/main/zshrc-manager",
+  "bugs": {
+    "url": "https://github.com/TurboCoder13/raycast-extensions/issues"
+  },
+  "keywords": [
+    "raycast",
+    "zsh",
+    "shell",
+    "configuration",
+    "aliases",
+    "exports",
+    "terminal",
+    "productivity"
+  ],
+  "engines": {
+    "node": ">=18.17.0 <23"
+  },
+  "commands": [
+    {
+      "name": "zshrc-statistics",
+      "title": "Zshrc Statistics",
+      "description": "View statistics and overview of your ~/.zshrc configuration",
+      "mode": "view"
+    },
+    {
+      "name": "sections",
+      "title": "Sections",
+      "description": "Manage and organize sections in your ~/.zshrc",
+      "mode": "view"
+    },
+    {
+      "name": "aliases",
+      "title": "Aliases",
+      "description": "Add, edit, and manage aliases in your ~/.zshrc",
+      "mode": "view"
+    },
+    {
+      "name": "exports",
+      "title": "Exports",
+      "description": "Add, edit, and manage exports in your ~/.zshrc",
+      "mode": "view"
+    },
+    {
+      "name": "functions",
+      "title": "Functions",
+      "description": "View and manage functions in your ~/.zshrc",
+      "mode": "view"
+    },
+    {
+      "name": "plugins",
+      "title": "Plugins",
+      "description": "View and manage plugins in your ~/.zshrc",
+      "mode": "view"
+    },
+    {
+      "name": "sources",
+      "title": "Sources",
+      "description": "View and manage source commands in your ~/.zshrc",
+      "mode": "view"
+    },
+    {
+      "name": "evals",
+      "title": "Evals",
+      "description": "View and manage eval commands in your ~/.zshrc",
+      "mode": "view"
+    },
+    {
+      "name": "setopts",
+      "title": "Setopts",
+      "description": "View and manage setopt commands in your ~/.zshrc",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "simple-icons": "^15.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/react-test-renderer": "^19.0.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.22.0",
+    "jsdom": "^27.0.1",
+    "prettier": "^3.5.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-test-renderer": "^19.0.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck && npm run test:coverage"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}
