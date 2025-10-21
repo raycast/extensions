@@ -12,7 +12,7 @@ interface DecryptFormValues {
   vaultUrl: string;
 }
 
-function DecryptResult({ data, onDecryptAnother }: { data: VaultResponse; onDecryptAnother: () => void }) {
+function DecryptResult({ data }: { data: VaultResponse }) {
   const markdown = `
 ## Decrypted Value
 \`\`\`
@@ -40,7 +40,7 @@ The decrypted value has been automatically copied to your clipboard.
               });
             }}
           />
-          <Action title="Decrypt Another Secret" onAction={onDecryptAnother} />
+
         </ActionPanel>
       }
     />
@@ -49,7 +49,7 @@ The decrypted value has been automatically copied to your clipboard.
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
-  const { push, pop } = useNavigation();
+  const { push } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<DecryptFormValues>({
     async onSubmit(values) {
@@ -100,14 +100,7 @@ export default function Command() {
           style: Toast.Style.Success,
         });
 
-        push(
-          <DecryptResult
-            data={data}
-            onDecryptAnother={() => {
-              pop();
-            }}
-          />,
-        );
+        push(<DecryptResult data={data} />);
       } catch (error) {
         await showToast({
           title: "Decryption failed",
