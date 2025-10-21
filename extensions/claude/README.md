@@ -51,7 +51,6 @@ Got the answer that you wanted? Great.
 - `claude-sonnet-4-5` (alias)
 - `claude-sonnet-4-5-20250929`
 
-
 ## Claude 4.1
 
 - `claude-opus-4-1` (alias)
