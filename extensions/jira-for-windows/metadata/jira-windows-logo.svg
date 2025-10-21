@@ -1,0 +1,82 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern gradient background - Windows 11 style -->
+  <defs>
+    <linearGradient id="windowsBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0078D4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0066B8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#005A9E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00BCF2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0078D4;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Rounded square background - Windows 11 style -->
+  <rect width="512" height="512" rx="115" fill="url(#windowsBg)"/>
+  
+  <!-- Windows-style floating card -->
+  <rect x="80" y="100" width="352" height="312" rx="16" fill="white" filter="url(#shadow)" opacity="0.98"/>
+  
+  <!-- Jira ticket header with Windows accent -->
+  <rect x="100" y="120" width="312" height="8" rx="4" fill="url(#accentGradient)"/>
+  
+  <!-- Ticket title area -->
+  <rect x="110" y="150" width="140" height="14" rx="7" fill="#0078D4" opacity="0.7"/>
+  <rect x="110" y="175" width="200" height="12" rx="6" fill="#0078D4" opacity="0.4"/>
+  <rect x="110" y="195" width="160" height="10" rx="5" fill="#0078D4" opacity="0.3"/>
+  
+  <!-- Separator line -->
+  <line x1="100" y1="225" x2="412" y2="225" stroke="#E1E1E1" stroke-width="2"/>
+  
+  <!-- Modern checkbox items with Windows style -->
+  <!-- Task 1 - Completed (Windows green) -->
+  <rect x="110" y="245" width="28" height="28" rx="6" fill="#107C10"/>
+  <path d="M 117 259 L 123 265 L 131 252" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="148" y="252" width="180" height="10" rx="5" fill="#E1E1E1"/>
+  <rect x="148" y="252" width="140" height="10" rx="5" fill="#107C10" opacity="0.3"/>
+  
+  <!-- Task 2 - Completed (Windows green) -->
+  <rect x="110" y="290" width="28" height="28" rx="6" fill="#107C10"/>
+  <path d="M 117 304 L 123 310 L 131 297" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="148" y="297" width="160" height="10" rx="5" fill="#E1E1E1"/>
+  <rect x="148" y="297" width="120" height="10" rx="5" fill="#107C10" opacity="0.3"/>
+  
+  <!-- Task 3 - In Progress (Windows blue) -->
+  <rect x="110" y="335" width="28" height="28" rx="6" fill="white" stroke="#0078D4" stroke-width="2.5"/>
+  <circle cx="124" cy="349" r="6" fill="#0078D4"/>
+  <rect x="148" y="342" width="200" height="10" rx="5" fill="#E1E1E1"/>
+  <rect x="148" y="342" width="100" height="10" rx="5" fill="#0078D4" opacity="0.3"/>
+  
+  <!-- Task 4 - Not Started -->
+  <rect x="110" y="375" width="28" height="28" rx="6" fill="white" stroke="#8A8A8A" stroke-width="2.5" opacity="0.5"/>
+  <rect x="148" y="382" width="220" height="10" rx="5" fill="#E1E1E1" opacity="0.6"/>
+  
+  <!-- Windows keyboard indicator (Ctrl badge) -->
+  <g transform="translate(370, 360)">
+    <rect width="100" height="100" rx="20" fill="#2C3E50" opacity="0.95"/>
+    <text x="50" y="45" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600" fill="white" text-anchor="middle">Ctrl</text>
+    <text x="50" y="72" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" fill="#FFB900" text-anchor="middle">+D</text>
+  </g>
+  
+  <!-- Windows flag accent (subtle) -->
+  <g transform="translate(40, 40)" opacity="0.15">
+    <rect width="35" height="35" fill="white"/>
+    <rect x="2" y="2" width="14" height="14" fill="#00BCF2"/>
+    <rect x="19" y="2" width="14" height="14" fill="#00BCF2"/>
+    <rect x="2" y="19" width="14" height="14" fill="#00BCF2"/>
+    <rect x="19" y="19" width="14" height="14" fill="#00BCF2"/>
+  </g>
+  
+  <!-- Priority indicator - Windows style -->
+  <circle cx="430" cy="82" r="42" fill="#D83B01"/>
+  <text x="430" y="95" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">!</text>
+  
+  <!-- Windows 11 style decorative elements -->
+  <circle cx="80" cy="450" r="25" fill="#00BCF2" opacity="0.2"/>
+  <circle cx="450" cy="180" r="20" fill="#FFB900" opacity="0.15"/>
+</svg>
+
