@@ -1,87 +1,59 @@
 import { LaunchProps, showToast, Toast, Clipboard, showHUD, closeMainWindow } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { withProfileContext } from "@src/components";
-import { useStripeClient } from "@src/hooks";
-import { useEffect } from "react";
+import Stripe from "stripe";
+import { getActiveProfileConfig } from "@src/utils/profile-storage";
+import { STRIPE_API_VERSION } from "@src/enums";
 
-/**
- * Arguments for the quick coupon creation command.
- */
 interface QuickCouponArguments {
   percentage: string;
 }
 
-/**
- * Create Coupon Quick Command - Rapidly create percentage-based coupons from anywhere.
- *
- * This is a no-UI quicklink command that:
- * - Accepts a percentage argument (0-100)
- * - Generates a random 8-character coupon code
- * - Creates a "forever" duration coupon
- * - Automatically copies coupon ID to clipboard
- * - Shows success HUD notification
- * - Respects the active profile selected in "Manage Stripe Accounts"
- *
- * Usage: Invoke from Raycast, enter percentage, get instant coupon.
- * Perfect for rapid coupon generation during sales or customer support.
- */
-function CreateCouponQuick(props: LaunchProps<{ arguments: QuickCouponArguments }>) {
+const generateCouponCode = () =>
+  Array.from({ length: 8 }, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 36)]).join("");
+
+export default async function CreateCouponQuick(props: LaunchProps<{ arguments: QuickCouponArguments }>) {
   const { percentage } = props.arguments;
-  const stripe = useStripeClient();
 
-  useEffect(() => {
-    (async () => {
-      if (!stripe) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Stripe API key is not configured",
-        });
-        return;
-      }
+  try {
+    const { activeProfile, activeEnvironment } = await getActiveProfileConfig();
 
-      // Validate percentage
-      const percentOff = parseFloat(percentage);
-      if (isNaN(percentOff) || percentOff <= 0 || percentOff > 100) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid percentage",
-          message: "Please enter a number between 0 and 100",
-        });
-        return;
-      }
+    if (!activeProfile) {
+      return showToast({ style: Toast.Style.Failure, title: "No Stripe Account", message: "Configure API keys in settings" });
+    }
 
-      try {
-        await closeMainWindow();
-        await showHUD("Creating coupon...");
-
-        // Generate random coupon ID (8 characters, uppercase alphanumeric)
-        const randomId = Array.from({ length: 8 }, () => {
-          const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-          return chars.charAt(Math.floor(Math.random() * chars.length));
-        }).join("");
-
-        // Create the coupon
-        const coupon = await stripe.coupons.create({
-          id: randomId,
-          percent_off: percentOff,
-          duration: "forever",
-          name: `${percentOff}% Off Coupon`,
-        });
-
-        // Copy coupon ID to clipboard
-        await Clipboard.copy(coupon.id);
-
-        await showHUD(`✅ Coupon "${coupon.id}" created (${percentOff}% off) - Copied to clipboard!`);
-      } catch (error) {
-        await showFailureToast(error, {
-          title: "Failed to create coupon",
-        });
-      }
+    const { effectiveEnvironment, apiKey } = (() => {
+      const hasLive = !!activeProfile.liveApiKey;
+      const hasTest = !!activeProfile.testApiKey;
+      const env = !hasLive && hasTest ? "test" : hasLive && !hasTest ? "live" : activeEnvironment;
+      return { effectiveEnvironment: env, apiKey: env === "test" ? activeProfile.testApiKey : activeProfile.liveApiKey };
     })();
-  }, [stripe, percentage]);
 
-  return null;
+    if (!apiKey) {
+      return showToast({
+        style: Toast.Style.Failure,
+        title: `${effectiveEnvironment === "test" ? "Test" : "Live"} Mode Key Missing`,
+        message: `Add your API key for ${activeProfile.name}`,
+      });
+    }
+
+    const percentOff = parseFloat(percentage);
+    if (isNaN(percentOff) || percentOff <= 0 || percentOff > 100) {
+      return showToast({ style: Toast.Style.Failure, title: "Invalid Percentage", message: "Enter a number between 1 and 100" });
+    }
+
+    await closeMainWindow();
+    await showHUD("Creating your coupon...");
+
+    const coupon = await new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }).coupons.create({
+      id: generateCouponCode(),
+      percent_off: percentOff,
+      duration: "forever",
+      name: `${percentOff}% Off Coupon`,
+    });
+
+    await Clipboard.copy(coupon.id);
+    await showHUD(`${effectiveEnvironment === "test" ? "🧪 Test Mode" : "✅"} ${percentOff}% off coupon created! Code: ${coupon.id}`);
+  } catch (error) {
+    await showFailureToast(error, { title: "Coupon Creation Failed" });
+  }
 }
-
-export default withProfileContext(CreateCouponQuick, { skipGuide: true });

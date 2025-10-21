@@ -6,7 +6,7 @@ import {
   saveActiveProfileId,
   generateProfileId,
   initializeProfiles,
-  getActiveEnvironment,
+  getActiveProfileConfig,
   saveActiveEnvironment,
 } from "@src/utils/profile-storage";
 import { StripeGuide } from "@src/components/organisms";
@@ -26,11 +26,10 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children, skip
   const [initError, setInitError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([initializeProfiles(), getActiveEnvironment()])
-      .then(([{ profiles: storedProfiles, activeProfileId: storedActiveId }, storedEnvironment]) => {
-        if (storedProfiles.length === 0) {
-          throw new Error("Failed to initialize profiles");
-        }
+    // Initialize profiles first, then get the active config
+    initializeProfiles()
+      .then(() => getActiveProfileConfig())
+      .then(({ profiles: storedProfiles, activeProfileId: storedActiveId, activeEnvironment: storedEnvironment }) => {
         setProfiles(storedProfiles);
         setActiveProfileId(storedActiveId);
         setActiveEnvironmentState(storedEnvironment);

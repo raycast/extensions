@@ -81,3 +81,35 @@ export const initializeProfiles = async (): Promise<{
 export const validateProfile = (profile: StripeProfile, environment: Environment): boolean => {
   return environment === "test" ? !!profile.testApiKey : !!profile.liveApiKey;
 };
+
+/**
+ * Get the current active profile configuration.
+ * 
+ * This centralized function handles:
+ * - Fetching all profiles from storage
+ * - Getting the active profile ID
+ * - Getting the active environment (defaults to "live")
+ * - Finding and returning the active profile
+ * 
+ * @returns Object containing profiles, activeProfile, activeProfileId, and activeEnvironment
+ */
+export const getActiveProfileConfig = async (): Promise<{
+  profiles: StripeProfile[];
+  activeProfile: StripeProfile | null;
+  activeProfileId: string | null;
+  activeEnvironment: Environment;
+}> => {
+  const profiles = await getStoredProfiles();
+  const activeProfileId = await getActiveProfileId();
+  const activeEnvironment = await getActiveEnvironment();
+
+  // Find the active profile, or use the first one if none is set
+  const activeProfile = profiles.find((p) => p.id === activeProfileId) || profiles[0] || null;
+
+  return {
+    profiles,
+    activeProfile,
+    activeProfileId: activeProfile?.id || activeProfileId,
+    activeEnvironment,
+  };
+};
