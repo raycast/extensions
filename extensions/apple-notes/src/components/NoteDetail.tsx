@@ -4,7 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 import { getNoteBody } from "../api/applescript";
-import { truncate } from "../helpers";
+import { truncate, stripLargeImages } from "../helpers";
 import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import NoteActions from "./NoteActions";
@@ -19,8 +19,9 @@ export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps)
   const { data, isLoading } = useCachedPromise(
     async (id) => {
       const content = await getNoteBody(id);
+      const processedContent = stripLargeImages(content, 1024);
       const nodeToMarkdown = new NodeHtmlMarkdown({ keepDataImages: true });
-      return nodeToMarkdown.translate(content);
+      return nodeToMarkdown.translate(processedContent);
     },
     [note.id],
   );

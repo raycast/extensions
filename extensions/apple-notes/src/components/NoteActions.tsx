@@ -20,7 +20,7 @@ import { useState } from "react";
 
 import { NoteTitle } from "..";
 import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api/applescript";
-import { fileIcon, getOpenNoteURL } from "../helpers";
+import { fileIcon, getOpenNoteURL, stripLargeImages } from "../helpers";
 import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import AddTextForm from "./AddTextForm";
@@ -210,8 +210,9 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
             onAction={async () =>
               copyNoteContent(async (noteId) => {
                 const content = await getNoteBody(noteId);
-                const nodeToMarkdown = new NodeHtmlMarkdown();
-                return nodeToMarkdown.translate(content);
+                const processedContent = stripLargeImages(content, 500);
+                const nodeToMarkdown = new NodeHtmlMarkdown({ keepDataImages: true });
+                return nodeToMarkdown.translate(processedContent);
               })
             }
             shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
