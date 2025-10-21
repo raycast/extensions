@@ -50,3 +50,9 @@ export class IvpnFreeTrialExpiredError extends IvpnCliError {
     super(execException.message, execException, "IvpnFreeTrialExpiredError");
   }
 }
+
+export class IvpnServersPingingSkippedError extends IvpnCliError {
+  constructor(execException: ExecException) {
+    super(execException.message, execException, "IvpnServersPingingSkippedError");
+  }
+}

@@ -92,7 +92,7 @@ function ditchDateTimezone(dateStr: string) {
 
 export function parseIvpnServersOutput(stdout: string) {
   const rgx =
-    /^\s*(?<protocol>WireGuard|OpenVPN)\s*\|\s*(?<location>[^|]+)\s*\|\s*(?<city>[^(|]+)\s\((?<countryCode>[A-Z]{2})\)\s*\|\s*(?<country>[^|]+)\s*\|\s*(?<ISP>[^|]+)\s*\|\s*(?<ipvTunnels>[^| ]+)\s*\|\s*(?<pingMs>\d+|\?)\s*(?:ms)?\s*\|/gm;
+    /^\s*(?<protocol>WireGuard|OpenVPN)\s*\|\s*(?<location>[^|]+)\s*\|\s*(?<city>[^(|]+)\s\((?<countryCode>[A-Z]{2})\)\s*\|\s*(?<country>[^|]+)\s*\|\s*(?<ISP>[^|]+)\s*\|\s*(?<ipvTunnels>[^| ]+)\s*\|(\s*(?<pingMs>\d+|\?)\s*(?:ms)?\s*\|)?/gm;
 
   const servers: IvpnServerParsed[] = [];
 

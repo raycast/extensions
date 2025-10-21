@@ -14,7 +14,7 @@ import Fuse from "fuse.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { IVPN } from "@/api/ivpn";
-import { IvpnPingAlreadyInProgressError } from "@/api/ivpn/errors";
+import { IvpnPingAlreadyInProgressError, IvpnServersPingingSkippedError } from "@/api/ivpn/errors";
 import { IvpnServerParsed } from "@/api/ivpn/types";
 import { IvpnConnectionProvider, useIvpnConnection } from "@/contexts/IvpnConnectionContext";
 import { useFrecencySortingExtended } from "@/hooks/useFrecencySortingExtended";
@@ -31,18 +31,32 @@ export default () => (
 function ServerList() {
   const abortable = useRef(new AbortController());
 
+  const [shouldPing, setShouldPing] = useState(true);
   const [citiesUnfiltered, setCitiesCached] = useCachedState<IvpnCity[] | undefined>("servers-list");
   const {
     isLoading: isLoadingCities,
     error: citiesError,
     revalidate: refetchCities,
-  } = usePromise(async () => collapseServersIntoCities(await IVPN.getServers(abortable.current.signal)), [], {
-    abortable,
-    onData: setCitiesCached,
-    onError: (error) => {
-      if (!(error instanceof IvpnPingAlreadyInProgressError)) setCitiesCached(undefined);
+  } = usePromise(
+    async (shouldPing) =>
+      collapseServersIntoCities(await IVPN.getServers({ signal: abortable.current.signal, shouldPing })),
+    [shouldPing],
+    {
+      abortable,
+      onData: setCitiesCached,
+      onError: (error) => {
+        if (error instanceof IvpnServersPingingSkippedError) {
+          // this weird error will occur unpredictably
+          // if we're already connected trying to ping
+          if (!citiesUnfiltered?.length) setShouldPing(false); // i.e. try again w/o pinging, but only if we have no cached pinged servers
+          return;
+        }
+        if (!(error instanceof IvpnPingAlreadyInProgressError)) setCitiesCached(undefined);
+      },
     },
-  });
+  );
+
+  const hasAnyPings = useMemo(() => !!citiesUnfiltered?.some((city) => !!city.server.pingMs), [citiesUnfiltered]);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -107,10 +121,12 @@ function ServerList() {
   };
 
   const { showErrorToast, ErrorComponent } = handleError(citiesError, refetchCities);
-  if (ErrorComponent && (!cities || !(citiesError instanceof IvpnPingAlreadyInProgressError))) {
-    return <ErrorComponent />;
+  if (!(citiesError instanceof IvpnServersPingingSkippedError)) {
+    if (ErrorComponent && (!cities || !(citiesError instanceof IvpnPingAlreadyInProgressError))) {
+      return <ErrorComponent />;
+    }
+    showErrorToast?.();
   }
-  showErrorToast?.();
 
   return (
     <List
@@ -134,6 +150,7 @@ function ServerList() {
           sortedBy={sortBy}
           frecency={{ visitItem, resetRanking }}
           pendingConnect={{ pendingConnectItem, onRequestConnectToItem }}
+          formatting={{ showPingTags: hasAnyPings }}
         />
       ) : null}
     </List>
@@ -145,12 +162,14 @@ type ServerListItemsProps = {
   sortedBy: ServersSortType;
   frecency: { visitItem: (item: IvpnCity) => Promise<void>; resetRanking: (item: IvpnCity) => Promise<void> };
   pendingConnect: { pendingConnectItem: IvpnCity | null; onRequestConnectToItem: (city: IvpnCity) => void };
+  formatting: { showPingTags: boolean };
 };
 function ServerListItems({
   items,
   sortedBy,
   frecency: { visitItem, resetRanking },
   pendingConnect: { pendingConnectItem, onRequestConnectToItem },
+  formatting,
 }: ServerListItemsProps) {
   const ivpn = useIvpnConnection();
   const nav = useNavigation();
@@ -293,6 +312,7 @@ function ServerListItems({
               onConnectRandom: connectRandom,
               onConnectFastest: connectFastest,
             }}
+            formatting={formatting}
           />
         );
       })}
@@ -305,6 +325,7 @@ function ServerListItem({
   info,
   connectionState,
   events,
+  formatting: { showPingTags },
 }: {
   id: string;
   info: IvpnCity;
@@ -316,8 +337,9 @@ function ServerListItem({
     onConnectRandom: () => void;
     onConnectFastest: () => void;
   };
+  formatting: ServerListItemsProps["formatting"];
 }) {
-  const accessories = getServerListItemAccessories(info, connectionState);
+  const accessories = getServerListItemAccessories(info, connectionState, showPingTags);
 
   return (
     <List.Item
@@ -367,6 +389,7 @@ function ServerListItem({
 function getServerListItemAccessories(
   info: IvpnCity,
   connectionState: Parameters<typeof ServerListItem>[0]["connectionState"],
+  showPingTags: boolean,
 ) {
   const accessories: List.Item.Accessory[] = [];
   // connection status
@@ -379,7 +402,7 @@ function getServerListItemAccessories(
   }
   // ping speed
   if (info.server.pingMs === null) {
-    accessories.push({ tag: { value: "unknown", color: Color.SecondaryText } });
+    if (showPingTags) accessories.push({ tag: { value: "unknown", color: Color.SecondaryText } });
   } else if (info.server.pingMs < 100) {
     accessories.push({ tag: { value: info.server.pingMs + "ms", color: Color.Green } });
   } else if (info.server.pingMs < 300) {

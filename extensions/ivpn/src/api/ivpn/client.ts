@@ -6,6 +6,7 @@ import {
   IvpnInvalidAccountIdError,
   IvpnNotLoggedInError,
   IvpnPingAlreadyInProgressError,
+  IvpnServersPingingSkippedError,
   IvpnSubscriptionExpiredError,
 } from "./errors";
 import { ConnectPayload } from "./types";
@@ -47,8 +48,10 @@ export class IVPN {
   }
 
   @ivpnErrorInterpreter
-  static async getServers(signal?: AbortSignal) {
-    const { stdout } = await execPromise("ivpn servers -ping", { signal });
+  static async getServers(opts: { signal: AbortSignal; shouldPing: boolean }) {
+    const { stdout } = await execPromise(`ivpn servers ${opts.shouldPing ? "-ping" : ""}`, {
+      signal: opts.signal,
+    });
     return parseIvpnServersOutput(stdout);
   }
 
@@ -105,6 +108,13 @@ function ivpnErrorInterpreter<T>(
 
       if (err.stderr?.includes("free trial has expired") || err.stdout?.includes("free trial has expired")) {
         throw new IvpnFreeTrialExpiredError(err);
+      }
+
+      if (
+        err.stderr?.includes("pinging skipped due to connected state") ||
+        err.stdout?.includes("pinging skipped due to connected state")
+      ) {
+        throw new IvpnServersPingingSkippedError(err);
       }
 
       throw err;
