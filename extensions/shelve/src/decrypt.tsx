@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Detail, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
 
@@ -135,7 +135,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Decrypt Secret" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Decrypt Secret" onSubmit={handleSubmit} icon={Icon.LockUnlocked} />
         </ActionPanel>
       }
     >
