@@ -50,7 +50,7 @@ export default function Command() {
           <Grid.Section title="Results" subtitle={data?.length + ""}>
             {data?.map((meme) => (
               <SearchGridItem
-                key={meme.title}
+                key={meme.link}
                 searchResult={{
                   name: meme.title,
                   url: meme.link,
@@ -78,7 +78,7 @@ export default function Command() {
           <List.Section title="Results" subtitle={data?.length + ""}>
             {data?.map((meme) => (
               <SearchListItem
-                key={meme.title}
+                key={meme.link}
                 searchResult={{
                   name: meme.title,
                   url: meme.link,
