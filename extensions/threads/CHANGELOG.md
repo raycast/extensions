@@ -1,6 +1,6 @@
 # Threads Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-10-21
 
 - Update threads.net to threads.com and centeralize the base URL in constants file
 - Add `View Profile` command to quickly view any user's profile
