@@ -28,18 +28,13 @@ export function createInitialApps(paths: string[], tagMap: { [key: string]: stri
   });
 }
 
-export function updateDisplayNamesInBatches(
-  paths: string[],
-  onUpdate: (updates: { [path: string]: string }) => void,
-): void {
+export async function loadDisplayNames(paths: string[]): Promise<{ [path: string]: string }> {
+  const updates: { [path: string]: string } = {};
   const batchSize = 20;
-  let currentIndex = 0;
 
-  const updateBatch = () => {
-    if (currentIndex >= paths.length) return;
-
-    const batch = paths.slice(currentIndex, currentIndex + batchSize);
-    const updates: { [path: string]: string } = {};
+  // Process in batches to avoid command line length limits
+  for (let i = 0; i < paths.length; i += batchSize) {
+    const batch = paths.slice(i, i + batchSize);
 
     try {
       const batchCmd = batch.map((p) => `mdls -name kMDItemDisplayName -raw "${p}"`).join(' && echo "---" && ');
@@ -53,17 +48,10 @@ export function updateDisplayNamesInBatches(
           }
         }
       });
-
-      onUpdate(updates);
     } catch (error) {
-      console.warn(`Failed to update display names for batch ${currentIndex}-${currentIndex + batchSize}:`, error);
+      console.warn(`Failed to update display names for batch ${i}-${i + batchSize}:`, error);
     }
+  }
 
-    currentIndex += batchSize;
-    if (currentIndex < paths.length) {
-      setTimeout(updateBatch, 50);
-    }
-  };
-
-  setTimeout(updateBatch, 100);
+  return updates;
 }

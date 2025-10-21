@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { AppInfo } from "./types";
-import { discoverApps, createInitialApps, updateDisplayNamesInBatches } from "./services/appDiscovery";
+import { discoverApps, createInitialApps, loadDisplayNames } from "./services/appDiscovery";
 import { loadTags } from "./services/tagStorage";
 import { toPinyin } from "./utils/pinyin";
 import TagManagementForm from "./components/TagManagementForm";
@@ -22,17 +22,14 @@ export default function Command() {
       const initialApps = await loadApps();
       const paths = initialApps.map((app) => app.path);
 
-      // Start background updates for Chinese display names
-      updateDisplayNamesInBatches(paths, (updates) => {
-        const updatedApps = initialApps.map((app) => {
-          const newDisplayName = updates[app.path];
-          return newDisplayName ? { ...app, displayName: newDisplayName } : app;
-        });
-        // Trigger re-render with updated names
-        mutate(Promise.resolve(updatedApps), { optimisticUpdate: () => updatedApps });
-      });
+      // Load all display names upfront
+      const displayNames = await loadDisplayNames(paths);
+      const finalApps = initialApps.map((app) => ({
+        ...app,
+        displayName: displayNames[app.path] || app.displayName,
+      }));
 
-      return initialApps;
+      return finalApps;
     },
     [],
     {
