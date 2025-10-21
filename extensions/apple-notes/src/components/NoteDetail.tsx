@@ -1,10 +1,9 @@
 import { Detail, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { formatDistanceToNow } from "date-fns";
-import { NodeHtmlMarkdown } from "node-html-markdown";
 
 import { getNoteBody } from "../api/applescript";
-import { truncate, stripLargeImages } from "../helpers";
+import { truncate, convertHtmlToMarkdownSafely } from "../helpers";
 import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import NoteActions from "./NoteActions";
@@ -16,15 +15,23 @@ type NoteDetailProps = {
 };
 
 export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps) {
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error } = useCachedPromise(
     async (id) => {
       const content = await getNoteBody(id);
-      const processedContent = stripLargeImages(content, 1024);
-      const nodeToMarkdown = new NodeHtmlMarkdown({ keepDataImages: true });
-      return nodeToMarkdown.translate(processedContent);
+      // Use memory-safe conversion that strips large images to prevent heap out of memory errors
+      return convertHtmlToMarkdownSafely(content);
     },
     [note.id],
   );
+
+  if (error) {
+    return (
+      <Detail
+        markdown={`# Error Loading Note\n\n${error.message}\n\n**Tip:** Notes with large images may exceed memory limits. Try opening the note directly in the Apple Notes app.`}
+        actions={<NoteActions note={note} isDeleted={isDeleted} mutate={mutate} isDetail />}
+      />
+    );
+  }
 
   return (
     <Detail

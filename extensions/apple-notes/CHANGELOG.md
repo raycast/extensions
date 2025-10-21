@@ -1,5 +1,11 @@
 # Apple Notes Changelog
 
+## [Fix large image memory issue] - {PR_MERGE_DATE}
+
+Fix #21822
+
+To improve memory management when handling notes with large images, the extension now strips images exceeding a certain size threshold. Instead of loading these large images with base64 data, it creates temporary small images. This change helps prevent memory-related crashes and enhances overall performance when viewing notes with large images.
+
 ## [View Random Note command] - 2025-06-30
 
 Add a new command for viewing a random note from a user's note library.

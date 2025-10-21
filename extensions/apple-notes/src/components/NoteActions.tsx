@@ -15,12 +15,11 @@ import {
   AI,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { NodeHtmlMarkdown } from "node-html-markdown";
 import { useState } from "react";
 
 import { NoteTitle } from "..";
 import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api/applescript";
-import { fileIcon, getOpenNoteURL, stripLargeImages } from "../helpers";
+import { fileIcon, getOpenNoteURL, convertHtmlToMarkdownSafely } from "../helpers";
 import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import AddTextForm from "./AddTextForm";
@@ -210,9 +209,8 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
             onAction={async () =>
               copyNoteContent(async (noteId) => {
                 const content = await getNoteBody(noteId);
-                const processedContent = stripLargeImages(content, 500);
-                const nodeToMarkdown = new NodeHtmlMarkdown({ keepDataImages: true });
-                return nodeToMarkdown.translate(processedContent);
+                // Use memory-safe conversion that strips large images to prevent heap out of memory errors
+                return convertHtmlToMarkdownSafely(content);
               })
             }
             shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
