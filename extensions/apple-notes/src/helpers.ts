@@ -166,7 +166,7 @@ export async function convertHtmlToMarkdownSafely(htmlContent: string): Promise<
 
     return processedMarkdown;
 
-    return processedMarkdown;
+  }
   } catch (err) {
     if (err instanceof Error && err.message.includes("heap out of memory")) {
       throw new Error("Content exceeds memory limits. Please open this note in the Apple Notes app.");
