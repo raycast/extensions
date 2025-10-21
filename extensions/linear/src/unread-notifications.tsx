@@ -94,14 +94,14 @@ function UnreadNotifications() {
     >
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title="Open inbox"
+          title="Open Inbox"
           icon="linear-app-icon.png"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={openInbox}
         />
         {unreadNotifications.length > 0 ? (
           <MenuBarExtra.Item
-            title="Mark all as read"
+            title="Mark All as Read"
             icon={Icon.CheckCircle}
             shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
             onAction={markAllAsRead}
@@ -111,7 +111,7 @@ function UnreadNotifications() {
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={unreadNotifications.length !== 0 ? "Unread notifications" : "No unread notifications"}
+          title={unreadNotifications.length !== 0 ? "Unread Notifications" : "No Unread Notifications"}
         />
 
         {unreadNotifications.map((notification) => {
@@ -146,7 +146,7 @@ function UnreadNotifications() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           icon={Icon.Eye}
-          title="View all notifications"
+          title="View All Notifications"
           onAction={() => launchCommand({ name: "notifications", type: LaunchType.UserInitiated })}
         />
       </MenuBarExtra.Section>
