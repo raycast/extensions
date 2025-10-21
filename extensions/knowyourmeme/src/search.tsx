@@ -23,7 +23,7 @@ function escapeHtmlAttr(value: string) {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const isGridView = preferences.viewType === "grid";
   const maxResults = preferences.maxResults;
 
