@@ -21,7 +21,7 @@ type HandlerOptions = {
  */
 export const handleError = async (error: unknown, handlerOptions?: HandlerOptions) => {
   if (error instanceof HTTPError) return handleHttpError(error, handlerOptions);
-  if (error instanceof SubprocessError) return handleSubprocessError(error);
+  if (error instanceof SubprocessError) return handleSubprocessError(error, handlerOptions);
   return operation.showFailureToast(error);
 };
 
@@ -69,8 +69,9 @@ export const handleHttpError = async (error: HTTPError, handlerOptions?: Handler
  * Handle nano-spawn SubprocessError and show a failure toast.
  * @param error The SubprocessError to handle.
  */
-export const handleSubprocessError = (error: SubprocessError) =>
+export const handleSubprocessError = (error: SubprocessError, handlerOptions?: HandlerOptions) =>
   operation.showFailureToast([error.message, error.stderr].join("\n"), {
     title: error.message,
     message: error.stderr,
+    primaryAction: handlerOptions?.primaryAction,
   });

@@ -2,7 +2,7 @@ import { ActionPanel } from "@raycast/api";
 
 import { LanguageActionItem } from "@components";
 
-import { IconConstants, ShortcutConstants } from "@constants";
+import { IconConstants, ShortcutConstants } from "Const";
 
 import { Language } from "@models";
 

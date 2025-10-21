@@ -1,5 +1,12 @@
 # Window Sizer Changelog
 
+## [Chore] - 2025-09-30
+- Updated screenshots to macOS Tahoe
+
+## [Chore] - 2025-06-03
+
+- Fixed store page styling
+
 ## [Chore] - 2025-06-03
 
 - Fixed store page styling

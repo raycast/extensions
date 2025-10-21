@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tududi",
+  "title": "Tududi",
+  "description": "An extension to access tududi features from Raycast",
+  "icon": "extension-icon.png",
+  "author": "david_leibovych",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "API Base URL",
+      "description": "The base URL for the Tududi API"
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Your Tududi email"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your Tududi password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "all-tasks",
+      "title": "All Tasks",
+      "subtitle": "View all tududi tasks",
+      "description": "Browse all Tududi tasks directly from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Create Tududi Task",
+      "description": "Quickly add a Tududi task with rich options",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "Creates new tududi note",
+      "description": "Compose detailed Tududi notes without leaving Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "all-notes",
+      "title": "All Notes",
+      "subtitle": "Shows all tududi notes",
+      "description": "Review every Tududi note alongside tags and projects",
+      "mode": "view"
+    },
+    {
+      "name": "today-tasks",
+      "title": "Today Tasks",
+      "subtitle": "Tasks that are planned for today",
+      "description": "Focus on Tududi tasks scheduled for completion today",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

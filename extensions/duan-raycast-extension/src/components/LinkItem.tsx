@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, confirmAlert, Alert, Keyboard, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, confirmAlert, Alert, Keyboard, Color, showToast, Toast } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
 import type { Link, SortOption } from "../types";
 import { LinkDetail } from "./LinkDetail";
@@ -50,6 +50,21 @@ export const LinkItem = ({
     }
   };
 
+  // Backend returns UTC timestamps in the fixed format
+  // "YYYY-MM-DD HH:MM:SS" (no T/Z/offset).
+  // Always parse as UTC by converting to ISO 8601:
+  // replace the space with 'T' and append 'Z', then
+  // render with toLocaleString() for local time.
+  const formatLocalDateTime = (value: string | null): string => {
+    if (!value) return "Never";
+    const raw = value.trim();
+    const isoUTC = `${raw.includes("T") ? raw : raw.replace(" ", "T")}Z`;
+    const d = new Date(isoUTC);
+    if (Number.isNaN(d.getTime())) return "Never";
+    return d.toLocaleString();
+  };
+  const lastVisitedLabel = formatLocalDateTime(link.last_visited_at);
+
   const accessories: List.Item.Accessory[] = [];
   if (link.description) {
     accessories.push({
@@ -85,6 +100,17 @@ export const LinkItem = ({
               style={Action.Style.Destructive}
               shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={handleDelete}
+            />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Last Visited: ">
+            <Action
+              icon={Icon.Clock}
+              title={lastVisitedLabel}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              onAction={async () => {
+                await showToast({ style: Toast.Style.Success, title: "Last Visited", message: lastVisitedLabel });
+              }}
             />
           </ActionPanel.Section>
 

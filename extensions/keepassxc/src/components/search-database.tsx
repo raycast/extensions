@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { JSX } from "react/jsx-runtime";
 import {
   Action,
   ActionPanel,
@@ -47,7 +48,7 @@ function getFolders(entries: string[][]): string[] {
  *
  * @returns {JSX.Element} The dropdown component.
  */
-function FolderFilterDropdown(props: { folders: string[]; onFolderChange: (newValue: string) => void }) {
+function FolderFilterDropdown(props: { folders: string[]; onFolderChange: (newValue: string) => void }): JSX.Element {
   const { folders, onFolderChange } = props;
   return (
     <List.Dropdown
@@ -80,7 +81,11 @@ function FolderFilterDropdown(props: { folders: string[]; onFolderChange: (newVa
  * pasting or copying passwords, usernames, and TOTP, as well as opening URLs associated
  * with entries. If an error occurs, the database is locked, and an error message is shown.
  */
-export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUnlocked: boolean) => void }) {
+export default function SearchDatabase({
+  setIsUnlocked,
+}: {
+  setIsUnlocked: (isUnlocked: boolean) => void;
+}): JSX.Element {
   const [entries, setEntries] = useState<string[][]>([]);
   const [folders, setFolders] = useState<string[]>([]);
   const [entriesFolder, setEntriesFolder] = useState<string>("");
@@ -173,7 +178,7 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       }}
                     />
                     <Action
-                      title="Paste Totp"
+                      title="Paste TOTP"
                       icon={Icon.BlankDocument}
                       shortcut={{ modifiers: ["opt"], key: "enter" }}
                       onAction={() => {
@@ -213,7 +218,7 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       }}
                     />
                     <Action
-                      title="Copy Totp"
+                      title="Copy TOTP"
                       icon={Icon.Clipboard}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => {

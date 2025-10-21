@@ -1,0 +1,94 @@
+# Auto-labels PRs "Approved" on non-maintainer approvals.
+# Skips write+/maintain/admin users to highlight community reviews.
+# Handles bots/externals/404s/none as allowable; only for open PRs.
+# Edge: API errors skip labeling (no job failure); idempotent adds.
+
+name: Auto-label approved PRs (external reviewers only)
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label_on_approval:
+    runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved' && github.event.pull_request.state == 'open'
+    steps:
+    - name: Check reviewer permissions
+      id: check_permissions
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const reviewer = context.payload.review.user;
+          const pr = context.payload.pull_request;
+          
+          console.log(`Reviewer: ${reviewer.login}, Type: ${reviewer.type}`);
+          
+          // If not a human user (e.g., bot), always label
+          if (reviewer.type !== 'User') {
+            console.log('Non-human reviewer: Will add label');
+            return 'label';
+          }
+          
+          // For human users, check if they're a collaborator using GITHUB_TOKEN
+          try {
+            const { data: collaborator } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: reviewer.login
+            });
+            
+            const permission = collaborator.permission;
+            console.log(`User permission: ${permission}`);
+            
+            // Only label if they have read/triage/none permissions
+            if (['read', 'triage', 'none'].includes(permission)) {
+              console.log(`Will add label for ${permission} user`);
+              return 'label';
+            } else {
+              console.log(`Will skip label for ${permission} user`);
+              return 'skip';
+            }
+          } catch (error) {
+            if (error.status === 404) {
+              // User is not a collaborator, allow labeling
+              console.log('User is not a collaborator: Will add label');
+              return 'label';
+            } else {
+              console.log(`Permission check error: ${error.message}`);
+              return 'skip';
+            }
+          }
+        result-encoding: string
+
+    - name: Add Approved label
+      if: steps.check_permissions.outputs.result == 'label'
+      run: |
+        pr_number="${{ github.event.pull_request.number }}"
+        
+        echo "Adding 'Approved' label using RAYCAST_BOT_API_ACCESS_TOKEN..."
+        
+        response=$(curl -s -w "\n%{http_code}" \
+          -X POST \
+          -H "Authorization: token ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/repos/${{ github.repository }}/issues/${pr_number}/labels" \
+          -d '{"labels":["Approved"]}')
+        
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | sed '$d')
+        
+        echo "Label API HTTP Code: $http_code"
+        
+        # 200 = success, 422 = label already exists (also success for our purposes)
+        if [[ "$http_code" == "200" || "$http_code" == "422" ]]; then
+          echo "Successfully added 'Approved' label to PR #$pr_number"
+        else
+          echo "Failed to add label (HTTP $http_code): $response_body"
+          exit 1
+        fi
+      env:
+        RAYCAST_BOT_API_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}

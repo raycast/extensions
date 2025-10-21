@@ -1,5 +1,25 @@
 # Unicode Symbols
 
+## [Bugfix] - 2025-10-13
+
+- Fixing an issue where the extension does not show proper icons in the Grid view on Windows (ref: [#22082](https://github.com/raycast/extensions/issues/22082))
+- Remove `encode`, opting for a built-in method instead
+- Add Favorites functionality
+- Improve search performance
+- Add Copy (Unicode Escape) to Clipboard action
+- Refactor code to use hooks and clean up the codebase
+
+## [Improvements] - 2025-10-10
+
+- Added Windows support as this is not using any macOS specific APIs
+
+## [Improvements] - 2025-09-24
+
+- Update to `unidata16` to version `1.1.0`, which contains a bit more info
+- Improve generate script to add back Tab and add mirror and age code
+- Update Grid/List item actions to reset filters on the top
+- Search for number in the `1/2` format as well
+
 ## [Improvements] - 2025-09-17
 
 - Update to `unidata16` to version `1.0.0`, which contains the latest Unicode data set (version 17.0.0)

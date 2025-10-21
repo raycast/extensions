@@ -19,6 +19,7 @@ devutils
 arc
 netlify
 pinata
+plane
 grafbase
 tailscale
 todoist

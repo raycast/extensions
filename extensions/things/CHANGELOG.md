@@ -1,5 +1,12 @@
 # Things Changelog
 
+## [Fix Timeout on macOS Tahoe] - 2025-10-15
+
+- Fixed timeout errors when opening "Add New To-Do" command on macOS Tahoe (26.x)
+- Consolidated concurrent JXA queries into single execution to prevent race conditions
+- Improved error reporting to show which operation timed out
+- Added operation context to all error messages for better debugging
+
 ## [Improved Project Handling] - 2025-09-09
 
 - Added Update and Delete project tools with proper Things URL scheme support

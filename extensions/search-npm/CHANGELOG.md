@@ -1,5 +1,11 @@
 # Search npm Changelog
 
+## [Improvements and Fix] - 2025-10-14
+
+- Fix broken search link, implemented suggestion from [#21972](https://github.com/raycast/extensions/issues/21972)
+- Update dependencies to the latest
+- Refactor codebase for better readability and maintainability
+
 ## [Fixes] - 2025-02-05
 
 - Fix URL parsing issue
