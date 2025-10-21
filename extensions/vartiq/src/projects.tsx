@@ -1,4 +1,4 @@
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { vartiq } from "./vartiq";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import Webhooks from "./webhooks";
@@ -40,11 +40,15 @@ export default function Projects() {
 }
 
 function Apps({ projectId, navigationTitle }: { projectId: string; navigationTitle: string }) {
-  const { isLoading, data: apps=[] } = usePromise(
-    async () => {
+  const { isLoading, data: apps } = useCachedPromise(
+    async (projectId: string) => {
       const { data } = await vartiq.app.list(projectId);
       return data;
-    }
+    },
+    [projectId],
+    {
+      initialData: [],
+    },
   );
 
   return (

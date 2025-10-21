@@ -1,5 +1,5 @@
 import { List, Color, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { ApiSuccessResponse, WebhookMessage } from "vartiq";
 import { vartiq } from "./vartiq";
 
@@ -10,13 +10,15 @@ export default function WebhookMessages({
   webhookId: string;
   navigationTitle: string;
 }) {
-  const { isLoading, data: messages=[] } = usePromise(
-    async () => {
+  const { isLoading, data: messages } = useCachedPromise(
+    async (webhookId: string) => {
       const { data } = await vartiq.request<ApiSuccessResponse<WebhookMessage[]>>(
         `webhook-messages?webhookIds=${webhookId}`,
       );
       return data;
-    }
+    },
+    [webhookId],
+    { initialData: [] },
   );
 
   return (

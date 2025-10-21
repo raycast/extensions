@@ -12,7 +12,7 @@ import {
   Form,
   Keyboard,
 } from "@raycast/api";
-import { useForm, FormValidation, usePromise } from "@raycast/utils";
+import { useForm, FormValidation, useCachedPromise } from "@raycast/utils";
 import { vartiq } from "./vartiq";
 import { CreateWebhookInput } from "vartiq";
 import WebhookMessages from "./webhook-messages";
@@ -20,14 +20,16 @@ import WebhookMessages from "./webhook-messages";
 export default function Webhooks({ appId, navigationTitle }: { appId: string; navigationTitle: string }) {
   const {
     isLoading,
-    data: webhooks=[],
+    data: webhooks,
     error,
     mutate,
-  } = usePromise(
-    async () => {
+  } = useCachedPromise(
+    async (appId: string) => {
       const { data } = await vartiq.webhook.list(appId);
       return data;
-    }
+    },
+    [appId],
+    { initialData: [] },
   );
 
   return (
@@ -90,12 +92,7 @@ export default function Webhooks({ appId, navigationTitle }: { appId: string; na
                         async onAction() {
                           const toast = await showToast(Toast.Style.Animated, "Deleting", webhook.url);
                           try {
-                            await mutate(vartiq.request("webhooks", {
-                                method: "DELETE",
-                                data: {
-                                    webhookIds: [webhook.id]
-                                }
-                            }), {
+                            await mutate(vartiq.webhook.delete(webhook.id), {
                               optimisticUpdate(data) {
                                 return (data ?? []).filter((w) => w.id !== webhook.id);
                               },
@@ -131,42 +128,42 @@ function CreateWebhook({ appId, navigationTitle }: { appId: string; navigationTi
     authMethod: string;
     user: string;
     pass: string;
-  }
-  const { handleSubmit, itemProps,values } = useForm<FormValues>({
+  };
+  const { handleSubmit, itemProps, values } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating", values.url);
       try {
-        const {authMethod, user,pass} = values;
+        const { authMethod, user, pass } = values;
         let input: Partial<CreateWebhookInput> = {};
-        const base = {appId, url: values.url};
+        const base = { appId, url: values.url };
         switch (authMethod) {
-            case "basic":
-                input = {
-                    ...base,
-                    authMethod: "basic",
-                    userName: user,
-                    password: pass
-                } as CreateWebhookInput
-                break;
-            case "hmac":
-                input = {
-                    ...base,
-                    authMethod: "hmac",
-                    hmacHeader: user,
-                    hmacSecret: pass
-                } as CreateWebhookInput
-                break;
-            case "apiKey":
-                input = {
-                    ...base,
-                    authMethod: "apiKey",
-                    apiKeyHeader: user, 
-                    apiKey: pass
-                } as CreateWebhookInput
-                break;
-            default:
-                input = base;
-                break;
+          case "basic":
+            input = {
+              ...base,
+              authMethod: "basic",
+              userName: user,
+              password: pass,
+            } as CreateWebhookInput;
+            break;
+          case "hmac":
+            input = {
+              ...base,
+              authMethod: "hmac",
+              hmacHeader: user,
+              hmacSecret: pass,
+            } as CreateWebhookInput;
+            break;
+          case "apiKey":
+            input = {
+              ...base,
+              authMethod: "apiKey",
+              apiKeyHeader: user,
+              apiKey: pass,
+            } as CreateWebhookInput;
+            break;
+          default:
+            input = base;
+            break;
         }
         await vartiq.webhook.create(input as CreateWebhookInput);
         toast.style = Toast.Style.Success;
@@ -205,10 +202,26 @@ function CreateWebhook({ appId, navigationTitle }: { appId: string; navigationTi
         <Form.Dropdown.Item title="HMAC Signature" value="hmac" />
         <Form.Dropdown.Item title="Api Key" value="apiKey" />
       </Form.Dropdown>
-      {values.authMethod && <>
-        <Form.TextField title={values.authMethod==="basic" ? "Username" : values.authMethod==="hmac" ? "HPAC Header" : "ApiKey Header"} placeholder={values.authMethod==="basic" ? "user@vartiq.com" : ""} {...itemProps.user} />
-        <Form.PasswordField title={values.authMethod==="basic" ? "Password" : values.authMethod==="hmac" ? "HPAC Secret" : "ApiKey"} placeholder={values.authMethod==="basic" ? "Enter your password" : ""} {...itemProps.pass} />
-      </>}
+      {values.authMethod && (
+        <>
+          <Form.TextField
+            title={
+              values.authMethod === "basic"
+                ? "Username"
+                : values.authMethod === "hmac"
+                  ? "HPAC Header"
+                  : "ApiKey Header"
+            }
+            placeholder={values.authMethod === "basic" ? "user@vartiq.com" : ""}
+            {...itemProps.user}
+          />
+          <Form.PasswordField
+            title={values.authMethod === "basic" ? "Password" : values.authMethod === "hmac" ? "HPAC Secret" : "ApiKey"}
+            placeholder={values.authMethod === "basic" ? "Enter your password" : ""}
+            {...itemProps.pass}
+          />
+        </>
+      )}
     </Form>
   );
 }
