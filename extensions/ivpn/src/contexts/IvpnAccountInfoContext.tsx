@@ -51,7 +51,7 @@ export function IvpnAccountInfoProvider({ children }: PropsWithChildren) {
 export function useIvpnAccountInfo() {
   const ctx = useContext(IvpnAccountInfoContext);
 
-  if (!ctx) throw new Error("useIvpnAccountInfo mused be used within IvpnAccountInfoProvider");
+  if (!ctx) throw new Error("useIvpnAccountInfo must be used within IvpnAccountInfoProvider");
 
   return ctx;
 }
