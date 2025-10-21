@@ -21,3 +21,10 @@ This is a Raycast extension for [Vartiq](https://vartiq.com/) - _Webhook Infra f
     e. Toggle "env" to _Production_
 
     f. `Copy` and `Paste` in Preferences
+
+## Looking for more?
+
+Try these:
+
+<a title="Install resend Raycast Extension" href="https://www.raycast.com/xmok/resend"><img src="https://www.raycast.com/xmok/resend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install unkey Raycast Extension" href="https://www.raycast.com/xmok/unkey"><img src="https://www.raycast.com/xmok/unkey/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
