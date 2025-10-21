@@ -44,20 +44,34 @@ Got the answer that you wanted? Great.
 
 # Models available
 
+## Claude 4.5
+
+- `claude-haiku-4-5` (alias)
+- `claude-haiku-4-5-20251001`
+- `claude-sonnet-4-5` (alias)
+- `claude-sonnet-4-5-20250929`
+
+
+## Claude 4.1
+
+- `claude-opus-4-1` (alias)
+- `claude-opus-4-1-20250805`
+
 ## Claude 4
 
+- `claude-sonnet-4-0` (alias)
 - `claude-sonnet-4-20250514`
 
 ## Claude 3.7
 
-- `claude-3-7-sonnet-latest`
+- `claude-3-7-sonnet-latest` (alias)
 - `claude-3-7-sonnet-20250219`
 
 ## Claude 3.5
 
-- `claude-3-5-haiku-latest`
+- `claude-3-5-haiku-latest` (alias)
 - `claude-3-5-haiku-20241022`
-- `claude-3-5-sonnet-latest`
+- `claude-3-5-sonnet-latest` (alias)
 - `claude-3-5-sonnet-20241022`
 - `claude-3-5-sonnet-20240620`
 
