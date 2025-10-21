@@ -132,7 +132,6 @@ export default function Command() {
 
   return (
     <Form
-      enableDrafts={false}
       isLoading={isLoading}
       actions={
         <ActionPanel>
