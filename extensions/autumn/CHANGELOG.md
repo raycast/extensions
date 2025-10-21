@@ -1,13 +1,17 @@
 # Autumn Changelog
 
-## [] - {PR_MERGE_DATE}
+## [List Features + Windows Support] - {PR_MERGE_DATE}
 
+### Additions
+- List Features (new command)
 - Delete Product
+- Delete Customer
+- View Customer Details
 - Add "Open in Autumn" component
-- List Features
+
+### Enhancements
+- Now supports Windows
 - List Customers is now paginated
-- Delete Customers
-- Customer Details
 
 ## [Initial Version] - 2025-09-15
 
