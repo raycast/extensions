@@ -9,10 +9,6 @@ export interface Suggestion {
   type: "search" | "url";
 }
 
-interface HeliumPreferences {
-  searchEngine: string;
-}
-
 // Type for search engine suggestion API responses
 type SuggestionApiResponse = unknown;
 
@@ -74,7 +70,7 @@ const SEARCH_ENGINES: Record<string, SearchEngineConfig> = {
  * Get the current search engine configuration
  */
 function getSearchEngineConfig(): SearchEngineConfig {
-  const preferences = getPreferenceValues<HeliumPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const engineKey = preferences.searchEngine || "google";
   return SEARCH_ENGINES[engineKey] || SEARCH_ENGINES.google;
 }

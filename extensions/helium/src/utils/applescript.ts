@@ -401,19 +401,22 @@ export async function getHeliumBookmarks(): Promise<string[]> {
         end tell
       end try
 
-      return allBookmarks
+      -- Convert list to newline-delimited string to avoid issues with commas in bookmark data
+      set AppleScript's text item delimiters to linefeed
+      set bookmarkString to allBookmarks as text
+      set AppleScript's text item delimiters to ""
+      return bookmarkString
     end tell
   `;
 
   const result = await runAppleScript(script);
 
-  // Parse the AppleScript list result
-  // Result comes back as comma-separated values
+  // Parse the result - now newline-delimited instead of comma-separated
   if (!result || result.trim() === "") {
     return [];
   }
 
-  // Split by comma, but be careful with URLs that might contain commas
-  const bookmarkStrings = result.split(", ");
+  // Split by newline - much more robust than comma-space
+  const bookmarkStrings = result.split("\n").filter((s) => s.trim() !== "");
   return bookmarkStrings;
 }
