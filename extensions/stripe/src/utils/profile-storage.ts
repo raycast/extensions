@@ -84,13 +84,13 @@ export const validateProfile = (profile: StripeProfile, environment: Environment
 
 /**
  * Get the current active profile configuration.
- * 
+ *
  * This centralized function handles:
  * - Fetching all profiles from storage
  * - Getting the active profile ID
  * - Getting the active environment (defaults to "live")
  * - Finding and returning the active profile
- * 
+ *
  * @returns Object containing profiles, activeProfile, activeProfileId, and activeEnvironment
  */
 export const getActiveProfileConfig = async (): Promise<{

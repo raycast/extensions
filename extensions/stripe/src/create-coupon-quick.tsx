@@ -18,14 +18,21 @@ export default async function CreateCouponQuick(props: LaunchProps<{ arguments: 
     const { activeProfile, activeEnvironment } = await getActiveProfileConfig();
 
     if (!activeProfile) {
-      return showToast({ style: Toast.Style.Failure, title: "No Stripe Account", message: "Configure API keys in settings" });
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "No Stripe Account",
+        message: "Configure API keys in settings",
+      });
     }
 
     const { effectiveEnvironment, apiKey } = (() => {
       const hasLive = !!activeProfile.liveApiKey;
       const hasTest = !!activeProfile.testApiKey;
       const env = !hasLive && hasTest ? "test" : hasLive && !hasTest ? "live" : activeEnvironment;
-      return { effectiveEnvironment: env, apiKey: env === "test" ? activeProfile.testApiKey : activeProfile.liveApiKey };
+      return {
+        effectiveEnvironment: env,
+        apiKey: env === "test" ? activeProfile.testApiKey : activeProfile.liveApiKey,
+      };
     })();
 
     if (!apiKey) {
@@ -38,7 +45,11 @@ export default async function CreateCouponQuick(props: LaunchProps<{ arguments: 
 
     const percentOff = parseFloat(percentage);
     if (isNaN(percentOff) || percentOff <= 0 || percentOff > 100) {
-      return showToast({ style: Toast.Style.Failure, title: "Invalid Percentage", message: "Enter a number between 1 and 100" });
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid Percentage",
+        message: "Enter a number between 1 and 100",
+      });
     }
 
     await closeMainWindow();
@@ -52,7 +63,9 @@ export default async function CreateCouponQuick(props: LaunchProps<{ arguments: 
     });
 
     await Clipboard.copy(coupon.id);
-    await showHUD(`${effectiveEnvironment === "test" ? "🧪 Test Mode" : "✅"} ${percentOff}% off coupon created! Code: ${coupon.id}`);
+    await showHUD(
+      `${effectiveEnvironment === "test" ? "🧪 Test Mode" : "✅"} ${percentOff}% off coupon created! Code: ${coupon.id}`,
+    );
   } catch (error) {
     await showFailureToast(error, { title: "Coupon Creation Failed" });
   }
