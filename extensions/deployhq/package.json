@@ -3,7 +3,7 @@
   "name": "deployhq",
   "title": "DeployHQ",
   "description": "Search and navigate to your DeployHQ projects",
-  "icon": "icon-deployhq.png",
+  "icon": "extension_icon.png",
   "author": "MelvinBrem",
   "contributors": [
     "olafvanmidden"
