@@ -2,7 +2,7 @@ import { useNavigation, showToast, Toast, Form, ActionPanel, Action, Icon } from
 import { useForm } from "@raycast/utils";
 import { autumn } from "../autumn";
 
-export default function CreateCustomer({onCreate}: {onCreate: () => void}) {
+export default function CreateCustomer({ onCreate }: { onCreate: () => void }) {
   const { pop } = useNavigation();
   type CreateCustomer = {
     name: string;
@@ -21,7 +21,7 @@ export default function CreateCustomer({onCreate}: {onCreate: () => void}) {
         if (error) throw new Error(error.message);
         toast.style = Toast.Style.Success;
         toast.title = "Created";
-         onCreate();
+        onCreate();
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;

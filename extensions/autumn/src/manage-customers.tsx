@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { autumn, AUTUMN_LIMIT } from "./autumn";
 import CreateCustomer from "./components/create-customer";
+import DeleteCustomerAction from "./components/DeleteCustomerAction";
 
 export default function ManageCustomers() {
   const {
@@ -12,12 +13,12 @@ export default function ManageCustomers() {
     pagination,
   } = useCachedPromise(
     () => async (options) => {
-      const { data, error } = await autumn.customers.list({ limit: AUTUMN_LIMIT, offset: options.page*AUTUMN_LIMIT});
+      const { data, error } = await autumn.customers.list({ limit: AUTUMN_LIMIT, offset: options.page * AUTUMN_LIMIT });
       if (error) throw new Error(error.message);
       return {
         data: data.list,
-        hasMore: data.total===data.limit
-      }
+        hasMore: data.total === data.limit,
+      };
     },
     [],
     {
@@ -56,55 +57,19 @@ export default function ManageCustomers() {
             ]}
             actions={
               <ActionPanel>
-                {customer.id && <Action.Push icon={Icon.Person} title="Customer Details" target={<CustomerDetails customerId={customer.id as string} />} />}
+                {customer.id && (
+                  <Action.Push
+                    icon={Icon.Person}
+                    title="Customer Details"
+                    target={<CustomerDetails customerId={customer.id as string} />}
+                  />
+                )}
                 <Action.Push
                   icon={Icon.AddPerson}
                   title="Create Customer"
                   target={<CreateCustomer onCreate={mutate} />}
                 />
-                {customer.id && <Action icon={Icon.RemovePerson} title="Delete Customer" onAction={() => confirmAlert({
-                  title: "Delete Customer",
-                  message: "Are you sure you want to delete this customer in Autumn? This action cannot be undone.",
-                  primaryAction: {
-                    style: Alert.ActionStyle.Destructive,
-                    title: "Delete",
-                    async onAction() {
-                      const delete_in_stripe = await confirmAlert({
-                        title: "Select whether to delete this customer in Stripe as well.",
-                        dismissAction: {
-                          title: "Delete in Autumn only"
-                        },
-                        primaryAction: {
-                          style: Alert.ActionStyle.Destructive,
-                          title: "Delete in Autumn and Stripe"
-                        },
-                        rememberUserChoice: true
-                      });
-                        const customerId = customer.id as string;
-                        const toast = await showToast(Toast.Style.Animated, "Deleting", customerId);
-                        try {
-                          await mutate(
-                            autumn.customers.delete(customerId, {
-                              delete_in_stripe
-                            }).then(({error}) => {
-                                if (error) throw new Error(error.message);
-                            }), {
-                              optimisticUpdate(data) {
-                                return data.filter(c => c.id!==customer.id)
-                              },
-                              shouldRevalidateAfter: false
-                            }
-                          )
-                          toast.style = Toast.Style.Success;
-                          toast.title = "Deleted";
-                        } catch (error) {
-                          toast.style = Toast.Style.Failure;
-                          toast.title = "Failed";
-                          toast.message = `${error}`;
-                        }
-                    }
-                  }
-                })} style={Action.Style.Destructive} shortcut={Keyboard.Shortcut.Common.Remove} />}
+                {customer.id && <DeleteCustomerAction customerId={customer.id as string} mutateCustomers={mutate} />}
               </ActionPanel>
             }
           />
@@ -114,17 +79,28 @@ export default function ManageCustomers() {
   );
 }
 
-function CustomerDetails({customerId}:{customerId:string}) {
-  const {isLoading, data: customer} = useCachedPromise(async(id: string) => {
-    const {data,error} = await autumn.customers.get(id);
-    if (error) throw new Error(error.message);
-    return data;
-  }, [customerId])
-  return <Detail isLoading={isLoading} metadata={customer&&<Detail.Metadata>
-<Detail.Metadata.Label title="ID" text={customer.id || "N/A"} />
-<Detail.Metadata.Label title="Name" text={customer.name || "None"} />
-<Detail.Metadata.Label title="Email" text={customer.email || "None"} />
-<Detail.Metadata.Label title="Fingerprint" text={customer.fingerprint || "None"} />
-  </Detail.Metadata>} />
+function CustomerDetails({ customerId }: { customerId: string }) {
+  const { isLoading, data: customer } = useCachedPromise(
+    async (id: string) => {
+      const { data, error } = await autumn.customers.get(id);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    [customerId],
+  );
+  return (
+    <Detail
+      isLoading={isLoading}
+      metadata={
+        customer && (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="ID" text={customer.id || "N/A"} />
+            <Detail.Metadata.Label title="Name" text={customer.name || "None"} />
+            <Detail.Metadata.Label title="Email" text={customer.email || "None"} />
+            <Detail.Metadata.Label title="Fingerprint" text={customer.fingerprint || "None"} />
+          </Detail.Metadata>
+        )
+      }
+    />
+  );
 }
-

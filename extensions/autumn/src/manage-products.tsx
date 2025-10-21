@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { autumn } from "./autumn";
 import { CreateProductParams } from "autumn-js";
+import DeleteProductAction from "./components/DeleteProductAction";
 
 export default function ManageProducts() {
   const {
@@ -28,7 +29,7 @@ export default function ManageProducts() {
           description="Each product defines features your customers get access to and how much they cost. Create separate products for any free plans, paid plans and any add-on or top up products ☝️"
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} onPop={mutate} />
+              <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct onCreate={mutate} />} />
             </ActionPanel>
           }
         />
@@ -38,38 +39,12 @@ export default function ManageProducts() {
             key={product.id}
             icon={Icon.Box}
             title={product.name}
+            subtitle={product.id}
+            accessories={[{ date: new Date(product.created_at) }]}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} onPop={mutate} />
-                <Action icon={Icon.Trash} title="Delete Product" onAction={() => confirmAlert({
-                                  title: "Delete Product",
-                                  message: "Are you sure you want to delete this plan? This action cannot be undone.",
-                                  primaryAction: {
-                                    style: Alert.ActionStyle.Destructive,
-                                    title: "Delete",
-                                    async onAction() {
-                                        const toast = await showToast(Toast.Style.Animated, "Deleting", product.id);
-                                        try {
-                                          await mutate(
-                                            autumn.products.delete(product.id).then(({error}) => {
-                                                if (error) throw new Error(error.message);
-                                            }), {
-                                              optimisticUpdate(data) {
-                                                return data.filter(p => p.id!==product.id)
-                                              },
-                                              shouldRevalidateAfter: false
-                                            }
-                                          )
-                                          toast.style = Toast.Style.Success;
-                                          toast.title = "Deleted";
-                                        } catch (error) {
-                                          toast.style = Toast.Style.Failure;
-                                          toast.title = "Failed";
-                                          toast.message = `${error}`;
-                                        }
-                                    }
-                                  }
-                                })} style={Action.Style.Destructive} />
+                <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct onCreate={mutate} />} />
+                <DeleteProductAction productId={product.id} mutateProducts={mutate} />
               </ActionPanel>
             }
           />
@@ -79,7 +54,7 @@ export default function ManageProducts() {
   );
 }
 
-function CreateProduct() {
+function CreateProduct({ onCreate }: { onCreate: () => void }) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<CreateProductParams>({
     async onSubmit(values) {
@@ -89,6 +64,7 @@ function CreateProduct() {
         if (error) throw new Error(error.message);
         toast.style = Toast.Style.Success;
         toast.title = "Created";
+        onCreate();
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -97,6 +73,7 @@ function CreateProduct() {
       }
     },
     validation: {
+      name: FormValidation.Required,
       id: FormValidation.Required,
     },
   });
