@@ -115,7 +115,7 @@ export function SearchTabsBase(props: SearchTabsBaseProps) {
   // Use useMemo to optimize performance
   const filteredGroupedTabs = useMemo(
     () => filterTabs(newData, searchText, tabsFilter),
-    [data, searchText, tabsFilter],
+    [newData, searchText, tabsFilter],
   );
 
   return (
