@@ -101,10 +101,15 @@ export default function Command() {
 function PokeForm({ peer, onDone }: { peer: NearbyPeer; onDone: () => void }) {
   const nav = useNavigation();
   async function onSubmit(values: { note?: string }) {
-    const res = await sendPoke(peer.id, values.note);
-    await showHUD(res.delivered ? `Poked ${peer.displayName}` : `Poke to ${peer.displayName} failed`);
-    nav.pop();
-    onDone();
+    try {
+      const res = await sendPoke(peer.id, values.note);
+      await showHUD(res.delivered ? `Poked ${peer.displayName}` : `Poke to ${peer.displayName} failed`);
+      nav.pop();
+      onDone();
+    } catch (error) {
+      await showHUD(`Failed to send poke: ${error}`);
+    }
+  }
   }
   return (
     <Form
