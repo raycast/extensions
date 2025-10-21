@@ -10,6 +10,16 @@ type AssigneeSection = {
   name: string;
 };
 
+type Section = {
+  gid: string;
+  name: string;
+};
+
+type Membership = {
+  project: Project;
+  section: Section | null;
+};
+
 type Assignee = {
   gid: string;
   name: string;
@@ -43,10 +53,11 @@ export type Task = {
   assignee_section: AssigneeSection;
   assignee: Assignee | null;
   custom_fields: CustomField[];
+  memberships: Membership[];
 };
 
 const taskFields =
-  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name";
+  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name";
 
 export async function getMyTasks(workspace: string, showCompletedTasks: boolean) {
   const {
