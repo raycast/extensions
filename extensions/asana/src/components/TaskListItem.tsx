@@ -46,6 +46,10 @@ export default function TaskListItem({ task, workspace, mutateList }: TaskListIt
     keywords.push(...task.projects.map((project) => project.name));
   }
 
+  if (task.tags && task.tags.length > 0) {
+    keywords.push(...task.tags.map((tag) => tag.name));
+  }
+
   if (task.due_on) {
     const dueOn = new Date(task.due_on);
     accessories.unshift({

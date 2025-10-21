@@ -10,6 +10,7 @@ export type TaskFormValues = {
   due_date: Date | null;
   start_date: Date | null;
   section?: string;
+  tags?: string[];
 };
 
 export default withAsanaAuth(CreateTaskForm);

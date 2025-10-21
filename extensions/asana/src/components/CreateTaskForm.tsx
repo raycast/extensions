@@ -18,6 +18,7 @@ import { useProjects } from "../hooks/useProjects";
 import { useUsers } from "../hooks/useUsers";
 import { useMe } from "../hooks/useMe";
 import { useSections } from "../hooks/useSections";
+import { useTags } from "../hooks/useTags";
 import { getErrorMessage } from "../helpers/errors";
 import { TaskFormValues } from "../create-task";
 import { getProjectIcon } from "../helpers/project";
@@ -59,6 +60,7 @@ export default function CreateTaskForm(props: {
           ...(values.assignee ? { assignee: values.assignee } : {}),
           ...(values.start_date ? { start_on: format(values.start_date, "yyyy-MM-dd") } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
+          ...(values.tags && values.tags.length > 0 ? { tags: values.tags } : {}),
         };
 
         // Use memberships to atomically set project and section together
@@ -129,6 +131,7 @@ export default function CreateTaskForm(props: {
       start_date: props.draftValues?.start_date,
       due_date: props.draftValues?.due_date,
       section: props.draftValues?.section,
+      tags: props.draftValues?.tags,
     },
   });
 
@@ -142,6 +145,7 @@ export default function CreateTaskForm(props: {
   const { data: me, isLoading: isLoadingMe } = useMe();
   const selectedProjectId = values.projects && values.projects.length === 1 ? values.projects[0] : undefined;
   const { data: sections, isLoading: isLoadingSections } = useSections(selectedProjectId);
+  const { data: tags, isLoading: isLoadingTags } = useTags(values.workspace);
 
   const customFields = useMemo(() => {
     const selectedProjects = allProjects?.filter((project) => {
@@ -166,7 +170,7 @@ export default function CreateTaskForm(props: {
         </ActionPanel>
       }
       enableDrafts={!props.fromEmptyView}
-      isLoading={isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe || isLoadingSections}
+      isLoading={isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe || isLoadingSections || isLoadingTags}
     >
       <Form.Dropdown title="Workspace" storeValue {...itemProps.workspace}>
         {workspaces?.map((workspace) => {
@@ -216,6 +220,13 @@ export default function CreateTaskForm(props: {
           );
         })}
       </Form.Dropdown>
+
+      <Form.TagPicker title="Tags" placeholder="Select tags (optional)" storeValue {...itemProps.tags}>
+        {tags?.map((tag) => {
+          return <Form.TagPicker.Item key={tag.gid} title={tag.name} value={tag.gid} />;
+        })}
+      </Form.TagPicker>
+
       {selectedWorkspace?.is_organization && showStartDate ? (
         <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.start_date} />
       ) : null}

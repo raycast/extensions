@@ -75,6 +75,14 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
             </Detail.Metadata.TagList>
           ) : null}
 
+          {task.tags && task.tags.length > 0 ? (
+            <Detail.Metadata.TagList title={task.tags.length === 1 ? "Tag" : "Tags"}>
+              {task.tags.map((tag) => {
+                return <Detail.Metadata.TagList.Item key={tag.gid} text={tag.name} />;
+              })}
+            </Detail.Metadata.TagList>
+          ) : null}
+
           {task.custom_fields && task.custom_fields.length > 0
             ? task.custom_fields.map((field) => {
                 if (field.resource_subtype === "enum" && field.enum_value) {

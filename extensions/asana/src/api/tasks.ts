@@ -40,6 +40,11 @@ export type CustomField = {
   resource_subtype: string;
 };
 
+type Tag = {
+  gid: string;
+  name: string;
+};
+
 export type Task = {
   gid: string;
   id: string;
@@ -54,10 +59,11 @@ export type Task = {
   assignee: Assignee | null;
   custom_fields: CustomField[];
   memberships: Membership[];
+  tags: Tag[];
 };
 
 const taskFields =
-  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name";
+  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name";
 
 export async function getMyTasks(workspace: string, showCompletedTasks: boolean) {
   const {
@@ -106,6 +112,7 @@ export type TaskPayload = {
   custom_fields: Record<string, string>;
   html_notes: string;
   memberships: { project: string; section?: string }[];
+  tags: string[];
 }>;
 
 export async function createTask(payload: TaskPayload) {
