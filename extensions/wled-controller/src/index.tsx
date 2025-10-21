@@ -59,7 +59,7 @@ function AddDeviceForm({ onDeviceAdded }: { onDeviceAdded: (device: WLEDDevice) 
         toast.style = Toast.Style.Success;
         toast.title = "Connection Successful";
         toast.message = `Connected to ${state.info.name || device.name} (v${state.info.ver})`;
-      } catch (error) {
+      } catch {
         toast.style = Toast.Style.Failure;
         toast.title = "Connection Failed";
         toast.message = `Could not reach ${device.ip}`;
@@ -174,7 +174,7 @@ function DeviceControl({ device, onBack }: { device: WLEDDevice; onBack: () => v
           accessories={[{ text: isOn ? "Currently On" : "Currently Off" }]}
           actions={
             <ActionPanel>
-              <Action title={isOn ? "Turn Off" : "Turn On"} icon={Icon.Power} onAction={togglePower} />
+              <Action title={isOn ? "Turn off" : "Turn on"} icon={Icon.Power} onAction={togglePower} />
             </ActionPanel>
           }
         />
