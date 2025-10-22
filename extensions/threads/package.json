@@ -177,6 +177,56 @@
       ]
     },
     {
+      "name": "view-profile",
+      "title": "View Profile",
+      "subtitle": "Threads",
+      "description": "View a Threads user profile",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "username",
+          "description": "The username to view",
+          "type": "text",
+          "placeholder": "@username",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "view-insights",
+      "title": "Insights",
+      "subtitle": "Threads",
+      "description": "View account insights",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "period",
+          "placeholder": "-",
+          "description": "Period to view insights for",
+          "type": "dropdown",
+          "default": "30",
+          "data": [
+            {
+              "title": "Last 7 days",
+              "value": "7"
+            },
+            {
+              "title": "Last 14 days",
+              "value": "14"
+            },
+            {
+              "title": "Last 30 days",
+              "value": "30"
+            },
+            {
+              "title": "Last 90 days",
+              "value": "90"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "download-thread-media",
       "title": "Download Threads Media",
       "description": "Download threads media with URL",
@@ -202,21 +252,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
+    "@raycast/api": "^1.103.2",
     "axios": "^1.8.4",
     "cheerio": "^1.0.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^9.9.0",
-    "eslint-plugin-react": "^7.35.0",
-    "globals": "^15.9.0",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^8.1.0"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.17.10",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -227,6 +274,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

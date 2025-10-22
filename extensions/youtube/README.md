@@ -8,7 +8,7 @@
     YouTube
   </h1>
 
-Raycast extension to search videos and channels, and view and search popular videos on YouTube.
+Raycast extension to search YouTube videos, channels, and more.
 
   <p>
     <a href="https://www.raycast.com/tonka3000/youtube">
@@ -47,6 +47,7 @@ Raycast extension to search videos and channels, and view and search popular vid
 
 - Search Videos
 - Search Channels
+- Search Live Streams
 - Popular Videos
 
 and more
