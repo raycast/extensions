@@ -1,9 +1,11 @@
-import { Detail, open } from "@raycast/api";
+import { Detail, open, showToast, Toast, closeMainWindow } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { formatDistanceToNow } from "date-fns";
+import { NodeHtmlMarkdown } from "node-html-markdown";
+import { useEffect, useRef } from "react";
 
 import { getNoteBody } from "../api/applescript";
-import { truncate, convertHtmlToMarkdownSafely } from "../helpers";
+import { stripLargeImages, truncate, isContentTooLarge, truncateContent, getOpenNoteURL } from "../helpers";
 import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import NoteActions from "./NoteActions";
@@ -15,19 +17,85 @@ type NoteDetailProps = {
 };
 
 export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps) {
-  const { data, isLoading, error } = useCachedPromise(
+  const hasOpenedInAppleNotes = useRef(false);
+
+  const { data, isLoading } = useCachedPromise(
     async (id) => {
-      const content = await getNoteBody(id);
-      // Use memory-safe conversion that strips large images to prevent heap out of memory errors
-      return convertHtmlToMarkdownSafely(content);
+      try {
+        const content = await getNoteBody(id);
+
+        // Check if content is too large before processing
+        const MAX_SAFE_SIZE_MB = 10;
+        if (isContentTooLarge(content, MAX_SAFE_SIZE_MB)) {
+          return {
+            tooLarge: true,
+            sizeMB: Math.round((content.length * 2) / 1024 / 1024),
+            content: null,
+          };
+        }
+
+        const processedContent = stripLargeImages({ html: content, maxSizeMB: 1 });
+        const nodeToMarkdown = new NodeHtmlMarkdown({ keepDataImages: true });
+        const markdown = nodeToMarkdown.translate(processedContent);
+
+        // Double check the final markdown size and truncate if needed
+        const finalMarkdown = truncateContent(markdown, MAX_SAFE_SIZE_MB);
+
+        return {
+          tooLarge: false,
+          content: finalMarkdown,
+          sizeMB: null,
+        };
+      } catch (err) {
+        // Clean up any allocated memory on error
+        if (global.gc) {
+          global.gc();
+        }
+        throw err;
+      }
     },
     [note.id],
+    {
+      onError: async (err) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load note",
+          message: String(err),
+        });
+      },
+    },
   );
 
-  if (error) {
+  // If note is too large, automatically open in Apple Notes
+  useEffect(() => {
+    if (data?.tooLarge && !hasOpenedInAppleNotes.current) {
+      hasOpenedInAppleNotes.current = true;
+
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Note Too Large",
+        message: `This note (${data.sizeMB}MB) is too large to display. Opening in Apple Notes...`,
+      }).then(async () => {
+        await open(getOpenNoteURL(note.UUID));
+        await closeMainWindow();
+      });
+    }
+  }, [data, note.UUID]);
+
+  // Show a placeholder while opening in Apple Notes
+  if (data?.tooLarge) {
     return (
       <Detail
-        markdown={`# Error Loading Note\n\n${error.message}\n\n**Tip:** Notes with large images may exceed memory limits. Try opening the note directly in the Apple Notes app.`}
+        markdown={`# Note Too Large to Display\n\nThis note is approximately **${data.sizeMB}MB** in size, which is too large to safely display in Raycast.\n\nThe note has been opened in **Apple Notes** for you to view.\n\n---\n\n**Note:** ${note.title}`}
+        metadata={
+          <Detail.Metadata>
+            {note.account ? <Detail.Metadata.Label title="Account" text={note.account} /> : null}
+            {note.folder ? <Detail.Metadata.Label title="Folder" text={note.folder} /> : null}
+            {note.modifiedAt ? (
+              <Detail.Metadata.Label title="Last Update" text={formatDistanceToNow(note.modifiedAt)} />
+            ) : null}
+          </Detail.Metadata>
+        }
         actions={<NoteActions note={note} isDeleted={isDeleted} mutate={mutate} isDetail />}
       />
     );
@@ -35,7 +103,7 @@ export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps)
 
   return (
     <Detail
-      markdown={data}
+      markdown={data?.content ?? ""}
       metadata={
         <Detail.Metadata>
           {note.account ? <Detail.Metadata.Label title="Account" text={note.account} /> : null}

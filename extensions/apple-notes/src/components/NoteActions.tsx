@@ -15,11 +15,12 @@ import {
   AI,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
+import { NodeHtmlMarkdown } from "node-html-markdown";
 import { useState } from "react";
 
 import { NoteTitle } from "..";
 import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api/applescript";
-import { fileIcon, getOpenNoteURL, convertHtmlToMarkdownSafely } from "../helpers";
+import { fileIcon, getOpenNoteURL, stripLargeImages, isContentTooLarge, truncateContent } from "../helpers";
 import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import AddTextForm from "./AddTextForm";
@@ -209,8 +210,25 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
             onAction={async () =>
               copyNoteContent(async (noteId) => {
                 const content = await getNoteBody(noteId);
-                // Use memory-safe conversion that strips large images to prevent heap out of memory errors
-                return convertHtmlToMarkdownSafely(content);
+
+                // Check if content is too large
+                const MAX_SAFE_SIZE_MB = 10;
+                if (isContentTooLarge(content, MAX_SAFE_SIZE_MB)) {
+                  const sizeMB = Math.round((content.length * 2) / 1024 / 1024);
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Note Too Large",
+                    message: `This note (${sizeMB}MB) is too large to copy. Please open it in Apple Notes.`,
+                  });
+                  throw new Error("Note too large to copy");
+                }
+
+                const processedContent = stripLargeImages({ html: content, maxSizeMB: 1 });
+                const nodeToMarkdown = new NodeHtmlMarkdown({ keepDataImages: true });
+                const markdown = nodeToMarkdown.translate(processedContent);
+
+                // Truncate if still too large after processing
+                return truncateContent(markdown, MAX_SAFE_SIZE_MB);
               })
             }
             shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}

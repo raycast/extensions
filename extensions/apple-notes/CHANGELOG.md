@@ -1,8 +1,8 @@
 # Apple Notes Changelog
 
-## [Fix large image memory issue] - {PR_MERGE_DATE}
+## [Fix Note Detail View Crash] - {PR_MERGE_DATE}
 
-Improve memory management when handling notes with large images, the extension now strips images exceeding a certain size threshold. Instead of loading these large images as base64 data, the extension extracts them to temporary files. This change helps prevent memory-related crashes and enhances overall performance when viewing notes with large images.
+Fix crash occurring when opening Note Detail View for notes with large embedded images by stripping out large base64 image data from the note content.
 
 ## [View Random Note command] - 2025-06-30
 
