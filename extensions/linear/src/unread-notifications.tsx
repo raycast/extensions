@@ -6,6 +6,8 @@ import {
   LaunchType,
   getPreferenceValues,
   Icon,
+  openCommandPreferences,
+  openExtensionPreferences,
 } from "@raycast/api";
 
 import { NotificationResult } from "./api/getNotifications";
@@ -148,6 +150,16 @@ function UnreadNotifications() {
           icon={Icon.Eye}
           title="View All Notifications"
           onAction={() => launchCommand({ name: "notifications", type: LaunchType.UserInitiated })}
+        />
+
+        <MenuBarExtra.Item
+          title="Configure Command"
+          icon={Icon.Gear}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={() => openCommandPreferences()}
+          alternate={
+            <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          }
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
