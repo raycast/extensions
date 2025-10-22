@@ -7,7 +7,7 @@
   ],
   "compilerOptions": {
     "lib": [
-      "es2021"
+      "es2021", "es2022"
     ],
     "module": "commonjs",
     "target": "es2021",
