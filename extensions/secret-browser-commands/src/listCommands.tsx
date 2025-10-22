@@ -7,6 +7,9 @@ import { SUPPORTED_BROWSERS, BROWSER_CHROME } from "./types/browsers";
 import { openUrlInBrowser } from "./utils/openUrlInBrowser";
 import { Platform } from "./types/types";
 
+// Default starred command IDs
+const DEFAULT_STARRED_COMMANDS = ["extensions", "bookmarks", "downloads", "whats-new", "flags"];
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const {
@@ -14,6 +17,11 @@ export default function Command() {
     setValue: setSelectedBrowser,
     isLoading,
   } = useLocalStorage<string>("selected-browser", "chrome");
+  const {
+    value: starredCommands = DEFAULT_STARRED_COMMANDS,
+    setValue: setStarredCommands,
+    isLoading: isStarredLoading,
+  } = useLocalStorage<string[]>("starred-commands", DEFAULT_STARRED_COMMANDS);
 
   const getCurrentBrowser = () => {
     const browser = SUPPORTED_BROWSERS.find((b) => b.key === selectedBrowser);
@@ -27,6 +35,14 @@ export default function Command() {
     if (platform === "darwin") return "mac";
     if (platform === "win32") return "windows";
     return "linux";
+  };
+
+  const toggleStar = (commandId: string) => {
+    if (starredCommands.includes(commandId)) {
+      setStarredCommands(starredCommands.filter((id) => id !== commandId));
+    } else {
+      setStarredCommands([...starredCommands, commandId]);
+    }
   };
 
   const filteredCommands = browserCommands.filter((command) => {
@@ -49,16 +65,48 @@ export default function Command() {
       (!command.excludedPlatforms || !command.excludedPlatforms.includes(userPlatform));
 
     return matchesSearch && isBrowserCompatible && isPlatformCompatible;
+  }).sort((a, b) => {
+    // Sort starred items to the top
+    const aIsStarred = starredCommands.includes(a.id);
+    const bIsStarred = starredCommands.includes(b.id);
+    if (aIsStarred && !bIsStarred) return -1;
+    if (!aIsStarred && bIsStarred) return 1;
+    // Otherwise maintain original order
+    return 0;
   });
 
   const getFullUrlForDisplayAndSubmenu = (itemPath: string): string => {
+    // If the path already contains a scheme (like chrome-untrusted://), return it as-is
+    if (itemPath.includes("://")) {
+      return itemPath;
+    }
     const browser = getCurrentBrowser();
-    return `${browser.scheme}${itemPath}`;
+    // Use displayScheme if available (e.g., atlas:// for Atlas), otherwise use scheme
+    const displayScheme = browser.displayScheme || browser.scheme;
+    return `${displayScheme}${itemPath}`;
+  };
+
+  const getPlatformDisplayName = (platform: Platform): string => {
+    const platformNames: Record<Platform, string> = {
+      windows: "Windows",
+      mac: "macOS",
+      linux: "Linux",
+    };
+    return platformNames[platform];
+  };
+
+  const getBrowserDisplayNames = (browserKeys: string[]): string => {
+    return browserKeys
+      .map((key) => {
+        const browser = SUPPORTED_BROWSERS.find((b) => b.key === key);
+        return browser?.title || key;
+      })
+      .join(", ");
   };
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isStarredLoading}
       isShowingDetail={true}
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -76,53 +124,102 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredCommands.map((command) => (
-        <List.Item
-          key={command.id}
-          title={command.name}
-          subtitle={command.path}
-          icon={
-            command.isInternalDebugging
-              ? { source: Icon.Bug, tintColor: Color.Orange }
-              : { source: Icon.Globe, tintColor: Color.Blue }
-          }
-          detail={
-            <List.Item.Detail
-              markdown={`# ${command.name}\n\n${
-                typeof command.description === "function"
-                  ? command.description(getCurrentBrowser())
-                  : command.description || "No description available."
-              }`}
-            />
-          }
-          actions={
-            <ActionPanel title={command.name}>
-              <Action
-                title={`Open in ${getCurrentBrowser().title}`}
-                icon={Icon.Globe}
-                onAction={async () => {
-                  const browser = getCurrentBrowser();
-                  if (!browser.appName) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Browser Error",
-                      message: `Could not determine application name for ${browser.title}`,
-                    });
-                    return;
-                  }
-                  await openUrlInBrowser(browser.appName, `${browser.scheme}${command.path}`);
-                }}
+      {filteredCommands.map((command) => {
+        const isStarred = starredCommands.includes(command.id);
+        const description =
+          typeof command.description === "function"
+            ? command.description(getCurrentBrowser())
+            : command.description || "No description available.";
+        const fullUrl = getFullUrlForDisplayAndSubmenu(command.path);
+
+        return (
+          <List.Item
+            key={`${command.id}-${selectedBrowser}`}
+            title={command.name}
+            subtitle={command.path}
+            icon={
+              command.isInternalDebugging
+                ? { source: Icon.Bug, tintColor: Color.Orange }
+                : { source: Icon.Globe, tintColor: Color.Blue }
+            }
+            accessories={isStarred ? [{ icon: Icon.Star, tooltip: "Starred" }] : []}
+            detail={
+              <List.Item.Detail
+                markdown={`# ${command.name}\n\n${description}`}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="URL" text={fullUrl} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Type"
+                      text={command.isInternalDebugging ? "Debug/Internal" : "Standard"}
+                      icon={command.isInternalDebugging ? { source: Icon.Bug, tintColor: Color.Orange } : { source: Icon.Globe, tintColor: Color.Blue }}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Supported Browsers"
+                      text={getBrowserDisplayNames(command.supportedBrowsers)}
+                    />
+                    {(command.platforms || command.excludedPlatforms) && (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label
+                          title="Platform Compatibility"
+                          text={
+                            command.platforms
+                              ? command.platforms.map(getPlatformDisplayName).join(", ")
+                              : command.excludedPlatforms
+                              ? `All except ${command.excludedPlatforms.map(getPlatformDisplayName).join(", ")}`
+                              : "All platforms"
+                          }
+                        />
+                      </>
+                    )}
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Starred"
+                      text={isStarred ? "Yes" : "No"}
+                      icon={isStarred ? { source: Icon.Star, tintColor: Color.Green } : undefined}
+                    />
+                  </List.Item.Detail.Metadata>
+                }
               />
-              <OpenInBrowserSubmenu commandPath={command.path} currentBrowser={selectedBrowser} />
-              <Action.CopyToClipboard
-                title="Copy URL"
-                content={getFullUrlForDisplayAndSubmenu(command.path)}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+            }
+            actions={
+              <ActionPanel title={command.name}>
+                <Action
+                  title={`Open in ${getCurrentBrowser().title}`}
+                  icon={Icon.Globe}
+                  onAction={async () => {
+                    const browser = getCurrentBrowser();
+                    if (!browser.appName) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "Browser Error",
+                        message: `Could not determine application name for ${browser.title}`,
+                      });
+                      return;
+                    }
+                    await openUrlInBrowser(browser.appName, `${browser.scheme}${command.path}`);
+                  }}
+                />
+                <Action
+                  title={isStarred ? "Unstar" : "Star"}
+                  icon={isStarred ? Icon.StarDisabled : Icon.Star}
+                  onAction={() => toggleStar(command.id)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                />
+                <OpenInBrowserSubmenu commandPath={command.path} currentBrowser={selectedBrowser} />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={fullUrl}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

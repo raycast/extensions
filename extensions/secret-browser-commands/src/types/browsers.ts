@@ -3,13 +3,15 @@
  *
  * @property key - A unique identifier for the browser.
  * @property title - The display name of the browser.
- * @property scheme - The URL scheme associated with the browser.
+ * @property scheme - The URL scheme used for opening URLs (e.g., chrome:// for Atlas).
+ * @property displayScheme - (Optional) The URL scheme displayed to users (e.g., atlas:// for Atlas). If not provided, uses scheme.
  * @property appName - (Optional) The application name for use with Action.OpenInBrowser.
  */
 export interface Browser {
   key: string;
   title: string;
   scheme: string;
+  displayScheme?: string;
   appName?: string;
 }
 
@@ -30,7 +32,8 @@ export const BROWSER_BRAVE: Browser = {
 export const BROWSER_CHATGPT_ATLAS: Browser = {
   key: "atlas",
   title: "ChatGPT Atlas",
-  scheme: "chrome://", // Atlas uses chrome:// internally since it's Chromium-based
+  scheme: "chrome://", // Atlas uses chrome:// for opening since it's Chromium-based
+  displayScheme: "atlas://", // But displays as atlas:// in the address bar
   appName: "ChatGPT Atlas",
 };
 
