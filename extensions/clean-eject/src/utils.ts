@@ -1,4 +1,4 @@
-import { showToast, Toast } from '@raycast/api';
+import { Icon, showToast, Toast } from '@raycast/api';
 import fs from 'fs';
 import path from 'path';
 
@@ -25,6 +25,7 @@ export const parseVolumes = (data?: string): Volume[] => {
         typeof obj.name === 'string' &&
         typeof obj.path === 'string' &&
         typeof obj.format === 'string' &&
+        typeof obj.protocol === 'string' &&
         typeof obj.size === 'string' &&
         typeof obj.isRemovable === 'boolean'
       ) {
@@ -36,6 +37,16 @@ export const parseVolumes = (data?: string): Volume[] => {
 
     return acc;
   }, []);
+};
+
+export const getVolumeIcon = (volume: Volume): string => {
+  if (!volume.isRemovable) {
+    return Icon.HardDrive;
+  }
+
+  return volume.protocol === 'Secure Digital'
+    ? Icon.MemoryChip
+    : Icon.MemoryStick;
 };
 
 export const isVolumeCleanable = (volume: Volume): boolean => {

@@ -3,6 +3,7 @@ export type Volume = {
   name: string;
   path: string;
   format: string;
+  protocol: string;
   size: string;
   isRemovable: boolean;
 };

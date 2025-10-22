@@ -1,10 +1,11 @@
-import { ActionPanel, Icon, List } from '@raycast/api';
+import { ActionPanel, List } from '@raycast/api';
 
 import type { Volume } from '../types';
 import { CleanAction } from '../actions/clean';
 import { CleanEjectAction } from '../actions/clean-eject';
 import { EjectAction } from '../actions/eject';
 import { QueryAction } from '../actions/query';
+import { getVolumeIcon } from '../utils';
 
 type DriveListItemProps = {
   volume: Volume;
@@ -15,10 +16,14 @@ export const DriveListItem = ({ volume, revalidate }: DriveListItemProps) => {
   return (
     <List.Item
       id={volume.id}
-      icon={volume.isRemovable ? Icon.MemoryStick : Icon.HardDrive}
+      icon={getVolumeIcon(volume)}
       title={volume.name}
       subtitle={volume.path}
-      accessories={[{ text: volume.format }, { text: volume.size }]}
+      accessories={[
+        { text: volume.format },
+        { text: volume.size },
+        { tag: volume.protocol },
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={volume.name}>
