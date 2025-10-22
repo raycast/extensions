@@ -24,7 +24,7 @@ const serializeFromJson = (jsonArray: string): Account[] => {
         ...obj,
         lastModified: new Date(parseInt(obj.last_modified_gmt, 10) * 1000),
         lastTouch: new Date(parseInt(obj.last_touch, 10) * 1000),
-      } as unknown as Account)
+      }) as unknown as Account,
   );
   return res;
 };
@@ -61,8 +61,8 @@ const execute = async (command: string) => {
         }
         console.log(`[${tookSeconds}s] Success:\n${stdout}`);
         res(stdout.trim());
-      }
-    )
+      },
+    ),
   );
 };
 
@@ -99,7 +99,7 @@ export const lastPass = (email: string, password: string) => {
 
     show: (id: string, opts: { sync: "auto" | "now" | "no" } = { sync: "auto" }): Promise<Account> =>
       execute(authorize(`show --sync=${opts.sync} --json ${id}`, { password })).then(
-        (stdout) => serializeFromJson(stdout)[0]
+        (stdout) => serializeFromJson(stdout)[0],
       ),
 
     list: (opts: { sync: "auto" | "now" | "no" } = { sync: "auto" }) =>
@@ -113,14 +113,14 @@ export const lastPass = (email: string, password: string) => {
             })
             .filter(({ name }) => name);
           return items;
-        }
+        },
       ),
 
     export: (opts: { sync: "auto" | "now" | "no" } = { sync: "auto" }) =>
       execute(
         authorize(`export --sync=${opts.sync} --fields=id,name,username,password,url`, {
           password,
-        })
+        }),
       ).then((stdout) => {
         const items: { id: string; name: string; username: string; password: string; url: string }[] = stdout
           .split("\n")
