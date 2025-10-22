@@ -2,14 +2,12 @@ import { Action, Icon, showToast, Toast } from '@raycast/api';
 import { useExec } from '@raycast/utils';
 
 import type { Volume } from '../types';
-import { isVolumeCleanable, showMissingPermissionToast } from '../utils';
 
 export const getCleanCommand = (volume: Volume): string => {
   return `
-  if [ -d "${volume.path}" ]; then
+  if [[ -d "${volume.path}" ]]; then
     dot_clean -m "${volume.path}"
-    find "${volume.path}" \\( -name .DS_Store -o -name .apdisk \\) -type f -delete
-    rm -rf "${volume.path}/{.Trashes,.Spotlight-V100,.fseventsd,.TemporaryItems}"
+    find "${volume.path}" -name .DS_Store -delete
   fi
 `;
 };
@@ -28,12 +26,6 @@ export const CleanAction = ({ volume, onSuccess }: CleanActionProps) => {
   });
 
   const handleClean = async () => {
-    if (!isVolumeCleanable(volume)) {
-      await showMissingPermissionToast();
-
-      return;
-    }
-
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Cleaning ${volume.name}`,

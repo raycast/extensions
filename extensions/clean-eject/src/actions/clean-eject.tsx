@@ -2,7 +2,6 @@ import { Action, Icon, showToast, Toast } from '@raycast/api';
 import { useExec } from '@raycast/utils';
 
 import type { Volume } from '../types';
-import { isVolumeCleanable, showMissingPermissionToast } from '../utils';
 import { getCleanCommand } from './clean';
 import { getEjectCommand } from './eject';
 
@@ -30,10 +29,6 @@ export const CleanEjectAction = ({
   });
 
   const handleCleanEject = async () => {
-    if (!isVolumeCleanable(volume)) {
-      return await showMissingPermissionToast();
-    }
-
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Clean ejecting ${volume.name}`,

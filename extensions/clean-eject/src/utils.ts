@@ -1,42 +1,26 @@
-import { Icon, showToast, Toast } from '@raycast/api';
-import fs from 'fs';
-import path from 'path';
+import { Icon } from '@raycast/api';
 
 import type { Volume } from './types';
 
 export const parseVolumes = (data?: string): Volume[] => {
-  if (typeof data !== 'string' || !data.trim()) {
+  if (!data?.trim()) {
     return [];
   }
 
-  return data.split('\n').reduce<Volume[]>((acc, line) => {
-    line = line.trim();
+  try {
+    const parsed = JSON.parse(data);
 
-    if (!line.startsWith('{') || !line.endsWith('}')) {
-      return acc;
+    if (!Array.isArray(parsed)) {
+      return [];
     }
 
-    try {
-      const obj = JSON.parse(line);
-
-      if (
-        obj &&
-        typeof obj.id === 'string' &&
-        typeof obj.name === 'string' &&
-        typeof obj.path === 'string' &&
-        typeof obj.format === 'string' &&
-        typeof obj.protocol === 'string' &&
-        typeof obj.size === 'string' &&
-        typeof obj.isRemovable === 'boolean'
-      ) {
-        acc.push(obj);
-      }
-
-      // eslint-disable-next-line no-empty
-    } catch {}
-
-    return acc;
-  }, []);
+    return parsed.filter(
+      (v): v is Volume =>
+        v && typeof v === 'object' && 'id' in v && 'path' in v,
+    );
+  } catch {
+    return [];
+  }
 };
 
 export const getVolumeIcon = (volume: Volume): string => {
@@ -47,27 +31,4 @@ export const getVolumeIcon = (volume: Volume): string => {
   return volume.protocol === 'Secure Digital'
     ? Icon.MemoryChip
     : Icon.MemoryStick;
-};
-
-export const isVolumeCleanable = (volume: Volume): boolean => {
-  const spotlightDir = path.join(volume.path, '.Spotlight-V100');
-
-  if (!fs.existsSync(spotlightDir)) {
-    return true;
-  }
-
-  try {
-    fs.accessSync(spotlightDir, fs.constants.W_OK);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-export const showMissingPermissionToast = async (): Promise<void> => {
-  await showToast({
-    style: Toast.Style.Failure,
-    title: 'Missing permission',
-    message: 'Please grant Raycast Full Disk Access in System Settings.',
-  });
 };
