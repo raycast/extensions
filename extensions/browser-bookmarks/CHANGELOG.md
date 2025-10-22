@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for ChatGPT Atlas Browser] - {PR_MERGE_DATE}
+
+- Added support for `ChatGPT Atlas` browser.
+
 ## [Fix Zen Support] - 2025-08-19
 
 - Fix Bundle ID for Zen Browser.
