@@ -5,6 +5,7 @@
   "description": "Search, view, and copy credentials from LastPass",
   "icon": "lastpass.png",
   "author": "alex-popov-tech",
+  "platforms": ["Windows", "macOS"],
   "categories": [
     "Productivity",
     "Security"
@@ -85,6 +86,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

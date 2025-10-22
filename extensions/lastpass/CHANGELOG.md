@@ -1,5 +1,8 @@
 # LastPass Changelog
 
+
+## [Add Windows platform] - {PR_MERGE_DATE}
+
 ## [Fix] - 2024-08-01
 
 - Increase `maxBuffer` to be able to handle larger output
