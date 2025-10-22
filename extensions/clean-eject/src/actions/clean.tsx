@@ -5,16 +5,11 @@ import type { Volume } from '../types';
 import { isVolumeCleanable, showMissingPermissionToast } from '../utils';
 
 export const getCleanCommand = (volume: Volume): string => {
-  const isFAT = volume.format !== 'APFS';
-
   return `
   if [ -d "${volume.path}" ]; then
     dot_clean -m "${volume.path}"
-
-    if [ "${isFAT}" = true ]; then
-      find "${volume.path}" \\( -name .DS_Store -o -name .apdisk \\) -type f -delete
-      rm -rf "${volume.path}/{.Trashes,.Spotlight-V100,.fseventsd,.TemporaryItems}"
-    fi
+    find "${volume.path}" \\( -name .DS_Store -o -name .apdisk \\) -type f -delete
+    rm -rf "${volume.path}/{.Trashes,.Spotlight-V100,.fseventsd,.TemporaryItems}"
   fi
 `;
 };
