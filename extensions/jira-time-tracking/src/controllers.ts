@@ -23,7 +23,7 @@ function getApiPath(path: string): string {
     if (path.includes("/project/search")) {
       path = path.replace("/rest/api/3/project/search", "/rest/api/2/project");
     } else if (path.includes("/search")) {
-      path = path.replace("/rest/api/3/search/jql", "/rest/api/2/search");
+      path = path.replace("/rest/api/3/search/jql", "/rest/api/2/search/jql");
     } else {
       path = path.replace("/rest/api/3", `/rest/api/${version}`);
     }
