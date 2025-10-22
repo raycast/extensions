@@ -84,7 +84,7 @@ export default function Webhooks({ appId, navigationTitle }: { appId: string; na
                   onAction={() =>
                     confirmAlert({
                       icon: { source: Icon.Trash, tintColor: Color.Red },
-                      title: "Delete Webhoook",
+                      title: "Delete Webhook",
                       message: "Are you sure you want to delete this webhook? This action cannot be undone.",
                       primaryAction: {
                         style: Alert.ActionStyle.Destructive,
@@ -209,14 +209,14 @@ function CreateWebhook({ appId, navigationTitle }: { appId: string; navigationTi
               values.authMethod === "basic"
                 ? "Username"
                 : values.authMethod === "hmac"
-                  ? "HPAC Header"
+                  ? "HMAC Header"
                   : "ApiKey Header"
             }
             placeholder={values.authMethod === "basic" ? "user@vartiq.com" : ""}
             {...itemProps.user}
           />
           <Form.PasswordField
-            title={values.authMethod === "basic" ? "Password" : values.authMethod === "hmac" ? "HPAC Secret" : "ApiKey"}
+            title={values.authMethod === "basic" ? "Password" : values.authMethod === "hmac" ? "HMAC Secret" : "ApiKey"}
             placeholder={values.authMethod === "basic" ? "Enter your password" : ""}
             {...itemProps.pass}
           />
