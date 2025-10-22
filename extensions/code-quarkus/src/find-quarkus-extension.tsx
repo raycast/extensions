@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, List, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, popToRoot, showToast, Toast, Icon } from "@raycast/api";
 import { QuarkusVersionDropdown } from "./QuarkusVersionDropDown";
 import { QuarkusVersion } from "./models/QuarkusVersion";
 import { fetchQuarkusExtensions, getQuarkusVersion } from "./api";
@@ -90,58 +90,83 @@ export default function FindQuarkusExtensionCommand() {
         <QuarkusVersionDropdown quarkusVersions={versions} onQuarkusVersionChange={onVersionChange} />
       }
     >
-      {dependencies.map((dep) => (
-        <List.Item
-          key={dep.id + ":" + dep.order}
-          title={dep.name.split("-")[0] + " [" + dep.id.split(":")[1] + "] : "}
-          accessories={[{ text: dep.description }]}
-          actions={
-            <ActionPanel title="#1 in raycast/extensions">
-              <Action.CopyToClipboard
-                title="Copy the Cli Command to Add This Extension"
-                content={getClipboard("cli", dep)}
-                onCopy={() => popToRoot()}
-              />
-              <Action.OpenInBrowser title="See the Extension Guide" url={dep.guide} />
-              <ActionPanel.Section title="Build tools">
-                <Action.CopyToClipboard
-                  title="Copy the Maven Command to Add This Extension"
-                  content={getClipboard("maven", dep)}
-                  onCopy={() => popToRoot()}
-                />
-                <Action.CopyToClipboard
-                  title="Copy the Gradle Command to Add This Extension"
-                  content={getClipboard("gradle", dep)}
-                  onCopy={() => popToRoot()}
-                />
-                <Action.CopyToClipboard
-                  title="Copy the Build.gradle.kts Dependency Snippet"
-                  content={getClipboard("gradle.kts", dep)}
-                  onCopy={() => popToRoot()}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section title="Snippet">
-                <Action.CopyToClipboard
-                  title="Copy the Maven Dependency Snippet"
-                  content={getClipboard("maven-snippet", dep)}
-                  onCopy={() => popToRoot()}
-                />
-                <Action.CopyToClipboard
-                  title="Copy the Gradle Dependency Snippet"
-                  content={getClipboard("gradle-snippet", dep)}
-                  onCopy={() => popToRoot()}
-                />
-              </ActionPanel.Section>
+      {dependencies.map((dep) => {
+        const icon = dep.platform ? Icon.Star : dep.providesExampleCode ? Icon.Code : Icon.Box;
+        const accessories: List.Item.Accessory[] = [];
 
-              <Action.CopyToClipboard
-                title="Copy Groupid:artifactid:version"
-                content={getClipboard("groupId", dep)}
-                onCopy={() => popToRoot()}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+        if (dep.platform) {
+          accessories.push({ tag: { value: "Platform", color: "#4B32C3" } });
+        }
+        if (dep.providesExampleCode) {
+          accessories.push({ tag: { value: "Examples", color: "#00A3E0" } });
+        }
+        if (dep.tags && dep.tags.length > 0) {
+          accessories.push({ tag: dep.tags[0] });
+        }
+        accessories.push({ text: dep.category });
+
+        return (
+          <List.Item
+            key={dep.id + ":" + dep.order}
+            title={dep.name}
+            subtitle={dep.id.split(":")[1]}
+            icon={icon}
+            accessories={accessories}
+            actions={
+              <ActionPanel title={dep.name}>
+                <Action.CopyToClipboard
+                  icon={Icon.Terminal}
+                  title="Copy Cli Command"
+                  content={getClipboard("cli", dep)}
+                  onCopy={() => popToRoot()}
+                />
+                <Action.OpenInBrowser icon={Icon.Book} title="Open Extension Guide" url={dep.guide} />
+                <ActionPanel.Section title="Build Tools">
+                  <Action.CopyToClipboard
+                    icon={Icon.Clipboard}
+                    title="Copy Maven Command"
+                    content={getClipboard("maven", dep)}
+                    onCopy={() => popToRoot()}
+                  />
+                  <Action.CopyToClipboard
+                    icon={Icon.Clipboard}
+                    title="Copy Gradle Command"
+                    content={getClipboard("gradle", dep)}
+                    onCopy={() => popToRoot()}
+                  />
+                  <Action.CopyToClipboard
+                    icon={Icon.Code}
+                    title="Copy Gradle Kotlin Dsl"
+                    content={getClipboard("gradle.kts", dep)}
+                    onCopy={() => popToRoot()}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Dependency Snippets">
+                  <Action.CopyToClipboard
+                    icon={Icon.Code}
+                    title="Copy Maven Xml Snippet"
+                    content={getClipboard("maven-snippet", dep)}
+                    onCopy={() => popToRoot()}
+                  />
+                  <Action.CopyToClipboard
+                    icon={Icon.Code}
+                    title="Copy Gradle Snippet"
+                    content={getClipboard("gradle-snippet", dep)}
+                    onCopy={() => popToRoot()}
+                  />
+                </ActionPanel.Section>
+
+                <Action.CopyToClipboard
+                  icon={Icon.Text}
+                  title="Copy Coordinates (gav)"
+                  content={getClipboard("groupId", dep)}
+                  onCopy={() => popToRoot()}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

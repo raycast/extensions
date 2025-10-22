@@ -15,13 +15,13 @@ export function QuarkusVersionDropdown(props: {
 
   return (
     <List.Dropdown
-      tooltip="Select Drink Type"
+      tooltip="Select a quarkus version"
       storeValue={true}
       onChange={(newValue) => {
         onVersionChange(newValue);
       }}
     >
-      <List.Dropdown.Section title="Alcoholic Beverages">
+      <List.Dropdown.Section title="Quarkus versions">
         {quarkusVersions.map((v) => (
           <List.Dropdown.Item key={v.key} value={v.key} title={v?.platformVersion + (v?.lts ? " [LTS]" : "")} />
         ))}
