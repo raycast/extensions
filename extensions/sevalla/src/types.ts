@@ -28,6 +28,31 @@ export type DatabaseDetailed = {
   external_hostname: string | null;
   external_port: string | null;
 };
+
+export type Deployment = {
+  id: string;
+  branch: string;
+  repo_url: string;
+  commit_message: string | null;
+  created_at: number;
+};
+export type DeploymentDetailed = {
+  id: string;
+  static_site_id: string;
+  repo_url: string;
+  branch: string;
+  status: "waiting" | "inProgress" | "success" | "failed" | "cancelled";
+  commit_sha: string | null;
+  commit_message: string | null;
+  author_login: string | null;
+  author_img: string | null;
+  cloud_build_id: string | null;
+  created_at: number;
+  updated_at: number;
+  finished_at: number | null;
+  started_at: number | null;
+};
+
 export type StaticSite = {
   id: string;
   name: string;
@@ -39,15 +64,6 @@ export type StaticSite = {
     | "deploymentCancelled"
     | "deleting"
     | "deletionFailed";
-};
-
-type Deployment = {
-  id: string;
-  status: string;
-  branch: string;
-  repo_url: string;
-  commit_message: string | null;
-  created_at: number;
 };
 export type StaticSiteDetailed = StaticSite & {
   repo_url: string;

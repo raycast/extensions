@@ -24,8 +24,8 @@ export default function DeleteDatabaseAction({
             async onAction() {
               const toast = await showToast(Toast.Style.Animated, "Deleting", database.display_name);
               try {
-                const result = await mutateDatabases(
-                  makeRequest<{ message: string }>(`databases/${database.id}`, {
+                const result = (await mutateDatabases(
+                  makeRequest(`databases/${database.id}`, {
                     method: "DELETE",
                   }),
                   {
@@ -33,7 +33,7 @@ export default function DeleteDatabaseAction({
                       return data.filter((db) => (db.id === database.id ? { ...db, status: "deleting" } : db));
                     },
                   },
-                );
+                )) as { message: string };
                 toast.style = Toast.Style.Success;
                 toast.title = "Deleted";
                 toast.message = result.message;

@@ -3,9 +3,15 @@ import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { makeRequest } from "./sevalla";
 import { StaticSite, StaticSiteDetailed } from "./types";
 import OpenInSevallaAction from "./components/OpenInSevallaAction";
+import DeleteStaticSiteAction from "./components/DeleteStaticSiteAction";
+import GetDeploymentDetails from "./views/get-deployment-details";
 
-export default function Command() {
-  const { isLoading, data: sites } = useCachedPromise(
+export default function SearchStaticSites() {
+  const {
+    isLoading,
+    data: sites,
+    mutate,
+  } = useCachedPromise(
     async () => {
       const result = await makeRequest<{ company: { static_sites: { items: StaticSite[] } } }>("static-sites");
       return result.company.static_sites.items;
@@ -38,6 +44,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.Push icon={Icon.Bolt} title="Static Site Details" target={<StaticSiteDetails site={site} />} />
                 <OpenInSevallaAction route="staticSites" />
+                <DeleteStaticSiteAction site={site} mutateSites={mutate} />
               </ActionPanel>
             }
           />
@@ -90,13 +97,18 @@ function StaticSiteDetails({ site }: { site: StaticSite }) {
                 }
               />
             }
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser icon={Icon.ArrowNe} title="Visit Site" url={`https://${details.hostname}`} />
+              </ActionPanel>
+            }
           />
           <List.Section title="Deployments">
             {details.deployments.map((deployment, index) => (
               <List.Item
                 key={deployment.id}
                 icon={`number-${String(index + 1).padStart(2, "0")}-16`}
-                title={deployment.commit_message || ""}
+                title={{ value: deployment.commit_message || "", tooltip: deployment.commit_message }}
                 detail={
                   <List.Item.Detail
                     markdown={deployment.commit_message}
@@ -111,6 +123,15 @@ function StaticSiteDetails({ site }: { site: StaticSite }) {
                     }
                   />
                 }
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      icon={Icon.Airplane}
+                      title="Deployment Details"
+                      target={<GetDeploymentDetails deployment={deployment} site={site} />}
+                    />
+                  </ActionPanel>
+                }
               />
             ))}
           </List.Section>
@@ -119,3 +140,5 @@ function StaticSiteDetails({ site }: { site: StaticSite }) {
     </List>
   );
 }
+
+
