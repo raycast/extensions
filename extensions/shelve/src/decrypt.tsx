@@ -31,6 +31,7 @@ The decrypted value has been automatically copied to your clipboard.
       actions={
         <ActionPanel>
           <Action
+            icon={Icon.CopyClipboard}
             title="Copy Decrypted Value"
             onAction={async () => {
               await Clipboard.copy(data.decryptedValue);
