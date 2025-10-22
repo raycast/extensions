@@ -19,7 +19,7 @@ export const getQueryCommand = (): string => {
       isRemovable=false
       [[ "$removable" == "Removable" ]] && isRemovable=true
 
-      if [ "$first" = true ]; then
+      if [[ "$first" == true ]]; then
         first=false
       else
         printf ","

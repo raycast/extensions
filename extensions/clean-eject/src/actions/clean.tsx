@@ -1,4 +1,4 @@
-import { Action, Icon, showToast, Toast } from '@raycast/api';
+import { Action, Icon, open, showToast, Toast } from '@raycast/api';
 import { useExec } from '@raycast/utils';
 
 import type { Volume } from '../types';
@@ -22,7 +22,17 @@ export const CleanAction = ({ volume, onSuccess }: CleanActionProps) => {
     shell: true,
     execute: false,
     onData: onSuccess,
-    failureToastOptions: { title: `Failed to clean ${volume.name}` },
+    failureToastOptions: {
+      title: `Failed to clean ${volume.name}`,
+      message: 'Raycast needs Full Disk Access to clean this device.',
+      primaryAction: {
+        title: 'Open Privacy & Security Settings',
+        onAction: () =>
+          open(
+            'x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles',
+          ),
+      },
+    },
   });
 
   const handleClean = async () => {
