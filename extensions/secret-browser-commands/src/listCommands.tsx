@@ -45,35 +45,39 @@ export default function Command() {
     }
   };
 
-  const filteredCommands = browserCommands.filter((command) => {
-    const description =
-      typeof command.description === "function" ? command.description(getCurrentBrowser()) : command.description || "";
+  const filteredCommands = browserCommands
+    .filter((command) => {
+      const description =
+        typeof command.description === "function"
+          ? command.description(getCurrentBrowser())
+          : command.description || "";
 
-    // Filter by search text
-    const matchesSearch =
-      command.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      command.path.toLowerCase().includes(searchText.toLowerCase()) ||
-      description.toLowerCase().includes(searchText.toLowerCase());
+      // Filter by search text
+      const matchesSearch =
+        command.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        command.path.toLowerCase().includes(searchText.toLowerCase()) ||
+        description.toLowerCase().includes(searchText.toLowerCase());
 
-    // Filter by browser compatibility
-    const isBrowserCompatible = command.supportedBrowsers.includes(selectedBrowser);
+      // Filter by browser compatibility
+      const isBrowserCompatible = command.supportedBrowsers.includes(selectedBrowser);
 
-    // Filter by platform compatibility
-    const userPlatform = getCurrentPlatform();
-    const isPlatformCompatible =
-      (!command.platforms || command.platforms.includes(userPlatform)) &&
-      (!command.excludedPlatforms || !command.excludedPlatforms.includes(userPlatform));
+      // Filter by platform compatibility
+      const userPlatform = getCurrentPlatform();
+      const isPlatformCompatible =
+        (!command.platforms || command.platforms.includes(userPlatform)) &&
+        (!command.excludedPlatforms || !command.excludedPlatforms.includes(userPlatform));
 
-    return matchesSearch && isBrowserCompatible && isPlatformCompatible;
-  }).sort((a, b) => {
-    // Sort starred items to the top
-    const aIsStarred = starredCommands.includes(a.id);
-    const bIsStarred = starredCommands.includes(b.id);
-    if (aIsStarred && !bIsStarred) return -1;
-    if (!aIsStarred && bIsStarred) return 1;
-    // Otherwise maintain original order
-    return 0;
-  });
+      return matchesSearch && isBrowserCompatible && isPlatformCompatible;
+    })
+    .sort((a, b) => {
+      // Sort starred items to the top
+      const aIsStarred = starredCommands.includes(a.id);
+      const bIsStarred = starredCommands.includes(b.id);
+      if (aIsStarred && !bIsStarred) return -1;
+      if (!aIsStarred && bIsStarred) return 1;
+      // Otherwise maintain original order
+      return 0;
+    });
 
   const getFullUrlForDisplayAndSubmenu = (itemPath: string): string => {
     // If the path already contains a scheme (like chrome-untrusted://), return it as-is
@@ -153,7 +157,11 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label
                       title="Type"
                       text={command.isInternalDebugging ? "Debug/Internal" : "Standard"}
-                      icon={command.isInternalDebugging ? { source: Icon.Bug, tintColor: Color.Orange } : { source: Icon.Globe, tintColor: Color.Blue }}
+                      icon={
+                        command.isInternalDebugging
+                          ? { source: Icon.Bug, tintColor: Color.Orange }
+                          : { source: Icon.Globe, tintColor: Color.Blue }
+                      }
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
@@ -169,8 +177,8 @@ export default function Command() {
                             command.platforms
                               ? command.platforms.map(getPlatformDisplayName).join(", ")
                               : command.excludedPlatforms
-                              ? `All except ${command.excludedPlatforms.map(getPlatformDisplayName).join(", ")}`
-                              : "All platforms"
+                                ? `All except ${command.excludedPlatforms.map(getPlatformDisplayName).join(", ")}`
+                                : "All platforms"
                           }
                         />
                       </>
