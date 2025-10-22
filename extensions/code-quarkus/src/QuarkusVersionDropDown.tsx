@@ -1,5 +1,4 @@
 import { List } from "@raycast/api";
-import React from "react";
 import { QuarkusVersion } from "./models/QuarkusVersion";
 
 export function QuarkusVersionDropdown(props: {

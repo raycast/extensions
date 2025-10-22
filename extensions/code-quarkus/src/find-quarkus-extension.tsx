@@ -158,7 +158,7 @@ export default function FindQuarkusExtensionCommand() {
 
                 <Action.CopyToClipboard
                   icon={Icon.Text}
-                  title="Copy Coordinates (gav)"
+                  title="Copy Coordinates (Gav)"
                   content={getClipboard("groupId", dep)}
                   onCopy={() => popToRoot()}
                 />

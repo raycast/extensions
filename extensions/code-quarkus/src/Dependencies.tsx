@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import {
   Action,
   ActionPanel,
@@ -83,7 +82,8 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
       }
 
       // Convert the response to a buffer
-      const buffer = await response.buffer();
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
       const homeDir = process.env.HOME;
       let dir = path.join(homeDir || "", "Downloads");
