@@ -21,7 +21,7 @@ You can also easily find the right extension for you project, get the command to
 - Open Raycast
 - Search for "Create Quarkus Project"
 - Fill in your project configuration (Quarkus version, build tool, groupId, artifact name, java version)
-- [Optional] You can save your personal preferences by ticking "save configuration as prefered".
+- [Optional] You can save your personal preferences by ticking "save configuration as preferred".
 
   ![image](assets/config.png)
   ![image](assets/personal-preferences.png)
