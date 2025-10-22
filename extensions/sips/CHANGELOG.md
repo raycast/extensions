@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- 
+
 ## [Bug Fixes] - 2025-07-07
 
 - Added support for detecting file selection in ForkLift's List and Icon views
