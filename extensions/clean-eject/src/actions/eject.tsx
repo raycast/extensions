@@ -20,7 +20,7 @@ export const EjectAction = ({ volume, onSuccess }: EjectActionProps) => {
     failureToastOptions: { title: `Failed to eject ${volume.name}` },
   });
 
-  const ejectDrive = async () => {
+  const handleEject = async () => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Ejecting ${volume.name}`,
@@ -46,7 +46,7 @@ export const EjectAction = ({ volume, onSuccess }: EjectActionProps) => {
       icon={Icon.XMarkCircle}
       title="Eject"
       shortcut={{ modifiers: ['cmd'], key: 'e' }}
-      onAction={() => ejectDrive()}
+      onAction={() => handleEject()}
     />
   );
 };

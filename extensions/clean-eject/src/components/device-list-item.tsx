@@ -7,12 +7,12 @@ import { EjectAction } from '../actions/eject';
 import { QueryAction } from '../actions/query';
 import { getVolumeIcon } from '../utils';
 
-type DriveListItemProps = {
+type DeviceListItemProps = {
   volume: Volume;
   revalidate: () => void;
 };
 
-export const DriveListItem = ({ volume, revalidate }: DriveListItemProps) => {
+export const DeviceListItem = ({ volume, revalidate }: DeviceListItemProps) => {
   return (
     <List.Item
       id={volume.id}

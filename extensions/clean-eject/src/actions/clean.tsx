@@ -27,7 +27,7 @@ export const CleanAction = ({ volume, onSuccess }: CleanActionProps) => {
     failureToastOptions: { title: `Failed to clean ${volume.name}` },
   });
 
-  const cleanDrive = async () => {
+  const handleClean = async () => {
     if (!isVolumeCleanable(volume)) {
       await showMissingPermissionToast();
 
@@ -55,6 +55,6 @@ export const CleanAction = ({ volume, onSuccess }: CleanActionProps) => {
   };
 
   return (
-    <Action icon={Icon.Trash} title="Clean" onAction={() => cleanDrive()} />
+    <Action icon={Icon.Trash} title="Clean" onAction={() => handleClean()} />
   );
 };

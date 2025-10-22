@@ -1,3 +1,3 @@
-import { DriveList } from './components/drive-list';
+import { DeviceList } from './components/device-list';
 
-export default DriveList;
+export default DeviceList;

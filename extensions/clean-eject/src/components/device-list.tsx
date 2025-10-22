@@ -4,12 +4,12 @@ import { useMemo } from 'react';
 
 import { getQueryCommand, QueryAction } from '../actions/query';
 import { parseVolumes } from '../utils';
-import { DriveListItem } from './drive-list-item';
+import { DeviceListItem } from './device-list-item';
 
-export const DriveList = () => {
+export const DeviceList = () => {
   const { data, isLoading, revalidate } = useExec(getQueryCommand(), {
     shell: true,
-    failureToastOptions: { title: 'Failed to query drives' },
+    failureToastOptions: { title: 'Failed to query storage devices' },
   });
 
   const volumes = useMemo(() => parseVolumes(data), [data]);
@@ -24,7 +24,7 @@ export const DriveList = () => {
       }
     >
       {volumes.map((volume) => (
-        <DriveListItem
+        <DeviceListItem
           key={volume.id}
           volume={volume}
           revalidate={revalidate}

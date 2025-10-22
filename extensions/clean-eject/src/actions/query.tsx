@@ -28,7 +28,7 @@ export const QueryAction = ({ onQuery }: QueryActionProps) => {
   return (
     <Action
       icon={Icon.ArrowClockwise}
-      title="Refresh Drive List"
+      title="Refresh Device List"
       shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={onQuery}
     />

@@ -29,7 +29,7 @@ export const CleanEjectAction = ({
     failureToastOptions: { title: `Failed to clean eject ${volume.name}` },
   });
 
-  const cleanEjectDrive = async () => {
+  const handleCleanEject = async () => {
     if (!isVolumeCleanable(volume)) {
       return await showMissingPermissionToast();
     }
@@ -58,7 +58,7 @@ export const CleanEjectAction = ({
     <Action
       icon={Icon.Eject}
       title="Clean & Eject"
-      onAction={() => cleanEjectDrive()}
+      onAction={() => handleCleanEject()}
     />
   );
 };
