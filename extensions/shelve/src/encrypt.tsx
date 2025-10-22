@@ -69,7 +69,6 @@ export default function Command() {
           message: error instanceof Error ? error.message : "Failed to encrypt secret",
           style: Toast.Style.Failure,
         });
-        console.error("Vault API error:", error);
       } finally {
         setIsLoading(false);
       }

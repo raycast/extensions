@@ -40,7 +40,6 @@ The decrypted value has been automatically copied to your clipboard.
               });
             }}
           />
-
         </ActionPanel>
       }
     />
@@ -107,7 +106,6 @@ export default function Command() {
           message: error instanceof Error ? error.message : "Failed to decrypt secret",
           style: Toast.Style.Failure,
         });
-        console.error("Vault decrypt error:", error);
       } finally {
         setIsLoading(false);
       }
