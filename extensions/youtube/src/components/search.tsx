@@ -45,7 +45,7 @@ export async function getRecentSearches(key: string): Promise<RecentSearch[] | u
         return result;
       }
     }
-  } catch (error) {
+  } catch {
     // ignore error
   }
   return [];
@@ -80,7 +80,7 @@ async function appendRecentSearchesStore(key: string, search: RecentSearch) {
   }
 }
 
-function NoSearchItem(props: { recentQueries: RecentSearch[] | undefined }): JSX.Element | null {
+function NoSearchItem(props: { recentQueries: RecentSearch[] | undefined }) {
   const rq = props.recentQueries;
   if (rq && rq.length > 0) {
     return null;
@@ -93,7 +93,7 @@ function SearchItem(props: {
   search: RecentSearch;
   setSearchText: (text: string) => void;
   clearAll?: () => Promise<void>;
-}): JSX.Element {
+}) {
   const handleClear = async () => {
     if (props.clearAll) {
       await props.clearAll();
@@ -129,7 +129,7 @@ export function RecentSearchesList(props: {
   setRootSearchText: (text: string) => void;
   isLoading?: boolean | undefined;
   clearAll?: () => Promise<void>;
-}): JSX.Element {
+}) {
   const setRootSearchText = props.setRootSearchText;
   const rq = props.recentSearches;
   const isLoading = props.isLoading;
@@ -183,7 +183,7 @@ export function useRecentSearch(
         if (!cancel) {
           setData(d);
         }
-      } catch (error) {
+      } catch {
         // ignore
       }
     }

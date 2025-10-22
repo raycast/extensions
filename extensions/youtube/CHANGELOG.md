@@ -1,5 +1,12 @@
 # YouTube Changelog
 
+## [Enhancements] - 2025-10-20
+
+- Added new `Search Live Streams` command to search for live YouTube broadcasts
+- Improved empty view messages with more engaging copy for `Search Videos` and `Search Channels` commands
+- Updated icons for `Remove from Pinned Videos` and `Remove from Pinned Channels` actions
+- Fixed error messages to remove HTML tags for cleaner toast notifications
+
 ## [Chore: Updated README] - 2025-10-17
 
 ## [Fix] - 2025-05-20
@@ -8,7 +15,7 @@
 
 ## [Enhancement] - 2024-10-22
 
-- Update the cache in the `search-videos` and `search-channels` commands to use local storage
+- Update the cache in the `Search Videos` and `Search Channels` commands to use local storage
 
 ## [Chore] - 2024-09-02
 
@@ -53,7 +60,7 @@
 
 ## [Search from Root] - 2023-02-08
 
-- Add query parameter to Search Videos and Search Channels commands
+- Add query parameter to `Search Videos` and `Search Channels` commands
 
 ## [README update] - 2023-01-17
 
