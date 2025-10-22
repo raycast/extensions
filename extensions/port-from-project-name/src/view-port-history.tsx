@@ -54,7 +54,7 @@ export default function Command() {
             <ActionPanel>
               <Action.CopyToClipboard title="Copy Port" content={String(item.port)} />
               <Action.CopyToClipboard title="Copy Project Name" content={item.projectName} />
-              <Action.CopyToClipboard title="Copy Project:port" content={`${item.projectName}:${item.port}`} />
+              <Action.CopyToClipboard title="Copy Project:Port" content={`${item.projectName}:${item.port}`} />
               <ActionPanel.Section>
                 <Action
                   title="Delete Entry"
