@@ -148,7 +148,7 @@ function transformMetadataToSearchItems(metadata: MetadataItem[]): SearchItem[] 
     if (item.subitems) {
       for (const subitem of item.subitems) {
         // Extract anchor from subitem title (look for : or . patterns)
-        const anchorMatch = subitem.title.match(/(:|\\.)(.+)$/);
+        const anchorMatch = subitem.title.match(/(:|\.)(.+)$/);
         const subitemUrl = anchorMatch ? `${url}#${anchorMatch[2]}` : url;
 
         searchItems.push({
