@@ -5,8 +5,10 @@
   "description": "Show friends in other timezones",
   "icon": "icon.png",
   "author": "andrebreia",
+  "type": "module",
   "contributors": [
-    "jelias"
+    "jelias",
+    "xulobeats"
   ],
   "categories": [
     "Fun"

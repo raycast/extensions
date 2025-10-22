@@ -389,7 +389,7 @@ export default function Command() {
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action
-                      title="Move Up"
+                      title="Move up"
                       icon={Icon.ArrowUp}
                       shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                       onAction={() => moveUp(index)}
