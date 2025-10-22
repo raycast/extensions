@@ -16,54 +16,6 @@
     "macOS",
     "Windows"
   ],
-  "preferences": [
-    {
-      "name": "preferredBrowser",
-      "title": "Preferred Browser",
-      "description": "Select your preferred browser to open secret URLs.",
-      "type": "dropdown",
-      "required": false,
-      "default": "chrome",
-      "data": [
-        {
-          "title": "Arc",
-          "value": "arc"
-        },
-        {
-          "title": "Brave",
-          "value": "brave"
-        },
-        {
-          "title": "ChatGPT Atlas",
-          "value": "atlas"
-        },
-        {
-          "title": "Dia",
-          "value": "dia"
-        },
-        {
-          "title": "Google Chrome",
-          "value": "chrome"
-        },
-        {
-          "title": "Microsoft Edge",
-          "value": "edge"
-        },
-        {
-          "title": "Opera",
-          "value": "opera"
-        },
-        {
-          "title": "Perplexity Comet",
-          "value": "comet"
-        },
-        {
-          "title": "Vivaldi",
-          "value": "vivaldi"
-        }
-      ]
-    }
-  ],
   "commands": [
     {
       "name": "listCommands",

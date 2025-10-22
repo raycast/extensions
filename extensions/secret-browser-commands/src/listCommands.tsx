@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Action, ActionPanel, Icon, List, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, showToast, Toast } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { OpenInBrowserSubmenu } from "./components/OpenInActions";
 import { browserCommands } from "./data/paths";
 import { SUPPORTED_BROWSERS, BROWSER_CHROME } from "./types/browsers";
@@ -7,34 +8,20 @@ import { openUrlInBrowser } from "./utils/openUrlInBrowser";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [showInternalDebugging, setShowInternalDebugging] = useState<"hide-debug" | "show-all" | "show-debug">(
-    "hide-debug",
-  );
-  const { preferredBrowser } = getPreferenceValues<Preferences>();
+  const {
+    value: selectedBrowser = "chrome",
+    setValue: setSelectedBrowser,
+    isLoading,
+  } = useLocalStorage<string>("selected-browser", "chrome");
 
-  const getPreferredBrowser = () => {
-    const DEFAULT_BROWSER_KEY = "chrome";
-    const browserKey = preferredBrowser || DEFAULT_BROWSER_KEY;
-
-    // Try to find the preferred browser or fall back to the default browser
-    const preferred = SUPPORTED_BROWSERS.find((b) => b.key === browserKey);
-    if (preferred) return preferred;
-
-    // Fall back to default browser if different from preferred
-    if (browserKey !== DEFAULT_BROWSER_KEY) {
-      const defaultBrowser = SUPPORTED_BROWSERS.find((b) => b.key === DEFAULT_BROWSER_KEY);
-      if (defaultBrowser) return defaultBrowser;
-    }
-
-    // Last resort: return the first available browser or Chrome as fallback
-    return SUPPORTED_BROWSERS[0] || BROWSER_CHROME;
+  const getCurrentBrowser = () => {
+    const browser = SUPPORTED_BROWSERS.find((b) => b.key === selectedBrowser);
+    return browser || BROWSER_CHROME;
   };
 
   const filteredCommands = browserCommands.filter((command) => {
     const description =
-      typeof command.description === "function"
-        ? command.description(getPreferredBrowser())
-        : command.description || "";
+      typeof command.description === "function" ? command.description(getCurrentBrowser()) : command.description || "";
 
     // Filter by search text
     const matchesSearch =
@@ -42,36 +29,34 @@ export default function Command() {
       command.path.toLowerCase().includes(searchText.toLowerCase()) ||
       description.toLowerCase().includes(searchText.toLowerCase());
 
-    // Filter based on debug view mode
-    const showBasedOnDebugging =
-      showInternalDebugging === "show-all" ||
-      (showInternalDebugging === "show-debug" && command.isInternalDebugging) ||
-      (showInternalDebugging === "hide-debug" && !command.isInternalDebugging);
+    // Filter by browser compatibility
+    const isBrowserCompatible = command.supportedBrowsers.includes(selectedBrowser);
 
-    return matchesSearch && showBasedOnDebugging;
+    return matchesSearch && isBrowserCompatible;
   });
 
   const getFullUrlForDisplayAndSubmenu = (itemPath: string): string => {
-    const browser = getPreferredBrowser();
+    const browser = getCurrentBrowser();
     return `${browser.scheme}${itemPath}`;
   };
 
   return (
     <List
+      isLoading={isLoading}
       isShowingDetail={true}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search commands..."
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filter Options"
+          tooltip="Select Browser"
           storeValue={true}
-          value={showInternalDebugging}
-          onChange={(value) => setShowInternalDebugging(value as "hide-debug" | "show-all" | "show-debug")}
+          value={selectedBrowser}
+          onChange={(value) => setSelectedBrowser(value)}
         >
-          <List.Dropdown.Item title="Show All" value="show-all" />
-          <List.Dropdown.Item title="Hide Debug Commands" value="hide-debug" />
-          <List.Dropdown.Item title="Show Debug Commands Only" value="show-debug" />
+          {SUPPORTED_BROWSERS.map((browser) => (
+            <List.Dropdown.Item key={browser.key} title={browser.title} value={browser.key} />
+          ))}
         </List.Dropdown>
       }
     >
@@ -89,7 +74,7 @@ export default function Command() {
             <List.Item.Detail
               markdown={`# ${command.name}\n\n${
                 typeof command.description === "function"
-                  ? command.description(getPreferredBrowser())
+                  ? command.description(getCurrentBrowser())
                   : command.description || "No description available."
               }`}
             />
@@ -97,10 +82,10 @@ export default function Command() {
           actions={
             <ActionPanel title={command.name}>
               <Action
-                title={`Open in ${getPreferredBrowser().title}`}
+                title={`Open in ${getCurrentBrowser().title}`}
                 icon={Icon.Globe}
                 onAction={async () => {
-                  const browser = getPreferredBrowser();
+                  const browser = getCurrentBrowser();
                   if (!browser.appName) {
                     await showToast({
                       style: Toast.Style.Failure,
@@ -112,7 +97,7 @@ export default function Command() {
                   await openUrlInBrowser(browser.appName, `${browser.scheme}${command.path}`);
                 }}
               />
-              <OpenInBrowserSubmenu commandPath={command.path} preferences={{ preferredBrowser }} />
+              <OpenInBrowserSubmenu commandPath={command.path} currentBrowser={selectedBrowser} />
               <Action.CopyToClipboard
                 title="Copy URL"
                 content={getFullUrlForDisplayAndSubmenu(command.path)}

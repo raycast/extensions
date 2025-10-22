@@ -30,7 +30,7 @@ export const BROWSER_BRAVE: Browser = {
 export const BROWSER_CHATGPT_ATLAS: Browser = {
   key: "atlas",
   title: "ChatGPT Atlas",
-  scheme: "atlas://",
+  scheme: "chrome://", // Atlas uses chrome:// internally since it's Chromium-based
   appName: "ChatGPT Atlas",
 };
 

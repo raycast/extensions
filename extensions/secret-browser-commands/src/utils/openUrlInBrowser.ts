@@ -37,7 +37,8 @@ export async function openUrlInBrowser(
 
   const escapedAppName = appName.replace(/"/g, '\\"');
   const escapedUrl = url.replace(/"/g, '\\"');
-  const command = `open -a "${escapedAppName}" "${escapedUrl}"`;
+  // Use -F flag to force app to foreground
+  const command = `open -F -a "${escapedAppName}" "${escapedUrl}"`;
 
   // Show a loading HUD if the operation might take time
   await showHUD(`Opening in ${appName}...`);

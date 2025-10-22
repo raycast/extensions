@@ -1,31 +1,26 @@
-import { Action, Icon, getPreferenceValues, ActionPanel } from "@raycast/api";
+import { Action, Icon, ActionPanel } from "@raycast/api";
 import { SUPPORTED_BROWSERS } from "../types/browsers";
 import { openUrlInBrowser } from "../utils/openUrlInBrowser";
 
 interface OpenInBrowserSubmenuProps {
   commandPath: string; // Just the path, e.g., "settings"
-  preferences: {
-    preferredBrowser?: string; // The 'key' of the preferred browser from list item context
-  };
+  currentBrowser: string; // The 'key' of the currently selected browser
 }
 
-export function OpenInBrowserSubmenu({ commandPath, preferences: propsPreferences }: OpenInBrowserSubmenuProps) {
-  const { preferredBrowser: settingsPrefBrowserKey } = getPreferenceValues<Preferences>();
-  const effectivePrefBrowserKey = propsPreferences.preferredBrowser || settingsPrefBrowserKey;
+export function OpenInBrowserSubmenu({ commandPath, currentBrowser }: OpenInBrowserSubmenuProps) {
+  // Find the current browser object
+  const selectedBrowser = SUPPORTED_BROWSERS.find((b) => b.key === currentBrowser);
 
-  // Find the preferred browser object if it's set
-  const preferredBrowser = SUPPORTED_BROWSERS.find((b) => b.key === effectivePrefBrowserKey);
-
-  // Get all browsers except the preferred one (if any)
-  const otherBrowsers = SUPPORTED_BROWSERS.filter((browser) => browser.key !== effectivePrefBrowserKey);
+  // Get all browsers except the current one
+  const otherBrowsers = SUPPORTED_BROWSERS.filter((browser) => browser.key !== currentBrowser);
 
   return (
     <ActionPanel.Submenu title="Open in…" icon={Icon.Globe}>
-      {preferredBrowser && (
+      {selectedBrowser && (
         <Action
-          title={preferredBrowser.title}
+          title={selectedBrowser.title}
           icon={Icon.Compass}
-          onAction={() => openUrlInBrowser(preferredBrowser.appName!, `${preferredBrowser.scheme}${commandPath}`)}
+          onAction={() => openUrlInBrowser(selectedBrowser.appName!, `${selectedBrowser.scheme}${commandPath}`)}
         />
       )}
 

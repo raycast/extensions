@@ -16,6 +16,7 @@ export interface BrowserInfo {
  * @property description - a description of the command, either as a string or as a function that takes
  *     a preferred browser object and returns a string
  * @property isInternalDebugging - whether this command requires enabling internal debugging
+ * @property supportedBrowsers - array of browser keys that support this command (e.g., ['chrome', 'arc', 'brave'])
  */
 export interface BrowserCommand {
   id: string;
@@ -23,4 +24,5 @@ export interface BrowserCommand {
   path: string;
   description: string | ((preferredBrowser: BrowserInfo) => string);
   isInternalDebugging?: boolean;
+  supportedBrowsers: string[];
 }
