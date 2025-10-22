@@ -77,7 +77,7 @@ export function stripLargeImagesFromHtml(htmlContent: string): string {
 
 /**
  * Cleans up old temporary image files to prevent disk space issues
- * Removes images older than 24 hours
+ * Removes images older than 1 hour
  */
 export function cleanupTempImages(): void {
   try {
