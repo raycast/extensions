@@ -32,6 +32,23 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "actor-internals",
+    name: "Actor Internals",
+    path: "actor-internals",
+    isInternalDebugging: true,
+    description: "Debug information for the actor component system.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "actor-overlay",
+    name: "Actor Overlay",
+    path: "actor-overlay",
+    description: "Displays the actor overlay interface for debugging actor-based features.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
     id: "app-service-internals",
     name: "App Service Internals",
     path: "app-service-internals",
@@ -65,6 +82,15 @@ export const browserCommands: BrowserCommand[] = [
     supportedBrowsers: ALL_CHROMIUM,
   },
 
+  {
+    id: "assistant",
+    name: "Assistant",
+    path: "assistant",
+    description: (preferredBrowser: { title: string }) =>
+      `Interface for ${preferredBrowser.title}'s built-in virtual assistant features.`,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
   // Start of newly added URLs from Chromium source
   {
     id: "assistant-optin",
@@ -92,6 +118,15 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "autofill-ml-internals",
+    name: "Autofill ML Internals",
+    path: "autofill-ml-internals",
+    isInternalDebugging: true,
+    description: "Debug information for machine learning features used in autofill predictions.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
     id: "batch-upload",
     name: "Batch Upload",
     path: "batch-upload",
@@ -113,6 +148,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "bluetooth-internals",
     description: "Displays detailed information about Bluetooth adapters, connections, and paired devices.",
     supportedBrowsers: ALL_CHROMIUM,
+    excludedPlatforms: ["mac"],
   },
 
   {
@@ -175,6 +211,31 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "color-pipeline-internals",
+    name: "Color Pipeline Internals",
+    path: "color-pipeline-internals",
+    isInternalDebugging: true,
+    description: "Debug information for the browser's color pipeline and color management system.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "comments-side-panel-top-chrome",
+    name: "Comments Side Panel Top Chrome",
+    path: "comments-side-panel.top-chrome",
+    description: "Opens the comments side panel directly in the browser's top chrome UI area.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "compare",
+    name: "Compare",
+    path: "compare",
+    description: "Interface for comparing products, prices, or other items.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
     id: "commerce-internals",
     name: "Commerce Internals",
     path: "commerce-internals",
@@ -214,6 +275,15 @@ export const browserCommands: BrowserCommand[] = [
     path: "connectors-internals",
     description: "Debug information for browser connectors and integrations.",
     supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "conflicts",
+    name: "Conflicts",
+    path: "conflicts",
+    description: "Displays information about software conflicts that may affect browser stability.",
+    supportedBrowsers: ALL_CHROMIUM,
+    platforms: ["windows"],
   },
 
   {
@@ -336,6 +406,14 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "extensions-zero-state",
+    name: "Extensions Zero State",
+    path: "extensions-zero-state",
+    description: "Displays the extensions page in its initial/empty state when no extensions are installed.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
     id: "family-link-user-internals",
     name: "Family Link User Internals",
     path: "family-link-user-internals",
@@ -440,6 +518,15 @@ export const browserCommands: BrowserCommand[] = [
     name: "IndexedDB Internals",
     path: "indexeddb-internals",
     description: "Displays detailed information about IndexedDB databases and their contents.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "infobar-internals",
+    name: "Infobar Internals",
+    path: "infobar-internals",
+    isInternalDebugging: true,
+    description: "Debug information for browser infobars (notification bars at the top of pages).",
     supportedBrowsers: ALL_CHROMIUM,
   },
 
@@ -653,6 +740,14 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "newtab-footer",
+    name: "New Tab Footer",
+    path: "newtab-footer",
+    description: "Displays the footer section of the new tab page.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
     id: "ntp-tiles-internals",
     name: "NTP Tiles Internals",
     path: "ntp-tiles-internals",
@@ -855,6 +950,15 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "sandbox",
+    name: "Sandbox",
+    path: "sandbox",
+    description: "Displays information about the browser's sandbox security implementation.",
+    supportedBrowsers: ALL_CHROMIUM,
+    excludedPlatforms: ["mac"],
+  },
+
+  {
     id: "saved-tab-groups-unsupported",
     name: "Saved Tab Groups Unsupported",
     path: "saved-tab-groups-unsupported",
@@ -952,6 +1056,22 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "skills-manager",
+    name: "Skills Manager",
+    path: "skills-manager",
+    description: "Interface for managing browser skills and capabilities.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "start-page",
+    name: "Start Page",
+    path: "start-page",
+    description: "Displays the browser's start page shown when first opening the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
     id: "suggest-internals",
     name: "Suggest Internals",
     path: "suggest-internals",
@@ -1003,10 +1123,27 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "tab-group-home",
+    name: "Tab Group Home",
+    path: "tab-group-home",
+    description: "Home page for managing and organizing tab groups.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
     id: "tab-search-top-chrome",
     name: "Tab Search Top Chrome",
     path: "tab-search.top-chrome",
     description: "Opens the tab search interface directly in the browser's top chrome UI area.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "tab-strip-internals",
+    name: "Tab Strip Internals",
+    path: "tab-strip-internals",
+    isInternalDebugging: true,
+    description: "Debug information for the browser's tab strip UI component.",
     supportedBrowsers: ALL_CHROMIUM,
   },
 
@@ -1116,11 +1253,27 @@ export const browserCommands: BrowserCommand[] = [
   },
 
   {
+    id: "watermark",
+    name: "Watermark",
+    path: "watermark",
+    description: "Displays watermark-related functionality for the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
     id: "web-app-internals",
     name: "Web App Internals",
     path: "web-app-internals",
     description: (preferredBrowser: { title: string }) =>
       `Displays debug information for Progressive Web Apps (PWAs) installed in ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "webrtc-internals",
+    name: "WebRTC Internals",
+    path: "webrtc-internals",
+    description: "Detailed information about WebRTC connections, peer connections, and media streams.",
     supportedBrowsers: ALL_CHROMIUM,
   },
 
@@ -1158,6 +1311,210 @@ export const browserCommands: BrowserCommand[] = [
     path: "whats-new",
     description: (preferredBrowser: { title: string }) =>
       `Displays a page highlighting new features in ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
+    platforms: ["windows", "mac", "linux"],
+  },
+
+  // Chrome-untrusted URLs
+  {
+    id: "compose-untrusted",
+    name: "Compose (Untrusted)",
+    path: "chrome-untrusted://compose",
+    description: "Untrusted context for the compose feature.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "data-sharing-untrusted",
+    name: "Data Sharing (Untrusted)",
+    path: "chrome-untrusted://data-sharing",
+    description: "Untrusted context for data sharing features.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "ntp-microsoft-auth-untrusted",
+    name: "NTP Microsoft Auth (Untrusted)",
+    path: "chrome-untrusted://ntp-microsoft-auth",
+    description: "Untrusted context for New Tab Page Microsoft authentication.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "print-untrusted",
+    name: "Print (Untrusted)",
+    path: "chrome-untrusted://print",
+    description: "Untrusted context for print functionality.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "privacy-sandbox-dialog-untrusted",
+    name: "Privacy Sandbox Dialog (Untrusted)",
+    path: "chrome-untrusted://privacy-sandbox-dialog",
+    description: "Untrusted context for Privacy Sandbox dialog.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "read-anything-side-panel-untrusted",
+    name: "Read Anything Side Panel (Untrusted)",
+    path: "chrome-untrusted://read-anything-side-panel.top-chrome",
+    description: "Untrusted context for the Read Anything side panel feature.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  // Debug/Crash commands (for debugging purposes only)
+  {
+    id: "badcastcrash",
+    name: "Bad Cast Crash",
+    path: "badcastcrash",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Triggers a bad cast crash for testing crash reporting.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "crash",
+    name: "Crash",
+    path: "crash",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Crashes the current renderer process.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "crash-rust",
+    name: "Crash Rust",
+    path: "crash/rust",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Triggers a crash in Rust code for testing.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "crashdump",
+    name: "Crash Dump",
+    path: "crashdump",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Forces a crash dump.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "gpuclean",
+    name: "GPU Clean",
+    path: "gpuclean",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Triggers a clean GPU process termination.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "gpucrash",
+    name: "GPU Crash",
+    path: "gpucrash",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Crashes the GPU process for testing.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "gpuhang",
+    name: "GPU Hang",
+    path: "gpuhang",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Causes the GPU process to hang.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "hang",
+    name: "Hang",
+    path: "hang",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Causes the renderer to hang indefinitely.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "inducebrowsercrashforrealz",
+    name: "Induce Browser Crash For Realz",
+    path: "inducebrowsercrashforrealz",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Crashes the entire browser process.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "inducebrowserdcheckforrealz",
+    name: "Induce Browser DCHECK For Realz",
+    path: "inducebrowserdcheckforrealz",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Triggers a DCHECK failure in the browser process.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "kill",
+    name: "Kill",
+    path: "kill",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Immediately kills the current renderer process.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "memory-exhaust",
+    name: "Memory Exhaust",
+    path: "memory-exhaust",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Attempts to exhaust available memory.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "memory-pressure-critical",
+    name: "Memory Pressure Critical",
+    path: "memory-pressure-critical",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Simulates critical memory pressure.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "memory-pressure-moderate",
+    name: "Memory Pressure Moderate",
+    path: "memory-pressure-moderate",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Simulates moderate memory pressure.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "quit",
+    name: "Quit",
+    path: "quit",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Immediately quits the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "restart",
+    name: "Restart",
+    path: "restart",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Restarts the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "shorthang",
+    name: "Short Hang",
+    path: "shorthang",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Causes a brief hang in the renderer.",
     supportedBrowsers: ALL_CHROMIUM,
   },
 ];

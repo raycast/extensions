@@ -5,6 +5,7 @@ import { OpenInBrowserSubmenu } from "./components/OpenInActions";
 import { browserCommands } from "./data/paths";
 import { SUPPORTED_BROWSERS, BROWSER_CHROME } from "./types/browsers";
 import { openUrlInBrowser } from "./utils/openUrlInBrowser";
+import { Platform } from "./types/types";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -17,6 +18,15 @@ export default function Command() {
   const getCurrentBrowser = () => {
     const browser = SUPPORTED_BROWSERS.find((b) => b.key === selectedBrowser);
     return browser || BROWSER_CHROME;
+  };
+
+  const getCurrentPlatform = (): Platform => {
+    // Detect platform from process.platform (Node.js environment)
+    // darwin = macOS, win32 = Windows, linux = Linux
+    const platform = process.platform;
+    if (platform === "darwin") return "mac";
+    if (platform === "win32") return "windows";
+    return "linux";
   };
 
   const filteredCommands = browserCommands.filter((command) => {
@@ -32,7 +42,13 @@ export default function Command() {
     // Filter by browser compatibility
     const isBrowserCompatible = command.supportedBrowsers.includes(selectedBrowser);
 
-    return matchesSearch && isBrowserCompatible;
+    // Filter by platform compatibility
+    const userPlatform = getCurrentPlatform();
+    const isPlatformCompatible =
+      (!command.platforms || command.platforms.includes(userPlatform)) &&
+      (!command.excludedPlatforms || !command.excludedPlatforms.includes(userPlatform));
+
+    return matchesSearch && isBrowserCompatible && isPlatformCompatible;
   });
 
   const getFullUrlForDisplayAndSubmenu = (itemPath: string): string => {

@@ -8,6 +8,11 @@ export interface BrowserInfo {
 }
 
 /**
+ * Supported operating system platforms
+ */
+export type Platform = "windows" | "mac" | "linux";
+
+/**
  * An object representing a command in the browser.
  *
  * @property id - the identifier for the command (e.g., 'about')
@@ -17,6 +22,8 @@ export interface BrowserInfo {
  *     a preferred browser object and returns a string
  * @property isInternalDebugging - whether this command requires enabling internal debugging
  * @property supportedBrowsers - array of browser keys that support this command (e.g., ['chrome', 'arc', 'brave'])
+ * @property platforms - array of platforms where this command is available (if omitted, available on all platforms)
+ * @property excludedPlatforms - array of platforms where this command is NOT available
  */
 export interface BrowserCommand {
   id: string;
@@ -25,4 +32,6 @@ export interface BrowserCommand {
   description: string | ((preferredBrowser: BrowserInfo) => string);
   isInternalDebugging?: boolean;
   supportedBrowsers: string[];
+  platforms?: Platform[];
+  excludedPlatforms?: Platform[];
 }
