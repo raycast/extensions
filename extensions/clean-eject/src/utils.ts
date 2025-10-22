@@ -25,7 +25,8 @@ export const parseVolumes = (data?: string): Volume[] => {
         typeof obj.name === 'string' &&
         typeof obj.path === 'string' &&
         typeof obj.format === 'string' &&
-        typeof obj.size === 'string'
+        typeof obj.size === 'string' &&
+        typeof obj.isRemovable === 'boolean'
       ) {
         acc.push(obj);
       }

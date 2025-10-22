@@ -12,12 +12,10 @@ type DriveListItemProps = {
 };
 
 export const DriveListItem = ({ volume, revalidate }: DriveListItemProps) => {
-  const isAPFS = volume.format === 'APFS';
-
   return (
     <List.Item
       id={volume.id}
-      icon={isAPFS ? Icon.HardDrive : Icon.MemoryStick}
+      icon={volume.isRemovable ? Icon.MemoryStick : Icon.HardDrive}
       title={volume.name}
       subtitle={volume.path}
       accessories={[{ text: volume.format }, { text: volume.size }]}

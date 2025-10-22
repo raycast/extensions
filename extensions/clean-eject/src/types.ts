@@ -2,6 +2,7 @@ export type Volume = {
   id: string;
   name: string;
   path: string;
-  format: 'APFS' | 'FAT' | 'ExFAT';
+  format: string;
   size: string;
+  isRemovable: boolean;
 };
