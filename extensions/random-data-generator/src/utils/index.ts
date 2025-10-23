@@ -12,7 +12,7 @@ const blacklistPaths = [
   "localeFallback",
   "_localeFallback",
   "definitions",
-  "rawDefinitions", 
+  "rawDefinitions",
   "fake",
   "faker",
   "unique",
@@ -22,7 +22,7 @@ const blacklistPaths = [
   "science",
   "_randomizer",
   "_defaultRefDate",
-  "seed", 
+  "seed",
 ];
 
 // Cache for problematic methods that should be skipped
