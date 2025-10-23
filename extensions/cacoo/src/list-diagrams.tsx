@@ -18,7 +18,7 @@ export default function Command() {
 				const { result } = await getOrganizations();
 
 				if (!organizationKey) {
-					setOrganizationKey(result[0].key || null);
+					setOrganizationKey(result[0]?.key || null);
 				}
 
 				return result;

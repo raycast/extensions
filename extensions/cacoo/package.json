@@ -12,7 +12,8 @@
 	"scripts": {
 		"build": "ray build -e dist",
 		"dev": "ray develop",
-		"publish": "ray publish"
+		"publish": "ray publish",
+		"test": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@raycast/api": "^1.103.4",
