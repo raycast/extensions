@@ -1,5 +1,5 @@
 import { Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { AttributeType } from "attio-js/dist/commonjs/models/components/attribute";
 import { attio } from "./attio";
 
@@ -12,10 +12,10 @@ const ATTRIBUTE_ICONS: Partial<Record<AttributeType, Icon>> = {
   timestamp: Icon.Clock,
 };
 export default function Attributes({ objectId }: { objectId: string }) {
-  const { isLoading, data: attributes = [] } = usePromise(async () => {
+  const { isLoading, data: attributes = [] } = useCachedPromise(async (objectId: string) => {
     const { data } = await attio.attributes.list({ target: "objects", identifier: objectId });
     return data;
-  });
+  },[objectId]);
   return (
     <List isLoading={isLoading}>
       {attributes.map((attribute) => (

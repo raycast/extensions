@@ -12,6 +12,8 @@ This is a **Raycast** extension for [Attio](https://attio.com/) - _The next gen 
 
     b. `Navigate` to "Workspace Settings" and `Copy` the **Slug**
 
+    c. `Enter` in Preferences
+
 ---
 
 Looking for more cool extensions? Try these:
@@ -19,3 +21,4 @@ Looking for more cool extensions? Try these:
 <a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install neon Raycast Extension" href="https://www.raycast.com/xmok/neon"><img src="https://www.raycast.com/xmok/neon/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install resend Raycast Extension" href="https://www.raycast.com/xmok/resend"><img src="https://www.raycast.com/xmok/resend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

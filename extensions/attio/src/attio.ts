@@ -9,7 +9,7 @@ export const attio = new Attio({
 });
 
 export async function queryRecords({ objectId }: { objectId: string }) {
-  // This crashes since web_url is passed so we bypass using a manual fetch
+  // 👇 This crashes since web_url is passed which zod does not expect so we bypass using a manual fetch
   // const {data} = await attio.records.query({object: objectId, requestBody: {}})
   const response = await fetch(new URL(`v2/objects/${objectId}/records/query`, attio._baseURL?.origin), {
     method: "POST",

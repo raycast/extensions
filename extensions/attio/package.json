@@ -3,7 +3,7 @@
   "name": "attio",
   "title": "Attio",
   "description": "The next gen of CRM",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "xmok",
   "platforms": [
     "macOS",
@@ -72,7 +72,9 @@
   "dependencies": {
     "@raycast/api": "^1.103.3",
     "@raycast/utils": "^1.17.0",
-    "attio-js": "^0.1.1"
+    "attio-js": "^0.1.1",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

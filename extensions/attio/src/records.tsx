@@ -1,10 +1,10 @@
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { AttributeValue } from "./types";
 import { queryRecords } from "./attio";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { ObjectT } from "attio-js/dist/commonjs/models/components/object";
 
-function getValue(val: AttributeValue[]) {
+const getValue = (val: AttributeValue[]) => {
   if (!val.length) return "-";
   const value = val.map((v) => {
     switch (v.attribute_type) {
@@ -42,7 +42,7 @@ function getValue(val: AttributeValue[]) {
   });
   return value.join();
 }
-function buildMarkdown(values: { [attributeSlug: string]: AttributeValue[] }) {
+const buildMarkdown = (values: { [attributeSlug: string]: AttributeValue[] }) => {
   return `
 | key | val |
 |-----|-----|
@@ -55,10 +55,10 @@ export default function Records({ object }: { object: ObjectT }) {
     isLoading,
     data: records = [],
     error,
-  } = usePromise(async () => {
-    const { data } = await queryRecords({ objectId: object.id.objectId });
+  } = useCachedPromise(async (objectId: string) => {
+    const { data } = await queryRecords({ objectId });
     return data;
-  });
+  },[object.id.objectId]);
   return (
     <List isLoading={isLoading} isShowingDetail={!!records.length}>
       {!isLoading && !records.length && !error ? (
