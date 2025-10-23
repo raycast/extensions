@@ -1,6 +1,6 @@
 # DockLock Plus Changelog
 
-## [v0.2.0] - {PR_MERGE_DATE}
+## [v0.2.0] - 2025-10-23
 
 ### Major Improvement
 - Migrated from legacy Apple URL scheme integrations to the **official DockLock Plus CLI**.
