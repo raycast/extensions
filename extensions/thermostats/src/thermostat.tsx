@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
 
 import { Action, ActionPanel, List, showToast, Toast, closeMainWindow, Detail, Cache, Icon, Color } from "@raycast/api";
 import { Seam } from "seam";
@@ -117,6 +116,7 @@ export default function Command() {
             targetStatus === DeviceStatus.OFF ? "Thermostat turned off" : `${targetStatus} to ${localTemperature}°F`,
         });
       } catch (error: any) {
+        console.log("Error sending thermostat command:", error);
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",
