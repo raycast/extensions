@@ -1,5 +1,9 @@
 # ChatGPT Atlas Changelog
 
+## [Improve Bookmarks Search] - {PR_MERGE_DATE}
+
+- Improve the bookmarks search to use the frecency sorting algorithm as well as match the search text in the name or URL.
+
 ## [Update Platforms] - 2025-10-23
 
 - Update platforms to macOS only.
