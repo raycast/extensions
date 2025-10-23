@@ -103,9 +103,9 @@ async function processImageData(imageData: Buffer, imageSource: string, fileName
       title: "Calendar event/reminder created",
       message: `Image "${fileName}" from ${imageSource} sent to Smart Calendars app`,
     });
-  } catch {
+  } catch (error) {
     // Show error toast
-    await showFailureToast("Failed to create calendar event/reminder");
+    await showFailureToast("Failed to create calendar event/reminder", error);
   }
 }
 

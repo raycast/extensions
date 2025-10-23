@@ -52,8 +52,8 @@ export default async function Command() {
       title: "Calendar event/reminder created",
       message: "URL sent to Smart Calendars app",
     });
-  } catch {
+  } catch (error) {
     // Show error toast
-    await showFailureToast("Failed to create calendar event/reminder");
+    await showFailureToast("Failed to create calendar event/reminder", error);
   }
 }
