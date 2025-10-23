@@ -12,7 +12,7 @@ const blacklistPaths = [
   "localeFallback",
   "_localeFallback",
   "definitions",
-  "rawDefinitions", // Skip the massive raw definitions that cause infinite loops
+  "rawDefinitions", 
   "fake",
   "faker",
   "unique",
@@ -20,16 +20,16 @@ const blacklistPaths = [
   "mersenne",
   "random",
   "science",
-  "_randomizer", // Skip - contains low-level functions not useful for end users
-  "_defaultRefDate", // Skip - internal function, not user-facing
-  "seed", // Skip - no UI to set seed value, not practical
+  "_randomizer",
+  "_defaultRefDate",
+  "seed", 
 ];
 
 // Cache for problematic methods that should be skipped
 const cache = new Cache({ namespace: "faker-problematic-methods" });
 let problematicMethods = new Set<string>();
 
-// Load cached problematic methods from Raycast Cache
+// Load cached problematic methods
 const loadCachedMethods = () => {
   try {
     const cached = cache.get("methods");
@@ -37,20 +37,19 @@ const loadCachedMethods = () => {
       problematicMethods = new Set(JSON.parse(cached));
     }
   } catch (error) {
-    // Ignore cache errors
+    console.error(error);
   }
 };
 
-// Save problematic methods to Raycast Cache
+// Save problematic methods
 const saveCachedMethods = () => {
   try {
     cache.set("methods", JSON.stringify([...problematicMethods]));
   } catch (error) {
-    // Ignore cache errors
+    console.error(error);
   }
 };
 
-// Load cache on module initialization
 loadCachedMethods();
 
 export const buildItems = (path: string, faker: typeof fakerClient.faker) => {
@@ -64,7 +63,6 @@ export const buildItems = (path: string, faker: typeof fakerClient.faker) => {
       if (_.isFunction(func)) {
         const methodPath = path ? `${path}.${key}` : key;
 
-        // Skip if we know this method is problematic
         if (problematicMethods.has(methodPath)) {
           return acc;
         }
@@ -84,25 +82,24 @@ export const buildItems = (path: string, faker: typeof fakerClient.faker) => {
                 return value.join(", ");
               }
               // Handle objects with meaningful string representation
-              if ((value as any).name || (value as any).title || (value as any).code) {
-                return (value as any).name || (value as any).title || (value as any).code;
+              const obj = value as { name?: string; title?: string; code?: string };
+              if (obj.name || obj.title || obj.code) {
+                return obj.name || obj.title || obj.code || "";
               }
               // Fallback to JSON for complex objects
               return JSON.stringify(value);
             }
-            return value.toString();
-          } catch (error) {
-            // Cache this method as problematic for future runs
+            // Handle primitive values (strings, numbers, etc.)
+            return String(value);
+          } catch {
             problematicMethods.add(methodPath);
-            saveCachedMethods(); // Persist the cache
+            saveCachedMethods();
             return "";
           }
         };
 
-        // Generate initial value for display
         const initialValue = getValue();
 
-        // Only add if we got a meaningful value
         if (initialValue) {
           acc.push({ section: path, id: key, value: initialValue, getValue });
         }

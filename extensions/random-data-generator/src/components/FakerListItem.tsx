@@ -1,6 +1,6 @@
 import isUrl from "is-url";
 import _ from "lodash";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 

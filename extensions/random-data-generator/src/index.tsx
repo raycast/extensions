@@ -13,16 +13,8 @@ type LocalStorageValues = { pinnedItemIds: string };
 
 export default function FakerList() {
   const [items, setItems] = useState<Item[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [groupedItems, setGroupedItems] = useState<Record<string, Item[]>>({});
   const [pinnedItems, setPinnedItems] = useState<Item[]>([]);
-
-  const generateItems = useCallback(async () => {
-    setIsLoading(true);
-    const newItems = buildItems("", fakerClient.faker);
-    setItems(newItems);
-    setIsLoading(false);
-  }, []);
 
   // Simple locale change - no regeneration, no loops
   const handleLocaleChange = useCallback(() => {
@@ -70,11 +62,7 @@ export default function FakerList() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail
-      searchBarAccessory={isLoading ? null : <Locales onChange={handleLocaleChange} />}
-    >
+    <List isShowingDetail searchBarAccessory={<Locales onChange={handleLocaleChange} />}>
       {pinnedItems.length > 0 && (
         <List.Section key="pinned" title="Pinned">
           {_.map(pinnedItems, (item) => (

@@ -1,4 +1,4 @@
-import { allFakers, allLocales, faker as fakerInstance } from "@faker-js/faker";
+import { LocaleDefinition, allFakers, allLocales, faker as fakerInstance } from "@faker-js/faker";
 
 class FakerClient {
   private _faker = fakerInstance;
@@ -41,12 +41,13 @@ class FakerClient {
   // Get the display name for a locale
   getLocaleDisplayName(localeCode: string): string {
     const locale = allLocales[localeCode as keyof typeof allLocales];
-    return (locale as any)?.metadata?.title || localeCode;
+    return (locale as LocaleDefinition)?.metadata?.title || localeCode;
   }
 
   // Get a function from faker by path (e.g., "person.firstName")
   getFunction(path: string) {
     // In v10, we can use lodash get to access nested properties
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const _ = require("lodash");
     return _.get(this._faker, path);
   }
