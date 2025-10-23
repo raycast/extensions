@@ -8,7 +8,7 @@ export const $environments = persistentAtom([], {
   storage: createLocalStorageAdapter(LocalStorage),
   key: "env",
   schema: environmentsSchema,
-  onCorruption: (error) => {
+  onCorruption: async (error) => {
     console.error(error);
     void showToast({
       style: Toast.Style.Failure,
