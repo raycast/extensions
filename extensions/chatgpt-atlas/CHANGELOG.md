@@ -1,6 +1,6 @@
 # ChatGPT Atlas Changelog
 
-## [Update Platforms] - {PR_MERGE_DATE}
+## [Update Platforms] - 2025-10-23
 
 - Update platforms to macOS only.
 
