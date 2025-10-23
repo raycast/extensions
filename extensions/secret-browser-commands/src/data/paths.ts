@@ -1323,7 +1323,8 @@ export const browserCommands: BrowserCommand[] = [
     id: "compose-untrusted",
     name: "Compose (Untrusted)",
     path: "chrome-untrusted://compose",
-    description: "ADVANCED: Isolated security context for the AI compose feature. Runs with limited privileges to handle potentially untrusted content. Not intended for direct user access.",
+    description:
+      "ADVANCED: Isolated security context for the AI compose feature. Runs with limited privileges to handle potentially untrusted content. Not intended for direct user access.",
     isUntrusted: true,
     supportedBrowsers: ALL_CHROMIUM,
   },
@@ -1332,7 +1333,8 @@ export const browserCommands: BrowserCommand[] = [
     id: "data-sharing-untrusted",
     name: "Data Sharing (Untrusted)",
     path: "chrome-untrusted://data-sharing",
-    description: "ADVANCED: Isolated security context for data sharing features. Runs in a sandboxed environment to protect user data. May not function correctly when accessed directly.",
+    description:
+      "ADVANCED: Isolated security context for data sharing features. Runs in a sandboxed environment to protect user data. May not function correctly when accessed directly.",
     isUntrusted: true,
     supportedBrowsers: ALL_CHROMIUM,
   },
@@ -1341,7 +1343,8 @@ export const browserCommands: BrowserCommand[] = [
     id: "ntp-microsoft-auth-untrusted",
     name: "NTP Microsoft Auth (Untrusted)",
     path: "chrome-untrusted://ntp-microsoft-auth",
-    description: "ADVANCED: Isolated security context for New Tab Page Microsoft authentication. Handles third-party authentication in a restricted environment. Direct access may cause authentication errors.",
+    description:
+      "ADVANCED: Isolated security context for New Tab Page Microsoft authentication. Handles third-party authentication in a restricted environment. Direct access may cause authentication errors.",
     isUntrusted: true,
     supportedBrowsers: ALL_CHROMIUM,
   },
@@ -1350,7 +1353,8 @@ export const browserCommands: BrowserCommand[] = [
     id: "print-untrusted",
     name: "Print (Untrusted)",
     path: "chrome-untrusted://print",
-    description: "ADVANCED: Isolated security context for print preview functionality. Renders print content in a sandboxed environment. May not display correctly when accessed directly.",
+    description:
+      "ADVANCED: Isolated security context for print preview functionality. Renders print content in a sandboxed environment. May not display correctly when accessed directly.",
     isUntrusted: true,
     supportedBrowsers: ALL_CHROMIUM,
   },
@@ -1359,7 +1363,8 @@ export const browserCommands: BrowserCommand[] = [
     id: "privacy-sandbox-dialog-untrusted",
     name: "Privacy Sandbox Dialog (Untrusted)",
     path: "chrome-untrusted://privacy-sandbox-dialog",
-    description: "ADVANCED: Isolated security context for Privacy Sandbox settings dialog. Runs with restricted permissions for enhanced security. Direct access may not function properly.",
+    description:
+      "ADVANCED: Isolated security context for Privacy Sandbox settings dialog. Runs with restricted permissions for enhanced security. Direct access may not function properly.",
     isUntrusted: true,
     supportedBrowsers: ALL_CHROMIUM,
   },
@@ -1368,7 +1373,8 @@ export const browserCommands: BrowserCommand[] = [
     id: "read-anything-side-panel-untrusted",
     name: "Read Anything Side Panel (Untrusted)",
     path: "chrome-untrusted://read-anything-side-panel.top-chrome",
-    description: "ADVANCED: Isolated security context for the Read Anything accessibility feature. Processes web content in a sandboxed environment. May cause errors when accessed directly.",
+    description:
+      "ADVANCED: Isolated security context for the Read Anything accessibility feature. Processes web content in a sandboxed environment. May cause errors when accessed directly.",
     isUntrusted: true,
     supportedBrowsers: ALL_CHROMIUM,
   },
