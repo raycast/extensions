@@ -1,6 +1,6 @@
 # Autumn Changelog
 
-## [List Features + Windows Support] - {PR_MERGE_DATE}
+## [List Features + Windows Support] - 2025-10-23
 
 ### Additions
 - List Features (new command)
