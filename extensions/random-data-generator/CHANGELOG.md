@@ -1,5 +1,11 @@
 # Random Data Generator Changelog
 
+## [Windows & Depdency Updates] - {PR_MERGE_DATE}
+
+- Updated to the latest version of Faker (v10)
+  - Command needs to be relaunched after local change
+- Released extension for Windows
+
 ## [Fix] - 2024-02-24
 
 - Fixed boolean "false" value not being displayed
