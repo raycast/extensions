@@ -5,9 +5,11 @@
   "description": "Search your history of ChatGPT Atlas, OpenAI's new browser.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Productivity",
