@@ -1,8 +1,14 @@
-import { Color, getPreferenceValues } from "@raycast/api";
+import { Color, getPreferenceValues, Icon } from "@raycast/api";
 import { State } from "./types";
 
 const { api_key, postiz_url } = getPreferenceValues<Preferences>();
-export const buildPostizUrl = (endpoint: string, params: Record<string, number | string> = {}) => {
+
+export const buildPostizPlatformUrl = (route: string) => {
+  const url = new URL(route, postiz_url);
+  if (url.host === "api.postiz.com") url.host = "platform.postiz.com";
+  return url.toString();
+};
+export const buildPostizApiUrl = (endpoint: string, params: Record<string, number | string> = {}) => {
   try {
     const url = new URL(postiz_url);
     url.pathname = url.host === "api.postiz.com" ? "public/v1" : "api/public/v1";
@@ -30,6 +36,12 @@ export const parsePostizResponse = async (response: Response) => {
   return result;
 };
 
+export const STATE_ICONS: Record<State, Icon> = {
+  QUEUE: Icon.Forward,
+  PUBLISHED: Icon.Check,
+  ERROR: Icon.Xmark,
+  DRAFT: Icon.Pencil,
+};
 export const STATE_COLORS: Record<State, Color> = {
   QUEUE: Color.Blue,
   PUBLISHED: Color.Green,
