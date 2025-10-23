@@ -1,9 +1,14 @@
-import { List } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
 import { getErrorMessage, showErrorToast } from "../utils";
 import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
+
+function activeProjects(): boolean {
+  const prefs = getPreferenceValues();
+  return (prefs.active as boolean) || false;
+}
 
 export function ProjectSearchList() {
   const [searchText, setSearchText] = useState<string>();
@@ -64,7 +69,8 @@ export function useSearch(
 
       try {
         const membership = scope === ProjectScope.membership ? "true" : "false";
-        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership });
+        const active = activeProjects();
+        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership, active });
 
         if (!didUnmount) {
           setProjects(glProjects);
