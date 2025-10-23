@@ -1,6 +1,6 @@
 # Random Data Generator Changelog
 
-## [Windows & Depdency Updates] - {PR_MERGE_DATE}
+## [Windows & Dependency Updates] - {PR_MERGE_DATE}
 
 - Updated to the latest version of Faker (v10)
   - Command needs to be relaunched after local change
