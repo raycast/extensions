@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zoho-bookings",
+  "title": "Zoho Bookings",
+  "description": "View and manage your Zoho Bookings appointments and services",
+  "icon": "extension-icon.png",
+  "author": "naveen",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "setup-auth",
+      "title": "Authenticate with Zoho",
+      "subtitle": "Zoho Bookings",
+      "description": "One-time setup to authenticate with Zoho Bookings",
+      "mode": "view"
+    },
+    {
+      "name": "list-appointments",
+      "title": "View Appointments",
+      "subtitle": "Zoho Bookings",
+      "description": "View your upcoming appointments",
+      "mode": "view"
+    },
+    {
+      "name": "list-services",
+      "title": "Browse Services",
+      "subtitle": "Zoho Bookings",
+      "description": "View available booking services",
+      "mode": "view"
+    },
+    {
+      "name": "logout",
+      "title": "Log out",
+      "subtitle": "Zoho Bookings",
+      "description": "Clear all authentication tokens",
+      "mode": "view"
+    },
+    {
+      "name": "copy-booking-link",
+      "title": "Copy Booking Link",
+      "description": "Copy your consultant booking link to clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "textfield",
+      "required": true,
+      "title": "Zoho Client ID",
+      "description": "Your Zoho OAuth Client ID from API Console",
+      "placeholder": "1000.XXXXXXXXXX"
+    },
+    {
+      "name": "clientSecret",
+      "type": "password",
+      "required": true,
+      "title": "Zoho Client Secret",
+      "description": "Your Zoho OAuth Client Secret"
+    },
+    {
+      "name": "dataCenter",
+      "type": "dropdown",
+      "required": true,
+      "title": "Data Center",
+      "description": "Your Zoho data center region",
+      "default": "com",
+      "data": [
+        {
+          "title": "US (.com)",
+          "value": "com"
+        },
+        {
+          "title": "EU (.eu)",
+          "value": "eu"
+        },
+        {
+          "title": "India (.in)",
+          "value": "in"
+        },
+        {
+          "title": "Australia (.com.au)",
+          "value": "com.au"
+        },
+        {
+          "title": "Japan (.jp)",
+          "value": "jp"
+        }
+      ]
+    },
+    {
+      "name": "bookingUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Consultant Booking URL",
+      "description": "Your personal booking link for customers",
+      "placeholder": "https://yourcompany.zohobookings.com/#/1234567890123456789"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.3",
+    "@raycast/utils": "^1.4.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "@types/react": "^17.0.28",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
