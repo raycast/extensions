@@ -1,0 +1,58 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "cacoo",
+	"description": "Create and search Cacoo diagrams.",
+	"categories": [
+		"Productivity",
+		"Design Tools",
+		"Developer Tools"
+	],
+	"license": "MIT",
+	"author": "simochee",
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"publish": "ray publish"
+	},
+	"dependencies": {
+		"@raycast/api": "^1.103.4",
+		"@raycast/utils": "^2.2.1",
+		"ofetch": "^1.4.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.2.7",
+		"@types/node": "^24.9.1",
+		"@types/react": "^19.2.2",
+		"lefthook": "^2.0.0",
+		"sort-package-json": "^3.4.0",
+		"typescript": "^5.9.3"
+	},
+	"icon": "icon.png",
+	"commands": [
+		{
+			"name": "list-diagrams",
+			"title": "My Diagrams",
+			"subtitle": "Cacoo",
+			"description": "Search your diagrams",
+			"mode": "view"
+		},
+		{
+			"name": "new-diagram",
+			"title": "New Diagram",
+			"subtitle": "Cacoo",
+			"description": "Create new diagram",
+			"mode": "no-view"
+		}
+	],
+	"preferences": [
+		{
+			"type": "textfield",
+			"required": true,
+			"title": "API Key",
+			"description": "Your Cacoo API Key",
+			"name": "apiKey",
+			"placeholder": "Your Cacoo API Key"
+		}
+	],
+	"title": "Cacoo"
+}
