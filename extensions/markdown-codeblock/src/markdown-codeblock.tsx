@@ -8,9 +8,14 @@ import {
   getSelectedText,
   showToast,
   Toast,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { LIST_ITEMS } from "./constants";
+
+interface Preferences {
+  isNewLinePrefix: boolean;
+}
 
 type Item = {
   title: string;
@@ -24,8 +29,10 @@ async function paste(item: Item, text?: string) {
     return;
   }
 
+  const { isNewLinePrefix } = getPreferenceValues<Preferences>();
   const [codeblockTag = ""] = item.keywords ?? [];
-  const codeblock = `\`\`\`${codeblockTag}\n${text}\n\`\`\``;
+  const prefix = `${isNewLinePrefix ? "\n" : ""}`;
+  const codeblock = `${prefix}\`\`\`${codeblockTag}\n${text}\n\`\`\``;
   await Clipboard.paste(codeblock);
   await updateLastUsed(item);
   await popToRoot({ clearSearchBar: true });
