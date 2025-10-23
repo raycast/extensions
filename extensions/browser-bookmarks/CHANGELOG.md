@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for ChatGPT Atlas Browser] - {PR_MERGE_DATE}
+## [Support for ChatGPT Atlas Browser] - 2025-10-23
 
 - Added support for `ChatGPT Atlas` browser.
 
