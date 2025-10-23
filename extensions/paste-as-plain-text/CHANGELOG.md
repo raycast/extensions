@@ -1,6 +1,6 @@
 # Paste as Plain text Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-10-23
 
 - Add support for Windows platform.
 - Bump all dependencies to the latest.
