@@ -23,14 +23,9 @@ Each browser uses its own URL scheme to access internal pages, though they share
 ## Features
 
 * Search and filter a comprehensive list of secret browser URLs.
-* Open URLs in your preferred browser (set in preferences) or other supported Chromium browsers.
+* Open URLs in any supported Chromium browser.
 * Access debugging tools, internal settings, and diagnostic pages.
 * View browser-specific features and configurations.
-
-## Setup
-
-1. Go to the extension preferences.
-2. Select your "Preferred Browser".
 
 ## Sources
 

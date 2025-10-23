@@ -11,8 +11,10 @@ export function OpenInBrowserSubmenu({ commandPath, currentBrowser }: OpenInBrow
   // Find the current browser object
   const selectedBrowser = SUPPORTED_BROWSERS.find((b) => b.key === currentBrowser);
 
-  // Get all browsers except the current one
-  const otherBrowsers = SUPPORTED_BROWSERS.filter((browser) => browser.key !== currentBrowser);
+  // Get all browsers except the current one, filtering out any without appName
+  const otherBrowsers = SUPPORTED_BROWSERS.filter(
+    (browser) => browser.key !== currentBrowser && browser.appName !== undefined,
+  );
 
   // Helper to build the full URL with the correct scheme
   const getFullUrl = (browserScheme: string, path: string): string => {
@@ -25,11 +27,13 @@ export function OpenInBrowserSubmenu({ commandPath, currentBrowser }: OpenInBrow
 
   return (
     <ActionPanel.Submenu title="Open in…" icon={Icon.Globe}>
-      {selectedBrowser && (
+      {selectedBrowser && selectedBrowser.appName && (
         <Action
           title={selectedBrowser.title}
           icon={Icon.Compass}
-          onAction={() => openUrlInBrowser(selectedBrowser.appName!, getFullUrl(selectedBrowser.scheme, commandPath))}
+          onAction={() =>
+            openUrlInBrowser(selectedBrowser.appName as string, getFullUrl(selectedBrowser.scheme, commandPath))
+          }
         />
       )}
 
