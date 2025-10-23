@@ -1,5 +1,9 @@
 # Markdown Codeblock Changelog
 
+## [Improvements] - 2025-10-23
+
+- Add support for newline prefix before codeblocks
+
 ## [Improvements] - 2025-05-19
 
 - Added support for blank codeblocks
