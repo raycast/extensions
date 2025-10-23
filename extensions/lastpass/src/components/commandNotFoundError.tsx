@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Detail, environment } from "@raycast/api";
 
-const isWindows = environment.commandName === "raycast" && process.platform === "win32";
+const isWindows = process.platform === "win32";
 
 const getMarkdown = () => {
   if (isWindows) {
