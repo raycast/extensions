@@ -36,8 +36,9 @@ const buildMacOSCommand = (command: string): string => {
 };
 
 const buildWindowsCommand = (command: string): string => {
-  // Use PowerShell for better piping support and Unix-like behavior
-  return `powershell -Command "& { ${command} }"`;
+  // Escape double quotes and backticks for PowerShell -Command string
+  const escapedCommand = command.replace(/"/g, '`"').replace(/`/g, '``');
+  return `powershell -Command "& { ${escapedCommand} }"`;
 };
 
 const execute = async (command: string) => {
