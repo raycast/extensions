@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flash-lark-post",
+  "title": "FlashLarkPost",
+  "version": "1.0.0",
+  "description": "A powerful Raycast extension for sending quick memos to Lark/Feishu with file attachments, templates, and message history",
+  "icon": "icon.png",
+  "author": "morio",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "quick-memo",
+      "title": "FlashLarkPost",
+      "subtitle": "Send quick memo to Lark/Feishu",
+      "description": "Send a text memo to your Lark/Feishu DM with one action",
+      "mode": "view",
+      "main": "src/quick-memo.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "larkDomain",
+      "type": "dropdown",
+      "required": false,
+      "title": "Lark Domain",
+      "description": "Choose your Lark/Feishu environment",
+      "default": "https://open.larksuite.com",
+      "data": [
+        {
+          "title": "Global (open.larksuite.com)",
+          "value": "https://open.larksuite.com"
+        },
+        {
+          "title": "China (open.feishu.cn)",
+          "value": "https://open.feishu.cn"
+        }
+      ]
+    },
+    {
+      "name": "appId",
+      "type": "password",
+      "required": false,
+      "title": "App ID",
+      "description": "Your Lark app ID from developer console"
+    },
+    {
+      "name": "appSecret",
+      "type": "password",
+      "required": false,
+      "title": "App Secret",
+      "description": "Your Lark app secret from developer console"
+    },
+    {
+      "name": "receiveIdType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Receive ID Type",
+      "description": "Type of recipient identifier",
+      "default": "email",
+      "data": [
+        {
+          "title": "Email",
+          "value": "email"
+        },
+        {
+          "title": "Open ID",
+          "value": "open_id"
+        },
+        {
+          "title": "Chat ID",
+          "value": "chat_id"
+        }
+      ]
+    },
+    {
+      "name": "receiveId",
+      "type": "textfield",
+      "required": false,
+      "title": "Receive ID",
+      "description": "Your Lark login email or open_id"
+    },
+    {
+      "name": "prefixTimestamp",
+      "type": "checkbox",
+      "required": false,
+      "title": "Prefix Timestamp",
+      "description": "Add timestamp prefix to messages",
+      "default": false,
+      "label": "Add timestamp prefix"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.24",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
