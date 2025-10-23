@@ -18,8 +18,6 @@ export const DiagramDetail = ({ diagram }: Props) => {
 		[diagram.diagramId],
 	);
 
-	console.log(data);
-
 	const markdown = data?.sheets
 		.map(({ name, url, imageUrlForApi }) =>
 			[`[${name}](${url})`, `![${name}](${withApiKey(imageUrlForApi)})`].join(
