@@ -58,20 +58,20 @@
   "dependencies": {
     "@bugsnag/cuid": "^3.0.2",
     "@faker-js/faker": "^7.6.0",
-    "@raycast/api": "^1.66.2",
+    "@raycast/api": "^1.103.0",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/bugsnag__cuid": "^3.0.2",
     "@types/is-url": "^1.2.32",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.11.16",
-    "@types/react": "^18.2.52",
-    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "eslint": "^8.56.0",
-        "prettier": "^3.2.5",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
   "scripts": {
@@ -80,5 +80,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
