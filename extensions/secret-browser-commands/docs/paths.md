@@ -117,7 +117,7 @@ chrome-untrusted://print
 chrome-untrusted://privacy-sandbox-dialog
 chrome-untrusted://read-anything-side-panel.top-chrome
 
-# Internal Debugging Page URLs
+## Internal Debugging Page URLs
 
 chrome://actor-internals
 chrome://autofill-ml-internals
@@ -151,7 +151,7 @@ chrome://webrtc-logs
 chrome://webui-gallery
 chrome://webuijserror
 
-# Command URLs for Debug
+## Command URLs for Debug
 
 The following URLs are for debugging purposes only. Because they crash or hang the renderer, they're not linked directly; you can type them into the address bar if you need them.
 
@@ -174,7 +174,7 @@ chrome://webuijserror
 chrome://quit
 chrome://restart
 
-From https://source.chromium.org/chromium/chromium/src/+/main:chrome/browser/ui/webui/chrome_url_data_manager_browsertest.cc?q=media-engagement&ss=chromium/chromium/src
+[Source](https://source.chromium.org/chromium/chromium/src/+/main:chrome/browser/ui/webui/chrome_url_data_manager_browsertest.cc?q=media-engagement&ss=chromium/chromium/src)
 
 ```cpp
 #if !BUILDFLAG(IS_CHROMEOS)

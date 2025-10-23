@@ -25,6 +25,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "hideDebugUrls",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Debug URLs",
+      "label": "Hide debug/crash commands",
+      "description": "Hide potentially dangerous debug commands that can crash or hang the browser. These are intended for developers testing crash reporting and browser stability.",
+      "default": true
+    },
+    {
+      "name": "hideUntrustedUrls",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Untrusted URLs",
+      "label": "Hide chrome-untrusted:// URLs",
+      "description": "Hide chrome-untrusted:// URLs which run in isolated security contexts. These are advanced features that may cause unexpected behavior if you don't understand their purpose.",
+      "default": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.4",
     "@raycast/utils": "^2.2.1"

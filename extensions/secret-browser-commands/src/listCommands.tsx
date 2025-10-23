@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Action, ActionPanel, Icon, List, Color, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { OpenInBrowserSubmenu } from "./components/OpenInActions";
 import { browserCommands } from "./data/paths";
@@ -10,7 +10,18 @@ import { Platform } from "./types/types";
 // Default starred command IDs
 const DEFAULT_STARRED_COMMANDS = ["extensions", "bookmarks", "downloads", "whats-new", "flags"];
 
+interface Preferences {
+  hideDebugUrls: boolean;
+  hideUntrustedUrls: boolean;
+}
+
 export default function Command() {
+  const prefs = getPreferenceValues<Preferences>();
+  // Provide defaults in case preferences are undefined
+  const preferences = {
+    hideDebugUrls: prefs.hideDebugUrls ?? true,
+    hideUntrustedUrls: prefs.hideUntrustedUrls ?? true,
+  };
   const [searchText, setSearchText] = useState("");
   const {
     value: selectedBrowser = "chrome",
@@ -67,7 +78,11 @@ export default function Command() {
         (!command.platforms || command.platforms.includes(userPlatform)) &&
         (!command.excludedPlatforms || !command.excludedPlatforms.includes(userPlatform));
 
-      return matchesSearch && isBrowserCompatible && isPlatformCompatible;
+      // Filter by preferences
+      const shouldShowDebug = !preferences.hideDebugUrls || !command.isInternalDebugging;
+      const shouldShowUntrusted = !preferences.hideUntrustedUrls || !command.isUntrusted;
+
+      return matchesSearch && isBrowserCompatible && isPlatformCompatible && shouldShowDebug && shouldShowUntrusted;
     })
     .sort((a, b) => {
       // Sort starred items to the top
@@ -144,7 +159,9 @@ export default function Command() {
             icon={
               command.isInternalDebugging
                 ? { source: Icon.Bug, tintColor: Color.Orange }
-                : { source: Icon.Globe, tintColor: Color.Blue }
+                : command.isUntrusted
+                  ? { source: Icon.Warning, tintColor: Color.Red }
+                  : { source: Icon.Globe, tintColor: Color.Blue }
             }
             accessories={isStarred ? [{ icon: Icon.Star, tooltip: "Starred" }] : []}
             detail={
@@ -156,11 +173,19 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Type"
-                      text={command.isInternalDebugging ? "Debug/Internal" : "Standard"}
+                      text={
+                        command.isInternalDebugging
+                          ? "Debug/Internal"
+                          : command.isUntrusted
+                            ? "Untrusted Context"
+                            : "Standard"
+                      }
                       icon={
                         command.isInternalDebugging
                           ? { source: Icon.Bug, tintColor: Color.Orange }
-                          : { source: Icon.Globe, tintColor: Color.Blue }
+                          : command.isUntrusted
+                            ? { source: Icon.Warning, tintColor: Color.Red }
+                            : { source: Icon.Globe, tintColor: Color.Blue }
                       }
                     />
                     <List.Item.Detail.Metadata.Separator />

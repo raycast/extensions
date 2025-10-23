@@ -26,6 +26,33 @@ Each browser uses its own URL scheme to access internal pages, though they share
 * Open URLs in any supported Chromium browser.
 * Access debugging tools, internal settings, and diagnostic pages.
 * View browser-specific features and configurations.
+* Filter debug and untrusted URLs via preferences (both hidden by default).
+
+## ⚠️ Important Warnings
+
+### Debug URLs
+
+This extension includes **debug commands** that are intended exclusively for browser developers testing crash reporting and stability. These commands can:
+
+* **Crash your browser** immediately (e.g., `chrome://crash`, `chrome://gpucrash`)
+* **Hang your browser** indefinitely (e.g., `chrome://hang`, `chrome://gpuhang`)
+* **Terminate browser processes** (e.g., `chrome://kill`, `chrome://quit`)
+* **Cause data loss** if you have unsaved work
+
+**These URLs are hidden by default.** Only enable them in preferences if you are a developer who understands their purpose and accepts the risks.
+
+### Chrome-Untrusted URLs
+
+The extension also includes **chrome-untrusted://** URLs, which run in isolated security contexts with restricted privileges. These URLs:
+
+* Are designed for internal browser features that handle untrusted content
+* Run in heavily sandboxed environments separate from normal browser pages
+* **May cause unexpected behavior, errors, or crashes** when accessed directly
+* Are not intended for direct user interaction
+
+Examples include `chrome-untrusted://compose`, `chrome-untrusted://print`, and `chrome-untrusted://privacy-sandbox-dialog`.
+
+**These URLs are also hidden by default.** Only enable them if you understand the security implications and are troubleshooting specific browser features.
 
 ## Sources
 
