@@ -3,9 +3,9 @@
   "name": "flash-lark-post",
   "title": "FlashLarkPost",
   "version": "1.0.0",
-  "description": "A powerful Raycast extension for sending quick memos to Lark/Feishu with file attachments, templates, and message history",
+  "description": "Send quick memos to Lark/Feishu with file attachments and templates",
   "icon": "icon.png",
-  "author": "morio",
+  "author": "Moorii",
   "categories": [
     "Productivity",
     "Communication"
@@ -15,8 +15,8 @@
   "commands": [
     {
       "name": "quick-memo",
-      "title": "FlashLarkPost",
-      "subtitle": "Send quick memo to Lark/Feishu",
+      "title": "Send Quick Memo",
+      "subtitle": "Lark",
       "description": "Send a text memo to your Lark/Feishu DM with one action",
       "mode": "view",
       "main": "src/quick-memo.tsx"
@@ -95,7 +95,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2"
+    "@raycast/api": "^1.103.4"
   },
   "devDependencies": {
     "@types/node": "20.8.10",
