@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "the-free-dictionary",
+  "title": "The Free Dictionary (TFD)",
+  "description": "Search for words in The Free Dictionary (TFD) website",
+  "icon": "icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manual-search",
+      "title": "Search Word",
+      "description": "Enter a word.\nYou'll then be redirected on TFD website to see its definition",
+      "mode": "view",
+      "subtitle": "Enter a word and search it on TFD"
+    },
+    {
+      "name": "selection-search",
+      "title": "Search Selected Word",
+      "description": "Redirect on TFD website to see the definition of the word that is currently selected.",
+      "mode": "no-view",
+      "subtitle": "Directly search your current selection in TFD"
+    },
+    {
+      "name": "search-history",
+      "title": "Searched Words History",
+      "description": "View your search history and quickly access previously searched words on TFD.",
+      "mode": "view",
+      "subtitle": "Access your previously searched words"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.9.1",
+    "@types/react": "19.2.2",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "ribbityfrog",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "volta": {
+    "node": "22.21.0",
+    "npm": "11.6.2"
+  }
+}
