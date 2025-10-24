@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sevalla",
   "title": "Sevalla",
-  "description": "",
+  "description": "Cloud Application Platform. Deploy Apps in Minutes.",
   "icon": "sevalla-orange.png",
   "author": "xmok",
   "platforms": [
@@ -35,13 +35,13 @@
     {
       "name": "search-databases",
       "title": "Search Databases",
-      "description": "",
+      "description": "Search Databases, View Details and More",
       "mode": "view"
     },
     {
       "name": "search-static-sites",
       "title": "Search Static Sites",
-      "description": "",
+      "description": "Search Static Sites, View Details and More",
       "mode": "view"
     }
   ],

@@ -22,7 +22,7 @@ export type DatabaseDetailed = {
     db_name: string;
     db_password: string;
     db_root_password: string | null;
-    db_user: string;
+    db_user: string | null;
   };
   external_connection_string: string;
   external_hostname: string | null;

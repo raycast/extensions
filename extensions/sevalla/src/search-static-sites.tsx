@@ -6,6 +6,11 @@ import OpenInSevallaAction from "./components/OpenInSevallaAction";
 import DeleteStaticSiteAction from "./components/DeleteStaticSiteAction";
 import GetDeploymentDetails from "./views/get-deployment-details";
 
+const STATUS_TAGS: Partial<Record<StaticSite["status"], string | { value: string; color: Color }>> = {
+  deploymentInProgress: "Deploying...",
+  deploymentSuccess: { value: "Deployed", color: Color.Green },
+};
+
 export default function SearchStaticSites() {
   const {
     isLoading,
@@ -28,7 +33,7 @@ export default function SearchStaticSites() {
           title="Create your first static site"
           actions={
             <ActionPanel>
-              <OpenInSevallaAction route="staticSites/new" />
+              <OpenInSevallaAction title="Add a Static Site" route="staticSites/new" />
             </ActionPanel>
           }
         />
@@ -39,7 +44,7 @@ export default function SearchStaticSites() {
             icon={Icon.Bolt}
             title={site.display_name}
             subtitle={site.name}
-            accessories={[{ tag: site.status }]}
+            accessories={[{ tag: STATUS_TAGS[site.status] || site.status }]}
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Bolt} title="Static Site Details" target={<StaticSiteDetails site={site} />} />
@@ -140,5 +145,3 @@ function StaticSiteDetails({ site }: { site: StaticSite }) {
     </List>
   );
 }
-
-

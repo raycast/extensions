@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { makeRequest } from "./sevalla";
 import { Database, DatabaseDetailed } from "./types";
@@ -17,6 +17,7 @@ const DATABASE_ICONS: Record<string, Image.ImageLike> = {
 
 const getDatabaseName = (databaseType: string) =>
   Object.keys(DATABASE_TYPES).find((type) => type.toLowerCase() === databaseType);
+
 export default function SearchDatabases() {
   const {
     isLoading,
@@ -66,7 +67,13 @@ export default function SearchDatabases() {
                   target={<DatabaseDetails database={database} />}
                 />
                 <DeleteDatabaseAction database={database} mutateDatabases={mutate} />
-                <Action.Push icon={Icon.Plus} title="Create a Database" target={<CreateDatabase />} onPop={mutate} />
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Create a Database"
+                  target={<CreateDatabase />}
+                  onPop={mutate}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                />
               </ActionPanel>
             }
           />
@@ -157,7 +164,9 @@ function DatabaseDetails({ database }: { database: Database }) {
                     <List.Item.Detail.Metadata.Label title="Host" text={details.internal_hostname} />
                     <List.Item.Detail.Metadata.Label title="Port" text={details.internal_port} />
                     <List.Item.Detail.Metadata.Label title="Database" text={details.data.db_name} />
-                    <List.Item.Detail.Metadata.Label title="User" text={details.data.db_user} />
+                    {details.data.db_user && (
+                      <List.Item.Detail.Metadata.Label title="User" text={details.data.db_user} />
+                    )}
                     <SecretListItem title="Password" text={details.data.db_password} show={showSecrets} />
                     <SecretListItem
                       title="URL"
@@ -184,7 +193,9 @@ function DatabaseDetails({ database }: { database: Database }) {
                     <List.Item.Detail.Metadata.Label title="Host" text={details.external_hostname || "N/A"} />
                     <List.Item.Detail.Metadata.Label title="Port" text={details.external_port || "N/A"} />
                     <List.Item.Detail.Metadata.Label title="Database" text={details.data.db_name} />
-                    <List.Item.Detail.Metadata.Label title="User" text={details.data.db_user} />
+                    {details.data.db_user && (
+                      <List.Item.Detail.Metadata.Label title="User" text={details.data.db_user} />
+                    )}
                     <SecretListItem title="Password" text={details.data.db_password} show={showSecrets} />
                     <SecretListItem title="URL" text={details.external_connection_string} show={showSecrets} />
                   </List.Item.Detail.Metadata>

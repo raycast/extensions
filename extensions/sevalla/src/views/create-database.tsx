@@ -1,10 +1,17 @@
-import { useNavigation, showToast, Toast, Form, ActionPanel, Action } from "@raycast/api";
+import { useNavigation, showToast, Toast, Form, ActionPanel, Action, Icon, confirmAlert, open } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { DATABASE_TYPES, DATABASE_LOCATIONS, DATABASE_RESOURCE_TYPES } from "../config";
 import { makeRequest } from "../sevalla";
+import { useState } from "react";
+import { buildSevallaUrl } from "../components/OpenInSevallaAction";
 
 export default function CreateDatabase() {
   const { pop } = useNavigation();
+
+  // unable to determine why but randomly this endpoint stops working and only returns 500 Error w/ no details.
+  // so we inform user that Sevalla may be having trouble so they should try later
+  const [numOf500ErrorsInARow, setNumOf500ErrorsInARow] = useState(0);
+
   type FormValues = {
     type: string;
     version: string;
@@ -30,9 +37,27 @@ export default function CreateDatabase() {
         toast.title = "Created";
         pop();
       } catch (error) {
+        const message = `${error}`;
+        if (message === "Error: Internal Server Error") setNumOf500ErrorsInARow((num) => num + 1);
+        else setNumOf500ErrorsInARow(0);
+
         toast.style = Toast.Style.Failure;
         toast.title = "Failed";
-        toast.message = `${error}`;
+        toast.message = message;
+
+        if (numOf500ErrorsInARow === 2)
+          await confirmAlert({
+            icon: Icon.Info,
+            title: "Sevalla API may be facing errors",
+            message: "Would you like to go online and try creating using the Sevalla Dashboard?",
+            primaryAction: {
+              title: "Open in Sevalla",
+              onAction() {
+                setNumOf500ErrorsInARow(0);
+                open(buildSevallaUrl("databases/new"));
+              },
+            },
+          });
       }
     },
     initialValues: {
@@ -42,7 +67,10 @@ export default function CreateDatabase() {
     validation: {
       type: FormValidation.Required,
       version: FormValidation.Required,
-      db_name: FormValidation.Required,
+      db_name(value) {
+        if (!value) return "The item is required";
+        if (value.includes(" ")) return "Name must contain alphanumeric characters and must not contain whitespaces.";
+      },
       db_user(value) {
         if (values.type !== "Redis" && !value) return "The item is required";
       },
@@ -57,9 +85,10 @@ export default function CreateDatabase() {
   });
   return (
     <Form
+      navigationTitle="Search Databases / Create"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Create" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
