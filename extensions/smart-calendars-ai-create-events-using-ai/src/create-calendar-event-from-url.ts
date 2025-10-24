@@ -54,6 +54,7 @@ export default async function Command() {
     });
   } catch (error) {
     // Show error toast
-    await showFailureToast("Failed to create calendar event/reminder", error);
+    await showFailureToast("Failed to create calendar event/reminder");
+    console.error("Error creating calendar event:", error);
   }
 }
