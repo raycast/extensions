@@ -19,6 +19,9 @@
   "description": "Search Jotoba.de from the comfort of Raycast.",
   "icon": "command-icon.png",
   "author": "clnhs",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity",
