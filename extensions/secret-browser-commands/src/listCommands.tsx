@@ -10,10 +10,7 @@ import { Platform } from "./types/types";
 // Default starred command IDs
 const DEFAULT_STARRED_COMMANDS = ["extensions", "bookmarks", "downloads", "whats-new", "flags"];
 
-interface Preferences {
-  hideDebugUrls: boolean;
-  hideUntrustedUrls: boolean;
-}
+// Preferences interface is auto-generated in raycast-env.d.ts
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
