@@ -13,10 +13,6 @@ import {
 import { useEffect, useState } from "react";
 import { LIST_ITEMS } from "./constants";
 
-interface Preferences {
-  isNewLinePrefix: boolean;
-}
-
 type Item = {
   title: string;
   icon: string;
@@ -29,10 +25,11 @@ async function paste(item: Item, text?: string) {
     return;
   }
 
-  const { isNewLinePrefix } = getPreferenceValues<Preferences>();
+  const { isNewLinePrefix, isNewLineSuffix } = getPreferenceValues<Preferences.MarkdownCodeblock>();
   const [codeblockTag = ""] = item.keywords ?? [];
   const prefix = `${isNewLinePrefix ? "\n" : ""}`;
-  const codeblock = `${prefix}\`\`\`${codeblockTag}\n${text}\n\`\`\``;
+  const suffix = `${isNewLineSuffix ? "\n" : ""}`;
+  const codeblock = `${prefix}\`\`\`${codeblockTag}\n${text}\n\`\`\`${suffix}`;
   await Clipboard.paste(codeblock);
   await updateLastUsed(item);
   await popToRoot({ clearSearchBar: true });

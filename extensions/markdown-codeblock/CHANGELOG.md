@@ -1,8 +1,9 @@
 # Markdown Codeblock Changelog
 
-## [Improvements] - 2025-10-23
+## [Improvements] - {PR_MERGE_DATE}
 
 - Add support for newline prefix before codeblocks
+- Add support for newline suffix after codeblocks
 
 ## [Improvements] - 2025-05-19
 
