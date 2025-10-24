@@ -1,97 +1,97 @@
 # 🚀 Project Manager - Raycast Extension
 
-Extension Raycast complète pour gérer et ouvrir rapidement tes projets avec ton éditeur de code préféré (Cursor, VS Code, Zed, WebStorm, Sublime Text) et Claude Code.
+Complete Raycast extension to manage and quickly open your projects with your favorite code editor (Cursor, VS Code, Zed, WebStorm, Sublime Text) and Claude Code.
 
-## ✨ Fonctionnalités
+## ✨ Features
 
-- **Add Project** : Ajoute un nouveau projet avec nom, chemin, éditeur et terminal préféré
-- **Open Project** : Ouvre un projet dans ton éditeur de code et/ou Terminal + Claude Code
-- **Edit Project** : Modifie les paramètres d'un projet existant
-- **List Projects** : Liste tous tes projets avec leurs détails
-- **Delete Project** : Supprime un projet de la liste
+- **Add Project**: Add a new project with name, path, preferred editor and terminal
+- **Open Project**: Open a project in your code editor and/or Terminal + Claude Code
+- **Edit Project**: Modify existing project settings
+- **List Projects**: List all your projects with their details
+- **Delete Project**: Remove a project from the list
 
 ## 📦 Installation
 
-### Prérequis
-- Node.js (v16 ou supérieur)
+### Prerequisites
+- Node.js (v16 or higher)
 - npm
-- Raycast installé
+- Raycast installed
 
-### Étapes d'installation
+### Installation Steps
 
-1. **Installer les dépendances :**
+1. **Install dependencies:**
 ```bash
-cd /Users/maximesaltet/Desktop/All_Projects/cc_raycast
+cd path/to/project-manager
 npm install
 ```
 
-2. **Lancer en mode développement :**
+2. **Launch in development mode:**
 ```bash
 npm run dev
 ```
 
-L'extension apparaîtra automatiquement dans Raycast !
+The extension will automatically appear in Raycast!
 
-## 🎯 Utilisation
+## 🎯 Usage
 
-### 1️⃣ Ajouter un projet
-- Lance **"Add Project"** dans Raycast (⌘ + Espace)
-- Remplis :
-  - Nom du projet
-  - Chemin du dossier (sélecteur de fichiers)
-  - Fichier workspace (optionnel) : Sélectionne un fichier `.workspace` pour l'ouvrir directement
-  - Éditeur de code (Cursor, VS Code, Zed, WebStorm, Sublime Text)
-  - Terminal préféré (Ghostty, iTerm, ou Terminal)
-  - Commande Claude Code : La commande pour lancer Claude Code (par défaut: `cc`)
+### 1️⃣ Add a Project
+- Launch **"Add Project"** in Raycast (⌘ + Space)
+- Fill in:
+  - Project name
+  - Folder path (file selector)
+  - Workspace file (optional): Select a `.workspace` file to open it directly
+  - Code editor (Cursor, VS Code, Zed, WebStorm, Sublime Text)
+  - Preferred terminal (Ghostty, iTerm, or Terminal)
+  - Claude Code command: The command to launch Claude Code (default: `cc`)
 
-### 2️⃣ Ouvrir un projet
-- Lance **"Open Project"** dans Raycast
-- Cherche ton projet dans la liste
-- Choisis une action :
-  - **Open Both** : Ouvre ton éditeur + Terminal + Claude Code
-  - **Open in [Editor] Only** : Ouvre uniquement ton éditeur
-  - **Open in Terminal + Claude Code** : Ouvre uniquement le terminal avec cc
-- Raccourci : **⌘ + E** pour éditer le projet
+### 2️⃣ Open a Project
+- Launch **"Open Project"** in Raycast
+- Search for your project in the list
+- Choose an action:
+  - **Open Both**: Opens your editor + Terminal + Claude Code
+  - **Open in [Editor] Only**: Opens only your editor
+  - **Open in Terminal + Claude Code**: Opens only the terminal with cc
+- Shortcut: **⌘ + E** to edit the project
 
-### 3️⃣ Éditer un projet
-- Lance **"Edit Project"** dans Raycast
-- Sélectionne le projet à modifier
-- Modifie ses paramètres (nom, chemin, workspace, éditeur, terminal)
-- Sauvegarde les changements
+### 3️⃣ Edit a Project
+- Launch **"Edit Project"** in Raycast
+- Select the project to modify
+- Modify its settings (name, path, workspace, editor, terminal)
+- Save changes
 
-### 4️⃣ Lister les projets
-- Lance **"List Projects"** pour voir tous tes projets avec :
-  - Icône 📄 si workspace configuré
-  - Badge vert : éditeur
-  - Badge bleu : terminal
-- Raccourci : **⌘ + E** pour éditer depuis la liste
+### 4️⃣ List Projects
+- Launch **"List Projects"** to see all your projects with:
+  - 📄 icon if workspace configured
+  - Green badge: editor
+  - Blue badge: terminal
+- Shortcut: **⌘ + E** to edit from the list
 
-### 5️⃣ Supprimer un projet
-- Lance **"Delete Project"**
-- Sélectionne le projet à supprimer
-- Confirme la suppression
+### 5️⃣ Delete a Project
+- Launch **"Delete Project"**
+- Select the project to remove
+- Confirm deletion
 
-## 🏗️ Structure du projet
+## 🏗️ Project Structure
 
 ```
-cc_raycast/
-├── package.json           # Configuration de l'extension
-├── tsconfig.json          # Configuration TypeScript
+project-manager/
+├── package.json           # Extension configuration
+├── tsconfig.json          # TypeScript configuration
 ├── assets/
-│   └── icon.png          # Icône de l'extension (à créer)
+│   └── icon.png          # Extension icon
 └── src/
-    ├── add-project.tsx    # Commande: Ajouter un projet
-    ├── edit-project.tsx   # Commande: Éditer un projet
-    ├── open-project.tsx   # Commande: Ouvrir un projet
-    ├── list-projects.tsx  # Commande: Lister les projets
-    ├── delete-project.tsx # Commande: Supprimer un projet
+    ├── add-project.tsx    # Command: Add a project
+    ├── edit-project.tsx   # Command: Edit a project
+    ├── open-project.tsx   # Command: Open a project
+    ├── list-projects.tsx  # Command: List projects
+    ├── delete-project.tsx # Command: Delete a project
     └── utils/
-        └── storage.ts     # Gestion du stockage local
+        └── storage.ts     # Local storage management
 ```
 
-## 💾 Stockage des données
+## 💾 Data Storage
 
-Les projets sont stockés dans le LocalStorage de Raycast. Format :
+Projects are stored in Raycast's LocalStorage. Format:
 
 ```typescript
 type EditorType = "cursor" | "vscode" | "zed" | "webstorm" | "sublime";
@@ -102,89 +102,89 @@ interface Project {
   path: string;
   editor: EditorType;
   terminal: "ghostty" | "iterm" | "terminal";
-  workspaceFile?: string; // Chemin optionnel vers un fichier .workspace
-  claudeCodeCommand: string; // Commande pour lancer Claude Code
+  workspaceFile?: string; // Optional path to a .workspace file
+  claudeCodeCommand: string; // Command to launch Claude Code
 }
 ```
 
-### 📄 Fichiers Workspace
+### 📄 Workspace Files
 
-Tu peux associer un fichier `.workspace` à ton projet. Quand tu ouvres le projet dans ton éditeur, c'est le workspace qui sera ouvert au lieu du simple dossier. Cela permet de :
-- Conserver tes onglets ouverts
-- Garder ta configuration d'éditeur spécifique au projet
-- Ouvrir plusieurs dossiers en même temps (multi-root workspace)
+You can associate a `.workspace` file with your project. When you open the project in your editor, the workspace will be opened instead of just the folder. This allows you to:
+- Keep your open tabs
+- Maintain your project-specific editor configuration
+- Open multiple folders at once (multi-root workspace)
 
-## 💻 Éditeurs supportés
+## 💻 Supported Editors
 
-- **Cursor** : L'éditeur AI-first basé sur VS Code
-- **VS Code** : L'éditeur Microsoft le plus populaire
-- **Zed** : Éditeur ultra-rapide et moderne
-- **WebStorm** : IDE JetBrains pour le développement web
-- **Sublime Text** : Éditeur léger et performant
+- **Cursor**: AI-first editor based on VS Code
+- **VS Code**: Microsoft's most popular editor
+- **Zed**: Ultra-fast and modern editor
+- **WebStorm**: JetBrains IDE for web development
+- **Sublime Text**: Lightweight and performant editor
 
-Chaque éditeur peut être configuré par projet, permettant d'utiliser différents éditeurs selon tes besoins.
+Each editor can be configured per project, allowing you to use different editors based on your needs.
 
-## 💡 Terminaux supportés
+## 💡 Supported Terminals
 
-- **Ghostty** : Terminal moderne et rapide
-- **iTerm** : Terminal avancé pour macOS
-- **Terminal** : Terminal natif macOS
+- **Ghostty**: Modern and fast terminal
+- **iTerm**: Advanced terminal for macOS
+- **Terminal**: Native macOS terminal
 
-Chaque terminal lance automatiquement Claude Code dans le dossier du projet.
+Each terminal automatically launches Claude Code in the project folder.
 
-## ⚙️ Commande Claude Code Personnalisable
+## ⚙️ Customizable Claude Code Command
 
-L'extension permet de configurer **par projet** la commande pour lancer Claude Code. Exemples de commandes possibles :
-- `cc` (par défaut) : Si Claude Code est installé avec le CLI standard
-- `claude code` : Si tu as installé avec ce nom de commande
-- `claude-code` : Variante avec tiret
-- `/chemin/absolu/vers/claude-code` : Chemin complet si la commande n'est pas dans le PATH
+The extension allows you to configure **per project** the command to launch Claude Code. Examples of possible commands:
+- `cc` (default): If Claude Code is installed with the standard CLI
+- `claude code`: If you installed with this command name
+- `claude-code`: Variant with dash
+- `/absolute/path/to/claude-code`: Full path if the command is not in PATH
 
-Cette flexibilité permet d'avoir différentes versions de Claude Code ou différentes installations selon les projets.
+This flexibility allows for different versions of Claude Code or different installations depending on the project.
 
-## 🔧 Dépendances
+## 🔧 Dependencies
 
-- `@raycast/api` : API Raycast pour les extensions
-- `@raycast/utils` : Utilitaires Raycast
-- `Cursor` : Éditeur de code
-- `Claude Code CLI (cc)` : Doit être installé et accessible dans le PATH
+- `@raycast/api`: Raycast API for extensions
+- `@raycast/utils`: Raycast utilities
+- Code editor of your choice
+- `Claude Code CLI (cc)`: Must be installed and accessible in PATH
 
-## 🛠️ Développement
+## 🛠️ Development
 
 ```bash
-# Installer les dépendances
+# Install dependencies
 npm install
 
-# Lancer en mode dev
+# Launch in dev mode
 npm run dev
 
-# Build pour production
+# Build for production
 npm run build
 
-# Linter
+# Lint
 npm run lint
 
-# Fix lint automatiquement
+# Auto-fix lint
 npm run fix-lint
 ```
 
 ## 📝 TODO
 
-- [ ] Ajouter une vraie icône PNG (512x512px minimum)
-- [x] Ajouter la possibilité d'éditer un projet existant
-- [x] Support pour plusieurs éditeurs (Cursor, VS Code, Zed, WebStorm, Sublime Text)
-- [x] Support pour les fichiers `.workspace`
-- [x] Commande Claude Code personnalisable par projet
-- [ ] Ajouter des raccourcis clavier personnalisés globaux
-- [ ] Ajouter des tags/catégories pour organiser les projets
-- [ ] Recherche avancée avec filtres
-- [ ] Import/Export de la configuration des projets
-- [ ] Favoris / Projets récents
+- [ ] Add a proper PNG icon (512x512px minimum)
+- [x] Add ability to edit an existing project
+- [x] Support for multiple editors (Cursor, VS Code, Zed, WebStorm, Sublime Text)
+- [x] Support for `.workspace` files
+- [x] Customizable Claude Code command per project
+- [ ] Add custom global keyboard shortcuts
+- [ ] Add tags/categories to organize projects
+- [ ] Advanced search with filters
+- [ ] Import/Export project configuration
+- [ ] Favorites / Recent projects
 
-## 📄 Licence
+## 📄 License
 
 MIT
 
 ---
 
-Créé avec ❤️ pour gérer tes projets rapidement avec Raycast, Cursor et Claude Code !
+Created with ❤️ to manage your projects quickly with Raycast and Claude Code!

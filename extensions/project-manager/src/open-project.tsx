@@ -6,6 +6,22 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
+/**
+ * Escapes a string for safe use in shell commands
+ * Wraps the string in single quotes and escapes any single quotes within
+ */
+function escapeShellArg(arg: string): string {
+  return `'${arg.replace(/'/g, "'\\''")}'`;
+}
+
+/**
+ * Escapes a string for use in AppleScript strings
+ * Escapes backslashes and double quotes
+ */
+function escapeAppleScriptString(str: string): string {
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export default function OpenProject() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,24 +83,37 @@ export default function OpenProject() {
       const ccCommand = project.claudeCodeCommand || "cc";
 
       switch (project.terminal) {
-        case "ghostty":
+        case "ghostty": {
           // Ghostty: ouvre l'app, active-la puis envoie les commandes
-          command = `open -na Ghostty && sleep 0.5 && osascript -e 'tell application "Ghostty" to activate' -e 'delay 0.3' -e 'tell application "System Events" to keystroke "cd ${project.path.replace(/"/g, '\\"')} && ${ccCommand}"' -e 'tell application "System Events" to keystroke return'`;
+          // Build the command to be typed safely
+          const cdCommand = `cd ${escapeShellArg(project.path)} && ${escapeShellArg(ccCommand)}`;
+          const escapedForAppleScript = escapeAppleScriptString(cdCommand);
+          command = `open -na Ghostty && sleep 0.5 && osascript -e 'tell application "Ghostty" to activate' -e 'delay 0.3' -e 'tell application "System Events" to keystroke "${escapedForAppleScript}"' -e 'tell application "System Events" to keystroke return'`;
           break;
-        case "iterm":
+        }
+        case "iterm": {
+          // For iTerm, we use AppleScript's "write text" which handles escaping
+          // But we still need to escape the path and command for the AppleScript string
+          const escapedPath = escapeAppleScriptString(project.path);
+          const escapedCommand = escapeAppleScriptString(ccCommand);
           command = `osascript -e 'tell application "iTerm"
             create window with default profile
             tell current session of current window
-              write text "cd '${project.path}' && ${ccCommand}"
+              write text "cd \\"${escapedPath}\\" && ${escapedCommand}"
             end tell
           end tell'`;
           break;
-        case "terminal":
+        }
+        case "terminal": {
+          // For Terminal, we use AppleScript's "do script"
+          const escapedPath = escapeAppleScriptString(project.path);
+          const escapedCommand = escapeAppleScriptString(ccCommand);
           command = `osascript -e 'tell application "Terminal"
-            do script "cd '${project.path}' && ${ccCommand}"
+            do script "cd \\"${escapedPath}\\" && ${escapedCommand}"
             activate
           end tell'`;
           break;
+        }
       }
 
       await execAsync(command);
