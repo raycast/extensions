@@ -5,7 +5,7 @@
  * priority-based matching, and context-aware parsing.
  */
 
-import { PARSING_CONSTANTS } from "../constants";
+import { PARSING_CONSTANTS, getSectionFormatsInOrder } from "../constants";
 
 import { SectionMarkerType } from "../types/enums";
 
@@ -49,41 +49,7 @@ export function detectSectionMarker(line: string, lineNumber: number): SectionMa
   const trimmedLine = line.trim();
 
   // Test all section formats in priority order
-  const formats = [
-    {
-      type: SectionMarkerType.CUSTOM_START,
-      regex: PARSING_CONSTANTS.SECTION_FORMATS.CUSTOM_START,
-    },
-    {
-      type: SectionMarkerType.CUSTOM_END,
-      regex: PARSING_CONSTANTS.SECTION_FORMATS.CUSTOM_END,
-    },
-    {
-      type: SectionMarkerType.DASHED_END,
-      regex: PARSING_CONSTANTS.SECTION_FORMATS.DASHED_END,
-    },
-    {
-      type: SectionMarkerType.DASHED_START,
-      regex: PARSING_CONSTANTS.SECTION_FORMATS.DASHED_START,
-    },
-    {
-      type: SectionMarkerType.BRACKETED,
-      regex: PARSING_CONSTANTS.SECTION_FORMATS.BRACKETED,
-    },
-    { type: SectionMarkerType.HASH, regex: PARSING_CONSTANTS.SECTION_FORMATS.HASH },
-    {
-      type: SectionMarkerType.FUNCTION_START,
-      regex: PARSING_CONSTANTS.SECTION_FORMATS.FUNCTION_START,
-    },
-    {
-      type: SectionMarkerType.FUNCTION_END,
-      regex: PARSING_CONSTANTS.SECTION_FORMATS.FUNCTION_END,
-    },
-    {
-      type: SectionMarkerType.LABELED,
-      regex: PARSING_CONSTANTS.SECTION_FORMATS.LABELED,
-    },
-  ];
+  const formats = getSectionFormatsInOrder();
 
   for (const format of formats) {
     const match = trimmedLine.match(format.regex);
