@@ -48,7 +48,30 @@
       "mode": "view"
     }
   ],
-  "preferences": [],
+  "preferences": [
+    {
+      "name": "currency",
+      "title": "Currency",
+      "default": "USD",
+      "description": "The displayed currency for money values",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "USD",
+          "value": "USD"
+        },
+        {
+          "title": "EUR",
+          "value": "EUR"
+        },
+        {
+          "title": "GBP",
+          "value": "GBP"
+        }
+      ]
+    }
+  ],
   "platforms": [
     "macOS",
     "Windows"

@@ -1,4 +1,5 @@
 import type { ManagementSchemas } from "@paynow-gg/typescript-sdk";
+import { getPreferenceValues } from "@raycast/api";
 
 type ToPriceStringObjectParam = Pick<
   ManagementSchemas["ProductDto"],
@@ -9,10 +10,12 @@ type ToPriceStringObjectParam = Pick<
 export function toPriceString(priceObj: ToPriceStringObjectParam): string;
 export function toPriceString(price: number): string;
 export function toPriceString(arg1: number | ToPriceStringObjectParam): string {
+  const currency = getPreferenceValues<ExtensionPreferences>().currency || "USD";
+
   if (typeof arg1 === "number") {
     return arg1.toLocaleString("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currency,
     });
   }
 
@@ -25,7 +28,7 @@ export function toPriceString(arg1: number | ToPriceStringObjectParam): string {
   } = arg1;
   const priceStr = (price / 100).toLocaleString("en", {
     style: "currency",
-    currency: "USD",
+    currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
