@@ -5,6 +5,9 @@
  * used throughout the application.
  */
 
+import { getSectionPrefs, getCustomPatterns } from "./lib/preferences";
+import { SectionMarkerType } from "./types/enums";
+
 /**
  * Display and UI constants
  */
@@ -141,3 +144,107 @@ export const MODERN_COLORS = {
   error: "#FF3B30",
   neutral: "#8E8E93",
 } as const;
+
+/**
+ * Default section formats
+ */
+const DEFAULT_SECTION_FORMATS = {
+  LABELED: /^(?:\s*)#\s*section\s*:\s*(.+?)\s*$/i,
+  DASHED_START: /^(?:\s*)#\s*---\s*(?!End\b)(.+?)\s*---\s*#\s*$/i,
+  DASHED_END: /^(?:\s*)#\s*---\s*End\s+.*---\s*#\s*$/i,
+  BRACKETED: /^(?:\s*)#\s*\[\s*(.+?)\s*\]\s*$/i,
+  HASH: /^(?:\s*)#\s*#\s*(.+?)\s*$/i,
+  CUSTOM_START: /^(?:\s*)#\s*@start\s+(.+?)\s*$/i,
+  CUSTOM_END: /^(?:\s*)#\s*@end\s+(.+?)\s*$/i,
+  FUNCTION_START: /^(?:\s*)([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*\)\s*\{\s*$/,
+  FUNCTION_END: /^(?:\s*)\}\s*$/,
+} as const;
+
+/**
+ * Section format configuration with type information
+ */
+export interface SectionFormatConfig {
+  type: SectionMarkerType;
+  regex: RegExp;
+}
+
+/**
+ * Gets section formats in priority order based on user preferences
+ *
+ * Returns an array of section format configurations ordered by priority.
+ * Custom patterns from preferences are included if enabled.
+ *
+ * @returns Array of section format configurations
+ */
+export function getSectionFormatsInOrder(): SectionFormatConfig[] {
+  const prefs = getSectionPrefs();
+  const customPatterns = getCustomPatterns();
+  const formats: SectionFormatConfig[] = [];
+
+  // Add custom patterns first (highest priority)
+  if (customPatterns.startPattern) {
+    formats.push({
+      type: SectionMarkerType.CUSTOM_START,
+      regex: customPatterns.startPattern,
+    });
+  }
+
+  if (customPatterns.endPattern) {
+    formats.push({
+      type: SectionMarkerType.CUSTOM_END,
+      regex: customPatterns.endPattern,
+    });
+  }
+
+  // Add default patterns if enabled
+  if (prefs.enableDefaults) {
+    formats.push(
+      {
+        type: SectionMarkerType.CUSTOM_START,
+        regex: DEFAULT_SECTION_FORMATS.CUSTOM_START,
+      },
+      {
+        type: SectionMarkerType.CUSTOM_END,
+        regex: DEFAULT_SECTION_FORMATS.CUSTOM_END,
+      },
+      {
+        type: SectionMarkerType.DASHED_END,
+        regex: DEFAULT_SECTION_FORMATS.DASHED_END,
+      },
+      {
+        type: SectionMarkerType.DASHED_START,
+        regex: DEFAULT_SECTION_FORMATS.DASHED_START,
+      },
+      {
+        type: SectionMarkerType.BRACKETED,
+        regex: DEFAULT_SECTION_FORMATS.BRACKETED,
+      },
+      {
+        type: SectionMarkerType.HASH,
+        regex: DEFAULT_SECTION_FORMATS.HASH,
+      },
+      {
+        type: SectionMarkerType.FUNCTION_START,
+        regex: DEFAULT_SECTION_FORMATS.FUNCTION_START,
+      },
+      {
+        type: SectionMarkerType.FUNCTION_END,
+        regex: DEFAULT_SECTION_FORMATS.FUNCTION_END,
+      },
+      {
+        type: SectionMarkerType.LABELED,
+        regex: DEFAULT_SECTION_FORMATS.LABELED,
+      },
+    );
+  }
+
+  // Add custom header pattern if enabled
+  if (customPatterns.headerPattern) {
+    formats.push({
+      type: SectionMarkerType.LABELED,
+      regex: customPatterns.headerPattern,
+    });
+  }
+
+  return formats;
+}
