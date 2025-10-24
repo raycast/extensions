@@ -1,5 +1,9 @@
 # Comet Browser Changelog
 
+## [Fix French Text in UI] - {PR_MERGE_DATE}
+
+- Fixed inconsistent language in Search History command - changed "Historique" to "Results" for English consistency
+
 ## [Fix Memory Limit Errors] - 2025-10-06
 
 - Fixed "Worker terminated due to reaching memory limit: JS heap out of memory" errors in search-history and search-bookmarks commands
