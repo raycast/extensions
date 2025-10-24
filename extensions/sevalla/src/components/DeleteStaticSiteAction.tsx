@@ -30,7 +30,7 @@ export default function DeleteStaticSiteAction({
                   }),
                   {
                     optimisticUpdate(data) {
-                      return data.filter((s) => (s.id === site.id ? { ...s, status: "deleting" } : s));
+                      return data.map((s) => (s.id === site.id ? { ...s, status: "deleting" } : s));
                     },
                   },
                 )) as { transaction_id: string };

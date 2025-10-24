@@ -69,7 +69,7 @@ export default function CreateDatabase() {
       version: FormValidation.Required,
       db_name(value) {
         if (!value) return "The item is required";
-        if (value.includes(" ")) return "Name must contain alphanumeric characters and must not contain whitespaces.";
+        if (value.includes(" ")) return "Name must contain alphanumeric characters and must not contain whitespaces";
       },
       db_user(value) {
         if (values.type !== "Redis" && !value) return "The item is required";

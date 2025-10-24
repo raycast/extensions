@@ -30,7 +30,7 @@ export default function DeleteDatabaseAction({
                   }),
                   {
                     optimisticUpdate(data) {
-                      return data.filter((db) => (db.id === database.id ? { ...db, status: "deleting" } : db));
+                      return data.map((db) => (db.id === database.id ? { ...db, status: "deleting" } : db));
                     },
                   },
                 )) as { message: string };
