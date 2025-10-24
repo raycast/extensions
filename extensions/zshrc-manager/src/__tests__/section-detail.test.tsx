@@ -48,7 +48,21 @@ describe("SectionDetail", () => {
     content: "alias ll='ls -la'\nexport PATH=/usr/local/bin:$PATH",
     startLine: 1,
     endLine: 2,
-    type: "labeled",
+    aliasCount: 1,
+    exportCount: 1,
+    evalCount: 0,
+    setoptCount: 0,
+    pluginCount: 0,
+    functionCount: 0,
+    sourceCount: 0,
+    autoloadCount: 0,
+    fpathCount: 0,
+    pathCount: 0,
+    themeCount: 0,
+    completionCount: 0,
+    historyCount: 0,
+    keybindingCount: 0,
+    otherCount: 0,
   };
 
   const mockParsedContent = {
@@ -61,7 +75,7 @@ describe("SectionDetail", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Default mock implementations
     mockParseSectionContent.mockReturnValue(mockParsedContent);
     mockApplyContentFilter.mockImplementation((content) => content);
@@ -69,29 +83,18 @@ describe("SectionDetail", () => {
     mockTruncateValueMiddle.mockImplementation((value) => value);
   });
 
-  it("should be defined", () => {
-    // Basic test to ensure the component can be imported
-    expect(true).toBe(true);
-  });
-
-  it("should have proper exports", async () => {
+  it("should export SectionDetail and SectionDetailList components", async () => {
     const SectionDetail = await import("../section-detail");
     expect(SectionDetail.SectionDetail).toBeDefined();
-  });
-
-  it("should handle section data", () => {
-    // Test that the component can handle section data
-    expect(mockSection.label).toBe("Test Section");
-    expect(mockSection.content).toContain("alias ll='ls -la'");
-    expect(mockSection.startLine).toBe(1);
-    expect(mockSection.endLine).toBe(2);
-    expect(mockSection.type).toBe("labeled");
+    expect(SectionDetail.SectionDetailList).toBeDefined();
+    expect(typeof SectionDetail.SectionDetail).toBe("function");
+    expect(typeof SectionDetail.SectionDetailList).toBe("function");
   });
 
   it("should handle content parsing", () => {
     // Test that the component can handle content parsing
     const parsedContent = mockParseSectionContent(mockSection);
-    
+
     expect(parsedContent).toBeDefined();
     expect(parsedContent.aliases).toHaveLength(1);
     expect(parsedContent.exports).toHaveLength(1);
@@ -101,14 +104,10 @@ describe("SectionDetail", () => {
   it("should handle markdown generation", () => {
     // Test that the component can handle markdown generation
     const markdown = mockGenerateSectionMarkdown(mockSection, "formatted", mockParsedContent);
-    
+
     expect(markdown).toBeDefined();
     expect(markdown).toContain("# Test Section");
-    expect(mockGenerateSectionMarkdown).toHaveBeenCalledWith(
-      mockSection,
-      "formatted",
-      mockParsedContent
-    );
+    expect(mockGenerateSectionMarkdown).toHaveBeenCalledWith(mockSection, "formatted", mockParsedContent);
   });
 
   it("should handle different display modes", () => {
@@ -117,11 +116,7 @@ describe("SectionDetail", () => {
 
     displayModes.forEach((mode) => {
       mockGenerateSectionMarkdown(mockSection, mode, mockParsedContent);
-      expect(mockGenerateSectionMarkdown).toHaveBeenCalledWith(
-        mockSection,
-        mode,
-        mockParsedContent
-      );
+      expect(mockGenerateSectionMarkdown).toHaveBeenCalledWith(mockSection, mode, mockParsedContent);
     });
   });
 
@@ -135,61 +130,15 @@ describe("SectionDetail", () => {
     });
   });
 
-  it("should handle different section types", () => {
-    // Test that the component can handle different section types
-    const sectionTypes = ["labeled", "dashed", "unlabeled"] as const;
+  it("should parse section content correctly", () => {
+    const parsedContent = mockParseSectionContent(mockSection);
 
-    sectionTypes.forEach((type) => {
-      const section: LogicalSection = {
-        ...mockSection,
-        type,
-      };
-
-      expect(section.type).toBe(type);
-      expect(section.label).toBe("Test Section");
-    });
-  });
-
-  it("should handle sections with special characters", () => {
-    // Test that the component can handle special characters
-    const specialSection: LogicalSection = {
-      label: "Section with @#$%^&*()",
-      content: "alias test='echo \"hello world\"'\nexport PATH=\"/usr/local/bin:$PATH\"",
-      startLine: 1,
-      endLine: 2,
-      type: "labeled",
-    };
-
-    expect(specialSection.label).toContain("@#$%^&*()");
-    expect(specialSection.content).toContain("echo \"hello world\"");
-  });
-
-  it("should handle very long section labels", () => {
-    // Test that the component can handle very long labels
-    const longLabel = "A".repeat(100);
-    const longSection: LogicalSection = {
-      label: longLabel,
-      content: "alias test='echo hello'",
-      startLine: 1,
-      endLine: 1,
-      type: "labeled",
-    };
-
-    expect(longSection.label).toHaveLength(100);
-  });
-
-  it("should handle large line numbers", () => {
-    // Test that the component can handle large line numbers
-    const largeLineSection: LogicalSection = {
-      label: "Large Line Section",
-      content: "alias test='echo hello'",
-      startLine: 1000,
-      endLine: 2000,
-      type: "labeled",
-    };
-
-    expect(largeLineSection.startLine).toBe(1000);
-    expect(largeLineSection.endLine).toBe(2000);
+    expect(parsedContent.aliases).toHaveLength(1);
+    expect(parsedContent.exports).toHaveLength(1);
+    expect(parsedContent.aliases[0]?.name).toBe("ll");
+    expect(parsedContent.aliases[0]?.command).toBe("ls -la");
+    expect(parsedContent.exports[0]?.variable).toBe("PATH");
+    expect(parsedContent.exports[0]?.value).toBe("/usr/local/bin:$PATH");
   });
 
   it("should handle empty section content", () => {
@@ -199,7 +148,21 @@ describe("SectionDetail", () => {
       content: "",
       startLine: 1,
       endLine: 1,
-      type: "labeled",
+      aliasCount: 0,
+      exportCount: 0,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     };
 
     const emptyParsedContent = {
@@ -215,24 +178,18 @@ describe("SectionDetail", () => {
     expect(parsedContent.exports).toHaveLength(0);
   });
 
-  it("should handle component props", () => {
-    // Test that the component can handle different props
-    const props = {
-      section: mockSection,
-      isSeparateWindow: false,
-      actions: null,
-      filterType: "all" as const,
-      displayMode: "formatted" as const,
-    };
+  it("should apply content filters correctly", () => {
+    const allContent = mockApplyContentFilter(mockParsedContent, "all");
+    const aliasesOnly = mockApplyContentFilter(mockParsedContent, "aliases");
+    const exportsOnly = mockApplyContentFilter(mockParsedContent, "exports");
 
-    expect(props.section).toBeDefined();
-    expect(typeof props.isSeparateWindow).toBe("boolean");
-    expect(["all", "aliases", "exports"]).toContain(props.filterType);
-    expect(["formatted", "raw", "compact"]).toContain(props.displayMode);
+    expect(mockApplyContentFilter).toHaveBeenCalledTimes(3);
+    expect(allContent).toBeDefined();
+    expect(aliasesOnly).toBeDefined();
+    expect(exportsOnly).toBeDefined();
   });
 
-  it("should handle value truncation", () => {
-    // Test that the component can handle value truncation
+  it("should truncate long values properly", () => {
     const longValue = "A".repeat(1000);
     const truncatedValue = mockTruncateValueMiddle(longValue);
 
@@ -255,38 +212,8 @@ describe("SectionDetail", () => {
       throw new Error("Markdown generation failed");
     });
 
-    expect(() => mockGenerateSectionMarkdown(mockSection, "formatted", mockParsedContent))
-      .toThrow("Markdown generation failed");
-  });
-
-  it("should handle content filtering", () => {
-    // Test that the component can handle content filtering
-    const filteredContent = mockApplyContentFilter(mockParsedContent, "aliases");
-    
-    expect(mockApplyContentFilter).toHaveBeenCalledWith(mockParsedContent, "aliases");
-    expect(filteredContent).toBeDefined();
-  });
-
-  it("should handle complex section content", () => {
-    // Test that the component can handle complex section content
-    const complexSection: LogicalSection = {
-      label: "Complex Section",
-      content: `# Complex configuration
-alias ll='ls -la'
-alias gs='git status'
-export PATH="/usr/local/bin:$PATH"
-export EDITOR="code"
-# Some comments
-function test() {
-  echo "hello"
-}`,
-      startLine: 1,
-      endLine: 8,
-      type: "labeled",
-    };
-
-    expect(complexSection.content).toContain("alias ll='ls -la'");
-    expect(complexSection.content).toContain("export PATH=");
-    expect(complexSection.content).toContain("function test()");
+    expect(() => mockGenerateSectionMarkdown(mockSection, "formatted", mockParsedContent)).toThrow(
+      "Markdown generation failed",
+    );
   });
 });
