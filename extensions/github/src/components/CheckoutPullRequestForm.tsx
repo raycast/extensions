@@ -54,9 +54,11 @@ export default function CheckoutPullRequestForm({ pullRequest }: CheckoutPullReq
             style: Toast.Style.Animated,
           });
 
-          await execAsync(`git fetch origin ${branchName}`, { cwd: targetDir });
+          const { stdout: remoteName } = await execAsync("git remote", { cwd: targetDir });
+          const remote = remoteName.trim().split("\n")[0] || "origin";
+          await execAsync(`git fetch ${remote} ${branchName}`, { cwd: targetDir });
           await execAsync(`git checkout ${branchName}`, { cwd: targetDir });
-          await execAsync(`git reset --hard origin/${branchName}`, { cwd: targetDir });
+          await execAsync(`git reset --hard ${remote}/${branchName}`, { cwd: targetDir });
 
           await showToast({
             style: Toast.Style.Success,
