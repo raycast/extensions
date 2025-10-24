@@ -7,13 +7,14 @@ import {
   type SectionMarker,
   type SectionContext,
 } from "../lib/section-detector";
+import { SectionMarkerType } from "../types/enums";
 
 describe("section-detector.ts", () => {
   describe("detectSectionMarker", () => {
     it("should detect dashed start markers", () => {
       const marker = detectSectionMarker("# --- Python Environment --- #", 1);
       expect(marker).toEqual({
-        type: "dashed_start",
+        type: SectionMarkerType.DASHED_START,
         name: "Python Environment",
         lineNumber: 1,
         originalLine: "# --- Python Environment --- #",
@@ -22,12 +23,9 @@ describe("section-detector.ts", () => {
     });
 
     it("should detect dashed end markers", () => {
-      const marker = detectSectionMarker(
-        "# --- End Python Environment --- #",
-        1,
-      );
+      const marker = detectSectionMarker("# --- End Python Environment --- #", 1);
       expect(marker).toEqual({
-        type: "dashed_end",
+        type: SectionMarkerType.DASHED_END,
         name: "",
         lineNumber: 1,
         originalLine: "# --- End Python Environment --- #",
@@ -125,7 +123,7 @@ describe("section-detector.ts", () => {
   describe("updateSectionContext", () => {
     it("should update context for start markers", () => {
       const marker: SectionMarker = {
-        type: "dashed_start",
+        type: SectionMarkerType.DASHED_START,
         name: "Test Section",
         lineNumber: 1,
         originalLine: "# --- Test Section --- #",
@@ -146,7 +144,7 @@ describe("section-detector.ts", () => {
 
     it("should update context for end markers", () => {
       const marker: SectionMarker = {
-        type: "dashed_end",
+        type: SectionMarkerType.DASHED_END,
         name: "Test Section",
         lineNumber: 10,
         originalLine: "# --- End Test Section --- #",
@@ -167,7 +165,7 @@ describe("section-detector.ts", () => {
 
     it("should handle nested sections", () => {
       const marker: SectionMarker = {
-        type: "dashed_start",
+        type: SectionMarkerType.DASHED_START,
         name: "Nested Section",
         lineNumber: 5,
         originalLine: "# --- Nested Section --- #",
@@ -183,15 +181,12 @@ describe("section-detector.ts", () => {
       const updatedContext = updateSectionContext(marker, context);
 
       expect(updatedContext.currentSection).toBe("Nested Section");
-      expect(updatedContext.sectionStack).toEqual([
-        "Parent Section",
-        "Nested Section",
-      ]);
+      expect(updatedContext.sectionStack).toEqual(["Parent Section", "Nested Section"]);
     });
 
     it("should handle function start markers", () => {
       const marker: SectionMarker = {
-        type: "function_start",
+        type: SectionMarkerType.FUNCTION_START,
         name: "setup_environment",
         lineNumber: 1,
         originalLine: "setup_environment() {",
@@ -208,14 +203,12 @@ describe("section-detector.ts", () => {
 
       expect(updatedContext.functionLevel).toBe(1);
       expect(updatedContext.currentSection).toBe("Function: setup_environment");
-      expect(updatedContext.sectionStack).toEqual([
-        "Function: setup_environment",
-      ]);
+      expect(updatedContext.sectionStack).toEqual(["Function: setup_environment"]);
     });
 
     it("should handle function end markers", () => {
       const marker: SectionMarker = {
-        type: "function_end",
+        type: SectionMarkerType.FUNCTION_END,
         name: "",
         lineNumber: 10,
         originalLine: "}",
@@ -360,11 +353,7 @@ alias active_sims="xcrun simctl list 'devices' 'booted'"
       const suggestions = suggestSectionImprovements(content);
 
       expect(suggestions.length).toBeGreaterThan(0);
-      expect(
-        suggestions.some((s) =>
-          s.suggestion.includes("consistent section formatting"),
-        ),
-      ).toBe(true);
+      expect(suggestions.some((s) => s.suggestion.includes("consistent section formatting"))).toBe(true);
     });
 
     it("should return empty suggestions for well-organized content", () => {

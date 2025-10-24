@@ -147,10 +147,9 @@ describe("Functions", () => {
 
   describe("performance", () => {
     it("should handle large numbers of functions efficiently", async () => {
-      const largeMockContent = Array.from(
-        { length: 100 },
-        (_, i) => `function test${i}() {\n  echo ${i}\n}`,
-      ).join("\n");
+      const largeMockContent = Array.from({ length: 100 }, (_, i) => `function test${i}() {\n  echo ${i}\n}`).join(
+        "\n",
+      );
 
       mockReadZshrcFile.mockResolvedValue(largeMockContent);
 

@@ -45,10 +45,7 @@ const createMockSection = (
 describe("markdown.ts", () => {
   describe("parseSectionContent", () => {
     it("should parse aliases from content", () => {
-      const section = createMockSection(
-        "Test",
-        "alias ll='ls -la'\nalias gs='git status'",
-      );
+      const section = createMockSection("Test", "alias ll='ls -la'\nalias gs='git status'");
       const content = parseSectionContent(section);
 
       expect(content.aliases).toHaveLength(2);
@@ -57,10 +54,7 @@ describe("markdown.ts", () => {
     });
 
     it("should parse exports from content", () => {
-      const section = createMockSection(
-        "Test",
-        "export PATH=/usr/bin\nexport LANG=en_US.UTF-8",
-      );
+      const section = createMockSection("Test", "export PATH=/usr/bin\nexport LANG=en_US.UTF-8");
       const content = parseSectionContent(section);
 
       expect(content.exports).toHaveLength(2);
@@ -69,10 +63,7 @@ describe("markdown.ts", () => {
     });
 
     it("should extract other lines", () => {
-      const section = createMockSection(
-        "Test",
-        "# Comment\nalias a='a'\n# Another comment\nsome_function",
-      );
+      const section = createMockSection("Test", "# Comment\nalias a='a'\n# Another comment\nsome_function");
       const content = parseSectionContent(section);
 
       expect(content.otherLines).toContain("some_function");
@@ -80,18 +71,11 @@ describe("markdown.ts", () => {
     });
 
     it("should filter out comments and empty lines", () => {
-      const section = createMockSection(
-        "Test",
-        "# Comment\nalias a='a'\n\n  \nother_line",
-      );
+      const section = createMockSection("Test", "# Comment\nalias a='a'\n\n  \nother_line");
       const content = parseSectionContent(section);
 
-      expect(content.otherLines.every((line) => !line.startsWith("#"))).toBe(
-        true,
-      );
-      expect(content.otherLines.every((line) => line.trim().length > 0)).toBe(
-        true,
-      );
+      expect(content.otherLines.every((line) => !line.startsWith("#"))).toBe(true);
+      expect(content.otherLines.every((line) => line.trim().length > 0)).toBe(true);
     });
 
     it("should handle empty content", () => {
@@ -104,10 +88,7 @@ describe("markdown.ts", () => {
     });
 
     it("should handle content with only comments", () => {
-      const section = createMockSection(
-        "Test",
-        "# Comment 1\n# Comment 2\n# Comment 3",
-      );
+      const section = createMockSection("Test", "# Comment 1\n# Comment 2\n# Comment 3");
       const content = parseSectionContent(section);
 
       expect(content.aliases).toHaveLength(0);
@@ -120,10 +101,7 @@ describe("markdown.ts", () => {
     let content: ParsedSectionContent;
 
     beforeEach(() => {
-      const section = createMockSection(
-        "Test",
-        "alias a='a'\nexport A=1\nother_line",
-      );
+      const section = createMockSection("Test", "alias a='a'\nexport A=1\nother_line");
       content = parseSectionContent(section);
     });
 
@@ -162,12 +140,7 @@ describe("markdown.ts", () => {
 
   describe("generateRawMarkdown", () => {
     it("should generate raw markdown with section content", () => {
-      const section = createMockSection(
-        "Test",
-        "alias a='a'\nexport A=1",
-        5,
-        15,
-      );
+      const section = createMockSection("Test", "alias a='a'\nexport A=1", 5, 15);
       const md = generateRawMarkdown(section);
 
       expect(md).toContain("# Test");
@@ -243,10 +216,7 @@ describe("markdown.ts", () => {
     });
 
     it("should format aliases as list items", () => {
-      const section = createMockSection(
-        "Test",
-        "alias ll='ls -la'\nalias gs='git status'",
-      );
+      const section = createMockSection("Test", "alias ll='ls -la'\nalias gs='git status'");
       const content = parseSectionContent(section);
       const md = generateFormattedMarkdown(section, content);
 

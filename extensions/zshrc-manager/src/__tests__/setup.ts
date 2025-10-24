@@ -12,9 +12,7 @@ vi.mock("@raycast/api", () => import("./__mocks__/@raycast/api"));
 
 // Global type declarations
 declare global {
-  function createMockZshrcContent(
-    sections: Array<{ label?: string; content: string }>,
-  ): string;
+  function createMockZshrcContent(sections: Array<{ label?: string; content: string }>): string;
   function createMockAlias(name: string, command: string): string;
   function createMockExport(variable: string, value: string): string;
 }
@@ -36,9 +34,7 @@ if (typeof globalThis !== "undefined" && globalThis.HTMLFormElement) {
 }
 
 // Global test utilities
-global.createMockZshrcContent = (
-  sections: Array<{ label?: string; content: string }>,
-) => {
+global.createMockZshrcContent = (sections: Array<{ label?: string; content: string }>) => {
   return sections
     .map((section) => {
       if (section.label) {
@@ -49,11 +45,9 @@ global.createMockZshrcContent = (
     .join("\n\n");
 };
 
-global.createMockAlias = (name: string, command: string) =>
-  `alias ${name}='${command}'`;
+global.createMockAlias = (name: string, command: string) => `alias ${name}='${command}'`;
 
-global.createMockExport = (variable: string, value: string) =>
-  `export ${variable}=${value}`;
+global.createMockExport = (variable: string, value: string) => `export ${variable}=${value}`;
 
 // Basic test to ensure setup file is loaded
 describe("Test Setup", () => {

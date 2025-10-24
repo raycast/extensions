@@ -34,11 +34,7 @@ export const Icon = {
 
 // Mock ActionPanel component
 export const ActionPanel = ({ children }: { children: React.ReactNode }) => {
-  return React.createElement(
-    "div",
-    { "data-testid": "action-panel" },
-    children,
-  );
+  return React.createElement("div", { "data-testid": "action-panel" }, children);
 };
 
 // Mock Action components
@@ -48,18 +44,10 @@ const ActionObject = {
     Regular: "regular" as const,
   },
   Push: ({ children, ...props }: any) => {
-    return React.createElement(
-      "div",
-      { "data-testid": "action-push", ...props },
-      children,
-    );
+    return React.createElement("div", { "data-testid": "action-push", ...props }, children);
   },
   Open: ({ children, ...props }: any) => {
-    return React.createElement(
-      "div",
-      { "data-testid": "action-open", ...props },
-      children,
-    );
+    return React.createElement("div", { "data-testid": "action-open", ...props }, children);
   },
   SubmitForm: ({ children, title, onSubmit, ...props }: any) => {
     return React.createElement(
@@ -73,60 +61,42 @@ const ActionObject = {
     );
   },
   CopyToClipboard: ({ children, ...props }: any) => {
-    return React.createElement(
-      "div",
-      { "data-testid": "action-copy", ...props },
-      children,
-    );
+    return React.createElement("div", { "data-testid": "action-copy", ...props }, children);
   },
   OpenWith: ({ children, ...props }: any) => {
-    return React.createElement(
-      "div",
-      { "data-testid": "action-open-with", ...props },
-      children,
-    );
+    return React.createElement("div", { "data-testid": "action-open-with", ...props }, children);
   },
 };
 
 // Export Action as both a component and an object with sub-components
-export const Action = Object.assign(
-  ({ children, style, title, onAction, ...props }: any) => {
-    // Handle Raycast Action.Style values
-    const buttonProps: any = { "data-testid": "action-component", ...props };
-    if (style === "destructive") {
-      buttonProps.style = { backgroundColor: "red" };
-    }
-    // Map onAction to onClick for testing
-    if (onAction) {
-      buttonProps.onClick = onAction;
-    }
-    // Use title as children if provided, otherwise use children
-    const buttonContent = title || children;
-    return React.createElement("button", buttonProps, buttonContent);
-  },
-  ActionObject,
-);
+export const Action = Object.assign(({ children, style, title, onAction, ...props }: any) => {
+  // Handle Raycast Action.Style values
+  const buttonProps: any = { "data-testid": "action-component", ...props };
+  if (style === "destructive") {
+    buttonProps.style = { backgroundColor: "red" };
+  }
+  // Map onAction to onClick for testing
+  if (onAction) {
+    buttonProps.onClick = onAction;
+  }
+  // Use title as children if provided, otherwise use children
+  const buttonContent = title || children;
+  return React.createElement("button", buttonProps, buttonContent);
+}, ActionObject);
 
 // Mock Form component - this needs to be a React component that renders children
 export const Form = ({ children, actions, ...props }: any) => {
   const allChildren = [];
-  if (actions)
-    allChildren.push(React.cloneElement(actions, { key: "actions" }));
+  if (actions) allChildren.push(React.cloneElement(actions, { key: "actions" }));
   if (children) {
     if (Array.isArray(children)) {
       allChildren.push(
         ...children.map((child, index) =>
-          React.isValidElement(child)
-            ? React.cloneElement(child, { key: `child-${index}` })
-            : child,
+          React.isValidElement(child) ? React.cloneElement(child, { key: `child-${index}` }) : child,
         ),
       );
     } else {
-      allChildren.push(
-        React.isValidElement(children)
-          ? React.cloneElement(children, { key: "child" })
-          : children,
-      );
+      allChildren.push(React.isValidElement(children) ? React.cloneElement(children, { key: "child" }) : children);
     }
   }
 
@@ -155,27 +125,15 @@ Form.TextField = ({ children, value, onChange, ...props }: any) => {
 };
 
 Form.Dropdown = ({ children, ...props }: any) => {
-  return React.createElement(
-    "select",
-    { "data-testid": "form-dropdown", ...props },
-    children,
-  );
+  return React.createElement("select", { "data-testid": "form-dropdown", ...props }, children);
 };
 
 Form.TextArea = ({ children, ...props }: any) => {
-  return React.createElement(
-    "textarea",
-    { "data-testid": "form-textarea", ...props },
-    children,
-  );
+  return React.createElement("textarea", { "data-testid": "form-textarea", ...props }, children);
 };
 
 Form.Description = ({ children, text, ...props }: any) => {
-  return React.createElement(
-    "div",
-    { "data-testid": "form-description", ...props },
-    text || children,
-  );
+  return React.createElement("div", { "data-testid": "form-description", ...props }, text || children);
 };
 
 // Mock List components
@@ -183,102 +141,56 @@ export const List = (props: any) => {
   const content = [];
   // Render navigationTitle as visible text for testing
   if (props.navigationTitle) {
-    content.push(
-      React.createElement(
-        "div",
-        { key: "navigation-title" },
-        props.navigationTitle,
-      ),
-    );
+    content.push(React.createElement("div", { key: "navigation-title" }, props.navigationTitle));
   }
   if (props.children) {
     content.push(props.children);
   }
 
-  return React.createElement(
-    "div",
-    { "data-testid": "list", className: props.className },
-    content,
-  );
+  return React.createElement("div", { "data-testid": "list", className: props.className }, content);
 };
 
-List.Item = ({
-  children,
-  title,
-  subtitle,
-  accessories,
-  detail,
-  ...props
-}: any) => {
+List.Item = ({ children, title, subtitle, accessories, detail, ...props }: any) => {
   const content = [];
   if (title) content.push(React.createElement("div", { key: "title" }, title));
-  if (subtitle)
-    content.push(React.createElement("div", { key: "subtitle" }, subtitle));
+  if (subtitle) content.push(React.createElement("div", { key: "subtitle" }, subtitle));
   if (accessories) {
     // Handle accessories array - each accessory can be {text} or {icon}
     const accessoryContent = accessories
       .map((accessory: any, index: number) => {
         if (accessory.text) {
-          return React.createElement(
-            "div",
-            { key: `accessory-text-${index}` },
-            accessory.text,
-          );
+          return React.createElement("div", { key: `accessory-text-${index}` }, accessory.text);
         }
         if (accessory.icon) {
-          return React.createElement(
-            "div",
-            { key: `accessory-icon-${index}` },
-            "icon",
-          );
+          return React.createElement("div", { key: `accessory-icon-${index}` }, "icon");
         }
         return null;
       })
       .filter(Boolean);
-    content.push(
-      React.createElement("div", { key: "accessories" }, accessoryContent),
-    );
+    content.push(React.createElement("div", { key: "accessories" }, accessoryContent));
   }
-  if (detail)
-    content.push(React.createElement("div", { key: "detail" }, detail));
+  if (detail) content.push(React.createElement("div", { key: "detail" }, detail));
   if (children) content.push(children);
 
-  return React.createElement(
-    "div",
-    { "data-testid": "list-item", ...props },
-    content,
-  );
+  return React.createElement("div", { "data-testid": "list-item", ...props }, content);
 };
 
 const ListItemDetail = ({ children, markdown, metadata, ...props }: any) => {
-  return React.createElement(
-    "div",
-    { "data-testid": "list-item-detail", ...props },
-    [
-      markdown && React.createElement("div", { key: "markdown" }, markdown),
-      metadata && React.createElement("div", { key: "metadata" }, metadata),
-      children,
-    ],
-  );
+  return React.createElement("div", { "data-testid": "list-item-detail", ...props }, [
+    markdown && React.createElement("div", { key: "markdown" }, markdown),
+    metadata && React.createElement("div", { key: "metadata" }, metadata),
+    children,
+  ]);
 };
 
 // Add Detail property to List.Item
 (List.Item as any).Detail = ListItemDetail;
 
 (ListItemDetail as any).Metadata = ({ children, ...props }: any) => {
-  return React.createElement(
-    "div",
-    { "data-testid": "list-item-detail-metadata", ...props },
-    children,
-  );
+  return React.createElement("div", { "data-testid": "list-item-detail-metadata", ...props }, children);
 };
 
-(ListItemDetail as any).Metadata.Label = ({
-  children,
-  title,
-  text,
-  ...props
-}: any) => {
+(ListItemDetail as any).Metadata.Label = ({ children, title, text, ...props }: any) => {
   const content = [];
   if (title) content.push(React.createElement("div", { key: "title" }, title));
   if (text) {
@@ -286,38 +198,22 @@ const ListItemDetail = ({ children, markdown, metadata, ...props }: any) => {
     content.push(React.createElement("div", { key: "text" }, textValue));
   }
   if (children) content.push(children);
-  return React.createElement(
-    "div",
-    { "data-testid": "list-item-detail-metadata-label", ...props },
-    content,
-  );
+  return React.createElement("div", { "data-testid": "list-item-detail-metadata-label", ...props }, content);
 };
 
 (ListItemDetail as any).Metadata.TagList = ({ children, ...props }: any) => {
-  return React.createElement(
-    "div",
-    { "data-testid": "list-item-detail-metadata-taglist", ...props },
-    children,
-  );
+  return React.createElement("div", { "data-testid": "list-item-detail-metadata-taglist", ...props }, children);
 };
 
-(ListItemDetail as any).Metadata.TagList.Item = ({
-  children,
-  ...props
-}: any) => {
-  return React.createElement(
-    "div",
-    { "data-testid": "list-item-detail-metadata-taglist-item", ...props },
-    children,
-  );
+(ListItemDetail as any).Metadata.TagList.Item = ({ children, ...props }: any) => {
+  return React.createElement("div", { "data-testid": "list-item-detail-metadata-taglist-item", ...props }, children);
 };
 
 List.Section = ({ children, title, ...props }: any) => {
-  return React.createElement(
-    "div",
-    { "data-testid": "list-section", ...props },
-    [title && React.createElement("div", { key: "title" }, title), children],
-  );
+  return React.createElement("div", { "data-testid": "list-section", ...props }, [
+    title && React.createElement("div", { key: "title" }, title),
+    children,
+  ]);
 };
 
 // Mock other components
@@ -348,11 +244,7 @@ export const Detail = ({ children, markdown, ...props }: any) => {
           .trim()
       : content;
 
-  return React.createElement(
-    "div",
-    { "data-testid": "detail", ...props },
-    textContent,
-  );
+  return React.createElement("div", { "data-testid": "detail", ...props }, textContent);
 };
 
 // Mock functions

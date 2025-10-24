@@ -147,10 +147,7 @@ describe("Evals", () => {
 
   describe("performance", () => {
     it("should handle large numbers of evals efficiently", async () => {
-      const largeMockContent = Array.from(
-        { length: 100 },
-        (_, i) => `eval "$(tool${i} init -)"`,
-      ).join("\n");
+      const largeMockContent = Array.from({ length: 100 }, (_, i) => `eval "$(tool${i} init -)"`).join("\n");
 
       mockReadZshrcFile.mockResolvedValue(largeMockContent);
 

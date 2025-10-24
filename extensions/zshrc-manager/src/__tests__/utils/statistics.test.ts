@@ -56,9 +56,7 @@ describe("statistics.ts", () => {
     });
 
     it("should parse aliases from sections", () => {
-      const sections = [
-        createMockSection("Test", "alias ll='ls -la'\nalias gs='git status'"),
-      ];
+      const sections = [createMockSection("Test", "alias ll='ls -la'\nalias gs='git status'")];
 
       const stats = calculateStatistics(sections);
 
@@ -68,12 +66,7 @@ describe("statistics.ts", () => {
     });
 
     it("should parse exports from sections", () => {
-      const sections = [
-        createMockSection(
-          "Test",
-          "export PATH=/usr/local/bin\nexport LANG=en_US.UTF-8",
-        ),
-      ];
+      const sections = [createMockSection("Test", "export PATH=/usr/local/bin\nexport LANG=en_US.UTF-8")];
 
       const stats = calculateStatistics(sections);
 
@@ -85,12 +78,7 @@ describe("statistics.ts", () => {
     it("should aggregate entries across multiple sections", () => {
       const sections = [
         createMockSection("Section1", "alias ll='ls -la'\nexport A=1", 1, 5),
-        createMockSection(
-          "Section2",
-          "alias gs='git status'\nexport B=2",
-          6,
-          10,
-        ),
+        createMockSection("Section2", "alias gs='git status'\nexport B=2", 6, 10),
       ];
 
       const stats = calculateStatistics(sections);
@@ -213,9 +201,7 @@ setopt opt`,
     });
 
     it("should only count entries that exist", () => {
-      const sections = [
-        createMockSection("OnlyAliases", "alias a='a'\nalias b='b'"),
-      ];
+      const sections = [createMockSection("OnlyAliases", "alias a='a'\nalias b='b'")];
 
       const stats = calculateStatistics(sections);
       const total = getTotalEntryCount(stats);

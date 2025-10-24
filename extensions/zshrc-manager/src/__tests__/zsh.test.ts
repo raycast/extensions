@@ -2,11 +2,7 @@
 
 import { readZshrcFile, writeZshrcFile, ZSHRC_PATH } from "../lib/zsh";
 import { readFile, writeFile, stat } from "fs/promises";
-import {
-  validateFilePath,
-  validateFileSize,
-  truncateContent,
-} from "../utils/sanitize";
+import { validateFilePath, validateFileSize, truncateContent } from "../utils/sanitize";
 import { vi } from "vitest";
 
 // Mock dependencies
@@ -153,17 +149,13 @@ describe("zsh.ts", () => {
     it("should throw error when file path is invalid", async () => {
       mockValidateFilePath.mockResolvedValue(false);
 
-      await expect(writeZshrcFile("content")).rejects.toThrow(
-        "Invalid file path",
-      );
+      await expect(writeZshrcFile("content")).rejects.toThrow("Invalid file path");
     });
 
     it("should throw error when content is not a string", async () => {
       mockValidateFilePath.mockResolvedValue(true);
 
-      await expect(writeZshrcFile(123 as any)).rejects.toThrow(
-        "Content must be a string",
-      );
+      await expect(writeZshrcFile(123 as any)).rejects.toThrow("Content must be a string");
     });
 
     it("should handle EACCES error", async () => {

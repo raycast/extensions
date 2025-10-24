@@ -32,9 +32,7 @@ describe("sanitize.ts", () => {
     it("should handle multiple special characters", () => {
       const content = "This has `backticks`, $variables, and \\backslashes";
       const result = sanitizeMarkdown(content);
-      expect(result).toBe(
-        "This has \\\\`backticks\\\\`, \\\\$variables, and \\\\backslashes",
-      );
+      expect(result).toBe("This has \\\\`backticks\\\\`, \\\\$variables, and \\\\backslashes");
     });
 
     it("should handle empty content", () => {
@@ -51,8 +49,7 @@ describe("sanitize.ts", () => {
 
   describe("escapeShellContent", () => {
     it("should escape all shell special characters", () => {
-      const content =
-        "This has `backticks`, $variables, \\backslashes, \"quotes\", and 'apostrophes'";
+      const content = "This has `backticks`, $variables, \\backslashes, \"quotes\", and 'apostrophes'";
       const result = escapeShellContent(content);
       expect(result).toBe(
         "This has \\\\`backticks\\\\`, \\\\$variables, \\\\backslashes, \\\"quotes\\\", and \\'apostrophes\\'",
@@ -193,9 +190,7 @@ alias ll='ls -la'`;
       const result = validateZshrcContent(content);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        "Suspicious pattern detected: eval with curl",
-      );
+      expect(result.errors).toContain("Suspicious pattern detected: eval with curl");
     });
 
     it("should detect dangerous rm -rf / command", () => {
@@ -220,9 +215,7 @@ rm -rf /`;
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(3);
       expect(result.errors).toContain("Line 1 is too long (1001 characters)");
-      expect(result.errors).toContain(
-        "Suspicious pattern detected: eval with curl",
-      );
+      expect(result.errors).toContain("Suspicious pattern detected: eval with curl");
       expect(result.errors).toContain("Dangerous command detected: rm -rf /");
     });
 

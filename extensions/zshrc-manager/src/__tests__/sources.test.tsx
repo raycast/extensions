@@ -20,8 +20,7 @@ const mockSections = [
     label: "General",
     startLine: 1,
     endLine: 10,
-    content:
-      "source ~/.oh-my-zsh/themes/robbyrussell.zsh-theme\nsource ~/.config/zsh/custom.zsh",
+    content: "source ~/.oh-my-zsh/themes/robbyrussell.zsh-theme\nsource ~/.config/zsh/custom.zsh",
     aliasCount: 0,
     exportCount: 0,
     evalCount: 0,
@@ -148,10 +147,7 @@ describe("Sources", () => {
 
   describe("performance", () => {
     it("should handle large numbers of sources efficiently", async () => {
-      const largeMockContent = Array.from(
-        { length: 100 },
-        (_, i) => `source ~/.config/source${i}.zsh`,
-      ).join("\n");
+      const largeMockContent = Array.from({ length: 100 }, (_, i) => `source ~/.config/source${i}.zsh`).join("\n");
 
       mockReadZshrcFile.mockResolvedValue(largeMockContent);
 

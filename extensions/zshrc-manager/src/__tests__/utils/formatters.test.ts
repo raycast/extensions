@@ -2,12 +2,7 @@
  * Tests for formatters utility module
  */
 
-import {
-  truncateValueMiddle,
-  formatCount,
-  formatLineRange,
-  sanitizeForMarkdown,
-} from "../../utils/formatters";
+import { truncateValueMiddle, formatCount, formatLineRange, sanitizeForMarkdown } from "../../utils/formatters";
 
 describe("formatters.ts", () => {
   describe("truncateValueMiddle", () => {

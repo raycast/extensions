@@ -22,25 +22,19 @@ const mockItems: TestItem[] = [
 
 describe("useZshrcFilter", () => {
   it("should initialize with empty search text", () => {
-    const { result } = renderHook(() =>
-      useZshrcFilter(mockItems, ["name", "command"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(mockItems, ["name", "command"]));
 
     expect(result.current.searchText).toBe("");
   });
 
   it("should return all items with empty search", () => {
-    const { result } = renderHook(() =>
-      useZshrcFilter(mockItems, ["name", "command"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(mockItems, ["name", "command"]));
 
     expect(result.current.filtered).toEqual(mockItems);
   });
 
   it("should filter items by name", () => {
-    const { result } = renderHook(() =>
-      useZshrcFilter(mockItems, ["name", "command"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(mockItems, ["name", "command"]));
 
     act(() => {
       result.current.setSearchText("gs");
@@ -51,9 +45,7 @@ describe("useZshrcFilter", () => {
   });
 
   it("should filter items by command", () => {
-    const { result } = renderHook(() =>
-      useZshrcFilter(mockItems, ["name", "command"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(mockItems, ["name", "command"]));
 
     act(() => {
       result.current.setSearchText("git");
@@ -64,9 +56,7 @@ describe("useZshrcFilter", () => {
   });
 
   it("should be case insensitive", () => {
-    const { result } = renderHook(() =>
-      useZshrcFilter(mockItems, ["name", "command"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(mockItems, ["name", "command"]));
 
     act(() => {
       result.current.setSearchText("GIT");
@@ -96,9 +86,7 @@ describe("useZshrcFilter", () => {
   });
 
   it("should group filtered items by section", () => {
-    const { result } = renderHook(() =>
-      useZshrcFilter(mockItems, ["name", "command"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(mockItems, ["name", "command"]));
 
     act(() => {
       result.current.setSearchText("git");
@@ -109,9 +97,7 @@ describe("useZshrcFilter", () => {
   });
 
   it("should group all sections when no filter applied", () => {
-    const { result } = renderHook(() =>
-      useZshrcFilter(mockItems, ["name", "command"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(mockItems, ["name", "command"]));
 
     const sections = Object.keys(result.current.grouped);
     expect(sections).toContain("General");
@@ -187,9 +173,7 @@ describe("useZshrcFilter", () => {
   });
 
   it("should handle multiple search fields", () => {
-    const { result } = renderHook(() =>
-      useZshrcFilter(mockItems, ["name", "command", "section"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(mockItems, ["name", "command", "section"]));
 
     act(() => {
       result.current.setSearchText("python");
@@ -205,13 +189,8 @@ describe("useZshrcFilter", () => {
   });
 
   it("should handle items with empty string fields", () => {
-    const itemsWithEmpty = [
-      ...mockItems,
-      { name: "", command: "test-command", section: "Test" },
-    ];
-    const { result } = renderHook(() =>
-      useZshrcFilter(itemsWithEmpty, ["name", "command"]),
-    );
+    const itemsWithEmpty = [...mockItems, { name: "", command: "test-command", section: "Test" }];
+    const { result } = renderHook(() => useZshrcFilter(itemsWithEmpty, ["name", "command"]));
 
     act(() => {
       result.current.setSearchText("test");
@@ -237,9 +216,7 @@ describe("useZshrcFilter", () => {
       { name: "test-alias", command: "test", section: "Test" },
       { name: "test.alias", command: "test", section: "Test" },
     ];
-    const { result } = renderHook(() =>
-      useZshrcFilter(itemsWithSpecial, ["name"]),
-    );
+    const { result } = renderHook(() => useZshrcFilter(itemsWithSpecial, ["name"]));
 
     act(() => {
       result.current.setSearchText("test-");

@@ -162,10 +162,7 @@ describe("Exports", () => {
 
   describe("performance", () => {
     it("should handle large numbers of exports efficiently", async () => {
-      const largeMockContent = Array.from(
-        { length: 100 },
-        (_, i) => `export TEST${i}=value${i}`,
-      ).join("\n");
+      const largeMockContent = Array.from({ length: 100 }, (_, i) => `export TEST${i}=value${i}`).join("\n");
 
       mockReadZshrcFile.mockResolvedValue(largeMockContent);
 

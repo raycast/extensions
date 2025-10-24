@@ -20,8 +20,7 @@ const mockSections = [
     label: "General",
     startLine: 1,
     endLine: 10,
-    content:
-      "setopt HIST_EXPIRE_DUPS_FIRST\nsetopt HIST_IGNORE_DUPS\nsetopt SHARE_HISTORY",
+    content: "setopt HIST_EXPIRE_DUPS_FIRST\nsetopt HIST_IGNORE_DUPS\nsetopt SHARE_HISTORY",
     aliasCount: 0,
     exportCount: 0,
     evalCount: 0,
@@ -148,10 +147,7 @@ describe("Setopts", () => {
 
   describe("performance", () => {
     it("should handle large numbers of setopts efficiently", async () => {
-      const largeMockContent = Array.from(
-        { length: 100 },
-        (_, i) => `setopt OPTION${i}`,
-      ).join("\n");
+      const largeMockContent = Array.from({ length: 100 }, (_, i) => `setopt OPTION${i}`).join("\n");
 
       mockReadZshrcFile.mockResolvedValue(largeMockContent);
 

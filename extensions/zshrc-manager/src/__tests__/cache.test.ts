@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { stat } from "fs/promises";
-import {
-  getCachedSections,
-  setCachedSections,
-  clearCache,
-  getCacheStats,
-} from "../lib/cache";
+import { getCachedSections, setCachedSections, clearCache, getCacheStats } from "../lib/cache";
 import { LogicalSection } from "../lib/parse-zshrc";
 import { vi } from "vitest";
 
@@ -176,9 +171,7 @@ describe("cache.ts", () => {
       mockStat.mockRejectedValue(new Error("Permission denied"));
 
       // Should not throw
-      await expect(
-        setCachedSections(mockFilePath, mockSections),
-      ).resolves.toBeUndefined();
+      await expect(setCachedSections(mockFilePath, mockSections)).resolves.toBeUndefined();
     });
   });
 

@@ -60,10 +60,7 @@ describe("Section Icons", () => {
       expect(unknownIcon.icon).toBeDefined();
       expect(unknownIcon.color).toBeDefined();
       // Should be either a data URL (Simple Icon) or Raycast icon (semantic fallback)
-      expect(
-        typeof unknownIcon.icon === "string" ||
-          typeof unknownIcon.icon === "object",
-      ).toBe(true);
+      expect(typeof unknownIcon.icon === "string" || typeof unknownIcon.icon === "object").toBe(true);
     });
 
     it("should handle config sections semantically", () => {
@@ -72,10 +69,7 @@ describe("Section Icons", () => {
       expect(configIcon.icon).toBeDefined();
       expect(configIcon.color).toBeDefined();
       // Should be either Raycast icon (semantic) or Simple Icon (if found)
-      expect(
-        typeof configIcon.icon === "string" ||
-          typeof configIcon.icon === "object",
-      ).toBe(true);
+      expect(typeof configIcon.icon === "string" || typeof configIcon.icon === "object").toBe(true);
     });
 
     it("should handle aliases section semantically", () => {
@@ -130,10 +124,7 @@ describe("Section Icons", () => {
       if (typeof reactIcon.icon === "string") {
         expect(reactIcon.icon).toMatch(/^data:image\/svg\+xml/);
         // Should be either base64 or URL encoded
-        expect(
-          reactIcon.icon.includes("base64") ||
-            reactIcon.icon.includes("charset=utf-8"),
-        ).toBe(true);
+        expect(reactIcon.icon.includes("base64") || reactIcon.icon.includes("charset=utf-8")).toBe(true);
       }
     });
   });
@@ -217,14 +208,7 @@ describe("Section Icons", () => {
 
   describe("Dynamic icon system", () => {
     it("should find Simple Icons for common technologies", () => {
-      const testCases = [
-        "Python",
-        "React",
-        "Docker",
-        "MongoDB",
-        "Redis",
-        "GitHub",
-      ];
+      const testCases = ["Python", "React", "Docker", "MongoDB", "Redis", "GitHub"];
 
       testCases.forEach((sectionName) => {
         const icon = getSectionIcon(sectionName);
@@ -258,13 +242,7 @@ describe("Section Icons", () => {
     });
 
     it("should use semantic fallback for non-brand sections", () => {
-      const semanticSections = [
-        "Settings",
-        "Aliases",
-        "Exports",
-        "Functions",
-        "Plugins",
-      ];
+      const semanticSections = ["Settings", "Aliases", "Exports", "Functions", "Plugins"];
 
       semanticSections.forEach((sectionName) => {
         const icon = getSectionIcon(sectionName);
@@ -381,15 +359,7 @@ describe("Section Icons", () => {
     });
 
     it("should handle section names with numbers", () => {
-      const numericCases = [
-        "python3",
-        "nodejs16",
-        "java8",
-        "php7",
-        "ruby2",
-        "go1.19",
-        "rust1.70",
-      ];
+      const numericCases = ["python3", "nodejs16", "java8", "php7", "ruby2", "go1.19", "rust1.70"];
 
       numericCases.forEach((sectionName) => {
         const icon = getSectionIcon(sectionName);
@@ -415,13 +385,7 @@ describe("Section Icons", () => {
     });
 
     it("should handle unicode section names", () => {
-      const unicodeCases = [
-        "café",
-        "naïve",
-        "résumé",
-        "café-au-lait",
-        "naïve-bayes",
-      ];
+      const unicodeCases = ["café", "naïve", "résumé", "café-au-lait", "naïve-bayes"];
 
       unicodeCases.forEach((sectionName) => {
         const icon = getSectionIcon(sectionName);

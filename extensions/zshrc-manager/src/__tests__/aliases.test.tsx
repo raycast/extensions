@@ -162,10 +162,7 @@ describe("Aliases", () => {
 
   describe("performance", () => {
     it("should handle large numbers of aliases efficiently", async () => {
-      const largeMockContent = Array.from(
-        { length: 100 },
-        (_, i) => `alias test${i}='echo ${i}'`,
-      ).join("\n");
+      const largeMockContent = Array.from({ length: 100 }, (_, i) => `alias test${i}='echo ${i}'`).join("\n");
 
       mockReadZshrcFile.mockResolvedValue(largeMockContent);
 

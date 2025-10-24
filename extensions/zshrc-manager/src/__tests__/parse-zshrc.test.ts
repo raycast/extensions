@@ -4,12 +4,7 @@
  * Tests section detection, alias/export parsing, edge cases, and category inference.
  */
 
-import {
-  parseZshrc,
-  toLogicalSections,
-  AliasEntry,
-  ExportEntry,
-} from "../lib/parse-zshrc";
+import { parseZshrc, toLogicalSections, AliasEntry, ExportEntry } from "../lib/parse-zshrc";
 
 describe("parseZshrc", () => {
   describe("section detection", () => {
@@ -42,9 +37,7 @@ export NODE_PATH="/usr/local/lib/node_modules"
 `;
 
       const entries = parseZshrc(content);
-      const pythonEntry = entries.find(
-        (e) => e.sectionLabel === "Python Config",
-      );
+      const pythonEntry = entries.find((e) => e.sectionLabel === "Python Config");
       const nodeEntry = entries.find((e) => e.sectionLabel === "Node Setup");
 
       expect(pythonEntry).toBeDefined();
@@ -62,9 +55,7 @@ alias ll="ls -la"
 `;
 
       const entries = parseZshrc(content);
-      const pythonEntry = entries.find(
-        (e) => e.sectionLabel === "Python Config",
-      );
+      const pythonEntry = entries.find((e) => e.sectionLabel === "Python Config");
       const unlabeledEntry = entries.find((e) => e.sectionLabel === undefined);
 
       expect(pythonEntry).toBeDefined();
@@ -199,9 +190,7 @@ export PATH="/usr/local/bin:$PATH"
 
       const entries = parseZshrc(content);
       const aliasEntry = entries.find((e) => e.type === "alias") as AliasEntry;
-      const exportEntry = entries.find(
-        (e) => e.type === "export",
-      ) as ExportEntry;
+      const exportEntry = entries.find((e) => e.type === "export") as ExportEntry;
 
       expect(aliasEntry.lineNumber).toBe(3);
       expect(exportEntry.lineNumber).toBe(5);
@@ -248,9 +237,7 @@ function test_func() {
 
       const entries = parseZshrc(content);
       const aliasEntry = entries.find((e) => e.type === "alias") as AliasEntry;
-      const exportEntry = entries.find(
-        (e) => e.type === "export",
-      ) as ExportEntry;
+      const exportEntry = entries.find((e) => e.type === "export") as ExportEntry;
       const otherEntry = entries.find((e) => e.type === "other");
 
       expect(aliasEntry).toBeDefined();

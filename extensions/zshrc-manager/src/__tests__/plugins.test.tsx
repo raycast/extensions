@@ -147,10 +147,7 @@ describe("Plugins", () => {
 
   describe("performance", () => {
     it("should handle large numbers of plugins efficiently", async () => {
-      const largeMockContent = Array.from(
-        { length: 100 },
-        (_, i) => `plugins=(plugin${i})`,
-      ).join("\n");
+      const largeMockContent = Array.from({ length: 100 }, (_, i) => `plugins=(plugin${i})`).join("\n");
 
       mockReadZshrcFile.mockResolvedValue(largeMockContent);
 
