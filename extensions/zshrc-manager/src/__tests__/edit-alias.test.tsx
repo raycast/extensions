@@ -47,7 +47,6 @@ vi.mock("@raycast/utils", () => ({
 }));
 
 describe("EditAlias", () => {
-  const mockOnSave = vi.fn();
   const mockItemProps = {
     name: {
       value: "",
@@ -61,7 +60,7 @@ describe("EditAlias", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Default mock implementations
     mockReadZshrcFile.mockResolvedValue("test content");
     mockWriteZshrcFile.mockResolvedValue(undefined);
@@ -70,89 +69,10 @@ describe("EditAlias", () => {
     });
   });
 
-  it("should be defined", () => {
-    // Basic test to ensure the component can be imported
-    expect(true).toBe(true);
-  });
-
-  it("should have proper exports", async () => {
+  it("should export EditAlias component", async () => {
     const EditAlias = await import("../edit-alias");
     expect(EditAlias.default).toBeDefined();
-  });
-
-  it("should handle props interface", () => {
-    // Test that the component accepts expected props
-    const props = {
-      existingName: "test",
-      existingCommand: "echo test",
-      sectionLabel: "Test Section",
-      onSave: mockOnSave,
-    };
-
-    // Just verify the props structure is valid
-    expect(props.existingName).toBe("test");
-    expect(props.existingCommand).toBe("echo test");
-    expect(props.sectionLabel).toBe("Test Section");
-    expect(typeof props.onSave).toBe("function");
-  });
-
-  it("should handle empty props", () => {
-    // Test that the component can handle empty props
-    const props = {};
-
-    // Just verify empty props don't cause issues
-    expect(Object.keys(props)).toHaveLength(0);
-  });
-
-  it("should handle special characters in props", () => {
-    // Test that the component can handle special characters
-    const props = {
-      existingName: "test@alias",
-      existingCommand: "echo 'hello world'",
-      sectionLabel: "Section with @#$%^&*()",
-    };
-
-    expect(props.existingName).toContain("@");
-    expect(props.existingCommand).toContain("'");
-    expect(props.sectionLabel).toContain("@#$%^&*()");
-  });
-
-  it("should handle very long strings in props", () => {
-    // Test that the component can handle very long strings
-    const longName = "a".repeat(100);
-    const longCommand = "echo " + "b".repeat(1000);
-    const longSection = "c".repeat(200);
-
-    const props = {
-      existingName: longName,
-      existingCommand: longCommand,
-      sectionLabel: longSection,
-    };
-
-    expect(props.existingName).toHaveLength(100);
-    expect(props.existingCommand).toHaveLength(1005);
-    expect(props.sectionLabel).toHaveLength(200);
-  });
-
-  it("should handle function callbacks", () => {
-    // Test that the component can handle function callbacks
-    const mockCallback = vi.fn();
-
-    expect(typeof mockCallback).toBe("function");
-    expect(mockCallback).toBeDefined();
-  });
-
-  it("should handle edge cases", () => {
-    // Test edge cases that might occur
-    const edgeCases = [
-      { existingName: "", existingCommand: "" },
-      { existingName: null, existingCommand: null },
-      { existingName: undefined, existingCommand: undefined },
-    ];
-
-    edgeCases.forEach((testCase) => {
-      expect(testCase).toBeDefined();
-    });
+    expect(typeof EditAlias.default).toBe("function");
   });
 
   it("should handle file operations", async () => {
@@ -204,94 +124,32 @@ describe("EditAlias", () => {
     });
   });
 
-  it("should handle form validation", () => {
-    // Test that the component can handle form validation
-    const formData = {
-      name: "test",
-      command: "echo test",
-    };
-
-    // Test validation logic
-    const isValid = formData.name.trim() !== "" && formData.command.trim() !== "";
-    expect(isValid).toBe(true);
-
-    // Test invalid data
-    const invalidData = {
-      name: "",
-      command: "",
-    };
-    const isInvalid = invalidData.name.trim() !== "" && invalidData.command.trim() !== "";
-    expect(isInvalid).toBe(false);
-  });
-
-  it("should handle form submission", () => {
-    // Test that the component can handle form submission
-    const onSubmit = vi.fn();
-    const formValues = {
-      name: "test",
-      command: "echo test",
-    };
-
-    onSubmit(formValues);
-    expect(onSubmit).toHaveBeenCalledWith(formValues);
-  });
-
-  it("should handle different section labels", () => {
-    // Test that the component can handle different section labels
-    const sectionLabels = ["Aliases", "Custom Aliases", "Section with @#$%^&*()"];
-
-    sectionLabels.forEach((sectionLabel) => {
-      expect(sectionLabel).toBeDefined();
-      expect(typeof sectionLabel).toBe("string");
-    });
-  });
-
-  it("should handle alias name validation", () => {
-    // Test that the component can handle alias name validation
-    const validNames = ["ll", "gs", "test-alias", "test_alias"];
-    const invalidNames = ["", " ", "test alias"];
+  it("should validate alias names correctly", () => {
+    const validNames = ["ll", "gs", "test_alias", "alias123"];
+    const invalidNames = ["", " ", "test alias", "test-alias"];
 
     validNames.forEach((name) => {
-      const isValid = name.trim() !== "" && !name.includes(" ");
+      const isValid = /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
       expect(isValid).toBe(true);
     });
 
     invalidNames.forEach((name) => {
-      const isValid = name.trim() !== "" && !name.includes(" ");
+      const isValid = /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
       expect(isValid).toBe(false);
     });
   });
 
-  it("should handle command validation", () => {
-    // Test that the component can handle command validation
-    const validCommands = ["ls -la", "git status", "echo 'hello world'"];
-    const invalidCommands = ["", " ", "\t"];
+  it("should generate alias line correctly", async () => {
+    const { aliasConfig } = await import("../edit-alias");
 
-    validCommands.forEach((command) => {
-      const isValid = command.trim() !== "";
-      expect(isValid).toBe(true);
-    });
-
-    invalidCommands.forEach((command) => {
-      const isValid = command.trim() !== "";
-      expect(isValid).toBe(false);
-    });
+    const line = aliasConfig.generateLine("ll", "ls -la");
+    expect(line).toBe("alias ll='ls -la'");
   });
 
-  it("should handle component state management", () => {
-    // Test that the component can handle state management
-    const state = {
-      isLoading: false,
-      isEditing: true,
-      formValues: {
-        name: "test",
-        command: "echo test",
-      },
-    };
+  it("should generate pattern for finding aliases", async () => {
+    const { aliasConfig } = await import("../edit-alias");
 
-    expect(typeof state.isLoading).toBe("boolean");
-    expect(typeof state.isEditing).toBe("boolean");
-    expect(state.formValues.name).toBe("test");
-    expect(state.formValues.command).toBe("echo test");
+    const pattern = aliasConfig.generatePattern("ll");
+    expect(pattern).toBeInstanceOf(RegExp);
   });
 });
