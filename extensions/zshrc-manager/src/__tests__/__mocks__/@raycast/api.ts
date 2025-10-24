@@ -250,6 +250,7 @@ export const Detail = ({ children, markdown, ...props }: any) => {
 // Mock functions
 export const showToast = vi.fn().mockResolvedValue(undefined);
 export const popToRoot = vi.fn().mockResolvedValue(undefined);
+export const getPreferenceValues = vi.fn(() => ({}));
 
 export const Toast = {
   Style: {

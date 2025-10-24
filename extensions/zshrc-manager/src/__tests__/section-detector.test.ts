@@ -8,8 +8,19 @@ import {
   type SectionContext,
 } from "../lib/section-detector";
 import { SectionMarkerType } from "../types/enums";
+import { getPreferenceValues } from "@raycast/api";
+import { vi } from "vitest";
 
 describe("section-detector.ts", () => {
+  beforeEach(() => {
+    // Reset to default preferences for all tests
+    vi.mocked(getPreferenceValues).mockReturnValue({
+      enableDefaults: true,
+      enableCustomHeaderPattern: false,
+      enableCustomStartEndPatterns: false,
+    });
+  });
+
   describe("detectSectionMarker", () => {
     it("should detect dashed start markers", () => {
       const marker = detectSectionMarker("# --- Python Environment --- #", 1);
@@ -369,6 +380,117 @@ alias ni="npm install"`;
 
       const suggestions = suggestSectionImprovements(content);
       expect(suggestions.length).toBe(0);
+    });
+  });
+
+  describe("custom patterns", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("should detect custom header pattern when enabled", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        enableDefaults: true,
+        enableCustomHeaderPattern: true,
+        customHeaderPattern: "^#\\s+(.+)$",
+        enableCustomStartEndPatterns: false,
+      });
+
+      const marker = detectSectionMarker("# My Custom Section", 1);
+      expect(marker).not.toBeNull();
+      expect(marker?.name).toBe("My Custom Section");
+    });
+
+    it("should detect custom start/end patterns when enabled", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        enableDefaults: true,
+        enableCustomHeaderPattern: false,
+        enableCustomStartEndPatterns: true,
+        customStartPattern: "^#\\s*start\\s+(.+)$",
+        customEndPattern: "^#\\s*end\\s+(.+)$",
+      });
+
+      const startMarker = detectSectionMarker("# start Test Section", 1);
+      expect(startMarker).not.toBeNull();
+      expect(startMarker?.type).toBe(SectionMarkerType.CUSTOM_START);
+      expect(startMarker?.name).toBe("Test Section");
+
+      const endMarker = detectSectionMarker("# end Test Section", 2);
+      expect(endMarker).not.toBeNull();
+      expect(endMarker?.type).toBe(SectionMarkerType.CUSTOM_END);
+    });
+
+    it("should work with defaults disabled and only custom patterns", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        enableDefaults: false,
+        enableCustomHeaderPattern: true,
+        customHeaderPattern: "^##\\s+(.+)$",
+        enableCustomStartEndPatterns: false,
+      });
+
+      const marker = detectSectionMarker("## Custom Only Section", 1);
+      expect(marker).not.toBeNull();
+      expect(marker?.name).toBe("Custom Only Section");
+
+      // Default patterns should not match
+      const defaultMarker = detectSectionMarker("# --- Python Environment --- #", 2);
+      expect(defaultMarker).toBeNull();
+    });
+
+    it("should ignore invalid regex patterns gracefully", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        enableDefaults: true,
+        enableCustomHeaderPattern: true,
+        customHeaderPattern: "[invalid regex", // Invalid regex
+        enableCustomStartEndPatterns: false,
+      });
+
+      // Should still work with defaults
+      const marker = detectSectionMarker("# --- Python Environment --- #", 1);
+      expect(marker).not.toBeNull();
+      expect(marker?.name).toBe("Python Environment");
+    });
+
+    it("should ignore patterns without capture groups", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        enableDefaults: true,
+        enableCustomHeaderPattern: true,
+        customHeaderPattern: "^#", // No capture group
+        enableCustomStartEndPatterns: false,
+      });
+
+      // Should still work with defaults since custom pattern is invalid
+      const marker = detectSectionMarker("# --- Python Environment --- #", 1);
+      expect(marker).not.toBeNull();
+      expect(marker?.name).toBe("Python Environment");
+    });
+
+    it("should handle custom end pattern without capture group (optional)", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        enableDefaults: true,
+        enableCustomHeaderPattern: false,
+        enableCustomStartEndPatterns: true,
+        customStartPattern: "^#\\s*start\\s+(.+)$",
+        customEndPattern: "^#\\s*end$", // No capture group - allowed for end markers
+      });
+
+      const endMarker = detectSectionMarker("# end", 1);
+      expect(endMarker).not.toBeNull();
+      expect(endMarker?.type).toBe(SectionMarkerType.CUSTOM_END);
+    });
+
+    it("should handle empty or whitespace-only custom patterns", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        enableDefaults: true,
+        enableCustomHeaderPattern: true,
+        customHeaderPattern: "   ", // Whitespace only
+        enableCustomStartEndPatterns: false,
+      });
+
+      // Should still work with defaults
+      const marker = detectSectionMarker("# --- Python Environment --- #", 1);
+      expect(marker).not.toBeNull();
+      expect(marker?.name).toBe("Python Environment");
     });
   });
 });

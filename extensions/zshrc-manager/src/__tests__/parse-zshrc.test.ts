@@ -5,8 +5,18 @@
  */
 
 import { parseZshrc, toLogicalSections, AliasEntry, ExportEntry } from "../lib/parse-zshrc";
+import { getPreferenceValues } from "@raycast/api";
+import { vi } from "vitest";
 
 describe("parseZshrc", () => {
+  beforeEach(() => {
+    // Reset to default preferences for all tests
+    vi.mocked(getPreferenceValues).mockReturnValue({
+      enableDefaults: true,
+      enableCustomHeaderPattern: false,
+      enableCustomStartEndPatterns: false,
+    });
+  });
   describe("section detection", () => {
     it("should detect labeled sections", () => {
       const content = `
