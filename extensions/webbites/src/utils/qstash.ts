@@ -78,7 +78,7 @@ export const saveTabToQstash = async (data: {
     }
 
     // Make request to backend API
-    const response = await fetch(buildApiUrl(API_ENDPOINTS.BOOKMARKS), {
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.SAVE_BOOKMARK), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,7 +103,8 @@ export const saveTabToQstash = async (data: {
       throw new Error(result.message || "Failed to save bookmark");
     }
 
-    console.log("Bookmark saved successfully:", result);
+    const isDev = process.env.NODE_ENV !== "production";
+    if (isDev) console.log("Bookmark saved successfully:", result);
     return result;
   } catch (error) {
     console.error("Error saving bookmark to backend:", error);

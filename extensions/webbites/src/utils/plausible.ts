@@ -73,8 +73,6 @@ class PlausibleAnalytics {
         },
         body: JSON.stringify(eventData),
       });
-
-      console.log(`Plausible event sent: ${eventName}`, eventData.props);
     } catch (error) {
       console.error("Error sending Plausible event:", error);
       // Fail silently - we don't want analytics to break the app
