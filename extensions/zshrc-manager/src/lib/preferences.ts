@@ -8,12 +8,26 @@
 import { getPreferenceValues } from "@raycast/api";
 
 /**
+ * Type for section detection preferences
+ *
+ * Matches the preferences defined in package.json
+ */
+type SectionPreferences = {
+  enableDefaults: boolean;
+  enableCustomHeaderPattern: boolean;
+  customHeaderPattern?: string;
+  enableCustomStartEndPatterns: boolean;
+  customStartPattern?: string;
+  customEndPattern?: string;
+};
+
+/**
  * Reads section preferences from Raycast configuration
  *
  * @returns Section preferences object
  */
-export function getSectionPrefs() {
-  return getPreferenceValues();
+export function getSectionPrefs(): SectionPreferences {
+  return getPreferenceValues<SectionPreferences>();
 }
 
 /**
