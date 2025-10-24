@@ -5,10 +5,16 @@ All notable changes to the Zshrc Manager extension will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
+- Initial release of Zshrc Manager extension
+- Core functionality for managing zshrc configuration
+- Support for aliases, exports, functions, plugins, sources, evals, and setopts
+- Basic search and filtering capabilities
+- Section organization and detail views
+- Form-based editing for aliases and exports
 - Comprehensive statistics overview of zshrc configuration
 - Smart search across all content types with real-time filtering
 - Section-based organization of zshrc content
@@ -30,17 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling in form components
 - Enhanced validation for alias names and export variables
 - Fixed search filtering edge cases
-
-## [1.0.0] - {PR_MERGE_DATE}
-
-### Added
-
-- Initial release of Zshrc Manager extension
-- Core functionality for managing zshrc configuration
-- Support for aliases, exports, functions, plugins, sources, evals, and setopts
-- Basic search and filtering capabilities
-- Section organization and detail views
-- Form-based editing for aliases and exports
 
 ### Commands
 
