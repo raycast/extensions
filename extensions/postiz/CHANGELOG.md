@@ -1,6 +1,6 @@
 # Postiz Changelog
 
-## [Fix Creation Failing + Post Enhancements] - {PR_MERGE_DATE}
+## [Fix Creation Failing + Post Enhancements] - 2025-10-24
 
 ### Search Posts
 - Posts sorted by "publishDate"
