@@ -28,6 +28,59 @@
   "engines": {
     "node": ">=18.17.0 <23"
   },
+  "preferences": [
+    {
+      "name": "enableDefaults",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable Default Section Patterns",
+      "title": "Enable Default Section Patterns",
+      "description": "Enable built-in section detection patterns (recommended)"
+    },
+    {
+      "name": "enableCustomHeaderPattern",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Custom Header Pattern",
+      "title": "Enable Custom Header Pattern",
+      "description": "Use a custom regex pattern for section headers"
+    },
+    {
+      "name": "customHeaderPattern",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Header Pattern",
+      "description": "Regex pattern for section headers (must include one capture group for section name)",
+      "placeholder": "^#\\s+(.+)$"
+    },
+    {
+      "name": "enableCustomStartEndPatterns",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Custom Start/End Patterns",
+      "title": "Enable Custom Start/End Patterns",
+      "description": "Use custom regex patterns for section start/end markers"
+    },
+    {
+      "name": "customStartPattern",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Start Pattern",
+      "description": "Regex pattern for section start markers (must include one capture group for section name)",
+      "placeholder": "^#\\s*start\\s+(.+)$"
+    },
+    {
+      "name": "customEndPattern",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom End Pattern",
+      "description": "Regex pattern for section end markers",
+      "placeholder": "^#\\s*end\\s+(.+)$"
+    }
+  ],
   "commands": [
     {
       "name": "zshrc-statistics",
