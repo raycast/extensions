@@ -3,7 +3,17 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { Action, ActionPanel, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  getPreferenceValues,
+  open,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { showFailureToast, useForm } from "@raycast/utils";
 
 import { AcceptableCloneProtocol, buildCloneCommand } from "../helpers/repository";
@@ -44,9 +54,9 @@ export default function CheckoutPullRequestForm({ pullRequest }: CheckoutPullReq
             style: Toast.Style.Animated,
           });
 
-          await execAsync(`git fetch origin ${branchName}:${branchName}`, { cwd: targetDir });
-          await execAsync(`git reset --hard origin/${branchName}`, { cwd: targetDir });
+          await execAsync(`git fetch origin ${branchName}`, { cwd: targetDir });
           await execAsync(`git checkout ${branchName}`, { cwd: targetDir });
+          await execAsync(`git reset --hard origin/${branchName}`, { cwd: targetDir });
 
           await showToast({
             style: Toast.Style.Success,
@@ -80,6 +90,8 @@ export default function CheckoutPullRequestForm({ pullRequest }: CheckoutPullReq
         }
 
         await open(targetDir);
+        await popToRoot();
+        await closeMainWindow();
       } catch (error) {
         if (error instanceof Error && error.message.includes("Repository not found")) {
           await showFailureToast(error, {
