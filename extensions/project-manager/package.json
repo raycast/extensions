@@ -5,6 +5,7 @@
   "description": "Manage and open your projects with multiple code editors and Claude Code",
   "icon": "icon.png",
   "author": "mcson2",
+  "version":"1.0.1",
   "license": "MIT",
   "commands": [
     {
