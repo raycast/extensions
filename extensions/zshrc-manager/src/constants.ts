@@ -73,8 +73,7 @@ export const PARSING_CONSTANTS = {
   /** Regex patterns for parsing zsh content */
   PATTERNS: {
     ALIAS: /^(?:\s*)alias\s+([A-Za-z0-9_.:-]+)=(?:'|")(.*?)(?:'|")(?:\s*)$/,
-    EXPORT:
-      /^(?:\s*)(?:export|typeset\s+-x)\s+([A-Za-z_][A-Za-z0-9_]*)=(.*?)(?:\s*)$/,
+    EXPORT: /^(?:\s*)(?:export|typeset\s+-x)\s+([A-Za-z_][A-Za-z0-9_]*)=(.*?)(?:\s*)$/,
     EVAL: /^(?:\s*)eval\s+(.+?)(?:\s*)$/,
     SETOPT: /^(?:\s*)setopt\s+(.+?)(?:\s*)$/,
     PLUGIN: /^(?:\s*)plugins\s*=\s*\(([^)]+)\)(?:\s*)$/,

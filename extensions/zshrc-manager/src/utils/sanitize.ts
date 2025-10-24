@@ -18,10 +18,7 @@ import { FILE_CONSTANTS } from "../constants";
  */
 export function sanitizeMarkdown(content: string): string {
   // Escape backticks to prevent code injection
-  return content
-    .replace(/`/g, "\\`")
-    .replace(/\$/g, "\\$")
-    .replace(/\\/g, "\\\\");
+  return content.replace(/`/g, "\\`").replace(/\$/g, "\\$").replace(/\\/g, "\\\\");
 }
 
 /**
@@ -73,7 +70,7 @@ export async function validateFilePath(filePath: string): Promise<boolean> {
 
     // Check if the resolved path is outside the home directory
     // This prevents access to system files like /etc/passwd
-    const homeDir = process.env.HOME || process.env.USERPROFILE;
+    const homeDir = process.env["HOME"] || process.env["USERPROFILE"];
     if (homeDir && !resolvedPath.startsWith(homeDir)) {
       return false;
     }
@@ -103,10 +100,7 @@ export function validateFileSize(fileSize: number): boolean {
  * @param maxLength Maximum allowed length (defaults to FILE_CONSTANTS.MAX_CONTENT_LENGTH)
  * @returns Truncated content with ellipsis if truncated
  */
-export function truncateContent(
-  content: string,
-  maxLength: number = FILE_CONSTANTS.MAX_CONTENT_LENGTH,
-): string {
+export function truncateContent(content: string, maxLength: number = FILE_CONSTANTS.MAX_CONTENT_LENGTH): string {
   if (content.length <= maxLength) {
     return content;
   }

@@ -52,10 +52,7 @@ interface UseZshrcFilterResult<T extends FilterableItem> {
  *   </List>
  * );
  */
-export function useZshrcFilter<T extends FilterableItem>(
-  items: T[],
-  searchFields: string[],
-): UseZshrcFilterResult<T> {
+export function useZshrcFilter<T extends FilterableItem>(items: T[], searchFields: string[]): UseZshrcFilterResult<T> {
   const [searchText, setSearchText] = useState("");
 
   const filtered = useMemo(() => {

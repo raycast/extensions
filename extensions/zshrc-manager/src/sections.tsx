@@ -1,62 +1,23 @@
-import {
-  Action,
-  ActionPanel,
-  List,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useState, useEffect } from "react";
-import { readZshrcFile, ZSHRC_PATH } from "./lib/zsh";
-import { LogicalSection, toLogicalSections } from "./lib/parse-zshrc";
+import { Action, ActionPanel, List, Icon } from "@raycast/api";
+import { useState } from "react";
+import { ZSHRC_PATH } from "./lib/zsh";
 import { MODERN_COLORS } from "./constants";
 import { getSectionIcon } from "./lib/section-icons";
 import { SectionDetail } from "./section-detail";
+import { useZshrcLoader } from "./hooks/useZshrcLoader";
+import { generateSectionAccessories, calculateTotalEntries } from "./utils/section-accessories";
 
 /**
  * Sections management command for zshrc content
  */
 export default function Sections() {
-  const [sections, setSections] = useState<LogicalSection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { sections, isLoading, refresh } = useZshrcLoader("Sections");
   const [searchText, setSearchText] = useState("");
 
-  const loadSections = async () => {
-    try {
-      const content = await readZshrcFile();
-      const parsedSections = toLogicalSections(content);
-      setSections([...parsedSections]);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error Loading Sections",
-        message:
-          error instanceof Error ? error.message : "Failed to load zshrc file",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const filteredSections = sections.filter((section) => section.label.toLowerCase().includes(searchText.toLowerCase()));
 
-  useEffect(() => {
-    loadSections();
-  }, []);
-
-  const handleRefresh = () => {
-    setIsLoading(true);
-    loadSections();
-  };
-
-  const filteredSections = sections.filter((section) =>
-    section.label.toLowerCase().includes(searchText.toLowerCase()),
-  );
-
-  const labeledSections = filteredSections.filter(
-    (section) => section.label !== "Unlabeled",
-  );
-  const unlabeledSections = filteredSections.filter(
-    (section) => section.label === "Unlabeled",
-  );
+  const labeledSections = filteredSections.filter((section) => section.label !== "Unlabeled");
+  const unlabeledSections = filteredSections.filter((section) => section.label === "Unlabeled");
 
   return (
     <List
@@ -70,14 +31,10 @@ export default function Sections() {
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            onAction={handleRefresh}
+            onAction={refresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action.Open
-            title="Open ~/.Zshrc"
-            target={ZSHRC_PATH}
-            icon={Icon.Document}
-          />
+          <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
         </ActionPanel>
       }
     >
@@ -112,15 +69,11 @@ Each section contains related configuration:
           }
           actions={
             <ActionPanel>
-              <Action.Open
-                title="Open ~/.Zshrc"
-                target={ZSHRC_PATH}
-                icon={Icon.Document}
-              />
+              <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
               <Action
                 title="Refresh Sections"
                 icon={Icon.ArrowClockwise}
-                onAction={handleRefresh}
+                onAction={refresh}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
             </ActionPanel>
@@ -132,22 +85,7 @@ Each section contains related configuration:
         <List.Section title="Labeled Sections">
           {labeledSections.map((section) => {
             const sectionIcon = getSectionIcon(section.label);
-            const totalEntries =
-              section.aliasCount +
-              section.exportCount +
-              section.functionCount +
-              section.pluginCount +
-              section.sourceCount +
-              section.evalCount +
-              section.setoptCount +
-              section.autoloadCount +
-              section.fpathCount +
-              section.pathCount +
-              section.themeCount +
-              section.completionCount +
-              section.historyCount +
-              section.keybindingCount +
-              section.otherCount;
+            const totalEntries = calculateTotalEntries(section);
 
             return (
               <List.Item
@@ -157,52 +95,7 @@ Each section contains related configuration:
                   source: sectionIcon.icon,
                   tintColor: sectionIcon.color,
                 }}
-                accessories={[
-                  ...(section.aliasCount > 0
-                    ? [
-                        {
-                          icon: {
-                            source: Icon.Terminal,
-                            tintColor: MODERN_COLORS.success,
-                          },
-                          text: `${section.aliasCount}`,
-                        },
-                      ]
-                    : []),
-                  ...(section.exportCount > 0
-                    ? [
-                        {
-                          icon: {
-                            source: Icon.Box,
-                            tintColor: MODERN_COLORS.primary,
-                          },
-                        },
-                        { text: `${section.exportCount}` },
-                      ]
-                    : []),
-                  ...(section.functionCount > 0
-                    ? [
-                        {
-                          icon: {
-                            source: Icon.Code,
-                            tintColor: MODERN_COLORS.primary,
-                          },
-                        },
-                        { text: `${section.functionCount}` },
-                      ]
-                    : []),
-                  ...(section.pluginCount > 0
-                    ? [
-                        {
-                          icon: {
-                            source: Icon.Box,
-                            tintColor: MODERN_COLORS.warning,
-                          },
-                        },
-                        { text: `${section.pluginCount}` },
-                      ]
-                    : []),
-                ]}
+                accessories={generateSectionAccessories(section)}
                 detail={
                   <List.Item.Detail
                     markdown={`
@@ -234,15 +127,11 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
                       target={<SectionDetail section={section} />}
                       icon={Icon.Eye}
                     />
-                    <Action.Open
-                      title="Open ~/.Zshrc"
-                      target={ZSHRC_PATH}
-                      icon={Icon.Document}
-                    />
+                    <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
-                      onAction={handleRefresh}
+                      onAction={refresh}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
                   </ActionPanel>
@@ -257,22 +146,7 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
         <List.Section title="Unlabeled Sections">
           {unlabeledSections.map((section, index) => {
             const sectionIcon = getSectionIcon(section.label);
-            const totalEntries =
-              section.aliasCount +
-              section.exportCount +
-              section.functionCount +
-              section.pluginCount +
-              section.sourceCount +
-              section.evalCount +
-              section.setoptCount +
-              section.autoloadCount +
-              section.fpathCount +
-              section.pathCount +
-              section.themeCount +
-              section.completionCount +
-              section.historyCount +
-              section.keybindingCount +
-              section.otherCount;
+            const totalEntries = calculateTotalEntries(section);
 
             return (
               <List.Item
@@ -282,52 +156,7 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
                   source: sectionIcon.icon,
                   tintColor: sectionIcon.color,
                 }}
-                accessories={[
-                  ...(section.aliasCount > 0
-                    ? [
-                        {
-                          icon: {
-                            source: Icon.Terminal,
-                            tintColor: MODERN_COLORS.success,
-                          },
-                          text: `${section.aliasCount}`,
-                        },
-                      ]
-                    : []),
-                  ...(section.exportCount > 0
-                    ? [
-                        {
-                          icon: {
-                            source: Icon.Box,
-                            tintColor: MODERN_COLORS.primary,
-                          },
-                        },
-                        { text: `${section.exportCount}` },
-                      ]
-                    : []),
-                  ...(section.functionCount > 0
-                    ? [
-                        {
-                          icon: {
-                            source: Icon.Code,
-                            tintColor: MODERN_COLORS.primary,
-                          },
-                        },
-                        { text: `${section.functionCount}` },
-                      ]
-                    : []),
-                  ...(section.pluginCount > 0
-                    ? [
-                        {
-                          icon: {
-                            source: Icon.Box,
-                            tintColor: MODERN_COLORS.warning,
-                          },
-                        },
-                        { text: `${section.pluginCount}` },
-                      ]
-                    : []),
-                ]}
+                accessories={generateSectionAccessories(section)}
                 detail={
                   <List.Item.Detail
                     markdown={`
@@ -363,15 +192,11 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
                       target={<SectionDetail section={section} />}
                       icon={Icon.Eye}
                     />
-                    <Action.Open
-                      title="Open ~/.Zshrc"
-                      target={ZSHRC_PATH}
-                      icon={Icon.Document}
-                    />
+                    <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
-                      onAction={handleRefresh}
+                      onAction={refresh}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
                   </ActionPanel>

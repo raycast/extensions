@@ -12,11 +12,7 @@ import { MODERN_COLORS } from "./constants";
 import { getSectionIcon } from "./lib/section-icons";
 import { useZshrcLoader } from "./hooks/useZshrcLoader";
 import { truncateValueMiddle } from "./utils/formatters";
-import {
-  calculateStatistics,
-  hasContent,
-  getTopEntries,
-} from "./utils/statistics";
+import { calculateStatistics, hasContent, getTopEntries } from "./utils/statistics";
 
 /**
  * Statistics overview command for zshrc content
@@ -25,8 +21,7 @@ import {
  * with quick links to manage individual entry types.
  */
 export default function ZshrcStatistics() {
-  const { sections, isLoading, refresh, isFromCache } =
-    useZshrcLoader("Statistics");
+  const { sections, isLoading, refresh, isFromCache } = useZshrcLoader("Statistics");
   const stats = sections.length > 0 ? calculateStatistics(sections) : null;
 
   const handleRefresh = () => {
@@ -40,9 +35,7 @@ export default function ZshrcStatistics() {
           title="📊 Loading..."
           subtitle="Analyzing .zshrc"
           icon={{ source: Icon.Document, tintColor: MODERN_COLORS.primary }}
-          accessories={[
-            { text: isFromCache ? "Cached" : "Reading", icon: Icon.Clock },
-          ]}
+          accessories={[{ text: isFromCache ? "Cached" : "Reading", icon: Icon.Clock }]}
           detail={
             <List.Item.Detail
               markdown={`
@@ -87,10 +80,7 @@ ${isFromCache ? "⚠️ Using cached data" : "📖 Reading file..."}
                 `}
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Sections Found"
-                    text={`${sectionLength} total`}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Sections Found" text={`${sectionLength} total`} />
                   {getTopEntries(sections, 6).map((section, idx) => (
                     <List.Item.Detail.Metadata.Label
                       key={`section-${idx}`}
@@ -108,16 +98,8 @@ ${isFromCache ? "⚠️ Using cached data" : "📖 Reading file..."}
           }
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View All Sections"
-                target={<Sections />}
-                icon={Icon.Folder}
-              />
-              <Action.Open
-                title="Open ~/.Zshrc"
-                target={ZSHRC_PATH}
-                icon={Icon.Document}
-              />
+              <Action.Push title="View All Sections" target={<Sections />} icon={Icon.Folder} />
+              <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
               <Action
                 title="Refresh Statistics"
                 icon={Icon.ArrowClockwise}
@@ -144,10 +126,7 @@ ${getTopEntries(allAliases, 5)
                 `}
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Aliases Found"
-                    text={`${allAliases.length} total`}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Aliases Found" text={`${allAliases.length} total`} />
                   {getTopEntries(allAliases, 6).map((alias, idx) => (
                     <List.Item.Detail.Metadata.Label
                       key={`alias-${idx}`}
@@ -162,16 +141,8 @@ ${getTopEntries(allAliases, 5)
           }
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View All Aliases"
-                target={<Aliases />}
-                icon={Icon.Terminal}
-              />
-              <Action.Open
-                title="Open ~/.Zshrc"
-                target={ZSHRC_PATH}
-                icon={Icon.Document}
-              />
+              <Action.Push title="View All Aliases" target={<Aliases />} icon={Icon.Terminal} />
+              <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
               <Action
                 title="Refresh Statistics"
                 icon={Icon.ArrowClockwise}
@@ -198,10 +169,7 @@ ${getTopEntries(allExports, 5)
                 `}
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Exports Found"
-                    text={`${allExports.length} total`}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Exports Found" text={`${allExports.length} total`} />
                   {getTopEntries(allExports, 6).map((exp, idx) => (
                     <List.Item.Detail.Metadata.Label
                       key={`export-${idx}`}
@@ -216,16 +184,8 @@ ${getTopEntries(allExports, 5)
           }
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View All Exports"
-                target={<Exports />}
-                icon={Icon.Box}
-              />
-              <Action.Open
-                title="Open ~/.Zshrc"
-                target={ZSHRC_PATH}
-                icon={Icon.Document}
-              />
+              <Action.Push title="View All Exports" target={<Exports />} icon={Icon.Box} />
+              <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
               <Action
                 title="Refresh Statistics"
                 icon={Icon.ArrowClockwise}
@@ -261,16 +221,8 @@ ${getTopEntries(allFunctions, 10)
             }
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View All Functions"
-                  target={<Functions />}
-                  icon={Icon.Code}
-                />
-                <Action.Open
-                  title="Open ~/.Zshrc"
-                  target={ZSHRC_PATH}
-                  icon={Icon.Document}
-                />
+                <Action.Push title="View All Functions" target={<Functions />} icon={Icon.Code} />
+                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -306,16 +258,8 @@ ${getTopEntries(allPlugins, 10)
             }
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View All Plugins"
-                  target={<Plugins />}
-                  icon={Icon.Box}
-                />
-                <Action.Open
-                  title="Open ~/.Zshrc"
-                  target={ZSHRC_PATH}
-                  icon={Icon.Document}
-                />
+                <Action.Push title="View All Plugins" target={<Plugins />} icon={Icon.Box} />
+                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -351,16 +295,8 @@ ${getTopEntries(allSources, 10)
             }
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View All Sources"
-                  target={<Sources />}
-                  icon={Icon.Document}
-                />
-                <Action.Open
-                  title="Open ~/.Zshrc"
-                  target={ZSHRC_PATH}
-                  icon={Icon.Document}
-                />
+                <Action.Push title="View All Sources" target={<Sources />} icon={Icon.Document} />
+                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -396,16 +332,8 @@ ${getTopEntries(allEvals, 10)
             }
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View All Evals"
-                  target={<Evals />}
-                  icon={Icon.Terminal}
-                />
-                <Action.Open
-                  title="Open ~/.Zshrc"
-                  target={ZSHRC_PATH}
-                  icon={Icon.Document}
-                />
+                <Action.Push title="View All Evals" target={<Evals />} icon={Icon.Terminal} />
+                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -441,16 +369,8 @@ ${getTopEntries(allSetopts, 10)
             }
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View All Setopts"
-                  target={<Setopts />}
-                  icon={Icon.Gear}
-                />
-                <Action.Open
-                  title="Open ~/.Zshrc"
-                  target={ZSHRC_PATH}
-                  icon={Icon.Document}
-                />
+                <Action.Push title="View All Setopts" target={<Setopts />} icon={Icon.Gear} />
+                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -479,11 +399,7 @@ ${getTopEntries(allSetopts, 10)
             onAction={handleRefresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action.Open
-            title="Open ~/.Zshrc"
-            target={ZSHRC_PATH}
-            icon={Icon.Document}
-          />
+          <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
         </ActionPanel>
       }
     >

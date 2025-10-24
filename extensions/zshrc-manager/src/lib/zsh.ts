@@ -8,18 +8,8 @@
 import { homedir } from "os";
 import { readFile, writeFile, stat } from "fs/promises";
 import { FILE_CONSTANTS, ERROR_MESSAGES } from "../constants";
-import {
-  FileNotFoundError,
-  PermissionError,
-  FileTooLargeError,
-  ReadError,
-  WriteError,
-} from "../utils/errors";
-import {
-  validateFilePath,
-  validateFileSize,
-  truncateContent,
-} from "../utils/sanitize";
+import { FileNotFoundError, PermissionError, FileTooLargeError, ReadError, WriteError } from "../utils/errors";
+import { validateFilePath, validateFileSize, truncateContent } from "../utils/sanitize";
 
 export const ZSHRC_PATH: string = `${homedir()}/${FILE_CONSTANTS.ZSHRC_FILENAME}`;
 
@@ -42,11 +32,7 @@ export async function readZshrcFile(): Promise<string> {
     // Check file size before reading
     const stats = await stat(ZSHRC_PATH);
     if (!validateFileSize(stats.size)) {
-      throw new FileTooLargeError(
-        ZSHRC_PATH,
-        stats.size,
-        FILE_CONSTANTS.MAX_FILE_SIZE,
-      );
+      throw new FileTooLargeError(ZSHRC_PATH, stats.size, FILE_CONSTANTS.MAX_FILE_SIZE);
     }
 
     const fileContents = await readFile(ZSHRC_PATH, { encoding: "utf8" });

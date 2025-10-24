@@ -26,8 +26,7 @@ export abstract class ZshManagerError extends Error {
  */
 export class FileNotFoundError extends ZshManagerError {
   readonly code = "FILE_NOT_FOUND";
-  readonly userMessage =
-    "~/.zshrc file not found. Please ensure the file exists in your home directory.";
+  readonly userMessage = "~/.zshrc file not found. Please ensure the file exists in your home directory.";
 
   constructor(filePath: string) {
     super(`Zshrc file not found: ${filePath}`, { filePath });
@@ -39,8 +38,7 @@ export class FileNotFoundError extends ZshManagerError {
  */
 export class PermissionError extends ZshManagerError {
   readonly code = "PERMISSION_DENIED";
-  readonly userMessage =
-    "Permission denied reading ~/.zshrc. Please check file permissions.";
+  readonly userMessage = "Permission denied reading ~/.zshrc. Please check file permissions.";
 
   constructor(filePath: string) {
     super(`Permission denied reading file: ${filePath}`, { filePath });
@@ -52,8 +50,7 @@ export class PermissionError extends ZshManagerError {
  */
 export class FileTooLargeError extends ZshManagerError {
   readonly code = "FILE_TOO_LARGE";
-  readonly userMessage =
-    "~/.zshrc file is too large to process. Please reduce file size.";
+  readonly userMessage = "~/.zshrc file is too large to process. Please reduce file size.";
 
   constructor(filePath: string, fileSize: number, maxSize: number) {
     super(`File too large: ${filePath} (${fileSize} bytes, max: ${maxSize})`, {
@@ -69,8 +66,7 @@ export class FileTooLargeError extends ZshManagerError {
  */
 export class ParseError extends ZshManagerError {
   readonly code = "PARSE_ERROR";
-  readonly userMessage =
-    "Failed to parse ~/.zshrc content. Please check for syntax errors.";
+  readonly userMessage = "Failed to parse ~/.zshrc content. Please check for syntax errors.";
 
   constructor(message: string, lineNumber?: number, content?: string) {
     super(`Parse error: ${message}`, { lineNumber, content });
@@ -100,13 +96,10 @@ export class WriteError extends ZshManagerError {
   readonly userMessage = "Failed to write to ~/.zshrc file. Please try again.";
 
   constructor(filePath: string, originalError?: Error) {
-    super(
-      `Write error for ${filePath}: ${originalError?.message || "Unknown error"}`,
-      {
-        filePath,
-        originalError: originalError?.message,
-      },
-    );
+    super(`Write error for ${filePath}: ${originalError?.message || "Unknown error"}`, {
+      filePath,
+      originalError: originalError?.message,
+    });
   }
 }
 

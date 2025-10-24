@@ -38,9 +38,7 @@ export function formatCount(count: number, singular: string): string {
     return `${count} ${singular}`;
   }
   // Handle words ending in 's' or 'ss' or 'x' or 'z' or 'ch' or 'sh'
-  const plural = singular.match(/[sxz]$|[cs]h$/)
-    ? `${singular}es`
-    : `${singular}s`;
+  const plural = singular.match(/[sxz]$|[cs]h$/) ? `${singular}es` : `${singular}s`;
   return `${count} ${plural}`;
 }
 
@@ -66,8 +64,5 @@ export function formatLineRange(startLine: number, endLine: number): string {
  * @returns Sanitized value safe for markdown display
  */
 export function sanitizeForMarkdown(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/`/g, "\\`")
-    .replace(/\$/g, "\\$");
+  return value.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$/g, "\\$");
 }

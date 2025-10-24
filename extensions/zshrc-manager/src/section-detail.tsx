@@ -6,11 +6,7 @@ import { ZSHRC_PATH } from "./lib/zsh";
 import EditAlias from "./edit-alias";
 import EditExport from "./edit-export";
 import { truncateValueMiddle } from "./utils/formatters";
-import {
-  parseSectionContent,
-  applyContentFilter,
-  generateSectionMarkdown,
-} from "./utils/markdown";
+import { parseSectionContent, applyContentFilter, generateSectionMarkdown } from "./utils/markdown";
 
 interface SectionDetailProps {
   /** The section to display */
@@ -38,11 +34,7 @@ export function SectionDetail({
   displayMode = "formatted",
 }: SectionDetailProps) {
   const content = parseSectionContent(section);
-  const markdownContent = generateSectionMarkdown(
-    section,
-    displayMode,
-    content,
-  );
+  const markdownContent = generateSectionMarkdown(section, displayMode, content);
 
   return (
     <Detail
@@ -56,11 +48,7 @@ export function SectionDetail({
               content={section.content}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
-            <Action.Open
-              title="Open ~/.Zshrc"
-              target={ZSHRC_PATH}
-              icon={Icon.Document}
-            />
+            <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
             <Action.OpenWith title="Open with Editor" path={ZSHRC_PATH} />
             <Action.CopyToClipboard
               title="Copy Section Name"
@@ -239,14 +227,8 @@ Type \`${alias.name}\` in your terminal to execute: \`${alias.command}\`
                                     title="Copy Alias"
                                     content={`alias ${alias.name}='${alias.command}'`}
                                   />
-                                  <Action.CopyToClipboard
-                                    title="Copy Command Only"
-                                    content={alias.command}
-                                  />
-                                  <Action.CopyToClipboard
-                                    title="Copy Name Only"
-                                    content={alias.name}
-                                  />
+                                  <Action.CopyToClipboard title="Copy Command Only" content={alias.command} />
+                                  <Action.CopyToClipboard title="Copy Name Only" content={alias.name} />
                                 </ActionPanel>
                               }
                             />
@@ -338,14 +320,8 @@ This environment variable will be available to all child processes.
                                     title="Copy Export"
                                     content={`export ${exp.variable}=${exp.value}`}
                                   />
-                                  <Action.CopyToClipboard
-                                    title="Copy Value Only"
-                                    content={exp.value}
-                                  />
-                                  <Action.CopyToClipboard
-                                    title="Copy Variable Only"
-                                    content={exp.variable}
-                                  />
+                                  <Action.CopyToClipboard title="Copy Value Only" content={exp.value} />
+                                  <Action.CopyToClipboard title="Copy Variable Only" content={exp.variable} />
                                 </ActionPanel>
                               }
                             />
@@ -419,10 +395,7 @@ This line is part of the "${section.label}" section in your zshrc file.
                               `}
                               actions={
                                 <ActionPanel>
-                                  <Action.CopyToClipboard
-                                    title="Copy Line"
-                                    content={line}
-                                  />
+                                  <Action.CopyToClipboard title="Copy Line" content={line} />
                                 </ActionPanel>
                               }
                             />
@@ -549,14 +522,8 @@ Type \`${alias.name}\` in your terminal to execute: \`${alias.command}\`
                                     title="Copy Alias"
                                     content={`alias ${alias.name}='${alias.command}'`}
                                   />
-                                  <Action.CopyToClipboard
-                                    title="Copy Command Only"
-                                    content={alias.command}
-                                  />
-                                  <Action.CopyToClipboard
-                                    title="Copy Name Only"
-                                    content={alias.name}
-                                  />
+                                  <Action.CopyToClipboard title="Copy Command Only" content={alias.command} />
+                                  <Action.CopyToClipboard title="Copy Name Only" content={alias.name} />
                                 </ActionPanel>
                               }
                             />
@@ -648,14 +615,8 @@ This environment variable will be available to all child processes.
                                     title="Copy Export"
                                     content={`export ${exp.variable}=${exp.value}`}
                                   />
-                                  <Action.CopyToClipboard
-                                    title="Copy Value Only"
-                                    content={exp.value}
-                                  />
-                                  <Action.CopyToClipboard
-                                    title="Copy Variable Only"
-                                    content={exp.variable}
-                                  />
+                                  <Action.CopyToClipboard title="Copy Value Only" content={exp.value} />
+                                  <Action.CopyToClipboard title="Copy Variable Only" content={exp.variable} />
                                 </ActionPanel>
                               }
                             />
@@ -729,10 +690,7 @@ This line is part of the "${section.label}" section in your zshrc file.
                               `}
                               actions={
                                 <ActionPanel>
-                                  <Action.CopyToClipboard
-                                    title="Copy Line"
-                                    content={line}
-                                  />
+                                  <Action.CopyToClipboard title="Copy Line" content={line} />
                                 </ActionPanel>
                               }
                             />

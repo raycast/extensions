@@ -5,9 +5,7 @@ import * as SimpleIcons from "simple-icons";
 /**
  * Helper function to get Simple Icon data
  */
-function getSimpleIcon(
-  name: string,
-): { svg: string; hex: string; title?: string; slug?: string } | null {
+function getSimpleIcon(name: string): { svg: string; hex: string; title?: string; slug?: string } | null {
   try {
     // Convert name to Simple Icons property format (e.g., "python" -> "siPython")
     const propertyName = `si${name.charAt(0).toUpperCase()}${name.slice(1)}`;
@@ -86,9 +84,7 @@ function normalizeSectionName(name: string): string {
 /**
  * Finds the best matching Simple Icon for a section name
  */
-function findBestSimpleIcon(
-  sectionName: string,
-): { name: string; icon: { svg: string; hex?: string } } | null {
+function findBestSimpleIcon(sectionName: string): { name: string; icon: { svg: string; hex?: string } } | null {
   const normalized = normalizeSectionName(sectionName);
 
   // Skip semantic categories - they should use Raycast icons
@@ -158,9 +154,7 @@ function findBestSimpleIcon(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const slug: string = (icon as any)?.slug || name;
       const slugNormalized = slug.replace(/-/g, "");
-      const titleNorm = (icon?.title || name)
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "");
+      const titleNorm = (icon?.title || name).toLowerCase().replace(/[^a-z0-9]/g, "");
       return {
         key,
         name,
@@ -192,9 +186,7 @@ function findBestSimpleIcon(
         it.titleNorm.startsWith(normalized),
     );
     if (startsWith.length > 0) {
-      const sorted = startsWith.sort(
-        (a, b) => b.slugNormalized.length - a.slugNormalized.length,
-      );
+      const sorted = startsWith.sort((a, b) => b.slugNormalized.length - a.slugNormalized.length);
       return sorted[0] || null;
     }
   }
@@ -205,19 +197,12 @@ function findBestSimpleIcon(
       const candidates = [it.slugNormalized, it.name, it.titleNorm];
       return candidates.some((cand) => {
         if (cand.length < 3) return false;
-        const lengthRatio =
-          Math.min(normalized.length, cand.length) /
-          Math.max(normalized.length, cand.length);
-        return (
-          lengthRatio > 0.6 &&
-          (cand.includes(normalized) || normalized.includes(cand))
-        );
+        const lengthRatio = Math.min(normalized.length, cand.length) / Math.max(normalized.length, cand.length);
+        return lengthRatio > 0.6 && (cand.includes(normalized) || normalized.includes(cand));
       });
     });
     if (contains.length > 0) {
-      const sorted = contains.sort(
-        (a, b) => b.slugNormalized.length - a.slugNormalized.length,
-      );
+      const sorted = contains.sort((a, b) => b.slugNormalized.length - a.slugNormalized.length);
       return sorted[0] || null;
     }
   }
@@ -230,9 +215,7 @@ function findBestSimpleIcon(
       return distance <= Math.floor(maxLength * 0.25); // More lenient threshold
     });
     if (distMatches.length > 0) {
-      const sorted = distMatches.sort(
-        (a, b) => b.slugNormalized.length - a.slugNormalized.length,
-      );
+      const sorted = distMatches.sort((a, b) => b.slugNormalized.length - a.slugNormalized.length);
       return sorted[0] || null;
     }
   }
@@ -240,9 +223,7 @@ function findBestSimpleIcon(
   // 5) Word-based matching for compound names
   if (normalized.length >= 4) {
     // Split on hyphens, underscores, and camelCase boundaries
-    const words = normalized
-      .split(/[-_]|(?=[A-Z])/)
-      .filter((w) => w.length >= 2);
+    const words = normalized.split(/[-_]|(?=[A-Z])/).filter((w) => w.length >= 2);
     if (words.length > 1) {
       // Try to find icons that match any of the words
       const wordMatches = allIcons.filter((it) => {
@@ -404,16 +385,7 @@ function getSemanticCategory(sectionName: string): {
     "symfony",
   ];
 
-  const databases = [
-    "mysql",
-    "postgresql",
-    "mongodb",
-    "redis",
-    "sqlite",
-    "mariadb",
-    "elasticsearch",
-    "cassandra",
-  ];
+  const databases = ["mysql", "postgresql", "mongodb", "redis", "sqlite", "mariadb", "elasticsearch", "cassandra"];
 
   const devops = [
     "docker",
@@ -429,19 +401,7 @@ function getSemanticCategory(sectionName: string): {
     "bitbucket",
   ];
 
-  const packageManagers = [
-    "npm",
-    "yarn",
-    "pnpm",
-    "pip",
-    "composer",
-    "cargo",
-    "maven",
-    "gradle",
-    "brew",
-    "apt",
-    "yum",
-  ];
+  const packageManagers = ["npm", "yarn", "pnpm", "pip", "composer", "cargo", "maven", "gradle", "brew", "apt", "yum"];
 
   // Zsh-specific frameworks and tools
   const zshFrameworks = [
@@ -785,8 +745,7 @@ function getSemanticCategory(sectionName: string): {
       color: MODERN_COLORS.warning,
     },
     {
-      pattern:
-        /^(powerlevel10k|p10k|starship|spaceship|pure|agnoster|robbyrussell)$/,
+      pattern: /^(powerlevel10k|p10k|starship|spaceship|pure|agnoster|robbyrussell)$/,
       icon: Icon.Eye,
       color: MODERN_COLORS.success,
     },
@@ -1004,10 +963,7 @@ function getSemanticCategory(sectionName: string): {
       return { icon: Icon.Folder, color: MODERN_COLORS.primary };
     }
 
-    if (
-      normalized.endsWith("completions") ||
-      normalized.endsWith("completion")
-    ) {
+    if (normalized.endsWith("completions") || normalized.endsWith("completion")) {
       return { icon: Icon.Terminal, color: MODERN_COLORS.success };
     }
 
@@ -1015,10 +971,7 @@ function getSemanticCategory(sectionName: string): {
       return { icon: Icon.Clock, color: MODERN_COLORS.neutral };
     }
 
-    if (
-      normalized.endsWith("keybindings") ||
-      normalized.endsWith("keybinding")
-    ) {
+    if (normalized.endsWith("keybindings") || normalized.endsWith("keybinding")) {
       return { icon: Icon.Keyboard, color: MODERN_COLORS.warning };
     }
   }

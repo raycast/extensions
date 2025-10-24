@@ -31,9 +31,7 @@ export interface ParsedSectionContent {
  * const content = parseSectionContent(section);
  * console.log(`Found ${content.aliases.length} aliases`);
  */
-export function parseSectionContent(
-  section: LogicalSection,
-): ParsedSectionContent {
+export function parseSectionContent(section: LogicalSection): ParsedSectionContent {
   const aliases = parseAliases(section.content);
   const exports = parseExports(section.content);
 
@@ -69,10 +67,8 @@ export function applyContentFilter(
   filterType: "all" | "aliases" | "exports" = "all",
 ): ParsedSectionContent {
   return {
-    aliases:
-      filterType === "aliases" || filterType === "all" ? content.aliases : [],
-    exports:
-      filterType === "exports" || filterType === "all" ? content.exports : [],
+    aliases: filterType === "aliases" || filterType === "all" ? content.aliases : [],
+    exports: filterType === "exports" || filterType === "all" ? content.exports : [],
     otherLines: filterType === "all" ? content.otherLines : [],
   };
 }
@@ -115,10 +111,7 @@ ${section.content}
  * const filtered = applyContentFilter(content, "aliases");
  * const md = generateCompactMarkdown(section, filtered);
  */
-export function generateCompactMarkdown(
-  section: LogicalSection,
-  content: ParsedSectionContent,
-): string {
+export function generateCompactMarkdown(section: LogicalSection, content: ParsedSectionContent): string {
   const hasAliases = content.aliases.length > 0;
   const hasExports = content.exports.length > 0;
   const hasOtherContent = content.otherLines.length > 0;
@@ -172,10 +165,7 @@ ${content.otherLines.join("\n")}
  * const content = parseSectionContent(section);
  * const md = generateFormattedMarkdown(section, content);
  */
-export function generateFormattedMarkdown(
-  section: LogicalSection,
-  content: ParsedSectionContent,
-): string {
+export function generateFormattedMarkdown(section: LogicalSection, content: ParsedSectionContent): string {
   const hasAliases = content.aliases.length > 0;
   const hasExports = content.exports.length > 0;
   const hasOtherContent = content.otherLines.length > 0;

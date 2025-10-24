@@ -48,10 +48,7 @@ class ZshrcCache {
     try {
       // Check if file has changed
       const stats = await stat(filePath);
-      if (
-        stats.size !== entry.fileSize ||
-        stats.mtime.getTime() !== entry.fileMtime
-      ) {
+      if (stats.size !== entry.fileSize || stats.mtime.getTime() !== entry.fileMtime) {
         this.cache.delete(filePath);
         return null;
       }
@@ -109,19 +106,14 @@ const cache = new ZshrcCache();
 /**
  * Get cached zshrc sections or null if not cached/expired
  */
-export async function getCachedSections(
-  filePath: string,
-): Promise<LogicalSection[] | null> {
+export async function getCachedSections(filePath: string): Promise<LogicalSection[] | null> {
   return cache.get(filePath);
 }
 
 /**
  * Cache zshrc sections
  */
-export async function setCachedSections(
-  filePath: string,
-  sections: LogicalSection[],
-): Promise<void> {
+export async function setCachedSections(filePath: string, sections: LogicalSection[]): Promise<void> {
   await cache.set(filePath, sections);
 }
 

@@ -1,64 +1,35 @@
-import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
-import { ZSHRC_PATH } from "./lib/zsh";
+import { Icon, List } from "@raycast/api";
 import { parseSetopts } from "./utils/parsers";
 import { MODERN_COLORS } from "./constants";
-import { useZshrcLoader } from "./hooks/useZshrcLoader";
-import { useZshrcFilter } from "./hooks/useZshrcFilter";
+import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
+
+/**
+ * Setopt item interface
+ */
+interface SetoptItem extends FilterableItem {
+  option: string;
+}
 
 /**
  * Setopts management command for zshrc content
  */
 export default function Setopts() {
-  const { sections, isLoading, refresh } = useZshrcLoader("Setopts");
-
-  const allSetopts = (sections || []).flatMap((section) =>
-    parseSetopts(section.content).map((setopt) => ({
-      ...setopt,
-      section: section.label,
-      sectionStartLine: section.startLine,
-    })),
-  );
-
-  const { searchText, setSearchText, grouped } = useZshrcFilter(allSetopts, [
-    "option",
-    "section",
-  ]);
-
   return (
-    <List
+    <ListViewController<SetoptItem>
+      commandName="Setopts"
       navigationTitle="Setopts"
-      searchBarPlaceholder="Search setopt options..."
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}
-      isShowingDetail={true}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={refresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-          <Action.Open
-            title="Open ~/.Zshrc"
-            target={ZSHRC_PATH}
-            icon={Icon.Document}
-          />
-        </ActionPanel>
-      }
-    >
-      <List.Section title="Overview">
-        <List.Item
-          title="Setopt Summary"
-          subtitle={`${allSetopts.length} setopts found across ${sections.length} sections`}
-          icon={{ source: Icon.Gear, tintColor: MODERN_COLORS.success }}
-          detail={
-            <List.Item.Detail
-              markdown={`
+      searchPlaceholder="Search setopt options..."
+      icon={Icon.Gear}
+      tintColor={MODERN_COLORS.success}
+      itemType="setopt"
+      itemTypePlural="setopts"
+      parser={parseSetopts}
+      searchFields={["option", "section"]}
+      generateTitle={(setopt) => setopt.option}
+      generateOverviewMarkdown={(_, allSetopts, grouped) => `
 # Setopt Summary
 
-Your \`.zshrc\` file contains **${allSetopts.length} setopts** across **${sections.length} sections**.
+Your \`.zshrc\` file contains **${allSetopts.length} setopts** across **${allSetopts.length > 0 ? Object.keys(grouped).length : 0} sections**.
 
 ## ⚙️ What are Setopts?
 Setopts are Zsh shell options that control the shell's behavior. They enable or disable various features like history management, job control, prompt expansion, and more.
@@ -82,46 +53,8 @@ Setopts are Zsh shell options that control the shell's behavior. They enable or 
 - **Prompts**: Prompt expansion options
 - **Expansion**: Variable/glob expansion options
 - **Completion**: Completion behavior options
-              `}
-            />
-          }
-          actions={
-            <ActionPanel>
-              <Action.Open
-                title="Open ~/.Zshrc"
-                target={ZSHRC_PATH}
-                icon={Icon.Document}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={refresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-
-      {Object.entries(grouped).map(([sectionName, setopts]) => (
-        <List.Section key={sectionName} title={sectionName}>
-          {setopts.map((setopt, index) => (
-            <List.Item
-              key={`${sectionName}-${setopt.option}-${index}`}
-              title={setopt.option}
-              icon={{ source: Icon.Gear, tintColor: MODERN_COLORS.success }}
-              accessories={[
-                { text: sectionName },
-                {
-                  icon: {
-                    source: Icon.Document,
-                    tintColor: Color.SecondaryText,
-                  },
-                },
-              ]}
-              detail={
-                <List.Item.Detail
-                  markdown={`
+      `}
+      generateItemMarkdown={(setopt) => `
 # Setopt: \`${setopt.option}\`
 
 ## ⚙️ Option Configuration
@@ -153,86 +86,43 @@ setopt ${setopt.option}
 
 ## 📖 Documentation
 Run \`man zshopptions\` in your terminal to see detailed documentation on all available setopts.
-                  `}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Option Name"
-                        text={setopt.option}
-                        icon={{
-                          source: Icon.Gear,
-                          tintColor: MODERN_COLORS.success,
-                        }}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Section"
-                        text={setopt.section}
-                        icon={{
-                          source: Icon.Folder,
-                          tintColor: MODERN_COLORS.neutral,
-                        }}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="File"
-                        text="~/.zshrc"
-                        icon={{
-                          source: Icon.Document,
-                          tintColor: MODERN_COLORS.neutral,
-                        }}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Type"
-                        text="Shell Option"
-                        icon={{
-                          source: Icon.Gear,
-                          tintColor: MODERN_COLORS.warning,
-                        }}
-                      />
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action.Open
-                    title="Open ~/.Zshrc"
-                    target={ZSHRC_PATH}
-                    icon={Icon.Document}
-                  />
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={refresh}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
-
-      {Object.keys(grouped).length === 0 && !isLoading && (
-        <List.Section title="No Setopts Found">
-          <List.Item
-            title="No setopt options match your search"
-            subtitle="Try adjusting your search terms"
+      `}
+      generateMetadata={(setopt) => (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="Option Name"
+            text={setopt.option}
             icon={{
-              source: Icon.MagnifyingGlass,
+              source: Icon.Gear,
+              tintColor: MODERN_COLORS.success,
+            }}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Section"
+            text={setopt.section}
+            icon={{
+              source: Icon.Folder,
               tintColor: MODERN_COLORS.neutral,
             }}
-            actions={
-              <ActionPanel>
-                <Action.Open
-                  title="Open ~/.Zshrc"
-                  target={ZSHRC_PATH}
-                  icon={Icon.Document}
-                />
-              </ActionPanel>
-            }
           />
-        </List.Section>
+          <List.Item.Detail.Metadata.Label
+            title="File"
+            text="~/.zshrc"
+            icon={{
+              source: Icon.Document,
+              tintColor: MODERN_COLORS.neutral,
+            }}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Type"
+            text="Shell Option"
+            icon={{
+              source: Icon.Gear,
+              tintColor: MODERN_COLORS.warning,
+            }}
+          />
+        </>
       )}
-    </List>
+    />
   );
 }

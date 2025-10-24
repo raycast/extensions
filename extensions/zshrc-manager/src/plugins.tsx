@@ -1,67 +1,42 @@
-import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
-import { ZSHRC_PATH } from "./lib/zsh";
+import { Icon, List } from "@raycast/api";
 import { parsePlugins } from "./utils/parsers";
 import { MODERN_COLORS } from "./constants";
-import { useZshrcLoader } from "./hooks/useZshrcLoader";
-import { useZshrcFilter } from "./hooks/useZshrcFilter";
+import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
+
+/**
+ * Plugin item interface
+ */
+interface PluginItem extends FilterableItem {
+  name: string;
+}
 
 /**
  * Plugins management command for zshrc content
  */
 export default function Plugins() {
-  const { sections, isLoading, refresh } = useZshrcLoader("Plugins");
-
-  const allPlugins = (sections || []).flatMap((section) =>
-    parsePlugins(section.content).map((plugin) => ({
-      ...plugin,
-      section: section.label,
-      sectionStartLine: section.startLine,
-    })),
-  );
-
-  const { searchText, setSearchText, grouped } = useZshrcFilter(allPlugins, [
-    "name",
-    "section",
-  ]);
-
-  // Get unique plugins (since they might appear in multiple sections)
-  const uniquePlugins = Array.from(new Set(allPlugins.map((p) => p.name)));
-
   return (
-    <List
+    <ListViewController<PluginItem>
+      commandName="Plugins"
       navigationTitle="Plugins"
-      searchBarPlaceholder="Search plugins..."
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}
-      isShowingDetail={true}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={refresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-          <Action.Open
-            title="Open ~/.Zshrc"
-            target={ZSHRC_PATH}
-            icon={Icon.Document}
-          />
-        </ActionPanel>
-      }
-    >
-      <List.Section title="Overview">
-        <List.Item
-          title="Plugin Summary"
-          subtitle={`${uniquePlugins.length} unique plugins found across ${sections.length} sections`}
-          icon={{ source: Icon.Box, tintColor: MODERN_COLORS.warning }}
-          detail={
-            <List.Item.Detail
-              markdown={`
+      searchPlaceholder="Search plugins..."
+      icon={Icon.Box}
+      tintColor={MODERN_COLORS.warning}
+      itemType="plugin"
+      itemTypePlural="plugins"
+      parser={parsePlugins}
+      searchFields={["name", "section"]}
+      generateTitle={(plugin) => plugin.name}
+      postProcessItems={(items) => {
+        // Get unique plugins (since they might appear in multiple sections)
+        const uniquePlugins = Array.from(new Set(items.map((p) => p.name)));
+        return items.filter((item) => uniquePlugins.includes(item.name));
+      }}
+      generateOverviewMarkdown={(_, allPlugins, grouped) => {
+        const uniquePlugins = Array.from(new Set(allPlugins.map((p) => p.name)));
+        return `
 # Plugin Summary
 
-Your \`.zshrc\` file contains **${uniquePlugins.length} unique plugins** across **${sections.length} sections**.
+Your \`.zshrc\` file contains **${uniquePlugins.length} unique plugins** across **${allPlugins.length > 0 ? Object.keys(grouped).length : 0} sections**.
 
 ## 🔌 What are Plugins?
 Plugins extend zsh functionality with additional features and commands. They're typically loaded through frameworks like Oh My Zsh, Zinit, or Antigen.
@@ -81,46 +56,9 @@ Plugins extend zsh functionality with additional features and commands. They're 
 
 ## ⚠️ Performance Note
 Too many plugins can slow down shell startup. Consider using lazy loading or removing unused plugins.
-              `}
-            />
-          }
-          actions={
-            <ActionPanel>
-              <Action.Open
-                title="Open ~/.Zshrc"
-                target={ZSHRC_PATH}
-                icon={Icon.Document}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={refresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-
-      {Object.entries(grouped).map(([sectionName, plugins]) => (
-        <List.Section key={sectionName} title={sectionName}>
-          {plugins.map((plugin, index) => (
-            <List.Item
-              key={`${sectionName}-${plugin.name}-${index}`}
-              title={plugin.name}
-              icon={{ source: Icon.Box, tintColor: MODERN_COLORS.warning }}
-              accessories={[
-                { text: sectionName },
-                {
-                  icon: {
-                    source: Icon.Document,
-                    tintColor: Color.SecondaryText,
-                  },
-                },
-              ]}
-              detail={
-                <List.Item.Detail
-                  markdown={`
+        `;
+      }}
+      generateItemMarkdown={(plugin) => `
 # Plugin: \`${plugin.name}\`
 
 ## 🔌 Plugin Configuration
@@ -147,86 +85,43 @@ plugins=(${plugin.name} ...)
 
 ## ⚠️ Note
 Plugin functionality depends on your zsh plugin manager. Use the "Open ~/.Zshrc" action to view the complete plugin configuration.
-                  `}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Plugin Name"
-                        text={plugin.name}
-                        icon={{
-                          source: Icon.Box,
-                          tintColor: MODERN_COLORS.warning,
-                        }}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Section"
-                        text={plugin.section}
-                        icon={{
-                          source: Icon.Folder,
-                          tintColor: MODERN_COLORS.neutral,
-                        }}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="File"
-                        text="~/.zshrc"
-                        icon={{
-                          source: Icon.Document,
-                          tintColor: MODERN_COLORS.neutral,
-                        }}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Type"
-                        text="Zsh Plugin"
-                        icon={{
-                          source: Icon.Gear,
-                          tintColor: MODERN_COLORS.success,
-                        }}
-                      />
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action.Open
-                    title="Open ~/.Zshrc"
-                    target={ZSHRC_PATH}
-                    icon={Icon.Document}
-                  />
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={refresh}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
-
-      {Object.keys(grouped).length === 0 && !isLoading && (
-        <List.Section title="No Plugins Found">
-          <List.Item
-            title="No plugins match your search"
-            subtitle="Try adjusting your search terms"
+      `}
+      generateMetadata={(plugin) => (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="Plugin Name"
+            text={plugin.name}
             icon={{
-              source: Icon.MagnifyingGlass,
+              source: Icon.Box,
+              tintColor: MODERN_COLORS.warning,
+            }}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Section"
+            text={plugin.section}
+            icon={{
+              source: Icon.Folder,
               tintColor: MODERN_COLORS.neutral,
             }}
-            actions={
-              <ActionPanel>
-                <Action.Open
-                  title="Open ~/.Zshrc"
-                  target={ZSHRC_PATH}
-                  icon={Icon.Document}
-                />
-              </ActionPanel>
-            }
           />
-        </List.Section>
+          <List.Item.Detail.Metadata.Label
+            title="File"
+            text="~/.zshrc"
+            icon={{
+              source: Icon.Document,
+              tintColor: MODERN_COLORS.neutral,
+            }}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Type"
+            text="Zsh Plugin"
+            icon={{
+              source: Icon.Gear,
+              tintColor: MODERN_COLORS.success,
+            }}
+          />
+        </>
       )}
-    </List>
+    />
   );
 }

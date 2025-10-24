@@ -11,11 +11,8 @@
  * @param content The raw content to parse
  * @returns Array of alias objects with name and command
  */
-export function parseAliases(
-  content: string,
-): ReadonlyArray<{ name: string; command: string }> {
-  const regex =
-    /^(?:\s*)alias\s+([A-Za-z0-9_.:-]+)=(?:'|")(.*?)(?:'|")(?:\s*)$/gm;
+export function parseAliases(content: string): ReadonlyArray<{ name: string; command: string }> {
+  const regex = /^(?:\s*)alias\s+([A-Za-z0-9_.:-]+)=(?:'|")(.*?)(?:'|")(?:\s*)$/gm;
   const result: Array<{ name: string; command: string }> = [];
   let match: RegExpExecArray | null;
   while ((match = regex.exec(content)) !== null) {
@@ -31,11 +28,8 @@ export function parseAliases(
  * @param content The raw content to parse
  * @returns Array of export objects with variable and value
  */
-export function parseExports(
-  content: string,
-): ReadonlyArray<{ variable: string; value: string }> {
-  const regex =
-    /^(?:\s*)(?:export|typeset\s+-x)\s+([A-Za-z_][A-Za-z0-9_]*)=(.*?)(?:\s*)$/gm;
+export function parseExports(content: string): ReadonlyArray<{ variable: string; value: string }> {
+  const regex = /^(?:\s*)(?:export|typeset\s+-x)\s+([A-Za-z_][A-Za-z0-9_]*)=(.*?)(?:\s*)$/gm;
   const result: Array<{ variable: string; value: string }> = [];
   let match: RegExpExecArray | null;
   while ((match = regex.exec(content)) !== null) {
@@ -51,9 +45,7 @@ export function parseExports(
  * @param content The raw content to parse
  * @returns Array of eval objects with command
  */
-export function parseEvals(
-  content: string,
-): ReadonlyArray<{ command: string }> {
+export function parseEvals(content: string): ReadonlyArray<{ command: string }> {
   const regex = /^(?:\s*)eval\s+(.+?)(?:\s*)$/gm;
   const result: Array<{ command: string }> = [];
   let match: RegExpExecArray | null;
@@ -70,9 +62,7 @@ export function parseEvals(
  * @param content The raw content to parse
  * @returns Array of setopt objects with option
  */
-export function parseSetopts(
-  content: string,
-): ReadonlyArray<{ option: string }> {
+export function parseSetopts(content: string): ReadonlyArray<{ option: string }> {
   const regex = /^(?:\s*)setopt\s+(.+?)(?:\s*)$/gm;
   const result: Array<{ option: string }> = [];
   let match: RegExpExecArray | null;
@@ -109,9 +99,7 @@ export function parsePlugins(content: string): ReadonlyArray<{ name: string }> {
  * @param content The raw content to parse
  * @returns Array of function names
  */
-export function parseFunctions(
-  content: string,
-): ReadonlyArray<{ name: string }> {
+export function parseFunctions(content: string): ReadonlyArray<{ name: string }> {
   const regex = /^(?:\s*)([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*\)\s*\{(?:\s*)$/gm;
   const result: Array<{ name: string }> = [];
   let match: RegExpExecArray | null;
@@ -145,11 +133,8 @@ export function parseSources(content: string): ReadonlyArray<{ path: string }> {
  * @param content The raw content to parse
  * @returns Array of autoload objects with function name
  */
-export function parseAutoloads(
-  content: string,
-): ReadonlyArray<{ function: string }> {
-  const regex =
-    /^(?:\s*)autoload\s+(?:-Uz\s+)?([A-Za-z_][A-Za-z0-9_]*)(?:\s*)$/gm;
+export function parseAutoloads(content: string): ReadonlyArray<{ function: string }> {
+  const regex = /^(?:\s*)autoload\s+(?:-Uz\s+)?([A-Za-z_][A-Za-z0-9_]*)(?:\s*)$/gm;
   const result: Array<{ function: string }> = [];
   let match: RegExpExecArray | null;
   while ((match = regex.exec(content)) !== null) {
@@ -165,9 +150,7 @@ export function parseAutoloads(
  * @param content The raw content to parse
  * @returns Array of fpath objects with directories
  */
-export function parseFpaths(
-  content: string,
-): ReadonlyArray<{ directories: ReadonlyArray<string> }> {
+export function parseFpaths(content: string): ReadonlyArray<{ directories: ReadonlyArray<string> }> {
   const regex = /^(?:\s*)fpath\s*=\s*\(([^)]+)\)(?:\s*)$/gm;
   const result: Array<{ directories: string[] }> = [];
   let match: RegExpExecArray | null;
@@ -219,9 +202,7 @@ export function parseThemes(content: string): ReadonlyArray<{ name: string }> {
  * @param content The raw content to parse
  * @returns Array of completion objects with command
  */
-export function parseCompletions(
-  content: string,
-): ReadonlyArray<{ command: string }> {
+export function parseCompletions(content: string): ReadonlyArray<{ command: string }> {
   const regex = /^(?:\s*)compinit(?:\s*)$/gm;
   const result: Array<{ command: string }> = [];
   while (regex.exec(content) !== null) {
@@ -235,9 +216,7 @@ export function parseCompletions(
  * @param content The raw content to parse
  * @returns Array of history objects with variable and value
  */
-export function parseHistorySettings(
-  content: string,
-): ReadonlyArray<{ variable: string; value: string }> {
+export function parseHistorySettings(content: string): ReadonlyArray<{ variable: string; value: string }> {
   const regex = /^(?:\s*)(HIST[A-Z_]*)\s*=\s*(.+?)(?:\s*)$/gm;
   const result: Array<{ variable: string; value: string }> = [];
   let match: RegExpExecArray | null;
@@ -254,9 +233,7 @@ export function parseHistorySettings(
  * @param content The raw content to parse
  * @returns Array of keybinding objects with command
  */
-export function parseKeybindings(
-  content: string,
-): ReadonlyArray<{ command: string }> {
+export function parseKeybindings(content: string): ReadonlyArray<{ command: string }> {
   const regex = /^(?:\s*)bindkey\s+(.+?)(?:\s*)$/gm;
   const result: Array<{ command: string }> = [];
   let match: RegExpExecArray | null;

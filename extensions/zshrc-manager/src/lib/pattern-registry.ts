@@ -19,9 +19,7 @@ export const PATTERN_REGISTRY = {
    * @returns Number of alias declarations found
    */
   countAliases: (content: string): number => {
-    const matches = content.match(
-      new RegExp(PARSING_CONSTANTS.PATTERNS.ALIAS.source, "gm"),
-    );
+    const matches = content.match(new RegExp(PARSING_CONSTANTS.PATTERNS.ALIAS.source, "gm"));
     return matches ? matches.length : 0;
   },
 
@@ -71,9 +69,7 @@ export const PATTERN_REGISTRY = {
    * @returns Number of function definitions found
    */
   countFunctions: (content: string): number => {
-    const matches = content.match(
-      /^\s*[A-Za-z_][A-Za-z0-9_]*\s*\(\s*\)\s*\{/gm,
-    );
+    const matches = content.match(/^\s*[A-Za-z_][A-Za-z0-9_]*\s*\(\s*\)\s*\{/gm);
     return matches ? matches.length : 0;
   },
 

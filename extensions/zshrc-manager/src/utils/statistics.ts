@@ -52,9 +52,7 @@ export interface ZshrcStatistics {
  * const stats = calculateStatistics(sections);
  * console.log(`${stats.aliases.length} aliases found`);
  */
-export function calculateStatistics(
-  sections: LogicalSection[],
-): ZshrcStatistics {
+export function calculateStatistics(sections: LogicalSection[]): ZshrcStatistics {
   return {
     sectionCount: sections.length,
     aliases: sections.flatMap((section) => parseAliases(section.content)),
@@ -81,10 +79,7 @@ export function calculateStatistics(
  *   return <List.Item title="Aliases" subtitle={`${stats.aliases.length} found`} />;
  * }
  */
-export function hasContent(
-  stats: ZshrcStatistics,
-  type: keyof Omit<ZshrcStatistics, "sectionCount">,
-): boolean {
+export function hasContent(stats: ZshrcStatistics, type: keyof Omit<ZshrcStatistics, "sectionCount">): boolean {
   return (stats[type] as unknown[]).length > 0;
 }
 
@@ -120,9 +115,6 @@ export function getTotalEntryCount(stats: ZshrcStatistics): number {
  * @example
  * const topAliases = getTopEntries(stats.aliases, 5);
  */
-export function getTopEntries<T>(
-  entries: readonly T[],
-  count: number = 10,
-): T[] {
+export function getTopEntries<T>(entries: readonly T[], count: number = 10): T[] {
   return entries.slice(0, count);
 }

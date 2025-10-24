@@ -57,8 +57,7 @@ export function useZshrcLoader(commandName: string): UseZshrcLoaderResult {
       setSections([...parsedSections]);
       setIsFromCache(false);
     } catch (error) {
-      const errorObj =
-        error instanceof Error ? error : new Error("Failed to load zshrc file");
+      const errorObj = error instanceof Error ? error : new Error("Failed to load zshrc file");
       setLastError(errorObj);
 
       const message = isZshManagerError(error)

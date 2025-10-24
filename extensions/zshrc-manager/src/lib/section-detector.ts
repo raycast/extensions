@@ -45,45 +45,42 @@ export interface SectionContext {
  * @param context Current section context
  * @returns Detected section marker or null
  */
-export function detectSectionMarker(
-  line: string,
-  lineNumber: number,
-): SectionMarker | null {
+export function detectSectionMarker(line: string, lineNumber: number): SectionMarker | null {
   const trimmedLine = line.trim();
 
   // Test all section formats in priority order
   const formats = [
     {
-      type: "custom_start" as const,
+      type: SectionMarkerType.CUSTOM_START,
       regex: PARSING_CONSTANTS.SECTION_FORMATS.CUSTOM_START,
     },
     {
-      type: "custom_end" as const,
+      type: SectionMarkerType.CUSTOM_END,
       regex: PARSING_CONSTANTS.SECTION_FORMATS.CUSTOM_END,
     },
     {
-      type: "dashed_end" as const,
+      type: SectionMarkerType.DASHED_END,
       regex: PARSING_CONSTANTS.SECTION_FORMATS.DASHED_END,
     },
     {
-      type: "dashed_start" as const,
+      type: SectionMarkerType.DASHED_START,
       regex: PARSING_CONSTANTS.SECTION_FORMATS.DASHED_START,
     },
     {
-      type: "bracketed" as const,
+      type: SectionMarkerType.BRACKETED,
       regex: PARSING_CONSTANTS.SECTION_FORMATS.BRACKETED,
     },
-    { type: "hash" as const, regex: PARSING_CONSTANTS.SECTION_FORMATS.HASH },
+    { type: SectionMarkerType.HASH, regex: PARSING_CONSTANTS.SECTION_FORMATS.HASH },
     {
-      type: "function_start" as const,
+      type: SectionMarkerType.FUNCTION_START,
       regex: PARSING_CONSTANTS.SECTION_FORMATS.FUNCTION_START,
     },
     {
-      type: "function_end" as const,
+      type: SectionMarkerType.FUNCTION_END,
       regex: PARSING_CONSTANTS.SECTION_FORMATS.FUNCTION_END,
     },
     {
-      type: "labeled" as const,
+      type: SectionMarkerType.LABELED,
       regex: PARSING_CONSTANTS.SECTION_FORMATS.LABELED,
     },
   ];
@@ -117,10 +114,7 @@ export function detectSectionMarker(
  * @param context Current section context
  * @returns Updated context
  */
-export function updateSectionContext(
-  marker: SectionMarker,
-  context: SectionContext,
-): SectionContext {
+export function updateSectionContext(marker: SectionMarker, context: SectionContext): SectionContext {
   const newContext = { ...context };
 
   switch (marker.type) {
@@ -138,9 +132,7 @@ export function updateSectionContext(
       // End current section
       newContext.sectionStack.pop();
       newContext.currentSection =
-        newContext.sectionStack.length > 0
-          ? newContext.sectionStack[newContext.sectionStack.length - 1]
-          : undefined;
+        newContext.sectionStack.length > 0 ? newContext.sectionStack[newContext.sectionStack.length - 1] : undefined;
       break;
 
     case "function_start":
@@ -155,15 +147,10 @@ export function updateSectionContext(
     case "function_end":
       newContext.functionLevel--;
       // If we're ending a function that was treated as a section
-      if (
-        newContext.functionLevel === 0 &&
-        newContext.currentSection?.startsWith("Function:")
-      ) {
+      if (newContext.functionLevel === 0 && newContext.currentSection?.startsWith("Function:")) {
         newContext.sectionStack.pop();
         newContext.currentSection =
-          newContext.sectionStack.length > 0
-            ? newContext.sectionStack[newContext.sectionStack.length - 1]
-            : undefined;
+          newContext.sectionStack.length > 0 ? newContext.sectionStack[newContext.sectionStack.length - 1] : undefined;
       }
       break;
   }
@@ -269,16 +256,7 @@ export function groupContentIntoSections(content: string): Array<{
         }
 
         // Start new section if it's a start marker
-        if (
-          [
-            "custom_start",
-            "dashed_start",
-            "bracketed",
-            "hash",
-            "labeled",
-            "function_start",
-          ].includes(marker.type)
-        ) {
+        if (["custom_start", "dashed_start", "bracketed", "hash", "labeled", "function_start"].includes(marker.type)) {
           currentSection = {
             name: marker.name,
             startLine: i + 1,
@@ -346,8 +324,7 @@ export function suggestSectionImprovements(content: string): Array<{
   if (formatCounts.size > 2) {
     suggestions.push({
       lineNumber: 1,
-      suggestion:
-        "Consider using consistent section formatting throughout the file",
+      suggestion: "Consider using consistent section formatting throughout the file",
       priority: "low",
     });
   }
