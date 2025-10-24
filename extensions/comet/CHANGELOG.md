@@ -1,6 +1,6 @@
 # Comet Browser Changelog
 
-## [Fix French Text in UI] - {PR_MERGE_DATE}
+## [Fix French Text in UI] - 2025-10-24
 
 - Fixed inconsistent language in Search History command - changed "Historique" to "Results" for English consistency
 
