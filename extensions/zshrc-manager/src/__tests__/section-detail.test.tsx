@@ -8,7 +8,7 @@ const mockGenerateSectionMarkdown = vi.fn();
 const mockTruncateValueMiddle = vi.fn();
 
 vi.mock("../lib/zsh", () => ({
-  ZSHRC_PATH: "/test/.zshrc",
+  getZshrcPath: vi.fn(() => "/test/.zshrc"),
 }));
 
 vi.mock("../edit-alias", () => ({

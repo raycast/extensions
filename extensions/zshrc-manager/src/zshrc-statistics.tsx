@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
-import { ZSHRC_PATH } from "./lib/zsh";
+import { getZshrcPath } from "./lib/zsh";
 import Sections from "./sections";
 import Aliases from "./aliases";
 import Exports from "./exports";
@@ -99,7 +99,7 @@ ${isFromCache ? "⚠️ Using cached data" : "📖 Reading file..."}
           actions={
             <ActionPanel>
               <Action.Push title="View All Sections" target={<Sections />} icon={Icon.Folder} />
-              <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+              <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
               <Action
                 title="Refresh Statistics"
                 icon={Icon.ArrowClockwise}
@@ -142,7 +142,7 @@ ${getTopEntries(allAliases, 5)
           actions={
             <ActionPanel>
               <Action.Push title="View All Aliases" target={<Aliases />} icon={Icon.Terminal} />
-              <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+              <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
               <Action
                 title="Refresh Statistics"
                 icon={Icon.ArrowClockwise}
@@ -185,7 +185,7 @@ ${getTopEntries(allExports, 5)
           actions={
             <ActionPanel>
               <Action.Push title="View All Exports" target={<Exports />} icon={Icon.Box} />
-              <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+              <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
               <Action
                 title="Refresh Statistics"
                 icon={Icon.ArrowClockwise}
@@ -222,7 +222,7 @@ ${getTopEntries(allFunctions, 10)
             actions={
               <ActionPanel>
                 <Action.Push title="View All Functions" target={<Functions />} icon={Icon.Code} />
-                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -259,7 +259,7 @@ ${getTopEntries(allPlugins, 10)
             actions={
               <ActionPanel>
                 <Action.Push title="View All Plugins" target={<Plugins />} icon={Icon.Box} />
-                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -296,7 +296,7 @@ ${getTopEntries(allSources, 10)
             actions={
               <ActionPanel>
                 <Action.Push title="View All Sources" target={<Sources />} icon={Icon.Document} />
-                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -333,7 +333,7 @@ ${getTopEntries(allEvals, 10)
             actions={
               <ActionPanel>
                 <Action.Push title="View All Evals" target={<Evals />} icon={Icon.Terminal} />
-                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -370,7 +370,7 @@ ${getTopEntries(allSetopts, 10)
             actions={
               <ActionPanel>
                 <Action.Push title="View All Setopts" target={<Setopts />} icon={Icon.Gear} />
-                <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                 <Action
                   title="Refresh Statistics"
                   icon={Icon.ArrowClockwise}
@@ -399,7 +399,7 @@ ${getTopEntries(allSetopts, 10)
             onAction={handleRefresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
         </ActionPanel>
       }
     >

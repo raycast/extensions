@@ -3,7 +3,7 @@ import { parseExports } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
 import EditExport from "./edit-export";
 import { MODERN_COLORS } from "./constants";
-import { ZSHRC_PATH } from "./lib/zsh";
+import { getZshrcPath } from "./lib/zsh";
 import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
 
 /**
@@ -112,7 +112,7 @@ echo $${exportItem.variable}
       generateOverviewActions={(_, refresh) => (
         <ActionPanel>
           <Action.Push title="Add New Export" target={<EditExport onSave={refresh} />} icon={Icon.Plus} />
-          <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
@@ -137,7 +137,7 @@ echo $${exportItem.variable}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
           />
           <Action.Push title="Add New Export" target={<EditExport onSave={refresh} />} icon={Icon.Plus} />
-          <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}

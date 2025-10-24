@@ -6,7 +6,7 @@
  */
 
 import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
-import { ZSHRC_PATH } from "./zsh";
+import { getZshrcPath } from "./zsh";
 import { MODERN_COLORS } from "../constants";
 import { useZshrcLoader } from "../hooks/useZshrcLoader";
 import { useZshrcFilter } from "../hooks/useZshrcFilter";
@@ -126,7 +126,7 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
           onAction={refresh}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
-        <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+        <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
       </ActionPanel>
     );
   };
@@ -140,7 +140,7 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
 
     return (
       <ActionPanel>
-        <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+        <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
@@ -155,7 +155,7 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
   const getEmptyActions = (): React.ReactNode => {
     return (
       <ActionPanel>
-        <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+        <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
       </ActionPanel>
     );
   };
@@ -176,7 +176,7 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
             onAction={refresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
         </ActionPanel>
       }
     >

@@ -7,11 +7,32 @@
 
 import { homedir } from "os";
 import { readFile, writeFile, stat } from "fs/promises";
+import { getPreferenceValues } from "@raycast/api";
 import { FILE_CONSTANTS, ERROR_MESSAGES } from "../constants";
 import { FileNotFoundError, PermissionError, FileTooLargeError, ReadError, WriteError } from "../utils/errors";
 import { validateFilePath, validateFileSize, truncateContent } from "../utils/sanitize";
 
-export const ZSHRC_PATH: string = `${homedir()}/${FILE_CONSTANTS.ZSHRC_FILENAME}`;
+/**
+ * Gets the zshrc file path from preferences or default location
+ *
+ * @returns The zshrc file path
+ */
+export function getZshrcPath(): string {
+  const prefs = getPreferenceValues<Preferences>();
+
+  if (prefs["enableCustomZshrcPath"] && prefs["customZshrcPath"]) {
+    let customPath = prefs["customZshrcPath"];
+
+    // Expand ~ to home directory
+    if (customPath.startsWith("~")) {
+      customPath = customPath.replace("~", homedir());
+    }
+
+    return customPath;
+  }
+
+  return `${homedir()}/${FILE_CONSTANTS.ZSHRC_FILENAME}`;
+}
 
 /**
  * Reads the zshrc file with enhanced error handling and validation
@@ -23,19 +44,21 @@ export const ZSHRC_PATH: string = `${homedir()}/${FILE_CONSTANTS.ZSHRC_FILENAME}
  * @throws {ReadError} When file reading fails for other reasons
  */
 export async function readZshrcFile(): Promise<string> {
+  const zshrcPath = getZshrcPath();
+
   try {
     // Validate file path
-    if (!(await validateFilePath(ZSHRC_PATH))) {
+    if (!(await validateFilePath(zshrcPath))) {
       throw new Error("Invalid file path");
     }
 
     // Check file size before reading
-    const stats = await stat(ZSHRC_PATH);
+    const stats = await stat(zshrcPath);
     if (!validateFileSize(stats.size)) {
-      throw new FileTooLargeError(ZSHRC_PATH, stats.size, FILE_CONSTANTS.MAX_FILE_SIZE);
+      throw new FileTooLargeError(zshrcPath, stats.size, FILE_CONSTANTS.MAX_FILE_SIZE);
     }
 
-    const fileContents = await readFile(ZSHRC_PATH, { encoding: "utf8" });
+    const fileContents = await readFile(zshrcPath, { encoding: "utf8" });
 
     // Truncate content if it's still too large after reading
     const safeContent = truncateContent(fileContents);
@@ -57,19 +80,19 @@ export async function readZshrcFile(): Promise<string> {
       const nodeError = error as Error & { code?: string };
 
       if (nodeError.code === "ENOENT") {
-        throw new FileNotFoundError(ZSHRC_PATH);
+        throw new FileNotFoundError(zshrcPath);
       }
 
       if (nodeError.code === "EACCES" || nodeError.code === "EPERM") {
-        throw new PermissionError(ZSHRC_PATH);
+        throw new PermissionError(zshrcPath);
       }
 
       // Generic read error
-      throw new ReadError(ZSHRC_PATH, error);
+      throw new ReadError(zshrcPath, error);
     }
 
     // Fallback for unknown errors
-    throw new ReadError(ZSHRC_PATH, new Error(ERROR_MESSAGES.READ_ERROR));
+    throw new ReadError(zshrcPath, new Error(ERROR_MESSAGES.READ_ERROR));
   }
 }
 
@@ -82,9 +105,11 @@ export async function readZshrcFile(): Promise<string> {
  * @throws {WriteError} When file writing fails for other reasons
  */
 export async function writeZshrcFile(content: string): Promise<void> {
+  const zshrcPath = getZshrcPath();
+
   try {
     // Validate file path
-    if (!(await validateFilePath(ZSHRC_PATH))) {
+    if (!(await validateFilePath(zshrcPath))) {
       throw new Error("Invalid file path");
     }
 
@@ -94,7 +119,7 @@ export async function writeZshrcFile(content: string): Promise<void> {
     }
 
     // Write the file
-    await writeFile(ZSHRC_PATH, content, { encoding: "utf8" });
+    await writeFile(zshrcPath, content, { encoding: "utf8" });
   } catch (error) {
     // Re-throw our custom errors as-is
     if (error instanceof PermissionError || error instanceof WriteError) {
@@ -106,14 +131,14 @@ export async function writeZshrcFile(content: string): Promise<void> {
       const nodeError = error as Error & { code?: string };
 
       if (nodeError.code === "EACCES" || nodeError.code === "EPERM") {
-        throw new PermissionError(ZSHRC_PATH);
+        throw new PermissionError(zshrcPath);
       }
 
       // Generic write error
-      throw new WriteError(ZSHRC_PATH, error);
+      throw new WriteError(zshrcPath, error);
     }
 
     // Fallback for unknown errors
-    throw new WriteError(ZSHRC_PATH);
+    throw new WriteError(zshrcPath);
   }
 }

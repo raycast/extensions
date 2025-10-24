@@ -2,7 +2,7 @@ import { Detail, List, ActionPanel, Action, Icon } from "@raycast/api";
 import { LogicalSection } from "./lib/parse-zshrc";
 import { MODERN_COLORS } from "./constants";
 import { ReactNode, ReactElement } from "react";
-import { ZSHRC_PATH } from "./lib/zsh";
+import { getZshrcPath } from "./lib/zsh";
 import EditAlias from "./edit-alias";
 import EditExport from "./edit-export";
 import { truncateValueMiddle } from "./utils/formatters";
@@ -48,8 +48,8 @@ export function SectionDetail({
               content={section.content}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
-            <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
-            <Action.OpenWith title="Open with Editor" path={ZSHRC_PATH} />
+            <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
+            <Action.OpenWith title="Open with Editor" path={getZshrcPath()} />
             <Action.CopyToClipboard
               title="Copy Section Name"
               content={section.label}

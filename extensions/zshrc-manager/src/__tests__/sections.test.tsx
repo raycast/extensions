@@ -9,7 +9,7 @@ const mockShowToast = vi.fn();
 
 vi.mock("../lib/zsh", () => ({
   readZshrcFile: mockReadZshrcFile,
-  ZSHRC_PATH: "/test/.zshrc",
+  getZshrcPath: vi.fn(() => "/test/.zshrc"),
 }));
 
 vi.mock("../lib/parse-zshrc", () => ({

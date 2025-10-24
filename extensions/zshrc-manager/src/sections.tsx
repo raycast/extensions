@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useState } from "react";
-import { ZSHRC_PATH } from "./lib/zsh";
+import { getZshrcPath } from "./lib/zsh";
 import { MODERN_COLORS } from "./constants";
 import { getSectionIcon } from "./lib/section-icons";
 import { SectionDetail } from "./section-detail";
@@ -34,7 +34,7 @@ export default function Sections() {
             onAction={refresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
         </ActionPanel>
       }
     >
@@ -69,7 +69,7 @@ Each section contains related configuration:
           }
           actions={
             <ActionPanel>
-              <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+              <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
               <Action
                 title="Refresh Sections"
                 icon={Icon.ArrowClockwise}
@@ -127,7 +127,7 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
                       target={<SectionDetail section={section} />}
                       icon={Icon.Eye}
                     />
-                    <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+                    <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
@@ -192,7 +192,7 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
                       target={<SectionDetail section={section} />}
                       icon={Icon.Eye}
                     />
-                    <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+                    <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}

@@ -3,7 +3,7 @@ import { LogicalSection } from "../lib/parse-zshrc";
 
 // Mock dependencies
 vi.mock("../lib/zsh", () => ({
-  ZSHRC_PATH: "/test/.zshrc",
+  getZshrcPath: vi.fn(() => "/test/.zshrc"),
 }));
 
 vi.mock("../lib/section-icons", () => ({

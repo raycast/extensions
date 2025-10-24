@@ -79,6 +79,23 @@
       "title": "Custom End Pattern",
       "description": "Regex pattern for section end markers",
       "placeholder": "^#\\s*end\\s+(.+)$"
+    },
+    {
+      "name": "enableCustomZshrcPath",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use Custom Zshrc Path",
+      "title": "Use Custom Zshrc Path",
+      "description": "Specify a custom location for your zshrc file"
+    },
+    {
+      "name": "customZshrcPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Zshrc Path",
+      "description": "Full path to your zshrc file (e.g., /Users/username/.config/zshrc)",
+      "placeholder": "~/.zshrc"
     }
   ],
   "commands": [

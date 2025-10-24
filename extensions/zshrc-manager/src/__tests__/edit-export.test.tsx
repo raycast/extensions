@@ -10,7 +10,7 @@ const mockUseForm = vi.fn();
 vi.mock("../lib/zsh", () => ({
   readZshrcFile: mockReadZshrcFile,
   writeZshrcFile: mockWriteZshrcFile,
-  ZSHRC_PATH: "/Users/test/.zshrc",
+  getZshrcPath: "/Users/test/.zshrc",
 }));
 
 vi.mock("@raycast/api", () => ({

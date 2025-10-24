@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { readZshrcFile, writeZshrcFile } from "./zsh";
-import { ZSHRC_PATH } from "./zsh";
+import { getZshrcPath } from "./zsh";
 
 /**
  * Configuration for EditItemForm component
@@ -202,7 +202,7 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
               onAction={handleDelete}
             />
           )}
-          <Action.Open title="Open ~/.Zshrc" target={ZSHRC_PATH} icon={Icon.Document} />
+          <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
         </ActionPanel>
       }
     >
