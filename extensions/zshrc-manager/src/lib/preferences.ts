@@ -8,26 +8,12 @@
 import { getPreferenceValues } from "@raycast/api";
 
 /**
- * Type for section detection preferences
- *
- * Matches the preferences defined in package.json
- */
-type SectionPreferences = {
-  enableDefaults: boolean;
-  enableCustomHeaderPattern: boolean;
-  customHeaderPattern?: string;
-  enableCustomStartEndPatterns: boolean;
-  customStartPattern?: string;
-  customEndPattern?: string;
-};
-
-/**
  * Reads section preferences from Raycast configuration
  *
  * @returns Section preferences object
  */
-export function getSectionPrefs(): SectionPreferences {
-  return getPreferenceValues<SectionPreferences>();
+export function getSectionPrefs(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 /**
@@ -80,20 +66,20 @@ export function getCustomPatterns(): {
   let startPattern: RegExp | null = null;
   let endPattern: RegExp | null = null;
 
-  if (prefs.enableCustomHeaderPattern && prefs.customHeaderPattern) {
-    if (hasCaptureGroup(prefs.customHeaderPattern)) {
-      headerPattern = compilePattern(prefs.customHeaderPattern, "header");
+  if (prefs["enableCustomHeaderPattern"] && prefs["customHeaderPattern"]) {
+    if (hasCaptureGroup(prefs["customHeaderPattern"])) {
+      headerPattern = compilePattern(prefs["customHeaderPattern"], "header");
     } else {
       console.warn("Custom header pattern must contain exactly one capture group");
     }
   }
 
-  if (prefs.enableCustomStartEndPatterns) {
-    if (prefs.customStartPattern && hasCaptureGroup(prefs.customStartPattern)) {
-      startPattern = compilePattern(prefs.customStartPattern, "start");
+  if (prefs["enableCustomStartEndPatterns"]) {
+    if (prefs["customStartPattern"] && hasCaptureGroup(prefs["customStartPattern"])) {
+      startPattern = compilePattern(prefs["customStartPattern"], "start");
     }
-    if (prefs.customEndPattern) {
-      endPattern = compilePattern(prefs.customEndPattern, "end");
+    if (prefs["customEndPattern"]) {
+      endPattern = compilePattern(prefs["customEndPattern"], "end");
     }
   }
 

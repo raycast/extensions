@@ -197,7 +197,7 @@ export function getSectionFormatsInOrder(): SectionFormatConfig[] {
   }
 
   // Add default patterns if enabled
-  if (prefs.enableDefaults) {
+  if (prefs["enableDefaults"]) {
     formats.push(
       {
         type: SectionMarkerType.CUSTOM_START,

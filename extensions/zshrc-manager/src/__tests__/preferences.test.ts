@@ -22,9 +22,9 @@ describe("preferences.ts", () => {
       });
 
       const prefs = getSectionPrefs();
-      expect(prefs.enableDefaults).toBe(true);
-      expect(prefs.enableCustomHeaderPattern).toBe(false);
-      expect(prefs.enableCustomStartEndPatterns).toBe(false);
+      expect(prefs["enableDefaults"]).toBe(true);
+      expect(prefs["enableCustomHeaderPattern"]).toBe(false);
+      expect(prefs["enableCustomStartEndPatterns"]).toBe(false);
     });
 
     it("should handle empty preferences", () => {
