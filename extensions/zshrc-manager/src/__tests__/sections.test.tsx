@@ -53,41 +53,79 @@ describe("Sections", () => {
       content: "alias ll='ls -la'\nalias gs='git status'",
       startLine: 1,
       endLine: 2,
-      type: "labeled",
+      aliasCount: 2,
+      exportCount: 0,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     },
     {
       label: "Exports",
       content: "export PATH=/usr/local/bin:$PATH\nexport EDITOR=code",
       startLine: 3,
       endLine: 4,
-      type: "labeled",
+      aliasCount: 0,
+      exportCount: 2,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     },
     {
       label: "Unlabeled Section",
       content: "# Some comments",
       startLine: 5,
       endLine: 5,
-      type: "unlabeled",
+      aliasCount: 0,
+      exportCount: 0,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     },
   ];
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Default mock implementations
     mockReadZshrcFile.mockResolvedValue("test content");
     mockToLogicalSections.mockReturnValue(mockSections);
     mockGetSectionIcon.mockReturnValue({ source: "test-icon" });
   });
 
-  it("should be defined", () => {
-    // Basic test to ensure the component can be imported
-    expect(true).toBe(true);
-  });
-
-  it("should have proper exports", async () => {
+  it("should export Sections component", async () => {
     const Sections = await import("../sections");
     expect(Sections.default).toBeDefined();
+    expect(typeof Sections.default).toBe("function");
   });
 
   it("should handle file operations", async () => {
@@ -117,16 +155,16 @@ describe("Sections", () => {
   it("should handle section data", () => {
     // Test that the component can handle section data
     expect(mockSections).toHaveLength(3);
-    expect(mockSections[0].label).toBe("Aliases");
-    expect(mockSections[1].label).toBe("Exports");
-    expect(mockSections[2].label).toBe("Unlabeled Section");
+    expect(mockSections[0]?.label).toBe("Aliases");
+    expect(mockSections[1]?.label).toBe("Exports");
+    expect(mockSections[2]?.label).toBe("Unlabeled Section");
   });
 
-  it("should handle different section types", () => {
-    // Test that the component can handle different section types
-    const sectionTypes = mockSections.map(section => section.type);
-    expect(sectionTypes).toContain("labeled");
-    expect(sectionTypes).toContain("unlabeled");
+  it("should handle different section labels", () => {
+    // Test that the component can handle different section labels
+    const sectionLabels = mockSections.map((section) => section.label);
+    expect(sectionLabels).toContain("Aliases");
+    expect(sectionLabels).toContain("Unlabeled Section");
   });
 
   it("should handle sections with special characters", () => {
@@ -136,7 +174,21 @@ describe("Sections", () => {
       content: "test content",
       startLine: 1,
       endLine: 1,
-      type: "labeled",
+      aliasCount: 0,
+      exportCount: 0,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     };
 
     expect(specialSection.label).toContain("@#$%^&*()");
@@ -150,7 +202,21 @@ describe("Sections", () => {
       content: "test content",
       startLine: 1,
       endLine: 1,
-      type: "labeled",
+      aliasCount: 0,
+      exportCount: 0,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     };
 
     expect(longSection.label).toHaveLength(100);
@@ -163,7 +229,21 @@ describe("Sections", () => {
       content: "test content",
       startLine: 1000,
       endLine: 2000,
-      type: "labeled",
+      aliasCount: 0,
+      exportCount: 0,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     };
 
     expect(largeLineSection.startLine).toBe(1000);
@@ -180,18 +260,18 @@ describe("Sections", () => {
   it("should handle section filtering", () => {
     // Test that the component can handle section filtering
     const searchText = "alias";
-    const filteredSections = mockSections.filter(section =>
-      section.label.toLowerCase().includes(searchText.toLowerCase())
+    const filteredSections = mockSections.filter((section) =>
+      section.label.toLowerCase().includes(searchText.toLowerCase()),
     );
 
     expect(filteredSections).toHaveLength(1);
-    expect(filteredSections[0].label).toBe("Aliases");
+    expect(filteredSections[0]?.label).toBe("Aliases");
   });
 
   it("should handle section icon generation", () => {
     // Test that the component can handle section icon generation
     const icon = mockGetSectionIcon("Aliases");
-    
+
     expect(icon).toBeDefined();
     expect(icon.source).toBe("test-icon");
     expect(mockGetSectionIcon).toHaveBeenCalledWith("Aliases");
@@ -200,7 +280,7 @@ describe("Sections", () => {
   it("should handle toast notifications", () => {
     // Test that the component can handle toast notifications
     const error = new Error("Test error");
-    
+
     mockShowToast({
       style: "failure",
       title: "Error Loading Sections",
@@ -214,36 +294,78 @@ describe("Sections", () => {
     });
   });
 
-  it("should handle mixed section types", () => {
-    // Test that the component can handle mixed section types
+  it("should handle mixed section labels", () => {
+    // Test that the component can handle mixed section labels
     const mixedSections: LogicalSection[] = [
       {
         label: "Labeled Section",
         content: "alias test='echo hello'",
         startLine: 1,
         endLine: 1,
-        type: "labeled",
+        aliasCount: 1,
+        exportCount: 0,
+        evalCount: 0,
+        setoptCount: 0,
+        pluginCount: 0,
+        functionCount: 0,
+        sourceCount: 0,
+        autoloadCount: 0,
+        fpathCount: 0,
+        pathCount: 0,
+        themeCount: 0,
+        completionCount: 0,
+        historyCount: 0,
+        keybindingCount: 0,
+        otherCount: 0,
       },
       {
         label: "Dashed Section",
         content: "export TEST=value",
         startLine: 2,
         endLine: 2,
-        type: "dashed",
+        aliasCount: 0,
+        exportCount: 1,
+        evalCount: 0,
+        setoptCount: 0,
+        pluginCount: 0,
+        functionCount: 0,
+        sourceCount: 0,
+        autoloadCount: 0,
+        fpathCount: 0,
+        pathCount: 0,
+        themeCount: 0,
+        completionCount: 0,
+        historyCount: 0,
+        keybindingCount: 0,
+        otherCount: 0,
       },
       {
         label: "Unlabeled Section",
         content: "# Some comments",
         startLine: 3,
         endLine: 3,
-        type: "unlabeled",
+        aliasCount: 0,
+        exportCount: 0,
+        evalCount: 0,
+        setoptCount: 0,
+        pluginCount: 0,
+        functionCount: 0,
+        sourceCount: 0,
+        autoloadCount: 0,
+        fpathCount: 0,
+        pathCount: 0,
+        themeCount: 0,
+        completionCount: 0,
+        historyCount: 0,
+        keybindingCount: 0,
+        otherCount: 0,
       },
     ];
 
     expect(mixedSections).toHaveLength(3);
-    expect(mixedSections[0].type).toBe("labeled");
-    expect(mixedSections[1].type).toBe("dashed");
-    expect(mixedSections[2].type).toBe("unlabeled");
+    expect(mixedSections[0]?.label).toBe("Labeled Section");
+    expect(mixedSections[1]?.label).toBe("Dashed Section");
+    expect(mixedSections[2]?.label).toBe("Unlabeled Section");
   });
 
   it("should handle component state management", () => {

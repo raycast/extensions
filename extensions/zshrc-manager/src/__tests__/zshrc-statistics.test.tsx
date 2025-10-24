@@ -62,6 +62,10 @@ vi.mock("@raycast/api", () => ({
   },
 }));
 
+vi.mock("@raycast/utils", () => ({
+  usePromise: vi.fn(),
+}));
+
 describe("ZshrcStatistics", () => {
   const mockSections: LogicalSection[] = [
     {
@@ -69,21 +73,55 @@ describe("ZshrcStatistics", () => {
       content: "alias ll='ls -la'\nalias gs='git status'",
       startLine: 1,
       endLine: 2,
-      type: "labeled",
+      aliasCount: 2,
+      exportCount: 0,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     },
     {
       label: "Exports",
       content: "export PATH=/usr/local/bin:$PATH\nexport EDITOR=code",
       startLine: 3,
       endLine: 4,
-      type: "labeled",
+      aliasCount: 0,
+      exportCount: 2,
+      evalCount: 0,
+      setoptCount: 0,
+      pluginCount: 0,
+      functionCount: 0,
+      sourceCount: 0,
+      autoloadCount: 0,
+      fpathCount: 0,
+      pathCount: 0,
+      themeCount: 0,
+      completionCount: 0,
+      historyCount: 0,
+      keybindingCount: 0,
+      otherCount: 0,
     },
   ];
 
   const mockStats = {
     sectionCount: 2,
-    aliases: [{ name: "ll", command: "ls -la" }, { name: "gs", command: "git status" }],
-    exports: [{ variable: "PATH", value: "/usr/local/bin:$PATH" }, { variable: "EDITOR", value: "code" }],
+    aliases: [
+      { name: "ll", command: "ls -la" },
+      { name: "gs", command: "git status" },
+    ],
+    exports: [
+      { variable: "PATH", value: "/usr/local/bin:$PATH" },
+      { variable: "EDITOR", value: "code" },
+    ],
     evals: [],
     setopts: [],
     plugins: [],
@@ -94,7 +132,7 @@ describe("ZshrcStatistics", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Default mock implementations
     mockUseZshrcLoader.mockReturnValue({
       sections: mockSections,
@@ -109,14 +147,10 @@ describe("ZshrcStatistics", () => {
     mockGetTopEntries.mockReturnValue([]);
   });
 
-  it("should be defined", () => {
-    // Basic test to ensure the component can be imported
-    expect(true).toBe(true);
-  });
-
-  it("should have proper exports", () => {
-    // Test that the component can be imported without errors
-    expect(true).toBe(true);
+  it("should export ZshrcStatistics component", async () => {
+    const ZshrcStatistics = await import("../zshrc-statistics");
+    expect(ZshrcStatistics.default).toBeDefined();
+    expect(typeof ZshrcStatistics.default).toBe("function");
   });
 
   it("should handle hook dependencies", () => {
@@ -177,39 +211,67 @@ describe("ZshrcStatistics", () => {
   it("should handle section data", () => {
     // Test that the component can handle section data
     expect(mockSections).toHaveLength(2);
-    expect(mockSections[0].label).toBe("Aliases");
-    expect(mockSections[1].label).toBe("Exports");
+    expect(mockSections[0]?.label).toBe("Aliases");
+    expect(mockSections[1]?.label).toBe("Exports");
   });
 
   it("should handle special characters in section labels", () => {
     // Test that the component can handle special characters
-    const specialSections = [
+    const specialSections: LogicalSection[] = [
       {
         label: "Section with @#$%^&*()",
         content: "alias test='echo hello'",
         startLine: 1,
         endLine: 1,
-        type: "labeled",
+        aliasCount: 1,
+        exportCount: 0,
+        evalCount: 0,
+        setoptCount: 0,
+        pluginCount: 0,
+        functionCount: 0,
+        sourceCount: 0,
+        autoloadCount: 0,
+        fpathCount: 0,
+        pathCount: 0,
+        themeCount: 0,
+        completionCount: 0,
+        historyCount: 0,
+        keybindingCount: 0,
+        otherCount: 0,
       },
     ];
 
-    expect(specialSections[0].label).toContain("@#$%^&*()");
+    expect(specialSections[0]?.label).toContain("@#$%^&*()");
   });
 
   it("should handle very long section labels", () => {
     // Test that the component can handle very long labels
     const longLabel = "A".repeat(100);
-    const longSections = [
+    const longSections: LogicalSection[] = [
       {
         label: longLabel,
         content: "alias test='echo hello'",
         startLine: 1,
         endLine: 1,
-        type: "labeled",
+        aliasCount: 1,
+        exportCount: 0,
+        evalCount: 0,
+        setoptCount: 0,
+        pluginCount: 0,
+        functionCount: 0,
+        sourceCount: 0,
+        autoloadCount: 0,
+        fpathCount: 0,
+        pathCount: 0,
+        themeCount: 0,
+        completionCount: 0,
+        historyCount: 0,
+        keybindingCount: 0,
+        otherCount: 0,
       },
     ];
 
-    expect(longSections[0].label).toHaveLength(100);
+    expect(longSections[0]?.label).toHaveLength(100);
   });
 
   it("should handle different section types", () => {
@@ -260,7 +322,7 @@ describe("ZshrcStatistics", () => {
   it("should handle error states", () => {
     // Test that the component can handle error states
     const mockError = new Error("File not found");
-    
+
     expect(mockError).toBeInstanceOf(Error);
     expect(mockError.message).toBe("File not found");
   });
