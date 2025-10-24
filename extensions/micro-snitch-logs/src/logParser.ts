@@ -10,10 +10,8 @@ export function parseLogFile(filePath: string): LogEntry[] {
       .map((line) => parseLogLine(line))
       .filter(Boolean) as LogEntry[];
 
-    // Sort by timestamp, newest first
-    return entries.sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
-    );
+    // Reverse to show oldest first, newest last
+    return entries.reverse();
   } catch (error) {
     console.error("Error reading log file:", error);
     return [];
