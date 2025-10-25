@@ -2,7 +2,8 @@
  * タスクテンプレート関連の型定義
  */
 
-import { TaskPriority } from "./task";
+// TaskPriority type definition
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
 
 // タスクテンプレート
 export interface TaskTemplate {
