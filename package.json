@@ -15,6 +15,7 @@
       "mode": "view"
     }
   ],
+  "platforms": ["macos"],
   "dependencies": {
     "@raycast/api": "^1.103.3"
   },
