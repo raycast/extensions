@@ -8,7 +8,8 @@
   "contributors": [
     "VBenny42",
     "ridemountainpig",
-    "jlokos"
+    "jlokos",
+    "YourMCGeek"
   ],
   "license": "MIT",
   "categories": [
@@ -69,6 +70,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
