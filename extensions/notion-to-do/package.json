@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notion-to-do",
+  "title": "Notion Task Manager",
+  "version": "1.0.0",
+  "description": "Manage your Notion tasks with quick capture, status updates, and daily overviews",
+  "icon": "extension-icon.png",
+  "author": "iroshandezilva",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Notion",
+      "description": "Quickly create a new task in your Notion database",
+      "mode": "view",
+      "keywords": ["ct", "new", "add", "task"],
+      "preferences": []
+    },
+    {
+      "name": "update-task",
+      "title": "Update Task",
+      "subtitle": "Notion",
+      "description": "Update the status and properties of existing tasks",
+      "mode": "view",
+      "keywords": ["ut", "edit", "modify", "change"]
+    },
+    {
+      "name": "daily-overview",
+      "title": "Daily Overview",
+      "subtitle": "Notion",
+      "description": "View your daily task summary with focus areas",
+      "mode": "view",
+      "keywords": ["do", "today", "overview", "summary"]
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Notion",
+      "description": "Search all tasks with full-text search",
+      "mode": "view",
+      "keywords": ["st", "find", "search"]
+    },
+    {
+      "name": "task-summary-menubar",
+      "title": "Task Summary",
+      "subtitle": "Notion",
+      "description": "Quick view of your daily task summary in menu bar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "keywords": ["summary", "stats", "pin"]
+    },
+    {
+      "name": "smart-task-creation",
+      "title": "Smart Task Creation",
+      "subtitle": "Notion AI",
+      "description": "Create tasks from natural language with AI suggestions",
+      "mode": "view",
+      "keywords": ["ai", "smart", "natural", "language"]
+    },
+    {
+      "name": "task-breakdown",
+      "title": "Task Breakdown",
+      "subtitle": "Notion AI",
+      "description": "Break down complex tasks into subtasks with AI",
+      "mode": "view",
+      "keywords": ["ai", "breakdown", "subtasks"]
+    },
+    {
+      "name": "smart-prioritization",
+      "title": "Smart Prioritization",
+      "subtitle": "Notion AI",
+      "description": "Get AI-powered daily priority suggestions",
+      "mode": "view",
+      "keywords": ["ai", "priority", "focus", "suggest"]
+    },
+    {
+      "name": "ai-task-summary",
+      "title": "AI Task Summary",
+      "subtitle": "Notion AI",
+      "description": "Generate AI summaries of your work",
+      "mode": "view",
+      "keywords": ["ai", "summary", "report", "standup"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notionApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Notion API Key",
+      "description": "Your Notion integration token (Internal Integration Token)",
+      "placeholder": "secret_xxxxxxxxxxxxx"
+    },
+    {
+      "name": "notionDatabaseId",
+      "type": "password",
+      "required": true,
+      "title": "Notion Database ID",
+      "description": "The ID of your task management database",
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for AI-powered features (optional)",
+      "placeholder": "sk-xxxxxxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^1.17.0",
+    "@notionhq/client": "^2.2.14",
+    "date-fns": "^3.0.0",
+    "openai": "^4.20.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

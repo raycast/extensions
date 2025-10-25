@@ -1,0 +1,159 @@
+# Raycast Notion Task Manager Extension
+
+## Project Overview
+
+A Raycast extension that integrates with Notion for quick task management. Enables rapid task capture, status updates, and daily overviews directly from the Raycast command bar without context switching.
+
+## Tech Stack
+
+- **Language**: TypeScript
+- **Framework**: Raycast API (^1.64.0)
+- **Integration**: Notion SDK (@notionhq/client ^2.2.14)
+- **Utilities**: date-fns (^3.0.0)
+
+## Notion Database Schema
+
+The extension connects to "My task management database" with these properties:
+
+- **Name** (Title): Task name
+- **Status** (Status): Backlog, To-do, Blocked, In progress, Done
+- **Priority** (Select): Critical, High, Medium, Low
+- **Due Date** (Date): Optional deadline
+- **Planned** (Date): Planned execution date
+- **Project** (Select): 12 project options (Obsidian, Productivity, PatternedAI, etc.)
+- **Tags** (Multi-select): 13 options (Design, Development, Research, etc.)
+- **Estimated Time** (Select): 15 min, 30 min, 1 hour, 2 hours, 4 hours, 1 day, 2-3 days, 1 week+
+- **Energy Level** (Select): High Energy, Medium Energy, Low Energy
+- **Progress** (Select): 0%, 25%, 50%, 75%, 100%
+- **Urgency** (Select): Urgent, Not Urgent
+- **Importance** (Select): Important, Not Important
+- **Link** (URL): Optional reference link
+- **Blocked by** (Relation): Link to blocking tasks
+
+## Core Commands
+
+1. **Create Task** (`ct`) - Quick task capture with smart defaults
+2. **Update Task** (`ut`) - Update status and properties of existing tasks
+3. **Daily Overview** (`do`) - Show daily summary with Today's Focus, In Progress, Blocked, Overdue, and Completed sections
+4. **Search Tasks** (`st`) - Full-text task search
+
+## Code Conventions
+
+### TypeScript Interface
+
+```typescript
+interface NotionTask {
+  Name: string;
+  Status: "Backlog" | "To-do" | "Blocked" | "In progress" | "Done";
+  Priority: "Critical" | "High" | "Medium" | "Low";
+  "Due Date": Date;
+  "Planned ": Date;
+  Project: string;
+  Tags: string[];
+  "Estimated Time": string;
+  "Energy Level": string;
+  Progress: "0%" | "25%" | "50%" | "75%" | "100%";
+  Urgency: "Urgent" | "Not Urgent";
+  Importance: "Important" | "Not Important";
+  Link: string;
+  "Blocked by ": string;
+}
+```
+
+### Smart Defaults
+
+- Status: "To-do" for new tasks
+- Priority: Suggest "High" if due date is today
+- Remember recent project selection
+
+### Visual Icons
+
+Use consistent emoji indicators:
+
+- 🔴 Critical priority
+- 🟠 High priority
+- 🟡 Medium priority
+- ⚪ Low priority
+- ⏱ Time estimate
+- 🔋 Energy level
+- 📅 Due date
+- ✓ Completed
+
+### Keyboard Shortcuts
+
+- `Enter` - Select/Confirm
+- `⌘ + Enter` - Create and create another
+- `⌘ + O` - Open in Notion
+- `⌘ + E` - Edit task details
+- `⌘ + D` - Mark as Done
+- `⌘ + P` - Change priority
+- `Esc` - Cancel/Go back
+
+### Success Feedback
+
+Always show toast notifications:
+
+- "✓ Task created: [Task Name]"
+- "✓ [Task Name] → [New Status]"
+  Provide options to "Open in Notion" or "Create Another"
+
+## Performance Targets
+
+- Task list loads: < 1 second
+- Search results: < 300ms
+- Task creation: < 2 seconds
+
+## Error Handling
+
+- Handle Notion API rate limits gracefully
+- Detect offline state and notify user
+- Target error rate: < 1%
+
+## Form Field Order (Create Task)
+
+1. Task Name (required)
+2. Project (optional)
+3. Status (optional, default "To-do")
+4. Priority (optional)
+5. Due Date (optional)
+6. Tags (optional)
+7. Estimated Time (optional)
+8. Energy Level (optional)
+
+## Daily Overview Sections
+
+1. **Today's Focus**: Due today, sorted by priority
+2. **In Progress**: 3 most recent with progress %
+3. **Blocked**: Show blocking dependencies
+4. **Overdue**: Due < Today AND Status ≠ Done
+5. **Completed Today**: Status = Done, edited today
+
+## Best Practices
+
+- Use real-time Notion API queries (no caching in V1)
+- Follow Raycast design guidelines
+- Store API credentials in Raycast secure storage
+- Use HTTPS for all data transmission
+- Support natural language date parsing where possible
+- Provide clear error messages
+- Make all actions reversible where possible
+
+## Task List Display Format§
+
+```
+[Priority Icon] Task Name
+Project · Due: Today · ⏱ 2 hours
+```
+
+## Security
+
+- No local data storage except API credentials
+- Use Raycast secure storage for credentials
+- Comply with Notion API terms of service
+- No custom analytics or tracking
+
+## Future Considerations (for context)
+
+- Phase 2: Recurring tasks, time tracking, quick notes, templates
+- Phase 3: AI suggestions, weekly/monthly views, bulk operations
+- Phase 4: Collaboration, analytics, voice input, integrations
