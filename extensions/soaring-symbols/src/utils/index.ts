@@ -19,8 +19,5 @@ export const getFlagEmoji = (isoCode?: string) => {
 };
 
 export const normalizeFill = (svg: string): string => {
-  const currentColor = 'fill="currentColor"';
-  return svg.replace(/\sfill="#[0-9a-fA-F]{3,8}"/g, (match) => {
-    return match.includes(currentColor) ? match : ` ${currentColor}`;
-  });
+  return svg.replace(/\sfill="#[0-9a-fA-F]{3,8}"/g, ' fill="currentColor"');
 };
