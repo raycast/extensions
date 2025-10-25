@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "millin_gabani",
   "contributors": [
-    "jimmy-b36"
+    "jimmy-b36",
+    "omar_hedeya"
   ],
   "categories": [
     "Productivity"
@@ -17,7 +18,25 @@
       "name": "capture",
       "title": "Obsidian Smart Capture",
       "description": "Capture whats on your screen into obsidian",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openInBackground",
+          "label": "Capture in Background",
+          "description": "Do not bring Obsidian to front when capturing",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "openInNewTab",
+          "label": "Open in New Tab",
+          "description": "Open captured notes in a new tab within Obsidian",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     }
   ],
   "dependencies": {

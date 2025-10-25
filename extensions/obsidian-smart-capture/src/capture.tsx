@@ -10,7 +10,6 @@ import {
   Icon,
   List,
   LocalStorage,
-  open,
   popToRoot,
   showHUD,
   showToast,
@@ -26,7 +25,10 @@ import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMess
 import { GET_ACTIVE_APP_SCRIPT, GET_LINK_FROM_BROWSER_SCRIPT, SUPPORTED_BROWSERS } from "./scripts/browser";
 import { SUMMARY_PROMPT } from "./utils/constants";
 
-import { urlToMarkdown, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
+import { urlToMarkdown, useObsidianVaults, vaultPluginCheck, openObsidianURI } from "./utils/utils";
+import fs from "fs";
+import { default as pathModule } from "path";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function Capture() {
   const canAccessAI = environment.canAccess(AI);
@@ -47,28 +49,46 @@ export default function Capture() {
 
   const formatData = (
     content?: string,
-    link?: string,
-    highlight?: string,
+    link?: string | string[],
+    highlight?: boolean,
     includePageContents = false,
     includeSummary = false
   ) => {
-    const data = [];
-    if (content) {
-      data.push(content);
+    const sections: string[] = [];
+
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, "0");
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const yy = String(now.getFullYear()).slice(-2);
+    const HH = String(now.getHours()).padStart(2, "0");
+    const MM = String(now.getMinutes()).padStart(2, "0");
+    const SS = String(now.getSeconds()).padStart(2, "0");
+
+    sections.push(`## ${dd}/${mm}/${yy}: ${HH}:${MM}:${SS}`);
+
+    if (highlight && selectedText) {
+      sections.push(`> [!quote] Quote\n${selectedText}`);
     }
-    if (link) {
-      data.push(`[${resourceInfo}](${link})`);
+
+    if (content && content.trim().length > 0) {
+      sections.push(`> [!note] Note\n${content}`);
     }
-    if (highlight) {
-      data.push(`> ${selectedText}`);
+
+    const url = Array.isArray(link) ? link[0] : link;
+    if (url) {
+      const linkText = resourceInfo || url;
+      sections.push(`Source: [${linkText}](${url})`);
     }
-    if (includeSummary) {
-      data.push(`---\n\n${summary}\n\n---`);
+
+    if (includeSummary && summary) {
+      sections.push(`---\n\n${summary}\n\n---`);
     }
-    if (includePageContents) {
-      data.push(pageContent);
+
+    if (includePageContents && pageContent) {
+      sections.push(pageContent);
     }
-    return data.join("\n\n");
+
+    return sections.join("\n\n");
   };
 
   async function createNewNote({ fileName, content, link, vault, path, highlight }: Form.Values) {
@@ -76,15 +96,27 @@ export default function Capture() {
       if (vault) await LocalStorage.setItem("vault", vault);
       if (path) await LocalStorage.setItem("path", path);
 
-      const target = `obsidian://advanced-uri?vault=${encodeURIComponent(vault)}&filepath=${encodeURIComponent(
-        path
-      )}/${encodeURIComponent(fileName)}&data=${encodeURIComponent(
-        formatData(content, link, highlight, includePageContents, includeSummary)
-      )}`;
-      open(target);
+      const vaultObj = allVaults.find((v) => v.name === vault);
+      const relativeFile = `${path}/${fileName}`;
+      const absoluteFile = vaultObj ? pathModule.join(vaultObj.path, `${relativeFile}.md`) : undefined;
+      const shouldAppend = absoluteFile ? fs.existsSync(absoluteFile) : false;
+
+      const pref = getPreferenceValues<{ openInNewTab?: boolean }>();
+      const newTabParam = pref.openInNewTab && !shouldAppend ? "&openmode=tab" : "";
+
+      const target =
+        `obsidian://advanced-uri?` +
+        (shouldAppend ? "mode=append&" : "") +
+        `vault=${encodeURIComponent(vault)}&filepath=${encodeURIComponent(path)}/${encodeURIComponent(
+          fileName
+        )}&data=${encodeURIComponent(formatData(content, link, highlight, includePageContents, includeSummary))}` +
+        (shouldAppend ? "&openmode=silent" : newTabParam);
+
+      await openObsidianURI(target);
       popToRoot();
       closeMainWindow();
       showHUD("Note Captured", { clearRootSearch: true });
+      return;
     } catch (e) {
       showToast({
         style: Toast.Style.Failure,
@@ -92,16 +124,19 @@ export default function Capture() {
       });
     }
 
-    // Save vault and path to local storage
+    // Fallback path if we reach here
     await LocalStorage.setItem("vault", vault);
     await LocalStorage.setItem("path", path);
 
-    const target = `obsidian://advanced-uri?vault=${encodeURIComponent(vault)}&filepath=${encodeURIComponent(
+    const pref = getPreferenceValues<{ openInNewTab?: boolean }>();
+    const newTabParam = pref.openInNewTab ? "&openmode=tab" : "";
+
+    const fallbackTarget = `obsidian://advanced-uri?vault=${encodeURIComponent(vault)}&filepath=${encodeURIComponent(
       path
     )}/${encodeURIComponent(fileName)}&data=${encodeURIComponent(
       formatData(content, link, highlight, includePageContents, includeSummary)
-    )}`;
-    open(target);
+    )}${newTabParam}`;
+    await openObsidianURI(fallbackTarget);
     popToRoot();
     showHUD("Note Captured", { clearRootSearch: true });
   }

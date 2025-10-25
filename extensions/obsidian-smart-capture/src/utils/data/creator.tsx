@@ -1,4 +1,4 @@
-import { showToast, Toast, confirmAlert, Icon, open } from "@raycast/api";
+import { showToast, Toast, confirmAlert, Icon, getPreferenceValues } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 
@@ -6,6 +6,7 @@ import { FormValue, Vault } from "../interfaces";
 import { applyTemplates } from "../utils";
 import { directoryCreationErrorToast, fileWriteErrorToast } from "../../components/Toasts";
 import { NoteFormPreferences } from "../preferences";
+import { openObsidianURI } from "../utils";
 
 class NoteCreator {
   vaultPath: string;
@@ -46,11 +47,15 @@ class NoteCreator {
     const saved = await this.saveNote(content, name);
 
     if (this.pref.openOnCreate) {
+      const pref = getPreferenceValues<{ openInNewTab?: boolean }>();
+      const newTabParam = pref.openInNewTab ? "&openmode=tab" : "";
       const target =
-        "obsidian://open?path=" + encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, name + ".md"));
+        "obsidian://open?path=" +
+        encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, name + ".md")) +
+        newTabParam;
       if (saved) {
-        setTimeout(() => {
-          open(target);
+        setTimeout(async () => {
+          await openObsidianURI(target);
         }, 200);
       }
     }

@@ -1,4 +1,4 @@
-import { Clipboard, getPreferenceValues, getSelectedText, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, getSelectedText, showToast, Toast, open as raycastOpen } from "@raycast/api";
 
 import fs from "fs";
 import { readFile } from "fs/promises";
@@ -8,6 +8,7 @@ import { parse } from "node-html-parser";
 import { homedir } from "os";
 import { default as fsPath, default as path } from "path";
 import { createContext, useEffect, useMemo, useState } from "react";
+import { runAppleScript } from "@raycast/utils";
 
 // @ts-expect-error url and input are mismatched
 global.fetch = fetch;
@@ -637,3 +638,19 @@ export async function urlToMarkdown(url: string) {
 export const NotesContext = createContext([] as Note[]);
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const NotesDispatchContext = createContext((() => {}) as (action: NoteReducerAction) => void);
+
+export async function openObsidianURI(uri: string, options?: { hidden?: boolean; background?: boolean }) {
+  const pref = getPreferenceValues<{ openInBackground?: boolean }>();
+  const useBackground = options?.background ?? pref.openInBackground ?? true;
+  const flag = options?.hidden ? "-j" : useBackground ? "-g" : "";
+  try {
+    if (flag) {
+      await runAppleScript(`do shell script "open ${flag} " & quoted form of "${uri}"`);
+    } else {
+      await runAppleScript(`do shell script "open " & quoted form of "${uri}"`);
+    }
+  } catch {
+    // Fallback to default behavior if AppleScript fails
+    await raycastOpen(uri);
+  }
+}
