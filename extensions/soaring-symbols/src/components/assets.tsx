@@ -30,7 +30,7 @@ const getDownloadsDir = (): string => {
 export default function AirlineAssets(airline: AirlineMeta) {
   const assets = Object.entries(assetTypes)
     .map(([category, variants]) => {
-      const colors = airline.branding?.colors[category as keyof typeof assetTypes];
+      const colors = airline?.branding?.colors[category as keyof typeof assetTypes];
       if (!Array.isArray(colors)) return [];
       const single = Array.isArray(colors) && colors.length === 1;
 

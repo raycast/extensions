@@ -51,7 +51,7 @@ export default function ViewAirlineInfo() {
                     <List.Item.Detail.Metadata.Label title="IATA" text={airline.iata} />
                     <List.Item.Detail.Metadata.Label title="ICAO" text={airline.icao} />
                     <List.Item.Detail.Metadata.Label title="Country" text={airline.country} />
-                    {airline.branding.tagline && (
+                    {airline.branding?.tagline && (
                       <List.Item.Detail.Metadata.Label title="Tagline" text={airline.branding.tagline} />
                     )}
                     <List.Item.Detail.Metadata.Label title="Alliance" text={airline.alliance} />
