@@ -2,14 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "smartthings",
   "title": "SmartThings Connector for Windows",
-  "description": "Control devices.",
+  "description": "Control Devices linked to SmartThings.",
   "icon": "smartthings.png",
   "license": "MIT",
   "commands": [
     {
       "name": "control-devices",
       "title": "Control Devices",
-      "description": "Control Devices",
+      "description": "Control Devices linked to SmartThings",
       "mode": "view",
       "subtitle": "SmartThings Connector for Windows"
     }
