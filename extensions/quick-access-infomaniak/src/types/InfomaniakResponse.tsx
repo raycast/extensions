@@ -1,5 +1,5 @@
 export interface InfomaniakResponse<T> {
-  result: 'success' | 'error';
+  result: "success" | "error";
   data: T[];
   total: number;
   pages: number;

@@ -3,10 +3,10 @@ import { Tag } from "./Tag";
 export interface Hosting {
   id: number;
   account_id: number;
-  service_id: number,
-  service_name: string,
-  customer_name: string,
-  internal_name: string|null;
+  service_id: number;
+  service_name: string;
+  customer_name: string;
+  internal_name: string | null;
   created_at: number;
   expired_at: number;
   version: number;
@@ -22,5 +22,5 @@ export interface Hosting {
   rights: {
     technical: boolean;
     statistic: boolean;
-  }
+  };
 }

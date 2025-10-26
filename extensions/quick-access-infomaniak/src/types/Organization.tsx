@@ -1,7 +1,7 @@
 export interface Organization {
   id: number;
   name: string;
-  legal_entity_type: 'association' | 'company' | 'individual';
+  legal_entity_type: "association" | "company" | "individual";
   created_at: number;
   website: string;
   phone: string;

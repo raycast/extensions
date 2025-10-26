@@ -26,7 +26,7 @@
     {
       "name": "personalAccessToken",
       "title": "Infomaniak Token",
-      "description": "Your Infomaniak's personal access token. Required scopes: notifications repo project read:org read:user.",
+      "description": "Your Infomaniak's personal access token. Required scopes: accounts, mail, web, domain.",
       "type": "password",
       "required": true,
       "placeholder": "Enter your personal access token"
