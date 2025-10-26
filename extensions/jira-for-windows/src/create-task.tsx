@@ -117,7 +117,6 @@ export default function Command() {
         projectKey: values.project,
         summary: values.title,
         description: values.description || "",
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation, open, getPreferenceValues } from "@raycast/api";
         dueDate: values.dueDate ? formatDateForJira(values.dueDate) : undefined,
         priorityId: values.priority,
         labels: values.labels,
@@ -167,18 +166,6 @@ import { Form, ActionPanel, Action, showToast, Toast, useNavigation, open, getPr
         result.setMonth(result.getMonth() + 1);
         return result;
       }
-      default:
-        return undefined;
-    }
-  }
-      case "3days":
-        return new Date(today.setDate(today.getDate() + 3));
-      case "1week":
-        return new Date(today.setDate(today.getDate() + 7));
-      case "2weeks":
-        return new Date(today.setDate(today.getDate() + 14));
-      case "1month":
-        return new Date(today.setMonth(today.getMonth() + 1));
       default:
         return undefined;
     }
