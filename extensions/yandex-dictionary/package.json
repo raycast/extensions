@@ -1,0 +1,319 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yandex-dictionary",
+  "title": "Yandex Dictionary",
+  "description": "Raycast extension for Yandex Dictionary: quickly translate words between multiple languages, view translation history, and reuse past queries with a single action.",
+  "icon": "icon.png",
+  "author": "zagoruyko-v",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiKey",
+      "title": "Yandex Dictionary API Key",
+      "description": "Enter your Yandex Dictionary API key",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "lookup",
+      "title": "Yandex Dictionary",
+      "description": "Translate words or sentences",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "Query"
+        },
+        {
+          "name": "from",
+          "type": "dropdown",
+          "required": true,
+          "placeholder": "From language code",
+          "data": [
+            {
+              "title": "Belarusian",
+              "value": "be"
+            },
+            {
+              "title": "Bulgarian",
+              "value": "bg"
+            },
+            {
+              "title": "Czech",
+              "value": "cs"
+            },
+            {
+              "title": "Danish",
+              "value": "da"
+            },
+            {
+              "title": "German",
+              "value": "de"
+            },
+            {
+              "title": "Greek",
+              "value": "el"
+            },
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Spanish",
+              "value": "es"
+            },
+            {
+              "title": "Estonian",
+              "value": "et"
+            },
+            {
+              "title": "Finnish",
+              "value": "fi"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "Hungarian",
+              "value": "hu"
+            },
+            {
+              "title": "Italian",
+              "value": "it"
+            },
+            {
+              "title": "Lithuanian",
+              "value": "lt"
+            },
+            {
+              "title": "Latvian",
+              "value": "lv"
+            },
+            {
+              "title": "Moksha",
+              "value": "mhr"
+            },
+            {
+              "title": "Meadow Mari",
+              "value": "mrj"
+            },
+            {
+              "title": "Dutch",
+              "value": "nl"
+            },
+            {
+              "title": "Norwegian",
+              "value": "no"
+            },
+            {
+              "title": "Polish",
+              "value": "pl"
+            },
+            {
+              "title": "Portuguese",
+              "value": "pt"
+            },
+            {
+              "title": "Russian",
+              "value": "ru"
+            },
+            {
+              "title": "Slovak",
+              "value": "sk"
+            },
+            {
+              "title": "Swedish",
+              "value": "sv"
+            },
+            {
+              "title": "Turkish",
+              "value": "tr"
+            },
+            {
+              "title": "Tatar",
+              "value": "tt"
+            },
+            {
+              "title": "Ukrainian",
+              "value": "uk"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Emoji",
+              "value": "emj"
+            }
+          ]
+        },
+        {
+          "name": "to",
+          "type": "dropdown",
+          "required": true,
+          "placeholder": "To language code",
+          "data": [
+            {
+              "title": "Belarusian",
+              "value": "be"
+            },
+            {
+              "title": "Bulgarian",
+              "value": "bg"
+            },
+            {
+              "title": "Czech",
+              "value": "cs"
+            },
+            {
+              "title": "Danish",
+              "value": "da"
+            },
+            {
+              "title": "German",
+              "value": "de"
+            },
+            {
+              "title": "Greek",
+              "value": "el"
+            },
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Spanish",
+              "value": "es"
+            },
+            {
+              "title": "Estonian",
+              "value": "et"
+            },
+            {
+              "title": "Finnish",
+              "value": "fi"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "Hungarian",
+              "value": "hu"
+            },
+            {
+              "title": "Italian",
+              "value": "it"
+            },
+            {
+              "title": "Lithuanian",
+              "value": "lt"
+            },
+            {
+              "title": "Latvian",
+              "value": "lv"
+            },
+            {
+              "title": "Moksha",
+              "value": "mhr"
+            },
+            {
+              "title": "Meadow Mari",
+              "value": "mrj"
+            },
+            {
+              "title": "Dutch",
+              "value": "nl"
+            },
+            {
+              "title": "Norwegian",
+              "value": "no"
+            },
+            {
+              "title": "Polish",
+              "value": "pl"
+            },
+            {
+              "title": "Portuguese",
+              "value": "pt"
+            },
+            {
+              "title": "Brazilian Portuguese",
+              "value": "pt-BR"
+            },
+            {
+              "title": "Russian",
+              "value": "ru"
+            },
+            {
+              "title": "Slovak",
+              "value": "sk"
+            },
+            {
+              "title": "Swedish",
+              "value": "sv"
+            },
+            {
+              "title": "Turkish",
+              "value": "tr"
+            },
+            {
+              "title": "Tatar",
+              "value": "tt"
+            },
+            {
+              "title": "Ukrainian",
+              "value": "uk"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Emoji",
+              "value": "emj"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Yandex Dictionary History",
+      "description": "View past translations",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
