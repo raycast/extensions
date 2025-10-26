@@ -117,7 +117,7 @@ export default function Command() {
         projectKey: values.project,
         summary: values.title,
         description: values.description || "",
-        issueType: values.issueType,
+import { Form, ActionPanel, Action, showToast, Toast, useNavigation, open, getPreferenceValues } from "@raycast/api";
         dueDate: values.dueDate ? formatDateForJira(values.dueDate) : undefined,
         priorityId: values.priority,
         labels: values.labels,
