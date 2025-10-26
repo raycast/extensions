@@ -1,4 +1,4 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
@@ -14,7 +14,6 @@ import {
 import { Championship, CoppaRounds, Round } from "../types/coppa";
 
 const { apikey, language } = getPreferenceValues();
-const cache = new Cache();
 
 const endpoint = "https://www.legaseriea.it/api";
 

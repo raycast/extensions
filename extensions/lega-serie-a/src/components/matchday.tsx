@@ -9,6 +9,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { formatDate } from "date-fns";
+import { JSX } from "react";
 import { Broadcaster, Match } from "../types";
 
 const { language } = getPreferenceValues();
