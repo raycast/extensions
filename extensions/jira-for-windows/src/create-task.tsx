@@ -45,6 +45,17 @@ export default function Command() {
   const [issueTypes, setIssueTypes] = useState<IssueType[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>("");
+  const [deadlineType, setDeadlineType] = useState<string>("1week");
+
+  const deadlineOptions = [
+    { title: "Today", value: "today" },
+    { title: "Tomorrow", value: "tomorrow" },
+    { title: "In 3 days", value: "3days" },
+    { title: "In 1 week", value: "1week" },
+    { title: "In 2 weeks", value: "2weeks" },
+    { title: "In 1 month", value: "1month" },
+    { title: "Custom", value: "custom" },
+  ];
 
   useEffect(() => {
     async function fetchInitialData() {
@@ -117,6 +128,7 @@ export default function Command() {
         projectKey: values.project,
         summary: values.title,
         description: values.description || "",
+        issueType: values.issueType,
         dueDate: values.dueDate ? formatDateForJira(values.dueDate) : undefined,
         priorityId: values.priority,
         labels: values.labels,
@@ -179,10 +191,22 @@ export default function Command() {
           <Action.SubmitForm
             title="Create Task"
             onSubmit={(rawValues: Record<string, unknown>) => {
-              const values = rawValues as FormValues & { customDate?: Date };
+              const values = {
+                title: String(rawValues.title || ""),
+                description: String(rawValues.description || ""),
+                project: String(rawValues.project || ""),
+                issueType: String(rawValues.issueType || ""),
+                priority: rawValues.priority
+                  ? String(rawValues.priority)
+                  : undefined,
+                labels: Array.isArray(rawValues.labels)
+                  ? (rawValues.labels as string[])
+                  : [],
+              } as FormValues;
+              const customDate = rawValues.customDate as Date | undefined;
               const dueDate =
                 deadlineType === "custom"
-                  ? values.customDate
+                  ? customDate
                   : getDateFromDeadlineType(deadlineType);
               handleSubmit({ ...values, dueDate });
             }}
