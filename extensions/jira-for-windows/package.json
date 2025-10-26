@@ -4,8 +4,6 @@
   "title": "Jira for Windows",
   "description": "Windows-optimized Jira task manager with Ctrl shortcuts. Create and review tasks with a streamlined interface.",
   "icon": "extension-icon.png",
-  "owner": "owendavidprice",
-  "access": "public",
   "license": "MIT",
   "commands": [
     {
