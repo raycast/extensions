@@ -1,20 +1,34 @@
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { attio, parseErrorMessage } from "./attio";
-import { Action, ActionPanel, Color, Form, Icon, Image, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  Icon,
+  Image,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import Records from "./records";
 import Attributes from "./attributes";
 import { PostV2ObjectsData } from "attio-js/dist/commonjs/models/operations/postv2objects";
 import OpenInAttio from "./open-in-attio";
 import { ObjectT } from "attio-js/dist/commonjs/models/components/object";
 
-const STANDARD_OBJECT_ICONS: Record<string,Image.ImageLike> = {
-  companies: {source: Icon.Building, tintColor: Color.Orange},
+export const getObjectTitle = (object: ObjectT) =>
+  object.pluralNoun || object.singularNoun || object.apiSlug || object.id.objectId;
+const STANDARD_OBJECT_ICONS: Record<string, Image.ImageLike> = {
+  companies: { source: Icon.Building, tintColor: Color.Orange },
   deals: Icon.BankNote,
-  people: {source: Icon.Person, tintColor: Color.Blue},
-  users: {source: Icon.Person, tintColor: Color.Green},
-  workspaces: Icon.AppWindowGrid2x2
-}
-const isStandardObject = (object: ObjectT) => !!STANDARD_OBJECT_ICONS[object.apiSlug || ""]
+  people: { source: Icon.Person, tintColor: Color.Blue },
+  users: { source: Icon.Person, tintColor: Color.Green },
+  workspaces: Icon.AppWindowGrid2x2,
+};
+const isStandardObject = (object: ObjectT) => !!STANDARD_OBJECT_ICONS[object.apiSlug || ""];
 export default function Objects() {
   const {
     isLoading,
@@ -37,19 +51,23 @@ export default function Objects() {
           title={object.pluralNoun || ""}
           accessories={[
             {
-              tag: isStandardObject(object) ? "Standard" : {value:"Custom", color: Color.Blue}
-            }
+              tag: isStandardObject(object) ? "Standard" : { value: "Custom", color: Color.Blue },
+            },
           ]}
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.Document} title="Records" target={<Records object={object} />} />
+              <Action.Push icon={Icon.AppWindowGrid2x2} title="Attributes" target={<Attributes object={object} />} />
+              {object.apiSlug && (
+                <OpenInAttio route={isStandardObject(object) ? object.apiSlug : `custom/${object.apiSlug}`} />
+              )}
               <Action.Push
-                icon={Icon.AppWindowGrid2x2}
-                title="Attributes"
-                target={<Attributes objectId={object.id.objectId} />}
+                icon={Icon.Plus}
+                title="New Custom Object"
+                target={<NewCustomObject />}
+                onPop={mutate}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
-              {object.apiSlug && <OpenInAttio route={isStandardObject(object) ? object.apiSlug : `custom/${object.apiSlug}`} />}
-              <Action.Push icon={Icon.Plus} title="New Custom Object" target={<NewCustomObject />} onPop={mutate} shortcut={Keyboard.Shortcut.Common.New} />
             </ActionPanel>
           }
         />

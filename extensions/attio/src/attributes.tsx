@@ -2,6 +2,8 @@ import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { AttributeType } from "attio-js/dist/commonjs/models/components/attribute";
 import { attio } from "./attio";
+import { getObjectTitle } from "./objects";
+import { ObjectT } from "attio-js/dist/commonjs/models/components/object";
 
 const ATTRIBUTE_ICONS: Partial<Record<AttributeType, Icon>> = {
   text: Icon.Text,
@@ -11,13 +13,16 @@ const ATTRIBUTE_ICONS: Partial<Record<AttributeType, Icon>> = {
   date: Icon.Calendar,
   timestamp: Icon.Clock,
 };
-export default function Attributes({ objectId }: { objectId: string }) {
-  const { isLoading, data: attributes = [] } = useCachedPromise(async (objectId: string) => {
-    const { data } = await attio.attributes.list({ target: "objects", identifier: objectId });
-    return data;
-  },[objectId]);
+export default function Attributes({ object }: { object: ObjectT }) {
+  const { isLoading, data: attributes = [] } = useCachedPromise(
+    async (objectId: string) => {
+      const { data } = await attio.attributes.list({ target: "objects", identifier: objectId });
+      return data;
+    },
+    [object.id.objectId],
+  );
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle={`Objects / ${getObjectTitle(object)} / Attributes`}>
       {attributes.map((attribute) => (
         <List.Item
           key={attribute.id.attributeId}

@@ -3,6 +3,7 @@ import { AttributeValue } from "./types";
 import { queryRecords } from "./attio";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { ObjectT } from "attio-js/dist/commonjs/models/components/object";
+import { getObjectTitle } from "./objects";
 
 const getValue = (val: AttributeValue[]) => {
   if (!val.length) return "-";
@@ -41,7 +42,7 @@ const getValue = (val: AttributeValue[]) => {
     }
   });
   return value.join();
-}
+};
 const buildMarkdown = (values: { [attributeSlug: string]: AttributeValue[] }) => {
   return `
 | key | val |
@@ -49,18 +50,25 @@ const buildMarkdown = (values: { [attributeSlug: string]: AttributeValue[] }) =>
 ${Object.entries(values)
   .map(([key, val]) => `| ${key} | ${getValue(val)} |`)
   .join(`\n`)}`;
-}
+};
 export default function Records({ object }: { object: ObjectT }) {
   const {
     isLoading,
     data: records = [],
     error,
-  } = useCachedPromise(async (objectId: string) => {
-    const { data } = await queryRecords({ objectId });
-    return data;
-  },[object.id.objectId]);
+  } = useCachedPromise(
+    async (objectId: string) => {
+      const { data } = await queryRecords({ objectId });
+      return data;
+    },
+    [object.id.objectId],
+  );
   return (
-    <List isLoading={isLoading} isShowingDetail={!!records.length}>
+    <List
+      isLoading={isLoading}
+      navigationTitle={`Objects / ${getObjectTitle(object)} / Records`}
+      isShowingDetail={!!records.length}
+    >
       {!isLoading && !records.length && !error ? (
         <List.EmptyView
           icon="empty/record.svg"
