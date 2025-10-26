@@ -149,25 +149,28 @@ export default function Command() {
     return `${year}-${month}-${day}`;
   }
 
-  const deadlineOptions = [
-    { title: "Today", value: "today" },
-    { title: "Tomorrow", value: "tomorrow" },
-    { title: "In 3 days", value: "3days" },
-    { title: "In 1 week", value: "1week" },
-    { title: "In 2 weeks", value: "2weeks" },
-    { title: "In 1 month", value: "1month" },
-    { title: "Custom", value: "custom" },
-  ];
-
-  const [deadlineType, setDeadlineType] = useState<string>("1week");
-
   function getDateFromDeadlineType(type: string): Date | undefined {
     const today = new Date();
     switch (type) {
       case "today":
-        return today;
+        return new Date(today);
       case "tomorrow":
-        return new Date(today.setDate(today.getDate() + 1));
+        return new Date(today.getTime() + 24 * 60 * 60 * 1000);
+      case "3days":
+        return new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
+      case "1week":
+        return new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+      case "2weeks":
+        return new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+      case "1month": {
+        const result = new Date(today);
+        result.setMonth(result.getMonth() + 1);
+        return result;
+      }
+      default:
+        return undefined;
+    }
+  }
       case "3days":
         return new Date(today.setDate(today.getDate() + 3));
       case "1week":
