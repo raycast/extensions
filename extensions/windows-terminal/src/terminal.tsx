@@ -76,7 +76,7 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
       const isErrorFinal = hasError || code !== 0;
 
       const result: HistoryItem = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         command,
         output: formatOutput(finalOutput),
         timestamp: Date.now(),
