@@ -7,7 +7,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "windows-terminal",
+      "name": "terminal",
       "title": "Windows Terminal",
       "description": "Execute a terminal command",
       "mode": "view",
