@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { webcrypto } from "crypto";
 import { DICTIONARY } from "./dictionary";
 
@@ -39,6 +39,7 @@ function generateNPasswords(n: number): string[] {
   for (let i = 0; i < n; i++) {
     result.push(generateXKCDPassword());
   }
+  result.sort((a, b) => a.length - b.length);
   return result;
 }
 
@@ -50,6 +51,7 @@ export default function Command() {
           key={`pw-${i}`}
           icon="copy.png"
           title={pw}
+          accessories={[{ text: `(${pw.length} characters)`, icon: Icon.Ruler }]}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy to Clipboard" content={pw} />
