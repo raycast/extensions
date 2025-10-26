@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "diskutil-mac",
   "title": "Diskutil",
-  "description": "View your disks and volumes\nAn implementation of the macOS 'diskutil' command with quicker access to features, providing a better overview and a much more userfriendly interface",
+  "description": "View your disks and volumes. An implementation of the macOS 'diskutil' command with quicker access to functionality, providing a better overview and a more user-friendly interface.",
   "icon": "extension-icon.png",
   "version": "1.1.0",
   "author": "Globolo",
@@ -16,7 +16,7 @@
     {
       "name": "index",
       "title": "Run Diskutil",
-      "description": "View, mount and eject your disks and volumes like with diskutil. Just with a nice UI. \n(Note: Due to limitation with the diskutil command implementation the execution takes some time with HDDs)",
+      "description": "View, mount, and eject your disks and volumes like diskutil, but with a user-friendly UI.",
       "mode": "view"
     }
   ],

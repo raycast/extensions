@@ -58,7 +58,12 @@ export default function DiskListItem({
             icon={Icon.Sidebar}
             onAction={() => onToggleDetail(1)}
           />
-          <Action title="Toggle Sizes View" shortcut={{ modifiers: ["cmd"], key: "." }} onAction={onToggleSizesView} />
+          <Action
+            title="Toggle Sizes View"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+            icon={Icon.ArrowClockwise}
+            onAction={onToggleSizesView}
+          />
         </ActionPanel>
       }
     />

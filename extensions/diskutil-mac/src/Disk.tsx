@@ -1,7 +1,5 @@
 import { Color, Icon, Image, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { exec } from "child_process";
-import * as sudo from "sudo-prompt";
 import plist from "plist";
 import { JSX } from "react";
 import { execDiskCommand } from "./diskUtils";
@@ -67,7 +65,7 @@ export default class Disk {
       },
     });
 
-    const failureAction = (title: string, icon?: Image.ImageLike, message?: string) => ({
+    const failureAction = (title: string, message?: string) => ({
       title,
       icon: Icon.Warning,
       onAction: () => showFailureToast(message, { title: `${this.identifier} ${title}` }),
@@ -245,6 +243,10 @@ export default class Disk {
     await this.handleMountAction(true);
   }
 
+  /**
+   * Initializes the disk by fetching its details using diskutil info commands.
+   * @returns Promise<void> as it sets all attributes inside the instance.
+   */
   async init(): Promise<void> {
     try {
       const detailsPromise: Promise<string> = execDiskCommand(`diskutil info -plist ${this.identifier}`);
@@ -315,7 +317,7 @@ export default class Disk {
       this.isWhole = true;
       return "Whole";
     }
-    if ((this.details.Content as string).includes("Apple_APFS")) return "Container";
+    if ((this.details.Content as string | undefined)?.includes("Apple_APFS")) return "Container";
     return this.details.MountPoint ? "Mounted" : "Unmounted";
   }
 
@@ -444,12 +446,12 @@ export default class Disk {
   }
 
   /**
-   * @param data Recursively parsing the nested Plist Object when reading from diskutil info -plist
+   * @param data Recursively parsing the nested "diskutil list --plist" Plist Object when reading from diskutil info -plist
    * @param indent NestLevel
    * @param isArrayChild Is child of an array
    * @returns The nested metadata as JSX element
    */
-  renderMetadata(data: any, indent = 0, isArrayChild = false): JSX.Element[] {
+  renderMetadata(data: unknown, indent = 0, isArrayChild = false): JSX.Element[] {
     if (Array.isArray(data)) {
       // If this array is nested inside a dict (isArrayChild true), simply flatten it without an index label.
       if (isArrayChild) {
@@ -497,7 +499,7 @@ export default class Disk {
     return [];
   }
   getDetailsPlistSummary() {
-    const dash = "-_-";
+    const dash = "⌀";
     const summary = [
       { key: "Disk Identifier", value: this.identifier },
       { key: "Disk Name", value: this.name },

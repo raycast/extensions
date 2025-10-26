@@ -1,13 +1,11 @@
-// ---------- diskUtils ----------
 import { exec } from "child_process";
-import DiskSection from "./DiskSection";
 import sudo from "sudo-prompt";
 
 export async function execDiskCommand(command: string, options?: { sudo?: boolean }): Promise<string> {
   const env = {
     ...process.env,
     PATH: `${process.env.PATH ?? ""}:/usr/sbin:/usr/bin`,
-    USER: process.env.USER ?? "root", // Set as needed
+    USER: process.env.USER ?? "root",
   };
 
   if (options?.sudo) {

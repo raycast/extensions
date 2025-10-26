@@ -1,6 +1,5 @@
 import { LocalStorage } from "@raycast/api";
 
-// ---------- sizesViewUtils ----------
 export enum SizesView {
   Full = "Full",
   Used = "Used",
