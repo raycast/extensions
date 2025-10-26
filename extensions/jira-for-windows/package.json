@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-for-windows",
+  "title": "Jira for Windows",
+  "description": "Windows-optimized Jira task manager with Ctrl shortcuts. Create and review tasks with a streamlined interface.",
+  "icon": "extension-icon.png",
+  "owner": "owendavidprice",
+  "access": "public",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a new Jira task with title, description, deadline, priority, tags, and project",
+      "mode": "view"
+    },
+    {
+      "name": "review-tasks",
+      "title": "Review Tasks",
+      "description": "View tasks assigned to you, sorted by deadline",
+      "mode": "view"
+    },
+    {
+      "name": "project-overview",
+      "title": "Project Overview",
+      "description": "View all outstanding tasks in a project - select project from dropdown",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jiraDomain",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira Domain",
+      "description": "Your Jira domain (e.g., yourcompany.atlassian.net)",
+      "placeholder": "yourcompany.atlassian.net",
+      "default": ""
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Your Atlassian account email",
+      "placeholder": "your.email@company.com",
+      "default": ""
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Jira API token (generate at https://id.atlassian.com/manage-profile/security/api-tokens)",
+      "placeholder": "Enter your API token",
+      "default": ""
+    },
+    {
+      "name": "defaultProject",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Project",
+      "description": "Default project key to use when creating tasks (e.g., PROJ)",
+      "placeholder": "Enter project key (optional)",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "owendavidprice",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}
