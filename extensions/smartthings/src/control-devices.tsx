@@ -74,7 +74,7 @@ export default function ControlDevices() {
           Authorization: `Bearer ${SMARTTHINGS_API_TOKEN}`,
         },
       });
-      const locationId = locationsResponse.data.items[0]?.locationId;
+      const locationId = locationsResponse.data.items?.[0]?.locationId;
 
       if (!locationId) {
         throw new Error("No locations found.");
