@@ -86,10 +86,6 @@ export default function Command() {
       await Clipboard.copy(text);
       console.log("Message also saved to clipboard for user convenience");
 
-      // Verify clipboard content
-      const clipboardContent = await Clipboard.read();
-      console.log("Clipboard verification:", clipboardContent.text);
-
       await showHUD("Message sent successfully!");
     } catch (error) {
       console.error("Error in handleSubmit:", error);
