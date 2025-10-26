@@ -6,6 +6,7 @@ import {
   Toast,
   useNavigation,
   open,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { JiraAPI } from "./jira-api";
@@ -187,7 +188,8 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm
             title="Create Task"
-            onSubmit={(values) => {
+            onSubmit={(rawValues: Record<string, unknown>) => {
+              const values = rawValues as FormValues & { customDate?: Date };
               const dueDate =
                 deadlineType === "custom"
                   ? values.customDate

@@ -276,14 +276,17 @@ export default function Command() {
                 },
               },
               issue.fields.priority
-                ? {
+                ? ({
                     text: issue.fields.priority.name,
-                    icon: priorityInfo,
-                  }
-                : {},
+                    icon: {
+                      source: priorityInfo.icon,
+                      tintColor: priorityInfo.tintColor,
+                    },
+                  } as const)
+                : ({} as const),
               {
                 text: formatDate(issue.fields.duedate),
-                icon: dateInfo,
+                icon: { source: dateInfo.icon, tintColor: dateInfo.tintColor },
               },
             ].filter((acc) => Object.keys(acc).length > 0)}
             actions={
