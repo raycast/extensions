@@ -64,7 +64,11 @@ function ChangeStatusSubmenu({
   }
 
   return (
-    <ActionPanel.Submenu title="Change Status" icon={Icon.ArrowRight} shortcut={{ modifiers: ["ctrl"], key: "t" }}>
+    <ActionPanel.Submenu
+      title="Change Status"
+      icon={Icon.ArrowRight}
+      shortcut={{ modifiers: ["ctrl"], key: "t" }}
+    >
       {transitions.map((transition) => (
         <Action
           key={transition.id}
@@ -77,7 +81,13 @@ function ChangeStatusSubmenu({
   );
 }
 
-function AddCommentForm({ issue, onCommentAdded }: { issue: JiraIssue; onCommentAdded: () => void }) {
+function AddCommentForm({
+  issue,
+  onCommentAdded,
+}: {
+  issue: JiraIssue;
+  onCommentAdded: () => void;
+}) {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -129,7 +139,9 @@ function AddCommentForm({ issue, onCommentAdded }: { issue: JiraIssue; onComment
         </ActionPanel>
       }
     >
-      <Form.Description text={`Add a comment to ${issue.key}: ${issue.fields.summary}`} />
+      <Form.Description
+        text={`Add a comment to ${issue.key}: ${issue.fields.summary}`}
+      />
       <Form.TextArea
         id="comment"
         title="Comment"
@@ -159,7 +171,10 @@ export default function Command() {
 
         // Set default project from preferences, or fall back to first project
         const prefs = getPreferenceValues<{ defaultProject?: string }>();
-        if (prefs.defaultProject && projectsData.some((p) => p.key === prefs.defaultProject)) {
+        if (
+          prefs.defaultProject &&
+          projectsData.some((p) => p.key === prefs.defaultProject)
+        ) {
           setSelectedProject(prefs.defaultProject);
         } else if (projectsData.length > 0) {
           setSelectedProject(projectsData[0].key);
@@ -243,7 +258,11 @@ export default function Command() {
     }
   }
 
-  async function handleChangeStatus(issue: JiraIssue, transitionId: string, transitionName: string) {
+  async function handleChangeStatus(
+    issue: JiraIssue,
+    transitionId: string,
+    transitionName: string,
+  ) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Changing status...",
@@ -285,10 +304,16 @@ export default function Command() {
     } else if (compareDate.getTime() === tomorrow.getTime()) {
       return "Tomorrow";
     } else if (compareDate < today) {
-      const daysOverdue = Math.floor((today.getTime() - compareDate.getTime()) / (1000 * 60 * 60 * 24));
+      const daysOverdue = Math.floor(
+        (today.getTime() - compareDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
       return `${daysOverdue} day${daysOverdue > 1 ? "s" : ""} overdue`;
     } else {
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
     }
   }
 
@@ -296,15 +321,24 @@ export default function Command() {
     const lowerStatus = statusName.toLowerCase();
     if (lowerStatus.includes("done") || lowerStatus.includes("complete")) {
       return Color.Green;
-    } else if (lowerStatus.includes("progress") || lowerStatus.includes("doing")) {
+    } else if (
+      lowerStatus.includes("progress") ||
+      lowerStatus.includes("doing")
+    ) {
       return Color.Blue;
-    } else if (lowerStatus.includes("blocked") || lowerStatus.includes("hold")) {
+    } else if (
+      lowerStatus.includes("blocked") ||
+      lowerStatus.includes("hold")
+    ) {
       return Color.Red;
     }
     return Color.SecondaryText;
   }
 
-  function getDueDateIcon(dateString?: string): { icon: Icon; tintColor: Color } {
+  function getDueDateIcon(dateString?: string): {
+    icon: Icon;
+    tintColor: Color;
+  } {
     if (!dateString) {
       return { icon: Icon.Calendar, tintColor: Color.SecondaryText };
     }
@@ -337,7 +371,11 @@ export default function Command() {
           isLoading={isLoading}
         >
           {projects.map((project) => (
-            <List.Dropdown.Item key={project.id} value={project.key} title={`${project.name} (${project.key})`} />
+            <List.Dropdown.Item
+              key={project.id}
+              value={project.key}
+              title={`${project.name} (${project.key})`}
+            />
           ))}
         </List.Dropdown>
       }
@@ -375,7 +413,10 @@ export default function Command() {
               },
               {
                 text: formatDate(issue.fields.duedate),
-                icon: { source: Icon.Calendar, tintColor: dueDateInfo.tintColor },
+                icon: {
+                  source: Icon.Calendar,
+                  tintColor: dueDateInfo.tintColor,
+                },
               },
             ]}
             actions={
@@ -385,7 +426,9 @@ export default function Command() {
                     title="Open in Jira"
                     icon={Icon.Globe}
                     onAction={() => {
-                      const prefs = getPreferenceValues<{ jiraDomain: string }>();
+                      const prefs = getPreferenceValues<{
+                        jiraDomain: string;
+                      }>();
                       open(`https://${prefs.jiraDomain}/browse/${issue.key}`);
                     }}
                   />
@@ -406,7 +449,12 @@ export default function Command() {
                     title="Add Comment"
                     icon={Icon.Message}
                     shortcut={{ modifiers: ["ctrl"], key: "m" }}
-                    target={<AddCommentForm issue={issue} onCommentAdded={handleRefresh} />}
+                    target={
+                      <AddCommentForm
+                        issue={issue}
+                        onCommentAdded={handleRefresh}
+                      />
+                    }
                   />
                   <Action
                     title="Refresh"

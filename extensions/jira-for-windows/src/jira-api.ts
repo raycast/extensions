@@ -115,7 +115,11 @@ export class JiraAPI {
     return `https://${this.domain}/rest/api/${version}`;
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}, apiVersion: number = 3): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    apiVersion: number = 3,
+  ): Promise<T> {
     const url = `${this.getBaseUrl(apiVersion)}${endpoint}`;
     console.log(`Making request to: ${url}`);
 
@@ -131,8 +135,12 @@ export class JiraAPI {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`API Error - URL: ${url}, Status: ${response.status}, Response: ${errorText}`);
-      throw new Error(`Jira API error (${response.status}) at ${endpoint}: ${errorText}`);
+      console.error(
+        `API Error - URL: ${url}, Status: ${response.status}, Response: ${errorText}`,
+      );
+      throw new Error(
+        `Jira API error (${response.status}) at ${endpoint}: ${errorText}`,
+      );
     }
 
     // Handle empty responses (204 No Content, etc.)
@@ -140,7 +148,11 @@ export class JiraAPI {
     const contentLength = response.headers.get("content-length");
 
     // If no content or content-length is 0, return empty object
-    if (response.status === 204 || contentLength === "0" || !contentType?.includes("application/json")) {
+    if (
+      response.status === 204 ||
+      contentLength === "0" ||
+      !contentType?.includes("application/json")
+    ) {
       return {} as T;
     }
 
@@ -172,7 +184,11 @@ export class JiraAPI {
   }
 
   async getIssueTypes(projectKey: string): Promise<JiraIssueType[]> {
-    const response = await this.request<{ issueTypes: JiraIssueType[] }>(`/project/${projectKey}`, {}, 2);
+    const response = await this.request<{ issueTypes: JiraIssueType[] }>(
+      `/project/${projectKey}`,
+      {},
+      2,
+    );
     return response.issueTypes.filter((type) => !type.subtask);
   }
 
@@ -225,7 +241,8 @@ export class JiraAPI {
   }
 
   async getMyIssues(): Promise<JiraIssue[]> {
-    const jql = "assignee = currentUser() AND resolution = Unresolved ORDER BY duedate ASC";
+    const jql =
+      "assignee = currentUser() AND resolution = Unresolved ORDER BY duedate ASC";
     // Use the new /search/jql endpoint (API v3)
     const response = await this.request<{ issues: JiraIssue[] }>(
       `/search/jql?jql=${encodeURIComponent(jql)}&fields=summary,description,status,priority,project,duedate,labels,assignee,created,updated`,
@@ -270,7 +287,11 @@ export class JiraAPI {
   }
 
   async getTransitions(issueKey: string): Promise<JiraTransition[]> {
-    const response = await this.request<{ transitions: JiraTransition[] }>(`/issue/${issueKey}/transitions`, {}, 3);
+    const response = await this.request<{ transitions: JiraTransition[] }>(
+      `/issue/${issueKey}/transitions`,
+      {},
+      3,
+    );
     return response.transitions;
   }
 

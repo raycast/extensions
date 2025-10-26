@@ -60,7 +60,11 @@ function ChangeStatusSubmenu({
   }
 
   return (
-    <ActionPanel.Submenu title="Change Status" icon={Icon.ArrowRight} shortcut={{ modifiers: ["ctrl"], key: "t" }}>
+    <ActionPanel.Submenu
+      title="Change Status"
+      icon={Icon.ArrowRight}
+      shortcut={{ modifiers: ["ctrl"], key: "t" }}
+    >
       {transitions.map((transition) => (
         <Action
           key={transition.id}
@@ -133,7 +137,11 @@ export default function Command() {
     }
   }
 
-  async function handleChangeStatus(issue: JiraIssue, transitionId: string, transitionName: string) {
+  async function handleChangeStatus(
+    issue: JiraIssue,
+    transitionId: string,
+    transitionName: string,
+  ) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Changing status...",
@@ -174,10 +182,14 @@ export default function Command() {
     } else if (date.getTime() === tomorrow.getTime()) {
       return "Tomorrow";
     } else if (date < today) {
-      const daysOverdue = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+      const daysOverdue = Math.floor(
+        (today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+      );
       return `Overdue by ${daysOverdue} day${daysOverdue > 1 ? "s" : ""}`;
     } else {
-      const daysUntil = Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntil = Math.floor(
+        (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      );
       return `In ${daysUntil} day${daysUntil > 1 ? "s" : ""}`;
     }
   }
@@ -199,7 +211,10 @@ export default function Command() {
     }
   }
 
-  function getPriorityIcon(priority?: { name: string }): { icon: Icon; tintColor?: Color } {
+  function getPriorityIcon(priority?: { name: string }): {
+    icon: Icon;
+    tintColor?: Color;
+  } {
     if (!priority) return { icon: Icon.Minus };
 
     const priorityName = priority.name.toLowerCase();
@@ -217,7 +232,9 @@ export default function Command() {
     return { icon: Icon.Minus };
   }
 
-  function getStatusColor(status?: { statusCategory?: { colorName: string } }): Color {
+  function getStatusColor(status?: {
+    statusCategory?: { colorName: string };
+  }): Color {
     const colorName = status?.statusCategory?.colorName?.toLowerCase();
     switch (colorName) {
       case "green":
@@ -253,7 +270,10 @@ export default function Command() {
             accessories={[
               {
                 text: issue.fields.status.name,
-                icon: { source: Icon.Circle, tintColor: getStatusColor(issue.fields.status) },
+                icon: {
+                  source: Icon.Circle,
+                  tintColor: getStatusColor(issue.fields.status),
+                },
               },
               issue.fields.priority
                 ? {
@@ -273,7 +293,9 @@ export default function Command() {
                     title="Open in Jira"
                     icon={Icon.Globe}
                     onAction={() => {
-                      open(`https://${preferences.jiraDomain}/browse/${issue.key}`);
+                      open(
+                        `https://${preferences.jiraDomain}/browse/${issue.key}`,
+                      );
                     }}
                   />
                   <Action

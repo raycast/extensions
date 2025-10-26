@@ -1,4 +1,12 @@
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation, open } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  useNavigation,
+  open,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { JiraAPI } from "./jira-api";
 
@@ -41,7 +49,10 @@ export default function Command() {
     async function fetchInitialData() {
       try {
         const api = new JiraAPI();
-        const [projectsData, prioritiesData] = await Promise.all([api.getProjects(), api.getPriorities()]);
+        const [projectsData, prioritiesData] = await Promise.all([
+          api.getProjects(),
+          api.getPriorities(),
+        ]);
 
         setProjects(projectsData);
         setPriorities(prioritiesData);
@@ -177,7 +188,10 @@ export default function Command() {
           <Action.SubmitForm
             title="Create Task"
             onSubmit={(values) => {
-              const dueDate = deadlineType === "custom" ? values.customDate : getDateFromDeadlineType(deadlineType);
+              const dueDate =
+                deadlineType === "custom"
+                  ? values.customDate
+                  : getDateFromDeadlineType(deadlineType);
               handleSubmit({ ...values, dueDate });
             }}
           />
@@ -186,7 +200,12 @@ export default function Command() {
     >
       <Form.Description text="Create a new Jira task with all the details" />
 
-      <Form.TextField id="title" title="Title" placeholder="Enter task title" info="A brief summary of the task" />
+      <Form.TextField
+        id="title"
+        title="Title"
+        placeholder="Enter task title"
+        info="A brief summary of the task"
+      />
 
       <Form.TextArea
         id="description"
@@ -205,13 +224,25 @@ export default function Command() {
         info="Select the Jira project for this task"
       >
         {projects.map((project) => (
-          <Form.Dropdown.Item key={project.id} value={project.key} title={`${project.name} (${project.key})`} />
+          <Form.Dropdown.Item
+            key={project.id}
+            value={project.key}
+            title={`${project.name} (${project.key})`}
+          />
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="issueType" title="Issue Type" info="Type of issue to create">
+      <Form.Dropdown
+        id="issueType"
+        title="Issue Type"
+        info="Type of issue to create"
+      >
         {issueTypes.map((type) => (
-          <Form.Dropdown.Item key={type.id} value={type.name} title={type.name} />
+          <Form.Dropdown.Item
+            key={type.id}
+            value={type.name}
+            title={type.name}
+          />
         ))}
       </Form.Dropdown>
 
@@ -225,22 +256,38 @@ export default function Command() {
         info="When should this task be completed?"
       >
         {deadlineOptions.map((option) => (
-          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+          <Form.Dropdown.Item
+            key={option.value}
+            value={option.value}
+            title={option.title}
+          />
         ))}
       </Form.Dropdown>
 
       {deadlineType === "custom" && (
-        <Form.DatePicker id="customDate" title="Custom Date" info="Select a custom due date" />
+        <Form.DatePicker
+          id="customDate"
+          title="Custom Date"
+          info="Select a custom due date"
+        />
       )}
 
       <Form.Dropdown id="priority" title="Priority" info="Task priority level">
         <Form.Dropdown.Item value="" title="None" />
         {priorities.map((priority) => (
-          <Form.Dropdown.Item key={priority.id} value={priority.id} title={priority.name} />
+          <Form.Dropdown.Item
+            key={priority.id}
+            value={priority.id}
+            title={priority.name}
+          />
         ))}
       </Form.Dropdown>
 
-      <Form.TagPicker id="labels" title="Labels" info="Add labels to categorize this task">
+      <Form.TagPicker
+        id="labels"
+        title="Labels"
+        info="Add labels to categorize this task"
+      >
         {labels.map((label) => (
           <Form.TagPicker.Item key={label} value={label} title={label} />
         ))}
