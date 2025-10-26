@@ -12,8 +12,8 @@ import {
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TagEditor } from "./components/tag-editor";
-import { PAGE_SIZE, REFRESH_KEY, TAG_DEFINITIONS_KEY, TAG_ORDER_KEY } from "./contants";
-import { generateId, TagEvents } from "./helpers";
+import { PAGE_SIZE, REFRESH_KEY, TAG_DEFINITIONS_KEY, TAG_ORDER_KEY } from "./constants";
+import { generateId, loadStoredTags, TagEvents } from "./helpers";
 import { AppTags, TagDefinitions } from "./types";
 
 /* -------------------------------------------------------------------------- */
@@ -28,46 +28,16 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isLoading, setIsLoading] = useState(true);
-  const [refreshVersion, setRefreshVersion] = useState<string | null>(null);
 
   /* ---------------------------------------------------------------------- */
   /*              🚀 1. Load cached data immediately (no delay)              */
   /* ---------------------------------------------------------------------- */
   useEffect(() => {
     (async () => {
-      const stored = await LocalStorage.allItems();
-      const cachedTags: AppTags = {};
-      let defs: TagDefinitions = {};
-      let order: string[] = [];
-
-      if (stored[TAG_DEFINITIONS_KEY]) {
-        try {
-          defs = JSON.parse(stored[TAG_DEFINITIONS_KEY] as string);
-          // eslint-disable-next-line no-empty
-        } catch {}
-      }
-      if (stored[TAG_ORDER_KEY]) {
-        try {
-          order = JSON.parse(stored[TAG_ORDER_KEY] as string);
-          // eslint-disable-next-line no-empty
-        } catch {}
-      }
-      for (const [key, value] of Object.entries(stored)) {
-        if ([TAG_DEFINITIONS_KEY, TAG_ORDER_KEY, REFRESH_KEY].includes(key)) continue;
-        try {
-          const parsed = JSON.parse(value as string);
-          if (Array.isArray(parsed)) cachedTags[key] = parsed;
-          // eslint-disable-next-line no-empty
-        } catch {}
-      }
-
-      const allTagIds = Object.keys(defs);
-      if (order.length === 0) order = allTagIds;
-      else order = [...order.filter((id) => allTagIds.includes(id)), ...allTagIds.filter((id) => !order.includes(id))];
-
-      setTags(cachedTags);
-      setTagDefinitions(defs);
-      setTagOrder(order);
+      const { tags, tagDefinitions, tagOrder } = await loadStoredTags();
+      setTags(tags);
+      setTagDefinitions(tagDefinitions);
+      setTagOrder(tagOrder);
     })();
   }, []);
 
@@ -78,62 +48,17 @@ export default function Command() {
     const installedApps = await getApplications();
     installedApps.sort((a, b) => a.name.localeCompare(b.name));
 
-    const stored = await LocalStorage.allItems();
-    const parsedTags: AppTags = {};
-    let definitions: TagDefinitions = {};
-    let order: string[] = [];
-
-    if (stored[TAG_DEFINITIONS_KEY]) {
-      try {
-        definitions = JSON.parse(stored[TAG_DEFINITIONS_KEY] as string);
-        // eslint-disable-next-line no-empty
-      } catch {}
-    }
-
-    if (stored[TAG_ORDER_KEY]) {
-      try {
-        order = JSON.parse(stored[TAG_ORDER_KEY] as string);
-        // eslint-disable-next-line no-empty
-      } catch {}
-    }
-
-    for (const [key, value] of Object.entries(stored)) {
-      if ([TAG_DEFINITIONS_KEY, TAG_ORDER_KEY, REFRESH_KEY].includes(key)) continue;
-      try {
-        const parsed = JSON.parse(value as string);
-        if (Array.isArray(parsed)) parsedTags[key] = parsed;
-        // eslint-disable-next-line no-empty
-      } catch {}
-    }
-
-    const allTagIds = Object.keys(definitions);
-    if (order.length === 0) order = allTagIds;
-    else order = [...order.filter((id) => allTagIds.includes(id)), ...allTagIds.filter((id) => !order.includes(id))];
-
+    const { tags, tagDefinitions, tagOrder } = await loadStoredTags();
     setAllApps(installedApps);
-    setTags(parsedTags);
-    setTagDefinitions(definitions);
-    setTagOrder(order);
+    setTags(tags);
+    setTagDefinitions(tagDefinitions);
+    setTagOrder(tagOrder);
     setIsLoading(false);
   }, []);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  /* ---------------------------------------------------------------------- */
-  /*                🔄 Periodic background refresh watcher                   */
-  /* ---------------------------------------------------------------------- */
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const version = await LocalStorage.getItem<string>(REFRESH_KEY);
-      if (version && version !== refreshVersion) {
-        setRefreshVersion(version);
-        await loadData();
-      }
-    }, 800);
-    return () => clearInterval(interval);
-  }, [refreshVersion, loadData]);
 
   /* ---------------------------------------------------------------------- */
   /*                         Persistence helpers                            */

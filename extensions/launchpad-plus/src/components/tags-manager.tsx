@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { TAG_DEFINITIONS_KEY } from "../contants";
+import { TAG_DEFINITIONS_KEY } from "../constants";
 import { TagDefinitions } from "../types";
 import { CreateTagForm } from "./create-tag-form";
 import { EditTagForm } from "./edit-tag-form";
