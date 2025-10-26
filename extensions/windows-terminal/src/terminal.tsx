@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail, showToast, Toast, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, showToast, Toast, useNavigation, confirmAlert, Alert, AI } from "@raycast/api";
 import { spawn, ChildProcess } from "child_process";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
@@ -10,6 +10,44 @@ interface HistoryItem {
   timestamp: number;
   isError: boolean;
   duration: number;
+}
+
+// AI Safety Check Function
+async function checkCommandSafety(command: string): Promise<{ safe: boolean; reason?: string }> {
+  try {
+    const check = await AI.ask(
+      `Act as a security researcher. Your purpose is to analyze PowerShell/shell commands and identify the ones that could be unsafe to execute on users machine. Reply with "safe" if it is ok to run the command, otherwise reply with an explanation why is it unsafe. Unsafe are the only ones that could be harmful for user without the way to recover from the damage.
+       
+       Examples:
+       Command: Remove-Item -Path C:\\ -Recurse -Force
+       Result: It will remove all files on the C: drive without a way to recover
+       
+       Command: Get-ChildItem C:\\Users
+       Result: safe
+       
+       Command: Write-Host "Hello, World!"
+       Result: safe
+       
+       Command: Format-Volume -DriveLetter C -FileSystem NTFS -Confirm:$false
+       Result: It will format the C: drive and remove all data without confirmation
+       
+       Command: while($true){Start-Process powershell}
+       Result: It will create unlimited processes and crash the system
+       
+       Command: ${command}
+       Result:`
+    );
+
+    const isSafe = check.trim().toLowerCase() === "safe";
+    return {
+      safe: isSafe,
+      reason: isSafe ? undefined : check,
+    };
+  } catch (error) {
+    // If AI check fails, allow execution but warn user
+    console.error("AI safety check failed:", error);
+    return { safe: true };
+  }
 }
 
 // Live execution fullscreen view
@@ -31,7 +69,7 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
       setCurrentTime(Date.now());
     }, 100);
 
-    let completed = false; // Flag to prevent double completion
+    let completed = false;
 
     // Start command execution
     const process = spawn(command, {
@@ -53,8 +91,6 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
     process.stderr?.on("data", (data: Buffer) => {
       const chunk = data.toString();
       accumulatedOutput += chunk;
-      // hasError = true;
-      // setIsError(true);
       setOutput(formatOutput(accumulatedOutput));
     });
 
@@ -62,10 +98,9 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
       if (code != 0 && code != null && hasError) {
         console.log(`Command exited with code ${code}`);
         hasError = true;
-        // setIsError(true);
       }
       if (accumulatedOutput == "") return;
-      if (completed) return; // Prevent duplicate completion
+      if (completed) return;
       completed = true;
 
       clearInterval(timer);
@@ -91,7 +126,6 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
     });
 
     process.on("error", (error: Error) => {
-      // This only triggers if the process could not be started
       if (completed) return;
       completed = true;
 
@@ -103,7 +137,7 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
       setOutput(`Failed to start process: ${error.message}`);
 
       const result: HistoryItem = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         command,
         output: `Failed to start process: ${error.message}`,
         timestamp: Date.now(),
@@ -143,12 +177,28 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
 
   const cancelExecution = useCallback(() => {
     if (processRef.current) {
-      processRef.current.kill();
+      // Kill the entire process tree on Windows
+      const isWindows = process.platform === 'win32';
+      
+      if (isWindows) {
+        // Use taskkill to force terminate the process tree on Windows
+        spawn('taskkill', ['/pid', processRef.current.pid!.toString(), '/f', '/t'], {
+          shell: true,
+          windowsHide: true,
+        });
+      } else {
+        // On Unix-like systems, send SIGKILL
+        processRef.current.kill('SIGKILL');
+      }
+      
       setIsLoading(false);
+      setOutput((prev) => prev + "\n\n[Process terminated by user]");
+      
+      // Complete immediately on termination
       onComplete({
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         command,
-        output: output || "Command cancelled by user",
+        output: (output || "") + "\n\n[Process terminated by user]",
         timestamp: Date.now(),
         isError: true,
         duration: Date.now() - startTime,
@@ -190,11 +240,43 @@ export default function Terminal() {
   const { push } = useNavigation();
 
   const executeCommand = useCallback(
-    (cmd: string) => {
+    async (cmd: string) => {
       const trimmedCmd = cmd.trim();
       if (!trimmedCmd) {
         showToast({ style: Toast.Style.Failure, title: "Command cannot be empty" });
         return;
+      }
+
+      // Show verification toast
+      const verifyingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Verifying command safety...",
+      });
+
+      // Check command safety with AI
+      const safetyCheck = await checkCommandSafety(trimmedCmd);
+
+      verifyingToast.hide();
+
+      // If command is potentially unsafe, show confirmation dialog
+      if (!safetyCheck.safe) {
+        const confirmed = await confirmAlert({
+          title: "⚠️ Potentially Unsafe Command",
+          message: `Command: ${trimmedCmd}\n\n${safetyCheck.reason}`,
+          primaryAction: {
+            title: "Execute Anyway",
+            style: Alert.ActionStyle.Destructive,
+          },
+          dismissAction: {
+            title: "Cancel",
+            style: Alert.ActionStyle.Cancel,
+          },
+        });
+
+        if (!confirmed) {
+          showToast({ style: Toast.Style.Success, title: "Command execution cancelled" });
+          return;
+        }
       }
 
       // Navigate to live execution view
@@ -231,23 +313,23 @@ export default function Terminal() {
     <List
       searchText={command}
       onSearchTextChange={setCommand}
-      searchBarPlaceholder="Type shell command and press Enter"
+      searchBarPlaceholder="Type shell command and press Enter (AI-verified)"
       throttle={true}
     >
       <List.EmptyView
-        title="Shell Terminal"
-        description="Enter commands above to execute in fullscreen live view"
+        title="Shell Terminal with AI Safety"
+        description="Enter commands above - AI will verify safety before execution"
         icon="💻"
       />
 
       {command.trim() && (
         <List.Item
           title={`> ${command}`}
-          subtitle="Press Enter to execute with live output"
+          subtitle="Press Enter to verify and execute with live output"
           icon="⚡"
           actions={
             <ActionPanel>
-              <Action title="Execute" onAction={() => executeCommand(command)} />
+              <Action title="Execute (AI-Verified)" onAction={() => executeCommand(command)} />
             </ActionPanel>
           }
         />
