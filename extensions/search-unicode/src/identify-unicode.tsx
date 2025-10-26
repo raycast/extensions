@@ -145,7 +145,7 @@ export default function Command() {
                     value: getCharSvg(item),
                   }}
                   title={item.name}
-                  subtitle={item.cat}
+                  subtitle={item.cat.replace("_", " ")}
                   accessories={[{ text: item.cpoint }]}
                   detail={
                     <List.Item.Detail

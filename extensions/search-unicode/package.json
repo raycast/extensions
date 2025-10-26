@@ -73,8 +73,16 @@
       "title": "Executable Path",
       "type": "file",
       "required": false,
-      "description": "Path to the `uni` executable when 'Custom Path' is selected as execution source.",
+      "description": "Path to the `uni` executable when “Custom Path” is selected as execution source.",
       "default": "/"
+    },
+    {
+      "name": "searchResultLimitStr",
+      "title": "Search results limit",
+      "description": "Maximum number of items shown in the list. The lower the number of shown items is, the faster they’ll be retrieved. Defaults to 100.",
+      "type": "textfield",
+      "default": "100",
+      "required": false
     }
   ],
   "dependencies": {
