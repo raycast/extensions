@@ -13,7 +13,10 @@ export async function toggleDevice(deviceId: string) {
       Authorization: `Bearer ${SMARTTHINGS_API_TOKEN}`,
     },
   });
-  const currentStatus = statusResponse.data.components.main.switch.switch.value;
+  const currentStatus = statusResponse.data.components?.main?.switch?.switch?.value;
+  if (!currentStatus) {
+    throw new Error("Device does not support switch capability");
+  }
 
   const newStatus = currentStatus === "on" ? "off" : "on";
 
