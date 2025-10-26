@@ -8,6 +8,7 @@ import {
   Color,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
@@ -15,11 +16,14 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { getApiKeys, getEmail, sendEmail } from "./utils/api";
+import { getApiKeys, getEmail, isApiError, sendEmail } from "./utils/api";
 import { RESEND_URL } from "./utils/constants";
 import fs from "fs";
 import path from "path";
 import ErrorComponent from "./components/ErrorComponent";
+import { onError, useEmails } from "./lib/hooks";
+import { resend } from "./lib/resend";
+import { CreateEmailOptions, GetEmailResponseSuccess } from "resend";
 
 // Get preferences for sender information
 const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -28,18 +32,18 @@ const preferences = getPreferenceValues<ExtensionPreferences>();
 const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
 
 export default function Emails() {
-  const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
-  type LoggedEmail = GetEmailResponse & { logged_at: Date; retrieved_at: Date };
-  const [emails, setEmails] = useCachedState<LoggedEmail[]>("emails", []);
-  const [error, setError] = useState("");
+  type LoggedEmail = GetEmailResponseSuccess & { logged_at: Date; retrieved_at: Date };
+  const [cachedEmails, setCachedEmails] = useCachedState<LoggedEmail[]>("emails", []);
+  
+  const { isLoading: isLoadingEmails, emails, error } = useEmails();
 
   async function getNewEmail(id: string) {
     setIsLoading(true);
-    const response = await getEmail(id);
-    if (!("statusCode" in response)) {
-      showToast(Toast.Style.Success, "Fetched Email", response.id);
-      setEmails([...emails, { ...response, logged_at: new Date(), retrieved_at: new Date() }]);
+    const {data} = await resend.emails.get(id);
+    if (data) {
+      await showToast(Toast.Style.Success, "Fetched Email", id);
+      setCachedEmails([...cachedEmails, { ...data, logged_at: new Date(), retrieved_at: new Date() }]);
     }
     setIsLoading(false);
   }
@@ -63,53 +67,22 @@ export default function Emails() {
     }
     setIsLoading(false);
   }
-  async function confirmAndRemove(email: LoggedEmail) {
-    if (
-      await confirmAlert({
-        title: `Remove '${email.subject}' From Log?`,
-        message: `This will NOT remove the email from your Resend Dashboard.`,
-        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
-      })
-    ) {
-      setIsLoading(true);
-      const newEmails = emails;
-      const index = newEmails.findIndex((newEmail) => newEmail.id === email.id);
-      newEmails.splice(index, 1);
-      setEmails([...newEmails]);
-      setIsLoading(false);
-    }
-  }
 
-  async function getAPIKeysFromApi() {
-    const response = await getApiKeys();
-    if ("name" in response) {
-      if (response.name === "validation_error" || response.name === "restricted_api_key") {
-        setError(response.message);
-      }
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    // this function is called to determine if the set API Key is valid and has permissions
-    getAPIKeysFromApi();
-  }, []);
-
-  return error ? (
-    <ErrorComponent error={error} />
+  return error && isApiError(error) ? (
+    <ErrorComponent error={error.message} />
   ) : (
-    <List isLoading={isLoading} searchBarPlaceholder="Search email" isShowingDetail={emails.length > 0}>
+    <List isLoading={isLoading || isLoadingEmails} searchBarPlaceholder="Search email" isShowingDetail={emails.length > 0}>
       {emails.length === 0 ? (
         <List.EmptyView
-          title="No emails found."
-          description="Send an email to begin logging sent emails."
+          title="No emails yet"
+          description="Start sending emails to see insights and previews for every message."
           actions={
             <ActionPanel>
-              <Action
+              <Action.Push
                 title="Send New Email"
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 icon={Icon.Envelope}
-                onAction={() => push(<EmailSend onEmailSent={getNewEmail} />)}
+                target={<EmailSend onEmailSent={getNewEmail} />}
               />
               <Action.OpenInBrowser
                 title="View API Reference"
@@ -144,11 +117,11 @@ export default function Emails() {
                     url={`${RESEND_URL}emails/${email.id}`}
                   />
                   <ActionPanel.Section>
-                    <Action
+                    <Action.Push
                       title="Send New Email"
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      shortcut={Keyboard.Shortcut.Common.New}
                       icon={Icon.Envelope}
-                      onAction={() => push(<EmailSend onEmailSent={getNewEmail} />)}
+                      target={<EmailSend onEmailSent={getNewEmail} />}
                     />
                     <Action.OpenInBrowser
                       title="View API Reference"
@@ -208,7 +181,6 @@ type EmailSendProps = {
 function EmailSend({ onEmailSent }: EmailSendProps) {
   const { pop } = useNavigation();
 
-  const [isLoading, setIsLoading] = useState(false);
   const [attachmentType, setAttachmentType] = useState("FilePicker");
   const [hostedAttachmentUrl, sethostedAttachmentUrl] = useState("");
   type Tag = EmailTag & { nameError: string; valueError: string };
@@ -223,41 +195,44 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
 
   const { handleSubmit, itemProps } = useForm<SendEmailRequestForm>({
     async onSubmit(values) {
-      setIsLoading(true);
-
-      const { from, subject, reply_to, html, text } = values;
-      const to = values.to.split(",").map((item) => item.trim());
-      const bcc = values.bcc && values.bcc.split(",").map((item) => item.trim());
-      const cc = values.cc && values.cc.split(",").map((item) => item.trim());
-
-      const attachments: EmailAttachment[] = [];
-      if (attachmentType === "Hosted") {
-        const filename = path.basename(hostedAttachmentUrl);
-        attachments.push({ filename, path: hostedAttachmentUrl });
-      } else {
-        const files = values.attachments?.filter((file) => fs.existsSync(file) && fs.lstatSync(file).isFile());
-        if (files) {
-          for (const file of files) {
-            const content = fs.readFileSync(file);
-            const filename = path.basename(file);
-            attachments.push({ filename, content });
+      try {
+        const toast = await showToast(Toast.Style.Animated, "Sending Email");
+        const { from, subject, reply_to, html, text } = values;
+        const to = values.to.split(",").map((item) => item.trim());
+        const bcc = values.bcc && values.bcc.split(",").map((item) => item.trim());
+        const cc = values.cc && values.cc.split(",").map((item) => item.trim());
+  
+        const attachments: EmailAttachment[] = [];
+        if (attachmentType === "Hosted") {
+          const filename = path.basename(hostedAttachmentUrl);
+          attachments.push({ filename, path: hostedAttachmentUrl });
+        } else {
+          const files = values.attachments?.filter((file) => fs.existsSync(file) && fs.lstatSync(file).isFile());
+          if (files) {
+            for (const file of files) {
+              const content = fs.readFileSync(file);
+              const filename = path.basename(file);
+              attachments.push({ filename, content });
+            }
           }
         }
-      }
-
-      const tags: EmailTag[] = emailTags.map((tag) => {
-        return { name: tag.name, value: tag.value };
-      });
-
-      const newEmail: SendEmailRequest = { from, to, subject, bcc, cc, reply_to, html, text, attachments, tags };
-      if (!attachments.length) delete newEmail.attachments;
-      const response = await sendEmail(newEmail);
-      if (!("statusCode" in response)) {
-        showToast(Toast.Style.Success, "Sent Email", response.id);
+  
+        const tags: EmailTag[] = emailTags.map((tag) => {
+          return { name: tag.name, value: tag.value };
+        });
+  
+        const newEmail: CreateEmailOptions = { from, to, subject, bcc, cc, replyTo: reply_to, html, text, attachments, tags, react: undefined };
+        if (!attachments.length) delete newEmail.attachments;
+        const {data,error} = await resend.emails.send(newEmail);
+        if (error) throw new Error(error.message, {cause: error.name});
+        toast.style = Toast.Style.Success;
+        toast.title = "Sent Email";
+        toast.message = data.id
+        onEmailSent(data.id);
         pop();
-        onEmailSent(response.id);
+      } catch (error) {
+        onError(error as Error);
       }
-      setIsLoading(false);
     },
     validation: {
       from: FormValidation.Required,
@@ -274,7 +249,6 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
 
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />

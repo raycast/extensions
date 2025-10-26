@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/resend-extension_icon@dark.png" width="150" height="150" />
+</p>
+
 # <img src="./assets/resend-extension_icon@dark.png" width="20" height="20" /> Resend Raycast Extension
 
 This is a Raycast extension for [Resend](https://resend.com/). With this extension, you can Manage API Keys and Domains, and Send Emails using Resend.

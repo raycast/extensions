@@ -122,3 +122,5 @@ export async function updateContact(audienceId: string, contactId: string, updat
     "Updating Contact",
   )) as ErrorResponse | UpdateContactResponse;
 }
+
+export const isApiError = (error: Error) => error.cause === "validation_error" || error.cause === "restricted_api_key";

@@ -55,17 +55,31 @@ export const useGetDomains = () => {
 }
 
 export const useGetAPIKeys = () => {
-  const { data, ...rest } = useResend<GetAPIKeysResponse>("api-keys", {
-    animatedToastMessage: "Fetching API Keys",
-    async onData(data) {
-      const numOfKeys = data.data.length;
-      await showToast({
-        title: "Success",
-        message: `Fetched ${numOfKeys} ${numOfKeys === 1 ? "API Key" : "API Keys"}`,
-        style: Toast.Style.Success,
-      });
-    },
-  });
-  const keys = data?.data ?? [];
-  return { keys, ...rest };
+  const { data, ...rest } = useCachedPromise(async () => {
+    await showToast(Toast.Style.Animated, "Processing...", "Fetching API Keys");
+    const res = await resend.apiKeys.list();
+    if (res.error) throw new Error(res.error.message, {cause: res.error.name});
+    const data = res.data.data ?? [];
+    await showSuccessToast(data, "api key");
+    return data;
+  }, [], {
+    initialData: [],
+    onError,
+  })
+  return {keys: data, ...rest};
+};
+
+export const useEmails = () => {
+  const { data, ...rest } = useCachedPromise(async () => {
+    await showToast(Toast.Style.Animated, "Processing...", "Fetching Emails");
+    const res = await resend.emails.list();
+    if (res.error) throw new Error(res.error.message, {cause: res.error.name});
+    const data = res.data.data ?? [];
+    await showSuccessToast(data, "email");
+    return data;
+  }, [], {
+    initialData: [],
+    onError,
+  })
+  return {emails: data, ...rest};
 };

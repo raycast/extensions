@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AddDomainRequestForm, AddDomainResponse, Domain } from "./utils/types";
 import {
   Action,
   ActionPanel,
   Alert,
-  Color,
   Form,
   Icon,
   Keyboard,
@@ -14,27 +13,17 @@ import {
   showToast,
 } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
-import { ADD_DOMAIN_REGIONS, RESEND_URL } from "./utils/constants";
+import { ADD_DOMAIN_REGIONS, DOMAIN_STATUS_COLORS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useGetDomains } from "./lib/hooks";
-import { CreateDomainOptions } from "resend";
+import { DomainRegion } from "resend";
 import { resend } from "./lib/resend";
+import { isApiError } from "./utils/api";
 
 export default function Domains() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const { isLoading: isLoadingDomains, domains, error: errorDomains, revalidate, mutate } = useGetDomains();
-
-  useEffect(() => {
-    if (!errorDomains) return;
-    if (errorDomains.cause === "validation_error" || errorDomains.cause === "restricted_api_key") {
-      setError(errorDomains.message);
-    }
-  }, [errorDomains]);
+  const { isLoading, domains, error, revalidate, mutate } = useGetDomains();
 
   async function verifyDomainFromApi(domain: Domain) {
-    setIsLoading(true);
     const toast = await showToast(Toast.Style.Animated, "Verifying Domain", domain.name);
     
     try {
@@ -44,7 +33,8 @@ export default function Domains() {
         }), {
           optimisticUpdate(data) {
             return data.map(d => d.id!==domain.id ? d : ({...d, status: "pending"}));
-          }
+          },
+          shouldRevalidateAfter: false
         }
       )
       toast.style = Toast.Style.Success;
@@ -52,8 +42,6 @@ export default function Domains() {
       toast.message = "You will receive an email notification once this operation is completed.";
     } catch (error) {
       onError(error as Error);
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -65,7 +53,6 @@ export default function Domains() {
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      setIsLoading(true);
       const toast = await showToast(Toast.Style.Animated, "Deleting Domain", item.name);
       try {
         await mutate(
@@ -82,27 +69,31 @@ export default function Domains() {
         toast.title = "Deleted Domain";
       } catch (error) {
         onError(error as Error);
-      } finally {
-        setIsLoading(false);
       }
     }
   }
 
-  function getStatusColor(status: string) {
-    if (status === "verified") return Color.Green;
-    else if (status === "pending") return Color.Yellow;
-    else if (status === "not_started") return Color.Orange;
-    else if (status === "failed") return Color.Red;
-    else return undefined;
-  }
-
   const numOfDomains = domains.length;
   const title = `${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`;
-  return error ? (
+  return error && isApiError(error) ? (
     <ErrorComponent error={error} />
   ) : (
-    <List isLoading={isLoading || isLoadingDomains} searchBarPlaceholder="Search domain">
-      <List.Section title={title}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search domain">
+      {!isLoading && !domains.length ? <List.EmptyView title="No domains yet" description="Verify a domain by adding a DNS record and start sending emails from your own address." actions={
+        <ActionPanel>
+            <Action.Push
+              title="Add New Domain"
+              icon={Icon.Plus}
+              target={<DomainsAdd onDomainAdded={revalidate} />}
+              shortcut={Keyboard.Shortcut.Common.New}
+            />
+            <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
+            <Action.OpenInBrowser
+              title="View API Reference"
+              url={`${RESEND_URL}docs/api-reference/domains/create-domain`}
+            />
+          </ActionPanel>
+      } /> : <List.Section title={title}>
         {domains.map((item) => {
           const region = ADD_DOMAIN_REGIONS.find((region) => region.value === item.region);
           return (
@@ -112,7 +103,7 @@ export default function Domains() {
               icon={getFavicon(`https://${item.name}`, { fallback: Icon.Globe })}
               subtitle={item.id}
               accessories={[
-                { tag: { value: item.status, color: getStatusColor(item.status) } },
+                { tag: { value: item.status, color: DOMAIN_STATUS_COLORS[item.status] } },
                 region ? { icon: region.icon, tooltip: region.title } : {},
                 { tag: new Date(item.created_at), tooltip: `Created: ${item.created_at}` },
               ]}
@@ -153,51 +144,19 @@ export default function Domains() {
             />
           );
         })}
-      </List.Section>
-      {!isLoading && !isLoadingDomains && (
-        <List.Section title="Actions">
-          <List.Item
-            title="Add New Domain"
-            icon={Icon.Plus}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Add New Domain"
-                  icon={Icon.Plus}
-                  target={<DomainsAdd onDomainAdded={revalidate} />}
-                />
-                <Action.OpenInBrowser
-                  title="View API Reference"
-                  url={`${RESEND_URL}docs/api-reference/domains/create-domain`}
-                />
-              </ActionPanel>
-            }
-          />
-          <List.Item
-            title="Reload Domains"
-            icon={Icon.Redo}
-            actions={
-              <ActionPanel>
-                <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      )}
+      </List.Section>}
     </List>
   );
 }
 
 function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
-  const [isLoading, setIsLoading] = useState(false);
   const [newDomain, setNewDomain] = useState<AddDomainResponse>();
 
   const { handleSubmit, itemProps } = useForm<AddDomainRequestForm>({
     async onSubmit(values) {
-      setIsLoading(true);
       const toast = await showToast(Toast.Style.Animated, "Processing...", "Adding Domain");
       try {
-        const {error,data} = await resend.domains.create({name: values.name, region: values.region as CreateDomainOptions["region"]});
+        const {error,data} = await resend.domains.create({name: values.name, region: values.region as DomainRegion});
         if (error) throw new Error(error.message, {cause: error.name});
         onDomainAdded();
         setNewDomain(data);
@@ -206,8 +165,6 @@ function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
         toast.message = data.name;
       } catch (error) {
         onError(error as Error);
-      } finally {
-        setIsLoading(false);
       }
     },
     validation: {
@@ -217,7 +174,6 @@ function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
 
   return !newDomain ? (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} onSubmit={handleSubmit} />
