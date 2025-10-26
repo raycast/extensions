@@ -15,7 +15,7 @@
       "subtitle": "Count Beats Per Minute",
       "description": "A simple & minimal BPM counter that displays halftime & doubletime values",
       "mode": "view",
-      "keywords": ["bpm counter", "beats per mintue", "counter", "beat counter"]
+      "keywords": ["bpm counter", "beats per minute", "counter", "beat counter"]
     }
   ],
   "dependencies": {

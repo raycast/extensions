@@ -5,27 +5,28 @@ export default function getBpm() {
   const [timestampArr, setTimestampArr] = useState<number[]>([]);
   const timeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleTap = () => {
-    const timestamp: number = Date.now();
-
   const firstTimestamp = timestampArr[0];
   const lastTimestamp = timestampArr[timestampArr.length - 1];
   const numberOfIntervals = timestampArr.length - 2;
   const bpm = (numberOfIntervals / ((lastTimestamp - firstTimestamp) / 1000)) * 60;
 
   const handleTap = () => {
+    const timestamp: number = Date.now();
+
     if (timeoutId.current !== null) {
       clearTimeout(timeoutId.current);
     }
+
     setTimestampArr([...timestampArr, timestamp]);
+
     timeoutId.current = setTimeout(async () => {
-      console.log("Timeout reached");
-      await Clipboard.copy(bpm);
+      await Clipboard.copy(Math.floor(bpm));
       await showToast({
         style: Toast.Style.Success,
         title: `BPM: ${Math.floor(bpm)}`,
         message: "Copied to clipboard...",
       });
+
       setTimestampArr([]);
     }, 5000);
   };
