@@ -5,7 +5,8 @@ export default function getBpm() {
   const [timestampArr, setTimestampArr] = useState<number[]>([]);
   const timeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const timestamp: number = Date.now();
+  const handleTap = () => {
+    const timestamp: number = Date.now();
 
   const firstTimestamp = timestampArr[0];
   const lastTimestamp = timestampArr[timestampArr.length - 1];
