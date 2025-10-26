@@ -74,7 +74,7 @@ export default function ClubDetails(props: {
           <Action.Push
             title="Squad"
             icon={Icon.TwoPeople}
-            target={<ClubSquad {...props} />}
+            target={<ClubSquad {...props} netco_id={club.netco_id} />}
           />
           <Action.OpenInBrowser title="Website" url={club.website} />
           <Action.OpenInBrowser

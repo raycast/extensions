@@ -16,11 +16,9 @@ const { language } = getPreferenceValues();
 export default function ClubSquad(props: {
   team_name: string;
   season: string;
+  netco_id: string;
 }) {
-  const { data: positions, isLoading } = usePromise(getSquad, [
-    props.team_name,
-    props.season,
-  ]);
+  const { data: positions, isLoading } = usePromise(getSquad, [props.netco_id]);
 
   return (
     <Grid

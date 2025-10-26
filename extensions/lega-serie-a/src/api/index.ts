@@ -47,16 +47,6 @@ export const getStandings = async (season: string): Promise<Standing[]> => {
   try {
     const { data }: AxiosResponse<SerieA<Standing[]>> = await axios(config);
 
-    const squadCodes = data.data.reduce(
-      (out: { [key: string]: string }, cur) => {
-        out[cur.Nome] = cur.CODSQUADRA;
-        return out;
-      },
-      {},
-    );
-
-    cache.set(season, JSON.stringify(squadCodes));
-
     return data.data;
   } catch (e) {
     showFailureToast(e);
@@ -114,24 +104,12 @@ export const getMatches = async (
 };
 
 export const getSquad = async (
-  team_name: string,
-  season: string,
+  teamCode: string,
 ): Promise<SquadGroup | undefined> => {
   try {
-    const [title] = season.split("_");
-
-    const hasCache = cache.has(team_name);
-    if (!hasCache) {
-      await getStandings(title);
-    }
-
-    const squadCodes = cache.get(title);
-    if (!squadCodes) return undefined;
-
-    const teamCode = JSON.parse(squadCodes)[team_name];
     const config: AxiosRequestConfig = {
       method: "GET",
-      url: `${endpoint}/team/${teamCode}/players`,
+      url: `${endpoint}/team/${teamCode.toString()}/players`,
     };
 
     const { data }: AxiosResponse<SerieA<SquadGroup>> = await axios(config);

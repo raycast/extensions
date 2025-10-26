@@ -1,6 +1,6 @@
 # Lega Serie A Changelog
 
-## API Modernization - 2025-10-26
+## API Modernization - {PR_MERGED_DATE}
 
 - Migrated standings data fetching to API v3.
 - Maintained support for the older standings API for historical data spanning the 2022-23 season and backward, ensuring no disruption for older data retrieval.
