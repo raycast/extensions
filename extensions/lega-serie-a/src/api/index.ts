@@ -1,84 +1,51 @@
+import { Cache, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import {
+  Club,
+  DataV3,
   Match,
   Matchday,
+  SerieA,
   SquadGroup,
-  SerieAFixtureAndResult,
-  SerieAMatchday,
-  SerieASquad,
-  SerieATable,
-  SerieATeams,
   Standing,
   Team,
-  Player,
-  SerieAPlayer,
-  Club,
 } from "../types";
 import { Championship, CoppaRounds, Round } from "../types/coppa";
 
-const { language } = getPreferenceValues();
+const { apikey, language } = getPreferenceValues();
 const cache = new Cache();
-
-function showFailureToast() {
-  showToast(
-    Toast.Style.Failure,
-    "Something went wrong",
-    "Please try again later",
-  );
-}
 
 const endpoint = "https://www.legaseriea.it/api";
 
 export const getMatchday = async (season: string): Promise<Matchday[]> => {
-  const [title, season_id] = season.split("_");
+  const [, season_id] = season.split("_");
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/season/${season_id}/championship/A/matchday?lang=${language}`,
   };
 
   try {
-    const { data }: AxiosResponse<SerieAMatchday> = await axios(config);
+    const { data }: AxiosResponse<SerieA<Matchday[]>> = await axios(config);
 
     return data.data;
   } catch (e) {
-    showFailureToast();
-
-    return [];
-  }
-};
-
-export const getTeams = async (season: string): Promise<Team[]> => {
-  const config: AxiosRequestConfig = {
-    method: "GET",
-    url: `${endpoint}/widget/all-teams`,
-    params: {
-      lang: "en",
-      id_category: "150060",
-    },
-  };
-
-  try {
-    const { data }: AxiosResponse<SerieATeams> = await axios(config);
-
-    return data.data.body;
-  } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
 };
 
 export const getStandings = async (season: string): Promise<Standing[]> => {
-  const [title, season_id] = season.split("_");
+  const [title] = season.split("_");
 
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/stats/live/Classificacompleta?CAMPIONATO=A&STAGIONE=${title}&TURNO=UNICO&GIRONE=UNI`,
+    url: `${endpoint}/stats/Classificacompleta?CAMPIONATO=A&STAGIONE=${title}&TURNO=UNICO&GIRONE=UNI`,
   };
 
   try {
-    const { data }: AxiosResponse<SerieATable> = await axios(config);
+    const { data }: AxiosResponse<SerieA<Standing[]>> = await axios(config);
 
     const squadCodes = data.data.reduce(
       (out: { [key: string]: string }, cur) => {
@@ -92,7 +59,26 @@ export const getStandings = async (season: string): Promise<Standing[]> => {
 
     return data.data;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
+
+    return [];
+  }
+};
+
+export const getStandingsV3 = async (season: string): Promise<Standing[]> => {
+  const [, , season_id] = season.split("_");
+
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/stats/v3/live/overall?season_id=serie-a::Football_Season::${season_id}`,
+  };
+
+  try {
+    const { data }: AxiosResponse<SerieA<DataV3>> = await axios(config);
+
+    return data.data.standings[0].teams;
+  } catch (e) {
+    showFailureToast(e);
 
     return [];
   }
@@ -102,7 +88,7 @@ export const getMatches = async (
   season: string,
   params: object,
 ): Promise<Match[]> => {
-  const [title, season_id] = season.split("_");
+  const [, season_id] = season.split("_");
 
   const config: AxiosRequestConfig = {
     method: "GET",
@@ -117,11 +103,11 @@ export const getMatches = async (
   };
 
   try {
-    const { data }: AxiosResponse<SerieAFixtureAndResult> = await axios(config);
+    const { data }: AxiosResponse<SerieA<Match[]>> = await axios(config);
 
     return data.data;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -132,7 +118,7 @@ export const getSquad = async (
   season: string,
 ): Promise<SquadGroup | undefined> => {
   try {
-    const [title, seasonId] = season.split("_");
+    const [title] = season.split("_");
 
     const hasCache = cache.has(team_name);
     if (!hasCache) {
@@ -148,39 +134,44 @@ export const getSquad = async (
       url: `${endpoint}/team/${teamCode}/players`,
     };
 
-    const { data }: AxiosResponse<SerieASquad> = await axios(config);
+    const { data }: AxiosResponse<SerieA<SquadGroup>> = await axios(config);
 
     return data.data;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return undefined;
   }
 };
 
-export const getPlayer = async (
-  player_id: string,
-): Promise<Player | undefined> => {
+export const getTeams = async (): Promise<Team[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/stats/Rosasquadra?CAMPIONATO=*&STAGIONE=*&CODGIOCATORE=${player_id}`,
+    url: `https://www.legaseriea.it/_next/data/${apikey}/en/serie-a/squadre.json?slug=serie-a&slug=squadre`,
   };
 
   try {
-    const { data }: AxiosResponse<SerieAPlayer> = await axios(config);
+    const { data } = await axios(config);
 
-    return data.data.reverse()[0];
+    const body = data?.pageProps?.page?.body;
+    if (Array.isArray(body)) {
+      const teams = body.find((o) => o.name === "NavbarTeam");
+
+      return teams ? teams.body : [];
+    }
+
+    return [];
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
-    return undefined;
+    return [];
   }
 };
 
 export const getClub = async (slug: string): Promise<Club | undefined> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `https://www.legaseriea.it/_next/data/0pQSbyByFdxlm81lnGxQP/en/team/${slug}/club.json?slug=team&slug=${slug}&slug=club`,
+    url: `https://www.legaseriea.it/_next/data/${apikey}/en/team/${slug}/club.json?slug=team&slug=${slug}&slug=club`,
   };
 
   try {
@@ -188,14 +179,14 @@ export const getClub = async (slug: string): Promise<Club | undefined> => {
 
     return data?.pageProps?.page?.context;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return undefined;
   }
 };
 
 export const getCoppaRounds = async (season: string): Promise<Round[]> => {
-  const [title, seasonId] = season.split("_");
+  const [, seasonId] = season.split("_");
 
   const config: AxiosRequestConfig = {
     method: "GET",
@@ -207,7 +198,7 @@ export const getCoppaRounds = async (season: string): Promise<Round[]> => {
 
     return data.data;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -216,7 +207,7 @@ export const getCoppaRounds = async (season: string): Promise<Round[]> => {
 export const getChampionships = async (
   season: string,
 ): Promise<Championship[]> => {
-  const [title, seasonId] = season.split("_");
+  const [, seasonId] = season.split("_");
 
   const config: AxiosRequestConfig = {
     method: "GET",
@@ -228,7 +219,7 @@ export const getChampionships = async (
 
     return data.data?.body || [];
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
