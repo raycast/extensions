@@ -16,6 +16,11 @@ import { toggleDevice, setLightLevel, setLightColor, setTemperature as apiSetTem
 
 type DeviceComponentStatus = Exclude<Device["status"], undefined>;
 
+interface Room {
+  roomId: string;
+  name: string;
+}
+
 const ICON_URLS = {
   switch: "https://api.iconify.design/material-symbols/switch.svg",
   light: "https://api.iconify.design/tabler/light-bulb.svg",
@@ -76,7 +81,7 @@ export default function ControlDevices() {
       }
 
       const [roomsResponse, devicesResponse] = await Promise.all([
-        axios.get(`https://api.smartthings.com/v1/locations/${locationId}/rooms`, {
+        axios.get<{ items: Room[] }>(`https://api.smartthings.com/v1/locations/${locationId}/rooms`, {
           headers: {
             Authorization: `Bearer ${SMARTTHINGS_API_TOKEN}`,
           },
@@ -90,7 +95,7 @@ export default function ControlDevices() {
 
       const roomsData = roomsResponse.data.items;
       const roomMap = roomsData.reduce(
-        (acc, room) => {
+        (acc: Record<string, string>, room: Room) => {
           acc[room.roomId] = room.name;
           return acc;
         },
