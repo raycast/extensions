@@ -1,4 +1,10 @@
-import { ActionPanel, Action, Icon, List, openExtensionPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  openExtensionPreferences,
+} from "@raycast/api";
 import API from "../api/api";
 import { useState } from "react";
 import { Organization } from "../types/Organization";
@@ -55,7 +61,10 @@ export default function BrowseOrganizationHostings(props: MetadataProps) {
           description="Please setup your access token in the settings."
           actions={
             <ActionPanel>
-              <Action title="Open Extension Settings" onAction={openExtensionPreferences} />
+              <Action
+                title="Open Extension Settings"
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />

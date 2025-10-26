@@ -18,7 +18,11 @@ export default function BrowseOrganizationProducts(props: MetadataProps) {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
-              url={"https://manager.infomaniak.com/v3/" + props.organization.id.toString() + "/ng/home"}
+              url={
+                "https://manager.infomaniak.com/v3/" +
+                props.organization.id.toString() +
+                "/ng/home"
+              }
             />
           </ActionPanel>
         }
@@ -29,7 +33,12 @@ export default function BrowseOrganizationProducts(props: MetadataProps) {
         title="List domains"
         actions={
           <ActionPanel>
-            <Action.Push title="Browse" target={<BrowseOrganizationDomains organization={props.organization} />} />
+            <Action.Push
+              title="Browse"
+              target={
+                <BrowseOrganizationDomains organization={props.organization} />
+              }
+            />
           </ActionPanel>
         }
       />
@@ -39,7 +48,12 @@ export default function BrowseOrganizationProducts(props: MetadataProps) {
         title="List hostings"
         actions={
           <ActionPanel>
-            <Action.Push title="Browse" target={<BrowseOrganizationHostings organization={props.organization} />} />
+            <Action.Push
+              title="Browse"
+              target={
+                <BrowseOrganizationHostings organization={props.organization} />
+              }
+            />
           </ActionPanel>
         }
       />
@@ -51,7 +65,11 @@ export default function BrowseOrganizationProducts(props: MetadataProps) {
           <ActionPanel>
             <Action.Push
               title="Browse"
-              target={<BrowseOrganizationEmailHostings organization={props.organization} />}
+              target={
+                <BrowseOrganizationEmailHostings
+                  organization={props.organization}
+                />
+              }
             />
           </ActionPanel>
         }
