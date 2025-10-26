@@ -4,7 +4,7 @@
   "title": "Tap BPM",
   "description": "Tap to calculate Beats Per Minute",
   "icon": "extension-icon.png",
-  "author": "ethan-anderson",
+  "author": "ethan_anderson",
   "platforms": ["macOS", "Windows"],
   "categories": ["Productivity", "Applications"],
   "license": "MIT",
