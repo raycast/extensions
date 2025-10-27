@@ -68,6 +68,8 @@ export default function Command() {
 
   const batteryColor = !stats
     ? undefined
+    : stats.latest.chargingStatus === "fully charged" || stats.latest.chargingStatus === "on hold"
+    ? Color.Green
     : stats.latest.charging
     ? Color.Blue
     : stats.latest.capacity < 0.1
@@ -100,10 +102,14 @@ export default function Command() {
 
   const iconColor = !stats
     ? Color.SecondaryText
-    : stats.latest.charging && stats.latest.capacity == 1
-    ? undefined
-    : stats.latest.charging
+    : stats.latest.chargingStatus === "fully charged" || stats.latest.chargingStatus === "on hold"
+    ? Color.Green
+    : stats.latest.chargingStatus === "charging"
     ? Color.Blue
+    : stats.latest.chargingStatus === "discharging" && stats.latest.lowPowerMode
+    ? Color.Yellow
+    : stats.latest.chargingStatus === "discharging" && stats.latest.capacity < 0.3
+    ? Color.Red
     : remainingColor
     ? remainingColor
     : powerColor
@@ -148,7 +154,17 @@ export default function Command() {
                 source: stats.latest.connected ? Icon.BatteryCharging : Icon.Battery,
                 tintColor: batteryColor,
               }}
-              subtitle={stats.latest.charging ? "Charging" : "Discharging"}
+              subtitle={
+                stats.latest.chargingStatus === "fully charged"
+                  ? "Fully Charged"
+                  : stats.latest.chargingStatus === "on hold"
+                  ? "Charging on Hold"
+                  : stats.latest.chargingStatus === "charging"
+                  ? "Charging"
+                  : stats.latest.chargingStatus === "discharging"
+                  ? "Discharging"
+                  : "Unknown"
+              }
               title={`${Math.round(stats.latest.capacity * 100)}%`}
               onAction={openBatterySettings}
             />
