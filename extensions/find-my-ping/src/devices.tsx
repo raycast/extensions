@@ -83,8 +83,11 @@ export default function Command() {
       f20: 90,
     };
 
-    const { key, modifiers } = parseHotkey(preferences.siriKeybind);
     const keycode = keycodeMap[key.toLowerCase()];
+    
+    if (!keycode && key.toLowerCase().startsWith('f')) {
+      throw new Error(`Unsupported function key: ${key}. Only f13-f20 are supported.`);
+    }
 
     const modifierString = modifiers.length > 0 ? ` using {${modifiers.join(", ")}}` : "";
     const keyCommand = keycode ? `key code ${keycode}${modifierString}` : `keystroke "${key}"${modifierString}`;
