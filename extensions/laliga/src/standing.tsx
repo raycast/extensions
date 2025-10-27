@@ -6,11 +6,7 @@ import { getPrevNextMatches, getStandings } from "./api";
 import CompetitionDropdown from "./components/competition_dropdown";
 import { Match } from "./types";
 
-function PreviousNextMatches(props: {
-  team: string;
-  previous?: Match[];
-  next?: Match[];
-}) {
+function PreviousNextMatches(props: { team: string; previous?: Match[]; next?: Match[] }) {
   const { team, previous, next } = props;
   const metadata = [];
 
@@ -29,23 +25,11 @@ function PreviousNextMatches(props: {
         text = match.home_team.slug === team ? "W" : "L";
         color = text === "L" ? Color.Red : Color.Green;
       }
-      return (
-        <List.Item.Detail.Metadata.TagList.Item
-          key={match.id}
-          text={text}
-          color={color}
-        />
-      );
+      return <List.Item.Detail.Metadata.TagList.Item key={match.id} text={text} color={color} />;
     });
 
     // latest match is in the right
-    metadata.push(
-      <List.Item.Detail.Metadata.TagList
-        key="form"
-        title="Form"
-        children={form.reverse()}
-      />,
-    );
+    metadata.push(<List.Item.Detail.Metadata.TagList key="form" title="Form" children={form.reverse()} />);
   }
 
   if (next?.length) {
@@ -59,11 +43,7 @@ function PreviousNextMatches(props: {
       <List.Item.Detail.Metadata.Label
         key="kickoff"
         title="Kick Off"
-        text={
-          next[0].date
-            ? formatDate(next[0].date, "eee dd.MM.yyyy HH:mm")
-            : "TBC"
-        }
+        text={next[0].date ? formatDate(next[0].date, "eee dd.MM.yyyy HH:mm") : "TBC"}
       />,
       <List.Item.Detail.Metadata.Label
         key="stadium"
@@ -100,9 +80,7 @@ export default function GetTables() {
     <List
       throttle
       isLoading={isLoading}
-      searchBarAccessory={
-        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
-      }
+      searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
       isShowingDetail={true}
       onSelectionChange={setTeam}
     >
@@ -171,41 +149,17 @@ export default function GetTables() {
                   <List.Item.Detail.Metadata>
                     {team.qualify && (
                       <List.Item.Detail.Metadata.TagList title="Qualify">
-                        <List.Item.Detail.Metadata.TagList.Item
-                          text={team.qualify.name}
-                          color={team.qualify.color}
-                        />
+                        <List.Item.Detail.Metadata.TagList.Item text={team.qualify.name} color={team.qualify.color} />
                       </List.Item.Detail.Metadata.TagList>
                     )}
-                    <List.Item.Detail.Metadata.Label
-                      title="Played"
-                      text={team.played.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Won"
-                      text={team.won.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Drawn"
-                      text={team.drawn.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Lost"
-                      text={team.lost.toString()}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Played" text={team.played.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Won" text={team.won.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Drawn" text={team.drawn.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Lost" text={team.lost.toString()} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goals For"
-                      text={team.goals_for.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goals Against"
-                      text={team.goals_against.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goal Difference"
-                      text={team.goal_difference.toString()}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Goals For" text={team.goals_for.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Goals Against" text={team.goals_against.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Goal Difference" text={team.goal_difference.toString()} />
 
                     {!isLoadingPrevNext && (
                       <PreviousNextMatches

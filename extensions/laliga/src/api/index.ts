@@ -23,9 +23,7 @@ const headers = {
 
 const limit = 50;
 
-export const getCurrentGameWeek = async (
-  competition: string,
-): Promise<Gameweek | undefined> => {
+export const getCurrentGameWeek = async (competition: string): Promise<Gameweek | undefined> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/subscriptions/${competition}/current-gameweek`,
@@ -58,8 +56,7 @@ export const getTeams = async (season: string): Promise<Team[]> => {
   };
 
   try {
-    const { data }: AxiosResponse<Record<"teams", Team[]>> =
-      await axios(config);
+    const { data }: AxiosResponse<Record<"teams", Team[]>> = await axios(config);
 
     return data.teams;
   } catch (e) {
@@ -87,9 +84,7 @@ export const getTeam = async (team: string) => {
   }
 };
 
-export const getStandings = async (
-  competition: string,
-): Promise<Standing[]> => {
+export const getStandings = async (competition: string): Promise<Standing[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/subscriptions/${competition}/standing`,
@@ -97,8 +92,7 @@ export const getStandings = async (
   };
 
   try {
-    const { data }: AxiosResponse<Record<"standings", Standing[]>> =
-      await axios(config);
+    const { data }: AxiosResponse<Record<"standings", Standing[]>> = await axios(config);
 
     return data.standings;
   } catch (e) {
@@ -108,10 +102,7 @@ export const getStandings = async (
   }
 };
 
-export const getMatches = async (
-  subscriptionSlug: string,
-  week: number,
-): Promise<Match[]> => {
+export const getMatches = async (subscriptionSlug: string, week: number): Promise<Match[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/matches`,
@@ -126,8 +117,7 @@ export const getMatches = async (
   };
 
   try {
-    const { data }: AxiosResponse<Record<"matches", Match[]>> =
-      await axios(config);
+    const { data }: AxiosResponse<Record<"matches", Match[]>> = await axios(config);
 
     return data.matches;
   } catch (e) {
@@ -155,10 +145,7 @@ export const getPrevNextMatches = async (
   };
 
   try {
-    const {
-      data,
-    }: AxiosResponse<Record<"match_previous_next", MatchPreviousNext>> =
-      await axios(config);
+    const { data }: AxiosResponse<Record<"match_previous_next", MatchPreviousNext>> = await axios(config);
 
     return data.match_previous_next;
   } catch (e) {
@@ -187,8 +174,7 @@ export const getSquad = async (team: string): Promise<Squad[]> => {
   };
 
   try {
-    const { data }: AxiosResponse<Record<"squads", Squad[]>> =
-      await axios(config);
+    const { data }: AxiosResponse<Record<"squads", Squad[]>> = await axios(config);
 
     return data.squads;
   } catch (e) {
@@ -198,9 +184,7 @@ export const getSquad = async (team: string): Promise<Squad[]> => {
   }
 };
 
-export const getSubscriptionRounds = async (
-  competition: string,
-): Promise<Round[]> => {
+export const getSubscriptionRounds = async (competition: string): Promise<Round[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/subscriptions/${competition}/rounds`,
@@ -208,8 +192,7 @@ export const getSubscriptionRounds = async (
   };
 
   try {
-    const { data }: AxiosResponse<Record<"rounds", Round[]>> =
-      await axios(config);
+    const { data }: AxiosResponse<Record<"rounds", Round[]>> = await axios(config);
 
     return data.rounds;
   } catch (e) {
@@ -233,10 +216,7 @@ export const getMatchComments = async (slug: string, page: number) => {
   };
 
   try {
-    const {
-      data,
-    }: AxiosResponse<{ total: number; match_commentaries: MatchCommentary[] }> =
-      await axios(config);
+    const { data }: AxiosResponse<{ total: number; match_commentaries: MatchCommentary[] }> = await axios(config);
 
     return {
       data: data.match_commentaries,

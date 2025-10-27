@@ -64,11 +64,7 @@ export default function CompetitionDropdown(props: {
   onSelect: React.Dispatch<React.SetStateAction<string>>;
 }) {
   return (
-    <List.Dropdown
-      tooltip="Filter by Competition"
-      value={props.selected}
-      onChange={props.onSelect}
-    >
+    <List.Dropdown tooltip="Filter by Competition" value={props.selected} onChange={props.onSelect}>
       {Object.entries(seasons)
         .reverse()
         .map(([year, competitions]) => {
@@ -76,11 +72,7 @@ export default function CompetitionDropdown(props: {
             <List.Dropdown.Section key={year} title={year}>
               {competitions.map((competition) => {
                 return (
-                  <List.Dropdown.Item
-                    key={competition.value}
-                    value={competition.value}
-                    title={competition.title}
-                  />
+                  <List.Dropdown.Item key={competition.value} value={competition.value} title={competition.title} />
                 );
               })}
             </List.Dropdown.Section>

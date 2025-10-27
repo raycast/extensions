@@ -20,9 +20,7 @@ export const getFlagEmoji = (isoCode?: string) => {
     return "🇬🇧";
   }
 
-  return isoCode
-    .toUpperCase()
-    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+  return isoCode.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
 
 export default function Player(squad: Squad) {
@@ -44,35 +42,18 @@ export default function Player(squad: Squad) {
             icon={getFlagEmoji(squad.person.country?.id)}
             text={squad.person.country?.id}
           />
-          <Detail.Metadata.Label
-            title="Date of Birth"
-            text={formatDate(squad.person.date_of_birth, "dd/MM/yyyy")}
-          />
-          <Detail.Metadata.Label
-            title="Place of Birth"
-            text={squad.person.place_of_birth}
-          />
-          <Detail.Metadata.Label
-            title="Height"
-            text={`${squad.person.height}cm`}
-          />
-          <Detail.Metadata.Label
-            title="Weight"
-            text={`${squad.person.weight}kg`}
-          />
+          <Detail.Metadata.Label title="Date of Birth" text={formatDate(squad.person.date_of_birth, "dd/MM/yyyy")} />
+          <Detail.Metadata.Label title="Place of Birth" text={squad.person.place_of_birth} />
+          <Detail.Metadata.Label title="Height" text={`${squad.person.height}cm`} />
+          <Detail.Metadata.Label title="Weight" text={`${squad.person.weight}kg`} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Position" text={squad.position.name} />
-          <Detail.Metadata.Label
-            title="Shirt Number"
-            text={squad.shirt_number?.toString()}
-          />
+          <Detail.Metadata.Label title="Shirt Number" text={squad.shirt_number?.toString()} />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://www.laliga.com/en-GB/player/${squad.person.slug}`}
-          />
+          <Action.OpenInBrowser url={`https://www.laliga.com/en-GB/player/${squad.person.slug}`} />
         </ActionPanel>
       }
     />
