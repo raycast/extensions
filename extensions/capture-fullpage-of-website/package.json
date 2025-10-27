@@ -53,7 +53,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx -y @raycast/api@latest publish",
-    "postinstall": "npx -y playwright install --with-deps chromium"
+    "postinstall": "npx -y playwright@1.44.1 install --with-deps chromium"
   },
   "platforms": [
     "macOS"
