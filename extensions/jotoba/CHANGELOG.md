@@ -1,6 +1,6 @@
 # Raycast Jotoba Changelog
 
-## [Fix Kanji Frame Image Display] - {PR_MERGE_DATE}
+## [Fix Kanji Frame Image Display] - 2025-10-27
 
 - Fixed kanji frame image display.
 
