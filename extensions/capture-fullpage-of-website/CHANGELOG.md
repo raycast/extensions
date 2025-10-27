@@ -1,6 +1,6 @@
 # Capture Fullpage of Website Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-10-27
 
 - Improve error handling for Chrome/Chromium installation issues, and update the playwright dependencies version to specify version
 
