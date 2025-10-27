@@ -1,6 +1,7 @@
 import { Color, getPreferenceValues, Icon, MenuBarExtra } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { cpus, loadavg } from "os";
+import { useEffect } from "react";
 
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -37,7 +38,7 @@ export default function Command() {
   };
 
   // periodically call getStats and update the state
-  const { isLoading: battIsLoading } = useCachedPromise(getStats, [], {
+  const { isLoading: battIsLoading, revalidate } = useCachedPromise(getStats, [], {
     onData(data) {
       if (!stats || (stats.prev && stats.prev.time < Date.now() - 5 * 60 * 1000)) {
         console.log("Resetting battery state", data);
@@ -51,6 +52,27 @@ export default function Command() {
       }
     },
   });
+
+  useEffect(() => {
+    if (!preferences.autoRefresh) {
+      return;
+    }
+
+    const interval = Number(preferences.refreshInterval) || 1;
+    const intervalMs = interval * 1000;
+
+    console.log(`Auto-refresh enabled: every ${interval} second(s)`);
+
+    const timer = setInterval(() => {
+      console.log("Auto-refresh: revalidating battery state");
+      revalidate();
+    }, intervalMs);
+
+    return () => {
+      console.log("Auto-refresh: clearing timer");
+      clearInterval(timer);
+    };
+  }, [preferences.autoRefresh, preferences.refreshInterval, revalidate]);
 
   const wattDiff =
     stats?.prev?.watts && stats.latest.watts && stats.prev.charging === stats.latest.charging
