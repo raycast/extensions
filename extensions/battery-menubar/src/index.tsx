@@ -97,23 +97,21 @@ export default function Command() {
     !stats || stats.latest.charging || !stats.latest.watts
       ? undefined
       : -stats.latest.watts > (Number(preferences.highPowerUsage) || 500)
-      ? Color.Yellow
+      ? Color.Purple
       : undefined;
 
   const iconColor = !stats
     ? Color.SecondaryText
+    : powerColor
+    ? powerColor
     : stats.latest.chargingStatus === "fully charged" || stats.latest.chargingStatus === "on hold"
     ? Color.Green
     : stats.latest.chargingStatus === "charging"
     ? Color.Blue
-    : stats.latest.chargingStatus === "discharging" && stats.latest.lowPowerMode
-    ? Color.Yellow
-    : stats.latest.chargingStatus === "discharging" && stats.latest.capacity < 0.3
-    ? Color.Red
+    : batteryColor
+    ? batteryColor
     : remainingColor
     ? remainingColor
-    : powerColor
-    ? powerColor
     : undefined;
 
   const battPct = stats ? Math.round(stats?.latest.capacity * 100) : null;
