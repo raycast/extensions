@@ -1,5 +1,11 @@
 # KeePassXC Extension Changelog
 
+## [1.8.0] - 2025-10-27
+
+### Added
+
+- Support for KeePassXC placeholders in copy and paste actions.
+
 ## [1.7.1] - 2025-10-14
 
 ### Fixed
