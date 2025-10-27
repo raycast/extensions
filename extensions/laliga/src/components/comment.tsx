@@ -15,7 +15,11 @@ export default function MatchComments(props: { slug: string; name: string }) {
   );
 
   return (
-    <List navigationTitle={`${props.name} | Comments`} isLoading={isLoading} pagination={pagination}>
+    <List
+      navigationTitle={`${props.name} | Comments`}
+      isLoading={isLoading}
+      pagination={pagination}
+    >
       {comments?.map((comment) => {
         return (
           <List.Item

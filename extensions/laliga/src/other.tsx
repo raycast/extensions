@@ -54,7 +54,9 @@ export default function OtherCompetitions() {
   const { data: fixtures, isLoading } = usePromise(
     async (round: Round | undefined) => {
       const gameweeks =
-        round?.gameweeks.sort((a, b) => a.week - b.week).map((gw) => getMatches(competition, gw.week)) ?? [];
+        round?.gameweeks
+          .sort((a, b) => a.week - b.week)
+          .map((gw) => getMatches(competition, gw.week)) ?? [];
       const data = await Promise.all(gameweeks);
 
       let matches: Match[] = [];
@@ -92,17 +94,38 @@ export default function OtherCompetitions() {
     <List
       throttle
       isLoading={isLoading}
-      navigationTitle={round ? `${round.name} | ${selectedCompetition?.title}` : "Fixtures & Results"}
+      navigationTitle={
+        round
+          ? `${round.name} | ${selectedCompetition?.title}`
+          : "Fixtures & Results"
+      }
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Competition" value={competition} onChange={setCompetition}>
+        <List.Dropdown
+          tooltip="Filter by Competition"
+          value={competition}
+          onChange={setCompetition}
+        >
           {competitions.map((c) => {
-            return <List.Dropdown.Item key={c.value} value={c.value} title={c.title} />;
+            return (
+              <List.Dropdown.Item
+                key={c.value}
+                value={c.value}
+                title={c.title}
+              />
+            );
           })}
         </List.Dropdown>
       }
     >
       {Object.entries(matchday).map(([roundname, matches]) => {
-        return <Matchday key={roundname} name={roundname} matches={matches} action={action} />;
+        return (
+          <Matchday
+            key={roundname}
+            name={roundname}
+            matches={matches}
+            action={action}
+          />
+        );
       })}
     </List>
   );

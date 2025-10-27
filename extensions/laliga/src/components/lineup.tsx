@@ -37,40 +37,42 @@ export default function MatchLineups(props: { slug: string; name: string }) {
         </List.Dropdown>
       }
     >
-      {Object.entries(groupBy(teamMap[team], "status")).map(([status, persons]) => {
-        return (
-          <List.Section key={status} title={posMap[status]}>
-            {persons.map((person) => {
-              const accessories: List.Item.Accessory[] = [];
+      {Object.entries(groupBy(teamMap[team], "status")).map(
+        ([status, persons]) => {
+          return (
+            <List.Section key={status} title={posMap[status]}>
+              {persons.map((person) => {
+                const accessories: List.Item.Accessory[] = [];
 
-              if (person.captain) {
-                accessories.push({ icon: getAvatarIcon("C") });
-              }
+                if (person.captain) {
+                  accessories.push({ icon: getAvatarIcon("C") });
+                }
 
-              return (
-                <List.Item
-                  key={person.id}
-                  title={person?.shirt_number?.toString() ?? "Coach"}
-                  subtitle={person.person.nickname}
-                  keywords={[person.person.nickname, person.person.name]}
-                  accessories={accessories}
-                  detail={
-                    <List.Item.Detail
-                      markdown={json2md([
-                        {
-                          img: {
-                            source: person.photos["001"]["512x556"],
+                return (
+                  <List.Item
+                    key={person.id}
+                    title={person?.shirt_number?.toString() ?? "Coach"}
+                    subtitle={person.person.nickname}
+                    keywords={[person.person.nickname, person.person.name]}
+                    accessories={accessories}
+                    detail={
+                      <List.Item.Detail
+                        markdown={json2md([
+                          {
+                            img: {
+                              source: person.photos["001"]["512x556"],
+                            },
                           },
-                        },
-                      ])}
-                    />
-                  }
-                />
-              );
-            })}
-          </List.Section>
-        );
-      })}
+                        ])}
+                      />
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          );
+        },
+      )}
     </List>
   );
 }
