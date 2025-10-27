@@ -23,7 +23,7 @@ interface Room {
 
 const ICON_URLS = {
   switch: "https://api.iconify.design/material-symbols/switch.svg",
-  light: "https://api.iconify.design/tabler/light-bulb.svg",
+  light: "https://api.iconify.design/iconoir/light-bulb.svg",
   motionsensor: "https://api.iconify.design/cbi/motionsensor.svg",
   mobilepresence: "https://api.iconify.design/tabler/device-mobile.svg",
   remotecontroller: "https://api.iconify.design/ri/remote-control-line.svg",
