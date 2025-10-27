@@ -96,7 +96,7 @@
     },
     {
       "name": "refreshInterval",
-      "title": "Constant refresh interval (seconds)",
+      "title": "Constant Refresh Interval (Seconds)",
       "description": "How often to refresh the stats when constant refresh is enabled",
       "placeholder": "1",
       "default": "1",
