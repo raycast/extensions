@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-10-27
 
 - Added `Search Space Tabs` command to search and select tabs in the current space only.
 
