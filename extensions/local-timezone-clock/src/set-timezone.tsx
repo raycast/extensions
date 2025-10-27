@@ -1,4 +1,15 @@
-import { Action, ActionPanel, closeMainWindow, Detail, Form, Icon, LocalStorage, PopToRootType } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Detail,
+  Form,
+  Icon,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  PopToRootType,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 
 interface Region {
@@ -21,6 +32,7 @@ export default function Command() {
   async function handleSubmit({ timezoneCity }: { timezoneCity: string }) {
     await LocalStorage.setItem("timezoneCity", timezoneCity);
     setCurrentTimezone(timezoneCity);
+    await launchCommand({ name: "index", type: LaunchType.UserInitiated });
     await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   }
 
