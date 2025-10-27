@@ -73,7 +73,7 @@ export default function Command() {
 
   async function pingDevice(deviceName: string) {
     const { key, modifiers } = parseHotkey(preferences.siriKeybind);
-    const delay = preferences.siriDelay;
+    const delay = parseFloat(preferences.siriDelay);
 
     const keycodeMap: Record<string, number> = {
       f13: 105,
