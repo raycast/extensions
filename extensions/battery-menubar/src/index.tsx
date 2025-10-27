@@ -54,25 +54,25 @@ export default function Command() {
   });
 
   useEffect(() => {
-    if (!preferences.autoRefresh) {
+    if (!preferences.constantRefresh) {
       return;
     }
 
     const interval = Number(preferences.refreshInterval) || 1;
     const intervalMs = interval * 1000;
 
-    console.log(`Auto-refresh enabled: every ${interval} second(s)`);
+    console.log(`Constant refresh enabled: every ${interval} second(s)`);
 
     const timer = setInterval(() => {
-      console.log("Auto-refresh: revalidating battery state");
+      console.log("Constant refresh: revalidating battery state");
       revalidate();
     }, intervalMs);
 
     return () => {
-      console.log("Auto-refresh: clearing timer");
+      console.log("Constant refresh: clearing timer");
       clearInterval(timer);
     };
-  }, [preferences.autoRefresh, preferences.refreshInterval, revalidate]);
+  }, [preferences.constantRefresh, preferences.refreshInterval, revalidate]);
 
   const wattDiff =
     stats?.prev?.watts && stats.latest.watts && stats.prev.charging === stats.latest.charging
