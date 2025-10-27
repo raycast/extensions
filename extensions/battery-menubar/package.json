@@ -87,7 +87,7 @@
     },
     {
       "name": "constantRefresh",
-      "title": "Enable constant refresh",
+      "title": "Enable Constant Refresh",
       "description": "continuously refresh battery stats at the specified interval",
       "type": "checkbox",
       "required": false,
