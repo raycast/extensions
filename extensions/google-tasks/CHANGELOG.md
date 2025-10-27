@@ -1,6 +1,12 @@
 # Google Tasks Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Update] - 2025-03-11
+
 - Sort completed tasks by completion date
 
 ## [Update] - 2024-11-05
