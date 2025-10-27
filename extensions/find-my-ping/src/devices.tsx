@@ -21,7 +21,7 @@ interface Device {
 }
 
 interface Preferences {
-  siriKeybind: Keyboard.KeyEquivalent;
+  siriKeybind: string;
 }
 
 function getIconPath(filename: string): string {
