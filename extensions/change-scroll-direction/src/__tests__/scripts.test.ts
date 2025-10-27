@@ -2,8 +2,8 @@ import os from "os";
 import { fetchAppleScript, scriptForOtherVersions, scriptForVentura, scriptForTahoe } from "../scripts";
 
 describe("Apple script test suite #1", () => {
-  it("should return the appropriate apple script if the system version is >=26 (MacOS Tahoe or after)", () => {
-    jest.spyOn(os, "release").mockReturnValue("26.0.0");
+  it("should return the appropriate apple script if the system version is >=25 (MacOS Tahoe or after)", () => {
+    jest.spyOn(os, "release").mockReturnValue("25.0.0");
     const script = fetchAppleScript();
     expect(script).toEqual(scriptForTahoe);
   });

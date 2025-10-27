@@ -58,7 +58,7 @@ export function fetchAppleScript(): string {
   try {
     // Output of `os.release()` would look like `22.3.0` (Depends on your macOS version)
     const version = Number(os.release().split(".")[0]);
-    // 25 and above refers to MacOS Tahoe. (`os.release()` returns 25.0.0 for MacOS Tahoe 26.0.1?)
+    // 25 and above refers to MacOS Tahoe.
     if (version >= 25) {
       return scriptForTahoe;
     }
