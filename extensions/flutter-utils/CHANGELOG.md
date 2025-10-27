@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [0.5.5] - {PR_MERGE_DATE}
+
+### Changed
+- Optimisation des images de la galerie du Store: formats, dimensions et poids normalisés dans `metadata/screenshots/` pour un rendu net et conforme.
+- Bump de version à 0.5.5.
+
 ## [0.5.4] - {PR_MERGE_DATE}
 
 ### Changed

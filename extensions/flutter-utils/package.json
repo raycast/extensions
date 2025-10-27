@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flutter-utils",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "title": "Flutter Utils",
   "description": "Quick commands for Flutter: run, pub get, clean, analyze, test, build, doctor",
   "icon": "icon.png",
