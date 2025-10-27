@@ -4,7 +4,7 @@ import { parseReadings } from "../../../JotobaUtils";
 
 function KanjiListItemDetail({ kanjiResult }: { kanjiResult: KanjiResult }) {
   const { kanjiDetailsTitleDisplayType } = getPreferenceValues<Preferences>();
-  const { literal, onyomi, kunyomi, stroke_count, jlpt, grade } = kanjiResult;
+  const { literal, onyomi, kunyomi } = kanjiResult;
 
   const jotobaFrameURL = `https://jotoba.de/resource/kanji/frames/`;
 
