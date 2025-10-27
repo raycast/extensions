@@ -60,8 +60,8 @@ class ContactsService {
 }
 class ConversationsService {
   constructor(private client: Chatwoot) {}
-  async list() {
-    return this.client["request"]<{ data: { payload: Conversation[] } }>("conversations");
+  async list(props: { status: string }) {
+    return this.client["request"]<{ data: { payload: Conversation[] } }>(`conversations?status=${props.status}`);
   }
 }
 class InboxesService {
