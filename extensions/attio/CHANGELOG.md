@@ -1,6 +1,6 @@
 # Attio Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-10-27
 
 - View Objects
     1. View Object Records
