@@ -1,4 +1,15 @@
-import { ActionPanel, Action, List, Detail, showToast, Toast, useNavigation, confirmAlert, Alert, AI } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Detail,
+  showToast,
+  Toast,
+  useNavigation,
+  confirmAlert,
+  Alert,
+  AI,
+} from "@raycast/api";
 import { spawn, ChildProcess } from "child_process";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
@@ -35,7 +46,7 @@ async function checkCommandSafety(command: string): Promise<{ safe: boolean; rea
        Result: It will create unlimited processes and crash the system
        
        Command: ${command}
-       Result:`
+       Result:`,
     );
 
     const isSafe = check.trim().toLowerCase() === "safe";
@@ -178,22 +189,22 @@ function LiveExecutionView({ command, onComplete }: { command: string; onComplet
   const cancelExecution = useCallback(() => {
     if (processRef.current) {
       // Kill the entire process tree on Windows
-      const isWindows = process.platform === 'win32';
-      
+      const isWindows = process.platform === "win32";
+
       if (isWindows) {
         // Use taskkill to force terminate the process tree on Windows
-        spawn('taskkill', ['/pid', processRef.current.pid!.toString(), '/f', '/t'], {
+        spawn("taskkill", ["/pid", processRef.current.pid!.toString(), "/f", "/t"], {
           shell: true,
           windowsHide: true,
         });
       } else {
         // On Unix-like systems, send SIGKILL
-        processRef.current.kill('SIGKILL');
+        processRef.current.kill("SIGKILL");
       }
-      
+
       setIsLoading(false);
       setOutput((prev) => prev + "\n\n[Process terminated by user]");
-      
+
       // Complete immediately on termination
       onComplete({
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
