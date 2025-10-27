@@ -22,13 +22,10 @@ export default function TagManagementForm({ app, onAppUpdate }: Props) {
     return trimmedSearch && !tags.some((tag) => tag.toLowerCase() === trimmedSearch.toLowerCase());
   }, [searchText, tags]);
 
-  const updateTags = (newTags: string[], successMessage: string) => {
-    setTags(newTags);
-    onAppUpdate({ ...app, tags: newTags });
-    showToast(Toast.Style.Success, successMessage);
-  };
-
   const handleAddTag = async (tagName: string) => {
+    const startTime = Date.now();
+    console.log(`[PERF] Starting handleAddTag for "${tagName}"...`);
+
     const trimmedTag = tagName.trim();
 
     if (!trimmedTag) {
@@ -41,23 +38,64 @@ export default function TagManagementForm({ app, onAppUpdate }: Props) {
       return;
     }
 
+    // Optimistic update - update UI immediately
+    const optimisticStart = Date.now();
+    const optimisticTags = [...new Set([...tags, trimmedTag])];
+    setTags(optimisticTags);
+    onAppUpdate({ ...app, tags: optimisticTags });
+    const optimisticTime = Date.now() - optimisticStart;
+    console.log(`[PERF] Optimistic update completed in ${optimisticTime}ms`);
+
+    showToast(Toast.Style.Success, `Added tag "${trimmedTag}"`);
+    await clearSearchBar();
+
+    // Save to storage in the background
     try {
-      const updatedTags = await addTag(app.name, tags, trimmedTag);
-      updateTags(updatedTags, `Added tag "${trimmedTag}"`);
-      await clearSearchBar();
+      const storageStart = Date.now();
+      await addTag(app.name, tags, trimmedTag);
+      const storageTime = Date.now() - storageStart;
+      console.log(`[PERF] Background storage completed in ${storageTime}ms`);
     } catch {
-      showToast(Toast.Style.Failure, "Failed to add tag");
+      // Revert optimistic update on failure
+      setTags(tags);
+      onAppUpdate({ ...app, tags });
+      showToast(Toast.Style.Failure, "Failed to save tag");
     }
+
+    const totalTime = Date.now() - startTime;
+    console.log(`[PERF] handleAddTag completed in ${totalTime}ms`);
   };
 
   const handleRemoveTag = async (tagToRemove: string) => {
+    const startTime = Date.now();
+    console.log(`[PERF] Starting handleRemoveTag for "${tagToRemove}"...`);
+
+    // Optimistic update - update UI immediately
+    const optimisticStart = Date.now();
+    const optimisticTags = tags.filter((tag) => tag !== tagToRemove);
+    setTags(optimisticTags);
+    onAppUpdate({ ...app, tags: optimisticTags });
+    const optimisticTime = Date.now() - optimisticStart;
+    console.log(`[PERF] Optimistic update completed in ${optimisticTime}ms`);
+
+    showToast(Toast.Style.Success, `Removed tag "${tagToRemove}"`);
+    await clearSearchBar();
+
+    // Save to storage in the background
     try {
-      const updatedTags = await removeTag(app.name, tags, tagToRemove);
-      updateTags(updatedTags, `Removed tag "${tagToRemove}"`);
-      await clearSearchBar();
+      const storageStart = Date.now();
+      await removeTag(app.name, tags, tagToRemove);
+      const storageTime = Date.now() - storageStart;
+      console.log(`[PERF] Background storage completed in ${storageTime}ms`);
     } catch {
+      // Revert optimistic update on failure
+      setTags(tags);
+      onAppUpdate({ ...app, tags });
       showToast(Toast.Style.Failure, "Failed to remove tag");
     }
+
+    const totalTime = Date.now() - startTime;
+    console.log(`[PERF] handleRemoveTag completed in ${totalTime}ms`);
   };
 
   return (

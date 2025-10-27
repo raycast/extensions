@@ -67,8 +67,7 @@ export default function ImportTagsCommand() {
 
     try {
       // Get current app list to verify apps exist
-      const currentTagStorage = await loadTags();
-      const currentAppPaths = discoverApps();
+      const [currentTagStorage, currentAppPaths] = await Promise.all([loadTags(), discoverApps()]);
       const currentAppList = createInitialApps(currentAppPaths, currentTagStorage);
       const currentAppNames = new Set(currentAppList.map((app) => app.name));
 

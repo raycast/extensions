@@ -47,8 +47,7 @@ export default function ExportTagsCommand() {
   const loadData = async () => {
     try {
       // Load current tag data
-      const tagStorage = await loadTags();
-      const appPaths = discoverApps();
+      const [tagStorage, appPaths] = await Promise.all([loadTags(), discoverApps()]);
       const appList = createInitialApps(appPaths, tagStorage);
 
       // Create export data with all apps (including those without tags)
