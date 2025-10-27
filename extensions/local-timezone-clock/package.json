@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "local-timezone-clock",
+  "title": "Timezone Clock",
+  "description": "Display the local time of a different timezone in your menubar",
+  "version": "1.0.0",
+  "icon": "timezone-icon.png",
+  "author": "PaulvdDool",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "System",
+    "Data",
+    "Other"
+  ],
+  "keywords": [
+    "timezone",
+    "time",
+    "clock",
+    "world clock"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Timezone",
+      "description": "Get the local time for a different timezone",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "set-timezone",
+      "title": "Set Timezone",
+      "description": "Change the timezone of the clock",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.9.1",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
