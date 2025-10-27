@@ -1,6 +1,6 @@
 # Sevalla Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-10-27
 
 - Search Databases
     1. View Database Details
