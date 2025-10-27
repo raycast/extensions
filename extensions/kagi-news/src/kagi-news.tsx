@@ -1,9 +1,6 @@
 import { List, Detail, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState, useEffect } from "react";
-
-interface Preferences {
-  language: string;
 }
 
 interface Category {
