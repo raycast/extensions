@@ -1,5 +1,9 @@
 # ipapi.is Changelog
 
+## [Fix Crash in IpMetadata] - {PR_MERGE_DATE}
+
+- Fix error when likely `location.latitude` or `location.longitude` or `location.local_time_unix` is missing or invalid (ref: [Issue #22492](https://github.com/raycast/extensions/issues/22492))
+
 ## [Enhancements + Windows Support] - 2025-10-07
 
 - Add Windows Support
