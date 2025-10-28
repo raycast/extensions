@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List, Color, Detail, useNavigation } from "@raycast/api";
-import React from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { withProfileContext, ListContainer } from "@src/components";
 import { useStripeDashboard, useStripeClient } from "@src/hooks";

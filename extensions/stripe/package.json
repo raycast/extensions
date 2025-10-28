@@ -145,7 +145,7 @@
   ],
   "preferences": [
     {
-      "name": "stripeLiveApiKey", 
+      "name": "stripeLiveApiKey",
       "type": "password",
       "required": false,
       "title": "Default Profile - Live API Key",
@@ -158,7 +158,7 @@
       "required": false,
       "title": "Default Profile - Test API Key",
       "description": "API Key for Test Environment of the default profile. For multiple profiles, use the Profile Manager once you have added your default profile.",
-      "placeholder": "Enter the Test API Key for default profile" 
+      "placeholder": "Enter the Test API Key for default profile"
     }
   ],
   "dependencies": {
@@ -168,8 +168,8 @@
     "stripe": "^17.3.1"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.182",
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.20",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",

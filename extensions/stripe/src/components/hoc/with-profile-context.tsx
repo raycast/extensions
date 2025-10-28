@@ -1,4 +1,3 @@
-import React from "react";
 import { ProfileProvider } from "@src/contexts";
 
 /**
