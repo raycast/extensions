@@ -58,6 +58,17 @@ export type Integration = {
   description: string;
   enabled: boolean;
 };
+
+export type Notification = {
+  id: number;
+  notification_type: string;
+  push_message_body: string;
+  "primary_actor_type": string
+"primary_actor_id": number
+  read_at: number | null
+  created_at: number;
+}
+
 export type Portal = {
   id: number;
   color: string;

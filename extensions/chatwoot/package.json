@@ -69,6 +69,12 @@
       "title": "List Portals",
       "description": "View Portals",
       "mode": "view"
+    },
+    {
+      "name": "my-inbox",
+      "title": "My Inbox",
+      "description": "Notifications from all subscribed inboxes",
+      "mode": "view"
     }
   ],
   "dependencies": {
