@@ -57,9 +57,7 @@ export default function MenubarTasks() {
   };
 
   const getIssueTitle = (issue: Issue) => {
-    const repo = getIssueRepo(issue);
-    const repoName = repo.split("/").pop() || repo;
-    return `${issue.title} (${repoName})`;
+    return `${issue.title}`;
   };
 
   const formatTimeAgo = (dateString: string) => {

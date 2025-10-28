@@ -2,7 +2,16 @@ import { environment, Icon } from "@raycast/api";
 import type { Issue } from "./api";
 
 export type IssueStatus = "queued" | "open" | "closed" | "merged" | "failed";
-export type IntegrationType = "github" | "postgres" | "sentry" | "linear" | "jira" | "supabase" | "other";
+export type IntegrationType =
+  | "github"
+  | "postgres"
+  | "sentry"
+  | "linear"
+  | "jira"
+  | "supabase"
+  | "user-supplied"
+  | "slack"
+  | "other";
 
 export function getIssueStatus(issue: Issue): IssueStatus {
   if (issue.solutions && issue.solutions.length > 0) {
@@ -24,6 +33,11 @@ export function getIssueStatus(issue: Issue): IssueStatus {
 }
 
 export function getIssueIntegrationType(issue: Issue): IntegrationType {
+  // Check if this is a user-supplied issue first
+  if (issue.kind === "user-supplied") {
+    return "user-supplied";
+  }
+
   if (!issue.issueSource) {
     return "other";
   }
@@ -33,6 +47,9 @@ export function getIssueIntegrationType(issue: Issue): IntegrationType {
 }
 
 export function getIssueRepo(issue: Issue): string {
+  if (issue.kind === "user-supplied") {
+    return "User Supplied";
+  }
   return issue.issueSource?.name || "Unknown";
 }
 
@@ -73,7 +90,11 @@ export function getIntegrationIcon(integrationType: IntegrationType) {
       return { source: "jira.png" };
     case "supabase":
       return { source: "supabase.png" };
-    default:
+    case "user-supplied":
       return Icon.Person;
+    case "slack":
+      return { source: "slack.png" };
+    default:
+      return Icon.QuestionMark;
   }
 }
