@@ -612,6 +612,27 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
     },
   },
+  {
+    name: "strata",
+    title: "Strata MCP - by Klavis AI",
+    description:
+      "Strata MCP is one MCP server for AI agents to use tools reliably at any scale.",
+    icon: "https://www.klavis.ai/images/favicon/apple-touch-icon.png",
+    homepage: "https://www.klavis.ai/",
+    configuration: {
+      "command": "npx",
+      "args": [
+        "-y"
+        "mcp-remote",
+        "https://strata.klavis.ai/mcp/"
+        "--header",
+        "Authorization:${AUTH_HEADER}"
+      ],
+      "env": {
+        "AUTH_HEADER": "Bearer YOUR_AUTH_TOKEN"
+      }
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
