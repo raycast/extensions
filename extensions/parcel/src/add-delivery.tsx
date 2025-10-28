@@ -49,7 +49,7 @@ export default function Command() {
     },
     validation: {
       trackingNumber: (value) => {
-        if (!value) {
+        if (!value || !value.trim()) {
           return "Tracking number is required";
         }
       },
