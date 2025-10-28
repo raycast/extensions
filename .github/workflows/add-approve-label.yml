@@ -1,7 +1,7 @@
 # Auto-labels PRs "Approved" on non-maintainer approvals.
 # Skips write+/maintain/admin users to highlight community reviews.
 # Handles bots/externals/404s/none as allowable; only for open PRs.
-# Edge: API errors fail the step so maintainers can act; transient network issues are retried.
+# API errors fail the step so maintainers can act; transient network issues are retried.
 
 name: Auto-label approved PRs (external reviewers only)
 
@@ -11,11 +11,12 @@ on:
 
 permissions:
   pull-requests: write
+  contents: read
 
 jobs:
   label_on_approval:
     runs-on: ubuntu-latest
-    if: |
+    if: >
       github.event.review.state == 'approved' &&
       github.event.pull_request.state == 'open'
     steps:
@@ -68,19 +69,11 @@ jobs:
             }
           result-encoding: string
 
-      - name: Set effective token (fallback if secret is not set)
-        run: |
-          if [ -n "${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}" ]; then
-            echo "EFFECTIVE_TOKEN=${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}" >> "$GITHUB_ENV"
-          else
-            echo "EFFECTIVE_TOKEN=${{ github.token }}" >> "$GITHUB_ENV"
-          fi
-
-      - name: Add "Approved" label
+      - name: Add "Approved" label using GitHub API
         if: steps.check_permissions.outputs.result == 'label'
         uses: actions/github-script@v7
         with:
-          github-token: ${{ env.EFFECTIVE_TOKEN }}
+          github-token: ${{ secrets.RAYCAST_PNT_LABEL }}
           script: |
             const prNumber = context.payload.pull_request.number;
             const label = "Approved";
