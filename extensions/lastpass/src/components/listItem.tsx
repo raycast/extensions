@@ -10,7 +10,7 @@ export const ListItem = (props: {
   password?: string;
   url?: string;
   showPassword: boolean;
-  setShowPassword: (it: boolean) => any;
+  setShowPassword: (it: boolean) => void;
   getDetails: () => Promise<Account>;
 }) => {
   return (

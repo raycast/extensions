@@ -1,5 +1,8 @@
 import { exec, ExecException } from "child_process";
 
+// Platform detection
+const isWindows = process.platform === "win32";
+
 export type Account = {
   name: string;
   id: string;
@@ -14,21 +17,31 @@ export type Account = {
 };
 
 const serializeFromJson = (jsonArray: string): Account[] => {
-  const array: any[] = JSON.parse(jsonArray);
+  const array: { last_modified_gmt: string; last_touch: string }[] = JSON.parse(jsonArray);
   const res = array.map(
     (obj) =>
       ({
         ...obj,
         lastModified: new Date(parseInt(obj.last_modified_gmt, 10) * 1000),
         lastTouch: new Date(parseInt(obj.last_touch, 10) * 1000),
-      } as Account)
+      } as unknown as Account)
   );
   return res;
 };
 
-const execute = async (command: string) => {
+// Platform-specific command builders
+const buildMacOSCommand = (command: string): string => {
   const PATH = "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin";
-  const wrappedCommand = `zsh -l -c 'export PATH="$PATH:${PATH}" && ${command}'`;
+  return `zsh -l -c 'export PATH="$PATH:${PATH}" && ${command}'`;
+};
+
+const buildWindowsCommand = (command: string): string => {
+  // Use PowerShell for better piping support and Unix-like behavior
+  return `powershell -Command "& { ${command} }"`;
+};
+
+const execute = async (command: string) => {
+  const wrappedCommand = isWindows ? buildWindowsCommand(command) : buildMacOSCommand(command);
 
   console.log(`Executing: ${wrappedCommand}`);
   const startTimestamp = Date.now();
@@ -53,11 +66,26 @@ const execute = async (command: string) => {
   );
 };
 
+// Platform-specific authorize functions
+const authorizeMacOS = (subcommand: string, password: string): string => {
+  const quote = password?.includes('"') ? "'" : '"';
+  return `echo ${quote}${password}${quote} | LPASS_DISABLE_PINENTRY=1 lpass ${subcommand}`;
+};
+
+const authorizeWindows = (subcommand: string, password: string): string => {
+  // PowerShell requires backtick escaping for special characters
+  // Escape backticks FIRST (since backtick is the escape character)
+  let escapedPassword = password.replace(/`/g, "``");
+  // Then escape other special characters: dollar ($), double-quote (")
+  escapedPassword = escapedPassword.replace(/[$"]/g, "`$&");
+
+  // Use double quotes with properly escaped password
+  return `$env:LPASS_DISABLE_PINENTRY=1; echo "${escapedPassword}" | lpass ${subcommand}`;
+};
+
 const authorize = (subcommand: string, opts: { password: string }) => {
   const { password } = opts;
-  const quote = password?.includes('"') ? "'" : '"';
-  const maskedCommand = `echo ${quote}${password}${quote} | LPASS_DISABLE_PINENTRY=1 lpass ${subcommand}`;
-  return maskedCommand;
+  return isWindows ? authorizeWindows(subcommand, password) : authorizeMacOS(subcommand, password);
 };
 
 export const lastPass = (email: string, password: string) => {
