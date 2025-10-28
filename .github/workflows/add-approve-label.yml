@@ -1,7 +1,10 @@
-# Auto-labels PRs "Approved" on non-maintainer approvals.
-# Skips write+/maintain/admin users to highlight community reviews.
-# Handles bots/externals/404s/none as allowable; only for open PRs.
-# API errors fail the step so maintainers can act; transient network issues are retried.
+# Auto-label approved PRs (external reviewers only)
+# --------------------------------------------------
+# Adds the "Approved" label to PRs when a non-maintainer user submits an approval.
+# Skips maintainers (write/maintain/admin) to highlight community reviews.
+# Designed to work with forked PRs using only GITHUB_TOKEN (no PATs required).
+# Fork PRs must use pull_request_review (not pull_request_target) for event security.
+# Fails on API errors (except label-already-exists), so maintainers can fix problems.
 
 name: Auto-label approved PRs (external reviewers only)
 
@@ -10,8 +13,9 @@ on:
     types: [submitted]
 
 permissions:
-  pull-requests: write
   contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   label_on_approval:
@@ -19,6 +23,7 @@ jobs:
     if: >
       github.event.review.state == 'approved' &&
       github.event.pull_request.state == 'open'
+
     steps:
       - name: Show basic event info
         run: |
@@ -32,10 +37,25 @@ jobs:
             echo "Note: PR head is in the same repository"
           fi
 
+      - name: Debug effective GITHUB_TOKEN permission
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const me = await github.rest.users.getAuthenticated();
+            const login = me.data.login;
+            const perm = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: login,
+            });
+            console.log(`🔍 GITHUB_TOKEN acts as '${login}' with permission: '${perm.data.permission}' on this repo`);
+
       - name: Check reviewer permissions
         id: check_permissions
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const reviewer = context.payload.review.user;
             console.log(`Reviewer: ${reviewer.login}, Type: ${reviewer.type}`);
@@ -70,24 +90,23 @@ jobs:
           result-encoding: string
 
       - name: Add "Approved" label using GitHub API
-        if: steps.check_permissions.outputs.result == 'label'
-        uses: actions/github-script@v7
+        if: ${{ steps.check_permissions.outputs.result == 'label' }}
+        uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.RAYCAST_PNT_LABEL }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const label = "Approved";
             try {
+              const prNumber = context.payload.pull_request?.number || context.issue.number;
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: prNumber,
-                labels: [label],
+                labels: ['Approved'],
               });
-              console.log(`✅ Label '${label}' added to PR #${prNumber}`);
+              console.log(`✅ Label added to PR #${prNumber}`);
             } catch (error) {
               if (error.status === 422) {
-                console.log(`ℹ️ Label '${label}' already exists on PR #${prNumber}`);
+                console.log('ℹ️ Label already exists on this PR');
               } else {
                 console.log(`❌ Failed to add label: ${error.message}`);
                 throw error;
