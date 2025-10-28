@@ -37,20 +37,6 @@ jobs:
             echo "Note: PR head is in the same repository"
           fi
 
-      - name: Debug effective GITHUB_TOKEN permission
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const me = await github.rest.users.getAuthenticated();
-            const login = me.data.login;
-            const perm = await github.rest.repos.getCollaboratorPermissionLevel({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              username: login,
-            });
-            console.log(`🔍 GITHUB_TOKEN acts as '${login}' with permission: '${perm.data.permission}' on this repo`);
-
       - name: Check reviewer permissions
         id: check_permissions
         uses: actions/github-script@v8
