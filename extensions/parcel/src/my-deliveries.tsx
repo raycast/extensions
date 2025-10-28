@@ -291,7 +291,7 @@ export default function Command() {
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 onAction={() => launchCommand({ name: "add-delivery", type: LaunchType.UserInitiated })}
-              />  
+              />
               <Action
                 title="Switch to Recent Deliveries"
                 icon={Icon.Clock}

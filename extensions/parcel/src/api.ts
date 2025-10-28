@@ -137,7 +137,12 @@ export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[
   return data.deliveries;
 }
 
-export async function addDelivery(trackingNumber: string, carrierCode: string, description: string, confirmationNotification: boolean): Promise<void> {
+export async function addDelivery(
+  trackingNumber: string,
+  carrierCode: string,
+  description: string,
+  confirmationNotification: boolean,
+): Promise<void> {
   const url = "https://api.parcel.app/external/add-delivery/";
   const response = await fetch(url, {
     headers: {
