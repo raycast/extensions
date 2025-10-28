@@ -14,7 +14,8 @@
     "ridemountainpig",
     "david_ferland",
     "sjasct",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "Zheckan"
   ],
   "categories": [
     "Applications",
@@ -40,6 +41,13 @@
       "subtitle": "Zen Browser",
       "description": "Open a new Zen Browser tab.",
       "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Create New Window",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser window.",
+      "mode": "no-view"
     },
     {
       "name": "search-history",
@@ -136,6 +144,11 @@
       "name": "new-tab",
       "title": "New Tab",
       "description": "Open a new Zen Browser tab"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a new Zen Browser window"
     },
     {
       "name": "search-history",

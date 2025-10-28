@@ -46,3 +46,21 @@ export async function openNewTab(queryText: string | null | undefined) {
 
   await runAppleScript(script);
 }
+
+export async function openNewWindow() {
+  const script = `
+    tell application "Raycast" to activate
+    tell application "Zen" to activate
+
+    tell application "System Events"
+      repeat 10 times
+        if frontmost of process "Zen" then exit repeat
+        delay 0.1
+      end repeat
+
+      keystroke "n" using {command down}
+    end tell
+  `;
+
+  await runAppleScript(script);
+}
