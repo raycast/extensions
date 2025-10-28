@@ -19,7 +19,7 @@ export default function Command() {
         // Trim whitespace from inputs
         const trackingNumber = values.trackingNumber.trim();
         const description = values.description.trim();
-        const confirmationNotification = values.confirmationNotification ? true : false;
+        const confirmationNotification = values.confirmationNotification;
 
         // Use the API to add delivery
         await addDelivery(trackingNumber, values.carrierCode, description, confirmationNotification);
