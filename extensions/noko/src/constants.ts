@@ -14,6 +14,8 @@ export const TOAST_MESSAGES = {
   SUCCESS: {
     ENTRY_ADDED: "Entry Added",
     ENTRY_ADDED_DESCRIPTION: "Time entry has been added successfully",
+    ENTRY_DELETED: "Entry Deleted",
+    ENTRY_DELETED_DESCRIPTION: "Time entry has been deleted successfully",
     TIMER_STARTED: "Timer Started",
     TIMER_PAUSED: "Timer Paused",
     TIMER_DISCARDED: "Timer Discarded",
@@ -21,6 +23,7 @@ export const TOAST_MESSAGES = {
   },
   ERROR: {
     FAILED_TO_ADD_ENTRY: "Failed to Add Entry",
+    FAILED_TO_DELETE_ENTRY: "Failed to Delete Entry",
     FAILED_TO_START_TIMER: "Failed to Start Timer",
     FAILED_TO_PAUSE_TIMER: "Failed to Pause Timer",
     FAILED_TO_DISCARD_TIMER: "Failed to Discard Timer",

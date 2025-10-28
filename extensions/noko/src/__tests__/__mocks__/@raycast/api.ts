@@ -47,6 +47,8 @@ export const Icon = {
   CircleFilled: "circle-filled",
 };
 
+export const confirmAlert = jest.fn();
+
 export const LaunchProps = {
   launchContext: {},
 };

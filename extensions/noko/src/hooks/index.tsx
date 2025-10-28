@@ -7,6 +7,7 @@ import {
   useEntries as useEntriesApi,
 } from "./useApiData";
 import { useTimerActions } from "./useTimerActions";
+import { useEntryActions } from "./useEntryActions";
 import useElapsedTime from "./useElapsedTime";
 import { useEntrySubmission } from "./useEntrySubmission";
 import useDetailToggle from "./useDetailToggle";
@@ -22,6 +23,7 @@ export {
   useEntries,
   // Action hooks
   useTimerActions,
+  useEntryActions,
   useElapsedTime,
   useEntrySubmission,
   // UI hooks

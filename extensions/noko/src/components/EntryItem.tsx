@@ -1,7 +1,8 @@
-import { Icon, List, ActionPanel, Action } from "@raycast/api";
-import { memo, useMemo } from "react";
+import { Icon, List, ActionPanel, Action, confirmAlert } from "@raycast/api";
+import { memo, useMemo, useCallback } from "react";
 import { EntryType } from "../types";
 import { userName, formatTags } from "../utils";
+import { useEntryActions } from "../hooks";
 
 interface EntryItemProps {
   entry: EntryType;
@@ -12,6 +13,26 @@ interface EntryItemProps {
 
 export const EntryItem = memo<EntryItemProps>(
   ({ entry, isShowingDetail, onToggleDetail, onCancel }: EntryItemProps) => {
+    const { deleteEntry } = useEntryActions({
+      onSuccess: () => {
+        onCancel?.();
+      },
+    });
+
+    const handleDelete = useCallback(async () => {
+      const confirmed = await confirmAlert({
+        title: "Delete Entry",
+        message: `Are you sure you want to delete this entry for "${entry.project.name}"?`,
+        primaryAction: {
+          title: "Delete",
+        },
+      });
+
+      if (confirmed) {
+        await deleteEntry(entry.id);
+      }
+    }, [deleteEntry, entry.id, entry.project.name]);
+
     const detailMetadata = useMemo(
       () => (
         <List.Item.Detail.Metadata>
@@ -103,6 +124,15 @@ export const EntryItem = memo<EntryItemProps>(
               onAction={onToggleDetail}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
+            {!entry.approved_by && (
+              <Action
+                title="Delete Entry"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={handleDelete}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              />
+            )}
             {onCancel && (
               <Action
                 title="Back"

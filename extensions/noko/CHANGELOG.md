@@ -5,6 +5,17 @@ All notable changes to the Noko Raycast extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0](https://github.com/JuanVqz/noko-for-raycast/compare/v0.3.0...v0.4.0) (2025-10-16)
+
+
+### Features
+
+* add delete unapproved entry functionality ([#23](https://github.com/JuanVqz/noko-for-raycast/issues/23)) ([6986d7f](https://github.com/JuanVqz/noko-for-raycast/commit/6986d7f1e365690df8eef1b6b602202c542a60da))
+* add summary section to EntriesView with time tracking and billable/unbillable split ([#15](https://github.com/JuanVqz/noko-for-raycast/issues/15)) ([7ecb065](https://github.com/JuanVqz/noko-for-raycast/commit/7ecb0657b3fb433b51da09a1450c4aaf2a6fdce8))
+* **entries:** add entry creation action to entries view ([#19](https://github.com/JuanVqz/noko-for-raycast/issues/19)) ([9f60d56](https://github.com/JuanVqz/noko-for-raycast/commit/9f60d567c11c0bb2e767e4513f327c9292b87e5f))
+* **ui:** improve navigation consistency ([#18](https://github.com/JuanVqz/noko-for-raycast/issues/18)) ([1f2e4c3](https://github.com/JuanVqz/noko-for-raycast/commit/1f2e4c3206f678cd14846e67c518e88a9331d4bb))
+* update extension icon ([#21](https://github.com/JuanVqz/noko-for-raycast/issues/21)) ([8c2ef4e](https://github.com/JuanVqz/noko-for-raycast/commit/8c2ef4e4531fa14bf9b3b7274c45eb96177ba7f1))
+
 ## [0.3.0](https://github.com/JuanVqz/noko-for-raycast/compare/v0.2.0...v0.3.0) (2025-10-13)
 
 
