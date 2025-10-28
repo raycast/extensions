@@ -1,6 +1,6 @@
 # DeployHQ Changelog
 
-## [DefaultAction fix & Project data in view ] - {PR_MERGE_DATE}
+## [DefaultAction fix & Project data in view ] - 2025-10-28
 
 - ✨ Add project data to list item when selected
 - 🐛 Add necessary keys to actions
