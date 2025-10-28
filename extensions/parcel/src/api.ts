@@ -170,7 +170,7 @@ export async function addDelivery(
         errorMessage = errorData.error_message;
       }
     } catch {
-      // Ohterwise use the raw error text
+      // Otherwise use the raw error text
       if (errorText) {
         errorMessage = errorText;
       }
