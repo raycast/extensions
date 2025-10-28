@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, open, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  Toast,
+  launchCommand,
+  LaunchType,
+  showToast,
+  open,
+} from "@raycast/api";
 import { isValid, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useEffect, useState } from "react";
@@ -255,6 +266,12 @@ export default function Command() {
                   open("https://web.parcelapp.net/");
                 }}
               />
+              <Action
+                title="Add Delivery"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                onAction={() => launchCommand({ name: "add-delivery", type: LaunchType.UserInitiated })}
+              />
             </ActionPanel>
           }
         />
@@ -269,6 +286,12 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
+              <Action
+                title="Add Delivery"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                onAction={() => launchCommand({ name: "add-delivery", type: LaunchType.UserInitiated })}
+              />  
               <Action
                 title="Switch to Recent Deliveries"
                 icon={Icon.Clock}
@@ -328,6 +351,12 @@ export default function Command() {
                   />
                   <Action.CopyToClipboard title="Copy Tracking Number" content={delivery.tracking_number} />
                   <Action.OpenInBrowser title="Open Parcel Web" url="https://web.parcelapp.net/" />
+                  <Action
+                    title="Add New Delivery"
+                    icon={Icon.Plus}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    onAction={() => launchCommand({ name: "add-delivery", type: LaunchType.UserInitiated })}
+                  />
                 </ActionPanel>
               }
             />

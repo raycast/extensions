@@ -84,27 +84,7 @@ export function getApiKey(): string {
 }
 
 function getSystemLanguage(): string {
-  try {
-    const locale = new Intl.DateTimeFormat().resolvedOptions().locale;
-    const languageCode = locale.split("-")[0].toLowerCase();
-    if (languageCode && languageCode.length >= 2) {
-      return languageCode;
-    }
-  } catch {
-    // Could not get language from Intl.DateTimeFormat().resolvedOptions().locale
-  }
-
-  // Fallback to LC_ALL environment variable
-  const langVar = process.env.LC_ALL;
-  if (langVar) {
-    const languageCode = langVar.split(".")[0].split("_")[0].toLowerCase();
-    if (languageCode && languageCode.length >= 2) {
-      return languageCode;
-    }
-  }
-
-  // Final fallback to English
-  return "en";
+  return Intl.DateTimeFormat().resolvedOptions().locale.slice(0, 2);
 }
 
 export function getDeliveriesUrl(filterMode: FilterMode): string {
@@ -141,7 +121,10 @@ export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status} (${await response.text()})`);
+    const errorText = await response.text();
+    throw new Error(
+      `Failed to fetch deliveries: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ""}`,
+    );
   }
 
   const data = (await response.json()) as ParcelApiResponse;
@@ -154,7 +137,7 @@ export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[
   return data.deliveries;
 }
 
-export async function addDelivery(trackingNumber: string, carrierCode: string, description: string): Promise<void> {
+export async function addDelivery(trackingNumber: string, carrierCode: string, description: string, confirmationNotification: boolean): Promise<void> {
   const url = "https://api.parcel.app/external/add-delivery/";
   const response = await fetch(url, {
     headers: {
@@ -166,12 +149,29 @@ export async function addDelivery(trackingNumber: string, carrierCode: string, d
       tracking_number: trackingNumber,
       carrier_code: carrierCode,
       description: description,
+      send_push_confirmation: confirmationNotification,
       language: getSystemLanguage(),
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status} (${await response.text()})`);
+    const errorText = await response.text();
+    let errorMessage = `Failed to add delivery: ${response.status} ${response.statusText}`;
+
+    // Parse JSON error response for better error message
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.error_message) {
+        errorMessage = errorData.error_message;
+      }
+    } catch {
+      // Ohterwise use the raw error text
+      if (errorText) {
+        errorMessage = errorText;
+      }
+    }
+
+    throw new Error(errorMessage);
   }
 
   const data = (await response.json()) as ParcelApiResponse;
@@ -184,7 +184,7 @@ export async function addDelivery(trackingNumber: string, carrierCode: string, d
 
 export function getAPIError(data: ParcelApiResponse): Error | null {
   if (!data.success) {
-    return new Error(data?.error_message || "Unknown API error");
+    return new Error(data?.error_message || "API request failed. Please check your API key and try again.");
   }
 
   return null;

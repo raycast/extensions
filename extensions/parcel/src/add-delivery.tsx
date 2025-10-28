@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
-import { showFailureToast, useForm, FormValidation } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useCarriers } from "./hooks/useCarriers";
 import { addDelivery } from "./api";
 
@@ -7,6 +7,7 @@ interface FormValues {
   trackingNumber: string;
   carrierCode: string;
   description: string;
+  confirmationNotification: boolean;
 }
 
 export default function Command() {
@@ -18,9 +19,10 @@ export default function Command() {
         // Trim whitespace from inputs
         const trackingNumber = values.trackingNumber.trim();
         const description = values.description.trim();
+        const confirmationNotification = values.confirmationNotification ? true : false;
 
         // Use the API to add delivery
-        await addDelivery(trackingNumber, values.carrierCode, description);
+        await addDelivery(trackingNumber, values.carrierCode, description, confirmationNotification);
 
         // Show a success HUD
         await showHUD(`📦 Delivery Added`, {
@@ -28,17 +30,35 @@ export default function Command() {
         });
       } catch (error) {
         console.error("Error adding delivery:", error);
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        await showFailureToast({
-          title: "Failed to Add Delivery",
+
+        let errorMessage = "Something went wrong";
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === "string") {
+          errorMessage = error;
+        } else {
+          errorMessage = String(error);
+        }
+
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error adding delivery",
           message: errorMessage,
         });
       }
     },
     validation: {
-      trackingNumber: FormValidation.Required,
+      trackingNumber: (value) => {
+        if (!value) {
+          return "Tracking number is required";
+        }
+      },
       carrierCode: FormValidation.Required,
-      description: FormValidation.Required,
+      description: (value) => {
+        if (!value) {
+          return "Description is required";
+        }
+      },
     },
   });
 
@@ -66,6 +86,11 @@ export default function Command() {
         title="Description"
         placeholder="Enter a description for this package"
         {...itemProps.description}
+      />
+      <Form.Checkbox
+        title="Confirmation"
+        label="Receive a push notification when the delivery is added."
+        {...itemProps.confirmationNotification}
       />
     </Form>
   );

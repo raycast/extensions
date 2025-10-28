@@ -6,6 +6,7 @@
 - The Add Delivery form now prevents leaving required form fields empty
 - Deliveries added from the extension will automatically use your system's language in Parcel
 - Replaced the success toast with a cleaner Raycast HUD notification
+- Fixed API errors to display the specific error from Parcel rather than a generic "Something went wrong" 
 
 ## [Detail View Refactor, Metadata, UX] - 2025-09-19
 
