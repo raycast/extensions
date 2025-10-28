@@ -31,11 +31,11 @@ export default function ListConversations() {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter} defaultValue={filter}>
-          <Form.Dropdown.Item title="All" value="status_all" />
-          <Form.Dropdown.Item title="Open" value="status_open" />
-          <Form.Dropdown.Item title="Resolved" value="status_resolved" />
-          <Form.Dropdown.Item title="Pending" value="status_pending" />
-          <Form.Dropdown.Item title="Snoozed" value="status_snoozed" />
+          <List.Dropdown.Item title="All" value="status_all" />
+          <List.Dropdown.Item title="Open" value="status_open" />
+          <List.Dropdown.Item title="Resolved" value="status_resolved" />
+          <List.Dropdown.Item title="Pending" value="status_pending" />
+          <List.Dropdown.Item title="Snoozed" value="status_snoozed" />
         </List.Dropdown>
       }
     >
