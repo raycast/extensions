@@ -37,7 +37,6 @@ jobs:
         with:
           script: |
             const reviewer = context.payload.review.user;
-            const pr = context.payload.pull_request;
             console.log(`Reviewer: ${reviewer.login}, Type: ${reviewer.type}`);
             if (reviewer.type !== 'User') {
               console.log('Non-human reviewer: Will add label');
