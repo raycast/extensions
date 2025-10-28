@@ -55,7 +55,7 @@ export default function Command() {
       },
       carrierCode: FormValidation.Required,
       description: (value) => {
-        if (!value) {
+        if (!value || !value.trim()) {
           return "Description is required";
         }
       },
