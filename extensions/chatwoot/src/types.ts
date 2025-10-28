@@ -19,7 +19,7 @@ export type Message = {
   content: string | null;
   created_at: number;
   private: boolean;
-  status: "sent"|"delivered"|"read"|"failed"
+  status: "sent" | "delivered" | "read" | "failed";
 } & (
   | {
       message_type: Exclude<MessageType, MessageType.Activity | MessageType.Bot>;
@@ -42,7 +42,7 @@ export type Conversation = {
   id: number;
   messages: Message[];
   snoozed_until: string | null;
-  status: "open"| "resolved"| "pending"|"snoozed";
+  status: "open" | "resolved" | "pending" | "snoozed";
   created_at: number;
   last_activity_at: number;
 };
@@ -63,11 +63,11 @@ export type Notification = {
   id: number;
   notification_type: string;
   push_message_body: string;
-  "primary_actor_type": string
-"primary_actor_id": number
-  read_at: number | null
+  primary_actor_type: string;
+  primary_actor_id: number;
+  read_at: number | null;
   created_at: number;
-}
+};
 
 export type Portal = {
   id: number;

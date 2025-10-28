@@ -5,11 +5,11 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Conversation, Message, MessageType } from "./types";
 
 const MESSAGE_STATUS_ACCESSORY: Record<Message["status"], List.Item.Accessory> = {
-  read: {icon: {source: Icon.Checkmark, tintColor: Color.Blue}, tooltip: "Read"},
-  sent: {icon: Icon.Checkmark, tooltip: "Delivered successfully"},
-  failed: {icon: {source: Icon.Warning, tintColor: Color.Red}},
-  delivered: {}
-}
+  read: { icon: { source: Icon.Checkmark, tintColor: Color.Blue }, tooltip: "Read" },
+  sent: { icon: Icon.Checkmark, tooltip: "Delivered successfully" },
+  failed: { icon: { source: Icon.Warning, tintColor: Color.Red } },
+  delivered: {},
+};
 export default function ListConversations() {
   const [filter, setFilter] = useCachedState("LIST_CONVERSATIONS_FILTER", "status_open");
   const {
@@ -19,7 +19,7 @@ export default function ListConversations() {
   } = useCachedPromise(
     async (filter: string) => {
       const [, val] = filter.split("_");
-      const { data } = await chatwoot.conversations.list({status: val});
+      const { data } = await chatwoot.conversations.list({ status: val });
       return data.payload;
     },
     [filter],
@@ -27,13 +27,18 @@ export default function ListConversations() {
   );
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<List.Dropdown tooltip="Filter" onChange={setFilter} defaultValue={filter}>
-      <Form.Dropdown.Item title="All" value="status_all" />
-      <Form.Dropdown.Item title="Open" value="status_open" />
-      <Form.Dropdown.Item title="Resolved" value="status_resolved" />
-      <Form.Dropdown.Item title="Pending" value="status_pending" />
-      <Form.Dropdown.Item title="Snoozed" value="status_snoozed" />
-    </List.Dropdown>}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter" onChange={setFilter} defaultValue={filter}>
+          <Form.Dropdown.Item title="All" value="status_all" />
+          <Form.Dropdown.Item title="Open" value="status_open" />
+          <Form.Dropdown.Item title="Resolved" value="status_resolved" />
+          <Form.Dropdown.Item title="Pending" value="status_pending" />
+          <Form.Dropdown.Item title="Snoozed" value="status_snoozed" />
+        </List.Dropdown>
+      }
+    >
       {!isLoading && !conversations.length ? (
         <List.EmptyView title="There are no active conversations in this group." />
       ) : (
@@ -51,7 +56,16 @@ export default function ListConversations() {
             }
             accessories={[
               MESSAGE_STATUS_ACCESSORY[conversation.messages[0].status],
-              {tag: {value:conversation.status, color: conversation.status==="snoozed" ? Color.Yellow : undefined}, tooltip: conversation.status==="snoozed" ? `Snoozed until ${conversation.snoozed_until ? formatDistanceToNow(conversation.snoozed_until) : "next reply"}` : ""},
+              {
+                tag: {
+                  value: conversation.status,
+                  color: conversation.status === "snoozed" ? Color.Yellow : undefined,
+                },
+                tooltip:
+                  conversation.status === "snoozed"
+                    ? `Snoozed until ${conversation.snoozed_until ? formatDistanceToNow(conversation.snoozed_until) : "next reply"}`
+                    : "",
+              },
               conversation.meta.sender.email
                 ? {}
                 : {
@@ -97,9 +111,9 @@ const getMessageIcon = (message: Message) => {
     case MessageType.Bot:
       return getAvatarIcon("B");
     default:
-      return getAvatarIcon(message.sender.name)
+      return getAvatarIcon(message.sender.name);
   }
-}
+};
 function ListMessages({ conversation }: { conversation: Conversation }) {
   const {
     isLoading,
@@ -119,13 +133,12 @@ function ListMessages({ conversation }: { conversation: Conversation }) {
         <List.Item
           key={message.id}
           icon={getMessageIcon(message)}
-          // title={{value: `${(message.content || "").slice(0, 15)}...`, tooltip: message.content}}
           title=""
           subtitle={message.content ? "" : "No content available"}
           accessories={[
             { icon: message.private ? Icon.Lock : undefined },
             { text: format(new Date(message.created_at * 1000), "MMM d, h:mm a") },
-            MESSAGE_STATUS_ACCESSORY[message.status]
+            MESSAGE_STATUS_ACCESSORY[message.status],
           ]}
           detail={<List.Item.Detail markdown={message.content} />}
           actions={
@@ -133,7 +146,9 @@ function ListMessages({ conversation }: { conversation: Conversation }) {
               <Action.Push
                 icon={Icon.SpeechBubbleActive}
                 title="Create Message"
-                target={<CreateMessage conversationId={conversation.id} lastMessageContent={messages.at(-1)?.content} />}
+                target={
+                  <CreateMessage conversationId={conversation.id} lastMessageContent={messages.at(-1)?.content} />
+                }
                 onPop={mutate}
               />
             </ActionPanel>
@@ -143,7 +158,13 @@ function ListMessages({ conversation }: { conversation: Conversation }) {
     </List>
   );
 }
-function CreateMessage({ conversationId, lastMessageContent }: { conversationId: number, lastMessageContent?: string | null }) {
+function CreateMessage({
+  conversationId,
+  lastMessageContent,
+}: {
+  conversationId: number;
+  lastMessageContent?: string | null;
+}) {
   const { pop } = useNavigation();
   type FormValues = {
     private: boolean;

@@ -1,6 +1,10 @@
 # Chatwoot Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Add "My Inbox" + Fix "List Messages"] - {PR_MERGE_DATE}
+
+### My Inbox
+- show notifications
+- mark as read
 
 ### Conversations
 - `filter` conversations by **status**

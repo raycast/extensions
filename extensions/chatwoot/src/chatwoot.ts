@@ -40,7 +40,7 @@ class Chatwoot {
     });
     if (!response.headers.get("content-type")?.includes("application/json")) throw new Error(response.statusText);
     const contentLength = response.headers.get("content-length");
-    if (response.ok && contentLength==="0") return undefined as T; // edge case when notification is marked as read
+    if (response.ok && contentLength === "0") return undefined as T; // edge case when notification is marked as read
     const result = await response.json();
     if (!response.ok) {
       const errorResult = result as { error: string } | { message: string; attributes: string[] };
@@ -95,12 +95,12 @@ class MessagesService {
 class NotificationsService {
   constructor(private client: Chatwoot) {}
   async list() {
-    return this.client["request"]<{data: ListResult<Notification>}>("notifications");
+    return this.client["request"]<{ data: ListResult<Notification> }>("notifications");
   }
-  async markAsRead(props: {primaryActorType:string, primaryActorid:number}) {
+  async markAsRead(props: { primaryActorType: string; primaryActorid: number }) {
     return this.client["request"]("notifications/read_all", {
       method: "POST",
-      body: JSON.stringify(props)
+      body: JSON.stringify(props),
     });
   }
 }
