@@ -6,17 +6,18 @@
 name: Auto-label approved PRs (external reviewers only)
 
 on:
-  pull_request_review_target:
+  pull_request_review:
     types: [submitted]
 
 permissions:
-  contents: read
   pull-requests: write
 
 jobs:
   label_on_approval:
     runs-on: ubuntu-latest
-    if: github.event.review.state == 'approved' && github.event.pull_request.state == 'open'
+    if: |
+      github.event.review.state == 'approved' &&
+      github.event.pull_request.state == 'open'
     steps:
       - name: Show basic event info
         run: |
@@ -24,7 +25,6 @@ jobs:
           echo "Review author: ${{ github.event.review.user.login }}"
           echo "PR head repo: ${{ github.event.pull_request.head.repo.full_name }}"
           echo "PR base repo: ${{ github.event.pull_request.base.repo.full_name }}"
-          # Show whether the event appears to come from a fork
           if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
             echo "Note: PR head is from a fork or different repo"
           else
@@ -37,6 +37,7 @@ jobs:
         with:
           script: |
             const reviewer = context.payload.review.user;
+            const pr = context.payload.pull_request;
             console.log(`Reviewer: ${reviewer.login}, Type: ${reviewer.type}`);
             if (reviewer.type !== 'User') {
               console.log('Non-human reviewer: Will add label');
@@ -68,46 +69,9 @@ jobs:
             }
           result-encoding: string
 
-      - name: Add Approved label (bot-token)
+      - name: Add "Approved" label
         if: steps.check_permissions.outputs.result == 'label'
-        env:
-          RAYCAST_BOT_API_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-        run: |
-          pr_number="${{ github.event.pull_request.number }}"
-
-          # Token guard: skip if secret not present (e.g., misconfiguration)
-          if [ -z "${RAYCAST_BOT_API_ACCESS_TOKEN:-}" ]; then
-            echo "RAYCAST_BOT_API_ACCESS_TOKEN not available — skipping label step."
-            exit 0
-          fi
-
-          echo "Adding 'Approved' label to PR #$pr_number using RAYCAST_BOT_API_ACCESS_TOKEN..."
-
-          # Use reasonable curl timeouts and transient retries
-          response=$(curl -sS --connect-timeout 5 --max-time 15 --retry 3 --retry-delay 2 --retry-connrefused -w "\n%{http_code}" \
-            -X POST \
-            -H "Authorization: token ${RAYCAST_BOT_API_ACCESS_TOKEN}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Content-Type: application/json" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${pr_number}/labels" \
-            -d '{"labels":["Approved"]}')
-
-          http_code=$(echo "$response" | tail -n1)
-          response_body=$(echo "$response" | sed '$d')
-
-          echo "Label API HTTP Code: $http_code"
-          if [ "$http_code" = "401" ]; then
-            echo "ERROR: 401 Bad credentials. Check RAYCAST_BOT_API_ACCESS_TOKEN value and scopes."
-            echo "Response body: $response_body"
-            exit 1
-          fi
-
-          # 200 = success (labels added), 422 = label already exists (idempotent)
-          if [[ "$http_code" == "200" || "$http_code" == "422" ]]; then
-            echo "Successfully added 'Approved' label to PR #$pr_number"
-            exit 0
-          else
-            echo "Failed to add label (HTTP $http_code): $response_body"
-            # Fail so maintainers see the issue and can act
-            exit 1
-          fi
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: "Approved"
+          github_token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
