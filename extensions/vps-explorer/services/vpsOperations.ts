@@ -4,7 +4,9 @@ import { promisify } from "util";
 import { writeFileSync, unlinkSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
+import { execFile } from "child_process";
 
+const execFileAsync = promisify(execFile);
 const execAsync = promisify(exec);
 
 export class VPSOperations implements VPSConnection {
@@ -67,54 +69,56 @@ expect {
   }
 
   async connect(config: VPSConnectionData): Promise<void> {
-    console.log(`Testing connection to ${config.host}:${config.port}`);
-
-    let scriptPath: string | null = null;
+    this.config = config;
 
     try {
-      const connectCommand = `ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${config.port} ${config.username}@${config.host} "echo 'Connection test successful'"`;
+      let result: { stdout: string; stderr: string };
 
-      if (config.password) {
-        scriptPath = await this.createExpectScript(connectCommand, config.password);
-        await execAsync(`chmod +x ${scriptPath}`);
-        await execAsync(`expect ${scriptPath}`);
-      } else {
+      if (this.config.password) {
+        const connectionScript = `#!/usr/bin/expect -f
+set timeout 30
+set password [lindex $argv 0]
+spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o CheckHostIP=no -p ${this.config.port} ${this.config.username}@${this.config.host} "echo 'Connection test successful'"
+expect {
+    "password:" {
+        send "$password\\r"
+        exp_continue
+    }
+    "Password:" {
+        send "$password\\r"
+        exp_continue
+    }
+    "Connection test successful" {
+        exit 0
+    }
+    timeout {
+        exit 1
+    }
+    eof
+}
+`;
+
+        const scriptPath = join(tmpdir(), `ssh_connect_${Date.now()}.exp`);
+        writeFileSync(scriptPath, connectionScript, { mode: 0o700 });
+
+        result = await execFileAsync("expect", [scriptPath, this.config.password]);
+
         try {
-          await execAsync(
-            `ssh -o ConnectTimeout=10 -o BatchMode=yes -p ${config.port} ${config.username}@${config.host} "echo 'Connection test successful'"`,
-          );
-        } catch {
-          scriptPath = await this.createExpectScript(connectCommand);
-          await execAsync(`chmod +x ${scriptPath}`);
-          await execAsync(`expect ${scriptPath}`);
+          unlinkSync(scriptPath);
+        } catch (cleanupError) {
+          console.warn("Failed to cleanup temporary script:", cleanupError);
         }
+      } else {
+        const connectionCommand = `ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o CheckHostIP=no -p ${this.config.port} ${this.config.username}@${this.config.host} "echo 'Connection test successful'"`;
+        result = await execAsync(connectionCommand);
       }
 
       this.connected = true;
       console.log("Connected successfully!");
     } catch (error) {
       this.connected = false;
-      console.error(
-        `Failed to connect to ${config.host}:${config.port}: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
-
-      if (config.password) {
-        throw new Error(
-          `SSH connection failed. Please verify:\n• Host: ${config.host}\n• Port: ${config.port}\n• Username: ${config.username}\n• Password is correct\n• SSH server is running on the VPS`,
-        );
-      } else {
-        throw new Error(
-          `SSH connection failed. Please:\n• Set up SSH key authentication: ssh-copy-id ${config.username}@${config.host}\n• Or provide a password in the configuration\n• Verify SSH server is running on the VPS`,
-        );
-      }
-    } finally {
-      if (scriptPath) {
-        try {
-          unlinkSync(scriptPath);
-        } catch (cleanupError) {
-          console.warn("Failed to cleanup temporary script:", cleanupError);
-        }
-      }
+      console.error(`Connection failed: ${error}`);
+      throw new Error(`Failed to connect to VPS: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 
