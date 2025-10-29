@@ -1,5 +1,10 @@
 # JSR Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Refactored components, make the code more maintainable
+- Enabled for Windows platform
+
 ## [Updates] - 2024-12-04
 
 - Update API Search key retrieval (search was showing empty results)
