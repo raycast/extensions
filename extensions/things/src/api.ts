@@ -16,7 +16,7 @@ import {
   UpdateProjectParams,
 } from './types';
 
-export const preferences: Preferences = getPreferenceValues<Preferences>();
+export const preferences = getPreferenceValues();
 
 export class ThingsError extends Error {
   constructor(
@@ -32,7 +32,7 @@ export class ThingsError extends Error {
 
 export const executeJxa = async (script: string, operation?: string) => {
   try {
-     const result = await runAppleScript(`(function(){${script}})()`, {
+    const result = await runAppleScript(`(function(){${script}})()`, {
       humanReadableOutput: false,
       language: 'JavaScript',
       timeout: 60 * 1000, // 60 seconds
