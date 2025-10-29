@@ -11,9 +11,9 @@ import type {
   VersionPackage,
 } from "@/types";
 
-export const useStats = () => {
+export const useStats = (enabled = true) => {
   const url = `https://api.jsr.io/stats`;
-  return useFetch<StatsData>(url);
+  return useFetch<StatsData>(url, { execute: enabled });
 };
 
 export const usePackage = (item: NameAndScope | null) => {

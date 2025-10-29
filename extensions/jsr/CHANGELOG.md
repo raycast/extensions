@@ -4,6 +4,8 @@
 
 - Refactored components, make the code more maintainable
 - Enabled for Windows platform
+- Improved search functionality, better sorting and scoped search
+- Added ability to search for packages in a specific scope and runtime compatibility (see [here](https://jsr.io/docs/faq#can-i-filter-packages-by-compatible-runtime-in-the-search))
 
 ## [Updates] - 2024-12-04
 

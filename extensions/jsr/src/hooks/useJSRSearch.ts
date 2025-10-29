@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import { captureException, environment } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 
-import type { ErrorResult, SearchResult, SearchResults } from "@/types";
+import type { ErrorResult, RuntimeCompat, SearchResult, SearchResults } from "@/types";
 
 type SearchAPIData = {
   apiKey: string;
@@ -68,8 +68,57 @@ const useSearchAPIData = () => {
   });
 };
 
-export const useJSRSearch = (queryString: string) => {
+/*
+To filter for packages that are compatible with Deno, you can use the query runtime:deno. To filter for packages that are compatible with Node.js, you can use the query runtime:node. You can also combine these filters, for example runtime:deno runtime:browsers will return packages that are compatible with both Deno and web browsers. The possible values for the runtime filter are deno, node, browsers, workerd (Cloudflare Workers), and bun.
+*/
+const runtimeFilters = {
+  deno: "runtime:deno",
+  node: "runtime:node",
+  browsers: "runtime:browsers",
+  workerd: "runtime:workerd",
+  bun: "runtime:bun",
+};
+
+const useScopes = (queryString: string, scoped: string | null) => {
   const query = queryString?.trim() || "";
+  const terms = query.split(" ").filter((term) => term.trim() !== "");
+  const scopeTerm = terms.find((term) => term.startsWith("scope:"));
+  const runtimeTerms = terms.filter((term) => Object.values(runtimeFilters).includes(term));
+  const otherTerms = terms.filter((term) => term !== scopeTerm && !runtimeTerms.includes(term));
+
+  const filteredQuery = otherTerms.join(" ").trim();
+  const runtimes: RuntimeCompat = runtimeTerms.reduce((acc, term) => {
+    const runtime = term.replace("runtime:", "").trim();
+    if (runtime in runtimeFilters) {
+      acc[runtime as keyof RuntimeCompat] = true;
+    }
+    return acc;
+  }, {} as RuntimeCompat);
+
+  const splittedQuery = filteredQuery.split("/");
+  const onlyScoped =
+    filteredQuery.startsWith("@") &&
+    (splittedQuery.length === 1 ||
+      (filteredQuery.endsWith("/") && splittedQuery.length === 2 && splittedQuery[1].trim() === ""));
+
+  const queryValue = onlyScoped ? "" : filteredQuery;
+  const scopeValue = scopeTerm
+    ? scopeTerm.replace("scope:", "").trim()
+    : onlyScoped
+      ? filteredQuery.replace("@", "").replace("/", "")
+      : scoped;
+
+  return {
+    runtimes,
+    scope: scopeValue,
+    query: queryValue,
+    // The trigger query is only used to determine if we need to fetch
+    triggerQuery: `${scopeValue ? `@${scopeValue}/` : ""}${queryValue}${runtimeTerms.length > 0 ? ` ${runtimeTerms.join("|")}` : ""}`,
+  };
+};
+
+export const useJSRSearch = (queryString: string, scoped: string | null) => {
+  const { query, scope, triggerQuery, runtimes } = useScopes(queryString, scoped);
   const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError } = useSearchAPIData();
   const abortable = useRef<AbortController>();
 
@@ -81,19 +130,36 @@ export const useJSRSearch = (queryString: string) => {
   }, [apiData, isLoadingAPIData]);
 
   const formData = useMemo(() => {
-    const body = { term: query, limit: 20, mode: "fulltext" };
+    const whereClauses = Array<{ [key: string]: unknown }>();
+    if (scope) {
+      whereClauses.push({ scope: scope });
+    }
+    Object.entries(runtimes).forEach(([key, value]) => {
+      if (value) {
+        whereClauses.push({ [`runtimeCompat.${key}`]: true });
+      }
+    });
+    const whereClause =
+      whereClauses.length > 0 ? { where: whereClauses.reduce((acc, clause) => ({ ...acc, ...clause }), {}) } : {};
+    const body = {
+      term: query,
+      limit: 50,
+      mode: "fulltext",
+      boost: { id: 3, scope: 2, name: 1, description: 0.5 },
+      ...whereClause,
+    };
     const formData = new FormData();
     formData.append("q", JSON.stringify(body));
     return formData;
-  }, [query]);
+  }, [query, scope]);
 
   const {
     isLoading,
     error: dataError,
     ...rest
   } = useCachedPromise(
-    async (url: string | null, query: string) => {
-      if (!url || !query) {
+    async (url: string | null, triggerQuery: string) => {
+      if (!url || !triggerQuery) {
         return [] as SearchResult[];
       }
       return fetch(url, {
@@ -111,7 +177,7 @@ export const useJSRSearch = (queryString: string) => {
           return data.hits.filter((h) => !!h.id && !!h.document.id);
         });
     },
-    [searchURL, query],
+    [searchURL, triggerQuery],
     {
       abortable,
       initialData: [] as SearchResult[],

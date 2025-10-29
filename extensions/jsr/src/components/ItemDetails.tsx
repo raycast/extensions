@@ -2,7 +2,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 
 import type { Color } from "@raycast/api";
-import { Detail, Icon, List, open } from "@raycast/api";
+import { Detail, Icon, List, open, useNavigation } from "@raycast/api";
 import { getProgressIcon, showFailureToast } from "@raycast/utils";
 
 import type { SearchResultDocument } from "@/types";
@@ -10,6 +10,8 @@ import type { SearchResultDocument } from "@/types";
 import { compatIcons } from "@/lib/compat";
 
 import { useDependencies, useDependents, usePackage, usePackages } from "@/hooks/useJSRAPI";
+
+import Search from "@/components/Search";
 
 const ItemDetails = ({
   item,
@@ -20,6 +22,7 @@ const ItemDetails = ({
   progress: number;
   iconColor: Color;
 }) => {
+  const { push } = useNavigation();
   const icons = compatIcons(item);
   const { data, isLoading, error } = usePackage(item);
 
@@ -51,7 +54,11 @@ const ItemDetails = ({
               <Detail.Metadata.TagList title="Scope">
                 <Detail.Metadata.TagList.Item text={`@${item.scope}`} />
                 {typeof scopePackages?.total === "number" && scopePackages?.total > 1 ? (
-                  <Detail.Metadata.TagList.Item text={`${scopePackages?.items.length}`} icon={Icon.Box} />
+                  <Detail.Metadata.TagList.Item
+                    text={`${scopePackages?.items.length}`}
+                    icon={Icon.Box}
+                    onAction={() => push(<Search scope={item.scope} />)}
+                  />
                 ) : null}
               </Detail.Metadata.TagList>
               <Detail.Metadata.Label
