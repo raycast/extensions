@@ -49,7 +49,6 @@ export async function openNewTab(queryText: string | null | undefined) {
 
 export async function openNewWindow() {
   const script = `
-    tell application "Raycast" to activate
     tell application "Zen" to activate
 
     tell application "System Events"

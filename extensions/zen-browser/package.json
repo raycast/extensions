@@ -146,11 +146,6 @@
       "description": "Open a new Zen Browser tab"
     },
     {
-      "name": "new-window",
-      "title": "Create New Window",
-      "description": "Open a new Zen Browser window"
-    },
-    {
       "name": "search-history",
       "title": "Search History",
       "description": "Search the browsing history"
