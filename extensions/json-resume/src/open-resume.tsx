@@ -375,13 +375,6 @@ export default function Command() {
                   onAction={() => void saveCurrentUrl()}
                 />
               )}
-              <Action
-                title="Clear Saved URL"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-                onAction={() => void clearSavedUrl()}
-              />
             </ActionPanel.Section>
           </ActionPanel>
         }
