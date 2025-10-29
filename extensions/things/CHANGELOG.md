@@ -1,7 +1,7 @@
 # Things Changelog
 
-## [Timeout increasing in Apple Script] - {PR_MERGE_DATE}
-- Increased timeout to 60 seconds in Apple Scripts
+## [Timeout increasing in AppleScript] - {PR_MERGE_DATE}
+- Increased timeout to 60 seconds in AppleScript
 
 ## [Fix Timeout on macOS Tahoe] - 2025-10-15
 
