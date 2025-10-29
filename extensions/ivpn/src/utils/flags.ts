@@ -17,6 +17,12 @@ const FLAG_SOURCES = {
       fallback: Icon.Globe,
     };
   },
+  ["local"](countryCode) {
+    return {
+      source: `${getPrefs().flagIconDirectory}/${countryCode.toLowerCase()}.png`,
+      fallback: Icon.Globe,
+    };
+  },
 } satisfies Record<ExtensionPreferences["flagIconSource"], typeof getFlagIcon>;
 
 const getPrefs = () => getPreferenceValues<Preferences>();
