@@ -1,8 +1,7 @@
 # FileMaker Snippets Changelog
 
-
-
 ## [Fixes] - {PR_MERGE_DATE}
+
 - Fix dynamic fields being overwritten when editing a snippet
 
 ## [Fixes] - 2025-03-03
