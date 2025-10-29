@@ -2,19 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paynow",
   "title": "Paynow.gg",
-  "type": "module",
   "description": "Unofficial PayNow.gg extension",
   "icon": "extension-icon.png",
   "author": "maxijonson",
   "license": "MIT",
-  "scripts": {
-    "build": "ray build",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix && tsc --noEmit",
-    "lint": "ray lint && tsc --noEmit",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance",
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "list-stores",
@@ -72,14 +71,6 @@
       ]
     }
   ],
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
-  "categories": [
-    "Finance",
-    "Developer Tools"
-  ],
   "dependencies": {
     "@paynow-gg/typescript-sdk": "^1.0.20",
     "@raycast/api": "^1.103.3",
@@ -94,5 +85,14 @@
     "eslint-plugin-react-hooks": "^6.1.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix && tsc --noEmit",
+    "lint": "ray lint && tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
