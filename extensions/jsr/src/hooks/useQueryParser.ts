@@ -1,14 +1,6 @@
 import type { RuntimeCompat } from "@/types";
 
-const runtimeFilters = {
-  deno: "runtime:deno",
-  node: "runtime:node",
-  browsers: "runtime:browsers",
-  workerd: "runtime:workerd",
-  bun: "runtime:bun",
-} as const;
-
-const runtimeFilterValues = Object.values(runtimeFilters) as readonly string[];
+import { runtimeFilterValues, runtimeFilters } from "@/lib/filters";
 
 /**
  * This type represents the parsed query object.
