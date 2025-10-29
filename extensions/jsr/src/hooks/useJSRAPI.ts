@@ -57,11 +57,9 @@ export const useScore = (item: NameAndScope | null) => {
  *
  * @param {NameAndScope | null} item - The package name and scope.
  */
-export const useDependents = (
-  item: NameAndScope | null,
-): { data: ApiResults<WithKey<Dependent>>; isLoading: boolean } => {
+export const useDependents = (item: NameAndScope | null) => {
   const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/dependents?limit=100`;
-  const { data, isLoading } = useFetch<ApiResults<WithKey<Dependent>>>(url, {
+  return useFetch<ApiResults<WithKey<Dependent>>>(url, {
     execute: !!item,
     onError() {},
     mapResult: (result) => {
@@ -80,13 +78,6 @@ export const useDependents = (
       };
     },
   });
-  return {
-    data: {
-      total: data?.total || 0,
-      items: data?.items || [],
-    },
-    isLoading,
-  };
 };
 
 /**
@@ -95,12 +86,9 @@ export const useDependents = (
  * @param {NameAndScope | null} item - The package name and scope.
  * @param {string | null} version - The package version.
  */
-export const useDependencies = (
-  item: NameAndScope | null,
-  version: string | null,
-): { data: Dependency[]; isLoading: boolean } => {
+export const useDependencies = (item: NameAndScope | null, version: string | null) => {
   const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/versions/${version}/dependencies?limit=100`;
-  const { data, isLoading } = useFetch<Dependency[]>(url, {
+  return useFetch<Dependency[]>(url, {
     execute: !!item && !!version,
     onError() {},
     mapResult: (result) => {
@@ -112,10 +100,6 @@ export const useDependencies = (
       };
     },
   });
-  return {
-    data: data || [],
-    isLoading,
-  };
 };
 
 /**
