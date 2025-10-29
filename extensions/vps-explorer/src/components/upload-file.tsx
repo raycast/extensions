@@ -34,7 +34,7 @@ export default function UploadFile({ onSubmit }: { onSubmit: (localPath: string)
         {...itemProps.files}
         id="files"
         title="Choose file to upload"
-        allowMultipleSelection={true}
+        allowMultipleSelection={false}
         canChooseDirectories={false}
         canChooseFiles={true}
       />

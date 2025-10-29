@@ -587,7 +587,7 @@ export default function Metadata() {
     >
       {!isLoading && <GoBackAction />}
 
-      {currentPath === "/root" && !isLoading && (
+      {navigationHistory.length === 0 && !isLoading && (
         <MainDirectoryItem onGoToParentDirectory={() => handleGoToDirectory("..")} />
       )}
 

@@ -236,11 +236,3 @@ export const getUniqueFilename = (directory: string, filename: string): string =
 
   return newFilename;
 };
-
-export const getMarkdownBasedOnTheme = () => {
-  if (environment.appearance === "dark") {
-    return markdownLightIcon;
-  } else {
-    return markdownLightIcon;
-  }
-};
