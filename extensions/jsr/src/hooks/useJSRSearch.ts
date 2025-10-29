@@ -1,120 +1,15 @@
-import * as cheerio from "cheerio";
 import { useMemo, useRef } from "react";
 
-import { captureException, environment } from "@raycast/api";
-import { useCachedPromise, useFetch } from "@raycast/utils";
+import { captureException } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 
-import type { ErrorResult, RuntimeCompat, SearchResult, SearchResults } from "@/types";
+import type { ErrorResult, SearchResult, SearchResults } from "@/types";
 
-type SearchAPIData = {
-  apiKey: string;
-  indexId: string;
-};
-type SearchAPIDataResponse = {
-  v: Array<Array<object | SearchAPIData> | Array<never>>;
-};
-
-/**
- * This function will download the frontpage of jsr.io and extract the apiKey + indexId from the script tags.
- */
-const useSearchAPIData = () => {
-  return useFetch<SearchAPIData | null>("https://jsr.io", {
-    method: "GET",
-    headers: {
-      Agent: `Raycast/${environment.raycastVersion} ${environment.extensionName} (https://raycast.com)`,
-    },
-    keepPreviousData: true,
-    parseResponse: async (response) => {
-      let res: SearchAPIData | null = null;
-      const text = await response.text();
-      const $ = cheerio.load(text);
-
-      const scriptElements = $("script");
-
-      scriptElements.each((_index, element) => {
-        const script = $(element).html();
-
-        if (script?.includes(`apiKey`)) {
-          const start = script.indexOf(`"[[`) + 1;
-          const end = script.indexOf(`]"`) + 1;
-          const slice = script.slice(start, end).replace(/\\/g, "");
-          try {
-            const arr = JSON.parse(slice);
-            // find element that is string and starts with 'jsr-'
-            const indexIdPosition = arr.findIndex(
-              (item: unknown) => typeof item === "string" && item.startsWith("jsr-"),
-            );
-            if (indexIdPosition !== -1 && indexIdPosition > 0 && typeof arr[indexIdPosition - 1] === "string") {
-              res = { apiKey: arr[indexIdPosition - 1], indexId: arr[indexIdPosition] };
-            }
-            // eslint-disable-next-line no-empty
-          } catch {}
-        }
-
-        if (script?.includes(`"apiKey"`)) {
-          const json = JSON.parse(script) as SearchAPIDataResponse;
-          const searchAPIData = json.v[0].find((item) => "apiKey" in item && "indexId" in item) as
-            | SearchAPIData
-            | undefined;
-          if (searchAPIData) {
-            res = searchAPIData;
-          }
-        }
-      });
-
-      return res;
-    },
-  });
-};
-
-const runtimeFilters = {
-  deno: "runtime:deno",
-  node: "runtime:node",
-  browsers: "runtime:browsers",
-  workerd: "runtime:workerd",
-  bun: "runtime:bun",
-};
-
-const useScopes = (queryString: string, scoped: string | null) => {
-  const query = queryString?.trim() || "";
-  const terms = query.split(" ").filter((term) => term.trim() !== "");
-  const scopeTerm = terms.find((term) => term.startsWith("scope:"));
-  const runtimeTerms = terms.filter((term) => Object.values(runtimeFilters).includes(term));
-  const otherTerms = terms.filter((term) => term !== scopeTerm && !runtimeTerms.includes(term));
-
-  const filteredQuery = otherTerms.join(" ").trim();
-  const runtimes: RuntimeCompat = runtimeTerms.reduce((acc, term) => {
-    const runtime = term.replace("runtime:", "").trim();
-    if (runtime in runtimeFilters) {
-      acc[runtime as keyof RuntimeCompat] = true;
-    }
-    return acc;
-  }, {} as RuntimeCompat);
-
-  const splittedQuery = filteredQuery.split("/");
-  const onlyScoped =
-    filteredQuery.startsWith("@") &&
-    (splittedQuery.length === 1 ||
-      (filteredQuery.endsWith("/") && splittedQuery.length === 2 && splittedQuery[1].trim() === ""));
-
-  const queryValue = onlyScoped ? "" : filteredQuery;
-  const scopeValue = scopeTerm
-    ? scopeTerm.replace("scope:", "").trim()
-    : onlyScoped
-      ? filteredQuery.replace("@", "").replace("/", "")
-      : scoped;
-
-  return {
-    runtimes,
-    scope: scopeValue,
-    query: queryValue,
-    // The trigger query is only used to determine if we need to fetch
-    triggerQuery: `${scopeValue ? `@${scopeValue}/` : ""}${queryValue}${runtimeTerms.length > 0 ? ` ${runtimeTerms.join("|")}` : ""}`,
-  };
-};
+import { useQueryParser } from "@/hooks/useQueryParser";
+import { useSearchAPIData } from "@/hooks/useSearchAPIData";
 
 export const useJSRSearch = (queryString: string, scoped: string | null) => {
-  const { query, scope, triggerQuery, runtimes } = useScopes(queryString, scoped);
+  const { query, scope, triggerQuery, runtimes } = useQueryParser(queryString, scoped);
   const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError } = useSearchAPIData();
   const abortable = useRef<AbortController>(null);
 
