@@ -6,7 +6,7 @@ Add Crypto wallets by their addresses and track your entire Crypto portfolio.
 - `Add Ethereum Address <address> <name?>`: Add an Ethereum wallet address to your portfolio.
 - `Portfolio`: View your entire Crypto portfolio with real-time prices.
 
-## Supported Tokens
+## Supported Chains
 
 ### Ethereum (ETH) ✅
 #### Supported Features 🚀
