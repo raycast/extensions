@@ -1,6 +1,6 @@
 # Sidecar Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2025-10-29
 
 - Fix bug where button cannot be found in Tahoe.
 
