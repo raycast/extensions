@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [UI Refresh & Bug Fixes] - {PR_MERGE_DATE}
+## [UI Refresh & Bug Fixes] - 2025-10-29
 
 - Fix: Pagination converted to use `next_page` URL provided by Harvest API response as `page` is a deprecated API parameter
 - Fix: Removed double-layer caching on projects as some users have too many objects to store via `useCachedState`; utilizing cached promise data within the session should work fine for most
