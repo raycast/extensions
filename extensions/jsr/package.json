@@ -24,7 +24,7 @@
   "preferences": [
     {
       "name": "openWebsiteByDefault",
-      "description": "Open JSR.io istead of showing the details",
+      "description": "Open JSR.io instead of showing the details",
       "type": "checkbox",
       "defaultValue": false,
       "required": false,

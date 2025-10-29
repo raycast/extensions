@@ -147,7 +147,7 @@ export const useJSRSearch = (queryString: string, scoped: string | null) => {
     const formData = new FormData();
     formData.append("q", JSON.stringify(body));
     return formData;
-  }, [query, scope]);
+  }, [query, scope, runtimes]);
 
   const {
     isLoading,
