@@ -1,4 +1,3 @@
-/* eslint-disable @raycast/prefer-title-case */
 import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 

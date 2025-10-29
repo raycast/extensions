@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 
 import { List } from "@raycast/api";
 
@@ -13,7 +13,7 @@ type StatsSectionsProps = {
   enabled: boolean;
   setIsShowingDetails: Dispatch<SetStateAction<boolean>>;
   isShowingDetails: boolean;
-  extraActions: JSX.Element;
+  extraActions: ReactNode;
 };
 
 const StatsSections = ({

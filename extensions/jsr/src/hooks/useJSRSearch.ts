@@ -1,5 +1,4 @@
 import * as cheerio from "cheerio";
-import fetch, { FormData } from "node-fetch";
 import { useMemo, useRef } from "react";
 
 import { captureException, environment } from "@raycast/api";
@@ -68,9 +67,6 @@ const useSearchAPIData = () => {
   });
 };
 
-/*
-To filter for packages that are compatible with Deno, you can use the query runtime:deno. To filter for packages that are compatible with Node.js, you can use the query runtime:node. You can also combine these filters, for example runtime:deno runtime:browsers will return packages that are compatible with both Deno and web browsers. The possible values for the runtime filter are deno, node, browsers, workerd (Cloudflare Workers), and bun.
-*/
 const runtimeFilters = {
   deno: "runtime:deno",
   node: "runtime:node",
@@ -120,7 +116,7 @@ const useScopes = (queryString: string, scoped: string | null) => {
 export const useJSRSearch = (queryString: string, scoped: string | null) => {
   const { query, scope, triggerQuery, runtimes } = useScopes(queryString, scoped);
   const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError } = useSearchAPIData();
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
 
   const searchURL = useMemo(() => {
     if (!apiData || isLoadingAPIData) {
