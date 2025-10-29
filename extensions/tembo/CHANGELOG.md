@@ -1,6 +1,6 @@
 # Tembo Changelog
 
-## [Improve menu bar listing, add Slack icon] - {PR_MERGE_DATE}
+## [Improve menu bar listing, add Slack icon] - 2025-10-29
 
 - Adds an icon for issues created from Slack
 - Makes the task listing in the menubar no longer duplicate the issue source name
