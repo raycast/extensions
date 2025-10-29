@@ -20,8 +20,8 @@ export default function MemosListCommand(): JSX.Element {
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
   useEffect(() => {
-    const user = userData.user || {};
-    if (!isLoadingUser && user.name) {
+    const user = userData?.user;
+    if (!isLoadingUser && user?.name) {
       const userId = +user.name.split("/")[1];
       setCurrentUserId(userId);
     }
@@ -36,32 +36,37 @@ export default function MemosListCommand(): JSX.Element {
   useEffect(() => {
     const dataList = data || [];
 
-    setFilterList(
-      dataList
-        .filter((item) => item.content.includes(searchText))
-        .map((item) => {
-          item.markdown = item.content;
-          if (item.attachments.length > 0) {
-            getItemMarkdown(item);
-          }
-          return item;
-        }) || [],
-    );
+    if (searchText) {
+      setFilterList(
+        dataList
+          .filter((item) => item.content.includes(searchText))
+          .map((item) => {
+            item.markdown = item.content;
+            if (item.attachments.length > 0) {
+              getItemMarkdown(item);
+            }
+            return item;
+          }) || [],
+      );
+    }
   }, [searchText]);
 
   useEffect(() => {
     const dataList = data || [];
-    setFilterList(
-      dataList.map((item) => {
-        item.markdown = item.content;
 
-        if (item.attachments.length > 0) {
-          getItemMarkdown(item);
-        }
+    if (data.length > 0) {
+      setFilterList(
+        dataList.map((item) => {
+          item.markdown = item.content;
 
-        return item;
-      }),
-    );
+          if (item.attachments.length > 0) {
+            getItemMarkdown(item);
+          }
+
+          return item;
+        }),
+      );
+    }
   }, [data]);
 
   function getItemUrl(item: MemoInfoResponse) {

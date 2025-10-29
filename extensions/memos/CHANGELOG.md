@@ -1,8 +1,13 @@
 # Send To Memos Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- fix user undefined error.
+- improve useEffect.
+
 ## [Update & Breaking Change] - 2025-09-03
 
-- support memos@0.25.0. 
+- support memos@0.25.0.
 
 ## [Update] - 2025-03-31
 
