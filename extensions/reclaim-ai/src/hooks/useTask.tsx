@@ -6,9 +6,7 @@ import { CreateTaskProps, PlannerActionIntermediateResult } from "./useTask.type
 import { fetchPromise } from "../utils/fetcher";
 
 export const useTasks = () => {
-  const { data: tasks, error, isLoading } = useApi<Task[]>(
-	"/tasks?instances=true&status=NEW&status=SCHEDULED&status=IN_PROGRESS&status=COMPLETE&status=ARCHIVED"
-	);
+  const { data: tasks, error, isLoading } = useApi<Task[]>("/tasks?instances=true");
 
   return {
     tasks,
