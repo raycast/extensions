@@ -11,7 +11,7 @@ export const useTasks = () => {
       &status=SCHEDULED
       &status=COMPLETE
       &status=ARCHIVED
-      &status=IN_PROGRESS`.replace(/\s+/g, "");
+      &status=IN_PROGRESS`.replace(/\n\s*/g, "");
 
   const {
     data: tasks,
