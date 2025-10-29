@@ -2,6 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 - Update to the package.json platforms property to include Windows.
+- Update to Search Tasks to not include tasks that are cancelled.
 
 
 ## [Update] - 2025-06-04
