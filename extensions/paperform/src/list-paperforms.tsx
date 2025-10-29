@@ -10,7 +10,8 @@ import {
   open,
   showToast,
 } from "@raycast/api";
-import { LocalStorage, Color } from "@raycast/api";
+import { Color, LocalStorage } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Preferences = { apiKey: string; businessApi?: boolean };
@@ -52,6 +53,16 @@ const PINS_STORAGE_KEY = "paperform_pinned_form_ids";
 
 export default function Command() {
   const { apiKey, businessApi = false } = getPreferenceValues<Preferences>();
+  // Expose API key for AI tools fallback
+  useEffect(() => {
+    (async () => {
+      try {
+        if (apiKey) await LocalStorage.setItem("paperform_api_key", apiKey);
+      } catch {
+        // ignore
+      }
+    })();
+  }, [apiKey]);
   const [searchText, setSearchText] = useState("");
   const [serverQuery, setServerQuery] = useState("");
   const [baseForms, setBaseForms] = useState<PaperformForm[]>([]);
@@ -65,30 +76,9 @@ export default function Command() {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [totalFormsBase, setTotalFormsBase] = useState<number | undefined>(undefined);
   const [totalFormsSearch, setTotalFormsSearch] = useState<number | undefined>(undefined);
-  const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
+  const [pinnedIdsArray, setPinnedIdsArray] = useCachedState<string[]>(PINS_STORAGE_KEY, []);
 
-  // Load pinned forms once
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const raw = await LocalStorage.getItem<string>(PINS_STORAGE_KEY);
-        if (cancelled) return;
-        const arr = raw ? (JSON.parse(raw) as string[]) : [];
-        setPinnedIds(new Set(arr));
-      } catch {
-        // ignore corrupted storage
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const persistPins = useCallback(async (ids: Set<string>) => {
-    const arr = Array.from(ids);
-    await LocalStorage.setItem(PINS_STORAGE_KEY, JSON.stringify(arr));
-  }, []);
+  const pinnedSet = useMemo(() => new Set(pinnedIdsArray), [pinnedIdsArray]);
 
   // (No local disabled persistence; Business API toggle only when enabled)
 
@@ -218,8 +208,8 @@ export default function Command() {
   const sorted = useMemo(() => {
     const arr = [...combinedForms];
     arr.sort((a, b) => {
-      const aPinned = pinnedIds.has(String(a.id));
-      const bPinned = pinnedIds.has(String(b.id));
+      const aPinned = pinnedSet.has(String(a.id));
+      const bPinned = pinnedSet.has(String(b.id));
       if (aPinned !== bPinned) return aPinned ? -1 : 1;
       const at = getFormCreatedAt(a);
       const bt = getFormCreatedAt(b);
@@ -228,7 +218,7 @@ export default function Command() {
       return bTime - aTime;
     });
     return arr;
-  }, [combinedForms, pinnedIds]);
+  }, [combinedForms, pinnedSet]);
 
   return (
     <List
@@ -245,7 +235,7 @@ export default function Command() {
     >
       {sorted.map((form) => {
         const idStr = String(form.id);
-        const pinned = pinnedIds.has(idStr);
+        const pinned = pinnedSet.has(idStr);
         return (
           <List.Item
             key={idStr}
@@ -259,22 +249,8 @@ export default function Command() {
                 refresh={refresh}
                 isPinned={pinned}
                 businessApi={businessApi}
-                pin={(id) => {
-                  setPinnedIds((prev) => {
-                    const next = new Set(prev);
-                    next.add(id);
-                    persistPins(next);
-                    return next;
-                  });
-                }}
-                unpin={(id) => {
-                  setPinnedIds((prev) => {
-                    const next = new Set(prev);
-                    next.delete(id);
-                    persistPins(next);
-                    return next;
-                  });
-                }}
+                pin={(id) => setPinnedIdsArray((prev = []) => Array.from(new Set([...prev, id])))}
+                unpin={(id) => setPinnedIdsArray((prev = []) => prev.filter((x) => x !== id))}
               />
             }
           />
