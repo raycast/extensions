@@ -53,6 +53,7 @@ export function useSearch(
   const [projects, setProjects] = useState<Project[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const active = activeProjects();
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -69,7 +70,6 @@ export function useSearch(
 
       try {
         const membership = scope === ProjectScope.membership ? "true" : "false";
-        const active = activeProjects();
         const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership, active });
 
         if (!didUnmount) {
@@ -91,7 +91,7 @@ export function useSearch(
     return () => {
       didUnmount = true;
     };
-  }, [query, scope]);
+  }, [query, scope, active]);
 
   return { projects, error, isLoading };
 }
