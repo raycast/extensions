@@ -18,7 +18,7 @@
     {
       "name": "add-ethereum-address",
       "title": "Add Ethereum Address",
-      "subtitle": "Import an Eth address",
+      "subtitle": "Import an Ethereum address",
       "description": "Import an Ethereum address to add to your portfolio.",
       "mode": "no-view",
       "arguments": [

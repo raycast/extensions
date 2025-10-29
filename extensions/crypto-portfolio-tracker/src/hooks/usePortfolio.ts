@@ -6,6 +6,7 @@ export const usePortfolio = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const getPortfolio_ = useCallback(async () => {
+    setIsLoading(true);
     const storedPortfolio = await getPortfolio();
     setPortfolio(storedPortfolio);
     setIsLoading(false);

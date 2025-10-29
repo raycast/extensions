@@ -21,7 +21,7 @@ export function EthAddressDetail({ address, name }: EthAddressDetailProps) {
 # ${dollarValue}
 ## ${ethBalance}
 **Address:** \`${address}\`
-${error ? `\n**Error fetching balance:** ${error.message}\n` : ""}
+${error ? `\n**Error fetching balance:** ${error instanceof Error ? error.message : String(error)}\n` : ""}
 `;
 
   return (

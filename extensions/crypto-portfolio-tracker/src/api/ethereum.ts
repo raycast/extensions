@@ -106,12 +106,18 @@ export async function getEthBalance(address: string): Promise<EthAddressBalance>
         throw new Error("No result returned from RPC");
       }
 
-      // Use viem's formatEther for safe BigInt arithmetic
-      const balanceInEth = Number(formatEther(BigInt(data.result)));
+      // Convert Wei to ETH for display using viem's formatEther
+      const balanceInWei = BigInt(data.result);
+      const balanceInEth = Number(formatEther(balanceInWei));
 
       // Fetch current ETH price to calculate dollar value
       const ethPrice = await getEthPrice();
-      const dollarValue = balanceInEth * ethPrice;
+
+      // Use BigInt arithmetic to avoid precision loss when calculating dollar value
+      // Scale price to cents to avoid decimals, do multiplication, then convert back
+      const priceInCents = BigInt(Math.round(ethPrice * 100));
+      const valueInCents = (balanceInWei * priceInCents) / BigInt(10 ** 18);
+      const dollarValue = Number(valueInCents) / 100;
 
       return {
         eth: {
