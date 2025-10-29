@@ -9,7 +9,7 @@ import type { SearchResultDocument } from "@/types";
 
 import { compatIcons } from "@/lib/compat";
 
-import { useDependencies, useDependents, usePackage, usePackages } from "@/hooks/useJSRAPI";
+import { useDependencies, useDependents, usePackage, usePackages } from "@/hooks/jsrApi";
 
 import Search from "@/components/Search";
 

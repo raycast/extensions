@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { usePackage } from "@/hooks/useJSRAPI";
+import { usePackage } from "@/hooks/jsrApi";
 
 /**
  * This hook is used to get/set the selected package data.

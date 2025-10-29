@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-import { useStats } from "@/hooks/useJSRAPI";
+import { useStats } from "@/hooks/jsrApi";
 import { useJSRSearch } from "@/hooks/useJSRSearch";
 import { useSelectedPackage } from "@/hooks/useSelectedPackage";
 
