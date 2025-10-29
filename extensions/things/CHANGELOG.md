@@ -1,5 +1,8 @@
 # Things Changelog
 
+## [Timeout increasing in Apple Script] - {PR_MERGE_DATE}
+- Increased timeout to 60 seconds in Apple Scripts
+
 ## [Fix Timeout on macOS Tahoe] - 2025-10-15
 
 - Fixed timeout errors when opening "Add New To-Do" command on macOS Tahoe (26.x)
