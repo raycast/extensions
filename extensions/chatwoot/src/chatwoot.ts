@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Contact, Conversation, Inbox, Integration, ListResult, Message, Portal } from "./types";
+import { Contact, Conversation, Inbox, Integration, ListResult, Message, Notification, Portal } from "./types";
 
 class Chatwoot {
   private url: string;
@@ -10,6 +10,7 @@ class Chatwoot {
   public inboxes: InboxesService;
   public integrations: IntegrationsService;
   public messages: MessagesService;
+  public notifications: NotificationsService;
   public portals: PortalsService;
 
   constructor(url: string, accessToken: string, accountId: string) {
@@ -21,6 +22,7 @@ class Chatwoot {
     this.inboxes = new InboxesService(this);
     this.integrations = new IntegrationsService(this);
     this.messages = new MessagesService(this);
+    this.notifications = new NotificationsService(this);
     this.portals = new PortalsService(this);
   }
 
@@ -37,6 +39,8 @@ class Chatwoot {
       },
     });
     if (!response.headers.get("content-type")?.includes("application/json")) throw new Error(response.statusText);
+    const contentLength = response.headers.get("content-length");
+    if (response.ok && contentLength === "0") return undefined as T; // edge case when notification is marked as read
     const result = await response.json();
     if (!response.ok) {
       const errorResult = result as { error: string } | { message: string; attributes: string[] };
@@ -60,8 +64,8 @@ class ContactsService {
 }
 class ConversationsService {
   constructor(private client: Chatwoot) {}
-  async list() {
-    return this.client["request"]<{ data: { payload: Conversation[] } }>("conversations");
+  async list(props: { status: string }) {
+    return this.client["request"]<{ data: { payload: Conversation[] } }>(`conversations?status=${props.status}`);
   }
 }
 class InboxesService {
@@ -86,6 +90,18 @@ class MessagesService {
   }
   async list(props: { conversationId: number }) {
     return this.client["request"]<{ payload: Message[] }>(`conversations/${props.conversationId}/messages`);
+  }
+}
+class NotificationsService {
+  constructor(private client: Chatwoot) {}
+  async list() {
+    return this.client["request"]<{ data: ListResult<Notification> }>("notifications");
+  }
+  async markAsRead(props: { primaryActorType: string; primaryActorid: number }) {
+    return this.client["request"]("notifications/read_all", {
+      method: "POST",
+      body: JSON.stringify(props),
+    });
   }
 }
 class PortalsService {

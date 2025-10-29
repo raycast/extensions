@@ -54,10 +54,6 @@ To use this extension, you'll need to:
    ```bash
    npm install
    ```
-3. Link the extension to Raycast for development:
-   ```bash
-   npx @raycast/api@latest link
-   ```
 
 ### Available Scripts
 

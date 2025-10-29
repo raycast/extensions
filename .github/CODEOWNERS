@@ -991,6 +991,7 @@
 /extensions/karakeep                                                @foru17 @kdurek @foru17
 /extensions/kde-connect                                             @StevenRCE0
 /extensions/keepassxc                                               @pabroux @zkytech @Osmagtor @Ygnas
+/extensions/keeper-security                                         @amuley-ks
 /extensions/kef-control                                             @ho991217
 /extensions/keka                                                    @aonez
 /extensions/key-value                                               @NirLevy98 @pernielsentikaer @gkpln3
@@ -1461,6 +1462,7 @@
 /extensions/pastefy                                                 @JulianFun123
 /extensions/pastery                                                 @xmok
 /extensions/paymenter                                               @xmok
+/extensions/paynow                                                  @maxijonson
 /extensions/paystack                                                @DominusKelvin
 /extensions/pcloud                                                  @xela92
 /extensions/pdb-explorer                                            @mattgra
@@ -2365,7 +2367,7 @@
 /extensions/zed-recent-projects                                     @ewgenius @tleo19 @jylamont @pernielsentikaer @tmwrnr @true-real-michael @remorses
 /extensions/zefix                                                   @cimnine
 /extensions/zeitraum                                                @KennethWussmann
-/extensions/zen-browser                                             @Keyruu @theherk @walker-tx @Jimmy-b36 @sdaza @elliothco @ridemountainpig @Davidferl @sjasct @pernielsentikaer
+/extensions/zen-browser                                             @Keyruu @theherk @walker-tx @Jimmy-b36 @sdaza @elliothco @ridemountainpig @Davidferl @sjasct @pernielsentikaer @Zheckan
 /extensions/zen-mode                                                @pradeepb28
 /extensions/zendesk                                                 @cpenned @xmok
 /extensions/zendesk-admin                                           @miguelcorderocollar

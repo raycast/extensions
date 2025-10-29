@@ -1,5 +1,9 @@
 # FileMaker Snippets Changelog
 
+## [Fixes] - 2025-10-29
+
+- Fix dynamic fields being overwritten when editing a snippet
+
 ## [Fixes] - 2025-03-03
 
 - Update to Raycast API 1.93.0

@@ -11,22 +11,24 @@ export type Contact = {
 export enum MessageType {
   Incoming,
   Outgoing,
-  Bot = 3,
+  Activity,
+  Bot,
 }
 export type Message = {
   id: number;
   content: string | null;
   created_at: number;
   private: boolean;
+  status: "sent" | "delivered" | "read" | "failed";
 } & (
   | {
-      message_type: Exclude<MessageType, MessageType.Bot>;
+      message_type: Exclude<MessageType, MessageType.Activity | MessageType.Bot>;
       sender: {
         name: string;
       };
     }
   | {
-      message_type: MessageType.Bot;
+      message_type: MessageType.Activity | MessageType.Bot;
       sender?: never;
     }
 );
@@ -39,6 +41,8 @@ export type Conversation = {
   };
   id: number;
   messages: Message[];
+  snoozed_until: string | null;
+  status: "open" | "resolved" | "pending" | "snoozed";
   created_at: number;
   last_activity_at: number;
 };
@@ -54,6 +58,17 @@ export type Integration = {
   description: string;
   enabled: boolean;
 };
+
+export type Notification = {
+  id: number;
+  notification_type: string;
+  push_message_body: string;
+  primary_actor_type: string;
+  primary_actor_id: number;
+  read_at: number | null;
+  created_at: number;
+};
+
 export type Portal = {
   id: number;
   color: string;
