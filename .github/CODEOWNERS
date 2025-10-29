@@ -99,7 +99,7 @@
 /extensions/array-this                                              @matheus-depaula
 /extensions/ars-technica                                            @edwin-dd-ong
 /extensions/arxiv                                                   @koayon @pernielsentikaer @osteele
-/extensions/asana                                                   @thomaslombart @spaceDolph1n @tuzemec @xmok
+/extensions/asana                                                   @thomaslombart @spaceDolph1n @tuzemec @xmok @abcd-ca
 /extensions/asciimath-to-latex-converter                            @Nebow
 /extensions/asoiaf                                                  @xmok
 /extensions/aspect-raytio                                           @ickas
@@ -219,7 +219,7 @@
 /extensions/bundlephobia-search                                     @PeraSite @rushelex
 /extensions/cache-control-builder                                   @rkusa
 /extensions/cacher                                                  @jookyboi
-/extensions/cal-com-share-meeting-links                             @eluce2 @peduarte @pernielsentikaer @AlexIsMaking @jfkisafk
+/extensions/cal-com-share-meeting-links                             @eluce2 @peduarte @pernielsentikaer @AlexIsMaking @jfkisafk @runofthemillgeek
 /extensions/calendar                                                @fuksman @pernielsentikaer
 /extensions/calendly                                                @eluce2
 /extensions/can-i-php                                               @mechelon
@@ -1859,7 +1859,7 @@
 /extensions/shottr                                                  @jfernandogt
 /extensions/shroud-email                                            @xmok
 /extensions/shutdown-timer                                          @WhosMadeer
-/extensions/sidecar                                                 @lsps9150414
+/extensions/sidecar                                                 @lsps9150414 @shkm
 /extensions/signal                                                  @leeraymond78
 /extensions/silent-mention                                          @peduarte
 /extensions/simctl                                                  @noppefoxwolf @xmok

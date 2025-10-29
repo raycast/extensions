@@ -1,7 +1,7 @@
 export interface CoppaRounds {
   success: boolean;
   message: string;
-  errors: any[];
+  errors: unknown[];
   data: Round[];
   code: number;
 }

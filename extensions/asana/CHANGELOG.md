@@ -1,5 +1,13 @@
 # Asana Changelog
 
+## [Add support for Asana sections] - 2025-10-28
+
+- Added option for assigning a section when creating a task. User can select from a list of existing sections.
+- Added action on tasks returned from My Tasks allowing user to move a task to another section
+- Added option for assigning tags when creating a task. User can select from a list of existing tags.
+- Added ability to filter My Tasks by section and tag
+- Section and tags are now displayed in the task detail view
+
 ## [Auto-close window after task creation & configuration modernization] - 2025-04-16
 
 - Introduced a preference to automatically close the Raycast window and show a HUD notification after creating a task, streamlining the workflow.
