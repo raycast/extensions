@@ -1,6 +1,6 @@
 # Chatwoot Changelog
 
-## [Add "My Inbox" + Fix "List Messages"] - {PR_MERGE_DATE}
+## [Add "My Inbox" + Fix "List Messages"] - 2025-10-29
 
 ### My Inbox
 - show notifications
