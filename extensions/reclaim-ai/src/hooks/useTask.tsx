@@ -18,7 +18,7 @@ export const useTasks = () => {
     data: tasks,
     error,
     isLoading,
-  } = useApi<Task[]>(url);
+  } = useApi<Task[]>(taskURL);
 
   return {
     tasks,
