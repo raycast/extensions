@@ -122,3 +122,5 @@ export type StatsData = {
   updated: Array<VersionPackageBase>;
   featured: Array<Package>;
 };
+
+export type WithKey<T> = T & { key: string };

@@ -9,6 +9,7 @@ import type {
   PackageScore,
   StatsData,
   VersionPackage,
+  WithKey,
 } from "@/types";
 
 /**
@@ -58,26 +59,32 @@ export const useScore = (item: NameAndScope | null) => {
  */
 export const useDependents = (
   item: NameAndScope | null,
-): { data: ApiResults<Dependent & { key: string }>; isLoading: boolean } => {
+): { data: ApiResults<WithKey<Dependent>>; isLoading: boolean } => {
   const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/dependents?limit=100`;
-  const { data, isLoading } = useFetch<ApiResults<Dependent>>(url, {
+  const { data, isLoading } = useFetch<ApiResults<WithKey<Dependent>>>(url, {
     execute: !!item,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onError(_) {},
-  });
-  const items = (data?.items || [])
-    .map((item) => {
+    onError() {},
+    mapResult: (result) => {
       return {
-        ...item,
-        key: `${item.scope}/${item.package}`,
+        data: {
+          total: result.total,
+          items: result.items
+            .map((item) => {
+              return {
+                ...item,
+                key: `${item.scope}/${item.package}`,
+              };
+            })
+            .filter((item, index, self) => self.findIndex((t) => t.key === item.key) === index),
+        },
       };
-    })
-    .filter((item, index, self) => self.findIndex((t) => t.key === item.key) === index);
+    },
+  });
   return {
     data: {
       total: data?.total || 0,
-      items: items,
-    } as ApiResults<Dependent & { key: string }>,
+      items: data?.items || [],
+    },
     isLoading,
   };
 };
@@ -95,16 +102,18 @@ export const useDependencies = (
   const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/versions/${version}/dependencies?limit=100`;
   const { data, isLoading } = useFetch<Dependency[]>(url, {
     execute: !!item && !!version,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onError(_) {},
+    onError() {},
+    mapResult: (result) => {
+      return {
+        data: result.filter(
+          (dep, index, self) =>
+            self.findIndex((t) => t.kind === dep.kind && t.name === dep.name && t.path === dep.path) === index,
+        ),
+      };
+    },
   });
-  // Check if we have unique results based on dep.kind, dep.name, and dep.path combined
-  const filteredData = (data || []).filter(
-    (dep, index, self) =>
-      self.findIndex((t) => t.kind === dep.kind && t.name === dep.name && t.path === dep.path) === index,
-  );
   return {
-    data: filteredData,
+    data: data || [],
     isLoading,
   };
 };
