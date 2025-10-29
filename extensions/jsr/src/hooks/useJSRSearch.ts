@@ -32,7 +32,7 @@ const useSearchAPIData = () => {
 
       const scriptElements = $("script");
 
-      scriptElements.each((index, element) => {
+      scriptElements.each((_index, element) => {
         const script = $(element).html();
 
         if (script?.includes(`apiKey`)) {
@@ -49,7 +49,7 @@ const useSearchAPIData = () => {
               res = { apiKey: arr[indexIdPosition - 1], indexId: arr[indexIdPosition] };
             }
             // eslint-disable-next-line no-empty
-          } catch (_) {}
+          } catch {}
         }
 
         if (script?.includes(`"apiKey"`)) {

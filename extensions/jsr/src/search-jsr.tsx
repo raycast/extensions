@@ -1,15 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Action, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-
-import { packageToSearchResultDocument } from "@/lib/convert";
 
 import { useStats } from "@/hooks/useJSRAPI";
 import { useJSRSearch } from "@/hooks/useJSRSearch";
 import { useSelectedPackage } from "@/hooks/useSelectedPackage";
 
 import ListItem from "@/components/ListItem";
+import StatsSections from "@/components/StatsSections";
+
+import OptionalActions from "./components/OptionalActions";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -17,25 +18,7 @@ export default function Command() {
   const { data, isLoading, error } = useJSRSearch(searchText);
   const { data: statsData, isLoading: statsIsLoading } = useStats();
   const { selectedPackageData, selectedPackageError, selectedPageLoading, setSelectedId } = useSelectedPackage();
-
-  const extraActions = useMemo(() => {
-    if (selectedPageLoading || selectedPackageError || !selectedPackageData) {
-      return <></>;
-    }
-    if (selectedPackageData.githubRepository?.owner && selectedPackageData.githubRepository?.name) {
-      return (
-        <>
-          <Action.OpenInBrowser
-            title="Open GitHub Repository"
-            icon={{ source: "github.svg" }}
-            url={`https://github.com/${selectedPackageData.githubRepository.owner}/${selectedPackageData.githubRepository.name}`}
-            shortcut={{ key: "g", modifiers: ["cmd", "shift"] }}
-          />
-        </>
-      );
-    }
-    return <></>;
-  }, [selectedPackageData, selectedPackageError, selectedPageLoading]);
+  const addExtraActions = !(selectedPageLoading || selectedPackageError || !selectedPackageData);
 
   useEffect(() => {
     if (error) {
@@ -58,36 +41,13 @@ export default function Command() {
       isLoading={isLoading || (searchText === "" && statsIsLoading)}
       onSelectionChange={setSelectedId}
     >
-      {searchText === "" && statsData ? (
-        <>
-          <List.Section title="Featured">
-            {statsData.featured.map((result) => (
-              <ListItem
-                key={`featured/${result.scope}/${result.name}`}
-                item={packageToSearchResultDocument(result)}
-                toggleDetails={() => {
-                  setIsShowingDetails((state) => !state);
-                }}
-                isShowingDetails={isShowingDetails}
-                extraActions={extraActions}
-              />
-            ))}
-          </List.Section>
-          <List.Section title="Newest">
-            {statsData.newest.map((result) => (
-              <ListItem
-                key={`newest/${result.scope}/${result.name}`}
-                item={packageToSearchResultDocument(result)}
-                toggleDetails={() => {
-                  setIsShowingDetails((state) => !state);
-                }}
-                isShowingDetails={isShowingDetails}
-                extraActions={extraActions}
-              />
-            ))}
-          </List.Section>
-        </>
-      ) : null}
+      <StatsSections
+        statsData={statsData}
+        enabled={searchText === ""}
+        setIsShowingDetails={setIsShowingDetails}
+        isShowingDetails={isShowingDetails}
+        extraActions={<OptionalActions selectedPackageData={selectedPackageData} enabled={addExtraActions} />}
+      />
       {data?.map((result) => (
         <ListItem
           key={result.id}
@@ -96,7 +56,7 @@ export default function Command() {
             setIsShowingDetails((state) => !state);
           }}
           isShowingDetails={isShowingDetails}
-          extraActions={extraActions}
+          extraActions={<OptionalActions selectedPackageData={selectedPackageData} enabled={addExtraActions} />}
         />
       ))}
       <List.EmptyView

@@ -7,17 +7,13 @@ import type {
   NameAndScope,
   Package,
   PackageScore,
+  StatsData,
   VersionPackage,
-  VersionPackageBase,
 } from "@/types";
 
 export const useStats = () => {
   const url = `https://api.jsr.io/stats`;
-  return useFetch<{
-    newest: Array<Package>;
-    updated: Array<VersionPackageBase>;
-    featured: Array<Package>;
-  }>(url);
+  return useFetch<StatsData>(url);
 };
 
 export const usePackage = (item: NameAndScope | null) => {
@@ -42,8 +38,19 @@ export const useDependents = (item: NameAndScope | null) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onError(_) {},
   });
+  const items = (data?.items || [])
+    .map((item) => {
+      return {
+        ...item,
+        key: `${item.scope}/${item.package}`,
+      };
+    })
+    .filter((item, index, self) => self.findIndex((t) => t.key === item.key) === index);
   return {
-    data: (data || { total: 0, items: [] }) as ApiResults<Dependent>,
+    data: {
+      total: data?.total || 0,
+      items: items,
+    } as ApiResults<Dependent & { key: string }>,
     isLoading,
   };
 };
@@ -55,13 +62,18 @@ export const useDependencies = (item: NameAndScope | null, version: string | nul
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onError(_) {},
   });
+  // Check if we have unique results based on dep.kind, dep.name, and dep.path combined
+  const filteredData = (data || []).filter(
+    (dep, index, self) =>
+      self.findIndex((t) => t.kind === dep.kind && t.name === dep.name && t.path === dep.path) === index,
+  );
   return {
-    data: data || [],
+    data: filteredData,
     isLoading,
   };
 };
 
 export const usePackages = (scope: string) => {
   const url = `https://api.jsr.io/scopes/${scope}/packages?limit=100`;
-  return useFetch<Package[]>(url);
+  return useFetch<ApiResults<Package>>(url);
 };

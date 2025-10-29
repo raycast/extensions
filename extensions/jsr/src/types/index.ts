@@ -117,3 +117,9 @@ export type ApiResults<T> = {
   items: T[];
   total: number;
 };
+
+export type StatsData = {
+  newest: Array<Package>;
+  updated: Array<VersionPackageBase>;
+  featured: Array<Package>;
+};
