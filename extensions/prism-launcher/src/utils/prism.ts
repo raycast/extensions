@@ -12,15 +12,30 @@ export const instancesPath = path.join(
   "instances",
 );
 
-export const prismLauncherPath = fs.pathExistsSync(path.join("/Applications", "PrismLauncher.app"))
-  ? path.join("/Applications", "PrismLauncher.app")
-  : path.join("/Applications", "Prism Launcher.app");
+/**
+ * Get the PrismLauncher installation path dynamically
+ */
+async function getPrismLauncherPath(): Promise<string | null> {
+  const prismLauncherApp = path.join("/Applications", "PrismLauncher.app");
+  const prismLauncherWithSpace = path.join("/Applications", "Prism Launcher.app");
+
+  if (await fs.pathExists(prismLauncherApp)) {
+    return prismLauncherApp;
+  }
+
+  if (await fs.pathExists(prismLauncherWithSpace)) {
+    return prismLauncherWithSpace;
+  }
+
+  return null;
+}
 
 /**
  * Check if PrismLauncher is installed
  */
 export async function isPrismLauncherInstalled(): Promise<boolean> {
-  return (await fs.pathExists(prismLauncherPath)) && (await fs.pathExists(instancesPath));
+  const prismLauncherPath = await getPrismLauncherPath();
+  return prismLauncherPath !== null && (await fs.pathExists(instancesPath));
 }
 
 /**
