@@ -16,7 +16,7 @@
   "pastContributors": [
     "ridemountainpig"
   ],
-  "platforms" :  ["macOS", "Windows"],
+  "platforms": ["macOS", "Windows"],
   "owner": "reclaim-ai",
   "access": "public",
   "categories": [
