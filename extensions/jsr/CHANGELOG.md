@@ -1,6 +1,6 @@
 # JSR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-10-29
 
 - Refactored components, make the code more maintainable
 - Enabled for Windows platform
