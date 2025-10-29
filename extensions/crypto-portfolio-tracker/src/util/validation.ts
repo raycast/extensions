@@ -1,3 +1,3 @@
-const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+import { isAddress } from "viem";
 
-export const isValidEthereumAddress = (address: string): boolean => ETH_ADDRESS_REGEX.test(address);
+export const isValidEthereumAddress = (address: string): boolean => isAddress(address);

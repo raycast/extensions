@@ -21,7 +21,16 @@ const emptyPortfolio: StoredPortfolio = {
 export const getPortfolio = async (): Promise<StoredPortfolio> => {
   const portfolioJson = await LocalStorage.getItem<string>(STORAGE_KEY);
 
-  return portfolioJson ? (JSON.parse(portfolioJson) as StoredPortfolio) : emptyPortfolio;
+  if (!portfolioJson) {
+    return emptyPortfolio;
+  }
+
+  try {
+    return JSON.parse(portfolioJson) as StoredPortfolio;
+  } catch (error) {
+    console.error("Failed to parse portfolio data:", error);
+    return emptyPortfolio;
+  }
 };
 
 export const addToPortfolio = async (addressEntry: Omit<AddressEntry, "timestamp">): Promise<void> => {

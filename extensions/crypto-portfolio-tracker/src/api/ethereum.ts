@@ -1,4 +1,5 @@
 import { withCache } from "@raycast/utils";
+import { formatEther } from "viem";
 
 // Public RPC endpoints to try in order (no API key required)
 const LLAMA_RPC_ENDPOINT = "https://eth.llamarpc.com";
@@ -105,10 +106,8 @@ export async function getEthBalance(address: string): Promise<EthAddressBalance>
         throw new Error("No result returned from RPC");
       }
 
-      // Convert from Wei to ETH (1 ETH = 10^18 Wei)
-      // Result is in hex format (0x...)
-      const balanceInWei = BigInt(data.result);
-      const balanceInEth = Number(balanceInWei) / 1e18;
+      // Use viem's formatEther for safe BigInt arithmetic
+      const balanceInEth = Number(formatEther(BigInt(data.result)));
 
       // Fetch current ETH price to calculate dollar value
       const ethPrice = await getEthPrice();

@@ -1,4 +1,5 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { generateAddressName, generateRandomAddressName } from "./util/address-name";
 import { Tokens } from "./util/tokens";
 import { addToPortfolio } from "./util/portfolio";
@@ -36,11 +37,7 @@ export default async function Command(props: LaunchProps<{ arguments: AddEthAddr
       style: Toast.Style.Success,
       title: "Ethereum Address Added",
     });
-  } catch (e) {
-    console.error(e);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Add Ethereum Address",
-    });
+  } catch (error) {
+    await showFailureToast(error, { title: "Failed to Add Ethereum Address" });
   }
 }

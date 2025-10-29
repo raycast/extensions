@@ -2,7 +2,7 @@
 
 Add Crypto wallets by their addresses and track your entire Crypto portfolio.
 
-## Commdands
+## Commands
 - `Add Ethereum Address <address> <name?>`: Add an Ethereum wallet address to your portfolio.
 - `Portfolio`: View your entire Crypto portfolio with real-time prices.
 

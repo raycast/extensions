@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { getEthBalance, formatEthBalance, formatDollarValue, EthAddressBalance } from "../api/ethereum";
+import { useCachedPromise } from "@raycast/utils";
+import { getEthBalance, formatEthBalance, formatDollarValue } from "../api/ethereum";
 
 interface EthAddressDetailProps {
   address: string;
@@ -8,31 +8,12 @@ interface EthAddressDetailProps {
 }
 
 export function EthAddressDetail({ address, name }: EthAddressDetailProps) {
-  const [balance, setBalance] = useState<EthAddressBalance | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchBalance = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const ethBalance = await getEthBalance(address);
-      setBalance(ethBalance);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [address]);
-
-  useEffect(() => {
-    fetchBalance();
-  }, [fetchBalance]);
+  const { data: balance, isLoading, error } = useCachedPromise(getEthBalance, [address]);
 
   const ethBalance = balance ? formatEthBalance(balance.eth.balance) : "Unknown";
   const dollarValue = balance ? formatDollarValue(balance.eth.dollarValue) : "Unknown";
+  const ethPrice = balance ? formatDollarValue(balance.ethPrice) : "Unknown";
+  const rpcEndpoint = balance?.rpcEndpoint ?? "Unknown";
 
   const markdown = isLoading
     ? "# Loading..."
@@ -40,7 +21,7 @@ export function EthAddressDetail({ address, name }: EthAddressDetailProps) {
 # ${dollarValue}
 ## ${ethBalance}
 **Address:** \`${address}\`
-${error ? `\n**Error fetching balance:** ${error}\n` : ""}
+${error ? `\n**Error fetching balance:** ${error.message}\n` : ""}
 `;
 
   return (
@@ -52,11 +33,11 @@ ${error ? `\n**Error fetching balance:** ${error}\n` : ""}
           <List.Item.Detail.Metadata.Label title="Dollar Value" text={dollarValue} />
           <List.Item.Detail.Metadata.Label title="Eth Balance" text={ethBalance} />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Eth Price" text={`${balance?.ethPrice}`} />
+          <List.Item.Detail.Metadata.Label title="Eth Price" text={ethPrice} />
           <List.Item.Detail.Metadata.Label title="Address" text={address} />
           <List.Item.Detail.Metadata.Label title="Name" text={name} />
           <List.Item.Detail.Metadata.Label title="Token" text="Ethereum" />
-          <List.Item.Detail.Metadata.Label title="RPC Endpoint" text={balance?.rpcEndpoint} />
+          <List.Item.Detail.Metadata.Label title="RPC Endpoint" text={rpcEndpoint} />
         </List.Item.Detail.Metadata>
       }
     />
