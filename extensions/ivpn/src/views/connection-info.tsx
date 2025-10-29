@@ -17,6 +17,7 @@ import { useState } from "react";
 
 import { IvpnInfoParsed } from "@/api/ivpn/types";
 import { IvpnStatusExtended, UseIvpnConnectionOptions, useIvpnConnection } from "@/contexts/IvpnConnectionContext";
+import { getFlagIcon } from "@/utils/flags";
 
 type ConnectionInfoProps = {
   initialTrigger?: (...args: Parameters<NonNullable<UseIvpnConnectionOptions["onInit"]>>) => Promise<void>;
@@ -182,7 +183,7 @@ function IvpnMetadata({ info, status }: { info: IvpnInfoParsed; status: IvpnStat
       <Detail.Metadata.Label
         title="Location"
         text={`${info.serverLocation.city}, ${info.serverLocation.country}`}
-        icon={{ source: `countries/${info.serverLocation.countryCode.toLowerCase()}.png`, fallback: Icon.Globe }}
+        icon={getFlagIcon(info.serverLocation.countryCode)}
       />
       <Detail.Metadata.Label title="Connected Since" text={connectedSince} />
 

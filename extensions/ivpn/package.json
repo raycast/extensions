@@ -56,6 +56,35 @@
         }
       ],
       "required": false
+    },
+    {
+      "name": "flagIconSource",
+      "title": "Flag Icon Source",
+      "description": "Where flag icons are retrieved from.",
+      "type": "dropdown",
+      "default": "flagsapi.com",
+      "data": [
+        {
+          "title": "flagsapi.com (flat)",
+          "value": "flagsapi.com"
+        },
+        {
+          "title": "flagcdn.com (wavy)",
+          "value": "flagcdn.com"
+        },
+        {
+          "title": "Local (specify folder)",
+          "value": "local"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "flagIconDirectory",
+      "title": "Flag Icon Folder",
+      "description": "Local directory to retrieve icon flags from.\nEach flag icon have a format of '<COUNTRY_CODE_UPPERCASE>.png'.\n\nThis setting will be ignored unless \"Flag Icon Source\" is set to \"local\"",
+      "type": "directory",
+      "required": false
     }
   ],
   "commands": [

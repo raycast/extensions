@@ -22,6 +22,8 @@ import { getRandomValue } from "@/utils/arrays";
 import { handleError } from "@/utils/errorHandler";
 import { ConnectionInfo } from "@/views/connection-info";
 
+import { getFlagIcon } from "./utils/flags";
+
 export default () => (
   <IvpnConnectionProvider>
     <ServerList />
@@ -347,7 +349,7 @@ function ServerListItem({
       title={info.city}
       subtitle={info.country}
       accessories={accessories}
-      icon={`countries/${info.countryCode}-px.png`}
+      icon={getFlagIcon(info.countryCode)}
       actions={
         <ActionPanel>
           {!connectionState.isConnected ? (
