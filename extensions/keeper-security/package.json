@@ -77,5 +77,8 @@
       "required": true,
       "description": "Your Keeper Security Service Mode API key"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
