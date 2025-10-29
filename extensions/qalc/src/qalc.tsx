@@ -1,14 +1,48 @@
-import { ActionPanel, Action, List, Detail, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Detail,
+  getPreferenceValues,
+  openExtensionPreferences,
+  environment,
+} from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { ChildProcess, ChildProcessWithoutNullStreams, spawn } from "node:child_process";
+import path from "node:path";
+import { accessSync, copyFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 
 // TODO
-// - better parse result -> copy result ?
-// - ask: ask user perm to download & install qalc ? -> no need to ask
+// - better parse result
+// - autmate: ask user perm to download & install qalc ?
 // -x persistent qalc + restart ?
 // -x out colors + fmt
 
 // --------  os interface
+
+function ensureCfg() {
+  const cfgFile = "qalc.cfg";
+  const cfgPath = path.join(environment.supportPath, cfgFile);
+  try {
+    accessSync(cfgPath);
+  } catch {
+    const cfgAsset = path.join(environment.assetsPath, cfgFile);
+    copyFileSync(cfgAsset, cfgPath);
+  }
+}
+
+async function loadHistory(): Promise<[string, string][]> {
+  const historyPath = path.join(environment.supportPath, "qalc.history");
+  try {
+    const histFile = await readFile(historyPath, { encoding: "utf-8" });
+    const hist: [string, string][] = [];
+    for (const line of histFile.split("\n")) if (line) hist.push([line, "― "]);
+    return hist.reverse();
+  } catch {
+    return [];
+  }
+}
 
 function spawnQalc(
   pathsToTry: string[],
@@ -17,7 +51,7 @@ function spawnQalc(
   isDead: [0 | 1],
   errors: [string, Error][] = [],
 ) {
-  const p = spawn(pathsToTry[0]); // Start qalc
+  const p = spawn(pathsToTry[0], ["+u8"], { env: { ...process.env, QALCULATE_USER_DIR: environment.supportPath } }); // Start qalc
   p.on("error", (err) => {
     errors.push([pathsToTry[0], err]);
     if (!isDead[0] && pathsToTry.length > 1) spawnQalc(pathsToTry.slice(1), callback, setErr, isDead, errors);
@@ -111,6 +145,8 @@ function ActualCommand(props: { rerender: () => void }) {
     ];
     const isDead: [0 | 1] = [0];
     let destructor = () => (isDead[0] = 1) as unknown;
+    ensureCfg();
+    loadHistory().then((hist) => (history.current = [...history.current, ...hist]));
     spawnQalc(
       pathsToTry,
       (p) => {
@@ -136,6 +172,9 @@ function ActualCommand(props: { rerender: () => void }) {
   }, [searchText, qalcProcess]);
 
   if (err404) return Qalc404(err404, props.rerender);
+  const universalActions = (
+    <Action title="Execute" shortcut={{ modifiers: ["alt"], key: "enter" }} onAction={onExecute} />
+  );
   return (
     <List
       isLoading={data.loading}
@@ -155,7 +194,7 @@ function ActualCommand(props: { rerender: () => void }) {
                   content={line.slice(2)} // TODO better parse
                   shortcut={{ modifiers: ["cmd"], key: "." }}
                 />
-                <Action title="Execute" shortcut={{ modifiers: ["alt"], key: "enter" }} onAction={onExecute} />
+                {universalActions}
               </ActionPanel>
             }
           />
@@ -170,6 +209,7 @@ function ActualCommand(props: { rerender: () => void }) {
             actions={
               <ActionPanel>
                 <Action title="Replace Input" onAction={() => setSearchText(expr)} />
+                {universalActions}
               </ActionPanel>
             }
           />
