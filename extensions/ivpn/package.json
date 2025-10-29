@@ -82,7 +82,7 @@
     {
       "name": "flagIconDirectory",
       "title": "Flag Icon Folder",
-      "description": "Local directory to retrieve icon flags from.\nEach flag icon have a format of '<COUNTRY_CODE_UPPERCASE>.png'.\n\nThis setting will be ignored unless \"Flag Icon Source\" is set to \"local\"",
+      "description": "Local directory to retrieve icon flags from.\nEach flag icon have a format of '<COUNTRY_CODE_LOWERCASE>.png'.\n\nThis setting will be ignored unless \"Flag Icon Source\" is set to \"local\"",
       "type": "directory",
       "required": false
     }
