@@ -13,7 +13,7 @@ import {
 import { LocalStorage, Color } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-type Preferences = { apiKey: string };
+type Preferences = { apiKey: string; businessApi?: boolean };
 
 type PaperformForm = {
   id: string | number;
@@ -28,6 +28,7 @@ type PaperformForm = {
   created_at_utc?: string;
   updated_at_utc?: string;
   submission_count?: number;
+  disabled?: boolean;
   additional_urls?: {
     edit_url?: string;
     submissions_url?: string;
@@ -50,7 +51,7 @@ const SUBMISSIONS_LIMIT = 100;
 const PINS_STORAGE_KEY = "paperform_pinned_form_ids";
 
 export default function Command() {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey, businessApi = false } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const [serverQuery, setServerQuery] = useState("");
   const [baseForms, setBaseForms] = useState<PaperformForm[]>([]);
@@ -88,6 +89,8 @@ export default function Command() {
     const arr = Array.from(ids);
     await LocalStorage.setItem(PINS_STORAGE_KEY, JSON.stringify(arr));
   }, []);
+
+  // (No local disabled persistence; Business API toggle only when enabled)
 
   // Base list loader (no search)
   useEffect(() => {
@@ -241,10 +244,11 @@ export default function Command() {
       pagination={pagination}
     >
       {sorted.map((form) => {
-        const pinned = pinnedIds.has(String(form.id));
+        const idStr = String(form.id);
+        const pinned = pinnedIds.has(idStr);
         return (
           <List.Item
-            key={String(form.id)}
+            key={idStr}
             icon={getFormIcon(form)}
             title={form.name || form.title || form.slug || String(form.id)}
             subtitle={form.custom_slug || form.slug || undefined}
@@ -254,6 +258,7 @@ export default function Command() {
                 form={form}
                 refresh={refresh}
                 isPinned={pinned}
+                businessApi={businessApi}
                 pin={(id) => {
                   setPinnedIds((prev) => {
                     const next = new Set(prev);
@@ -290,13 +295,15 @@ function buildFormAccessories(form: PaperformForm, pinned = false): List.Item.Ac
   }
 
   const live = getFormLiveStatus(form);
+  const apiDisabled = !!(form as Record<string, unknown>)?.["disabled"];
+  const closed = apiDisabled || live === false;
   if (typeof form.submission_count === "number") {
     accessories.push({
-      icon: live === false ? Icon.CircleDisabled : Icon.List,
+      icon: closed ? Icon.CircleDisabled : Icon.List,
       text: String(form.submission_count),
-      tooltip: live === false ? "No longer accepting submissions" : "Submissions",
+      tooltip: closed ? "No longer accepting submissions" : "Submissions",
     });
-  } else if (live === false) {
+  } else if (closed) {
     // Show closed state even if we don't have a count
     accessories.push({ icon: Icon.CircleDisabled, tooltip: "No longer accepting submissions" });
   }
@@ -313,7 +320,8 @@ function getFormUpdatedAt(form: PaperformForm): string | undefined {
 
 function getFormIcon(form: PaperformForm) {
   const live = getFormLiveStatus(form);
-  if (live === false) return { source: Icon.CircleDisabled, tintColor: Color.Red } as const;
+  const apiDisabled = !!(form as Record<string, unknown>)?.["disabled"];
+  if (apiDisabled || live === false) return { source: Icon.CircleDisabled, tintColor: Color.Red } as const;
   const cover = (form.cover_image_url || "").trim();
   if (cover) return { source: cover, mask: Image.Mask.RoundedRectangle } as const;
   return { source: "extension_icon.png", mask: Image.Mask.RoundedRectangle } as const;
@@ -341,23 +349,31 @@ function getFormLiveStatus(form: PaperformForm): boolean | undefined {
   return undefined;
 }
 
+// Local disabled is handled in Command via LocalStorage; API-disabled not used without Business plan
+
 function FormActions({
   form,
   refresh,
   pin,
   unpin,
   isPinned,
+  businessApi,
 }: {
   form: PaperformForm;
   refresh: () => void;
   pin: (id: string) => void;
   unpin: (id: string) => void;
   isPinned: boolean;
+  businessApi: boolean;
 }) {
   const linkSlug = (form.custom_slug || form.slug || String(form.id)) as string;
   const submissionsUrl = form.additional_urls?.submissions_url || `https://paperform.co/submissions/${linkSlug}`;
   const editUrl = form.additional_urls?.edit_url || `https://paperform.co/edit/${linkSlug}`;
+  const duplicateUrl = form.additional_urls?.duplicate_url;
   const viewUrl = form.url || `https://${linkSlug}.paperform.co`;
+  const { apiKey } = getPreferenceValues<Preferences>();
+  const idForApi = String(form.id || linkSlug);
+  const remoteDisabled = !!(form as Record<string, unknown>)?.["disabled"];
   return (
     <ActionPanel>
       <Action.Push
@@ -393,6 +409,55 @@ function FormActions({
         icon={Icon.Pencil}
         shortcut={{ modifiers: ["cmd"], key: "e" }}
       />
+      {duplicateUrl ? (
+        <Action.OpenInBrowser
+          title="Duplicate Form"
+          url={duplicateUrl}
+          icon={Icon.Duplicate}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+        />
+      ) : null}
+      {businessApi ? (
+        remoteDisabled ? (
+          <Action
+            title="Enable Submissions"
+            icon={Icon.Play}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+            onAction={async () => {
+              const toast = await showToast({ style: Toast.Style.Animated, title: "Enabling submissions..." });
+              try {
+                await apiFetchJson(apiKey!, `/forms/${encodeURIComponent(idForApi)}`, "PUT", { disabled: false });
+                await showToast({ style: Toast.Style.Success, title: "Submissions enabled" });
+                refresh();
+              } catch (e) {
+                const err = e as Error;
+                await showToast({ style: Toast.Style.Failure, title: "Failed to enable", message: err.message });
+              } finally {
+                toast.hide();
+              }
+            }}
+          />
+        ) : (
+          <Action
+            title="Disable Submissions"
+            icon={Icon.Stop}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+            onAction={async () => {
+              const toast = await showToast({ style: Toast.Style.Animated, title: "Disabling submissions..." });
+              try {
+                await apiFetchJson(apiKey!, `/forms/${encodeURIComponent(idForApi)}`, "PUT", { disabled: true });
+                await showToast({ style: Toast.Style.Success, title: "Submissions disabled" });
+                refresh();
+              } catch (e) {
+                const err = e as Error;
+                await showToast({ style: Toast.Style.Failure, title: "Failed to disable", message: err.message });
+              } finally {
+                toast.hide();
+              }
+            }}
+          />
+        )
+      ) : null}
       <Action.CopyToClipboard title="Copy Form URL" content={viewUrl} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       <Action.CopyToClipboard
         title="Copy Form ID"
@@ -669,8 +734,57 @@ async function apiFetch<T>(apiKey: string, path: string, retries = 1): Promise<T
     throw new Error("rate_limited");
   }
   if (!res.ok) {
+    let message = `HTTP ${res.status}`;
+    try {
+      const text = await res.text();
+      if (text) message = `${message}: ${text.slice(0, 200)}`;
+    } catch {
+      // ignore
+    }
+    if (res.status === 403) message = "Update form requires Business API access";
+    if (res.status === 404) message = "Form not found or insufficient permissions";
+    throw new Error(message);
+  }
+  return (await res.json()) as T;
+}
+
+async function apiFetchJson<T>(
+  apiKey: string,
+  path: string,
+  method: "PUT" | "POST" | "PATCH" | "DELETE",
+  body: unknown,
+  retries = 1,
+): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body ?? {}),
+  });
+  if (res.status === 401) {
+    const toast = await showToast({ style: Toast.Style.Failure, title: "Unauthorized", message: "Check API Key" });
+    toast.primaryAction = {
+      title: "Open Developer Page",
+      onAction: () => open("https://paperform.co/account/developer"),
+    };
+    throw new Error("unauthorized");
+  }
+  if (res.status === 429) {
+    const retryAfter = res.headers.get("Retry-After");
+    const waitMs = (retryAfter ? Number(retryAfter) : 1) * 1000;
+    if (retries > 0) {
+      await sleep(waitMs);
+      return apiFetchJson<T>(apiKey, path, method, body, retries - 1);
+    }
+    await showToast({ style: Toast.Style.Failure, title: "Rate limited", message: "Please try again shortly" });
+    throw new Error("rate_limited");
+  }
+  if (!res.ok) {
     throw new Error(`HTTP ${res.status}`);
   }
+  if (res.status === 204) return {} as T;
   return (await res.json()) as T;
 }
 

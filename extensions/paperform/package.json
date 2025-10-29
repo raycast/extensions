@@ -33,6 +33,14 @@
           "required": true,
           "placeholder": "Paste your Paperform API key",
           "description": "Generate a key at https://paperform.co/account/developer"
+        },
+        {
+          "name": "businessApi",
+          "label": "Business API access",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "description": "Enable Business API-only actions like enabling/disabling submissions."
         }
       ]
     }
@@ -43,7 +51,6 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
