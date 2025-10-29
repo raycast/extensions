@@ -6,13 +6,13 @@ import { CreateTaskProps, PlannerActionIntermediateResult } from "./useTask.type
 import { fetchPromise } from "../utils/fetcher";
 
 export const useTasks = () => {
-  const url =
+  const taskURL =
     "/tasks?instances=true" +
     "&status=NEW" +
     "&status=SCHEDULED" +
     "&status=COMPLETE" +
     "&status=ARCHIVED" +
-    "&status=INPROGRESS";
+    "&status=IN_PROGRESS";
 
   const {
     data: tasks,
