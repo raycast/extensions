@@ -6,12 +6,13 @@ import { CreateTaskProps, PlannerActionIntermediateResult } from "./useTask.type
 import { fetchPromise } from "../utils/fetcher";
 
 export const useTasks = () => {
-  const url = `/tasks?instances=true
-      &status=NEW
-      &status=SCHEDULED
-      &status=COMPLETE
-      &status=ARCHIVED
-      &status=IN_PROGRESS`.replace(/\n\s*/g, "");
+  const url =
+    "/tasks?instances=true" +
+    "&status=NEW" +
+    "&status=SCHEDULED" +
+    "&status=COMPLETE" +
+    "&status=ARCHIVED" +
+    "&status=INPROGRESS";
 
   const {
     data: tasks,
