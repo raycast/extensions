@@ -1,0 +1,437 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omniai",
+  "title": "OmniAI",
+  "description": "Query multiple AI models simultaneously (OpenAI, Anthropic, Google, DeepSeek, xAI, Perplexity, Llama, Mistral) and compare their responses side-by-side in real-time",
+  "icon": "icon.png",
+  "author": "kawamataryo",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "query-to-all-models",
+      "title": "Query",
+      "subtitle": "Query To All Models",
+      "mode": "view",
+      "description": "Query to all models with the same prompt",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "prompt",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "ask-other-ais",
+      "title": "Ask Other AIs",
+      "description": "Ask other AIs to answer"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Enable OpenAI",
+      "label": "Enable OpenAI",
+      "name": "enableOpenAI",
+      "description": "Enable OpenAI in the query",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "title": "OpenAI Model",
+      "label": "OpenAI Model",
+      "name": "openaiModel",
+      "description": "OpenAI model to use in the query",
+      "type": "dropdown",
+      "default": "OpenAI_GPT4o-mini",
+      "data": [
+        {
+          "value": "OpenAI_GPT5-mini",
+          "title": "GPT-5 mini"
+        },
+        {
+          "value": "OpenAI_GPT5-nano",
+          "title": "GPT-5 nano"
+        },
+        {
+          "value": "OpenAI_GPT4.1",
+          "title": "GPT-4.1"
+        },
+        {
+          "value": "OpenAI_GPT4.1-mini",
+          "title": "GPT-4.1 mini"
+        },
+        {
+          "value": "OpenAI_GPT4.1-nano",
+          "title": "GPT-4.1 nano"
+        },
+        {
+          "value": "OpenAI_GPT4",
+          "title": "GPT-4"
+        },
+        {
+          "value": "OpenAI_GPT4-turbo",
+          "title": "GPT-4 turbo"
+        },
+        {
+          "value": "OpenAI_GPT4o",
+          "title": "GPT-4o"
+        },
+        {
+          "value": "OpenAI_GPT4o-mini",
+          "title": "GPT-4o mini"
+        },
+        {
+          "value": "OpenAI_GPT5",
+          "title": "GPT-5"
+        },
+        {
+          "value": "OpenAI_o3",
+          "title": "O3"
+        },
+        {
+          "value": "OpenAI_o4-mini",
+          "title": "O4 mini"
+        },
+        {
+          "value": "OpenAI_o1",
+          "title": "O1"
+        },
+        {
+          "value": "OpenAI_o3-mini",
+          "title": "O3 mini"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "OpenAI API Key (Optional)",
+      "label": "OpenAI API Key (Optional)",
+      "name": "openaiApiKey",
+      "description": "If provided, uses your own API key instead of Raycast AI quota",
+      "type": "password",
+      "required": false
+    },
+    {
+      "title": "Enable Anthropic",
+      "label": "Enable Anthropic",
+      "name": "enableAnthropic",
+      "description": "Enable Anthropic in the query",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "title": "Anthropic Model",
+      "label": "Anthropic Model",
+      "name": "anthropicModel",
+      "description": "Anthropic model to use in the query",
+      "type": "dropdown",
+      "default": "Anthropic_Claude_Haiku",
+      "data": [
+        {
+          "value": "Anthropic_Claude_Haiku",
+          "title": "Claude Haiku"
+        },
+        {
+          "value": "Anthropic_Claude_Sonnet",
+          "title": "Claude Sonnet"
+        },
+        {
+          "value": "Anthropic_Claude_Sonnet_3.7",
+          "title": "Claude Sonnet 3.7"
+        },
+        {
+          "value": "Anthropic_Claude_4_Sonnet",
+          "title": "Claude 4 Sonnet"
+        },
+        {
+          "value": "Anthropic_Claude_4_Opus",
+          "title": "Claude 4 Opus"
+        },
+        {
+          "value": "Anthropic_Claude_4.1_Opus",
+          "title": "Claude 4.1 Opus"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "Anthropic API Key (Optional)",
+      "label": "Anthropic API Key (Optional)",
+      "name": "anthropicApiKey",
+      "description": "If provided, uses your own API key instead of Raycast AI quota",
+      "type": "password",
+      "required": false
+    },
+    {
+      "title": "Enable Google",
+      "label": "Enable Google",
+      "name": "enableGoogle",
+      "description": "Enable Google in the query",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "title": "Google Model",
+      "label": "Google Model",
+      "name": "googleModel",
+      "description": "Google model to use in the query",
+      "type": "dropdown",
+      "default": "Google_Gemini_2.5_Flash_Lite",
+      "data": [
+        {
+          "value": "Google_Gemini_2.5_Pro",
+          "title": "Gemini 2.5 Pro"
+        },
+        {
+          "value": "Google_Gemini_2.5_Flash",
+          "title": "Gemini 2.5 Flash"
+        },
+        {
+          "value": "Google_Gemini_2.5_Flash_Lite",
+          "title": "Gemini 2.5 Flash Lite"
+        },
+        {
+          "value": "Google_Gemini_2.0_Flash",
+          "title": "Gemini 2.0 Flash"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "Google API Key (Optional)",
+      "label": "Google API Key (Optional)",
+      "name": "googleApiKey",
+      "description": "If provided, uses your own API key instead of Raycast AI quota",
+      "type": "password",
+      "required": false
+    },
+    {
+      "title": "Enable DeepSeek",
+      "label": "Enable DeepSeek",
+      "name": "enableDeepSeek",
+      "description": "Enable DeepSeek in the query",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "title": "DeepSeek Model",
+      "label": "DeepSeek Model",
+      "name": "deepseekModel",
+      "description": "DeepSeek model to use in the query",
+      "type": "dropdown",
+      "default": "DeepSeek_R1",
+      "data": [
+        {
+          "value": "DeepSeek_R1",
+          "title": "DeepSeek R1"
+        },
+        {
+          "value": "DeepSeek_V3",
+          "title": "DeepSeek V3"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "Enable xAI",
+      "label": "Enable xAI",
+      "name": "enableXAI",
+      "description": "Enable xAI in the query",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "title": "xAI Model",
+      "label": "xAI Model",
+      "name": "xaiModel",
+      "description": "xAI model to use in the query",
+      "type": "dropdown",
+      "default": "xAI_Grok_2",
+      "data": [
+        {
+          "value": "xAI_Grok_4",
+          "title": "Grok 4"
+        },
+        {
+          "value": "xAI_Grok_3",
+          "title": "Grok 3"
+        },
+        {
+          "value": "xAI_Grok_3_Mini",
+          "title": "Grok 3 Mini"
+        },
+        {
+          "value": "xAI_Grok_2",
+          "title": "Grok 2"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "xAI API Key (Optional)",
+      "label": "xAI API Key (Optional)",
+      "name": "xaiApiKey",
+      "description": "If provided, uses your own API key instead of Raycast AI quota",
+      "type": "password",
+      "required": false
+    },
+    {
+      "title": "Enable Perplexity",
+      "label": "Enable Perplexity",
+      "name": "enablePerplexity",
+      "description": "Enable Perplexity in the query",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "title": "Perplexity Model",
+      "label": "Perplexity Model",
+      "name": "perplexityModel",
+      "description": "Perplexity model to use in the query",
+      "type": "dropdown",
+      "default": "Perplexity_Sonar_Pro",
+      "data": [
+        {
+          "value": "Perplexity_Sonar_Pro",
+          "title": "Sonar Pro"
+        },
+        {
+          "value": "Perplexity_Sonar_Reasoning",
+          "title": "Sonar Reasoning"
+        },
+        {
+          "value": "Perplexity_Sonar_Reasoning_Pro",
+          "title": "Sonar Reasoning Pro"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "Enable Llama",
+      "label": "Enable Llama",
+      "name": "enableLlama",
+      "description": "Enable Llama in the query",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "title": "Llama Model",
+      "label": "Llama Model",
+      "name": "llamaModel",
+      "description": "Llama model to use in the query",
+      "type": "dropdown",
+      "default": "Llama3.1_8B",
+      "data": [
+        {
+          "value": "Llama4_Scout",
+          "title": "Llama 4 Scout"
+        },
+        {
+          "value": "Llama3.3_70B",
+          "title": "Llama 3.3 70B"
+        },
+        {
+          "value": "Llama3.1_8B",
+          "title": "Llama 3.1 8B"
+        },
+        {
+          "value": "Llama3.1_405B",
+          "title": "Llama 3.1 405B"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "Enable Mistral",
+      "label": "Enable Mistral",
+      "name": "enableMistral",
+      "description": "Enable Mistral in the query",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "title": "Mistral Model",
+      "label": "Mistral Model",
+      "name": "mistralModel",
+      "description": "Mistral model to use in the query",
+      "type": "dropdown",
+      "default": "Mistral_Small",
+      "data": [
+        {
+          "value": "Mistral_Nemo",
+          "title": "Mistral Nemo"
+        },
+        {
+          "value": "Mistral_Large",
+          "title": "Mistral Large"
+        },
+        {
+          "value": "Mistral_Medium",
+          "title": "Mistral Medium"
+        },
+        {
+          "value": "Mistral_Small",
+          "title": "Mistral Small"
+        },
+        {
+          "value": "Mistral_Codestral",
+          "title": "Mistral Codestral"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "Mistral API Key (Optional)",
+      "label": "Mistral API Key (Optional)",
+      "name": "mistralApiKey",
+      "description": "If provided, uses your own API key instead of Raycast AI quota",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.39",
+    "@ai-sdk/google": "^2.0.25",
+    "@ai-sdk/mistral": "^2.0.21",
+    "@ai-sdk/openai": "^2.0.58",
+    "@ai-sdk/xai": "^2.0.29",
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^1.17.0",
+    "ai": "^5.0.82"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
