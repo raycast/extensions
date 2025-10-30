@@ -624,7 +624,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       "args": [
         "-y"
         "mcp-remote",
-        "https://strata.klavis.ai/mcp/"
+        "https://strata.klavis.ai/mcp/",
         "--header",
         "Authorization:${AUTH_HEADER}"
       ],
