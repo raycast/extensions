@@ -1,3 +1,3 @@
-# Soundboard 2.0 Changelog
+# Farrago Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
