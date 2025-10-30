@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "soundraw",
+  "title": "Soundraw",
+  "description": "Interact with Soundraw to increase your music creation productivity",
+  "icon": "soundraw.png",
+  "author": "clins1994",
+  "owner": "soundraw",
+  "access": "public",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun",
+    "Productivity",
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-samples",
+      "title": "Search Samples",
+      "description": "Search for samples",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "soundrawToken",
+      "title": "API Token",
+      "description": "Your Soundraw API token",
+      "type": "password",
+      "placeholder": "8bf36ea4-6e85-4c46-814a-eb9c5676b03d",
+      "required": true
+    },
+    {
+      "name": "soundrawApiUrl",
+      "title": "API Url",
+      "description": "Your Soundraw API URL",
+      "type": "textfield",
+      "placeholder": "https://api.example.com/api/v1",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.2",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
