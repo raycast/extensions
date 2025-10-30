@@ -1,6 +1,6 @@
 # reclaim Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-10-30
 - Update to the package.json platforms property to include Windows.
 - Update to Search Tasks to not include tasks that are cancelled.
 
