@@ -22,7 +22,7 @@ export default function Receive() {
 
     async function setup() {
       try {
-        const server = await startReceiveServer({ downloadDir: preferredDownloadDir });
+        const server = await startReceiveServer({ downloadDir: resolvedDownloadDir });
         cleanup = server.close;
         if (!isMounted) {
           await server.close();
@@ -66,7 +66,7 @@ export default function Receive() {
         void cleanup();
       }
     };
-  }, []);
+  }, [preferredDownloadDir]);
 
   return (
     <Detail
