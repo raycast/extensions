@@ -6,4 +6,4 @@
 
 Multiple team IDs may be entered separated by commas.
 
-> Unfortunitly <b>drafts</b> are not available via the Figma API and will not be listed.
+> Unfortunately <b>drafts</b> are not available via the Figma API and will not be listed.
