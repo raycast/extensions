@@ -2,23 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "things",
   "title": "Things",
-  "version": "1.0.0",
   "description": "Search and manage your Things to-dos from Raycast",
   "icon": "things-icon.png",
   "author": "loris",
-  "contributors": [
-    "andreaselia",
-    "stelo",
-    "thomaslombart",
-    "srikirank",
-    "vimtor",
-    "samuelkraft",
-    "bendrucker",
-    "vmrjnvc",
-    "dinocosta",
-    "janosorcsik"
-  ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "show-today-list",
@@ -203,6 +193,34 @@
       "name": "delete-project",
       "title": "Delete Project",
       "description": "Delete a project in Things"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "authToken",
+      "type": "password",
+      "title": "Authentication Token",
+      "required": false,
+      "description": "You can find your unique token in Things’ settings. go to Things → Settings → General → Enable Things URLs → Manage",
+      "placeholder": "k2Zxf5M9R_lXJeP3BvOmYA"
+    },
+    {
+      "name": "thingsAppIdentifier",
+      "type": "dropdown",
+      "required": false,
+      "title": "Things version switcher",
+      "description": "Switch between Things or Things Beta",
+      "default": "com.culturedcode.ThingsMac",
+      "data": [
+        {
+          "value": "com.culturedcode.ThingsMac",
+          "title": "Things"
+        },
+        {
+          "value": "com.culturedcode.ThingsMac.beta",
+          "title": "Things Beta"
+        }
+      ]
     }
   ],
   "ai": {
@@ -395,33 +413,17 @@
       }
     ]
   },
-  "preferences": [
-    {
-      "name": "authToken",
-      "type": "password",
-      "title": "Authentication Token",
-      "required": false,
-      "description": "You can find your unique token in Things’ settings. go to Things → Settings → General → Enable Things URLs → Manage",
-      "placeholder": "k2Zxf5M9R_lXJeP3BvOmYA"
-    },
-    {
-      "name": "thingsAppIdentifier",
-      "type": "dropdown",
-      "required": false,
-      "title": "Things version switcher",
-      "description": "Switch between Things or Things Beta",
-      "default": "com.culturedcode.ThingsMac",
-      "data": [
-        {
-          "value": "com.culturedcode.ThingsMac",
-          "title": "Things"
-        },
-        {
-          "value": "com.culturedcode.ThingsMac.beta",
-          "title": "Things Beta"
-        }
-      ]
-    }
+  "contributors": [
+    "andreaselia",
+    "stelo",
+    "thomaslombart",
+    "srikirank",
+    "vimtor",
+    "samuelkraft",
+    "bendrucker",
+    "vmrjnvc",
+    "dinocosta",
+    "janosorcsik"
   ],
   "dependencies": {
     "@raycast/api": "^1.103.5",
@@ -437,14 +439,12 @@
     "eslint": "^9.38.0",
     "typescript": "^5.9.3"
   },
+  "version": "1.0.0",
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }
