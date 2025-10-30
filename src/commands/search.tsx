@@ -66,6 +66,7 @@ const TileListItem = React.memo(
 
     const [playing, setPlaying] = useState(false);
     const [fading, setFading] = useState(false);
+    const [remainingTimeFormatted, setRemainingTimeFormatted] = useState(formatDuration(tile.playerSettings.duration));
 
     useEffect(() => {
       if (oscReceiver.isClosed()) oscReceiver.open();
@@ -84,9 +85,16 @@ const TileListItem = React.memo(
         },
       });
 
+      const unsubscribeRemainingTime = oscReceiver.subscribeToTileAction({
+        tile,
+        action: "remainingTime",
+        handler: (remainingTime: number) => setRemainingTimeFormatted(formatDuration(remainingTime)),
+      });
+
       return () => {
         unsubscribePlaying();
         unsubscribeFading();
+        unsubscribeRemainingTime();
       };
     }, []);
 
@@ -96,9 +104,10 @@ const TileListItem = React.memo(
       return () => clearTimeout(timeout);
     }, [fading]);
 
-    const accessories = useMemo(() => {
-      return [{ text: formatDuration(tile.playerSettings.duration), tooltip: "Duration" }] as List.Item.Accessory[];
-    }, [latestDbUpdate]);
+    const accessories = useMemo<List.Item.Accessory[]>(
+      () => [{ text: remainingTimeFormatted, tooltip: "Duration" }],
+      [latestDbUpdate, remainingTimeFormatted],
+    );
 
     const playStopIcon = playing ? Icon.Stop : Icon.Play;
 
