@@ -3,7 +3,7 @@
     "target": "ES2020",
     "lib": ["ES2020", "DOM"],
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": false,
     "jsx": "react-jsx",
     "declaration": false,
@@ -24,7 +24,9 @@
     "allowUnreachableCode": true,
     "allowUnusedLabels": true,
     "noErrorTruncation": true,
-    "skipDefaultLibCheck": true
+    "skipDefaultLibCheck": true,
+    "isolatedModules": true,
+    "jsxImportSource": "react"
   },
   "include": [
     "src/**/*"

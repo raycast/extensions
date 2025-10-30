@@ -99,7 +99,7 @@
   },
   "devDependencies": {
     "@types/node": "20.8.10",
-    "@types/react": "^18.3.24",
+    "@types/react": "^18.3.26",
     "@typescript-eslint/eslint-plugin": "^8.44.1",
     "@typescript-eslint/parser": "^8.44.1",
     "eslint": "^9.36.0",
