@@ -1,7 +1,7 @@
-import { MenuBarExtra, Icon, LocalStorage, environment, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, LocalStorage, Color } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "util";
-import React, { useEffect, useState } from "react";
 
 const execAsync = promisify(exec);
 
@@ -25,83 +25,71 @@ async function pingGoogle(): Promise<number | null> {
   }
 }
 
+async function loadHistory(): Promise<PingResult[]> {
+  const storedHistory = await LocalStorage.getItem<string>("pingHistory");
+  if (!storedHistory) return [];
+
+  try {
+    const parsed = JSON.parse(storedHistory) as Array<{
+      timestamp: string;
+      latency: number | null;
+      error?: string;
+    }>;
+    return parsed.map((item) => ({
+      ...item,
+      timestamp: new Date(item.timestamp),
+    }));
+  } catch (e) {
+    console.error("Failed to parse history", e);
+    return [];
+  }
+}
+
+interface PingData {
+  latency: number | null;
+  history: PingResult[];
+}
+
+async function pingWithHistory(): Promise<PingData> {
+  // Perform ping
+  const latency = await pingGoogle();
+
+  // Load existing history
+  const history = await loadHistory();
+
+  // Add new ping result to history
+  const newResult: PingResult = {
+    timestamp: new Date(),
+    latency,
+    error: latency === null ? "Failed" : undefined,
+  };
+  const updated = [newResult, ...history].slice(0, 10);
+
+  // Persist updated history
+  await LocalStorage.setItem("pingHistory", JSON.stringify(updated));
+
+  return {
+    latency,
+    history: updated,
+  };
+}
+
 export default function Command() {
-  const [currentLatency, setCurrentLatency] = useState<number | null>(null);
-  const [pingHistory, setPingHistory] = useState<PingResult[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading } = useCachedPromise(pingWithHistory, [], {
+    initialData: { latency: null, history: [] },
+    keepPreviousData: true,
+  });
 
-  useEffect(() => {
-    let isMounted = true;
-    let intervalId: NodeJS.Timeout | undefined;
-
-    async function loadHistory() {
-      const storedHistory = await LocalStorage.getItem<string>("pingHistory");
-      if (!isMounted) return;
-      if (storedHistory) {
-        try {
-          const parsed = JSON.parse(storedHistory) as Array<{
-            timestamp: string;
-            latency: number | null;
-            error?: string;
-          }>;
-          const history: PingResult[] = parsed.map((item) => ({
-            ...item,
-            timestamp: new Date(item.timestamp),
-          }));
-          setPingHistory(history);
-          if (history.length > 0) {
-            setCurrentLatency(history[0].latency);
-          }
-        } catch (e) {
-          console.error("Failed to parse history", e);
-        }
-      }
-    }
-
-    async function recordPing() {
-      const latency = await pingGoogle();
-      if (!isMounted) return;
-      setCurrentLatency(latency);
-
-      const newResult: PingResult = {
-        timestamp: new Date(),
-        latency,
-        error: latency === null ? "Failed" : undefined,
-      };
-
-      setPingHistory((prev) => {
-        const updated = [newResult, ...prev].slice(0, 10);
-        LocalStorage.setItem("pingHistory", JSON.stringify(updated));
-        return updated;
-      });
-    }
-
-    // Load cached history first
-    loadHistory();
-
-    // Do initial ping
-    recordPing().finally(() => setIsLoading(false));
-
-    // Only run continuous interval if NOT a background launch
-    // Background launches just do one ping and exit
-    if (environment.launchType !== LaunchType.Background) {
-      // User-initiated: keep updating every second
-      intervalId = setInterval(recordPing, 1000);
-    }
-
-    return () => {
-      isMounted = false;
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, []);
+  const currentLatency = data?.latency ?? null;
+  const pingHistory = data?.history ?? [];
 
   const menuBarTitle = currentLatency !== null ? `${Math.round(currentLatency)}ms` : "...";
 
   function iconTintForLatency(lat: number | null): string {
-    if (lat === null) return "#8E8E93"; // system gray
-    if (lat < 60) return "#2ECC71"; // green
-    if (lat < 150) return "#F5A623"; // orange
-    return "#FF3B30"; // red
+    if (lat === null) return Color.SecondaryText;
+    if (lat < 60) return Color.Green;
+    if (lat < 150) return Color.Yellow;
+    return Color.Red;
   }
 
   const menuBarIcon = { source: Icon.Dot, tintColor: iconTintForLatency(currentLatency) } as const;
@@ -112,20 +100,12 @@ export default function Command() {
       : "Pinging google.com...";
 
   return (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - Raycast API type conflicts with React types
     <MenuBarExtra icon={menuBarIcon} title={menuBarTitle} isLoading={isLoading} tooltip={tooltip}>
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore */}
       <MenuBarExtra.Section title="Recent Pings">
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-        {/* @ts-ignore */}
         {pingHistory.length === 0 && <MenuBarExtra.Item title="No ping results yet..." />}
-        {pingHistory.map((result, index) => (
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
+        {pingHistory.map((result: PingResult, index: number) => (
           <MenuBarExtra.Item
-            key={index}
+            key={`${result.timestamp.getTime()}-${index}`}
             icon={result.latency !== null ? Icon.Dot : Icon.XMarkCircle}
             title={result.latency !== null ? `${Math.round(result.latency)}ms` : "Failed"}
             subtitle={result.timestamp.toLocaleTimeString()}
