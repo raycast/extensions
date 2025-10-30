@@ -107,7 +107,7 @@ export class OscReceiver {
     try {
       return osc.fromBuffer(msg);
     } catch (err) {
-      if (isOscNullChararcterError(err)) {
+      if (isOscNullCharacterError(err)) {
         console.warn(`encountered ${err.name} – "${err.message}"`);
         return null;
       } else {
@@ -119,6 +119,6 @@ export class OscReceiver {
 
 // idk what this error is, throws unpredictably
 // osc-min failing to parse message from Farrago
-function isOscNullChararcterError(error: any): error is Error {
+function isOscNullCharacterError(error: any): error is Error {
   return error.name == "OSCError" && error.message == "All osc-strings must contain a null character";
 }
