@@ -7,10 +7,23 @@
   "author": "tamag0tcha",
   "license": "MIT",
   "version": "0.0.1",
-  "type": "module",
-  "platforms": ["macOS"],
-  "categories": ["Productivity", "Media"],
-  "keywords": ["youtube", "media", "music", "video", "browser", "play", "pause", "control"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "youtube",
+    "media",
+    "music",
+    "video",
+    "browser",
+    "play",
+    "pause",
+    "control"
+  ],
   "commands": [
     {
       "name": "play-pause",
@@ -72,10 +85,12 @@
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@types/node": "^22.7.5",
-    "@raycast/eslint-config": "^1.0.11",
-    "eslint": "^8.57.0",
-    "typescript": "^5.6.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -84,4 +99,3 @@
     "lint": "ray lint"
   }
 }
-

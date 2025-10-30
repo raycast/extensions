@@ -1,6 +1,5 @@
 import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
-import { findYouTubeTabs } from "./utils/browser-control";
-import { executeInYouTubeTab } from "./utils/browser-control";
+import { findYouTubeTabs, executeInYouTubeTab } from "./utils/browser-control";
 
 export default async function Command() {
   try {
@@ -28,11 +27,7 @@ export default async function Command() {
       })();
     `;
 
-    const currentTimeStr = await executeInYouTubeTab(
-      tab.browser,
-      jsCode,
-      tab.url,
-    );
+    const currentTimeStr = await executeInYouTubeTab(tab.browser, jsCode, tab.url);
     const currentTime = parseInt(currentTimeStr) || 0;
 
     // Build URL with timestamp

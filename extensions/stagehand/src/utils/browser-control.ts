@@ -1,11 +1,6 @@
 import { runAppleScript } from "@raycast/utils";
 
-export type BrowserType =
-  | "Google Chrome"
-  | "Arc"
-  | "Brave Browser"
-  | "Safari"
-  | "Dia";
+export type BrowserType = "Google Chrome" | "Arc" | "Brave Browser" | "Safari" | "Dia";
 
 export interface MediaInfo {
   title: string;
@@ -18,11 +13,7 @@ export interface MediaInfo {
 }
 
 // Note: Dia doesn't support AppleScript automation yet (as of 2025)
-const CHROMIUM_BROWSERS: BrowserType[] = [
-  "Google Chrome",
-  "Arc",
-  "Brave Browser",
-];
+const CHROMIUM_BROWSERS: BrowserType[] = ["Google Chrome", "Arc", "Brave Browser"];
 
 /**
  * Find all YouTube tabs across supported browsers
@@ -54,9 +45,7 @@ export async function findYouTubeTabs(): Promise<MediaInfo[]> {
 /**
  * Find YouTube tabs in Chromium-based browsers (Chrome, Arc, Brave, Dia)
  */
-async function findYouTubeTabsInChromiumBrowser(
-  browser: BrowserType,
-): Promise<MediaInfo[]> {
+async function findYouTubeTabsInChromiumBrowser(browser: BrowserType): Promise<MediaInfo[]> {
   const script = `
     tell application "${browser}"
       if not running then return "[]"
@@ -173,11 +162,7 @@ async function findYouTubeTabsInSafari(): Promise<MediaInfo[]> {
  * Execute JavaScript in a specific YouTube tab by URL
  * This is exported so other commands can use it directly
  */
-export async function executeInYouTubeTab(
-  browser: BrowserType,
-  jsCode: string,
-  targetUrl?: string,
-): Promise<string> {
+export async function executeInYouTubeTab(browser: BrowserType, jsCode: string, targetUrl?: string): Promise<string> {
   if (CHROMIUM_BROWSERS.includes(browser)) {
     return executeInChromiumBrowser(browser, jsCode, targetUrl);
   } else if (browser === "Safari") {
@@ -190,11 +175,7 @@ export async function executeInYouTubeTab(
 /**
  * Execute JavaScript in Chromium-based browser (optionally targeting specific tab by URL)
  */
-async function executeInChromiumBrowser(
-  browser: BrowserType,
-  jsCode: string,
-  targetUrl?: string,
-): Promise<string> {
+async function executeInChromiumBrowser(browser: BrowserType, jsCode: string, targetUrl?: string): Promise<string> {
   // Escape the JavaScript code for AppleScript
   const escapedJS = jsCode.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
@@ -255,10 +236,7 @@ async function executeInChromiumBrowser(
 /**
  * Execute JavaScript in Safari (optionally targeting specific tab by URL)
  */
-async function executeInSafari(
-  jsCode: string,
-  targetUrl?: string,
-): Promise<string> {
+async function executeInSafari(jsCode: string, targetUrl?: string): Promise<string> {
   const escapedJS = jsCode.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
   const script = targetUrl
@@ -318,10 +296,7 @@ async function executeInSafari(
 /**
  * Toggle play/pause on YouTube
  */
-export async function togglePlayPause(
-  browser: BrowserType,
-  targetUrl?: string,
-): Promise<string> {
+export async function togglePlayPause(browser: BrowserType, targetUrl?: string): Promise<string> {
   const jsCode = `
     (function() {
       const video = document.querySelector('video');
@@ -355,9 +330,7 @@ export async function togglePlayPause(
 /**
  * Get current playback info
  */
-export async function getPlaybackInfo(
-  browser: BrowserType,
-): Promise<MediaInfo | null> {
+export async function getPlaybackInfo(browser: BrowserType): Promise<MediaInfo | null> {
   const jsCode = `
     (function() {
       const video = document.querySelector('video');
@@ -396,10 +369,7 @@ export async function getPlaybackInfo(
 /**
  * Skip forward by seconds
  */
-export async function skipForward(
-  browser: BrowserType,
-  seconds: number = 10,
-): Promise<void> {
+export async function skipForward(browser: BrowserType, seconds: number = 10): Promise<void> {
   const jsCode = `
     (function() {
       const video = document.querySelector('video');
@@ -417,10 +387,7 @@ export async function skipForward(
 /**
  * Skip backward by seconds
  */
-export async function skipBackward(
-  browser: BrowserType,
-  seconds: number = 10,
-): Promise<void> {
+export async function skipBackward(browser: BrowserType, seconds: number = 10): Promise<void> {
   const jsCode = `
     (function() {
       const video = document.querySelector('video');
@@ -438,11 +405,7 @@ export async function skipBackward(
 /**
  * Adjust volume using YouTube keyboard shortcuts
  */
-export async function adjustVolume(
-  browser: BrowserType,
-  delta: number,
-  targetUrl?: string,
-): Promise<void> {
+export async function adjustVolume(browser: BrowserType, delta: number, targetUrl?: string): Promise<void> {
   // YouTube keyboard shortcuts: Up arrow = +5%, Down arrow = -5%
   // We'll simulate 2 presses for ~10%
   const key = delta > 0 ? "ArrowUp" : "ArrowDown";
@@ -481,10 +444,7 @@ export async function adjustVolume(
 /**
  * Toggle mute/unmute by clicking YouTube's mute button
  */
-export async function toggleMute(
-  browser: BrowserType,
-  targetUrl?: string,
-): Promise<string> {
+export async function toggleMute(browser: BrowserType, targetUrl?: string): Promise<string> {
   const jsCode = `
     (function() {
       const video = document.querySelector('video');
@@ -512,24 +472,20 @@ export async function toggleMute(
 /**
  * Focus on a specific browser tab by URL
  */
-export async function focusTab(
-  browser: BrowserType,
-  targetUrl: string,
-): Promise<void> {
+export async function focusTab(browser: BrowserType, targetUrl: string): Promise<void> {
   if (CHROMIUM_BROWSERS.includes(browser)) {
     await focusChromiumTab(browser, targetUrl);
   } else if (browser === "Safari") {
     await focusSafariTab(targetUrl);
+  } else {
+    throw new Error(`Focusing tabs is not supported for ${browser}. Dia doesn't support AppleScript automation yet.`);
   }
 }
 
 /**
  * Focus on a specific tab in Chromium browsers
  */
-async function focusChromiumTab(
-  browser: BrowserType,
-  targetUrl: string,
-): Promise<void> {
+async function focusChromiumTab(browser: BrowserType, targetUrl: string): Promise<void> {
   const script = `
     tell application "${browser}"
       set tabFound to false

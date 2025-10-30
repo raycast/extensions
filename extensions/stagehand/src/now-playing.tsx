@@ -1,20 +1,6 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Clipboard,
-} from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import {
-  findYouTubeTabs,
-  togglePlayPause,
-  focusTab,
-  executeInYouTubeTab,
-  BrowserType,
-} from "./utils/browser-control";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Clipboard } from "@raycast/api";
+import { usePromise, showFailureToast } from "@raycast/utils";
+import { findYouTubeTabs, togglePlayPause, focusTab, executeInYouTubeTab, BrowserType } from "./utils/browser-control";
 
 export default function Command() {
   const { data: tabs, isLoading, revalidate } = usePromise(findYouTubeTabs);
@@ -39,14 +25,11 @@ export default function Command() {
           title={tab.title}
           subtitle={tab.url}
           icon={getBrowserIcon(tab.browser)}
-          accessories={[
-            { tag: tab.browser },
-            { icon: tab.isPlaying ? Icon.Play : Icon.Pause },
-          ]}
+          accessories={[{ tag: tab.browser }, { icon: tab.isPlaying ? Icon.Play : Icon.Pause }]}
           actions={
             <ActionPanel>
               <Action
-                title="Play/pause"
+                title="Play / Pause"
                 icon={Icon.Play}
                 onAction={async () => {
                   try {
@@ -63,11 +46,8 @@ export default function Command() {
                         title: "Paused",
                       });
                     } else if (result === "failed-to-play") {
-                      await showToast({
-                        style: Toast.Style.Failure,
+                      await showFailureToast(new Error("Play video in browser first, then use Stagehand"), {
                         title: "Video not ready",
-                        message:
-                          "Play video in browser first, then use Stagehand",
                       });
                     } else {
                       await showToast({
@@ -78,10 +58,7 @@ export default function Command() {
 
                     await revalidate();
                   } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to control media",
-                    });
+                    await showFailureToast(error, { title: "Failed to control media" });
                   }
                 }}
               />
@@ -111,11 +88,7 @@ export default function Command() {
                       })();
                     `;
 
-                    const currentTimeStr = await executeInYouTubeTab(
-                      tab.browser,
-                      jsCode,
-                      tab.url,
-                    );
+                    const currentTimeStr = await executeInYouTubeTab(tab.browser, jsCode, tab.url);
                     const currentTime = parseInt(currentTimeStr) || 0;
 
                     const baseUrl = tab.url.split("&t=")[0].split("?t=")[0];
@@ -133,10 +106,7 @@ export default function Command() {
                       message: `at ${timeDisplay}`,
                     });
                   } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to copy URL",
-                    });
+                    await showFailureToast(error, { title: "Failed to copy URL" });
                   }
                 }}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
@@ -152,10 +122,7 @@ export default function Command() {
                       title: "Switched to tab",
                     });
                   } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to open tab",
-                    });
+                    await showFailureToast(error, { title: "Failed to open tab" });
                   }
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
