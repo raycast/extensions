@@ -21,6 +21,7 @@
     {
       "name": "kagi-news",
       "title": "Browse Daily News",
+      "subtitle": "Kagi News",
       "description": "Browse news articles and sources from Kagi News",
       "mode": "view"
     }
@@ -34,41 +35,119 @@
       "description": "Article language",
       "default": "default",
       "data": [
-        { "title": "Default (Source Language)", "value": "default" },
-        { "title": "English", "value": "en" },
-        { "title": "Español", "value": "es" },
-        { "title": "Français", "value": "fr" },
-        { "title": "Deutsch", "value": "de" },
-        { "title": "Italiano", "value": "it" },
-        { "title": "Português", "value": "pt" },
-        { "title": "Português (Brasil)", "value": "pt-BR" },
-        { "title": "日本語", "value": "ja" },
-        { "title": "한국어", "value": "ko" },
-        { "title": "中文 (简体)", "value": "zh-Hans" },
-        { "title": "中文 (繁體)", "value": "zh-Hant" },
-        { "title": "Nederlands", "value": "nl" },
-        { "title": "Polski", "value": "pl" },
-        { "title": "Русский", "value": "ru" },
-        { "title": "Svenska", "value": "sv" },
-        { "title": "Suomi", "value": "fi" },
-        { "title": "Norsk", "value": "nb" },
-        { "title": "Türkçe", "value": "tr" },
-        { "title": "ไทย", "value": "th" },
-        { "title": "Українська", "value": "uk" },
-        { "title": "Català", "value": "ca" },
-        { "title": "हिन्दी", "value": "hi" },
-        { "title": "العربية", "value": "ar" },
-        { "title": "עברית", "value": "he" },
-        { "title": "Lëtzebuergesch", "value": "lb" }
+        {
+          "title": "Default (Source Language)",
+          "value": "default"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Español",
+          "value": "es"
+        },
+        {
+          "title": "Français",
+          "value": "fr"
+        },
+        {
+          "title": "Deutsch",
+          "value": "de"
+        },
+        {
+          "title": "Italiano",
+          "value": "it"
+        },
+        {
+          "title": "Português",
+          "value": "pt"
+        },
+        {
+          "title": "Português (Brasil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "日本語",
+          "value": "ja"
+        },
+        {
+          "title": "한국어",
+          "value": "ko"
+        },
+        {
+          "title": "中文 (简体)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "中文 (繁體)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "Nederlands",
+          "value": "nl"
+        },
+        {
+          "title": "Polski",
+          "value": "pl"
+        },
+        {
+          "title": "Русский",
+          "value": "ru"
+        },
+        {
+          "title": "Svenska",
+          "value": "sv"
+        },
+        {
+          "title": "Suomi",
+          "value": "fi"
+        },
+        {
+          "title": "Norsk",
+          "value": "nb"
+        },
+        {
+          "title": "Türkçe",
+          "value": "tr"
+        },
+        {
+          "title": "ไทย",
+          "value": "th"
+        },
+        {
+          "title": "Українська",
+          "value": "uk"
+        },
+        {
+          "title": "Català",
+          "value": "ca"
+        },
+        {
+          "title": "हिन्दी",
+          "value": "hi"
+        },
+        {
+          "title": "العربية",
+          "value": "ar"
+        },
+        {
+          "title": "עברית",
+          "value": "he"
+        },
+        {
+          "title": "Lëtzebuergesch",
+          "value": "lb"
+        }
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
