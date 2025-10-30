@@ -23,7 +23,7 @@ export class ThingsError extends Error {
     message: string,
     public readonly type: 'APP_NOT_FOUND' | 'PERMISSION_DENIED' | 'EXECUTION_ERROR' | 'UNKNOWN_ERROR',
     public readonly originalError?: string,
-    public readonly operation?: string
+    public readonly operation?: string,
   ) {
     super(operation ? `${operation}: ${message}` : message);
     this.name = 'ThingsError';
@@ -56,7 +56,7 @@ export const executeJxa = async (script: string, operation?: string) => {
         'Things application not found. Please make sure Things is installed and running.',
         'APP_NOT_FOUND',
         message,
-        operation
+        operation,
       );
       // https://developer.apple.com/documentation/coreservices/1527221-anonymous/erraeeventnotpermitted
     } else if (
@@ -68,21 +68,21 @@ export const executeJxa = async (script: string, operation?: string) => {
         'Permission denied. Please grant Raycast access to Things in System Settings > Privacy & Security > Automation > Raycast > Things.',
         'PERMISSION_DENIED',
         message,
-        operation
+        operation,
       );
     } else if (message.match(/doesn't understand/i) || message.match(/can't get/i)) {
       throw new ThingsError(
         'Things automation interface error. This might be due to a Things version incompatibility or the app not being ready.',
         'EXECUTION_ERROR',
         message,
-        operation
+        operation,
       );
     } else if (message.match(/timed out/i)) {
       throw new ThingsError(
         'Command timed out. Things may be unresponsive or not running.',
         'EXECUTION_ERROR',
         message,
-        operation
+        operation,
       );
     } else {
       throw new ThingsError(`Unexpected error: ${message}`, 'UNKNOWN_ERROR', message, operation);
@@ -135,7 +135,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     },
   }));
 `,
-    `Get ${commandListName} list`
+    `Get ${commandListName} list`,
   );
 };
 
@@ -147,7 +147,7 @@ export const getTodoName = (todoId: string) =>
 
   return todo.name();
 `,
-    'Get todo name'
+    'Get todo name',
   );
 
 export const getProjectName = (projectId: string) =>
@@ -158,7 +158,7 @@ export const getProjectName = (projectId: string) =>
 
   return project.name();
 `,
-    'Get project name'
+    'Get project name',
   );
 
 export const setTodoProperty = (todoId: string, key: string, value: string) =>
@@ -167,7 +167,7 @@ export const setTodoProperty = (todoId: string, key: string, value: string) =>
   const things = Application('${preferences.thingsAppIdentifier}');
   things.toDos.byId('${todoId}').${key} = '${value}';
 `,
-    'Set todo property'
+    'Set todo property',
   );
 
 export const deleteTodo = (todoId: string) =>
@@ -176,7 +176,7 @@ export const deleteTodo = (todoId: string) =>
   const things = Application('${preferences.thingsAppIdentifier}');
   things.delete(things.toDos.byId('${todoId}'));
 `,
-    'Delete todo'
+    'Delete todo',
   );
 
 export const deleteProject = (projectId: string) =>
@@ -185,7 +185,7 @@ export const deleteProject = (projectId: string) =>
   const things = Application('${preferences.thingsAppIdentifier}');
   things.delete(things.projects.byId('${projectId}'));
 `,
-    'Delete project'
+    'Delete project',
   );
 
 // JXA mapping templates - reusable across individual and combined queries
@@ -241,7 +241,7 @@ export const getTags = (): Promise<string[]> =>
   const things = Application('${preferences.thingsAppIdentifier}');
   return things.tags().map(${mapTagJxa});
 `,
-    'Get tags'
+    'Get tags',
   );
 
 export const getProjects = async (): Promise<Project[]> => {
@@ -250,7 +250,7 @@ export const getProjects = async (): Promise<Project[]> => {
     const things = Application('${preferences.thingsAppIdentifier}');
     return things.projects().map(${mapProjectJxa});
   `,
-    'Get projects'
+    'Get projects',
   );
 };
 
@@ -260,7 +260,7 @@ export const getAreas = async (): Promise<Area[]> => {
     const things = Application('${preferences.thingsAppIdentifier}');
     return things.areas().map(${mapAreaJxa});
   `,
-    'Get areas'
+    'Get areas',
   );
 };
 
@@ -279,7 +279,7 @@ export const getTagsProjectsAndAreas = async (): Promise<{
 
     return { tags, projects, areas };
   `,
-    'Get tags, projects, and areas'
+    'Get tags, projects, and areas',
   );
 };
 
@@ -353,7 +353,7 @@ export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
       'auth-token': authToken,
       id,
       ...todoParams,
-    })}`
+    })}`,
   );
 }
 
@@ -367,7 +367,7 @@ export async function updateProject(id: string, projectParams: UpdateProjectPara
       'auth-token': authToken,
       id,
       ...projectParams,
-    })}`
+    })}`,
   );
 }
 
