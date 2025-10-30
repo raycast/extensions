@@ -622,7 +622,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       "command": "npx",
       "args": [
-        "-y"
+        "-y",
         "mcp-remote",
         "https://strata.klavis.ai/mcp/",
         "--header",
