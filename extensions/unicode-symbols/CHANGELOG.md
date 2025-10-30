@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-10-30
 
 - Fixing an issue where it is filtered out characters because of improper search logic (ref: [#22508](https://github.com/raycast/extensions/issues/22508))
 
