@@ -1,16 +1,14 @@
-import { List, Detail, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useState } from "react";
-import { Article, HistoricalEvent, Source } from "./interfaces";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
 import { useCategories } from "./hooks/useCategories";
-import { getDomain, stripHtml } from "./utils";
+import { stripHtml } from "./utils";
+import { ArticleDetail } from "./views/ArticleDetail";
+import { EventDetail } from "./views/EventDetail";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [selectedCategory, setSelectedCategory] = useCachedState<string>("selected-category", "world.json");
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<HistoricalEvent | null>(null);
 
   const { categories, isLoading: loadingCategories, error: categoriesError } = useCategories();
 
@@ -21,70 +19,6 @@ export default function Command() {
     error: contentError,
     isOnThisDay,
   } = useCategoryFeed(selectedCategory, preferences.language);
-
-  if (selectedEvent) {
-    const markdown = `# ${selectedEvent.year}\n\n${stripHtml(selectedEvent.content)}`;
-
-    return (
-      <Detail
-        markdown={markdown}
-        metadata={
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="Type" text={selectedEvent.type} />
-          </Detail.Metadata>
-        }
-      />
-    );
-  }
-
-  if (selectedArticle) {
-    const sources = selectedArticle.sources || [];
-    const highlights = selectedArticle.highlights || [];
-
-    let markdown = `# ${selectedArticle.title}\n\n## Summary\n${selectedArticle.summary}`;
-
-    if (highlights.length > 0) {
-      markdown += `\n\n## Talking Points\n`;
-      highlights.forEach((highlight) => {
-        markdown += `- ${highlight}\n`;
-      });
-    }
-
-    if (selectedArticle.didYouKnow) {
-      markdown += `\n\n## Did You Know?\n${selectedArticle.didYouKnow}`;
-    }
-
-    const allText = [selectedArticle.summary, ...(highlights || []), selectedArticle.didYouKnow || ""].join(" ");
-    const refRegex = /\[([a-z0-9.-]+)#(\d+)\]/g;
-    const referencedSources = new Map<string, Source>();
-
-    let match;
-    while ((match = refRegex.exec(allText)) !== null) {
-      const domain = match[1];
-      const num = parseInt(match[2], 10);
-      const key = `${domain}#${num}`;
-
-      const source = sources.find((s) => getDomain(s.url) === domain);
-      if (source && !referencedSources.has(key)) {
-        referencedSources.set(key, source);
-      }
-    }
-
-    return (
-      <Detail
-        markdown={markdown}
-        metadata={
-          referencedSources.size > 0 ? (
-            <Detail.Metadata>
-              {Array.from(referencedSources.entries()).map(([key, source], index) => (
-                <Detail.Metadata.Link key={index} title={`[${key}]`} target={source.url} text={source.name} />
-              ))}
-            </Detail.Metadata>
-          ) : undefined
-        }
-      />
-    );
-  }
 
   return (
     <List
@@ -124,7 +58,7 @@ export default function Command() {
                     title={`${event.year} - ${stripHtml(event.content).substring(0, 80)}...`}
                     actions={
                       <ActionPanel>
-                        <Action title="View Event" icon={Icon.Eye} onAction={() => setSelectedEvent(event)} />
+                        <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
                       </ActionPanel>
                     }
                   />
@@ -140,7 +74,7 @@ export default function Command() {
                     title={`${event.year} - ${stripHtml(event.content).substring(0, 80)}...`}
                     actions={
                       <ActionPanel>
-                        <Action title="View Event" icon={Icon.Eye} onAction={() => setSelectedEvent(event)} />
+                        <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
                       </ActionPanel>
                     }
                   />
@@ -159,7 +93,7 @@ export default function Command() {
             accessories={[{ tag: article.category }]}
             actions={
               <ActionPanel>
-                <Action title="View Article" icon={Icon.Eye} onAction={() => setSelectedArticle(article)} />
+                <Action.Push title="View Article" icon={Icon.Eye} target={<ArticleDetail article={article} />} />
               </ActionPanel>
             }
           />
