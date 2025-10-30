@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, Clipboard, showHUD } from "@raycast/api";
 
 // 语言配置
@@ -117,7 +117,7 @@ const languages = {
 
 export default function Command() {
   const lang = "en";
-  const t = languages[lang as keyof typeof languages] || languages.zh;
+  const t = languages[lang as keyof typeof languages] || languages.en;
 
   const [inputString, setInputString] = useState<string>("");
   const [removeChars, setRemoveChars] = useState<string>("");
@@ -326,7 +326,7 @@ export default function Command() {
         info={detectedSeparator ? `${t.labels.detectedSeparator}: ${detectedSeparator}` : t.labels.separatorInfo}
       >
         {t.separatorOptions.map((option) => (
-          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+          <Form.Dropdown.Item value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
 
@@ -342,7 +342,7 @@ export default function Command() {
         info={t.labels.decoratorInfo}
       >
         {t.decoratorOptions.map((option) => (
-          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+          <Form.Dropdown.Item value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
 
@@ -354,7 +354,7 @@ export default function Command() {
         info={t.labels.outputSeparatorInfo}
       >
         {t.outputSeparatorOptions.map((option) => (
-          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+          <Form.Dropdown.Item value={option.value} title={option.title} />
         ))}
       </Form.Dropdown>
 
