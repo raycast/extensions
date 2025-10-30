@@ -229,7 +229,7 @@ export default function Command() {
       // 使用指定的输出分隔符
       const finalOutputSeparator = outSep === "\\t" ? "\t" : outSep === "\\n" ? "\n" : outSep;
       return { result: decoratedParts.join(finalOutputSeparator), detectedSep };
-    } catch (err) {
+    } catch {
       throw new Error(t.labels.formatError);
     }
   };
@@ -268,7 +268,7 @@ export default function Command() {
     try {
       await Clipboard.copy(formattedResult);
       await showHUD(t.labels.copySuccess);
-    } catch (err) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: t.labels.copyFailed,
