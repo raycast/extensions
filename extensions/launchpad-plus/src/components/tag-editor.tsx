@@ -145,7 +145,7 @@ export function TagEditor({
         color: def.color,
       };
     })
-    .filter(Boolean);
+    .filter((item): item is { id: string; key: string; name: string; color: string } => item !== null);
 
   return (
     <Form
@@ -172,9 +172,9 @@ export function TagEditor({
       <Form.TagPicker id="tags" title="Tags" value={selectedTagIds} onChange={setSelectedTagIds}>
         {tagItems.map((item) => (
           <Form.TagPicker.Item
-            key={item!.key}
-            value={item!.id}
-            title={item!.name}
+            key={item.key}
+            value={item.id}
+            title={item.name}
             icon={{ source: Icon.Tag, tintColor: item!.color }}
           />
         ))}

@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import EventEmitter from "events";
 import { REFRESH_KEY, TAG_DEFINITIONS_KEY, TAG_ORDER_KEY } from "./constants";
 import { AppTags, TagDefinitions } from "./types";
@@ -27,18 +27,29 @@ export async function loadStoredTags(): Promise<{
   let definitions: TagDefinitions = {};
   let order: string[] = [];
 
+  const handleParseError = async (key: string, error: unknown) => {
+    console.error(`Failed to parse stored item "${key}":`, error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Data Error",
+      message: `Could not load stored data for key: ${key}`,
+    });
+  };
+
   if (stored[TAG_DEFINITIONS_KEY]) {
     try {
       definitions = JSON.parse(stored[TAG_DEFINITIONS_KEY] as string);
-      // eslint-disable-next-line no-empty
-    } catch {}
+    } catch (err) {
+      await handleParseError(TAG_DEFINITIONS_KEY, err);
+    }
   }
 
   if (stored[TAG_ORDER_KEY]) {
     try {
       order = JSON.parse(stored[TAG_ORDER_KEY] as string);
-      // eslint-disable-next-line no-empty
-    } catch {}
+    } catch (err) {
+      await handleParseError(TAG_ORDER_KEY, err);
+    }
   }
 
   for (const [key, value] of Object.entries(stored)) {
@@ -46,8 +57,9 @@ export async function loadStoredTags(): Promise<{
     try {
       const parsed = JSON.parse(value as string);
       if (Array.isArray(parsed)) parsedTags[key] = parsed;
-      // eslint-disable-next-line no-empty
-    } catch {}
+    } catch (err) {
+      await handleParseError(key, err);
+    }
   }
 
   const allTagIds = Object.keys(definitions);

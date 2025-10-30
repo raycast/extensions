@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, List, LocalStorage, confirmAlert } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TAG_DEFINITIONS_KEY } from "../constants";
 import { TagDefinitions } from "../types";
@@ -19,11 +19,8 @@ export function TagsManager({
   const [tagDefinitions, setTagDefinitions] = useState<TagDefinitions>({});
 
   useEffect(() => {
-    // Return a cleanup function that runs when this component is unmounted (when user presses Esc/back)
     return () => {
-      if (onWillDisappear) {
-        onWillDisappear();
-      }
+      onWillDisappear?.();
     };
   }, []);
 
@@ -34,8 +31,9 @@ export function TagsManager({
       if (!defsStr || cancelled) return;
       try {
         setTagDefinitions(JSON.parse(defsStr));
-        // eslint-disable-next-line no-empty
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
     load();
     const interval = setInterval(load, 1000);
@@ -44,6 +42,21 @@ export function TagsManager({
       clearInterval(interval);
     };
   }, []);
+
+  async function handleDelete(id: string, name: string) {
+    const confirmed = await confirmAlert({
+      title: "Delete Tag",
+      message: `Are you sure you want to delete the tag "${name}"?`,
+      icon: Icon.Trash,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (confirmed) {
+      onDelete(id);
+    }
+  }
 
   return (
     <List navigationTitle="Manage Tags">
@@ -59,7 +72,7 @@ export function TagsManager({
                 title="Delete Tag"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
-                onAction={() => onDelete(def.id)}
+                onAction={() => handleDelete(def.id, def.name)}
               />
             </ActionPanel>
           }
