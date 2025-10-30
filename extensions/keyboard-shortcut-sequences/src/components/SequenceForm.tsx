@@ -10,7 +10,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sequence, specialKeys } from "../types";
 
 export default function SequenceForm(props: {
@@ -33,8 +33,19 @@ export default function SequenceForm(props: {
     sequence ? sequence.shortcuts.map((shortcut) => shortcut.delay) : [undefined]
   );
   const [delayErrors, setDelayErrors] = useState<(string | undefined)[]>([]);
+  const [focusDelayIndex, setFocusDelayIndex] = useState<number | null>(null);
 
   const { pop } = useNavigation();
+  const dropdownShortcutsRef = useRef<Form.ItemReference | null>(null);
+  const delayRefs = useRef<(Form.ItemReference | null)[]>([]);
+
+  // Focus the newest delay field when a new shortcut is added
+  useEffect(() => {
+    if (focusDelayIndex !== null && delayRefs.current[focusDelayIndex]) {
+      delayRefs.current[focusDelayIndex]?.focus();
+      setFocusDelayIndex(null);
+    }
+  }, [focusDelayIndex, shortcutCount]);
 
   const updateNameError = (name?: string): boolean => {
     if (!name) {
@@ -57,6 +68,7 @@ export default function SequenceForm(props: {
         placeholder="… delay before execution"
         defaultValue={shortcutDelays[index]?.toString()}
         info="The delay in milliseconds before the next shortcut in the sequence is run."
+        ref={(ref) => (delayRefs.current[index] = ref)}
         onChange={(value) => {
           if (value.length > 0 && !/^\d+$/.test(value))
             return setDelayErrors((prev) => {
@@ -254,24 +266,39 @@ export default function SequenceForm(props: {
         title="Add/Remove Shortcuts"
         id="editShortcuts"
         value="placeholder"
-        info="Use the selection to add or remove shortcuts from the sequence."
+        info="Use the selection to add or remove shortcuts from the sequence. Press Enter to expand."
+        ref={dropdownShortcutsRef}
         onChange={(value) => {
+          if (value == "placeholder") return;
+
+          let newIndex = 0;
+
           if (value === "add") {
+            newIndex = shortcutCount;
             setShortcutCount(shortcutCount + 1);
             setShortcutKeys([...shortcutKeys, ""]);
             setShortcutModifiers([...shortcutModifiers, []]);
             setShortcutSpecials([...shortcutSpecials, []]);
             setShortcutDelays([...shortcutDelays, undefined]);
           } else if (value === "remove" && shortcutCount > 1) {
+            newIndex = shortcutCount - 2;
             setShortcutCount(shortcutCount - 1);
             setShortcutKeys(shortcutKeys.slice(0, -1));
             setShortcutModifiers(shortcutModifiers.slice(0, -1));
             setShortcutSpecials(shortcutSpecials.slice(0, -1));
             setShortcutDelays(shortcutDelays.slice(0, -1));
           }
+
+          // Set focus to the new delay field after state updates
+          setTimeout(() => setFocusDelayIndex(newIndex), 100);
+
+          // Reset to initial value
+          setTimeout(() => {
+            dropdownShortcutsRef.current?.reset();
+          }, 0);
         }}
       >
-        <Form.Dropdown.Item title="Edit Shortcuts" value="placeholder" icon={Icon.Pencil} />
+        <Form.Dropdown.Item title="Edit Shortcuts" value="placeholder" />
         <Form.Dropdown.Item title="Add new" value="add" icon={Icon.Plus} />
         {shortcutCount > 1 && (
           <Form.Dropdown.Item title={`Remove last (Shortcut #${shortcutCount})`} value="remove" icon={Icon.Trash} />
