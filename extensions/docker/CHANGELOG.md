@@ -1,6 +1,6 @@
 # Docker Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-10-30
 
 - Added Windows support for the Docker extension
 - Updated keyboard shortcuts to be platform-specific (Cmd on macOS, Ctrl on Windows)
