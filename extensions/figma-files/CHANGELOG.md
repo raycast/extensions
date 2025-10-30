@@ -1,6 +1,6 @@
 # Figma Files Changelog
 
-## [Adds cache clearing action] - {PR_MERGE_DATE}
+## [Adds cache clearing action] - 2025-10-30
 
 - More granular Oauth scopes for Figma
 - Adds HELP.md for better user onboarding
