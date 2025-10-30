@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-10-30
 
 - Restructured the code to add more features in the future
 
