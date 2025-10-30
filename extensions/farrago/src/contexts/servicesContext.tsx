@@ -24,7 +24,7 @@ type ServiceMap = {
 const ServicesContext = createContext<ServiceMap | null>(null);
 
 export const ServicesProvider = ({ children }: { children: ReactNode }) => {
-  const refs = useRef<Partial<Record<keyof ServiceMap, any>>>({});
+  const refs = useRef<Partial<ServiceMap>>({});
 
   const services = useMemo(
     () =>
