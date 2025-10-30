@@ -5,6 +5,18 @@
   "description": "Search and manage your Things to-dos from Raycast",
   "icon": "things-icon.png",
   "author": "loris",
+  "contributors": [
+    "andreaselia",
+    "stelo",
+    "thomaslombart",
+    "srikirank",
+    "vimtor",
+    "samuelkraft",
+    "bendrucker",
+    "vmrjnvc",
+    "dinocosta",
+    "janosorcsik"
+  ],
   "license": "MIT",
   "platforms": [
     "macOS"
@@ -413,18 +425,6 @@
       }
     ]
   },
-  "contributors": [
-    "andreaselia",
-    "stelo",
-    "thomaslombart",
-    "srikirank",
-    "vimtor",
-    "samuelkraft",
-    "bendrucker",
-    "vmrjnvc",
-    "dinocosta",
-    "janosorcsik"
-  ],
   "dependencies": {
     "@raycast/api": "^1.103.5",
     "@raycast/utils": "^2.2.1",
