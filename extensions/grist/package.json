@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grist",
+  "title": "Grist",
+  "description": "Spreadsheet Software to End Data Chaos",
+  "icon": "grist.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "grist_url",
+      "title": "Grist URL",
+      "default": "https://docs.getgrist.com",
+      "placeholder": "https://docs.getgrist.com",
+      "required": true,
+      "type": "textfield",
+      "description": "Grist URL"
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "776c874dbc7643160f989f58907da497947de662",
+      "required": true,
+      "type": "password",
+      "description": "Grist API Token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-organizations",
+      "title": "Search Organizations",
+      "description": "Organizations, Workspaces, Documents, Tables, Records",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.2",
+    "grist-js": "^0.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
