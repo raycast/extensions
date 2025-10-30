@@ -57,7 +57,7 @@ export default function Users() {
   );
 }
 
-function CreateUser({ mutate }: { mutate: MutatePromise<sdk.Models.User<sdk.Models.Preferences>[]> }) {
+function CreateUser({ mutate }: { mutate: MutatePromise<sdk.Models.User[]> }) {
   type FormValues = {
     userId: string;
     name: string;
