@@ -1,6 +1,6 @@
 # Stagehand Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-10-30
 
 ### Added
 
