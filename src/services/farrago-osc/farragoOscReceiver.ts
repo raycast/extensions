@@ -9,11 +9,11 @@ type OscMessageHandler<T = any> = (...values: T[]) => void;
 export class FarragoOscReceiver extends OscReceiver {
   private addTypedHandler<T>(pattern: Endpoint | RegExp, handler: OscMessageHandler<T>) {
     const regexp = typeof pattern === "string" ? makeStrictRegExp(pattern) : pattern;
-    const _handler = this.addMessageHandler(regexp, (msg) => {
+    const addedHandler = this.addMessageHandler(regexp, (msg) => {
       const values = msg.args.map((arg) => arg.value) as T[];
       handler(...values);
     });
-    return () => this.removeMessageHandler(_handler);
+    return () => this.removeMessageHandler(addedHandler);
   }
 
   subscribeToTileAction<T>(opts: { tile: DBSoundTile; action: TileAction; handler: OscMessageHandler<T> }) {
