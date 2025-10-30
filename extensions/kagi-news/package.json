@@ -5,6 +5,9 @@
   "description": "Browse news articles and sources from Kagi News",
   "icon": "extension-icon.png",
   "author": "mickaphd",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "platforms": [
     "macOS",
     "Windows"
