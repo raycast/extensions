@@ -27,10 +27,7 @@ const ICON_MAP: Record<string, string> = {
   Scripting: "../assets/icons/script.svg",
   UI: "../assets/icons/ui.svg",
   Sound: "../assets/icons/audio.svg",
-  Animation: "../assets/icons/animation.svg",
-  Lighting: "../assets/icons/light.svg",
   Physics: "../assets/icons/physics.svg",
-  Art: "../assets/icons/camera.svg",
 };
 
 const ACTION_ICONS = {

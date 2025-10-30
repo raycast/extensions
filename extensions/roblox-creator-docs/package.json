@@ -3,7 +3,7 @@
   "name": "roblox-creator-docs",
   "title": "Roblox Creator Docs",
   "description": "Fast look-up for Roblox Creator Docs",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "ben_rowlands",
   "license": "MIT",
   "version": "1.0.1",
