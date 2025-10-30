@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inbound",
   "title": "Inbound",
-  "description": "",
-  "icon": "extension-icon.png",
+  "description": "Email API for Developers - Send, Receive & Reply",
+  "icon": "icon.png",
   "author": "xmok",
   "platforms": [
     "macOS",
@@ -27,7 +27,13 @@
     {
       "name": "domains-and-addresses",
       "title": "Domains and Addresses",
-      "description": "",
+      "description": "Manage Domains and Addresses",
+      "mode": "view"
+    },
+    {
+      "name": "send-email",
+      "title": "Send Email",
+      "description": "Send an Email",
       "mode": "view"
     }
   ],
