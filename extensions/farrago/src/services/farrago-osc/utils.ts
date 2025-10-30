@@ -8,7 +8,7 @@ export function getTileCoordinates(tile: DBSoundTile) {
     // i.e. if it's a grid
     tilePosition = { x: tile.gridPositionX, y: tile.gridPositionY };
   } else {
-    // if it 's a list
+    // if it's a list
     tilePosition.y = tile.listPositionY;
   }
 
