@@ -2,7 +2,7 @@
 
 All notable changes to the String Formatter extension will be documented in this file.
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-10-30
 
 ### Added
 - 🎉 Initial release of String Formatter extension
