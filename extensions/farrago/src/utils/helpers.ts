@@ -121,18 +121,16 @@ export async function launchFarrago() {
 export async function farragoDataDirExists() {
   const { farragoDataDir } = getPreferences();
 
-  return new Promise<boolean>((resolve, reject) => {
-    fs.stat(expandTilde(farragoDataDir), (err, stats) => {
-      if (err) {
-        if (err.code === "ENOENT") {
-          return resolve(false);
-        }
-        return reject(err);
-      }
-
-      return resolve(stats.isDirectory());
-    });
-  });
+  try {
+    const stats = await fs.promises.stat(expandTilde(farragoDataDir));
+    return stats.isDirectory();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    if (err.code === "ENOENT") {
+      return false;
+    }
+    throw err;
+  }
 }
 
 export class AbortError extends Error {
