@@ -1,160 +1,115 @@
 # Grokipedia Raycast AI Tools
 
-This directory contains Raycast AI tools that expose Grokipedia's API functionality to AI assistants.
+This folder contains the Raycast AI tool implementations that wrap Grokipedia's HTTP API. Each file exports a small, focused tool that can be registered with Raycast (or used programmatically) to fetch stats, run searches, or fetch page content.
 
-## Available Tools
+Files in this directory (what's actually implemented):
 
-### 1. `get-stats`
+- `get-stats.ts` — returns site-wide statistics (page counts, index size, total views)
+- `search-typeahead.ts` — fast typeahead/autocomplete suggestions for a query
+- `full-text-search.ts` — comprehensive full-text search with highlights, snippets, facets
+- `full-text-search.confirmation.ts` — optional confirmation metadata for the full-text search tool
+- `get-page.ts` — fetch a single page by slug; optional full content and link validation
+- `README.md` — this file
 
-Fetches site-wide statistics from Grokipedia.
+## Tool inputs & outputs (summary)
 
-**Input:** None
+- get-stats: no input, returns basic metrics like `totalPages`, `totalViews`, `indexSizeBytes`, and a `statsTimestamp`.
+- search-typeahead: { query: string; limit?: number } → list of suggestions ({ title, snippet, slug, score }) and `tookMs`.
+- full-text-search: { query: string; limit?: number; offset?: number } → paginated results with highlights, `total`, facets and `tookMs`.
+- get-page: { slug: string; includeContent?: boolean; validateLinks?: boolean } → page metadata, optional `content`, `citations`, and `linkedPages`.
 
-**Returns:**
+All tools return a small wrapper object with `{ success: boolean, data: ... }` or throw an error on network/HTTP failure.
 
-- `totalPages`: Total number of pages in the database
-- `totalViews`: Total view count across all pages
-- `avgViewsPerPage`: Average views per page
-- `indexSizeBytes`: Size of the search index
-- `statsTimestamp`: When the stats were last updated
+## Implementation notes
 
-**Example Use Case:** "What are the current Grokipedia statistics?"
+- The tools use the native `fetch` API and a shared `buildUrl` helper (`../utils/apiClient.ts`) to create request URLs.
+- TypeScript types live in `src/types.ts` and are used for the tool inputs and responses.
+- Tools are intentionally minimal and dependency-free so they are easy to embed into other projects or Raycast tool registrations.
 
----
+## Example usage (programmatic)
 
-### 2. `search-typeahead`
+Each tool exports a default async function that accepts the input object; usage example:
 
-Gets typeahead/autocomplete suggestions for a search query.
+```ts
+import getStats from "./tools/get-stats";
 
-**Input:**
-
-- `query` (required): The search query
-- `limit` (optional): Max suggestions to return (default: 5)
-
-**Returns:**
-
-- Array of suggestions with titles, snippets, slugs, and relevance scores
-- Search time in milliseconds
-
-**Example Use Case:** "Give me suggestions for 'Albert Ein'"
-
----
-
-### 3. `full-text-search`
-
-Performs a comprehensive full-text search across all Grokipedia articles.
-
-**Input:**
-
-- `query` (required): The search query
-- `limit` (optional): Max results to return (default: 12)
-- `offset` (optional): Results to skip for pagination (default: 0)
-
-**Returns:**
-
-- Array of search results with highlights and snippets
-- Total result count
-- Facets for filtering
-- Search time in milliseconds
-
-**Example Use Case:** "Search for articles about quantum physics"
-
-**Note:** Includes an optional confirmation (demonstration purpose) defined in `full-text-search.confirmation.ts`
-
----
-
-### 4. `get-page`
-
-Fetches a specific Grokipedia page by its slug.
-
-**Input:**
-
-- `slug` (required): The page slug (e.g., "Albert_Einstein")
-- `includeContent` (optional): Include full page content (default: true)
-- `validateLinks` (optional): Validate page links (default: true)
-
-**Returns:**
-
-- Full page content (if requested)
-- Page metadata (categories, language, last modified, etc.)
-- Statistics (views, quality score)
-- Citations
-- Linked pages (indexed and unindexed)
-
-**Example Use Case:** "Get the full content of the Albert Einstein page"
-
----
-
-## Implementation Details
-
-All tools:
-
-- Use the native `fetch` API (no external dependencies)
-- Share the same `buildUrl` utility from `../utils/apiClient.ts`
-- Return a consistent response format with `success` flag and `data`
-- Include proper TypeScript types from `../types.ts`
-- Follow Raycast tool conventions with detailed JSDoc comments
-
-## Tool Structure
-
-Each tool follows this pattern:
-
-```typescript
-import { buildUrl } from "../utils/apiClient";
-import type { ResponseType } from "../types";
-
-type Input = {
-  /** JSDoc description for AI to understand the parameter */
-  paramName: string;
-};
-
-const tool = async (input: Input) => {
-  const url = buildUrl("/endpoint", { ...input });
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Failed: ${response.statusText}`);
-  }
-
-  const data = (await response.json()) as ResponseType;
-
-  return {
-    data,
-    success: true,
-  };
-};
-
-export default tool;
+const result = await getStats({});
+if (result.success) {
+  console.log(result.data.totalPages);
+}
 ```
 
-## Optional Confirmations
+## Raycast registration
 
-Tools can include optional confirmation dialogs (see `full-text-search.confirmation.ts`):
-
-```typescript
-import { Tool } from "@raycast/api";
-
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  return {
-    message: "Are you sure?",
-    info: [{ name: "Field", value: input.field }],
-  };
-};
-```
-
-## Registration
-
-Tools are registered in `package.json` under the `tools` array:
+To register these tools with Raycast (in `package.json`), include entries similar to:
 
 ```json
 {
   "tools": [
     {
-      "name": "tool-name",
-      "title": "Tool Title",
-      "description": "What the tool does",
+      "name": "get-stats",
+      "title": "Grokipedia: Get Stats",
+      "description": "Fetch site statistics",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-typeahead",
+      "title": "Grokipedia: Typeahead",
+      "description": "Get autocomplete suggestions",
       "mode": "no-view"
     }
   ]
 }
 ```
+
+Adjust fields as needed for your Raycast tooling setup.
+
+## Development & testing
+
+1. Install deps: `npm install`
+2. Build: `npm run build`
+3. When editing a tool, keep its API shape stable — the type declarations in `src/types.ts` are used across the repo.
+
+If you want to exercise the tools locally without Raycast, write a small script that imports the tool and calls it (see example above).
+
+## Examples & expected shapes
+
+search-typeahead response (abbreviated):
+
+```json
+{
+  "success": true,
+  "data": {
+    "suggestions": [
+      {
+        "title": "Albert Einstein",
+        "snippet": "German-born theoretical physicist...",
+        "slug": "Albert_Einstein",
+        "score": 98
+      }
+    ],
+    "tookMs": 12
+  }
+}
+```
+
+full-text-search response (abbreviated):
+
+```json
+{
+  "success": true,
+  "data": {
+    "total": 123,
+    "results": [{ "title": "Quantum mechanics", "snippet": "...", "highlights": ["quantum"] }],
+    "facets": {},
+    "tookMs": 34
+  }
+}
+```
+
+## Notes & assumptions
+
+- These tools assume a reachable Grokipedia HTTP API endpoint and a `buildUrl` helper that constructs full URLs including any API key or base path.
+- Error handling currently throws for non-OK HTTP responses; callers (or Raycast integrations) should handle and present errors accordingly.
+
+If you'd like, I can also generate small test harness scripts for each tool to make local development and CI testing easier.
