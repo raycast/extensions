@@ -5,6 +5,10 @@
   "description": "Generate strong passwords according to the \"xkcd\" style: https://xkcd.com/936/",
   "icon": "xkcd-pw-gen-icon.png",
   "author": "nkcmr",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Security"
   ],

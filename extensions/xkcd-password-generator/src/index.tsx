@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useState } from "react";
 import { webcrypto } from "crypto";
 import { DICTIONARY } from "./dictionary";
 
@@ -44,9 +45,26 @@ function generateNPasswords(n: number): string[] {
 }
 
 export default function Command() {
+  const [passwords, setPasswords] = useState<string[]>(() => generateNPasswords(numSets));
+
+  const refreshPasswords = () => {
+    setPasswords(generateNPasswords(numSets));
+  };
+
   return (
-    <List>
-      {generateNPasswords(numSets).map((pw, i) => (
+    <List
+      actions={
+        <ActionPanel>
+          <Action
+            icon={Icon.ArrowClockwise}
+            title="Generate New Passwords"
+            onAction={refreshPasswords}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+        </ActionPanel>
+      }
+    >
+      {passwords.map((pw, i) => (
         <List.Item
           key={`pw-${i}`}
           icon="copy.png"
@@ -55,6 +73,12 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy to Clipboard" content={pw} />
+              <Action
+                icon={Icon.ArrowClockwise}
+                title="Generate New Passwords"
+                onAction={refreshPasswords}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
             </ActionPanel>
           }
         />
