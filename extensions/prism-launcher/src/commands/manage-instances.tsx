@@ -84,7 +84,7 @@ export default function ManageInstances() {
                 <ActionPanel>
                   <Action
                     title="Launch Instance"
-                    icon={"app-window-16"}
+                    icon={Icon.Rocket}
                     onAction={async () => {
                       child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instance.id}"`);
                       await closeMainWindow({
@@ -101,7 +101,7 @@ export default function ManageInstances() {
                   />
                   <Action
                     title="Open Instance Window"
-                    icon={"app-window-list-16"}
+                    icon={Icon.AppWindowList}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                     onAction={async () => {
                       child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --show "${instance.id}"`);
@@ -135,7 +135,7 @@ export default function ManageInstances() {
       </When>
       <When condition={isPrismInstalled == false}>
         <List.EmptyView
-          icon={"x-mark-circle-16"}
+          icon={Icon.ExclamationMark}
           title={"Prism Launcher is not installed"}
           description={`Prism Launcher not installed or ${instancesPath} is not present`}
         />

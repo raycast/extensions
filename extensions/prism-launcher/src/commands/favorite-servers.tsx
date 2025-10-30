@@ -149,7 +149,7 @@ export default function FavoriteServers() {
         ))
       ) : (
         <List.EmptyView
-          icon={"server-stack-16"}
+          icon={Icon.Signal0}
           title={"No favorite servers"}
           description={"Mark servers as favorites to see them here"}
         />

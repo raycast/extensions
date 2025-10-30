@@ -23,6 +23,7 @@ import {
   parseServersFromInstance,
   sortServers,
   loadFavoriteInstanceIds,
+  instancesPath,
 } from "../utils/prism";
 import { Server, Instance } from "../types";
 
@@ -116,7 +117,7 @@ export default function JoinServer() {
                   <ActionPanel>
                     <Action
                       title="Join Server"
-                      icon={Icon.GameController}
+                      icon={Icon.Network}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
                       onAction={async () => {
                         child_process.exec(
@@ -130,7 +131,7 @@ export default function JoinServer() {
                     />
                     <Action
                       title="Launch Instance"
-                      icon={"app-window-16"}
+                      icon={Icon.Rocket}
                       onAction={async () => {
                         child_process.exec(
                           `open -b "org.prismlauncher.PrismLauncher" --args --launch "${server.instanceId}"`,
@@ -161,7 +162,7 @@ export default function JoinServer() {
             ))
           ) : (
             <List.EmptyView
-              icon={"server-stack-16"}
+              icon={Icon.Signal0}
               title={"No servers found"}
               description={"No servers were found in this instance"}
             />
@@ -191,12 +192,12 @@ export default function JoinServer() {
                 <ActionPanel>
                   <Action
                     title="View Servers"
-                    icon={"server-stack-16"}
+                    icon={Icon.AppWindowList}
                     onAction={() => handleInstanceSelect(instance)}
                   />
                   <Action
                     title="Launch Instance"
-                    icon={"app-window-16"}
+                    icon={Icon.Rocket}
                     onAction={async () => {
                       child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instance.id}"`);
                       await closeMainWindow({
@@ -212,9 +213,9 @@ export default function JoinServer() {
       </When>
       <When condition={isPrismInstalled == false}>
         <List.EmptyView
-          icon={"x-mark-circle-16"}
+          icon={Icon.ExclamationMark}
           title={"Prism Launcher is not installed"}
-          description={"Prism Launcher not installed or instances folder is not present"}
+          description={`Prism Launcher not installed or ${instancesPath} is not present`}
         />
       </When>
     </List>
