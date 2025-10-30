@@ -6,13 +6,29 @@
   "icon": "extension-icon.png",
   "author": "ben_rowlands",
   "license": "MIT",
+  "version": "1.0.1",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
   "commands": [
     {
       "name": "creator-docs",
       "title": "Roblox Creator Docs",
       "subtitle": "Search Creator Docs",
       "description": "Browse and open Roblox Creator Docs in default browser",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "hideIcons",
+          "type": "checkbox",
+          "required": false,
+          "title": "Hide Icons",
+          "label": "Hide icons in search results",
+          "description": "When enabled, icons will not be displayed next to search results",
+          "default": false
+        }
+      ]
     }
   ],
   "dependencies": {

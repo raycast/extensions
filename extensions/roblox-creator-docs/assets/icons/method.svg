@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
+  <!-- Box -->
+  <rect x="7" y="4" width="7" height="8" rx="1" fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+  <!-- Windlines to the left -->
+  <path d="M2 6H5.5M2 8H5M2 10H5.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
