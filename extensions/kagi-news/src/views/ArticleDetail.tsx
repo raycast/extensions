@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import { Article, Source } from "../interfaces";
-import { getDomain, stripHtml } from "../utils";
+import { getDomain } from "../utils";
 
 interface ArticleDetailProps {
   article: Article;
