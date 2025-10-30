@@ -71,7 +71,7 @@ export function useLatestDbUpdate() {
   const [latestDbUpdate, setLatestDbUpdate] = useState(dataParser.lastParsedSets);
 
   useInterval(() => {
-    if (!dataParser.hasFreshSets()) {
+    if (!dataParser.hasUpToDateSets()) {
       dataSource.emptyDb();
       dataSource.populateDb(dataParser.getFreshSetsParsed());
       setLatestDbUpdate(dataParser.lastParsedSets);

@@ -64,7 +64,7 @@ export class FarragoDataParser {
     return result;
   }
 
-  hasFreshSets() {
+  hasUpToDateSets() {
     const lastTimeEdited = this.getLastTimeEdited();
     return this.lastParsedSets && this.lastParsedSets > lastTimeEdited;
   }
