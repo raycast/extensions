@@ -1,4 +1,4 @@
-import { OscSender } from "@/services/osc/oscSender";
+import { OscSender, SupportedArgType } from "@/services/osc/oscSender";
 import { DBSoundSet, DBSoundTile } from "@/types";
 
 import {
@@ -13,7 +13,7 @@ import {
 import { getTileBaseAddress } from "./utils";
 
 export class FarragoOscSender extends OscSender {
-  private async sendToFarrago(endpoint: Endpoint, args: Array<any>) {
+  private async sendToFarrago(endpoint: Endpoint, args: Array<SupportedArgType>) {
     await super.send(endpoint, args);
   }
 
@@ -21,31 +21,31 @@ export class FarragoOscSender extends OscSender {
     await this.sendToFarrago("/ping", [true]);
   }
 
-  async runTileAction(action: TileAction, tile: DBSoundTile, args?: Array<any>) {
+  async runTileAction(action: TileAction, tile: DBSoundTile, args?: Array<SupportedArgType>) {
     await this.sendToFarrago(`${getTileBaseAddress(tile)}/${action}`, args ?? [true]);
   }
 
-  async runSetAction(set: DBSoundSet, args?: Array<any>) {
+  async runSetAction(set: DBSoundSet, args?: Array<SupportedArgType>) {
     await this.sendToFarrago(`/set/${set.position}`, args ?? [true]);
   }
 
-  async runTransportAction(action: TransportAction, args?: Array<any>) {
+  async runTransportAction(action: TransportAction, args?: Array<SupportedArgType>) {
     await this.sendToFarrago(`/transport/${action}`, args ?? [true]);
   }
 
-  async runMasterAction(action: MasterAction, args?: Array<any>) {
+  async runMasterAction(action: MasterAction, args?: Array<SupportedArgType>) {
     await this.sendToFarrago(`/master/${action}`, args ?? [true]);
   }
 
-  async runInspectorAction(action: InspectorAction, args?: Array<any>) {
+  async runInspectorAction(action: InspectorAction, args?: Array<SupportedArgType>) {
     await this.sendToFarrago(`/inspector/${action}`, args ?? [true]);
   }
 
-  async runListAction(action: ListAction, args?: Array<any>) {
+  async runListAction(action: ListAction, args?: Array<SupportedArgType>) {
     await this.sendToFarrago(`/list/${action}`, args ?? [true]);
   }
 
-  async runGlobalAction(action: GlobalAction, args?: Array<any>) {
+  async runGlobalAction(action: GlobalAction, args?: Array<SupportedArgType>) {
     await this.sendToFarrago(`/global/${action}`, args ?? [true]);
   }
 }

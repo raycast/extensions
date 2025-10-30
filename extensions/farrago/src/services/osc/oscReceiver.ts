@@ -119,6 +119,7 @@ export class OscReceiver {
 
 // idk what this error is, throws unpredictably
 // osc-min failing to parse message from Farrago
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isOscNullCharacterError(error: any): error is Error {
   return error.name == "OSCError" && error.message == "All osc-strings must contain a null character";
 }

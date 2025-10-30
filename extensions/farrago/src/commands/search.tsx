@@ -22,7 +22,7 @@ import { applyShortcutTitleTemplate, formatDuration, getTileColorByIndex } from 
 export function SearchCommand() {
   const { dataSource } = useServices();
   const latestDbUpdate = useLatestDbUpdate();
-  const [gridFilter, setGridFilter] = useState<any>("");
+  const [gridFilter, setGridFilter] = useState("");
 
   const tiles = useMemo(() => {
     const allTiles = dataSource.getAllTiles();

@@ -1,6 +1,6 @@
 import dgram from "dgram";
 
-type SupportedArgType = number | string | boolean;
+export type SupportedArgType = number | string | boolean;
 
 export class OscSender {
   private remoteHost: string;

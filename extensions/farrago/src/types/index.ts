@@ -19,7 +19,7 @@ export type SoundSetTile = {
   automations: Automation;
   colorIndex: number;
   editorModelState: EditorModelState;
-  editorWindowState: Record<string, any>;
+  editorWindowState: Record<string, unknown>;
   favorite: boolean;
   fileName: string;
   fileUUID: string;
@@ -60,7 +60,7 @@ export type SoundSet = {
 };
 
 type Automation = {
-  modelItems: any[];
+  modelItems: unknown[];
 };
 
 type Clip = {

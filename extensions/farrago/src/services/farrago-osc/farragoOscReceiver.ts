@@ -4,7 +4,7 @@ import { DBSoundTile } from "@/types";
 import { Endpoint, TileAction } from "./types";
 import { getTileBaseAddress } from "./utils";
 
-type OscMessageHandler<T = any> = (...values: T[]) => void;
+type OscMessageHandler<T = unknown> = (...values: T[]) => void;
 
 export class FarragoOscReceiver extends OscReceiver {
   private addTypedHandler<T>(pattern: Endpoint | RegExp, handler: OscMessageHandler<T>) {

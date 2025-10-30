@@ -237,7 +237,7 @@ function FarragoChecker<P extends LaunchProps>(
 
 // * like the HOC above, but for no-view commands
 
-export function withFarragoRunningNoView<P extends LaunchProps>(command: (props: P) => any | Promise<any>) {
+export function withFarragoRunningNoView<P extends LaunchProps>(command: (props: P) => unknown | Promise<unknown>) {
   return async (props: P) => {
     const farragoExists = await checkFarragoExists();
     if (!farragoExists) {
