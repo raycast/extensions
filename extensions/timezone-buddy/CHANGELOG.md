@@ -1,6 +1,6 @@
 # Timezone Buddy Changelog
 
-## [Added Windows Support] - {PR_MERGE_DATE}
+## [Added Windows Support] - 2025-10-30
 
 ## [New Feature] - 2025-08-06
 
