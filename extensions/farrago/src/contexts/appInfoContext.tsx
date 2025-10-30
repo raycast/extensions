@@ -3,17 +3,17 @@ import {
   ActionPanel,
   Application,
   Color,
-  environment,
   Icon,
   LaunchProps,
   List,
+  Toast,
+  environment,
   open,
   openExtensionPreferences,
   popToRoot,
   showToast,
-  Toast,
 } from "@raycast/api";
-import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { FC } from "react";
 
 import { FarragoOscPinger } from "@/services/farrago-osc/farragoOscPinger";
