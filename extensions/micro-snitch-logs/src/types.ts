@@ -1,14 +1,7 @@
 export interface LogEntry {
   timestamp: Date;
   dateString: string;
-  eventType:
-    | "launched"
-    | "connected"
-    | "disconnected"
-    | "active"
-    | "inactive"
-    | "found"
-    | "enabled";
+  eventType: "launched" | "connected" | "disconnected" | "active" | "inactive" | "found" | "enabled";
   deviceType: "Audio" | "Video" | "System" | "Unknown";
   deviceName: string;
   message: string;
