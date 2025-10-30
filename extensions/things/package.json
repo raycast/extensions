@@ -207,34 +207,6 @@
       "description": "Delete a project in Things"
     }
   ],
-  "preferences": [
-    {
-      "name": "authToken",
-      "type": "password",
-      "title": "Authentication Token",
-      "required": false,
-      "description": "You can find your unique token in Things’ settings. go to Things → Settings → General → Enable Things URLs → Manage",
-      "placeholder": "k2Zxf5M9R_lXJeP3BvOmYA"
-    },
-    {
-      "name": "thingsAppIdentifier",
-      "type": "dropdown",
-      "required": false,
-      "title": "Things version switcher",
-      "description": "Switch between Things or Things Beta",
-      "default": "com.culturedcode.ThingsMac",
-      "data": [
-        {
-          "value": "com.culturedcode.ThingsMac",
-          "title": "Things"
-        },
-        {
-          "value": "com.culturedcode.ThingsMac.beta",
-          "title": "Things Beta"
-        }
-      ]
-    }
-  ],
   "ai": {
     "instructions": "Moving a to-do means changing its list. For example, moving \"buy milk\" from inbox to today means changing its list to today. Only update the when property of the to-do when referring to a date.",
     "evals": [
@@ -425,6 +397,34 @@
       }
     ]
   },
+  "preferences": [
+    {
+      "name": "authToken",
+      "type": "password",
+      "title": "Authentication Token",
+      "required": false,
+      "description": "You can find your unique token in Things’ settings. go to Things → Settings → General → Enable Things URLs → Manage",
+      "placeholder": "k2Zxf5M9R_lXJeP3BvOmYA"
+    },
+    {
+      "name": "thingsAppIdentifier",
+      "type": "dropdown",
+      "required": false,
+      "title": "Things version switcher",
+      "description": "Switch between Things or Things Beta",
+      "default": "com.culturedcode.ThingsMac",
+      "data": [
+        {
+          "value": "com.culturedcode.ThingsMac",
+          "title": "Things"
+        },
+        {
+          "value": "com.culturedcode.ThingsMac.beta",
+          "title": "Things Beta"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.5",
     "@raycast/utils": "^2.2.1",
