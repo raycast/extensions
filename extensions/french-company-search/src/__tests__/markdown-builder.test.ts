@@ -81,6 +81,82 @@ describe("markdown-builder", () => {
       expect(result).toContain("123\u00A0456\u00A0789");
       expect(result).toContain("Jean DUPONT");
     });
+
+    it("should format corporate entity in English using the default template", () => {
+      const mockData: CompanyData = {
+        id: "test-id-123",
+        formality: {
+          siren: "123456789",
+          content: {
+            succursaleOuFiliale: "AVEC_ETABLISSEMENT",
+            formeExerciceActivitePrincipale: "COMMERCIALE",
+            personneMorale: {
+              denomination: "Test Company SARL",
+              identite: {
+                entreprise: {
+                  denomination: "Test Company SARL",
+                },
+                description: {
+                  montantCapital: 10000,
+                },
+              },
+              adresseEntreprise: {
+                adresse: {
+                  codePostal: "75001",
+                  numeroVoie: "123",
+                  typeVoie: "rue",
+                  libelleVoie: "de la Paix",
+                  commune: "Paris",
+                },
+              },
+              immatriculationRcs: {
+                villeImmatriculation: "PARIS",
+                numeroRcs: "123456789",
+              },
+              composition: {
+                pouvoirs: [
+                  {
+                    individu: {
+                      descriptionPersonne: {
+                        nom: "Dupont",
+                        prenoms: ["Jean"],
+                        genre: "1",
+                      },
+                    },
+                    roleEntreprise: "5132",
+                  },
+                ],
+              },
+            },
+            natureCreation: {
+              dateCreation: "2020-01-01",
+              societeEtrangere: false,
+              formeJuridique: "5499",
+              formeJuridiqueInsee: "5499",
+              etablieEnFrance: true,
+              salarieEnFrance: false,
+              relieeEntrepriseAgricole: false,
+              entrepriseAgricole: false,
+            },
+          },
+        },
+        updatedAt: "2023-01-01",
+        nombreEtablissementsOuverts: 1,
+        nombreRepresentantsActifs: 1,
+      };
+
+      const result = buildPersonneMoraleMarkdown(mockData, undefined, "en");
+
+      expect(result).toContain("**Test Company SARL**,");
+      expect(result).toContain(
+        "A Limited liability (*Société à responsabilité limitée (SARL)*) company, with a share capital of €10,000.00,",
+      );
+      expect(result).toContain("Having its head office located at 123 rue de la Paix, 75001 Paris,");
+      expect(result).toContain("Registered under number 123,456,789 with the Paris Trade and Companies Register,");
+      expect(result).toContain(
+        "Represented by Jean DUPONT, its President, who warrants that he is duly authorized for the purposes herein set out,",
+      );
+    });
   });
 
   describe("buildPersonnePhysiqueMarkdown", () => {
@@ -119,7 +195,14 @@ describe("markdown-builder", () => {
               },
             },
             natureCreation: {
+              dateCreation: "2020-01-01",
+              societeEtrangere: false,
+              formeJuridique: "1000",
+              formeJuridiqueInsee: "1000",
               etablieEnFrance: true,
+              salarieEnFrance: false,
+              relieeEntrepriseAgricole: false,
+              entrepriseAgricole: false,
             },
           },
         },
@@ -131,6 +214,119 @@ describe("markdown-builder", () => {
       expect(result).toContain("Née(e) le 1980-01-15");
       expect(result).toContain("De nationalité Française");
       expect(result).toContain("987\u00A0654\u00A0321");
+    });
+  });
+
+  describe("buildMarkdown with custom template", () => {
+    it("should apply template override for corporate entities", () => {
+      const mockData: CompanyData = {
+        id: "template-test-1",
+        updatedAt: "2024-01-01",
+        nombreRepresentantsActifs: 1,
+        nombreEtablissementsOuverts: 1,
+        formality: {
+          siren: "123456789",
+          content: {
+            succursaleOuFiliale: "AVEC_ETABLISSEMENT",
+            formeExerciceActivitePrincipale: "COMMERCIALE",
+            personneMorale: {
+              denomination: "Demo Corp",
+              adresseEntreprise: {
+                adresse: {
+                  codePostal: "75001",
+                  numeroVoie: "1",
+                  typeVoie: "rue",
+                  libelleVoie: "du Temple",
+                  commune: "Paris",
+                },
+              },
+              composition: {
+                pouvoirs: [
+                  {
+                    individu: {
+                      descriptionPersonne: {
+                        nom: "Durand",
+                        prenoms: ["Alice"],
+                        genre: "2",
+                      },
+                    },
+                    roleEntreprise: "5132",
+                  },
+                ],
+              },
+            },
+            natureCreation: {
+              dateCreation: "2020-01-01",
+              societeEtrangere: false,
+              formeJuridique: "5370",
+              formeJuridiqueInsee: "5370",
+              etablieEnFrance: true,
+              salarieEnFrance: false,
+              relieeEntrepriseAgricole: false,
+              entrepriseAgricole: false,
+            },
+          },
+        },
+      };
+
+      const template = "Company {{company_name}} ({{siren_formatted}}) led by {{representative_name}}";
+      const result = buildMarkdown(mockData, { template });
+
+      expect(result).toBe("Company Demo Corp (123\u00A0456\u00A0789) led by Alice DURAND");
+    });
+
+    it("should apply template override for individual entrepreneurs", () => {
+      const mockData: CompanyData = {
+        id: "template-test-2",
+        updatedAt: "2025-08-12T12:00:00+02:00",
+        nombreRepresentantsActifs: 1,
+        nombreEtablissementsOuverts: 1,
+        formality: {
+          siren: "987654321",
+          content: {
+            succursaleOuFiliale: "SANS_ETABLISSEMENT",
+            formeExerciceActivitePrincipale: "COMMERCIALE",
+            personnePhysique: {
+              identite: {
+                entrepreneur: {
+                  descriptionPersonne: {
+                    nom: "Martin",
+                    prenoms: ["Marie"],
+                    genre: "2",
+                    dateDeNaissance: "1980-01-15",
+                    lieuDeNaissance: "Lyon",
+                    nationalite: "Française",
+                  },
+                },
+              },
+              adresseEntreprise: {
+                adresse: {
+                  numeroVoie: "45",
+                  typeVoie: "avenue",
+                  libelleVoie: "Victor Hugo",
+                  codePostal: "69001",
+                  commune: "Lyon",
+                },
+              },
+            },
+            natureCreation: {
+              dateCreation: "2020-01-01",
+              societeEtrangere: false,
+              formeJuridique: "1000",
+              formeJuridiqueInsee: "1000",
+              etablieEnFrance: true,
+              salarieEnFrance: false,
+              relieeEntrepriseAgricole: false,
+              entrepriseAgricole: false,
+            },
+          },
+        },
+      } as CompanyData;
+
+      const template = "{{civility}} {{full_name}} ({{legal_form}})";
+      const result = buildMarkdown(mockData, { template });
+
+      expect(result).toBe("Madame Marie Martin (Entrepreneur individuel)");
     });
   });
 

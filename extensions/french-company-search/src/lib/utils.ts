@@ -1,6 +1,7 @@
-import { AddressInfo } from "../types";
+import { AddressInfo, OutputLanguage } from "../types";
 import { environment } from "@raycast/api";
 import roleMappings from "../../assets/role-mappings.json";
+import roleMappingsEn from "../../assets/role-mappings-en.json";
 import { expandStreetType } from "./address-formatter";
 import { toTitleCase } from "./formatting";
 
@@ -175,10 +176,136 @@ export function formatAddress(address: AddressInfo): string {
   return `${street}, ${city}`.trim();
 }
 
-export function getGenderAgreement(gender: string | null): string {
+export function getGenderAgreement(gender: string | null, language: OutputLanguage = "fr"): string {
+  if (language === "en") {
+    return "authorized";
+  }
   if (gender === "M" || gender === "1") return "habilité";
   if (gender === "F" || gender === "2") return "habilitée";
   return "habilité(e)";
+}
+
+export function getRepresentativePronoun(gender: string | null): string {
+  if (gender === "F" || gender === "2") return "she";
+  if (gender === "M" || gender === "1") return "he";
+  return "they";
+}
+
+export function getEnglishAuthorizationPhrase(gender: string | null): { pronoun: string; verb: string } {
+  if (gender === "F" || gender === "2") {
+    return { pronoun: "she", verb: "is" };
+  }
+  if (gender === "M" || gender === "1") {
+    return { pronoun: "he", verb: "is" };
+  }
+  return { pronoun: "they", verb: "are" };
+}
+
+export function getCorporateAuthorizationPhrase(): { pronoun: string; verb: string } {
+  return { pronoun: "it", verb: "is" };
+}
+
+const ROLE_NAME_ENGLISH_OVERRIDES: Record<string, string> = {
+  president: "President",
+  "president du conseil d'administration": "Chairman of the Board of Directors",
+  "president du directoire": "Chairman of the Management Board",
+  "president du conseil de surveillance": "Chairman of the Supervisory Board",
+  "directeur general": "Chief Executive Officer",
+  "directeur generale": "Chief Executive Officer",
+  "directeur general unique": "Sole Chief Executive Officer",
+  "directeur general delegue": "Deputy Chief Executive Officer",
+  gerant: "Manager",
+  "gerant et associe indefiniment et solidairement responsable": "Managing partner with unlimited joint liability",
+  "membre du directoire": "Member of the Management Board",
+  "membre du conseil de surveillance": "Member of the Supervisory Board",
+  "vice-president": "Vice President",
+  dirigeant: "Director",
+  "dirigeant a l'etranger": "Foreign representative",
+  "dirigeant en france": "Representative in France",
+  liquidateur: "Liquidator",
+  "commissaire aux comptes titulaire": "Statutory auditor",
+  "commissaire aux comptes suppleant": "Alternate statutory auditor",
+  "représentant social à l'étranger": "Foreign legal representative",
+  "representant social a l'etranger": "Foreign legal representative",
+  "personne decisionnaire designee": "Designated decision maker",
+};
+
+function normalizeRoleKey(role: string): string {
+  return role
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim();
+}
+
+export function getRoleNameEnglishByCode(roleCode: string): string {
+  if (!roleCode || roleCode.trim() === "") {
+    return FALLBACK_VALUES.REPRESENTATIVE_ROLE;
+  }
+
+  const trimmed = roleCode.trim();
+  const mappedRole = (roleMappingsEn as { [key: string]: string })[trimmed];
+
+  if (mappedRole) {
+    return mappedRole;
+  }
+
+  if (/^\d+$/.test(trimmed)) {
+    return `[[Role code ${trimmed} - English mapping to add]]`;
+  }
+
+  return FALLBACK_VALUES.REPRESENTATIVE_ROLE;
+}
+
+export function getRoleNameEnglish(roleOrCode: string): string {
+  if (!roleOrCode || roleOrCode.trim() === "") {
+    return FALLBACK_VALUES.REPRESENTATIVE_ROLE;
+  }
+
+  const trimmed = roleOrCode.trim();
+
+  if (/^\d+$/.test(trimmed)) {
+    return getRoleNameEnglishByCode(trimmed);
+  }
+
+  const normalized = normalizeRoleKey(trimmed);
+  return ROLE_NAME_ENGLISH_OVERRIDES[normalized] ?? trimmed;
+}
+
+const LEGAL_FORM_ENGLISH_OVERRIDES: { pattern: RegExp; replacement: string }[] = [
+  {
+    pattern: /société par actions simplifiée à associé unique/i,
+    replacement: "Single-shareholder simplified joint-stock",
+  },
+  { pattern: /société par actions simplifiée/i, replacement: "Simplified joint-stock" },
+  { pattern: /société à responsabilité limitée/i, replacement: "Limited liability" },
+  { pattern: /société anonyme/i, replacement: "Public limited" },
+  { pattern: /société en nom collectif/i, replacement: "General partnership" },
+  { pattern: /société en commandite simple/i, replacement: "Limited partnership" },
+  { pattern: /société en commandite par actions/i, replacement: "Partnership limited by shares" },
+  { pattern: /société coopérative/i, replacement: "Cooperative" },
+  { pattern: /groupement d'intérêt économique/i, replacement: "Economic interest group" },
+  { pattern: /entrepreneur individuel/i, replacement: "Sole proprietorship" },
+  { pattern: /entreprise individuelle/i, replacement: "Sole proprietorship" },
+];
+
+export function getLegalFormLabelEnglish(legalFormLabel: string): string {
+  if (!legalFormLabel) {
+    return "[[Legal form to be completed]]";
+  }
+
+  const trimmed = legalFormLabel.trim();
+  if (!trimmed) {
+    return "[[Legal form to be completed]]";
+  }
+
+  for (const { pattern, replacement } of LEGAL_FORM_ENGLISH_OVERRIDES) {
+    if (pattern.test(trimmed)) {
+      return replacement;
+    }
+  }
+
+  return trimmed;
 }
 
 export function getLegalFormLabel(code: string): string {
@@ -188,6 +315,13 @@ export function getLegalFormLabel(code: string): string {
 export function formatSiren(siren: string): string {
   if (siren && siren.length === 9) {
     return `${siren.slice(0, 3)}\u00A0${siren.slice(3, 6)}\u00A0${siren.slice(6, 9)}`;
+  }
+  return siren;
+}
+
+export function formatSirenEnglish(siren: string): string {
+  if (siren && siren.length === 9) {
+    return `${siren.slice(0, 3)},${siren.slice(3, 6)},${siren.slice(6, 9)}`;
   }
   return siren;
 }
@@ -225,6 +359,23 @@ export function formatFrenchNumber(value: string | number): string {
 
   // Return with French decimal separator (comma) and exactly 2 decimal places
   return `${formattedInteger},${decimalPart}`;
+}
+
+export function formatEnglishNumber(value: string | number): string {
+  if (!value) return value as string;
+
+  const numString = value.toString().replace(/\s/g, "").replace(",", ".");
+
+  if (!/^\d+(\.\d+)?$/.test(numString)) {
+    return value as string;
+  }
+
+  const num = parseFloat(numString);
+  return num.toLocaleString("en-GB", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: true,
+  });
 }
 
 /**

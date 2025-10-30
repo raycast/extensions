@@ -24,6 +24,7 @@ export const getPreferenceValues = jest.fn(() => {
     return {
       inpiUsername: "",
       inpiPassword: "",
+      outputTemplate: "",
     };
   }
 
@@ -31,6 +32,7 @@ export const getPreferenceValues = jest.fn(() => {
   return {
     inpiUsername: credentials.username,
     inpiPassword: credentials.password,
+    outputTemplate: "",
   };
 });
 
