@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Timeout increasing in AppleScript] - {PR_MERGE_DATE}
+## [Timeout increasing in AppleScript] - 2025-10-30
 
 - Increased timeout to 60 seconds in AppleScript
 
