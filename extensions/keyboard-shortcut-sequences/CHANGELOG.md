@@ -1,6 +1,6 @@
 # Auto Keyboard Shortcuts Changelog
 
-## [delay for shortcuts and improved ux] - 2025-10-14
+## [delay for shortcuts and improved ux] - {PR_MERGE_DATE}
 
 A delay before a command execution can be added in a sequence.
 
