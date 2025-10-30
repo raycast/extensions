@@ -2,6 +2,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import EventEmitter from "events";
 import { REFRESH_KEY, TAG_DEFINITIONS_KEY, TAG_ORDER_KEY } from "./constants";
 import { AppTags, TagDefinitions } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export function generateId(): string {
   return `tag_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
@@ -29,8 +30,7 @@ export async function loadStoredTags(): Promise<{
 
   const handleParseError = async (key: string, error: unknown) => {
     console.error(`Failed to parse stored item "${key}":`, error);
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Data Error",
       message: `Could not load stored data for key: ${key}`,
     });

@@ -175,7 +175,7 @@ export function TagEditor({
             key={item.key}
             value={item.id}
             title={item.name}
-            icon={{ source: Icon.Tag, tintColor: item!.color }}
+            icon={{ source: Icon.Tag, tintColor: item.color }}
           />
         ))}
       </Form.TagPicker>
