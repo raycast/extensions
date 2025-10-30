@@ -111,5 +111,3 @@ full-text-search response (abbreviated):
 
 - These tools assume a reachable Grokipedia HTTP API endpoint and a `buildUrl` helper that constructs full URLs including any API key or base path.
 - Error handling currently throws for non-OK HTTP responses; callers (or Raycast integrations) should handle and present errors accordingly.
-
-If you'd like, I can also generate small test harness scripts for each tool to make local development and CI testing easier.
