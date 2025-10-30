@@ -1,4 +1,4 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import EventEmitter from "events";
 import { REFRESH_KEY, TAG_DEFINITIONS_KEY, TAG_ORDER_KEY } from "./constants";
 import { AppTags, TagDefinitions } from "./types";
