@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grokipedia",
+  "title": "Grokipedia",
+  "description": "A Raycast extension that lets you quickly search Grokipedia for concise knowledge and reference results.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Web",
+    "Media",
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-grokipedia",
+      "title": "Search Grokipedia",
+      "description": "Search Grokipedia for articles and reference entries",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-stats",
+      "title": "Get Grokipedia Stats",
+      "description": "Fetches Grokipedia site statistics including total pages, views, and index size",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-typeahead",
+      "title": "Search Typeahead",
+      "description": "Gets typeahead/autocomplete suggestions for a search query",
+      "mode": "no-view"
+    },
+    {
+      "name": "full-text-search",
+      "title": "Full-Text Search",
+      "description": "Performs a full-text search across Grokipedia articles",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-page",
+      "title": "Get Page",
+      "description": "Fetches a specific Grokipedia page by its slug with full content and metadata",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "./node_modules/.bin/tsc --noEmit"
+  }
+}
