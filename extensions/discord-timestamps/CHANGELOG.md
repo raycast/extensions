@@ -1,5 +1,8 @@
 # Discord Timestamps Changelog
 
+## [Windows Support] - 2025-10-31
+- Added support for Windows to this plugin
+
 ## [AM/PM Fix] - 2025-01-26
 - Fixed a bug that showed AM instead of PM when the time was set to 12 PM
 
