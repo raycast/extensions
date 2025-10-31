@@ -1,5 +1,5 @@
 # FreeDNS Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support] - 2025-10-31
 
 ## [Initial Version] - 2024-12-03
