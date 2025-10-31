@@ -1,6 +1,6 @@
 # Plane Changelog
 
-## [Fix README] - {PR_MERGE_DATE}
+## [Fix README] - 2025-10-31
 
 ## [Cycle and Member Filtering Improvements] - 2025-10-15
 
