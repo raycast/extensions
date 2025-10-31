@@ -191,6 +191,51 @@ export type AudioQuality = {
 
 export const VIDEO_ENCODING_MODES = ["crf", "vbr", "vbr-2-pass"] as const;
 export type VideoEncodingMode = (typeof VIDEO_ENCODING_MODES)[number];
+
+// Runtime object for video quality settings (for minimal redundancy)
+const VIDEO_QUALITY_OBJECT = {
+  ".mp4": [
+    { encodingMode: "crf", crf: 75, preset: "medium" },
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", preset: "medium" },
+  ],
+  ".avi": [
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "" },
+  ],
+  ".mov": [{ variant: "standard" }],
+  ".mkv": [
+    { encodingMode: "crf", crf: 75, preset: "medium" },
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", preset: "medium" },
+  ],
+  ".mpg": [
+    { encodingMode: "crf", crf: 75 },
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "" },
+  ],
+  ".webm": [
+    { encodingMode: "crf", crf: 60, quality: "good" },
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", quality: "good" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", quality: "good" },
+  ],
+} as const;
+
+// Derive VideoQuality type from VIDEO_QUALITY_OBJECT
+export type VideoQuality = {
+  [K in keyof typeof VIDEO_QUALITY_OBJECT]: (typeof VIDEO_QUALITY_OBJECT)[K][number];
+};
+
+// Generate allowed encoding modes from VIDEO_QUALITY_OBJECT
+export const ALLOWED_VIDEO_ENCODING_MODES: Record<OutputVideoExtension, VideoEncodingMode[]> = Object.fromEntries(
+  Object.entries(VIDEO_QUALITY_OBJECT).map(([ext, arr]) => [
+    ext,
+    arr
+      .map((q) => (typeof q === "object" && "encodingMode" in q ? q.encodingMode : null))
+      .filter((m): m is VideoEncodingMode => m !== null),
+  ]),
+) as Record<OutputVideoExtension, VideoEncodingMode[]>;
+
 export type VideoCrf = Percentage; // 0-100 for user-friendly quality (converted to FFmpeg CRF 0-51 internally)
 export const VIDEO_BITRATE = [
   "50000",
@@ -240,25 +285,6 @@ export type VideoControlType =
   | "preset"
   | "quality"
   | "variant";
-
-export type VideoQuality = {
-  ".mp4":
-    | { encodingMode: "crf"; crf: VideoCrf; preset: VideoPreset }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; preset: VideoPreset };
-  ".avi":
-    | { encodingMode: "crf"; crf: VideoCrf }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate };
-  ".mov": { variant: ProResVariant };
-  ".mkv":
-    | { encodingMode: "crf"; crf: VideoCrf; preset: VideoPreset }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; preset: VideoPreset };
-  ".mpg":
-    | { encodingMode: "crf"; crf: VideoCrf }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate };
-  ".webm":
-    | { encodingMode: "crf"; crf: VideoCrf; quality: VP9Quality }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; quality: VP9Quality };
-};
 
 // =============================================================================
 // Universal Quality Type
@@ -318,11 +344,11 @@ export const SIMPLE_QUALITY_MAPPINGS = {
     highest: { encodingMode: "crf", crf: 95, preset: "slower" },
   },
   ".avi": {
-    lowest: { encodingMode: "crf", crf: 30 },
-    low: { encodingMode: "crf", crf: 50 },
-    medium: { encodingMode: "crf", crf: 75 },
-    high: { encodingMode: "crf", crf: 85 },
-    highest: { encodingMode: "crf", crf: 95 },
+    lowest: { encodingMode: "vbr", bitrate: "1000", maxBitrate: "" },
+    low: { encodingMode: "vbr", bitrate: "1500", maxBitrate: "" },
+    medium: { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
+    high: { encodingMode: "vbr", bitrate: "3000", maxBitrate: "" },
+    highest: { encodingMode: "vbr", bitrate: "5000", maxBitrate: "" },
   },
   ".mov": {
     lowest: { variant: "proxy" },
@@ -382,7 +408,7 @@ export const DEFAULT_QUALITIES = {
 
   // Video defaults (CRF mode)
   ".mp4": { encodingMode: "crf", crf: 75, preset: "medium" },
-  ".avi": { encodingMode: "crf", crf: 75 },
+  ".avi": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
   ".mov": { variant: "standard" },
   ".mkv": { encodingMode: "crf", crf: 75, preset: "medium" },
   ".mpg": { encodingMode: "crf", crf: 75 },

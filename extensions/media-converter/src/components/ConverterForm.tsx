@@ -19,6 +19,7 @@ import {
   OUTPUT_IMAGE_EXTENSIONS,
   type MediaType,
   type AllOutputExtension,
+  type OutputVideoExtension,
   type QualitySettings,
   getMediaType,
   AUDIO_BITRATES,
@@ -33,7 +34,7 @@ import {
   DEFAULT_VBR_QUALITIES,
   AUDIO_COMPRESSION_LEVEL,
   type AudioCompressionLevel,
-  VIDEO_ENCODING_MODES,
+  ALLOWED_VIDEO_ENCODING_MODES,
   type VideoEncodingMode,
   VIDEO_BITRATE,
   type VideoBitrate,
@@ -245,7 +246,6 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
               <Action
                 title="Copy FFmpeg Command"
                 icon={Icon.Clipboard}
-                // TODO: Add proper keyboard shortcuts
                 shortcut={{
                   macOS: { modifiers: ["cmd", "shift"], key: "c" },
                   windows: { modifiers: ["ctrl", "shift"], key: "c" },
@@ -685,7 +685,7 @@ function QualitySettingsComponent({
                 }}
                 info="CRF provides constant visual quality, VBR uses variable bitrate for target file size"
               >
-                {VIDEO_ENCODING_MODES.map((mode) => (
+                {(ALLOWED_VIDEO_ENCODING_MODES[outputFormat as OutputVideoExtension] || []).map((mode) => (
                   <Form.Dropdown.Item
                     key={mode}
                     value={mode}

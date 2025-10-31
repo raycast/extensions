@@ -300,6 +300,11 @@ export async function convertMedia<T extends AllOutputExtension>(
           throw new Error(`Unknown video output format: ${currentOutputFormat}`);
       }
 
+      // Force common pixel format for compatibility, except for .mov which may use higher bit depths
+      if (currentOutputFormat !== ".mov") {
+        ffmpegCmd += ` -pix_fmt yuv420p`;
+      }
+
       // Handle encoding mode (unified for all formats except .mov)
       const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
       let logFilePrefix: string | null = null;
