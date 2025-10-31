@@ -8,6 +8,7 @@ import {
   Icon,
   openCommandPreferences,
   getPreferenceValues,
+  Clipboard,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
@@ -233,13 +234,49 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       actions={
         <ActionPanel>
           {currentFiles && currentFiles.length > 0 && selectedFileType && (
-            <Action.SubmitForm
-              title="Convert"
-              onSubmit={handleSubmit}
-              icon={Icon.NewDocument}
-              // For some reason, this still shows up as cmd+return instead of just return, so no use for now
-              /* shortcut={{ modifiers: [], key: "return" }} */
-            />
+            <>
+              <Action.SubmitForm
+                title="Convert"
+                onSubmit={handleSubmit}
+                icon={Icon.NewDocument}
+                // For some reason, this still shows up as cmd+return instead of just return, so no use for now
+                /* shortcut={{ modifiers: [], key: "return" }} */
+              />
+              <Action
+                title="Copy FFmpeg Command"
+                icon={Icon.Clipboard}
+                // TODO: Add proper keyboard shortcuts
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                  windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                }}
+                onAction={async () => {
+                  if (!outputFormat || !currentQualitySetting) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Configuration incomplete",
+                      message: "Output format and quality settings must be configured",
+                    });
+                    return;
+                  }
+                  try {
+                    const command = await convertMedia(currentFiles[0], outputFormat, currentQualitySetting, true);
+                    await Clipboard.copy(command);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Command copied to clipboard",
+                      message: currentFiles.length > 1 ? "Command for the first file copied" : "FFmpeg command copied",
+                    });
+                  } catch (error) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to generate command",
+                      message: String(error),
+                    });
+                  }
+                }}
+              />
+            </>
           )}
         </ActionPanel>
       }
