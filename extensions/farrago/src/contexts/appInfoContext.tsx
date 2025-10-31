@@ -144,7 +144,7 @@ function FarragoChecker<P extends LaunchProps>(
     return (
       <List isLoading={false}>
         <List.EmptyView
-          icon={{ source: "extension-icon.png" }}
+          icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Red }}
           title="Farrago Not Found"
           description="Install Farrago to use this extension."
           actions={
@@ -167,7 +167,7 @@ function FarragoChecker<P extends LaunchProps>(
     return (
       <List isLoading={false}>
         <List.EmptyView
-          icon={{ source: "extension-icon.png" }}
+          icon={{ source: Icon.AppWindow, tintColor: Color.Red }}
           title="Farrago Not Running"
           description="Open Farrago to use this extension."
           actions={
