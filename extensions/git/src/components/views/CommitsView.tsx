@@ -23,7 +23,7 @@ import { RepositoryContext, NavigationContext } from "../../open-repository";
 import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../actions/WorkspaceNavigationActions";
 import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../actions/ToggleDetailAction";
 import { basename } from "path";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 export function CommitsView(context: RepositoryContext & NavigationContext) {
   const toggleDetailController = useToggleDetail("Commits-Detail", "Detail", false);
@@ -287,7 +287,7 @@ function CommitListItem(
 
           <ActionPanel.Section>
             <CommitAttachedLinksAction {...context} />
-            <CopyToClibpoardMenuAction
+            <CopyToClipboardMenuAction
               contents={[
                 { title: "Commit Hash", content: context.commit.hash, icon: Icon.Hashtag },
                 { title: "Short Hash", content: context.commit.shortHash, icon: Icon.Hashtag },

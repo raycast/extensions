@@ -1705,7 +1705,6 @@ __REBASE_TODO__
 
     // Create temp tracking directory and files outside of the repo dir
     const tempDir = await fs.mkdtemp(join(tmpdir(), "raycast-git-clone-"));
-    // const tempDir = await join("/Users/ernest0n/Downloads", "raycast-git-clone");
     await fs.mkdir(tempDir, { recursive: true });
 
     const stderrPath = join(tempDir, ".git-clone-stderr.log");

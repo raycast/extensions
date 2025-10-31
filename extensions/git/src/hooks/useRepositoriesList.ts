@@ -91,7 +91,6 @@ export function useRepositoriesList() {
   );
 
   /**
-  /**
    * Updates the cloning state of a repository.
    */
   const updateCloningState = useCallback(

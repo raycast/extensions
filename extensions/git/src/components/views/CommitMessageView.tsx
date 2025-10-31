@@ -35,7 +35,7 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
     if (preferences.autoGenerateCommitMessage && !context.commit) {
       generateCommitMessage(defaultPreset);
     }
-  }, []);
+  }, [defaultPreset]);
 
   // Handle amend checkbox changes
   const handleAmendChange = async (newAmendValue: boolean) => {

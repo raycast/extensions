@@ -18,7 +18,7 @@ import { RepositoryContext } from "../../open-repository";
 import { basename } from "path";
 import { FileManagerActions } from "../actions/FileActions";
 import { existsSync } from "fs";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 export default function FileMergeResolveView(context: RepositoryContext & { filePath: string }) {
   const { pop } = useNavigation();
@@ -192,7 +192,7 @@ function ConflictSegmentOptionItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <FileManagerActions filePath={filePath} />
-            <CopyToClibpoardMenuAction
+            <CopyToClipboardMenuAction
               contents={[
                 { title: "File Path", content: `${filePath}:${segment.startLine}`, icon: Icon.Document },
                 { title: "Selected Content", content: content, icon: Icon.Text },

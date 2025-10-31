@@ -1,11 +1,10 @@
+import { showFailureToast } from "@raycast/utils";
 import { execSync } from "child_process";
 
 /**
  * Cached environment variables for Git operations.
  */
 export const shellEnvironmentVariables: { [key: string]: string } = (() => {
-  // Load all user environment variables from the current shell in interactive mode with triggering cd hook, to correctly simulate startup (for mise, asdf, dotenv, etc.)
-  export const shellEnvironmentVariables: { [key: string]: string } = (() => {
   try {
     // Load all user environment variables from the current shell in interactive mode with triggering cd hook, to correctly simulate startup (for mise, asdf, dotenv, etc.)
     const userEnvironment = execSync(`/bin/zsh -l -i -c 'cd . &> /dev/null; /usr/bin/env -0'`)
@@ -27,15 +26,9 @@ export const shellEnvironmentVariables: { [key: string]: string } = (() => {
     return {
       ...userEnvironment,
       SSH_AUTH_SOCK: SSH_AUTH_SOCK_VALUE,
-    };
+    } as { [key: string]: string };
   } catch (error) {
-    console.warn('Failed to load shell environment variables:', error);
-    return process.env;
+    showFailureToast(error, { title: "Failed to load ZSH-shell environment variables" });
+    return { ...process.env } as { [key: string]: string };
   }
-})();
-
-  return {
-    ...userEnvironment,
-    SSH_AUTH_SOCK: SSH_AUTH_SOCK_VALUE,
-  };
 })();

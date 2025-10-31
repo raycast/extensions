@@ -40,7 +40,7 @@ export default function CloneRepository(props: LaunchProps<{ arguments: CloneRep
     }
     // Check if repository already exists
     if (targetDirectory && existsSync(targetDirectory)) {
-      return `Directory "${targetDirectory}" already exists"`;
+      return `Directory "${targetDirectory}" already exists`;
     }
 
     return undefined;

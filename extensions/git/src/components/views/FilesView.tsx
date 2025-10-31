@@ -9,7 +9,7 @@ import { search, sortKind } from "fast-fuzzy";
 import { NavigationContext, RepositoryContext } from "../../open-repository";
 import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../actions/WorkspaceNavigationActions";
 import { FileAttachedLinksAction } from "../actions/StatusActions";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 const MAX_RESULTS = 60;
 
@@ -135,7 +135,7 @@ function FileListItem(
             <FileHistoryAction {...context} filePath={absolutePath} onOpen={context.onOpen} />
 
             <FileManagerActions filePath={absolutePath} />
-            <CopyToClibpoardMenuAction
+            <CopyToClipboardMenuAction
               contents={[
                 { title: "Relative Path", content: context.filePath, icon: Icon.Document },
                 { title: "Absolute Path", content: absolutePath, icon: Icon.Document },

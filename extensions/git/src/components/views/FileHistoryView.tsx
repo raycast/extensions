@@ -10,7 +10,7 @@ import { basename, join } from "path";
 import { existsSync } from "fs";
 import { RepositoryContext } from "../../open-repository";
 import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../actions/ToggleDetailAction";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 export function FileHistoryAction(
   context: RepositoryContext & {
@@ -184,7 +184,7 @@ function CommitListItem(
 
           <ActionPanel.Section>
             <FileAttachedLinksAction {...context} filePath={context.file.path} commit={context.commit} />
-            <CopyToClibpoardMenuAction
+            <CopyToClipboardMenuAction
               contents={[
                 { title: "Relative Path", content: context.file.path, icon: Icon.Document },
                 { title: "Absolute Path", content: absolutePath, icon: Icon.Document },

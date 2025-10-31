@@ -8,7 +8,7 @@ export type GitView = "branches" | "status" | "commits" | "files" | "stashes" | 
 /**
  * User preferences for the Git Client extension.
  */
-export interface Preferences {
+export type Preferences = {
   /** Default terminal for opening repository directory. */
   defaultTerminal: Application;
   /** External git client for git commands. */
@@ -21,12 +21,12 @@ export interface Preferences {
   maxTagsToLoad: string;
   /** Automatically generate a commit message using AI when opening the commit view. */
   autoGenerateCommitMessage: boolean;
-}
+};
 
 /**
  * Configuration for URL tracking feature.
  */
-export interface IssueTrackerConfig {
+export type IssueTrackerConfig = {
   /** Unique identifier for the configuration. */
   id: string;
   /** Title of the URL tracker (e.g., "Jira Ticket", "GitHub Issue"). */
@@ -35,7 +35,7 @@ export interface IssueTrackerConfig {
   regex: string;
   /** URL template where @key will be replaced with the regex match. */
   urlPlaceholder: string;
-}
+};
 
 export type ListPagination = {
   pageSize: number;

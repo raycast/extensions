@@ -12,7 +12,7 @@ import { WorkspaceNavigationActions } from "../actions/WorkspaceNavigationAction
 import { FileAttachedLinksAction, FileRestoreAction } from "../actions/StatusActions";
 import { FileHistoryAction } from "./FileHistoryView";
 import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../actions/ToggleDetailAction";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 export function CommitDetailsView(
   context: RepositoryContext &
@@ -204,7 +204,7 @@ function FileListItem(
             <FileRestoreAction before={true} filePath={absolutePath} {...context} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClibpoardMenuAction
+            <CopyToClipboardMenuAction
               contents={[
                 { title: "Relative Path", content: context.file.path, icon: Icon.Document },
                 { title: "Absolute Path", content: absolutePath, icon: Icon.Document },

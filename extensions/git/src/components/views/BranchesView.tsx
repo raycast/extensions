@@ -18,7 +18,7 @@ import { RemoteHostIcon, RemoteHostProviderIcon } from "../icons/RemoteHostIcons
 import { NavigationContext, RepositoryContext } from "../../open-repository";
 import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../actions/WorkspaceNavigationActions";
 import { RemoteFetchAction, RemotePullAction } from "../actions/RemoteActions";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 import { TagCreateAction } from "../actions/TagActions";
 
 export function BranchesView(context: RepositoryContext & NavigationContext) {
@@ -204,7 +204,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
 
               <ActionPanel.Section>
                 <BranchRenameAction {...context} />
-                <CopyToClibpoardMenuAction
+                <CopyToClipboardMenuAction
                   contents={[
                     { title: "Branch Name", content: context.branch.displayName, icon: icon },
                     ...(context.branch.upstream
@@ -244,7 +244,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
 
               <ActionPanel.Section>
                 <BranchRenameAction {...context} />
-                <CopyToClibpoardMenuAction
+                <CopyToClipboardMenuAction
                   contents={[
                     { title: "Branch Name", content: context.branch.displayName, icon: icon },
                     ...(context.branch.upstream
@@ -278,7 +278,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
               </ActionPanel.Section>
 
               <ActionPanel.Section>
-                <CopyToClibpoardMenuAction contents={[{ title: "Branch Name", content: context.branch.displayName }]} />
+                <CopyToClipboardMenuAction contents={[{ title: "Branch Name", content: context.branch.displayName }]} />
                 <BranchDeleteAction {...context} />
               </ActionPanel.Section>
             </>

@@ -13,7 +13,7 @@ import {
   TagRenameAction,
 } from "../actions/TagActions";
 import { Tag } from "../../types";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 export default function TagsView(context: RepositoryContext & NavigationContext) {
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
@@ -112,7 +112,7 @@ function TagListItem(
             <Action.Push title="Show Commit" icon={Icon.Document} target={<TagDetailsView {...context} />} />
             <TagCheckoutAction tagName={context.tag.name} {...context} />
             <TagRenameAction tagName={context.tag.name} {...context} />
-            <CopyToClibpoardMenuAction
+            <CopyToClipboardMenuAction
               contents={[
                 { title: "Tag Name", content: context.tag.name, icon: Icon.Tag },
                 { title: "Commit Hash", content: context.tag.commitHash, icon: Icon.Hashtag },

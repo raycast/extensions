@@ -26,7 +26,7 @@ import { ToggleDetailAction, ToggleDetailController, useToggleDetail } from "../
 import { basename } from "path";
 import { BranchAttachedLinksAction, BranchPushAction, BranchPushForceAction } from "../actions/BranchActions";
 import { RemoteFetchAction, RemotePullAction } from "../actions/RemoteActions";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 export function StatusView(context: RepositoryContext & NavigationContext) {
   const toggleController = useToggleDetail("Status Diff", "Changes", true);
@@ -252,7 +252,7 @@ function FileListItem(
                 <FileUnstageAction {...context} />
                 <ToggleDetailAction controller={context.toggleController} />
                 <FileManagerActions filePath={context.file.absolutePath} />
-                <CopyToClibpoardMenuAction
+                <CopyToClipboardMenuAction
                   contents={[
                     { title: "Relative Path", content: context.file.relativePath, icon: Icon.Document },
                     { title: "Absolute Path", content: context.file.absolutePath, icon: Icon.Document },
@@ -268,7 +268,7 @@ function FileListItem(
                 <FileStageAction {...context} />
                 <ToggleDetailAction controller={context.toggleController} />
                 <FileManagerActions filePath={context.file.absolutePath} />
-                <CopyToClibpoardMenuAction
+                <CopyToClipboardMenuAction
                   contents={[
                     { title: "Relative Path", content: context.file.relativePath, icon: Icon.Document },
                     { title: "Absolute Path", content: context.file.absolutePath, icon: Icon.Document },

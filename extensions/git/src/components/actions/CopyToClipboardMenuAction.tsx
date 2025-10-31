@@ -3,7 +3,7 @@ import { Action, ActionPanel, Icon } from "@raycast/api";
 /**
  * Action for copying multiple items to the clipboard.
  */
-export function CopyToClibpoardMenuAction({ contents }: { contents: Action.CopyToClipboard.Props[] }) {
+export function CopyToClipboardMenuAction({ contents }: { contents: Action.CopyToClipboard.Props[] }) {
   if (contents.length === 0) {
     return undefined;
   }

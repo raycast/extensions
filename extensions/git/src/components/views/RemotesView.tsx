@@ -6,7 +6,7 @@ import { usePromise } from "@raycast/utils";
 import { NavigationContext, RepositoryContext } from "../../open-repository";
 import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../actions/WorkspaceNavigationActions";
 import { RemoteAddAction, RemoteDeleteAction, RemoteEditAction } from "../actions/RemoteActions";
-import { CopyToClibpoardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
 
 type RemoteConnectivity = {
   reachable: boolean;
@@ -119,7 +119,7 @@ function RemoteListItem(
             <Action.OpenInBrowser title="Open in Browser" url={context.remote.fetchUrl} icon={Icon.Link} />
             <RemoteEditAction initialRemote={context.remote} {...context} />
 
-            <CopyToClibpoardMenuAction
+            <CopyToClipboardMenuAction
               contents={[
                 { title: "Fetch URL", content: context.remote.fetchUrl, icon: Icon.Link },
                 ...(context.remote.pushUrl !== context.remote.fetchUrl
