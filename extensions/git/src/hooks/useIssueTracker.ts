@@ -143,7 +143,7 @@ export function replaceUrlPatternsWithLinks(text: string, configs: IssueTrackerC
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       // Skip invalid regex patterns
-      console.warn(`Invalid regex pattern in config "${config.title}. Reason: ${errorMessage}"`);
+      console.warn(`Invalid regex pattern in config "${config.title}". Reason: ${errorMessage}`);
     }
   }
 
