@@ -3,7 +3,7 @@ import { YASB } from "./executor";
 
 export default async function Stop() {
   try {
-    YASB.executeCommand(YASB.STOP_COMMAND);
+    await YASB.executeCommand(YASB.STOP_COMMAND);
     await showHUD("YASB stopped successfully");
   } catch (error) {
     console.error("Error stopping YASB:", error);

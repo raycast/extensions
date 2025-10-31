@@ -8,7 +8,7 @@ export default async function ToggleBar(props: LaunchProps<{ arguments: Argument
     const { screen } = props.arguments;
     const args = screen ? ["--screen", `"${screen}"`] : [];
 
-    YASB.executeCommand(YASB.TOGGLE_BAR_COMMAND, args);
+    await YASB.executeCommand(YASB.TOGGLE_BAR_COMMAND, args);
     await showHUD("YASB bar toggled.");
   } catch (error) {
     console.error("Error toggling YASB bar:", error);

@@ -3,7 +3,7 @@ import { YASB } from "./executor";
 
 export default async function Reload() {
   try {
-    YASB.executeCommand(YASB.RELOAD_COMMAND);
+    await YASB.executeCommand(YASB.RELOAD_COMMAND);
     await showHUD("YASB reloaded successfully");
   } catch (error) {
     console.error("Error reloading YASB:", error);

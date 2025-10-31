@@ -3,7 +3,7 @@ import { YASB } from "./executor";
 
 // Due to raycast limitations, we cannot have dynamic arguments for commands.
 // Ideally, we dynamically fetch the list of available screens and let the user choose.
-export default async function ToggleWiget(props: LaunchProps<{ arguments: Arguments.ToggleWidget }>) {
+export default async function ToggleWidget(props: LaunchProps<{ arguments: Arguments.ToggleWidget }>) {
   try {
     const { widget, screen } = props.arguments;
     const args = screen ? ["--screen", `"${screen}"`] : [];
@@ -15,7 +15,7 @@ export default async function ToggleWiget(props: LaunchProps<{ arguments: Argume
 
     args.push(`"${widget}"`);
 
-    YASB.executeCommand(YASB.SHOW_BAR_COMMAND, args);
+    await YASB.executeCommand(YASB.SHOW_BAR_COMMAND, args);
     await showHUD("YASB widget toggled.");
   } catch (error) {
     console.error("Error toggling YASB widget:", error);

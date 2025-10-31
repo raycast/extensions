@@ -8,7 +8,7 @@ export default async function ShowBar(props: LaunchProps<{ arguments: Arguments.
     const { screen } = props.arguments;
     const args = screen ? ["--screen", `"${screen}"`] : [];
 
-    YASB.executeCommand(YASB.SHOW_BAR_COMMAND, args);
+    await YASB.executeCommand(YASB.SHOW_BAR_COMMAND, args);
     await showHUD("YASB bar shown.");
   } catch (error) {
     console.error("Error showing YASB bar:", error);

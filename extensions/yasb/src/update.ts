@@ -3,7 +3,7 @@ import { YASB } from "./executor";
 
 export default async function Update() {
   try {
-    YASB.executeCommand(YASB.UPDATE_COMMAND);
+    await YASB.executeCommand(YASB.UPDATE_COMMAND);
     await showHUD("YASB updated successfully");
   } catch (error) {
     console.error("Error updating YASB:", error);

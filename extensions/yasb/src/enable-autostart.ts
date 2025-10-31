@@ -3,7 +3,7 @@ import { YASB } from "./executor";
 
 export default async function EnableAutostart() {
   try {
-    YASB.executeCommand(YASB.ENABLE_AUTO_START_COMMAND);
+    await YASB.executeCommand(YASB.ENABLE_AUTO_START_COMMAND);
     await showHUD("YASB autostart enabled");
   } catch (error) {
     console.error("Error enabling YASB autostart:", error);

@@ -19,6 +19,6 @@ It literally just runs `yasbc` commands in the terminal, so you need to have [YA
 3. Run `npm run dev` to start the development server
 4. Raycast should automatically pick up the extension
 5. Make changes and test them in Raycast
-6. When you're done, run `npm run build -e dist` to ensure everything is built correctly
+6. When you're done, run `npm run build` to ensure everything is built correctly
 7. Open a pull request with your changes
 8. Celebrate your contribution to the Raycast YASBC Extension!

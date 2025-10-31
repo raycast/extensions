@@ -3,7 +3,7 @@ import { YASB } from "./executor";
 
 export default async function Start() {
   try {
-    YASB.executeCommand(YASB.START_COMMAND);
+    await YASB.executeCommand(YASB.START_COMMAND);
     await showHUD("YASB started successfully");
   } catch (error) {
     console.error("Error starting YASB:", error);

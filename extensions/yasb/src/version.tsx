@@ -1,13 +1,17 @@
 import { Detail } from "@raycast/api";
+import { useExec } from "@raycast/utils";
 import { YASB } from "./executor";
 
 export default function Version() {
-  try {
-    const output = YASB.executeCommand(YASB.VERSION_COMMAND);
+  const {
+    data: output,
+    isLoading,
+    error,
+  } = useExec(YASB.VERSION_COMMAND.split(" ")[0], YASB.VERSION_COMMAND.split(" ").slice(1));
 
-    return <Detail markdown={`# YASB Version\n\n${output}`} />;
-  } catch (error) {
-    console.error("Error getting YASB version:", error);
-    return;
+  if (error) {
+    return <Detail markdown={`# Error\n\nFailed to get YASB version: ${error.message}`} />;
   }
+
+  return <Detail isLoading={isLoading} markdown={`# YASB Version\n\n${output || ""}`} />;
 }

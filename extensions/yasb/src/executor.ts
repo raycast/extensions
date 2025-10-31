@@ -21,7 +21,12 @@ class YASB {
     if (args && args.length > 0) {
       command += " " + args.join(" ");
     }
-    return execSync(command).toString().trim();
+    try {
+      return execSync(command).toString().trim();
+    } catch (error) {
+      console.error(`Error executing command: ${command}`, error);
+      throw new Error(`Failed to execute command: ${command}`);
+    }
   }
 }
 

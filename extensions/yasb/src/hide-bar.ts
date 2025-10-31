@@ -8,7 +8,7 @@ export default async function HideBar(props: LaunchProps<{ arguments: Arguments.
     const { screen } = props.arguments;
     const args = screen ? ["--screen", `"${screen}"`] : [];
 
-    YASB.executeCommand(YASB.HIDE_BAR_COMMAND, args);
+    await YASB.executeCommand(YASB.HIDE_BAR_COMMAND, args);
     await showHUD("YASB bar hidden.");
   } catch (error) {
     console.error("Error hiding YASB bar:", error);
