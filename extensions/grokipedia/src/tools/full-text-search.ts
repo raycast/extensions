@@ -1,5 +1,6 @@
 import { buildUrl } from "../utils/apiClient";
 import type { FullTextSearchResponse } from "../types";
+import { MAX_API_LIMIT } from "../constants";
 
 type Input = {
   /**
@@ -21,8 +22,26 @@ type Input = {
  * Returns detailed search results with snippets, highlights, and relevance scores.
  */
 const tool = async (input: Input) => {
+  // Validate query input
+  if (!input.query || typeof input.query !== "string" || input.query.trim() === "") {
+    throw new Error("Invalid query: query must be a non-empty string");
+  }
+
+  // Validate limit if provided
+  if (
+    input.limit !== undefined &&
+    (typeof input.limit !== "number" || input.limit < 1 || input.limit > MAX_API_LIMIT)
+  ) {
+    throw new Error(`Invalid limit: must be a number between 1 and ${MAX_API_LIMIT}`);
+  }
+
+  // Validate offset if provided
+  if (input.offset !== undefined && (typeof input.offset !== "number" || input.offset < 0)) {
+    throw new Error("Invalid offset: must be a non-negative number");
+  }
+
   const url = buildUrl("/full-text-search", {
-    query: input.query,
+    query: input.query.trim(),
     limit: input.limit || 12,
     offset: input.offset || 0,
   });
@@ -30,7 +49,8 @@ const tool = async (input: Input) => {
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error(`Failed to perform full-text search: ${response.statusText}`);
+    const errorBody = await response.text().catch(() => "Unknown error");
+    throw new Error(`Failed to perform full-text search (${response.status}): ${response.statusText}. ${errorBody}`);
   }
 
   const data = (await response.json()) as FullTextSearchResponse;

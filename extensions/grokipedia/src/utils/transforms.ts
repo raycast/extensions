@@ -6,16 +6,14 @@ export function toNumber(val: string | number): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-export function mapStats(raw: StatsResponseRaw): { data: Stats } {
+export function mapStats(raw: StatsResponseRaw): Stats {
   return {
-    data: {
-      totalPages: toNumber(raw.totalPages),
-      totalViews: toNumber(raw.totalViews),
-      avgViewsPerPage: toNumber(raw.avgViewsPerPage),
-      indexSizeBytes: toNumber(raw.indexSizeBytes),
-      statsTimestamp: toNumber(raw.statsTimestamp),
-      raw,
-    },
+    totalPages: toNumber(raw.totalPages),
+    totalViews: toNumber(raw.totalViews),
+    avgViewsPerPage: toNumber(raw.avgViewsPerPage),
+    indexSizeBytes: toNumber(raw.indexSizeBytes),
+    statsTimestamp: toNumber(raw.statsTimestamp),
+    raw,
   };
 }
 

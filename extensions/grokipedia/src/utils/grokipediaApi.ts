@@ -10,7 +10,7 @@ import { mapStats } from "./transforms";
 export function useStats() {
   return useFetch<StatsResponseRaw, Stats>(buildUrl("/stats"), {
     mapResult(raw: StatsResponseRaw) {
-      return mapStats(raw);
+      return { data: mapStats(raw) };
     },
   });
 }
@@ -18,13 +18,14 @@ export function useStats() {
 /**
  * Fetches typeahead suggestions.
  * Only executes if a query is provided. Returns empty results when query is empty.
+ * Note: Rate limiting is handled by the Raycast List component's `throttle` prop.
  */
 export function useTypeahead(query: string, limit = 5) {
   const url = buildUrl("/typeahead", { query, limit });
 
   const fetchResult = useFetch<TypeaheadResponse>(url, {
     execute: !!query,
-    keepPreviousData: true,
+    // keepPreviousData removed: typeahead users expect fresh results immediately
   });
 
   if (!query) {

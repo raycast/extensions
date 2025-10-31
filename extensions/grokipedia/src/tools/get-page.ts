@@ -23,8 +23,13 @@ type Input = {
  * Returns page content, metadata, statistics, citations, and linked pages.
  */
 const tool = async (input: Input) => {
+  // Validate slug input
+  if (!input.slug || typeof input.slug !== "string" || input.slug.trim() === "") {
+    throw new Error("Invalid slug provided: slug must be a non-empty string");
+  }
+
   const url = buildUrl("/page", {
-    slug: input.slug,
+    slug: input.slug.trim(),
     includeContent: input.includeContent !== false,
     validateLinks: input.validateLinks !== false,
   });
@@ -32,7 +37,8 @@ const tool = async (input: Input) => {
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch page: ${response.statusText}`);
+    const errorBody = await response.text().catch(() => "Unknown error");
+    throw new Error(`Failed to fetch page (${response.status}): ${response.statusText}. ${errorBody}`);
   }
 
   const data = (await response.json()) as PageResponse;

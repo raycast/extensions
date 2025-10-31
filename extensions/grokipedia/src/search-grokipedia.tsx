@@ -3,7 +3,8 @@ import { useState, useCallback } from "react";
 import { useStats, useTypeahead, useFullTextSearch, usePage } from "./utils";
 import type { RawSearchItem, Citation } from "./types";
 import CitationsList from "./citations";
-import { pageUrl } from "./constants";
+import { pageUrl, TYPEAHEAD_LIMIT, FULL_TEXT_SEARCH_LIMIT, FULL_TEXT_SEARCH_OFFSET } from "./constants";
+import { processMarkdownContent } from "./utils/markdown";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -11,9 +12,13 @@ export default function Command() {
 
   const { data: stats, isLoading: statsLoading } = useStats();
 
-  const { data: typeaheadData, isLoading: typeaheadLoading } = useTypeahead(searchText, 10);
+  const { data: typeaheadData, isLoading: typeaheadLoading } = useTypeahead(searchText, TYPEAHEAD_LIMIT);
 
-  const { data: fullTextData, mutate: refetchFullText } = useFullTextSearch(searchText, 20, 0);
+  const { data: fullTextData, mutate: refetchFullText } = useFullTextSearch(
+    searchText,
+    FULL_TEXT_SEARCH_LIMIT,
+    FULL_TEXT_SEARCH_OFFSET,
+  );
 
   const handleFullTextSearch = useCallback(async () => {
     if (!searchText.trim()) return;
@@ -34,7 +39,7 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={placeholder}
-      throttle
+      throttle // Rate limiting: debounces search input to prevent excessive API calls
     >
       {!isSearchActive && searchText && (
         <List.Item
@@ -83,11 +88,11 @@ function ArticleDetail({ slug }: { slug: string }) {
   }
 
   const { title, content, description, stats: pageStats, citations } = page.page;
-  const articleBody = content || description || "No content available.";
+  const articleBody = processMarkdownContent(content || description || "No content available.");
 
   return (
     <Detail
-      markdown={`${articleBody}`}
+      markdown={articleBody}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Views" text={Number(pageStats.totalViews).toLocaleString()} />

@@ -8,6 +8,8 @@ export function sanitizeMarkdown(input?: string) {
   s = s.replace(/\[([^\]]+)\]\((?:[^)]+)\)/g, "$1");
   s = s.replace(/(\*\*|\*|__|_)(.*?)\1/g, "$2");
   s = s.replace(/`([^`]+)`/g, "$1");
+  // Convert <br> tags to newlines before stripping HTML
+  s = s.replace(/<br\s*\/?>/gi, "\n");
   // Strip any HTML tags
   s = s.replace(/<[^>]*>/g, "");
   // Decode common HTML entities
@@ -23,6 +25,24 @@ export function sanitizeMarkdown(input?: string) {
   s = s.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
   // Collapse whitespace
   s = s.replace(/\s+/g, " ").trim();
+  return s;
+}
+
+/**
+ * Process markdown content for rendering, converting HTML elements to markdown equivalents.
+ * Converts <br> tags to inline separators that work in markdown tables.
+ * Removes images due to broken relative URLs in the API.
+ */
+export function processMarkdownContent(input?: string) {
+  if (!input) return "";
+  let s = input;
+
+  // Replace <br> tags with a simple space to keep content inline
+  s = s.replace(/<br\s*\/?>/gi, " ");
+
+  // Remove markdown images (they have broken relative URLs)
+  s = s.replace(/!\[([^\]]*)\]\([^)]+\)/g, "");
+
   return s;
 }
 

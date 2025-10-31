@@ -39,7 +39,13 @@ export type Stats = {
   raw?: StatsResponseRaw;
 };
 
-export type Citation = { id: string; title: string; description: string; url: string; favicon: string };
+export type Citation = {
+  id?: string;
+  title?: string;
+  description?: string;
+  url?: string;
+  favicon?: string;
+};
 
 export type PageMetadata = {
   categories: string[];
