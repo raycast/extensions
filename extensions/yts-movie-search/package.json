@@ -1,0 +1,219 @@
+{
+  "name": "yts-movie-search",
+  "title": "Yts Movie Search",
+  "description": "Search movies from YTS and copy magnet links",
+  "icon": "icon.png",
+  "author": "yts",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-movies",
+      "title": "Search Movies",
+      "subtitle": "YTS",
+      "description": "Search for movies and copy magnet links (auto-detects selected text)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Movie title",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultQuality",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Quality Filter",
+      "description": "Default quality filter when opening the extension",
+      "default": "All",
+      "data": [
+        {
+          "title": "All Qualities",
+          "value": "All"
+        },
+        {
+          "title": "4K Ultra HD",
+          "value": "2160p"
+        },
+        {
+          "title": "Full HD",
+          "value": "1080p"
+        },
+        {
+          "title": "HD",
+          "value": "720p"
+        },
+        {
+          "title": "SD",
+          "value": "480p"
+        }
+      ]
+    },
+    {
+      "name": "defaultRating",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Rating Filter",
+      "description": "Default minimum rating filter when opening the extension",
+      "default": "All",
+      "data": [
+        {
+          "title": "All Ratings",
+          "value": "All"
+        },
+        {
+          "title": "9+ Stars",
+          "value": "9+"
+        },
+        {
+          "title": "8+ Stars",
+          "value": "8+"
+        },
+        {
+          "title": "7+ Stars",
+          "value": "7+"
+        },
+        {
+          "title": "6+ Stars",
+          "value": "6+"
+        },
+        {
+          "title": "5+ Stars",
+          "value": "5+"
+        }
+      ]
+    },
+    {
+      "name": "defaultSort",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Sort Order",
+      "description": "Default sort order when browsing (auto-switches to Popular when searching)",
+      "default": "date_added",
+      "data": [
+        {
+          "title": "Latest",
+          "value": "date_added"
+        },
+        {
+          "title": "Popular",
+          "value": "download_count"
+        },
+        {
+          "title": "Top Rated",
+          "value": "rating"
+        },
+        {
+          "title": "By Year",
+          "value": "year"
+        },
+        {
+          "title": "A-Z",
+          "value": "title"
+        },
+        {
+          "title": "Most Liked",
+          "value": "like_count"
+        }
+      ]
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Columns",
+      "description": "Number of columns in the movie grid view",
+      "default": "5",
+      "data": [
+        {
+          "title": "3 Columns",
+          "value": "3"
+        },
+        {
+          "title": "4 Columns",
+          "value": "4"
+        },
+        {
+          "title": "5 Columns",
+          "value": "5"
+        },
+        {
+          "title": "6 Columns",
+          "value": "6"
+        },
+        {
+          "title": "7 Columns",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "name": "itemsPerPage",
+      "type": "dropdown",
+      "required": false,
+      "title": "Items Per Page",
+      "description": "Number of movies to load per page",
+      "default": "20",
+      "data": [
+        {
+          "title": "10 items",
+          "value": "10"
+        },
+        {
+          "title": "20 items",
+          "value": "20"
+        },
+        {
+          "title": "30 items",
+          "value": "30"
+        },
+        {
+          "title": "50 items",
+          "value": "50"
+        }
+      ]
+    },
+    {
+      "name": "tmdbApiToken",
+      "type": "password",
+      "required": false,
+      "title": "TMDB API Token (Optional)",
+      "description": "Your TMDB API Read Access Token for fetching missing movie descriptions. Get one at https://www.themoviedb.org/settings/api",
+      "placeholder": "eyJhbGciOiJIUzI1NiJ9..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.103.4",
+    "@raycast/utils": "^2.2.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "jsdom": "^24.0.0",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

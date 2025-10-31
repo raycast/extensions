@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Raycast
+.raycast/
+
+# Claude Code
+.claude/settings.local.json
+
+# Temporary and backup files
+*copy.*
+*temp.*
+*backup.*
+*.tmp
+*.bak
