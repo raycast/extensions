@@ -91,7 +91,7 @@ export interface Series {
   titleSlug: string;
   certification?: string;
   genres: string[];
-  tags: unknown[];
+  tags: number[];
   added: string;
   ratings: Ratings;
   qualityProfileId: number;
@@ -101,6 +101,7 @@ export interface Series {
 export interface Image {
   coverType: CoverType;
   url: string;
+  remoteUrl?: string;
 }
 
 export enum CoverType {
