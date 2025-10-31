@@ -1222,7 +1222,7 @@ __REBASE_TODO__
    * Creates a tag.
    */
   async createTag(tagName: string, commitHash: string, message?: string): Promise<void> {
-    this.git.raw(["tag", "-a", tagName, "-m", message || "", commitHash]);
+    await this.git.raw(["tag", "-a", tagName, "-m", message || "", commitHash]);
   }
 
   /**
