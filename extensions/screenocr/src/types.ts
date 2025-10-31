@@ -5,6 +5,7 @@ export interface Preferences {
   ignoreLineBreaks: boolean;
   keepImage: boolean;
   customWordsList: string;
+  playSound: boolean;
 }
 
 export type Language = {

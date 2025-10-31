@@ -122,6 +122,14 @@
       "default": true
     },
     {
+      "name": "playSound",
+      "description": "Play camera shutter sound when capturing screenshots",
+      "type": "checkbox",
+      "required": false,
+      "label": "Play sounds",
+      "default": true
+    },
+    {
       "name": "ignoreLineBreaks",
       "description": "Ignores Line Breaks",
       "type": "checkbox",

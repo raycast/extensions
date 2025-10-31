@@ -18,6 +18,7 @@ export const recognizeText = async (isFullScreen = false) => {
       preference.ignoreLineBreaks,
       preference.customWordsList ? preference.customWordsList.split(",") : [],
       languages.map((lang) => lang.value),
+      Boolean(preference.playSound),
     );
 
     return recognizedText;
@@ -31,7 +32,10 @@ export const detectBarcode = async () => {
   const preference = usePreferences();
 
   try {
-    const detectedCodes = await detectBarcodeSwift(preference.keepImage);
+    const detectedCodes = await detectBarcodeSwift(
+      preference.keepImage,
+      Boolean(preference.playSound),
+    );
 
     return detectedCodes;
   } catch (error) {
