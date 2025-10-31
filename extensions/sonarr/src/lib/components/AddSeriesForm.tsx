@@ -1,7 +1,7 @@
+import { addSeries, getQualityProfiles, getRootFolders } from "@/lib/hooks/useSonarrAPI";
+import type { AddSeriesOptions, QualityProfile, RootFolder, SeriesLookup } from "@/lib/types/series";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import type { SeriesLookup, RootFolder, QualityProfile, AddSeriesOptions } from "@/lib/types/series";
-import { addSeries, getRootFolders, getQualityProfiles } from "@/lib/hooks/useSonarrAPI";
 
 interface AddSeriesFormProps {
   series: SeriesLookup;
@@ -77,8 +77,8 @@ export default function AddSeriesForm({ series, onSeriesAdded }: AddSeriesFormPr
       await addSeries(options);
       onSeriesAdded();
       pop();
-    } catch (error) {
-      console.error("Failed to add series:", error);
+    } catch {
+      // Error toast already shown by addSeries()
     }
   }
 

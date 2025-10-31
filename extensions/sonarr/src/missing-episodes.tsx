@@ -32,7 +32,7 @@ export default function Command() {
       let statusMatch = true;
       if (filterStatus === "missing") statusMatch = hasAired;
       else if (filterStatus === "upcoming") statusMatch = willAir;
-      else if (filterStatus === "unreleased") statusMatch = !episode.airDate;
+      else if (filterStatus === "unreleased") statusMatch = !episode.airDateUtc;
 
       // Filter by search text
       const searchMatch =

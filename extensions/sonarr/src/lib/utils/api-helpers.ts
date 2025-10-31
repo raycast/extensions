@@ -1,5 +1,5 @@
-import { showToast, Toast } from "@raycast/api";
 import type { z } from "zod";
+import { showFailureToast } from "@raycast/utils";
 
 const DEFAULT_TIMEOUT = 10000;
 const DEFAULT_RETRIES = 3;
@@ -73,11 +73,7 @@ export async function fetchAndValidateWithToast<T>(
   try {
     return await fetchAndValidate(url, schema, options);
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: errorTitle,
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    await showFailureToast(error, { title: errorTitle });
     throw error;
   }
 }

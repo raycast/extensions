@@ -193,11 +193,6 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
 
           <ActionPanel.Section title="Open">
             <Action.OpenInBrowser
-              title="Open Episode in Sonarr"
-              url={`${sonarrUrl}/series/${episode.series.titleSlug}`}
-              icon={Icon.Globe}
-            />
-            <Action.OpenInBrowser
               title="Open Series in Sonarr"
               url={`${sonarrUrl}/series/${episode.series.titleSlug}`}
               icon={Icon.Globe}

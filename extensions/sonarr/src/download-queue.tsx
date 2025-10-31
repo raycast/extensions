@@ -168,8 +168,8 @@ function QueueListItem({ item, onRefresh }: { item: QueueItem; onRefresh: () => 
       try {
         await removeQueueItem(item.id, blocklist);
         onRefresh();
-      } catch (error) {
-        console.error("Failed to remove queue item:", error);
+      } catch {
+        // Error toast already shown by removeQueueItem()
       }
     }
   };
