@@ -22,7 +22,7 @@ function convertQualityToCrf(qualityPercentage: Percentage): number {
   return Math.round(51 - (qualityPercentage / 100) * 51);
 }
 
-export function getUniqueOutputPath(filePath: string, extension: string): string {
+function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
   let finalOutputPath = outputFilePath;
   let counter = 1;

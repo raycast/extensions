@@ -19,11 +19,6 @@ export type Percentage = Range<0, 100>;
 // Quality level presets (user-friendly)
 export type QualityLevel = "lowest" | "low" | "medium" | "high" | "highest";
 
-// Simple quality settings type for basic mode
-export type SimpleQualitySettings = {
-  [K in AllOutputExtension]: QualityLevel;
-};
-
 // Basic format extensions
 export const INPUT_VIDEO_EXTENSIONS = [
   ".mov",
@@ -141,10 +136,7 @@ export type OutputVideoExtension = (typeof OUTPUT_VIDEO_EXTENSIONS)[number];
 export type OutputImageExtension = (typeof OUTPUT_IMAGE_EXTENSIONS)[number];
 export type OutputAudioExtension = (typeof OUTPUT_AUDIO_EXTENSIONS)[number];
 
-export type AllOutputExtension = (typeof OUTPUT_ALL_EXTENSIONS)[number];
-
-// =============================================================================
-// Image Quality Settings
+export type AllOutputExtension = OutputVideoExtension | OutputAudioExtension | OutputImageExtension;
 // =============================================================================
 
 export type ImageQuality = {
@@ -193,7 +185,7 @@ export const VIDEO_ENCODING_MODES = ["crf", "vbr", "vbr-2-pass"] as const;
 export type VideoEncodingMode = (typeof VIDEO_ENCODING_MODES)[number];
 
 // Runtime object for video quality settings (for minimal redundancy)
-export const VIDEO_QUALITY_OBJECT = {
+const VIDEO_QUALITY_OBJECT = {
   ".mp4": [
     { encodingMode: "crf", crf: 75, preset: "medium" },
     { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
@@ -236,7 +228,6 @@ export const ALLOWED_VIDEO_ENCODING_MODES: Record<OutputVideoExtension, VideoEnc
   ]),
 ) as Record<OutputVideoExtension, VideoEncodingMode[]>;
 
-export type VideoCrf = Percentage; // 0-100 for user-friendly quality (converted to FFmpeg CRF 0-51 internally)
 export const VIDEO_BITRATE = [
   "50000",
   "40000",
@@ -294,19 +285,18 @@ export type QualitySettings = ImageQuality | AudioQuality | VideoQuality;
 export type AllControlType = VideoControlType | AudioControlType | "qualityLevel";
 
 // ---------------- Video builder factory ----------------
-export type VideoOverrides = Partial<{
-  encodingMode: VideoEncodingMode;
-  crf: number;
-  bitrate: VideoBitrate;
-  maxBitrate: VideoMaxBitrate;
-  preset: VideoPreset;
-  quality: VP9Quality;
-  variant: ProResVariant;
-}>;
 
 export function buildVideoQuality<K extends OutputVideoExtension>(
   format: K,
-  overrides?: VideoOverrides,
+  overrides?: Partial<{
+    encodingMode: VideoEncodingMode;
+    crf: number;
+    bitrate: VideoBitrate;
+    maxBitrate: VideoMaxBitrate;
+    preset: VideoPreset;
+    quality: VP9Quality;
+    variant: ProResVariant;
+  }>,
   base?: VideoQuality[K],
 ): VideoQuality[K] {
   const options = (VIDEO_QUALITY_OBJECT as Record<string, readonly unknown[]>)[format] ?? [];
