@@ -1,6 +1,6 @@
 # Discord Timestamps Changelog
 
-## [Windows Support] - 2025-10-31
+## [Windows Support] - {PR_MERGE_DATE}
 - Added support for Windows to this plugin
 
 ## [AM/PM Fix] - 2025-01-26
