@@ -151,12 +151,15 @@ export default function Command() {
           icon={Icon.Calendar}
           onAction={async () => {
             // make sure no other timer is running
+            const toast = new Toast({ style: Toast.Style.Animated, title: "Loading..." });
+            await toast.show();
             await stopTimer();
 
             param.spent_date = dayjs().format("YYYY-MM-DD");
             await newTimeEntry(param);
             await changeViewDate(new Date());
             revalidate();
+            await toast.hide();
           }}
         />
         <Action
