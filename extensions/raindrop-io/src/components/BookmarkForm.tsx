@@ -36,6 +36,7 @@ async function updateBookmark({
     body: JSON.stringify({
       link: values.link.trim(),
       title: values.title,
+      note: values.note,
       collectionId,
       tags: values.tags,
       pleaseParse: {},
@@ -158,6 +159,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         }}
       />
       <Form.TextField {...itemProps.title} title="Title" placeholder="Example title" />
+      <Form.TextArea {...itemProps.note} title="Note" placeholder="Add a note" />
       <Form.Dropdown
         {...itemProps.collection}
         title="Collection"
