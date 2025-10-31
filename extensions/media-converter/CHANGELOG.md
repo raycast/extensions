@@ -9,6 +9,7 @@
 ### Fixed
 
 - CRF option removed from AVI as it is not actually available
+- Applied `-pix_fmt yuv420p` to all videos except `.mov` to broaden support when converting from specific/unsupported video codecs
 
 ### API Changes
 
