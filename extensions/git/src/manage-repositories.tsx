@@ -185,7 +185,7 @@ function RepositoryListItem({
             <Action.CreateQuicklink
               title="Create Quicklink"
               quicklink={{
-                link: `raycast://extensions/ernest0n/git-client/open-repository?arguments=${encodeURIComponent(
+                link: `raycast://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(
                   JSON.stringify({ path: repo.path }),
                 )}`,
                 name: `Show ${repo.name} in Git`,
