@@ -28,6 +28,14 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "text-to-resume",
+      "title": "Convert Text to JSON Resume",
+      "description": "Converts plain text (like a resume, CV, or bio) into a validated JSON Resume schema format",
+      "confirmation": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.4",
     "@raycast/utils": "^1.17.0",
