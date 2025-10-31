@@ -193,7 +193,7 @@ export const VIDEO_ENCODING_MODES = ["crf", "vbr", "vbr-2-pass"] as const;
 export type VideoEncodingMode = (typeof VIDEO_ENCODING_MODES)[number];
 
 // Runtime object for video quality settings (for minimal redundancy)
-const VIDEO_QUALITY_OBJECT = {
+export const VIDEO_QUALITY_OBJECT = {
   ".mp4": [
     { encodingMode: "crf", crf: 75, preset: "medium" },
     { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
@@ -292,6 +292,99 @@ export type VideoControlType =
 
 export type QualitySettings = ImageQuality | AudioQuality | VideoQuality;
 export type AllControlType = VideoControlType | AudioControlType | "qualityLevel";
+
+// ---------------- Video builder factory ----------------
+export type VideoOverrides = Partial<{
+  encodingMode: VideoEncodingMode;
+  crf: number;
+  bitrate: VideoBitrate;
+  maxBitrate: VideoMaxBitrate;
+  preset: VideoPreset;
+  quality: VP9Quality;
+  variant: ProResVariant;
+}>;
+
+export function buildVideoQuality<K extends OutputVideoExtension>(
+  format: K,
+  overrides?: VideoOverrides,
+  base?: VideoQuality[K],
+): VideoQuality[K] {
+  const options = (VIDEO_QUALITY_OBJECT as Record<string, readonly unknown[]>)[format] ?? [];
+
+  // MOV (ProRes-style): only variant
+  if (format === ".mov") {
+    const fallbackVariant =
+      base && typeof base === "object" && "variant" in (base as Record<string, unknown>)
+        ? (base as Record<string, unknown>).variant
+        : ((options[0] as Record<string, unknown>)?.variant ?? PRORES_VARIANTS[0]);
+    const selected = (overrides && overrides.variant) || (fallbackVariant as ProResVariant);
+    return { variant: selected } as VideoQuality[K];
+  }
+
+  // Determine allowed modes and a sane default
+  const allowedModes: readonly VideoEncodingMode[] =
+    (ALLOWED_VIDEO_ENCODING_MODES as Record<string, readonly VideoEncodingMode[]>)[format] ??
+    (VIDEO_ENCODING_MODES as readonly VideoEncodingMode[]);
+  const baseMode =
+    base && typeof base === "object" && "encodingMode" in (base as Record<string, unknown>)
+      ? ((base as Record<string, unknown>).encodingMode as VideoEncodingMode | undefined)
+      : undefined;
+  const defaultMode = baseMode && allowedModes.includes(baseMode) ? baseMode : (allowedModes[0] ?? "crf");
+  const mode =
+    overrides && overrides.encodingMode && allowedModes.includes(overrides.encodingMode)
+      ? overrides.encodingMode
+      : (defaultMode as VideoEncodingMode);
+
+  // Find the prototype/default entry for that mode in VIDEO_QUALITY_OBJECT
+  const proto =
+    (options as readonly Record<string, unknown>[]).find((o) => (o as Record<string, unknown>).encodingMode === mode) ??
+    (options[0] as Record<string, unknown>) ??
+    {};
+
+  if (mode === "crf") {
+    const crf =
+      overrides && typeof overrides.crf === "number"
+        ? overrides.crf
+        : (((proto as Record<string, unknown>).crf as number | undefined) ??
+          (base && ((base as Record<string, unknown>).crf as number | undefined)));
+    const preset =
+      overrides && overrides.preset
+        ? overrides.preset
+        : (((proto as Record<string, unknown>).preset as VideoPreset | undefined) ??
+          (base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)));
+    return { encodingMode: "crf", crf: crf as number, ...(preset ? { preset } : {}) } as VideoQuality[K];
+  }
+
+  // vbr / vbr-2-pass
+  const bitrate =
+    overrides && overrides.bitrate
+      ? overrides.bitrate
+      : (((proto as Record<string, unknown>).bitrate as VideoBitrate | undefined) ??
+        (base && ((base as Record<string, unknown>).bitrate as VideoBitrate | undefined)));
+  const maxBitrate =
+    overrides && overrides.maxBitrate
+      ? overrides.maxBitrate
+      : (((proto as Record<string, unknown>).maxBitrate as VideoMaxBitrate | undefined) ??
+        (base && ((base as Record<string, unknown>).maxBitrate as VideoMaxBitrate | undefined)));
+  const preset =
+    overrides && overrides.preset
+      ? overrides.preset
+      : (((proto as Record<string, unknown>).preset as VideoPreset | undefined) ??
+        (base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)));
+  const quality =
+    overrides && overrides.quality
+      ? overrides.quality
+      : (((proto as Record<string, unknown>).quality as VP9Quality | undefined) ??
+        (base && ((base as Record<string, unknown>).quality as VP9Quality | undefined)));
+
+  const result: Record<string, unknown> = { encodingMode: mode };
+  if (bitrate) result.bitrate = bitrate;
+  if (maxBitrate !== undefined) result.maxBitrate = maxBitrate;
+  if (preset) result.preset = preset;
+  if (quality) result.quality = quality;
+
+  return result as VideoQuality[K];
+}
 
 // =============================================================================
 // Simple Quality Level Mappings
