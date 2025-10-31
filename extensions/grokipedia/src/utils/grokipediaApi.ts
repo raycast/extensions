@@ -17,8 +17,8 @@ export function useStats() {
 
 /**
  * Fetches typeahead suggestions.
- * Only executes if a query is provided. Returns empty results when query is empty.
- * Note: Rate limiting is handled by the Raycast List component's `throttle` prop.
+ * Callers should debounce user input (see MIN_SEARCH_LENGTH and SEARCH_DEBOUNCE_MS)
+ * and pass an empty string when the query should be skipped.
  */
 export function useTypeahead(query: string, limit = 5) {
   const url = buildUrl("/typeahead", { query, limit });
@@ -53,11 +53,14 @@ export function useTypeahead(query: string, limit = 5) {
 
 /**
  * Fetches full-text search results.
+ * Execute only when a non-empty query is provided; callers can trigger `revalidate`
+ * manually to control when results are fetched.
  */
-export function useFullTextSearch(query: string, limit = 12, offset = 0) {
+export function useFullTextSearch(query: string, limit = 12, offset = 0, options?: { execute?: boolean }) {
   const url = buildUrl("/full-text-search", { query, limit, offset });
   return useFetch<FullTextSearchResponse>(url, {
     keepPreviousData: true,
+    execute: options?.execute ?? !!query,
   });
 }
 

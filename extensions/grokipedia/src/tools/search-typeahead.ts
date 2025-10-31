@@ -1,6 +1,7 @@
+import { createFailure, createSuccess, type ToolResult } from "./tool-result";
 import { buildUrl } from "../utils/apiClient";
 import type { TypeaheadResponse } from "../types";
-import { MAX_API_LIMIT } from "../constants";
+import { MAX_API_LIMIT, TYPEAHEAD_LIMIT } from "../constants";
 
 type Input = {
   /**
@@ -8,7 +9,7 @@ type Input = {
    */
   query: string;
   /**
-   * Maximum number of suggestions to return. Defaults to 5.
+   * Maximum number of suggestions to return. Defaults to TYPEAHEAD_LIMIT.
    */
   limit?: number;
 };
@@ -17,41 +18,44 @@ type Input = {
  * Gets typeahead/autocomplete suggestions for a search query.
  * Useful for helping users find the right search terms quickly.
  */
-const tool = async (input: Input) => {
-  // Validate query input
-  if (!input.query || typeof input.query !== "string" || input.query.trim() === "") {
-    return {
-      data: { results: [], searchTimeMs: 0 },
-      success: true,
-    };
+const EMPTY_RESPONSE: TypeaheadResponse = {
+  results: [],
+  searchTimeMs: 0,
+};
+
+const tool = async (input: Input): Promise<ToolResult<TypeaheadResponse>> => {
+  const query = typeof input.query === "string" ? input.query.trim() : "";
+
+  if (!query) {
+    return createSuccess(EMPTY_RESPONSE);
   }
 
-  // Validate limit if provided
-  if (
-    input.limit !== undefined &&
-    (typeof input.limit !== "number" || input.limit < 1 || input.limit > MAX_API_LIMIT)
-  ) {
-    throw new Error(`Invalid limit: must be a number between 1 and ${MAX_API_LIMIT}`);
+  const limit = input.limit ?? TYPEAHEAD_LIMIT;
+  if (typeof limit !== "number" || Number.isNaN(limit) || limit < 1 || limit > MAX_API_LIMIT) {
+    return createFailure(`Invalid limit: must be a number between 1 and ${MAX_API_LIMIT}`);
   }
 
   const url = buildUrl("/typeahead", {
-    query: input.query.trim(),
-    limit: input.limit || 5,
+    query,
+    limit,
   });
 
-  const response = await fetch(url);
+  try {
+    const response = await fetch(url);
 
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => "Unknown error");
-    throw new Error(`Failed to fetch typeahead suggestions (${response.status}): ${response.statusText}. ${errorBody}`);
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => "Unknown error");
+      return createFailure(
+        `Failed to fetch typeahead suggestions (${response.status}): ${response.statusText}. ${errorBody}`,
+      );
+    }
+
+    const data = (await response.json()) as TypeaheadResponse;
+    return createSuccess(data);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return createFailure(`Failed to fetch typeahead suggestions: ${message}`);
   }
-
-  const data = (await response.json()) as TypeaheadResponse;
-
-  return {
-    data,
-    success: true,
-  };
 };
 
 export default tool;

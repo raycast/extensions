@@ -1,27 +1,60 @@
 import { ActionPanel, List, Action, Detail, Icon } from "@raycast/api";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useStats, useTypeahead, useFullTextSearch, usePage } from "./utils";
-import type { RawSearchItem, Citation } from "./types";
+import type { RawSearchItem } from "./types";
 import CitationsList from "./citations";
-import { pageUrl, TYPEAHEAD_LIMIT, FULL_TEXT_SEARCH_LIMIT, FULL_TEXT_SEARCH_OFFSET } from "./constants";
+import {
+  pageUrl,
+  TYPEAHEAD_LIMIT,
+  FULL_TEXT_SEARCH_LIMIT,
+  FULL_TEXT_SEARCH_OFFSET,
+  MIN_SEARCH_LENGTH,
+  SEARCH_DEBOUNCE_MS,
+} from "./constants";
 import { processMarkdownContent } from "./utils/markdown";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(handle);
+  }, [searchText]);
+
+  useEffect(() => {
+    if (searchText.trim().length < MIN_SEARCH_LENGTH && isSearchActive) {
+      setIsSearchActive(false);
+    }
+  }, [searchText, isSearchActive]);
 
   const { data: stats, isLoading: statsLoading } = useStats();
 
-  const { data: typeaheadData, isLoading: typeaheadLoading } = useTypeahead(searchText, TYPEAHEAD_LIMIT);
+  const { data: typeaheadData, isLoading: typeaheadLoading } = useTypeahead(
+    debouncedSearchText.length >= MIN_SEARCH_LENGTH ? debouncedSearchText : "",
+    TYPEAHEAD_LIMIT,
+  );
+
+  const trimmedFullTextQuery = searchText.trim();
+
+  const canExecuteFullText = trimmedFullTextQuery.length >= MIN_SEARCH_LENGTH;
 
   const { data: fullTextData, mutate: refetchFullText } = useFullTextSearch(
-    searchText,
+    trimmedFullTextQuery,
     FULL_TEXT_SEARCH_LIMIT,
     FULL_TEXT_SEARCH_OFFSET,
+    { execute: isSearchActive && canExecuteFullText },
   );
 
   const handleFullTextSearch = useCallback(async () => {
-    if (!searchText.trim()) return;
+    const nextQuery = searchText.trim();
+    if (nextQuery.length < MIN_SEARCH_LENGTH) {
+      return;
+    }
     setIsSearchActive(true);
     await refetchFullText();
   }, [searchText, refetchFullText]);
@@ -39,19 +72,23 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={placeholder}
-      throttle // Rate limiting: debounces search input to prevent excessive API calls
+      throttle // Combine Raycast throttling with SEARCH_DEBOUNCE_MS debounce upstream
     >
-      {!isSearchActive && searchText && (
-        <List.Item
-          icon={Icon.MagnifyingGlass}
-          title={`Press Enter to search for "${searchText}"`}
-          actions={
-            <ActionPanel>
-              <Action title="Full Text Search" icon={Icon.MagnifyingGlass} onAction={handleFullTextSearch} />
-            </ActionPanel>
-          }
-        />
-      )}
+      {!isSearchActive &&
+        searchText &&
+        (canExecuteFullText ? (
+          <List.Item
+            icon={Icon.MagnifyingGlass}
+            title={`Press Enter to search for "${searchText}"`}
+            actions={
+              <ActionPanel>
+                <Action title="Full Text Search" icon={Icon.MagnifyingGlass} onAction={handleFullTextSearch} />
+              </ActionPanel>
+            }
+          />
+        ) : (
+          <List.Item icon={Icon.Info} title={`Type at least ${MIN_SEARCH_LENGTH} characters to run full-text search`} />
+        ))}
       {items.map((item) => (
         <List.Item
           key={item.slug}
@@ -111,11 +148,11 @@ function ArticleDetail({ slug }: { slug: string }) {
             title="Copy Link"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
-          {citations && citations.length > 0 && (
+          {citations.length > 0 && (
             <Action.Push
               title="View Citations"
               icon={Icon.Link}
-              target={<CitationsList citations={citations as Citation[]} title={title} />}
+              target={<CitationsList citations={citations} title={title} />}
               shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
             />
           )}

@@ -67,18 +67,23 @@ export type PageStats = {
   lastViewed: string;
 };
 
-export type PageResponse = {
-  page: {
-    citations: Citation[];
-    images: unknown[];
-    fixedIssues: unknown[];
-    slug: string;
-    title: string;
-    content: string;
-    description: string;
-    metadata: PageMetadata;
-    stats: PageStats;
-    linkedPages: { indexedSlugs: string[]; unindexedSlugs: string[] };
-  };
-  found: boolean;
-};
+export type PageResponse =
+  | {
+      found: false;
+      page?: undefined;
+    }
+  | {
+      found: true;
+      page: {
+        citations: Citation[];
+        images: unknown[];
+        fixedIssues: unknown[];
+        slug: string;
+        title: string;
+        content: string;
+        description: string;
+        metadata: PageMetadata;
+        stats: PageStats;
+        linkedPages: { indexedSlugs: string[]; unindexedSlugs: string[] };
+      };
+    };

@@ -24,6 +24,16 @@ export const FULL_TEXT_SEARCH_LIMIT = 20;
 export const FULL_TEXT_SEARCH_OFFSET = 0;
 
 /**
+ * Minimum characters required before triggering remote search.
+ */
+export const MIN_SEARCH_LENGTH = 2;
+
+/**
+ * Debounce duration (ms) when streaming user input to search APIs.
+ */
+export const SEARCH_DEBOUNCE_MS = 300;
+
+/**
  * Maximum allowed limit for API requests to prevent abuse.
  */
 export const MAX_API_LIMIT = 100;
