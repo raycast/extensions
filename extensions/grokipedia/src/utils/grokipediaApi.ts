@@ -1,4 +1,4 @@
-import { useFetch, AsyncState } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import type { TypeaheadResponse, FullTextSearchResponse, StatsResponseRaw, Stats, PageResponse } from "../types";
 import { buildUrl } from "./apiClient";
 import { mapStats } from "./transforms";
@@ -29,22 +29,12 @@ export function useTypeahead(query: string, limit = 5) {
   });
 
   if (!query) {
+    // Ensure a consistent return shape while short-circuiting empty queries
     return {
+      ...fetchResult,
       data: { results: [], searchTimeMs: 0 },
       isLoading: false,
       error: undefined,
-      revalidate: fetchResult.revalidate,
-      mutate: fetchResult.mutate,
-    } as AsyncState<TypeaheadResponse> & {
-      revalidate: () => void;
-      mutate: (
-        asyncUpdate?: Promise<TypeaheadResponse | undefined>,
-        options?: {
-          optimisticUpdate?: (data: TypeaheadResponse) => TypeaheadResponse;
-          rollbackOnError?: boolean | ((data: TypeaheadResponse) => TypeaheadResponse);
-          shouldRevalidateAfter?: boolean;
-        },
-      ) => Promise<TypeaheadResponse | undefined>;
     };
   }
 
