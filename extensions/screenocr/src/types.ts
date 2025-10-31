@@ -6,6 +6,7 @@ export interface Preferences {
   keepImage: boolean;
   customWordsList: string;
   playSound: boolean;
+  showToast: boolean;
 }
 
 export type Language = {

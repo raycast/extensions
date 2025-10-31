@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  getPreferenceValues,
   Icon,
   List,
   LocalStorage,
@@ -11,8 +12,7 @@ import {
 import { useEffect } from "react";
 import { useImmer } from "use-immer";
 import supportedLanguages from "../../data/supportedLanguages";
-import { usePreferences } from "../../hooks";
-import { Language } from "../../types";
+import { Language, Preferences } from "../../types";
 
 export function LanguagesManagerItem({
   language,
@@ -52,7 +52,7 @@ export function LanguagesManagerItem({
 }
 
 export const LanguagesManagerList = () => {
-  const preference = usePreferences();
+  const preference = getPreferenceValues<Preferences>();
   const [selectedLanguages, setSelectedLanguages] = useImmer<Language[]>([]);
 
   const getSelectedLanguages = async () => {

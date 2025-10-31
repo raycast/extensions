@@ -130,6 +130,14 @@
       "default": true
     },
     {
+      "name": "showToast",
+      "description": "Show toast notifications for command results",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show toast messages",
+      "default": true
+    },
+    {
       "name": "ignoreLineBreaks",
       "description": "Ignores Line Breaks",
       "type": "checkbox",
