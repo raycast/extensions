@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { useMemo } from "react";
 import { Item, Folder } from "../@types/eagle";
-import { useFolderMap, useFolderList } from "../utils/query";
+import { useFolderList } from "../utils/query";
 import { FolderView } from "../folder";
 
 interface FolderNavigationActionsProps {
@@ -10,11 +10,10 @@ interface FolderNavigationActionsProps {
 }
 
 export function FolderNavigationActions({ item, shortcut }: FolderNavigationActionsProps) {
-  const { data: folderMap } = useFolderMap();
   const { data: allFolders = [] } = useFolderList();
 
   const itemFolders = useMemo(() => {
-    if (!folderMap || !item.folders || item.folders.length === 0) return [];
+    if (!item.folders || item.folders.length === 0 || allFolders.length === 0) return [];
 
     // Flatten all folders including nested ones
     const flattenFolders = (folders: Folder[]): Folder[] => {
@@ -31,7 +30,7 @@ export function FolderNavigationActions({ item, shortcut }: FolderNavigationActi
     return item.folders
       .map((folderId) => allFlatFolders.find((f) => f.id === folderId))
       .filter((folder): folder is Folder => !!folder);
-  }, [item.folders, folderMap, allFolders]);
+  }, [item.folders, allFolders]);
 
   if (itemFolders.length === 0) return null;
 
