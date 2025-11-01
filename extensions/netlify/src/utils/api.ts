@@ -23,6 +23,7 @@ import {
   ALGOLIA_PUBLIC_API_KEY,
   API_TOKEN,
 } from './constants';
+import { parseLinkHeader } from '@web3-storage/parse-link-header';
 
 class Api {
   algolia: AxiosInstance;
@@ -144,20 +145,26 @@ class Api {
     return data;
   }
 
-  async getSites(query: string, team?: string): Promise<Site[]> {
+  async getSites(
+    query: string,
+    team?: string,
+    page = 1,
+  ): Promise<{ data: Site[]; hasMore: boolean }> {
     const params = [
       `name=${query}`,
       `filter=all`,
       `sort_by=updated_at`,
-      `page=1`,
-      `per_page=30`,
+      `page=${page}`,
+      `per_page=100`,
       `include_favorites=true`,
     ];
     const path = [team && `/${team}`, `/sites?${params.join('&')}`]
       .filter(Boolean)
       .join('');
-    const { data } = await this.netlify.get<Site[]>(path);
-    return data;
+    const { data, headers } = await this.netlify.get<Site[]>(path);
+    const parsed = parseLinkHeader(headers.link);
+    const hasMore = !!parsed?.next;
+    return { data, hasMore };
   }
 
   async getTeams(): Promise<Team[]> {

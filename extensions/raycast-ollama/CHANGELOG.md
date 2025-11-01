@@ -1,5 +1,28 @@
 # raycast-ollama Changelog
 
+## [Improvement and Fix] - 2025-05-07
+
+- [Improvement] Implemented support for Mcp Server. README.md for more information on how to use it.
+- [Improvement] On Command "Manage Models" and "Loaded Models" opening last selected server is the default choice.
+- [Improvement] Implemented an empty view on Command "Manage Models" and "Loaded Models" when no models are installed or loaded.
+- [Fix] Error loading models on changing models form when one or more Ollama server was unreachable.
+
+## [Fix] - 2025-02-24
+
+- Improved Ollama streaming processing leading to better performance when using remote Ollama server.
+
+## [Fix] - 2025-01-26
+
+- Corrected typos
+
+## [Improvement] - 2025-01-02
+
+- New Command 'Loaded Models': lists currently models loaded on memory. Data are auto updated every 3 seconds.
+- Command 'Manage Models': model currently loaded in memory flagged with tag 'In Memory'.
+- Command 'Manage Models': added Action 'Update Model', pull selected model from registry updating it. 
+- Command 'Manage Models': added Action 'Model Library', open Ollama Library Web page for listing available models.
+- Command 'Chat with Ollama': modified copy keybinds to 'cmd+shift+c' from 'cmd+c'.
+
 ## [Improvement and BugFix] - 2024-08-05
 
 - [Improvement] New action "Continue as Chat" on single shot commands allow continuing conversation on "Chat with Ollama".

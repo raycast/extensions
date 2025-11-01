@@ -1,4 +1,16 @@
-import { Color, Icon, MenuBarExtra, Toast, confirmAlert, openCommandPreferences, showToast, open } from "@raycast/api";
+import {
+  Cache,
+  Color,
+  confirmAlert,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  open,
+  openCommandPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { calData, calDateTitle, calFirstColumn, calWeekTitle } from "./utils/calendar-utils";
 import { CALENDAR_APP, REMINDERS_APP, SETTINGS_APP } from "./utils/constans";
 import {
@@ -11,6 +23,7 @@ import {
   showReminders,
   showSettings,
   showWeekNumber,
+  titleTruncateLength,
 } from "./types/preferences";
 import {
   extraItemIcon,
@@ -25,24 +38,27 @@ import {
 } from "./utils/common-utils";
 import { Fragment, useMemo } from "react";
 import { Reminder, useReminders } from "./hooks/useReminders";
-import { addPriorityToTitle, isOverdue, isToday, isTomorrow } from "./utils/reminders-utils";
+import { addPriorityToTitle, buildReminderToolTip, isOverdue, isToday, isTomorrow } from "./utils/reminders-utils";
 import { deleteReminder as apiDeleteReminder, toggleCompletionStatus } from "swift:../swift/AppleReminders";
 import { CalendarEvent, useCalendar } from "./hooks/useCalendar";
 import {
+  buildCalendarToolTip,
   findFirstEventWithinNHours,
   formatEventTimeMultiItemSubtitle,
   formatEventTimeMultiSection,
   getCalendarIcon,
+  getEventUrl,
   timeStampIsThreeDay,
   timeStampIsToday,
 } from "./utils/calendar-events-utils";
 import { format } from "date-fns";
+import { CacheKey, CCalendarList } from "./types/calendar";
 
 export default function Command() {
   const calList = calData();
 
-  const { data: calendarEvents } = useCalendar();
-  const { data: remindersEvents, isLoading, mutate } = useReminders();
+  const { data: calendarData } = useCalendar();
+  const { data: remindersData, isLoading, mutate } = useReminders();
 
   async function deleteReminder(reminder: Reminder) {
     try {
@@ -63,9 +79,26 @@ export default function Command() {
   }
 
   const reminders = useMemo(() => {
-    if (!remindersEvents) return [];
-    return remindersEvents.reminders;
-  }, [remindersEvents]);
+    if (!remindersData) return [];
+    const cache = new Cache();
+    const calendarListItemsStr = cache.get(CacheKey.CONFIGURE_LIST_ITEMS);
+    if (calendarListItemsStr) {
+      let ccListItem: CCalendarList[] = [];
+      try {
+        ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+      } catch (error) {
+        console.error("JSON parsing error:", error);
+      }
+      const cCalendarList = ccListItem[1].list.filter((item) => item.enabled);
+      return remindersData.reminders.filter((calendar) => {
+        if (calendar.list != null) {
+          return cCalendarList.findIndex((item) => item.id === calendar.list!.id) !== -1;
+        }
+        return true;
+      });
+    }
+    return remindersData.reminders;
+  }, [remindersData]);
 
   const reminderSections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -114,9 +147,23 @@ export default function Command() {
   }, [reminders]);
 
   const calendars = useMemo(() => {
-    if (!calendarEvents) return [];
-    return calendarEvents;
-  }, [calendarEvents]);
+    if (!calendarData) return [];
+    const cache = new Cache();
+    const calendarListItemsStr = cache.get(CacheKey.CONFIGURE_LIST_ITEMS);
+    if (calendarListItemsStr) {
+      let ccListItem: CCalendarList[] = [];
+      try {
+        ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+      } catch (error) {
+        console.error("JSON parsing error:", error);
+      }
+      const cCalendarList = ccListItem[0].list.filter((item) => item.enabled);
+      return calendarData.filter(
+        (calendar) => cCalendarList.findIndex((item) => item.id === calendar.calendar.id) !== -1,
+      );
+    }
+    return calendarData;
+  }, [calendarData]);
 
   const calendarEventSections = useMemo(() => {
     if (calendarView === "none") return [];
@@ -139,12 +186,14 @@ export default function Command() {
     return allCalendarEvents.sort((a, b) => a.startDate - b.startDate);
   }, [calendars]);
 
-  const eventMenubatTitle = useMemo(() => {
+  const eventMenubarTitle = useMemo(() => {
     const event = findFirstEventWithinNHours(calendarEventSections, Number(showEventsInMenubar));
     if (event.event === null) {
       return "";
     } else {
-      return "  " + truncateMenubarTitle(event.event.title) + "  • in " + event.timeUntilEvent;
+      return (
+        "  " + truncateMenubarTitle(event.event.title, parseInt(titleTruncateLength)) + "  • in " + event.timeUntilEvent
+      );
     }
   }, [calendarEventSections]);
 
@@ -169,7 +218,7 @@ export default function Command() {
   }, [calendarEventSections]);
 
   return (
-    <MenuBarExtra isLoading={isLoading} title={menubarTitle() + eventMenubatTitle} icon={menubarIcon()}>
+    <MenuBarExtra isLoading={isLoading} title={menubarTitle() + eventMenubarTitle} icon={menubarIcon()}>
       <MenuBarExtra.Item title={calDateTitle} onAction={highlightCalendar ? () => {} : undefined} />
       <MenuBarExtra.Item title={calWeekTitle()} onAction={highlightCalendar ? () => {} : undefined} />
       {calList.map((calRow, index) => (
@@ -190,55 +239,77 @@ export default function Command() {
           {largeCalendar && index !== calList.length - 1 && <MenuBarExtra.Item key={"space_end_" + index} title={""} />}
         </Fragment>
       ))}
-
+      // calendar events
       {Object.keys(groupedEvents).map((dayKey) => {
         return (
           <MenuBarExtra.Section
             key={dayKey}
             title={truncate(formatEventTimeMultiSection(groupedEvents[dayKey][0].startDate))}
           >
-            {groupedEvents[dayKey].map((event, index) => (
-              <MenuBarExtra.Item
-                key={event.openUrl + index}
-                icon={getCalendarIcon(event.status, event.color)}
-                title={truncate(event.title.replace(/\\n/g, " "))}
-                subtitle={truncateSubtitle(
-                  event.title.replace(/\\n/g, " "),
-                  formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay),
-                )}
-                onAction={async () => {
-                  await open(event.openUrl, "com.apple.iCal");
-                }}
-                alternate={
-                  <MenuBarExtra.Item
-                    key={event.openUrl + index}
-                    icon={getCalendarIcon(event.status, event.color)}
-                    title={truncate(formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay))}
-                    subtitle={truncateSubtitle(
-                      formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay),
-                      event.title.replace(/\\n/g, " "),
-                    )}
-                    onAction={async () => {
-                      await open(event.openUrl, "com.apple.iCal");
-                    }}
-                  />
-                }
-              />
-            ))}
+            {groupedEvents[dayKey].map((event, index) => {
+              const eventUrl = getEventUrl(event);
+              return (
+                <MenuBarExtra.Item
+                  key={event.openUrl + index}
+                  icon={getCalendarIcon(event.status, event.color)}
+                  title={truncate(event.title.replace(/\\n/g, " "))}
+                  subtitle={truncateSubtitle(
+                    event.title.replace(/\\n/g, " "),
+                    formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay),
+                  )}
+                  tooltip={buildCalendarToolTip(event)}
+                  onAction={async () => {
+                    await open(event.openUrl, "com.apple.iCal");
+                  }}
+                  alternate={
+                    <MenuBarExtra.Item
+                      key={event.openUrl + index}
+                      icon={
+                        eventUrl
+                          ? { source: Icon.Link, tintColor: event.color }
+                          : getCalendarIcon(event.status, event.color)
+                      }
+                      title={truncate(eventUrl ? eventUrl : truncate(event.title.replace(/\\n/g, " ")))}
+                      subtitle={
+                        eventUrl
+                          ? undefined
+                          : truncateSubtitle(
+                              event.title.replace(/\\n/g, " "),
+                              formatEventTimeMultiItemSubtitle(event.startDate, event.endDate, event.isAllDay),
+                            )
+                      }
+                      tooltip={buildCalendarToolTip(event)}
+                      onAction={
+                        eventUrl
+                          ? async () => {
+                              await open(eventUrl);
+                            }
+                          : undefined
+                      }
+                    />
+                  }
+                />
+              );
+            })}
           </MenuBarExtra.Section>
         );
       })}
-
+      // reminders
       {reminderSections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
           {section.items.map((reminder) => {
             return (
               <MenuBarExtra.Item
-                icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
+                icon={
+                  reminder.isCompleted
+                    ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                    : { source: Icon.Circle, tintColor: reminder.list?.color }
+                }
                 key={reminder.id}
                 title={truncate(addPriorityToTitle(reminder.title, reminder.priority))}
+                tooltip={buildReminderToolTip(reminder)}
                 onAction={async (itemActionEvent) => {
-                  if (itemActionEvent.type === "left-click") {
+                  if (itemActionEvent.type === "right-click") {
                     try {
                       await toggleCompletionStatus(reminder.id);
                       await mutate();
@@ -260,8 +331,9 @@ export default function Command() {
                 }}
                 alternate={
                   <MenuBarExtra.Item
-                    icon={Icon.Trash}
+                    icon={{ source: Icon.Trash, tintColor: Color.Red }}
                     title={truncate(addPriorityToTitle(reminder.title, reminder.priority))}
+                    subtitle={reminder.url ? reminder.url : undefined}
                     onAction={async () => {
                       if (
                         await confirmAlert({
@@ -280,7 +352,6 @@ export default function Command() {
           })}
         </MenuBarExtra.Section>
       ))}
-
       <MenuBarExtra.Section>
         {showCalendar && (
           <MenuBarExtra.Item
@@ -297,6 +368,27 @@ export default function Command() {
             icon={extraItemIcon(REMINDERS_APP, Icon.BulletPoints)}
             onAction={async () => {
               await openApp(REMINDERS_APP);
+            }}
+          />
+        )}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        {showSettings && (
+          <MenuBarExtra.Item
+            title={"Calendar List"}
+            icon={extraItemIcon(CALENDAR_APP, Icon.List)}
+            onAction={async () => {
+              try {
+                await launchCommand({
+                  name: "index2",
+                  type: LaunchType.UserInitiated,
+                });
+              } catch (e) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Calendar List command is disabled",
+                });
+              }
             }}
           />
         )}

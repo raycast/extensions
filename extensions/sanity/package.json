@@ -3,8 +3,11 @@
   "name": "sanity",
   "title": "Sanity",
   "description": "Quickly search for Sanity projects you have access to",
-  "icon": "sanity-icon.png",
+  "icon": "favicon-512.png",
   "author": "marcusforsberg",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Developer Tools",
     "Web",
@@ -20,26 +23,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.3",
-    "@raycast/utils": "^1.9.0",
-    "@sanity/cli": "^3.15.1",
-    "@sanity/client": "^6.4.6",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
+    "@sanity/cli": "^3.95.0",
+    "@sanity/client": "^7.6.0",
     "configstore": "^6.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/configstore": "^6.0.0",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

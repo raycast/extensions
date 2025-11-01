@@ -1,5 +1,7 @@
+import { BrowserExtension, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runJxa } from "run-jxa";
+import { Preferences } from "../types";
 
 export interface Link {
   title: string;
@@ -12,7 +14,24 @@ export function isLink(val: unknown): val is Link {
   return typeof link.title === "string" && typeof link.url === "string";
 }
 
-export async function getFrontmostLink(): Promise<Link | null> {
+async function getFrontmostLinkFromExtension(): Promise<Link | null> {
+  try {
+    const tabs = await BrowserExtension.getTabs();
+    const activeTab = tabs.find((tab) => tab.active);
+
+    if (!activeTab?.url) return null;
+
+    return {
+      title: activeTab.title || "",
+      url: activeTab.url,
+    };
+  } catch (error) {
+    console.error("Error getting tab from Browser Extension:", error);
+    return null;
+  }
+}
+
+async function getFrontmostLinkFromJxa(): Promise<Link | null> {
   const result = await runJxa(`
     const chromium = new Set([
       "com.google.Chrome",
@@ -42,7 +61,6 @@ export async function getFrontmostLink(): Promise<Link | null> {
       return {url: tab.url(), title: tab.name()};
     }
 
-
     function getFrontmostApp() {
       const apps = Application("System Events")
         .applicationProcesses
@@ -69,6 +87,19 @@ export async function getFrontmostLink(): Promise<Link | null> {
   if (result == null) return null;
   if (isLink(result)) return result;
   throw new Error(`Unknown link format: ${JSON.stringify(result)}`);
+}
+
+export async function getFrontmostLink(): Promise<Link | null> {
+  const { useBrowserExtension } = getPreferenceValues<Preferences>();
+
+  // Only try browser extension if the preference is enabled
+  if (useBrowserExtension) {
+    const extensionLink = await getFrontmostLinkFromExtension();
+    if (extensionLink) return extensionLink;
+  }
+
+  // Use JXA if browser extension is disabled or fails
+  return getFrontmostLinkFromJxa();
 }
 
 export type FrontmostLinkHook = { link: Link | null | undefined; loading: boolean };

@@ -5,6 +5,9 @@
   "description": "Restart system processes such as Finder, Dock, Menu Bar, Audio and more!",
   "icon": "main-icon.png",
   "author": "muzhen_gaming",
+  "contributors": [
+    "hrueger"
+  ],
   "categories": [
     "Productivity",
     "System",
@@ -17,6 +20,17 @@
       "title": "Restart System Processes",
       "description": "Restart system processes",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useSudo",
+      "default": false,
+      "description": "This is required for some processes. See README for more info.",
+      "type": "checkbox",
+      "label": "Use sudo when running the command.",
+      "required": true,
+      "title": "Use sudo"
     }
   ],
   "dependencies": {

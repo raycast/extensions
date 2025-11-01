@@ -4,6 +4,12 @@ type SpotlightSearchPreferences = {
   maxResults: number;
   pluginsEnabled: boolean;
   pluginsFolder: string;
+  showNonCloudLibraryPaths: boolean;
+  filterLibraryFolders: boolean;
+  pinned: SpotlightSearchResult[];
+  searchScope: string;
+  isShowingDetail: boolean;
+  openFolderAfterMove: boolean;
 };
 
 type FolderSearchPlugin = {
@@ -20,9 +26,9 @@ type SpotlightSearchResult = {
   kMDItemFSName: string;
   kMDItemKind: string;
   kMDItemFSSize: number;
-  kMDItemFSCreationDate: Date;
-  kMDItemContentModificationDate: Date;
-  kMDItemLastUsedDate: Date;
+  kMDItemFSCreationDate: string;
+  kMDItemContentModificationDate: string;
+  kMDItemLastUsedDate: string;
   kMDItemUseCount: number;
 };
 

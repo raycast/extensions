@@ -1,6 +1,5 @@
 import { Action, ActionPanel, getPreferenceValues } from "@raycast/api";
 import { DocItem } from "../models/docItem.model";
-import { Preferences } from "../models/preferences.model";
 
 const { paperlessURL }: Preferences = getPreferenceValues();
 

@@ -1,123 +1,18 @@
-import {
-  IssueImpl,
-  IssueTag,
-  NewIssue,
-  ReducedIssue,
-  ReducedProject,
-  ReducedUser,
-  WorkItem,
-  Youtrack,
-} from "youtrack-rest-client";
-import { Issue, IssueExtended, Project, User } from "./interfaces";
-import { IssueCustomFieldValue } from "youtrack-rest-client/dist/entities/issueCustomField";
+import type { DurationPresentation } from "youtrack-client";
+import type { Comment, CustomField, EnumValue, Issue, IssueExtended, IssueTag, Project } from "./interfaces";
 
 type PreparedFavorites = { cached: Project[]; toFetch: string[] };
-type FetchedFavorites = { fetched: Project[]; errored: string[] };
-
 export function getEmptyIssue(): Issue {
   return {
     id: "",
     summary: "Connecting to YouTrack...",
     date: "",
     created: "",
+    description: "",
     resolved: false,
+    project: null,
+    customFields: [],
   };
-}
-
-function issueToItem(issue: ReducedIssue): Issue {
-  return {
-    id: `${issue.project?.shortName}-${issue.numberInProject}`,
-    summary: issue.summary ?? "Unable to load issue summary",
-    date: new Date(issue.updated ?? 0).toDateString(),
-    created: new Date(issue.created ?? 0).toDateString(),
-    resolved: !!issue.resolved,
-    description: issue.description,
-  };
-}
-
-function prepareProject(project: ReducedProject): Project {
-  return {
-    id: project.id!,
-    shortName: project.shortName!,
-    name: project.name!,
-  };
-}
-
-async function getUserAvatarUrl(userId: string, yt: Youtrack): Promise<string | undefined> {
-  const { avatarUrl } = await yt.users.byId(userId);
-  return avatarUrl ?? "";
-}
-
-async function customFieldToUser(user: IssueCustomFieldValue, yt: Youtrack): Promise<User> {
-  return {
-    id: user.id ?? "0",
-    name: user.name ?? "Unknown",
-    fullName: user.fullName ?? "Unknown",
-    avatarUrl: user.id ? await getUserAvatarUrl(user.id, yt) : undefined,
-  };
-}
-
-async function reducedUserToUser(user: ReducedUser, yt: Youtrack): Promise<User> {
-  return {
-    id: user.id,
-    name: user.name,
-    fullName: user.fullName,
-    avatarUrl: await getUserAvatarUrl(user.id, yt),
-  };
-}
-
-export async function fetchIssues(query: string, limit: number, yt: Youtrack): Promise<Issue[]> {
-  const data = await yt.issues.search(query, { $top: limit });
-  return data.map(issueToItem);
-}
-
-export async function fetchProjects(limit: number, yt: Youtrack): Promise<Project[]> {
-  const projects = await yt.projects.all({ $top: limit });
-  return projects.map(prepareProject);
-}
-
-export async function fetchTags(limit: number, yt: Youtrack): Promise<IssueTag[]> {
-  const tags = await yt.tags.all({ $top: limit });
-  return tags.filter((tag) => tag.name !== "Star");
-}
-
-export async function fetchProjectById(id: string, yt: Youtrack): Promise<Project> {
-  const project = await yt.projects.byId(id);
-  return prepareProject(project);
-}
-
-export async function createIssue(issue: NewIssue, yt: Youtrack): Promise<IssueImpl> {
-  const newIssue = await yt.issues.create(issue);
-  return newIssue;
-}
-
-function formatDate(dateString: number): string {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeStyle: "medium" }).format(date);
-}
-
-export async function fetchIssueDetails(issue: Issue, yt: Youtrack): Promise<IssueExtended> {
-  const issueDetails = await yt.issues.byId(issue.id);
-  let assignee = undefined;
-  if (issueDetails.fields) {
-    const assigneeField = issueDetails.fields.find((field) => field.name === "Assignee");
-    assignee = assigneeField?.value ?? undefined;
-  }
-  const { reporter, updater, tags, created, updated, project } = issueDetails;
-  return {
-    ...issue,
-    date: formatDate(updated ?? 0),
-    created: formatDate(created ?? 0),
-    assignee: assignee && (await customFieldToUser(assignee, yt)),
-    reporter: reporter && (await reducedUserToUser(reporter, yt)),
-    updater: updater && (await reducedUserToUser(updater, yt)),
-    tags,
-    workItemTypes: await yt.projects.getWorkItemTypes(project?.id || ""),
-  };
-}
-
-export async function createWorkItem(issue: Issue, workItem: WorkItem, yt: Youtrack) {
-  return yt.workItems.create(issue.id, workItem);
 }
 
 export const issueStates = {
@@ -129,14 +24,27 @@ export function isURL(s: string) {
   try {
     new URL(s);
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 }
 
-export function removeMarkdownImages(issueBody: string) {
-  const imagePattern = /!\[[^\]]*\]\([^)]+\){[^}]*}|!\[]\([^)]+\)/g;
-  return issueBody.replace(imagePattern, "");
+export function addMarkdownImages(entity: IssueExtended | Comment, host: string) {
+  const imagePattern = /!\[[^\]]*\]\(([^)]+)\)(?:\[([^\]]*)\])?(?:\{[^}]*\})?/g;
+  const content = "description" in entity ? entity.description : entity.text;
+
+  return content.replace(imagePattern, (match, attachmentPath, linkUrl) => {
+    // Clean path and find attachment
+    const cleanPath = attachmentPath.replace(/\{[^}]*\}/g, "");
+    const attachmentName = cleanPath.split("/").pop();
+    const attachment = entity.attachments?.find((a) => a.name === attachmentName);
+
+    if (!attachment) return match;
+
+    // Return formatted markdown with optional URL reference
+    const imgMarkdown = `![${attachment.name}](${host}${attachment.url})`;
+    return linkUrl ? `${imgMarkdown}[${linkUrl}]` : imgMarkdown;
+  });
 }
 
 export function prepareFavorites(cachedProjects: Project[], favorites: string[]): PreparedFavorites {
@@ -154,25 +62,73 @@ export function prepareFavorites(cachedProjects: Project[], favorites: string[])
   );
 }
 
-export async function fetchFavorites(favorites: string[], yt: Youtrack): Promise<FetchedFavorites> {
-  const favoriteProjects: FetchedFavorites = { fetched: [], errored: [] };
+export function getTagsToAdd(tagsToAdd: string[], stateTags: IssueTag[]): IssueTag[] {
+  return tagsToAdd
+    .map((tag) => stateTags.find((t) => t.name === tag))
+    .filter((tag): tag is IssueTag => tag !== undefined);
+}
 
-  for (const projectId of favorites) {
-    try {
-      const fetchedProject = await fetchProjectById(projectId, yt);
-      favoriteProjects.fetched.push(fetchedProject);
-    } catch {
-      favoriteProjects.errored.push(projectId);
+export function formatDate(dateString: number): string {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeStyle: "medium" }).format(date);
+}
+
+export function isDurationValid(duration: string): boolean {
+  if (!/\d/.test(duration)) {
+    return false;
+  }
+  return /^\s*(?:\d+\s*w)?(?:\s*\d+\s*d)?(?:\s*\d+\s*h)?(?:\s*\d+\s*m)?\s*$/.test(duration);
+}
+
+export function isDurationValue(duration: string): duration is DurationPresentation {
+  return isDurationValid(duration);
+}
+
+export function stripHtmlTags(html: string | null | undefined) {
+  return html ? html.replace(/<[^>]*>/g, "") : "";
+}
+
+export function transformCustomFieldValue(
+  value: unknown,
+):
+  | string
+  | number
+  | { id: string; name: string; color: { background: string | null; foreground: string | null } | null } {
+  if (typeof value === "string" || typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "object" && value !== null) {
+    // Check if it already has the complete structure
+    if ("name" in value && "color" in value) {
+      return value as {
+        id: string;
+        name: string;
+        color: { background: string | null; foreground: string | null } | null;
+      };
+    }
+
+    // Transform partial object to complete structure
+    if ("name" in value) {
+      return {
+        id: "id" in value ? String(value.id) : "",
+        name: String(value.name || ""),
+        color: null,
+      };
     }
   }
 
-  return favoriteProjects;
+  return "";
 }
 
-function isTag(tag: IssueTag | undefined): tag is IssueTag {
-  return Boolean(tag);
+export function getPriorityFieldValue(customFields: CustomField[]): EnumValue | null {
+  const priority = customFields.find((field) => field.name === "Priority");
+  if (priority && typeof priority.value === "object" && "name" in priority.value && "color" in priority.value) {
+    return priority.value;
+  }
+  return null;
 }
 
-export function getTagsToAdd(tagsToAdd: string[], stateTags: IssueTag[]): IssueTag[] {
-  return tagsToAdd.map((tag) => stateTags.find((t) => t.name === tag)).filter(isTag);
+export function getUserAvatar(avatarUrl: string, host: string): string {
+  return isURL(avatarUrl) ? avatarUrl : `${host}${avatarUrl}`;
 }

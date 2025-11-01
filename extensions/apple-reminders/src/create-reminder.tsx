@@ -13,7 +13,7 @@ import {
   PopToRootType,
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
-import { format } from "date-fns";
+import { addMilliseconds, format, startOfToday } from "date-fns";
 import { createReminder } from "swift:../swift/AppleReminders";
 
 import LocationForm from "./components/LocationForm";
@@ -21,7 +21,7 @@ import { getIntervalValidationError, getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
 
-type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
 export type NewReminder = {
   title: string;
   listId?: string;
@@ -54,7 +54,7 @@ type CreateReminderValues = {
 };
 
 type CreateReminderFormProps = {
-  draftValues?: CreateReminderValues;
+  draftValues?: Partial<CreateReminderValues>;
   listId?: string;
   mutate?: MutatePromise<{ reminders: Reminder[]; lists: List[] } | undefined>;
 };
@@ -67,7 +67,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
-  const { selectDefaultList } = getPreferenceValues<Preferences.CreateReminder>();
+  const { selectDefaultList, selectTodayAsDefault } = getPreferenceValues<Preferences.CreateReminder>();
   let initialListId;
   if (listId !== "all") {
     initialListId = listId;
@@ -77,11 +77,18 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     initialListId = defaultList.id;
   }
 
+  let initialDueDate;
+  if (draftValues?.dueDate) {
+    initialDueDate = draftValues?.dueDate;
+  } else if (selectTodayAsDefault) {
+    initialDueDate = addMilliseconds(startOfToday(), 1);
+  }
+
   const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({
     initialValues: {
       title: draftValues?.title ?? "",
       notes: draftValues?.notes ?? "",
-      dueDate: draftValues?.dueDate,
+      dueDate: initialDueDate,
       priority: draftValues?.priority,
       listId: initialListId,
       isRecurring: draftValues?.isRecurring ?? false,
@@ -200,6 +207,12 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       case "daily":
         repetitionPeriod = intervalNum > 1 ? `${intervalNum} days` : "day";
         break;
+      case "weekdays":
+        repetitionPeriod = intervalNum > 1 ? `${intervalNum} weeks on weekdays` : "week on weekdays";
+        break;
+      case "weekends":
+        repetitionPeriod = intervalNum > 1 ? `${intervalNum} weekends` : "weekend";
+        break;
       case "weekly":
         repetitionPeriod = intervalNum > 1 ? `${intervalNum} weeks` : "week";
         break;
@@ -259,6 +272,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             <>
               <Form.Dropdown {...itemProps.frequency} title="Frequency">
                 <Form.Dropdown.Item title="Daily" value="daily" />
+                <Form.Dropdown.Item title="Weekdays" value="weekdays" />
+                <Form.Dropdown.Item title="Weekends" value="weekends" />
                 <Form.Dropdown.Item title="Weekly" value="weekly" />
                 <Form.Dropdown.Item title="Monthly" value="monthly" />
                 <Form.Dropdown.Item title="Yearly" value="yearly" />

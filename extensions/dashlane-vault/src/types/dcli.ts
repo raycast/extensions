@@ -1,7 +1,13 @@
 import * as v from "valibot";
 
-const StringBooleanSchema = v.coerce(v.boolean(), (v) => v === "true");
-const StringNumberSchema = v.coerce(v.number(), (v) => (typeof v === "string" ? parseInt(v, 10) : 0));
+const StringBooleanSchema = v.pipe(
+  v.unknown(),
+  v.transform((v) => v === "true"),
+);
+const StringNumberSchema = v.pipe(
+  v.unknown(),
+  v.transform((v) => (typeof v === "string" ? parseInt(v, 10) : 0)),
+);
 
 export const VaultCredentialSchema = v.object({
   id: v.string("ID is required."),
@@ -30,7 +36,7 @@ export const VaultCredentialSchema = v.object({
   localeFormat: v.optional(v.string()),
 });
 
-export type VaultCredential = v.Output<typeof VaultCredentialSchema>;
+export type VaultCredential = v.InferOutput<typeof VaultCredentialSchema>;
 
 const VaultNoteAttachmentSchema = v.object({
   id: v.string("Attachment ID is required."),
@@ -46,14 +52,14 @@ const VaultNoteAttachmentSchema = v.object({
   version: v.optional(v.number(), 1),
 });
 
-export type NoteAttachment = v.Output<typeof VaultNoteAttachmentSchema>;
+export type NoteAttachment = v.InferOutput<typeof VaultNoteAttachmentSchema>;
 
 export const VaultNoteSchema = v.object({
   id: v.string("ID is required."),
   anonId: v.optional(v.string()),
   title: v.optional(v.string(), "Untitled Note"),
   content: v.optional(v.string()),
-  attachments: v.optional(v.array(VaultNoteAttachmentSchema), []),
+  attachments: v.optional(v.array(VaultNoteAttachmentSchema)),
   category: v.optional(v.string()),
   secured: v.optional(StringBooleanSchema, false),
   type: v.optional(v.string()),
@@ -66,4 +72,14 @@ export const VaultNoteSchema = v.object({
   localeFormat: v.optional(v.string()),
 });
 
-export type VaultNote = v.Output<typeof VaultNoteSchema>;
+export type VaultNote = v.InferOutput<typeof VaultNoteSchema>;
+
+export type Device = {
+  deviceId: string;
+  deviceName?: string;
+  devicePlatform?: string;
+  creationDateUnix: number;
+  lastUpdateDateUnix: number;
+  lastActivityDateUnix: number;
+  isCurrentDevice: boolean;
+};

@@ -1,7 +1,7 @@
+import { exec } from "node:child_process";
 import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Icon } from "@raycast/api";
 import { ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { exec } from "child_process";
 import {
   continueInterval,
   createInterval,
@@ -12,9 +12,10 @@ import {
   preferences,
   resetInterval,
   restartInterval,
-} from "../lib/intervals";
-import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse, Interval, Quote } from "../lib/types";
+} from "./lib/intervals";
+import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
+import { GiphyResponse, Interval, Quote } from "./lib/types";
+import { checkDNDExtensionInstall } from "./lib/doNotDisturb";
 
 const createAction = (action: () => void) => () => {
   action();
@@ -34,6 +35,7 @@ const createAction = (action: () => void) => () => {
 
 const ActionsList = () => {
   const currentInterval = getCurrentInterval();
+  checkDNDExtensionInstall();
 
   return (
     <List navigationTitle="Control Pomodoro Timers">
@@ -160,7 +162,7 @@ const EndOfInterval = () => {
         `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
         {
           keepPreviousData: true,
-        }
+        },
       );
       if (!isLoading && data) {
         const giphyResponse = data as GiphyResponse;

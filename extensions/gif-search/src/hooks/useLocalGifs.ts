@@ -68,8 +68,8 @@ export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize)
   return {
     favoriteGifs: localGifs && "favoriteGifs" in localGifs ? localGifs.favoriteGifs : [],
     recentGifs: localGifs && "recentGifs" in localGifs ? localGifs.recentGifs : [],
-    allGifs,
     isLoading: isLoadingLocalGifs || isLoadingAllGifs,
+    allGifs,
     mutate,
   };
 }

@@ -6,7 +6,7 @@ const config: IConfig = {
   defaultModel: undefined,
 
   /* eslint-disable @typescript-eslint/no-unused-vars */
-  async listModels(apikey: string | undefined): Promise<IModel[]> {
+  async listModels(apikey: string | undefined, _: string | undefined): Promise<IModel[]> {
     return Promise.resolve([]);
   },
   defaultEntrypoint: "",

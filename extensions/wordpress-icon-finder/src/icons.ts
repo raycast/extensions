@@ -397,7 +397,7 @@ export const iconsData = [
   },
   {
     name: "close",
-    path: '<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"/>',
+    path: '<path d="m13.06 12 6.47-6.47-1.06-1.06L12 10.94 5.53 4.47 4.47 5.53 10.94 12l-6.47 6.47 1.06 1.06L12 13.06l6.47 6.47 1.06-1.06L13.06 12Z"/>',
     keywords: ["x", "times", "dismiss"],
     minWidth: 0,
     minHeight: 0,
@@ -1037,6 +1037,15 @@ export const iconsData = [
   {
     name: "help",
     path: '<path d="M12 4.75a7.25 7.25 0 100 14.5 7.25 7.25 0 000-14.5zM3.25 12a8.75 8.75 0 1117.5 0 8.75 8.75 0 01-17.5 0zM12 8.75a1.5 1.5 0 01.167 2.99c-.465.052-.917.44-.917 1.01V14h1.5v-.845A3 3 0 109 10.25h1.5a1.5 1.5 0 011.5-1.5zM11.25 15v1.5h1.5V15h-1.5z"/>',
+    keywords: [],
+    minWidth: 0,
+    minHeight: 0,
+    width: 24,
+    height: 24,
+  },
+  {
+    name: "home-button",
+    path: '<path fill-rule="evenodd" clip-rule="evenodd" d="M4.25 7A2.75 2.75 0 0 1 7 4.25h10A2.75 2.75 0 0 1 19.75 7v10A2.75 2.75 0 0 1 17 19.75H7A2.75 2.75 0 0 1 4.25 17V7ZM7 5.75c-.69 0-1.25.56-1.25 1.25v10c0 .69.56 1.25 1.25 1.25h10c.69 0 1.25-.56 1.25-1.25V7c0-.69-.56-1.25-1.25-1.25H7Z"/>',
     keywords: [],
     minWidth: 0,
     minHeight: 0,
@@ -2007,6 +2016,15 @@ export const iconsData = [
     height: 24,
   },
   {
+    name: "send",
+    path: '<path fill-rule="evenodd" clip-rule="evenodd" d="M6.332 5.748c-1.03-.426-2.06.607-1.632 1.636l1.702 3.93 7.481.575c.123.01.123.19 0 .2l-7.483.575-1.7 3.909c-.429 1.029.602 2.062 1.632 1.636l12.265-5.076c1.03-.426 1.03-1.884 0-2.31L6.332 5.748Z"/>',
+    keywords: ["newsletter", "deliver", "message", "submit"],
+    minWidth: 0,
+    minHeight: 0,
+    width: 24,
+    height: 24,
+  },
+  {
     name: "separator",
     path: '<path d="M4.5 12.5v4H3V7h1.5v3.987h15V7H21v9.5h-1.5v-4h-15Z"/>',
     keywords: [],
@@ -2098,7 +2116,7 @@ export const iconsData = [
   },
   {
     name: "sides-axial",
-    path: "<path d=\"M8.2 5.3h8V3.8h-8v1.5zm0 14.5h8v-1.5h-8v1.5zm3.5-6.5h1v-1h-1v1zm1-6.5h-1v.5h1v-.5zm-1 4.5h1v-1h-1v1zm0-2h1v-1h-1v1zm0 7.5h1v-.5h-1v.5zm1-2.5h-1v1h1v-1zm-8.5 1.5h1.5v-8H4.2v8zm14.5-8v8h1.5v-8h-1.5zm-5 4.5v-1h-1v1h1zm-6.5 0h.5v-1h-.5v1zm3.5-1v1h1v-1h-1zm6 1h.5v-1h-.5v1zm-8-1v1h1v-1h-1zm6 0v1h1v-1h-1z\" style=\"&#xA;&#x9;&#x9;&#x9;&#x9;fill: '#1e1e1e',&#xA;&#x9;&#x9;&#x9;&#x9;fillRule: 'evenodd',&#xA;&#x9;&#x9;&#x9;&#x9;clipRule: 'evenodd',&#xA;&#x9;&#x9;&#x9;\"/>",
+    path: '<path fill-rule="evenodd" clip-rule="evenodd" d="M8.2 5.3h8V3.8h-8v1.5zm0 14.5h8v-1.5h-8v1.5zm3.5-6.5h1v-1h-1v1zm1-6.5h-1v.5h1v-.5zm-1 4.5h1v-1h-1v1zm0-2h1v-1h-1v1zm0 7.5h1v-.5h-1v.5zm1-2.5h-1v1h1v-1zm-8.5 1.5h1.5v-8H4.2v8zm14.5-8v8h1.5v-8h-1.5zm-5 4.5v-1h-1v1h1zm-6.5 0h.5v-1h-.5v1zm3.5-1v1h1v-1h-1zm6 1h.5v-1h-.5v1zm-8-1v1h1v-1h-1zm6 0v1h1v-1h-1z"/>',
     keywords: [],
     minWidth: 0,
     minHeight: 0,
@@ -2107,7 +2125,7 @@ export const iconsData = [
   },
   {
     name: "sides-bottom",
-    path: '<path d="m7.5 6h9v-1.5h-9zm0 13.5h9v-1.5h-9zm-3-3h1.5v-9h-1.5zm13.5-9v9h1.5v-9z" style=" opacity: 0.25 "/><path d="m16.5 19.5h-9v-1.5h9z" style=" fill: \'#1e1e1e\' "/>',
+    path: '<path d="m7.5 6h9v-1.5h-9zm0 13.5h9v-1.5h-9zm-3-3h1.5v-9h-1.5zm13.5-9v9h1.5v-9z" style=" opacity: 0.25 "/><path d="m16.5 19.5h-9v-1.5h9z"/>',
     keywords: [],
     minWidth: 0,
     minHeight: 0,
@@ -2233,7 +2251,7 @@ export const iconsData = [
   },
   {
     name: "styles",
-    path: '<path d="M12 4c-4.4 0-8 3.6-8 8v.1c0 4.1 3.2 7.5 7.2 7.9h.8c4.4 0 8-3.6 8-8s-3.6-8-8-8zm0 15V5c3.9 0 7 3.1 7 7s-3.1 7-7 7z"/>',
+    path: '<path fill-rule="evenodd" clip-rule="evenodd" d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-1.5 0a6.5 6.5 0 0 1-6.5 6.5v-13a6.5 6.5 0 0 1 6.5 6.5Z"/>',
     keywords: [],
     minWidth: 0,
     minHeight: 0,

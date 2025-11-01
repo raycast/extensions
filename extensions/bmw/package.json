@@ -138,7 +138,7 @@
   "dependencies": {
     "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.9.1",
-    "axios": "^1.6.2",
+    "axios": "^1.8.4",
     "bmw-connected-drive": "^2.1.0",
     "javascript-time-ago": "^2.5.9",
     "moment": "^2.29.4",

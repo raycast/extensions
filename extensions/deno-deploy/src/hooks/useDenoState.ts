@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import type { Organization, User } from "@/api/types";
 import { useDashApi } from "@/hooks/useDashApi";
@@ -35,7 +36,9 @@ const useDenoState = () => {
             setSelectedOrganizationId(fetchedOrganizations[0].id);
           }
         } catch (error) {
-          // console.log("IN ERROR", error);
+          showFailureToast(error, {
+            title: "Error fetching data",
+          });
         }
       }
     };

@@ -2,6 +2,12 @@
 
 The `MenuBarExtra` component can be used to create commands which populate the [extras](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar#menu-bar-commands) section of macOS' menu bar.
 
+{% hint style="info" %}
+
+Menubar commands aren't available on Windows.
+
+{% endhint %}
+
 ## Getting Started
 
 If you don't have an extension yet, follow the [getting started](../basics/getting-started.md) guide and then return to this page.
@@ -95,7 +101,7 @@ If your command returns a `MenuBarExtra`, it _must_ either not set `isLoading` -
 If your `menu-bar` command also makes use of [background refresh](../information/lifecycle/background-refresh.md) _and_ it has background refresh activated, Raycast will run the command at set intervals. In your command, you can use `environment.launchType` to check whether it is launched in the background or by the user.
 
 {% hint style="info" %}
-To ease testing, commands configured to run in the background have an extra action in development mode:
+To ease testing, commands configured to run in the background have an extra action in development mode:\
 ![Menu Bar Command - Run in Background](../.gitbook/assets/menu-bar-run-in-background.webp)
 {% endhint %}
 

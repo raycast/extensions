@@ -6,14 +6,7 @@ export const ModelDropdown = (props: ChangeModelProp) => {
   const separateDefaultModel = models.filter((x) => x.id !== "default");
   const defaultModel = models.find((x) => x.id === "default");
   return (
-    <List.Dropdown
-      tooltip="Select Model"
-      storeValue={true}
-      defaultValue={selectedModel}
-      onChange={(id) => {
-        onModelChange(id);
-      }}
-    >
+    <List.Dropdown tooltip="Select Model" storeValue={true} defaultValue={selectedModel} onChange={onModelChange}>
       {defaultModel && <List.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />}
       <List.Dropdown.Section title="Custom Models">
         {separateDefaultModel.map((model) => (

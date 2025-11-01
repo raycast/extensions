@@ -1,11 +1,11 @@
-import { Detail, showHUD, Clipboard, popToRoot, closeMainWindow, LaunchProps } from "@raycast/api";
+import { Clipboard, closeMainWindow, Detail, LaunchProps, popToRoot, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { callbackLaunchCommand, LaunchOptions } from "raycast-cross-extension";
 import { useEffect } from "react";
-import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
+import { pickColor } from "swift:../swift/color-picker";
 import { addToHistory } from "./history";
 import { Color } from "./types";
 import { getFormattedColor } from "./utils";
-import { pickColor } from "swift:../swift/color-picker";
 
 export default function Command({
   launchContext = {},
@@ -25,23 +25,24 @@ export default function Command({
 
         addToHistory(pickedColor);
 
-        const hex = getFormattedColor(pickedColor);
-        if (!hex) {
+        const hex = getFormattedColor(pickedColor, "hex");
+        const formattedColor = getFormattedColor(pickedColor);
+        if (!formattedColor) {
           throw new Error("Failed to format color");
         }
 
         if (launchContext?.callbackLaunchOptions) {
           if (launchContext.copyToClipboard) {
-            await Clipboard.copy(hex);
+            await Clipboard.copy(formattedColor);
           }
           try {
-            await callbackLaunchCommand(launchContext.callbackLaunchOptions, { hex });
+            await callbackLaunchCommand(launchContext.callbackLaunchOptions, { hex, formattedColor });
           } catch (e) {
             await showFailureToast(e);
           }
         } else {
-          await Clipboard.copy(hex);
-          await showHUD(`Copied color ${hex} to clipboard`);
+          await Clipboard.copy(formattedColor);
+          await showHUD(`Copied color ${formattedColor} to clipboard`);
           await closeMainWindow();
           await popToRoot();
         }

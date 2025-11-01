@@ -1,8 +1,10 @@
-import { formatUrl } from "../utils";
+import { formatUrl, generateRemainderScript } from "../utils";
 
 import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { ConclusionView } from "./conslusionView";
 import { runAppleScript } from "run-applescript";
+
+const { Metadata } = List.Item.Detail;
 
 export function Video(props: {
   title: string;
@@ -25,27 +27,7 @@ export function Video(props: {
 }) {
   async function addWatchLaterReminder() {
     try {
-      await runAppleScript(`
-      tell application "Reminders"
-        try
-          get list "Raycast Bilibili"
-          set mylist to list "Raycast Bilibili"
-          tell mylist
-            make new reminder with properties {name:"${props.title} - ${props.uploader.name}", body:"${formatUrl(
-        props.url
-      )}"}
-          end tell
-        on error
-          make new list with properties {name:"Raycast Bilibili"}
-          set mylist to list "Raycast Bilibili"
-          tell mylist
-            make new reminder with properties {name:"${props.title} - ${props.uploader.name}", body:"${formatUrl(
-        props.url
-      )}"}
-          end tell
-        end try
-      end tell
-      `);
+      await runAppleScript(generateRemainderScript(props.title, props.uploader.name, props.url));
 
       await showToast({
         style: Toast.Style.Success,
@@ -65,9 +47,9 @@ export function Video(props: {
         <List.Item.Detail
           markdown={`<img src="${formatUrl(props.cover)}" center width="300" />`}
           metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title={props.title} />
-              <List.Item.Detail.Metadata.Label
+            <Metadata>
+              <Metadata.Label title={props.title} />
+              <Metadata.Label
                 title="Uploader"
                 text={props.uploader.name}
                 icon={{
@@ -75,26 +57,18 @@ export function Video(props: {
                   mask: Image.Mask.Circle,
                 }}
               />
-              <List.Item.Detail.Metadata.Label title="Duration" text={String(props.duration)} />
-              <List.Item.Detail.Metadata.Label title="Time" text={new Date(props.pubdate * 1000).toLocaleString()} />
-              <List.Item.Detail.Metadata.TagList title="Stat">
-                {props.stat.highlight && (
-                  <List.Item.Detail.Metadata.TagList.Item text={props.stat.highlight} color={"#FB7299"} />
-                )}
-                {props.stat.view && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`Play: ${props.stat.view}`} color={Color.Green} />
-                )}
-                {props.stat.coin && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`Coin: ${props.stat.coin}`} color={Color.Orange} />
-                )}
-                {props.stat.view && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`View: ${props.stat.view}`} color={Color.Purple} />
-                )}
+              <Metadata.Label title="Duration" text={String(props.duration)} />
+              <Metadata.Label title="Time" text={new Date(props.pubdate * 1000).toLocaleString()} />
+              <Metadata.TagList title="Stat">
+                {props.stat.highlight && <Metadata.TagList.Item text={props.stat.highlight} color={"#FB7299"} />}
+                {props.stat.view && <Metadata.TagList.Item text={`Play: ${props.stat.view}`} color={Color.Green} />}
+                {props.stat.coin && <Metadata.TagList.Item text={`Coin: ${props.stat.coin}`} color={Color.Orange} />}
+                {props.stat.view && <Metadata.TagList.Item text={`View: ${props.stat.view}`} color={Color.Purple} />}
                 {props.stat.danmaku && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`Danmaku: ${props.stat.danmaku}`} color={Color.Blue} />
+                  <Metadata.TagList.Item text={`Danmaku: ${props.stat.danmaku}`} color={Color.Blue} />
                 )}
-              </List.Item.Detail.Metadata.TagList>
-            </List.Item.Detail.Metadata>
+              </Metadata.TagList>
+            </Metadata>
           }
         />
       }

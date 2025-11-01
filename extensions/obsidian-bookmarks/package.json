@@ -7,7 +7,8 @@
   "author": "dru89",
   "contributors": [
     "moeyua",
-    "iwex"
+    "iwex",
+    "qfettes"
   ],
   "categories": [
     "Productivity",
@@ -27,6 +28,12 @@
       "title": "Search Bookmarks",
       "description": "Save your Obsidian bookmarks",
       "mode": "view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "description": "Clear the local Raycast cache for Obsidian bookmarks",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -65,10 +72,26 @@
     {
       "name": "bookmarksPath",
       "title": "Bookmarks Subfolder",
-      "description": "The subfolder where all of your bookmarks should be stored.",
+      "description": "The subfolder where all of your bookmarks should be stored. This will be the root for bookmark search.",
       "type": "textfield",
       "required": true,
       "default": "Bookmarks"
+    },
+    {
+      "name": "saveSubfolder",
+      "title": "Save Subfolder",
+      "description": "The subfolder where all of your new bookmarks are stored.  These paths should be relative to your vault path. \nThis should be equal to or a subfolder of bookmarksPath if you want these to appear in search results. \nLeave blank to default to bookmarksPath",
+      "type": "textfield",
+      "required": false,
+      "default": "Bookmarks"
+    },
+    {
+      "name": "ignoreSubfolders",
+      "title": "Ignore Subfolders",
+      "description": "A comma-separated list of subfolders to ignore during search. These paths should be relative to your vault path. Example: 'Archive,Private/Notes'",
+      "type": "textfield",
+      "placeholder": "Archive, Private/Notes",
+      "required": false
     },
     {
       "name": "defaultFormAction",
@@ -101,6 +124,10 @@
         {
           "title": "Copy Link as Markdown",
           "value": "copyUrlAsMarkdown"
+        },
+        {
+          "title": "Fetch Page Content",
+          "value": "fetchContent"
         }
       ]
     },
@@ -151,13 +178,48 @@
       "required": false
     },
     {
+      "name": "requiredTags",
+      "title": "Required Tags",
+      "description": "Use this preference to include a list of (comma-separated) tags. These tags will automatically be added to future saved bookmarks. Search actions will ignore notes which don't contain one or more of these tags.",
+      "type": "textfield",
+      "placeholder": "bookmark, clipping",
+      "required": false
+    },
+    {
       "name": "datePrefix",
       "label": "Date Prefix",
       "title": "Date Prefix",
       "description": "The prefix to use for the date in the filename of your bookmarks.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
+    },
+    {
+      "name": "useBrowserExtension",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Use Browser Extension",
+      "description": "Use the Raycast Browser Extension to get the active browser tab when available. Falls back to JXA if disabled or if extension access fails.",
+      "label": "Use Browser Extension"
+    },
+    {
+      "name": "searchRecursively",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Search Subdirectories",
+      "description": "Search recursively in subdirectories when looking for bookmarks. If disabled, only searches in the root bookmarks directory.",
+      "label": "Search Subdirectories"
+    },
+    {
+      "name": "checkDuplicates",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Check for Duplicates",
+      "description": "Check for duplicate bookmarks when saving a new bookmark. If enabled, shows a warning when attempting to save a URL that already exists.",
+      "label": "Check for Duplicates"
     }
   ]
 }

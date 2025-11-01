@@ -1,8 +1,23 @@
 import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import fetch from "node-fetch";
-import { FetcherArgs, FetcherResponse, PreferenceValues, TimeEntry } from "./types";
+import { FetcherArgs, FetcherResponse, TimeEntry } from "./types";
 
-export const API_URL = `https://api.clockify.me/api/v1`;
+// https://clockify.me/help/getting-started/data-regions
+const getApiUrl = (region: Preferences["region"]): string => {
+  switch (region) {
+    case "AU":
+      return `https://apse2.clockify.me/api/v1`;
+    case "UK":
+      return `https://euw2.clockify.me/api/v1`;
+    case "USA":
+      return `https://use2.clockify.me/api/v1`;
+    case "EU":
+      return `https://euc1.clockify.me/api/v1`;
+    case "GLOBAL":
+      return `https://api.clockify.me/api/v1`;
+    default:
+      return `https://api.clockify.me/api/v1`;
+  }
+};
 
 export const isInProgress = (entry: TimeEntry) => !entry?.timeInterval?.end;
 
@@ -10,11 +25,12 @@ export async function fetcher(
   url: string,
   { method, body, headers, ...args }: FetcherArgs = {},
 ): Promise<FetcherResponse> {
-  const preferences: PreferenceValues = getPreferenceValues();
-  const token = String(preferences?.token);
+  const preferences = getPreferenceValues<Preferences>();
+  const token = preferences.token;
+  const apiURL = getApiUrl(preferences.region);
 
   try {
-    const response = await fetch(`${API_URL}${url}`, {
+    const response = await fetch(`${apiURL}${url}`, {
       headers: { "X-Api-Key": token, "Content-Type": "application/json", ...headers },
       method: method || "GET",
       body: body ? JSON.stringify(body) : null,
@@ -38,8 +54,8 @@ export async function fetcher(
 }
 
 export function validateToken(): boolean {
-  const preferences: PreferenceValues = getPreferenceValues();
-  const token = String(preferences?.token);
+  const preferences = getPreferenceValues<Preferences>();
+  const token = preferences.token;
 
   if (token.length !== 48) {
     showToast(Toast.Style.Failure, "Invalid API Key detected");

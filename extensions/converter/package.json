@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "koinzhang",
   "contributors": [
-    "Saafo"
+    "Saafo",
+    "fmkra"
   ],
   "categories": [
     "Design Tools",
@@ -55,7 +56,17 @@
       "title": "Code Converter",
       "icon": "extension-icon.png",
       "description": "Convert between different character encodings: Unicode, Base64, UTF-8, ASCII, &#xXXXX, URL.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "asciiCommaSeparated",
+          "type": "checkbox",
+          "required": false,
+          "label": "Comma separated ASCII",
+          "description": "If disabled, only ASCII characters with code <13 is supported",
+          "default": true
+        }
+      ]
     },
     {
       "name": "byte-converter",
@@ -67,30 +78,12 @@
   ],
   "preferences": [
     {
-      "name": "autoDetect",
+      "name": "autoPaste",
       "type": "checkbox",
       "required": false,
-      "label": "Auto Detect",
-      "description": "Automatically detects selected text or clipboard when opening commands.",
+      "label": "Auto Paste",
+      "description": "Automatically pastes text from clipboard when opening a command.",
       "default": true
-    },
-    {
-      "name": "priorityDetection",
-      "type": "dropdown",
-      "required": false,
-      "title": "Priority detection",
-      "description": "Priority detection of selected text or clipboard.",
-      "default": "selected",
-      "data": [
-        {
-          "title": "Selected Text",
-          "value": "selected"
-        },
-        {
-          "title": "Clipboard Text",
-          "value": "clipboard"
-        }
-      ]
     }
   ],
   "dependencies": {

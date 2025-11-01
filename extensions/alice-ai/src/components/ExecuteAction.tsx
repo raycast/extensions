@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
 import { ChatCompletionChunk, ChatCompletionMessageParam } from "openai/resources";
 import { Stream } from "openai/streaming";
-import { useEffect, useState } from "react";
-import { useMetadata } from "../hooks";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useCost } from "../hooks";
 import openai, { getModelName } from "../lib/OpenAI";
 import { useHistoryState } from "../store/history";
 import { Action as StoreAction } from "../types";
@@ -14,15 +14,24 @@ interface Props {
 
 export default function ExecuteAction({ action, prompt }: Props) {
   const addHistoryItem = useHistoryState((state) => state.addItem);
+  const generateLock = useRef<boolean>(false);
 
   const [error, setError] = useState<string>("");
   const [stream, setStream] = useState<Stream<ChatCompletionChunk>>();
-  const [chat, setChat] = useState<ChatCompletionMessageParam[]>([]);
   const [result, setResult] = useState<string>("");
 
-  const metadata = useMetadata(chat, action.model);
+  const [inputTokens, setInputTokens] = useState<number>(0);
+  const [outputTokens, setOutputTokens] = useState<number>(0);
+  const [totalTokens, setTotalTokens] = useState<number>(0);
+  const cost = useCost(action.model, inputTokens, outputTokens);
 
-  const generateResponse = async () => {
+  const generateResponse = useCallback(async () => {
+    if (generateLock.current) {
+      return;
+    }
+
+    generateLock.current = true;
+
     setError("");
     setResult("");
 
@@ -37,8 +46,6 @@ export default function ExecuteAction({ action, prompt }: Props) {
       },
     ];
 
-    setChat(messages);
-
     try {
       const stream = await openai.chat.completions.create({
         model: action.model,
@@ -46,42 +53,57 @@ export default function ExecuteAction({ action, prompt }: Props) {
         temperature: parseFloat(action.temperature),
         max_tokens: +action.maxTokens === -1 ? undefined : +action.maxTokens,
         stream: true,
+        stream_options: {
+          include_usage: true,
+        },
       });
 
       setStream(stream);
 
       for await (const message of stream) {
-        const content = message.choices[0].delta.content || "";
+        if (message.choices.length > 0) {
+          const content = message.choices[0].delta?.content || "";
 
-        setResult((prev) => prev + content);
+          setResult((prev) => prev + content);
+        }
+
+        if (message.usage) {
+          setInputTokens(message.usage.prompt_tokens);
+          setOutputTokens(message.usage.completion_tokens);
+          setTotalTokens(message.usage.total_tokens);
+        }
       }
     } catch (e) {
       const error = e as Error;
       setError(`## ⚠️ Error Encountered\n### ${error.message}`);
     } finally {
       setStream(undefined);
+      generateLock.current = false;
     }
-  };
+  }, [action, prompt]);
 
   useEffect(() => {
     generateResponse();
+
+    return () => {
+      if (stream) {
+        stream.controller.abort();
+      }
+    };
   }, []);
 
   useEffect(() => {
     if (!stream && error.length === 0 && result.length > 0) {
-      setChat((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: result,
-        },
-      ]);
-
       addHistoryItem({
         action: action!,
         timestamp: Date.now(),
         prompt,
         result,
+        tokens: {
+          input: inputTokens,
+          output: outputTokens,
+          total: totalTokens,
+        },
       });
     }
   }, [result, stream]);
@@ -105,10 +127,10 @@ export default function ExecuteAction({ action, prompt }: Props) {
           <Detail.Metadata.TagList title="Model">
             <Detail.Metadata.TagList.Item text={getModelName(action.model)} color={Color.SecondaryText} />
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Prompt Tokens" text={metadata.promptTokens.toString()} />
-          <Detail.Metadata.Label title="Result Tokens" text={metadata.resultTokens.toString()} />
-          <Detail.Metadata.Label title="Total Tokens" text={metadata.totalTokens.toString()} />
-          <Detail.Metadata.Label title="Cost" text={`$${metadata.cost.toFixed(6)}`} />
+          <Detail.Metadata.Label title="Input Tokens" text={inputTokens.toString()} />
+          <Detail.Metadata.Label title="Output Tokens" text={outputTokens.toString()} />
+          <Detail.Metadata.Label title="Total Tokens" text={totalTokens.toString()} />
+          <Detail.Metadata.Label title="Cost" text={`$${cost.toFixed(6)}`} />
         </Detail.Metadata>
       }
       actions={

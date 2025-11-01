@@ -9,7 +9,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { CacheActionPanelSection } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 function getIcon(state: string): Image {
   if (state == "opened") {
@@ -35,7 +35,7 @@ function getEpicGroupName(epic: any): string | undefined {
   }
 }
 
-function ActionToggleGroupName(props: { show?: boolean; callback?: (newValue: boolean) => void }): JSX.Element | null {
+function ActionToggleGroupName(props: { show?: boolean; callback?: (newValue: boolean) => void }) {
   if (!props.callback) {
     return null;
   }
@@ -111,7 +111,7 @@ export function EpicList(props: { group: Group }) {
             min_access_level: "30",
             state: "opened",
           },
-          true
+          true,
         )) || [];
       return data;
     },
@@ -120,7 +120,7 @@ export function EpicList(props: { group: Group }) {
       onFilter: async (epics) => {
         return searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
       },
-    }
+    },
   );
 
   if (error) {

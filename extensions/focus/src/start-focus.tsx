@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
-import { getInstallStatus, getProfileNames, startFocusWithProfile, startFocus } from "./utils";
+import { getProfileNames, startFocusWithProfile, startFocus, getActiveProfileName } from "./utils";
+import { ensureFocusIsRunning } from "./helpers";
 
 export default async function Command() {
   const toast = await showToast({
@@ -7,12 +8,17 @@ export default async function Command() {
     title: "Starting Focus...",
   });
 
-  if (!(await getInstallStatus())) {
+  if (!(await ensureFocusIsRunning())) {
+    return;
+  }
+
+  const activeProfile = await getActiveProfileName();
+  if (activeProfile) {
     await toast.hide();
     await showToast({
       style: Toast.Style.Failure,
-      title: "Focus is not installed",
-      message: "Install Focus app from: https://heyfocus.com",
+      title: "Focus session already running",
+      message: `Profile "${activeProfile}" is currently active`,
     });
     return;
   }

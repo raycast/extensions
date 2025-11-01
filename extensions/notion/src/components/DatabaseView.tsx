@@ -1,13 +1,6 @@
 import { List, Image } from "@raycast/api";
 
-import {
-  notionColorToTintColor,
-  getPropertyConfig,
-  Page,
-  DatabaseProperty,
-  PropertyConfig,
-  User,
-} from "../utils/notion";
+import { notionColorToTintColor, isType, Page, DatabaseProperty, PropertyConfig, User } from "../utils/notion";
 import type { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
@@ -43,7 +36,7 @@ export function DatabaseView(props: DatabaseViewProps) {
   const propertyId = databaseView?.kanban?.property_id;
   const statusProperty = databaseProperties.find((dp) => dp.id === propertyId);
 
-  if (viewType === "list" || !propertyId || !statusProperty) {
+  if (viewType === "list" || !propertyId || !statusProperty || !isType(statusProperty, "status", "select")) {
     return (
       <>
         {databasePages?.map((p) => (
@@ -117,24 +110,16 @@ export function DatabaseView(props: DatabaseViewProps) {
     const prop = Object.values(p.properties).find((x) => x.id === propertyId);
     let propId = "_select_null_";
 
-    if (prop) {
-      if (prop.type == "select" && prop.select?.id) {
-        propId = prop.select.id;
-      } else if (prop.type == "status" && prop.status?.id) {
-        propId = prop.status.id;
-      }
-    }
+    if (prop && (prop.type == "select" || prop.type == "status") && prop.value) propId = prop.value.id;
 
-    if (!tempSections[propId]) {
-      tempSections[propId] = [];
-    }
+    if (!tempSections[propId]) tempSections[propId] = [];
 
     tempSections[propId].push(p);
   });
 
   const optionsMap: Record<string, PropertyConfig<"status">["options"][number]> = {};
-  const customOptions = getPropertyConfig(statusProperty, ["status"])
-    ?.options.filter((opt) => opt.id)
+  const customOptions = statusProperty.config.options
+    .filter((opt) => opt.id)
     .sort((dpa, dpb) => {
       const value_a = dpa.id ? actionEditIds.indexOf(dpa.id) : -1;
       const value_b = dpb.id ? actionEditIds.indexOf(dpb.id) : -1;
@@ -156,6 +141,7 @@ export function DatabaseView(props: DatabaseViewProps) {
         color: option.color,
         name: option.name,
         id: option.id,
+        description: option.description,
       };
     });
 

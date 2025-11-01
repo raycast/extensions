@@ -5,6 +5,10 @@
   "description": "Use the powerful models via Groq from the comfort of Raycast.",
   "icon": "groq.png",
   "author": "ilian",
+  "contributors": [
+    "dez_dezsson",
+    "g3ge"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools",
@@ -31,32 +35,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -73,7 +85,7 @@
           "title": "Summarize Prompt",
           "description": "The prompt for the summarize command.",
           "type": "textfield",
-          "default": "Summarize all relevant aspects from the following text as concise as possible.",
+          "default": "Summarize all relevant aspects from the following selected_text concisely.",
           "required": false
         },
         {
@@ -89,32 +101,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -131,7 +151,7 @@
           "title": "Prompt",
           "description": "The prompt for the grammar command.",
           "type": "textfield",
-          "default": "Fix spelling, grammar, and punctuation. Only write the corrected version without explanations and without wrapping it in quotation marks.",
+          "default": "Fix spelling, grammar, and punctuation of the selected_text. Only write the corrected version without explanations and without wrapping it in quotation marks.",
           "required": false
         },
         {
@@ -147,32 +167,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -189,7 +217,7 @@
           "title": "Make Shorter Prompt",
           "description": "The prompt for the shorter command.",
           "type": "textfield",
-          "default": "Make the following text shorter with the following instructions: Use the same style and tone of voice, reduce repetition, keep key information.",
+          "default": "Make the following selected_text shorter with the following instructions: Use the same style and tone of voice, reduce repetition, keep key information.",
           "required": false
         },
         {
@@ -205,32 +233,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -247,7 +283,7 @@
           "title": "Make Longer Prompt",
           "description": "The prompt for the longer command.",
           "type": "textfield",
-          "default": "Act as a world class content writer. Expand the text with the following instructions: Use the same style and tone of voice, expand the key information and concepts, avoid repetition, stay factual close to the provided text.",
+          "default": "Act as a world class content writer. Expand the selected_text with the following instructions: Use the same style and tone of voice, expand the key information and concepts, avoid repetition, stay factual close to the provided selected_text.",
           "required": false
         },
         {
@@ -263,32 +299,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -305,7 +349,7 @@
           "title": "Improve Text Prompt",
           "description": "The prompt for the improve command.",
           "type": "textfield",
-          "default": "You are an expert in writing charismatic texts. Improve texts by following these instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same. Only write the corrected version without explanations and without wrapping it in quotation marks.",
+          "default": "You are an expert in writing charismatic texts. Improve the selected_text by following these instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same. Only write the corrected version without explanations and without wrapping it in quotation marks.",
           "required": false
         },
         {
@@ -321,32 +365,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -379,7 +431,7 @@
           "title": "Default Question",
           "description": "Default question for selected text if none provided.",
           "type": "textfield",
-          "default": "Explain this as concise and simple as possible.",
+          "default": "Explain the selected_text as concise and simple as possible.",
           "required": false
         },
         {
@@ -395,32 +447,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -470,32 +530,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -513,7 +581,7 @@
           "title": "Change Tone Prompt",
           "description": "The prompt for the casual command.",
           "type": "textfield",
-          "default": "Rewrite the text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged.",
+          "default": "Rewrite the selected_text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged.",
           "required": false
         },
         {
@@ -529,32 +597,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -572,7 +648,7 @@
           "title": "Synonyms Prompt",
           "description": "The prompt for the synonyms command.",
           "type": "textfield",
-          "default": "Find synonyms for the given word and format the output as a markdown list. Do NOT write any explanations. Do NOT include the original word in the list. The list should not have any duplicates.",
+          "default": "Find synonyms for the given word in selected_text and format the output as a markdown list. Do NOT write any explanations. Do NOT include the original word in the list. The list should not have any duplicates.",
           "required": false
         },
         {
@@ -588,32 +664,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -631,7 +715,7 @@
           "title": "Change Tone Prompt",
           "description": "The prompt for the professional command.",
           "type": "textfield",
-          "default": "Rewrite the text using a professional tone of voice, formal language, concise phrasing, meaning unchanged.",
+          "default": "Rewrite the selected_text using a professional tone of voice, formal language, concise phrasing, meaning unchanged.",
           "required": false
         },
         {
@@ -647,32 +731,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -706,32 +798,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -749,7 +849,7 @@
           "title": "Language-defining Translation Prompt.",
           "description": "The prompt for the translate command.",
           "type": "textfield",
-          "default": "Act as translator. If English, to German. If German, to English. Maintain tone. Start with: '### Translated from .. to .. :'",
+          "default": "Act as translator and translate the selected_text. If English, to German. If German, to English. Maintain tone. Start with: '### Translated from .. to .. :'",
           "required": false
         },
         {
@@ -765,32 +865,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -808,7 +916,7 @@
           "title": "Generator Prompt",
           "description": "The prompt for generating tasks.",
           "type": "textfield",
-          "default": "Turn the following project title or project description into a list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Write a summary of the project.'",
+          "default": "Turn the following project title or project description in selected_text into a concise list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Write a summary of the project.'",
           "required": false
         },
         {
@@ -824,32 +932,40 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "openai/gpt-oss-120b",
+              "title": "GPT OSS 120B 131k"
+            },
+            {
+              "value": "openai/gpt-oss-20b",
+              "title": "GPT OSS 20B 131k"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
             }
           ]
         }
@@ -871,35 +987,43 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama3-70b-8192",
+      "default": "llama-3.3-70b-versatile",
       "data": [
         {
-          "value": "llama-3.1-70b-versatile",
-          "title": "Llama3.1 70B 132k"
+          "value": "openai/gpt-oss-120b",
+          "title": "GPT OSS 120B 131k"
+        },
+        {
+          "value": "openai/gpt-oss-20b",
+          "title": "GPT OSS 20B 131k"
+        },
+        {
+          "value": "moonshotai/kimi-k2-instruct",
+          "title": "Kimi K2 Instruct 131k"
+        },
+        {
+          "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+          "title": "Llama 4 Maverick 131k"
+        },
+        {
+          "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "title": "Llama 4 Scout 131k"
+        },
+        {
+          "value": "llama-3.3-70b-versatile",
+          "title": "Llama 3.3 70B 128k"
         },
         {
           "value": "llama-3.1-8b-instant",
-          "title": "Llama3.1 8B 132k"
+          "title": "Llama 3.1 8B 128k"
         },
         {
-          "value": "llama3-70b-8192",
-          "title": "Llama3 70B 8k"
+          "value": "deepseek-r1-distill-llama-70b",
+          "title": "DeepSeek R1 70B 128k"
         },
         {
-          "value": "llama3-8b-8192",
-          "title": "Llama3 8B 8k"
-        },
-        {
-          "value": "mixtral-8x7b-32768",
-          "title": "Mixtral 8x7B 32k"
-        },
-        {
-          "value": "gemma2-9b-it",
-          "title": "Gemma2 9B 8k"
-        },
-        {
-          "value": "gemma-7b-it",
-          "title": "Gemma 7B 8k"
+          "value": "qwen/qwen3-32b",
+          "title": "Qwen 3 32B 128K"
         }
       ]
     },
@@ -908,6 +1032,15 @@
       "title": "Response Streaming",
       "label": "Enabled",
       "description": "This will allow you to see the response as it's being generated. If disabled, the response will be shown once it's fully generated.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showMetadata",
+      "title": "Show metadata",
+      "label": "Enabled",
+      "description": "This will show the metadata of the response, including the model used, price, the token count, and the time taken to generate the response.",
       "type": "checkbox",
       "default": true,
       "required": false

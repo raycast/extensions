@@ -3,6 +3,7 @@ import React from "react";
 import { environment, Grid, List } from "@raycast/api";
 import { ActionNewFileHere } from "./action-new-file-here";
 import fileUrl from "file-url";
+import { MutatePromise } from "@raycast/utils";
 
 export function NewFileHereItem(props: {
   layout: string;
@@ -10,9 +11,9 @@ export function NewFileHereItem(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
   folder: string;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  mutate: MutatePromise<TemplateType[]>;
 }) {
-  const { layout, fileType, newFileType, templateFiles, folder, setRefresh } = props;
+  const { layout, fileType, newFileType, templateFiles, folder, mutate } = props;
   return layout === "List" ? (
     <List.Item
       keywords={fileType.keywords}
@@ -31,7 +32,7 @@ export function NewFileHereItem(props: {
           newFileType={newFileType}
           templateFiles={templateFiles}
           folder={folder}
-          setRefresh={setRefresh}
+          mutate={mutate}
         />
       }
     />
@@ -46,7 +47,7 @@ export function NewFileHereItem(props: {
           newFileType={newFileType}
           templateFiles={templateFiles}
           folder={folder}
-          setRefresh={setRefresh}
+          mutate={mutate}
         />
       }
     />

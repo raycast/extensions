@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wechat-devtool",
+  "title": "WeChat DevTool",
+  "description": "Quickly open WeChat mini program project via official CLI.",
+  "version": "1.3.0",
+  "type": "module",
+  "icon": "icon.png",
+  "author": "tofrankie",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.19.1",
+    "pinyin-pro": "^3.26.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "Developer Tools",
+    "WeChat",
+    "WeChat DevTool",
+    "WeChat mini program",
+    "miniprogram",
+    "miniapp"
+  ],
+  "commands": [
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "description": "Open mini program project via WeChat DevTool.",
+      "mode": "view"
+    },
+    {
+      "name": "preview-project",
+      "title": "Preview Project",
+      "description": "Generate QR Code for mini program project.",
+      "mode": "view"
+    },
+    {
+      "name": "configure-projects",
+      "title": "Configure Projects",
+      "description": "Configure mini program projects.",
+      "mode": "view"
+    }
+  ]
+}

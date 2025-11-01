@@ -1,50 +1,33 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { ActionCopyHeartbeatUrl, ActionDeleteHeartbeat } from "./actions";
-import { statusMap } from "./constants";
-import { HeartbeatItem, HeartbeatsState, Preferences } from "./interface";
+import { baseUrl, statusMap } from "./constants";
+import { HeartbeatsState, Preferences } from "./interface";
+import { useFetch } from "@raycast/utils";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<HeartbeatsState>({ items: [], isLoading: true });
+  const {
+    isLoading,
+    data: heartbeats,
+    revalidate,
+  } = useFetch<HeartbeatsState>(`${baseUrl}/heartbeats`, {
+    headers: { Authorization: `Bearer ${preferences.apiKey}` },
+  });
 
-  useEffect(() => {
-    async function fetchHeartbeats() {
-      setState((previous) => ({ ...previous, isLoading: true }));
-
-      try {
-        const { data } = await axios.get("https://betteruptime.com/api/v2/heartbeats", {
-          headers: { Authorization: `Bearer ${preferences.apiKey}` },
-        });
-
-        setState((previous) => ({ ...previous, items: data.data, isLoading: false }));
-      } catch (error) {
-        setState((previous) => ({
-          ...previous,
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-          isLoading: false,
-          items: [],
-        }));
-      }
-    }
-
-    fetchHeartbeats();
-  }, []);
-
-  useEffect(() => {
-    if (state.error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed loading heartbeats",
-        message: state.error.response.data.errors,
-      });
-    }
-  }, [state.error]);
+  if (!heartbeats?.data?.length) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          title="No Heartbeats"
+          description="You can add a heartbeat using the 'Add Heartbeat' command."
+        />
+      </List>
+    );
+  }
 
   return (
-    <List isShowingDetail isLoading={state.isLoading}>
-      {state.items?.map((item: HeartbeatItem, index: number) => (
+    <List isShowingDetail isLoading={isLoading}>
+      {heartbeats.data.map((item, index) => (
         <List.Item
           key={index}
           icon={statusMap[item.attributes.status] ?? "🔍"}
@@ -76,15 +59,7 @@ export default function Command() {
             <ActionPanel>
               <Action.OpenInBrowser title="Open Heartbeat URL in Browser" url={item.attributes.url} />
               <ActionCopyHeartbeatUrl url={item.attributes.url} />
-              <ActionDeleteHeartbeat
-                item={item}
-                onDeleted={() => {
-                  setState((previous) => ({
-                    ...previous,
-                    items: previous.items.filter((_item) => _item.id !== item.id),
-                  }));
-                }}
-              />
+              <ActionDeleteHeartbeat item={item} onDeleted={() => revalidate()} />
             </ActionPanel>
           }
         />

@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List, getApplications } from "@raycast/api";
 import { getFavicon, useFetch, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { BASE_URL } from "./utils/constants";
+import { formatAddress } from "./utils/formatting";
 
 type Arguments = {
   FindAddress: {
@@ -49,14 +50,10 @@ export default function Command(props: { arguments: Arguments["FindAddress"] }) 
     >
       {data && !("erro" in data) && isValidCep && (
         <List.Item
-          id={data.logradouro}
-          title={`${data.logradouro}, ${data.bairro}, ${data.localidade}/${data.uf}`}
+          title={formatAddress(data)}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard
-                title="Copy Address"
-                content={`${data.logradouro}, ${data.bairro}, ${data.localidade}/${data.uf}`}
-              />
+              <Action.CopyToClipboard title="Copy Address" content={formatAddress(data)} />
               <Action.OpenInBrowser
                 title="Open in Apple Maps"
                 url={`maps://?q=${data.cep}`}

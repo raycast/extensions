@@ -13,6 +13,8 @@ export default function NewFileWithDetails(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
   folder: string;
+  isLoading: boolean;
+  navigationTitle: string;
 }) {
   const templateFiles = props.templateFiles;
   const [newFileType, setNewFileType] = useState<{ section: string; index: number }>(props.newFileType);
@@ -23,7 +25,8 @@ export default function NewFileWithDetails(props: {
 
   return (
     <Form
-      navigationTitle={"New File With Details"}
+      isLoading={props.isLoading || false}
+      navigationTitle={props.navigationTitle}
       actions={
         <ActionPanel>
           <Action
@@ -77,11 +80,17 @@ export default function NewFileWithDetails(props: {
       >
         <Form.Dropdown.Section title={"Template"}>
           {templateFiles.map((template, index) => {
+            let title: string;
+            if (template.name.startsWith(".")) {
+              title = template.name;
+            } else {
+              title = template.name + "." + template.extension;
+            }
             return (
               <Form.Dropdown.Item
                 key={template.name + index}
                 icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
-                title={template.name + "." + template.extension}
+                title={title}
                 value={JSON.stringify({ section: "Template", index: index })}
               />
             );

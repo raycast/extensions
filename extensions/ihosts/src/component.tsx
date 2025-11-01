@@ -14,8 +14,8 @@ import {
   Alert,
 } from "@raycast/api";
 import { BackupSystemHostName, HostFolderMode, HostInactiveByFolderTip, State, SystemHostFilePath } from "./const";
-import { exportHost, getContentFromFile, getSysHostAccess } from "./utils/file";
-import { useState } from "react";
+import { exportHost, getContentFromFile, getContentFromUrl, getSysHostAccess } from "./utils/file";
+import { Fragment, useState } from "react";
 import { Action$ } from "raycast-toolkit";
 import path from "node:path";
 
@@ -346,11 +346,20 @@ function UpsertHost(props: {
   const [folder, updateFolderState] = useState<string>("");
   const [content, updateContentState] = useState<string>(props.host?.content || "");
   const [nameError, updateNameErrorState] = useState<string | undefined>();
+  const [isRemote, updateIsRemoteState] = useState<boolean>(props.host?.isRemote ? true : false);
+  const [urlInput, updateUrlInputState] = useState<string>(props.host?.url || "");
+  const [fetchError, updateFetchErrorState] = useState<string | undefined>();
   const { pop } = useNavigation();
 
   function dropNameErrorIfNeeded() {
     if (nameError && nameError.length > 0) {
       updateNameErrorState(undefined);
+    }
+  }
+
+  function dropFetchErrorIfNeeded() {
+    if (fetchError && fetchError.length > 0) {
+      updateFetchErrorState(undefined);
     }
   }
 
@@ -366,11 +375,15 @@ function UpsertHost(props: {
     if (!validName()) {
       return;
     }
+
     props.upsertHost({
       id: props.host?.id,
       name,
       folder,
+      // TODO: fix
+      // isRemote
       content: content.trim(),
+      url: urlInput,
     });
     pop();
   }
@@ -412,6 +425,32 @@ function UpsertHost(props: {
           dropNameErrorIfNeeded();
         }}
       />
+      <Form.Checkbox
+        id="remote"
+        label="remote"
+        title="Remote"
+        value={isRemote}
+        onChange={(value) => {
+          updateIsRemoteState(value);
+        }}
+      ></Form.Checkbox>
+
+      {isRemote && (
+        <>
+          <Form.TextField
+            id="hosts_url"
+            title="URL"
+            value={urlInput}
+            placeholder="Enter host URL"
+            error={fetchError}
+            onChange={(value) => {
+              updateUrlInputState(value);
+              dropFetchErrorIfNeeded();
+            }}
+          />
+          <Form.Description text="Enter the URL to fetch host content" />
+        </>
+      )}
       {!props.isEdit && (
         <Form.Dropdown id="folder" title="Folder" value={folder} onChange={updateFolderState}>
           <Form.Dropdown.Section>

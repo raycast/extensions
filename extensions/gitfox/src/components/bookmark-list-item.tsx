@@ -12,11 +12,14 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
       icon={{ source: "repository-30.png", tintColor: Color.Yellow }}
       accessories={[
         {
-          text: bookmark.getBranch,
+          text: bookmark.getBranch.name,
           icon: { source: "merge-git-30.png", tintColor: Color.SecondaryText },
         },
       ]}
-      keywords={[bookmark.getBranch, bookmark.getPath]}
+      keywords={[
+        ...bookmark.getBranch.name.replaceAll("_", "-").replaceAll("\\", "-").split("-"),
+        ...bookmark.getPath.split("\\"),
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -24,7 +27,8 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
             <Action.ShowInFinder path={bookmark.getPath} />
             <Action.OpenWith path={bookmark.getPath} shortcut={{ modifiers: ["cmd", "shift"], key: "return" }} />
             <Action.Open
-              title="Open in VSCode"
+              // eslint-disable-next-line @raycast/prefer-title-case
+              title="Open in VScode"
               icon="visual-studio-code-30.png"
               target={bookmark.getPath}
               application="Visual Studio Code"

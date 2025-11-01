@@ -54,7 +54,7 @@ export const FeatureSingle = ({ feature }: { feature: Feature }) => {
               <Detail.Metadata.Separator />
               {phpWebsiteResources.map((resource: Resource, index) => (
                 <Detail.Metadata.Link
-                  key={resource.name}
+                  key={resource.name + resource.url}
                   title={index === 0 ? "php.net" : ""}
                   text={resource.name}
                   target={resource.url}
@@ -67,7 +67,7 @@ export const FeatureSingle = ({ feature }: { feature: Feature }) => {
               <Detail.Metadata.Separator />
               {externalResources.map((resource: Resource, index) => (
                 <Detail.Metadata.Link
-                  key={resource.name}
+                  key={resource.name + resource.url}
                   title={index === 0 ? "Resources" : ""}
                   text={resource.name}
                   target={resource.url}

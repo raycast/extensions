@@ -2,80 +2,55 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rebrandly",
   "title": "Rebrandly",
-  "description": "Browse Rebrandly shortlinks",
+  "description": "Browse Rebrandly shortlinks, create new and delete old",
   "version": "0.0.1",
   "author": "grikomsn",
-  "icon": "icon.png",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "icon": "rebrandly.png",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "placeholder": "xxx...xxx",
+      "required": true,
+      "title": "API Key",
+      "description": "Required API key to interact with Rebrandly",
+      "link": "https://app.rebrandly.com/account/api-keys"
+    }
+  ],
   "commands": [
     {
       "name": "rebrandly",
       "title": "Browse Shortlinks",
       "subtitle": "Rebrandly",
-      "description": "Browse Rebrandly shortlinks",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "apiKey",
-          "type": "password",
-          "required": true,
-          "title": "API Key",
-          "description": "Required API key to interact with Rebrandly",
-          "link": "https://app.rebrandly.com/account/api-keys"
-        }
-      ]
+      "description": "Browse Rebrandly shortlinks, create new and delete old",
+      "mode": "view"
     }
   ],
   "scripts": {
-    "# raycast commands": "##################################################",
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "# general commands": "##################################################",
-    "deduplicate": "npx yarn-deduplicate && npm install",
-    "lint": "eslint --fix \"**/*.{js,jsx,ts,tsx}\"",
-    "type-check": "tsc --noEmit",
-    "validate": "npm run lint && npm run type-check",
-    "#": "###################################################################"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1",
-    "cross-fetch": "^3",
-    "zustand": "^3"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
-    "@types/node": "16",
-    "@types/react": "^17",
-    "eslint": "^7",
-    "eslint-config-kdnj": "^1",
-    "react": "^17",
-    "react-devtools": "^4",
-    "react-reconciler": "^0",
-    "typescript": "^4"
-  },
-  "eslintConfig": {
-    "extends": [
-      "eslint-config-kdnj/react"
-    ],
-    "rules": {
-      "react/react-in-jsx-scope": [
-        "off"
-      ]
-    },
-    "root": true
-  },
-  "lint-staged": {
-    "*.{js,json,md}": [
-      "prettier --write"
-    ],
-    "**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
-    ]
-  },
-  "prettier": {
-    "endOfLine": "auto",
-    "printWidth": 120,
-    "semi": true,
-    "singleQuote": false,
-    "trailingComma": "all"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "license": "MIT"
 }

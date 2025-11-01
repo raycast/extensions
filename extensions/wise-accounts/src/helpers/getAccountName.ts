@@ -1,9 +1,9 @@
-import { BusinessProfile, PersonalProfile } from "../api/profile";
+import { BusinessProfile, PersonalProfile, ProfileType } from "../api/profile";
 
 export const getAccountName = (profile: PersonalProfile | BusinessProfile): string => {
-  if (profile.type === "PERSONAL") {
-    return `${(profile as PersonalProfile).firstName} ${(profile as PersonalProfile).lastName}`;
+  if (profile.type === ProfileType.PERSONAL) {
+    return `${profile.firstName} ${profile.lastName}`;
   } else {
-    return (profile as BusinessProfile).name;
+    return profile.name ?? profile.businessName;
   }
 };

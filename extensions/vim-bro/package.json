@@ -7,13 +7,18 @@
   "author": "ajaypremshankar",
   "contributors": [
     "pernielsentikaer",
-    "talk2dc"
+    "talk2dc",
+    "zayadur"
   ],
   "license": "MIT",
   "categories": [
     "Productivity",
     "Developer Tools",
     "Documentation"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {

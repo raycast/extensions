@@ -1,5 +1,16 @@
 # Raycast Norwegian Public Transport Changelog
 
+## [Added trip search] - 2025-07-07
+
+Added a new command for trip search 🚀 Supports searching for trips between two stop places, and viewing details for each leg of said trip. Thanks to [@binarybaba](https://github.com/binarybaba) for the contribution!
+
+- Differentiates airport express transport modes
+- Updated AtB Travel Planner links to point to production
+
+## [Added configurable web planner] - 2024-10-30
+
+- Added the option to configure web travel planners from four different counties in the extension preferences: Reis Nordland, FRAM (Møre og Romsdal), Svipper (Troms) and AtB (Trøndelag)
+
 ## [Tweaks for Store readyness] - 2024-05-04
 
 - Changed the keyboard shortcut to add and remove favorites to ⌘⇧P, to match other Raycast extensions

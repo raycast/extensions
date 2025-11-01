@@ -11,7 +11,8 @@
     "mil3na",
     "xilopaint",
     "samuelkraft",
-    "abnershang"
+    "abnershang",
+    "zayadur"
   ],
   "icon": "extension-icon.png",
   "owner": "raycast",
@@ -31,6 +32,13 @@
       "title": "Explore Presets",
       "icon": "presets-icon.png",
       "description": "Find some inspiration in our AI Presets base.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-quicklinks",
+      "title": "Explore Quicklinks",
+      "icon": "quicklinks-icon.png",
+      "description": "Browse quicklinks",
       "mode": "view"
     },
     {
@@ -177,7 +185,7 @@
   "dependencies": {
     "@raycast/api": "^1.71.4",
     "@raycast/utils": "^1.14.0",
-    "axios": "^1.6.8",
+    "axios": "^1.8.4",
     "node-fetch": "^3.3.2",
     "remove-markdown": "^0.5.0"
   },

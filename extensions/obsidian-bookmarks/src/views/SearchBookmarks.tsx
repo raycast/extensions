@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import useFiles from "../hooks/use-files";
 import { File } from "../types";
 import FileListItem from "./FileListItem";
+import path from "node:path";
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -31,6 +32,13 @@ export default function SearchBookmarks() {
     );
 
     return Object.entries(ranked).sort((a, b) => b[1] - a[1]);
+  }, [files]);
+
+  const filePathsAlphabetical = useMemo(() => {
+    const uniquePaths = Array.from(new Set(files.map((file) => path.dirname(file.fullPath))));
+    return uniquePaths
+      .map((dirPath) => dirPath) // Get the last 32 characters of each directory path
+      .sort((a, b) => a.localeCompare(b)); // Sort the paths alphabetically
   }, [files]);
 
   const fuse = useMemo(() => {
@@ -70,11 +78,15 @@ export default function SearchBookmarks() {
           return input.filter((item) => item.attributes.saved >= date);
         }
         default: {
-          if (!filter.startsWith("tag:")) {
-            throw new Error(`Unknown filter: ${filter}`);
+          if (filter.startsWith("tag:")) {
+            const tag = filter.slice(4);
+            return input.filter((item) => item.attributes.tags.includes(tag));
+          } else if (filter.startsWith("fpath:")) {
+            const fpath = filter.slice(6);
+            return input.filter((item) => item.fullPath.startsWith(fpath));
           }
-          const tag = filter.slice(4);
-          return input.filter((item) => item.attributes.tags.includes(tag));
+
+          throw new Error(`Unknown filter: ${filter}`);
         }
       }
     };
@@ -101,6 +113,13 @@ export default function SearchBookmarks() {
             <List.Dropdown.Section title="Tags">
               {tagsByPopularity.map(([tag, count]) => (
                 <List.Dropdown.Item title={`${tag} (${count})`} value={`tag:${tag}`} key={tag} />
+              ))}
+            </List.Dropdown.Section>
+          )}
+          {filePathsAlphabetical.length > 0 && (
+            <List.Dropdown.Section title="Directories">
+              {filePathsAlphabetical.map((filePath) => (
+                <List.Dropdown.Item title={`...${filePath.slice(-29)}`} value={`fpath:${filePath}`} key={filePath} />
               ))}
             </List.Dropdown.Section>
           )}

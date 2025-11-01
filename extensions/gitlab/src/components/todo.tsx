@@ -63,7 +63,7 @@ export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | nu
   };
 }
 
-function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
+function TodoListEmptyView(props: { searchMode: boolean }) {
   if (props.searchMode) {
     return <List.EmptyView title="No Todos" icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }} />;
   }
@@ -76,7 +76,7 @@ function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
   );
 }
 
-export function TodoList(): JSX.Element {
+export function TodoList() {
   const [project, setProject] = useState<Project>();
   const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
 
@@ -118,7 +118,7 @@ export function getPrettyTodoActionName(todo: Todo): string {
   return capitalizeFirstLetter(todo.action_name.replaceAll("_", " "));
 }
 
-export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JSX.Element {
+export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
   const todo = props.todo;
   const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
   const updatedAt = todo.updated_at ? new Date(todo.updated_at) : undefined;

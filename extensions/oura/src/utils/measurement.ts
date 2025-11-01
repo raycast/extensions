@@ -4,7 +4,7 @@ import { Preference } from "../types";
 const preferences = getPreferenceValues<Preference>();
 
 // Minutes & Hours
-export const minutedFormatted = (minutes: number) => {
+export const minutesFormatted = (minutes: number) => {
   const hours = Math.floor(minutes / 60);
   const mins = Math.floor(minutes % 60);
   return `${hours}h ${mins}m`;

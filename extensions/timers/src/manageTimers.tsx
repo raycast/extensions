@@ -17,12 +17,11 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLinkP
         title: "This custom timer no longer exists!",
       });
     } else {
-      popToRoot();
       startTimer({
         timeInSeconds: ct.timeInSeconds,
         timerName: ct.name,
         selectedSound: ct.selectedSound,
-      });
+      }).then(() => popToRoot());
       return;
     }
   }

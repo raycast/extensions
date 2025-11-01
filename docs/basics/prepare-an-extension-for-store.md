@@ -12,6 +12,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure you use your **Raycast** account username in the `author` field
   - Ensure you use `MIT` in the `license` field
   - Ensure you are using the latest Raycast API version
+  - Ensure the `platforms` field matching the requirement of your extension, eg. if you use platform-specific APIs, restrict the `platforms` field to the corresponding platform
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
 - Please check the terms of service of third-party services that your extension uses.
 - Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
@@ -144,6 +145,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 - ✅ Select the most informative commands to showcase what your extension does – focus on giving the user as much detail as possible
 - ❌ Do not use multiple backgrounds for different screenshots – be consistent and use the same across all screenshots
 - ❌ Do not share sensitive data in your screenshots – these will be visible in the Store, as well as the Extension repository on GitHub
+- ❌ Do not include screenshots of other applications - keep the focus entirely on your extension within Raycast
 - ❌ Avoid using screenshots in different themes (light and dark), unless it is to demonstrate what your extension does
 
 ## Version History
@@ -153,7 +155,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 - Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
   - To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
 - See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)
-- With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD
+- With each modification, provide clear and descriptive details regarding the latest update, accompanied by a title formatted as an h2 header followed by `{PR_MERGE_DATE}`. This placeholder will be automatically replaced when the pull request is merged. While you may still use the date timestamp format YYYY-MM-DD, it is often more practical to use `{PR_MERGE_DATE}` since merging of a pull request can take several days (depending on the review comments, etc.).
   - Make sure your change title is within square brackets
   - Separate your title and date with a hyphen `-` and spaces either side of the hyphen
 - Below is an example of a changelog that follows the correct format
@@ -161,7 +163,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 ```markdown
 # Brew Changelog
 
-## [Added a bunch of new feedback] - 2023-01-17
+## [Added a bunch of new feedback] - {PR_MERGE_DATE}
 
 - Improve reliability of `outdated` command
 - Add action to copy formula/cask name

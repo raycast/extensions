@@ -1,4 +1,4 @@
-import { List, Grid } from "@raycast/api";
+import { Grid, List } from "@raycast/api";
 import { layout } from "./preferences";
 
 export type ListType = "list";

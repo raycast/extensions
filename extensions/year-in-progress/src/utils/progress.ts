@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import {
+  type Day,
   endOfDay,
   endOfMonth,
   endOfQuarter,
@@ -107,8 +108,8 @@ function getMonthProgress(): Progress {
 }
 
 function getWeekProgress(): Progress {
-  const startDate = startOfWeek(now, { weekStartsOn: +weekStartsOn as any });
-  const endDate = endOfWeek(now, { weekStartsOn: +weekStartsOn as any });
+  const startDate = startOfWeek(now, { weekStartsOn: +weekStartsOn as Day });
+  const endDate = endOfWeek(now, { weekStartsOn: +weekStartsOn as Day });
 
   return {
     title: "Week In Progress",

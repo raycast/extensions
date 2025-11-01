@@ -1,38 +1,35 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { Prefs } from "./type";
 import { updateCommandMetadata } from "@raycast/api";
+import { isSequoia } from "./utils";
 
 export async function execAirPodsMenu(
   { airpodsIndex, soundLoc, ccLoc, optionOne, optionTwo }: Prefs,
   toggleOption = "",
 ): Promise<string | null> {
+  const expandToggleIndex = isSequoia() ? "(i + 1)" : "(i - 1)";
   const script = `
 set AirPodsIndex to ${airpodsIndex}
 set ToggleOption to "${toggleOption}"
 
-on getOptionIndex(Opt1, Opt2)
-	if Opt1 is equal to "Off" then
-		set OptionIndex to 1
-	else if Opt1 is equal to "Transparency" then
-		set OptionIndex to 2
-	else if Opt1 is equal to "Adaptive" or Opt2 is equal to "Adaptive" then
-		if Opt1 is equal to "Adaptive" then
-			set OptionIndex to 3
-		else if Opt1 is equal to "Noise Cancellation" then
-			set OptionIndex to 4
-		end if
-	else if Opt1 is equal to "Noise Cancellation" then
-		set OptionIndex to 3
+on getOptionIndex(Opt)
+	if Opt is equal to "Transparency" then
+		return 1
+	else if Opt is equal to "Adaptive" then
+		return 2
+	else if Opt is equal to "Noise Cancellation" then
+		return 3
+	else
+		return 0
 	end if
-	return OptionIndex
 end getOptionIndex
 
 if ToggleOption is "noise-control"
 	set OptionOne to "${optionOne}"
 	set OptionTwo to "${optionTwo}"
 
-	set IndexOne to AirPodsIndex + getOptionIndex(OptionOne, OptionTwo)
-	set IndexTwo to AirPodsIndex + getOptionIndex(OptionTwo, OptionOne)
+	set IndexOne to AirPodsIndex + getOptionIndex(OptionOne)
+	set IndexTwo to AirPodsIndex + getOptionIndex(OptionTwo)
 else
 	set OptionOne to "Off"
 	set OptionTwo to "On"
@@ -84,7 +81,7 @@ tell application "System Events"
 						exit repeat -- exit the loop
 					end if
 				end repeat
-				set expandToggle to item (i - 1) of btMenuElements
+				set expandToggle to item ${expandToggleIndex} of btMenuElements
 				set expandToggleExpanded to value of expandToggle as boolean
 				if expandToggleExpanded is false then
 					click expandToggle
@@ -121,25 +118,38 @@ tell application "System Events"
 end tell
   `;
 
-  const res = await runAppleScript<string>(script);
-  switch (res) {
-    case "sound-not-found": {
-      showFailureToast("", { title: "Sound not found. Check Localization!" });
-      return null;
+  try {
+    const result = await runAppleScript<string>(script);
+
+    switch (result) {
+      case "sound-not-found": {
+        await showFailureToast("", {
+          title: "Sound not found. Check Localization!",
+        });
+
+        return null;
+      }
+      case "control-center-not-found": {
+        await showFailureToast("", {
+          title: "Control Center not found. Check Localization!",
+        });
+
+        return null;
+      }
+      case "airpods-not-connected": {
+        await showFailureToast("", { title: "AirPods not connected!" });
+
+        return null;
+      }
+      default: {
+        await updateCommandMetadata({ subtitle: `Mode: ${result}` });
+
+        return result;
+      }
     }
-    case "control-center-not-found": {
-      showFailureToast("", {
-        title: "Control Center not found. Check Localization!",
-      });
-      return null;
-    }
-    case "airpods-not-connected": {
-      showFailureToast("", { title: "AirPods not connected!" });
-      return null;
-    }
-    default: {
-      await updateCommandMetadata({ subtitle: `Mode: ${res}` });
-      return res;
-    }
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not run AppleScript" });
+
+    return null;
   }
 }

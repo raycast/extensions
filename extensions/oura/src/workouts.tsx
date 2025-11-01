@@ -1,6 +1,6 @@
 import { List, Color, LaunchProps, Icon } from "@raycast/api";
 import { oura } from "./utils/ouraData";
-import { today, tomorrow, getTimeDifference, calculatePastDate } from "./utils/datetime";
+import { getDate, getTimeDifference, calculatePastDate } from "./utils/datetime";
 import { WorkoutResponse } from "./types";
 import { convertMeters, numberWithCommas } from "./utils/measurement";
 import Unauthorized from "./unauthorized";
@@ -50,7 +50,7 @@ function getWorkoutIntensity(intensity: string) {
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Workouts }>) {
   const { days } = props.arguments;
-  let daysAgo = today();
+  let daysAgo = getDate();
   if (days) {
     daysAgo = calculatePastDate(parseInt(days));
   }
@@ -65,7 +65,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Workou
     );
   }
 
-  const workouts = oura(`usercollection/workout?start_date=${daysAgo}&end_date=${tomorrow()}`) as WorkoutResponse;
+  const workouts = oura(`usercollection/workout?start_date=${daysAgo}&end_date=${getDate(1)}`) as WorkoutResponse;
   if (workouts.isLoading) {
     return (
       <List isLoading={workouts.isLoading}>

@@ -8,8 +8,9 @@ const getStarredTimezones = async () => {
   const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
   const _starTimezones = _localStorage ? (JSON.parse(_localStorage) as Timezone[]) : [];
   _starTimezones.forEach((value) => {
-    value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
-    value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
+    const { date_time, unixtime } = calculateDateTimeByOffset(value.utc_offset);
+    value.date_time = date_time;
+    value.unixtime = unixtime;
   });
   return _starTimezones;
 };

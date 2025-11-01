@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "freeagent",
+  "title": "FreeAgent",
+  "description": "Interact with FreeAgent",
+  "icon": "icon.png",
+  "author": "SteveEdson",
+  "license": "MIT",
+  "categories": ["Finance", "Productivity"],
+  "commands": [
+    {
+      "name": "list-invoices",
+      "title": "List Invoices",
+      "subtitle": "FreeAgent",
+      "description": "List invoices from FreeAgent",
+      "mode": "view"
+    },
+    {
+      "name": "list-timeline",
+      "title": "List Tax Timeline",
+      "subtitle": "FreeAgent",
+      "description": "List tax timeline items from FreeAgent",
+      "mode": "view"
+    },
+    {
+      "name": "list-timeslips",
+      "title": "List Timeslips",
+      "subtitle": "FreeAgent",
+      "description": "List timeslips from FreeAgent",
+      "mode": "view"
+    },
+    {
+      "name": "create-new-invoice",
+      "title": "Create New Invoice",
+      "subtitle": "FreeAgent",
+      "description": "Create an invoice in FreeAgent",
+      "mode": "view"
+    },
+    {
+      "name": "create-timeslip",
+      "title": "Create Timeslip",
+      "subtitle": "FreeAgent",
+      "description": "Create a timeslip in FreeAgent",
+      "mode": "view"
+    },
+    {
+      "name": "list-bank-transactions",
+      "title": "List Bank Transactions",
+      "subtitle": "FreeAgent",
+      "description": "List all bank transactions from FreeAgent",
+      "mode": "view"
+    },
+    {
+      "name": "list-unexplained-transactions",
+      "title": "List Unexplained Transactions",
+      "subtitle": "FreeAgent",
+      "description": "List unexplained bank transactions that need attention",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "default_payment_terms_in_days",
+      "title": "Default Payment Terms (In Days)",
+      "description": "The default payment terms for new invoices (In Days)",
+      "type": "textfield",
+      "required": true,
+      "default": "30"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint:fix": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

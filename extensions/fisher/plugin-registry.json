@@ -1,0 +1,98 @@
+[
+  { "name": "z", "description": "Pure-Fish rupa/z-like directory jumping", "url": "https://github.com/jethrokuan/z" },
+  {
+    "name": "fzf.fish",
+    "description": "🔍🐟 Fzf plugin for Fish",
+    "url": "https://github.com/PatrickF1/fzf.fish"
+  },
+  {
+    "name": "fzf",
+    "description": "Ef-🐟-ient fish keybindings for fzf",
+    "url": "https://github.com/jethrokuan/fzf"
+  },
+  {
+    "name": "nvm.fish",
+    "description": "Node.js version manager lovingly made for Fish",
+    "url": "https://github.com/jorgebucaran/nvm.fish"
+  },
+  {
+    "name": "done",
+    "description": "Automatically receive notifications after a long process finishes",
+    "url": "https://github.com/franciscolourenco/done"
+  },
+  {
+    "name": "replay.fish",
+    "description": "Run Bash commands, replay changes in Fish 🍤",
+    "url": "https://github.com/jorgebucaran/replay.fish"
+  },
+  {
+    "name": "bass",
+    "description": "Make Bash utilities usable in Fish shell",
+    "url": "https://github.com/edc/bass"
+  },
+  {
+    "name": "spark.fish",
+    "description": "Sparklines for Fish 📊",
+    "url": "https://github.com/jorgebucaran/spark.fish"
+  },
+  {
+    "name": "dracula/fish",
+    "description": "🧛🏻‍♂️ Dark theme for fish",
+    "url": "https://github.com/dracula/fish"
+  },
+  {
+    "name": "gitnow",
+    "description": "Speed up your Git workflow. 🐠",
+    "url": "https://github.com/joseluisq/gitnow"
+  },
+  {
+    "name": "sponge",
+    "description": "🧽 Clean fish history from typos automatically",
+    "url": "https://github.com/meaningful-ooo/sponge"
+  },
+  {
+    "name": "autopair.fish",
+    "description": "Auto-complete matching pairs in the Fish command-line",
+    "url": "https://github.com/jorgebucaran/autopair.fish"
+  },
+  {
+    "name": "pisces",
+    "description": "♓️ Fish shell plugin that helps you to work with paired symbols in the command line",
+    "url": "https://github.com/laughedelic/pisces"
+  },
+  {
+    "name": "getopts.fish",
+    "description": "Parse CLI options in Fish",
+    "url": "https://github.com/jorgebucaran/getopts.fish"
+  },
+  {
+    "name": "fishtape",
+    "description": "100% pure-Fish test runner",
+    "url": "https://github.com/fisherman/fishtape"
+  },
+  {
+    "name": "puffer-fish",
+    "description": "🐡 Text Expansions for Fish",
+    "url": "https://github.com/nickeb96/puffer-fish"
+  },
+  {
+    "name": "projectdo",
+    "description": "Context-aware single-letter project commands to speed up your terminal workflow.",
+    "url": "https://github.com/paldepind/projectdo"
+  },
+  {
+    "name": "fish-async-prompt",
+    "description": "Make your prompt asynchronous to improve the reactivity",
+    "url": "https://github.com/acomagu/fish-async-prompt"
+  },
+  {
+    "name": "fish-apple-touchbar",
+    "description": "⚡️ Supercharge your touchbar with fish 🐠",
+    "url": "https://github.com/rodrigobdz/fish-apple-touchbar"
+  },
+  {
+    "name": "fish-abbreviation-tips",
+    "description": "💡 Help you remember your abbreviations",
+    "url": "https://github.com/gazorby/fish-abbreviation-tips"
+  }
+]

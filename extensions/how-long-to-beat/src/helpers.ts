@@ -1,6 +1,6 @@
 import { parse } from "node-html-parser";
 import { ApiService } from "./ApiService";
-
+import { HltbSearch } from "./hltbsearch";
 /**
  * Transform a word in a singular or plural form.
  *
@@ -37,13 +37,23 @@ export const fetchLatestHash = async () => {
   const jsFileUrl = await fetchLatestJSFileUrl();
   const response = await ApiService.getInstance().get(jsFileUrl);
 
-  const text = response.data;
+  const text = response.data as string;
 
-  const keyRegex = /concat\("([a-zA-Z0-9]+)"\)/;
-  const hashMatch = keyRegex.exec(text);
+  const escapedEndpoint = HltbSearch.API_SEARCH_ENDPOINT.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const apiFindRegex = new RegExp(
+    `fetch\\("${escapedEndpoint}"\\s*\\.concat\\("([^"]+)"\\)\\s*\\.concat\\("([^"]+)"\\)`,
+  );
+  const match = text.match(apiFindRegex);
 
-  if (hashMatch && hashMatch[1]) {
-    return hashMatch[1];
+  let hashParts: string[] = [];
+  if (match) {
+    hashParts = [match[1], match[2]];
+  }
+
+  const hash = hashParts.join("");
+
+  if (hash) {
+    return hash;
   }
 
   throw new Error("Hash not found");

@@ -3,15 +3,17 @@ import {
   Action,
   ActionPanel,
   Icon,
+  LaunchProps,
   LaunchType,
   List,
   Toast,
+  getPreferenceValues,
   launchCommand,
   popToRoot,
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { useMe } from "./hooks/useMe";
 import { ListOrGridSection } from "./components/ListOrGridSection";
@@ -19,8 +21,26 @@ import PlaylistItem from "./components/PlaylistItem";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { getError } from "./helpers/getError";
+import { CreateQuicklink } from "./components/CreateQuicklink";
+import getAllPlaylistItems from "./helpers/getAllPlaylistItems";
+import addTrackToPlaylistCache from "./helpers/addTrackToPlaylistCache";
 
-function AddToPlaylistCommand() {
+type LaunchContextData = {
+  playlistId?: string;
+};
+
+type AddToPlaylistCommandProps = {
+  playlistId?: string;
+};
+
+type AddToPlaylistCommandPreferences = {
+  duplicateSongCheck: boolean;
+};
+
+const preferences: AddToPlaylistCommandPreferences = getPreferenceValues();
+const DUPLICATE_SONG_CHECK = preferences.duplicateSongCheck;
+
+function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const [searchText, setSearchText] = useState("");
 
@@ -59,19 +79,47 @@ function AddToPlaylistCommand() {
       </List>
     );
   }
+
+  useEffect(() => {
+    if (props?.playlistId && currentlyPlayingData?.item?.uri && !currentlyPlayingIsLoading) {
+      const addToPlaylistAsync = async () => {
+        try {
+          await addToPlaylist({
+            playlistId: props.playlistId!,
+            trackUris: [currentlyPlayingData.item.uri!],
+          });
+          const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
+          if (!playlist) {
+            showHUD("Playlist not found");
+            popToRoot();
+            return;
+          }
+          showHUD(`Added to ${playlist?.name}`);
+        } catch (err) {
+          const error = getError(err);
+          showHUD(`Error adding song to playlist: ${error.message}`);
+        }
+        popToRoot();
+      };
+
+      addToPlaylistAsync();
+    }
+  }, [props?.playlistId, currentlyPlayingData?.item?.uri, currentlyPlayingIsLoading]);
+
   return (
     <List
       searchBarPlaceholder="Search for Playlist"
       searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={true}
+      isLoading={currentlyPlayingIsLoading}
     >
-      <ListOrGridSection type={"list"} title="Playlists">
+      <ListOrGridSection type="list" title="Playlists">
         {myPlaylistsData?.items
           ?.filter((playlist) => playlist.owner?.id === meData?.id)
           .map((playlist) => (
             <PlaylistItem
-              type={"list"}
+              type="list"
               key={playlist.id}
               playlist={playlist}
               actions={
@@ -81,6 +129,15 @@ function AddToPlaylistCommand() {
                     icon={Icon.Plus}
                     title="Add Current Song to Playlist"
                     onAction={async () => {
+                      if (currentlyPlayingIsLoading) {
+                        showToast({
+                          title: "Please wait",
+                          message: "Fetching currently playing track",
+                          style: Toast.Style.Failure,
+                        });
+                        return;
+                      }
+
                       if (playlist.id === undefined) {
                         showToast({
                           title: "Error adding song to playlist",
@@ -90,12 +147,48 @@ function AddToPlaylistCommand() {
                         return;
                       }
                       try {
-                        await addToPlaylist({
-                          playlistId: playlist.id,
-                          trackUris: [currentlyPlayingData.item?.uri as string],
-                        });
-                        await showHUD(`Added to ${playlist.name}`);
-                        await popToRoot();
+                        const addTrack = async () => {
+                          await addToPlaylist({
+                            playlistId: playlist.id!,
+                            trackUris: [currentlyPlayingData.item?.uri as string],
+                          });
+                          await addTrackToPlaylistCache(playlist.id!, currentlyPlayingData.item);
+                          await showHUD(`Added to ${playlist.name}`);
+                          await popToRoot();
+                        };
+
+                        if (DUPLICATE_SONG_CHECK) {
+                          await showToast({
+                            title: "Checking for duplicates",
+                            style: Toast.Style.Animated,
+                          });
+
+                          const playlistItems = await getAllPlaylistItems(playlist);
+                          let isInPlaylist = false;
+
+                          for (const uri of playlistItems) {
+                            if (uri === currentlyPlayingData.item?.uri) {
+                              isInPlaylist = true;
+                              break;
+                            }
+                          }
+
+                          if (isInPlaylist) {
+                            await showToast({
+                              title: "Duplicate found",
+                              style: Toast.Style.Failure,
+                              primaryAction: {
+                                async onAction() {
+                                  await addTrack();
+                                },
+                                title: "Add to playlist anyways",
+                              },
+                            });
+                            return;
+                          }
+                        }
+
+                        await addTrack();
                       } catch (err) {
                         const error = getError(err);
                         await showToast({
@@ -106,6 +199,14 @@ function AddToPlaylistCommand() {
                       }
                     }}
                   />
+                  {playlist.id && (
+                    <CreateQuicklink
+                      title={`Create Quicklink to Add to ${playlist.name}`}
+                      quicklinkTitle={`Add Playing Song to ${playlist.name}`}
+                      command="addPlayingSongToPlaylist"
+                      data={{ playlistId: playlist.id }}
+                    />
+                  )}
                 </ActionPanel>
               }
             />
@@ -115,10 +216,11 @@ function AddToPlaylistCommand() {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext: LaunchContextData }>) {
+  const playlistId = props?.launchContext?.playlistId;
   return (
     <View>
-      <AddToPlaylistCommand />
+      <AddToPlaylistCommand playlistId={playlistId} />
     </View>
   );
 }

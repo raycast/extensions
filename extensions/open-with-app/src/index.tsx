@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, useFrecencySorting, usePromise, runAppleScript, showFailureToast } from "@raycast/utils";
 import { homedir } from "node:os";
+import { useEffect, useState } from "react";
 
 /**
  * Get selected items from Finder, even if Finder is not the frontmost
@@ -166,18 +167,29 @@ export default function Command() {
 
   const placeholder = !isLoading && items.length === 0 ? "No selected item in Finder..." : makeTitle(items);
 
+  // implement custom filtering to support keeping the Recommended Apps section always on top of the Other Apps section
+  const [searchText, setSearchText] = useState("");
+  const [filteredRecommendedList, filterRecommendedList] = useState(sortedApps);
+  const [filteredOtherList, filterOtherList] = useState(sortedOtherApps);
+
+  useEffect(() => {
+    if (isLoading) return;
+    filterRecommendedList(sortedApps.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase())));
+    filterOtherList(sortedOtherApps.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase())));
+  }, [searchText, isLoading]);
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={placeholder}>
-      {items.length > 0 && sortedApps.length > 0 && (
+    <List filtering={false} onSearchTextChange={setSearchText} isLoading={isLoading} searchBarPlaceholder={placeholder}>
+      {items.length > 0 && !isLoading && filteredRecommendedList.length > 0 && (
         <List.Section title="Recommended Applications">
-          {sortedApps.map((app) => (
+          {filteredRecommendedList.map((app) => (
             <ApplicationListItem key={app.path} app={app} items={items} onAction={visitScope} />
           ))}
         </List.Section>
       )}
-      {items.length > 0 && !isLoading && sortedOtherApps.length > 0 && (
+      {items.length > 0 && !isLoading && filteredOtherList.length > 0 && (
         <List.Section title="Other Applications">
-          {sortedOtherApps.map((app) => (
+          {filteredOtherList.map((app) => (
             <ApplicationListItem key={app.path} app={app} items={items} onAction={visitAll} />
           ))}
         </List.Section>

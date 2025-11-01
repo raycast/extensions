@@ -4,7 +4,7 @@ import { TodoistNotificationListItem } from "./integrations/todoist/listitem/Tod
 import { GithubNotificationListItem } from "./integrations/github/listitem/GithubNotificationListItem";
 import { LinearNotificationListItem } from "./integrations/linear/listitem/LinearNotificationListItem";
 import { SlackNotificationListItem } from "./integrations/slack/listitem/SlackNotificationListItem";
-import { Notification, NotificationListItemProps } from "./notification";
+import { Notification, NotificationListItemProps, NotificationSourceKind } from "./notification";
 import { NotificationActions } from "./action/NotificationActions";
 import { Page, UniversalInboxPreferences } from "./types";
 import { useFetch } from "@raycast/utils";
@@ -33,7 +33,7 @@ export default function Command() {
 
   const [notificationKind, setNotificationKind] = useState("");
   const { isLoading, data, mutate } = useFetch<Page<Notification>>(
-    `${preferences.universalInboxBaseUrl}/api/notifications?status=Unread,Read&with_tasks=true${
+    `${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/notifications?status=Unread,Read&with_tasks=true${
       notificationKind ? "&notification_kind=" + notificationKind : ""
     }`,
     {
@@ -67,16 +67,16 @@ export default function Command() {
 }
 
 function NotificationListItem({ notification, mutate }: NotificationListItemProps) {
-  switch (notification.metadata.type) {
-    case "Github":
+  switch (notification.kind) {
+    case NotificationSourceKind.Github:
       return <GithubNotificationListItem notification={notification} mutate={mutate} />;
-    case "Linear":
+    case NotificationSourceKind.Linear:
       return <LinearNotificationListItem notification={notification} mutate={mutate} />;
-    case "GoogleMail":
+    case NotificationSourceKind.GoogleMail:
       return <GoogleMailNotificationListItem notification={notification} mutate={mutate} />;
-    case "Slack":
+    case NotificationSourceKind.Slack:
       return <SlackNotificationListItem notification={notification} mutate={mutate} />;
-    case "Todoist":
+    case NotificationSourceKind.Todoist:
       return <TodoistNotificationListItem notification={notification} mutate={mutate} />;
     default:
       return <DefaultNotificationListItem notification={notification} mutate={mutate} />;
@@ -88,7 +88,7 @@ function DefaultNotificationListItem({ notification, mutate }: NotificationListI
     <List.Item
       key={notification.id}
       title={notification.title}
-      subtitle={`#${notification.source_id}`}
+      subtitle={`#${notification.source_item.source_id}`}
       actions={
         <NotificationActions
           notification={notification}

@@ -1,138 +1,67 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
-import { getInputItem } from "./hooks/get-input-item";
-import { capitalize, convert, convertToBytes, KeyEquivalentByNumber } from "./utils/byte-converter-utils";
+import { Action, ActionPanel, Form, Keyboard } from "@raycast/api";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
+import useByteConverter from "./hooks/use-byte-converter";
+import { useState } from "react";
+
+const unitToExponent = {
+  bits: 0, // 2^0 bit
+  Bytes: 3, // 2^3 bits
+  KB: 13, // 2^10 B = 2^13 b
+  MB: 23, // 2^20 B = 2^23 b
+  GB: 33, // 2^30 B = 2^33 b
+  TB: 43, // 2^40 B = 2^43 b
+  PB: 53, // 2^50 B = 2^53 b
+  EB: 63, // 2^60 B = 2^63 b
+};
 
 export default function ByteConverter() {
-  const units = ["bits", "Bytes", "KB", "MB", "GB", "TB", "PB", "EB"] as const;
-  type Unit = (typeof units)[number];
-  type State = {
-    [unit in Unit]: number;
-  };
-  type SetFunction = (value: string) => void;
-  type SetFunctions<T> = {
-    [P in keyof T as `set${Capitalize<string & P>}`]: SetFunction;
-  };
+  const converter = useByteConverter(unitToExponent);
 
-  const [state, setState] = useState<State & SetFunctions<State>>(
-    units.reduce(
-      (acc, unit) => {
-        const capitalizedUnit = capitalize(unit);
-        const setFunctionName = `set${capitalizedUnit}`;
-        return {
-          ...acc,
-          [unit]: 0,
-          [setFunctionName]: (newValue: string) => {
-            let value = newValue || "0"; // Empty string
-            value = value.replace(/[^\d.]/g, ""); // Should only contains numbers
-            const parsedValue = parseFloat(value);
-            if (isNaN(parsedValue)) {
-              return;
-            }
-            const index = units.indexOf(unit);
-            const bytesValue = convertToBytes(parsedValue, index);
+  const [focusedUnit, setFocusedUnit] = useState<keyof typeof unitToExponent>("bits");
+  const focusedValue = `${converter.get(unitToExponent[focusedUnit])} ${focusedUnit}`;
 
-            setState((prevState) => {
-              const newState = { ...prevState };
-              for (let i = 0; i < index; i++) {
-                newState[units[i]] = convert(bytesValue, i);
-              }
-              newState[unit] = parsedValue;
-              for (let i = index + 1; i < units.length; i++) {
-                newState[units[i]] = convert(bytesValue, i);
-              }
-              return newState;
-            });
-          },
-        };
-      },
-      {} as State & SetFunctions<State>,
-    ),
-  );
-
-  const textFields = useRef<(Form.TextField | null)[]>(Array.from({ length: units.length }));
-
-  const [focusedTextFieldIndex, setFocusedTextFieldIndex] = useState<number>(0);
-
-  const inputItem = getInputItem();
-  useEffect(() => {
-    async function _fetch() {
-      state["setBytes"](inputItem);
-    }
-
-    _fetch().then();
-  }, [inputItem]);
-
-  const getBestUnitExpression = () => {
-    const values = units.map((unit) => state[unit]);
-    const maxValue = 1000;
-    let bestIndex = 0;
-    for (; bestIndex < units.length - 1; bestIndex++) {
-      const value = values[bestIndex];
-      if (value < maxValue) {
-        break;
-      }
-    }
-    return getExpressionAtIndex(bestIndex);
-  };
-
-  const getFocusedValueExpression = () => {
-    return getExpressionAtIndex(focusedTextFieldIndex);
-  };
-
-  const getExpressionAtIndex = (index: number): string => {
-    const unit = units[index];
-    const value = state[unit];
-    const expression = `${value} ${unit}`;
-    return expression;
-  };
+  const bestUnit = converter.getBestUnitExpression();
 
   return (
     <Form
       actions={
         <ActionPanel>
+          {bestUnit !== null && (
+            <Action.CopyToClipboard
+              title={`Copy ${bestUnit}`}
+              content={bestUnit}
+              // shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            />
+          )}
           <Action.CopyToClipboard
-            title={`Copy ${getBestUnitExpression()}`}
-            content={getBestUnitExpression()}
-            shortcut={{ modifiers: [], key: "enter" }}
+            title={`Copy ${focusedValue}`}
+            content={focusedValue}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
-          <Action.CopyToClipboard title={`Copy ${getFocusedValueExpression()}`} content={getFocusedValueExpression()} />
           <ActionPanel.Section>
-            {units.map((_, index) => {
-              const keyEquivalent = KeyEquivalentByNumber(index + 1);
-              return (
-                <Action.CopyToClipboard
-                  key={index} // to make key unique to avoid warning
-                  title={`Copy ${getExpressionAtIndex(index)}`}
-                  content={getExpressionAtIndex(index)}
-                  shortcut={keyEquivalent ? { modifiers: ["cmd"], key: keyEquivalent } : undefined}
-                />
-              );
-            })}
+            {Object.entries(unitToExponent).map(([unit, exponent], index) => (
+              <Action.CopyToClipboard
+                key={unit}
+                title={`Copy ${converter.get(exponent)} ${unit}`}
+                content={`${converter.get(exponent)} ${unit}`}
+                shortcut={{ modifiers: ["cmd"], key: `${index + 1}` as Keyboard.KeyEquivalent }}
+              />
+            ))}
           </ActionPanel.Section>
           <ActionOpenPreferences showCommandPreferences={false} showExtensionPreferences={true} />
         </ActionPanel>
       }
     >
-      {units.map((unit, index) => (
+      {Object.entries(unitToExponent).map(([unit, exponent]) => (
         <Form.TextField
           key={unit}
           id={unit}
           title={unit}
-          value={state[unit].toString()}
-          ref={(el) => (textFields.current[index] = el)}
-          autoFocus={index == 1}
+          value={converter.get(exponent)}
+          ref={(r) => (converter.ref.current[unit as keyof typeof unitToExponent] = r!)}
           placeholder="0"
-          onFocus={() => {
-            setFocusedTextFieldIndex(index);
-          }}
-          onChange={(newValue) => {
-            const setFunction = state[`set${capitalize(unit)}` as keyof typeof state];
-            if (typeof setFunction === "function") {
-              setFunction(newValue);
-            }
-          }}
+          onChange={(v) => converter.set(exponent, v)}
+          onFocus={() => setFocusedUnit(unit as keyof typeof unitToExponent)}
         />
       ))}
     </Form>

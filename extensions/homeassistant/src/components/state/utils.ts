@@ -89,7 +89,7 @@ export function filterStates(states: State[] | undefined, options?: { include?: 
 }
 
 export const PrimaryIconColor = Color.Blue;
-const UnavailableColor = "#bdbdbd";
+const UnavailableColor = Color.SecondaryText;
 const Unavailable = "unavailable";
 
 const lightColor: Record<string, Color.ColorLike> = {
@@ -98,20 +98,20 @@ const lightColor: Record<string, Color.ColorLike> = {
 };
 
 const coverStateIconSource: Record<string, string> = {
-  opening: "cover-up.png",
-  closing: "cover-down.png",
-  open: "cover-open.png",
-  closed: "cover-close.png",
+  opening: "arrow-up-box.svg",
+  closing: "arrow-down-box.png",
+  open: "window-open.svg",
+  closed: "window-closed.svg",
 };
 
 const deviceClassIconSource: Record<string, string> = {
-  temperature: "temperature.png",
-  power: "power.png",
-  update: "update.png",
-  connectivity: "connectivity.png",
-  carbon_dioxide: "carbon-dioxide.png",
-  pressure: "pressure.png",
-  humidity: "humidity.png",
+  temperature: "thermometer.svg",
+  power: "power-plug.svg",
+  update: "package.svg",
+  connectivity: "server-network.svg",
+  carbon_dioxide: "molecule-co2.svg",
+  pressure: "gauge.svg",
+  humidity: "humidity-percentage.svg",
 };
 
 /**
@@ -186,34 +186,34 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
     if (dc === "battery") {
       return getBatteryIconFromState(state);
     } else if (dc === "motion") {
-      const source = state.state === "on" ? "run.png" : "walk.png";
+      const source = state.state === "on" ? "run.svg" : "walk.svg";
       const color =
         state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
       return { source: source, tintColor: color };
     } else if (dc === "temperature") {
-      return { source: "temperature.png", tintColor: PrimaryIconColor };
+      return { source: "thermometer.svg", tintColor: PrimaryIconColor };
     } else if (dc === "plug") {
-      const source = state.state === "on" ? "power-plug.png" : "power-plug-off.png";
+      const source = state.state === "on" ? "power-plug.svg" : "power-plug-off.svg";
       const color = state.state === "unavailable" ? UnavailableColor : PrimaryIconColor;
       return { source: source, tintColor: color };
     } else if (dc === "door") {
-      const source = state.state === "on" ? "door-open.png" : "door-closed.png";
+      const source = state.state === "on" ? "door-open.svg" : "door-closed.svg";
       const color =
         state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
       return { source: source, tintColor: color };
     } else if (dc === "window") {
-      const source = state.state === "on" ? "cover-open.png" : "cover-close.png"; // window icons are the same as cover icons in HA
+      const source = state.state === "on" ? "window-open.svg" : "window-closed.svg"; // window icons are the same as cover icons in HA
       const color =
         state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
       return { source: source, tintColor: color };
     } else if (dc === "power_factor") {
       const color = state.state === Unavailable ? UnavailableColor : PrimaryIconColor;
-      return { source: "angle-acute.png", tintColor: color };
+      return { source: "angle-acute.svg", tintColor: color };
     } else if (dc === "energy") {
       const color = state.state === Unavailable ? UnavailableColor : PrimaryIconColor;
-      return { source: "flash.png", tintColor: color };
+      return { source: "flash.svg", tintColor: color };
     }
-    const src = deviceClassIconSource[dc] || "entity.png";
+    const src = deviceClassIconSource[dc] || "shape.svg";
     return { source: src, tintColor: PrimaryIconColor };
   } else {
     return undefined;
@@ -250,7 +250,7 @@ export function getStateValue(state: State): string | undefined {
     return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
   } else if (state.entity_id.startsWith("update")) {
     if (state.attributes.in_progress === true) {
-      return "in progress 🔄";
+      return "in progress";
     }
     const iv = state.attributes.installed_version;
     const lv = state.attributes.latest_version;
@@ -260,7 +260,7 @@ export function getStateValue(state: State): string | undefined {
       }
       return lv;
     } else if (state.state === "off") {
-      return "✅";
+      return "✔";
     }
     return state.state;
   }
@@ -269,7 +269,7 @@ export function getStateValue(state: State): string | undefined {
 
 function getLightIconSource(state: State): string {
   const attr = state.attributes;
-  return attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
+  return attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.svg" : "lightbulb.svg";
 }
 
 function getLightTintColor(state: State): Color.ColorLike {
@@ -295,14 +295,14 @@ export function getIcon(state: State): Image.ImageLike | undefined {
     if (ep && ep.startsWith("/")) {
       return { source: ha.urlJoin(ep), mask: Image.Mask.Circle };
     }
-    return { source: "person.png", tintColor: PrimaryIconColor };
+    return { source: "account.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("device_tracker")) {
-    let source = "entity.png";
+    let source = "shape.svg";
     let color: Color.ColorLike = PrimaryIconColor;
     switch (state.attributes.source_type) {
       case "gps":
         {
-          source = "person.png";
+          source = "account.svg";
         }
         break;
       case "router":
@@ -343,67 +343,73 @@ export function getIcon(state: State): Image.ImageLike | undefined {
     if (ep) {
       return ep.startsWith("/") ? ha.urlJoin(ep) : ep;
     }
-    return { source: "update.png", tintColor: state.state === "on" ? Color.Yellow : PrimaryIconColor };
+    return { source: "package.svg", tintColor: state.state === "on" ? Color.Yellow : PrimaryIconColor };
   } else if (e.startsWith("cover")) {
     const source = coverStateIconSource[`${state.state}`] || coverStateIconSource.open;
     return { source: source, tintColor: PrimaryIconColor };
   } else if (e.startsWith("automation")) {
-    return { source: "automation.png", tintColor: PrimaryIconColor };
+    return { source: "robot.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("climate")) {
-    return { source: "climate.png", tintColor: PrimaryIconColor };
+    return { source: "thermostat.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("media_player")) {
-    return { source: "mediaplayer.png", tintColor: PrimaryIconColor };
+    return { source: "cast-connected.svg", tintColor: PrimaryIconColor };
   } else if (e === "sun.sun") {
     const sl = state.state.toLocaleLowerCase();
-    const source = sl === "below_horizon" ? "weather-night.png" : "white-balance-sunny.png";
+    const source = sl === "below_horizon" ? "weather-night.svg" : "white-balance-sunny.svg";
     return { source: source, tintColor: PrimaryIconColor };
   } else if (e.startsWith("input_number")) {
-    return { source: "ray-vertex.png", tintColor: PrimaryIconColor };
+    return { source: "ray-vertex.svg", tintColor: PrimaryIconColor };
   } else if (e === "binary_sensor.rpi_power_status") {
-    return { source: "raspberry-pi.png", tintColor: PrimaryIconColor };
+    return { source: "raspberry-pi.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("water_heater")) {
-    return { source: "temperature.png", tintColor: PrimaryIconColor };
+    return { source: "thermometer.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("camera")) {
-    return { source: "video.png", tintColor: PrimaryIconColor };
+    return { source: "video.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("vacuum")) {
     const color = state.state === "cleaning" ? Color.Yellow : PrimaryIconColor;
-    return { source: "robot-vacuum.png", tintColor: color };
+    return { source: "robot-vacuum.svg", tintColor: color };
   } else if (e.startsWith("script")) {
     const color = state.state === "on" ? Color.Yellow : PrimaryIconColor;
-    return { source: "play.png", tintColor: color };
+    return { source: "play.svg", tintColor: color };
   } else if (e.startsWith("scene")) {
-    return { source: "palette.png", tintColor: PrimaryIconColor };
+    return { source: "palette.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("switch")) {
-    const wallSwitch = state.state === "on" ? { source: "on.png" } : { source: "off.png", tintColor: PrimaryIconColor };
+    const wallSwitch =
+      state.state === "on"
+        ? { source: "toggle-switch-outline.svg", tintColor: PrimaryIconColor }
+        : { source: "toggle-switch-off-outline.svg", tintColor: UnavailableColor };
     return wallSwitch;
   } else if (e.startsWith("input_boolean")) {
-    const wallSwitch = state.state === "on" ? { source: "on.png" } : { source: "off.png", tintColor: PrimaryIconColor };
+    const wallSwitch =
+      state.state === "on"
+        ? { source: "toggle-switch-outline.svg", tintColor: PrimaryIconColor }
+        : { source: "toggle-switch-off-outline.svg", tintColor: PrimaryIconColor };
     return wallSwitch;
   } else if (e.startsWith("timer")) {
     const color = state.state === "active" ? Color.Yellow : PrimaryIconColor;
-    return { source: "av-timer.png", tintColor: color };
+    return { source: "av-timer.svg", tintColor: color };
   } else if (e.startsWith("input_select")) {
-    return { source: "format-list-bulleted.png", tintColor: PrimaryIconColor };
+    return { source: "format-list-bulleted.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("input_button")) {
-    return { source: "gesture-tap-button.png", tintColor: PrimaryIconColor };
+    return { source: "gesture-tap-button.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("input_text")) {
-    return { source: "form-textbox.png", tintColor: PrimaryIconColor };
+    return { source: "form-textbox.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("input_datetime")) {
-    let source = "calendar-clock.png";
+    let source = "calendar-clock.svg";
     const hasDate: boolean = state.attributes.has_date || false;
     const hasTime: boolean = state.attributes.has_time || false;
     if (hasDate && hasTime) {
-      source = "calendar-clock.png";
+      source = "calendar-clock.svg";
     } else if (hasDate) {
-      source = "calendar.png";
+      source = "calendar.svg";
     } else if (hasTime) {
-      source = "clock-time-four.png";
+      source = "clock-time-four.svg";
     }
     return { source: source, tintColor: PrimaryIconColor };
   } else if (e.startsWith("weather")) {
     return { source: weatherConditionToIcon(state.state) };
   } else if (e.startsWith("fan")) {
-    let source = "fan.png";
+    let source = "fan.svg";
     let tintColor: Color.ColorLike = PrimaryIconColor;
 
     switch (state.state.toLocaleLowerCase()) {
@@ -411,7 +417,7 @@ export function getIcon(state: State): Image.ImageLike | undefined {
         tintColor = Color.Yellow;
         break;
       case "off":
-        source = "fan-off.png";
+        source = "fan-off.svg";
         break;
       case "unavailable":
         tintColor = UnavailableColor;
@@ -422,9 +428,9 @@ export function getIcon(state: State): Image.ImageLike | undefined {
   } else if (e.startsWith("zone")) {
     return { source: "home.svg", tintColor: PrimaryIconColor };
   } else if (e.startsWith("calendar")) {
-    return { source: "calendar.png", tintColor: PrimaryIconColor };
+    return { source: "calendar.svg", tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
-    return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
+    return di ? di : { source: "shape.svg", tintColor: PrimaryIconColor };
   }
 }

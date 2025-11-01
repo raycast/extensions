@@ -19,6 +19,12 @@ export function FooterAction({ url, uri, title }: FooterActionProps) {
           text: url,
         }}
       />
+      <Action.CopyToClipboard
+        icon={Icon.CopyClipboard}
+        title="Copy Artist and Title"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+        content={title}
+      />
       {isSpotifyInstalled ? (
         <Action.Open
           icon="spotify-icon.svg"

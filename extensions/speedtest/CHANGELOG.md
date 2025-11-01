@@ -1,5 +1,9 @@
 # Speedtest Changelog
 
+## [Enhancement] - 2024-11-25
+
+- Update README with FAQs
+
 ## [Update] - 2024-06-12
 
 - Updated command title.

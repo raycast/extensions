@@ -28,21 +28,21 @@ export function sortBatteries(states: State[] | undefined) {
 }
 
 const batterLevelIcons: string[] = [
-  "battery-00.png",
-  "battery-10.png",
-  "battery-20.png",
-  "battery-30.png",
-  "battery-40.png",
-  "battery-50.png",
-  "battery-60.png",
-  "battery-70.png",
-  "battery-80.png",
-  "battery-90.png",
-  "battery-100.png",
+  "battery-outline.svg",
+  "battery-10.svg",
+  "battery-20.svg",
+  "battery-30.svg",
+  "battery-40.svg",
+  "battery-50.svg",
+  "battery-60.svg",
+  "battery-70.svg",
+  "battery-80.svg",
+  "battery-90.svg",
+  "battery.svg",
 ];
 
 export function getBatteryIconSourceForValue(value: number | undefined): string {
-  const fallback = "battery-100.png";
+  const fallback = "battery.svg";
   if (value === undefined) {
     return fallback;
   }

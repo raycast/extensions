@@ -14,7 +14,7 @@ export default function Command() {
     headers: {
       Accept: "application/json",
     },
-    async parseResponse(response) {
+    async parseResponse(response: Response) {
       if (!response.ok) {
         throw new Error(response.statusText);
       }

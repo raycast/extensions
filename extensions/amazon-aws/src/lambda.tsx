@@ -5,6 +5,7 @@ import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
+import InvokeLambdaFunction from "./components/lambda/InvokeLambdaFunction";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -44,6 +45,12 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
             icon={Icon.Eye}
             shortcut={{ modifiers: ["opt"], key: "l" }}
             target={<CloudwatchLogStreams logGroupName={`/aws/lambda/${func.FunctionName}`}></CloudwatchLogStreams>}
+          />
+          <Action.Push
+            title="Invoke Function"
+            icon={Icon.Bolt}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            target={<InvokeLambdaFunction functionName={func.FunctionName || ""} />}
           />
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />

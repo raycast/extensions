@@ -4,15 +4,46 @@ import CreateDeckAction from './actions/CreateDeckAction';
 import deckActions from './api/deckActions';
 import miscellaneousActions from './api/miscellaneousActions';
 import { Action, ActionPanel, confirmAlert, Detail, List, showToast, Toast } from '@raycast/api';
-import { ShortcutDictionary } from './types';
+import { DeckStats, ShortcutDictionary } from './types';
 import { StudyDeck } from './actions/StudyDeck';
-import { delay, getDeckState } from './util';
+import { combineDeckInfo, delay, getDeckState } from './util';
 import { useCachedPromise } from '@raycast/utils';
 import { useCallback, useEffect, useMemo } from 'react';
 import useErrorHandling from './hooks/useErrorHandling';
+import { ankiReq } from './api/ankiClient';
 
 export default function Decks() {
-  const { data, isLoading, revalidate, error } = useCachedPromise(deckActions.getDecks);
+  const { data, isLoading, revalidate, error, pagination } = useCachedPromise(
+    () =>
+      async (options: { page: number }): Promise<{ data: DeckStats[]; hasMore: boolean }> => {
+        const pageSize = 20;
+
+        const allDeckNames: { [key: string]: number } = await ankiReq('deckNamesAndIds');
+
+        const deckEntries = Object.entries(allDeckNames);
+        const start = options.page * pageSize;
+        const end = start + pageSize;
+        const paginatedDeckEntries = deckEntries.slice(start, end);
+
+        const paginatedDeckNames = Object.fromEntries(paginatedDeckEntries);
+
+        await delay(1);
+
+        const deckStats: { [key: string]: DeckStats } = await ankiReq('getDeckStats', {
+          decks: paginatedDeckNames,
+        });
+
+        const combinedDeckInfo = combineDeckInfo(deckStats, paginatedDeckNames);
+
+        return {
+          data: combinedDeckInfo,
+          hasMore: end < deckEntries.length,
+        };
+      },
+    [],
+    { keepPreviousData: true }
+  );
+
   const { handleError, errorMarkdown } = useErrorHandling();
 
   const shortcuts = useMemo((): ShortcutDictionary => {
@@ -70,6 +101,7 @@ export default function Decks() {
           isLoading={isLoading}
           navigationTitle="Search Decks"
           searchBarPlaceholder="Enter deck name..."
+          pagination={pagination}
         >
           <List.Section title="Deck" subtitle="Total cards">
             {data?.map(deck => (

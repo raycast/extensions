@@ -1,5 +1,50 @@
 # Google Chrome Changelog
 
+## [Improvements] - 2025-10-13
+
+- Fix weird issue with a constant not working (ref: [#22053](https://github.com/raycast/extensions/issues/22053), [#22026](https://github.com/raycast/extensions/issues/22026), [#21966](https://github.com/raycast/extensions/issues/21966), [#21973](https://github.com/raycast/extensions/issues/21973), [#21928](https://github.com/raycast/extensions/issues/21928))
+- Add support for searching history in a specific profile.
+- Add support for getting all Chrome profiles in AI
+- Rewritten some of the logic to use `usePromise` instead of `useEffect`
+- Updated dependencies, mainly SQL.js was giving issues
+
+## [Fix Search Bookmarks] - 2025-10-01
+
+- Fix the "Search Bookmarks" command returning an error when the hard-coded default profile directory does not exist.
+
+## [Update the dependencies to fix search history and find tab] - 2025-09-03
+
+## [Chore: Updated contributors] - 2025-09-03
+
+## [Add Refresh Tab Command] - 2025-08-25
+
+- Add Reload Tab action to refresh a selected tab in the Search Tab command.
+
+## [Fix New Tab Command React Hooks Violation] - 2025-05-27
+
+- Fix React Rules of Hooks violation causing TypeError when opening new tabs.
+- Improve error handling for profile and history data loading.
+
+## [Add Omnibox-like search behavior for New Tab] - 2025-05-07
+
+- Add support for entering URLs or search terms in a single input field, mimicking Chrome's Omnibox behavior.
+
+## [Add Copy Title action for Search Tab] - 2025-04-22
+- Add the ability to create new incognito window.
+
+## [Add Copy Title action for Search Tab] - 2025-02-11
+- Add Copy Title action for Search Tab command.
+
+## [Add AI Tools] - 2025-02-21
+
+## [Allow to configure profile path] - 2025-01-18
+- The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
+
+## [Fix] - 2025-01-09
+
+- Fix Search Tabs command when "Extract the favicon from every open tab" is enabled.
+- Fix bookmark list in the Search All command.
+
 ## [Add Search All Command] - 2024-08-01
 
 - Add Google Chrome tabs and history, bookmarks search.

@@ -4,6 +4,7 @@ export interface TimeEntry {
   projectId: string;
   taskId: string | undefined;
   description: string;
+  tags: Tag[];
   project: Project;
   task: Task | undefined;
   timeInterval: {
@@ -25,13 +26,24 @@ export interface Task {
   name: string;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+}
+
 export interface FetcherArgs {
-  method?: string;
+  method?: "PATCH" | "POST";
   body?: any;
   headers?: {
-    "X-Api-Key": any;
+    "X-Api-Key": string;
     "Content-Type": string;
   };
+}
+
+export interface User {
+  id: string;
+  name: string;
+  defaultWorkspace: string;
 }
 
 export interface FetcherResponse {
@@ -39,12 +51,8 @@ export interface FetcherResponse {
   error?: string | Error;
 }
 
-export interface PreferenceValues {
-  token: string;
-}
-
 export interface DataValues {
-  userId: LocalStorageValue;
-  workspaceId: LocalStorageValue;
-  name: LocalStorageValue;
+  userId: string;
+  workspaceId: string;
+  name: string;
 }

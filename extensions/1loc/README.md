@@ -1,6 +1,6 @@
 # 1 LOC
 
-Browse JavaScript utilities from [1loc.dev](https://1loc.dev/).
+Browse JavaScript utilities from [1loc](https://github.com/phuocng/1loc).
 
 ## GitHub Access Token
 

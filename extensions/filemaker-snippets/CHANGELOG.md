@@ -1,5 +1,15 @@
 # FileMaker Snippets Changelog
 
+## [Fixes] - 2025-10-29
+
+- Fix dynamic fields being overwritten when editing a snippet
+
+## [Fixes] - 2025-03-03
+
+- Update to Raycast API 1.93.0
+- Fix a bug where the snippet text was not being saved when editing the XML of a snippet
+- Update FileMaker icons to the latest version
+
 ## [Fixes] - 2024-04-05
 
 - Fix encoding for launching favorite or recent files that contain special characters

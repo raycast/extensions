@@ -8,7 +8,7 @@ const config: IConfig = {
   },
   supportCustomModel: false,
   /* eslint-disable @typescript-eslint/no-unused-vars */
-  async listModels(apikey: string | undefined): Promise<IModel[]> {
+  async listModels(apikey: string | undefined, _: string | undefined): Promise<IModel[]> {
     return Promise.resolve([
       { name: "mixtral-8x7b-32768", id: "mixtral-8x7b-32768" },
       { name: "gemma-7b-it", id: "gemma-7b-it" },

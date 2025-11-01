@@ -1,0 +1,179 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mermaid-to-image",
+  "title": "Mermaid to Image",
+  "description": "Convert Mermaid diagrams to images",
+  "icon": "extension-icon.png",
+  "author": "chihkang",
+  "ai": {
+    "name": "Mermaid Diagram Generator",
+    "description": "Can generate Mermaid diagrams (like flowcharts, sequence diagrams, class diagrams) from descriptions and copy the resulting image.",
+    "examples": [
+      "Create a flowchart for user login and copy it",
+      "Generate a sequence diagram showing API request/response and copy image",
+      "Draw a class diagram for Animal, Duck, Fish and copy it"
+    ],
+    "instructions": "Your main task is to help users create mermaid diagrams and copy their images to the clipboard: when the user asks to draw/generate/create a diagram and copy it, first generate a complete and valid mermaid syntax yourself, then immediately call generateMermaidImageTool and pass the syntax as the mermaidSyntax parameter to the tool, don't just reply with the syntax.",
+    "creativity": 0.6,
+    "evals": [
+      {
+        "input": "@mermaid-to-image Draw a simple flowchart A -> B and copy the image.",
+        "mocks": {
+          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-mermaid-diagram-with-ai"
+            }
+          },
+          {
+            "includes": "copied to your clipboard"
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@mermaid-to-image convert below mermaid code to image and copy it. graph TD        A[Start] --> B{Is it working?}        B -->|Yes| C[Great!]        B -->|No| D[Debug]        D --> B",
+        "mocks": {
+          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-mermaid-diagram-with-ai"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@mermaid-to-image Create a class diagram for Vehicle and Car (Car inherits from Vehicle) and copy the resulting image.",
+        "mocks": {
+          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-mermaid-diagram-with-ai"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mermaid-to-image",
+      "title": "Mermaid to Image",
+      "description": "Convert Mermaid diagrams to images",
+      "mode": "view",
+      "subtitle": "Generate Diagram Images from Mermaid Markup"
+    }
+  ],
+  "tools": [
+    {
+      "name": "generate-mermaid-diagram-with-ai",
+      "title": "Generate Mermaid Diagram with AI",
+      "description": "Ask AI to generate a Mermaid diagram and copy the image"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "outputFormat",
+      "title": "Output Format",
+      "description": "The format of the generated image",
+      "type": "dropdown",
+      "required": true,
+      "default": "png",
+      "data": [
+        {
+          "title": "PNG",
+          "value": "png"
+        },
+        {
+          "title": "SVG",
+          "value": "svg"
+        }
+      ]
+    },
+    {
+      "name": "theme",
+      "title": "Theme",
+      "description": "The theme of the generated diagram",
+      "type": "dropdown",
+      "required": true,
+      "default": "default",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "Forest",
+          "value": "forest"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        },
+        {
+          "title": "Neutral",
+          "value": "neutral"
+        }
+      ]
+    },
+    {
+      "name": "generationTimeout",
+      "title": "Generation Timeout",
+      "description": "Maximum time in seconds to wait for diagram generation (for complex diagrams, use higher values)",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "placeholder": "10",
+      "validate": "^[1-9]\\d*$"
+    },
+    {
+      "name": "savePath",
+      "title": "Save Path",
+      "description": "The directory where images will be saved (must be a valid directory path)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Leave empty to use Downloads folder",
+      "validate": "^$|^/?(/[^/]+)+/?$"
+    },
+    {
+      "name": "customMmdcPath",
+      "title": "Custom mmdc Path",
+      "description": "Specify a custom path to the mmdc executable (e.g., from NVM installations)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/Users/username/.nvm/versions/node/v22.12.0/bin/mmdc"
+    }
+  ]
+}

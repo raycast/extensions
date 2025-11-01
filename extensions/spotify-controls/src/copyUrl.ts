@@ -17,7 +17,7 @@ export default async () => {
     await showToast({
       title: "Copied URL to clipboard",
     });
-  } catch (_) {
+  } catch {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed copying URL",

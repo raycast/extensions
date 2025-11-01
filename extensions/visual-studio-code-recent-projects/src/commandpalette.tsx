@@ -1,10 +1,10 @@
-import { Action, ActionPanel, List, showHUD, popToRoot, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { fileExists, getErrorMessage, openURIinVSCode, raycastForVSCodeURI, waitForFileExists } from "./utils";
+import { Action, ActionPanel, Icon, List, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
+import { useEffect, useState } from "react";
 import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
+import { fileExists, getErrorMessage, openURIinVSCode, raycastForVSCodeURI, waitForFileExists } from "./utils";
 
 interface CommandMetadata {
   command: string;
@@ -89,7 +89,7 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
           <ActionPanel.Section>
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-              title="Copy Command ID"
+              title="Copy Command Id"
               content={c.command}
             />
           </ActionPanel.Section>
@@ -102,7 +102,7 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
 function InstallRaycastForVSCodeAction(): JSX.Element {
   return (
     <Action.OpenInBrowser
-      title="Install Raycast for VSCode"
+      title="Install Raycast for Vscode"
       url={`${getBuildScheme()}:extension/tonka3000.raycast`}
       onOpen={() => {
         popToRoot();

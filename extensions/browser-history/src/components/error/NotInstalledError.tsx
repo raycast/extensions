@@ -29,7 +29,7 @@ export function NotInstalledError({ browser }: { browser: SupportedBrowsers }) {
                   await showToast(
                     Toast.Style.Failure,
                     DEFAULT_ERROR_TITLE,
-                    "An unknown error occurred while trying to install"
+                    "An unknown error occurred while trying to install",
                   );
                 }
                 setIsLoading(false);

@@ -1,8 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 
-const preferences = getPreferenceValues<Preferences>();
-export const togglApiToken = preferences.togglApiToken;
-
-interface Preferences {
-  togglApiToken: string;
-}
+const preferences = getPreferenceValues<ExtensionPreferences>();
+export const {
+  togglApiToken,
+  showClientsInForm,
+  showProjectsInForm,
+  showTasksInForm,
+  showTagsInForm,
+  timeEntriesLookbackDays,
+} = preferences;

@@ -10,7 +10,8 @@
     "sxn",
     "pernielsentikaer",
     "rspeicher",
-    "roele"
+    "roele",
+    "AntonNiklasson"
   ],
   "repository": {
     "type": "git",
@@ -26,7 +27,7 @@
     "svg:optimize": "find assets -type f -name '*.svg' -print0 | xargs -0 -n 1 -P 6 svgo"
   },
   "dependencies": {
-    "@raycast/api": "^1.71.0",
+    "@raycast/api": "^1.90.0",
     "fuzzball": "^2.1.2",
     "run-applescript": "^6.1.0"
   },
@@ -169,6 +170,187 @@
       "disabledByDefault": true
     }
   ],
+  "tools": [
+    {
+      "name": "get-bluetooth-devices",
+      "title": "Get Bluetooth Devices",
+      "description": "Get the names of all known or visible Bluetooth devices"
+    },
+    {
+      "name": "connect-bluetooth-device",
+      "title": "Connect Bluetooth Device",
+      "description": "Connects a given Bluetooth device by their MAC address."
+    },
+    {
+      "name": "disconnect-bluetooth-device",
+      "title": "Disconnect Bluetooth Device",
+      "description": "Disconnects a given Bluetooth device by it's MAC address."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@toothpick What are my Bluetooth devices?",
+        "expected": [
+          {
+            "callsTool": "get-bluetooth-devices"
+          }
+        ],
+        "mocks": {
+          "get-bluetooth-devices": [
+            {
+              "name": "John Smith - AirPods Pro",
+              "type": "Headphones",
+              "connected": false,
+              "batteryLevels": {
+                "main": "43%"
+              }
+            },
+            {
+              "name": "John Smith – Magic Trackpad",
+              "type": "Magic Trackpad",
+              "connected": true,
+              "batteryLevels": {
+                "main": "84%"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "input": "@toothpick What are my Bluetooth devices? Please include their MAC addresses",
+        "expected": [
+          {
+            "callsTool": "get-bluetooth-devices"
+          }
+        ],
+        "mocks": {
+          "get-bluetooth-devices": [
+            {
+              "name": "John Smith - AirPods Pro",
+              "type": "Headphones",
+              "connected": false,
+              "batteryLevels": {
+                "main": "43%"
+              },
+              "macAddress": "B0:BE:83:F3:4C:D4"
+            },
+            {
+              "name": "John Smith – Magic Trackpad",
+              "type": "Magic Trackpad",
+              "connected": true,
+              "batteryLevels": {
+                "main": "84%"
+              },
+              "macAddress": "B0:BE:83:F3:4C:D4"
+            }
+          ]
+        }
+      },
+      {
+        "input": "@toothpick Connect my headphones.",
+        "expected": [
+          {
+            "callsTool": "get-bluetooth-devices"
+          },
+          {
+            "callsTool": "connect-bluetooth-device"
+          }
+        ],
+        "mocks": {
+          "get-bluetooth-devices": [
+            {
+              "name": "John Smith - AirPods Pro",
+              "type": "Headphones",
+              "connected": false,
+              "batteryLevels": {
+                "main": "43%"
+              },
+              "macAddress": "B0:BE:83:F3:4C:D4"
+            },
+            {
+              "name": "John Smith – Magic Trackpad",
+              "type": "Magic Trackpad",
+              "connected": true,
+              "batteryLevels": {
+                "main": "84%"
+              },
+              "macAddress": "B0:BE:83:F3:4C:D4"
+            }
+          ],
+          "connect-bluetooth-device": "Successfully called \"connect-bluetooth-device\""
+        }
+      },
+      {
+        "input": "@toothpick Disconnect my headphones.",
+        "expected": [
+          {
+            "callsTool": "get-bluetooth-devices"
+          },
+          {
+            "callsTool": "disconnect-bluetooth-device"
+          }
+        ],
+        "mocks": {
+          "get-bluetooth-devices": [
+            {
+              "name": "John Smith - AirPods Pro",
+              "type": "Headphones",
+              "connected": true,
+              "batteryLevels": {
+                "main": "43%"
+              },
+              "macAddress": "B0:BE:83:F3:4C:D4"
+            },
+            {
+              "name": "John Smith – Magic Trackpad",
+              "type": "Magic Trackpad",
+              "connected": true,
+              "batteryLevels": {
+                "main": "84%"
+              },
+              "macAddress": "B0:BE:83:F3:4C:D4"
+            }
+          ],
+          "disconnect-bluetooth-device": "Successfully called \"disconnect-bluetooth-device\""
+        }
+      },
+      {
+        "input": "@toothpick Disconnect my devices.",
+        "expected": [
+          {
+            "callsTool": "get-bluetooth-devices"
+          },
+          {
+            "callsTool": "disconnect-bluetooth-device"
+          }
+        ],
+        "mocks": {
+          "get-bluetooth-devices": [
+            {
+              "name": "John Smith - AirPods Pro",
+              "type": "Headphones",
+              "connected": false,
+              "batteryLevels": {
+                "main": "43%"
+              },
+              "macAddress": "B0:BE:83:F3:4C:D4"
+            },
+            {
+              "name": "John Smith – Magic Trackpad",
+              "type": "Magic Trackpad",
+              "connected": true,
+              "batteryLevels": {
+                "main": "84%"
+              },
+              "macAddress": "B0:BE:83:F3:4C:D4"
+            }
+          ],
+          "disconnect-bluetooth-device": "Successfully called \"disconnect-bluetooth-device\""
+        }
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "fuzzyRatio",

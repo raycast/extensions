@@ -1,12 +1,25 @@
 # DocSearch Changelog
 
-## [Support for new documentation] - 2024-07-19
+## [Added support for new documentation] - 2025-07-11
 
-- 📄 Support [Vuetify](https://vuetifyjs.com/)
+- 📄 Support [TailwindCSS V4](https://tailwindcss.com/)
+- 📄 Support [Next.js](https://nextjs.org/)
+- 📄 Support [MassTransit](https://masstransit.io/)
+- 📄 Support [Pinia](https://pinia.vuejs.org/)
+- 🐛 Fix icon sizing
 
-## [Fix Bugs] - 2024-3-19
+## [New feature] - 2024-9-17
 
-- 🐛 Fix icon of docs not found
+- 📄 Support [TypeScript](https://www.typescriptlang.org/)
+
+## [New feature] - 2024-5-15
+
+- 📄 Support [Deno](https://deno.com/)
+
+## [New feature] - 2024-5-11
+
+- 📄 Support [Sass](https://sass-lang.com/)
+- 📄 Support [Less](https://lesscss.org/)
 
 ## [New feature] - 2024-2-3
 

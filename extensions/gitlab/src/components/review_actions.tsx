@@ -3,7 +3,7 @@ import { MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { MRDetail } from "./mr";
 
-export function ShowReviewMRAction(props: { mr: MergeRequest }): JSX.Element {
+export function ShowReviewMRAction(props: { mr: MergeRequest }) {
   const mr = props.mr;
   return (
     <Action.Push

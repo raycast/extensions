@@ -1,5 +1,26 @@
 # Library Genesis Changelog
 
+## [Fix Search + Modernize] - 2025-07-30
+
+- fix: search was not working due to site changes (ref: [Issue #20481](https://github.com/raycast/extensions/issues/20481))
+- ⚠️ only downloads from default gateway
+- automatically searches again on type change
+- added: `libgen.bz`, `libgen.li`
+- removed: `libgen.is`, `libgen.st`
+- **Fiction** titles now support same items as all other
+- Modernize to use latest Raycast config
+
+## [Experimental Fiction Search] - 2024-10-22
+
+- You can now choose to search for Fiction or Non-Fiction (default) titles every time. Fiction search results currently have the following:
+  1. ⚠️ do not yet support your Language and Format Preferences
+  2. ⚠️ do not show all the information e.g. no dates
+  3. ✅ supports downloading
+  4. ✅ supports opening in browser
+  5. ⚠️ no book cover
+- NOTE: Changing the type will not trigger the search again - you will need to re-type to get new results
+- removed `libgen.rs` as it seems to be inactive - may be brought back in future
+
 ## [Ignore HTTPS Errors] - 2024-02-17
 
 - Fixed an issue where `library.lol` gives certificate errors (ignore SSL errors) (#10798)

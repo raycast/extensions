@@ -1,8 +1,8 @@
-import { environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
+import { environment, open, showInFinder, showToast, Toast } from "@raycast/api";
 import fse, { existsSync } from "fs-extra";
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
-import { Preferences } from "../types/preferences";
+import { downloadDirectory } from "../types/preferences";
 import { BingImage, DownloadedBingImage } from "../types/types";
 import fetch from "node-fetch";
 import { buildBingImageURL, getPictureName } from "./bing-wallpaper-utils";
@@ -31,8 +31,8 @@ async function cachePicture(title: string, url: string) {
   });
   if (res) {
     const buffer = await res.arrayBuffer();
-    fse.writeFile(buildCachePath(title), Buffer.from(buffer), async (error) => {
-      if (error != null) {
+    fse.writeFile(buildCachePath(title), Buffer.from(buffer), async (error: NodeJS.ErrnoException | null) => {
+      if (error) {
         await showToast(Toast.Style.Failure, String(error));
       }
     });
@@ -98,10 +98,9 @@ export const setLocalWallpaper = async (path: string, isShowToast: boolean = tru
 };
 
 export const getPicturesDirectory = () => {
-  const directoryPreference = getPreferenceValues<Preferences>().downloadDirectory;
-  let actualDirectory = directoryPreference;
-  if (directoryPreference.startsWith("~")) {
-    actualDirectory = directoryPreference.replace("~", `${homedir()}`);
+  let actualDirectory = downloadDirectory;
+  if (downloadDirectory.startsWith("~")) {
+    actualDirectory = downloadDirectory.replace("~", `${homedir()}`);
   }
   if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
     return homedir() + "/Downloads";
@@ -117,8 +116,8 @@ export async function downloadPicture(downSize: string, bingImage: BingImage) {
     })
     .then(function (buffer) {
       const picturePath = `${getPicturesDirectory()}/${getPictureName(bingImage.url)}-${bingImage.startdate}.png`;
-      fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
-        if (error != null) {
+      fse.writeFile(picturePath, Buffer.from(buffer), async (error: NodeJS.ErrnoException | null) => {
+        if (error) {
           await showToast(Toast.Style.Failure, String(error));
         } else {
           const options: Toast.Options = {
@@ -155,8 +154,8 @@ export async function autoDownloadPictures(downSize: string, bingImages: BingIma
           return res.arrayBuffer();
         })
         .then(function (buffer) {
-          fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
-            if (error != null) {
+          fse.writeFile(picturePath, Buffer.from(buffer), async (error: NodeJS.ErrnoException | null) => {
+            if (error) {
               console.error(String(error));
             }
           });
@@ -177,6 +176,7 @@ export function getDownloadedBingWallpapers() {
     });
     return downloadedWallpapers;
   } catch (e) {
+    console.error(e);
     return downloadedWallpapers;
   }
 }

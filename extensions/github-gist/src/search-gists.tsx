@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { formatGistContentDetail } from "./util/utils";
 import { GistAction } from "./components/gist-action";
 import { ActionSettings } from "./components/action-settings";
-import { perPage, rememberTag, showDetail } from "./types/preferences";
+import { perPage, rememberTag, showDetail, defaultGistTag } from "./types/preferences";
 import { useFrontmostApp } from "./hooks/useFrontmostApp";
 import { withGitHubClient } from "./components/with-github-client";
 import { useCachedPromise } from "@raycast/utils";
@@ -80,7 +80,10 @@ function SearchGists() {
             setTag(newValue as GithubGistTag);
           }}
         >
-          {githubGistTags.map((tag) => {
+          {[
+            ...githubGistTags.filter((tag) => tag.value === defaultGistTag),
+            ...githubGistTags.filter((tag) => tag.value !== defaultGistTag),
+          ].map((tag) => {
             return <List.Dropdown.Item key={tag.title} title={tag.title} value={tag.value} icon={tag.icon} />;
           })}
         </List.Dropdown>

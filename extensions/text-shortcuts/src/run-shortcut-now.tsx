@@ -1,12 +1,12 @@
-import React, { useState } from "react";
 import { ActionPanel, Color, Form, getPreferenceValues, Icon } from "@raycast/api";
-import { Shortcut, ShortcutInfo, ShortcutSource, Taction } from "./util/shortcut";
-import { tactionForms } from "./create-shortcut";
-import { shortcutTips } from "./util/constants";
-import { ActionRunShortcut } from "./components/action-run-shortcut";
+import React, { useState } from "react";
 import { ActionOnTactions } from "./components/action-on-tactions";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { ActionRunShortcut } from "./components/action-run-shortcut";
+import { tactionForms } from "./create-shortcut";
 import { Preferences } from "./types/preferences";
+import { shortcutTips } from "./util/constants";
+import { Shortcut, ShortcutInfo, ShortcutSource, Taction } from "./util/shortcut";
 
 export default function CreateShortcut() {
   const [tactions, setTactions] = useState<Taction[]>([]);

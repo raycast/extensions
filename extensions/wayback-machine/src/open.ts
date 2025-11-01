@@ -1,5 +1,5 @@
 import type { LaunchProps } from "@raycast/api";
-import { closeMainWindow, getSelectedText, open, showHUD } from "@raycast/api";
+import { closeMainWindow, getSelectedText, open, showHUD, getPreferenceValues } from "@raycast/api";
 import fetch from "cross-fetch";
 
 type WaybackArguments = {
@@ -30,6 +30,9 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
 }
 
 async function openPage(webpageUrl: string) {
+  // Check if the user prefers to open the overview page instead of the snapshot
+  const openOverview = getPreferenceValues<Preferences>().openOverview;
+
   try {
     const res = await fetch(`https://archive.org/wayback/available?url=${webpageUrl}`);
 
@@ -40,6 +43,11 @@ async function openPage(webpageUrl: string) {
     const archive = await res.json();
 
     if (archive.archived_snapshots?.closest?.url) {
+      if (openOverview) {
+        await open(`https://web.archive.org/web/*/${webpageUrl}`);
+        return;
+      }
+
       const url = new URL(archive.archived_snapshots.closest.url);
       await open(`https://${url.host}${url.pathname}`);
       return;

@@ -43,5 +43,5 @@ export const sanitizePngFilePath = (filePath: string): string => {
 };
 
 export const sanitizeDirectoryPath = (directoryPath: string): string => {
-  return directoryPath.replace(/[^a-zA-Z0-9/_-]/g, "");
+  return directoryPath.replace(/[^a-zA-Z0-9/_ -]/g, "");
 };

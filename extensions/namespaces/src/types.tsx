@@ -1,9 +1,5 @@
 import { Icon } from "@raycast/api";
 
-type Preferences = {
-  spaces: Space[] | undefined;
-};
-
 type Color = {
   [index: string]: string;
 };
@@ -32,12 +28,12 @@ type CreatOrUpdateSpaceOptions = {
 };
 
 type SpaceFormValues = {
-  [index: string]: string | boolean;
   name: string;
   keyCode: string;
   color: string;
   icon: string;
   confetti: boolean;
+  modifiers: string[];
 };
 
-export type { Preferences, Color, ModifierMap, IconMap, Space, CreatOrUpdateSpaceOptions, SpaceFormValues };
+export type { Color, ModifierMap, IconMap, Space, CreatOrUpdateSpaceOptions, SpaceFormValues };

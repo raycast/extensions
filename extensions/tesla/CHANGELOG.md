@@ -1,5 +1,9 @@
 # Tesla Changelog
 
+## [Flash Fix] - 2024-12-03
+
+- Fixed screen flashing when view car command was refreshing
+
 ## [Cybertruck + QoL] - 2023-12-09
 
 - Added Cybertruck default/white/black car image options

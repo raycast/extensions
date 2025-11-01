@@ -31,7 +31,7 @@ async function addEntry(entry: Entry) {
   let command = `dayone2 new "${entry.body}" --isoDate "${date}"`;
 
   if (entry.journal) {
-    command = `${command} --journal ${entry.journal}`;
+    command = `${command} --journal "${entry.journal}"`;
   }
 
   const { stdout } = await exec(command);

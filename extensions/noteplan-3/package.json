@@ -7,7 +7,8 @@
   "author": "shakedlokits",
   "contributors": [
     "lukerandall",
-    "pr1mal"
+    "pr1mal",
+    "JamesDommisse"
   ],
   "categories": [
     "Productivity",
@@ -78,12 +79,12 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.21.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   }

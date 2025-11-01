@@ -1,5 +1,7 @@
 import useGemini from "./api/gemini";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function Summarize(props) {
-  return useGemini(props, { context: "Summarize the given text." });
+  const { prompt } = getPreferenceValues();
+  return useGemini(props, { context: prompt, useSelected: true });
 }

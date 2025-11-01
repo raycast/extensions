@@ -1,4 +1,4 @@
-import useMetadata from "./useMetadata";
+import useCost from "./useCost";
 import useSelectedText from "./useSelectedText";
 
-export { useMetadata, useSelectedText };
+export { useCost, useSelectedText };

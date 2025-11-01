@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "eggsy",
   "contributors": [
-    "Kang"
+    "Kang",
+    "yug2005",
+    "xmok"
   ],
   "license": "MIT",
   "keywords": [
@@ -51,14 +53,16 @@
       "title": "Access Key",
       "description": "Get your API key from https://unsplash.com/oauth/applications",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "XXX...XX"
     },
     {
       "name": "secretKey",
       "title": "Secret Key",
       "description": "Get your secret key from https://unsplash.com/oauth/applications",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "XXX...XX"
     },
     {
       "name": "gridItemSize",
@@ -311,25 +315,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "node-fetch": "^3.0.0",
-    "run-applescript": "^6.0.0",
-    "swr": "^1.2.0"
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

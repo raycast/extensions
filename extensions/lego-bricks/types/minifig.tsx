@@ -8,6 +8,6 @@ type LegoMinifig = {
 
 export type LegoMinifigsResponse = {
   count: number;
-  results: LegoMinifig;
+  results: LegoMinifig[];
   next: string | null;
 }

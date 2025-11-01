@@ -4,6 +4,11 @@ import { useColorSections } from "./hooks";
 import colors from "./colors";
 import { LaunchProps, DropdownProps } from "./types";
 
+const isValidHexColor = (color: string): boolean => {
+  const hexPattern = /^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+  return hexPattern.test(color);
+};
+
 const DropdownCategories = ({ categories, setSection }: DropdownProps) => (
   <List.Dropdown tooltip="Select Category" onChange={setSection}>
     <List.Dropdown.Item key="all_categories" title="All palettes" value="" />
@@ -28,7 +33,11 @@ export default function Command(props: LaunchProps) {
       const selectedText = await getSelectedText().catch(() => "");
 
       const searchTextToUse = color || selectedText || "";
-      setSearchText(searchTextToUse);
+
+      if (isValidHexColor(selectedText)) {
+        setSearchText(searchTextToUse);
+      }
+
       setIsLoading(false);
     }
 

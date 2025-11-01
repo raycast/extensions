@@ -1,7 +1,9 @@
-import { runAppleScript } from "run-applescript";
-import { checkLogin, formatUrl, getDynamicFeed } from "./utils";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { formatUrl } from "./utils";
+import { checkLogin, getDynamicFeed } from "./apis";
+
 import { spawnSync } from "child_process";
+import { runAppleScript } from "run-applescript";
+import { Color, getPreferenceValues, Icon, LocalStorage, showHUD } from "@raycast/api";
 
 interface Preferences {
   justNotifyVideos: boolean;
@@ -48,7 +50,7 @@ function notify(item: Bilibili.DynamicItem) {
       doNotify(
         item.modules.module_author.name,
         item.type,
-        item.modules.module_dynamic.desc.text,
+        item.modules.module_dynamic.desc?.text || `${item.modules.module_author.name}'s Post`,
         `https://www.bilibili.com/opus/${item.id_str}`
       );
       break;
@@ -79,7 +81,10 @@ function sleep(time: number) {
 }
 
 export default async function Command() {
-  if (!checkLogin()) return;
+  if (!checkLogin()) {
+    showHUD("Please use Login Bilibili command to login first.");
+    return;
+  }
 
   console.log("running");
   const items = await getDynamicFeed();
@@ -93,7 +98,6 @@ export default async function Command() {
 
     const unNotifies = newNotifications.slice(0, startNotifyIndex);
     for (const unNotify of unNotifies) {
-      console.log(unNotify);
       items.map(async (item) => {
         if (item.id_str === unNotify) {
           notify(item);

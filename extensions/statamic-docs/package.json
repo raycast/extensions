@@ -20,11 +20,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.0",
-    "algoliasearch": "^4.14.2",
-    "striptags": "^3.2.0"
+    "@raycast/api": "^1.41.0",
+    "html-entities": "^2.5.2",
+    "meilisearch": "^0.45.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.3.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -38,5 +41,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

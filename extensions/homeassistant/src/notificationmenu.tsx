@@ -6,8 +6,8 @@ import { UpdatesMenubarSection } from "@components/update/menu";
 import { getHACSRepositories } from "@components/update/utils";
 import { State } from "@lib/haapi";
 import { getErrorMessage } from "@lib/utils";
-import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Color, getPreferenceValues, MenuBarExtra } from "@raycast/api";
 
 function showCountInMenu() {
   const prefs = getPreferenceValues();
@@ -41,7 +41,9 @@ export default function MenuCommand() {
     }
     return `${messageCount} Notifications`;
   };
-  const icon = valid ? "home-assistant-orange.png" : "home-assistant.png";
+  const icon = valid
+    ? { source: "home-assistant.svg", tintColor: Color.Orange }
+    : { source: "home-assistant.svg", tintColor: Color.PrimaryText };
   const header = error ? getErrorMessage(error) : undefined;
   return (
     <MenuBarExtra icon={icon} isLoading={isLoading} title={title} tooltip={tooltip()}>

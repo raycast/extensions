@@ -16,4 +16,5 @@ export interface ListItems {
 
 export interface Preferences {
   showDate: boolean;
+  showCountdownByDay: boolean;
 }

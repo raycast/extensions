@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tidal-controller",
   "title": "Tidal Controller",
-  "description": "Control your local Tidal client with your keyboard.",
+  "description": "Control your local Tidal client with your keyboard.\nNote: You **must** enable Accessibility permissions for Raycast in order for this extension to work.",
   "icon": "extension-icon.png",
   "author": "broc-dev",
+  "contributors": [
+    "srcurran"
+  ],
   "categories": [
     "Media"
   ],
@@ -45,6 +48,31 @@
       "title": "Toggle Shuffle",
       "description": "Toggles on shuffle mode in Tidal.",
       "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "description": "Turns up the volume in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "description": "Turns down the volume in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "Shows the currently playing track as a popup",
+      "mode": "no-view"
+    },
+    {
+      "name": "now-playing-menu-bar",
+      "title": "Now Playing Menubar",
+      "description": "Shows the currently playing track as a menubar item. Note: it is only able to show the song title if the window is open or minimized. If Tidal is playing, but the song name doesn't appear, please ensure you didn't close the Tidal player window.",
+      "mode": "menu-bar",
+      "interval": "5s"
     }
   ],
   "preferences": [
@@ -56,6 +84,81 @@
       "title": "Show Messages",
       "description": "Show pop up messages when an action is performed, such as toggling play/pause. Will also show a message if the action fails for some reason. No messages will be shown (even errors) if this is disabled.",
       "default": true
+    },
+    {
+      "name": "language",
+      "label": "Choose Language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "default": "English",
+      "description": "Choose the language of the menu options.",
+      "data": [
+        {
+          "title": "Bulgarian",
+          "value": "Bulgarian"
+        },
+        {
+          "title": "Danish",
+          "value": "Danish"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "Croatian",
+          "value": "Croatian"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Norwegian",
+          "value": "Norwegian"
+        },
+        {
+          "title": "Polish",
+          "value": "Polish"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "PortugueseBrazil"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Slovenian",
+          "value": "Slovenian"
+        },
+        {
+          "title": "Serbian",
+          "value": "Serbian"
+        },
+        {
+          "title": "Swedish",
+          "value": "Swedish"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -79,5 +182,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

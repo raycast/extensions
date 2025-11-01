@@ -30,7 +30,7 @@ export class HtmlText {
   constructor(private text: string) {}
 
   public toClipboardContent(): Clipboard.Content {
-    return { html: this.text };
+    return { html: this.text.replaceAll("\n", "<br />") };
   }
 }
 

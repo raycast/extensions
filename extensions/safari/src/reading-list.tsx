@@ -1,8 +1,6 @@
+import { getPreferenceValues, List } from "@raycast/api";
 import _ from "lodash";
 import { useState } from "react";
-
-import { getPreferenceValues, List } from "@raycast/api";
-
 import { PermissionError, ReadingListSection } from "./components";
 import { useBookmarks } from "./hooks";
 import { ReadingListBookmark } from "./types";
@@ -10,11 +8,12 @@ import { search } from "./utils";
 
 type Preferences = {
   groupByStatus: boolean;
+  hideReadItems: boolean;
 };
 
-const { groupByStatus }: Preferences = getPreferenceValues();
+const { groupByStatus, hideReadItems }: Preferences = getPreferenceValues();
 
-const Command = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const { bookmarks, hasPermission } = useBookmarks(true);
 
@@ -22,9 +21,15 @@ const Command = () => {
     return <PermissionError />;
   }
 
+  const filteredBookmarks = hideReadItems
+    ? _.filter(bookmarks as ReadingListBookmark[], ({ dateLastViewed }) => !dateLastViewed)
+    : bookmarks;
+
   const groupedBookmarks = groupByStatus
-    ? _.groupBy(bookmarks as ReadingListBookmark[], ({ dateLastViewed }) => (dateLastViewed ? "read" : "unread"))
-    : { All: bookmarks || [] };
+    ? _.groupBy(filteredBookmarks as ReadingListBookmark[], ({ dateLastViewed }) =>
+        dateLastViewed ? "read" : "unread",
+      )
+    : { All: filteredBookmarks || [] };
 
   return (
     <List isLoading={!bookmarks} onSearchTextChange={setSearchText}>
@@ -43,6 +48,4 @@ const Command = () => {
       })}
     </List>
   );
-};
-
-export default Command;
+}

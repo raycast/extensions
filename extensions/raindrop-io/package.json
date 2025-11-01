@@ -9,10 +9,18 @@
   "contributors": [
     "shubham",
     "pernielsentikaer",
-    "sh-cho",
     "tdkn",
     "j3lte",
-    "rien7"
+    "rien7",
+    "teziovsky",
+    "pewpeo",
+    "joaopesce",
+    "ridemountainpig",
+    "GLaDO8",
+    "xmok"
+  ],
+  "pastContributors": [
+    "sh-cho"
   ],
   "license": "MIT",
   "commands": [
@@ -54,6 +62,69 @@
       "description": "Your Raindrop.io Test Access Token.",
       "link": "https://developer.raindrop.io/v1/authentication/token",
       "placeholder": "Enter your Raindrop.io Test Access token."
+    },
+    {
+      "name": "titleOnly",
+      "type": "checkbox",
+      "required": false,
+      "title": "Search",
+      "description": "Search on title only.",
+      "default": false,
+      "label": "Search on title only"
+    },
+    {
+      "name": "fetchAllResults",
+      "type": "checkbox",
+      "required": false,
+      "description": "Fetch all results. Perform multiple API requests for each result page. Disable to retrieve only the first page.",
+      "default": false,
+      "label": "Fetch all results"
+    },
+    {
+      "name": "sortBy",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "",
+          "title": "Default"
+        },
+        {
+          "value": "-sort",
+          "title": "Manual"
+        },
+        {
+          "value": "created",
+          "title": "Date ↑"
+        },
+        {
+          "value": "-created",
+          "title": "Date ↓"
+        },
+        {
+          "value": "title",
+          "title": "Name ↑"
+        },
+        {
+          "value": "-title",
+          "title": "Name ↓"
+        },
+        {
+          "value": "domain",
+          "title": "Sites ↑"
+        },
+        {
+          "value": "-domain",
+          "title": "Sites ↓"
+        },
+        {
+          "value": "score",
+          "title": "Relevance"
+        }
+      ],
+      "title": "Sort by",
+      "description": "Select the sort order for the search results.",
+      "default": ""
     },
     {
       "name": "useLastCollection",
@@ -115,28 +186,66 @@
       "title": "Display Date",
       "description": "Select date to display in list.",
       "default": "lastUpdated"
+    },
+    {
+      "name": "tagsDisplay",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "none",
+          "title": "None"
+        },
+        {
+          "value": "0",
+          "title": "0"
+        },
+        {
+          "value": "1",
+          "title": "1"
+        },
+        {
+          "value": "2",
+          "title": "2"
+        },
+        {
+          "value": "all",
+          "title": "All"
+        }
+      ],
+      "title": "Tags Display",
+      "description": "Select number of tags to display in list.",
+      "default": "1"
+    },
+    {
+      "name": "secondaryBrowser",
+      "title": "Secondary Browser",
+      "type": "appPicker",
+      "required": false,
+      "description": "Specify a secondary browser to use for opening bookmarks"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.3",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.0.0",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.51.0",
-    "prettier": "^3.3.3",
-    "react": "^18.2.0",
-    "typescript": "5.5.4"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx -y @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, showToast, Toast, open } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -20,10 +20,11 @@ import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocompleteUsers, User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
-import { slugify } from "../helpers/string";
+import { generateBranchName } from "../helpers/issues";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
+import IssueChildIssues from "./IssueChildIssues";
 import IssueCommentForm from "./IssueCommentForm";
 import IssueComments from "./IssueComments";
 import IssueDetail from "./IssueDetail";
@@ -33,6 +34,7 @@ type IssueActionsProps = {
   mutate?: MutatePromise<Issue[] | undefined>;
   mutateDetail?: MutatePromise<Issue | TIssueDetail | null>;
   showDetailsAction?: boolean;
+  showChildIssuesAction?: boolean;
   showAttachmentsAction?: boolean;
 };
 
@@ -46,6 +48,7 @@ export default function IssueActions({
   mutate,
   mutateDetail,
   showDetailsAction,
+  showChildIssuesAction,
   showAttachmentsAction,
 }: IssueActionsProps) {
   const { siteUrl, myself } = getJiraCredentials();
@@ -143,6 +146,8 @@ export default function IssueActions({
     }
   }
 
+  const { open_in, branch_name } = getPreferenceValues<Preferences>();
+
   return (
     <ActionPanel title={issue.key}>
       <ActionPanel.Section>
@@ -154,7 +159,18 @@ export default function IssueActions({
           />
         ) : null}
 
-        <Action.OpenInBrowser url={issueUrl} />
+        {open_in ? (
+          <Action
+            title={`Open in ${open_in.name}`}
+            icon={Icon.Globe}
+            onAction={async () => {
+              open(issueUrl, open_in);
+              closeMainWindow();
+            }}
+          />
+        ) : (
+          <Action.OpenInBrowser url={issueUrl} />
+        )}
 
         {showAttachmentsAction && "attachment" in issue.fields ? (
           <Action.Push
@@ -166,6 +182,23 @@ export default function IssueActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        {issue.fields.parent && (
+          <Action.Push
+            target={<IssueDetail initialIssue={issue.fields.parent} issueKey={issue.fields.parent?.key} />}
+            title="Open Parent Issue"
+            icon={Icon.ChevronUp}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+          />
+        )}
+
+        {showChildIssuesAction && (
+          <Action.Push
+            target={<IssueChildIssues issue={issue} />}
+            title="Open Child Issues"
+            icon={Icon.Tree}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          />
+        )}
         <ChangePrioritySubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
         <ChangeAssigneeSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
@@ -236,8 +269,14 @@ export default function IssueActions({
 
         <Action.CopyToClipboard
           title="Copy Git Branch Name"
-          content={`${issue.key}-${slugify(issue.fields.summary)}`}
+          content={generateBranchName(issue, branch_name)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Markdown Link"
+          content={`[${issue.key} - ${issue.fields.summary}](${issueUrl})`}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "," }}
         />
       </ActionPanel.Section>
 

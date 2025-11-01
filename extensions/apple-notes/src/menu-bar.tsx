@@ -1,8 +1,8 @@
 import { Icon, MenuBarExtra, getPreferenceValues, open, openCommandPreferences } from "@raycast/api";
 
-import { createNote, openNoteSeparately } from "./api";
+import { createNote, openNoteSeparately } from "./api/applescript";
 import { fileIcon, getOpenNoteURL } from "./helpers";
-import { NoteItem, useNotes } from "./useNotes";
+import { NoteItem, useNotes } from "./hooks/useNotes";
 
 export default function Command() {
   const { data, isLoading } = useNotes();

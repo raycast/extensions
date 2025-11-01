@@ -8,7 +8,7 @@ import { parse } from "csv-parse/sync";
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
   const { pop } = useNavigation();
-  const [selectedModel, setSelectedModel] = useState(model?.option ?? "claude-3-haiku-20240307");
+  const [selectedModel, setSelectedModel] = useState(model?.option ?? "claude-3-5-haiku-latest");
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
@@ -82,7 +82,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           return "Minimal value is 0";
         }
 
-        const maxAllowed = selectedModel === "claude-3-5-sonnet-20240620" ? 8192 : 4096;
+        const maxAllowed = selectedModel.startsWith("claude-3-5") ? 8192 : 4096;
 
         if (numValue > maxAllowed) {
           return `Maximum value is ${maxAllowed}`;
@@ -94,7 +94,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       name: model?.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
       max_tokens: model?.max_tokens ?? "4096",
-      option: model?.option ?? "claude-3-haiku-20240307",
+      option: model?.option ?? "claude-3-5-haiku-latest",
       prompt: model?.prompt ?? "",
       pinned: model?.pinned ?? false,
     },
@@ -159,7 +159,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       <Form.TextField
         title="Max token output"
         placeholder={`Set the maximum number of tokens to generate before stopping (0 - ${
-          selectedModel === "claude-3-5-sonnet-20240620" ? "8192" : "4096"
+          selectedModel.startsWith("claude-3-5") ? "8192" : "4096"
         })`}
         {...itemProps.max_tokens}
       />

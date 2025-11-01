@@ -6,10 +6,10 @@ const OpenUrlAction = ({ url, shortcut, title }: { url: string; shortcut?: Keybo
   let resolvedUrl = url;
   try {
     new URL(url);
-  } catch (e) {
+  } catch {
     try {
       resolvedUrl = `https://${url}`;
-    } catch (e) {
+    } catch {
       return null;
     }
   }

@@ -15,7 +15,7 @@ export const createShortLink = async ({
 }) => {
   const dub = getDubClient();
 
-  return dub.links.create({
+  return await dub.links.create({
     url: originalUrl,
     key,
     domain,
@@ -24,16 +24,24 @@ export const createShortLink = async ({
   });
 };
 
-export const getAllShortLinks = async () => {
+export const getAllShortLinks = async (search?: string) => {
   const dub = getDubClient();
 
-  return dub.links.list();
+  const { result } = await dub.links.list({ search });
+
+  return result;
+};
+
+export const getShortLinksCount = async (search?: string) => {
+  const dub = getDubClient();
+
+  return await dub.links.count({ search });
 };
 
 export const deleteShortLink = async (linkId: string) => {
   const dub = getDubClient();
 
-  return dub.links.delete(linkId);
+  return await dub.links.delete(linkId);
 };
 
 /**
@@ -42,11 +50,13 @@ export const deleteShortLink = async (linkId: string) => {
 export const getAllTags = async () => {
   const dub = getDubClient();
 
-  return dub.tags.list();
+  return await dub.tags.list();
 };
 
 export const getAllDomains = async () => {
   const dub = getDubClient();
 
-  return dub.domains.list();
+  const { result } = await dub.domains.list();
+
+  return result;
 };

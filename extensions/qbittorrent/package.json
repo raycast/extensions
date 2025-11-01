@@ -1,56 +1,62 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qbitorrent",
-  "title": "QBitorrent",
-  "description": "a qBitorrent client",
+  "title": "qBittorrent",
+  "description": "Manage your qBittorrent client directly from Raycast. Control downloads, add torrents, and monitor progress without leaving your workflow.",
   "icon": "qbittorrent.png",
-  "author": "J3n5en",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "timmevandermeer"
+  ],
+  "pastContributors": [
+    "J3n5en"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "torrents",
       "title": "List Torrents",
       "subtitle": "qBittorrent",
-      "description": "list qBitorrent torrents",
+      "description": "View and manage your active torrents. Monitor download progress, speeds, and control individual torrents.",
       "mode": "view"
     },
     {
       "name": "add-torrents",
       "title": "Add Torrents",
       "subtitle": "qBittorrent",
-      "description": "add qBitorrent torrents",
+      "description": "Add new torrents via magnet links or torrent files. Configure download options and categories.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "address",
-      "title": "address",
-      "description": "qBitorrent webui address",
-      "placeholder": "http://example.com:8080",
+      "title": "Web UI Address",
+      "description": "The address where your qBittorrent Web UI is running",
+      "placeholder": "http://localhost:8080",
       "type": "textfield",
       "required": true
     },
     {
       "name": "username",
-      "title": "username",
-      "description": "qBitorrent webui username",
+      "title": "Username",
+      "description": "Your qBittorrent Web UI username",
       "placeholder": "admin",
       "type": "textfield",
       "required": true
     },
     {
       "name": "password",
-      "title": "password",
-      "description": "qBitorrent webui password",
+      "title": "Password",
+      "description": "Your qBittorrent Web UI password",
       "type": "password",
       "placeholder": "adminadmin",
       "required": true
     },
     {
       "name": "timeout",
-      "title": "Refresh timeout in seconds",
-      "description": "Refresh timeout in seconds, 0 to disable",
+      "title": "Auto-refresh Interval",
+      "description": "How often to refresh the torrent list (in seconds). Set to 0 to disable auto-refresh.",
       "type": "textfield",
       "placeholder": "0",
       "default": "0",
@@ -58,24 +64,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
-    "qbit.js": "^2.1.2"
+    "@ctrl/qbittorrent": "^9.4.0",
+    "@raycast/api": "^1.92.1",
+    "change-case": "^5.4.4",
+    "filesize": "^10.1.6"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/qbittorrent-api-v2": "^1.2.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "~22.13.5",
+    "@types/react": "18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

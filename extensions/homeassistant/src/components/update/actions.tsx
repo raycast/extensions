@@ -1,10 +1,11 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon, showHUD } from "@raycast/api";
+import React from "react";
 import { ChangelogDetail } from "./detail";
 import { callUpdateInstallService, callUpdateSkipService } from "./utils";
 
-export function UpdateShowChangelogAction(props: { state: State }): JSX.Element | null {
+export function UpdateShowChangelogAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("update") || !s.attributes.release_summary) {
     return null;
@@ -19,22 +20,16 @@ export function UpdateShowChangelogAction(props: { state: State }): JSX.Element 
   );
 }
 
-export function UpdateOpenInBrowserAction(props: { state: State }): JSX.Element | null {
+export function UpdateOpenInBrowserAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const url = s.attributes.release_url;
   if (!s.entity_id.startsWith("update") || !url) {
     return null;
   }
-  return (
-    <Action.OpenInBrowser
-      shortcut={{ modifiers: ["cmd"], key: "b" }}
-      url={url}
-      onOpen={() => showHUD("Open Release Notes in Browser")}
-    />
-  );
+  return <Action.OpenInBrowser url={url} onOpen={() => showHUD("Open Release Notes in Browser")} />;
 }
 
-export function UpdateInstallAction(props: { state: State }): JSX.Element | null {
+export function UpdateInstallAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("update")) {
     return null;
@@ -55,7 +50,7 @@ export function UpdateInstallAction(props: { state: State }): JSX.Element | null
   );
 }
 
-export function UpdateSkipVersionAction(props: { state: State }): JSX.Element | null {
+export function UpdateSkipVersionAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("update")) {
     return null;

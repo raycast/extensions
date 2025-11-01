@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { SearchResult } from "../api/confluence";
 import { StandardUrlActionSection } from "../util/action-panels";
@@ -26,7 +27,7 @@ export function SearchActions({ globalActions, searchResult }: SearchActionsProp
   return (
     <ActionPanel>
       {searchActions}
-      {globalActions}
+      {globalActions as JSX.Element}
     </ActionPanel>
   );
 }

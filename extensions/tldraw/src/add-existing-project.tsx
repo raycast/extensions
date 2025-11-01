@@ -24,8 +24,8 @@ export default async function Command(props: Args) {
     return;
   }
 
-  if (!url.startsWith("https://www.tldraw.com/r/")) {
-    showFailureToast("Invalid project URL, must start with https://www.tldraw.com/r/");
+  if (!url.startsWith("https://www.tldraw.com/")) {
+    showFailureToast("Invalid project URL, must start with https://www.tldraw.com/");
     return;
   }
   if (await LocalStorage.getItem(name)) {

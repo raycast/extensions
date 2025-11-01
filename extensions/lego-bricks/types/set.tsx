@@ -1,4 +1,4 @@
-type LegoSet = {
+export type LegoSet = {
   set_num: string | "";
   name: string | "";
   year: number | 0;
@@ -11,5 +11,5 @@ type LegoSet = {
 export type LegoSetsResponse = {
   count: number;
   next: string | null;
-  results: LegoSet;
+  results: LegoSet[];
 }

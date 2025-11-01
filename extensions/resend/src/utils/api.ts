@@ -12,7 +12,6 @@ import {
   GetAPIKeysResponse,
   GetAudiencesResponse,
   GetContactsResponse,
-  GetDomainsResponse,
   GetEmailResponse,
   SendEmailRequest,
   SendEmailResponse,
@@ -20,7 +19,6 @@ import {
   UpdateContactResponse,
   VerifyDomainResponse,
 } from "./types";
-import fetch from "node-fetch";
 import { API_HEADERS, API_URL } from "./constants";
 
 const headers = API_HEADERS;
@@ -54,7 +52,7 @@ const callApi = async (endpoint: string, method: APIMethod, body?: BodyRequest, 
 
     const response = await apiResponse.json();
     return response;
-  } catch (err) {
+  } catch {
     const message = "Failed to execute request. Please try again later.";
     await showToast(Toast.Style.Failure, `Error`, message);
     return { name: "error", message, statusCode: 400 } as ErrorResponse;
@@ -75,9 +73,8 @@ export async function deleteApiKey(id: string) {
 }
 
 // DOMAINS
-export async function getDomains() {
-  return (await callApi(`domains`, "GET", undefined, "Fetching Domains")) as ErrorResponse | GetDomainsResponse;
-}
+// export async function getDomains() { -> MOVED TO HOOK
+
 export async function addDomain(newDomain: AddDomainRequest) {
   return (await callApi(`domains`, "POST", { ...newDomain }, "Adding Domain")) as ErrorResponse | AddDomainResponse;
 }
@@ -129,6 +126,6 @@ export async function updateContact(audienceId: string, contactId: string, updat
     `audiences/${audienceId}/contacts/${contactId}`,
     "PATCH",
     { ...updatedContact },
-    "Updating Contact"
+    "Updating Contact",
   )) as ErrorResponse | UpdateContactResponse;
 }

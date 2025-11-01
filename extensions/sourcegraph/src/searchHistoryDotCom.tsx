@@ -1,4 +1,4 @@
-import DotComCommand from "./components/CloudCommand";
+import DotComCommand from "./components/DotComCommand";
 import SearchHistoryCommand from "./components/SearchHistoryCommand";
 
 export default function SearchCloud() {

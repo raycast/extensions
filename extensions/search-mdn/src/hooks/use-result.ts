@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import path from "node:path";
+import { escape, unescape } from "node:querystring";
 import { URL } from "node:url";
 import { useMemo, useRef } from "react";
 
@@ -69,6 +70,12 @@ const cleanupContent = (raw: string, res: Result): string => {
       url = path.join(new URL(res.url).origin, href);
     }
     return `[${text}](${url})`;
+  });
+
+  // Unescape any unicode characters (because all \u characters should be treated as code)
+  // It's a dirty fix, but the Markdown parser doesn't seem to handle \u characters well
+  content = content.replace(/\\u([\d\w]{4})/gim, (match, code) => {
+    return unescape(escape(`\\u ${parseInt(code, 16).toString(16).toUpperCase()}`));
   });
 
   if (file.data.title) {

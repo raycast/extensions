@@ -1,10 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
-  layout: string;
-  columns: string;
-  itemInset: string;
-  refreshInterval: number;
-}
-
-export const { layout, columns, itemInset, refreshInterval } = getPreferenceValues<Preferences>();
+export const { layout, columns, itemInset } = getPreferenceValues<Preferences.SetAutoQuitApp>();
+export const { refreshInterval } = getPreferenceValues<Preferences.AutoQuitAppMenubar>();

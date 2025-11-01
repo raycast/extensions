@@ -44,7 +44,24 @@ export const formatDate = (item: CalendarEvent): string => {
   } else {
     return `${formatRelativeDay(item.startDate, new Date())} from ${format(
       item.startDate,
-      getHumanTimeFormat
+      getHumanTimeFormat,
     )} to ${format(item.endDate, getHumanTimeFormat)}`;
   }
+};
+
+export const preprocessQuery = (query: string): string => {
+  // Match patterns like 14u, 14h, 14u40, etc.
+  const timePattern = /\b(\d{1,2})([uUhH])(\d{2})?\b/g;
+  query = query.replace(timePattern, (match, hour, _, minutes) => {
+    hour = parseInt(hour, 10);
+    minutes = minutes ? parseInt(minutes, 10) : 0;
+
+    const date = new Date();
+    date.setHours(hour, minutes, 0, 0);
+
+    // Format the time correctly as "h:mm aa" (e.g., "2:00 PM" or "2:30 PM")
+    return format(date, 'h:mm aa');
+  });
+
+  return query;
 };

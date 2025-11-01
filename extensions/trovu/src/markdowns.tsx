@@ -42,5 +42,7 @@ You can [create and manage your own user shortcuts and set advanced settings](ht
 
 Once you have set up Trovu via your GitHub account, set your username in the Raycast extension preferences.
 
+To get an immediate update of your shortcuts, you can trigger a reload by sending a query with \`reload\`. (Note that Github sometimes needs 5 minutes to update their cache.)
+
 `,
 };

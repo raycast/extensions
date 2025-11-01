@@ -5,7 +5,10 @@ type Highlight = {
 
 export type Bookmark = {
   _id: number;
-  collection: unknown; // object
+  collection: {
+    $id: number;
+    title: string;
+  };
   cover: string;
   created: string;
   domain: string;
@@ -34,6 +37,7 @@ type CollectionParent = {
 export type Collection = {
   _id: number;
   title: string;
+  cover: [string];
   parent: CollectionParent;
   children?: Collection[];
 };
@@ -44,13 +48,6 @@ export type Group = {
   sort: number;
   collections: number[];
 };
-
-export interface Preferences {
-  token: string;
-  useLastCollection?: boolean;
-  additionalItemToDisplayInList?: string;
-  displayDate?: string;
-}
 
 export interface CollectionsResponse {
   result: boolean;
@@ -101,6 +98,7 @@ export interface CollectionItem {
   value?: number;
   label: string;
   name?: string;
+  cover?: string;
 }
 
 export type BookmarksParams = {
@@ -110,6 +108,7 @@ export type BookmarksParams = {
 
 export interface FormValues {
   link: string;
+  title?: string;
   collection?: string;
   tags: string[];
   newCollection?: string;

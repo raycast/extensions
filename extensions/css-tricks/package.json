@@ -5,6 +5,9 @@
   "description": "Search on CSS Tricks",
   "icon": "command-icon.png",
   "author": "j3lte",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Developer Tools",
     "Web"
@@ -21,8 +24,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.2",
-    "date-fns": "^3.6.0"
+    "@raycast/utils": "^1.17.0",
+    "html-to-md": "^0.8.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

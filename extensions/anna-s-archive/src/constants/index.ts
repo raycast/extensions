@@ -1,5 +1,3 @@
-export const mirrorList = ["https://annas-archive.org", "https://annas-archive.gs", "https://annas-archive.se"];
-
 export const languageStrings = [
   "English [en]",
   "Unknown language",

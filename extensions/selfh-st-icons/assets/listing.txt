@@ -1,0 +1,27 @@
+Store Description (200 chars max):
+Search, preview, and use self-hosted icons from selfh.st directly in Raycast. Copy URLs or download icons in multiple formats with light/dark variants.
+
+Feature List Bullets:
+• 🔍 Search through the entire selfh.st icon collection
+• 🖼️ Preview icons directly in Raycast
+• 📋 Copy icon URLs in PNG, SVG, or WebP formats
+• 🌓 Support for light and dark variants
+• 💾 Download icons to your local machine
+• 🚀 Fast search with local caching
+• 🔄 Automatic cache refresh every 24 hours
+
+Detailed Features Description:
+Selfh.st Icons brings the power of the selfh.st icon collection directly to your Raycast workflow. With this extension, you can:
+
+- Search through the entire selfh.st icon collection using a fast, responsive interface
+- Preview icons in a grid layout with instant visual feedback
+- Copy icon URLs in multiple formats (PNG, SVG, WebP) for easy integration into your projects
+- Access light and dark variants when available
+- Download icons directly to your Downloads folder
+- Benefit from local caching for fast searches
+- Enjoy automatic cache updates to stay current with the latest icons
+
+The extension is designed for developers, designers, and content creators who need quick access to high-quality, self-hosted icons. Whether you're working on documentation, presentations, or web projects, Selfh.st Icons streamlines your icon workflow.
+
+Keywords:
+icons, design, assets, self-hosted, png, svg, webp, dark-mode, light-mode

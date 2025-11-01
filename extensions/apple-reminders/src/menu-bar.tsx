@@ -24,11 +24,13 @@ import {
 
 import { getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
+import { sortByDate } from "./hooks/useViewReminders";
 
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
 export default function Command() {
-  const { titleType, hideMenuBarCountWhenEmpty, view, countType } = getPreferenceValues<Preferences.MenuBar>();
+  const { titleType, hideMenuBarCountWhenEmpty, displayListTitleForMenuBarReminders, view, countType } =
+    getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
@@ -46,7 +48,10 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    reminders?.forEach((reminder: Reminder) => {
+    const { sortMenuBarRemindersByDueDate } = getPreferenceValues<Preferences.MenuBar>();
+    const sortedReminders = sortMenuBarRemindersByDueDate ? reminders.sort(sortByDate) : reminders;
+
+    sortedReminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
 
       if (!reminder.dueDate) {
@@ -159,6 +164,10 @@ export default function Command() {
     }
   }
 
+  function addListTitle(title: string, listName?: string) {
+    return listName ? `${title} [${listName}]` : title;
+  }
+
   async function handleListChange(listId?: string) {
     setListId(listId);
     await mutate();
@@ -208,7 +217,14 @@ export default function Command() {
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
-                title={truncate(addPriorityToTitle(reminder.title, reminder.priority))}
+                title={truncate(
+                  addPriorityToTitle(
+                    displayListTitleForMenuBarReminders
+                      ? addListTitle(reminder.title, reminder.list?.title)
+                      : reminder.title,
+                    reminder.priority,
+                  ),
+                )}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"

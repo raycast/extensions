@@ -12,9 +12,9 @@ import {
   secondsBetweenDates,
   sortCalendarEvents,
 } from "@components/calendar/utils";
-import { getPreferenceValues, Icon, LaunchType } from "@raycast/api";
-import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { ensureShort, formatToHumanDateTime, getErrorMessage, getFriendlyName } from "@lib/utils";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { getPreferenceValues, Icon, LaunchType } from "@raycast/api";
 
 const now = new Date();
 
@@ -58,11 +58,15 @@ export default function MenuCommand() {
       minutesBetweenDates(now, new Date(c.start)) < 60,
   );
   const nextEventMeta = nextEvent
-    ? {
-        start: new Date(nextEvent.start),
-        humanTimeToEvent: formatToHumanDateTime(new Date(nextEvent.start) ?? ""),
-        secondsToEvent: secondsBetweenDates(new Date(), new Date(nextEvent.start)),
-      }
+    ? (() => {
+        const startDate = new Date(nextEvent.start);
+        const isValidDate = !isNaN(startDate.getTime());
+        return {
+          start: isValidDate ? startDate : undefined,
+          humanTimeToEvent: isValidDate ? formatToHumanDateTime(startDate) : "Invalid Date",
+          secondsToEvent: isValidDate ? secondsBetweenDates(new Date(), startDate) : undefined,
+        };
+      })()
     : undefined;
 
   const groupedByDay = groupEventsByDay(sortedEvents);
@@ -77,7 +81,10 @@ export default function MenuCommand() {
     <RUIMenuBarExtra
       icon={{ source: Icon.Calendar, tintColor: nextEvent ? nextEvent.calendarColor : undefined }}
       title={
-        maxRootLength > 0 && nextEventMeta && nextEventMeta.secondsToEvent < 30 * 60
+        maxRootLength > 0 &&
+        nextEventMeta &&
+        typeof nextEventMeta.secondsToEvent === "number" &&
+        nextEventMeta.secondsToEvent < 30 * 60
           ? `${ensureShort(nextEvent?.summary, { max: maxRootLength })} • ${nextEventMeta.humanTimeToEvent}`
           : undefined
       }

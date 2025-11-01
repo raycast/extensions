@@ -122,3 +122,40 @@ export interface ActivityResponse {
     ];
   };
 }
+
+export interface ResilienceResponse {
+  isLoading: boolean;
+  error: Error;
+  data: {
+    data: [
+      {
+        id: string;
+        day: string; // ISO date format
+        contributors: {
+          sleep_recovery: number;
+          daytime_recovery: number;
+          stress: number;
+        };
+        level: string;
+      },
+    ];
+    next_token: string;
+  };
+}
+
+export interface StressResponse {
+  isLoading: boolean;
+  error: Error;
+  data: {
+    data: [
+      {
+        id: string;
+        day: string;
+        stress_high: number;
+        recovery_high: number;
+        day_summary: string;
+      },
+    ];
+    next_token: string;
+  };
+}

@@ -15,6 +15,14 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "auto",
+      "title": "Auto Detect the Best Tool",
+      "subtitle": "DevUtils.com",
+      "description": "Let the auto-detect feature decide which tool to activate based on your current clipboard string",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
       "name": "backslash",
       "title": "Backslash Escape/Unescape",
       "subtitle": "DevUtils.com",
@@ -353,6 +361,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

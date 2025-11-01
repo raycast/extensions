@@ -1,5 +1,10 @@
 # Changelog
 
+## [New Models] - 2024-08-27
+- Feat: Added `gpt-4o` and `gpt-4o-mini` models.
+- Improvement: Default actions now use the `gpt-4o-mini` model, and the prompts have been updated to be consistent with the new model.
+- Internal: Removed the gpt-tokens package and replaced it with tokenization from the OpenAI API, calculating costs based on OpenAI's pricing.
+
 ## [New Additions] - 2024-05-03
 
 - Feat: You can now trigger actions from the menu bar.

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { WikiNode } from "./api";
-import { openInBrowser } from "./preferences";
 
 export function toTitleCase(str: string) {
   const result = str.replace(/([A-Z])/g, " $1");
@@ -15,7 +14,7 @@ export function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export function replaceLinks(text: string, language: string, links: string[] = []) {
+export function replaceLinks(text: string, language: string, links: string[] = [], openInBrowser = true) {
   const regex = new RegExp(`\\b(${links.map(escapeRegExp).join("|")})\\b`, "g");
   return text.replaceAll(regex, (link) => {
     const url = openInBrowser
@@ -25,14 +24,20 @@ export function replaceLinks(text: string, language: string, links: string[] = [
   });
 }
 
-export function renderContent(nodes: WikiNode[], level: number, links: string[] = [], language = "en"): string {
+export function renderContent(
+  nodes: WikiNode[],
+  level: number,
+  links: string[] = [],
+  language = "en",
+  openLinksInBrowser = true,
+): string {
   if (!nodes) return "";
   return nodes
     .filter((node) => node.content || node.content.length > 0)
     .filter((node) => !excludedSections.includes(node.title))
     .map((node) => {
       const title = `${"#".repeat(level)} ${node.title}`;
-      const content = replaceLinks(node.content, language, links);
+      const content = replaceLinks(node.content, language, links, openLinksInBrowser);
       const items = node.items ? renderContent(node.items, level + 1, links, language) : "";
       return `${title}\n\n${content}\n\n${items}`;
     })

@@ -629,6 +629,31 @@ export default function Command(props: LaunchProps) {
               actions={EntryActions(entry.url, entry.title, query, getHistoryAndFavourites, fetchTopArticles, "")}
             />
           );
+        } else {
+          // fallback if neither author nor title_alias is available (e.g. searching for "Insulin" wouldn't yield the Insulin page)
+          return (
+            <List.Item
+              key={"e5-" + entry.url}
+              title={{ value: entry.title, tooltip: entry.title }}
+              accessories={
+                entry.date_publish
+                  ? [
+                      {
+                        tag: new Date(entry.date_publish),
+                        tooltip:
+                          "Created " +
+                          new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          }),
+                      },
+                    ]
+                  : []
+              }
+              actions={EntryActions(entry.url, entry.title, query, getHistoryAndFavourites, fetchTopArticles, "")}
+            />
+          );
         }
       })}
     </List>

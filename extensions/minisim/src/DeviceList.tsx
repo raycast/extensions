@@ -1,20 +1,21 @@
 import { Action, ActionPanel, Icon, List, closeMainWindow, showHUD } from "@raycast/api";
-import { Command, Device, Platform } from "./types";
+
 import { getDeviceIcon } from "./utils";
+import { Command, Device, DeviceType, Platform } from "./types";
 import { executeCommand, launchDevice } from "./actions";
+
 interface Props {
   name: string;
-  platform: Platform;
   commands: Command[];
   devices?: Device[];
 }
 
-const DeviceList = ({ commands, devices, name, platform }: Props) => {
+const DeviceList = ({ commands, devices, name }: Props) => {
   return (
     <List.Section title={name}>
-      {devices?.map(({ name, ID, booted, displayName }) => (
+      {devices?.map(({ name, identifier, booted, displayName, type, platform }) => (
         <List.Item
-          key={ID || name}
+          key={identifier || name}
           title={displayName}
           icon={getDeviceIcon(name)}
           accessories={[
@@ -25,13 +26,15 @@ const DeviceList = ({ commands, devices, name, platform }: Props) => {
           ]}
           actions={
             <ActionPanel>
-              <Action
-                title={`Launch ${platform == Platform.android ? "Emulator" : "Simulator"}`}
-                onAction={() => {
-                  launchDevice(name);
-                  closeMainWindow();
-                }}
-              />
+              {type === DeviceType.virtual ? (
+                <Action
+                  title={`Launch ${platform == Platform.android ? "Emulator" : "Simulator"}`}
+                  onAction={() => {
+                    launchDevice(name);
+                    closeMainWindow();
+                  }}
+                />
+              ) : null}
               {commands.map((command) => {
                 if (command.needBootedDevice && !booted) return null;
                 if (command?.bootsDevice && booted) return null;
@@ -40,7 +43,7 @@ const DeviceList = ({ commands, devices, name, platform }: Props) => {
                     key={command.id}
                     title={command.name}
                     onAction={() => {
-                      executeCommand(command, name, ID ?? "");
+                      executeCommand(command, name, identifier ?? "", type);
                       showHUD(`${command.name} ✅`);
                       closeMainWindow();
                     }}

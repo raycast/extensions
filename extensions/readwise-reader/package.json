@@ -5,6 +5,11 @@
   "description": "Interact with Readwise Reader",
   "icon": "reader-logo.png",
   "author": "zach",
+  "contributors": [
+    "neil_brown",
+    "nicolas-marien",
+    "Civ2boss"
+  ],
   "categories": [
     "Productivity",
     "Media",
@@ -52,8 +57,27 @@
           "placeholder": "URL",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "author",
+          "placeholder": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tags",
+          "placeholder": "Tags",
+          "type": "text",
+          "required": false
         }
       ]
+    },
+    {
+      "name": "save-links",
+      "title": "Save Links",
+      "description": "Save URLs to Reader",
+      "mode": "view",
+      "icon": "reader-logo.png"
     },
     {
       "name": "save-selection",
@@ -82,22 +106,59 @@
       "description": "Opens Reader to the shortlist page",
       "mode": "no-view",
       "icon": "reader-logo.png"
+    },
+    {
+      "name": "list-documents",
+      "title": "List Documents",
+      "description": "List documents stored in Reader",
+      "mode": "view",
+      "icon": "reader-logo.png",
+      "preferences": [
+        {
+          "name": "defaultListLocation",
+          "data": [
+            {
+              "title": "New",
+              "value": "new"
+            },
+            {
+              "title": "Shortlist",
+              "value": "shortlist"
+            },
+            {
+              "title": "Feed",
+              "value": "feed"
+            },
+            {
+              "title": "Later",
+              "value": "later"
+            },
+            {
+              "title": "Archive",
+              "value": "archive"
+            }
+          ],
+          "required": false,
+          "default": "shortlist",
+          "type": "dropdown",
+          "description": "The default location to use when listing content",
+          "title": "Default list location"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "1.91.2",
+    "@raycast/utils": "1.18.1",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -114,6 +175,15 @@
       "required": true,
       "title": "Access Token",
       "placeholder": "Access Token"
+    },
+    {
+      "name": "openInDesktopApp",
+      "description": "Open links in desktop app instead of browser",
+      "type": "checkbox",
+      "required": false,
+      "title": "Desktop App",
+      "label": "Open links in desktop app",
+      "default": false
     }
   ]
 }

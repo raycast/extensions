@@ -8,13 +8,11 @@ import {
   Image,
   LaunchProps,
   List,
-  popToRoot,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { runAppleScript } from "@raycast/utils";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -25,14 +23,15 @@ import {
   GoogleChromeInfoCache,
   GoogleChromeLocalState,
   Profile,
+  Preferences,
 } from "./util/types";
-import { createBookmarkListItem, matchSearchText, isValidUrl, formatAsUrl } from "./util/util";
+import { createBookmarkListItem, matchSearchText, isValidUrl, formatAsUrl, openGoogleChrome } from "./util/util";
 
 const ProfileItem = (props: { index: number; profile: Profile }) => {
   const { index, profile } = props;
 
-  const context = encodeURIComponent(JSON.stringify({ index: index, directory: profile.directory }));
-  const deeplink = `raycast://extensions/frouo/${environment.extensionName}/${environment.commandName}?context=${context}`;
+  const context = encodeURIComponent(JSON.stringify({ directory: profile.directory }));
+  const deeplink = `raycast://extensions/frouo/${environment.extensionName}/open-profile?context=${context}`;
 
   return (
     <List.Item
@@ -53,7 +52,9 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
             title="Open in Google Chrome"
             icon={Icon.Globe}
             onAction={async () => {
-              await openGoogleChrome(profile.directory, "", () => showHUD("Opening profile..."));
+              await openGoogleChrome(profile.directory, "", async () => {
+                await showHUD("Opening profile...");
+              });
             }}
           />
           <Action.CreateQuicklink
@@ -66,15 +67,8 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
   );
 };
 
-export default function Command(props: LaunchProps) {
-  const immediatelyOpenProfile = props.launchContext?.index;
-  if (immediatelyOpenProfile) {
-    const profile = props.launchContext?.directory;
-    openGoogleChrome(profile, "", () => showHUD("Opening profile..."));
-    popToRoot();
-    return;
-  }
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function Command(_props: LaunchProps) {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
   const [error, setError] = useState<Error>();
 
@@ -103,7 +97,9 @@ export default function Command(props: LaunchProps) {
   return (
     <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
       {profiles &&
-        profiles.sort(sortAlphabetically).map((profile, index) => <ProfileItem index={index} profile={profile} />)}
+        profiles
+          .sort(sortAlphabetically)
+          .map((profile, index) => <ProfileItem key={profile.directory} index={index} profile={profile} />)}
     </List>
   );
 }
@@ -143,29 +139,6 @@ const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): Goo
         return extractBookmarksUrlRecursively(e);
     }
   });
-
-/**
- * Run the script that opens Google Chrome.
- *
- * @param profileDirectory The directory of the profile to open
- * @param link The URL to open. If falsy, fallback on the value of `newBlankTabURL` in the preference.
- * @param willOpen Function to run before opening Google Chrome
- */
-const openGoogleChrome = async (profileDirectory: string, link: string, willOpen: () => Promise<void>) => {
-  const script = `
-    set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    set theProfile to quoted form of "${profileDirectory}"
-    set theLink to quoted form of "${link || getPreferenceValues<Preferences>().newBlankTabURL}"
-    do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
-  `;
-
-  try {
-    await willOpen();
-    await runAppleScript(script);
-  } catch (error) {
-    await showToast(Toast.Style.Failure, "Could not find\nGoogle Chrome.app in Applications folder");
-  }
-};
 
 //-------------
 // Components
@@ -247,7 +220,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={tab.title}
               subtitle={tab.subtitle}
               icon={{ source: tab.iconURL, fallback: Icon.Globe }}
-              actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={tab.url} />}
+              actions={<BookmarksActionPanel profile={props.profile} url={tab.url} />}
             />
           ))}
         </List.Section>
@@ -260,7 +233,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={b.title}
               subtitle={b.subtitle}
               icon={{ source: b.iconURL, fallback: Icon.Globe }}
-              actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={b.url} />}
+              actions={<BookmarksActionPanel profile={props.profile} url={b.url} />}
             />
           ))}
         </List.Section>
@@ -273,24 +246,32 @@ function newTabUrlWithQuery(searchText: string) {
   return getPreferenceValues<Preferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
 }
 
-function BookmarksActionPanel(props: { profileDirectory: string; url: string }) {
+function BookmarksActionPanel(props: { profile: Profile; url: string }) {
+  const context = encodeURIComponent(JSON.stringify({ directory: props.profile.directory, url: props.url }));
+  const deeplink = `raycast://extensions/frouo/${environment.extensionName}/open-profile-url?context=${context}`;
   return (
     <ActionPanel>
       <Action
         title="Open in Google Chrome"
         icon={Icon.Globe}
         onAction={() => {
-          openGoogleChrome(props.profileDirectory, props.url, () => showHUD("Opening bookmark..."));
+          openGoogleChrome(props.profile.directory, props.url, async () => {
+            await showHUD("Opening bookmark...");
+          });
         }}
       />
       <Action
         title="Open in Background"
         icon={Icon.Globe}
         onAction={() => {
-          openGoogleChrome(props.profileDirectory, props.url, async () => {
+          openGoogleChrome(props.profile.directory, props.url, async () => {
             await showToast(Toast.Style.Success, "Opening bookmark...");
           });
         }}
+      />
+      <Action.CreateQuicklink
+        title={`Create Quicklink to ${props.profile.name} Profile`}
+        quicklink={{ name: `Open ${props.profile.name} Profile`, link: deeplink }}
       />
     </ActionPanel>
   );

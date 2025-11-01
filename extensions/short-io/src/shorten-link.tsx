@@ -1,18 +1,25 @@
-import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, open, showToast, Toast } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import { Action, ActionPanel, Clipboard, Form, Icon, open, showToast, Toast } from "@raycast/api";
+import React, { useEffect, useMemo, useState } from "react";
 import { shortenLinkWithSlug } from "./utils/axios-utils";
-import { alertDialog, getDefaultDomain } from "./hooks/hooks";
 import { isEmpty } from "./utils/common-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
 import { fetchLink } from "./utils/input-item";
+import { authFetchLink } from "./types/preferences";
+import { useDefaultDomain } from "./hooks/useDefaultDomain";
+import { alertDialog } from "./components/alert-dialog";
+import { Domain } from "./types/types";
 import Style = Toast.Style;
-import { Preferences } from "./types/preferences";
 
-export default function ShortenLink(props: { paraDomain?: string }) {
-  const paraDomain = typeof props.paraDomain !== "undefined" ? props.paraDomain : "";
-  const { authFetchLink } = getPreferenceValues<Preferences>();
-  const { defaultDomain, domainLoading } = getDefaultDomain(paraDomain);
+export default function ShortenLink(props: { defaultDomain?: Domain }) {
+  const { data: defaultDomainData, isLoading: domainLoading } = useDefaultDomain(props.defaultDomain);
+  const defaultDomain = useMemo(() => {
+    if (defaultDomainData) {
+      return defaultDomainData.hostname;
+    } else {
+      return "";
+    }
+  }, [defaultDomainData]);
 
   const [originalLink, setOriginalLink] = useState<string>("");
   const [originalLinkError, setOriginalLinkError] = useState<string | undefined>();

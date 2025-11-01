@@ -1,5 +1,17 @@
 # Purelymail Changelog
 
+## [Domain Enhancements] - 2025-01-07
+
+- Change "Delete Domain" shortcut from `Cmd+d` to `Ctrl+x`
+- "Delete Domain" uses `optimisticUpdate` for improved UX (previously the deleted domain would stay in `List`)
+- "Update Domain" is `optimistic` and no longer `popToRoot` allowing more changes
+
+## [Confirm Password when Creating User] - 2024-10-15
+
+- Move some endpoints to `useCachedPromise` w/ improved `callApi` for optimistic updates
+- fix: wrong toast title when Deleting User
+- When creating a User you now have to confirm the password (enter it twice)
+
 ## [Filter Users by Domain + Copy List of Users] - 2024-07-29
 
 ## [Added ListUser+ModifyUser Endpoints] - 2024-04-08

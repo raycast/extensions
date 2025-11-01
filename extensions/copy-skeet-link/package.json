@@ -14,19 +14,19 @@
       "name": "index",
       "title": "Copy Skeet Link",
       "description": "Create a rich skeet link using skeeet.xyz.",
-      "mode": "no-view"
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.2"
+    "@raycast/api": "^1.94.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.8.3",
-    "@types/react": "^18.2.11",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.13",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

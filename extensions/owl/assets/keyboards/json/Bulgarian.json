@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "1",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "2",
+        "upper": "?"
+    },
+    "Digit3": {
+        "lower": "3",
+        "upper": "+"
+    },
+    "Digit4": {
+        "lower": "4",
+        "upper": "\""
+    },
+    "Digit5": {
+        "lower": "5",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "6",
+        "upper": "="
+    },
+    "Digit7": {
+        "lower": "7",
+        "upper": ":"
+    },
+    "Digit8": {
+        "lower": "8",
+        "upper": "/"
+    },
+    "Digit9": {
+        "lower": "9",
+        "upper": "_"
+    },
+    "Digit0": {
+        "lower": "0",
+        "upper": "№"
+    },
+    "Minus": {
+        "lower": "-",
+        "upper": "I"
+    },
+    "Equal": {
+        "lower": ".",
+        "upper": "V"
+    },
+    "KeyQ": {
+        "lower": ",",
+        "upper": "ы"
+    },
+    "KeyW": {
+        "lower": "у",
+        "upper": "У"
+    },
+    "KeyE": {
+        "lower": "е",
+        "upper": "Е"
+    },
+    "KeyR": {
+        "lower": "и",
+        "upper": "И"
+    },
+    "KeyT": {
+        "lower": "ш",
+        "upper": "Ш"
+    },
+    "KeyY": {
+        "lower": "щ",
+        "upper": "Щ"
+    },
+    "KeyU": {
+        "lower": "к",
+        "upper": "К"
+    },
+    "KeyI": {
+        "lower": "с",
+        "upper": "С"
+    },
+    "KeyO": {
+        "lower": "д",
+        "upper": "Д"
+    },
+    "KeyP": {
+        "lower": "з",
+        "upper": "З"
+    },
+    "BracketLeft": {
+        "lower": "ц",
+        "upper": "Ц"
+    },
+    "BracketRight": {
+        "lower": ";",
+        "upper": "§"
+    },
+    "KeyA": {
+        "lower": "ь",
+        "upper": "ѝ"
+    },
+    "KeyS": {
+        "lower": "я",
+        "upper": "Я"
+    },
+    "KeyD": {
+        "lower": "а",
+        "upper": "А"
+    },
+    "KeyF": {
+        "lower": "о",
+        "upper": "О"
+    },
+    "KeyG": {
+        "lower": "ж",
+        "upper": "Ж"
+    },
+    "KeyH": {
+        "lower": "г",
+        "upper": "Г"
+    },
+    "KeyJ": {
+        "lower": "т",
+        "upper": "Т"
+    },
+    "KeyK": {
+        "lower": "н",
+        "upper": "Н"
+    },
+    "KeyL": {
+        "lower": "в",
+        "upper": "В"
+    },
+    "Semicolon": {
+        "lower": "м",
+        "upper": "М"
+    },
+    "Quote": {
+        "lower": "ч",
+        "upper": "Ч"
+    },
+    "Backquote": {
+        "lower": "`",
+        "upper": "~"
+    },
+    "Backslash": {
+        "lower": "(",
+        "upper": ")"
+    },
+    "KeyZ": {
+        "lower": "ю",
+        "upper": "Ю"
+    },
+    "KeyX": {
+        "lower": "й",
+        "upper": "Й"
+    },
+    "KeyC": {
+        "lower": "ъ",
+        "upper": "Ъ"
+    },
+    "KeyV": {
+        "lower": "э",
+        "upper": "Э"
+    },
+    "KeyB": {
+        "lower": "ф",
+        "upper": "Ф"
+    },
+    "KeyN": {
+        "lower": "х",
+        "upper": "Х"
+    },
+    "KeyM": {
+        "lower": "п",
+        "upper": "П"
+    },
+    "Comma": {
+        "lower": "р",
+        "upper": "Р"
+    },
+    "Period": {
+        "lower": "л",
+        "upper": "Л"
+    },
+    "Slash": {
+        "lower": "б",
+        "upper": "Б"
+    }
+}

@@ -1,4 +1,13 @@
-import { Action, ActionPanel, closeMainWindow, Icon, List, open, openExtensionPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Icon,
+  Keyboard,
+  List,
+  open,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { useState } from "react";
 import { useContacts } from "@/hooks/useContacts";
@@ -94,9 +103,20 @@ export default function Command() {
                   onAction={() => setShowingDetail(!showingDetail)}
                 />
                 {phone && <Action.OpenInBrowser title="Call" url={`tel:${phone}`} icon={Icon.Phone} />}
-                {phone && <Action.OpenInBrowser title="Whatsapp" url={`https://wa.me/${phone}`} icon={Icon.Message} />}
+                {phone && <Action.OpenInBrowser title="WhatsApp" url={`https://wa.me/${phone}`} icon={Icon.Message} />}
                 {email && <Action.OpenInBrowser title="Send Email" url={`mailto:${email}`} />}
                 {website && <Action.OpenInBrowser title="Open Website" url={website} />}
+                <ActionPanel.Submenu
+                  icon={Icon.CopyClipboard}
+                  title="Copy to Clipboard"
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                >
+                  {email && <Action.CopyToClipboard title="Email" content={email} />}
+                  {phone && <Action.CopyToClipboard title="Phone" content={phone} />}
+                  {website && <Action.CopyToClipboard title="Website" content={website} />}
+                  {name && <Action.CopyToClipboard title="Name" content={name} />}
+                  {company && <Action.CopyToClipboard title="Company" content={company} />}
+                </ActionPanel.Submenu>
                 <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }

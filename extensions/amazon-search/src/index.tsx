@@ -56,7 +56,11 @@ export default function Command() {
     }
   };
 
-  const suggestions = data ? data.suggestions.map((suggestion) => suggestion.value) : [];
+  const suggestions = data
+    ? data.suggestions.map((suggestion) => suggestion.value).includes(searchText)
+      ? data.suggestions.map((suggestion) => suggestion.value)
+      : [searchText, ...data.suggestions.map((suggestion) => suggestion.value)]
+    : [];
 
   return (
     <List
@@ -69,7 +73,7 @@ export default function Command() {
       {searchText.length > 0 && (
         <List.Section title="Suggestions" subtitle={`${suggestions.length}`}>
           {suggestions.map((item, index) => (
-            <SuggestionListItem key={index} item={item} tld={tld} searchText={searchText} onOpen={handleSearchOpen} />
+            <SuggestionListItem key={index} item={item} tld={tld} onOpen={handleSearchOpen} />
           ))}
         </List.Section>
       )}

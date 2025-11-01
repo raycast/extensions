@@ -1,6 +1,5 @@
 import { GoogleMailThreadPreview } from "../preview/GoogleMailThreadPreview";
 import { NotificationActions } from "../../../action/NotificationActions";
-//import { getLinearUserAccessory } from "../accessories";
 import { Notification } from "../../../notification";
 import { Icon, Color, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";

@@ -1,5 +1,26 @@
 # Copy Path Changelog
 
+## [Fix browser support] - 2025-08-28
+
+- Fix support for browsers.
+
+## [Support document windows] - 2025-08-25
+
+- Copy document paths from document windows.
+
+## [Update] - 2025-03-14
+
+- Update the Zen Browser name.
+- Update the AppleScript for Firefox-based browsers.
+
+## [Add Preference: Use tilde for home directory] - 2024-11-26
+
+- Add Preference _Use tilde for home directory_: Use a tilde for the home directory in the copied path.
+
+## [Support Zen Browser] - 2024-10-29
+
+- Support Zen Browser
+
 ## [Support More Browsers] - 2024-07-04
 
 - Now that there is no browser restriction, you can try to copy the URL in any Webkit or Chromium-based browser

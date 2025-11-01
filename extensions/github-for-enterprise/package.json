@@ -155,7 +155,6 @@
     "eslint-config-next": "^13.4.10",
     "eslint-config-prettier": "^8.8.0",
     "prettier": "^3.0.0",
-    "react-devtools": "^4.28.0",
     "typescript": "^5.1.6"
   },
   "scripts": {

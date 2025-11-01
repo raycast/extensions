@@ -1,104 +1,108 @@
-import { Color, getPreferenceValues, Icon, MenuBarExtra, open } from "@raycast/api";
-import { runAppleScript, useCachedPromise, useCachedState } from "@raycast/utils";
+import { Color, getPreferenceValues, Icon, MenuBarExtra } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { cpus, loadavg } from "os";
 
 import { exec } from "child_process";
 import { promisify } from "util";
 import { BatteryState, getBatteryState } from "./BatteryState";
-import { CPUStats, getCPUStats, calculateCPUUsage } from "./CPUStats";
+import { calculateCPUUsage, CPUStats, getCPUStats } from "./CPUStats";
+import { getScreenState, ScreenTimeState } from "./screenOn";
+import { openActivityMonitor, openBatterySettings, openScreenTimeSettings } from "./utils";
 
 export const execp = promisify(exec);
 
-type BatteryAndCPUState = BatteryState & { cpu: CPUStats };
+type SystemState = BatteryState & { cpu: CPUStats } & { screen: ScreenTimeState };
 
-const cacheKey = "batteryAndCPUState-V2";
+const cacheKey = "SystemState-V2";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const [batt, setBattState] = useCachedState<{
-    prev: BatteryAndCPUState | null;
-    next: BatteryAndCPUState;
-    latest: BatteryAndCPUState;
+  const preferences = getPreferenceValues();
+
+  // define a useCachedState hook that store all states in cache
+  const [stats, setBattState] = useCachedState<{
+    prev: SystemState | null;
+    next: SystemState;
+    latest: SystemState;
   } | null>(cacheKey, null);
 
-  const { isLoading: battIsLoading } = useCachedPromise(getBatteryState, [], {
+  // define a getStats function that call
+  // 1. getBatteryState
+  // 2. getCPUStats
+  // 3. getScreenState
+  const getStats = async () => {
+    const battery = await getBatteryState();
+    const cpu = getCPUStats();
+    const screen = getScreenState();
+    return { ...battery, cpu, screen };
+  };
+
+  // periodically call getStats and update the state
+  const { isLoading: battIsLoading } = useCachedPromise(getStats, [], {
     onData(data) {
-      const cpu = getCPUStats();
-      const battAndCPU = { ...data, cpu };
-      if (!batt || (batt.prev && batt.prev.time < Date.now() - 5 * 60 * 1000)) {
-        console.log("Resetting battery state", battAndCPU);
-        setBattState({ prev: null, next: battAndCPU, latest: battAndCPU });
-      } else if (batt.next.time < Date.now() - 60 * 1000 || batt.next.watts !== data.watts) {
-        console.log("Storing next battery state", battAndCPU);
-        setBattState({ prev: batt.next, next: battAndCPU, latest: battAndCPU });
+      if (!stats || (stats.prev && stats.prev.time < Date.now() - 5 * 60 * 1000)) {
+        console.log("Resetting battery state", data);
+        setBattState({ prev: null, next: data, latest: data });
+      } else if (stats.next.time < Date.now() - 60 * 1000 || stats.next.watts !== data.watts) {
+        console.log("Storing next battery state", data);
+        setBattState({ prev: stats.next, next: data, latest: data });
       } else {
-        console.log("Storing latest battery state", battAndCPU);
-        setBattState({ prev: batt.prev, next: batt.next, latest: battAndCPU });
+        console.log("Storing latest battery state", data);
+        setBattState({ prev: stats.prev, next: stats.next, latest: data });
       }
     },
   });
 
-  const openBatterySettings = () => {
-    open("x-apple.systempreferences:com.apple.preference.battery");
-  };
-
-  const openActivityMonitor = () => {
-    runAppleScript(`
-      tell application "Activity Monitor"
-        activate
-      end tell
-    `);
-  };
-
   const wattDiff =
-    batt?.prev?.watts && batt.latest.watts && batt.prev.charging === batt.latest.charging
-      ? Math.round((batt.latest.watts - batt.prev.watts) * 10) / 10
+    stats?.prev?.watts && stats.latest.watts && stats.prev.charging === stats.latest.charging
+      ? Math.round((stats.latest.watts - stats.prev.watts) * 10) / 10
       : null;
 
   const timeRemaining =
-    batt && batt.latest.hoursRemaining != null
-      ? `${batt.latest.hoursRemaining}:${String(batt.latest.minutesRemaining).padStart(2, "0")}`
+    stats && stats.latest.hoursRemaining != null
+      ? `${stats.latest.hoursRemaining}:${String(stats.latest.minutesRemaining).padStart(2, "0")}`
       : null;
 
-  const cpuUsage = batt?.prev?.cpu && batt.latest.cpu ? calculateCPUUsage(batt?.prev?.cpu, batt?.latest.cpu) : null;
+  const cpuUsage = stats?.prev?.cpu && stats.latest.cpu ? calculateCPUUsage(stats?.prev?.cpu, stats?.latest.cpu) : null;
 
-  const batteryColor = !batt
+  const screenTime = stats?.prev?.screen && stats.latest.screen ? stats.latest.screen : null;
+
+  const batteryColor = !stats
     ? undefined
-    : batt.latest.charging
+    : stats.latest.charging
     ? Color.Blue
-    : batt.latest.capacity < 0.1
+    : stats.latest.capacity < 0.1
     ? Color.Red
-    : batt.latest.capacity < 0.2
+    : stats.latest.capacity < 0.2
     ? Color.Orange
-    : batt.latest.capacity < 0.3
+    : stats.latest.capacity < 0.3
     ? Color.Yellow
     : undefined;
 
   const remainingColor =
-    !batt || batt.latest.charging
+    !stats || stats.latest.charging
       ? undefined
-      : batt.latest.timeRemaining == null
+      : stats.latest.timeRemaining == null
       ? Color.SecondaryText
-      : batt.latest.timeRemaining < (Number(preferences.remainingRed) || 0) * 60
+      : stats.latest.timeRemaining < (Number(preferences.remainingRed) || 0) * 60
       ? Color.Red
-      : batt.latest.timeRemaining < (Number(preferences.remainingOrange) || 0) * 60
+      : stats.latest.timeRemaining < (Number(preferences.remainingOrange) || 0) * 60
       ? Color.Orange
-      : batt.latest.timeRemaining < (Number(preferences.remainingYellow) || 0) * 60
+      : stats.latest.timeRemaining < (Number(preferences.remainingYellow) || 0) * 60
       ? Color.Yellow
       : undefined;
 
   const powerColor =
-    !batt || batt.latest.charging || !batt.latest.watts
+    !stats || stats.latest.charging || !stats.latest.watts
       ? undefined
-      : -batt.latest.watts > (Number(preferences.highPowerUsage) || 500)
+      : -stats.latest.watts > (Number(preferences.highPowerUsage) || 500)
       ? Color.Yellow
       : undefined;
 
-  const iconColor = !batt
+  const iconColor = !stats
     ? Color.SecondaryText
-    : batt.latest.charging && batt.latest.capacity == 1
+    : stats.latest.charging && stats.latest.capacity == 1
     ? undefined
-    : batt.latest.charging
+    : stats.latest.charging
     ? Color.Blue
     : remainingColor
     ? remainingColor
@@ -106,7 +110,7 @@ export default function Command() {
     ? powerColor
     : undefined;
 
-  const battPct = batt ? Math.round(batt?.latest.capacity * 100) : null;
+  const battPct = stats ? Math.round(stats?.latest.capacity * 100) : null;
 
   return (
     <MenuBarExtra
@@ -121,15 +125,15 @@ export default function Command() {
                 Icon[`Number${String(battPct).padStart(2, "0")}`],
           tintColor: iconColor,
         }
-        // getProgressIcon(batt?.latest.capacity ?? 0, iconColor)
+        // getProgressIcon(stats?.latest.capacity ?? 0, iconColor)
       }
       isLoading={battIsLoading}
       title={
         preferences.showInfo === "remaining"
           ? timeRemaining || "--:--"
           : preferences.showInfo === "watts"
-          ? batt?.latest.watts
-            ? `${Math.round(batt.latest.watts * 10) / 10}W`
+          ? stats?.latest.watts
+            ? `${Math.round(stats.latest.watts * 10) / 10}W`
             : "--W"
           : preferences.showInfo === "percent"
           ? "%"
@@ -137,32 +141,38 @@ export default function Command() {
       }
     >
       <MenuBarExtra.Section title="Battery">
-        {batt?.latest ? (
+        {stats?.latest ? (
           <>
             <MenuBarExtra.Item
               icon={{
-                source: batt.latest.connected ? Icon.BatteryCharging : Icon.Battery,
+                source: stats.latest.connected ? Icon.BatteryCharging : Icon.Battery,
                 tintColor: batteryColor,
               }}
-              subtitle={batt.latest.charging ? "Charging" : "Discharging"}
-              title={`${Math.round(batt.latest.capacity * 100)}%`}
+              subtitle={stats.latest.charging ? "Charging" : "Discharging"}
+              title={`${Math.round(stats.latest.capacity * 100)}%`}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
               icon={{ source: Icon.Clock, tintColor: remainingColor }}
               title={timeRemaining || "--:--"}
-              subtitle={batt.latest.charging ? "Time until charged" : "Time remaining"}
+              subtitle={stats.latest.charging ? "Time until charged" : "Time remaining"}
+              onAction={openBatterySettings}
+            />
+            <MenuBarExtra.Item
+              icon={{ source: Icon.Bolt, tintColor: stats.latest.lowPowerMode ? Color.Yellow : undefined }}
+              title={stats.latest.lowPowerMode ? "On" : "Off"}
+              subtitle={"Low Power Mode"}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
               icon={{ source: Icon.Check, tintColor: iconColor }}
-              title={batt.latest.health.toFixed(2) + "%"}
+              title={stats.latest.health.toFixed(2) + "%"}
               subtitle={"Battery health"}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
               icon={{ source: Icon.RotateAntiClockwise, tintColor: iconColor }}
-              title={batt.latest.cycles.toFixed(0)}
+              title={stats.latest.cycles.toFixed(0)}
               subtitle={"Battery cycles"}
               onAction={openBatterySettings}
             />
@@ -171,12 +181,12 @@ export default function Command() {
                 source: Icon.Bolt,
                 tintColor: powerColor,
               }}
-              title={batt.latest.watts ? `${Math.round(Math.abs(batt.latest.watts))}W` : "--"}
-              subtitle={batt.latest.charging ? "Power input (~1 min)" : "Power draw (~1 min)"}
+              title={stats.latest.watts ? `${Math.round(Math.abs(stats.latest.watts))}W` : "--"}
+              subtitle={stats.latest.charging ? "Power input (~1 min)" : "Power draw (~1 min)"}
               onAction={openBatterySettings}
             />
 
-            {!batt.latest.charging && wattDiff ? (
+            {!stats.latest.charging && wattDiff ? (
               <MenuBarExtra.Item
                 icon={{
                   source: wattDiff > 0 ? Icon.Minus : wattDiff < 0 ? Icon.Plus : Icon.Dot,
@@ -192,6 +202,15 @@ export default function Command() {
             ) : null}
           </>
         ) : null}
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section title="Screen">
+        <MenuBarExtra.Item
+          icon={Icon.Monitor}
+          title={screenTime?.duration || "--:--"}
+          subtitle="Screen Waking Time"
+          onAction={openScreenTimeSettings}
+        />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="CPU">
         <MenuBarExtra.Item

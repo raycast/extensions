@@ -15,12 +15,7 @@ type TaskListProps = {
   quickLinkView?: QuickLinkView;
 };
 
-export default function TaskListSections({
-  sections,
-  mode = ViewMode.date,
-  viewProps,
-  quickLinkView,
-}: TaskListProps): JSX.Element {
+export default function TaskListSections({ sections, mode = ViewMode.date, viewProps, quickLinkView }: TaskListProps) {
   const [data, setData] = useCachedData();
 
   return (

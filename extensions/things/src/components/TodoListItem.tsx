@@ -1,10 +1,10 @@
 import { List, Icon, Color } from '@raycast/api';
 import dayjs from 'dayjs';
 
-import { CommandListName, Todo, List as TList } from '../api';
 import { statusIcons } from '../helpers';
 
 import TodoListItemActions from './TodoListItemActions';
+import { CommandListName, Todo, List as TList } from '../types';
 
 const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
   const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();
@@ -12,7 +12,7 @@ const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
 
   let text, color;
 
-  if (diff <= -15 || diff >= 15) {
+  if (Math.abs(diff) >= 15) {
     text = dayjs(dueDate).format('D MMM');
   } else if (diff === 0) {
     text = 'Due today';
@@ -56,9 +56,7 @@ export default function TodoListItem({
     todo.project?.name ?? '',
     todo.project?.tags ?? '',
     todo.area?.name ?? '',
-    todo.area?.tags ?? '',
     todo.project?.area?.name ?? '',
-    todo.project?.area?.tags ?? '',
   ];
 
   const accessories: List.Item.Accessory[] = [];

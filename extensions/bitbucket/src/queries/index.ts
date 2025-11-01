@@ -1,12 +1,14 @@
+import { LocalStorage } from "@raycast/api";
 import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
 import { URLSearchParams } from "url";
+import { z } from "zod";
 
 const clientOptions = {
   baseUrl: "https://api.bitbucket.org/2.0",
   auth: {
-    username: preferences.accountName,
-    password: preferences.appPassword,
+    username: preferences.email,
+    password: preferences.apiToken,
   },
   notice: false,
 };
@@ -41,14 +43,14 @@ export async function getRepositoriesLazy(path: string) {
         "next",
       ].join(","),
     })
-    .catch((e) => {
+    .catch(() => {
       return { data: { values: [] as Schema.Repository[] }, status: 500 };
     });
 
   return data.values as Schema.Repository[];
 }
 
-export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
+export async function pipelinesGetQuery(repoSlug: string, pageNumber: number) {
   return await bitbucket.pipelines.list({
     ...defaults,
     repo_slug: repoSlug,
@@ -69,7 +71,7 @@ export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): P
   });
 }
 
-export async function pullRequestsGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
+export async function pullRequestsGetQuery(repoSlug: string) {
   return await bitbucket.pullrequests.list({
     ...defaults,
     repo_slug: repoSlug,
@@ -78,7 +80,7 @@ export async function pullRequestsGetQuery(repoSlug: string, pageNumber: number)
   });
 }
 
-export async function getCommitNames(repoSlug: string): Promise<any> {
+export async function getCommitNames(repoSlug: string) {
   return await bitbucket.pipelines.list({
     ...defaults,
     pagelen: 20,
@@ -87,19 +89,66 @@ export async function getCommitNames(repoSlug: string): Promise<any> {
   });
 }
 
-export async function getMyOpenPullRequests(): Promise<any> {
-  return await bitbucket.pullrequests.listPullrequestsForUser({
-    ...defaults,
-    pagelen: 20,
-    sort: "-created_on",
-    selected_user: preferences.accountName,
-    // fields: [
-    //   "values.uuid",
-    //   "values.build_number",
-    //   "values.state",
-    //   "values.creator.links.avatar.href",
-    //   "values.trigger.name",
-    //   "values.target.commit",
-    // ].join(",")
-  });
+async function getUsername() {
+  const key = `me:${preferences.email}`;
+  const stored = await LocalStorage.getItem<string>(key);
+  if (stored) {
+    return stored;
+  }
+
+  const response = await bitbucket.user.get({});
+  if (response.status >= 400) {
+    throw new Error(`Unable to get username: status ${response.status}`);
+  }
+
+  const result = response.data.username;
+  if (typeof result !== "string") {
+    throw new Error("Unable to get username: no username in response");
+  }
+
+  await LocalStorage.setItem(key, result);
+  return result;
+}
+
+const PullRequestsResponseSchema = z.object({
+  values: z.array(
+    z.object({
+      id: z.number(),
+      author: z.object({
+        nickname: z.string(),
+        links: z.object({
+          avatar: z.object({ href: z.string() }),
+        }),
+      }),
+      title: z.string(),
+      destination: z.object({
+        repository: z.object({
+          name: z.string(),
+          full_name: z.string(),
+        }),
+      }),
+      comment_count: z.number(),
+    }),
+  ),
+});
+
+// We can't use the Bitbucket package for this, as it doesn't support this endpoint
+// We can't use listPullrequestsForUser, as this has been removed: https://community.atlassian.com/forums/Bitbucket-articles/Reminder-List-pull-requests-for-a-user-API-removal/ba-p/2935311
+export async function getMyOpenPullRequests() {
+  const response = await fetch(
+    `https://api.bitbucket.org/2.0/workspaces/${preferences.workspace}/pullrequests/${await getUsername()}?pagelen=20&sort=-created_on&state=OPEN`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${preferences.email}:${preferences.apiToken}`).toString("base64")}`,
+        Accept: "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error fetching pull requests: ${response.status} (${response.statusText})`);
+  }
+
+  return PullRequestsResponseSchema.parse(await response.json()).values;
 }

@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Document } from "langchain/document";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
@@ -14,12 +14,17 @@ import {
   OllamaServerAuth,
 } from "../../ollama/types";
 import { AddSettingsCommandChat, GetSettingsCommandChatByIndex } from "../../settings/settings";
-import { RaycastChat, RaycastChatMessage, SettingsChatModel } from "../../settings/types";
+import { RaycastChat, SettingsChatModel } from "../../settings/types";
 import { Preferences, RaycastImage } from "../../types";
 import { GetAvailableModel, PromptTokenParser } from "../function";
+import { McpServerConfig, McpToolInfo } from "../../mcp/types";
+import { McpClientMultiServer } from "../../mcp/mcp";
+import { PromptContext } from "./type";
 import "../../polyfill/node-fetch";
 
 const preferences = getPreferenceValues<Preferences>();
+
+let McpClient: McpClientMultiServer;
 
 /**
  * Set Chat by given index.
@@ -216,44 +221,154 @@ async function GetDocumentByAffinity(
 }
 
 /**
- * Convert documents into text that can be added to the user's prompt.
+ * Convert documents into raw json.
  * @param documents
  */
-function DocumentsToText(documents: Document<Record<string, any>>[]): string {
-  let o = `\n\n`;
+function DocumentsToJson(documents: Document<Record<string, any>>[]): string {
+  const o = [];
   for (const document of documents) {
-    o += `<document>
-<source>${document.metadata.source}</source>
-<content>${document.pageContent}</content>
-</document>\n\n`;
+    o.push({
+      source: document.metadata.source,
+      content: document.pageContent,
+    });
   }
-  return o;
+  return JSON.stringify(o);
 }
 
 /**
- * Add document knowledge into user prompt.
+ * Get document knowledge, if tokens are not enough perform embeddings ans search by affinity.
  * @param query
  * @param chat
  * @param documents
  * @param image
  */
-async function PromptAddDocuments(
+async function GetDocuments(
   query: string,
   chat: RaycastChat,
   documents: Document<Record<string, any>>[],
   image: RaycastImage[] | undefined
 ): Promise<string> {
+  /* Get Model used for inference */
   let model = chat.models.main;
+  if (chat.models.tools && chat.mcp_server) model = chat.models.tools;
   if (chat.models.vision && image) model = chat.models.vision;
+
+  /* Get required tokens */
   const ollama = new Ollama(model.server);
   const availableToken = ollama.OllamaApiShowParseModelfile(await ollama.OllamaApiShow(model.tag)).parameter.num_ctx;
   const requiredToken = StringToTokens(query) + ChatToTokens(chat) + DocumentsToTokens(documents);
+
+  /* If tokens are not enough proceed with embedding */
   if (requiredToken > availableToken) {
     let model = chat.models.main;
     if (chat.models.embedding) model = chat.models.embedding;
     documents = await GetDocumentByAffinity(query, availableToken - StringToTokens(query), documents, model);
   }
-  return `${query}\n${DocumentsToText(documents)}`;
+
+  return DocumentsToJson(documents);
+}
+
+/**
+ * Get Messages for Inference with Context data.
+ * @param chat.
+ * @param query - User Prompt.
+ * @param image.
+ * @param context.
+ */
+function GetMessagesForInference(
+  chat: RaycastChat,
+  query: string,
+  image?: RaycastImage[],
+  context?: PromptContext
+): OllamaApiChatMessage[] {
+  const messages: OllamaApiChatMessage[] = [];
+
+  /* Slice Messages */
+  chat.messages
+    .slice(chat.messages.length - Number(preferences.ollamaChatHistoryMessagesNumber))
+    .forEach((v) => messages.push(...v.messages));
+
+  /* Create Prompt */
+  let content = query;
+  if (context && (context.tools || context.documents)) {
+    content = `Respond to the user's prompt using the provided context information. Cite sources with url when available.\nUser Prompt: '${query}'`;
+    if (context.tools) content += `Context from Tools Calling: '${context.tools.data}'\n`;
+    if (context.documents) content += `Context from Documents: ${context.documents}\n`;
+  }
+
+  /* Add User Query */
+  messages.push({
+    role: OllamaApiChatMessageRole.USER,
+    content: content,
+    images: image && image.map((i) => i.base64),
+  });
+
+  return messages;
+}
+
+/**
+ * Initialize McpClient.
+ */
+async function InitMcpClient(): Promise<void> {
+  const mcpServerConfigRaw = await LocalStorage.getItem<string>("mcp_server_config");
+  if (!mcpServerConfigRaw) throw "Mcp Servers are not configured";
+  const mcpServerConfig: McpServerConfig = JSON.parse(mcpServerConfigRaw);
+  McpClient = new McpClientMultiServer(mcpServerConfig);
+}
+
+/**
+ * Inference with tools from Mcp Servers.
+ * @param query - User Prompt.
+ * @param chat.
+ * @param image.
+ */
+async function ToolsCall(
+  query: string,
+  chat: RaycastChat,
+  image?: RaycastImage[]
+): Promise<[string | undefined, McpToolInfo[] | undefined]> {
+  await showToast({ style: Toast.Style.Animated, title: "🔧 Tool Calling..." });
+
+  /* Initialize McpClient if undefined. */
+  if (McpClient === undefined) {
+    await InitMcpClient().catch((e) => {
+      showToast({ title: "Error", message: e, style: Toast.Style.Failure });
+    });
+    if (McpClient === undefined) {
+      delete chat.mcp_server;
+      return [undefined, undefined];
+    }
+  }
+
+  /* Select model tag to use. */
+  let model = chat.models.main;
+  if (chat.models.tools) model = chat.models.tools;
+
+  /* Get Tools */
+  const tools = await McpClient.GetToolsOllama(true, chat.mcp_server);
+
+  /* Inference with tools */
+  const o = new Ollama(model.server);
+  const body: OllamaApiChatRequestBody = {
+    model: model.tag,
+    messages: GetMessagesForInference(chat, query, image),
+    keep_alive: model.keep_alive,
+    tools: tools,
+  };
+  const response = await o.OllamaApiChatNoStream(body);
+
+  /* Call tools on Mcp Server */
+  if (response.message?.tool_calls) {
+    /* Get Mcp Tools Info */
+    const toolsInfo = McpClient.GetToolsInfoForOllama(response.message.tool_calls);
+
+    /* Call tools */
+    const data = await McpClient.CallToolsForOllama(response.message.tool_calls);
+
+    if (data.length > 0) return [JSON.stringify(data), toolsInfo];
+  }
+
+  return [undefined, undefined];
 }
 
 /**
@@ -263,6 +378,7 @@ async function Inference(
   query: string,
   image: RaycastImage[] | undefined,
   documents: Document<Record<string, any>>[] | undefined,
+  context: PromptContext,
   chat: RaycastChat,
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
@@ -272,19 +388,9 @@ async function Inference(
   let model = chat.models.main;
   if (image && chat.models.vision) model = chat.models.vision;
 
-  const messages: OllamaApiChatMessage[] = [];
-  chat.messages
-    .slice(chat.messages.length - Number(preferences.ollamaChatHistoryMessagesNumber))
-    .forEach((v) => messages.push(...v.messages));
-  messages.push({
-    role: OllamaApiChatMessageRole.USER,
-    content: query,
-    images: image && image.map((i) => i.base64),
-  });
-
   const body: OllamaApiChatRequestBody = {
     model: model.tag,
-    messages: messages,
+    messages: GetMessagesForInference(chat, query, image, context),
     keep_alive: model.keep_alive,
   };
 
@@ -331,6 +437,7 @@ async function Inference(
               ...data,
               images: image,
               files: documents && documents.map((d) => d.metadata.source).filter((v, i) => i === documents.indexOf(v)),
+              tools: context.tools && context.tools.meta,
               messages: m.messages[m.messages.length - 1].messages,
             };
             setLoading(false);
@@ -354,7 +461,21 @@ export async function Run(
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<void> {
   setLoading(true);
+
+  const context: PromptContext = {};
+
+  /* Parse token on query */
   query = await PromptTokenParser(query);
-  if (documents) query = await PromptAddDocuments(query, chat, documents, image);
-  await Inference(query, image, documents, chat, setChat, setLoading);
+
+  /* If documents are defined add them to the context */
+  if (documents) context.documents = await GetDocuments(query, chat, documents, image);
+
+  /* Call Tools of mcp_server is defined */
+  if (chat.mcp_server) {
+    const [data, meta] = await ToolsCall(query, chat, image);
+    if (data && meta) context.tools = { data: data, meta: meta };
+  }
+
+  /* Start Inference */
+  await Inference(query, image, documents, context, chat, setChat, setLoading);
 }

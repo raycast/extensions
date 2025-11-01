@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import {
-  BlueskyImageEmbedType,
   ErrorLoadingNotification,
   LoadingNotificationContent,
   MarkNotificationsAsRead,
@@ -30,11 +29,12 @@ import HomeAction from "./components/actions/HomeAction";
 import NavigationDropdown from "./components/nav/NavigationDropdown";
 import { Notification } from "./types/types";
 import Onboard from "./components/onboarding/Onboard";
-import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { isThreadViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewImage } from "@atproto/api/dist/client/types/app/bsky/embed/images";
 import { showDangerToast } from "./utils/common";
 import { useCachedState } from "@raycast/utils";
 import useStartATSession from "./hooks/useStartATSession";
+import { AppBskyEmbedImages } from "@atproto/api";
 
 interface ViewNotificationProps {
   previousViewTitle?: string;
@@ -77,7 +77,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         return [...state, ...newNotifications];
       });
     },
-    [cursor]
+    [cursor],
   );
 
   useEffect(() => {
@@ -85,7 +85,15 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
       if (sessionStarted) {
         fetchNotifications(true);
 
-        const notificationCount = await getUnreadNotificationCount();
+        let notificationCount = 0;
+        try {
+          notificationCount = await getUnreadNotificationCount();
+        } catch (error) {
+          // This try...catch is to account for following case:
+          // When user runs extension and session is expiring or expired, ERROR on next line is thrown
+          // `initialRes.body?.cancel is not a function`
+          // We swallow the exception as it is not helpful to the user
+        }
         let notificationMessage = "";
         if (notificationCount > 1) {
           notificationMessage = `${notificationCount} ${NewNotifications}`;
@@ -139,15 +147,15 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
 
       try {
         const responseData = await getPostThread(uri);
-        if (!responseData || !responseData.thread || !responseData.thread.post) {
+        if (!responseData || !responseData.thread || !isThreadViewPost(responseData.thread)) {
           return;
         }
 
         let imageEmbeds: string[] = [];
-        const post = responseData.thread.post as PostView;
+        const post = responseData.thread.post;
 
-        if (post.embed?.$type === BlueskyImageEmbedType) {
-          imageEmbeds = (post.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
+        if (AppBskyEmbedImages.isView(post.embed)) {
+          imageEmbeds = post.embed.images.map((item: ViewImage) => item.thumb);
         }
 
         setDetailsText(await getPostMarkdownView(post, imageEmbeds));
@@ -166,7 +174,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         showNavDropdown={false}
         previousViewTitle={buildTitle(previousViewTitle, ViewNotificationsNavigationTitle)}
         authorHandle={notification.author.handle}
-      />
+      />,
     );
   };
 

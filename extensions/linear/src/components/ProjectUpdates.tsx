@@ -2,12 +2,11 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
+import { ProjectResult } from "../api/getProjects";
 import { getUserIcon } from "../helpers/users";
-
 import useProjectUpdates from "../hooks/useProjectUpdates";
 
 import OpenInLinear from "./OpenInLinear";
-import { ProjectResult } from "../api/getProjects";
 
 type ProjectUpdatesProps = {
   project: ProjectResult;

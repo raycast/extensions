@@ -1,5 +1,8 @@
-import { getPreferenceValues, environment } from "@raycast/api";
+import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import { ActivityType, SportType } from "./api/types";
+import { createWriteStream } from "fs";
+import path, { resolve } from "path";
+import { homedir } from "os";
 
 export const formatDuration = (duration: number) => {
   return new Date(duration * 1000).toISOString().substring(11, 19);
@@ -10,7 +13,7 @@ export const formatElevationGain = (elevationGain: number) => {
   if (preferences.distance_unit === "mi") {
     return `${(elevationGain * 3.28084).toFixed(0)}ft`;
   }
-  return `${elevationGain}m`;
+  return `${Math.round(elevationGain)}m`;
 };
 
 export const formatDistance = (distance: number) => {
@@ -77,19 +80,19 @@ export function getStartOfWeekUnix() {
   return Math.floor(weekStart.getTime() / 1000);
 }
 
-export function getSportTypesFromActivityTypes(
-  activityTypes: ActivityType[],
-  localized_sport_type: string,
-): SportType[] {
+export function getSportTypesFromActivityTypes(activityTypes: SportType[], localized_sport_type: string): SportType[] {
   const sportTypes: SportType[] = [];
-  if (activityTypes.includes(ActivityType.Ride)) {
+  if (activityTypes.includes(SportType.Ride)) {
     sportTypes.push(SportType.Ride);
     sportTypes.push(SportType.EBikeRide);
     sportTypes.push(SportType.EMountainBikeRide);
     sportTypes.push(SportType.VirtualRide);
     sportTypes.push(SportType.GravelRide);
+    sportTypes.push(SportType.Handcycle);
+    sportTypes.push(SportType.Wheelchair);
+    sportTypes.push(SportType.Velomobile);
   }
-  if (activityTypes.includes(ActivityType.Run)) {
+  if (activityTypes.includes(SportType.Run)) {
     sportTypes.push(SportType.Run);
     sportTypes.push(SportType.VirtualRun);
     sportTypes.push(SportType.TrailRun);
@@ -139,12 +142,9 @@ export function isDurationValid(
 }
 
 export function convertDistanceToMeters(distance: string, unit: string) {
+  if (!distance) return "";
   const cleanedString = distance.trim();
   const value = parseFloat(cleanedString);
-
-  if (isNaN(value)) {
-    throw new Error("Invalid distance format");
-  }
   switch (unit) {
     case "km":
       return value * 1000;
@@ -160,4 +160,102 @@ export function isNumber(distance: string | undefined) {
     const sanitizedValue = distance.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
     return !(sanitizedValue === "" || isNaN(Number(sanitizedValue)));
   }
+}
+
+export const saveFileToDesktop = (
+  fileName: string,
+  fileType: "gpx" | "tcx",
+  fileStream: NodeJS.ReadableStream | null,
+) => {
+  if (fileStream) {
+    const desktopDir = resolve(homedir(), "Desktop");
+    const downloadPath = path.join(desktopDir, `${fileName}.${fileType}`);
+    const writeStream = createWriteStream(downloadPath);
+    fileStream.pipe(writeStream);
+    writeStream.on("finish", () => {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Download successful",
+        message: `${fileType.toUpperCase()} file saved to your desktop`,
+      });
+    });
+    writeStream.on("error", () => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Download failed",
+        message: `Could not save the ${fileType.toUpperCase()} file.`,
+      });
+    });
+  } else {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Download failed",
+      message: `Could not download the ${fileType.toUpperCase()} file.`,
+    });
+  }
+};
+
+export function parseFlexibleTime(timeStr: string): string | null {
+  // Remove any whitespace
+  timeStr = timeStr.trim().toLowerCase();
+
+  // Handle HH:MM:SS format
+  if (isDurationValid(timeStr)) {
+    return timeStr;
+  }
+
+  // Handle HH:MM or MM:SS format
+  const timePartMatch = timeStr.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (timePartMatch) {
+    const [, part1, part2] = timePartMatch;
+    const num1 = parseInt(part1, 10);
+    const num2 = parseInt(part2, 10);
+
+    // If second number is >= 60, treat as HH:MM
+    if (num2 >= 60) {
+      return `${String(num1).padStart(2, "0")}:${String(num2).padStart(2, "0")}:00`;
+    }
+
+    // If first number >= 24, treat as MM:SS
+    if (num1 >= 24) {
+      const hours = Math.floor(num1 / 60);
+      const minutes = num1 % 60;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(num2).padStart(2, "0")}`;
+    }
+
+    // Default to HH:MM
+    return `${String(num1).padStart(2, "0")}:${String(num2).padStart(2, "0")}:00`;
+  }
+
+  // Initialize time components
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
+
+  // Handle formats like "5h4m23s", "25min", "25m", etc.
+  const hourMatch = timeStr.match(/(\d+)\s*h/);
+  const minMatch = timeStr.match(/(\d+)\s*m(?:in)?(?!\s*s)/);
+  const secMatch = timeStr.match(/(\d+)\s*s/);
+
+  if (hourMatch) hours = parseInt(hourMatch[1]);
+  if (minMatch) minutes = parseInt(minMatch[1]);
+  if (secMatch) seconds = parseInt(secMatch[1]);
+
+  // If no matches found, try parsing as pure minutes
+  if (!hourMatch && !minMatch && !secMatch) {
+    const numericValue = parseFloat(timeStr);
+    if (!isNaN(numericValue)) {
+      minutes = numericValue;
+    } else {
+      return null;
+    }
+  }
+
+  // Convert to total seconds and format
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = Math.floor(totalSeconds % 60);
+
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }

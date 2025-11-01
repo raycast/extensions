@@ -44,8 +44,16 @@ export interface View {
   type: string;
 }
 
-export interface RaycastExtensionPreferences {
-  airtableOAuthClientId: string;
-  airtableUiBaseUrl: string;
-  airtableApiBaseUrl: string;
+export interface AirtableRecord {
+  createdTime: string;
+  fields: Record<string, string | boolean | number | string[]>;
+  id: string;
+}
+
+export interface AirtableBaseRecordsResponse {
+  records: AirtableRecord[];
+}
+
+export interface ErrorResponse {
+  error: { type: string; message: string };
 }

@@ -5,6 +5,11 @@
   "description": "Search LeetCode problem, view LeetCode daily challenge, view LeetCode problem and more.",
   "icon": "leetcode.png",
   "author": "justin0u0",
+  "contributors": [
+    "xmok",
+    "doxxx93",
+    "svenhofman"
+  ],
   "categories": [
     "Web"
   ],
@@ -26,20 +31,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.1",
-    "@raycast/utils": "^1.4.16",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
     "node-html-markdown": "^1.3.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@types/turndown": "^5.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -47,5 +51,61 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "defaultLanguage",
+      "title": "Default Programming Language",
+      "description": "Select your preferred programming language",
+      "type": "dropdown",
+      "required": false,
+      "default": "python",
+      "data": [
+        {
+          "title": "Python",
+          "value": "python"
+        },
+        {
+          "title": "JavaScript",
+          "value": "javascript"
+        },
+        {
+          "title": "TypeScript",
+          "value": "typescript"
+        },
+        {
+          "title": "Java",
+          "value": "java"
+        },
+        {
+          "title": "C++",
+          "value": "cpp"
+        },
+        {
+          "title": "C",
+          "value": "c"
+        },
+        {
+          "title": "C#",
+          "value": "csharp"
+        },
+        {
+          "title": "Ruby",
+          "value": "ruby"
+        },
+        {
+          "title": "Swift",
+          "value": "swift"
+        },
+        {
+          "title": "Kotlin",
+          "value": "kotlin"
+        },
+        {
+          "title": "Go",
+          "value": "go"
+        }
+      ]
+    }
+  ]
 }

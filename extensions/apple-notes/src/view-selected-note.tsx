@@ -1,9 +1,9 @@
 import { Detail } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
-import { getSelectedNote } from "./api";
+import { getSelectedNote } from "./api/applescript";
 import NoteDetail from "./components/NoteDetail";
-import { useNotes } from "./useNotes";
+import { useNotes } from "./hooks/useNotes";
 
 export default function CurrentNote() {
   const { data: id, isLoading } = usePromise(getSelectedNote);

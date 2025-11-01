@@ -1,9 +1,13 @@
 export type Values = {
-  textfield: string; // Expected hash
+  textfield: string;
   textarea: string;
   datepicker: Date;
   checkbox: boolean;
   dropdown: string;
   tokeneditor: string[];
-  file: string[]; // Array of file paths
+  file: string[];
 };
+
+export interface ExtensionPreferences {
+  popRootAfterSubmit: boolean;
+}

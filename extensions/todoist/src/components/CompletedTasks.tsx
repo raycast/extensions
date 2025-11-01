@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { compareDesc, format } from "date-fns";
 import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
-import { handleError, getActivity } from "../api";
+import { getActivity } from "../api";
 import { uncompleteTask as apiUncompleteTask } from "../api";
-import { displayDueDate } from "../helpers/dates";
+import { displayDate } from "../helpers/dates";
 import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { QuickLinkView } from "../home";
 import useCachedData from "../hooks/useCachedData";
@@ -28,7 +28,7 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
       mutate();
       refreshMenuBarCommand();
     } catch (error) {
-      handleError({ error, title: "Unable to uncomplete task" });
+      await showFailureToast(error, { title: "Unable to uncomplete task" });
     }
   }
 
@@ -45,7 +45,7 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
     allDueDates.sort((dateA, dateB) => compareDesc(new Date(dateA), new Date(dateB)));
 
     const sections = allDueDates.map((date) => ({
-      name: displayDueDate(date),
+      name: displayDate(date),
       events: events?.filter((event) => event.date === date) || [],
     }));
 
@@ -64,7 +64,7 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
                   key={event.id}
                   title={removeMarkdown(event.extra_data?.content)}
                   accessories={[
-                    { text: `${displayDueDate(event.event_date)} ${format(new Date(event.event_date), "HH:mm")}` },
+                    { text: `${displayDate(event.event_date)} ${format(new Date(event.event_date), "HH:mm")}` },
                   ]}
                   actions={
                     <ActionPanel>

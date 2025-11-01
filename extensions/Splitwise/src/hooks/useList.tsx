@@ -1,7 +1,6 @@
-import { GetExpenses, Expense } from "../types/get_expenses.types"; // Types
+import { GetExpenses, Expense, GetCategories, Category } from "../types/get_expenses.types"; // Types
 import { showToast, Toast } from "@raycast/api";
 import { HEADER } from "./userPreferences";
-
 import { useFetch } from "@raycast/utils";
 import axios from "axios";
 
@@ -22,16 +21,28 @@ export function GetExpense(limit: string): [Expense[], boolean, any, any] {
   return [fetchedExpenses, isLoading, revalidate, mutate];
 }
 
+export function getCategories(): [Category[], boolean] {
+  const { isLoading, data, error } = useFetch<GetCategories>("https://secure.splitwise.com/api/v3.0/get_categories", {
+    method: "GET",
+    ...HEADER,
+    keepPreviousData: true,
+  });
+
+  const categories = data?.categories || [];
+
+  if (error) {
+    console.error(`Error while fetching categories: \n ${error}`);
+  }
+
+  return [categories, isLoading];
+}
+
 export const DeleteExpense = async (id: number, mutate: any) => {
   await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
   try {
     const responseDelete = await mutate(
       await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, HEADER),
       {
-        optimisticUpdate(expenses: Expense[]) {
-          const { [id]: _, ...remainingExpenses } = expenses;
-          return remainingExpenses;
-        },
         revalidate: true,
         rollbackOnError: true,
       }
@@ -53,15 +64,21 @@ export const DeleteExpense = async (id: number, mutate: any) => {
 };
 
 // FORM FUNCTION
-export async function UpdateExpense(expenseID: number, values: any) {
+export async function UpdateExpense(expenseID: number, values: any, mutate: any) {
   await showToast({ style: Toast.Style.Animated, title: "Updating Expense" });
   try {
-    const responseSubmit = await axios({
-      method: "post",
-      url: `https://secure.splitwise.com/api/v3.0/update_expense/${expenseID}`,
-      ...HEADER,
-      data: values,
-    });
+    const responseSubmit = await mutate(
+      await axios({
+        method: "post",
+        url: `https://secure.splitwise.com/api/v3.0/update_expense/${expenseID}`,
+        ...HEADER,
+        data: values,
+      }),
+      {
+        revalidate: true,
+        rollbackOnError: true,
+      }
+    );
 
     if (Object.keys(responseSubmit.data.errors).length === 0) {
       showToast({ style: Toast.Style.Success, title: `Expense '${values.description}' updated` });

@@ -1,52 +1,45 @@
-import { List, showToast, Toast, Image } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, Image, Icon } from "@raycast/api";
+import { useState } from "react";
 import { Actions } from "./components/Actions";
 import { FavoritesDropdown } from "./components/FavoritesDropdown";
 import { getQueue, getFavorites } from "./matterApi";
 import TokenErrorHandle from "./components/TokenErrorHandle";
-import { Item, Items } from "./types";
-
-interface State {
-  items?: any;
-  error?: Error;
-}
+import { ErrorResponse, FeedType, Item, Items } from "./types";
+import { showFailureToast, usePromise } from "@raycast/utils";
 
 export default function Command() {
   const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
-  const [state, setState] = useState<State>({});
-  // 1 = queue, 2 = favorites
-  const [filter, setFilter] = useState<any>(1);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [filter, setFilter] = useState<FeedType>(FeedType.Queue);
 
-  useEffect(() => {
-    fetchQueue();
-  }, [filter]);
-
-  async function fetchQueue() {
-    setLoading(true);
-    try {
-      let items: Items;
-      if (filter == 1) {
-        items = (await getQueue()) as Items;
+  const {
+    isLoading,
+    data: items,
+    pagination,
+  } = usePromise(
+    (feedType: FeedType) => async (options) => {
+      let result: Items | ErrorResponse;
+      if (feedType === FeedType.Queue) {
+        result = await getQueue(options.page + 1);
       } else {
         // If filter is set to favorites, get favorites instead
-        items = (await getFavorites()) as Items;
+        result = await getFavorites(options.page + 1);
       }
-      if (items.code == "token_not_valid") {
-        showToast(Toast.Style.Failure, "Token not valid", "Please check your token in preferences");
-        setLoading(false);
-        return;
-      }
+      if ("detail" in result) throw new Error(result.detail);
       setIsTokenValid(true);
-      setState({ items });
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      setState({
-        error: error instanceof Error ? error : new Error("Something went wrong with fetching the articles"),
-      });
+      return {
+        data: result.feed,
+        hasMore: !!result.next,
+      };
+    },
+    [filter],
+    {
+      async onError(error) {
+        if (error.message === "Given token not valid for any token type")
+          await showFailureToast("Please check your token in preferences", { title: "Token not valid" });
+        else showFailureToast(error, { title: "Error fetching articles" });
+      },
     }
-  }
+  );
 
   function getArticleThumbnail(item: Item) {
     if (item.content.photo_thumbnail_url) {
@@ -58,34 +51,38 @@ export default function Command() {
     }
   }
 
-  function filterSelection(type: any) {
+  function filterSelection(type: FeedType) {
     setFilter(type);
   }
 
   return (
     <>
-      {isTokenValid || loading ? (
-        <List isLoading={loading} searchBarAccessory={<FavoritesDropdown filterSelection={filterSelection} />}>
-          {state
-            ? state.items?.feed.map((item: any) => (
-                <List.Item
-                  key={item.id}
-                  icon={{
-                    source: getArticleThumbnail(item),
-                    mask: Image.Mask.Circle,
-                  }}
-                  title={item.content.title}
-                  actions={<Actions item={item} />}
-                  accessories={[
-                    {
-                      text: item.content.article?.word_count
-                        ? item.content.article?.word_count.toString() + " words"
-                        : "",
-                    },
-                  ]}
-                />
-              ))
-            : ""}
+      {isTokenValid || isLoading ? (
+        <List
+          isLoading={isLoading}
+          searchBarAccessory={<FavoritesDropdown filterSelection={filterSelection} />}
+          pagination={pagination}
+        >
+          {items?.map((item) => {
+            const accessories: List.Item.Accessory[] = [];
+            if (item.content.library.is_favorited) accessories.push({ icon: Icon.Star });
+            if (item.content.article?.word_count)
+              accessories.push({ text: `${item.content.article.word_count} words` });
+            if (item.content.article?.reading_time_minutes)
+              accessories.push({ text: `${item.content.article.reading_time_minutes}min` });
+            return (
+              <List.Item
+                key={item.id}
+                icon={{
+                  source: getArticleThumbnail(item),
+                  mask: Image.Mask.Circle,
+                }}
+                title={item.content.title}
+                actions={<Actions item={item} />}
+                accessories={accessories}
+              />
+            );
+          })}
         </List>
       ) : (
         <TokenErrorHandle></TokenErrorHandle>

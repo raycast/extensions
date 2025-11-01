@@ -3,13 +3,18 @@ import { Form, ActionPanel, Action, Toast, popToRoot, Icon } from "@raycast/api"
 import ampStart from "./amp-start";
 
 enum Intervals {
-  "minutes" = "30",
-  "hours" = "1",
+  minutes = "minutes",
+  hours = "hours",
+}
+
+enum DefaultDuration {
+  minutes = "30",
+  hours = "1",
 }
 
 export default function SessionWithDuration() {
-  const [interval, setInterval] = useState<keyof typeof Intervals>("minutes");
-  const [duration, setDuration] = useState<string>(Intervals[interval]);
+  const [interval, setInterval] = useState<keyof typeof Intervals>(Intervals.minutes);
+  const [duration, setDuration] = useState<string>(DefaultDuration.minutes);
 
   const toast = new Toast({
     title: "Starting New Session",
@@ -38,7 +43,6 @@ export default function SessionWithDuration() {
   function handleChangeDuration(newInterval: keyof typeof Intervals) {
     if (interval !== newInterval) {
       setInterval(newInterval);
-      setDuration(Intervals[newInterval]);
     }
   }
 
@@ -46,21 +50,16 @@ export default function SessionWithDuration() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Start Session"
-            onSubmit={submit}
-            shortcut={{ key: "enter", modifiers: [] }}
-            icon={Icon.List}
-          />
+          <Action.SubmitForm title="Start Session" onSubmit={submit} icon={Icon.List} />
           <Action
             title="Select Hours"
-            onAction={() => handleChangeDuration("hours")}
+            onAction={() => handleChangeDuration(Intervals.hours)}
             shortcut={{ key: "h", modifiers: ["cmd"] }}
             icon={Icon.Clock}
           />
           <Action
             title="Select Minutes"
-            onAction={() => handleChangeDuration("minutes")}
+            onAction={() => handleChangeDuration(Intervals.minutes)}
             shortcut={{ key: "m", modifiers: ["cmd"] }}
             icon={Icon.Clock}
           />
@@ -74,13 +73,13 @@ export default function SessionWithDuration() {
         info={`Sets the session duration based on the unit selected.\n\nCurrent: ${duration} ${
           duration === "1" ? interval.substring(0, interval.length - 1) : interval
         }`}
-        value={duration}
+        storeValue
         onChange={(value) => setDuration(value)}
       />
       <Form.Dropdown
         id="interval"
         title="Unit"
-        value={interval}
+        storeValue
         info={`Select whether the duration should be in minutes or in hours.\n\n- Changing the duration to hours will set a default value of 1 hour.\n- Changing the duration to minutes will set a default value of 30 minutes`}
         onChange={(value) => handleChangeDuration(value as keyof typeof Intervals)}
       >

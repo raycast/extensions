@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { cache, HttpService, KEY } from "./service";
 
@@ -20,6 +20,10 @@ export default function Command() {
           <List.Item
             key={index}
             title={service.name}
+            icon={{
+              source: Icon.CircleFilled,
+              tintColor: service.host.status,
+            }}
             detail={
               <List.Item.Detail
                 metadata={
@@ -39,6 +43,14 @@ export default function Command() {
                         <List.Item.Detail.Metadata.TagList.Item
                           key={index}
                           text={address}
+                          color={address.status}
+                          onAction={
+                            address.available
+                              ? () => {
+                                  open(`http://${address}`);
+                                }
+                              : undefined
+                          }
                         />
                       ))}
                     </List.Item.Detail.Metadata.TagList>

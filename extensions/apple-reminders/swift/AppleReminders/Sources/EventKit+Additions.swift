@@ -228,7 +228,8 @@ extension EKReminder {
       isCompleted: self.isCompleted, priority: reminderPriority.displayString,
       completionDate: completionDateString, isRecurring: isRecurring,
       recurrenceRule: recurrenceRuleDescription ?? "",
-      list: calendar.toStruct(defaultCalendarId: nil), location: location)
+      list: calendar.toStruct(defaultCalendarId: nil), location: location,
+      creationDate: self.creationDate)
   }
 }
 

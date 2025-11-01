@@ -3,10 +3,10 @@ import { useCachedState } from "@raycast/utils";
 
 import crypto from "crypto";
 
-import { Categories, DEFAULT_CATEGORY } from "./Categories";
-import { CategoryName } from "../types";
-import { getV7Items, getV7CategoryIcon } from "../utils";
 import resetCache from "../../reset-cache";
+import { CategoryName } from "../types";
+import { getV7CategoryIcon, getV7Items } from "../utils";
+import { Categories, DEFAULT_CATEGORY } from "./Categories";
 
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
@@ -19,7 +19,7 @@ export function Items() {
       : categoriesObj && [categoriesObj[category]];
 
   const onCategoryChange = (newCategory: string) => {
-    category !== newCategory && setCategory(newCategory);
+    if (category !== newCategory) setCategory(newCategory);
   };
 
   return (
@@ -34,7 +34,7 @@ export function Items() {
                 icon={{
                   value: {
                     source: getV7CategoryIcon(
-                      item.categorySingularName.replaceAll(" ", "_").toUpperCase() as CategoryName
+                      item.categorySingularName.replaceAll(" ", "_").toUpperCase() as CategoryName,
                     ),
                     tintColor: Color.Blue,
                   },
@@ -43,12 +43,13 @@ export function Items() {
                 title={item.itemTitle}
                 subtitle={item.accountName}
                 accessories={[{ text: item.vaultName }]}
+                keywords={item.accountName ? [item.accountName] : []}
                 actions={
                   <ActionPanel>
                     {item.categoryUUID === "001" && item.websiteURLs?.length && (
                       <Action.Open
                         icon={Icon.Globe}
-                        title="Open In Browser"
+                        title="Open in Browser"
                         target={`onepassword7://open_and_fill/${item.vaultUUID}/${item.uuid}/${crypto
                           .createHash("sha256")
                           .update(item.websiteURLs[0] as string)
@@ -57,12 +58,12 @@ export function Items() {
                       />
                     )}
                     <Action.Open
-                      title="Open In 1Password"
+                      title="Open in 1Password"
                       target={`onepassword7://view/${item.vaultUUID}/${item.uuid}`}
                       application="com.agilebits.onepassword7"
                     />
                     <Action.Open
-                      title="Edit In 1Password"
+                      title="Edit in 1Password"
                       target={`onepassword7://edit/${item.vaultUUID}/${item.uuid}`}
                       application="com.agilebits.onepassword7"
                       shortcut={{ modifiers: ["cmd"], key: "e" }}

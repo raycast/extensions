@@ -19,7 +19,7 @@ export const getPreviousSearches = () => {
       Object.entries(items).map(([data, meta]) => {
         meta = JSON.parse(meta);
         return { data, lastUsed: meta.lastUsed, type: meta.type, cluster: meta.cluster };
-      })
+      }),
     )
     .then((items) => items.sort((i1, i2) => i2.lastUsed - i1.lastUsed));
 };

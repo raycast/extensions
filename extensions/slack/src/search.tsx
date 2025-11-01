@@ -8,6 +8,7 @@ import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenI
 import { convertSlackEmojiToUnicode } from "./shared/utils";
 import { toZonedTime } from "date-fns-tz";
 import { differenceInMinutes } from "date-fns";
+import SendMessage from "./send-message";
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
@@ -84,6 +85,13 @@ function Search() {
                     {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
                   />
 
+                  <Action.Push
+                    title="Send Message"
+                    icon={Icon.Message}
+                    target={<SendMessage recipient={userId} />}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  />
+
                   <Action.CreateQuicklink
                     quicklink={{
                       name: `Open Chat with ${name}`,
@@ -92,6 +100,12 @@ function Search() {
                         : { link: `https://app.slack.com/client/${workspaceId}/${conversationId}` }),
                     }}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  />
+
+                  <Action.CopyToClipboard
+                    title="Copy Huddle Link"
+                    content={`https://app.slack.com/huddle/${workspaceId}/${conversationId}`}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />
 
                   <ActionPanel.Section>

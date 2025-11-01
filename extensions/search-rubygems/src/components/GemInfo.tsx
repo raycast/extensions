@@ -1,4 +1,4 @@
-import { Icon, Detail, ActionPanel, OpenInBrowserAction } from "@raycast/api";
+import { Icon, Detail, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useRubyGemsGemDetail } from "../rubygems/useRubyGemsGemDetail";
 import type { GemSearchResult, GemDetailResponse, Dependency } from "../rubygems/types";
@@ -8,7 +8,7 @@ interface Props {
   gem: GemSearchResult;
 }
 
-export const GemInfo = ({ gem }: Props): JSX.Element => {
+export const GemInfo = ({ gem }: Props) => {
   const [gemDetails, setGemInfo] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -72,10 +72,10 @@ export const GemInfo = ({ gem }: Props): JSX.Element => {
       markdown={`${gemDetails}`}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction icon={Icon.Globe} key={gem.name} title="Open on rubygems.org" url={gem.project_uri} />
+          <Action.OpenInBrowser icon={Icon.Globe} key={gem.name} title="Open on rubygems.org" url={gem.project_uri} />
           {mapGemLinks(gem).map((link) => {
             return (
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 icon={Icon.Globe}
                 key={link["title"]}
                 title={`Open ${link["title"]}`}

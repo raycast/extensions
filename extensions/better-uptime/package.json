@@ -54,6 +54,901 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-monitors",
+      "title": "Get Monitors",
+      "description": "Check to see the status or details of a monitor."
+    },
+    {
+      "name": "get-incidents",
+      "title": "Get Incidents",
+      "description": "Check to see the status or details of an incident."
+    },
+    {
+      "name": "get-heartbeats",
+      "title": "Get Heartbeats",
+      "description": "Check to see the details of a heartbeat."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@better-uptime Is the Raycast monitor up?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-monitors",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Returns the status of the monitor"
+          }
+        ],
+        "mocks": {
+          "get-incidents": [],
+          "get-monitors": [
+            {
+              "id": "2954787",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "monitor",
+              "attributes": {
+                "team_name": "Your team",
+                "policy_id": null,
+                "created_at": "2025-01-29T17:04:26.020Z",
+                "follow_redirects": true,
+                "maintenance_timezone": "Edinburgh",
+                "maintenance_to": null,
+                "check_frequency": 180,
+                "confirmation_period": 0,
+                "last_checked_at": "2025-01-31T15:01:47.000Z",
+                "request_headers": [],
+                "url": "https://raycast.com",
+                "paused_at": null,
+                "monitor_type": "status",
+                "team_wait": 180,
+                "monitor_group_id": null,
+                "auth_password": "",
+                "required_keyword": null,
+                "http_method": "get",
+                "sms": false,
+                "email": true,
+                "critical_alert": false,
+                "verify_ssl": true,
+                "recovery_period": 180,
+                "domain_expiration": null,
+                "request_timeout": 30,
+                "paused": false,
+                "status": "up",
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "updated_at": "2025-01-29T17:04:26.020Z",
+                "expected_status_codes": [],
+                "push": false,
+                "playwright_script": null,
+                "call": false,
+                "port": null,
+                "request_body": "",
+                "ssl_expiration": 7,
+                "checks_version": "v2",
+                "regions": [
+                  "eu",
+                  "us",
+                  "as",
+                  "au"
+                ],
+                "auth_username": "",
+                "pronounceable_name": "raycast.com",
+                "maintenance_from": null,
+                "remember_cookies": true,
+                "ip_version": null
+              }
+            },
+            {
+              "id": "2954813",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "monitor",
+              "attributes": {
+                "team_name": "Your team",
+                "policy_id": null,
+                "created_at": "2025-01-29T17:13:03.620Z",
+                "follow_redirects": true,
+                "maintenance_timezone": "Edinburgh",
+                "maintenance_to": null,
+                "check_frequency": 1800,
+                "confirmation_period": 0,
+                "last_checked_at": "2025-01-31T14:36:13.000Z",
+                "request_headers": [],
+                "url": "https://somerandomdomain.ai",
+                "paused_at": null,
+                "monitor_type": "status",
+                "team_wait": null,
+                "monitor_group_id": null,
+                "auth_password": "",
+                "required_keyword": null,
+                "http_method": "get",
+                "sms": false,
+                "email": true,
+                "critical_alert": false,
+                "verify_ssl": true,
+                "recovery_period": 180,
+                "domain_expiration": null,
+                "request_timeout": 30,
+                "paused": false,
+                "status": "down",
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "updated_at": "2025-01-29T17:35:38.788Z",
+                "expected_status_codes": [],
+                "push": false,
+                "playwright_script": null,
+                "call": false,
+                "port": null,
+                "request_body": "",
+                "ssl_expiration": 7,
+                "checks_version": "v2",
+                "regions": [
+                  "eu",
+                  "us",
+                  "as",
+                  "au"
+                ],
+                "auth_username": "",
+                "pronounceable_name": "somerandomdomain.ai",
+                "maintenance_from": null,
+                "remember_cookies": true,
+                "ip_version": null
+              }
+            }
+          ]
+        }
+      },
+      {
+        "input": "@better-uptime Is there a down monitor?",
+        "mocks": {
+          "get-monitors": [
+            {
+              "id": "2954787",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "monitor",
+              "attributes": {
+                "team_name": "Your team",
+                "policy_id": null,
+                "created_at": "2025-01-29T17:04:26.020Z",
+                "follow_redirects": true,
+                "maintenance_timezone": "Edinburgh",
+                "maintenance_to": null,
+                "check_frequency": 180,
+                "confirmation_period": 0,
+                "last_checked_at": "2025-01-31T15:01:47.000Z",
+                "request_headers": [],
+                "url": "https://raycast.com",
+                "paused_at": null,
+                "monitor_type": "status",
+                "team_wait": 180,
+                "monitor_group_id": null,
+                "auth_password": "",
+                "required_keyword": null,
+                "http_method": "get",
+                "sms": false,
+                "email": true,
+                "critical_alert": false,
+                "verify_ssl": true,
+                "recovery_period": 180,
+                "domain_expiration": null,
+                "request_timeout": 30,
+                "paused": false,
+                "status": "up",
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "updated_at": "2025-01-29T17:04:26.020Z",
+                "expected_status_codes": [],
+                "push": false,
+                "playwright_script": null,
+                "call": false,
+                "port": null,
+                "request_body": "",
+                "ssl_expiration": 7,
+                "checks_version": "v2",
+                "regions": [
+                  "eu",
+                  "us",
+                  "as",
+                  "au"
+                ],
+                "auth_username": "",
+                "pronounceable_name": "raycast.com",
+                "maintenance_from": null,
+                "remember_cookies": true,
+                "ip_version": null
+              }
+            },
+            {
+              "id": "2954813",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "monitor",
+              "attributes": {
+                "team_name": "Your team",
+                "policy_id": null,
+                "created_at": "2025-01-29T17:13:03.620Z",
+                "follow_redirects": true,
+                "maintenance_timezone": "Edinburgh",
+                "maintenance_to": null,
+                "check_frequency": 1800,
+                "confirmation_period": 0,
+                "last_checked_at": "2025-01-31T14:36:13.000Z",
+                "request_headers": [],
+                "url": "https://somerandomdomain.ai",
+                "paused_at": null,
+                "monitor_type": "status",
+                "team_wait": null,
+                "monitor_group_id": null,
+                "auth_password": "",
+                "required_keyword": null,
+                "http_method": "get",
+                "sms": false,
+                "email": true,
+                "critical_alert": false,
+                "verify_ssl": true,
+                "recovery_period": 180,
+                "domain_expiration": null,
+                "request_timeout": 30,
+                "paused": false,
+                "status": "down",
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "updated_at": "2025-01-29T17:35:38.788Z",
+                "expected_status_codes": [],
+                "push": false,
+                "playwright_script": null,
+                "call": false,
+                "port": null,
+                "request_body": "",
+                "ssl_expiration": 7,
+                "checks_version": "v2",
+                "regions": [
+                  "eu",
+                  "us",
+                  "as",
+                  "au"
+                ],
+                "auth_username": "",
+                "pronounceable_name": "somerandomdomain.ai",
+                "maintenance_from": null,
+                "remember_cookies": true,
+                "ip_version": null
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-monitors",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Tells that there is a monitor down"
+          }
+        ]
+      },
+      {
+        "input": "@better-uptime When was the last time a monitor was checked?",
+        "mocks": {
+          "get-monitors": [
+            {
+              "id": "2954787",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "monitor",
+              "attributes": {
+                "team_name": "Your team",
+                "policy_id": null,
+                "created_at": "2025-01-29T17:04:26.020Z",
+                "follow_redirects": true,
+                "maintenance_timezone": "Edinburgh",
+                "maintenance_to": null,
+                "check_frequency": 180,
+                "confirmation_period": 0,
+                "last_checked_at": "2025-01-31T15:01:47.000Z",
+                "request_headers": [],
+                "url": "https://raycast.com",
+                "paused_at": null,
+                "monitor_type": "status",
+                "team_wait": 180,
+                "monitor_group_id": null,
+                "auth_password": "",
+                "required_keyword": null,
+                "http_method": "get",
+                "sms": false,
+                "email": true,
+                "critical_alert": false,
+                "verify_ssl": true,
+                "recovery_period": 180,
+                "domain_expiration": null,
+                "request_timeout": 30,
+                "paused": false,
+                "status": "up",
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "updated_at": "2025-01-29T17:04:26.020Z",
+                "expected_status_codes": [],
+                "push": false,
+                "playwright_script": null,
+                "call": false,
+                "port": null,
+                "request_body": "",
+                "ssl_expiration": 7,
+                "checks_version": "v2",
+                "regions": [
+                  "eu",
+                  "us",
+                  "as",
+                  "au"
+                ],
+                "auth_username": "",
+                "pronounceable_name": "raycast.com",
+                "maintenance_from": null,
+                "remember_cookies": true,
+                "ip_version": null
+              }
+            },
+            {
+              "id": "2954813",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "monitor",
+              "attributes": {
+                "team_name": "Your team",
+                "policy_id": null,
+                "created_at": "2025-01-29T17:13:03.620Z",
+                "follow_redirects": true,
+                "maintenance_timezone": "Edinburgh",
+                "maintenance_to": null,
+                "check_frequency": 1800,
+                "confirmation_period": 0,
+                "last_checked_at": "2025-01-31T14:36:13.000Z",
+                "request_headers": [],
+                "url": "https://somerandomdomain.ai",
+                "paused_at": null,
+                "monitor_type": "status",
+                "team_wait": null,
+                "monitor_group_id": null,
+                "auth_password": "",
+                "required_keyword": null,
+                "http_method": "get",
+                "sms": false,
+                "email": true,
+                "critical_alert": false,
+                "verify_ssl": true,
+                "recovery_period": 180,
+                "domain_expiration": null,
+                "request_timeout": 30,
+                "paused": false,
+                "status": "down",
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "updated_at": "2025-01-29T17:35:38.788Z",
+                "expected_status_codes": [],
+                "push": false,
+                "playwright_script": null,
+                "call": false,
+                "port": null,
+                "request_body": "",
+                "ssl_expiration": 7,
+                "checks_version": "v2",
+                "regions": [
+                  "eu",
+                  "us",
+                  "as",
+                  "au"
+                ],
+                "auth_username": "",
+                "pronounceable_name": "somerandomdomain.ai",
+                "maintenance_from": null,
+                "remember_cookies": true,
+                "ip_version": null
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-monitors",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Returns the last checked time of a monitor"
+          }
+        ]
+      },
+      {
+        "input": "@better-uptime Are there any ongoing incidents?",
+        "mocks": {
+          "get-incidents": [
+            {
+              "id": "719839655",
+              "relationships": {
+                "heartbeat": {
+                  "data": {
+                    "id": "415246",
+                    "type": "heartbeat"
+                  }
+                }
+              },
+              "type": "incident",
+              "attributes": {
+                "status": "Started",
+                "metadata": {},
+                "url": null,
+                "call": false,
+                "team_name": "Your team",
+                "response_url": null,
+                "acknowledged_by": null,
+                "resolved_by": null,
+                "response_options": null,
+                "regions": null,
+                "acknowledged_at": null,
+                "escalation_policy_id": null,
+                "cause": "Missed heartbeat",
+                "push": false,
+                "name": "foobar",
+                "sms": false,
+                "origin_url": null,
+                "http_method": null,
+                "resolved_at": null,
+                "screenshot_url": null,
+                "email": true,
+                "incident_group_id": null,
+                "started_at": "2025-01-29T22:41:08.628Z",
+                "response_content": null,
+                "critical_alert": false
+              }
+            },
+            {
+              "id": "719836454",
+              "relationships": {
+                "heartbeat": {
+                  "data": {
+                    "id": "415246",
+                    "type": "heartbeat"
+                  }
+                }
+              },
+              "type": "incident",
+              "attributes": {
+                "status": "Resolved",
+                "metadata": {},
+                "url": null,
+                "call": false,
+                "team_name": "Your team",
+                "response_url": null,
+                "acknowledged_by": "Andreas Elia",
+                "resolved_by": "Andreas Elia",
+                "response_options": null,
+                "regions": null,
+                "acknowledged_at": "2025-01-29T22:41:01.376Z",
+                "escalation_policy_id": null,
+                "cause": "Missed heartbeat",
+                "push": false,
+                "name": "foobar",
+                "sms": false,
+                "origin_url": null,
+                "http_method": null,
+                "resolved_at": "2025-01-29T22:41:06.284Z",
+                "screenshot_url": null,
+                "email": true,
+                "incident_group_id": null,
+                "started_at": "2025-01-29T22:33:46.777Z",
+                "response_content": null,
+                "critical_alert": false
+              }
+            },
+            {
+              "id": "719758255",
+              "relationships": {
+                "heartbeat": {
+                  "data": {
+                    "id": "415246",
+                    "type": "heartbeat"
+                  }
+                }
+              },
+              "type": "incident",
+              "attributes": {
+                "status": "Resolved",
+                "metadata": {},
+                "url": null,
+                "call": false,
+                "team_name": "Your team",
+                "response_url": null,
+                "acknowledged_by": null,
+                "resolved_by": null,
+                "response_options": null,
+                "regions": null,
+                "acknowledged_at": null,
+                "escalation_policy_id": null,
+                "cause": "Reported failure",
+                "push": false,
+                "name": "foobar",
+                "sms": false,
+                "origin_url": null,
+                "http_method": null,
+                "resolved_at": "2025-01-29T19:27:59.655Z",
+                "screenshot_url": null,
+                "email": true,
+                "incident_group_id": null,
+                "started_at": "2025-01-29T19:27:31.021Z",
+                "response_content": null,
+                "critical_alert": false
+              }
+            },
+            {
+              "id": "719712937",
+              "relationships": {
+                "monitor": {
+                  "data": {
+                    "id": "2954813",
+                    "type": "monitor"
+                  }
+                }
+              },
+              "type": "incident",
+              "attributes": {
+                "status": "Started",
+                "metadata": {
+                  "Response code": "0"
+                },
+                "url": "https://somerandomdomain.ai",
+                "call": false,
+                "team_name": "Your team",
+                "response_url": null,
+                "acknowledged_by": null,
+                "resolved_by": null,
+                "response_options": null,
+                "escalation_policy_id": null,
+                "acknowledged_at": null,
+                "push": false,
+                "cause": "DNS lookup failure",
+                "regions": [
+                  "eu",
+                  "us",
+                  "as",
+                  "au"
+                ],
+                "name": "somerandomdomain.ai",
+                "sms": false,
+                "origin_url": null,
+                "http_method": "get",
+                "resolved_at": null,
+                "screenshot_url": null,
+                "email": true,
+                "incident_group_id": null,
+                "started_at": "2025-01-29T17:35:38.777Z",
+                "response_content": "",
+                "critical_alert": false
+              }
+            },
+            {
+              "id": "719709909",
+              "relationships": {},
+              "type": "incident",
+              "attributes": {
+                "status": "Started",
+                "metadata": {},
+                "url": null,
+                "call": false,
+                "team_name": "Your team",
+                "response_url": null,
+                "acknowledged_by": null,
+                "resolved_by": null,
+                "response_options": null,
+                "regions": null,
+                "acknowledged_at": null,
+                "escalation_policy_id": null,
+                "cause": "Wegw",
+                "push": false,
+                "name": "Manually reported",
+                "sms": false,
+                "origin_url": null,
+                "http_method": null,
+                "resolved_at": null,
+                "screenshot_url": null,
+                "email": true,
+                "incident_group_id": null,
+                "started_at": "2025-01-29T17:30:10.819Z",
+                "response_content": null,
+                "critical_alert": false
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-incidents",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Returns the status of incidents"
+          }
+        ]
+      },
+      {
+        "input": "@better-uptime Are all of the heartbeats working?",
+        "mocks": {
+          "get-heartbeats": [
+            {
+              "id": "415245",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "heartbeat",
+              "attributes": {
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "status": "pending",
+                "url": "https://betteruptime.com/api/v1/heartbeat/KJBfMxHW2jLPLvcPLEVHzibc",
+                "call": false,
+                "team_name": "Your team",
+                "paused": false,
+                "period": 10800,
+                "push": false,
+                "updated_at": "2025-01-29T16:20:13.643Z",
+                "maintenance_from": null,
+                "sort_index": null,
+                "name": "test",
+                "sms": false,
+                "heartbeat_group_id": null,
+                "maintenance_timezone": null,
+                "email": true,
+                "paused_at": null,
+                "grace": 300,
+                "critical_alert": false,
+                "created_at": "2025-01-29T16:20:13.643Z",
+                "policy_id": null,
+                "team_wait": null,
+                "maintenance_to": null
+              }
+            },
+            {
+              "id": "415246",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "heartbeat",
+              "attributes": {
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "status": "down",
+                "url": "https://betteruptime.com/api/v1/heartbeat/UXckHLkiAaWbe3b9mKGYVEb3",
+                "call": false,
+                "team_name": "Your team",
+                "paused": false,
+                "period": 10800,
+                "push": false,
+                "updated_at": "2025-01-29T22:41:08.957Z",
+                "maintenance_from": null,
+                "sort_index": null,
+                "name": "foobar",
+                "sms": false,
+                "heartbeat_group_id": null,
+                "maintenance_timezone": null,
+                "email": true,
+                "paused_at": null,
+                "grace": 300,
+                "critical_alert": false,
+                "created_at": "2025-01-29T16:20:20.056Z",
+                "policy_id": null,
+                "team_wait": null,
+                "maintenance_to": null
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-heartbeats",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Returns the status of heartbeats"
+          }
+        ]
+      },
+      {
+        "input": "@better-uptime When was the last heartbeat?",
+        "mocks": {
+          "get-heartbeats": [
+            {
+              "id": "415245",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "heartbeat",
+              "attributes": {
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "status": "pending",
+                "url": "https://betteruptime.com/api/v1/heartbeat/KJBfMxHW2jLPLvcPLEVHzibc",
+                "call": false,
+                "team_name": "Your team",
+                "paused": false,
+                "period": 10800,
+                "push": false,
+                "updated_at": "2025-01-29T16:20:13.643Z",
+                "maintenance_from": null,
+                "sort_index": null,
+                "name": "test",
+                "sms": false,
+                "heartbeat_group_id": null,
+                "maintenance_timezone": null,
+                "email": true,
+                "paused_at": null,
+                "grace": 300,
+                "critical_alert": false,
+                "created_at": "2025-01-29T16:20:13.643Z",
+                "policy_id": null,
+                "team_wait": null,
+                "maintenance_to": null
+              }
+            },
+            {
+              "id": "415246",
+              "relationships": {
+                "policy": {
+                  "data": null
+                }
+              },
+              "type": "heartbeat",
+              "attributes": {
+                "maintenance_days": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ],
+                "status": "down",
+                "url": "https://betteruptime.com/api/v1/heartbeat/UXckHLkiAaWbe3b9mKGYVEb3",
+                "call": false,
+                "team_name": "Your team",
+                "paused": false,
+                "period": 10800,
+                "push": false,
+                "updated_at": "2025-01-29T22:41:08.957Z",
+                "maintenance_from": null,
+                "sort_index": null,
+                "name": "foobar",
+                "sms": false,
+                "heartbeat_group_id": null,
+                "maintenance_timezone": null,
+                "email": true,
+                "paused_at": null,
+                "grace": 300,
+                "critical_alert": false,
+                "created_at": "2025-01-29T16:20:20.056Z",
+                "policy_id": null,
+                "team_wait": null,
+                "maintenance_to": null
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-heartbeats",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Returns the last heartbeat time"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "apiKey",
@@ -64,24 +959,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
-    "axios": "^0.26.1"
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

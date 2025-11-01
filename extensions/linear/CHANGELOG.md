@@ -1,5 +1,45 @@
 # Linear Changelog
 
+## [Notification improvements] - 2025-10-29
+
+- Improved notification display to support all notification types by reading directly from the API
+- Added "Mark all as read" action to notifications command and menu bar extension
+- Bumped `@linear/sdk` to v61.0.0
+
+## [Schema deprecation and update SDK] - 2025-10-13
+
+- Bumped `@linear/sdk` to v60.0.0
+- Removed references to "roadmap" which was [deprecated](https://linear.app/changelog/2024-07-25-priority-for-projects-and-micro-adjust) July 2024
+- Corrected project list empty state message
+
+## [Status Preference] - 2025-10-09
+
+- Added "Preferred Status" preference to "Create Issue for Myself" command to specify the initial status for new issues
+
+## [Update API and bug fixes] - 2025-04-15
+
+- Updated dependencies
+- Fix project statuses bug in AI Extension
+
+## [Fix Search Issue] - 2025-03-11
+
+- Updated getIssues to use the new searchIssues API instead of issueSearch ( now deprecated )
+
+## [Fix Creation Issue] - 2025-02-25
+
+- Fixed issue creation with stateId because of closing quote in the GraphQL mutation.
+- Added npm run publish to publish the extension to the Raycast Store as per [Docs](https://developers.raycast.com/basics/publish-an-extension).
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Focus Shortcuts] - 2025-02-07
+
+- Added input focus sub-commands to the `Create Issue` command for changing the focused form input quicker.
+
+## [Search Projects Fixes] - 2024-11-08
+
+- [#15052](https://github.com/raycast/extensions/issues/15052): Fixed incomplete project list by adding pagination and utilizing search text to fetch projects directly.
+
 ## [Search Projects Fixes] - 2024-08-08
 
 - [#13882](https://github.com/raycast/extensions/issues/13882): Replaced filtering on roadmaps with filtering on initiatives, as initiatives replaced roadmaps.

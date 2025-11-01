@@ -16,6 +16,10 @@ import { calMenubarTitle, curDay, curMonth, curYear, replaceWithFourPerEmSpace }
 import { weekNumber, weekNumberSun } from "weeknumber";
 import { format } from "date-fns";
 
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
+};
+
 export const menubarTitle = () => {
   return menubarStyle !== MenubarStyle.ICON_ONLY ? calMenubarTitle : "";
 };
@@ -65,38 +69,47 @@ export const openApp = async (appName: string) => {
   }
 };
 
+// date:  month, day, year
+export function formatDateWithCustomFormat(date: Date, customFormat: string = dateFormat) {
+  if (customFormat === "macOS") {
+    const divider = " ";
+    const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
+    return monthShort + divider + date.getDate() + divider + date.getFullYear();
+  } else {
+    return format(date, customFormat);
+  }
+}
+
 // date: week, month, day, year
 export function formatYearDateWithWeek(date: Date, customFormat: string = dateFormat) {
   const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
-  const devider = replaceWithFourPerEmSpace(" ").repeat(2);
+  const divider = replaceWithFourPerEmSpace(" ").repeat(2);
   if (customFormat === "macOS") {
     const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
-    const formatDate = weekDayShort + devider + monthShort + devider + date.getDate() + devider + date.getFullYear();
-    return formatDate;
+    return weekDayShort + divider + monthShort + divider + date.getDate() + divider + date.getFullYear();
   } else {
-    return weekDayShort + devider + format(date, customFormat);
+    return weekDayShort + divider + format(date, customFormat);
   }
 }
 
 // date: week, month, day
 export function formatMonthDateWithWeek(date: Date, customFormat: string = dateFormat) {
   const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
-  const devider = " ";
+  const divider = " ";
   if (customFormat === "macOS") {
     const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
-    const formatDate = weekDayShort + devider + monthShort + devider + date.getDate();
-    return formatDate;
+    return weekDayShort + divider + monthShort + divider + date.getDate();
   } else {
     let sanitizedFormat = dateFormat.replace(/y+\/?|\/?y+/gi, "").trim();
     sanitizedFormat = sanitizedFormat
       .replace(/^\/|\/$/g, "")
       .replace(/^\.|\.$/g, "")
       .replace(/^-|-$/g, "");
-    return weekDayShort + devider + format(date, sanitizedFormat);
+    return weekDayShort + divider + format(date, sanitizedFormat);
   }
 }
 
-export function truncateMenubarTitle(str: string, maxLength = 60): string {
+export function truncateMenubarTitle(str: string, maxLength: number = 60): string {
   let length = 0;
   let i;
   const finalStr = str;
@@ -177,4 +190,10 @@ export function truncateSubtitle(title: string, subtitle: string, maxLength = la
   }
 
   return truncatedSubtitle;
+}
+
+export function extractFirstUrl(text: string): string | null {
+  const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
+  const match = text.match(urlPattern);
+  return match ? match[0] : null;
 }

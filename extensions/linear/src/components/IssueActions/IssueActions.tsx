@@ -1,3 +1,5 @@
+import { IssuePriorityValue, User } from "@linear/sdk";
+import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
 import {
   Action,
   Icon,
@@ -10,36 +12,32 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { IssuePriorityValue, User } from "@linear/sdk";
-import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
 import { format } from "date-fns";
+import { useState } from "react";
 
 import { IssueResult, IssueDetailResult, Attachment } from "../../api/getIssues";
-
 import { getLinearClient } from "../../api/linearClient";
-
-import { getEstimateScale } from "../../helpers/estimates";
 import { getErrorMessage } from "../../helpers/errors";
+import { getEstimateScale } from "../../helpers/estimates";
 import { priorityIcons } from "../../helpers/priorities";
 import { getUserIcon } from "../../helpers/users";
-
+import useUsers from "../../hooks/useUsers";
+import CreateSubIssues from "../CreateSubIssues";
+import EditIssueForm from "../EditIssueForm";
+import IssueAttachments from "../IssueAttachments";
+import { IssueAttachmentsForm } from "../IssueAttachmentsForm";
+import IssueCommentForm from "../IssueCommentForm";
+import IssueComments from "../IssueComments";
+import OpenInLinear from "../OpenInLinear";
 import SubIssues from "../SubIssues";
+
 import CopyToClipboardSection from "./CopyToClipboardSection";
-import ProjectSubmenu from "./ProjectSubmenu";
 import CycleSubmenu from "./CycleSubmenu";
 import LabelSubmenu from "./LabelSubmenu";
-import ParentIssueSubmenu from "./ParentIssueSubmenu";
-import StateSubmenu from "./StateSubmenu";
-import EditIssueForm from "../EditIssueForm";
-import IssueComments from "../IssueComments";
-import IssueCommentForm from "../IssueCommentForm";
-import IssueAttachments from "../IssueAttachments";
-import CreateSubIssues from "../CreateSubIssues";
 import MilestoneSubmenu from "./MilestoneSubmenu";
-import OpenInLinear from "../OpenInLinear";
-import { useState } from "react";
-import useUsers from "../../hooks/useUsers";
-import { IssueAttachmentsForm } from "../IssueAttachmentsForm";
+import ParentIssueSubmenu from "./ParentIssueSubmenu";
+import ProjectSubmenu from "./ProjectSubmenu";
+import StateSubmenu from "./StateSubmenu";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -416,7 +414,7 @@ export default function IssueActions({
 
         <ActionPanel.Submenu
           icon={Icon.AddPerson}
-          title="Assign To"
+          title="Assign to"
           shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
           {...(supportsUserTypeahead && {
             onSearchTextChange: setUserQuery,
@@ -437,7 +435,7 @@ export default function IssueActions({
 
         {me ? (
           <Action
-            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Un-Assign from Me" : "Assign to Me"}
             icon={getUserIcon(me)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => setToMe(isAssignedToMe ? null : me)}
@@ -503,7 +501,7 @@ export default function IssueActions({
         />
 
         <Action.Push
-          title="Break Issues Into Sub-Issues"
+          title="Break Issues into Sub-Issues"
           icon={Icon.Stars}
           target={<CreateSubIssues issue={issue} />}
           shortcut={{ modifiers: ["opt", "shift"], key: "m" }}

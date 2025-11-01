@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wol",
-  "title": "WOL",
+  "title": "Wake-On-LAN",
   "description": "Simple wake on lan",
   "icon": "command-icon.png",
   "author": "Lemon",
+  "contributors": [
+    "sanjevidev"
+  ],
   "categories": [
     "System"
   ],
@@ -18,8 +21,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
-    "@raycast/utils": "^1.12.5"
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

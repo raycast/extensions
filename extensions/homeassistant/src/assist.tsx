@@ -3,7 +3,7 @@ import { getTranslation } from "@lib/translation";
 import { getErrorMessage } from "@lib/utils";
 import { Action, ActionPanel, Color, Icon, Image, List, Toast, clearSearchBar, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface PlainSpeech {
   speech: string;
@@ -114,7 +114,7 @@ function getInitialConversations(language: string): ConversationContent[] {
 function PipelinesDropdownList(props: {
   pipelines: HAAssistPipelines | undefined;
   onChange?: (newValue: HAAssistPipeline | undefined) => void;
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const p = props.pipelines;
   if (!p) {
     return null;
@@ -134,7 +134,7 @@ function PipelinesDropdownList(props: {
   );
 }
 
-export default function AssistCommand(): JSX.Element {
+export default function AssistCommand(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>("");
   const { pipelines, isLoading: isLoadingPipeline, error } = useAssistPipelines();
   const [conversations, setConversations] = useState<ConversationContent[]>();
@@ -187,12 +187,12 @@ export default function AssistCommand(): JSX.Element {
         return { source: currentUser.picture, mask: Image.Mask.Circle };
       }
     }
-    return { source: "person.png", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
+    return { source: "account.svg", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
   };
   const isLoading = !error ? isLoadingPipeline || !conversations : false;
   return (
     <List
-      searchBarPlaceholder="Type your Request and Press Enter"
+      searchBarPlaceholder="Enter your request"
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
@@ -212,8 +212,11 @@ export default function AssistCommand(): JSX.Element {
               key={i.toString()}
               title={c.text}
               icon={{
-                value: c.author === Author.Assist ? "home-assistant.png" : userPicture(),
-                tooltip: c.author === Author.Assist ? "Assist" : currentUser?.name ?? "",
+                value:
+                  c.author === Author.Assist
+                    ? { source: "home-assistant.svg", tintColor: Color.PrimaryText }
+                    : userPicture(),
+                tooltip: c.author === Author.Assist ? "Assist" : (currentUser?.name ?? ""),
               }}
               accessories={[{ date: c.date }]}
               actions={

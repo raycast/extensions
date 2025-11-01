@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Color, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, Color, Icon, useNavigation, closeMainWindow } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
@@ -40,50 +40,42 @@ export default function Command() {
     fetchSimulators();
   }, []);
 
-  const openAction = (device: Device) => {
-    if (device.state !== "Booted") {
-      return null;
-    }
-    return (
-      <Action
-        title="Open"
-        icon={Icon.Window}
-        onAction={() => {
-          exec(`open -g -a Simulator`);
-          const appleScript = `
-        if running of application "Simulator" then
-          tell application "System Events"
-            set theWindows to windows of (processes whose name is "Simulator")
-            repeat with theWindow in (the first item of theWindows)
-              set theWindowName to name of theWindow
-              if theWindowName contains "${device.name}" then
-                perform action "AXRaise" of theWindow
-              end if
-            end repeat
-          end tell
-          tell the application "Simulator"
-            activate
-          end tell
-        end if
-        `;
-          exec(`osascript -e '${appleScript}'`);
-        }}
-      />
-    );
-  };
-
   const bootAction = (device: Device) => {
-    if (device.state === "Booted") {
-      return null;
-    }
+    const navigation = useNavigation();
+
     return (
       <Action
-        title="Boot"
+        title={device.state === "Booted" ? "Open" : "Boot"}
         icon={Icon.Power}
         onAction={() => {
           exec(`xcrun simctl boot ${device.udid}`, () => {
             fetchSimulators();
           });
+          exec(`open -g -a Simulator`);
+          const appleScript = `
+            tell application "System Events"
+              repeat
+                set windowFound to false
+                set theWindows to windows of process "Simulator"
+                repeat with theWindow in theWindows
+                  set theWindowName to name of theWindow
+                  if theWindowName contains "${device.name}" then
+                    tell application "Simulator" to activate
+                    perform action "AXRaise" of theWindow
+                    set windowFound to true
+                    exit repeat 
+                  end if
+                  delay 0.1
+                end repeat
+                if windowFound then
+                  exit repeat
+                end if
+              end repeat
+            end tell
+        `;
+          exec(`osascript -e '${appleScript}'`);
+          navigation.pop();
+          closeMainWindow({ clearRootSearch: true });
         }}
       />
     );
@@ -107,6 +99,12 @@ export default function Command() {
     );
   };
 
+  function getIcon(name: string) {
+    if (name.includes("iPhone")) return Icon.Mobile;
+    if (name.includes("iPad")) return Icon.Desktop;
+    return Icon.Devices;
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter by name or runtime...">
       {state
@@ -122,7 +120,7 @@ export default function Command() {
           return (
             <List.Item
               id={device.udid}
-              icon="list-icon.png"
+              icon={getIcon(device.name)}
               title={device.name}
               keywords={device.runtime.split(" ")}
               subtitle={device.runtime}
@@ -132,23 +130,10 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  {openAction(device)}
                   {bootAction(device)}
                   {shutdownAction(device)}
-                  <Action
-                    title="Show Data"
-                    icon={Icon.Folder}
-                    onAction={() => {
-                      exec(`open ${device.dataPath}`);
-                    }}
-                  />
-                  <Action
-                    title="Show Logs"
-                    icon={Icon.Folder}
-                    onAction={() => {
-                      exec(`open ${device.logPath}`);
-                    }}
-                  />
+                  <Action.Open title="Open Data Folder" icon={Icon.Folder} target={device.dataPath} />
+                  <Action.Open title="Open Logs Folder" icon={Icon.Folder} target={device.logPath} />
                 </ActionPanel>
               }
             />

@@ -52,16 +52,17 @@ function environmentsTable(data: environment[]): string {
 }
 
 interface spaceData {
-  isLoading: boolean;
-  data: {
-    space: space;
-  };
+  space: space;
 }
 
 export default function SpaceDetail(props: { spaceId: number }) {
-  const data = sbData(`spaces/${props.spaceId}`) as spaceData;
+  const data = sbData<spaceData>(`spaces/${props.spaceId}`);
   if (data.isLoading) {
     return <Detail isLoading={data.isLoading} markdown={`Loading...`} />;
+  }
+
+  if (!data.data) {
+    return <Detail markdown="No details found" />;
   }
 
   const space = data.data.space;
@@ -88,7 +89,7 @@ export default function SpaceDetail(props: { spaceId: number }) {
           <Detail.Metadata.Link
             title={`Email Space Owner`}
             target={`mailto:${space.owner.real_email}`}
-            text={space.owner.friendly_name ?? "Owners email"}
+            text={space.owner.friendly_name ?? "Owner's email"}
           />
         </Detail.Metadata>
       }

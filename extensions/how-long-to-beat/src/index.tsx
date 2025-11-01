@@ -5,8 +5,6 @@ import { Details } from "./details";
 import { pluralize } from "./helpers";
 import { HltbSearch } from "./hltbsearch";
 
-export const baseUrl = "https://howlongtobeat.com/game?id=";
-
 export default function Command() {
   const { state, search } = useSearch();
 
@@ -22,7 +20,7 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) {
-  const url = `${baseUrl}${searchResult.id}`;
+  const url = `${HltbSearch.DETAIL_URL}${searchResult.id}`;
   const { push } = useNavigation();
 
   const mainStoryHours = searchResult.gameplayMain || 0;
@@ -84,8 +82,8 @@ function useSearch() {
               Math.round(resultEntry.comp_plus / 3600),
               Math.round(resultEntry.comp_100 / 3600),
               HowLongToBeatService.calcDistancePercentage(resultEntry.game_name, searchText),
-              searchText
-            )
+              searchText,
+            ),
           );
         }
 
@@ -104,7 +102,7 @@ function useSearch() {
         showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
       }
     },
-    [setState]
+    [setState],
   );
 
   useEffect(() => {

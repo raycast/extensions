@@ -1,10 +1,11 @@
 import { State } from "@lib/haapi";
-import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Color, launchCommand, LaunchType, MenuBarExtra, showToast, Toast } from "@raycast/api";
 
 import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { getIcon } from "../state/utils";
+import { useWeatherForecast } from "./hooks";
 import {
   Forecast,
   getHumidityFromState,
@@ -15,7 +16,6 @@ import {
   weatherConditionToText,
   WeatherForecastType,
 } from "./utils";
-import { useWeatherForecast } from "./hooks";
 
 export async function launchWeatherCommand() {
   try {
@@ -81,7 +81,7 @@ export function WeatherTemperatureMenubarItem({ state: s }: { state: State | und
     <MenuBarExtra.Item
       title="Temperature"
       subtitle={`${val}`}
-      icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "thermometer.svg", tintColor: Color.PrimaryText }}
       onAction={launchWeatherCommand}
     />
   );

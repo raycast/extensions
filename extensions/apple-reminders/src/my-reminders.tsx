@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, clearSearchBar, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import { useState } from "react";
 
 import ReminderListItem from "./components/ReminderListItem";
 import { CreateReminderForm } from "./create-reminder";
@@ -8,11 +9,12 @@ import useViewReminders from "./hooks/useViewReminders";
 
 export default function Command() {
   const { displayCompletionDate } = getPreferenceValues<Preferences.MyReminders>();
-  const [listId, setListId] = useCachedState<string>("today");
+  const [listId, setListId] = useCachedState<string>("view", "today");
+  const [newReminderTitle, setNewReminderTitle] = useState("");
 
   const { data, isLoading, mutate } = useData();
 
-  const { sections, viewProps } = useViewReminders(listId ?? "today", { data });
+  const { sections, viewProps } = useViewReminders(listId, { data });
 
   const placeholder =
     listId === "all" ? "Filter by title, notes, priority or list" : "Filter by title, notes or priority";
@@ -21,11 +23,18 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder={placeholder}
+      onSearchTextChange={setNewReminderTitle}
+      filtering={true}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by List" onChange={setListId} value={listId}>
           {data?.lists && data.lists.length > 0 ? (
             <>
               <List.Dropdown.Section>
+                <List.Dropdown.Item
+                  title="Overdue"
+                  icon={{ source: Icon.CheckList, tintColor: Color.Orange }}
+                  value="overdue"
+                />
                 <List.Dropdown.Item
                   title="Today"
                   icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
@@ -82,7 +91,8 @@ export default function Command() {
             <Action.Push
               title="Create Reminder"
               icon={Icon.Plus}
-              target={<CreateReminderForm listId={listId} mutate={mutate} />}
+              target={<CreateReminderForm draftValues={{ title: newReminderTitle }} listId={listId} mutate={mutate} />}
+              onPop={() => clearSearchBar()}
             />
 
             <Action

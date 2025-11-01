@@ -1,15 +1,16 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
 
-export function TimerStartAction(props: { state: State }): JSX.Element | null {
+export function TimerStartAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isTimerEditable(s)) {
     return null;
   }
   const title = s.state === "active" ? "Restart" : "Start";
-  const iconSource = s.state === "active" ? Icon.ArrowClockwise : "play.png";
+  const iconSource = s.state === "active" ? Icon.ArrowClockwise : "play.svg";
   return (
     <Action
       title={title}
@@ -20,7 +21,7 @@ export function TimerStartAction(props: { state: State }): JSX.Element | null {
   );
 }
 
-export function TimerPauseAction(props: { state: State }): JSX.Element | null {
+export function TimerPauseAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("timer") || s.attributes.editable !== true) {
     return null;
@@ -30,12 +31,12 @@ export function TimerPauseAction(props: { state: State }): JSX.Element | null {
       title="Pause"
       shortcut={{ modifiers: ["cmd"], key: "p" }}
       onAction={() => callTimerPauseService(s)}
-      icon={{ source: "pause.png", tintColor: Color.Green }}
+      icon={{ source: "pause.svg", tintColor: Color.Green }}
     />
   );
 }
 
-export function TimerCancelAction(props: { state: State }): JSX.Element | null {
+export function TimerCancelAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isTimerEditable(s) && s.state === "active") {
     return null;

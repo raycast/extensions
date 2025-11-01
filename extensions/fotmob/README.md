@@ -1,6 +1,6 @@
 # RayFotmob
 
-Unofficial [Fotmob](https://www.fotmob.com/) extension for [Raycast](https://raycast.com/).
+Unofficial [Fotmob](https://www.fotmob.com/) extension for [Raycast](https://raycast.com/)
 
 ## Features
 

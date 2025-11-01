@@ -24,7 +24,7 @@ const AccountDetailView: FC<IAccountDetailViewProps> = ({ pubkey, connection }) 
       return account;
     },
     [pubkey],
-    { abortable }
+    { abortable },
   );
 
   const {
@@ -37,7 +37,7 @@ const AccountDetailView: FC<IAccountDetailViewProps> = ({ pubkey, connection }) 
       return transactionsList;
     },
     [pubkey],
-    { abortable }
+    { abortable },
   );
 
   const revalidateAll = () => {

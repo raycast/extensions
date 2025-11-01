@@ -1,6 +1,7 @@
 import { Toast, showToast, List, ActionPanel, Action, Icon } from "@raycast/api";
-import { getInstallStatus, getProfileNames, startFocusWithProfile } from "./utils";
+import { getProfileNames, startFocusWithProfile, getActiveProfileName } from "./utils";
 import { useState, useEffect } from "react";
+import { ensureFocusIsRunning } from "./helpers";
 
 export default function Command() {
   const [profiles, setProfiles] = useState<string[]>([]);
@@ -8,12 +9,7 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchProfiles() {
-      if (!(await getInstallStatus())) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Focus is not installed",
-          message: "Install Focus app from: https://heyfocus.com",
-        });
+      if (!(await ensureFocusIsRunning())) {
         setIsLoading(false);
         return;
       }
@@ -27,6 +23,20 @@ export default function Command() {
   }, []);
 
   async function handleProfileSelection(profileName: string) {
+    if (!(await ensureFocusIsRunning())) {
+      return;
+    }
+
+    const activeProfile = await getActiveProfileName();
+    if (activeProfile) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Focus session already running",
+        message: `Profile "${activeProfile}" is currently active`,
+      });
+      return;
+    }
+
     await showToast({ style: Toast.Style.Animated, title: "Starting focus..." });
     await startFocusWithProfile(profileName);
     await showToast({ style: Toast.Style.Success, title: `Focus started with profile: ${profileName}` });

@@ -2,9 +2,10 @@ import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 
-export function SelectSourceAction(props: { state: State }): JSX.Element | null {
+export function SelectSourceAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
   let sl = state.attributes.source_list as string[] | undefined;
   const handle = async (source: string) => {
@@ -35,7 +36,7 @@ export function SelectSourceAction(props: { state: State }): JSX.Element | null 
   return null;
 }
 
-export function SelectVolumeAction(props: { state: State }): JSX.Element | null {
+export function SelectVolumeAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
   const handle = async (volumeLevel: number) => {
     await ha.setVolumeLevelMedia(state.entity_id, volumeLevel);
@@ -63,7 +64,7 @@ export function SelectVolumeAction(props: { state: State }): JSX.Element | null 
   return null;
 }
 
-export function CopyTrackToClipboard(props: { state: State }): JSX.Element | null {
+export function CopyTrackToClipboard(props: { state: State }): React.ReactElement | null {
   const state = props.state;
   const song = getMediaPlayerTitleAndArtist(state);
   if (song) {
@@ -74,7 +75,7 @@ export function CopyTrackToClipboard(props: { state: State }): JSX.Element | nul
   return null;
 }
 
-export function MediaPlayerTurnOnAction(props: { state: State }): JSX.Element | null {
+export function MediaPlayerTurnOnAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
   const handle = async () => {
     await ha.callService("media_player", "turn_on", { entity_id: state.entity_id });
@@ -89,12 +90,12 @@ export function MediaPlayerTurnOnAction(props: { state: State }): JSX.Element | 
       title="Turn On"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Green }}
+      icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
 
-export function MediaPlayerTurnOffAction(props: { state: State }): JSX.Element | null {
+export function MediaPlayerTurnOffAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
   const handle = async () => {
     await ha.callService("media_player", "turn_off", { entity_id: state.entity_id });
@@ -109,7 +110,7 @@ export function MediaPlayerTurnOffAction(props: { state: State }): JSX.Element |
       title="Turn Off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Red }}
+      icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -121,38 +122,39 @@ export function MediaPlayerActionPanel(props: { state: State }) {
     <ActionPanel>
       <ActionPanel.Section title="Controls">
         <Action
+          // eslint-disable-next-line @raycast/prefer-title-case
           title="Play/Pause"
           onAction={async () => await ha.playPauseMedia(entityID)}
-          icon={{ source: "play-pause.jpg", tintColor: Color.PrimaryText }}
+          icon={{ source: "play-pause.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Play"
           onAction={async () => await ha.playMedia(entityID)}
-          icon={{ source: "play.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "play.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Pause"
-          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           onAction={async () => await ha.pauseMedia(entityID)}
-          icon={{ source: "pause.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "pause.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Stop"
           shortcut={{ modifiers: ["cmd"], key: "s" }}
           onAction={async () => await ha.stopMedia(entityID)}
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+          icon={{ source: "stop.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Next"
           shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
           onAction={async () => await ha.nextMedia(entityID)}
-          icon={{ source: "next.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "skip-next.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Previous"
           shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
           onAction={async () => await ha.previousMedia(entityID)}
-          icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "skip-previous.svg", tintColor: Color.PrimaryText }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Volume">

@@ -1,32 +1,19 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
-import { searchResources, SiteData, getSites } from "./common/SoApi";
-import { useEffect, useState } from "react";
+import { searchResources, getSites } from "./common/SoApi";
+import { useState } from "react";
 import { useStore } from "./common/store";
 import { useVisitedUrls } from "./common/useVisitedUrls";
 import { QuestionDetail } from "./common/questionDetail";
+import { usePromise } from "@raycast/utils";
 
 export default function View() {
   const [urls] = useVisitedUrls();
   const store = useStore(["results"], (_, q, s) => searchResources(q as string, s as string));
-  const [sites, setSites] = useState<SiteData[]>([]);
-  const [isSitedataloading, setIsSitedataloading] = useState(true);
   const [sitename, setSitename] = useState("stackoverflow");
   const [query, setQuery] = useState("");
   const sectionNames = ["Search Results"];
 
-  useEffect(() => {
-    const getSitesData = async () => {
-      const s = await getSites();
-      setSites(s);
-    };
-
-    getSitesData();
-
-    return () => {
-      setIsSitedataloading(false);
-      // this now gets called when the component unmounts
-    };
-  }, []);
+  const { isLoading: isSitedataloading, data: sites = [] } = usePromise(getSites);
 
   const getIcon = (site: string) => {
     const correctSite = sites.filter((c) => c.api_site_parameter === site);

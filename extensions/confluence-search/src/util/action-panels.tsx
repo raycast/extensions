@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { Action, ActionPanel } from "@raycast/api";
 
 interface URLActionProps {
@@ -19,7 +20,7 @@ export function StandardUrlActionSection({ url, title, other }: URLActionProps) 
     <ActionPanel.Section title={title}>
       <Action.OpenInBrowser title="Open in Browser" url={url} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "." }} />
-      {other}
+      {other as JSX.Element}
     </ActionPanel.Section>
   );
 }

@@ -1,33 +1,31 @@
-import { useEffect, useState } from "react";
+import { IssuePriorityValue, User } from "@linear/sdk";
 import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { IssuePriorityValue, User } from "@linear/sdk";
+import { MutatePromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { UpdateIssuePayload, updateIssue } from "../api/updateIssue";
-
+import { getCycleOptions } from "../helpers/cycles";
+import { getErrorMessage } from "../helpers/errors";
+import { getEstimateScale } from "../helpers/estimates";
+import { getMilestoneIcon } from "../helpers/milestones";
+import { priorityIcons } from "../helpers/priorities";
+import { getProjectIcon } from "../helpers/projects";
+import { getOrderedStates, getStatusIcon } from "../helpers/states";
+import { getTeamIcon } from "../helpers/teams";
+import { getUserIcon } from "../helpers/users";
+import useCycles from "../hooks/useCycles";
+import useIssueDetail from "../hooks/useIssueDetail";
+import useIssues from "../hooks/useIssues";
 import useLabels from "../hooks/useLabels";
+import useMilestones from "../hooks/useMilestones";
+import useProjects from "../hooks/useProjects";
 import useStates from "../hooks/useStates";
 import useTeams from "../hooks/useTeams";
-import useCycles from "../hooks/useCycles";
-import useIssues from "../hooks/useIssues";
-import useProjects from "../hooks/useProjects";
-
-import { getEstimateScale } from "../helpers/estimates";
-import { getOrderedStates, getStatusIcon } from "../helpers/states";
-import { getErrorMessage } from "../helpers/errors";
-import { priorityIcons } from "../helpers/priorities";
-import { getUserIcon } from "../helpers/users";
-import { getCycleOptions } from "../helpers/cycles";
-import { getProjectIcon, projectStatusText } from "../helpers/projects";
-import { getTeamIcon } from "../helpers/teams";
-
-import useIssueDetail from "../hooks/useIssueDetail";
-import { MutatePromise } from "@raycast/utils";
-import { CreateIssueValues } from "./CreateIssueForm";
-import useMilestones from "../hooks/useMilestones";
-import { getMilestoneIcon } from "../helpers/milestones";
 import useUsers from "../hooks/useUsers";
+
+import { CreateIssueValues } from "./CreateIssueForm";
 
 type EditIssueFormProps = {
   issue: IssueResult;
@@ -287,7 +285,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
           {projects.map((project) => {
             return (
               <Form.Dropdown.Item
-                title={`${project.name} (${projectStatusText[project.state]})`}
+                title={`${project.name} (${project.status.name})`}
                 value={project.id}
                 key={project.id}
                 icon={getProjectIcon(project)}

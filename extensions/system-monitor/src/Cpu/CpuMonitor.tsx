@@ -25,7 +25,7 @@ export default function CpuMonitor() {
       icon={Icon.Monitor}
       accessories={[{ text: !cpu ? "Loading…" : `${cpu} %` }]}
       detail={<CpuMonitorDetail cpu={(cpu as string) || ""} />}
-      actions={<Actions />}
+      actions={<Actions radioButtonNumber={1} />}
     />
   );
 }

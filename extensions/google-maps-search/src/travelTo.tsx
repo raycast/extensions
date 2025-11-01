@@ -1,22 +1,15 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { fetchItemInput } from "./utils/input";
-import { Preferences, TransportType } from "./utils/types";
+import { Preferences, TransportType, OriginOption } from "./utils/types";
 import { makeDirectionsURL } from "./utils/url";
-
-// Enum for origin options in the form
-enum OriginOption {
-  CurLoc = "curloc",
-  Home = "home",
-  Custom = "custom",
-}
 
 export default function Command() {
   // Get user preferences
   const preferences = getPreferenceValues<Preferences>();
 
   // State variables
-  const [origin, setOrigin] = useState<OriginOption>(OriginOption.CurLoc); // Controls which origin option is selected
+  const [origin, setOrigin] = useState<OriginOption>(preferences.preferredOrigin); // Controls which origin option is selected
   const [originAddress, setOriginAddress] = useState<string>(""); // Stores the origin address
   const [destination, setDestination] = useState<string>(""); // Stores the destination address
   const [mode, setMode] = useState<string>(preferences.preferredMode); // Stores the selected transport mode

@@ -17,7 +17,7 @@ Who doesn't like a good morning read on [Hacker News](https://news.ycombinator.c
 First, let's get the latest top stories. For this we use a [RSS feed](https://hnrss.org):
 
 ```typescript
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Parser from "rss-parser";
 
@@ -143,7 +143,7 @@ function Actions(props: { item: Parser.Item }) {
           <Action.CopyToClipboard
             content={props.item.link}
             title="Copy Link"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         )}
       </ActionPanel.Section>

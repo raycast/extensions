@@ -9,11 +9,11 @@ import { MRListItem } from "./mr";
 import { useCachedState } from "@raycast/utils";
 import { GitLabIcons } from "../icons";
 
-function ReviewListEmptyView(): JSX.Element {
+function ReviewListEmptyView() {
   return <List.EmptyView title="No Reviews" icon={{ source: GitLabIcons.review, tintColor: Color.PrimaryText }} />;
 }
 
-export function ReviewList(): JSX.Element {
+export function ReviewList() {
   const [project, setProject] = useState<Project>();
   const { mrs, error, isLoading, performRefetch } = useMyReviews(project);
 
@@ -48,7 +48,10 @@ export function ReviewList(): JSX.Element {
   );
 }
 
-export function useMyReviews(project?: Project | undefined): {
+export function useMyReviews(
+  project?: Project | undefined,
+  labels: string[] | undefined = undefined,
+): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean;
   error: string | undefined;
@@ -56,22 +59,22 @@ export function useMyReviews(project?: Project | undefined): {
 } {
   const [mrs, setMrs] = useState<MergeRequest[]>();
   const { data, isLoading, error, performRefetch } = useCache<MergeRequest[] | undefined>(
-    `myreviews`,
+    `myreviews_${labels ? labels.join(",") : "[]"}`,
     async (): Promise<MergeRequest[] | undefined> => {
       const user = await gitlab.getMyself();
-      const glMRs = await gitlab.getMergeRequests({
+      return await gitlab.getMergeRequests({
         state: "opened",
         reviewer_id: user.id,
         in: "title",
         scope: "all",
+        ...(labels && { labels }),
       });
-      return glMRs;
     },
     {
-      deps: [],
-      secondsToRefetch: 1,
+      deps: [labels],
+      secondsToRefetch: 5,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   useEffect(() => {
     const filtered = project ? data?.filter((m) => m.project_id === project?.id) : data;

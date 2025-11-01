@@ -21,3 +21,13 @@ export function getAiInstructionSnippet(language: string, temporarySummary: stri
   
   Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
 }
+
+export function getFollowUpQuestionSnippet(question: string, transcript: string) {
+  return `The following text is the content of a video. Refer to it as video. You already summarized it for the person asking a question. Answer with a list starting with a fitting emoji. Ignore Sponsor Segments and Video Sponsors.
+  
+  Format:
+
+  [Emoji] [List Item] &nbsp;&nbsp;
+  
+  Here is the transcript: ${transcript}. This is the question: ${question}`;
+}

@@ -3,7 +3,7 @@ import { BybitResponse } from "@/types";
 import { useFetch } from "@raycast/utils";
 
 export const useBybit = () => {
-  const url = `https://api.bybit.com/derivatives/v3/public/tickers?symbol=TONUSDT`;
+  const url = `https://api.bybit.com/v5/market/tickers?category=spot&symbol=TONUSDT`;
   const { isLoading, data, error } = useFetch<unknown, unknown, BybitResponse>(url, { keepPreviousData: true });
 
   if (isLoading) {

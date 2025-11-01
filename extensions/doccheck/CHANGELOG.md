@@ -1,10 +1,16 @@
 # DocCheck Changelog
 
+# [Version 2.1.2] - 2025-03-11
+
+- Fixed: articles with neither author nor aliases weren't shown when searching for them
+
 ## [Version 2.1.1] - 2023-09-04
+
 - Fixed: removed the option to open an article with just the right arrow key (→) when there is a search query (so you move the cursor again with it)
 - Fixed: changed the shortcut for "Open Article in Browser" to ⇧ + ⏎ (because ⌘ + ⏎ is now reserved by Raycast)
 
 ## [Version 2.1] - 2023-07-21
+
 - NEW: Favourites - pin an article to the main screen, you will see a "★" in front of the navigation title at the bottom if the article is a favourite (shortcut to favourite and unfavourite: ⌘ + F; you can also unfavourite an article in Home)
 - NEW: option to force reload Home with ⌘ + R
 - NEW: option to clear all history or favourites (no shortcut, because there is no second prompt)
@@ -18,6 +24,7 @@
 - Fixed: some under the hood improvements (more unique listkeys in Home, check if item is still loading before you can bookmark it)
 
 ## [Version 2.0] - 2023-06-08
+
 - NEW: Home - completely redesigned main screen shows the History from the last read articles (see below), "Neu erstellt", "Frisch verbessert", "Schreib über", "Verbessere" in addition to the "Top Artikel" (information from the [main page](https://flexikon.doccheck.com/de/Hauptseite))
 - NEW: Cache - all of the above is now cached (you can change the time for a refresh in settings)
 - NEW: Full Navigation - you can now go back and forth (like in a browser, pro-tip: use the arrow keys (← or →); on the first page you now go back via `pop` (same functionality as using the esc key), so you don't lose context)

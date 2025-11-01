@@ -1,3 +1,4 @@
+import type { App } from "./util/hooks";
 import {
   Action,
   ActionPanel,
@@ -11,14 +12,21 @@ import {
   Toast,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { decode } from "hi-base32";
-import { Algorithm, Digits, Options, parseOtpUrl } from "./util/totp";
+import { Algorithm, Digits, Options, parse, parseOtpUrl } from "./util/totp";
 import { useApps } from "./util/hooks";
 
 export default function AppsView() {
   const { apps, updateApps } = useApps();
-  const { defaultAction } = getPreferenceValues();
+  const { defaultAction } = getPreferenceValues<Preferences>();
+
+  const updateLastTimeUsed = async (a: App) => {
+    const item = await LocalStorage.getItem(a.name);
+    const updated = { ...parse(item as string), lastTimeUsed: new Date().getTime() };
+    await LocalStorage.setItem(a.name, JSON.stringify(updated));
+  };
 
   return (
     <List
@@ -32,7 +40,7 @@ export default function AppsView() {
           />
           <Action.Push
             icon={Icon.Link}
-            title="Add App By URL"
+            title="Add App by URL"
             target={<AddAppByUrlForm />}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
           />
@@ -51,12 +59,12 @@ export default function AppsView() {
                   +a.percent > 75
                     ? Icon.CircleProgress100
                     : +a.percent > 50
-                    ? Icon.CircleProgress75
-                    : +a.percent > 25
-                    ? Icon.CircleProgress50
-                    : +a.time > 0
-                    ? Icon.CircleProgress25
-                    : Icon.Circle,
+                      ? Icon.CircleProgress75
+                      : +a.percent > 25
+                        ? Icon.CircleProgress50
+                        : +a.time > 0
+                          ? Icon.CircleProgress25
+                          : Icon.Circle,
               },
               tooltip: a.time,
             },
@@ -66,13 +74,13 @@ export default function AppsView() {
               <ActionPanel.Section>
                 {defaultAction == "copy" ? (
                   <>
-                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
-                    <Action.Paste content={a.code} title="Paste Code" />
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
+                    <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
                   </>
                 ) : (
                   <>
-                    <Action.Paste content={a.code} title="Paste Code" />
-                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
+                    <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
                   </>
                 )}
               </ActionPanel.Section>
@@ -85,7 +93,7 @@ export default function AppsView() {
                 />
                 <Action.Push
                   icon={Icon.Link}
-                  title="Add App By URL"
+                  title="Add App by URL"
                   target={<AddAppByUrlForm />}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                 />
@@ -110,6 +118,12 @@ export default function AppsView() {
                     modifiers: ["ctrl"],
                     key: "return",
                   }}
+                />
+                <Action.Push
+                  icon={Icon.Pencil}
+                  title="Edit App"
+                  target={<EditForm app={a} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -157,7 +171,10 @@ function AddForm() {
 
     const options: Options = { digits: values.digits, period: values.period, algorithm: values.algorithm };
 
-    await LocalStorage.setItem(values.name, JSON.stringify({ secret: values.secret, options: options }));
+    await LocalStorage.setItem(
+      values.name,
+      JSON.stringify({ secret: values.secret, options: options, lastTimeUsed: new Date().getTime() }),
+    );
 
     push(<AppsView />);
   };
@@ -219,7 +236,7 @@ function AddAppByUrlForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={onSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Submit" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
@@ -228,6 +245,41 @@ function AddAppByUrlForm() {
         title="Otpauth URL"
         placeholder="e.g. otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example"
       />
+    </Form>
+  );
+}
+
+function EditForm({ app }: { app: App }) {
+  const { pop } = useNavigation();
+  const onSubmit = async (e: { name?: string }) => {
+    const { name } = e;
+
+    if (!name) {
+      showToast(Toast.Style.Failure, "Please provide name");
+      return;
+    }
+
+    if (await LocalStorage.getItem(name)) {
+      showToast(Toast.Style.Failure, "This app name is already taken");
+      return;
+    }
+
+    const _app = await LocalStorage.getItem(app.name);
+    await LocalStorage.removeItem(app.name);
+    await LocalStorage.setItem(name, _app as LocalStorage.Value);
+    pop();
+  };
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Pencil} title="Submit" onSubmit={onSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="App Name" placeholder={app.name} defaultValue={app.name} />
+      <Form.Description title="⚠️" text="To prevent loss of data, please Backup your codes first" />
     </Form>
   );
 }

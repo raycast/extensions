@@ -12,7 +12,7 @@ export function useSchedule(leagueId: string) {
   };
 }
 
-interface ScheduleResponse {
+export interface ScheduleResponse {
   data: {
     schedule: {
       pages: Pages;

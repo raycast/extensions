@@ -5,10 +5,8 @@
   "description": "Manage your notifications in a single Universal Inbox",
   "icon": "ui-logo-transparent.png",
   "author": "dax42",
-  "version": "0.1.4",
-  "categories": [
-    "Productivity"
-  ],
+  "version": "0.2.0",
+  "categories": ["Productivity"],
   "license": "MIT",
   "preferences": [
     {

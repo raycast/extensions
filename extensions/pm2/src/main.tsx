@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, confirmAlert, open } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { $ } from "execa";
+import spawn from "nano-spawn";
 import { ProcessDescription } from "pm2";
 import { MetaData, ProcessActions } from "./components.js";
 import {
@@ -23,7 +23,7 @@ export default function Main() {
   const loadList = async () => {
     await checkIfNeedSetup();
     setupEnv();
-    const { stdout } = await $`node ${pm2WrapperIndexPath} list`;
+    const { stdout } = await spawn("node", [pm2WrapperIndexPath, "list"]);
     const parsedList = JSON.parse(stdout);
     setList(parsedList);
     setIsLoading(false);
@@ -55,7 +55,7 @@ export default function Main() {
     <List
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
-      actions={<ActionPanel>{startExampleAction}</ActionPanel>}
+      actions={!isLoading && <ActionPanel>{startExampleAction}</ActionPanel>}
     >
       {list.map((p, index) => {
         return (

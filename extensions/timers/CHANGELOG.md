@@ -1,6 +1,26 @@
 # Timers Changelog
 
-## [Bugfixes and improvements] - 2024-07-16
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Chore] - 2025-01-14
+
+- Moved contributor to past contributors list
+
+## [Pausable timers, custom timer form bypass] - 2025-01-03
+
+- Timers can now be paused/unpaused!
+- Added "Custom Timer Form Bypass" preference, allowing the form in "Start Custom Timer" to be skipped when args are provided (thanks to @a-laughlin for the contribution)
+
+## [Fix commands finishing before timer launch due to alert] - 2024-09-24
+
+## [Fix date formatter and residual timer files] - 2024-09-21
+
+- Fix issue where date formatter incorrectly displayed the previous month instead of the current one
+- Fix issue where the "Speak Timer Name" alert sound would result in residual timer files
+- Fix issue where the "Speak Timer Name" alert sound would not respect the "Ring Continuously" setting
+- Add alert to inform the user about how to stop the alert sound when "Ring Continuously" is enabled
+
+## [Bugfixes and improvements] - 2024-07-13
 
 - Fix bug where alert sound would not play if osascript notification command failed due to lack of permissions
 - Fix bug where quicklink-root-presets would not close properly if "Automatically close window on start" was disabled

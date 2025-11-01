@@ -35,7 +35,14 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
     }
 
     if (query === "") {
-      jql += "ORDER BY created DESC";
+      if (cachedProject) {
+        // Safe because project filter acts as restriction
+        jql += "ORDER BY created DESC";
+      } else {
+        // Add time-based restriction to avoid unbounded JQL error from Jira API
+        // Fetch issues created in the last 30 days by default
+        jql += "created >= -30d ORDER BY created DESC";
+      }
     } else if (query.startsWith("jql:")) {
       jql += query.split("jql:")[1];
     } else {
@@ -48,8 +55,13 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
 
       const singleNumberRegex = /^[0-9]+$/;
       const singleNumberMatches = query.match(singleNumberRegex);
-      if (singleNumberMatches && cachedProject) {
-        issueKeyQuery = `OR issuekey = ${cachedProject.key}-${singleNumberMatches[0]}`;
+      if (singleNumberMatches) {
+        if (cachedProject) {
+          issueKeyQuery = `OR issuekey = ${cachedProject.key}-${singleNumberMatches[0]}`;
+        } else {
+          const allPossibleIssueKeys = projects?.map((project) => `${project.key}-${singleNumberMatches[0]}`);
+          issueKeyQuery = `OR issuekey IN (${allPossibleIssueKeys?.join(",")})`;
+        }
       }
 
       const escapedQuery = query.replace(/[\\"]/g, "\\$&");

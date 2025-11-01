@@ -88,22 +88,23 @@ function NowPlayingCommand() {
 
   let title = "";
   let markdown;
-  let metadata: JSX.Element | null = null;
-  let trackOrEpisodeActions: JSX.Element | null = null;
+  let metadata: React.JSX.Element | null = null;
+  let trackOrEpisodeActions: React.JSX.Element | null = null;
 
   if (isTrack) {
     const { album, artists, id: trackId, duration_ms } = item as TrackObject;
     const albumName = album?.name;
-    const albumImage = album?.images[0].url;
+    const albumImage = album?.images[0]?.url;
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
     title = `${name} · ${artistName}`;
 
-    markdown = `# ${name}
-by ${artistName}
-
-![${name}](${albumImage}?raycast-width=250&raycast-height=250)
-`;
+    markdown = [
+      `# ${name}`,
+      `by ${artistName}`,
+      "",
+      albumImage ? `![${name}](${albumImage}?raycast-width=250&raycast-height=250)` : "",
+    ].join("\n");
 
     metadata = (
       <Detail.Metadata>
@@ -254,16 +255,17 @@ by ${artistName}
   } else {
     const { images, description, show } = item as EpisodeObject;
     const showName = show.name;
-    const image = images[0].url;
+    const image = images[0]?.url;
     title = `${name} · ${showName}`;
 
-    markdown = `# ${showName}
-${name}
-
-![${name}](${image}?raycast-width=250&raycast-height=250)
-
-${description}
-`;
+    markdown = [
+      `# ${showName}`,
+      name,
+      "",
+      image ? `![${name}](${image}?raycast-width=250&raycast-height=250)` : "",
+      "",
+      description,
+    ].join("\n");
 
     metadata = (
       <Detail.Metadata>

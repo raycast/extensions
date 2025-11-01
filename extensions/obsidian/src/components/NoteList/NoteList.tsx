@@ -6,7 +6,7 @@ import { MAX_RENDERED_NOTES } from "../../utils/constants";
 import { tagsForNotes } from "../../utils/yaml";
 import { NoteListItem } from "./NoteListItem";
 import { NoteListDropdown } from "./NoteListDropdown";
-import { filterNotes } from "../../utils/search";
+import { filterNotes, filterNotesFuzzy } from "../../utils/search";
 import { getObsidianTarget, ObsidianTargetType } from "../../utils/utils";
 import { SearchNotePreferences } from "../../utils/preferences";
 import { useNotesContext } from "../../utils/hooks";
@@ -17,7 +17,8 @@ export function NoteList(props: NoteListProps) {
   const pref = getPreferenceValues<SearchNotePreferences>();
   const allNotes = useNotesContext();
   const [searchText, setSearchText] = useState(searchArguments.searchArgument ?? "");
-  const list = useMemo(() => filterNotes(notes ?? [], searchText, pref.searchContent), [notes, searchText]);
+  const searchFunction = pref.fuzzySearch ? filterNotesFuzzy : filterNotes;
+  const list = useMemo(() => searchFunction(notes ?? [], searchText, pref.searchContent), [notes, searchText]);
   const _notes = list.slice(0, MAX_RENDERED_NOTES);
 
   const tags = tagsForNotes(allNotes);

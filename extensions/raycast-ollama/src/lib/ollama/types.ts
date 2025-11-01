@@ -103,11 +103,21 @@ export interface OllamaApiTagsResponse {
 
 export interface OllamaApiShowResponse {
   license?: string;
-  modelfile: string;
+  modelfile?: string;
   parameters?: string;
-  template: string;
+  template?: string;
   system?: string;
-  detail?: OllamaApiShowDetail;
+  details?: OllamaApiShowDetail;
+  messages?: OllamaApiChatMessage[];
+  model_info?: {
+    [name: string]: any;
+  };
+  projector_info?: {
+    [name: string]: any;
+  };
+  tensors?: OllamaApiTensor[];
+  capabilities?: Enum.OllamaApiModelCapability[];
+  modified_at?: string;
 }
 
 export interface OllamaApiShowDetail {
@@ -118,10 +128,16 @@ export interface OllamaApiShowDetail {
   quantization_level: string;
 }
 
+export interface OllamaApiTensor {
+  name: string;
+  type: string;
+  shape: number[];
+}
+
 export interface OllamaApiShowModelfile {
-  from: string;
+  from?: string;
   parameter: OllamaApiShowModelfileParameter;
-  template: string;
+  template?: string;
   system?: string;
   adapter?: string;
   license?: string;
@@ -165,6 +181,7 @@ export interface OllamaApiPullResponse {
 export interface OllamaApiChatRequestBody {
   model: string;
   messages: OllamaApiChatMessage[];
+  tools?: OllamaApiTool[];
   stream?: boolean;
   format?: string;
   keep_alive?: string;
@@ -176,4 +193,63 @@ export interface OllamaApiChatMessage {
   role: Enum.OllamaApiChatMessageRole;
   content: string;
   images?: string[];
+  tool_calls?: OllamaApiChatMessageToolCall[];
+}
+
+export interface OllamaApiChatMessageToolCall {
+  function: {
+    index?: number;
+    name: string;
+    arguments: {
+      [key: string]: any;
+    };
+  };
+}
+
+export interface OllamaApiTool {
+  type: "function";
+  function: OllamaApiToolFunction;
+}
+
+export interface OllamaApiToolFunction {
+  name: string;
+  description: string;
+  parameters: OllamaApiToolFunctionParameters;
+}
+
+export interface OllamaApiToolFunctionParameters {
+  type: "object";
+  required: string[];
+  properties: {
+    [name: string]: OllamaApiToolFunctionParameter;
+  };
+}
+
+export interface OllamaApiToolFunctionParameter {
+  type: string;
+  description: string;
+  enum?: string[];
+}
+
+export interface OllamaApiPsResponse {
+  models: OllamaApiPsModel[];
+}
+
+export interface OllamaApiPsModel {
+  name: string;
+  model: string;
+  size: number;
+  digest: string;
+  details: OllamaApiPsModelDetails;
+  expires_at: string;
+  size_vram: number;
+}
+
+export interface OllamaApiPsModelDetails {
+  parent_model: string;
+  format: string;
+  family: string;
+  families: string[];
+  parameter_size: string;
+  quantization_level: string;
 }

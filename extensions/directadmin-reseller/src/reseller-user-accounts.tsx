@@ -4,8 +4,6 @@ import {
   changeUserTicketingEmail,
   createUser,
   deleteUser,
-  getResellerIPs,
-  getResellerUserAccounts,
   getUserDomains,
   getUserUsage,
   modifyUser,
@@ -16,9 +14,6 @@ import {
   ChangeUserAccountEmailRequest,
   ChangeUserTicketingEmailFormValues,
   CreateUserFormValues,
-  ErrorResponse,
-  GetResellerIPsResponse,
-  GetResellerUserAccountsResponse,
   GetUserConfigResponse,
   GetUserDomainsResponse,
   GetUserUsageResponse,
@@ -34,6 +29,7 @@ import {
   Detail,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
@@ -41,34 +37,19 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
-import { getTextAndIconFromVal, getTitleFromKey } from "./utils/functions";
+import { getTextAndIconFromVal, getTitleFromKey, isInvalidUrl } from "./utils/functions";
 import CreateNewDomainComponent from "./components/CreateNewDomainComponent";
 import GetSubdomainsComponent from "./components/subdomains/GetSubdomainsComponent";
 import GetEmailAccountsComponent from "./components/email-accounts/GetEmailAccountsComponent";
 import ErrorComponent from "./components/ErrorComponent";
 import GetDatabasesComponent from "./components/databases/GetDatabasesComponent";
-import { useGetUserConfig, useGetUserPackages } from "./utils/hooks";
+import { useGetResellerIPs, useGetResellerUserAccounts, useGetUserConfig, useGetUserPackages } from "./utils/hooks";
+import InvalidUrlComponent from "./components/InvalidUrlComponent";
 
 export default function GetAccounts() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [users, setUsers] = useState<string[]>();
-  const [error, setError] = useState<ErrorResponse>();
+  if (isInvalidUrl()) return <InvalidUrlComponent />;
 
-  async function getFromApi() {
-    setIsLoading(true);
-    const response = await getResellerUserAccounts(RESELLER_USERNAME);
-    if (response.error === "0") {
-      const data = response as GetResellerUserAccountsResponse;
-      const { list } = data;
-      setUsers(list);
-      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Users`);
-    } else if (response.error === "1") setError(response as ErrorResponse);
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    getFromApi();
-  }, []);
+  const { isLoading, data: users, error, revalidate } = useGetResellerUserAccounts(RESELLER_USERNAME);
 
   async function confirmAndDeleteUser(user: string) {
     if (
@@ -83,7 +64,7 @@ export default function GetAccounts() {
       if (response.error === "0") {
         const data = response as SuccessResponse;
         await showToast(Toast.Style.Success, data.text, data.details);
-        await getFromApi();
+        revalidate();
       }
     }
   }
@@ -106,36 +87,34 @@ export default function GetAccounts() {
   return error ? (
     <ErrorComponent errorResponse={error} />
   ) : (
-    <List isLoading={isLoading}>
-      {!isLoading && (
-        <List.Item
-          title={RESELLER_USERNAME}
-          icon={Icon.PersonCircle}
-          accessories={[{ tag: "RESELLER_USER" }]}
-          actions={
-            <ActionPanel>
+    <List isLoading={isLoading} searchBarPlaceholder="Search user">
+      <List.Item
+        title={RESELLER_USERNAME}
+        icon={Icon.PersonCircle}
+        accessories={[{ tag: "RESELLER_USER" }]}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="See User Usage"
+              icon={Icon.Network}
+              target={<GetUserUsage user={RESELLER_USERNAME} is_reseller={true} />}
+            />
+            <Action.Push
+              title="See User Config"
+              icon={Icon.WrenchScrewdriver}
+              target={<GetUserConfig user={RESELLER_USERNAME} />}
+            />
+            <ActionPanel.Section>
               <Action.Push
-                title="See User Usage"
-                icon={Icon.Network}
-                target={<GetUserUsage user={RESELLER_USERNAME} is_reseller={true} />}
+                title="Create User"
+                icon={Icon.Plus}
+                target={<CreateUser onUserCreated={revalidate} />}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
-              <Action.Push
-                title="See User Config"
-                icon={Icon.WrenchScrewdriver}
-                target={<GetUserConfig user={RESELLER_USERNAME} />}
-              />
-              <ActionPanel.Section>
-                <Action.Push
-                  title="Create User"
-                  icon={Icon.Plus}
-                  target={<CreateUser onUserCreated={getFromApi} />}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      )}
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
       {users &&
         users.map((user) => (
           <List.Item
@@ -188,7 +167,7 @@ export default function GetAccounts() {
                   <Action.Push
                     title="Create User"
                     icon={Icon.Plus}
-                    target={<CreateUser onUserCreated={getFromApi} />}
+                    target={<CreateUser onUserCreated={revalidate} />}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
                 </ActionPanel.Section>
@@ -203,7 +182,7 @@ export default function GetAccounts() {
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action.Push title="Create User" icon={Icon.Plus} target={<CreateUser onUserCreated={getFromApi} />} />
+                <Action.Push title="Create User" icon={Icon.Plus} target={<CreateUser onUserCreated={revalidate} />} />
               </ActionPanel>
             }
           />
@@ -430,7 +409,7 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
   const { pop } = useNavigation();
 
   const { isLoading, data: packages } = useGetUserPackages();
-  const [IPs, setIPs] = useState<string[]>();
+  const { isLoading: isLoadingIPs, data: resellerIPs = [] } = useGetResellerIPs();
   // const [customizePackage, setCustomizePackage] = useState(false);
 
   const { handleSubmit, itemProps } = useForm<CreateUserFormValues>({
@@ -468,23 +447,9 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
     },
   });
 
-  async function getIPsFromApi() {
-    const response = await getResellerIPs();
-    if (response.error === "0") {
-      const data = response as GetResellerIPsResponse;
-      const { list } = data;
-      setIPs(list);
-      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} IPs`);
-    }
-  }
-
-  useEffect(() => {
-    getIPsFromApi();
-  }, []);
-
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingIPs}
       navigationTitle="Create User"
       actions={
         <ActionPanel>
@@ -504,7 +469,9 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
         ))}
       </Form.Dropdown>
       <Form.Dropdown title="IP" {...itemProps.ip}>
-        {IPs?.map((IP) => <Form.Dropdown.Item key={IP} title={IP} value={IP} />)}
+        {resellerIPs.map((IP) => (
+          <Form.Dropdown.Item key={IP} title={IP} value={IP} />
+        ))}
       </Form.Dropdown>
       <Form.Checkbox label="Send E-mail Notification" {...itemProps.notify} />
     </Form>

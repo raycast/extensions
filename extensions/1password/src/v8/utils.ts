@@ -4,12 +4,12 @@ import { execSync } from "node:child_process";
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 
-import { Category, CategoryName, Item, User, Vault } from "./types";
 import { useExec } from "@raycast/utils";
+import { Category, CategoryName, Item, User, Vault } from "./types";
 
 export type ActionID = string;
 
-const preferences = getPreferenceValues();
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export class ExtensionError extends Error {
   public title: string;
@@ -25,9 +25,16 @@ export class CommandLineMissingError extends ExtensionError {}
 export class ZshMissingError extends ExtensionError {}
 export class ConnectionError extends ExtensionError {}
 
-export const CLI_PATH = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) =>
-  existsSync(path)
-);
+export const getCliPath = () => {
+  const cliPath = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"]
+    .filter(Boolean)
+    .find((path) => (path ? existsSync(path) : false));
+
+  if (!cliPath) {
+    throw new CommandLineMissingError("1Password CLI is not found. Please set the path in the extension preferences.");
+  }
+  return cliPath;
+};
 
 export const ZSH_PATH = [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
 
@@ -53,6 +60,9 @@ export function actionsForItem(item: Item): ActionID[] {
     "copy-username",
     "copy-password",
     "copy-one-time-password",
+    "paste-username",
+    "paste-password",
+    "paste-one-time-password",
     "share-item",
     "switch-account",
   ];
@@ -65,15 +75,16 @@ export function actionsForItem(item: Item): ActionID[] {
     case "LOGIN":
       return deduplicatedActions;
     case "PASSWORD":
-      return deduplicatedActions.filter((action) => action !== "copy-username");
+      return deduplicatedActions.filter((action) => action !== "copy-username" && action !== "paste-username");
     default:
       return ["open-in-1password"];
   }
 }
 
 export function op(args: string[]) {
-  if (CLI_PATH) {
-    const stdout = execFileSync(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
+  const cliPath = getCliPath();
+  if (cliPath) {
+    const stdout = execFileSync(cliPath, args, { maxBuffer: 4096 * 1024 });
     return stdout.toString();
   }
   throw Error("1Password CLI is not found!");
@@ -83,7 +94,7 @@ export const handleErrors = (stderr: string) => {
   if (stderr.includes("no such host")) {
     throw new ConnectionError("No connection to 1Password.", "Verify Your Internet Connection.");
   } else if (stderr.includes("could not get item") || stderr.includes("isn't an item")) {
-    throw new NotFoundError("Item not found on 1password.", "Check it on your 1Password app.");
+    throw new NotFoundError("Item not found on 1Password.", "Check it on your 1Password app.");
   } else if (stderr.includes("ENOENT") || stderr.includes("file") || stderr.includes("enoent")) {
     throw new CommandLineMissingError("1Password CLI not found.");
   } else if (stderr.includes("does not have a field")) {
@@ -101,19 +112,19 @@ export const checkZsh = () => {
 };
 
 export const signIn = (account?: string) =>
-  execSync(`${CLI_PATH} signin ${account ? account : ""}`, { shell: ZSH_PATH });
+  execSync(`${getCliPath()} signin ${account ? account : ""}`, { shell: ZSH_PATH });
 
 export const getSignInStatus = () => {
   try {
-    execSync(`${CLI_PATH} whoami`);
+    execSync(`${getCliPath()} whoami`);
     return true;
-  } catch (stderr) {
+  } catch {
     return false;
   }
 };
 
 export const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) => {
-  return useExec<T, U>(CLI_PATH, [...args, "--format=json"], {
+  return useExec<T, U>(getCliPath(), [...args, "--format=json"], {
     parseOutput: ({ stdout, stderr, error, exitCode }) => {
       if (error) handleErrors(error.message);
       if (stderr) handleErrors(stderr);
@@ -140,7 +151,7 @@ export const usePasswords2 = ({
   execute: boolean;
 }) =>
   useExec<Item[], ExtensionError>(
-    CLI_PATH,
+    getCliPath(),
     ["--account", account, "items", "list", "--long", "--format=json", ...flags],
     {
       parseOutput: ({ stdout, stderr, error, exitCode }) => {
@@ -165,12 +176,12 @@ export const usePasswords2 = ({
           title: e.message,
         });
       },
-    }
+    },
   );
 
 export const usePasswords = (flags: string[] = []) =>
   useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>
-    data.sort((a, b) => a.title.localeCompare(b.title))
+    data.sort((a, b) => a.title.localeCompare(b.title)),
   );
 
 export const useVaults = () =>
@@ -178,13 +189,13 @@ export const useVaults = () =>
 
 export const useCategories = () =>
   useOp<Category[], ExtensionError>(["item", "template", "list"], (data) =>
-    data.sort((a, b) => a.name.localeCompare(b.name))
+    data.sort((a, b) => a.name.localeCompare(b.name)),
   );
 
 export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
 
 export const useAccounts = <T = User[], U = ExtensionError>(execute = true) =>
-  useExec<T, U>(CLI_PATH, ["account", "list", "--format=json"], {
+  useExec<T, U>(getCliPath(), ["account", "list", "--format=json"], {
     parseOutput: ({ stdout, stderr, error, exitCode }) => {
       if (error) handleErrors(error.message);
       if (stderr) handleErrors(stderr);

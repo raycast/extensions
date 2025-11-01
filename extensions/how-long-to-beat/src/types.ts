@@ -1,12 +1,18 @@
 interface RangeTime {
-  min: number;
-  max: number;
+  min: null;
+  max: null;
+}
+
+interface RangeYear {
+  min: string;
+  max: string;
 }
 
 interface Gameplay {
   perspective: string;
   flow: string;
   genre: string;
+  difficulty: string;
 }
 
 interface GamesOptions {
@@ -15,8 +21,13 @@ interface GamesOptions {
   sortCategory: string;
   rangeCategory: string;
   rangeTime: RangeTime;
+  rangeYear: RangeYear;
   gameplay: Gameplay;
   modifier: string;
+}
+
+interface ListsOptions {
+  sortCategory: string;
 }
 
 interface UsersOptions {
@@ -25,6 +36,7 @@ interface UsersOptions {
 
 interface SearchOptions {
   games: GamesOptions;
+  lists: ListsOptions;
   users: UsersOptions;
   filter: string;
   sort: number;
@@ -37,4 +49,18 @@ export interface SearchPayload {
   searchPage: number;
   size: number;
   searchOptions: SearchOptions;
+}
+
+export interface GameSearchResult {
+  game_id: number;
+  game_name: string;
+  game_image: string;
+  profile_platform?: string;
+  comp_main: number;
+  comp_plus: number;
+  comp_100: number;
+}
+
+export interface SearchResponse {
+  data: GameSearchResult[];
 }

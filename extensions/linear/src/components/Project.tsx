@@ -1,20 +1,19 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { ProjectResult } from "../api/getProjects";
-
 import { getLinearClient } from "../api/linearClient";
-import { getProjectIcon, projectStatusIcon, projectStatusText } from "../helpers/projects";
-import { getUserIcon } from "../helpers/users";
-import { getErrorMessage } from "../helpers/errors";
-
-import ProjectIssues from "./ProjectIssues";
-import EditProjectForm from "./EditProjectForm";
 import { getDateIcon } from "../helpers/dates";
+import { getErrorMessage } from "../helpers/errors";
+import { getProjectIcon, projectStatusIcon } from "../helpers/projects";
+import { getUserIcon } from "../helpers/users";
+
 import CreateMilestoneForm from "./CreateMilestoneForm";
+import EditProjectForm from "./EditProjectForm";
 import OpenInLinear from "./OpenInLinear";
+import ProjectIssues from "./ProjectIssues";
 import ProjectUpdates from "./ProjectUpdates";
 import { DocumentList } from "./docs/DocumentList";
 
@@ -22,7 +21,7 @@ type ProjectProps = {
   project: ProjectResult;
   priorities: IssuePriorityValue[] | undefined;
   me: User | undefined;
-  mutateProjects: MutatePromise<ProjectResult[] | undefined>;
+  mutateProjects: MutatePromise<ProjectResult[], ProjectResult[]>;
 };
 
 export default function Project({ project, priorities, me, mutateProjects }: ProjectProps) {
@@ -30,7 +29,7 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
 
   const progress = `${Math.round(project.progress * 100)}%`;
 
-  const keywords = [project.state, projectStatusText[project.state], ...project.teams.nodes.map((t) => t.key)];
+  const keywords = [project.status.name, ...project.teams.nodes.map((t) => t.key)];
 
   if (project.lead) {
     keywords.push(project.lead.displayName, project.lead?.email);
@@ -97,7 +96,7 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
           text: teams.length > 1 ? `${teams.length}` : teams[0].key,
           tooltip: `Teams: ${teams.map((team) => team.key).join(", ")}`,
         },
-        { icon: { source: projectStatusIcon[project.state] }, tooltip: projectStatusText[project.state] },
+        { icon: { source: projectStatusIcon[project.status.type] }, tooltip: project.status.name },
         {
           icon: getUserIcon(project.lead),
           tooltip: project.lead ? `Lead: ${project.lead?.displayName} (${project.lead?.email})` : "Unassigned",

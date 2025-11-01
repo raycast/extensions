@@ -8,3 +8,5 @@ raycast-env.d.ts
 
 # misc
 .DS_Store
+
+.idea

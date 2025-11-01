@@ -1,6 +1,6 @@
 import React from "react";
 import { User } from "@supabase/supabase-js";
-import { Action, ActionPanel, Icon, Image, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, Keyboard, List, Toast, showToast } from "@raycast/api";
 import { useGroups } from "../lib/use-groups";
 import { useBookmarks } from "../lib/use-bookmarks";
 import { getHostname } from "../lib/get-hostname";
@@ -67,15 +67,14 @@ export function SearchBookmarks({ user }: { user: User }) {
                     style={Action.Style.Destructive}
                     title="Delete Bookmark"
                     icon={Icon.Trash}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={async () => {
                       if (bookmark.id) {
                         showToast({ title: "Deleting bookmark...", style: Toast.Style.Animated });
                         const res = await deleteBookmark(bookmark.id);
                         revalidate();
-                        res.error
-                          ? showToast({ title: "Failed to delete bookmark", style: Toast.Style.Failure })
-                          : showToast({ title: "Bookmark deleted", style: Toast.Style.Success });
+                        if (res.error) showToast({ title: "Failed to delete bookmark", style: Toast.Style.Failure });
+                        else showToast({ title: "Bookmark deleted", style: Toast.Style.Success });
                       }
                     }}
                   />
@@ -95,9 +94,9 @@ export function SearchBookmarks({ user }: { user: User }) {
                                   showToast({ title: "Moving bookmark...", style: Toast.Style.Animated });
                                   const res = await moveBookmarkToGroup(bookmark.id, group.id);
                                   revalidate();
-                                  res.error
-                                    ? showToast({ title: "Failed to move bookmark", style: Toast.Style.Failure })
-                                    : showToast({ title: `Moved to ${group.name}`, style: Toast.Style.Success });
+                                  if (res.error)
+                                    showToast({ title: "Failed to move bookmark", style: Toast.Style.Failure });
+                                  else showToast({ title: `Moved to ${group.name}`, style: Toast.Style.Success });
                                 }
                               }}
                             />

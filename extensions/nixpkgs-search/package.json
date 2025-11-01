@@ -5,8 +5,17 @@
   "description": "Query NixPkgs like search.nixos.org",
   "icon": "nix-snowflake.png",
   "author": "aiotter",
-  "categories": ["Developer Tools"],
-  "keywords": ["Nix", "NixPkgs", "NixOS"],
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "Nix",
+    "NixPkgs",
+    "NixOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -18,39 +27,41 @@
   ],
   "preferences": [
     {
-    "name": "searchSize",
-    "description": "Number of result which will be shown at once",
-    "type": "textfield",
-    "required": false,
-    "title": "Search result count",
-    "default": "20"
+      "name": "searchSize",
+      "description": "Number of result which will be shown at once",
+      "type": "textfield",
+      "required": false,
+      "title": "Search result count",
+      "default": "20"
     },
     {
-    "name": "branchName",
-    "description": "Branch name of NixOS/nixpkgs to query against",
-    "type": "textfield",
-    "required": false,
-    "title": "NixPkgs verison",
-    "default": "unstable"
+      "name": "branchName",
+      "description": "Branch name of NixOS/nixpkgs to query against",
+      "type": "textfield",
+      "required": false,
+      "title": "NixPkgs verison",
+      "default": "unstable"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "node-fetch": "3.1.1"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

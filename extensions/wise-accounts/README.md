@@ -6,6 +6,6 @@ Fetch and review Wise profiles, balances, and transactions.
 
 ## Configuration
 
-The extension requires a Wise API key for your account to fetch personal information. Only the ``READ-ONLY`` version of the key is recommended as this extension does not perform any operation.
+The extension requires a Wise API key for your account to fetch personal information. Only the `READ-ONLY` version of the key is recommended as this extension does not perform any operation.
 
-The `Main Profile ID` can be configured later, it is only required when running the `Display Balances and Today's Transactions` menu bar command. The ID can be set by first running the `Get Profiles` and using the shortcut to `Copy Profile ID and Open Preference` and paste it onto the `Main Profile ID` field.
+The `Main Profile ID` can be configured later, it is only required when running the `Display Balances and Today's Transactions` menu bar command or the `Get Balances/Get Transactions` without a `Profile ID`. The ID can be set by first running the `Get Profiles` and using the shortcut to `Copy Profile ID and Open Preference` and paste it onto the `Main Profile ID` field.

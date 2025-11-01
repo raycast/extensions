@@ -43,7 +43,7 @@ export default function History() {
                   />
                   <Action.OpenInBrowser title="Open in Browser" url={item.url} />
                   <Action
-                    title="Remove From History"
+                    title="Remove from History"
                     icon={{
                       source: Icon.Trash,
                       tintColor: Color.Red,

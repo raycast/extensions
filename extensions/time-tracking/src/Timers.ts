@@ -1,4 +1,13 @@
-import { LocalStorage } from "@raycast/api";
+import {
+  getPreferenceValues,
+  LocalStorage,
+  openExtensionPreferences,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 
 export type Timer = {
   id: string;
@@ -52,6 +61,28 @@ export async function stopTimer(): Promise<Timer | null> {
   return timers[timerId];
 }
 
+export async function editTimer(timer: Timer): Promise<Timer | null> {
+  // Disallow setting end time before start time.
+  if (timer.end != null && timer.end <= timer.start) {
+    return null;
+  }
+
+  const timers = await getTimers();
+  // Don't allow editing a running timer.
+  const currentTimerId = await runningTimerId();
+  if (!timers[timer.id] || currentTimerId === timer.id) {
+    return null;
+  }
+
+  timers[timer.id].name = timer.name;
+  timers[timer.id].start = timer.start;
+  timers[timer.id].end = timer.end;
+
+  await LocalStorage.setItem("projecttimer.timers", JSON.stringify(timers));
+
+  return timer;
+}
+
 export async function runningTimerId(): Promise<string | null> {
   const id = await LocalStorage.getItem<string>("projecttimer.runningTimer");
   if (!id) {
@@ -102,4 +133,52 @@ export async function deleteTimer(timerId: string): Promise<TimerList> {
   }
 
   return timers;
+}
+
+export async function exportTimers() {
+  const exportDirectory = getPreferenceValues<ExtensionPreferences>().exportDirectory;
+  if (!exportDirectory) {
+    await showToast({
+      title: "Export directory not set",
+      message: "Please set the export directory in the extension preferences",
+      style: Toast.Style.Failure,
+      primaryAction: {
+        title: "Open Preferences",
+        onAction: () => {
+          openExtensionPreferences();
+        },
+      },
+    });
+    return;
+  }
+
+  const toast = await showToast(Toast.Style.Animated, "Fetching Timers");
+  const timers = await getTimers();
+  toast.title = "Exporting CSV";
+  const csv =
+    "id,name,start,end,duration,formatted\n" +
+    Object.values(timers)
+      .map((timer) => {
+        const duration = getDuration(timer);
+        return [...Object.values(timer), duration, formatDuration(duration)].join();
+      })
+      .join("\n");
+
+  const file = join(exportDirectory, `projecttimer.runningTimer-${new Date().getTime()}.csv`);
+  try {
+    await writeFile(file, csv, "utf8");
+    toast.message = file;
+    toast.style = Toast.Style.Success;
+    toast.title = "Exported CSV";
+    toast.primaryAction = {
+      title: "Show in Finder",
+      async onAction() {
+        await showInFinder(file);
+      },
+    };
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Export failed";
+    toast.message = `${error}`;
+  }
 }

@@ -1,6 +1,9 @@
 # MultiForce Changelog
 
-## 1.1 - 2024-08-06
+## [1.2] - 2025-03-11
+Version 1.2 introduces a recently used section to the org list. This section shows the 3 orgs that you most recently created or opened. This version also adds a warning indicator to scratch orgs that are set to expire in the next 7 days.
+
+## [1.1] - 2024-08-06
 Version 1.1 introduces the ability to choose where you want your login to take you. When creating an org, you now have the ability to choose if you want to automatically open to the Lightning Home or Setup Home in your org. You can also provide custom paths to open!
 
 New Org Actions 

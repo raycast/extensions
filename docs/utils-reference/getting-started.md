@@ -2,7 +2,7 @@
 
 In addition to the [Raycast API](../api-reference/cache.md) which is bundled as part of the app, we also provide a sibling package that contains a set of utilities to streamline common patterns and operations used in extensions.
 
-![](../.gitbook/assets/utils-illustration.jpg)
+![](.gitbook/assets/utils-illustration.jpg)
 
 ## Installation
 
@@ -15,6 +15,52 @@ npm install --save @raycast/utils
 `@raycast/utils` has a [peer dependency](https://docs.npmjs.com/cli/v8/configuring-npm/package-json#peerdependencies) on `@raycast/api`. This means that a certain version of `utils` will require a version above a certain version of `api`. `npm` will warn you if that is not the case.
 
 ## Changelog
+
+### v2.2.2
+
+- Fix `useCachedState` to preserve Date objects more precisely.
+
+### v2.2.1
+
+- Fix compiled file to actually make `useSQL` and `executeSQL` work on Windows.
+
+### v2.2.0
+
+- Make `useSQL` and `executeSQL` work on Windows.
+
+### v2.1.1
+
+- Fix the default size of `getFavicon`.
+
+### v2.1.0
+
+- `getFavicon` will now respect the user's setting for the favicon provider. Note that the `Apple` provider isn't supported since it relies on a native API.
+
+### v2.0.1
+
+- Fix types for ESM extensions
+
+### v2.0.0
+
+- The library can now be tree-shaken, reducing its size considerably.
+- When using `usePromise` and mutating the data with an optimistic update before it is fetched, the current fetch will be aborted to avoid a race condition.
+- Add a new [`runPowerShellScript`](./functions/runPowerShellScript.md) function.
+
+### v1.19.1
+
+- Fixed an issue where arguments weren't passed to `withCache`.
+
+### v1.19.0
+
+- Add a new [`withCache`](./functions/withCache.md) function.
+
+### v1.18.1
+
+- Fixed an issue where setting `timeout` to `0` in `runAppleScript` would not work.
+
+### v1.18.0
+
+- Add a new [`executeSQL](./functions/executeSQL.md) function.
 
 ### v1.17.0
 

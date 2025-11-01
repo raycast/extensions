@@ -17,6 +17,7 @@ export type MaskedEmail = {
   description: string;
   url: string | null;
   lastMessageAt: string;
+  createdAt: string;
 };
 
 function normalisePrefix(prefix: string): string {
@@ -48,11 +49,12 @@ type CreateMaskedEmail = {
       state: MaskedEmailState;
       description?: string;
       emailPrefix?: string;
+      forDomain?: string;
     }
   >;
 };
 
-export async function createMaskedEmail(prefix = "", description = "") {
+export async function createMaskedEmail(prefix = "", description = "", domain = "") {
   const session = await getSession();
   const request: APIRequest<CreateMaskedEmail> = {
     using: ["urn:ietf:params:jmap:core", MaskedEmailCapability],
@@ -63,9 +65,10 @@ export async function createMaskedEmail(prefix = "", description = "") {
           accountId: session.primaryAccounts[MaskedEmailCapability],
           create: {
             "raycast-masked-email": {
-              state: MaskedEmailState.Enabled,
+              state: MaskedEmailState.Pending,
               description,
               emailPrefix: normalisePrefix(prefix),
+              forDomain: domain,
             },
           },
         },

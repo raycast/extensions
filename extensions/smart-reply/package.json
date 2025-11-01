@@ -1,0 +1,160 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smart-reply",
+  "title": "Smart Reply - AI-Powered Multilingual Response Generator",
+  "description": "AI-powered multilingual translator and response generator with customizable languages and tones.",
+  "icon": "icon.png",
+  "author": "kawamataryo",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-reply",
+      "title": "Generate Reply",
+      "description": "Generate reply to the selected text",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1",
+    "franc-min": "^6.2.0",
+    "openai": "^4.85.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.1",
+    "globals": "^16.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.24.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "openAIApiKey",
+      "title": "OpenAI API Key",
+      "description": "Required to generate translations using OpenAI's language models.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "targetLanguage",
+      "title": "Target Language",
+      "description": "Select the target language for translation",
+      "type": "dropdown",
+      "required": true,
+      "default": "ja",
+      "data": [
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "🇺🇸 English",
+          "value": "en"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇨🇳 Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko"
+        },
+        {
+          "title": "🇵🇹 Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "🇹🇭 Thai",
+          "value": "th"
+        },
+        {
+          "title": "🇮🇩 Indonesian",
+          "value": "id"
+        }
+      ]
+    },
+    {
+      "name": "defaultTone",
+      "title": "Default Tone",
+      "description": "Set the default tone for replies",
+      "type": "dropdown",
+      "required": false,
+      "default": "formal",
+      "data": [
+        {
+          "title": "🎩 Formal",
+          "value": "formal"
+        },
+        {
+          "title": "😊 Casual",
+          "value": "casual"
+        }
+      ]
+    },
+    {
+      "name": "defaultStyle",
+      "title": "Default Translation Style",
+      "description": "Set the default translation style",
+      "type": "dropdown",
+      "required": false,
+      "default": "natural",
+      "data": [
+        {
+          "title": "🌿 Natural",
+          "value": "natural"
+        },
+        {
+          "title": "📝 Literal",
+          "value": "literal"
+        },
+        {
+          "title": "💫 Simple",
+          "value": "simple"
+        }
+      ]
+    }
+  ]
+}

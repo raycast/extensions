@@ -38,3 +38,9 @@ Prompt use [Raycast Prompt Explorer](https://prompts.ray.so/) format with the fo
 - ***{selection}***: Add text from selection or clipboard to the prompt.
 - ***{browser-tab}***: Add content from selected tab to the prompt. Raycast Browser Extension is required. Page format can be changed between: markdown {browser-tab}, html {browser-tab format="html"}, text {browser-tab format="text"}.
 - ***{image}***: Add jpeg or png image to the prompt. A Model with vision capabilities is required.
+
+### Command: Manage Mcp Server
+
+View, add, and remove MCP servers for use with "Chat With Ollama." Currently, only tools are supported. A model with tool capabilities is required.
+
+This feature was tested with [duckduckgo-mcp-server](https://github.com/nickclyde/duckduckgo-mcp-server), which allows the model to search information on DuckDuckGo.

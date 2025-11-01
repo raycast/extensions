@@ -1,11 +1,11 @@
-import React from "react";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { AsyncStatus, fetchBookDetails } from "./goodreads-api";
+import { useCachedState } from "@raycast/utils";
+import { AsyncStatus } from "./goodreads-api";
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { STRINGS } from "./strings";
-import { BookDetails, Review } from "./types";
+import type { BookDetails, Review } from "./types";
 import { ErrorScreen } from "./components/error-screen";
 import { convertHtmlToCommonMark } from "./utils";
+import { useBookDetails } from "./useBookDetails";
 
 interface BookDetailsProps {
   bookTitle: string;
@@ -14,15 +14,14 @@ interface BookDetailsProps {
 
 export default function BookDetails(props: BookDetailsProps) {
   const { bookTitle, qualifier } = props;
-  const { data, isLoading, revalidate } = useCachedPromise(fetchBookDetails, [qualifier], { keepPreviousData: true });
+  const { data, status, isLoading, revalidate } = useBookDetails(qualifier);
   const [showMetadata, setShowMetadata] = useCachedState("metaDataVisibility", true);
 
-  const status = data?.status;
   if (status === AsyncStatus.Error && !isLoading) {
     return <ErrorScreen retry={revalidate} />;
   }
 
-  const details = data?.data;
+  const details = data;
   const markdown = isLoading || !details ? "" : getMarkdown(details);
 
   return (

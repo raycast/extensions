@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { exec } from "child_process";
-import { Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Icon, LocalStorage, Toast, getPreferenceValues, showToast, environment, LaunchType } from "@raycast/api";
+import { execSync } from "node:child_process";
+import { updateVpnStatus, updateMenuBarRefreshTimestamp } from "./store";
 
 type Preferences = {
   hideInvalidDevices: boolean;
@@ -18,6 +20,110 @@ export type NetworkService = {
 };
 
 type NetworkServiceStatus = "connected" | "connecting" | "disconnecting" | "disconnected" | "invalid";
+
+export const LAST_USED_KEY = "network-service-last-used";
+
+const waitForFinalServiceStatus = (service: NetworkService) =>
+  new Promise<NetworkServiceStatus>((resolve) => {
+    let attempts = 0;
+    const maxAttempts = 20; // Maximum number of attempts (6 seconds with 300ms interval)
+
+    const checkStatus = async () => {
+      try {
+        attempts++;
+        const status = await showPPPoEStatus(service.name);
+        console.log(`Status check attempt ${attempts}/${maxAttempts} for ${service.name}: ${status}`);
+
+        if (status === "connected" || status === "disconnected" || attempts >= maxAttempts) {
+          // If we reached a final status or max attempts, resolve
+          console.log(`Resolving final status for ${service.name}: ${status} (after ${attempts} attempts)`);
+          resolve(status);
+        } else {
+          // Continue checking with shorter interval
+          setTimeout(checkStatus, 500);
+        }
+      } catch (err) {
+        console.error(`Error checking final status for ${service.name} (attempt ${attempts}/${maxAttempts}):`, err);
+        attempts++;
+
+        if (attempts >= maxAttempts) {
+          // If we reached max attempts, resolve with current status
+          console.log(
+            `Failed to get final status for ${service.name} after ${attempts} attempts, using current status`,
+          );
+          resolve(service.status);
+        } else {
+          setTimeout(checkStatus, 500);
+        }
+      }
+    };
+
+    checkStatus();
+  });
+
+export const setServiceStatus = async (
+  service: NetworkService,
+  status: NetworkServiceStatus,
+  statusUpdateFunction?: (status: NetworkServiceStatus) => void,
+) => {
+  const networkServiceName = service.name.replace(/"/g, '\\"');
+  const command =
+    status === "connecting"
+      ? `/usr/sbin/networksetup -connectpppoeservice "${networkServiceName}"`
+      : `/usr/sbin/networksetup -disconnectpppoeservice "${networkServiceName}"`;
+
+  console.log(`Executing command for ${service.name}: ${status}`);
+  await execPromise(command);
+
+  if (statusUpdateFunction) statusUpdateFunction(status);
+
+  // Update shared state with intermediate status
+  await updateVpnStatus({
+    serviceId: service.id,
+    status,
+    timestamp: Date.now(),
+  });
+
+  // Wait for final status
+  console.log(`Waiting for final status for ${service.name}`);
+  const updatedStatus = await waitForFinalServiceStatus(service);
+  console.log(`Final status for ${service.name}: ${updatedStatus}`);
+
+  if (statusUpdateFunction) statusUpdateFunction(updatedStatus);
+
+  // Update shared state with final status
+  await updateVpnStatus({
+    serviceId: service.id,
+    status: updatedStatus,
+    timestamp: Date.now(),
+  });
+  await LocalStorage.setItem(LAST_USED_KEY, networkServiceName);
+};
+
+export const getNetworkServices = async (favs: Record<string, boolean>, order: Record<string, number>) => {
+  const output = await listNetworkServiceOrder();
+  const denylist = ["Wi-Fi", "Bluetooth PAN", "Thunderbolt Bridge"];
+  const lines = output.split("\n");
+  const serviceLines = lines.slice(1).join("\n");
+
+  const services = parseServices(serviceLines).filter((service) => !denylist.includes(service.name));
+  const serviceStatuses = await Promise.all(
+    services.map((service) =>
+      showPPPoEStatus(service.name).then((status) => ({
+        ...service,
+        status,
+        favorite: !!favs[service.id],
+        order: order[service.id] ?? 0,
+      })),
+    ),
+  );
+  const servicesMap = serviceStatuses.reduce(
+    (acc, service) => ({ ...acc, [service.id]: service }),
+    {} as Record<string, NetworkService>,
+  );
+
+  return servicesMap;
+};
 
 export function useNetworkServices() {
   const { sortBy, hideInvalidDevices } = getPreferenceValues<Preferences>();
@@ -40,59 +146,49 @@ export function useNetworkServices() {
   }, []);
 
   const updateServiceStatus = async (service: NetworkService, status: NetworkServiceStatus) => {
-    const networkServiceName = service.name.replace(/"/g, '\\"');
-    const command =
-      status === "connecting"
-        ? `/usr/sbin/networksetup -connectpppoeservice "${networkServiceName}"`
-        : `/usr/sbin/networksetup -disconnectpppoeservice "${networkServiceName}"`;
-
     try {
-      await execPromise(command);
-      setNetworkServices((currentServices) => ({
-        ...currentServices,
-        [service.id]: { ...service, status },
-      }));
-      const updatedStatus = await waitForFinalServiceStatus(service);
-      setNetworkServices((currentServices) => ({
-        ...currentServices,
-        [service.id]: { ...service, status: updatedStatus },
-      }));
+      setServiceStatus(service, status, (newStatus) => {
+        // Update local state with status
+        setNetworkServices((currentServices) => ({
+          ...currentServices,
+          [service.id]: { ...service, status: newStatus },
+        }));
+      });
     } catch (err) {
+      console.error(`Error updating service status for ${service.name}:`, err);
       setError(err as Error);
     }
   };
 
   const fetchServiceStatus = async (service: NetworkService) => {
     try {
+      console.log(`Fetching status for ${service.name}`);
       const status = await showPPPoEStatus(service.name);
+      console.log(`Status for ${service.name}: ${status}`);
+
+      // Update local state
       setNetworkServices((currentServices) => ({
         ...currentServices,
         [service.id]: { ...service, status },
       }));
+
+      // Update shared state
+      await updateVpnStatus({
+        serviceId: service.id,
+        status,
+        timestamp: Date.now(),
+      });
+
+      // Explicitly trigger menubar refresh
+      await updateMenuBarRefreshTimestamp();
+
+      return status;
     } catch (err) {
+      console.error(`Error fetching service status for ${service.name}:`, err);
       setError(err as Error);
+      return service.status; // Return current status on error
     }
   };
-
-  const waitForFinalServiceStatus = (service: NetworkService) =>
-    new Promise<NetworkServiceStatus>((resolve) => {
-      const checkStatus = async () => {
-        try {
-          const status = await showPPPoEStatus(service.name);
-
-          if (status === "connected" || status === "disconnected") {
-            resolve(status);
-          } else {
-            setTimeout(checkStatus, 500);
-          }
-        } catch (err) {
-          // If there's an error, we'll continue polling
-          setTimeout(checkStatus, 500);
-        }
-      };
-
-      checkStatus();
-    });
 
   const addToFavorites = async (service: NetworkService) => {
     const updatedFavorites = { ...favorites, [service.id]: true };
@@ -174,29 +270,10 @@ export function useNetworkServices() {
 
   const fetchDataWithFavorites = async (favs: Record<string, boolean>, order: Record<string, number>) => {
     try {
-      const output = await listNetworkServiceOrder();
-      const denylist = ["Wi-Fi", "Bluetooth PAN", "Thunderbolt Bridge"];
-      const lines = output.split("\n");
-      const serviceLines = lines.slice(1).join("\n");
-
-      const services = parseServices(serviceLines).filter((service) => !denylist.includes(service.name));
-      const serviceStatuses = await Promise.all(
-        services.map((service) =>
-          showPPPoEStatus(service.name).then((status) => ({
-            ...service,
-            status,
-            favorite: !!favs[service.id],
-            order: order[service.id] ?? 0,
-          })),
-        ),
-      );
-      const servicesMap = serviceStatuses.reduce(
-        (acc, service) => ({ ...acc, [service.id]: service }),
-        {} as Record<string, NetworkService>,
-      );
-
+      const servicesMap = await getNetworkServices(favs, order);
       setNetworkServices(servicesMap);
     } catch (err) {
+      console.error("Error fetching data with favorites:", err);
       setError(err as Error);
     } finally {
       setIsLoading(false);
@@ -264,7 +341,8 @@ export function normalizeHardwarePort(hardwarePort: string, name: string) {
 
 export function openNetworkSettings() {
   exec("open x-apple.systempreferences:com.apple.Network-Settings.extension", (err) => {
-    if (err) {
+    // Only show toast if not in background mode
+    if (err && environment.launchType !== LaunchType.Background) {
       showToast({
         title: "Error",
         message: "Could not open Network Settings",
@@ -315,7 +393,7 @@ const sortNetworkServices = (
 const FAVORITES_KEY = "network-service-favorites";
 const FAVORITES_ORDER_KEY = "network-service-favorites-order";
 
-const loadFavorites = async (): Promise<Record<string, boolean>> => {
+export const loadFavorites = async (): Promise<Record<string, boolean>> => {
   const favorites = await LocalStorage.getItem<string>(FAVORITES_KEY);
   return favorites ? JSON.parse(favorites) : {};
 };
@@ -324,7 +402,7 @@ const saveFavorites = async (favorites: Record<string, boolean>) => {
   await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
 };
 
-const loadFavoriteOrder = async (): Promise<Record<string, number>> => {
+export const loadFavoriteOrder = async (): Promise<Record<string, number>> => {
   const order = await LocalStorage.getItem<string>(FAVORITES_ORDER_KEY);
   return order ? JSON.parse(order) : {};
 };
@@ -335,13 +413,15 @@ const saveFavoriteOrder = async (order: Record<string, number>) => {
 
 const execPromise = (command: string): Promise<string> =>
   new Promise((resolve, reject) => {
-    exec(command, (err, stdout) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(stdout.trim());
-      }
-    });
+    try {
+      const child = execSync(command);
+      const result = child.toString();
+
+      resolve(result.trim());
+    } catch (e) {
+      console.error(`Command ${command} thrown an error`, e);
+      reject(e);
+    }
   });
 
 const listNetworkServiceOrder = (): Promise<string> => execPromise("/usr/sbin/networksetup -listnetworkserviceorder");

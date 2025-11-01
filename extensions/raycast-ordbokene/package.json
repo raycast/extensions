@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-ordbokene",
+  "title": "Ordbøkene - Norwegian Dictionary",
+  "description": "Search the official Norwegian dictionary for both bokmål and nynorsk definitions.",
+  "icon": "ordbøkene-icon.png",
+  "author": "theherk",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Define",
+      "description": "Get definitions for a word.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "includeBokmal",
+      "label": "Include Bokmål",
+      "description": "Show suggestions for bokmål (BM)",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "includeNynorsk",
+      "label": "Include Nynorsk",
+      "description": "Show suggestions for nynorsk (NN)",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

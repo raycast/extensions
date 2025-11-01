@@ -1,12 +1,14 @@
-import { SWRConfig } from 'swr';
+import { TransactionCreateForm } from '@components/transactions/transactionCreateForm';
+import { checkForActiveBudget } from '@lib/utils/checkForActiveBudget';
+import { LaunchProps } from '@raycast/api';
 
-import { cacheConfig } from '@lib/cache';
-import { TransactionCreationForm } from '@components/transactions/transactionCreationForm';
+export default function Command(props: LaunchProps) {
+  const { activeBudgetId } = checkForActiveBudget();
 
-export default function Command() {
-  return (
-    <SWRConfig value={cacheConfig}>
-      <TransactionCreationForm />
-    </SWRConfig>
-  );
+  if (!activeBudgetId) {
+    return null;
+  }
+
+  const { categoryId, accountId, transaction } = props.launchContext || {};
+  return <TransactionCreateForm categoryId={categoryId} accountId={accountId} transaction={transaction} />;
 }

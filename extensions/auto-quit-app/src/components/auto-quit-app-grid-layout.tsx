@@ -1,17 +1,33 @@
-import React from "react";
-import { Application, Grid } from "@raycast/api";
+import React, { useMemo } from "react";
+import { Grid } from "@raycast/api";
 import { AutoQuitAppEmptyView } from "./auto-quit-app-empty-view";
 import { AutoQuitAppGridItem } from "./auto-quit-app-grid-item";
 import { columns, itemInset } from "../types/preferences";
 import { isEmpty } from "../utils/common-utils";
+import { useAutoQuitApps } from "../hooks/useAutoQuitApps";
+import { useDisAutoQuitApps } from "../hooks/useDisAutoQuitApps";
 
-export function AutoQuitAppGridLayout(props: {
-  quitApp: Application[];
-  disQuitApp: Application[];
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
-  loading: boolean;
-}) {
-  const { quitApp, disQuitApp, setRefresh, loading } = props;
+export function AutoQuitAppGridLayout() {
+  const { data: autoQuitAppsData, isLoading: autoQuitAppsIsLoading, mutate: autoQuitAppsMutate } = useAutoQuitApps();
+  const {
+    data: autoDisQuitAppsData,
+    isLoading: autoDisQuitAppsIsLoading,
+    mutate: autoDisQuitAppsMutate,
+  } = useDisAutoQuitApps();
+
+  const loading = autoQuitAppsIsLoading || autoDisQuitAppsIsLoading;
+  const quitApp = useMemo(() => {
+    return autoQuitAppsData || [];
+  }, [autoQuitAppsData]);
+  const disQuitApp = useMemo(() => {
+    return autoDisQuitAppsData || [];
+  }, [autoDisQuitAppsData]);
+
+  const setRefresh = async () => {
+    await autoQuitAppsMutate();
+    await autoDisQuitAppsMutate();
+  };
+
   return (
     <Grid
       columns={parseInt(columns)}

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+INSTALL_PYTHON=python3
+ARGS=(hook-impl --config=.pre-commit-config.yaml --hook-type=pre-push)
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+ARGS+=(--hook-dir "$HERE" -- "$@")
+
+if command -v pre-commit > /dev/null; then
+    exec pre-commit "${ARGS[@]}"
+elif [ -x "$INSTALL_PYTHON" ]; then
+    exec "$INSTALL_PYTHON" -mpre_commit "${ARGS[@]}"
+else
+    echo "`pre-commit` not found, install via `brew install pre-commit`." 1>&2
+    exit 1
+fi

@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon, List, Color, showToast, Toast } from "@raycast/api";
 import Topic from "./Topic";
 import { TopicType } from "./types/GithubType";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getPagesFromCache, checkForUpdates } from "./services/NextjsPages";
 import { useCachedPromise } from "@raycast/utils";
 
@@ -25,14 +25,14 @@ export default function main() {
     },
   );
 
-  const filteredTopics = topics.filter((topic) => topic.filepath.includes(type));
+  const filteredTopics = useMemo(() => topics.filter((topic) => topic.filepath.includes(type)), [type]);
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search documentation"
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" onChange={setType}>
+        <List.Dropdown tooltip="Filter" onChange={setType} storeValue={true}>
           <List.Dropdown.Item icon="command-icon.png" title="All" value="" />
           <List.Dropdown.Section>
             <List.Dropdown.Item
@@ -49,21 +49,35 @@ export default function main() {
         </List.Dropdown>
       }
     >
-      {filteredTopics.map((topic) => (
-        <List.Item
-          key={topic.sha}
-          keywords={topic.filepath.split("/")}
-          icon={Icon.Document}
-          title={topic.title}
-          actions={
-            <ActionPanel>
-              <Action.Push icon={Icon.Eye} title={`Browse ${topic.title}`} target={<Topic topic={topic} />} />
-              <Action.OpenInBrowser icon="command-icon.png" url={`https://nextjs.org/docs/${topic.filepath}`} />
-            </ActionPanel>
-          }
-          accessories={[{ text: topic.filepath }]}
-        />
-      ))}
+      {filteredTopics.map((topic) => {
+        // We separate the filepath by '/'
+        const split = topic.filepath.split("/");
+        // We remove the last item
+        const last = split.pop();
+        // If the last item was "index" then this was an index page else we want the whole filepath again
+        const path = last === "index" ? split.join("/") : topic.filepath;
+        const url = `https://nextjs.org/docs/${path}`;
+
+        return (
+          <List.Item
+            key={topic.sha}
+            keywords={topic.filepath.split("/")}
+            icon={Icon.Document}
+            title={topic.title}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.Eye}
+                  title={`Browse ${topic.title}`}
+                  target={<Topic topic={topic} url={url} />}
+                />
+                <Action.OpenInBrowser icon="command-icon.png" url={url} />
+              </ActionPanel>
+            }
+            accessories={[{ text: topic.filepath }]}
+          />
+        );
+      })}
     </List>
   );
 }

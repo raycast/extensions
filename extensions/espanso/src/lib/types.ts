@@ -30,7 +30,7 @@ type BaseMatch = Replacement & (SingleTrigger | MultiTrigger | RegexTrigger);
 
 export type EspansoMatch = BaseMatch & Label & Form;
 
-export type NormalizedEspansoMatch = EspansoMatch & MultiTrigger & FilePath;
+export type NormalizedEspansoMatch = EspansoMatch & MultiTrigger & FilePath & { category?: string };
 
 export type EspansoConfig = {
   config: string;

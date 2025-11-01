@@ -1,5 +1,9 @@
 # Open Link in Specific Browser Changelog
 
+## [New Command] - 2025-03-08
+
+- Add new command: Open selected text in default browser
+
 ## [Update Icon] - 2024-07-25
 
 - Update menu bar icon
