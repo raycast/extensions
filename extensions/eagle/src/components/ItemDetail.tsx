@@ -38,9 +38,11 @@ export function ItemDetail({ item }: { item: Item }) {
       actions={
         <ActionPanel>
           <FolderNavigationActions item={item} />
-          <ActionPanel.Section>
-            <MoveToTrashAction item={item} />
-          </ActionPanel.Section>
+          {!item.isDeleted && (
+            <ActionPanel.Section>
+              <MoveToTrashAction item={item} />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
       metadata={

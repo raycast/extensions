@@ -24,7 +24,7 @@ function GridEagleItem({ item, onRestore }: { item: Item; onRestore?: () => void
       title={item.name}
       actions={
         <ActionPanel>
-          <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
+          <Action.Push target={<ItemDetail item={item} />} title="View Detail" icon={Icon.Eye} />
         </ActionPanel>
       }
     />

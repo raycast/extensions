@@ -13,11 +13,13 @@ export default function EagleItem({ item, onTrash }: { item: Item; onTrash?: () 
       icon={Icon.Document}
       actions={
         <ActionPanel>
-          <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
+          <Action.Push target={<ItemDetail item={item} />} title="View Detail" icon={Icon.Eye} />
           <FolderNavigationActions item={item} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-          <ActionPanel.Section>
-            <MoveToTrashAction item={item} onTrash={onTrash} />
-          </ActionPanel.Section>
+          {!item.isDeleted && (
+            <ActionPanel.Section>
+              <MoveToTrashAction item={item} onTrash={onTrash} />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
