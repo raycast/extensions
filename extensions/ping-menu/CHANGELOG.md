@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - 2025-10-20
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Ping Menu extension
