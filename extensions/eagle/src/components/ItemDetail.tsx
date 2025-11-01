@@ -1,7 +1,7 @@
 import { Detail } from "@raycast/api";
 import { useMemo } from "react";
 import { useThumbnail } from "../utils/query";
-import { Item } from "../@types/eagle";
+import type { Item } from "../@types/eagle";
 
 export function ItemDetail({ item }: { item: Item }) {
   const { data: thumbnail } = useThumbnail(item.id);
@@ -24,7 +24,7 @@ export function ItemDetail({ item }: { item: Item }) {
     <Detail
       navigationTitle={item.name}
       markdown={`# ${item.name}
-  
+
   ![](${thumbnail})`}
       isLoading={!thumbnail}
       metadata={

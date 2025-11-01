@@ -9,6 +9,26 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "layout",
+      "type": "dropdown",
+      "required": false,
+      "title": "Layout",
+      "description": "Choose between list view and grid view",
+      "default": "list",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "index",
