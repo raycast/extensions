@@ -4,7 +4,9 @@ import { ConfigIniParser } from "config-ini-parser";
 import { Instance } from "../types";
 import * as async from "modern-async";
 
-export const instancesPath = path.join(
+export const isWindows = process.platform === "win32";
+
+export const macOsInstancesPath = path.join(
   process.env.HOME!,
   "Library",
   "Application Support",
@@ -12,19 +14,34 @@ export const instancesPath = path.join(
   "instances",
 );
 
+export const windowsInstancesPath = path.join(process.env.APPDATA!, "PrismLauncher", "instances");
+
+export const instancesPath = isWindows ? windowsInstancesPath : macOsInstancesPath;
+
 /**
  * Get the PrismLauncher installation path dynamically
  */
-async function getPrismLauncherPath(): Promise<string | null> {
-  const prismLauncherApp = path.join("/Applications", "PrismLauncher.app");
-  const prismLauncherWithSpace = path.join("/Applications", "Prism Launcher.app");
 
-  if (await fs.pathExists(prismLauncherApp)) {
-    return prismLauncherApp;
+export const prismLauncherAppWindows = path.join(
+  process.env.LOCALAPPDATA!,
+  "Programs",
+  "PrismLauncher",
+  "prismlauncher.exe",
+);
+export const prismLauncherAppMac = path.join("/Applications", "PrismLauncher.app");
+export const prismLauncherWithSpaceMac = path.join("/Applications", "Prism Launcher.app");
+
+async function getPrismLauncherPath(): Promise<string | null> {
+  if (isWindows && (await fs.pathExists(prismLauncherAppWindows))) {
+    return prismLauncherAppWindows;
   }
 
-  if (await fs.pathExists(prismLauncherWithSpace)) {
-    return prismLauncherWithSpace;
+  if (await fs.pathExists(prismLauncherAppMac)) {
+    return prismLauncherAppMac;
+  }
+
+  if (await fs.pathExists(prismLauncherWithSpaceMac)) {
+    return prismLauncherWithSpaceMac;
   }
 
   return null;

@@ -1,5 +1,9 @@
 # Prism Launcher Changelog
 
+## [New Additions] - 2025-11-01
+
+- Added windows support
+
 ## [Fix] - 2025-10-30
 
 - Restructured the code to add more features in the future

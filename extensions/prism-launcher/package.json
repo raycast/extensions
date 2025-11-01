@@ -7,7 +7,8 @@
   "author": "lockieluke3389",
   "contributors": [
     "tomjpeg",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "taken"
   ],
   "categories": [
     "Applications"
@@ -47,6 +48,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
