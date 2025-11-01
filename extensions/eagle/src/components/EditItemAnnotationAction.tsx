@@ -35,10 +35,8 @@ function EditAnnotationForm({ item, onUpdate }: EditItemAnnotationActionProps) {
 
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update annotation",
-        message: error instanceof Error ? error.message : "Unknown error",
+      await showFailureToast(error, {
+        title: "Failed to update annotation"
       });
     }
   };
