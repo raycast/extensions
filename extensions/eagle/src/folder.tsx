@@ -10,6 +10,11 @@ function FolderItem({ folder }: { folder: Folder }) {
     <List.Item
       title={folder.name}
       icon={Icon.Finder}
+      detail={
+        <List.Item.Detail
+          markdown={`# ${folder.name}\n\nFolder with ${folder.children.length} subfolder(s)`}
+        />
+      }
       actions={
         <ActionPanel>
           <Action.Push title="Open Folder" target={<FolderView folder={folder} />} />
@@ -27,7 +32,7 @@ function FolderView({ folder }: { folder: Folder }) {
   const images = items.map((item) => <EagleItem key={item.id} item={item} />);
 
   return (
-    <List>
+    <List isShowingDetail>
       {subFolders.length > 0 ? (
         <List.Section title="Folders">
           {subFolders.map((folder) => (
@@ -53,7 +58,7 @@ export default function Folder() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isShowingDetail isLoading={isLoading}>
       <List.Section title="Folders">
         {folders.map((folder) => (
           <FolderItem key={folder.id} folder={folder} />
