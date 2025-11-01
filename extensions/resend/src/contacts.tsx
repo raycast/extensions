@@ -1,11 +1,20 @@
 import { useState } from "react";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, showToast, Toast } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
-import { createContact, isApiError, updateContact } from "./utils/api";
 import {
-  CreateContactRequestForm,
-  UpdateContactRequestForm,
-} from "./utils/types";
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
+import { isApiError } from "./utils/api";
+import { CreateContactRequestForm, UpdateContactRequestForm } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useAudiences, useContacts } from "./lib/hooks";
 import { Audience, Contact } from "resend";
@@ -13,9 +22,14 @@ import { resend } from "./lib/resend";
 
 export default function Audiences() {
   const [audience, setAudience] = useState<Audience | undefined>();
-  
+
   const { isLoading: isLoadingAudience, audiences, error: errorAudiences } = useAudiences();
-  const { isLoading: isLoadingContacts, contacts, error: errorContacts, mutate: mutateContacts } = useContacts(audience?.id);
+  const {
+    isLoading: isLoadingContacts,
+    contacts,
+    error: errorContacts,
+    mutate: mutateContacts,
+  } = useContacts(audience?.id);
 
   async function confirmAndDelete(audienceId: string, contact: Contact) {
     if (
@@ -26,23 +40,24 @@ export default function Audiences() {
       })
     ) {
       const toast = await showToast(Toast.Style.Animated, "Deleting Contact", contact.id);
-                  try {
-                    await mutateContacts(
-                      resend.contacts.remove({audienceId, id: contact.id}).then(({error}) => {
-                        if (error) throw new Error(error.message, {cause: error.name});
-                      }), {
-                        optimisticUpdate(data) {
-                          return data.filter(c => c.id!==contact.id)
-                        },
-                        shouldRevalidateAfter: false
-                      }
-                    )
-                    toast.style = Toast.Style.Success;
-                    toast.title = "Deleted Contact";
-                  } catch (error) {
-                    onError(error as Error);
-                  }
-                  }
+      try {
+        await mutateContacts(
+          resend.contacts.remove({ audienceId, id: contact.id }).then(({ error }) => {
+            if (error) throw new Error(error.message, { cause: error.name });
+          }),
+          {
+            optimisticUpdate(data) {
+              return data.filter((c) => c.id !== contact.id);
+            },
+            shouldRevalidateAfter: false,
+          },
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted Contact";
+      } catch (error) {
+        onError(error as Error);
+      }
+    }
   }
 
   const error = errorAudiences || errorContacts;
@@ -58,7 +73,7 @@ export default function Audiences() {
             <Action.Push
               title="Create Contact"
               icon={Icon.Plus}
-              target={<CreateContact audience={audience} getContactsFromApi={mutateContacts} />}
+              target={<CreateContact audience={audience} onCreated={mutateContacts} />}
             />
           )}
         </ActionPanel>
@@ -82,7 +97,7 @@ export default function Audiences() {
                 <Action.Push
                   title="Create Contact"
                   icon={Icon.Plus}
-                  target={<CreateContact audience={audience} getContactsFromApi={mutateContacts} />}
+                  target={<CreateContact audience={audience} onCreated={mutateContacts} />}
                 />
               )}
               {audience && (
@@ -90,7 +105,7 @@ export default function Audiences() {
                   title="Edit Contact"
                   icon={Icon.Pencil}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  target={<UpdateContact contact={contact} audience={audience} />}
+                  target={<UpdateContact contact={contact} audience={audience} onUpdated={mutateContacts} />}
                 />
               )}
               {audience && (
@@ -147,20 +162,23 @@ export function AudienceDropdown(props: { audiences: Audience[]; setAudience: (a
   );
 }
 
-function CreateContact(props: { audience: Audience; getContactsFromApi: () => void }) {
-  const { audience, getContactsFromApi } = props;
-
+function CreateContact({ audience, onCreated }: { audience: Audience; onCreated: () => void }) {
+  const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<CreateContactRequestForm>({
     validation: {
       email: FormValidation.Required,
     },
     async onSubmit(values: CreateContactRequestForm) {
-      const contact = await createContact(audience.id, values);
-      if (!("statusCode" in contact)) {
-        getContactsFromApi();
-        showToast(Toast.Style.Success, "Created Contact", contact.email);
-      } else {
-        showToast(Toast.Style.Failure, "Error", contact.message);
+      const toast = await showToast(Toast.Style.Animated, "Creating Contact", values.email);
+      try {
+        const { error } = await resend.contacts.create({ ...values, audienceId: audience.id });
+        if (error) throw new Error(error.message, { cause: error.name });
+        toast.style = Toast.Style.Success;
+        toast.title = "Created Contact";
+        onCreated();
+        pop();
+      } catch (error) {
+        onError(error as Error);
       }
     },
   });
@@ -181,8 +199,9 @@ function CreateContact(props: { audience: Audience; getContactsFromApi: () => vo
   );
 }
 
-function UpdateContact(props: { contact: Contact; audience: Audience }) {
-  const { contact, audience } = props;
+function UpdateContact(props: { contact: Contact; audience: Audience; onUpdated: () => void }) {
+  const { pop } = useNavigation();
+  const { contact, audience, onUpdated } = props;
 
   const { itemProps, handleSubmit } = useForm<UpdateContactRequestForm>({
     initialValues: {
@@ -195,11 +214,15 @@ function UpdateContact(props: { contact: Contact; audience: Audience }) {
       email: FormValidation.Required,
     },
     async onSubmit(values: UpdateContactRequestForm) {
-      const response = await updateContact(audience.id, contact.id, values);
-      if (!("statusCode" in response)) {
-        showToast(Toast.Style.Success, "Updated Contact", contact.email);
-      } else {
-        showToast(Toast.Style.Failure, "Error", response.message);
+      const toast = await showToast(Toast.Style.Animated, "Updating Contact", values.email);
+      try {
+        resend.contacts.update({ ...values, audienceId: audience.id });
+        toast.style = Toast.Style.Success;
+        toast.title = "Created Contact";
+        onUpdated();
+        pop();
+      } catch (error) {
+        onError(error as Error);
       }
     },
   });

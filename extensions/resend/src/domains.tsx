@@ -1,17 +1,6 @@
 import { useState } from "react";
 import { AddDomainRequestForm, AddDomainResponse, Domain } from "./utils/types";
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Form,
-  Icon,
-  Keyboard,
-  List,
-  Toast,
-  confirmAlert,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Form, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { ADD_DOMAIN_REGIONS, DOMAIN_STATUS_COLORS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
@@ -25,18 +14,19 @@ export default function Domains() {
 
   async function verifyDomainFromApi(domain: Domain) {
     const toast = await showToast(Toast.Style.Animated, "Verifying Domain", domain.name);
-    
+
     try {
       await mutate(
-        resend.domains.verify(domain.id).then(({error}) => {
-          if (error) throw new Error(error.message, {cause: error.name});
-        }), {
+        resend.domains.verify(domain.id).then(({ error }) => {
+          if (error) throw new Error(error.message, { cause: error.name });
+        }),
+        {
           optimisticUpdate(data) {
-            return data.map(d => d.id!==domain.id ? d : ({...d, status: "pending"}));
+            return data.map((d) => (d.id !== domain.id ? d : { ...d, status: "pending" }));
           },
-          shouldRevalidateAfter: false
-        }
-      )
+          shouldRevalidateAfter: false,
+        },
+      );
       toast.style = Toast.Style.Success;
       toast.title = "In Progress";
       toast.message = "You will receive an email notification once this operation is completed.";
@@ -56,15 +46,16 @@ export default function Domains() {
       const toast = await showToast(Toast.Style.Animated, "Deleting Domain", item.name);
       try {
         await mutate(
-          resend.domains.remove(item.id).then(({error}) => {
-            if (error) throw new Error(error.message, {cause: error.name});
-          }), {
+          resend.domains.remove(item.id).then(({ error }) => {
+            if (error) throw new Error(error.message, { cause: error.name });
+          }),
+          {
             optimisticUpdate(data) {
-              return data.filter(d => d.id!==item.id)
+              return data.filter((d) => d.id !== item.id);
             },
-            shouldRevalidateAfter: false
-          }
-        )
+            shouldRevalidateAfter: false,
+          },
+        );
         toast.style = Toast.Style.Success;
         toast.title = "Deleted Domain";
       } catch (error) {
@@ -79,72 +70,80 @@ export default function Domains() {
     <ErrorComponent error={error} />
   ) : (
     <List isLoading={isLoading} searchBarPlaceholder="Search domain">
-      {!isLoading && !domains.length ? <List.EmptyView title="No domains yet" description="Verify a domain by adding a DNS record and start sending emails from your own address." actions={
-        <ActionPanel>
-            <Action.Push
-              title="Add New Domain"
-              icon={Icon.Plus}
-              target={<DomainsAdd onDomainAdded={revalidate} />}
-              shortcut={Keyboard.Shortcut.Common.New}
-            />
-            <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
-            <Action.OpenInBrowser
-              title="View API Reference"
-              url={`${RESEND_URL}docs/api-reference/domains/create-domain`}
-            />
-          </ActionPanel>
-      } /> : <List.Section title={title}>
-        {domains.map((item) => {
-          const region = ADD_DOMAIN_REGIONS.find((region) => region.value === item.region);
-          return (
-            <List.Item
-              key={item.id}
-              title={item.name}
-              icon={getFavicon(`https://${item.name}`, { fallback: Icon.Globe })}
-              subtitle={item.id}
-              accessories={[
-                { tag: { value: item.status, color: DOMAIN_STATUS_COLORS[item.status] } },
-                region ? { icon: region.icon, tooltip: region.title } : {},
-                { tag: new Date(item.created_at), tooltip: `Created: ${item.created_at}` },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action.CopyToClipboard title="Copy ID to Clipboard" content={item.id} />
-                  <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.name} />
-                  <Action.OpenInBrowser title="View Domain in Dashboard" url={`${RESEND_URL}domains/${item.id}`} />
-                  {item.status !== "pending" && (
+      {!isLoading && !domains.length ? (
+        <List.EmptyView
+          title="No domains yet"
+          description="Verify a domain by adding a DNS record and start sending emails from your own address."
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Add New Domain"
+                icon={Icon.Plus}
+                target={<DomainsAdd onDomainAdded={revalidate} />}
+                shortcut={Keyboard.Shortcut.Common.New}
+              />
+              <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
+              <Action.OpenInBrowser
+                title="View API Reference"
+                url={`${RESEND_URL}docs/api-reference/domains/create-domain`}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section title={title}>
+          {domains.map((item) => {
+            const region = ADD_DOMAIN_REGIONS.find((region) => region.value === item.region);
+            return (
+              <List.Item
+                key={item.id}
+                title={item.name}
+                icon={getFavicon(`https://${item.name}`, { fallback: Icon.Globe })}
+                subtitle={item.id}
+                accessories={[
+                  { tag: { value: item.status, color: DOMAIN_STATUS_COLORS[item.status] } },
+                  region ? { icon: region.icon, tooltip: region.title } : {},
+                  { tag: new Date(item.created_at), tooltip: `Created: ${item.created_at}` },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action.CopyToClipboard title="Copy ID to Clipboard" content={item.id} />
+                    <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.name} />
+                    <Action.OpenInBrowser title="View Domain in Dashboard" url={`${RESEND_URL}domains/${item.id}`} />
+                    {item.status !== "pending" && (
+                      <Action
+                        title="Verify Domain"
+                        icon={Icon.WrenchScrewdriver}
+                        onAction={() => verifyDomainFromApi(item)}
+                      />
+                    )}
                     <Action
-                      title="Verify Domain"
-                      icon={Icon.WrenchScrewdriver}
-                      onAction={() => verifyDomainFromApi(item)}
+                      title="Delete Domain"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={() => confirmAndDelete(item)}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
-                  )}
-                  <Action
-                    title="Delete Domain"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={() => confirmAndDelete(item)}
-                    shortcut={Keyboard.Shortcut.Common.Remove}
-                  />
-                  <ActionPanel.Section>
-                    <Action.Push
-                      title="Add New Domain"
-                      icon={Icon.Plus}
-                      target={<DomainsAdd onDomainAdded={revalidate} />}
-                      shortcut={Keyboard.Shortcut.Common.New}
-                    />
-                    <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
-                    <Action.OpenInBrowser
-                      title="View API Reference"
-                      url={`${RESEND_URL}docs/api-reference/domains/list-domains`}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>}
+                    <ActionPanel.Section>
+                      <Action.Push
+                        title="Add New Domain"
+                        icon={Icon.Plus}
+                        target={<DomainsAdd onDomainAdded={revalidate} />}
+                        shortcut={Keyboard.Shortcut.Common.New}
+                      />
+                      <Action title="Reload Domains" icon={Icon.Redo} onAction={revalidate} />
+                      <Action.OpenInBrowser
+                        title="View API Reference"
+                        url={`${RESEND_URL}docs/api-reference/domains/list-domains`}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
     </List>
   );
 }
@@ -156,12 +155,15 @@ function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Processing...", "Adding Domain");
       try {
-        const {error,data} = await resend.domains.create({name: values.name, region: values.region as DomainRegion});
-        if (error) throw new Error(error.message, {cause: error.name});
+        const { error, data } = await resend.domains.create({
+          name: values.name,
+          region: values.region as DomainRegion,
+        });
+        if (error) throw new Error(error.message, { cause: error.name });
         onDomainAdded();
         setNewDomain(data);
-        toast.style = Toast.Style.Success
-        toast.title = "Added Domain"
+        toast.style = Toast.Style.Success;
+        toast.title = "Added Domain";
         toast.message = data.name;
       } catch (error) {
         onError(error as Error);

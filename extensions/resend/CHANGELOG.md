@@ -1,5 +1,7 @@
 # Resend Changelog
 
+## [Use Resend SDK + Add Windows Support] - {PR_MERGE_DATE}
+
 ## [Update Icons] - 2025-07-04
 
 - Update Icons to reflect Resend's new Brand ([Brand Kit](https://resend.com/brand))

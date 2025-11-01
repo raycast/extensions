@@ -1,6 +1,6 @@
-import {  useState } from "react";
+import { useState } from "react";
 import { APIKey, CreateAPIKeyRequest, CreateAPIKeyRequestForm } from "./utils/types";
-import {isApiError } from "./utils/api";
+import { isApiError } from "./utils/api";
 import {
   Action,
   ActionPanel,
@@ -32,22 +32,23 @@ export default function APIKeys() {
       })
     ) {
       const toast = await showToast(Toast.Style.Animated, "Deleting API Key", item.name);
-            try {
-              await mutate(
-                resend.apiKeys.remove(item.id).then(({error}) => {
-                  if (error) throw new Error(error.message, {cause: error.name});
-                }), {
-                  optimisticUpdate(data) {
-                    return data.filter(k => k.id!==item.id)
-                  },
-                  shouldRevalidateAfter: false
-                }
-              )
-              toast.style = Toast.Style.Success;
-              toast.title = "Deleted API Key";
-            } catch (error) {
-              onError(error as Error);
-            }
+      try {
+        await mutate(
+          resend.apiKeys.remove(item.id).then(({ error }) => {
+            if (error) throw new Error(error.message, { cause: error.name });
+          }),
+          {
+            optimisticUpdate(data) {
+              return data.filter((k) => k.id !== item.id);
+            },
+            shouldRevalidateAfter: false,
+          },
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted API Key";
+      } catch (error) {
+        onError(error as Error);
+      }
     }
   }
 
@@ -145,11 +146,8 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
       if (newKey.domain_id === "all") delete newKey.domain_id;
 
       try {
-        const {error,data} = await resend.apiKeys.create(newKey);
-        if (error) throw new Error(error.message, {cause: error.name});
-        // toast.style = Toast.Style.Success
-        // toast.title = "Added Domain"
-        // toast.message = data.name;
+        const { error, data } = await resend.apiKeys.create(newKey);
+        if (error) throw new Error(error.message, { cause: error.name });
         showToast(Toast.Style.Success, "Created API Key", data.token);
         if (
           await confirmAlert({

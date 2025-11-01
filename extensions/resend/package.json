@@ -16,6 +16,10 @@
     "Communication",
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -118,6 +122,11 @@
       "name": "list-api-keys",
       "title": "List API Keys",
       "description": "List all API keys in your Resend account"
+    },
+    {
+      "name": "list-emails",
+      "title": "List Emails",
+      "description": "List all Emails in your Resend account"
     },
     {
       "name": "create-api-key",

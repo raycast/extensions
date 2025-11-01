@@ -31,7 +31,7 @@ const preferences = getPreferenceValues<ExtensionPreferences>();
 const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
 
 export default function Emails() {
-  const { isLoading, emails, error,pagination,mutate } = useEmails();
+  const { isLoading, emails, error, pagination, mutate } = useEmails();
 
   const getTintColor = (last_event: string) => {
     if (last_event === "delivered") return Color.Green;
@@ -72,7 +72,7 @@ export default function Emails() {
             <List.Item
               title={email.to[0]}
               subtitle={email.subject}
-              accessories={[{date: new Date(email.created_at)}]}
+              accessories={[{ date: new Date(email.created_at) }]}
               key={email.id}
               icon={{ source: Icon.Envelope, tintColor: getTintColor(email.last_event) }}
               actions={
@@ -97,7 +97,6 @@ export default function Emails() {
                   </ActionPanel.Section>
                 </ActionPanel>
               }
-              
             />
           ))
       )}
@@ -105,31 +104,41 @@ export default function Emails() {
   );
 }
 
-function ViewEmail({id}:{id: string}) {
-const {isLoading,email} = useGetEmail(id);
-  return <Detail isLoading={isLoading} markdown={email?.html || email?.text} metadata={email && <Detail.Metadata>
-                      <Detail.Metadata.Label title="ID" text={email.id} />
-                      <Detail.Metadata.Label title="To" text={email.to.join()} />
-                      <Detail.Metadata.Label title="From" text={email.from} />
-                      <Detail.Metadata.Label title="Created At" text={email.created_at} />
-                      <Detail.Metadata.Label title="Subject" text={email.subject} />
-                      <Detail.Metadata.Label
-                        title="BCC"
-                        text={email.bcc ? email.bcc.join() : undefined}
-                        icon={!email.bcc ? Icon.Minus : undefined}
-                      />
-                      <Detail.Metadata.Label
-                        title="CC"
-                        text={email.cc ? email.cc.join() : undefined}
-                        icon={!email.cc ? Icon.Minus : undefined}
-                      />
-                      <Detail.Metadata.Label
-                        title="Reply To"
-                        text={email.reply_to ? email.reply_to.join() : undefined}
-                        icon={!email.reply_to ? Icon.Minus : undefined}
-                      />
-                      <Detail.Metadata.Label title="Last Event" text={email.last_event} />
-  </Detail.Metadata>} />
+function ViewEmail({ id }: { id: string }) {
+  const { isLoading, email } = useGetEmail(id);
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={email?.html || email?.text}
+      metadata={
+        email && (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="ID" text={email.id} />
+            <Detail.Metadata.Label title="To" text={email.to.join()} />
+            <Detail.Metadata.Label title="From" text={email.from} />
+            <Detail.Metadata.Label title="Created At" text={email.created_at} />
+            <Detail.Metadata.Label title="Subject" text={email.subject} />
+            <Detail.Metadata.Label
+              title="BCC"
+              text={email.bcc ? email.bcc.join() : undefined}
+              icon={!email.bcc ? Icon.Minus : undefined}
+            />
+            <Detail.Metadata.Label
+              title="CC"
+              text={email.cc ? email.cc.join() : undefined}
+              icon={!email.cc ? Icon.Minus : undefined}
+            />
+            <Detail.Metadata.Label
+              title="Reply To"
+              text={email.reply_to ? email.reply_to.join() : undefined}
+              icon={!email.reply_to ? Icon.Minus : undefined}
+            />
+            <Detail.Metadata.Label title="Last Event" text={email.last_event} />
+          </Detail.Metadata>
+        )
+      }
+    />
+  );
 }
 
 type EmailSendProps = {
@@ -158,7 +167,7 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
         const to = values.to.split(",").map((item) => item.trim());
         const bcc = values.bcc && values.bcc.split(",").map((item) => item.trim());
         const cc = values.cc && values.cc.split(",").map((item) => item.trim());
-  
+
         const attachments: EmailAttachment[] = [];
         if (attachmentType === "Hosted") {
           const filename = path.basename(hostedAttachmentUrl);
@@ -173,18 +182,30 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
             }
           }
         }
-  
+
         const tags: EmailTag[] = emailTags.map((tag) => {
           return { name: tag.name, value: tag.value };
         });
-  
-        const newEmail: CreateEmailOptions = { from, to, subject, bcc, cc, replyTo: reply_to, html, text, attachments, tags, react: undefined };
+
+        const newEmail: CreateEmailOptions = {
+          from,
+          to,
+          subject,
+          bcc,
+          cc,
+          replyTo: reply_to,
+          html,
+          text,
+          attachments,
+          tags,
+          react: undefined,
+        };
         if (!attachments.length) delete newEmail.attachments;
-        const {data,error} = await resend.emails.send(newEmail);
-        if (error) throw new Error(error.message, {cause: error.name});
+        const { data, error } = await resend.emails.send(newEmail);
+        if (error) throw new Error(error.message, { cause: error.name });
         toast.style = Toast.Style.Success;
         toast.title = "Sent Email";
-        toast.message = data.id
+        toast.message = data.id;
         onEmailSent();
         pop();
       } catch (error) {
