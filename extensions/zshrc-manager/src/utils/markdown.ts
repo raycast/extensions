@@ -7,7 +7,6 @@
 
 import { LogicalSection } from "../lib/parse-zshrc";
 import { parseAliases, parseExports } from "./parsers";
-// import { truncateValueMiddle } from "./formatters";
 
 /**
  * Represents parsed section content with aliases, exports, and other lines

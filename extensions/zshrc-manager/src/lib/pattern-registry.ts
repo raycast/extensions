@@ -12,7 +12,7 @@ import { PARSING_CONSTANTS } from "../constants";
  * Pattern registry for counting entries in content
  * Uses the same patterns as the main parser but optimized for counting
  */
-export const PATTERN_REGISTRY = {
+const PATTERN_REGISTRY = {
   /**
    * Count aliases in content
    * @param content The content to analyze
