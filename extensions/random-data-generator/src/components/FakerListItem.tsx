@@ -1,18 +1,13 @@
 import isUrl from "is-url";
 import _ from "lodash";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
-import type { Faker } from "@/faker";
+import fakerClient from "@/faker";
 import usePreferences from "@/hooks/usePreferences";
 
-export type Item = {
-  section: string;
-  id: string;
-  value: string;
-  getValue(): string;
-};
+export type Item = { section: string; id: string; value: string; getValue(): string };
 
 export type Pin = (item: Item) => void;
 
@@ -20,7 +15,6 @@ interface FakerListItemProps {
   item: Item;
   pin?: Pin;
   unpin?: Pin;
-  faker: Faker;
 }
 
 function DefaultActions({ value, updateValue }: { value: string; updateValue: () => void }) {
@@ -42,16 +36,12 @@ function DefaultActions({ value, updateValue }: { value: string; updateValue: ()
   );
 }
 
-export default function FakerListItem({ item, pin, unpin, faker }: FakerListItemProps) {
-  const [value, setValue] = useState(item.value);
+export default function FakerListItem({ item, pin, unpin }: FakerListItemProps) {
+  const [value, setValue] = useState(() => item.value || item.getValue());
 
   const updateValue = async () => {
     setValue(item.getValue());
   };
-
-  useEffect(() => {
-    updateValue();
-  }, [item]);
 
   return (
     <List.Item
@@ -90,12 +80,7 @@ export default function FakerListItem({ item, pin, unpin, faker }: FakerListItem
             quicklink={{
               name: `Copy Random ${_.startCase(item.id)}`,
               link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
-                JSON.stringify({
-                  section: item.section,
-                  id: item.id,
-                  locale: faker.locale,
-                  mode: "copy",
-                }),
+                JSON.stringify({ section: item.section, id: item.id, locale: fakerClient.locale, mode: "copy" }),
               )}`,
             }}
           />
@@ -104,12 +89,7 @@ export default function FakerListItem({ item, pin, unpin, faker }: FakerListItem
             quicklink={{
               name: `Paste Random ${_.startCase(item.id)}`,
               link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
-                JSON.stringify({
-                  section: item.section,
-                  id: item.id,
-                  locale: faker.locale,
-                  mode: "paste",
-                }),
+                JSON.stringify({ section: item.section, id: item.id, locale: fakerClient.locale, mode: "paste" }),
               )}`,
             }}
           />

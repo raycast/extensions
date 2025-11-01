@@ -71,6 +71,15 @@ export const getLatestRunningDeploymentQuery = {
     "query GetLatestRunningDeployment($serviceID: ObjectID!, $environmentID: ObjectID!) {\n  deployments(\n    serviceID: $serviceID\n    environmentID: $environmentID\n    perPage: 1\n    filter: RUNNING\n  ) {\n    edges {\n      cursor\n      node {\n        _id\n        status\n        planMeta\n        createdAt\n        planType\n        commitMessage\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}",
 };
 
+export const getProjectUsageQuery = {
+  operationName: "GetProjectUsage",
+  variables: {
+    projectID: "",
+  },
+  query:
+    "query GetProjectUsage($projectID: ObjectID!) {\n  projectUsage(projectID: $projectID, usageGroupByEntity: CATEGORY) {\n    usages {\n      entity\n      usage\n      __typename\n    }\n    periodStart\n    periodEnd\n    budget\n    __typename\n  }\n}",
+};
+
 export const deleteProjectQuery = {
   operationName: "DeleteProject",
   variables: {

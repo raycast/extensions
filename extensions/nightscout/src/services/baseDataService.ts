@@ -141,8 +141,13 @@ export abstract class BaseDataService<T> {
       let allData: T[];
 
       if (isIncremental && cachedData) {
+        // filter out entries older than 24h in existing data to limit memory footprint
+        const yesterday = now - 24 * 60 * 60 * 1000;
+        const recentCachedData = cachedData.data.filter(
+          (item) => this.timestampExtractor.getTimestamp(item) > yesterday,
+        );
         // merge new data with existing ones
-        const combined = [...cachedData.data, ...newData];
+        const combined = [...recentCachedData, ...newData];
         // remove duplicates and sort by timestamp (newest first)
         const unique = combined.filter(
           (item, index, self) =>

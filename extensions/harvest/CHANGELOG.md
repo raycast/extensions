@@ -1,5 +1,25 @@
 # Harvest Changelog
 
+## [UI Refresh & Bug Fixes] - 2025-10-29
+
+- Fix: Pagination converted to use `next_page` URL provided by Harvest API response as `page` is a deprecated API parameter
+- Fix: Removed double-layer caching on projects as some users have too many objects to store via `useCachedState`; utilizing cached promise data within the session should work fine for most
+- Fix: Time entry caching now only persists today's entries to prevent unlimited cache growth; utilizing cached promise data for other dates should work fine for most
+- Fix: Favorites now store hours in decimal format internally to prevent display inconsistencies
+- Fix: Improved precision when converting H:mm time format to decimal to prevent rounding errors
+- Fix: Added keywords to favorites to match filtering options used in Today's Timesheet
+- Changed: UI updates across list views
+  - Added preference to select which field to use as primary title; other field becomes accessory
+  - Converted project and client to accessories with icons
+  - Converted duration to tag accessory
+  - Moved running timer icon into the duration tag with orange highlight
+- Changed: Migrated from `LocalStorage` to `useLocalStorage` hook for more predictable state management
+- Changed: Security update - upgraded axios from 0.23.0 to 1.12.2
+
+## [Favorites Command] - 2025-10-15
+
+- Added: New command to manage favorites
+  You can now add, edit, and delete favorites to quickly start timers or create time entries from a preset.
 
 ## [Fixes] - 2024-06-07
 

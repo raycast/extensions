@@ -1,13 +1,20 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "changedetection-io",
-  "title": "changedetection.io",
+  "title": "ChangeDetection.io",
   "description": "Website Change Detection For Clever People",
   "icon": "changedetection.png",
   "author": "xmok",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "preferences": [
@@ -42,6 +49,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",

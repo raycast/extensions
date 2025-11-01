@@ -1,5 +1,12 @@
 # Docker Changelog
 
+## [Windows Support] - 2025-10-30
+
+- Added Windows support for the Docker extension
+- Updated keyboard shortcuts to be platform-specific (Cmd on macOS, Ctrl on Windows)
+- Platform-specific default socket paths (macOS: `/var/run/docker.sock`, Windows: `//./pipe/docker_engine`)
+- Updated dependencies to latest Raycast API version
+
 ## [Feature] - 2025-09-08
 
 - Show loading toasts while container actions are running.

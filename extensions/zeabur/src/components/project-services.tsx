@@ -68,13 +68,17 @@ export default function ProjectServices({ projectID, environmentID }: ProjectSer
                     <ProjectDeployments projectID={projectID} serviceID={service._id} environmentID={environmentID} />
                   }
                 />
-                {service.domain && (
-                  <Action.OpenInBrowser title="Open Service Domain" url={`https://${service.domain}`} />
-                )}
                 <Action.OpenInBrowser
                   title="Open Service Page"
                   url={`https://zeabur.com/projects/${projectID}/services/${service._id}?envID=${environmentID}`}
                 />
+                {service.domain && (
+                  <Action.OpenInBrowser
+                    title="Open Service Domain"
+                    url={`https://${service.domain}`}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  />
+                )}
                 <Action
                   title="Suspend Service"
                   icon={Icon.Pause}

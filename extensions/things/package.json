@@ -2,7 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "things",
   "title": "Things",
-  "version": "1.0.0",
   "description": "Search and manage your Things to-dos from Raycast",
   "icon": "things-icon.png",
   "author": "loris",
@@ -19,6 +18,9 @@
     "janosorcsik"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "show-today-list",
@@ -424,27 +426,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
+    "@raycast/api": "^1.103.5",
     "@raycast/utils": "^2.2.1",
     "dayjs": "^1.11.18",
     "qs": "^6.14.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.3.1",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.9.2",
     "@types/qs": "^6.14.0",
-    "@types/react": "^19.1.12",
-    "eslint": "^9.35.0",
-    "typescript": "^5.9.2"
+    "@types/react": "^19.2.2",
+    "eslint": "^9.38.0",
+    "typescript": "^5.9.3"
   },
+  "version": "1.0.0",
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

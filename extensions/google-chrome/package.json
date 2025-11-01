@@ -19,7 +19,8 @@
     "santiago_perez",
     "drewbabel",
     "hayden_barnes",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "j3lte"
   ],
   "pastContributors": [
     "jonasengelmann"
@@ -96,6 +97,11 @@
       "name": "search-history",
       "title": "Search History",
       "description": "Search history for a given query."
+    },
+    {
+      "name": "get-profiles",
+      "title": "Get Profiles",
+      "description": "Get all Chrome profiles."
     }
   ],
   "ai": {
@@ -251,6 +257,32 @@
             "meetsCriteria": "Returns the history for Raycast"
           }
         ]
+      },
+      {
+        "input": "@google-chrome get me my profiles",
+        "mocks": {
+          "get-profiles": [
+            {
+              "id": "Default",
+              "name": "Personal"
+            },
+            {
+              "id": "Profile 1",
+              "name": "Test Profile"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-profiles"
+            }
+          },
+          {
+            "meetsCriteria": "Returns Chrome profiles with their names and IDs"
+          }
+        ]
       }
     ]
   },
@@ -298,20 +330,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
     "run-applescript": "^7.1.0",
-    "sql.js": "^1.12.0"
+    "sql.js": "^1.13.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/sql.js": "^1.4.9",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "react": "^18.2.0",
-    "typescript": "^5.8.2"
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

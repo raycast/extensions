@@ -1,48 +1,8 @@
-export interface SerieAFixtureAndResult {
+export interface SerieA<T> {
   success: boolean;
   message: string;
-  errors: any[];
-  data: Match[];
-  code: number;
-}
-
-export interface SerieATable {
-  success: boolean;
-  message: string;
-  errors: any[];
-  data: Standing[];
-  code: number;
-}
-
-export interface SerieAMatchday {
-  success: boolean;
-  message: string;
-  errors: any[];
-  data: Matchday[];
-  code: number;
-}
-
-export interface SerieATeams {
-  success: boolean;
-  message: string;
-  errors: any[];
-  data: Teams;
-  code: number;
-}
-
-export interface SerieASquad {
-  success: boolean;
-  message: string;
-  errors: any[];
-  data: SquadGroup;
-  code: number;
-}
-
-export interface SerieAPlayer {
-  success: boolean;
-  message: string;
-  errors: any[];
-  data: Player[];
+  errors: unknown[];
+  data: T;
   code: number;
 }
 
@@ -61,7 +21,43 @@ export enum CategoryStatus {
   ToBePlayed = "TO BE PLAYED",
 }
 
+export interface DataV3 {
+  apiCallRequestTime: Date;
+  standings: TableStanding[];
+}
+
+export interface TableStanding {
+  apiCallRequestTime: Date;
+  competition: Competition;
+  editorials: unknown[];
+  legenda: unknown[];
+  teams: Standing[];
+  type: string;
+}
+
 export interface Standing {
+  achievementStatuses: AchievementStatus[];
+  acronymName: string;
+  acronymNameLocalized: string;
+  countryCode: null;
+  isTeamFake: boolean;
+  mediaName: string;
+  mediaShortName: string;
+  note: string;
+  officialName: string;
+  providerId: string;
+  qualification: Qualification | null;
+  shortName: string;
+  stadium: null;
+  stats: Stat[];
+  teamId: string;
+  teamType: null;
+  team_active: string;
+  team_id: string;
+  team_image: string;
+  team_image_secondary: string;
+  team_slug: string;
+  // legacy api
   CAMPIONATO: string;
   CODSQUADRA: string;
   GIRONE: string;
@@ -120,7 +116,7 @@ export interface Match {
   away_team_name: string;
   away_team_short_name: string;
   away_team_url: string;
-  broadcasters: string;
+  broadcasters?: string;
   category_status: string;
   championship_background_image: string;
   championship_category_id: number;
@@ -175,7 +171,45 @@ export interface Match {
   venue_image: string;
   venue_name: string;
   venue_plan_image: string;
-  weather: string;
+  weather?: string;
+}
+
+export interface Competition {
+  acronymName: string;
+  competitionId: string;
+  endDateUtc: null;
+  name: string;
+  officialName: string;
+  providerId: string;
+  seasonId: string;
+  seasonName: string;
+  shortName: string;
+  startDateUtc: null;
+}
+
+export interface Qualification {
+  qualificationId: number;
+  qualificationLabel: string;
+}
+
+export interface AchievementStatus {
+  statusLabel: string;
+  typeLabel: string;
+}
+
+export interface Stat {
+  statsId: string;
+  statsLabel: string;
+  statsLabelAbbreviation: string;
+  statsUnit: null;
+  statsUnitAbbreviation: null;
+  statsValue: StatsValue[] | string | number | null;
+}
+
+export interface StatsValue {
+  formLabel: string;
+  formLabelAbbreviation: string;
+  formType: string;
 }
 
 export interface Broadcaster {
@@ -254,62 +288,6 @@ export enum Role {
   Centrocampista = "Centrocampista",
   Difensore = "Difensore",
   Portiere = "Portiere",
-}
-
-export interface Player {
-  ALLAGIORNATA: number;
-  Ammonizioni: number;
-  Attacchi: number;
-  CAMPIONATO: Campionato;
-  CODGIOCATORE: Codgiocatore;
-  CODRUOLO: Codruolo;
-  CODSQUADRA: Codsquadra;
-  Cognome: Cognome;
-  CognomeNomeXL: CognomeNomeXL;
-  DOPPIEAMMONI: number;
-  DataNascita: DataNascita;
-  Diffidato: number;
-  EspulTot: number;
-  Espulsioni: number;
-  IDOptaGiocatore: IDOptaGiocatore;
-  IMMAGIGIOCAT: Immagigiocat;
-  MINUTI: number;
-  MVPMese: string;
-  MVPMeseENG: string;
-  NAssist: number;
-  NAssistVin: number;
-  NUMEROMAGLIA: string;
-  Nazionalita: Nazionalita;
-  Nome: Nome;
-  NomeInFormazione: NomeInFormazione;
-  OccasioniDaGol: number;
-  PALLERECUPER: number;
-  Parate: number;
-  ParateDe: number;
-  PassChiave: number;
-  Presenze: number;
-  ROSA: number;
-  Reti: number;
-  RetiSuRigore: number;
-  RetiSubite: number;
-  Ruolo: Ruolo;
-  STAGIONE: string;
-  Squadra: Squadra;
-  Squalificato?: number;
-  TIRI: number;
-  do_deleted: number;
-  do_inserted: number;
-  do_loaded: number;
-  do_updated: number;
-  player_active: string;
-  player_head_shot: string;
-  player_image: string;
-  player_medium_shot: string;
-  player_slug: PlayerSlug;
-  team_active: string;
-  team_image: string;
-  team_image_secondary: string;
-  team_slug: TeamSlug;
 }
 
 export interface Club {

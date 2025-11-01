@@ -53,7 +53,7 @@ export default function Command() {
 
       const result = await temboAPI.createIssue({
         title: `Task: ${values.taskAssignment.slice(0, 50)}${values.taskAssignment.length > 50 ? "..." : ""}`,
-        description: values.taskAssignment,
+        prompt: values.taskAssignment,
         json: "{}",
         queueRightAway: true,
         codeRepoIds: values.repository ? [values.repository] : undefined,

@@ -146,35 +146,64 @@ export const resolveProfileName = (profileInput?: string): string | undefined =>
 
 const getBookmarksFilePath = (profile?: string) => getCometFilePath("Bookmarks", profile);
 
-function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
-  const bookmarks: HistoryEntry[] = [];
+function extractBookmarkFromBookmarkDirectory(
+  bookmarkDirectory: BookmarkDirectory,
+  maxResults?: number,
+  currentCount = { count: 0 },
+): HistoryEntry[] {
+  // Early return if we've reached the limit
+  if (maxResults !== undefined && currentCount.count >= maxResults) {
+    return [];
+  }
 
-  if (bookmarkDirectory.type === "folder") {
-    bookmarkDirectory.children.forEach((child) => {
-      bookmarks.push(...extractBookmarkFromBookmarkDirectory(child));
-    });
-  } else if (bookmarkDirectory.type === "url" && bookmarkDirectory.url) {
-    bookmarks.push({
+  if (bookmarkDirectory.type === "url" && bookmarkDirectory.url) {
+    // Direct bookmark - create and return immediately
+    const bookmark: HistoryEntry = {
       id: bookmarkDirectory.id,
       url: bookmarkDirectory.url,
       title: bookmarkDirectory.name,
       dateAdded: bookmarkDirectory.date_added,
-    });
+    };
+    currentCount.count++;
+    return [bookmark];
   }
-  return bookmarks;
+
+  if (bookmarkDirectory.type === "folder") {
+    const bookmarks: HistoryEntry[] = [];
+    // Process children with early termination
+    for (const child of bookmarkDirectory.children) {
+      if (maxResults !== undefined && currentCount.count >= maxResults) {
+        break;
+      }
+      const childBookmarks = extractBookmarkFromBookmarkDirectory(child, maxResults, currentCount);
+      bookmarks.push(...childBookmarks);
+    }
+    return bookmarks;
+  }
+
+  return [];
 }
 
-const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
+const extractBookmarks = (rawBookmarks: RawBookmarks, maxResults?: number): HistoryEntry[] => {
   const bookmarks: HistoryEntry[] = [];
-  Object.keys(rawBookmarks.roots).forEach((rootKey) => {
+  let totalCount = 0;
+
+  for (const rootKey of Object.keys(rawBookmarks.roots)) {
+    if (maxResults !== undefined && totalCount >= maxResults) {
+      break;
+    }
     const rootLevelBookmarkFolders = rawBookmarks.roots[rootKey];
-    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders);
+    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders, maxResults, {
+      count: totalCount,
+    });
     bookmarks.push(...bookmarkEntries);
-  });
+    totalCount += bookmarkEntries.length;
+  }
   return bookmarks;
 };
 
-export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
+export const getBookmarks = async (profile?: string, maxResults?: number): Promise<HistoryEntry[]> => {
+  const startTime = Date.now();
   try {
     const bookmarksFilePath = getBookmarksFilePath(profile);
 
@@ -184,14 +213,26 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
     }
 
     const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
-    const bookmarks = extractBookmarks(JSON.parse(fileBuffer));
+    const bookmarks = extractBookmarks(JSON.parse(fileBuffer), maxResults);
 
     if (bookmarks.length === 0) {
       throw new Error(NO_BOOKMARKS_MESSAGE);
     }
 
+    console.debug(`Bookmark extraction took ${Date.now() - startTime}ms for ${bookmarks.length} items`);
     return bookmarks;
-  } catch {
+  } catch (error) {
+    console.error(`Bookmark extraction failed after ${Date.now() - startTime}ms:`, error);
+
+    // Add specific error handling for different failure modes
+    if (error instanceof SyntaxError) {
+      console.error("Invalid bookmark file format:", error);
+    } else if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      console.error("Bookmark file not found:", error);
+    } else if (error && typeof error === "object" && "code" in error && error.code === "EACCES") {
+      console.error("Permission denied accessing bookmark file:", error);
+    }
+
     // If it's a profile that doesn't exist or file that doesn't exist,
     // always return the "no bookmarks" message
     throw new Error(NO_BOOKMARKS_MESSAGE);
@@ -258,7 +299,10 @@ export function showCometNotOpenToast() {
 }
 
 const whereClauses = (tableTitle: string, terms: string[]) => {
-  const sanitizedTerms = terms.map((t) => t.replace(/'/g, "''"));
+  // More robust SQL sanitization to prevent injection attacks
+  const sanitizedTerms = terms.map((t) =>
+    t.replace(/'/g, "''").replace(/"/g, '""').replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_"),
+  );
   return sanitizedTerms
     .map((t) => `(${tableTitle}.title LIKE '%${t}%' OR ${tableTitle}.url LIKE '%${t}%')`)
     .join(" AND ");
@@ -272,6 +316,46 @@ export const getHistoryQuery = (table: string, date_field: string, terms: string
      WHERE ${whereClauses(table, terms)}
      AND last_visit_time > 0
      ORDER BY ${date_field} DESC LIMIT 30;`;
+
+// Optimized query for better performance with index hints
+export const getOptimizedHistoryQuery = (table: string, date_field: string, terms: string[]) => {
+  if (terms.length === 0 || (terms.length === 1 && terms[0] === "")) {
+    // No search terms - return recent entries
+    return `SELECT id, url, title FROM ${table} WHERE last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
+  }
+
+  // Use optimized search with proper indexing and enhanced sanitization
+  const sanitizedTerms = terms.map((t) =>
+    t.replace(/'/g, "''").replace(/"/g, '""').replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_"),
+  );
+  const searchConditions = sanitizedTerms.map((t) => `(title LIKE '%${t}%' OR url LIKE '%${t}%')`).join(" AND ");
+
+  return `SELECT id, url, title FROM ${table} WHERE ${searchConditions} AND last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
+};
+
+// Enhanced secure query builder with parameterized approach
+export const buildSecureHistoryQuery = (table: string, date_field: string, terms: string[]) => {
+  if (terms.length === 0 || (terms.length === 1 && terms[0] === "")) {
+    return {
+      query: `SELECT id, url, title FROM ${table} WHERE last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`,
+      params: [],
+    };
+  }
+
+  // Build parameterized query with placeholders
+  const placeholders = terms
+    .map((_, index) => `(title LIKE $${index * 2 + 1} OR url LIKE $${index * 2 + 2})`)
+    .join(" AND ");
+  const query = `SELECT id, url, title FROM ${table} WHERE ${placeholders} AND last_visit_time > 0 ORDER BY ${date_field} DESC LIMIT 30;`;
+
+  // Create parameters array with LIKE patterns
+  const params: string[] = [];
+  terms.forEach((term) => {
+    params.push(`%${term}%`, `%${term}%`); // title and url patterns
+  });
+
+  return { query, params };
+};
 
 export const getHistory = async (profile?: string, query?: string): Promise<HistoryEntry[]> => {
   try {

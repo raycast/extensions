@@ -59,7 +59,7 @@ const handleError = (err: unknown) =>
   pipe(toAxiosError<{ message: string }>(err), (err) =>
     [403, 401].includes(err.response?.status ?? 500)
       ? new UnauthorizedError(err.response?.data?.message ?? "Unauthorized")
-      : E.toError(err)
+      : E.toError(err),
   );
 
 export const getDomainStatus: R.Reader<
@@ -76,7 +76,7 @@ export const getDomainStatus: R.Reader<
               domain: result.domain,
             },
           }),
-        handleError
+        handleError,
       ),
       TE.chainEitherKW(flow((r) => r.data, StatusResponse.decode)),
       TE.map(
@@ -86,11 +86,11 @@ export const getDomainStatus: R.Reader<
             ...result,
             status: d.summary as Status,
           })),
-          A.head
-        )
-      )
-    )
-  )
+          A.head,
+        ),
+      ),
+    ),
+  ),
 );
 
 export const search = (query: string): TE.TaskEither<Errors | UnauthorizedError | Error, ISearchResult[]> =>
@@ -102,13 +102,13 @@ export const search = (query: string): TE.TaskEither<Errors | UnauthorizedError 
             query,
           },
         }),
-      handleError
+      handleError,
     ),
     TE.chainEitherKW(flow((r) => r.data, SearchResponse.decode)),
-    TE.map(({ results }) => results)
+    TE.map(({ results }) => results),
   );
 
 export const fullSearch = flow(
   search,
-  TE.chain((domains) => pipe(domains, A.map(getDomainStatus), TE.sequenceArray))
+  TE.chain((domains) => pipe(domains, A.map(getDomainStatus), TE.sequenceArray)),
 );

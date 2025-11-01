@@ -5,7 +5,7 @@ import { URI } from "otpauth";
  * @param {string} totpUrl - The TOTP URL.
  * @returns {string} The generated TOTP code.
  */
-function getTOTPCode(totpUrl: string) {
+function getTOTPCode(totpUrl: string): string {
   const totp = URI.parse(totpUrl);
   const code = totp.generate();
   return code;

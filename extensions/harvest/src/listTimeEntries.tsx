@@ -27,7 +27,7 @@ import { HarvestTimeEntry } from "./services/responseTypes";
 import New from "./new";
 import { execSync } from "child_process";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./services/requestTypes";
-import { sumBy } from "lodash";
+import { sumBy } from "es-toolkit";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -41,6 +41,7 @@ dayjs.extend(relativeTime);
 
 export interface Preferences {
   sortBy: "updated-desc" | "updated-asc" | "created-desc" | "created-asc" | "none";
+  titleDisplay: "task" | "project";
 }
 
 export default function Command() {
@@ -48,13 +49,11 @@ export default function Command() {
   const { data: items, isLoading, revalidate } = useMyTimeEntries(viewDate);
 
   const [navigationTitle, setNavigationTitle] = useState("Today's Timesheet");
-  const [navSubtitle, setNavSubtitle] = useState("");
   const { data: company } = useCompany();
+  const { sortBy, titleDisplay }: Preferences = getPreferenceValues();
 
   const timeEntries = useMemo(() => {
     const timeEntries: HarvestTimeEntry[] = items;
-
-    const { sortBy }: Preferences = getPreferenceValues();
     switch (sortBy) {
       case "updated-desc": {
         timeEntries.sort((a, b) => {
@@ -97,15 +96,12 @@ export default function Command() {
     return timeEntries;
   }, [items]);
 
-  useEffect(() => {
-    const dayTotal = sumBy(timeEntries, "hours")?.toFixed(2) ?? "";
-    setNavSubtitle(formatHours(dayTotal, company));
-  }, [timeEntries, company]);
+  const navSubtitle = useMemo(() => {
+    const dayTotal = sumBy(items, (o) => o.hours)?.toFixed(2) ?? "";
+    return formatHours(dayTotal, company);
+  }, [items, company]);
 
   async function changeViewDate(date: Date) {
-    // const relative = dayjs(date).fromNow();
-    setNavSubtitle("");
-    // setIsLoading(true);
     if (dayjs(date).isToday()) {
       setNavigationTitle("Today's Timesheet");
     } else if (dayjs(date).isTomorrow()) {
@@ -246,19 +242,32 @@ export default function Command() {
             <List.Item
               id={entry.id.toString()}
               key={entry.id}
-              title={entry.project.name}
-              accessoryTitle={`${entry.client.name}${entry.client.name && entry.task.name ? " | " : ""}${
-                entry.task.name
-              } | ${formatHours(entry.hours.toFixed(2), company)}`}
-              accessoryIcon={
-                entry.external_reference ? { source: entry.external_reference.service_icon_url } : undefined
-              }
+              title={titleDisplay === "task" ? entry.task.name : entry.project.name}
               subtitle={entry.notes}
-              keywords={entry.notes
-                ?.split(" ")
-                .concat(entry.client?.name?.split(" "))
-                .concat(entry.task?.name?.split(" "))}
-              icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
+              keywords={[
+                ...(entry.notes?.split(" ") ?? []),
+                ...(entry.client?.name?.split(" ") ?? []),
+                ...((titleDisplay === "task" ? entry.project?.name : entry.task?.name)?.split(" ") ?? []),
+              ]}
+              accessories={[
+                {
+                  text: titleDisplay === "task" ? entry.project.name : entry.task.name,
+                  icon: Icon.Tag,
+                },
+                {
+                  text: entry.client.name,
+                  icon: entry.external_reference
+                    ? { source: entry.external_reference.service_icon_url }
+                    : Icon.Building,
+                },
+                {
+                  icon: entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined,
+                  tag: {
+                    value: formatHours(entry.hours.toFixed(2), company),
+                    color: entry.is_running ? Color.Orange : Color.SecondaryText,
+                  },
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title={`${entry.project.name} | ${entry.client.name}`}>

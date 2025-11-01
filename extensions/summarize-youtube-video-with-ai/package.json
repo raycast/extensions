@@ -13,6 +13,10 @@
     "Web"
   ],
   "license": "MIT",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
   "commands": [
     {
       "name": "summarizeVideo",
@@ -407,12 +411,11 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
-    "@raycast/api": "^1.99.3",
+    "@raycast/api": "^1.103.4",
     "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
     "openai": "^5.1.0",
-    "youtube-transcript-api": "^3.0.6",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {

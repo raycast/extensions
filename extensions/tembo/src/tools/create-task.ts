@@ -62,7 +62,7 @@ async function tool(input: Input) {
   try {
     const issue = await temboAPI.createIssue({
       title,
-      description: prompt.trim(),
+      prompt: prompt.trim(),
       json: JSON.stringify({
         createdVia: "raycast-tool",
         repository: repository || null,

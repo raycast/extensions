@@ -36,8 +36,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.95.0",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "@unkey/api": "^2.0.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -54,5 +55,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

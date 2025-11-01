@@ -1,5 +1,9 @@
 # Prism Launcher Changelog
 
+## [Fix] - 2025-10-30
+
+- Restructured the code to add more features in the future
+
 ## [New Additions] - 2025-06-10
 
 - Extend readme with new features

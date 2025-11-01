@@ -1,17 +1,21 @@
 # Lega Serie A Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## API Modernization - {PR_MERGED_DATE}
 
-- Cleanup unused gitignore records
+- Migrated standings data fetching to API v3.
+- Maintained support for the older standings API for historical data spanning the 2022-23 season and backward, ensuring no disruption for older data retrieval.
 
-## [Improvements] - 2023-02-21
+## [Standings Boost] - 2024-10-10
 
-- Added Club details
-- Refine Fixtures & Results (live fixtures status, broadcasters)
-- Added Coppa Italia & International Competitions
+- Updated standings to always display detailed statistics, including goals for/against, goal difference, and points.
+- Enhanced code maintainability and efficiency by utilizing the `usePromise` hook for asynchronous operations.
 
-## [Initial Version] - 2023-02-10
+## [Tournament Tracker] - 2023-02-21
 
-- Added Standings
-- Added Results
-- Added Clubs
+- Added detailed club profiles, including rosters, recent matches, and club history.
+- Enhanced fixtures and results page with live match status and broadcaster information.
+- Introduced new sections for Coppa Italia and International Competitions, allowing users to follow Italian teams in all major tournaments.
+
+## [Initial Release] - 2023-02-10
+
+- Launched with core features for Serie A standings, match results, and club information.
