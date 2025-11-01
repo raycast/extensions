@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spotify-music-player",
+  "title": "Spotify Player",
+  "description": "Control Spotify playback on Windows",
+  "icon": "extension_icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Spotify",
+      "description": "Search for songs, artists, albums, and playlists on Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "nowPlaying",
+      "title": "Now Playing",
+      "subtitle": "Spotify",
+      "description": "See what's currently playing on Spotify",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showAlbumArt",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Album Art",
+          "description": "Display album artwork in the Now Playing view",
+          "default": true,
+          "label": "Show album artwork"
+        }
+      ]
+    },
+    {
+      "name": "quickActions",
+      "title": "Quick Actions",
+      "subtitle": "Spotify",
+      "description": "Quick actions to control Spotify playback",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "volumeStep",
+      "type": "dropdown",
+      "required": false,
+      "title": "Volume Step",
+      "description": "Amount to increase/decrease volume",
+      "default": "10",
+      "data": [
+        {
+          "title": "5%",
+          "value": "5"
+        },
+        {
+          "title": "10%",
+          "value": "10"
+        },
+        {
+          "title": "15%",
+          "value": "15"
+        },
+        {
+          "title": "20%",
+          "value": "20"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "node-fetch": "^2.7.0",
+    "oazapfts": "^5.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "jumahl",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ]
+}
