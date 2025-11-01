@@ -1,6 +1,6 @@
 # Exif Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-11-01
 
 - Updated (dev) dependencies
 - Update JSON stringify generation in order for it to fit better on the screen
