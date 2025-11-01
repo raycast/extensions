@@ -6,6 +6,7 @@
  */
 
 import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
+import type { ReactElement } from "react";
 import { getZshrcPath } from "./zsh";
 import { MODERN_COLORS } from "../constants";
 import { useZshrcLoader } from "../hooks/useZshrcLoader";
@@ -81,6 +82,8 @@ export interface ListViewConfig<T extends FilterableItem> {
   generateTitle: TitleGenerator<T>;
   /** Custom post-processing of items */
   postProcessItems?: (items: T[]) => T[];
+  /** Optional search bar accessory (e.g., dropdown) */
+  searchBarAccessory?: ReactElement | null | undefined;
 }
 
 /**
@@ -166,6 +169,8 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
       searchBarPlaceholder={config.searchPlaceholder}
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      searchBarAccessory={config.searchBarAccessory as ReactElement<any> | undefined}
       isLoading={isLoading}
       isShowingDetail={true}
       actions={

@@ -1,4 +1,5 @@
 import { Icon, List } from "@raycast/api";
+import type { ReactElement } from "react";
 import { parseSources } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
 import { MODERN_COLORS } from "./constants";
@@ -11,10 +12,14 @@ interface SourceItem extends FilterableItem {
   path: string;
 }
 
+interface SourcesProps {
+  searchBarAccessory?: ReactElement | null;
+}
+
 /**
  * Sources management command for zshrc content
  */
-export default function Sources() {
+export default function Sources({ searchBarAccessory }: SourcesProps) {
   return (
     <ListViewController<SourceItem>
       commandName="Sources"
@@ -26,6 +31,7 @@ export default function Sources() {
       itemTypePlural="sources"
       parser={parseSources}
       searchFields={["path", "section"]}
+      searchBarAccessory={searchBarAccessory}
       generateTitle={(source) => truncateValueMiddle(source.path)}
       generateOverviewMarkdown={(_, allSources, grouped) => `
 # Source Summary
@@ -78,7 +84,7 @@ source ${source.path}
 Source commands load external files. Make sure the referenced files exist and are accessible.
       `}
       generateMetadata={(source) => (
-        <>
+        <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Source Path"
             text={truncateValueMiddle(source.path, 60)}
@@ -117,7 +123,7 @@ Source commands load external files. Make sure the referenced files exist and ar
               tintColor: MODERN_COLORS.warning,
             }}
           />
-        </>
+        </List.Item.Detail.Metadata>
       )}
     />
   );

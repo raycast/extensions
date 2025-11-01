@@ -1,4 +1,5 @@
 import { Icon, List } from "@raycast/api";
+import type { ReactElement } from "react";
 import { parseEvals } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
 import { MODERN_COLORS } from "./constants";
@@ -11,10 +12,14 @@ interface EvalItem extends FilterableItem {
   command: string;
 }
 
+interface EvalsProps {
+  searchBarAccessory?: ReactElement | null;
+}
+
 /**
  * Evals management command for zshrc content
  */
-export default function Evals() {
+export default function Evals({ searchBarAccessory }: EvalsProps) {
   return (
     <ListViewController<EvalItem>
       commandName="Evals"
@@ -26,6 +31,7 @@ export default function Evals() {
       itemTypePlural="evals"
       parser={parseEvals}
       searchFields={["command", "section"]}
+      searchBarAccessory={searchBarAccessory}
       generateTitle={(evalItem) => truncateValueMiddle(evalItem.command)}
       generateOverviewMarkdown={(_, allEvals, grouped) => `
 # Eval Summary
@@ -76,7 +82,7 @@ eval "${evalItem.command}"
 Eval commands execute during shell startup. Multiple evals can increase startup time. Consider lazy loading alternatives.
       `}
       generateMetadata={(evalItem) => (
-        <>
+        <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Command"
             text={truncateValueMiddle(evalItem.command, 60)}
@@ -101,7 +107,7 @@ Eval commands execute during shell startup. Multiple evals can increase startup 
               tintColor: MODERN_COLORS.neutral,
             }}
           />
-        </>
+        </List.Item.Detail.Metadata>
       )}
     />
   );

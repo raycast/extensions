@@ -1,4 +1,5 @@
 import { Icon, List } from "@raycast/api";
+import type { ReactElement } from "react";
 import { parsePlugins } from "./utils/parsers";
 import { MODERN_COLORS } from "./constants";
 import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
@@ -10,10 +11,14 @@ interface PluginItem extends FilterableItem {
   name: string;
 }
 
+interface PluginsProps {
+  searchBarAccessory?: ReactElement | null;
+}
+
 /**
  * Plugins management command for zshrc content
  */
-export default function Plugins() {
+export default function Plugins({ searchBarAccessory }: PluginsProps) {
   return (
     <ListViewController<PluginItem>
       commandName="Plugins"
@@ -25,6 +30,7 @@ export default function Plugins() {
       itemTypePlural="plugins"
       parser={parsePlugins}
       searchFields={["name", "section"]}
+      searchBarAccessory={searchBarAccessory}
       generateTitle={(plugin) => plugin.name}
       postProcessItems={(items) => {
         // Get unique plugins (since they might appear in multiple sections)
@@ -87,7 +93,7 @@ plugins=(${plugin.name} ...)
 Plugin functionality depends on your zsh plugin manager. Use the "Open ~/.Zshrc" action to view the complete plugin configuration.
       `}
       generateMetadata={(plugin) => (
-        <>
+        <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Plugin Name"
             text={plugin.name}
@@ -120,7 +126,7 @@ Plugin functionality depends on your zsh plugin manager. Use the "Open ~/.Zshrc"
               tintColor: MODERN_COLORS.success,
             }}
           />
-        </>
+        </List.Item.Detail.Metadata>
       )}
     />
   );

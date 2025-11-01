@@ -1,5 +1,6 @@
 import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useState } from "react";
+import type { ReactElement } from "react";
 import { getZshrcPath } from "./lib/zsh";
 import { MODERN_COLORS } from "./constants";
 import { getSectionIcon } from "./lib/section-icons";
@@ -10,7 +11,11 @@ import { generateSectionAccessories, calculateTotalEntries } from "./utils/secti
 /**
  * Sections management command for zshrc content
  */
-export default function Sections() {
+interface SectionsProps {
+  searchBarAccessory?: ReactElement | null;
+}
+
+export default function Sections({ searchBarAccessory }: SectionsProps) {
   const { sections, isLoading, refresh } = useZshrcLoader("Sections");
   const [searchText, setSearchText] = useState("");
 
@@ -23,6 +28,8 @@ export default function Sections() {
     <List
       navigationTitle="Sections"
       searchBarPlaceholder="Search sections..."
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      searchBarAccessory={searchBarAccessory as ReactElement<any> | undefined}
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       isShowingDetail={true}

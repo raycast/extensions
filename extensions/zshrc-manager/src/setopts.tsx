@@ -1,4 +1,5 @@
 import { Icon, List } from "@raycast/api";
+import type { ReactElement } from "react";
 import { parseSetopts } from "./utils/parsers";
 import { MODERN_COLORS } from "./constants";
 import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
@@ -10,10 +11,14 @@ interface SetoptItem extends FilterableItem {
   option: string;
 }
 
+interface SetoptsProps {
+  searchBarAccessory?: ReactElement | null;
+}
+
 /**
  * Setopts management command for zshrc content
  */
-export default function Setopts() {
+export default function Setopts({ searchBarAccessory }: SetoptsProps) {
   return (
     <ListViewController<SetoptItem>
       commandName="Setopts"
@@ -25,6 +30,7 @@ export default function Setopts() {
       itemTypePlural="setopts"
       parser={parseSetopts}
       searchFields={["option", "section"]}
+      searchBarAccessory={searchBarAccessory}
       generateTitle={(setopt) => setopt.option}
       generateOverviewMarkdown={(_, allSetopts, grouped) => `
 # Setopt Summary
@@ -88,7 +94,7 @@ setopt ${setopt.option}
 Run \`man zshopptions\` in your terminal to see detailed documentation on all available setopts.
       `}
       generateMetadata={(setopt) => (
-        <>
+        <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Option Name"
             text={setopt.option}
@@ -121,7 +127,7 @@ Run \`man zshopptions\` in your terminal to see detailed documentation on all av
               tintColor: MODERN_COLORS.warning,
             }}
           />
-        </>
+        </List.Item.Detail.Metadata>
       )}
     />
   );

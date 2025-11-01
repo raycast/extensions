@@ -1,4 +1,5 @@
 import { Icon, List } from "@raycast/api";
+import type { ReactElement } from "react";
 import { parseFunctions } from "./utils/parsers";
 import { MODERN_COLORS } from "./constants";
 import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
@@ -10,10 +11,14 @@ interface FunctionItem extends FilterableItem {
   name: string;
 }
 
+interface FunctionsProps {
+  searchBarAccessory?: ReactElement | null;
+}
+
 /**
  * Functions management command for zshrc content
  */
-export default function Functions() {
+export default function Functions({ searchBarAccessory }: FunctionsProps) {
   return (
     <ListViewController<FunctionItem>
       commandName="Functions"
@@ -25,6 +30,7 @@ export default function Functions() {
       itemTypePlural="functions"
       parser={parseFunctions}
       searchFields={["name", "section"]}
+      searchBarAccessory={searchBarAccessory}
       generateTitle={(func) => func.name}
       generateOverviewMarkdown={(_, allFunctions, grouped) => `
 # Function Summary
@@ -75,7 +81,7 @@ ${func.name}
 Function bodies are not parsed from the zshrc file. Use the "Open ~/.Zshrc" action to view the complete function definition.
       `}
       generateMetadata={(func) => (
-        <>
+        <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Function Name"
             text={func.name}
@@ -108,7 +114,7 @@ Function bodies are not parsed from the zshrc file. Use the "Open ~/.Zshrc" acti
               tintColor: MODERN_COLORS.warning,
             }}
           />
-        </>
+        </List.Item.Detail.Metadata>
       )}
     />
   );
