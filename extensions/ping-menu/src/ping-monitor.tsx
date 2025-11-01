@@ -1,5 +1,5 @@
 import { MenuBarExtra, Icon, LocalStorage, Color } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 
@@ -75,10 +75,57 @@ async function pingWithHistory(): Promise<PingData> {
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(pingWithHistory, [], {
-    initialData: { latency: null, history: [] },
-    keepPreviousData: true,
-  });
+  const [data, setData] = useState<PingData>({ latency: null, history: [] });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    let isFirstLoad = true;
+    
+    async function fetchPing() {
+      console.log("[Ping Monitor] Fetching ping at:", new Date().toLocaleTimeString());
+      
+      // Load cached data first to prevent flickering
+      if (isFirstLoad) {
+        const cachedHistory = await loadHistory();
+        if (cachedHistory.length > 0 && !cancelled) {
+          // If we have cached data, use it immediately and skip loading state
+          setData({
+            latency: cachedHistory[0].latency,
+            history: cachedHistory,
+          });
+          setIsLoading(false);
+        } else {
+          setIsLoading(true);
+        }
+      }
+      
+      const result = await pingWithHistory();
+      if (!cancelled) {
+        console.log("[Ping Monitor] Got result, latency:", result.latency);
+        setData(result);
+        if (isFirstLoad) {
+          setIsLoading(false);
+          isFirstLoad = false;
+        }
+      }
+    }
+    
+    // Fetch immediately on mount
+    fetchPing();
+    
+    // Set up interval to fetch every second
+    const intervalId = setInterval(() => {
+      if (!cancelled) {
+        fetchPing();
+      }
+    }, 1000);
+    
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   const currentLatency = data?.latency ?? null;
   const pingHistory = data?.history ?? [];

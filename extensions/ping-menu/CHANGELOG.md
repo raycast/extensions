@@ -2,6 +2,13 @@
 
 ## [1.0.0] - {PR_MERGE_DATE}
 
+### Changed
+- Replaced `useCachedPromise` with manual `useEffect` and `useState` for better refresh control
+- Implemented internal `setInterval` to enable smooth 1-second updates when menu dropdown is open
+- Optimized loading state to only show on initial load, preventing UI flicker
+- As per greptile's feedback updated Node.js version in `mise.toml` to use specific version `20.11.0` instead of `latest` for better dependency management
+- Removed unused `revalidate` variable from `useCachedPromise` hook to fix ESLint error
+
 ### Added
 - Initial release of Ping Menu extension
 - Real-time ping monitoring to google.com in menu bar
