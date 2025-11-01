@@ -1,4 +1,6 @@
 import { Grid } from "@raycast/api";
+import { JSX } from "react";
+
 import { DISPLAY_VALUES, LUNA_LOGO_IMG, MIN_SEARCH_LENGTH } from "../../constants";
 import { EmptyActions } from "../Actions";
 import { SearchCallback } from "../..";

@@ -1,4 +1,6 @@
 import { Action, Icon } from "@raycast/api";
+import { JSX } from "react";
+
 import { SearchCallback } from "../..";
 import { DISPLAY_VALUES } from "../../constants";
 
@@ -25,7 +27,10 @@ export function SeeTrendingAction({ searchCallback }: Props): JSX.Element {
     <Action
       icon={Icon.LineChart}
       onAction={() => searchCallback({ isTrending: true })}
-      shortcut={{ modifiers: ["cmd"], key: "t" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "t" },
+        windows: { modifiers: ["ctrl"], key: "t" },
+      }}
       title={DISPLAY_VALUES.seeTrendingTitle}
     />
   );

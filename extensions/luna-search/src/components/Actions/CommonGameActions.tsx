@@ -1,4 +1,6 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
+import { JSX } from "react";
+
 import { GameSummary } from "../../models";
 import { DISPLAY_VALUES } from "../../constants";
 import { OpenUrlAction } from "./OpenUrlAction";
