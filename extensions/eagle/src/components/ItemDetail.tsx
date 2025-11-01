@@ -1,7 +1,8 @@
-import { Detail } from "@raycast/api";
+import { Detail, ActionPanel } from "@raycast/api";
 import { useMemo } from "react";
 import { useThumbnail, useFolderMap } from "../utils/query";
 import type { Item } from "../@types/eagle";
+import { FolderNavigationActions } from "./FolderNavigationActions";
 
 export function ItemDetail({ item }: { item: Item }) {
   const { data: thumbnail } = useThumbnail(item.id);
@@ -33,6 +34,11 @@ export function ItemDetail({ item }: { item: Item }) {
 
   ![](${thumbnail})`}
       isLoading={!thumbnail}
+      actions={
+        <ActionPanel>
+          <FolderNavigationActions item={item} />
+        </ActionPanel>
+      }
       metadata={
         <Detail.Metadata>
           {item.palettes.length > 0 ? (

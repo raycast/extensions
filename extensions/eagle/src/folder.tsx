@@ -5,6 +5,7 @@ import { checkEagleInstallation } from "./utils/checkInstall";
 import { showEagleNotOpenToast } from "./utils/error";
 import { useFolderItemList, useFolderList, useThumbnail, useRootItemList } from "./utils/query";
 import { ItemDetail } from "./components/ItemDetail";
+import { FolderNavigationActions } from "./components/FolderNavigationActions";
 
 interface Preferences {
   layout: "list" | "grid";
@@ -23,6 +24,7 @@ function GridEagleItem({ item }: { item: Item }) {
       actions={
         <ActionPanel>
           <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
+          <FolderNavigationActions item={item} shortcut={{ modifiers: ["cmd"], key: "o" }} />
         </ActionPanel>
       }
     />
@@ -59,7 +61,7 @@ function FolderItem({ folder }: { folder: Folder }) {
   );
 }
 
-function FolderView({ folder }: { folder: Folder }) {
+export function FolderView({ folder }: { folder: Folder }) {
   const preferences = getPreferenceValues<Preferences>();
   const subFolders = folder.children;
   const { data: items = [] } = useFolderItemList(folder.id);

@@ -7,6 +7,7 @@ import { checkEagleInstallation } from "./utils/checkInstall";
 import { showEagleNotOpenToast } from "./utils/error";
 import { Item } from "./@types/eagle";
 import { ItemDetail } from "./components/ItemDetail";
+import { FolderNavigationActions } from "./components/FolderNavigationActions";
 
 interface Preferences {
   layout: "list" | "grid";
@@ -25,6 +26,7 @@ function GridEagleItem({ item }: { item: Item }) {
       actions={
         <ActionPanel>
           <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
+          <FolderNavigationActions item={item} shortcut={{ modifiers: ["cmd"], key: "o" }} />
         </ActionPanel>
       }
     />
