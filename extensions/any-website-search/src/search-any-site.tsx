@@ -104,8 +104,13 @@ export default function () {
 
   const textToSearch = useMemo(() => {
     const bang = currentBang ?? "";
+
+    if (searchSuggestionsProvider === "__NONE__") {
+      return `${bang} ${searchText}`.trim();
+    }
+
     return `${bang} ${selectedSuggestion}`.trim();
-  }, [selectedSuggestion, currentBang, selectedSite]);
+  }, [selectedSuggestion, currentBang, searchSuggestionsProvider, searchText]);
 
   // If the user typed a URL, prefer opening it directly
   const directOpenUrl = useMemo(() => toFullUrlIfLikely(textToSearch), [textToSearch]);

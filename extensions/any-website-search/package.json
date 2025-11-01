@@ -5,6 +5,9 @@
   "description": "Search any site on the web",
   "icon": "search-icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "taken"
+  ],
   "categories": [
     "Productivity",
     "Web"
@@ -82,6 +85,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
