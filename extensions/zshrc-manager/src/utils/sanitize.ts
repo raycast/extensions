@@ -5,7 +5,7 @@
  * injection attacks and ensure safe rendering.
  */
 
-import { resolve, normalize } from "node:path";
+import { resolve, normalize, dirname } from "node:path";
 import { access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { FILE_CONSTANTS } from "../constants";
@@ -78,6 +78,52 @@ export async function validateFilePath(filePath: string): Promise<boolean> {
     // Check if the file exists and is accessible
     await access(resolvedPath, constants.R_OK);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validates file path for write operations.
+ *
+ * Ensures the path is safe, inside the user's home directory, and that either
+ * the file itself is writable (if it exists) or the parent directory is
+ * writable (to allow first-time file creation).
+ */
+export async function validateFilePathForWrite(filePath: string): Promise<boolean> {
+  try {
+    if (!filePath || filePath.trim() === "") {
+      return false;
+    }
+
+    if (filePath.includes("\0")) {
+      return false;
+    }
+
+    if (filePath.includes("..") || filePath.includes("../")) {
+      return false;
+    }
+
+    // Normalize and resolve the path
+    const normalizedPath = normalize(filePath);
+    const resolvedPath = resolve(normalizedPath);
+
+    const homeDir = process.env["HOME"] || process.env["USERPROFILE"];
+    if (homeDir && !resolvedPath.startsWith(homeDir)) {
+      return false;
+    }
+
+    // If the file exists, check for read and write access
+    try {
+      await access(resolvedPath, constants.F_OK);
+      await access(resolvedPath, constants.R_OK | constants.W_OK);
+      return true;
+    } catch {
+      // If the file doesn't exist, ensure parent directory is writable
+      const parentDir = dirname(resolvedPath);
+      await access(parentDir, constants.W_OK);
+      return true;
+    }
   } catch {
     return false;
   }

@@ -2,6 +2,7 @@ import {
   sanitizeMarkdown,
   escapeShellContent,
   validateFilePath,
+  validateFilePathForWrite,
   validateFileSize,
   truncateContent,
   validateZshrcContent,
@@ -107,6 +108,24 @@ describe("sanitize.ts", () => {
 
     it("should handle empty path", async () => {
       expect(await validateFilePath("")).toBe(false); // Empty path is not valid
+    });
+  });
+
+  describe("validateFilePathForWrite", () => {
+    it("should allow writing to ~/.zshrc or creating it if missing", async () => {
+      const path = `${homedir()}/.zshrc`;
+      const result = await validateFilePathForWrite(path);
+      expect(result).toBe(true);
+    });
+
+    it("should reject paths outside home directory", async () => {
+      const result = await validateFilePathForWrite(`/etc/passwd`);
+      expect(result).toBe(false);
+    });
+
+    it("should reject paths with traversal or null bytes", async () => {
+      expect(await validateFilePathForWrite(`../.zshrc`)).toBe(false);
+      expect(await validateFilePathForWrite(`/tmp/.zshrc\0`)).toBe(false);
     });
   });
 
