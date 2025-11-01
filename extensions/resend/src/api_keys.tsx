@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { APIKey, CreateAPIKeyRequest, CreateAPIKeyRequestForm } from "./utils/types";
+import { CreateAPIKeyRequestForm } from "./utils/types";
 import { isApiError } from "./utils/api";
 import {
   Action,
@@ -19,11 +19,12 @@ import { CREATE_API_KEY_PERMISSIONS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useGetAPIKeys, useGetDomains } from "./lib/hooks";
 import { resend } from "./lib/resend";
+import { ApiKey, CreateApiKeyOptions } from "resend";
 
 export default function APIKeys() {
   const { isLoading, keys, error, revalidate, mutate } = useGetAPIKeys();
 
-  async function confirmAndDelete(item: APIKey) {
+  async function confirmAndDelete(item: ApiKey) {
     if (
       await confirmAlert({
         title: `Delete '${item.name}'?`,
@@ -139,7 +140,7 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
     async onSubmit(values) {
       setIsLoading(true);
 
-      const newKey: CreateAPIKeyRequest = {
+      const newKey: CreateApiKeyOptions = {
         ...values,
         permission: values.permission === "full_access" ? "full_access" : "sending_access",
       };

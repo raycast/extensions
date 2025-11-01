@@ -1,7 +1,9 @@
-import { Color } from "@raycast/api";
+import { Color, getPreferenceValues } from "@raycast/api";
 import { DomainRegion, DomainStatus } from "resend";
 
 export const RESEND_URL = "https://resend.com/";
+
+export const API_KEY = getPreferenceValues<ExtensionPreferences>().api_key;
 
 export const CREATE_API_KEY_PERMISSIONS = [
   { title: "Full access", value: "full_access", description: "Can create, delete, get, and update any resource." },

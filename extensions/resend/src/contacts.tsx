@@ -168,7 +168,7 @@ function CreateContact({ audience, onCreated }: { audience: Audience; onCreated:
     validation: {
       email: FormValidation.Required,
     },
-    async onSubmit(values: CreateContactRequestForm) {
+    async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating Contact", values.email);
       try {
         const { error } = await resend.contacts.create({ ...values, audienceId: audience.id });
@@ -192,8 +192,8 @@ function CreateContact({ audience, onCreated }: { audience: Audience; onCreated:
       }
     >
       <Form.TextField title="Email" {...itemProps.email} placeholder="john.doe@example.com" />
-      <Form.TextField title="First Name" {...itemProps.first_name} placeholder="John" />
-      <Form.TextField title="Last Name" {...itemProps.last_name} placeholder="Doe" />
+      <Form.TextField title="First Name" {...itemProps.firstName} placeholder="John" />
+      <Form.TextField title="Last Name" {...itemProps.lastName} placeholder="Doe" />
       <Form.Checkbox label="Unsubscribed" {...itemProps.unsubscribed} />
     </Form>
   );
@@ -206,14 +206,14 @@ function UpdateContact(props: { contact: Contact; audience: Audience; onUpdated:
   const { itemProps, handleSubmit } = useForm<UpdateContactRequestForm>({
     initialValues: {
       email: contact.email,
-      first_name: contact.first_name,
-      last_name: contact.last_name,
+      firstName: contact.first_name,
+      lastName: contact.last_name,
       unsubscribed: contact.unsubscribed,
     },
     validation: {
       email: FormValidation.Required,
     },
-    async onSubmit(values: UpdateContactRequestForm) {
+    async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating Contact", values.email);
       try {
         resend.contacts.update({ ...values, audienceId: audience.id });
@@ -236,8 +236,8 @@ function UpdateContact(props: { contact: Contact; audience: Audience; onUpdated:
       }
     >
       <Form.TextField title="Email" {...itemProps.email} placeholder="john.doe@example.com" />
-      <Form.TextField title="First Name" {...itemProps.first_name} placeholder="John" />
-      <Form.TextField title="Last Name" {...itemProps.last_name} placeholder="Doe" />
+      <Form.TextField title="First Name" {...itemProps.firstName} placeholder="John" />
+      <Form.TextField title="Last Name" {...itemProps.lastName} placeholder="Doe" />
       <Form.Checkbox label="Unsubscribed" {...itemProps.unsubscribed} />
     </Form>
   );

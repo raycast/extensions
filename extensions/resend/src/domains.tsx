@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { AddDomainRequestForm, AddDomainResponse, Domain } from "./utils/types";
+import { AddDomainRequestForm } from "./utils/types";
 import { Action, ActionPanel, Alert, Form, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { ADD_DOMAIN_REGIONS, DOMAIN_STATUS_COLORS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useGetDomains } from "./lib/hooks";
-import { DomainRegion } from "resend";
+import { CreateDomainResponseSuccess, Domain, DomainRegion } from "resend";
 import { resend } from "./lib/resend";
 import { isApiError } from "./utils/api";
 
@@ -149,7 +149,7 @@ export default function Domains() {
 }
 
 function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
-  const [newDomain, setNewDomain] = useState<AddDomainResponse>();
+  const [newDomain, setNewDomain] = useState<CreateDomainResponseSuccess>();
 
   const { handleSubmit, itemProps } = useForm<AddDomainRequestForm>({
     async onSubmit(values) {

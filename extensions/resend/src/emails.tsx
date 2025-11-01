@@ -1,5 +1,5 @@
 import { FormValidation, useForm } from "@raycast/utils";
-import { EmailAttachment, EmailTag, SendEmailRequestForm } from "./utils/types";
+import { SendEmailRequestForm } from "./utils/types";
 import React, { useState } from "react";
 import {
   Action,
@@ -22,7 +22,7 @@ import path from "path";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useEmails, useGetEmail } from "./lib/hooks";
 import { resend } from "./lib/resend";
-import { CreateEmailOptions } from "resend";
+import { Attachment, CreateEmailOptions, Tag as EmailTag } from "resend";
 
 // Get preferences for sender information
 const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -168,7 +168,7 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
         const bcc = values.bcc && values.bcc.split(",").map((item) => item.trim());
         const cc = values.cc && values.cc.split(",").map((item) => item.trim());
 
-        const attachments: EmailAttachment[] = [];
+        const attachments: Attachment[] = [];
         if (attachmentType === "Hosted") {
           const filename = path.basename(hostedAttachmentUrl);
           attachments.push({ filename, path: hostedAttachmentUrl });
