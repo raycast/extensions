@@ -22,7 +22,7 @@ This is a Raycast extension for [Resend](https://resend.com/) - _Email for devel
    d. `Copy` the once shown **API Key**
    <img src="./assets/resend-view-api-key.png" alt="View API Key" />
 
-   d. `Enter` API Key in Preferences OR at first prompt
+   e. `Enter` API Key in Preferences OR at first prompt
 
 ## 🔧 Commands
 

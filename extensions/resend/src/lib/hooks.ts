@@ -15,7 +15,7 @@ export const useGetDomains = () => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Domains");
       const res = await resend.domains.list();
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
-      const data = res.data?.data ?? [];
+      const data = res.data.data;
       await showSuccessToast(data, "domain");
       return data;
     },
@@ -35,7 +35,7 @@ export const useGetAPIKeys = () => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching API Keys");
       const res = await resend.apiKeys.list();
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
-      const data = res.data.data ?? [];
+      const data = res.data.data;
       await showSuccessToast(data, "api key");
       return data;
     },
@@ -54,7 +54,7 @@ export const useEmails = () => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Emails");
       const res = await resend.emails.list({ after: options.lastItem?.id });
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
-      const data = res.data.data ?? [];
+      const data = res.data.data;
       await showSuccessToast(data, "email");
       return {
         data,
@@ -93,7 +93,7 @@ export const useAudiences = () => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Audiences");
       const res = await resend.audiences.list();
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
-      const data = res.data.data ?? [];
+      const data = res.data.data;
       await showSuccessToast(data, "audience");
       return data;
     },
@@ -112,7 +112,7 @@ export const useContacts = (audienceId?: string) => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Contacts");
       const res = await resend.contacts.list({ audienceId });
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
-      const data = res.data.data ?? [];
+      const data = res.data.data;
       await showSuccessToast(data, "contact");
       return data;
     },

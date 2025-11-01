@@ -66,7 +66,7 @@ export default function Audiences() {
   ) : (
     <List
       isLoading={isLoadingAudience || isLoadingContacts}
-      searchBarAccessory={<AudienceDropdown audiences={audiences as Audience[]} setAudience={setAudience} />}
+      searchBarAccessory={<AudienceDropdown audiences={audiences} setAudience={setAudience} />}
       actions={
         <ActionPanel>
           {audience && (
@@ -216,9 +216,9 @@ function UpdateContact(props: { contact: Contact; audience: Audience; onUpdated:
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating Contact", values.email);
       try {
-        resend.contacts.update({ ...values, audienceId: audience.id });
+        await resend.contacts.update({ ...values, audienceId: audience.id });
         toast.style = Toast.Style.Success;
-        toast.title = "Created Contact";
+        toast.title = "Updated Contact";
         onUpdated();
         pop();
       } catch (error) {
