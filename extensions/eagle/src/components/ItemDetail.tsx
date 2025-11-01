@@ -1,10 +1,11 @@
 import { Detail } from "@raycast/api";
 import { useMemo } from "react";
-import { useThumbnail } from "../utils/query";
+import { useThumbnail, useFolderMap } from "../utils/query";
 import type { Item } from "../@types/eagle";
 
 export function ItemDetail({ item }: { item: Item }) {
   const { data: thumbnail } = useThumbnail(item.id);
+  const { data: folderMap } = useFolderMap();
 
   const lastModifiedAt = useMemo(() => {
     const date = new Date(item.modificationTime);
@@ -19,6 +20,11 @@ export function ItemDetail({ item }: { item: Item }) {
 
     return "";
   }, [item]);
+
+  const folderNames = useMemo(() => {
+    if (!folderMap || !item.folders || item.folders.length === 0) return [];
+    return item.folders.map((folderId) => folderMap.get(folderId)).filter((name): name is string => !!name);
+  }, [item.folders, folderMap]);
 
   return (
     <Detail
@@ -49,6 +55,14 @@ export function ItemDetail({ item }: { item: Item }) {
             <Detail.Metadata.TagList title="Tags">
               {item.tags.map((tag, index) => (
                 <Detail.Metadata.TagList.Item text={tag} key={index} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+
+          {folderNames.length > 0 && (
+            <Detail.Metadata.TagList title="Folders">
+              {folderNames.map((folderName, index) => (
+                <Detail.Metadata.TagList.Item text={folderName} key={index} />
               ))}
             </Detail.Metadata.TagList>
           )}

@@ -65,3 +65,22 @@ export function useFolderList() {
     return res.data.data;
   });
 }
+
+// Helper function to flatten folder tree into a map
+function flattenFolders(folders: any[], map: Map<string, string> = new Map()): Map<string, string> {
+  for (const folder of folders) {
+    map.set(folder.id, folder.name);
+    if (folder.children && folder.children.length > 0) {
+      flattenFolders(folder.children, map);
+    }
+  }
+  return map;
+}
+
+export function useFolderMap() {
+  return usePromise(async () => {
+    const res = await getFolderList();
+    if (res.data.status !== "success") return new Map();
+    return flattenFolders(res.data.data);
+  });
+}
