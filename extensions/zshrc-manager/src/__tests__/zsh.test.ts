@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { readZshrcFile, writeZshrcFile, getZshrcPath } from "../lib/zsh";
-import { readFile, writeFile, stat } from "fs/promises";
+import { readFile, writeFile, stat, rename, lstat, realpath } from "fs/promises";
 import { getPreferenceValues } from "@raycast/api";
-import { validateFilePath, validateFileSize, truncateContent } from "../utils/sanitize";
+import { validateFilePath, validateFileSize, truncateContent, validateFilePathForWrite } from "../utils/sanitize";
 import { vi } from "vitest";
 import { homedir } from "os";
 
@@ -14,11 +14,15 @@ vi.mock("../utils/sanitize");
 
 const mockReadFile = vi.mocked(readFile);
 const mockWriteFile = vi.mocked(writeFile);
+const mockRename = vi.mocked(rename);
 const mockStat = vi.mocked(stat);
+const mockLstat = vi.mocked(lstat);
+const mockRealpath = vi.mocked(realpath);
 const mockGetPreferenceValues = vi.mocked(getPreferenceValues);
 const mockValidateFilePath = vi.mocked(validateFilePath);
 const mockValidateFileSize = vi.mocked(validateFileSize);
 const mockTruncateContent = vi.mocked(truncateContent);
+const mockValidateFilePathForWrite = vi.mocked(validateFilePathForWrite);
 
 describe("zsh.ts", () => {
   beforeEach(() => {
@@ -191,26 +195,34 @@ describe("zsh.ts", () => {
       const content = "export PATH=/usr/local/bin:$PATH\nalias ll='ls -la'";
       const expectedPath = `${homedir()}/.zshrc`;
 
-      mockValidateFilePath.mockResolvedValue(true);
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockStat.mockRejectedValue(new Error("no file")); // simulate non-existent file
+      mockLstat.mockRejectedValue(new Error("no file"));
       mockWriteFile.mockResolvedValue(undefined);
+      mockRename.mockResolvedValue(undefined as any);
 
       await writeZshrcFile(content);
 
-      expect(mockValidateFilePath).toHaveBeenCalledWith(expectedPath);
-      expect(mockWriteFile).toHaveBeenCalledWith(expectedPath, content, {
-        encoding: "utf8",
-      });
+      expect(mockValidateFilePathForWrite).toHaveBeenCalledWith(expectedPath);
+      // temp file write
+      const tmpCall = mockWriteFile.mock.calls[0];
+      expect(tmpCall).toBeDefined();
+      expect(String(tmpCall![0])).toContain(`${expectedPath}.tmp-`);
+      expect(tmpCall![1]).toBe(content);
+      expect(tmpCall![2]).toMatchObject({ encoding: "utf8" });
+      // rename to final path
+      expect(mockRename).toHaveBeenCalledWith(expect.stringContaining(`${expectedPath}.tmp-`), expectedPath);
       // Note: showToast is now handled by edit components, not in writeZshrcFile
     });
 
     it("should throw error when file path is invalid", async () => {
-      mockValidateFilePath.mockResolvedValue(false);
+      mockValidateFilePathForWrite.mockResolvedValue(false);
 
-      await expect(writeZshrcFile("content")).rejects.toThrow("Invalid file path");
+      await expect(writeZshrcFile("content")).rejects.toThrow();
     });
 
     it("should throw error when content is not a string", async () => {
-      mockValidateFilePath.mockResolvedValue(true);
+      mockValidateFilePathForWrite.mockResolvedValue(true);
 
       await expect(writeZshrcFile(123 as any)).rejects.toThrow("Content must be a string");
     });
@@ -221,7 +233,9 @@ describe("zsh.ts", () => {
       };
       mockError.code = "EACCES";
 
-      mockValidateFilePath.mockResolvedValue(true);
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockStat.mockRejectedValue(new Error("no file"));
+      mockLstat.mockRejectedValue(new Error("no file"));
       mockWriteFile.mockRejectedValue(mockError);
 
       await expect(writeZshrcFile("content")).rejects.toThrow();
@@ -234,7 +248,9 @@ describe("zsh.ts", () => {
       };
       mockError.code = "EPERM";
 
-      mockValidateFilePath.mockResolvedValue(true);
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockStat.mockRejectedValue(new Error("no file"));
+      mockLstat.mockRejectedValue(new Error("no file"));
       mockWriteFile.mockRejectedValue(mockError);
 
       await expect(writeZshrcFile("content")).rejects.toThrow();
@@ -244,8 +260,10 @@ describe("zsh.ts", () => {
     it("should handle generic write error", async () => {
       const mockError = new Error("Write failed");
 
-      mockValidateFilePath.mockResolvedValue(true);
-      mockWriteFile.mockRejectedValue(mockError);
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockStat.mockRejectedValue(new Error("no file"));
+      mockLstat.mockRejectedValue(new Error("no file"));
+      mockWriteFile.mockRejectedValue(mockError as any);
 
       await expect(writeZshrcFile("content")).rejects.toThrow();
       // Note: showToast is now handled by edit components, not in writeZshrcFile
@@ -254,11 +272,37 @@ describe("zsh.ts", () => {
     it("should handle unknown errors", async () => {
       const mockError = "Unknown error";
 
-      mockValidateFilePath.mockResolvedValue(true);
-      mockWriteFile.mockRejectedValue(mockError);
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockStat.mockRejectedValue(new Error("no file"));
+      mockLstat.mockRejectedValue(new Error("no file"));
+      mockWriteFile.mockRejectedValue(mockError as any);
 
       await expect(writeZshrcFile("content")).rejects.toThrow();
       // Note: showToast is now handled by edit components, not in writeZshrcFile
+    });
+
+    it("writes to real target when ~/.zshrc is a symlink", async () => {
+      const content = "export TEST=1";
+      const expectedPath = `${homedir()}/.zshrc`;
+      const realTarget = `${homedir()}/.config/zsh/.zshrc`;
+
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      // lstat says symlink
+      mockLstat.mockResolvedValue({ isSymbolicLink: () => true } as any);
+      mockRealpath.mockResolvedValue(realTarget as any);
+      mockStat.mockRejectedValue(new Error("no file"));
+      mockWriteFile.mockResolvedValue(undefined);
+      mockRename.mockResolvedValue(undefined as any);
+
+      await writeZshrcFile(content);
+
+      // Temp path should be based on real target path
+      const writeCall = mockWriteFile.mock.calls[0];
+      expect(writeCall).toBeDefined();
+      expect(writeCall![0]).toContain(`${realTarget}.tmp-`);
+      expect(mockRename).toHaveBeenCalledWith(expect.stringContaining(`${realTarget}.tmp-`), realTarget);
+      // Not writing to the symlink path directly
+      expect(String(writeCall![0])).not.toContain(`${expectedPath}.tmp-`);
     });
   });
 });

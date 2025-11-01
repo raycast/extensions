@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock dependencies
-const mockReadZshrcFile = vi.fn();
+const mockReadZshrcFileRaw = vi.fn();
 const mockWriteZshrcFile = vi.fn();
 const mockShowToast = vi.fn();
 const mockPopToRoot = vi.fn();
 const mockUseForm = vi.fn();
 
 vi.mock("../lib/zsh", () => ({
-  readZshrcFile: mockReadZshrcFile,
+  readZshrcFileRaw: mockReadZshrcFileRaw,
   writeZshrcFile: mockWriteZshrcFile,
   getZshrcPath: "/Users/test/.zshrc",
 }));
@@ -62,7 +62,7 @@ describe("EditAlias", () => {
     vi.clearAllMocks();
 
     // Default mock implementations
-    mockReadZshrcFile.mockResolvedValue("test content");
+    mockReadZshrcFileRaw.mockResolvedValue("test content");
     mockWriteZshrcFile.mockResolvedValue(undefined);
     mockUseForm.mockReturnValue({
       itemProps: mockItemProps,
@@ -77,21 +77,21 @@ describe("EditAlias", () => {
 
   it("should handle file operations", async () => {
     // Test that the component can handle file operations
-    const content = await mockReadZshrcFile();
+    const content = await mockReadZshrcFileRaw();
     await mockWriteZshrcFile(content);
 
     expect(content).toBe("test content");
-    expect(mockReadZshrcFile).toHaveBeenCalled();
+    expect(mockReadZshrcFileRaw).toHaveBeenCalled();
     expect(mockWriteZshrcFile).toHaveBeenCalledWith(content);
   });
 
   it("should handle file read errors", async () => {
     // Test that the component can handle file read errors
     const error = new Error("File not found");
-    mockReadZshrcFile.mockRejectedValue(error);
+    mockReadZshrcFileRaw.mockRejectedValue(error);
 
     try {
-      await mockReadZshrcFile();
+      await mockReadZshrcFileRaw();
     } catch (err) {
       expect(err).toBeInstanceOf(Error);
       expect((err as Error).message).toBe("File not found");
