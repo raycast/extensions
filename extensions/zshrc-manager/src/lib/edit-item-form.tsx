@@ -1,8 +1,10 @@
 import { Form, ActionPanel, Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { readZshrcFileRaw, writeZshrcFile, checkZshrcAccess, getZshrcPath } from "./zsh";
+import { useState, useEffect } from "react";
+import { readZshrcFileRaw, writeZshrcFile, checkZshrcAccess, getZshrcPath, readZshrcFile } from "./zsh";
 import { findSectionBounds } from "./section-detector";
 import { clearCache } from "./cache";
+import { toLogicalSections } from "./parse-zshrc";
 
 /**
  * Configuration for EditItemForm component
@@ -51,15 +53,38 @@ interface EditItemFormProps {
 export default function EditItemForm({ existingKey, existingValue, sectionLabel, onSave, config }: EditItemFormProps) {
   const { pop } = useNavigation();
   const isEditing = !!existingKey;
+  const [sections, setSections] = useState<string[]>([]);
+  const [isLoadingSections, setIsLoadingSections] = useState(true);
+
+  // Load sections for dropdown
+  useEffect(() => {
+    const loadSections = async () => {
+      try {
+        const content = await readZshrcFile();
+        const logicalSections = toLogicalSections(content);
+        const sectionNames = logicalSections.map((s) => s.label).filter((name) => name !== "Unlabeled");
+        setSections(Array.from(new Set(sectionNames)).sort());
+      } catch {
+        // If loading fails, continue with empty sections
+      } finally {
+        setIsLoadingSections(false);
+      }
+    };
+    loadSections();
+  }, []);
 
   const { itemProps, handleSubmit } = useForm({
     initialValues: {
       key: existingKey || "",
       value: existingValue || "",
+      section: sectionLabel || "Uncategorized",
+      newSectionName: "",
     },
     onSubmit: async (values) => {
       const key = values.key?.trim() || "";
       const value = values.value?.trim() || "";
+      const selectedSection = values.section?.trim() || "Uncategorized";
+      const newSectionName = values.newSectionName?.trim() || "";
 
       if (!key || !value) {
         await showToast({
@@ -70,60 +95,60 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
         return;
       }
 
+      // Determine the actual section to use
+      let targetSection: string;
+      if (selectedSection === "New Section") {
+        if (!newSectionName) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Validation Error",
+            message: "Please provide a name for the new section",
+          });
+          return;
+        }
+        targetSection = newSectionName;
+      } else {
+        targetSection = selectedSection;
+      }
+
       try {
         const zshrcContent = await readZshrcFileRaw();
 
         if (isEditing) {
-          // Update existing item - replace only the first match
-          const pattern = config.generatePattern(existingKey!);
-          const match = zshrcContent.match(pattern);
+          // Check if section changed
+          const sectionChanged = sectionLabel !== targetSection;
 
-          if (!match || match.length === 0) {
-            throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
-          }
+          if (sectionChanged) {
+            // Moving to a different section - remove from old location and add to new
+            const pattern = config.generatePattern(existingKey!);
+            const match = zshrcContent.match(pattern);
 
-          // Create a non-global version of the pattern to replace only first match
-          const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
+            if (!match || match.length === 0) {
+              throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
+            }
 
-          // Use replace with a function to preserve whitespace
-          const updatedContent = zshrcContent.replace(nonGlobalPattern, (matchedLine) => {
-            // Extract leading whitespace from the original line
-            const leadingWhitespace = matchedLine.match(/^(\s*)/)?.[1] || "";
-            // Generate replacement and preserve whitespace
-            const replacement = config.generateReplacement(key, value);
-            return `${leadingWhitespace}${replacement.trimStart()}`;
-          });
-          await writeZshrcFile(updatedContent);
-          clearCache(getZshrcPath());
-          // Verify write by re-reading and comparing
-          const verify = await readZshrcFileRaw();
-          if (verify !== updatedContent) {
-            throw new Error("Write verification failed: content mismatch after save");
-          }
+            // Create a non-global version to replace only first match
+            const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
 
-          await showToast({
-            style: Toast.Style.Success,
-            title: `${config.itemTypeCapitalized} Updated`,
-            message: `Updated ${config.itemType} "${key}"`,
-          });
-        } else {
-          // Add new item
-          const itemLine = config.generateLine(key, value);
+            // Remove the old line
+            let updatedContent = zshrcContent.replace(nonGlobalPattern, () => "");
 
-          // Find the section to add the item to
-          let updatedContent = zshrcContent;
+            // Clean up empty lines left behind
+            updatedContent = updatedContent.replace(/\n\n\n+/g, "\n\n");
 
-          if (sectionLabel) {
-            // Find the section using all supported formats
-            const sectionBounds = findSectionBounds(zshrcContent, sectionLabel);
+            // Generate the new line
+            const itemLine = config.generateLine(key, value);
 
-            if (sectionBounds) {
-              // Find the last non-empty line before the section end
-              const lines = zshrcContent.split(/\r?\n/);
-              let insertLineIndex = sectionBounds.endLine - 1;
+            // Find the target section to add to
+            const targetSectionBounds = findSectionBounds(updatedContent, targetSection);
+
+            if (targetSectionBounds) {
+              // Found target section - add to it
+              const lines = updatedContent.split(/\r?\n/);
+              let insertLineIndex = targetSectionBounds.endLine - 1;
 
               // Find the last non-empty line in the section
-              for (let i = sectionBounds.endLine - 1; i >= sectionBounds.startLine - 1; i--) {
+              for (let i = targetSectionBounds.endLine - 1; i >= targetSectionBounds.startLine - 1; i--) {
                 const line = lines[i];
                 if (line && line.trim().length > 0) {
                   insertLineIndex = i;
@@ -131,29 +156,112 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
                 }
               }
 
-              // Rebuild content with the new item inserted after the last non-empty line
               const beforeLines = lines.slice(0, insertLineIndex + 1);
               const afterLines = lines.slice(insertLineIndex + 1);
 
-              // Join with original line endings preserved
               const beforeSection = beforeLines.join("\n");
               const afterSection = afterLines.join("\n");
 
-              // Insert the new item with proper spacing
               if (afterSection) {
                 updatedContent = `${beforeSection}\n${itemLine}\n${afterSection}`;
               } else {
-                // End of file - add without trailing newline
                 updatedContent = `${beforeSection}\n${itemLine}`;
               }
             } else {
-              // Section not found, add at the end of file with a section header
-              // Use a simple format that's commonly supported
-              updatedContent = `${zshrcContent}\n\n# --- ${sectionLabel} --- #\n${itemLine}`;
+              // Target section not found - create it at the end
+              updatedContent = `${updatedContent}\n\n# --- ${targetSection} --- #\n${itemLine}`;
+            }
+
+            await writeZshrcFile(updatedContent);
+            clearCache(getZshrcPath());
+            const verify = await readZshrcFileRaw();
+            if (verify !== updatedContent) {
+              throw new Error("Write verification failed: content mismatch after save");
+            }
+
+            await showToast({
+              style: Toast.Style.Success,
+              title: `${config.itemTypeCapitalized} Updated`,
+              message: `Updated ${config.itemType} "${key}" and moved to "${targetSection}"`,
+            });
+          } else {
+            // Same section - just update the line in place
+            const pattern = config.generatePattern(existingKey!);
+            const match = zshrcContent.match(pattern);
+
+            if (!match || match.length === 0) {
+              throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
+            }
+
+            // Create a non-global version of the pattern to replace only first match
+            const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
+
+            // Use replace with a function to preserve whitespace
+            const updatedContent = zshrcContent.replace(nonGlobalPattern, (matchedLine) => {
+              // Extract leading whitespace from the original line
+              const leadingWhitespace = matchedLine.match(/^(\s*)/)?.[1] || "";
+              // Generate replacement and preserve whitespace
+              const replacement = config.generateReplacement(key, value);
+              return `${leadingWhitespace}${replacement.trimStart()}`;
+            });
+            await writeZshrcFile(updatedContent);
+            clearCache(getZshrcPath());
+            // Verify write by re-reading and comparing
+            const verify = await readZshrcFileRaw();
+            if (verify !== updatedContent) {
+              throw new Error("Write verification failed: content mismatch after save");
+            }
+
+            await showToast({
+              style: Toast.Style.Success,
+              title: `${config.itemTypeCapitalized} Updated`,
+              message: `Updated ${config.itemType} "${key}"`,
+            });
+          }
+        } else {
+          // Add new item
+          const itemLine = config.generateLine(key, value);
+
+          // Find the section to add the item to
+          let updatedContent = zshrcContent;
+
+          // Find the section using all supported formats
+          const sectionBounds = findSectionBounds(zshrcContent, targetSection);
+
+          if (sectionBounds) {
+            // Found existing section - add to it
+            // Find the last non-empty line before the section end
+            const lines = zshrcContent.split(/\r?\n/);
+            let insertLineIndex = sectionBounds.endLine - 1;
+
+            // Find the last non-empty line in the section
+            for (let i = sectionBounds.endLine - 1; i >= sectionBounds.startLine - 1; i--) {
+              const line = lines[i];
+              if (line && line.trim().length > 0) {
+                insertLineIndex = i;
+                break;
+              }
+            }
+
+            // Rebuild content with the new item inserted after the last non-empty line
+            const beforeLines = lines.slice(0, insertLineIndex + 1);
+            const afterLines = lines.slice(insertLineIndex + 1);
+
+            // Join with original line endings preserved
+            const beforeSection = beforeLines.join("\n");
+            const afterSection = afterLines.join("\n");
+
+            // Insert the new item with proper spacing
+            if (afterSection) {
+              updatedContent = `${beforeSection}\n${itemLine}\n${afterSection}`;
+            } else {
+              // End of file - add without trailing newline
+              updatedContent = `${beforeSection}\n${itemLine}`;
             }
           } else {
-            // No specific section, add at the end
-            updatedContent = `${zshrcContent}\n\n${itemLine}`;
+            // Section not found - create a new section at the end of the file
+            // Use a simple format that's commonly supported
+            updatedContent = `${zshrcContent}\n\n# --- ${targetSection} --- #\n${itemLine}`;
           }
 
           await writeZshrcFile(updatedContent);
@@ -279,11 +387,16 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
 
       <Form.TextField {...itemProps.value} title={config.valueLabel} placeholder={config.valuePlaceholder} />
 
-      {sectionLabel && (
-        <Form.Description
-          title="Section"
-          text={`This ${config.itemType} will be added to the "${sectionLabel}" section`}
-        />
+      <Form.Dropdown {...itemProps.section} title="Section" isLoading={isLoadingSections}>
+        <Form.Dropdown.Item value="Uncategorized" title="Uncategorized" />
+        {sections.map((section) => (
+          <Form.Dropdown.Item key={section} value={section} title={section} />
+        ))}
+        <Form.Dropdown.Item value="New Section" title="➕ New Section" />
+      </Form.Dropdown>
+
+      {itemProps.section.value === "New Section" && (
+        <Form.TextField {...itemProps.newSectionName} title="New Section Name" placeholder="e.g., My Custom Section" />
       )}
     </Form>
   );
