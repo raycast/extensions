@@ -16,6 +16,9 @@
   "categories": [
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -74,7 +77,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.7",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.1",
     "tildify": "^3.0.0"
   },
@@ -85,18 +88,15 @@
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.6"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "create-fixtures": "./scripts/create-fixtures.sh",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
+    "publish": "npx @raycast/api@latest publish",
     "test": "vitest"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }
