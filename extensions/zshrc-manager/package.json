@@ -100,57 +100,9 @@
   ],
   "commands": [
     {
-      "name": "zshrc-statistics",
-      "title": "Zshrc Statistics",
-      "description": "View statistics and overview of your ~/.zshrc configuration",
-      "mode": "view"
-    },
-    {
-      "name": "sections",
-      "title": "Sections",
-      "description": "Manage and organize sections in your ~/.zshrc",
-      "mode": "view"
-    },
-    {
-      "name": "aliases",
-      "title": "Aliases",
-      "description": "Add, edit, and manage aliases in your ~/.zshrc",
-      "mode": "view"
-    },
-    {
-      "name": "exports",
-      "title": "Exports",
-      "description": "Add, edit, and manage exports in your ~/.zshrc",
-      "mode": "view"
-    },
-    {
-      "name": "functions",
-      "title": "Functions",
-      "description": "View and manage functions in your ~/.zshrc",
-      "mode": "view"
-    },
-    {
-      "name": "plugins",
-      "title": "Plugins",
-      "description": "View and manage plugins in your ~/.zshrc",
-      "mode": "view"
-    },
-    {
-      "name": "sources",
-      "title": "Sources",
-      "description": "View and manage source commands in your ~/.zshrc",
-      "mode": "view"
-    },
-    {
-      "name": "evals",
-      "title": "Evals",
-      "description": "View and manage eval commands in your ~/.zshrc",
-      "mode": "view"
-    },
-    {
-      "name": "setopts",
-      "title": "Setopts",
-      "description": "View and manage setopt commands in your ~/.zshrc",
+      "name": "index",
+      "title": "Zshrc Manager",
+      "description": "View and manage your ~/.zshrc configuration (use dropdown to switch views)",
       "mode": "view"
     }
   ],
