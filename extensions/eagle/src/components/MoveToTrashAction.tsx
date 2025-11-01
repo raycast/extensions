@@ -1,4 +1,5 @@
 import { Action, Icon, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { moveToTrash } from "../utils/api";
 import type { Item } from "../@types/eagle";
 

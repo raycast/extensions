@@ -13,7 +13,10 @@ function RenameFolderForm({ folder, onRenamed }: RenameFolderActionProps) {
   const { pop } = useNavigation();
 
   const handleSubmit = async () => {
-    if (!newName.trim()) {
+    const trimmedNewName = newName.trim();
+    const trimmedCurrentName = folder.name.trim();
+
+    if (!trimmedNewName) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Folder name is required",
@@ -21,7 +24,7 @@ function RenameFolderForm({ folder, onRenamed }: RenameFolderActionProps) {
       return;
     }
 
-    if (newName === folder.name) {
+    if (trimmedNewName === trimmedCurrentName) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No changes made",
@@ -38,13 +41,13 @@ function RenameFolderForm({ folder, onRenamed }: RenameFolderActionProps) {
 
       await renameFolder({
         folderId: folder.id,
-        newName: newName.trim(),
+        newName: trimmedNewName,
       });
 
       await showToast({
         style: Toast.Style.Success,
         title: "Folder renamed",
-        message: `${folder.name} → ${newName}`,
+        message: `${folder.name} → ${trimmedNewName}`,
       });
 
       if (onRenamed) {

@@ -17,6 +17,21 @@ interface Preferences {
   layout: "list" | "grid";
 }
 
+const folderColorMap: Record<string, Color> = {
+  red: Color.Red,
+  orange: Color.Orange,
+  yellow: Color.Yellow,
+  green: Color.Green,
+  aqua: Color.Blue,
+  blue: Color.Blue,
+  purple: Color.Purple,
+  pink: Color.Magenta,
+};
+
+const getFolderColor = (color?: string): Color | undefined => {
+  return color ? folderColorMap[color] : undefined;
+};
+
 function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) {
   const { data: thumbnail } = useThumbnail(item.id);
 
@@ -49,20 +64,6 @@ function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) 
 }
 
 function GridFolderItem({ folder, onUpdate }: { folder: Folder; onUpdate?: () => void }) {
-  const getFolderColor = (color?: string): Color | undefined => {
-    const colorMap: Record<string, Color> = {
-      red: Color.Red,
-      orange: Color.Orange,
-      yellow: Color.Yellow,
-      green: Color.Green,
-      aqua: Color.Blue,
-      blue: Color.Blue,
-      purple: Color.Purple,
-      pink: Color.Magenta,
-    };
-    return color ? colorMap[color] : undefined;
-  };
-
   return (
     <Grid.Item
       content={{ source: Icon.Folder, tintColor: getFolderColor(folder.iconColor) }}
@@ -83,20 +84,6 @@ function GridFolderItem({ folder, onUpdate }: { folder: Folder; onUpdate?: () =>
 }
 
 function FolderItem({ folder, onUpdate }: { folder: Folder; onUpdate?: () => void }) {
-  const getFolderColor = (color?: string): Color | undefined => {
-    const colorMap: Record<string, Color> = {
-      red: Color.Red,
-      orange: Color.Orange,
-      yellow: Color.Yellow,
-      green: Color.Green,
-      aqua: Color.Blue,
-      blue: Color.Blue,
-      purple: Color.Purple,
-      pink: Color.Magenta,
-    };
-    return color ? colorMap[color] : undefined;
-  };
-
   return (
     <List.Item
       title={folder.name}
