@@ -27,7 +27,7 @@ function UpdateFolderForm({ folder, onUpdated }: UpdateFolderActionProps) {
         folderId: folder.id,
         newName: newName !== folder.name ? newName : undefined,
         newDescription: newDescription !== (folder.description || "") ? newDescription : undefined,
-        newColor: newColor || undefined,
+        newColor: newColor !== "" ? newColor : undefined,
       });
 
       await showToast({
