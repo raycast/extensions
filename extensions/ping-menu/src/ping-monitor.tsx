@@ -81,10 +81,10 @@ export default function Command() {
   useEffect(() => {
     let cancelled = false;
     let isFirstLoad = true;
-    
+
     async function fetchPing() {
       console.log("[Ping Monitor] Fetching ping at:", new Date().toLocaleTimeString());
-      
+
       // Load cached data first to prevent flickering
       if (isFirstLoad) {
         const cachedHistory = await loadHistory();
@@ -99,7 +99,7 @@ export default function Command() {
           setIsLoading(true);
         }
       }
-      
+
       const result = await pingWithHistory();
       if (!cancelled) {
         console.log("[Ping Monitor] Got result, latency:", result.latency);
@@ -110,17 +110,17 @@ export default function Command() {
         }
       }
     }
-    
+
     // Fetch immediately on mount
     fetchPing();
-    
+
     // Set up interval to fetch every second
     const intervalId = setInterval(() => {
       if (!cancelled) {
         fetchPing();
       }
     }, 1000);
-    
+
     return () => {
       cancelled = true;
       clearInterval(intervalId);
