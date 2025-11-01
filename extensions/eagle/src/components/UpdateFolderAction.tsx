@@ -11,9 +11,9 @@ interface UpdateFolderActionProps {
 function UpdateFolderForm({ folder, onUpdated }: UpdateFolderActionProps) {
   const [newName, setNewName] = useState(folder.name);
   const [newDescription, setNewDescription] = useState(folder.description || "");
-  const [newColor, setNewColor] = useState<"red" | "orange" | "green" | "yellow" | "aqua" | "blue" | "purple" | "pink" | "">(
-    "",
-  );
+  const [newColor, setNewColor] = useState<
+    "red" | "orange" | "green" | "yellow" | "aqua" | "blue" | "purple" | "pink" | ""
+  >("");
   const { pop } = useNavigation();
 
   const handleSubmit = async () => {
