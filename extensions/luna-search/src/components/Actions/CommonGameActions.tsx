@@ -37,7 +37,10 @@ function PlayGameAction({ game }: { game: GameSummary }) {
  */
 function CopyUrlAction({ url }: { url: string }) {
   return (
-    <Action.CopyToClipboard title={DISPLAY_VALUES.copyTitle} shortcut={Keyboard.Shortcut.Common.Copy} content={url} />
+    <Action.CopyToClipboard
+      title={DISPLAY_VALUES.copyTitle}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+      content={url} />
   );
 }
 
@@ -52,8 +55,8 @@ function CopyUrlAction({ url }: { url: string }) {
  */
 export function getCommonGameActions(game: GameSummary, searchCallback: SearchCallback): JSX.Element[] {
   return [
-    <PlayGameAction game={game} />,
-    <CopyUrlAction url={game.rawUrl} />,
-    <SeeTrendingAction searchCallback={searchCallback} />,
+    <PlayGameAction game={game} key="play-action" />,
+    <CopyUrlAction url={game.rawUrl} key="url-action" />,
+    <SeeTrendingAction searchCallback={searchCallback} key="trending-action"  />,
   ];
 }

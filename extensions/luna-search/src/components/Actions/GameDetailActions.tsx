@@ -64,7 +64,7 @@ export function GameDetailActions({ game, searchCallback }: Props): JSX.Element 
 
   return (
     <ActionPanel>
-      <OpenGameInBrowserAction game={game} />
+      <OpenGameInBrowserAction game={game} key="open-in-browser" />
       {getCommonGameActions(game, onSearch)}
     </ActionPanel>
   );
