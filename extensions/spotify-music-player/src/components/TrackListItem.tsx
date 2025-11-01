@@ -23,6 +23,7 @@ export default function TrackListItem({ track, album }: TrackListItemProps) {
     } catch (error) {
       console.error("Failed to play track", error);
       showFailureToast("Failed to play track");
+      showFailureToast("Failed to play track");
     }
   };
 
