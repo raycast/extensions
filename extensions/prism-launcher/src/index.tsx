@@ -1,5 +1,5 @@
-import ManageInstances from "./commands/manage-instances";
+import { Detail } from "@raycast/api";
 
 export default function Command() {
-  return <ManageInstances />;
+  return <Detail markdown="# Prism Launcher instance launcher." />;
 }

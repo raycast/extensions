@@ -1,0 +1,32 @@
+{
+    "$schema": "https://plugins.dprint.dev/dprint/dprint-plugin-typescript/latest/schema.json",
+    "indentWidth": 4,
+    "lineWidth": 150,
+    "useTabs": false,
+    "typescript": {
+        "semiColons": "asi",
+        "quoteStyle": "alwaysDouble",
+        "newLineKind": "lf",
+        "bracePosition": "sameLine",
+        "trailingCommas": "never",
+        "operatorPosition": "maintain",
+        "typeLiteral.separatorKind.singleLine": "comma",
+        "typeLiteral.separatorKind.multiLine": "semiColon"
+    },
+    "json": {
+    },
+    "markdown": {
+    },
+    "toml": {
+    },
+    "excludes": [
+        "**/node_modules",
+        "**/*-lock.json"
+    ],
+    "plugins": [
+        "https://plugins.dprint.dev/typescript-0.91.8.wasm",
+        "https://plugins.dprint.dev/json-0.19.3.wasm",
+        "https://plugins.dprint.dev/markdown-0.17.8.wasm",
+        "https://plugins.dprint.dev/toml-0.6.2.wasm"
+    ]
+}
