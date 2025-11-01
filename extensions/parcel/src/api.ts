@@ -101,19 +101,6 @@ export function getSupportedCarriersUrl(): string {
   return "https://api.parcel.app/external/supported_carriers.json";
 }
 
-export async function fetchSupportedCarriers(): Promise<Carrier[]> {
-  const response = await fetch(getSupportedCarriersUrl());
-  if (!response.ok) {
-    throw new Error(`Failed to load supported carriers: ${response.status}`);
-  }
-
-  const data = (await response.json()) as Record<string, string>;
-  const carriers: Carrier[] = Object.entries(data).map(([code, name]) => ({ code, name }));
-
-  carriers.sort((a, b) => a.name.localeCompare(b.name));
-  return carriers;
-}
-
 export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[]> {
   const url = getDeliveriesUrl(filterMode);
   const response = await fetch(url, {
