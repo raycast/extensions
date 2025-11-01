@@ -55,7 +55,7 @@ export default function Index() {
 
   checkEagleInstallation();
 
-  if (error?.code === "ECONNREFUSED") {
+  if (error && "code" in error && error.code === "ECONNREFUSED") {
     showEagleNotOpenToast();
   } else if (error) {
     console.error(error);

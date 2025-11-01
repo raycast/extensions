@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, Grid, getPreferenceValues, Color } from "@raycast/api";
-import { Folder, Item } from "./@types/eagle";
+import type { Folder, Item } from "./@types/eagle";
 import EagleItem from "./components/EagleItem";
 import { checkEagleInstallation } from "./utils/checkInstall";
 import { showEagleNotOpenToast } from "./utils/error";
@@ -166,7 +166,7 @@ export default function Folder() {
 
   checkEagleInstallation();
 
-  if (error?.code === "ECONNREFUSED") {
+  if (error && "code" in error && error.code === "ECONNREFUSED") {
     showEagleNotOpenToast();
   } else if (error) {
     console.error(error);

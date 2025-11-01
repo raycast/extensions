@@ -16,7 +16,7 @@ export default function AddFromURL() {
 
   checkEagleInstallation();
 
-  if (error?.code === "ECONNREFUSED") {
+  if (error && "code" in error && error.code === "ECONNREFUSED") {
     showEagleNotOpenToast();
   }
 

@@ -18,11 +18,14 @@ import { Folder } from "../@types/eagle";
  * @returns A function that returns a promise that resolves to a string.
  */
 export function useThumbnail(id: string) {
-  return usePromise(async () => {
-    const res = await getItemThumbnail(id);
-    const imagePath = decodeURIComponent(res.data.data);
-    return fileUrl(imagePath);
-  }, [id]);
+  return usePromise(
+    async (id: string) => {
+      const res = await getItemThumbnail(id);
+      const imagePath = decodeURIComponent(res.data.data);
+      return fileUrl(imagePath);
+    },
+    [id],
+  );
 }
 
 export function useApplicationInfo() {
@@ -52,7 +55,7 @@ export function useFolderItemList(folders?: string) {
       if (res.data.status !== "success") return [];
       return res.data.data;
     },
-    [folders],
+    [folders || ""],
     {
       execute: shouldFetch,
     },

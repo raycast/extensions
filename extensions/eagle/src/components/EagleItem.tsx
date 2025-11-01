@@ -11,7 +11,7 @@ export default function EagleItem({ item, onTrash }: { item: Item; onTrash?: () 
   return (
     <List.Item
       title={item.name}
-      detail={<ItemListDetail id={item.id} ext={item.ext} />}
+      detail={<ItemListDetail id={item.id} />}
       icon={Icon.Document}
       actions={
         <ActionPanel>

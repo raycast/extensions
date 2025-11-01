@@ -11,7 +11,9 @@ interface UpdateFolderActionProps {
 function UpdateFolderForm({ folder, onUpdated }: UpdateFolderActionProps) {
   const [newName, setNewName] = useState(folder.name);
   const [newDescription, setNewDescription] = useState(folder.description || "");
-  const [newColor, setNewColor] = useState<string>("");
+  const [newColor, setNewColor] = useState<"red" | "orange" | "green" | "yellow" | "aqua" | "blue" | "purple" | "pink" | "">(
+    "",
+  );
   const { pop } = useNavigation();
 
   const handleSubmit = async () => {
@@ -63,7 +65,12 @@ function UpdateFolderForm({ folder, onUpdated }: UpdateFolderActionProps) {
         value={newDescription}
         onChange={setNewDescription}
       />
-      <Form.Dropdown id="newColor" title="Color (Optional)" value={newColor} onChange={setNewColor}>
+      <Form.Dropdown
+        id="newColor"
+        title="Color (Optional)"
+        value={newColor}
+        onChange={(value) => setNewColor(value as typeof newColor)}
+      >
         <Form.Dropdown.Item value="" title="No Change" />
         <Form.Dropdown.Item value="red" title="🔴 Red" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
         <Form.Dropdown.Item value="orange" title="🟠 Orange" icon={{ source: Icon.Circle, tintColor: Color.Orange }} />

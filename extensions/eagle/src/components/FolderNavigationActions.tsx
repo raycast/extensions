@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { useMemo } from "react";
 import { Item, Folder } from "../@types/eagle";
 import { useFolderMap, useFolderList } from "../utils/query";
@@ -6,7 +6,7 @@ import { FolderView } from "../folder";
 
 interface FolderNavigationActionsProps {
   item: Item;
-  shortcut?: { modifiers: string[]; key: string };
+  shortcut?: Keyboard.Shortcut;
 }
 
 export function FolderNavigationActions({ item, shortcut }: FolderNavigationActionsProps) {

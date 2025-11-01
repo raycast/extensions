@@ -10,7 +10,7 @@ export default function Library() {
 
   checkEagleInstallation();
 
-  if (error?.code === "ECONNREFUSED") {
+  if (error && "code" in error && error.code === "ECONNREFUSED") {
     showEagleNotOpenToast();
   } else if (error) {
     console.error(error);
