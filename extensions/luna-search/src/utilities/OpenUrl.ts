@@ -1,4 +1,4 @@
-import { Application, getApplications, open, environment } from "@raycast/api";
+import { Application, getApplications, open } from "@raycast/api";
 
 /**
  * The bundle ID for the Google Chrome browser (macOS).
@@ -34,19 +34,14 @@ const LUNA_COMPATIBLE_WIN_EXES = new Set([CHROME_WIN_PATH, EDGE_WIN_PATH]);
 const targetBrowser = (async (): Promise<Application | undefined> => {
   const installedApplications = await getApplications();
 
-  if (environment.commandName && environment.supportPath) {
-    // Check if we're on Windows by looking at the platform
-    const isWindows = process.platform === "win32";
-
-    if (isWindows) {
-      // On Windows, match by executable path
-      const target = installedApplications.find((app) => {
-        if (!app.path) return false;
-        const exeName = app.path.toLowerCase().split("\\").pop();
-        return exeName ? LUNA_COMPATIBLE_WIN_EXES.has(exeName) : false;
-      });
-      return target;
-    }
+  if (process.platform === "win32") {
+    // On Windows, match by executable path
+    const target = installedApplications.find((app) => {
+      if (!app.path) return false;
+      const exeName = app.path.toLowerCase().split("\\").pop();
+      return exeName ? LUNA_COMPATIBLE_WIN_EXES.has(exeName) : false;
+    });
+    return target;
   }
 
   // On macOS, match by bundle ID
