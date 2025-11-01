@@ -216,6 +216,27 @@ List.Section = ({ children, title, ...props }: any) => {
   ]);
 };
 
+// Mock List.Dropdown
+const ListDropdown = ({ children, value, onChange, tooltip, ...props }: any) => {
+  return React.createElement(
+    "select",
+    {
+      "data-testid": "list-dropdown",
+      value: value || "",
+      onChange: (e: any) => onChange && onChange(e.target.value),
+      title: tooltip,
+      ...props,
+    },
+    children,
+  );
+};
+
+ListDropdown.Item = ({ title, value, ...props }: any) => {
+  return React.createElement("option", { "data-testid": "list-dropdown-item", value, ...props }, title);
+};
+
+List.Dropdown = ListDropdown;
+
 // Mock other components
 export const Color = {
   Red: "red" as const,
@@ -251,6 +272,12 @@ export const Detail = ({ children, markdown, ...props }: any) => {
 export const showToast = vi.fn().mockResolvedValue(undefined);
 export const popToRoot = vi.fn().mockResolvedValue(undefined);
 export const getPreferenceValues = vi.fn(() => ({}));
+
+// Mock useNavigation hook
+export const useNavigation = vi.fn(() => ({
+  pop: vi.fn(),
+  push: vi.fn(),
+}));
 
 export const Toast = {
   Style: {
