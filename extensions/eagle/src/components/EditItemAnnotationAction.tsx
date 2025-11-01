@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { updateItem } from "../utils/api";
 import type { Item } from "../@types/eagle";
@@ -36,7 +37,7 @@ function EditAnnotationForm({ item, onUpdate }: EditItemAnnotationActionProps) {
       pop();
     } catch (error) {
       await showFailureToast(error, {
-        title: "Failed to update annotation"
+        title: "Failed to update annotation",
       });
     }
   };

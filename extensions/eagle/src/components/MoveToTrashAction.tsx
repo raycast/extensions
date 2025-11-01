@@ -40,7 +40,7 @@ export function MoveToTrashAction({ item, onUpdate }: MoveToTrashActionProps) {
         onUpdate();
       }
     } catch (error) {
-      await showFailureToast("Failed to move to trash", error);
+      await showFailureToast(error, { title: "Failed to move to trash" });
     }
   };
 
