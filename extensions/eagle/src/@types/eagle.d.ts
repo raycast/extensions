@@ -42,6 +42,7 @@ export type Folder = {
   descendantImageCount: number;
   pinyin: string;
   extendTags: string[];
+  iconColor?: string;
 };
 
 export type Library = {

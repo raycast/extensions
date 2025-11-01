@@ -114,4 +114,107 @@ export async function getCurrentLibrary() {
   return response.data.data.library;
 }
 
+export function addItemFromURL(params: {
+  url: string;
+  name?: string;
+  website?: string;
+  tags?: string[];
+  annotation?: string;
+  modificationTime?: number;
+  folderId?: string;
+}) {
+  return instance.post<EagleAPIResponse<null>>("/item/addFromURL", params);
+}
+
+export function addItemFromPath(params: {
+  path: string;
+  name?: string;
+  website?: string;
+  tags?: string[];
+  annotation?: string;
+  modificationTime?: number;
+  folderId?: string;
+}) {
+  return instance.post<EagleAPIResponse<null>>("/item/addFromPath", params);
+}
+
+export function updateItem(params: {
+  id: string;
+  tags?: string[];
+  annotation?: string;
+  url?: string;
+  star?: number;
+}) {
+  return instance.post<EagleAPIResponse<null>>("/item/update", params);
+}
+
+export function createFolder(params: { folderName: string; parent?: string }) {
+  return instance.post<
+    EagleAPIResponse<{
+      id: string;
+      name: string;
+      images: string[];
+      folders: string[];
+      modificationTime: number;
+      imagesMappings: Record<string, unknown>;
+      tags: string[];
+      children: unknown[];
+      isExpand: boolean;
+    }>
+  >("/folder/create", params);
+}
+
+export function renameFolder(params: { folderId: string; newName: string }) {
+  return instance.post<
+    EagleAPIResponse<{
+      id: string;
+      name: string;
+      images: string[];
+      folders: string[];
+      modificationTime: number;
+      imagesMappings: Record<string, unknown>;
+      tags: string[];
+      children: unknown[];
+      isExpand: boolean;
+      size: number;
+      vstype: string;
+      styles: Record<string, unknown>;
+      isVisible: boolean;
+      pinyin: string;
+    }>
+  >("/folder/rename", params);
+}
+
+export function updateFolder(params: {
+  folderId: string;
+  newName?: string;
+  newDescription?: string;
+  newColor?: "red" | "orange" | "green" | "yellow" | "aqua" | "blue" | "purple" | "pink";
+}) {
+  return instance.post<
+    EagleAPIResponse<{
+      id: string;
+      name: string;
+      description?: string;
+      images: string[];
+      folders: string[];
+      modificationTime: number;
+      imagesMappings: Record<string, unknown>;
+      tags: string[];
+      children: unknown[];
+      isExpand: boolean;
+      size: number;
+      vstype: string;
+      styles: Record<string, unknown>;
+      isVisible: boolean;
+      pinyin: string;
+      iconColor?: string;
+    }>
+  >("/folder/update", params);
+}
+
+export function getRecentFolders() {
+  return instance.get<EagleAPIResponse<Folder[]>>("/folder/listRecent");
+}
+
 export default instance;

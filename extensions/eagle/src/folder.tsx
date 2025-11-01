@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Grid, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Grid, getPreferenceValues, Color } from "@raycast/api";
 import { Folder, Item } from "./@types/eagle";
 import EagleItem from "./components/EagleItem";
 import { checkEagleInstallation } from "./utils/checkInstall";
@@ -7,6 +7,11 @@ import { useFolderItemList, useFolderList, useThumbnail, useRootItemList } from 
 import { ItemDetail } from "./components/ItemDetail";
 import { FolderNavigationActions } from "./components/FolderNavigationActions";
 import { MoveToTrashAction } from "./components/MoveToTrashAction";
+import { CreateFolderAction } from "./components/CreateFolderAction";
+import { RenameFolderAction } from "./components/RenameFolderAction";
+import { UpdateFolderAction } from "./components/UpdateFolderAction";
+import { EditItemTagsAction } from "./components/EditItemTagsAction";
+import { EditItemAnnotationAction } from "./components/EditItemAnnotationAction";
 
 interface Preferences {
   layout: "list" | "grid";
@@ -27,9 +32,15 @@ function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) 
           <Action.Push target={<ItemDetail item={item} />} title="View Detail" icon={Icon.Eye} />
           <FolderNavigationActions item={item} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           {!item.isDeleted && (
-            <ActionPanel.Section>
-              <MoveToTrashAction item={item} onTrash={onTrash} />
-            </ActionPanel.Section>
+            <>
+              <ActionPanel.Section title="Edit">
+                <EditItemTagsAction item={item} onUpdate={onTrash} />
+                <EditItemAnnotationAction item={item} onUpdate={onTrash} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <MoveToTrashAction item={item} onTrash={onTrash} />
+              </ActionPanel.Section>
+            </>
           )}
         </ActionPanel>
       }
@@ -37,30 +48,68 @@ function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) 
   );
 }
 
-function GridFolderItem({ folder }: { folder: Folder }) {
+function GridFolderItem({ folder, onUpdate }: { folder: Folder; onUpdate?: () => void }) {
+  const getFolderColor = (color?: string): Color | undefined => {
+    const colorMap: Record<string, Color> = {
+      red: Color.Red,
+      orange: Color.Orange,
+      yellow: Color.Yellow,
+      green: Color.Green,
+      aqua: Color.Blue,
+      blue: Color.Blue,
+      purple: Color.Purple,
+      pink: Color.Magenta,
+    };
+    return color ? colorMap[color] : undefined;
+  };
+
   return (
     <Grid.Item
-      content={{ source: Icon.Folder }}
+      content={{ source: Icon.Folder, tintColor: getFolderColor(folder.iconColor) }}
       title={folder.name}
       subtitle={`${folder.children.length} subfolder(s)`}
       actions={
         <ActionPanel>
-          <Action.Push title="Open Folder" target={<FolderView folder={folder} />} />
+          <Action.Push title="Open Folder" icon={Icon.ArrowRight} target={<FolderView folder={folder} />} />
+          <ActionPanel.Section title="Manage">
+            <UpdateFolderAction folder={folder} onUpdated={onUpdate} />
+            <RenameFolderAction folder={folder} onRenamed={onUpdate} />
+            <CreateFolderAction parentFolderId={folder.id} onCreated={onUpdate} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 }
 
-function FolderItem({ folder }: { folder: Folder }) {
+function FolderItem({ folder, onUpdate }: { folder: Folder; onUpdate?: () => void }) {
+  const getFolderColor = (color?: string): Color | undefined => {
+    const colorMap: Record<string, Color> = {
+      red: Color.Red,
+      orange: Color.Orange,
+      yellow: Color.Yellow,
+      green: Color.Green,
+      aqua: Color.Blue,
+      blue: Color.Blue,
+      purple: Color.Purple,
+      pink: Color.Magenta,
+    };
+    return color ? colorMap[color] : undefined;
+  };
+
   return (
     <List.Item
       title={folder.name}
-      icon={Icon.Finder}
+      icon={{ source: Icon.Folder, tintColor: getFolderColor(folder.iconColor) }}
       detail={<List.Item.Detail markdown={`# ${folder.name}\n\nFolder with ${folder.children.length} subfolder(s)`} />}
       actions={
         <ActionPanel>
-          <Action.Push title="Open Folder" target={<FolderView folder={folder} />} />
+          <Action.Push title="Open Folder" icon={Icon.ArrowRight} target={<FolderView folder={folder} />} />
+          <ActionPanel.Section title="Manage">
+            <UpdateFolderAction folder={folder} onUpdated={onUpdate} />
+            <RenameFolderAction folder={folder} onRenamed={onUpdate} />
+            <CreateFolderAction parentFolderId={folder.id} onCreated={onUpdate} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -110,7 +159,7 @@ export function FolderView({ folder }: { folder: Folder }) {
 
 export default function Folder() {
   const preferences = getPreferenceValues<Preferences>();
-  const { data: folders = [], isLoading: foldersLoading, error } = useFolderList();
+  const { data: folders = [], isLoading: foldersLoading, error, revalidate: revalidateFolders } = useFolderList();
   const { data: rootItems = [], isLoading: itemsLoading, revalidate } = useRootItemList();
 
   const isLoading = foldersLoading || itemsLoading;
@@ -129,7 +178,7 @@ export default function Folder() {
         {folders.length > 0 && (
           <Grid.Section title="Folders">
             {folders.map((folder) => (
-              <GridFolderItem key={folder.id} folder={folder} />
+              <GridFolderItem key={folder.id} folder={folder} onUpdate={revalidateFolders} />
             ))}
           </Grid.Section>
         )}
@@ -140,6 +189,17 @@ export default function Folder() {
             ))}
           </Grid.Section>
         )}
+        <Grid.Section title="Actions">
+          <Grid.Item
+            content={{ source: Icon.Plus }}
+            title="Create Folder"
+            actions={
+              <ActionPanel>
+                <CreateFolderAction onCreated={revalidateFolders} />
+              </ActionPanel>
+            }
+          />
+        </Grid.Section>
       </Grid>
     );
   }
@@ -149,7 +209,7 @@ export default function Folder() {
       {folders.length > 0 && (
         <List.Section title="Folders">
           {folders.map((folder) => (
-            <FolderItem key={folder.id} folder={folder} />
+            <FolderItem key={folder.id} folder={folder} onUpdate={revalidateFolders} />
           ))}
         </List.Section>
       )}
@@ -160,6 +220,17 @@ export default function Folder() {
           ))}
         </List.Section>
       )}
+      <List.Section title="Actions">
+        <List.Item
+          title="Create Folder"
+          icon={Icon.Plus}
+          actions={
+            <ActionPanel>
+              <CreateFolderAction onCreated={revalidateFolders} />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
     </List>
   );
 }

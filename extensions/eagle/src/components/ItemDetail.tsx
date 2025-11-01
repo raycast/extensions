@@ -4,6 +4,8 @@ import { useThumbnail, useFolderMap } from "../utils/query";
 import type { Item } from "../@types/eagle";
 import { FolderNavigationActions } from "./FolderNavigationActions";
 import { MoveToTrashAction } from "./MoveToTrashAction";
+import { EditItemTagsAction } from "./EditItemTagsAction";
+import { EditItemAnnotationAction } from "./EditItemAnnotationAction";
 
 export function ItemDetail({ item }: { item: Item }) {
   const { data: thumbnail } = useThumbnail(item.id);
@@ -39,9 +41,15 @@ export function ItemDetail({ item }: { item: Item }) {
         <ActionPanel>
           <FolderNavigationActions item={item} />
           {!item.isDeleted && (
-            <ActionPanel.Section>
-              <MoveToTrashAction item={item} />
-            </ActionPanel.Section>
+            <>
+              <ActionPanel.Section title="Edit">
+                <EditItemTagsAction item={item} />
+                <EditItemAnnotationAction item={item} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <MoveToTrashAction item={item} />
+              </ActionPanel.Section>
+            </>
           )}
         </ActionPanel>
       }

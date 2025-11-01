@@ -57,6 +57,20 @@
       "subtitle": "Eagle",
       "description": "Switch between Eagle libraries",
       "mode": "view"
+    },
+    {
+      "name": "add-from-url",
+      "title": "Add Item from URL",
+      "subtitle": "Eagle",
+      "description": "Add image or file from URL to Eagle",
+      "mode": "view"
+    },
+    {
+      "name": "add-from-clipboard",
+      "title": "Add from Clipboard",
+      "subtitle": "Eagle",
+      "description": "Add URL or file path from clipboard to Eagle",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

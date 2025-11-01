@@ -9,6 +9,8 @@ import { Item } from "./@types/eagle";
 import { ItemDetail } from "./components/ItemDetail";
 import { FolderNavigationActions } from "./components/FolderNavigationActions";
 import { MoveToTrashAction } from "./components/MoveToTrashAction";
+import { EditItemTagsAction } from "./components/EditItemTagsAction";
+import { EditItemAnnotationAction } from "./components/EditItemAnnotationAction";
 
 interface Preferences {
   layout: "list" | "grid";
@@ -29,9 +31,15 @@ function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) 
           <Action.Push target={<ItemDetail item={item} />} title="View Detail" icon={Icon.Eye} />
           <FolderNavigationActions item={item} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           {!item.isDeleted && (
-            <ActionPanel.Section>
-              <MoveToTrashAction item={item} onTrash={onTrash} />
-            </ActionPanel.Section>
+            <>
+              <ActionPanel.Section title="Edit">
+                <EditItemTagsAction item={item} onUpdate={onTrash} />
+                <EditItemAnnotationAction item={item} onUpdate={onTrash} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <MoveToTrashAction item={item} onTrash={onTrash} />
+              </ActionPanel.Section>
+            </>
           )}
         </ActionPanel>
       }
