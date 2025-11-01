@@ -12,7 +12,7 @@ interface Preferences {
   layout: "list" | "grid";
 }
 
-function GridEagleItem({ item, onRestore }: { item: Item; onRestore?: () => void }) {
+function GridEagleItem({ item }: { item: Item }) {
   const { data: thumbnail } = useThumbnail(item.id);
 
   // Convert file:// URL back to regular path
@@ -47,7 +47,7 @@ export default function Trash() {
     return (
       <Grid isLoading={isLoading}>
         {items.map((item) => (
-          <GridEagleItem key={item.id} item={item} onRestore={revalidate} />
+          <GridEagleItem key={item.id} item={item} />
         ))}
       </Grid>
     );

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { readdir, readFile } from "fs/promises";
 import { join, basename } from "path";
-import { Application, EagleAPIResponse, Folder, Item, Library } from "../@types/eagle";
+import { Application, EagleAPIResponse, Folder, Item } from "../@types/eagle";
 
 export const instance = axios.create({
   baseURL: "http://localhost:41595/api/",

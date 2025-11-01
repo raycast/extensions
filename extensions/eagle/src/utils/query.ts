@@ -9,6 +9,7 @@ import {
   getLibraryHistory,
   getCurrentLibrary,
 } from "./api";
+import { Folder } from "../@types/eagle";
 
 /**
  * It fetches the thumbnail of an item from the server and returns the URL of the
@@ -38,7 +39,7 @@ export function useItemList(search: string) {
       if (res.data.status !== "success") return [];
       return res.data.data;
     },
-    [search]
+    [search],
   );
 }
 
@@ -54,7 +55,7 @@ export function useFolderItemList(folders?: string) {
     [folders],
     {
       execute: shouldFetch,
-    }
+    },
   );
 }
 
@@ -75,7 +76,7 @@ export function useFolderList() {
 }
 
 // Helper function to flatten folder tree into a map
-function flattenFolders(folders: any[], map: Map<string, string> = new Map()): Map<string, string> {
+function flattenFolders(folders: Folder[], map: Map<string, string> = new Map()): Map<string, string> {
   for (const folder of folders) {
     map.set(folder.id, folder.name);
     if (folder.children && folder.children.length > 0) {

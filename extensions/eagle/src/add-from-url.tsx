@@ -4,6 +4,7 @@ import { addItemFromURL } from "./utils/api";
 import { useFolderList } from "./utils/query";
 import { checkEagleInstallation } from "./utils/checkInstall";
 import { showEagleNotOpenToast } from "./utils/error";
+import { Folder } from "./@types/eagle";
 
 export default function AddFromURL() {
   const [url, setUrl] = useState("");
@@ -59,7 +60,7 @@ export default function AddFromURL() {
   };
 
   // Flatten folder tree for dropdown
-  const flattenFolders = (folders: any[], prefix = ""): { id: string; name: string }[] => {
+  const flattenFolders = (folders: Folder[], prefix = ""): { id: string; name: string }[] => {
     const result: { id: string; name: string }[] = [];
     for (const folder of folders) {
       const displayName = prefix ? `${prefix} / ${folder.name}` : folder.name;
