@@ -2,6 +2,22 @@
 
 ## [Use Resend SDK + Add Windows Support] - {PR_MERGE_DATE}
 
+- Add Windows Support
+- We now use Resend Node SDK
+
+### API Keys
+- Deletion is now optimistic
+
+### Contacts
+- Deletion is now optimistic
+- Automatically reload after Update
+
+### Domain
+- Deletion is now optimistic
+
+### Emails
+- Resend now lets you fetch sent emails via API so no more need for local logging
+
 ## [Update Icons] - 2025-07-04
 
 - Update Icons to reflect Resend's new Brand ([Brand Kit](https://resend.com/brand))
