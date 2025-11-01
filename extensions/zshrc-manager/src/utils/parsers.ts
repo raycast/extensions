@@ -127,4 +127,3 @@ export function parseSources(content: string): ReadonlyArray<{ path: string }> {
   }
   return result;
 }
-
