@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
-import { scoopSearch, scoopInstall, scoopList, scoopUninstall, ScoopPackage } from "./scoop";
 import { ScoopInfo } from "./components/ScoopInfo";
 import { withToast } from "./utils";
+import { useScoop } from "./hooks/scoopHooks";
+import { ScoopPackage } from "./types/index.types";
 
 export default function SearchCommand() {
+  const scoop = useScoop();
   const [query, setQuery] = useState("");
   const [packages, setPackages] = useState<ScoopPackage[]>([]);
   const [installedPackages, setInstalledPackages] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    scoopList().then((pkgs) => {
+    scoop.listInstalled().then((pkgs) => {
       setInstalledPackages(new Set(pkgs.map((p) => p.Name)));
       setIsLoading(false);
     });
@@ -22,7 +24,7 @@ export default function SearchCommand() {
     const search = async () => {
       if (query) {
         setIsLoading(true);
-        const pkgs = await scoopSearch(query);
+        const pkgs = await scoop.search(query);
         if (!cancelled) {
           setPackages(pkgs);
           setIsLoading(false);
@@ -40,7 +42,7 @@ export default function SearchCommand() {
 
   const refreshInstalled = async () => {
     setIsLoading(true);
-    const pkgs = await scoopList();
+    const pkgs = await scoop.listInstalled();
     setInstalledPackages(new Set(pkgs.map((p) => p.Name)));
     setIsLoading(false);
   };
@@ -77,7 +79,7 @@ export default function SearchCommand() {
                     onAction={() =>
                       withToast(
                         async () => {
-                          await scoopUninstall(pkg.Name);
+                          await scoop.uninstall(pkg.Name);
                           await refreshInstalled();
                         },
                         {
@@ -94,7 +96,7 @@ export default function SearchCommand() {
                     onAction={() =>
                       withToast(
                         async () => {
-                          await scoopInstall(pkg.Name);
+                          await scoop.install(pkg.Name);
                           await refreshInstalled();
                         },
                         {

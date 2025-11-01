@@ -64,7 +64,10 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
           {containerInfo?.State.Running === true && (
             <Action
               title="Stop Container"
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
+              shortcut={{
+                macOS: { modifiers: ['cmd', 'shift'], key: 'w' },
+                windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
+              }}
               onAction={withToast({
                 action: () => stopContainer(containerInfo),
                 onStart: () => `Stopping container ${containerName(containerInfo)}`,
@@ -77,7 +80,10 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
             <Action
               title="Restart Container"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ['opt'], key: 'r' }}
+              shortcut={{
+                macOS: { modifiers: ['opt'], key: 'r' },
+                windows: { modifiers: ['alt'], key: 'r' },
+              }}
               onAction={withToast({
                 action: () => restartContainer(containerInfo),
                 onStart: () => `Restarting container ${containerName(containerInfo)}`,
@@ -89,7 +95,10 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
           {containerInfo?.State.Running === false && (
             <Action
               title="Start Container"
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+              shortcut={{
+                macOS: { modifiers: ['cmd', 'shift'], key: 'r' },
+                windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
+              }}
               onAction={withToast({
                 action: () => startContainer(containerInfo),
                 onStart: () => `Starting container ${containerName(containerInfo)}`,

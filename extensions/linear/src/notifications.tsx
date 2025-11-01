@@ -9,7 +9,7 @@ import OpenInLinear from "./components/OpenInLinear";
 import View from "./components/View";
 import { getBotIcon } from "./helpers/bots";
 import { getErrorMessage } from "./helpers/errors";
-import { getNotificationIcon, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
+import { getNotificationIcon, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useMe from "./hooks/useMe";
 import useNotifications from "./hooks/useNotifications";
@@ -160,6 +160,59 @@ function Notifications() {
     }
   }
 
+  async function markAllAsRead() {
+    if (unreadNotifications.length === 0) {
+      await showToast({ style: Toast.Style.Success, title: "No unread notifications" });
+      return;
+    }
+
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Marking ${unreadNotifications.length} notification${unreadNotifications.length === 1 ? "" : "s"} as read`,
+      });
+
+      const readAt = new Date();
+
+      await mutateNotifications(
+        Promise.all(unreadNotifications.map((notification) => updateNotification({ id: notification.id, readAt }))),
+        {
+          optimisticUpdate(data) {
+            if (!data) {
+              return data;
+            }
+            return {
+              ...data,
+              notifications: data?.notifications?.map((x) => (x.readAt ? x : { ...x, readAt })),
+            };
+          },
+          rollbackOnError(data) {
+            if (!data) {
+              return data;
+            }
+            return {
+              ...data,
+              notifications: data?.notifications?.map((x) => {
+                const original = unreadNotifications.find((n) => n.id === x.id);
+                return original ? { ...x, readAt: original.readAt } : x;
+              }),
+            };
+          },
+          shouldRevalidateAfter: true,
+        },
+      );
+
+      await showToast({ style: Toast.Style.Success, title: "Marked all as read" });
+      await launchCommand({ name: "unread-notifications", type: LaunchType.Background });
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to mark all as read",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   return (
     <List isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe}>
       <List.EmptyView title="Inbox" description="You don't have any notifications." />
@@ -188,9 +241,20 @@ function Notifications() {
 
               const url = getNotificationURL(notification);
 
+              // Use Linear API's subtitle and title for consistent display
+              // Truncate to ensure accessories (date, icon) are never squeezed
+              const truncate = (text: string, maxLength: number) => {
+                const ellipsis = text.length > maxLength ? "…" : "";
+                return text.substring(0, maxLength).trim() + ellipsis;
+              };
+
+              const notificationTitle = truncate(notification.title, 60);
+              const notificationSubtitle = truncate(notification.subtitle, 80);
+
               return (
                 <List.Item
-                  title={`${getNotificationTitle(notification)} by ${displayName}`}
+                  title={notificationTitle}
+                  subtitle={notificationSubtitle}
                   key={notification.id}
                   keywords={keywords}
                   icon={
@@ -200,14 +264,10 @@ function Notifications() {
                         ? getBotIcon(notification.botActor)
                         : "linear-app-icon.png"
                   }
-                  {...(notification.issue
-                    ? { subtitle: `${notification.issue?.identifier} ${notification.issue?.title}` }
-                    : {})}
-                  {...(notification.project ? { subtitle: `${notification.project.name}` } : {})}
                   accessories={[
                     {
                       date: createdAt,
-                      tooltip: `Created: ${format(createdAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
+                      tooltip: `${format(createdAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
                     },
                     {
                       icon: getNotificationIcon(notification),
@@ -216,10 +276,28 @@ function Notifications() {
                   actions={
                     <ActionPanel>
                       {notification.readAt ? (
-                        <Action title="Mark as Unread" icon={Icon.Dot} onAction={() => markAsUnread(notification)} />
+                        <Action
+                          title="Mark as Unread"
+                          icon={Icon.Dot}
+                          onAction={() => markAsUnread(notification)}
+                          shortcut={{ modifiers: ["cmd"], key: "u" }}
+                        />
                       ) : (
-                        <Action title="Mark as Read" icon={Icon.Checkmark} onAction={() => markAsRead(notification)} />
+                        <Action
+                          title="Mark as Read"
+                          icon={Icon.Checkmark}
+                          onAction={() => markAsRead(notification)}
+                          shortcut={{ modifiers: ["cmd"], key: "u" }}
+                        />
                       )}
+                      {unreadNotifications.length > 0 ? (
+                        <Action
+                          title="Mark All as Read"
+                          icon={Icon.CheckCircle}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                          onAction={markAllAsRead}
+                        />
+                      ) : null}
                       {url ? <OpenInLinear url={url} /> : null}
                       <ActionPanel.Section>
                         {notification.issue ? (

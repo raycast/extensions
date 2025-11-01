@@ -1,11 +1,34 @@
 import { memo } from "react";
-
 import { List } from "@raycast/api";
-
+import type { Character, CharacterSection } from "@/types";
+import { useListContext } from "@/context/ListContext";
 import { CharacterActionPanel } from "@/components/CharacterActionPanel";
 import DataSetSelector from "@/components/DataSetSelector";
-import { useListContext } from "@/context/ListContext";
-import { getFilteredSubtitle, getFilteredValue } from "@/utils/string";
+
+const upperCaseFirst = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
+/**
+ * Raycast is breaking on certain character sets in List Mode, so we filter the value and subtitle
+ */
+const getFilteredValue = (item: Character, section: CharacterSection): string => {
+  if (section.sectionTitle === "Ancient Symbols") {
+    return "?";
+  }
+  return item.v;
+};
+
+/**
+ * Raycast is breaking on certain character sets in List Mode, so we filter the subtitle
+ */
+const getFilteredSubtitle = (item: Character, section: CharacterSection): string => {
+  const subTitle = upperCaseFirst(item.n);
+  if (section.sectionTitle === "Ancient Symbols") {
+    return `${subTitle} (see in Grid Mode)`;
+  }
+  return subTitle;
+};
 
 export const ItemList = memo(() => {
   const { list, onSearchTextChange, loading } = useListContext();

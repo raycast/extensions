@@ -10,6 +10,7 @@ export const BROWSERS_BUNDLE_ID = {
   chromeBeta: "com.google.chrome.beta",
   chromeDev: "com.google.chrome.dev",
   dia: "company.thebrowser.dia",
+  chatGPTAtlas: "com.openai.atlas",
   firefox: "org.mozilla.firefox",
   firefoxDev: "org.mozilla.firefoxdeveloperedition",
   ghostBrowser: "com.ghostbrowser.gb1",

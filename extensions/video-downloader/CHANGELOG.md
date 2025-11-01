@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Fix: Update Button Text to "Open in Explorer" on Windows] - 2025-10-20
+
+- The text on the "Open in Finder" button will now display "Open in Explorer" on Windows.
+
 ## [Fix: Instagram Same Title Issue] - 2025-10-03
 
 - Resolved a bug where videos from the same Instagram user overwrote each other due to identical filenames. Filenames now include both username and video ID for uniqueness.

@@ -83,7 +83,17 @@
       "title": "Search Projects",
       "subtitle": "GitLab",
       "description": "Search GitLab Projects",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "active",
+          "description": "Limit by projects that are not archived and not marked for deletion",
+          "type": "checkbox",
+          "required": false,
+          "label": "Search active projects only",
+          "default": false
+        }
+      ]
     },
     {
       "name": "project_starred",
@@ -414,7 +424,8 @@
     "constantins2001",
     "pernielsentikaer",
     "tane_van_wifferen",
-    "1weiho"
+    "1weiho",
+    "pnowy"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

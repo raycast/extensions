@@ -1,4 +1,3 @@
-/* eslint-disable @raycast/prefer-title-case */
 import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 
@@ -7,7 +6,7 @@ import { showFailureToast } from "@raycast/utils";
 
 import type { NameAndScope } from "@/types";
 
-import { useVersions } from "@/hooks/useJSRAPI";
+import { useVersions } from "@/hooks/jsrApi";
 
 export const VersionList = (props: NameAndScope) => {
   const { error, data, isLoading } = useVersions(props);

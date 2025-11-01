@@ -14,7 +14,25 @@
       "name": "markdown-codeblock",
       "title": "Markdown Codeblock",
       "description": "Wrap the clipboard text in a markdown codeblock and paste it into the active application",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "label": "Newline before codeblock",
+          "description": "Adds a newline before the codeblock",
+          "default": true,
+          "type": "checkbox",
+          "name": "isNewLinePrefix",
+          "required": false
+        },
+        {
+          "label": "Newline after codeblock",
+          "description": "Adds a newline after the codeblock",
+          "default": false,
+          "type": "checkbox",
+          "name": "isNewLineSuffix",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -1,7 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
 
 export default async function () {
-  runAppleScript(
+  return runAppleScript(
     `
 set osver to system version of (system info)
 if osver ≥ 13.0 then

@@ -1,5 +1,10 @@
 # base64 Changelog
 
+## [Maintenance] - 2025-10-13
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Improvements and Fixes] - 2024-08-06
 
 - Encode and Decode: Used toasts instead of HUDs to color-code messages/prompts.

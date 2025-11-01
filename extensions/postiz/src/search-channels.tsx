@@ -1,10 +1,10 @@
 import { Color, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { buildPostizUrl, POSTIZ_HEADERS } from "./postiz";
-import { Integration } from "./types";
+import { buildPostizApiUrl, POSTIZ_HEADERS } from "./postiz";
+import { Identifier, Integration } from "./types";
 
 export default function SearchChannels() {
-  const { isLoading, data: channels } = useFetch<Integration[], Integration[]>(buildPostizUrl("integrations"), {
+  const { isLoading, data: channels } = useFetch<Integration[], Integration[]>(buildPostizApiUrl("integrations"), {
     headers: POSTIZ_HEADERS,
     initialData: [],
   });
@@ -18,7 +18,10 @@ export default function SearchChannels() {
           title={channel.name}
           subtitle={channel.profile}
           accessories={[
-            { icon: `platforms/${channel.identifier}.png`, tooltip: channel.identifier },
+            {
+              icon: `platforms/${channel.identifier}.png`,
+              tooltip: Object.entries(Identifier).find(([, identifier]) => identifier === channel.identifier)?.[0],
+            },
             {
               tag: channel.disabled
                 ? { value: "DISABLED", color: Color.Red }

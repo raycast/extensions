@@ -28,7 +28,8 @@ export const DEFAULT_WORKSPACE_DB_VERSION = 28;
 
 export async function queryDb(dbPath: string, query: string) {
   try {
-    const result = await execFilePromise("sqlite3", [dbPath, query]);
+    // Apply `--init /dev/null` to ignore user sqlite configuration
+    const result = await execFilePromise("sqlite3", ["--init", "/dev/null", dbPath, query]);
 
     if (result.stderr) {
       console.error(`Error querying Zed workspace DB: ${result.stderr}`);

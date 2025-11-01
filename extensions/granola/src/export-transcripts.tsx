@@ -1,9 +1,11 @@
 import { ActionPanel, Action, List, showToast, Toast, Detail, Icon, Color, Clipboard } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { exec } from "child_process";
 import { useGranolaData } from "./utils/useGranolaData";
 import { getTranscript } from "./utils/fetchData";
 import { getDocumentToFolderMapping } from "./utils/folderHelpers";
+import { useFolders } from "./utils/useFolders";
+import { mapIconToHeroicon, getDefaultIconUrl, mapColorToHex } from "./utils/iconMapper";
 import {
   sanitizeFileName,
   createExportFilename,
@@ -21,6 +23,7 @@ interface BulkTranscriptResult extends ExportResult {
   transcriptPreview: string; // Only a tiny preview for display
   transcriptLength?: number; // Just the character count
   id: string; // Alias for noteId to satisfy ExportableItem interface
+  folderNames?: string[];
 }
 
 interface BulkNotionResult {
@@ -55,11 +58,88 @@ export default function Command() {
 
 function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untitledNoteTitle: string }) {
   const [selectedNoteIds, setSelectedNoteIds] = useState<Set<string>>(new Set());
-
   const [bulkResults, setBulkResults] = useState<BulkTranscriptResult[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [notionResults, setNotionResults] = useState<BulkNotionResult[]>([]);
   const [showNotionResults, setShowNotionResults] = useState(false);
+
+  const { folders, isLoading: foldersLoading } = useFolders();
+  const [selectedFolder, setSelectedFolder] = useState<string>("all");
+
+  const docToFolderNames = useMemo(() => {
+    const mapping: Record<string, string[]> = {};
+    folders.forEach((folder) => {
+      folder.document_ids.forEach((docId) => {
+        if (!mapping[docId]) {
+          mapping[docId] = [];
+        }
+        mapping[docId].push(folder.title);
+      });
+    });
+    return mapping;
+  }, [folders]);
+
+  const folderIdToDocIds = useMemo(() => {
+    const record: Record<string, Set<string>> = {};
+    folders.forEach((folder) => {
+      record[folder.id] = new Set(folder.document_ids);
+    });
+    return record;
+  }, [folders]);
+
+  const noteIdsSet = useMemo(() => new Set(notes.map((note) => note.id)), [notes]);
+
+  const folderNoteCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    folders.forEach((folder) => {
+      const relevantIds = folder.document_ids.filter((id) => noteIdsSet.has(id));
+      counts[folder.id] = relevantIds.length;
+    });
+    return counts;
+  }, [folders, noteIdsSet]);
+
+  const notesNotInFolders = useMemo(() => {
+    return notes.filter((note) => !docToFolderNames[note.id]?.length);
+  }, [notes, docToFolderNames]);
+
+  const filteredNotes = useMemo(() => {
+    if (selectedFolder === "all") {
+      return notes;
+    }
+
+    if (selectedFolder === "orphans") {
+      return notesNotInFolders;
+    }
+
+    const docIds = folderIdToDocIds[selectedFolder];
+    if (!docIds) {
+      return [];
+    }
+    return notes.filter((note) => docIds.has(note.id));
+  }, [notes, selectedFolder, folderIdToDocIds, notesNotInFolders]);
+
+  const filteredNoteIds = useMemo(() => filteredNotes.map((note) => note.id), [filteredNotes]);
+
+  const currentFolderLabel = useMemo(() => {
+    if (selectedFolder === "all") {
+      return null;
+    }
+    if (selectedFolder === "orphans") {
+      return "Notes Not in Folders";
+    }
+    const match = folders.find((folder) => folder.id === selectedFolder);
+    return match?.title || null;
+  }, [selectedFolder, folders]);
+
+  const filterLabel = useMemo(() => {
+    if (selectedFolder === "all") {
+      return "All Notes";
+    }
+    if (selectedFolder === "orphans") {
+      return "Notes Not in Folders";
+    }
+    return currentFolderLabel || "Selected Folder";
+  }, [selectedFolder, currentFolderLabel]);
 
   const toggleNoteSelection = (noteId: string) => {
     const newSelection = new Set(selectedNoteIds);
@@ -72,15 +152,17 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
   };
 
   const selectAllNotes = () => {
-    setSelectedNoteIds(new Set(notes.map((note) => note.id)));
+    setSelectedNoteIds(new Set(filteredNoteIds));
   };
 
   const clearSelection = () => {
     setSelectedNoteIds(new Set());
   };
 
-  const saveSelectedToNotion = async () => {
-    if (selectedNoteIds.size === 0) {
+  const saveSelectedToNotion = async (noteIdsParam?: string[]) => {
+    const noteIds = noteIdsParam ?? Array.from(selectedNoteIds);
+
+    if (noteIds.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No notes selected",
@@ -89,7 +171,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       return;
     }
 
-    if (selectedNoteIds.size > 500) {
+    if (noteIds.length > 500) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Too many notes",
@@ -98,7 +180,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       return;
     }
 
-    const selectedNoteIdsArray = Array.from(selectedNoteIds);
+    const noteIdsSetForLookup = new Set(noteIds);
 
     // Conservative batch sizing for Notion API stability
     const getNotionBatchSize = (totalNotes: number): number => {
@@ -108,8 +190,8 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       return 7; // Large: 7 per batch (conservative for API stability)
     };
 
-    const batchSize = getNotionBatchSize(selectedNoteIdsArray.length);
-    const estimatedBatches = Math.ceil(selectedNoteIdsArray.length / batchSize);
+    const batchSize = getNotionBatchSize(noteIds.length);
+    const estimatedBatches = Math.ceil(noteIds.length / batchSize);
     const estimatedTimeSeconds = estimatedBatches * 2.5; // ~2.5s per batch (800ms delay + API time + safety margin)
     const timeDisplay =
       estimatedTimeSeconds > 60
@@ -119,10 +201,10 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving to Notion",
-      message: `${selectedNoteIdsArray.length} notes in batches of ${batchSize} (${timeDisplay})`,
+      message: `${noteIds.length} notes in batches of ${batchSize} (${timeDisplay})`,
     });
 
-    const selectedNotes = notes.filter((note) => selectedNoteIds.has(note.id));
+    const selectedNotes = notes.filter((note) => noteIdsSetForLookup.has(note.id));
 
     // Initialize results with pending status for interactive UI
     const initialResults: BulkNotionResult[] = selectedNotes.map((note) => ({
@@ -244,8 +326,10 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
     }, 100);
   };
 
-  const retrieveSelectedTranscripts = async () => {
-    if (selectedNoteIds.size === 0) {
+  const retrieveSelectedTranscripts = async (noteIdsParam?: string[]) => {
+    const noteIds = noteIdsParam ?? Array.from(selectedNoteIds);
+
+    if (noteIds.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No notes selected",
@@ -254,7 +338,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       return;
     }
 
-    if (selectedNoteIds.size > 500) {
+    if (noteIds.length > 500) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Batch too large",
@@ -263,7 +347,8 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       return;
     }
 
-    const selectedNotes = notes.filter((note) => selectedNoteIds.has(note.id));
+    const noteIdSetForLookup = new Set(noteIds);
+    const selectedNotes = notes.filter((note) => noteIdSetForLookup.has(note.id));
 
     // Initialize results with pending status
     const initialResults: BulkTranscriptResult[] = selectedNotes.map((note) => ({
@@ -272,6 +357,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
       title: note.title || untitledNoteTitle,
       transcriptPreview: "",
       status: "pending",
+      folderNames: docToFolderNames[note.id] || [],
     }));
 
     setBulkResults(initialResults);
@@ -280,7 +366,7 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
     await showToast({
       style: Toast.Style.Animated,
       title: "Retrieving transcripts",
-      message: `Processing ${selectedNoteIds.size} notes...`,
+      message: `Processing ${noteIds.length} notes...`,
     });
 
     const BATCH_SIZE = getDynamicBatchSize(selectedNotes.length);
@@ -376,9 +462,56 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
     }, 100);
   };
 
+  const retrieveFilteredTranscripts = async () => {
+    if (filteredNoteIds.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No notes in current filter",
+        message: `Try selecting a different folder before retrieving transcripts.`,
+      });
+      return;
+    }
+
+    const targetIds = filteredNoteIds;
+    setSelectedNoteIds(new Set(targetIds));
+    await retrieveSelectedTranscripts(targetIds);
+  };
+
+  const saveFilteredToNotion = async () => {
+    if (filteredNoteIds.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No notes in current filter",
+        message: `Try selecting a different folder before saving to Notion.`,
+      });
+      return;
+    }
+
+    const targetIds = filteredNoteIds;
+    setSelectedNoteIds(new Set(targetIds));
+    await saveSelectedToNotion(targetIds);
+  };
+
+  const navigationTitle =
+    selectedFolder === "all"
+      ? `Export Transcripts (${selectedNoteIds.size} selected)`
+      : `Export Transcripts (${selectedNoteIds.size} selected) – ${filterLabel}`;
+
+  const searchPlaceholder =
+    selectedFolder === "all"
+      ? "Search notes to select for export..."
+      : selectedFolder === "orphans"
+        ? "Search notes not in folders..."
+        : `Search notes in ${filterLabel}...`;
+
   if (showResults) {
     return (
-      <BulkTranscriptResults results={bulkResults} onBackToSelection={() => setShowResults(false)} notes={notes} />
+      <BulkTranscriptResults
+        results={bulkResults}
+        onBackToSelection={() => setShowResults(false)}
+        notes={notes}
+        docToFolderNames={docToFolderNames}
+      />
     );
   }
 
@@ -388,94 +521,187 @@ function BulkTranscriptsList({ notes, untitledNoteTitle }: { notes: Doc[]; untit
 
   return (
     <List
-      navigationTitle={`Export Transcripts (${selectedNoteIds.size} selected)`}
-      searchBarPlaceholder="Search notes to select for export..."
+      navigationTitle={navigationTitle}
+      searchBarPlaceholder={searchPlaceholder}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={setSelectedFolder}>
+          <List.Dropdown.Section title="All Notes">
+            <List.Dropdown.Item title="All Folders" value="all" icon={Icon.Folder} />
+            {notesNotInFolders.length > 0 && (
+              <List.Dropdown.Item
+                title={`Notes Not in Folders (${notesNotInFolders.length})`}
+                value="orphans"
+                icon={{ source: Icon.Document, tintColor: Color.SecondaryText }}
+              />
+            )}
+          </List.Dropdown.Section>
+
+          {!foldersLoading && folders.length > 0 && (
+            <List.Dropdown.Section title="Folders">
+              {folders
+                .slice()
+                .sort((a, b) => a.title.localeCompare(b.title))
+                .map((folder) => (
+                  <List.Dropdown.Item
+                    key={folder.id}
+                    title={`${folder.title} (${folderNoteCounts[folder.id] || 0})`}
+                    value={folder.id}
+                    icon={{
+                      source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                      tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
+                    }}
+                  />
+                ))}
+            </List.Dropdown.Section>
+          )}
+        </List.Dropdown>
+      }
       actions={
-        selectedNoteIds.size > 0 ? (
-          <ActionPanel>
-            <Action
-              title={`Retrieve ${selectedNoteIds.size} Transcripts`}
-              icon={Icon.Download}
-              onAction={retrieveSelectedTranscripts}
-            />
-            <Action
-              title={`Save ${selectedNoteIds.size} to Notion`}
-              icon={Icon.Document}
-              onAction={saveSelectedToNotion}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-            />
+        <ActionPanel>
+          {selectedNoteIds.size > 0 && (
+            <>
+              <Action
+                title={`Retrieve ${selectedNoteIds.size} Transcripts`}
+                icon={Icon.Download}
+                onAction={() => retrieveSelectedTranscripts()}
+              />
+              <Action
+                title={`Save ${selectedNoteIds.size} to Notion`}
+                icon={Icon.Document}
+                onAction={() => saveSelectedToNotion()}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
+            </>
+          )}
+          <Action
+            title={
+              selectedFolder === "all"
+                ? `Retrieve ${filteredNoteIds.length} Transcripts`
+                : `Retrieve ${filteredNoteIds.length} Transcripts in ${filterLabel}`
+            }
+            icon={Icon.Download}
+            onAction={retrieveFilteredTranscripts}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          />
+          <Action
+            title={
+              selectedFolder === "all"
+                ? `Save ${filteredNoteIds.length} Notes to Notion`
+                : `Save ${filteredNoteIds.length} from ${filterLabel} to Notion`
+            }
+            icon={Icon.Document}
+            onAction={saveFilteredToNotion}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          />
+          {selectedNoteIds.size > 0 && (
             <Action
               title="Clear Selection"
               icon={Icon.XMarkCircle}
               onAction={clearSelection}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
-            <Action
-              title="Select All"
-              icon={Icon.CheckCircle}
-              onAction={selectAllNotes}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-            />
-          </ActionPanel>
-        ) : (
-          <ActionPanel>
-            <Action
-              title="Select All"
-              icon={Icon.CheckCircle}
-              onAction={selectAllNotes}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-            />
-          </ActionPanel>
-        )
+          )}
+          <Action
+            title={
+              selectedFolder === "all"
+                ? `Select All Notes (${filteredNoteIds.length})`
+                : `Select All in ${filterLabel} (${filteredNoteIds.length})`
+            }
+            icon={Icon.CheckCircle}
+            onAction={selectAllNotes}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          />
+        </ActionPanel>
       }
     >
-      {notes.map((note) => (
-        <List.Item
-          key={note.id}
-          title={note.title ?? untitledNoteTitle}
-          icon={{
-            source: selectedNoteIds.has(note.id) ? Icon.CheckCircle : Icon.Circle,
-            tintColor: selectedNoteIds.has(note.id) ? Color.Green : Color.SecondaryText,
-          }}
-          accessories={[{ date: new Date(note.created_at) }, { text: note.creation_source || "Unknown source" }]}
-          actions={
-            <ActionPanel>
-              <Action
-                title={selectedNoteIds.has(note.id) ? "Deselect Note" : "Select Note"}
-                icon={selectedNoteIds.has(note.id) ? Icon.XMarkCircle : Icon.CheckCircle}
-                onAction={() => toggleNoteSelection(note.id)}
-              />
-              {selectedNoteIds.size > 0 && (
-                <>
+      {filteredNotes.map((note) => {
+        const folderNames = docToFolderNames[note.id] || [];
+        const accessories = [];
+
+        if (folderNames.length > 0) {
+          accessories.push({
+            text: folderNames.join(", "),
+            icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+          });
+        }
+
+        accessories.push({ date: new Date(note.created_at) });
+        accessories.push({ text: note.creation_source || "Unknown source" });
+
+        return (
+          <List.Item
+            key={note.id}
+            title={note.title ?? untitledNoteTitle}
+            icon={{
+              source: selectedNoteIds.has(note.id) ? Icon.CheckCircle : Icon.Circle,
+              tintColor: selectedNoteIds.has(note.id) ? Color.Green : Color.SecondaryText,
+            }}
+            accessories={accessories}
+            actions={
+              <ActionPanel>
+                <Action
+                  title={selectedNoteIds.has(note.id) ? "Deselect Note" : "Select Note"}
+                  icon={selectedNoteIds.has(note.id) ? Icon.XMarkCircle : Icon.CheckCircle}
+                  onAction={() => toggleNoteSelection(note.id)}
+                />
+                {selectedNoteIds.size > 0 && (
+                  <>
+                    <Action
+                      title={`Retrieve ${selectedNoteIds.size} Transcripts`}
+                      icon={Icon.Download}
+                      onAction={() => retrieveSelectedTranscripts()}
+                    />
+                    <Action
+                      title={`Save ${selectedNoteIds.size} to Notion`}
+                      icon={Icon.Document}
+                      onAction={() => saveSelectedToNotion()}
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    />
+                  </>
+                )}
+                <Action
+                  title={
+                    selectedFolder === "all"
+                      ? `Retrieve ${filteredNoteIds.length} Transcripts`
+                      : `Retrieve ${filteredNoteIds.length} Transcripts in ${filterLabel}`
+                  }
+                  icon={Icon.Download}
+                  onAction={retrieveFilteredTranscripts}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                />
+                <Action
+                  title={
+                    selectedFolder === "all"
+                      ? `Save ${filteredNoteIds.length} Notes to Notion`
+                      : `Save ${filteredNoteIds.length} from ${filterLabel} to Notion`
+                  }
+                  icon={Icon.Document}
+                  onAction={saveFilteredToNotion}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                />
+                {selectedNoteIds.size > 0 && (
                   <Action
-                    title={`Retrieve ${selectedNoteIds.size} Transcripts`}
-                    icon={Icon.Download}
-                    onAction={retrieveSelectedTranscripts}
+                    title="Clear Selection"
+                    icon={Icon.XMarkCircle}
+                    onAction={clearSelection}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
                   />
-                  <Action
-                    title={`Save ${selectedNoteIds.size} to Notion`}
-                    icon={Icon.Document}
-                    onAction={saveSelectedToNotion}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  />
-                </>
-              )}
-              <Action
-                title="Clear Selection"
-                icon={Icon.XMarkCircle}
-                onAction={clearSelection}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-              />
-              <Action
-                title="Select All"
-                icon={Icon.CheckCircle}
-                onAction={selectAllNotes}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+                )}
+                <Action
+                  title={
+                    selectedFolder === "all"
+                      ? `Select All Notes (${filteredNoteIds.length})`
+                      : `Select All in ${filterLabel} (${filteredNoteIds.length})`
+                  }
+                  icon={Icon.CheckCircle}
+                  onAction={selectAllNotes}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
@@ -484,10 +710,12 @@ function BulkTranscriptResults({
   results,
   onBackToSelection,
   notes,
+  docToFolderNames,
 }: {
   results: BulkTranscriptResult[];
   onBackToSelection: () => void;
   notes: Doc[];
+  docToFolderNames: Record<string, string[]>;
 }) {
   const [selectedResult, setSelectedResult] = useState<BulkTranscriptResult | null>(null);
 
@@ -740,82 +968,128 @@ ${transcript}
 
       {successResults.length > 0 && (
         <List.Section title={`Successful (${successResults.length})`}>
-          {successResults.map((result) => (
-            <List.Item
-              key={result.noteId}
-              title={result.title}
-              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-              accessories={[{ text: `${result.transcriptLength || 0} characters` }]}
-              actions={
-                <ActionPanel>
-                  <Action title="View Transcript" icon={Icon.Eye} onAction={() => setSelectedResult(result)} />
-                  <Action
-                    title="Copy This Transcript"
-                    icon={Icon.CopyClipboard}
-                    onAction={async () => {
-                      // Show immediate feedback
-                      const toast = await showToast({
-                        style: Toast.Style.Animated,
-                        title: "Copying...",
-                      });
-                      try {
-                        // Fetch and copy in parallel with toast update
-                        const [transcript] = await Promise.all([
-                          getTranscript(result.noteId),
-                          new Promise((resolve) => setTimeout(resolve, 100)), // Min toast display time
-                        ]);
+          {successResults.map((result) => {
+            const note = notes.find((n) => n.id === result.noteId);
+            const folderNames =
+              (result.folderNames && result.folderNames.length > 0
+                ? result.folderNames
+                : docToFolderNames[result.noteId]) || [];
 
-                        await Clipboard.copy(transcript);
-                        toast.style = Toast.Style.Success;
-                        toast.title = "Copied!";
-                        toast.message = `${Math.round(transcript.length / 1000)}k characters`;
-                      } catch (error) {
-                        toast.style = Toast.Style.Failure;
-                        toast.title = "Copy failed";
-                        toast.message = String(error);
-                      }
-                    }}
-                  />
-                  <ActionPanel.Section>
-                    {successResults.length > 0 && (
-                      <>
-                        <Action
-                          title="Export All to Zip"
-                          icon={Icon.ArrowDown}
-                          onAction={exportTranscriptsToZip}
-                          shortcut={{ modifiers: ["cmd"], key: "e" }}
-                        />
-                        <Action
-                          title="Copy All Successful Transcripts"
-                          icon={Icon.CopyClipboard}
-                          onAction={generateCombinedTranscript}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        />
-                      </>
-                    )}
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
+            const accessories = [];
+
+            if (folderNames.length > 0) {
+              accessories.push({
+                text: folderNames.join(", "),
+                icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+              });
+            }
+
+            if (note) {
+              accessories.push({ date: new Date(note.created_at) });
+            }
+
+            accessories.push({ text: `${result.transcriptLength || 0} characters` });
+
+            return (
+              <List.Item
+                key={result.noteId}
+                title={result.title}
+                icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+                accessories={accessories}
+                actions={
+                  <ActionPanel>
+                    <Action title="View Transcript" icon={Icon.Eye} onAction={() => setSelectedResult(result)} />
+                    <Action
+                      title="Copy This Transcript"
+                      icon={Icon.CopyClipboard}
+                      onAction={async () => {
+                        // Show immediate feedback
+                        const toast = await showToast({
+                          style: Toast.Style.Animated,
+                          title: "Copying...",
+                        });
+                        try {
+                          // Fetch and copy in parallel with toast update
+                          const [transcript] = await Promise.all([
+                            getTranscript(result.noteId),
+                            new Promise((resolve) => setTimeout(resolve, 100)), // Min toast display time
+                          ]);
+
+                          await Clipboard.copy(transcript);
+                          toast.style = Toast.Style.Success;
+                          toast.title = "Copied!";
+                          toast.message = `${Math.round(transcript.length / 1000)}k characters`;
+                        } catch (error) {
+                          toast.style = Toast.Style.Failure;
+                          toast.title = "Copy failed";
+                          toast.message = String(error);
+                        }
+                      }}
+                    />
+                    <ActionPanel.Section>
+                      {successResults.length > 0 && (
+                        <>
+                          <Action
+                            title="Export All to Zip"
+                            icon={Icon.ArrowDown}
+                            onAction={exportTranscriptsToZip}
+                            shortcut={{ modifiers: ["cmd"], key: "e" }}
+                          />
+                          <Action
+                            title="Copy All Successful Transcripts"
+                            icon={Icon.CopyClipboard}
+                            onAction={generateCombinedTranscript}
+                            shortcut={{ modifiers: ["cmd"], key: "c" }}
+                          />
+                        </>
+                      )}
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
 
       {errorResults.length > 0 && (
         <List.Section title={`Failed (${errorResults.length})`}>
-          {errorResults.map((result) => (
-            <List.Item
-              key={result.noteId}
-              title={result.title}
-              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-              accessories={[{ text: "Failed" }]}
-              actions={
-                <ActionPanel>
-                  <Action title="View Error" icon={Icon.ExclamationMark} onAction={() => setSelectedResult(result)} />
-                </ActionPanel>
-              }
-            />
-          ))}
+          {errorResults.map((result) => {
+            const note = notes.find((n) => n.id === result.noteId);
+            const folderNames =
+              (result.folderNames && result.folderNames.length > 0
+                ? result.folderNames
+                : docToFolderNames[result.noteId]) || [];
+
+            const accessories = [];
+
+            if (folderNames.length > 0) {
+              accessories.push({
+                text: folderNames.join(", "),
+                icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+              });
+            }
+
+            if (note) {
+              accessories.push({ date: new Date(note.created_at) });
+            }
+
+            accessories.push({ text: "Failed" });
+
+            return (
+              <List.Item
+                key={result.noteId}
+                title={result.title}
+                icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                accessories={accessories}
+                actions={
+                  <ActionPanel>
+                    <Action title="View Error" icon={Icon.ExclamationMark} onAction={() => setSelectedResult(result)} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>

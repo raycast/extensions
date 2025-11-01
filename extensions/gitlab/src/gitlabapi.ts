@@ -690,13 +690,16 @@ export class GitLab {
     });
   }
 
-  async getProjects(args = { searchText: "", searchIn: "", membership: "true" }): Promise<Project[]> {
+  async getProjects(args = { searchText: "", searchIn: "", membership: "true", active: false }): Promise<Project[]> {
     const params: { [key: string]: string } = {};
     if (args.searchText) {
       params.search = args.searchText;
       params.in = args.searchIn || "title";
     }
     params.membership = args.membership;
+    if (args.active) {
+      params.active = "true";
+    }
     const issueItems: Project[] = await this.fetch("projects", params).then((projects) => {
       return projects.map((project: any) => dataToProject(project));
     });

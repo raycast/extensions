@@ -16,6 +16,7 @@ import {
   SuspendService,
   RestartService,
   RedeployService,
+  ProjectUsage,
 } from "../type";
 import {
   getTemplateQuery,
@@ -26,6 +27,7 @@ import {
   getGroupsQuery,
   getLast5DeploymentsQuery,
   getLatestRunningDeploymentQuery,
+  getProjectUsageQuery,
   deleteProjectQuery,
   deleteServiceQuery,
   suspendServiceQuery,
@@ -204,6 +206,22 @@ export async function getLatestRunningDeployment(serviceID: string, environmentI
 
   const json = (await res.json()) as Deployments;
   return json.data.deployments.edges[0];
+}
+
+export async function getProjectUsage(projectID: string) {
+  const query = getProjectUsageQuery;
+  query.variables.projectID = projectID;
+  const res = await fetch(api, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${zeaburToken}`,
+    },
+    body: JSON.stringify(query),
+  });
+
+  const json = (await res.json()) as ProjectUsage;
+  return json.data.projectUsage;
 }
 
 export async function deleteProject(projectID: string) {

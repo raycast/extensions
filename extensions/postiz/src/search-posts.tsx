@@ -1,9 +1,31 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
-import { useMemo } from "react";
-import { format, getISOWeek, subDays } from "date-fns";
-import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
-import { buildPostizUrl, POSTIZ_HEADERS, STATE_COLORS } from "./postiz";
-import { Identifier, Integration, Post } from "./types";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useMemo, useState } from "react";
+import { compareDesc, endOfDay, format, getISOWeek, startOfMonth, subDays } from "date-fns";
+import { useFetch } from "@raycast/utils";
+import {
+  buildPostizApiUrl,
+  buildPostizPlatformUrl,
+  parsePostizResponse,
+  POSTIZ_HEADERS,
+  STATE_COLORS,
+  STATE_ICONS,
+} from "./postiz";
+import { Identifier, Post } from "./types";
+import CreatePost from "./create-post";
+
+const { postiz_version } = getPreferenceValues<Preferences>();
 
 const generateMarkdown = (post: Post) => {
   switch (post.integration.providerIdentifier) {
@@ -19,26 +41,53 @@ const generateMarkdown = (post: Post) => {
       return post.content;
   }
 };
+const getProviderIdentifierIcon = (providerIdentifier: string) => `platforms/${providerIdentifier}.png`;
 
 export default function SearchPosts() {
+  type Display = "day" | "week" | "month";
+  const [display, setDisplay] = useState<Display>("week");
   const date = useMemo(() => new Date(), []);
+  const startDate = useMemo(() => {
+    switch (display) {
+      case "day":
+        return date;
+      case "week":
+        return subDays(date, 6);
+      case "month":
+        return startOfMonth(date);
+    }
+  }, [date, display]);
+
   const {
     isLoading,
     data: posts,
     revalidate,
     mutate,
   } = useFetch(
-    buildPostizUrl("posts", {
-      display: "week",
-      day: date.getDay().toString(),
-      week: getISOWeek(date).toString(),
-      month: (date.getMonth() + 1).toString(),
-      year: date.getFullYear().toString(),
-    }),
+    buildPostizApiUrl(
+      "posts",
+      postiz_version === "1"
+        ? {
+            display: "week",
+            day: date.getDay().toString(),
+            week: getISOWeek(date).toString(),
+            month: (date.getMonth() + 1).toString(),
+            year: date.getFullYear().toString(),
+          }
+        : {
+            startDate: startDate.toISOString(),
+            endDate: endOfDay(date).toISOString(),
+          },
+    ),
     {
       headers: POSTIZ_HEADERS,
-      mapResult(result: { posts: Post[] }) {
-        return { data: result.posts };
+      parseResponse: parsePostizResponse,
+      mapResult(result) {
+        return {
+          data: (result as { posts: Post[] }).posts.sort((a, b) =>
+            compareDesc(new Date(a.publishDate), new Date(b.publishDate)),
+          ),
+        };
       },
       initialData: [],
     },
@@ -58,14 +107,13 @@ export default function SearchPosts() {
       },
     };
     if (!(await confirmAlert(options))) return;
+    const toast = await showToast(Toast.Style.Animated, "Deleting", postId);
     try {
       await mutate(
-        fetch(buildPostizUrl(`posts/${postId}`), {
+        fetch(buildPostizApiUrl(`posts/${postId}`), {
           method: "DELETE",
           headers: POSTIZ_HEADERS,
-        }).then((res) => {
-          if (!res.ok) throw new Error("Failed");
-        }),
+        }).then(parsePostizResponse),
         {
           optimisticUpdate(data) {
             return data.filter((p) => p.id !== postId);
@@ -73,22 +121,44 @@ export default function SearchPosts() {
           shouldRevalidateAfter: false,
         },
       );
+      toast.style = Toast.Style.Success;
+      toast.title = "Deleted";
     } catch (error) {
-      await showFailureToast(error);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = `${error}`;
     }
   };
-
+  const subtitle = `${format(postiz_version === "1" ? subDays(date, 6) : startDate, "MM/dd/yyyy")} - ${format(date, "MM/dd/yyyy")}`;
   return (
-    <List isLoading={isLoading} isShowingDetail>
-      <List.Section
-        title="Today"
-        subtitle={`${format(subDays(date, 6), "MM/dd/yyyy")} - ${format(date, "MM/dd/yyyy")}`}
-      >
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarAccessory={
+        postiz_version === "1" ? undefined : (
+          <List.Dropdown tooltip="Display" onChange={(d) => setDisplay(d as Display)} defaultValue="week" storeValue>
+            <List.Dropdown.Item icon={Icon.Calendar} title="Day" value="day" />
+            <List.Dropdown.Item icon={Icon.Calendar} title="Week" value="week" />
+            <List.Dropdown.Item icon={Icon.Calendar} title="Month" value="month" />
+          </List.Dropdown>
+        )
+      }
+    >
+      <List.EmptyView title="No Results" description={subtitle} />
+      <List.Section title="Today" subtitle={subtitle}>
         {posts.map((post) => (
           <List.Item
             key={post.id}
             icon={post.integration.picture}
-            title={post.id}
+            title={{ value: `${post.id.slice(0, 6)}...`, tooltip: post.id }}
+            accessories={[
+              {
+                icon: getProviderIdentifierIcon(post.integration.providerIdentifier),
+                tooltip: post.integration.providerIdentifier,
+              },
+              { icon: { source: STATE_ICONS[post.state], tintColor: STATE_COLORS[post.state] }, tooltip: post.state },
+              { date: new Date(post.publishDate) },
+            ]}
             detail={
               <List.Item.Detail
                 markdown={generateMarkdown(post)}
@@ -96,23 +166,43 @@ export default function SearchPosts() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label
                       title="Provider"
-                      icon={`platforms/${post.integration.providerIdentifier}.png`}
+                      icon={getProviderIdentifierIcon(post.integration.providerIdentifier)}
                     />
                     <List.Item.Detail.Metadata.TagList title="State">
                       <List.Item.Detail.Metadata.TagList.Item text={post.state} color={STATE_COLORS[post.state]} />
                     </List.Item.Detail.Metadata.TagList>
+                    <List.Item.Detail.Metadata.Label title="Publish Date" text={post.publishDate} />
                   </List.Item.Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Plus} title="Create Post" target={<CreatePost />} onPop={revalidate} />
+                {post.releaseURL && (
+                  <Action.OpenInBrowser
+                    icon={getProviderIdentifierIcon(post.integration.providerIdentifier)}
+                    title="View Post"
+                    url={post.releaseURL}
+                  />
+                )}
+                <Action.OpenInBrowser
+                  icon={Icon.Eye}
+                  title="Preview Post"
+                  url={buildPostizPlatformUrl(`p/${post.id}`)}
+                />
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Create Post"
+                  target={<CreatePost />}
+                  onPop={revalidate}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                />
                 <Action
                   icon={Icon.Trash}
                   title="Delete Post"
                   onAction={() => confirmAndDelete(post.id)}
                   style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel>
             }
@@ -120,85 +210,5 @@ export default function SearchPosts() {
         ))}
       </List.Section>
     </List>
-  );
-}
-
-function CreatePost() {
-  const { pop } = useNavigation();
-  const { isLoading, data: channels } = useFetch<Integration[], Integration[]>(buildPostizUrl("integrations"), {
-    headers: POSTIZ_HEADERS,
-    initialData: [],
-  });
-  type FormValues = {
-    type: string;
-    integrationId: string;
-    content: string;
-  };
-  const { handleSubmit, itemProps } = useForm<FormValues>({
-    async onSubmit(values) {
-      try {
-        const body = {
-          type: values.type,
-          date: new Date().toISOString(),
-          tags: [],
-          shortLink: false,
-          posts: [
-            {
-              integration: {
-                id: values.integrationId,
-              },
-              value: [
-                {
-                  content: values.content,
-                },
-              ],
-            },
-          ],
-        };
-        const response = await fetch(buildPostizUrl("posts"), {
-          method: "POST",
-          headers: POSTIZ_HEADERS,
-          body: JSON.stringify(body),
-        });
-        const result = await response.json();
-        if (!response.ok) {
-          const err = result as { error?: string; message: string[] | string };
-          throw new Error(Array.isArray(err.message) ? err.message[0] : err.message);
-        }
-        pop();
-      } catch (error) {
-        await showFailureToast(error);
-      }
-    },
-    validation: {
-      type: FormValidation.Required,
-      integrationId: FormValidation.Required,
-      content: FormValidation.Required,
-    },
-  });
-  return (
-    <Form
-      isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Create" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Dropdown title="Type" {...itemProps.type}>
-        <Form.Dropdown.Item title="Draft" value="draft" />
-      </Form.Dropdown>
-      <Form.Dropdown title="Channel" {...itemProps.integrationId}>
-        {channels.map((channel) => (
-          <Form.Dropdown.Item
-            key={channel.id}
-            icon={channel.picture}
-            title={`${channel.profile} (${channel.identifier})`}
-            value={channel.id}
-          />
-        ))}
-      </Form.Dropdown>
-      <Form.TextArea title="Content" {...itemProps.content} />
-    </Form>
   );
 }

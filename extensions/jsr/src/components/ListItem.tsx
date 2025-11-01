@@ -1,10 +1,10 @@
-/* eslint-disable @raycast/prefer-title-case */
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import type { ReactNode } from "react";
+
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 
 import type { SearchResultDocument } from "@/types";
 
 import { compatIcons } from "@/lib/compat";
-import preferences from "@/lib/preferences";
 
 import CopyActions from "@/components/CopyActions";
 import ItemDetails from "@/components/ItemDetails";
@@ -14,10 +14,11 @@ type ListItemProps = {
   item: SearchResultDocument;
   toggleDetails: () => void;
   isShowingDetails: boolean;
-  extraActions?: JSX.Element;
+  extraActions?: ReactNode;
 };
 
 const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions }: ListItemProps) => {
+  const { openWebsiteByDefault } = getPreferenceValues<Preferences>();
   const progress = item.score ?? 0;
   const iconColor = progress >= 80 ? Color.Green : progress >= 50 ? Color.Yellow : Color.Red;
   const icons = compatIcons(item);
@@ -36,7 +37,7 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions }: ListI
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Main">
-            {preferences.openWebsiteByDefault ? (
+            {openWebsiteByDefault ? (
               <>
                 <Action.OpenInBrowser
                   title="Open Main Page (JSR)"
@@ -68,7 +69,7 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions }: ListI
               icon={{ source: Icon.List }}
               target={<VersionList scope={item.scope} name={item.name} />}
             />
-            {extraActions}
+            {extraActions ? <>{extraActions}</> : null}
           </ActionPanel.Section>
           <CopyActions item={item} />
         </ActionPanel>

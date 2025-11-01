@@ -5,8 +5,9 @@ import { useSQL } from "@raycast/utils";
 import { handleErrorToastAction } from "@raycast/utils/dist/handle-error-toast-action";
 import { useState, useEffect, useMemo } from "react";
 import { HistoryEntry, SearchResult } from "../interfaces";
-import { getHistoryDbPath, getHistoryQuery } from "../util";
+import { getHistoryDbPath, getOptimizedHistoryQuery } from "../util";
 import { useCometInstallation } from "./useCometInstallation";
+import { MAX_HISTORY_RESULTS } from "../constants";
 
 // Create empty SQLite database once at module load to avoid hook violations
 const EMPTY_DB_PATH = "/tmp/comet-raycast-empty.db";
@@ -28,8 +29,13 @@ const ensureEmptyDbExists = () => {
 ensureEmptyDbExists();
 
 const searchHistory = (profile: string, query?: string, enabled = true): SearchResult<HistoryEntry> => {
-  const terms = query ? query.trim().split(" ") : [""];
-  const queries = getHistoryQuery("urls", "last_visit_time", terms);
+  const terms = query
+    ? query
+        .trim()
+        .split(" ")
+        .filter((term) => term.length > 0)
+    : [""];
+  const queries = getOptimizedHistoryQuery("urls", "last_visit_time", terms);
   const dbPath = getHistoryDbPath(profile);
 
   // All hooks must be called at the top level
@@ -40,7 +46,10 @@ const searchHistory = (profile: string, query?: string, enabled = true): SearchR
 
   useEffect(() => {
     return () => {
-      if (retryTimer) clearTimeout(retryTimer);
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+        setRetryTimer(null);
+      }
     };
   }, [retryTimer]);
 
@@ -53,9 +62,14 @@ const searchHistory = (profile: string, query?: string, enabled = true): SearchR
   }, [enabled, dbPath]);
   const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(sqlPath, queries as unknown as string, {
     onData() {
+      // Reset retry state on successful data load
       setRetryWaiting(false);
       setRetryTimes(0);
-      setRetryTimer(null);
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+        setRetryTimer(null);
+      }
+      // Note: Result limiting is handled in the final return statement
     },
     onError(error) {
       // In rare cases, we encounter the SQLite error "database disk image is malformed (11)",
@@ -66,13 +80,19 @@ const searchHistory = (profile: string, query?: string, enabled = true): SearchR
         setRetryTimes(retryTimes + 1);
         const timer = setTimeout(() => {
           revalidate();
-          clearTimeout(timer);
+          if (retryTimer) {
+            clearTimeout(retryTimer);
+          }
+          setRetryTimer(null);
         }, 1000);
         setRetryTimer(timer);
       } else {
         setRetryWaiting(false);
         setRetryTimes(0);
-        setRetryTimer(null);
+        if (retryTimer) {
+          clearTimeout(retryTimer);
+          setRetryTimer(null);
+        }
         // Default error handling copied from useSQL
         if (api.environment.launchType !== api.LaunchType.Background) {
           api.showToast({
@@ -116,8 +136,11 @@ const searchHistory = (profile: string, query?: string, enabled = true): SearchR
     };
   }
 
+  // Apply memory limit as final safeguard
+  const limitedData = (data || []).slice(0, MAX_HISTORY_RESULTS);
+
   return {
-    data: data || [],
+    data: limitedData,
     isLoading: isLoading || retryWaiting,
     errorView: permissionView,
     revalidate,

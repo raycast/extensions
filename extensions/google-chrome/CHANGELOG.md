@@ -1,5 +1,13 @@
 # Google Chrome Changelog
 
+## [Improvements] - 2025-10-13
+
+- Fix weird issue with a constant not working (ref: [#22053](https://github.com/raycast/extensions/issues/22053), [#22026](https://github.com/raycast/extensions/issues/22026), [#21966](https://github.com/raycast/extensions/issues/21966), [#21973](https://github.com/raycast/extensions/issues/21973), [#21928](https://github.com/raycast/extensions/issues/21928))
+- Add support for searching history in a specific profile.
+- Add support for getting all Chrome profiles in AI
+- Rewritten some of the logic to use `usePromise` instead of `useEffect`
+- Updated dependencies, mainly SQL.js was giving issues
+
 ## [Fix Search Bookmarks] - 2025-10-01
 
 - Fix the "Search Bookmarks" command returning an error when the hard-coded default profile directory does not exist.

@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading={isLoading}
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Sign In" icon={Icon.Key} onSubmit={onSubmit} />
+            <Action.SubmitForm title="Sign in" icon={Icon.Key} onSubmit={onSubmit} />
           </ActionPanel>
         }
       >

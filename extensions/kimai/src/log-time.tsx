@@ -50,11 +50,11 @@ const LogTimeCommand = () => {
 
       try {
         const toast = await showToast({ style: Toast.Style.Animated, title: "Saving new time log!" });
-        const begin = dayjs(values.activityDate).set("seconds", 0).format(DATE_FORMAT);
-        const end = dayjs(values.activityDate)
-          .add(Number(values.duration), "minutes")
-          .set("seconds", 0)
-          .format(DATE_FORMAT);
+        const startDate = dayjs(values.activityDate);
+        const begin = startDate.set("seconds", 0).format(DATE_FORMAT);
+        const durationMinutes = Number(values.duration);
+        const end =
+          durationMinutes > 0 ? startDate.add(durationMinutes, "minutes").set("seconds", 0).format(DATE_FORMAT) : null;
         await saveTimesheet({
           begin,
           end,
@@ -80,11 +80,11 @@ const LogTimeCommand = () => {
       },
       duration: (value) => {
         if (!value) {
-          return "Please enter duration!";
+          return undefined;
         }
         const numberValue = parseInt(value);
-        if (isNaN(numberValue)) {
-          return "Please enter duration!";
+        if (isNaN(numberValue) || numberValue < 0) {
+          return "Please enter a valid duration!";
         }
       },
     },

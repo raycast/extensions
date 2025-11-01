@@ -33,7 +33,10 @@ export default function ImageList() {
               <Action.Push
                 title="Inspect"
                 icon={{ source: Icon.Binoculars }}
-                shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                shortcut={{
+                  macOS: { modifiers: ['cmd'], key: 'i' },
+                  windows: { modifiers: ['ctrl'], key: 'i' },
+                }}
                 target={<ImageDetail imageId={image.Id} />}
               />
               <Action
@@ -52,7 +55,10 @@ export default function ImageList() {
                 target={<CrateContainer imageId={image.Id} />}
                 title="Create Container"
                 icon={{ source: Icon.Plus }}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+                shortcut={{
+                  macOS: { modifiers: ['cmd', 'shift'], key: 'c' },
+                  windows: { modifiers: ['ctrl', 'shift'], key: 'c' },
+                }}
               />
             </ActionPanel>
           }

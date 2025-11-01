@@ -12,7 +12,7 @@ export default function Command() {
     isValidating,
   } = useSWR(
     () => (query ? `/ens-query/${query}` : null),
-    () => performSearch(query)
+    () => performSearch(query),
   );
 
   useEffect(() => {

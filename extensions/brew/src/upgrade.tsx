@@ -5,7 +5,7 @@ import { showActionToast, showFailureToast, wait } from "./utils";
 
 export default async (): Promise<void> => {
   try {
-    const abort = showActionToast({ title: "Upgrading formula & casks" + String.ellipsis, cancelable: true });
+    const abort = showActionToast({ title: "Upgrading formulae & casks" + String.ellipsis, cancelable: true });
     await brewUpgradeAll(preferences.greedyUpgrades, abort);
     showToast(Toast.Style.Success, "Upgrade completed");
   } catch (err) {
