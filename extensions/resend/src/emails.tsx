@@ -1,29 +1,28 @@
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
-import { EmailAttachment, EmailTag, GetEmailResponse, SendEmailRequest, SendEmailRequestForm } from "./utils/types";
-import React, { useEffect, useState } from "react";
+import { FormValidation, useForm } from "@raycast/utils";
+import { EmailAttachment, EmailTag, SendEmailRequestForm } from "./utils/types";
+import React, { useState } from "react";
 import {
   Action,
   ActionPanel,
-  Alert,
   Color,
+  Detail,
   Form,
   Icon,
   Keyboard,
   List,
   Toast,
-  confirmAlert,
   getPreferenceValues,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { getApiKeys, getEmail, isApiError, sendEmail } from "./utils/api";
+import { isApiError } from "./utils/api";
 import { RESEND_URL } from "./utils/constants";
 import fs from "fs";
 import path from "path";
 import ErrorComponent from "./components/ErrorComponent";
-import { onError, useEmails } from "./lib/hooks";
+import { onError, useEmails, useGetEmail } from "./lib/hooks";
 import { resend } from "./lib/resend";
-import { CreateEmailOptions, GetEmailResponseSuccess } from "resend";
+import { CreateEmailOptions } from "resend";
 
 // Get preferences for sender information
 const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -32,21 +31,7 @@ const preferences = getPreferenceValues<ExtensionPreferences>();
 const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
 
 export default function Emails() {
-  const [isLoading, setIsLoading] = useState(true);
-  type LoggedEmail = GetEmailResponseSuccess & { logged_at: Date; retrieved_at: Date };
-  const [cachedEmails, setCachedEmails] = useCachedState<LoggedEmail[]>("emails", []);
-  
-  const { isLoading: isLoadingEmails, emails, error } = useEmails();
-
-  async function getNewEmail(id: string) {
-    setIsLoading(true);
-    const {data} = await resend.emails.get(id);
-    if (data) {
-      await showToast(Toast.Style.Success, "Fetched Email", id);
-      setCachedEmails([...cachedEmails, { ...data, logged_at: new Date(), retrieved_at: new Date() }]);
-    }
-    setIsLoading(false);
-  }
+  const { isLoading, emails, error,pagination,mutate } = useEmails();
 
   const getTintColor = (last_event: string) => {
     if (last_event === "delivered") return Color.Green;
@@ -56,22 +41,10 @@ export default function Emails() {
     else return undefined;
   };
 
-  async function retrieveEmailAgain(id: string) {
-    setIsLoading(true);
-    const response = await getEmail(id);
-    if (!("statusCode" in response)) {
-      showToast(Toast.Style.Success, "Retrieved Email", response.id);
-      const newEmails = emails;
-      const index = newEmails.findIndex((email) => email.id === id);
-      newEmails[index] = { ...response, logged_at: newEmails[index].logged_at, retrieved_at: new Date() };
-    }
-    setIsLoading(false);
-  }
-
   return error && isApiError(error) ? (
     <ErrorComponent error={error.message} />
   ) : (
-    <List isLoading={isLoading || isLoadingEmails} searchBarPlaceholder="Search email" isShowingDetail={emails.length > 0}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search email" pagination={pagination}>
       {emails.length === 0 ? (
         <List.EmptyView
           title="No emails yet"
@@ -82,7 +55,7 @@ export default function Emails() {
                 title="Send New Email"
                 shortcut={Keyboard.Shortcut.Common.New}
                 icon={Icon.Envelope}
-                target={<EmailSend onEmailSent={getNewEmail} />}
+                target={<EmailSend onEmailSent={mutate} />}
               />
               <Action.OpenInBrowser
                 title="View API Reference"
@@ -97,21 +70,15 @@ export default function Emails() {
           .sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf())
           .map((email) => (
             <List.Item
-              title={email.subject}
-              accessories={[{ tag: new Date(email.created_at) }]}
+              title={email.to[0]}
+              subtitle={email.subject}
+              accessories={[{date: new Date(email.created_at)}]}
               key={email.id}
               icon={{ source: Icon.Envelope, tintColor: getTintColor(email.last_event) }}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy ID To Clipbard" content={email.id} />
-                  <Action title="Retrieve Email Again" icon={Icon.Redo} onAction={() => retrieveEmailAgain(email.id)} />
-                  <Action
-                    title="Remove Email From Log"
-                    icon={Icon.Eraser}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                    style={Action.Style.Destructive}
-                    onAction={() => confirmAndRemove(email)}
-                  />
+                  <Action.CopyToClipboard title="Copy ID To Clipboard" content={email.id} />
+                  <Action.Push icon={Icon.Eye} title="View Email" target={<ViewEmail id={email.id} />} />
                   <Action.OpenInBrowser
                     title="Open Email In Resend Dashboard"
                     url={`${RESEND_URL}emails/${email.id}`}
@@ -121,7 +88,7 @@ export default function Emails() {
                       title="Send New Email"
                       shortcut={Keyboard.Shortcut.Common.New}
                       icon={Icon.Envelope}
-                      target={<EmailSend onEmailSent={getNewEmail} />}
+                      target={<EmailSend onEmailSent={mutate} />}
                     />
                     <Action.OpenInBrowser
                       title="View API Reference"
@@ -130,44 +97,7 @@ export default function Emails() {
                   </ActionPanel.Section>
                 </ActionPanel>
               }
-              detail={
-                <List.Item.Detail
-                  markdown={email.html || email.text}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="ID" text={email.id} />
-                      <List.Item.Detail.Metadata.Label title="To" text={email.to.join()} />
-                      <List.Item.Detail.Metadata.Label title="From" text={email.from} />
-                      <List.Item.Detail.Metadata.Label title="Created At" text={email.created_at} />
-                      <List.Item.Detail.Metadata.Label title="Subject" text={email.subject} />
-                      <List.Item.Detail.Metadata.Label
-                        title="BCC"
-                        text={email.bcc ? email.bcc.join() : undefined}
-                        icon={!email.bcc ? Icon.Minus : undefined}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="CC"
-                        text={email.cc ? email.cc.join() : undefined}
-                        icon={!email.cc ? Icon.Minus : undefined}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Reply To"
-                        text={email.reply_to ? email.reply_to.join() : undefined}
-                        icon={!email.reply_to ? Icon.Minus : undefined}
-                      />
-                      <List.Item.Detail.Metadata.Label title="Last Event" text={email.last_event} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Logged At"
-                        text={email.logged_at?.toDateString() || "-"}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Retrieved At"
-                        text={email.retrieved_at?.toDateString() || "-"}
-                      />
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
+              
             />
           ))
       )}
@@ -175,8 +105,35 @@ export default function Emails() {
   );
 }
 
+function ViewEmail({id}:{id: string}) {
+const {isLoading,email} = useGetEmail(id);
+  return <Detail isLoading={isLoading} markdown={email?.html || email?.text} metadata={email && <Detail.Metadata>
+                      <Detail.Metadata.Label title="ID" text={email.id} />
+                      <Detail.Metadata.Label title="To" text={email.to.join()} />
+                      <Detail.Metadata.Label title="From" text={email.from} />
+                      <Detail.Metadata.Label title="Created At" text={email.created_at} />
+                      <Detail.Metadata.Label title="Subject" text={email.subject} />
+                      <Detail.Metadata.Label
+                        title="BCC"
+                        text={email.bcc ? email.bcc.join() : undefined}
+                        icon={!email.bcc ? Icon.Minus : undefined}
+                      />
+                      <Detail.Metadata.Label
+                        title="CC"
+                        text={email.cc ? email.cc.join() : undefined}
+                        icon={!email.cc ? Icon.Minus : undefined}
+                      />
+                      <Detail.Metadata.Label
+                        title="Reply To"
+                        text={email.reply_to ? email.reply_to.join() : undefined}
+                        icon={!email.reply_to ? Icon.Minus : undefined}
+                      />
+                      <Detail.Metadata.Label title="Last Event" text={email.last_event} />
+  </Detail.Metadata>} />
+}
+
 type EmailSendProps = {
-  onEmailSent: (id: string) => void;
+  onEmailSent: () => void;
 };
 function EmailSend({ onEmailSent }: EmailSendProps) {
   const { pop } = useNavigation();
@@ -228,7 +185,7 @@ function EmailSend({ onEmailSent }: EmailSendProps) {
         toast.style = Toast.Style.Success;
         toast.title = "Sent Email";
         toast.message = data.id
-        onEmailSent(data.id);
+        onEmailSent();
         pop();
       } catch (error) {
         onError(error as Error);

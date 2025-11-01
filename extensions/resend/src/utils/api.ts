@@ -1,8 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import {
   APIMethod,
-  AddDomainRequest,
-  AddDomainResponse,
   BodyRequest,
   CreateAPIKeyRequest,
   CreateAPIKeyResponse,
@@ -17,7 +15,7 @@ import {
   SendEmailResponse,
   UpdateContactRequest,
   UpdateContactResponse,
-  VerifyDomainResponse,
+
 } from "./types";
 import { API_HEADERS, API_URL } from "./constants";
 import { resend } from "../lib/resend";
@@ -62,25 +60,8 @@ const callApi = async (endpoint: string, method: APIMethod, body?: BodyRequest, 
 };
 
 // API KEYS
-export async function getApiKeys() {
-  return (await callApi(`api-keys`, "GET", undefined, "Fetching API Keys")) as ErrorResponse | GetAPIKeysResponse;
-}
-export async function createApiKey(newKey: CreateAPIKeyRequest) {
-  return (await callApi(`api-keys`, "POST", { ...newKey }, "Creating API Key")) as ErrorResponse | CreateAPIKeyResponse;
-}
-export async function deleteApiKey(id: string) {
-  return (await callApi(`api-keys/${id}`, "DELETE", undefined, "Deleting API Key")) as
-    | ErrorResponse
-    | Record<string, never>;
-}
 
 // DOMAINS
-// export async function getDomains() { -> MOVED TO HOOK
-
-// sdk
-// export async function addDomain(newDomain: CreateDomainOptions) {
-// export async function verifyDomain(id: string) {
-// export async function deleteDomain(id: string) {
 
 // EMAILS
 export async function getEmail(id: string) {
@@ -91,16 +72,8 @@ export async function sendEmail(newEmail: SendEmailRequest) {
 }
 
 // AUDIENCES
-export async function getAudiences() {
-  return (await callApi(`audiences`, "GET", undefined, "Fetching Audiences")) as ErrorResponse | GetAudiencesResponse;
-}
 
 // CONTACTS
-export async function getContacts(id: string) {
-  return (await callApi(`audiences/${id}/contacts`, "GET", undefined, "Fetching Contacts")) as
-    | ErrorResponse
-    | GetContactsResponse;
-}
 
 export async function createContact(id: string, newContact: CreateContactRequest) {
   return (await callApi(`audiences/${id}/contacts`, "POST", { ...newContact }, "Adding Contact")) as
