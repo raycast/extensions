@@ -18,7 +18,7 @@ export default async function Command() {
     const title = currentlyPlayingData.item.name;
 
     await Clipboard.copy({
-      html: `<a href=${external_urls?.spotify}>${title}</a>`,
+      html: `<a href="${external_urls?.spotify}">${title}</a>`,
       text: external_urls?.spotify,
     });
 
