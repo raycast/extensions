@@ -4,6 +4,7 @@ import {
   analyzeSectionMarkers,
   groupContentIntoSections,
   suggestSectionImprovements,
+  findSectionBounds,
   type SectionMarker,
   type SectionContext,
 } from "../lib/section-detector";
@@ -491,6 +492,149 @@ alias ni="npm install"`;
       const marker = detectSectionMarker("# --- Python Environment --- #", 1);
       expect(marker).not.toBeNull();
       expect(marker?.name).toBe("Python Environment");
+    });
+  });
+
+  describe("findSectionBounds", () => {
+    it("should find section bounds for dashed section format", () => {
+      const content = `# --- Python Environment --- #
+export PATH=/usr/local/bin:$PATH
+alias py="python3"
+
+# --- End Python Environment --- #
+
+# [Node.js Tools]
+export NODE_PATH="/usr/local/lib/node_modules"`;
+
+      const bounds = findSectionBounds(content, "Python Environment");
+
+      expect(bounds).not.toBeNull();
+      expect(bounds?.startLine).toBe(1);
+      expect(bounds?.endLine).toBe(5);
+    });
+
+    it("should find section bounds for bracketed section format", () => {
+      const content = `# [Node.js Tools]
+export NODE_PATH="/usr/local/lib/node_modules"
+alias ni="npm install"
+
+# [Docker Configuration]
+export DOCKER_DEFAULT_PLATFORM=linux/amd64`;
+
+      const bounds = findSectionBounds(content, "Node.js Tools");
+
+      expect(bounds).not.toBeNull();
+      expect(bounds?.startLine).toBe(1);
+      expect(bounds?.endLine).toBe(4); // Ends before next section
+    });
+
+    it("should find section bounds for hash section format", () => {
+      const content = `## Docker Configuration
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+alias dc="docker compose"
+
+## Another Section
+export VAR=value`;
+
+      const bounds = findSectionBounds(content, "Docker Configuration");
+
+      expect(bounds).not.toBeNull();
+      expect(bounds?.startLine).toBe(1);
+      expect(bounds?.endLine).toBe(4); // Ends before next section
+    });
+
+    it("should find section bounds for labeled section format", () => {
+      const content = `# Section: Python Environment
+export PATH=/usr/local/bin:$PATH
+alias py="python3"
+
+# Section: Node.js Tools
+export NODE_PATH="/usr/local/lib/node_modules"`;
+
+      const bounds = findSectionBounds(content, "Python Environment");
+
+      expect(bounds).not.toBeNull();
+      expect(bounds?.startLine).toBe(1);
+      expect(bounds?.endLine).toBe(4); // Ends before next section
+    });
+
+    it("should find section bounds for custom start/end format", () => {
+      const content = `# @start iOS Development
+alias active_sims="xcrun simctl list 'devices' 'booted'"
+export SIMULATOR_DEVICE="iPhone 15"
+# @end iOS Development
+
+# [Another Section]
+export VAR=value`;
+
+      const bounds = findSectionBounds(content, "iOS Development");
+
+      expect(bounds).not.toBeNull();
+      expect(bounds?.startLine).toBe(1);
+      expect(bounds?.endLine).toBe(4); // Ends at the end marker
+    });
+
+    it("should return null for non-existent section", () => {
+      const content = `# --- Python Environment --- #
+export PATH=/usr/local/bin:$PATH
+
+# [Node.js Tools]
+export NODE_PATH="/usr/local/lib/node_modules"`;
+
+      const bounds = findSectionBounds(content, "Non-existent Section");
+
+      expect(bounds).toBeNull();
+    });
+
+    it("should handle section that extends to end of file", () => {
+      const content = `# --- Python Environment --- #
+export PATH=/usr/local/bin:$PATH
+alias py="python3"`;
+
+      const bounds = findSectionBounds(content, "Python Environment");
+
+      expect(bounds).not.toBeNull();
+      expect(bounds?.startLine).toBe(1);
+      expect(bounds?.endLine).toBe(3); // End of file
+    });
+
+    it("should handle multiple sections with same name correctly", () => {
+      const content = `# --- Python Environment --- #
+export PATH=/usr/local/bin:$PATH
+# --- End Python Environment --- #
+
+# --- Python Environment --- #
+alias py="python3"
+# --- End Python Environment --- #`;
+
+      const bounds = findSectionBounds(content, "Python Environment");
+
+      expect(bounds).not.toBeNull();
+      expect(bounds?.startLine).toBe(1); // Should find first occurrence
+      expect(bounds?.endLine).toBe(3);
+    });
+
+    it("should calculate endIndex correctly", () => {
+      const content = `# --- Python Environment --- #
+export PATH=/usr/local/bin:$PATH
+alias py="python3"
+
+# --- End Python Environment --- #`;
+
+      const bounds = findSectionBounds(content, "Python Environment");
+
+      expect(bounds).not.toBeNull();
+      expect(bounds?.endIndex).toBeGreaterThan(0);
+      // Verify endIndex points to end of section
+      const lines = content.split(/\r?\n/);
+      let expectedIndex = 0;
+      for (let i = 0; i < bounds!.endLine - 1; i++) {
+        const line = lines[i];
+        if (line) {
+          expectedIndex += line.length + 1;
+        }
+      }
+      expect(bounds?.endIndex).toBe(expectedIndex);
     });
   });
 });

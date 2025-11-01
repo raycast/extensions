@@ -297,3 +297,89 @@ export function suggestSectionImprovements(content: string): Array<{
 
   return suggestions;
 }
+
+/**
+ * Finds the end line of a section by its label
+ *
+ * Uses all supported section formats to find a section and returns
+ * the line number where the section ends (before the next section starts).
+ *
+ * @param content The zshrc file content
+ * @param sectionLabel The label of the section to find
+ * @returns Object with startLine, endLine, and endIndex, or null if not found
+ */
+export function findSectionBounds(
+  content: string,
+  sectionLabel: string,
+): {
+  startLine: number;
+  endLine: number;
+  endIndex: number;
+} | null {
+  const lines = content.split(/\r?\n/);
+  let sectionStartLine: number | null = null;
+  let sectionEndLine: number | null = null;
+
+  // Find the section start
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) continue;
+    const marker = detectSectionMarker(line, i + 1);
+
+    if (marker && marker.name === sectionLabel) {
+      // Found the section start
+      if (["custom_start", "dashed_start", "bracketed", "hash", "labeled", "function_start"].includes(marker.type)) {
+        sectionStartLine = i + 1;
+        break;
+      }
+    }
+  }
+
+  if (sectionStartLine === null) {
+    return null;
+  }
+
+  // Find the section end (next section start or end marker)
+  for (let i = sectionStartLine; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) continue;
+    const marker = detectSectionMarker(line, i + 1);
+
+    if (marker) {
+      // Check if it's an end marker for this section
+      if (["custom_end", "dashed_end"].includes(marker.type)) {
+        sectionEndLine = i + 1;
+        break;
+      }
+
+      // Check if it's a new section start (but not the same section)
+      if (
+        ["custom_start", "dashed_start", "bracketed", "hash", "labeled", "function_start"].includes(marker.type) &&
+        marker.name !== sectionLabel
+      ) {
+        sectionEndLine = i; // End before the next section
+        break;
+      }
+    }
+  }
+
+  // If no end found, section goes to end of file
+  if (sectionEndLine === null) {
+    sectionEndLine = lines.length;
+  }
+
+  // Calculate end index in content
+  let endIndex = 0;
+  for (let i = 0; i < sectionEndLine - 1; i++) {
+    const line = lines[i];
+    if (line) {
+      endIndex += line.length + 1; // +1 for newline
+    }
+  }
+
+  return {
+    startLine: sectionStartLine,
+    endLine: sectionEndLine,
+    endIndex,
+  };
+}
