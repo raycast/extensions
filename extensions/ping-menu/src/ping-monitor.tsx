@@ -75,7 +75,7 @@ async function pingWithHistory(): Promise<PingData> {
 }
 
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(pingWithHistory, [], {
+  const { data, isLoading, revalidate } = useCachedPromise(pingWithHistory, [], {
     initialData: { latency: null, history: [] },
     keepPreviousData: true,
   });
