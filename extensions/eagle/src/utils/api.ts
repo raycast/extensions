@@ -1,7 +1,7 @@
 import axios from "axios";
 import { readdir, readFile } from "fs/promises";
-import { join } from "path";
-import { Application, EagleAPIResponse, Folder, Item } from "../@types/eagle";
+import { join, basename } from "path";
+import { Application, EagleAPIResponse, Folder, Item, Library } from "../@types/eagle";
 
 export const instance = axios.create({
   baseURL: "http://localhost:41595/api/",
@@ -88,6 +88,30 @@ export async function getTrashItems(): Promise<Item[]> {
     console.error("Failed to get trash items:", error);
     return [];
   }
+}
+
+export async function getLibraryHistory() {
+  const response = await instance.get<EagleAPIResponse<string[]>>("/library/history");
+  return response.data.data.map((path) => ({
+    path,
+    name: basename(path, ".library"),
+  }));
+}
+
+export function switchLibrary(libraryPath: string) {
+  return instance.post<EagleAPIResponse<null>>("/library/switch", {
+    libraryPath,
+  });
+}
+
+export function getLibraryIcon(libraryPath: string) {
+  const encodedPath = encodeURIComponent(libraryPath);
+  return `http://localhost:41595/api/library/icon?libraryPath=${encodedPath}`;
+}
+
+export async function getCurrentLibrary() {
+  const response = await instance.get<EagleAPIResponse<{ library: { path: string; name: string } }>>("/library/info");
+  return response.data.data.library;
 }
 
 export default instance;

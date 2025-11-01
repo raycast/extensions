@@ -44,6 +44,11 @@ export type Folder = {
   extendTags: string[];
 };
 
+export type Library = {
+  path: string;
+  name: string;
+};
+
 export type EagleAPIResponse<T> = {
   status: "success";
   data: T;

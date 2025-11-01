@@ -1,6 +1,14 @@
 import { usePromise } from "@raycast/utils";
 import fileUrl from "file-url";
-import { getItemThumbnail, getApplicationInfo, getItems, getFolderList, getTrashItems } from "./api";
+import {
+  getItemThumbnail,
+  getApplicationInfo,
+  getItems,
+  getFolderList,
+  getTrashItems,
+  getLibraryHistory,
+  getCurrentLibrary,
+} from "./api";
 
 /**
  * It fetches the thumbnail of an item from the server and returns the URL of the
@@ -88,5 +96,17 @@ export function useFolderMap() {
 export function useTrashItemList() {
   return usePromise(async () => {
     return await getTrashItems();
+  });
+}
+
+export function useLibraryHistory() {
+  return usePromise(async () => {
+    return await getLibraryHistory();
+  });
+}
+
+export function useCurrentLibrary() {
+  return usePromise(async () => {
+    return await getCurrentLibrary();
   });
 }

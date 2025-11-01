@@ -50,6 +50,13 @@
       "subtitle": "Eagle",
       "description": "View items in trash",
       "mode": "view"
+    },
+    {
+      "name": "library",
+      "title": "Switch Library",
+      "subtitle": "Eagle",
+      "description": "Switch between Eagle libraries",
+      "mode": "view"
     }
   ],
   "dependencies": {
