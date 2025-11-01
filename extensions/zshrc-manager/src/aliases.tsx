@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import type { ReactElement } from "react";
 import { parseAliases } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
-import EditAlias from "./edit-alias";
+import EditAlias, { aliasConfig } from "./edit-alias";
 import { MODERN_COLORS } from "./constants";
 import { getZshrcPath } from "./lib/zsh";
 import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
+import { deleteItem } from "./lib/delete-item";
 
 /**
  * Alias item interface
@@ -14,10 +16,14 @@ interface AliasItem extends FilterableItem {
   command: string;
 }
 
+interface AliasesProps {
+  searchBarAccessory?: ReactElement | null;
+}
+
 /**
  * Aliases management command for zshrc content
  */
-export default function Aliases() {
+export default function Aliases({ searchBarAccessory }: AliasesProps) {
   return (
     <ListViewController<AliasItem>
       commandName="Aliases"
@@ -29,6 +35,7 @@ export default function Aliases() {
       itemTypePlural="aliases"
       parser={parseAliases}
       searchFields={["name", "command", "section"]}
+      searchBarAccessory={searchBarAccessory}
       generateTitle={(alias) => alias.name}
       generateOverviewMarkdown={(_, allAliases, grouped) => `
 # Alias Summary
@@ -71,7 +78,7 @@ ${alias.command}
 Use the actions below to edit or manage this alias.
       `}
       generateMetadata={(alias) => (
-        <>
+        <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Alias Name"
             text={alias.name}
@@ -104,7 +111,7 @@ Use the actions below to edit or manage this alias.
               tintColor: MODERN_COLORS.neutral,
             }}
           />
-        </>
+        </List.Item.Detail.Metadata>
       )}
       generateOverviewActions={(_, refresh) => (
         <ActionPanel>
@@ -132,6 +139,20 @@ Use the actions below to edit or manage this alias.
             }
             icon={Icon.Pencil}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
+          />
+          <Action
+            title="Delete Alias"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onAction={async () => {
+              try {
+                await deleteItem(alias.name, aliasConfig);
+                refresh();
+              } catch {
+                // Error already shown in deleteItem
+              }
+            }}
           />
           <Action.Push title="Add New Alias" target={<EditAlias onSave={refresh} />} icon={Icon.Plus} />
           <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />

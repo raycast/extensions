@@ -1,12 +1,13 @@
-import { Detail, List, ActionPanel, Action, Icon } from "@raycast/api";
+import { Detail, List, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { LogicalSection } from "./lib/parse-zshrc";
 import { MODERN_COLORS } from "./constants";
 import { ReactNode, ReactElement } from "react";
 import { getZshrcPath } from "./lib/zsh";
-import EditAlias from "./edit-alias";
-import EditExport from "./edit-export";
+import EditAlias, { aliasConfig } from "./edit-alias";
+import EditExport, { exportConfig } from "./edit-export";
 import { truncateValueMiddle } from "./utils/formatters";
 import { parseSectionContent, applyContentFilter, generateSectionMarkdown } from "./utils/markdown";
+import { deleteItem } from "./lib/delete-item";
 
 interface SectionDetailProps {
   /** The section to display */
@@ -86,6 +87,7 @@ export function SectionDetailList({
   actions,
   searchBarAccessory,
 }: SectionDetailListProps) {
+  const { pop } = useNavigation();
   const content = parseSectionContent(section);
   const filtered = applyContentFilter(content, filterType);
   const { aliases, exports, otherLines } = filtered;
@@ -203,6 +205,20 @@ alias ${alias.name}='${alias.command}'
                           icon={Icon.Pencil}
                           shortcut={{ modifiers: ["cmd"], key: "e" }}
                         />
+                        <Action
+                          title="Delete Alias"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          onAction={async () => {
+                            try {
+                              await deleteItem(alias.name, aliasConfig);
+                              pop();
+                            } catch {
+                              // Error already shown in deleteItem
+                            }
+                          }}
+                        />
                         <Action.Push
                           title="View Alias Detail"
                           target={
@@ -295,6 +311,20 @@ export ${exp.variable}=${exp.value}
                           }
                           icon={Icon.Pencil}
                           shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        />
+                        <Action
+                          title="Delete Export"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          onAction={async () => {
+                            try {
+                              await deleteItem(exp.variable, exportConfig);
+                              pop();
+                            } catch {
+                              // Error already shown in deleteItem
+                            }
+                          }}
                         />
                         <Action.Push
                           title="View Export Detail"
@@ -498,6 +528,20 @@ alias ${alias.name}='${alias.command}'
                           icon={Icon.Pencil}
                           shortcut={{ modifiers: ["cmd"], key: "e" }}
                         />
+                        <Action
+                          title="Delete Alias"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          onAction={async () => {
+                            try {
+                              await deleteItem(alias.name, aliasConfig);
+                              pop();
+                            } catch {
+                              // Error already shown in deleteItem
+                            }
+                          }}
+                        />
                         <Action.Push
                           title="View Alias Detail"
                           target={
@@ -590,6 +634,20 @@ export ${exp.variable}=${exp.value}
                           }
                           icon={Icon.Pencil}
                           shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        />
+                        <Action
+                          title="Delete Export"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          onAction={async () => {
+                            try {
+                              await deleteItem(exp.variable, exportConfig);
+                              pop();
+                            } catch {
+                              // Error already shown in deleteItem
+                            }
+                          }}
                         />
                         <Action.Push
                           title="View Export Detail"

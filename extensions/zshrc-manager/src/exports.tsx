@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import type { ReactElement } from "react";
 import { parseExports } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
-import EditExport from "./edit-export";
+import EditExport, { exportConfig } from "./edit-export";
 import { MODERN_COLORS } from "./constants";
 import { getZshrcPath } from "./lib/zsh";
 import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
+import { deleteItem } from "./lib/delete-item";
 
 /**
  * Export item interface
@@ -14,10 +16,14 @@ interface ExportItem extends FilterableItem {
   value: string;
 }
 
+interface ExportsProps {
+  searchBarAccessory?: ReactElement | null;
+}
+
 /**
  * Exports management command for zshrc content
  */
-export default function Exports() {
+export default function Exports({ searchBarAccessory }: ExportsProps) {
   return (
     <ListViewController<ExportItem>
       commandName="Exports"
@@ -29,6 +35,7 @@ export default function Exports() {
       itemTypePlural="exports"
       parser={parseExports}
       searchFields={["variable", "value", "section"]}
+      searchBarAccessory={searchBarAccessory}
       generateTitle={(exportItem) => exportItem.variable}
       generateOverviewMarkdown={(_, allExports, grouped) => `
 # Export Summary
@@ -74,7 +81,7 @@ echo $${exportItem.variable}
 - **Custom**: Application-specific configuration
       `}
       generateMetadata={(exportItem) => (
-        <>
+        <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Variable Name"
             text={exportItem.variable}
@@ -107,7 +114,7 @@ echo $${exportItem.variable}
               tintColor: MODERN_COLORS.neutral,
             }}
           />
-        </>
+        </List.Item.Detail.Metadata>
       )}
       generateOverviewActions={(_, refresh) => (
         <ActionPanel>
@@ -135,6 +142,20 @@ echo $${exportItem.variable}
             }
             icon={Icon.Pencil}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
+          />
+          <Action
+            title="Delete Export"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onAction={async () => {
+              try {
+                await deleteItem(exportItem.variable, exportConfig);
+                refresh();
+              } catch {
+                // Error already shown in deleteItem
+              }
+            }}
           />
           <Action.Push title="Add New Export" target={<EditExport onSave={refresh} />} icon={Icon.Plus} />
           <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
