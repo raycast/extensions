@@ -7,7 +7,7 @@ import { MoveToTrashAction } from "./MoveToTrashAction";
 import { EditItemTagsAction } from "./EditItemTagsAction";
 import { EditItemAnnotationAction } from "./EditItemAnnotationAction";
 
-export default function EagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) {
+export default function EagleItem({ item, onUpdate }: { item: Item; onUpdate?: () => void }) {
   return (
     <List.Item
       title={item.name}
@@ -20,11 +20,11 @@ export default function EagleItem({ item, onTrash }: { item: Item; onTrash?: () 
           {!item.isDeleted && (
             <>
               <ActionPanel.Section title="Edit">
-                <EditItemTagsAction item={item} onUpdate={onTrash} />
-                <EditItemAnnotationAction item={item} onUpdate={onTrash} />
+                <EditItemTagsAction item={item} onUpdate={onUpdate} />
+                <EditItemAnnotationAction item={item} onUpdate={onUpdate} />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <MoveToTrashAction item={item} onTrash={onTrash} />
+                <MoveToTrashAction item={item} onUpdate={onUpdate} />
               </ActionPanel.Section>
             </>
           )}

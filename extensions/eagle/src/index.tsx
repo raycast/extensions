@@ -16,7 +16,7 @@ interface Preferences {
   layout: "list" | "grid";
 }
 
-function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) {
+function GridEagleItem({ item, onUpdate }: { item: Item; onUpdate?: () => void }) {
   const { data: thumbnail } = useThumbnail(item.id);
 
   // Convert file:// URL back to regular path
@@ -33,11 +33,11 @@ function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) 
           {!item.isDeleted && (
             <>
               <ActionPanel.Section title="Edit">
-                <EditItemTagsAction item={item} onUpdate={onTrash} />
-                <EditItemAnnotationAction item={item} onUpdate={onTrash} />
+                <EditItemTagsAction item={item} onUpdate={onUpdate} />
+                <EditItemAnnotationAction item={item} onUpdate={onUpdate} />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <MoveToTrashAction item={item} onTrash={onTrash} />
+                <MoveToTrashAction item={item} onUpdate={onUpdate} />
               </ActionPanel.Section>
             </>
           )}
@@ -65,7 +65,7 @@ export default function Index() {
     return (
       <Grid onSearchTextChange={setSearch} isLoading={isLoading}>
         {items.map((item) => (
-          <GridEagleItem key={item.id} item={item} onTrash={revalidate} />
+          <GridEagleItem key={item.id} item={item} onUpdate={revalidate} />
         ))}
       </Grid>
     );
@@ -74,7 +74,7 @@ export default function Index() {
   return (
     <List isShowingDetail onSearchTextChange={setSearch} isLoading={isLoading}>
       {items.map((item) => (
-        <EagleItem key={item.id} item={item} onTrash={revalidate} />
+        <EagleItem key={item.id} item={item} onUpdate={revalidate} />
       ))}
     </List>
   );

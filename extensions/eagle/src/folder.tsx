@@ -32,7 +32,7 @@ const getFolderColor = (color?: string): Color | undefined => {
   return color ? folderColorMap[color] : undefined;
 };
 
-function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) {
+function GridEagleItem({ item, onUpdate }: { item: Item; onUpdate?: () => void }) {
   const { data: thumbnail } = useThumbnail(item.id);
 
   // Convert file:// URL back to regular path
@@ -49,11 +49,11 @@ function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) 
           {!item.isDeleted && (
             <>
               <ActionPanel.Section title="Edit">
-                <EditItemTagsAction item={item} onUpdate={onTrash} />
-                <EditItemAnnotationAction item={item} onUpdate={onTrash} />
+                <EditItemTagsAction item={item} onUpdate={onUpdate} />
+                <EditItemAnnotationAction item={item} onUpdate={onUpdate} />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <MoveToTrashAction item={item} onTrash={onTrash} />
+                <MoveToTrashAction item={item} onUpdate={onUpdate} />
               </ActionPanel.Section>
             </>
           )}
@@ -120,14 +120,14 @@ export function FolderView({ folder }: { folder: Folder }) {
         ) : null}
         <Grid.Section title="Items">
           {items.map((item) => (
-            <GridEagleItem key={item.id} item={item} onTrash={revalidate} />
+            <GridEagleItem key={item.id} item={item} onUpdate={revalidate} />
           ))}
         </Grid.Section>
       </Grid>
     );
   }
 
-  const images = items.map((item) => <EagleItem key={item.id} item={item} onTrash={revalidate} />);
+  const images = items.map((item) => <EagleItem key={item.id} item={item} onUpdate={revalidate} />);
 
   return (
     <List isShowingDetail>
@@ -172,7 +172,7 @@ export default function Folder() {
         {rootItems.length > 0 && (
           <Grid.Section title="Items">
             {rootItems.map((item) => (
-              <GridEagleItem key={item.id} item={item} onTrash={revalidate} />
+              <GridEagleItem key={item.id} item={item} onUpdate={revalidate} />
             ))}
           </Grid.Section>
         )}
@@ -203,7 +203,7 @@ export default function Folder() {
       {rootItems.length > 0 && (
         <List.Section title="Items">
           {rootItems.map((item) => (
-            <EagleItem key={item.id} item={item} onTrash={revalidate} />
+            <EagleItem key={item.id} item={item} onUpdate={revalidate} />
           ))}
         </List.Section>
       )}

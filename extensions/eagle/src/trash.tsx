@@ -12,8 +12,9 @@ interface Preferences {
   layout: "list" | "grid";
 }
 
-function GridEagleItem({ item }: { item: Item }) {
+function GridEagleItem({ item, onUpdate }: { item: Item; onUpdate?: () => void }) {
   const { data: thumbnail } = useThumbnail(item.id);
+  void onUpdate; // Placeholder to keep signature aligned with list variant for future restore actions.
 
   // Convert file:// URL back to regular path
   const filePath = thumbnail ? decodeURIComponent(thumbnail.replace("file://", "")) : undefined;
@@ -47,7 +48,7 @@ export default function Trash() {
     return (
       <Grid isLoading={isLoading}>
         {items.map((item) => (
-          <GridEagleItem key={item.id} item={item} />
+          <GridEagleItem key={item.id} item={item} onUpdate={revalidate} />
         ))}
       </Grid>
     );
@@ -56,7 +57,7 @@ export default function Trash() {
   return (
     <List isShowingDetail isLoading={isLoading}>
       {items.map((item) => (
-        <EagleItem key={item.id} item={item} onTrash={revalidate} />
+        <EagleItem key={item.id} item={item} onUpdate={revalidate} />
       ))}
     </List>
   );

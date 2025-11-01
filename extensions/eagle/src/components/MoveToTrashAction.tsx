@@ -5,10 +5,10 @@ import type { Item } from "../@types/eagle";
 
 interface MoveToTrashActionProps {
   item: Item;
-  onTrash?: () => void;
+  onUpdate?: () => void;
 }
 
-export function MoveToTrashAction({ item, onTrash }: MoveToTrashActionProps) {
+export function MoveToTrashAction({ item, onUpdate }: MoveToTrashActionProps) {
   const handleMoveToTrash = async () => {
     const confirmed = await confirmAlert({
       title: "Move to Trash?",
@@ -36,8 +36,8 @@ export function MoveToTrashAction({ item, onTrash }: MoveToTrashActionProps) {
       });
 
       // Call the callback if provided (to refresh the list)
-      if (onTrash) {
-        onTrash();
+      if (onUpdate) {
+        onUpdate();
       }
     } catch (error) {
       await showFailureToast("Failed to move to trash", error);
