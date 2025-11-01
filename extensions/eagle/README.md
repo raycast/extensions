@@ -10,9 +10,15 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 - **Navigate Folders** - Browse folders and view items organized by folders
 - **Trash Management** - View and manage items in trash
 - **Library Switcher** - Switch between multiple Eagle libraries with active library indicator
+- **Add from URL** - Add images or files from URLs to Eagle
+- **Add from Clipboard** - Add URLs or file paths from clipboard to Eagle
 - **Item Details** - View detailed information including thumbnails, tags, folders, color palettes, and metadata
+- **Edit Item Tags** - Update tags for items
+- **Edit Item Annotation** - Update notes/annotations for items
+- **Folder Management** - Create, rename, and move folders
 - **Folder Navigation** - Navigate to item folders directly from items (with multi-folder dropdown)
 - **Move to Trash** - Delete items with confirmation dialog
+- **Reveal in Folder** - Open item location in Finder
 - **Grid/List View** - Toggle between grid and list layouts via preferences
 
 ### API Coverage
@@ -22,9 +28,9 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 
 #### Folder APIs
 - ✅ `/api/folder/list` - List all folders in library
-- ❌ `/api/folder/create` - Create new folder
-- ❌ `/api/folder/rename` - Rename existing folder
-- ❌ `/api/folder/update` - Update folder properties
+- ✅ `/api/folder/create` - Create new folder
+- ✅ `/api/folder/rename` - Rename existing folder
+- ✅ `/api/folder/update` - Update folder properties
 - ❌ `/api/folder/listRecent` - List recently accessed folders
 
 #### Item APIs
@@ -32,14 +38,14 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 - ✅ `/api/item/thumbnail` - Get item thumbnail
 - ✅ `/api/item/list` - List items with filtering
 - ✅ `/api/item/moveToTrash` - Move items to trash
-- ❌ `/api/item/addFromURL` - Add item from URL
+- ✅ `/api/item/addFromURL` - Add item from URL
+- ✅ `/api/item/addFromPath` - Add item from local file path
+- ✅ `/api/item/update` - Update item properties (tags, annotation, etc.)
 - ❌ `/api/item/addFromURLs` - Add multiple items from URLs
-- ❌ `/api/item/addFromPath` - Add item from local file path
 - ❌ `/api/item/addFromPaths` - Add multiple items from local paths
 - ❌ `/api/item/addBookmark` - Add bookmark item
 - ❌ `/api/item/refreshPalette` - Refresh item color palette
 - ❌ `/api/item/refreshThumbnail` - Regenerate item thumbnail
-- ❌ `/api/item/update` - Update item properties (tags, annotation, etc.)
 
 #### Library APIs
 - ✅ `/api/library/info` - Get current library information
@@ -51,24 +57,19 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 
 ### High Priority 🔥
 
-- [ ] **Add Item from URL** - Quick action to add images/files from URLs
-- [ ] **Add Item from Clipboard** - Add image from clipboard
-- [ ] **Update Item Tags** - Edit tags for selected items
-- [ ] **Update Item Annotation** - Edit notes/annotations for items
-- [ ] **Create Folder** - Create new folders from within Raycast
-- [ ] **Rename Folder** - Rename existing folders
 - [ ] **Recent Folders** - Quick access to recently used folders
-
-### Medium Priority 🎯
-
 - [ ] **Restore from Trash** - Add restore action for trashed items
 - [ ] **Permanent Delete** - Permanently delete items from trash
 - [ ] **Empty Trash** - Clear all items from trash
+
+### Medium Priority 🎯
+
 - [ ] **Refresh Thumbnail** - Regenerate thumbnails for items
 - [ ] **Refresh Color Palette** - Update color palette extraction
-- [ ] **Folder Properties** - Edit folder description and metadata
 - [ ] **Copy Item** - Duplicate items within library
 - [ ] **Move to Folder** - Move items between folders
+- [ ] **Batch Add from URLs** - Add multiple items from URLs at once
+- [ ] **Batch Add from Paths** - Add multiple items from file paths at once
 
 ### Low Priority 💡
 
@@ -79,7 +80,6 @@ Eagle Extension for Raycast - Manage your Eagle assets directly from Raycast.
 - [ ] **Smart Folders** - Create and manage smart folders
 - [ ] **Export Items** - Export items to file system
 - [ ] **Item Ratings** - Add/edit item ratings
-- [ ] **Item Notes** - Quick notes for items
 
 ### Nice to Have ✨
 
