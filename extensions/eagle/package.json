@@ -43,6 +43,13 @@
       "subtitle": "Eagle",
       "description": "Navigate Folder",
       "mode": "view"
+    },
+    {
+      "name": "trash",
+      "title": "Trash",
+      "subtitle": "Eagle",
+      "description": "View items in trash",
+      "mode": "view"
     }
   ],
   "dependencies": {
