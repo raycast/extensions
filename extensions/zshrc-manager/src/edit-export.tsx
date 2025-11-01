@@ -22,7 +22,13 @@ export const exportConfig: EditItemConfig = {
   keyPattern: /^[A-Z_][A-Z0-9_]*$/,
   keyValidationError: "Variable name must be uppercase and contain only letters, numbers, and underscores",
   generateLine: (variable, value) => `export ${variable}=${value}`,
-  generatePattern: (variable) => new RegExp(`^(\\s*)(?:export|typeset\\s+-x)\\s+${variable}\\s*=\\s*.*?$`, "gm"),
+  // Match export lines with quoted or unquoted values and optional inline comments
+  // Examples:
+  //   export PATH="/usr/local/bin:$PATH"
+  //   export PATH=/usr/local/bin:$PATH # comment
+  //   typeset -x PATH=/usr/local/bin
+  generatePattern: (variable) =>
+    new RegExp(`^(\\s*)(?:export|typeset\\s+-x)\\s+${variable}\\s*=\\s*([^\\\n#]*?)(\\s*#.*)?$`, "gm"),
   generateReplacement: (variable, value) => `export ${variable}=${value}`,
   itemType: "export",
   itemTypeCapitalized: "Export",

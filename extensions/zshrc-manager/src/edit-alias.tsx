@@ -23,7 +23,12 @@ export const aliasConfig: EditItemConfig = {
   keyValidationError:
     "Alias name must start with letter or underscore and contain only letters, numbers, and underscores",
   generateLine: (name, command) => `alias ${name}='${command}'`,
-  generatePattern: (name) => new RegExp(`^(\\s*)alias\\s+${name}\\s*=\\s*(['"]).*?\\2\\s*$`, "gm"),
+  // Match alias lines with optional quotes and optional inline comments
+  // Examples:
+  //   alias ll='ls -la'
+  //   alias ll=ls -la # comment
+  //   alias ll = "ls -la"
+  generatePattern: (name) => new RegExp(`^(\\s*)alias\\s+${name}\\s*=\\s*([^\\\n#]*?)(\\s*#.*)?$`, "gm"),
   generateReplacement: (name, command) => `alias ${name}='${command}'`,
   itemType: "alias",
   itemTypeCapitalized: "Alias",
