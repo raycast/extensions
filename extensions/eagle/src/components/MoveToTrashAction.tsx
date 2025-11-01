@@ -39,11 +39,7 @@ export function MoveToTrashAction({ item, onTrash }: MoveToTrashActionProps) {
         onTrash();
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to move to trash",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast("Failed to move to trash", error);
     }
   };
 
