@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import useSWR from "swr";
+import { usePromise } from "@raycast/utils";
 import fileUrl from "file-url";
 import { getItemThumbnail, getApplicationInfo, getItems, getFolderList } from "./api";
 
@@ -10,93 +9,59 @@ import { getItemThumbnail, getApplicationInfo, getItems, getFolderList } from ".
  * @returns A function that returns a promise that resolves to a string.
  */
 export function useThumbnail(id: string) {
-  return useSWR(`/api/item/thumbnail?id=${id}`, async () => {
+  return usePromise(async () => {
     const res = await getItemThumbnail(id);
     const imagePath = decodeURIComponent(res.data.data);
-
     return fileUrl(imagePath);
-  });
+  }, [id]);
 }
 
 export function useApplicationInfo() {
-  return useSWR("/application/info", async () => {
+  return usePromise(async () => {
     const res = await getApplicationInfo();
     return res.data.data;
   });
 }
 
 export function useItemList(search: string) {
-  const { data, error } = useSWR(`/api/item/list?keyword=${search}`, () => {
-    return getItems({ keyword: search });
-  });
-
-  const items = useMemo(() => {
-    if (!data || data.data.status !== "success") return [];
-
-    return data.data.data;
-  }, [data]);
-
-  return {
-    data: items,
-    isLoading: !error && !data,
-    error,
-  };
+  return usePromise(
+    async (search: string) => {
+      const res = await getItems({ keyword: search });
+      if (res.data.status !== "success") return [];
+      return res.data.data;
+    },
+    [search]
+  );
 }
 
 export function useFolderItemList(folders?: string) {
   const shouldFetch = folders !== undefined;
-  const { data, error } = useSWR(
-    shouldFetch ? `/api/folder/item/list?folders=${folders}` : null,
-    () => {
-      return getItems({ folders: folders });
+
+  return usePromise(
+    async (folders: string) => {
+      const res = await getItems({ folders });
+      if (res.data.status !== "success") return [];
+      return res.data.data;
+    },
+    [folders],
+    {
+      execute: shouldFetch,
     }
   );
-
-  const items = useMemo(() => {
-    if (!data || data.data.status !== "success") return [];
-
-    return data.data.data;
-  }, [data]);
-
-  return {
-    data: items,
-    isLoading: shouldFetch ? !error && !data : false,
-    error,
-  };
 }
 
 export function useRootItemList() {
-  const { data, error } = useSWR("/api/item/list?folders=", () => {
-    return getItems({ folders: "" });
+  return usePromise(async () => {
+    const res = await getItems({ folders: "" });
+    if (res.data.status !== "success") return [];
+    return res.data.data;
   });
-
-  const items = useMemo(() => {
-    if (!data || data.data.status !== "success") return [];
-
-    return data.data.data;
-  }, [data]);
-
-  return {
-    data: items,
-    isLoading: !error && !data,
-    error,
-  };
 }
 
 export function useFolderList() {
-  const { data, error } = useSWR(`/api/folder/list`, () => {
-    return getFolderList();
+  return usePromise(async () => {
+    const res = await getFolderList();
+    if (res.data.status !== "success") return [];
+    return res.data.data;
   });
-
-  const items = useMemo(() => {
-    if (!data || data.data.status !== "success") return [];
-
-    return data.data.data;
-  }, [data]);
-
-  return {
-    data: items,
-    isLoading: !error && !data,
-    error,
-  };
 }

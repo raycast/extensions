@@ -49,11 +49,7 @@ function FolderItem({ folder }: { folder: Folder }) {
     <List.Item
       title={folder.name}
       icon={Icon.Finder}
-      detail={
-        <List.Item.Detail
-          markdown={`# ${folder.name}\n\nFolder with ${folder.children.length} subfolder(s)`}
-        />
-      }
+      detail={<List.Item.Detail markdown={`# ${folder.name}\n\nFolder with ${folder.children.length} subfolder(s)`} />}
       actions={
         <ActionPanel>
           <Action.Push title="Open Folder" target={<FolderView folder={folder} />} />
@@ -66,7 +62,7 @@ function FolderItem({ folder }: { folder: Folder }) {
 function FolderView({ folder }: { folder: Folder }) {
   const preferences = getPreferenceValues<Preferences>();
   const subFolders = folder.children;
-  const { data: items } = useFolderItemList(folder.id);
+  const { data: items = [] } = useFolderItemList(folder.id);
 
   if (preferences.layout === "grid") {
     return (
@@ -106,8 +102,8 @@ function FolderView({ folder }: { folder: Folder }) {
 
 export default function Folder() {
   const preferences = getPreferenceValues<Preferences>();
-  const { data: folders, isLoading: foldersLoading, error } = useFolderList();
-  const { data: rootItems, isLoading: itemsLoading } = useRootItemList();
+  const { data: folders = [], isLoading: foldersLoading, error } = useFolderList();
+  const { data: rootItems = [], isLoading: itemsLoading } = useRootItemList();
 
   const isLoading = foldersLoading || itemsLoading;
 

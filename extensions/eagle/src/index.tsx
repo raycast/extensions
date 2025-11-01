@@ -35,7 +35,7 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const preferences = getPreferenceValues<Preferences>();
 
-  const { isLoading, data: items, error } = useItemList(search);
+  const { isLoading, data: items = [], error } = useItemList(search);
 
   checkEagleInstallation();
 
