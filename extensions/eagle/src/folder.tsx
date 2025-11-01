@@ -6,12 +6,13 @@ import { showEagleNotOpenToast } from "./utils/error";
 import { useFolderItemList, useFolderList, useThumbnail, useRootItemList } from "./utils/query";
 import { ItemDetail } from "./components/ItemDetail";
 import { FolderNavigationActions } from "./components/FolderNavigationActions";
+import { MoveToTrashAction } from "./components/MoveToTrashAction";
 
 interface Preferences {
   layout: "list" | "grid";
 }
 
-function GridEagleItem({ item }: { item: Item }) {
+function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) {
   const { data: thumbnail } = useThumbnail(item.id);
 
   // Convert file:// URL back to regular path
@@ -25,6 +26,9 @@ function GridEagleItem({ item }: { item: Item }) {
         <ActionPanel>
           <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
           <FolderNavigationActions item={item} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          <ActionPanel.Section>
+            <MoveToTrashAction item={item} onTrash={onTrash} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -64,7 +68,7 @@ function FolderItem({ folder }: { folder: Folder }) {
 export function FolderView({ folder }: { folder: Folder }) {
   const preferences = getPreferenceValues<Preferences>();
   const subFolders = folder.children;
-  const { data: items = [] } = useFolderItemList(folder.id);
+  const { data: items = [], revalidate } = useFolderItemList(folder.id);
 
   if (preferences.layout === "grid") {
     return (
@@ -78,14 +82,14 @@ export function FolderView({ folder }: { folder: Folder }) {
         ) : null}
         <Grid.Section title="Items">
           {items.map((item) => (
-            <GridEagleItem key={item.id} item={item} />
+            <GridEagleItem key={item.id} item={item} onTrash={revalidate} />
           ))}
         </Grid.Section>
       </Grid>
     );
   }
 
-  const images = items.map((item) => <EagleItem key={item.id} item={item} />);
+  const images = items.map((item) => <EagleItem key={item.id} item={item} onTrash={revalidate} />);
 
   return (
     <List isShowingDetail>
@@ -105,7 +109,7 @@ export function FolderView({ folder }: { folder: Folder }) {
 export default function Folder() {
   const preferences = getPreferenceValues<Preferences>();
   const { data: folders = [], isLoading: foldersLoading, error } = useFolderList();
-  const { data: rootItems = [], isLoading: itemsLoading } = useRootItemList();
+  const { data: rootItems = [], isLoading: itemsLoading, revalidate } = useRootItemList();
 
   const isLoading = foldersLoading || itemsLoading;
 
@@ -130,7 +134,7 @@ export default function Folder() {
         {rootItems.length > 0 && (
           <Grid.Section title="Items">
             {rootItems.map((item) => (
-              <GridEagleItem key={item.id} item={item} />
+              <GridEagleItem key={item.id} item={item} onTrash={revalidate} />
             ))}
           </Grid.Section>
         )}
@@ -150,7 +154,7 @@ export default function Folder() {
       {rootItems.length > 0 && (
         <List.Section title="Items">
           {rootItems.map((item) => (
-            <EagleItem key={item.id} item={item} />
+            <EagleItem key={item.id} item={item} onTrash={revalidate} />
           ))}
         </List.Section>
       )}

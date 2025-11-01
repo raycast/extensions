@@ -8,12 +8,13 @@ import { showEagleNotOpenToast } from "./utils/error";
 import { Item } from "./@types/eagle";
 import { ItemDetail } from "./components/ItemDetail";
 import { FolderNavigationActions } from "./components/FolderNavigationActions";
+import { MoveToTrashAction } from "./components/MoveToTrashAction";
 
 interface Preferences {
   layout: "list" | "grid";
 }
 
-function GridEagleItem({ item }: { item: Item }) {
+function GridEagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) {
   const { data: thumbnail } = useThumbnail(item.id);
 
   // Convert file:// URL back to regular path
@@ -27,6 +28,9 @@ function GridEagleItem({ item }: { item: Item }) {
         <ActionPanel>
           <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
           <FolderNavigationActions item={item} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          <ActionPanel.Section>
+            <MoveToTrashAction item={item} onTrash={onTrash} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -37,7 +41,7 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const preferences = getPreferenceValues<Preferences>();
 
-  const { isLoading, data: items = [], error } = useItemList(search);
+  const { isLoading, data: items = [], error, revalidate } = useItemList(search);
 
   checkEagleInstallation();
 
@@ -51,7 +55,7 @@ export default function Index() {
     return (
       <Grid onSearchTextChange={setSearch} isLoading={isLoading}>
         {items.map((item) => (
-          <GridEagleItem key={item.id} item={item} />
+          <GridEagleItem key={item.id} item={item} onTrash={revalidate} />
         ))}
       </Grid>
     );
@@ -60,7 +64,7 @@ export default function Index() {
   return (
     <List isShowingDetail onSearchTextChange={setSearch} isLoading={isLoading}>
       {items.map((item) => (
-        <EagleItem key={item.id} item={item} />
+        <EagleItem key={item.id} item={item} onTrash={revalidate} />
       ))}
     </List>
   );

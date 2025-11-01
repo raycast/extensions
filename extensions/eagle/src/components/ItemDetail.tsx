@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useThumbnail, useFolderMap } from "../utils/query";
 import type { Item } from "../@types/eagle";
 import { FolderNavigationActions } from "./FolderNavigationActions";
+import { MoveToTrashAction } from "./MoveToTrashAction";
 
 export function ItemDetail({ item }: { item: Item }) {
   const { data: thumbnail } = useThumbnail(item.id);
@@ -37,6 +38,9 @@ export function ItemDetail({ item }: { item: Item }) {
       actions={
         <ActionPanel>
           <FolderNavigationActions item={item} />
+          <ActionPanel.Section>
+            <MoveToTrashAction item={item} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       metadata={

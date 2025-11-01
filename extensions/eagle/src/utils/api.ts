@@ -38,4 +38,10 @@ export function getFolderList() {
   return instance.get<EagleAPIResponse<Folder[]>>("/folder/list");
 }
 
+export function moveToTrash(itemIds: string[]) {
+  return instance.post<EagleAPIResponse<null>>("/item/moveToTrash", {
+    itemIds,
+  });
+}
+
 export default instance;

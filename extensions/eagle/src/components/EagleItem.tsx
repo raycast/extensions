@@ -3,8 +3,9 @@ import { Item } from "../@types/eagle";
 import { ItemDetail } from "./ItemDetail";
 import { ItemListDetail } from "./ItemListDetail";
 import { FolderNavigationActions } from "./FolderNavigationActions";
+import { MoveToTrashAction } from "./MoveToTrashAction";
 
-export default function EagleItem({ item }: { item: Item }) {
+export default function EagleItem({ item, onTrash }: { item: Item; onTrash?: () => void }) {
   return (
     <List.Item
       title={item.name}
@@ -14,6 +15,9 @@ export default function EagleItem({ item }: { item: Item }) {
         <ActionPanel>
           <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
           <FolderNavigationActions item={item} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          <ActionPanel.Section>
+            <MoveToTrashAction item={item} onTrash={onTrash} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
