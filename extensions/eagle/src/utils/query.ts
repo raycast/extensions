@@ -44,12 +44,31 @@ export function useItemList(search: string) {
 }
 
 export function useFolderItemList(folders?: string) {
+  const shouldFetch = folders !== undefined;
   const { data, error } = useSWR(
-    () => (folders ? `/api/folder/item/list?folders=${folders}` : null),
+    shouldFetch ? `/api/folder/item/list?folders=${folders}` : null,
     () => {
       return getItems({ folders: folders });
     }
   );
+
+  const items = useMemo(() => {
+    if (!data || data.data.status !== "success") return [];
+
+    return data.data.data;
+  }, [data]);
+
+  return {
+    data: items,
+    isLoading: shouldFetch ? !error && !data : false,
+    error,
+  };
+}
+
+export function useRootItemList() {
+  const { data, error } = useSWR("/api/item/list?folders=", () => {
+    return getItems({ folders: "" });
+  });
 
   const items = useMemo(() => {
     if (!data || data.data.status !== "success") return [];

@@ -3,7 +3,7 @@ import { Folder, Item } from "./@types/eagle";
 import EagleItem from "./components/EagleItem";
 import { checkEagleInstallation } from "./utils/checkInstall";
 import { showEagleNotOpenToast } from "./utils/error";
-import { useFolderItemList, useFolderList, useThumbnail } from "./utils/query";
+import { useFolderItemList, useFolderList, useThumbnail, useRootItemList } from "./utils/query";
 import { ItemDetail } from "./components/ItemDetail";
 
 interface Preferences {
@@ -106,7 +106,10 @@ function FolderView({ folder }: { folder: Folder }) {
 
 export default function Folder() {
   const preferences = getPreferenceValues<Preferences>();
-  const { data: folders, isLoading, error } = useFolderList();
+  const { data: folders, isLoading: foldersLoading, error } = useFolderList();
+  const { data: rootItems, isLoading: itemsLoading } = useRootItemList();
+
+  const isLoading = foldersLoading || itemsLoading;
 
   checkEagleInstallation();
 
@@ -119,22 +122,40 @@ export default function Folder() {
   if (preferences.layout === "grid") {
     return (
       <Grid isLoading={isLoading}>
-        <Grid.Section title="Folders">
-          {folders.map((folder) => (
-            <GridFolderItem key={folder.id} folder={folder} />
-          ))}
-        </Grid.Section>
+        {folders.length > 0 && (
+          <Grid.Section title="Folders">
+            {folders.map((folder) => (
+              <GridFolderItem key={folder.id} folder={folder} />
+            ))}
+          </Grid.Section>
+        )}
+        {rootItems.length > 0 && (
+          <Grid.Section title="Items">
+            {rootItems.map((item) => (
+              <GridEagleItem key={item.id} item={item} />
+            ))}
+          </Grid.Section>
+        )}
       </Grid>
     );
   }
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      <List.Section title="Folders">
-        {folders.map((folder) => (
-          <FolderItem key={folder.id} folder={folder} />
-        ))}
-      </List.Section>
+      {folders.length > 0 && (
+        <List.Section title="Folders">
+          {folders.map((folder) => (
+            <FolderItem key={folder.id} folder={folder} />
+          ))}
+        </List.Section>
+      )}
+      {rootItems.length > 0 && (
+        <List.Section title="Items">
+          {rootItems.map((item) => (
+            <EagleItem key={item.id} item={item} />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
