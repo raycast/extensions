@@ -1,9 +1,9 @@
 # Search Any Site Changelog
 
-## [Update] - 2025-10-03
+## [Update] - 2025-11-01
 
 - **Windows**: Toggled on windows support
-- **Bug fix**: Fixed issue where it wouldn't open corrent url if suggestions were toggled off.
+- **Bug fix**: Fixed issue where it wouldn't open correct url if suggestions were toggled off.
 
 ## [Update] - 2025-10-03
 
