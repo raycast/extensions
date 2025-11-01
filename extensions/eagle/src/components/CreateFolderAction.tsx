@@ -66,12 +66,7 @@ function CreateFolderForm({ parentFolderId, onCreated }: CreateFolderActionProps
         value={folderName}
         onChange={setFolderName}
       />
-      {parentFolderId && (
-        <Form.Description
-          title="Location"
-          text={`This folder will be created as a subfolder`}
-        />
-      )}
+      {parentFolderId && <Form.Description title="Location" text={`This folder will be created as a subfolder`} />}
     </Form>
   );
 }

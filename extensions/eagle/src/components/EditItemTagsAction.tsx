@@ -21,7 +21,12 @@ function EditTagsForm({ item, onUpdate }: EditItemTagsActionProps) {
 
       await updateItem({
         id: item.id,
-        tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+        tags: tags
+          ? tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : [],
       });
 
       await showToast({
@@ -59,10 +64,7 @@ function EditTagsForm({ item, onUpdate }: EditItemTagsActionProps) {
         onChange={setTags}
         info="Comma-separated list of tags"
       />
-      <Form.Description
-        title="Current Tags"
-        text={item.tags.length > 0 ? item.tags.join(", ") : "No tags"}
-      />
+      <Form.Description title="Current Tags" text={item.tags.length > 0 ? item.tags.join(", ") : "No tags"} />
     </Form>
   );
 }

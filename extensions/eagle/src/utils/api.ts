@@ -138,13 +138,7 @@ export function addItemFromPath(params: {
   return instance.post<EagleAPIResponse<null>>("/item/addFromPath", params);
 }
 
-export function updateItem(params: {
-  id: string;
-  tags?: string[];
-  annotation?: string;
-  url?: string;
-  star?: number;
-}) {
+export function updateItem(params: { id: string; tags?: string[]; annotation?: string; url?: string; star?: number }) {
   return instance.post<EagleAPIResponse<null>>("/item/update", params);
 }
 

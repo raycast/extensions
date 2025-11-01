@@ -55,13 +55,7 @@ function UpdateFolderForm({ folder, onUpdated }: UpdateFolderActionProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="newName"
-        title="Name"
-        placeholder="Enter folder name"
-        value={newName}
-        onChange={setNewName}
-      />
+      <Form.TextField id="newName" title="Name" placeholder="Enter folder name" value={newName} onChange={setNewName} />
       <Form.TextArea
         id="newDescription"
         title="Description"
@@ -73,19 +67,11 @@ function UpdateFolderForm({ folder, onUpdated }: UpdateFolderActionProps) {
         <Form.Dropdown.Item value="" title="No Change" />
         <Form.Dropdown.Item value="red" title="🔴 Red" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
         <Form.Dropdown.Item value="orange" title="🟠 Orange" icon={{ source: Icon.Circle, tintColor: Color.Orange }} />
-        <Form.Dropdown.Item
-          value="yellow"
-          title="🟡 Yellow"
-          icon={{ source: Icon.Circle, tintColor: Color.Yellow }}
-        />
+        <Form.Dropdown.Item value="yellow" title="🟡 Yellow" icon={{ source: Icon.Circle, tintColor: Color.Yellow }} />
         <Form.Dropdown.Item value="green" title="🟢 Green" icon={{ source: Icon.Circle, tintColor: Color.Green }} />
         <Form.Dropdown.Item value="aqua" title="🔵 Aqua" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
         <Form.Dropdown.Item value="blue" title="🔵 Blue" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
-        <Form.Dropdown.Item
-          value="purple"
-          title="🟣 Purple"
-          icon={{ source: Icon.Circle, tintColor: Color.Purple }}
-        />
+        <Form.Dropdown.Item value="purple" title="🟣 Purple" icon={{ source: Icon.Circle, tintColor: Color.Purple }} />
         <Form.Dropdown.Item value="pink" title="🩷 Pink" icon={{ source: Icon.Circle, tintColor: Color.Magenta }} />
       </Form.Dropdown>
       <Form.Description title="Current Name" text={folder.name} />
