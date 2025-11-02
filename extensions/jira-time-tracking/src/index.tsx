@@ -27,8 +27,8 @@ export default function Command() {
   const projectsPageGot = useRef(0);
   const projectsPageTotal = useRef(1);
 
-  const issuesPageGot = useRef(0);
-  const issuesPageTotal = useRef(1);
+  const issuesNextPageToken = useRef<string | null | undefined>(undefined);
+  const issuesHasMore = useRef(true);
 
   const handleTimeInput = (newTime: string) => {
     if (isValidTimeInput(newTime)) {
@@ -131,14 +131,14 @@ export default function Command() {
     let isMounted = true;
 
     const fetchIssues = async () => {
-      if (!selectedProject || issuesPageGot.current >= issuesPageTotal.current) {
+      if (!selectedProject || !issuesHasMore.current) {
         setLoading(false);
         return;
       }
 
       setLoading(true);
       try {
-        const result = await getIssues(issuesPageGot.current, selectedProject);
+        const result = await getIssues(issuesNextPageToken.current, selectedProject);
         if (result.data.length > 0 && isMounted) {
           setIssueCache((prev) => {
             const updatedIssues = [...(prev.get(selectedProject) || []), ...result.data];
@@ -157,13 +157,17 @@ export default function Command() {
             return uniqueIssues;
           });
 
-          issuesPageTotal.current = result.total;
-          issuesPageGot.current += result.data.length;
+          // Update pagination state
+          issuesNextPageToken.current = result.nextPageToken;
+          issuesHasMore.current = !!result.nextPageToken;
 
-          showToast(Toast.Style.Success, `Issues loaded ${issuesPageGot.current}/${issuesPageTotal.current}`);
+          const issuesCount = (issueCache.get(selectedProject)?.length || 0) + result.data.length;
+          showToast(Toast.Style.Success, `Issues loaded: ${issuesCount}`);
         } else {
+          issuesHasMore.current = false;
           setLoading(false);
-          showToast(Toast.Style.Success, `Issues loaded ${issuesPageGot.current}/${issuesPageTotal.current}`);
+          const issuesCount = issueCache.get(selectedProject)?.length || 0;
+          showToast(Toast.Style.Success, `All issues loaded: ${issuesCount}`);
         }
       } catch (e) {
         if (isMounted) {
@@ -185,9 +189,9 @@ export default function Command() {
     const list = issueCache.get(selectedProject) ?? [];
     setIssues(list);
     setSelectedIssue(list.length > 0 ? list[0] : null);
-    issuesPageGot.current = list.length;
+    issuesNextPageToken.current = undefined;
     if (resetLength) {
-      issuesPageTotal.current = Math.max(issuesPageTotal.current, list.length + 1);
+      issuesHasMore.current = true;
     }
   };
 

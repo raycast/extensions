@@ -33,10 +33,12 @@ export type Issue = {
 export type Result = {
   total: number;
   data: Issue[] | Project[];
+  nextPageToken?: string | null;
 };
 
 export type IssueBody = {
   issues: Issue[];
+  nextPageToken?: string | null;
 } & unknown;
 
 export type ProjectBody = {
@@ -48,6 +50,11 @@ export type PaginationBody = {
   startAt: number;
   total: number;
 };
+
+export type JqlSearchBody = {
+  issues: Issue[];
+  nextPageToken?: string | null;
+} & unknown;
 
 export type JiraErrorResponseBody = {
   message?: string;

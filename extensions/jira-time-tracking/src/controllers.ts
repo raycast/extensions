@@ -1,6 +1,6 @@
 import { parseDate } from "./utils";
 import { jiraRequest } from "./requests";
-import { issuesValidator, paginationValidator, projectsValidator } from "./validators";
+import { issuesValidator, paginationValidator, projectsValidator, jqlSearchValidator } from "./validators";
 import { getPreferenceValues } from "@raycast/api";
 import { Project } from "./types";
 
@@ -43,30 +43,72 @@ export const getProjects = async (begin: number) => {
   };
 };
 
-export const getIssues = async (begin: number, projectId?: string) => {
+export const getIssues = async (nextPageToken: string | null | undefined, projectId?: string) => {
+  const isJiraCloud = userPrefs.isJiraCloud === "cloud";
+
+  // Jira Server still uses the old endpoint with offset pagination
+  if (!isJiraCloud) {
+    const begin = typeof nextPageToken === "string" ? parseInt(nextPageToken, 10) || 0 : 0;
+    const jqlParts = [];
+
+    if (projectId) {
+      jqlParts.push(`project=${projectId}`);
+    }
+
+    if (userPrefs.customJQL) {
+      jqlParts.push(`(${userPrefs.customJQL})`);
+    }
+
+    const jql = jqlParts.length > 0 ? `&jql=${jqlParts.join(" AND ")}` : "";
+    const basePath = `/rest/api/3/search?fields=summary,parent,project&maxResults=500&startAt=${begin}${jql}`;
+    const apiPath = getApiPath(basePath);
+
+    console.log(`Fetching issues from (Jira Server): ${apiPath}`);
+    const response = await jiraRequest(apiPath);
+
+    return {
+      total: handlePaginationResp(response),
+      data: handleIssueResp(response),
+      nextPageToken: (begin + 500).toString(), // Use offset as token for Server
+    };
+  }
+
+  // Jira Cloud uses the new JQL search endpoint with cursor pagination
   const jqlParts = [];
 
-  // Add project ID filter if provided
   if (projectId) {
     jqlParts.push(`project=${projectId}`);
   }
 
-  // Add custom JQL query from preferences
   if (userPrefs.customJQL) {
     jqlParts.push(`(${userPrefs.customJQL})`);
   }
 
-  // Construct JQL query dynamically
-  const jql = jqlParts.length > 0 ? `&jql=${jqlParts.join(" AND ")}` : "";
-  const basePath = `/rest/api/3/search?fields=summary,parent,project&maxResults=500&startAt=${begin}${jql}`;
-  const apiPath = getApiPath(basePath);
+  // Default to all issues if no filters provided
+  const jql = jqlParts.length > 0 ? jqlParts.join(" AND ") : "order by created DESC";
 
-  console.log(`Fetching issues from: ${apiPath}`); // Debugging log
-  const response = await jiraRequest(apiPath);
+  // Build request body for POST /rest/api/3/search/jql
+  const requestBody: Record<string, unknown> = {
+    jql,
+    fields: ["summary", "parent", "project"],
+    maxResults: 500,
+  };
+
+  // Only include nextPageToken if it's not null/undefined
+  if (nextPageToken) {
+    requestBody.nextPageToken = nextPageToken;
+  }
+
+  const apiPath = "/rest/api/3/search/jql";
+  console.log(`Fetching issues from (Jira Cloud): ${apiPath}`);
+  console.log(`Request body: ${JSON.stringify(requestBody)}`);
+
+  const response = await jiraRequest(apiPath, JSON.stringify(requestBody), "POST");
 
   return {
-    total: handlePaginationResp(response),
-    data: handleIssueResp(response),
+    total: handleJqlSearchResp(response).total,
+    data: handleJqlSearchResp(response).data,
+    nextPageToken: handleJqlSearchResp(response).nextPageToken,
   };
 };
 
@@ -103,6 +145,21 @@ const handleProjectResp = (resp: unknown): Project[] => {
 
 const handleIssueResp = (resp: unknown) => {
   return issuesValidator(resp) ? resp.issues : [];
+};
+
+const handleJqlSearchResp = (resp: unknown) => {
+  if (jqlSearchValidator(resp)) {
+    return {
+      data: resp.issues,
+      nextPageToken: resp.nextPageToken || null,
+      total: resp.issues.length, // JQL search doesn't provide total count
+    };
+  }
+  return {
+    data: [],
+    nextPageToken: null,
+    total: 0,
+  };
 };
 
 export const postTimeLog = async (timeSpentSeconds: number, issueId: string, description: string, startedAt: Date) => {

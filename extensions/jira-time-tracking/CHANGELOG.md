@@ -1,5 +1,12 @@
 # Changelog
 
+## [Atlassian API Migration] - 2025-11-02
+
+- Migrated from deprecated `/rest/api/3/search` endpoint to new `/rest/api/3/search/jql` endpoint for Jira Cloud instances.
+- Updated pagination from offset-based (`startAt`) to cursor-based (`nextPageToken`) for Jira Cloud.
+- Maintained backward compatibility with Jira Server instances (still using `/rest/api/2/search`).
+- Fixed extension compatibility with Atlassian's API deprecation schedule (deprecated endpoints removed after October 31, 2025).
+
 ## [Custom JQL and Default Project Preference] - 2024-12-05
 
 - Removed Only My Issues preference.

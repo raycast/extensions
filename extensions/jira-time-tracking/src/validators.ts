@@ -1,4 +1,4 @@
-import { IssueBody, ProjectBody, JiraErrorResponseBody, PaginationBody } from "./types";
+import { IssueBody, ProjectBody, JiraErrorResponseBody, PaginationBody, JqlSearchBody } from "./types";
 
 export const projectsValidator = (body: unknown): body is ProjectBody => {
   if (Array.isArray(body)) {
@@ -42,3 +42,11 @@ export const paginationValidator = (body: unknown): body is PaginationBody => {
 
 export const isJiraErrorResponseBody = (body: unknown): body is JiraErrorResponseBody =>
   typeof body === "object" && body !== null && ("message" in body || "messages" in body);
+
+export const jqlSearchValidator = (body: unknown): body is JqlSearchBody => {
+  if (typeof body === "object" && body !== null && "issues" in body) {
+    const partial = body as { issues: unknown };
+    return Array.isArray(partial.issues);
+  }
+  return false;
+};
