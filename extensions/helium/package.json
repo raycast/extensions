@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "helium",
+  "title": "Helium",
+  "description": "Navigate open tabs, bookmarks, and the web in Helium browser",
+  "icon": "icon.png",
+  "author": "islamtayeb",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "searchEngine",
+      "title": "Search Engine",
+      "description": "Choose your preferred search engine for suggestions and searches",
+      "type": "dropdown",
+      "required": false,
+      "default": "google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
+        },
+        {
+          "title": "Yahoo",
+          "value": "yahoo"
+        },
+        {
+          "title": "Ecosia",
+          "value": "ecosia"
+        }
+      ]
+    },
+    {
+      "name": "enableSpaceSwitching",
+      "title": "Enable Space Switching (Experimental)",
+      "description": "⚠️ EXPERIMENTAL: Automatically switch to Helium's macOS Space when selecting tabs. Works by briefly opening/closing a temporary tab. May cause a brief visual flicker.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable automatic Space switching"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "description": "Search and navigate through open tabs in Helium browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-web",
+      "title": "Search Web",
+      "description": "Search the web with Helium browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search and open bookmarks from Helium browser",
+      "mode": "view"
+    },
+    {
+      "name": "open-new-tab",
+      "title": "Open New Tab",
+      "description": "Open a new tab in Helium browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "description": "Open a new window in Helium browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-incognito-window",
+      "title": "Open New Incognito Window",
+      "description": "Open a new incognito window in Helium browser",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
