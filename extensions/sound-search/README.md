@@ -1,7 +1,5 @@
 # Sound Search
 
-## Description
-
 Sound Search is a Raycast extension designed to help anyone—artists, creators, filmmakers, advocates, and more—quickly find the perfect sound or music sample for any purpose. Whether you're making videos, podcasts, campaigns, or just looking for creative inspiration, Sound Search enables you to discover quality samples from curated sources to fit your needs.
 
 ## Available Sources
