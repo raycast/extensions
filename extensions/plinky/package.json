@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "plinky",
+  "title": "Plinky",
+  "description": "Save links to Plinky",
+  "icon": "command-icon.png",
+  "author": "sergiospagnuolo",
+  "access": "private",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "saveLink",
+      "title": "Save Link to Plinky",
+      "description": "Save a URL to your Plinky account",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Plinky ID",
+      "description": "Your Plinky ID (API Key) from Plinky Settings",
+      "placeholder": "ID123456789012345678901234567890"
+    },
+    {
+      "name": "integrationName",
+      "type": "textfield",
+      "required": false,
+      "title": "Integration Name",
+      "description": "Optional: Name for this integration",
+      "default": "Raycast",
+      "placeholder": "Raycast"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.0",
+    "@raycast/utils": "^1.5.2",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
