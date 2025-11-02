@@ -12,7 +12,7 @@ Get sounds from [Soundraw](https://soundraw.io), the 100% Copyright-Safe AI Musi
 
 **ℹ️ Note**
 
-Soundraw's API for sound search is currently in a closed beta. At this time, users cannot self-serve an API token. If you are a paid [Soundraw](https://soundraw.io) user and would like early access or have questions regarding this extension, please contact our [customer support team](https://3jz3x.channel.io/workflows/704128).
+Soundraw's API for sound search is currently in a closed beta. At this time, users cannot self-serve an API token. If you are a paid [Soundraw](https://soundraw.io) user and would like early access or have questions regarding this extension, please contact [Soundraw](https://soundraw.io)'s [customer support team](https://3jz3x.channel.io/workflows/704128).
 
 **⚙️ Preferences**
 
