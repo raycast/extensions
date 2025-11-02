@@ -1,6 +1,6 @@
 import type { Movie } from "./movie";
 
-export interface QueueItem {
+export type QueueItem = {
   id: number;
   movieId: number;
   movie: Movie;
@@ -30,4 +30,4 @@ export interface QueueItem {
   outputPath: string;
   timeleft?: string;
   estimatedCompletionTime?: string;
-}
+};

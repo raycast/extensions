@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export async function handleAPIError(error: unknown, context: string): Promise<void> {
   console.error(`${context} error:`, error);
@@ -11,8 +11,7 @@ export async function handleAPIError(error: unknown, context: string): Promise<v
     errorMessage = error;
   }
 
-  await showToast({
-    style: Toast.Style.Failure,
+  await showFailureToast({
     title: context,
     message: errorMessage,
   });
