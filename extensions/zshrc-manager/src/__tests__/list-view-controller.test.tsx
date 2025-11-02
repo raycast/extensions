@@ -5,6 +5,7 @@ import { useZshrcLoader } from "../hooks/useZshrcLoader";
 import { useZshrcFilter } from "../hooks/useZshrcFilter";
 import { vi } from "vitest";
 import type { FilterableItem } from "../lib/list-view-controller";
+import { createMockSection } from "./fixtures/sections";
 
 // Mock dependencies
 vi.mock("../hooks/useZshrcLoader");
@@ -50,30 +51,34 @@ describe("list-view-controller.tsx", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    const testItems: TestItem[] = [
+      {
+        name: "item1",
+        value: "item1",
+        section: "Test Section",
+        sectionStartLine: 1,
+      },
+    ];
     mockUseZshrcLoader.mockReturnValue({
       sections: [
-        {
+        createMockSection({
           label: "Test Section",
           startLine: 1,
           endLine: 3,
           content: "item1\nitem2\nitem3",
-        },
+        }),
       ],
       isLoading: false,
       refresh: mockRefresh,
+      isFromCache: false,
+      lastError: null,
     });
     mockUseZshrcFilter.mockReturnValue({
       searchText: "",
       setSearchText: mockSetSearchText,
+      filtered: testItems,
       grouped: {
-        "Test Section": [
-          {
-            name: "item1",
-            value: "item1",
-            section: "Test Section",
-            sectionStartLine: 1,
-          },
-        ],
+        "Test Section": testItems,
       },
     });
   });
@@ -102,6 +107,8 @@ describe("list-view-controller.tsx", () => {
         sections: [],
         isLoading: true,
         refresh: mockRefresh,
+        isFromCache: false,
+        lastError: null,
       });
 
       render(<ListViewController {...mockConfig} />);
@@ -115,6 +122,7 @@ describe("list-view-controller.tsx", () => {
       mockUseZshrcFilter.mockReturnValue({
         searchText: "nonexistent",
         setSearchText: mockSetSearchText,
+        filtered: [],
         grouped: {},
       });
 
@@ -128,10 +136,13 @@ describe("list-view-controller.tsx", () => {
         sections: [],
         isLoading: true,
         refresh: mockRefresh,
+        isFromCache: false,
+        lastError: null,
       });
       mockUseZshrcFilter.mockReturnValue({
         searchText: "",
         setSearchText: mockSetSearchText,
+        filtered: [],
         grouped: {},
       });
 
@@ -190,15 +201,17 @@ describe("list-view-controller.tsx", () => {
 
       mockUseZshrcLoader.mockReturnValue({
         sections: [
-          {
+          createMockSection({
             label: "Test Section",
             startLine: 1,
             endLine: 3,
             content: "item1\nitem2\nitem3",
-          },
+          }),
         ],
         isLoading: false,
         refresh: mockRefresh,
+        isFromCache: false,
+        lastError: null,
       });
 
       render(<ListViewController {...mockConfig} postProcessItems={postProcessItems} />);
@@ -218,6 +231,7 @@ describe("list-view-controller.tsx", () => {
       mockUseZshrcFilter.mockReturnValue({
         searchText: "test query",
         setSearchText: mockSetSearchText,
+        filtered: [],
         grouped: {},
       });
 
@@ -251,45 +265,50 @@ describe("list-view-controller.tsx", () => {
 
   describe("multiple sections", () => {
     it("should handle multiple sections correctly", () => {
+      const section1Items: TestItem[] = [
+        {
+          name: "item1",
+          value: "item1",
+          section: "Section 1",
+          sectionStartLine: 1,
+        },
+      ];
+      const section2Items: TestItem[] = [
+        {
+          name: "item2",
+          value: "item2",
+          section: "Section 2",
+          sectionStartLine: 3,
+        },
+      ];
       mockUseZshrcLoader.mockReturnValue({
         sections: [
-          {
+          createMockSection({
             label: "Section 1",
             startLine: 1,
             endLine: 2,
             content: "item1",
-          },
-          {
+          }),
+          createMockSection({
             label: "Section 2",
             startLine: 3,
             endLine: 4,
             content: "item2",
-          },
+          }),
         ],
         isLoading: false,
         refresh: mockRefresh,
+        isFromCache: false,
+        lastError: null,
       });
 
       mockUseZshrcFilter.mockReturnValue({
         searchText: "",
         setSearchText: mockSetSearchText,
+        filtered: [...section1Items, ...section2Items],
         grouped: {
-          "Section 1": [
-            {
-              name: "item1",
-              value: "item1",
-              section: "Section 1",
-              sectionStartLine: 1,
-            },
-          ],
-          "Section 2": [
-            {
-              name: "item2",
-              value: "item2",
-              section: "Section 2",
-              sectionStartLine: 3,
-            },
-          ],
+          "Section 1": section1Items,
+          "Section 2": section2Items,
         },
       });
 
@@ -312,8 +331,8 @@ describe("list-view-controller.tsx", () => {
       );
 
       expect(customOverviewActions).toHaveBeenCalled();
-      const callArgs = customOverviewActions.mock.calls[0];
-      expect(callArgs[1]).toBe(mockRefresh);
+      const callArgs = customOverviewActions.mock.calls[0] as unknown[];
+      expect(callArgs?.[1]).toBe(mockRefresh);
     });
 
     it("should provide refresh function to item action generators", () => {
@@ -328,8 +347,8 @@ describe("list-view-controller.tsx", () => {
       );
 
       expect(customItemActions).toHaveBeenCalled();
-      const callArgs = customItemActions.mock.calls[0];
-      expect(callArgs[1]).toBe(mockRefresh);
+      const callArgs = customItemActions.mock.calls[0] as unknown[];
+      expect(callArgs?.[1]).toBe(mockRefresh);
     });
   });
 
@@ -371,6 +390,8 @@ describe("list-view-controller.tsx", () => {
         sections: [],
         isLoading: false,
         refresh: mockRefresh,
+        isFromCache: false,
+        lastError: null,
       });
 
       render(<ListViewController {...mockConfig} />);

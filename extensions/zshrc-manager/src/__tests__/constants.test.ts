@@ -23,6 +23,7 @@ describe("constants.ts", () => {
         enableDefaults: true,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: false,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: null,
@@ -33,15 +34,15 @@ describe("constants.ts", () => {
       const formats = getSectionFormatsInOrder();
 
       expect(formats).toHaveLength(9); // All default patterns
-      expect(formats[0].type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[1].type).toBe(SectionMarkerType.CUSTOM_END);
-      expect(formats[2].type).toBe(SectionMarkerType.DASHED_END);
-      expect(formats[3].type).toBe(SectionMarkerType.DASHED_START);
-      expect(formats[4].type).toBe(SectionMarkerType.BRACKETED);
-      expect(formats[5].type).toBe(SectionMarkerType.HASH);
-      expect(formats[6].type).toBe(SectionMarkerType.FUNCTION_START);
-      expect(formats[7].type).toBe(SectionMarkerType.FUNCTION_END);
-      expect(formats[8].type).toBe(SectionMarkerType.LABELED);
+      expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
+      expect(formats[1]?.type).toBe(SectionMarkerType.CUSTOM_END);
+      expect(formats[2]?.type).toBe(SectionMarkerType.DASHED_END);
+      expect(formats[3]?.type).toBe(SectionMarkerType.DASHED_START);
+      expect(formats[4]?.type).toBe(SectionMarkerType.BRACKETED);
+      expect(formats[5]?.type).toBe(SectionMarkerType.HASH);
+      expect(formats[6]?.type).toBe(SectionMarkerType.FUNCTION_START);
+      expect(formats[7]?.type).toBe(SectionMarkerType.FUNCTION_END);
+      expect(formats[8]?.type).toBe(SectionMarkerType.LABELED);
     });
 
     it("should return empty array when defaults are disabled and no custom patterns", () => {
@@ -49,6 +50,7 @@ describe("constants.ts", () => {
         enableDefaults: false,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: false,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: null,
@@ -69,6 +71,7 @@ describe("constants.ts", () => {
         enableDefaults: true,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: true,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: null,
@@ -80,10 +83,10 @@ describe("constants.ts", () => {
 
       expect(formats.length).toBeGreaterThan(0);
       // Custom patterns should come first
-      expect(formats[0].type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[0].regex).toBe(customStartPattern);
-      expect(formats[1].type).toBe(SectionMarkerType.CUSTOM_END);
-      expect(formats[1].regex).toBe(customEndPattern);
+      expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
+      expect(formats[0]?.regex).toBe(customStartPattern);
+      expect(formats[1]?.type).toBe(SectionMarkerType.CUSTOM_END);
+      expect(formats[1]?.regex).toBe(customEndPattern);
     });
 
     it("should include custom header pattern when enabled", () => {
@@ -93,6 +96,7 @@ describe("constants.ts", () => {
         enableDefaults: true,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: false,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: customHeaderPattern,
@@ -104,8 +108,8 @@ describe("constants.ts", () => {
 
       // Custom header pattern should be added at the end
       const lastFormat = formats[formats.length - 1];
-      expect(lastFormat.type).toBe(SectionMarkerType.LABELED);
-      expect(lastFormat.regex).toBe(customHeaderPattern);
+      expect(lastFormat?.type).toBe(SectionMarkerType.LABELED);
+      expect(lastFormat?.regex).toBe(customHeaderPattern);
     });
 
     it("should include custom header pattern even when defaults are disabled", () => {
@@ -115,6 +119,7 @@ describe("constants.ts", () => {
         enableDefaults: false,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: false,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: customHeaderPattern,
@@ -125,8 +130,8 @@ describe("constants.ts", () => {
       const formats = getSectionFormatsInOrder();
 
       expect(formats).toHaveLength(1);
-      expect(formats[0].type).toBe(SectionMarkerType.LABELED);
-      expect(formats[0].regex).toBe(customHeaderPattern);
+      expect(formats[0]?.type).toBe(SectionMarkerType.LABELED);
+      expect(formats[0]?.regex).toBe(customHeaderPattern);
     });
 
     it("should include all custom patterns when all are enabled", () => {
@@ -138,6 +143,7 @@ describe("constants.ts", () => {
         enableDefaults: true,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: true,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: customHeaderPattern,
@@ -149,14 +155,14 @@ describe("constants.ts", () => {
 
       expect(formats.length).toBeGreaterThan(9); // Defaults + custom patterns
       // Custom start/end should be first
-      expect(formats[0].type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[0].regex).toBe(customStartPattern);
-      expect(formats[1].type).toBe(SectionMarkerType.CUSTOM_END);
-      expect(formats[1].regex).toBe(customEndPattern);
+      expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
+      expect(formats[0]?.regex).toBe(customStartPattern);
+      expect(formats[1]?.type).toBe(SectionMarkerType.CUSTOM_END);
+      expect(formats[1]?.regex).toBe(customEndPattern);
       // Custom header should be last
       const lastFormat = formats[formats.length - 1];
-      expect(lastFormat.type).toBe(SectionMarkerType.LABELED);
-      expect(lastFormat.regex).toBe(customHeaderPattern);
+      expect(lastFormat?.type).toBe(SectionMarkerType.LABELED);
+      expect(lastFormat?.regex).toBe(customHeaderPattern);
     });
 
     it("should handle only custom start pattern", () => {
@@ -166,6 +172,7 @@ describe("constants.ts", () => {
         enableDefaults: false,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: true,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: null,
@@ -176,8 +183,8 @@ describe("constants.ts", () => {
       const formats = getSectionFormatsInOrder();
 
       expect(formats).toHaveLength(1);
-      expect(formats[0].type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[0].regex).toBe(customStartPattern);
+      expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
+      expect(formats[0]?.regex).toBe(customStartPattern);
     });
 
     it("should handle only custom end pattern", () => {
@@ -187,6 +194,7 @@ describe("constants.ts", () => {
         enableDefaults: false,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: true,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: null,
@@ -197,8 +205,8 @@ describe("constants.ts", () => {
       const formats = getSectionFormatsInOrder();
 
       expect(formats).toHaveLength(1);
-      expect(formats[0].type).toBe(SectionMarkerType.CUSTOM_END);
-      expect(formats[0].regex).toBe(customEndPattern);
+      expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_END);
+      expect(formats[0]?.regex).toBe(customEndPattern);
     });
 
     it("should maintain correct priority order", () => {
@@ -210,6 +218,7 @@ describe("constants.ts", () => {
         enableDefaults: true,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: true,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: customHeaderPattern,
@@ -221,14 +230,14 @@ describe("constants.ts", () => {
 
       // Order should be: custom start, custom end, defaults (9 patterns), custom header
       expect(formats.length).toBe(12); // 2 custom + 9 defaults + 1 custom header
-      expect(formats[0].type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[1].type).toBe(SectionMarkerType.CUSTOM_END);
+      expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
+      expect(formats[1]?.type).toBe(SectionMarkerType.CUSTOM_END);
       // Defaults follow
-      expect(formats[2].type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[3].type).toBe(SectionMarkerType.CUSTOM_END);
+      expect(formats[2]?.type).toBe(SectionMarkerType.CUSTOM_START);
+      expect(formats[3]?.type).toBe(SectionMarkerType.CUSTOM_END);
       // Custom header is last
-      expect(formats[11].type).toBe(SectionMarkerType.LABELED);
-      expect(formats[11].regex).toBe(customHeaderPattern);
+      expect(formats[11]?.type).toBe(SectionMarkerType.LABELED);
+      expect(formats[11]?.regex).toBe(customHeaderPattern);
     });
 
     it("should handle null custom patterns gracefully", () => {
@@ -236,6 +245,7 @@ describe("constants.ts", () => {
         enableDefaults: true,
         enableCustomHeaderPattern: true,
         enableCustomStartEndPatterns: true,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: null,
@@ -247,8 +257,8 @@ describe("constants.ts", () => {
 
       // Should only have defaults (9 patterns)
       expect(formats).toHaveLength(9);
-      expect(formats[0].type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[8].type).toBe(SectionMarkerType.LABELED);
+      expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
+      expect(formats[8]?.type).toBe(SectionMarkerType.LABELED);
     });
 
     it("should return formats with correct regex instances", () => {
@@ -256,6 +266,7 @@ describe("constants.ts", () => {
         enableDefaults: true,
         enableCustomHeaderPattern: false,
         enableCustomStartEndPatterns: false,
+        enableCustomZshrcPath: false,
       });
       mockGetCustomPatterns.mockReturnValue({
         headerPattern: null,
