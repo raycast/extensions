@@ -1,5 +1,7 @@
 # Appwrite Changelog
 
+## [] - {PR_MERGE_DATE}
+
 ## [DB, Storage, User Enhancements] - 2025-07-14
 
 - In **Databases**:

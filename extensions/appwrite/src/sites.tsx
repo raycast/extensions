@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Icon, Image, List } from "@raycast/api";
 import { useContext } from "react";
 import { SDKContext } from "./sdk";
 import { DeploymentStatus } from "node-appwrite";
@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { filesize } from "filesize";
+import Variables from "./sites/variables";
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
@@ -26,11 +27,12 @@ export default function Sites() {
   return (
     <List isLoading={isLoading}>
       {!isLoading && !sites.length && !error ? <List.EmptyView title="Create your first site" description="Deploy and manage your web applications with Sites." /> : sites.map((site) => (
-        <List.Item key={site.$id} icon={`https://cloud.appwrite.io/console/icons/dark/color/${site.framework}.svg`} title={site.name} accessories={[
+        <List.Item key={site.$id} icon={`https://cloud.appwrite.io/console/icons/${environment.appearance}/color/${site.framework}.svg`} title={site.name} accessories={[
           { icon: Icon.Plus, date: new Date(site.$createdAt), tooltip: `Created: ${site.$createdAt}` },
           { icon: Icon.Pencil, date: new Date(site.$updatedAt), tooltip: `Updated: ${site.$updatedAt}` },
         ]} actions={<ActionPanel>
           <Action.Push icon={Icon.Airplane} title="Deployments" target={<Deployments siteId={site.$id} />} />
+          <Action.Push icon={Icon.Code} title="Variables" target={<Variables siteId={site.$id} />} />
         </ActionPanel>} />
       ))}
     </List>
@@ -75,3 +77,4 @@ function Deployments({ siteId }: { siteId: string }) {
     </List>
   );
 }
+

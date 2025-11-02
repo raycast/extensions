@@ -69,10 +69,9 @@ function CreateUser({ mutate }: { mutate: MutatePromise<sdk.Models.User[]> }) {
   const { users } = useContext(SDKContext);
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
-      const { userId, email, phone, password, name } = values;
       const toast = await showToast(Toast.Style.Animated, "Creating", values.userId);
       try {
-        await mutate(users.create(userId, email, phone, password, name));
+        await mutate(users.create(values));
         toast.style = Toast.Style.Success;
         toast.title = "Created";
         pop();
