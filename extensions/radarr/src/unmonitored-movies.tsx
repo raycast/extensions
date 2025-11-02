@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Grid, ActionPanel, Action, Icon } from "@raycast/api";
 
-import { useInstanceManager } from "./hooks/useInstanceManager";
-import { useMovies } from "./hooks/useRadarrAPI";
-import { getMoviePoster } from "./utils";
-import type { Movie } from "./types";
+import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
+import { useMovies } from "@/lib/hooks/useRadarrAPI";
+import { getMoviePoster } from "@/lib/utils/formatting";
+import type { Movie } from "@/lib/types/movie";
 
 type AvailabilityFilter = "all" | "available" | "missing";
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
 
-import { addMovie, getRootFolders, getQualityProfiles } from "./hooks/useRadarrAPI";
-import { formatMovieTitle } from "./utils";
-import type { MovieLookup, RadarrInstance } from "./types";
+import { addMovie, getRootFolders, getQualityProfiles } from "@/lib/hooks/useRadarrAPI";
+import { formatMovieTitle } from "@/lib/utils/formatting";
+import type { MovieLookup, RadarrInstance } from "@/lib/types/movie";
 
 interface AddMovieFormProps {
   movie: MovieLookup;

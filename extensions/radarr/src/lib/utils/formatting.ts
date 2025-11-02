@@ -1,4 +1,4 @@
-import type { MovieLookup, Movie } from "./types";
+import type { MovieLookup, Movie } from "@/lib/types/movie";
 
 export function formatMovieTitle(movie: MovieLookup | Movie): string {
   return `${movie.title} (${movie.year})`;
@@ -108,16 +108,13 @@ export function formatOverview(overview: string): string {
     return "No overview available";
   }
 
-  // Split into sentences and add line breaks for better readability
   const sentences = overview.split(/(?<=[.!?])\s+/);
 
-  // Group sentences into paragraphs (every 2-3 sentences)
   const paragraphs: string[] = [];
   for (let i = 0; i < sentences.length; i += 2) {
     const paragraph = sentences.slice(i, i + 2).join(" ");
     paragraphs.push(paragraph);
   }
 
-  // Join paragraphs with double line breaks
   return paragraphs.join("\n\n");
 }

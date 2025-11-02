@@ -1,15 +1,9 @@
 import { useFetch } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
-import type {
-  Movie,
-  QueueItem,
-  CalendarMovie,
-  HealthCheck,
-  SystemStatus,
-  HistoryRecord,
-  MovieLookup,
-  RadarrInstance,
-} from "../types";
+import type { Movie, CalendarMovie, HistoryRecord, MovieLookup } from "@/lib/types/movie";
+import type { QueueItem } from "@/lib/types/queue";
+import type { HealthCheck, SystemStatus } from "@/lib/types/system";
+import type { RadarrInstance } from "@/lib/types/config";
 
 interface APIResponse<T> {
   data: T | undefined;

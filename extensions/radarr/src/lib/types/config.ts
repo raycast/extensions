@@ -1,5 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { RadarrInstance } from "./types";
+
+export interface RadarrInstance {
+  name: string;
+  url: string;
+  apiKey: string;
+  isDefault: boolean;
+}
 
 interface Preferences {
   primaryInstanceName: string;
@@ -16,19 +22,17 @@ export function getRadarrInstances(): RadarrInstance[] {
   const preferences = getPreferenceValues<Preferences>();
   const instances: RadarrInstance[] = [];
 
-  // Primary instance (always present)
   if (!preferences.primaryInstanceName || !preferences.primaryInstanceUrl || !preferences.primaryInstanceApiKey) {
     throw new Error("Primary Radarr instance configuration is incomplete");
   }
 
   instances.push({
     name: preferences.primaryInstanceName,
-    url: preferences.primaryInstanceUrl.replace(/\/$/, ""), // Remove trailing slash
+    url: preferences.primaryInstanceUrl.replace(/\/$/, ""),
     apiKey: preferences.primaryInstanceApiKey,
     isDefault: true,
   });
 
-  // Secondary instance (optional)
   if (
     preferences.enableSecondaryInstance &&
     preferences.secondaryInstanceName &&
@@ -37,7 +41,7 @@ export function getRadarrInstances(): RadarrInstance[] {
   ) {
     instances.push({
       name: preferences.secondaryInstanceName,
-      url: preferences.secondaryInstanceUrl.replace(/\/$/, ""), // Remove trailing slash
+      url: preferences.secondaryInstanceUrl.replace(/\/$/, ""),
       apiKey: preferences.secondaryInstanceApiKey,
       isDefault: false,
     });
@@ -50,21 +54,18 @@ export function getActiveRadarrInstance(): RadarrInstance {
   const preferences = getPreferenceValues<Preferences>();
   const instances = getRadarrInstances();
 
-  // If secondary instance is enabled and selected, use it
   if (preferences.activeInstance === "secondary" && preferences.enableSecondaryInstance && instances.length > 1) {
-    return instances[1]; // Secondary instance
+    return instances[1];
   }
 
-  // Otherwise use primary instance
   if (instances.length > 0) {
-    return instances[0]; // Primary instance
+    return instances[0];
   }
 
   throw new Error("No Radarr instances configured");
 }
 
 export function getDefaultRadarrInstance(): RadarrInstance {
-  // Keep for backward compatibility, but use active instance logic
   return getActiveRadarrInstance();
 }
 

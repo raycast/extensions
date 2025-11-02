@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Grid, ActionPanel, Action, Icon } from "@raycast/api";
 
-import { useInstanceManager } from "./hooks/useInstanceManager";
-import { useCalendar } from "./hooks/useRadarrAPI";
-import { getMoviePoster, formatReleaseDate } from "./utils";
-import type { CalendarMovie } from "./types";
+import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
+import { useCalendar } from "@/lib/hooks/useRadarrAPI";
+import { getMoviePoster, formatReleaseDate } from "@/lib/utils/formatting";
+import type { CalendarMovie } from "@/lib/types/movie";
 
 type MonitoringFilter = "all" | "monitored" | "unmonitored";
 
