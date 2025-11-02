@@ -1,5 +1,17 @@
 # Swift Command Changelog
 
+## [Add Clipboard Placeholder and Shortcuts] - {PR_MERGE_DATE}
+
+### Added
+
+- Add clipboard placeholder
+- Add shortcut key to insert placeholder
+- Run command on multiple terminals
+
+### Changed
+
+- Remove the display of Arguments
+
 ## [Add Import Alias Command] - 2025-04-29
 
 ### Added
