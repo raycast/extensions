@@ -212,7 +212,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
         }
         icon={searchText.trim() ? Icon.MagnifyingGlass : Icon.Video}
       />
-      {(searchResults || []).map(movieListItem)}contributions/merge-1755946618974
+      {(searchResults || []).map(movieListItem)}
     </List>
   );
 }

@@ -38,6 +38,28 @@ export function formatReleaseDate(dateString?: string): string {
   }
 }
 
+export function getNextReleaseDate(movie: {
+  digitalRelease?: string;
+  inCinemas?: string;
+  physicalRelease?: string;
+}): string | null {
+  const today = new Date();
+
+  if (movie.digitalRelease && new Date(movie.digitalRelease) > today) {
+    return movie.digitalRelease;
+  }
+
+  if (movie.inCinemas && new Date(movie.inCinemas) > today) {
+    return movie.inCinemas;
+  }
+
+  if (movie.physicalRelease && new Date(movie.physicalRelease) > today) {
+    return movie.physicalRelease;
+  }
+
+  return movie.digitalRelease || movie.inCinemas || movie.physicalRelease || null;
+}
+
 export function getMoviePoster(movie: MovieLookup | Movie): string | undefined {
   const posterImage = movie.images?.find(img => img.coverType === "poster");
   return posterImage?.remoteUrl || posterImage?.url;
