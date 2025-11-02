@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-search",
+  "title": "App Search",
+  "description": "AI-powered application search - find installed apps by name, purpose, or description",
+  "icon": "icon.png",
+  "author": "tktcorporation",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "description": "Select your preferred language for the extension",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "日本語 (Japanese)",
+          "value": "ja"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Apps",
+      "description": "Search for installed applications using AI-powered fuzzy matching",
+      "mode": "view",
+      "keywords": [
+        "app",
+        "application",
+        "search",
+        "find",
+        "launch",
+        "open"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-installed-apps",
+      "title": "Search Installed Apps",
+      "description": "Search for installed applications by name, purpose, or category. Returns installed apps with optional suggestions for uninstalled apps."
+    }
+  ],
+  "ai": {
+    "instructions": "Help users find applications on their system. ALWAYS search installed applications first. Match based on app name, purpose, or category. Only suggest uninstalled apps if few matches found or explicitly requested. Indicate which apps are installed vs suggestions.",
+    "evals": [
+      {
+        "input": "@search-app メール書くアプリ",
+        "expected": [
+          {
+            "callsTool": "search-installed-apps"
+          },
+          {
+            "meetsCriteria": "Returns email applications"
+          },
+          {
+            "includes": "Mail"
+          }
+        ]
+      },
+      {
+        "input": "@search-app browser",
+        "expected": [
+          {
+            "callsTool": "search-installed-apps"
+          },
+          {
+            "meetsCriteria": "Returns browser applications like Chrome or Safari"
+          }
+        ]
+      },
+      {
+        "input": "@search-app 画像編集",
+        "expected": [
+          {
+            "callsTool": "search-installed-apps"
+          },
+          {
+            "meetsCriteria": "Returns image editing applications"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.87.0",
+    "@raycast/utils": "^1.19.0",
+    "fuse.js": "^7.0.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@vitest/ui": "^4.0.5",
+    "prettier": "^3.4.2",
+    "typescript": "5.4.5",
+    "vitest": "^4.0.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "tsc --noEmit && ray lint",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
