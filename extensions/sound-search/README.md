@@ -23,15 +23,17 @@ Soundraw's API for sound search is currently in a closed beta. At this time, use
 
 Want support for a new data source or sample provider? Please request it in the [GitHub Discussions section](https://github.com/clins1994/sound-search/discussions) for this extension!
 
-Alternatively, you are welcome to open a pull request with a new integration.
+Alternatively, you are welcome to open a pull request with any new integration. All ideas are welcome!
 
-Can't promise but I'll do my best to add some other sources. Any will be very much appreciated 🤗
+Can't promise but I'll do my best to add some more sources. Any help will be very much appreciated 🤗
 
 ## Author
 
-Created by Caio Lins ([@clins1994 on GitHub](https://github.com/clins1994))
+Created by Caio Lins ([@clins1994 on GitHub](https://github.com/clins1994)).
 
-Special thanks to [Ravi](https://github.com/perfectbase), who helped me implement the core features during the [Tokyo AI Hackathon](https://raycast.connpass.com/event/369928/)
+Special thanks to Ravi ([@perfectbase on GitHub](https://github.com/perfectbase)), who helped me implement the core features during the [Tokyo AI Hackathon](https://raycast.connpass.com/event/369928/) organized by [Raycast](https://github.com/raycast), [Anthropic](https://github.com/anthropics), [Vercel](https://github.com/vercel), and [Supabase](https://github.com/supabase) on October 30th, 2025.
+
+<img src="assets/tokyo-ai-hackathon.jpeg" alt="Tokyo AI Hackathon" style="max-width: 100%; width: 100%;" />
 
 ## License
 
