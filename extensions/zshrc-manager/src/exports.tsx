@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import type { ReactElement } from "react";
 import { parseExports } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
@@ -118,7 +118,7 @@ echo $${exportItem.variable}
       )}
       generateOverviewActions={(_, refresh) => (
         <ActionPanel>
-          <Action.Push title="Add New Export" target={<EditExport onSave={refresh} />} icon={Icon.Plus} />
+          <Action.Push title="Add New Export" target={<EditExport onSave={refresh} />} shortcut={Keyboard.Shortcut.Common.New} icon={Icon.Plus} />
           <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
           <Action
             title="Refresh"
@@ -157,7 +157,7 @@ echo $${exportItem.variable}
               }
             }}
           />
-          <Action.Push title="Add New Export" target={<EditExport onSave={refresh} />} icon={Icon.Plus} />
+          <Action.Push title="Add New Export" target={<EditExport onSave={refresh} />} shortcut={Keyboard.Shortcut.Common.New} icon={Icon.Plus} />
           <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
           <Action
             title="Refresh"

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import type { ReactElement } from "react";
 import { parseAliases } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
@@ -115,7 +115,7 @@ Use the actions below to edit or manage this alias.
       )}
       generateOverviewActions={(_, refresh) => (
         <ActionPanel>
-          <Action.Push title="Add New Alias" target={<EditAlias onSave={refresh} />} icon={Icon.Plus} />
+          <Action.Push title="Add New Alias" target={<EditAlias onSave={refresh} />} shortcut={Keyboard.Shortcut.Common.New} icon={Icon.Plus} />
           <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
           <Action
             title="Refresh"
@@ -154,7 +154,7 @@ Use the actions below to edit or manage this alias.
               }
             }}
           />
-          <Action.Push title="Add New Alias" target={<EditAlias onSave={refresh} />} icon={Icon.Plus} />
+          <Action.Push title="Add New Alias" target={<EditAlias onSave={refresh} />} shortcut={Keyboard.Shortcut.Common.New} icon={Icon.Plus} />
           <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
           <Action
             title="Refresh"
