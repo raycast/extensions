@@ -1,5 +1,4 @@
 import { Color } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
 import { updateUspsTracking, ableToTrackUspsRemotely, urlToUspsTrackingWebpage } from "./carriers/usps";
 import { updateUpsTracking, ableToTrackUpsRemotely, urlToUpsTrackingWebpage } from "./carriers/ups";
 import { updateFedexTracking, ableToTrackFedexRemotely, urlToFedexTrackingWebpage } from "./carriers/fedex";
@@ -10,7 +9,7 @@ const carriers: Carrier[] = [
     id: "usps",
     name: "USPS",
     color: Color.Blue,
-    icon: getFavicon("https://www.usps.com", { fallback: "usps.png" }),
+    icon: "usps.png",
     updateTracking: updateUspsTracking,
     ableToTrackRemotely: ableToTrackUspsRemotely,
     urlToTrackingWebpage: urlToUspsTrackingWebpage,
@@ -19,7 +18,7 @@ const carriers: Carrier[] = [
     id: "ups",
     name: "UPS",
     color: Color.Orange,
-    icon: getFavicon("https://www.ups.com", { fallback: "ups.png" }),
+    icon: "ups.png",
     updateTracking: updateUpsTracking,
     ableToTrackRemotely: ableToTrackUpsRemotely,
     urlToTrackingWebpage: urlToUpsTrackingWebpage,
@@ -28,7 +27,7 @@ const carriers: Carrier[] = [
     id: "fedex",
     name: "FedEx",
     color: Color.Purple,
-    icon: getFavicon("https://www.fedex.com", { fallback: "fedex.png" }),
+    icon: "fedex.png",
     updateTracking: updateFedexTracking,
     ableToTrackRemotely: ableToTrackFedexRemotely,
     urlToTrackingWebpage: urlToFedexTrackingWebpage,

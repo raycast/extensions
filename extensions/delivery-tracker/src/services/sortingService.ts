@@ -95,6 +95,11 @@ export function sortTracking(tracks: Delivery[], packages: PackageMap): Delivery
 export function groupDeliveriesByStatus(
   deliveries: Delivery[],
   packages: PackageMap,
+  options?: {
+    maxArrivingToday?: number;
+    maxInTransit?: number;
+    maxDelivered?: number;
+  },
 ): {
   arrivingToday: Delivery[];
   inTransit: Delivery[];
@@ -109,7 +114,24 @@ export function groupDeliveriesByStatus(
     unknown: [] as Delivery[],
   };
 
+  // Early exit if all limits are reached
+  const checkLimits = () => {
+    if (!options) return false;
+    const { maxArrivingToday, maxInTransit, maxDelivered } = options;
+    return (
+      maxArrivingToday !== undefined &&
+      groups.arrivingToday.length >= maxArrivingToday &&
+      maxInTransit !== undefined &&
+      groups.inTransit.length >= maxInTransit &&
+      maxDelivered !== undefined &&
+      groups.delivered.length >= maxDelivered
+    );
+  };
+
   for (const delivery of deliveries) {
+    // Skip if all limits reached
+    if (checkLimits()) break;
+
     const deliveryPackages = packages[delivery.id]?.packages ?? [];
 
     if (!hasPackages(deliveryPackages)) {
@@ -118,7 +140,9 @@ export function groupDeliveriesByStatus(
     }
 
     if (allPackagesDelivered(deliveryPackages)) {
-      groups.delivered.push(delivery);
+      if (!options?.maxDelivered || groups.delivered.length < options.maxDelivered) {
+        groups.delivered.push(delivery);
+      }
       continue;
     }
 
@@ -126,12 +150,18 @@ export function groupDeliveriesByStatus(
     if (earliestPackage?.deliveryDate) {
       const dayDifference = calculateDayDifference(earliestPackage.deliveryDate, now);
       if (dayDifference === 0) {
-        groups.arrivingToday.push(delivery);
+        if (!options?.maxArrivingToday || groups.arrivingToday.length < options.maxArrivingToday) {
+          groups.arrivingToday.push(delivery);
+        }
       } else {
-        groups.inTransit.push(delivery);
+        if (!options?.maxInTransit || groups.inTransit.length < options.maxInTransit) {
+          groups.inTransit.push(delivery);
+        }
       }
     } else {
-      groups.inTransit.push(delivery);
+      if (!options?.maxInTransit || groups.inTransit.length < options.maxInTransit) {
+        groups.inTransit.push(delivery);
+      }
     }
   }
 

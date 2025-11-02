@@ -2,6 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { Delivery } from "../types/delivery";
 import { PackageMap } from "../types/package";
 import carriers from "../carriers";
+import { categorizeError, summarizeErrors, TrackingError } from "../types/errors";
 
 export async function refreshTracking(
   forceRefresh: boolean,
@@ -9,6 +10,7 @@ export async function refreshTracking(
   packages: PackageMap,
   setPackages: (value: ((prevState: PackageMap) => PackageMap) | PackageMap) => void,
   setTrackingIsLoading: (value: ((prevState: boolean) => boolean) | boolean) => void,
+  refreshIntervalMinutes: number = 30,
 ): Promise<void> {
   if (!deliveries || !packages) {
     return;
@@ -17,7 +19,7 @@ export async function refreshTracking(
   setTrackingIsLoading(true);
 
   const now = new Date();
-  const errors: string[] = [];
+  const errors: TrackingError[] = [];
 
   for (const delivery of deliveries.filter((delivery) => !delivery.debug && !delivery.archived)) {
     const carrier = carriers.get(delivery.carrier);
@@ -31,9 +33,9 @@ export async function refreshTracking(
       !forceRefresh &&
       currentTrackPackages &&
       currentTrackPackages.lastUpdated &&
-      now.getTime() - currentTrackPackages.lastUpdated.getTime() <= 30 * 60 * 1000
+      now.getTime() - currentTrackPackages.lastUpdated.getTime() <= refreshIntervalMinutes * 60 * 1000
     ) {
-      // skip updating if less than 30 minutes since last update
+      // skip updating if less than the configured interval since last update
       continue;
     }
 
@@ -50,20 +52,29 @@ export async function refreshTracking(
         };
       });
     } catch (error) {
-      errors.push(`${delivery.name}: ${String(error)}`);
+      const categorizedError = categorizeError(error, delivery.name);
+      errors.push(categorizedError);
     }
   }
 
   setTrackingIsLoading(false);
 
   if (errors.length > 0) {
+    const summary = summarizeErrors(errors);
+
     await showToast({
       style: Toast.Style.Failure,
       title: `Failed to Update ${errors.length} Deliver${errors.length > 1 ? "ies" : "y"}`,
-      message: errors.length === 1 ? errors[0] : "Check console for details",
+      message: summary.userMessage,
     });
-    if (errors.length > 1) {
-      console.error("Tracking update errors:", errors);
-    }
+
+    // Log detailed error information grouped by category
+    console.error("Tracking update errors by category:");
+    summary.byCategory.forEach((errorMessages, category) => {
+      console.error(
+        `\n[${category.toUpperCase()}] (${errorMessages.length} error${errorMessages.length > 1 ? "s" : ""}):`,
+      );
+      errorMessages.forEach((msg) => console.error(`  - ${msg}`));
+    });
   }
 }

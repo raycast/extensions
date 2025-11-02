@@ -131,10 +131,6 @@ Added new optional fields to `Delivery` interface:
 - `archivedAt?: Date` - When delivery was archived
 - `notes?: string` - User notes about the delivery
 
-## Breaking Changes
-
-None! All changes are backward compatible. Existing data will work seamlessly with the new features.
-
 ## Migration Notes
 
 - Old deliveries without new fields will work as-is
@@ -162,27 +158,32 @@ src/
 │   └── sortingService.ts     # Sorting and grouping
 ├── hooks/
 │   ├── useDeliveries.ts      # Delivery state management
-│   └── usePackages.ts        # Package cache management
+│   ├── usePackages.ts        # Package cache management
+│   └── useRefreshDeliveries.ts # Refresh tracking hook
 ├── utils/
-│   └── carrierDetection.ts   # Carrier auto-detection
+│   └── dateUtils.ts          # Date formatting and utilities
 ├── views/
 │   ├── TrackNewDeliveryView.tsx
 │   ├── EditDeliveryView.tsx
 │   ├── ShowDetailsView.tsx
 │   └── TrackNewDeliveryAction.tsx
+├── types/
+│   ├── carrier.ts            # Carrier type definitions
+│   ├── delivery.ts           # Delivery type definitions
+│   ├── package.ts            # Package type definitions
+│   ├── errors.ts             # Error type definitions
+│   └── index.ts              # Type exports
 ├── carriers/
-│   ├── ups.ts
-│   ├── fedex.ts
-│   └── usps.ts
+│   ├── ups.ts                # UPS tracking integration
+│   ├── fedex.ts              # FedEx tracking integration
+│   └── usps.ts               # USPS tracking integration
 ├── track-deliveries.tsx      # Main command (refactored)
 ├── track-new-delivery.tsx    # New delivery command
-├── menu-bar.tsx              # Menu bar extra (new)
-├── background-refresh.tsx    # Background refresh (new)
-├── view-archived.tsx         # Archived view (new)
-├── carriers.ts
-├── delivery.ts               # Updated interface
-├── package.ts
-└── debugData.ts
+├── menu-bar.tsx              # Menu bar extra
+├── view-archived.tsx         # Archived deliveries view
+├── carriers.ts               # Carrier utilities
+├── package.ts                # Package utilities
+└── debugData.ts              # Debug data helpers
 ```
 
 ## Summary
@@ -193,5 +194,6 @@ This refactoring significantly improves the extension's:
 - **Code Quality**: Service layer, custom hooks, TypeScript strict mode
 - **User Experience**: Sections, better empty states, improved error messages
 - **Maintainability**: Cleaner architecture, separation of concerns
+- **Documentation**: Clear setup guides, comprehensive changelog, detailed improvement docs
 
-The extension is now more powerful, easier to use, and better organized for future enhancements.
+The extension is now more powerful, easier to use, better documented, and well-organized for future enhancements.

@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Keyboard } from "@raycast/api";
 import { Delivery } from "../types/delivery";
 import { Package } from "../types/package";
 import { deliveryIcon, deliveryStatus, getPackageWithEarliestDeliveryDate } from "../package";
+import { formatDate } from "../utils/dateUtils";
 import carriers from "../carriers";
 
 export default function ShowDetailsView({ delivery, packages }: { delivery: Delivery; packages: Package[] }) {
@@ -29,7 +30,11 @@ ${packages.length > 0 ? packages.map((aPackage, index) => markdownForPackage(aPa
           <Detail.Metadata.Label title="Status" text={deliveryStatus(packages).value} icon={deliveryIcon(packages)} />
           <Detail.Metadata.Label
             title="Delivery Date"
-            text={getPackageWithEarliestDeliveryDate(packages)?.deliveryDate?.toDateString() ?? "Unknown"}
+            text={
+              getPackageWithEarliestDeliveryDate(packages)?.deliveryDate
+                ? formatDate(getPackageWithEarliestDeliveryDate(packages)!.deliveryDate!)
+                : "Unknown"
+            }
           />
           <Detail.Metadata.Label title="Number of Packages" text={packages.length.toString()} />
           {delivery.notes && (
@@ -61,7 +66,7 @@ ${packages.length > 0 ? packages.map((aPackage, index) => markdownForPackage(aPa
     
 ${aPackage.delivered ? "Delivered!" : "Not delivered."}
 
-Delivery Date: ${aPackage.deliveryDate?.toDateString() ?? "Unknown"}.
+Delivery Date: ${aPackage.deliveryDate ? formatDate(aPackage.deliveryDate) : "Unknown"}.
 `;
   }
 }

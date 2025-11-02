@@ -122,7 +122,7 @@ export default function TrackNewDeliveryView({
       {showDatePicker && (
         <Form.DatePicker
           title="Manual delivery date"
-          info="This carrier doesn't support updating the tracking over the Internet yet.  Set a delivery date manually."
+          info="This carrier doesn't support updating the tracking over the Internet yet. Set a delivery date manually."
           type={Form.DatePicker.Type.Date}
           {...itemProps.manualDeliveryDate}
         />

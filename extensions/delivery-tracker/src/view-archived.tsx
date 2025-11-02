@@ -2,25 +2,16 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useDeliveries } from "./hooks/useDeliveries";
 import { usePackages } from "./hooks/usePackages";
 import { deliveryIcon, deliveryStatus } from "./package";
+import { formatDate } from "./utils/dateUtils";
 import carriers from "./carriers";
 import ShowDetailsView from "./views/ShowDetailsView";
+import { unarchiveDelivery } from "./services/deliveryService";
 
 export default function ViewArchivedCommand() {
   const { archivedDeliveries, activeDeliveries, setDeliveries, isLoading } = useDeliveries();
   const { packages } = usePackages();
 
-  const unarchiveDelivery = async (id: string) => {
-    const delivery = archivedDeliveries.find((d) => d.id === id);
-    if (!delivery) return;
-
-    // Combine active and archived deliveries to preserve all entries
-    const allDeliveries = [...activeDeliveries, ...archivedDeliveries];
-    const index = allDeliveries.findIndex((d) => d.id === id);
-    if (index !== -1) {
-      allDeliveries[index] = { ...allDeliveries[index], archived: false, archivedAt: undefined };
-      await setDeliveries(allDeliveries);
-    }
-  };
+  const allDeliveries = [...activeDeliveries, ...archivedDeliveries];
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search archived deliveries...">
@@ -38,9 +29,7 @@ export default function ViewArchivedCommand() {
             title={delivery.name}
             subtitle={delivery.trackingNumber}
             accessories={[
-              delivery.archivedAt
-                ? { text: `Archived ${delivery.archivedAt.toLocaleDateString()}`, icon: Icon.Clock }
-                : {},
+              delivery.archivedAt ? { text: `Archived ${formatDate(delivery.archivedAt)}`, icon: Icon.Clock } : {},
               { text: deliveryStatus(packages[delivery.id]?.packages) },
               {
                 icon: carriers.get(delivery.carrier)?.icon,
@@ -57,9 +46,13 @@ export default function ViewArchivedCommand() {
                 <Action
                   title="Unarchive Delivery"
                   icon={Icon.ArrowCounterClockwise}
-                  onAction={() => unarchiveDelivery(delivery.id)}
+                  onAction={() => unarchiveDelivery(delivery.id, allDeliveries, setDeliveries)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
                 />
-                <Action.OpenInBrowser url={carriers.get(delivery.carrier)?.urlToTrackingWebpage(delivery) ?? ""} />
+                <Action.OpenInBrowser
+                  url={carriers.get(delivery.carrier)?.urlToTrackingWebpage(delivery) ?? ""}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
               </ActionPanel>
             }
           />

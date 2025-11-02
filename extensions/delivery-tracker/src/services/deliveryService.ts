@@ -155,6 +155,35 @@ export async function archiveDelivery(
   });
 }
 
+export async function unarchiveDelivery(
+  id: string,
+  deliveries: Delivery[] | undefined,
+  setDeliveries: (value: Delivery[]) => Promise<void>,
+): Promise<void> {
+  if (!deliveries) {
+    return;
+  }
+
+  const deliveryIndex = deliveries.findIndex((delivery) => delivery.id === id);
+  if (deliveryIndex === -1) {
+    return;
+  }
+
+  deliveries[deliveryIndex] = {
+    ...deliveries[deliveryIndex],
+    archived: false,
+    archivedAt: undefined,
+  };
+
+  await setDeliveries(deliveries);
+
+  await showToast({
+    style: Toast.Style.Success,
+    title: "Delivery Unarchived",
+    message: deliveries[deliveryIndex].name,
+  });
+}
+
 export function atLeastOneDeliveryIsFullyDelivered(deliveries: Delivery[] | undefined, packages: PackageMap): boolean {
   if (!deliveries || !packages) {
     return false;

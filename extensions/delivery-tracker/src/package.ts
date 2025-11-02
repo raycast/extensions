@@ -1,9 +1,7 @@
 import { Color, Icon } from "@raycast/api";
 import { Delivery } from "./types/delivery";
 import { Package, PackageMap } from "./types/package";
-
-// Re-export types for backward compatibility
-export type { Package, PackageMap, Activity } from "./types/package";
+import { formatDayDifference } from "./utils/dateUtils";
 
 export function packagesFromOfflineCarrier(delivery: Delivery): Package[] {
   return [
@@ -34,16 +32,6 @@ export function deliveryIcon(packages?: Package[]): Icon {
   }
 
   return Icon.CircleProgress;
-}
-
-function formatDayDifference(days: number): string {
-  if (days === 0) {
-    return "Delivery expected today";
-  } else if (days === 1) {
-    return "1 day until delivery";
-  } else {
-    return `${days} days until delivery`;
-  }
 }
 
 export function deliveryStatus(packages?: Package[]): { value: string; color?: Color } {
@@ -96,7 +84,7 @@ export function getPackageWithEarliestDeliveryDate(packages: Package[]): Package
     return null;
   }
 
-  const now = new Date();
+  const nowTime = new Date().getTime();
 
   return packages.reduce((closest, current) => {
     const closestDeliveryDate = closest.deliveryDate;
@@ -112,9 +100,7 @@ export function getPackageWithEarliestDeliveryDate(packages: Package[]): Package
       return current;
     }
 
-    if (
-      Math.abs(currentDeliveryDate.getTime() - now.getTime()) < Math.abs(closestDeliveryDate.getTime() - now.getTime())
-    ) {
+    if (Math.abs(currentDeliveryDate.getTime() - nowTime) < Math.abs(closestDeliveryDate.getTime() - nowTime)) {
       return current;
     } else {
       return closest;

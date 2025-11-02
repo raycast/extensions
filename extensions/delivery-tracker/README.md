@@ -1,7 +1,5 @@
 # Delivery Tracker
 
-[Original repository](https://github.com/halprin/raycast-delivery-tracker).
-
 Tracks deliveries, packages, and parcels in Raycast. Remembers your deliveries, so you can keep watch as they make
 their way to you.
 
@@ -28,9 +26,7 @@ carrier, which allows you to be in charge of your privacy.
 
 ## Supported Carriers
 
-A carrier can either support online updating of the tracking over the Internet or not. You are able to specify a manual
-delivery date for a delivery from a carrier that does not support online updating or a carrier that's missing
-credentials.
+A carrier can either support online updating of the tracking over the Internet or not. You are able to specify a manual delivery date for a delivery from a carrier that does not support online updating or a carrier that's missing credentials.
 
 ### United Parcel Service (UPS)
 
@@ -65,10 +61,9 @@ works, so the USPS carrier only supports setting manual delivery dates for now.
 
 ## Contributing
 
-Feel free to file an issue or fork and PR on the
-[original repository](https://github.com/halprin/raycast-delivery-tracker) or through the
+Feel free to file an issue or fork and PR through the
 [main extension repository](https://github.com/raycast/extensions)
 [workflow](https://developers.raycast.com/basics/contribute-to-an-extension).
 
 If you are adding support for a new carrier, you can take inspiration from the [existing carriers](./src/carriers).
-Please update the documentation here on how one signs-up for the carrier and gets any API keys.
+Please update the documentation here on how one signs-up for the carrier and gets any API keys. When adding a new carrier, please include a 40x40px PNG icon in the `assets/` directory named `[carrier-name].png` (e.g., `dhl.png`). The icon should be the carrier's logo or favicon on a transparent background.

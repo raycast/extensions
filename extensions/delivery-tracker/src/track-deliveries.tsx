@@ -2,12 +2,12 @@ import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import carriers from "./carriers";
 import { deliveryIcon, deliveryStatus } from "./package";
 import { Delivery } from "./types/delivery";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import TrackNewDeliveryAction from "./views/TrackNewDeliveryAction";
 import ShowDetailsView from "./views/ShowDetailsView";
 import EditDeliveryView from "./views/EditDeliveryView";
 import { useDeliveries } from "./hooks/useDeliveries";
-import { refreshTracking } from "./services/trackingService";
+import { useRefreshDeliveries } from "./hooks/useRefreshDeliveries";
 import {
   deleteDelivery,
   deleteDeliveredDeliveries,
@@ -22,13 +22,22 @@ import { PackageMap } from "./types/package";
 export default function TrackDeliveriesCommand() {
   const { activeDeliveries, setDeliveries, isLoading } = useDeliveries();
   const { packages, setPackages } = usePackages();
-  const [trackingIsLoading, setTrackingIsLoading] = useState(false);
+  const { trackingIsLoading, handleRefresh, refreshTitle } = useRefreshDeliveries(
+    activeDeliveries,
+    packages,
+    setPackages,
+  );
   const [selectedCarrier, setSelectedCarrier] = useState<string>("all");
   const [searchText, setSearchText] = useState("");
+  const prevDeliveriesRef = useRef<Delivery[] | undefined>(undefined);
 
   useEffect(() => {
-    refreshTracking(false, activeDeliveries, packages, setPackages, setTrackingIsLoading);
-  }, [activeDeliveries]);
+    // Only refresh when deliveries actually change (added/removed), not on every render
+    if (prevDeliveriesRef.current !== activeDeliveries) {
+      prevDeliveriesRef.current = activeDeliveries;
+      handleRefresh(false);
+    }
+  }, [activeDeliveries, handleRefresh]);
 
   // Filter deliveries
   const filteredDeliveries = activeDeliveries.filter((delivery) => {
@@ -97,6 +106,8 @@ export default function TrackDeliveriesCommand() {
                   setDeliveries={setDeliveries}
                   setPackages={setPackages}
                   isLoading={isLoading}
+                  refreshTitle={refreshTitle}
+                  handleRefresh={handleRefresh}
                 />
               ))}
             </List.Section>
@@ -115,6 +126,8 @@ export default function TrackDeliveriesCommand() {
                   setDeliveries={setDeliveries}
                   setPackages={setPackages}
                   isLoading={isLoading}
+                  refreshTitle={refreshTitle}
+                  handleRefresh={handleRefresh}
                 />
               ))}
             </List.Section>
@@ -133,6 +146,8 @@ export default function TrackDeliveriesCommand() {
                   setDeliveries={setDeliveries}
                   setPackages={setPackages}
                   isLoading={isLoading}
+                  refreshTitle={refreshTitle}
+                  handleRefresh={handleRefresh}
                 />
               ))}
             </List.Section>
@@ -151,6 +166,8 @@ export default function TrackDeliveriesCommand() {
                   setDeliveries={setDeliveries}
                   setPackages={setPackages}
                   isLoading={isLoading}
+                  refreshTitle={refreshTitle}
+                  handleRefresh={handleRefresh}
                 />
               ))}
             </List.Section>
@@ -168,6 +185,8 @@ function DeliveryListItem({
   setDeliveries,
   setPackages,
   isLoading,
+  refreshTitle,
+  handleRefresh,
 }: {
   delivery: Delivery;
   packages: PackageMap;
@@ -175,6 +194,8 @@ function DeliveryListItem({
   setDeliveries: (value: Delivery[]) => Promise<void>;
   setPackages: React.Dispatch<React.SetStateAction<PackageMap>>;
   isLoading: boolean;
+  refreshTitle: string;
+  handleRefresh: (forceRefresh: boolean) => Promise<void>;
 }) {
   return (
     <List.Item
@@ -262,13 +283,11 @@ function DeliveryListItem({
           <ActionPanel.Section>
             <TrackNewDeliveryAction deliveries={deliveries} setDeliveries={setDeliveries} isLoading={isLoading} />
             <Action
-              title="Refresh All"
+              title={refreshTitle}
               icon={Icon.RotateClockwise}
               shortcut={Keyboard.Shortcut.Common.Refresh}
               style={Action.Style.Regular}
-              onAction={() => {
-                refreshTracking(true, deliveries, packages, setPackages, () => {});
-              }}
+              onAction={() => handleRefresh(true)}
             />
           </ActionPanel.Section>
         </ActionPanel>

@@ -2,7 +2,7 @@ import { environment } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { Delivery } from "../types/delivery";
 import { debugDeliveries } from "../debugData";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 export function useDeliveries() {
   const {
@@ -39,8 +39,8 @@ export function useDeliveries() {
     [deliveries, setDeliveries],
   );
 
-  const activeDeliveries = deliveries?.filter((d) => !d.archived) ?? [];
-  const archivedDeliveries = deliveries?.filter((d) => d.archived) ?? [];
+  const activeDeliveries = useMemo(() => deliveries?.filter((d) => !d.archived) ?? [], [deliveries]);
+  const archivedDeliveries = useMemo(() => deliveries?.filter((d) => d.archived) ?? [], [deliveries]);
 
   return {
     deliveries,

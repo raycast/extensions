@@ -44,7 +44,7 @@
       "subtitle": "Delivery Tracker",
       "description": "View delivery status in the menu bar.",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "30m"
     },
     {
       "name": "view-archived",
@@ -56,6 +56,35 @@
   ],
   "preferences": [
     {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "How often to refresh tracking data from carrier APIs (in minutes)",
+      "type": "dropdown",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        }
+      ]
+    },{
       "name": "upsClientId",
       "title": "UPS Client ID",
       "description": "The client ID for your app in the UPS developer portal",
