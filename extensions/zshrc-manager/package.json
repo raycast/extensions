@@ -8,12 +8,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/TurboCoder13/raycast-extensions.git",
-    "directory": "zshrc-manager"
+    "url": "https://github.com/raycast/extensions.git",
+    "directory": "extensions/zshrc-manager"
   },
-  "homepage": "https://github.com/TurboCoder13/raycast-extensions/tree/main/zshrc-manager",
+  "homepage": "https://github.com/raycast/extensions/tree/main/extensions/zshrc-manager",
   "bugs": {
-    "url": "https://github.com/TurboCoder13/raycast-extensions/issues"
+    "url": "https://github.com/raycast/extensions/issues"
   },
   "keywords": [
     "raycast",
