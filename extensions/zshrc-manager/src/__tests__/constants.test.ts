@@ -81,7 +81,8 @@ describe("constants.ts", () => {
 
       const formats = getSectionFormatsInOrder();
 
-      expect(formats.length).toBeGreaterThan(0);
+      // Should have custom patterns (2) + defaults (9) = 11 total
+      expect(formats).toHaveLength(11);
       // Custom patterns should come first
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
       expect(formats[0]?.regex).toBe(customStartPattern);
@@ -153,7 +154,8 @@ describe("constants.ts", () => {
 
       const formats = getSectionFormatsInOrder();
 
-      expect(formats.length).toBeGreaterThan(9); // Defaults + custom patterns
+      // Should have custom start/end (2) + defaults (9) + custom header (1) = 12 total
+      expect(formats).toHaveLength(12);
       // Custom start/end should be first
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
       expect(formats[0]?.regex).toBe(customStartPattern);
