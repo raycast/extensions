@@ -2,15 +2,33 @@
 
 [Original repository](https://github.com/halprin/raycast-delivery-tracker).
 
-Tracks deliveries, packages, and parcels in Raycast.  Remembers your deliveries, so you can keep watch as they make
+Tracks deliveries, packages, and parcels in Raycast. Remembers your deliveries, so you can keep watch as they make
 their way to you.
 
-This extension does not use a third-party tracking service as a proxy.  It directly integrates with each supported
+This extension does not use a third-party tracking service as a proxy. It directly integrates with each supported
 carrier, which allows you to be in charge of your privacy.
+
+## Features
+
+- **Track Multiple Carriers**: Support for UPS, FedEx, and USPS with direct API integration
+- **Smart Organization**: Deliveries automatically grouped by status (Arriving Today, In Transit, Delivered)
+- **Delivery Notes**: Add optional notes to any delivery for better organization
+- **Archive System**: Archive delivered packages instead of deleting them, with a dedicated view to browse archived items
+- **Menu Bar Extra**: Quick glance at your deliveries from the menu bar with auto-refresh every 10 minutes
+- **Search & Filter**: Real-time search by name or tracking number, filter by specific carrier
+- **Carrier Icons**: Visual identification with carrier-specific favicons and themed fallback icons
+- **Keyboard Shortcuts**: Efficient navigation with comprehensive keyboard shortcuts throughout the extension
+
+## Commands
+
+- **Track Deliveries**: View and manage all your active deliveries with sections, filtering, and search
+- **Track New Delivery**: Add a new delivery to track with optional notes
+- **View Archived Deliveries**: Browse deliveries you've archived with the ability to unarchive them
+- **Delivery Tracker Menu Bar**: Quick status overview in your menu bar (auto-refreshes every 10 minutes)
 
 ## Supported Carriers
 
-A carrier can either support online updating of the tracking over the Internet or not.  You are able to specify a manual
+A carrier can either support online updating of the tracking over the Internet or not. You are able to specify a manual
 delivery date for a delivery from a carrier that does not support online updating or a carrier that's missing
 credentials.
 

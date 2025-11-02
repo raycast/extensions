@@ -1,24 +1,9 @@
 import { Color, Icon } from "@raycast/api";
-import { Delivery } from "./delivery";
+import { Delivery } from "./types/delivery";
+import { Package, PackageMap } from "./types/package";
 
-interface Activity {
-  time: Date;
-  description: string;
-  location: string;
-}
-
-export interface Package {
-  deliveryDate?: Date;
-  delivered: boolean;
-  activity: Activity[];
-}
-
-export interface PackageMap {
-  [key: string]: {
-    packages: Package[];
-    lastUpdated?: Date;
-  };
-}
+// Re-export types for backward compatibility
+export type { Package, PackageMap, Activity } from "./types/package";
 
 export function packagesFromOfflineCarrier(delivery: Delivery): Package[] {
   return [
@@ -51,6 +36,16 @@ export function deliveryIcon(packages?: Package[]): Icon {
   return Icon.CircleProgress;
 }
 
+function formatDayDifference(days: number): string {
+  if (days === 0) {
+    return "Delivery expected today";
+  } else if (days === 1) {
+    return "1 day until delivery";
+  } else {
+    return `${days} days until delivery`;
+  }
+}
+
 export function deliveryStatus(packages?: Package[]): { value: string; color?: Color } {
   // check whether all, some, or no packages in a track are delivered
 
@@ -80,7 +75,8 @@ export function deliveryStatus(packages?: Package[]): { value: string; color?: C
   let accessoryText = "En route";
   if (closestPackage?.deliveryDate) {
     const now = new Date();
-    accessoryText = calculateDayDifference(closestPackage.deliveryDate, now).toString() + " days until delivery";
+    const dayDifference = calculateDayDifference(closestPackage.deliveryDate, now);
+    accessoryText = formatDayDifference(dayDifference);
   }
 
   let accessoryColor = undefined;
