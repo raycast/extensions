@@ -3,7 +3,8 @@ import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast
 
 import { addMovie, getRootFolders, getQualityProfiles } from "@/lib/hooks/useRadarrAPI";
 import { formatMovieTitle } from "@/lib/utils/formatting";
-import type { MovieLookup, RadarrInstance } from "@/lib/types/movie";
+import type { MovieLookup } from "@/lib/types/movie";
+import type { RadarrInstance } from "@/lib/types/config";
 
 interface AddMovieFormProps {
   movie: MovieLookup;

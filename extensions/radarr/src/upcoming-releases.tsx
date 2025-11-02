@@ -25,6 +25,7 @@ export default function UpcomingReleases() {
     data: calendarMovies,
     isLoading,
     error,
+    mutate,
   } = useCalendar(selectedInstance, today.toISOString().split("T")[0], twoMonthsFromNow.toISOString().split("T")[0]);
 
   const movieGridItem = (movie: CalendarMovie) => {
@@ -89,7 +90,7 @@ export default function UpcomingReleases() {
               )}
             </ActionPanel.Section>
             <ActionPanel.Section>
-              <Action title="Refresh" icon={Icon.RotateClockwise} onAction={() => window.location.reload()} />
+              <Action title="Refresh" icon={Icon.RotateClockwise} onAction={() => mutate()} />
             </ActionPanel.Section>
             {instances.length > 1 && (
               <ActionPanel.Section title="Instance">
@@ -140,7 +141,7 @@ export default function UpcomingReleases() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action title="Retry" icon={Icon.RotateClockwise} onAction={() => window.location.reload()} />
+              <Action title="Retry" icon={Icon.RotateClockwise} onAction={() => mutate()} />
             </ActionPanel>
           }
         />

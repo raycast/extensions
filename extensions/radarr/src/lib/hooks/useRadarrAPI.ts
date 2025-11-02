@@ -169,7 +169,7 @@ export async function addMovie(
       throw new Error(`HTTP ${response.status}: ${errorBody}`);
     }
 
-    const addedMovie = await response.json();
+    const addedMovie = (await response.json()) as Movie;
 
     showToast({
       style: Toast.Style.Success,
@@ -262,7 +262,7 @@ export async function getRootFolders(instance: RadarrInstance | null): Promise<{
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const rootFolders = await response.json();
+    const rootFolders = (await response.json()) as Array<{ path: string; id: number }>;
     return rootFolders.map((rf: { path: string; id: number }) => ({ path: rf.path, id: rf.id }));
   } catch (error) {
     console.error("Failed to get root folders:", error);
@@ -288,7 +288,7 @@ export async function getQualityProfiles(instance: RadarrInstance | null): Promi
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const profiles = await response.json();
+    const profiles = (await response.json()) as Array<{ name: string; id: number }>;
     return profiles.map((p: { name: string; id: number }) => ({ name: p.name, id: p.id }));
   } catch (error) {
     console.error("Failed to get quality profiles:", error);
