@@ -114,24 +114,7 @@ export function groupDeliveriesByStatus(
     unknown: [] as Delivery[],
   };
 
-  // Early exit if all limits are reached
-  const checkLimits = () => {
-    if (!options) return false;
-    const { maxArrivingToday, maxInTransit, maxDelivered } = options;
-    return (
-      maxArrivingToday !== undefined &&
-      groups.arrivingToday.length >= maxArrivingToday &&
-      maxInTransit !== undefined &&
-      groups.inTransit.length >= maxInTransit &&
-      maxDelivered !== undefined &&
-      groups.delivered.length >= maxDelivered
-    );
-  };
-
   for (const delivery of deliveries) {
-    // Skip if all limits reached
-    if (checkLimits()) break;
-
     const deliveryPackages = packages[delivery.id]?.packages ?? [];
 
     if (!hasPackages(deliveryPackages)) {
