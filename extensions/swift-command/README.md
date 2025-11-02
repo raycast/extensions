@@ -10,6 +10,6 @@ Minimalist Linux command and AI prompt management
 - Execute commands directly in Terminal
 - Import aliases from your shell configuration files (supports .zshrc, .bashrc, and fish config)
 
-Special thanks to @felixwortmann for the Terminal execution and alias import features
+Special thanks to `@felixwortmann` for the Terminal execution and alias import features
 
-Frontmost App Name and Run Command on Multiple Terminals are powered by [shell-history](https://www.raycast.com/koinzhang/shell-history). Thanks to @koinzhang for the great work
+Frontmost App Name and Run Command on Multiple Terminals are powered by [shell-history](https://www.raycast.com/koinzhang/shell-history). Thanks to `@koinzhang` for the great work

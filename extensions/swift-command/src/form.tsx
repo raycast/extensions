@@ -191,7 +191,7 @@ export function ArgumentForm(props: {
       }
     };
     initializeData();
-  }, []);
+  }, [data, args]);
 
   const handlePaste = () => {
     props.onPaste(props.cmd);
