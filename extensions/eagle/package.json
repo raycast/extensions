@@ -46,7 +46,7 @@
     },
     {
       "name": "trash",
-      "title": "Trash",
+      "title": "View Trash",
       "subtitle": "Eagle",
       "description": "View items in trash",
       "mode": "view"
