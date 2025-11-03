@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "mzaien",
   "contributors": [
-    "menisy"
+    "menisy",
+    "YourMCGeek"
   ],
   "categories": [
     "Applications",
@@ -65,10 +66,13 @@
     {
       "name": "menu_bar_icon_only",
       "title": "Menu Bar Display",
-      "description": "Display icon only in Menu Bar",
+      "description": "Display icon only in Menu Bar (MacOS only currently)",
       "label": "Display icon only in Menu Bar",
       "type": "checkbox",
-      "default": true,
+      "default": {
+        "macOS": true,
+        "Windows": false
+      },
       "required": false
     },
     {
@@ -167,6 +171,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
