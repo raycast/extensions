@@ -85,14 +85,59 @@ async function loadGitignoreFiles(dir: string): Promise<GitignoreFile[]> {
   return files.flat();
 }
 
+// Custom hook to manage favorites with LocalStorage persistence
+function useFavorites(): [Set<string>, (gitignoreFile: GitignoreFile) => void] {
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  // Load favorites from LocalStorage on mount
+  useEffect(() => {
+    LocalStorage.getItem<string>("favorites")
+      .then((stored) => {
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored) as string[];
+            setFavorites(new Set(parsed));
+          } catch (error) {
+            console.error("Failed to parse favorites:", error);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load favorites:", error);
+      });
+  }, []);
+
+  // Toggle favorite status
+  const toggleFavorite = useCallback((gitignore: GitignoreFile) => {
+    setFavorites((prevFavorites) => {
+      const newFavorites = new Set(prevFavorites);
+      if (newFavorites.has(gitignore.id)) {
+        newFavorites.delete(gitignore.id);
+      } else {
+        newFavorites.add(gitignore.id);
+      }
+      // Persist to LocalStorage
+      LocalStorage.setItem("favorites", JSON.stringify(Array.from(newFavorites))).catch((error) => {
+        console.error("Failed to save favorites:", error);
+      });
+      return newFavorites;
+    });
+  }, []);
+
+  return [favorites, toggleFavorite];
+}
+
 export function useGitignore(): [
   state: State,
   selected: Set<string>,
   toggleSelection: (gitignoreFile: GitignoreFile) => void,
-  refresh: () => void
+  refresh: () => void,
+  favorites: Set<string>,
+  toggleFavorite: (gitignoreFile: GitignoreFile) => void,
 ] {
   const [state, setState] = useState<State>({ gitignoreFiles: [], loading: true, lastUpdated: null });
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [favorites, toggleFavorite] = useFavorites();
 
   const refresh = useCallback(
     async (shouldDownload: boolean) => {
@@ -180,7 +225,7 @@ export function useGitignore(): [
     refresh(false);
   }, [refresh]);
 
-  return [state, selected, toggleSelection, () => refresh(true)];
+  return [state, selected, toggleSelection, () => refresh(true), favorites, toggleFavorite];
 }
 
 export function useListDetailPreference(): boolean {
