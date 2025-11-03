@@ -1,4 +1,4 @@
--- Sample data for Zed v28 fixture
+-- Sample data for Zed v30 fixture
 
 -- Insert sample remote connections
 INSERT INTO remote_connections (id, kind, host, port, user, distro) VALUES (1, 'ssh', 'remote-host', NULL, NULL, NULL);
