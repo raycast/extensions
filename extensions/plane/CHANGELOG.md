@@ -1,5 +1,10 @@
 # Plane Changelog
 
+## [Add API Key Authentication and Support for Self-Hosted Plane Instances] - {PR_MERGE_DATE}
+
+- **API Key Authentication**
+- **Support for Self-Hosted Plane Instances**
+
 ## [Fix README] - 2025-10-31
 
 ## [Cycle and Member Filtering Improvements] - 2025-10-15
