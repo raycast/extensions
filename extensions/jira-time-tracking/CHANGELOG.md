@@ -1,6 +1,6 @@
 # Changelog
 
-## [Atlassian API Migration] - 2025-11-02
+## [Atlassian API Migration] - {PR_MERGE_DATE}
 
 - Migrated from deprecated `/rest/api/3/search` endpoint to new `/rest/api/3/search/jql` endpoint for Jira Cloud instances.
 - Updated pagination from offset-based (`startAt`) to cursor-based (`nextPageToken`) for Jira Cloud.
