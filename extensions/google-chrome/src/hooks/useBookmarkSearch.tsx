@@ -4,6 +4,7 @@ import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
 import { getBookmarks } from "../util";
 import { usePromise } from "@raycast/utils";
+import { parseSearchQuery, matchesQuery } from "../util/search-parser";
 
 export function useBookmarkSearch(
   profile: string,
@@ -21,11 +22,11 @@ export function useBookmarkSearch(
       getBookmarks(profile).then((bookmarks) => {
         setErrorView(undefined);
         setIsEmpty(bookmarks.length === 0);
-        return bookmarks.filter(
-          (bookmark) =>
-            bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-            bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
-        );
+        const parsedQuery = parseSearchQuery(query || "");
+        return bookmarks.filter((bookmark) => {
+          const searchableText = `${bookmark.title.toLowerCase()} ${bookmark.url.toLowerCase()}`;
+          return matchesQuery(searchableText, parsedQuery);
+        });
       }),
     [profile, query],
     {
