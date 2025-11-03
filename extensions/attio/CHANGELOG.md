@@ -1,6 +1,6 @@
 # Attio Changelog
 
-## [Use Attio Logo + Add Task] - {PR_MERGE_DATE}
+## [Use Attio Logo + Add Task] - 2025-11-03
 
 - Attio Logo is now used with permission
 - Add Tasks
