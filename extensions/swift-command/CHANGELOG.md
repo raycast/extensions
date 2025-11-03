@@ -1,6 +1,6 @@
 # Swift Command Changelog
 
-## [Add Clipboard Placeholder and Shortcuts] - {PR_MERGE_DATE}
+## [Add Clipboard Placeholder and Shortcuts] - 2025-11-03
 
 ### Added
 
