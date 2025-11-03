@@ -28,8 +28,6 @@
 - Removed openHistoryTab and setActiveTab functions in favor of simpler browser opening
 - Removed code for searching tabs as it was unused
 
-## []
-
 ## [Fix New Tab and History Tab] - 2025-06-11
 
 - Fix new tab and history tab commands, by adding a delay to the script to ensure the URL bar is focused.
