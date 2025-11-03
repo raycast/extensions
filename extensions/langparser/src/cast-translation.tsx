@@ -71,7 +71,16 @@ function TranslationResultView({ translation }: { translation: Translation }) {
     <List>
       <List.Item title="Original text" subtitle={translation.text} />
       {translation.translations.map((t, index) => (
-        <List.Item key={index} title={t.text} accessories={[{ text: `${t.examples.length} examples` }]} />
+        <List.Item
+          key={index}
+          title={t.text}
+          accessories={[{ text: `${t.examples.length} examples` }]}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard content={t.text} title="Copy Translation" />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );

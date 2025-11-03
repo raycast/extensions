@@ -1,3 +1,3 @@
-# LingueeCaster Changelog
+# Langparser Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
