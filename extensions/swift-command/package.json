@@ -12,6 +12,10 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "manage-commands",
