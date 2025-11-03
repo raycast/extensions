@@ -15,20 +15,36 @@ export interface Cluster {
   title: string;
   short_summary: string;
   articles: ClusterArticle[];
-  talking_points?: string[];
-  did_you_know?: string;
   emoji?: string;
   category: string;
+  primary_image?: { url: string; caption: string; credit: string };
+  talking_points?: string[];
+  secondary_image?: { url: string; caption: string; credit: string };
+  perspectives?: Array<{ text: string; sources: Source[] }>;
+  historical_background?: string;
+  technical_details?: string[];
+  industry_impact?: string[];
+  timeline?: Array<{ date: string; content: string }>;
+  international_reactions?: string[];
+  did_you_know?: string;
 }
 export interface Article {
   id: string;
   title: string;
   summary: string;
   sources: Source[];
-  highlights?: string[];
-  didYouKnow?: string;
   emoji?: string;
   category: string;
+  primary_image?: { url: string; caption: string; credit: string };
+  highlights?: string[];
+  secondary_image?: { url: string; caption: string; credit: string };
+  perspectives?: Array<{ text: string; sources: Source[] }>;
+  historical_background?: string;
+  technical_details?: string[];
+  industry_impact?: string[];
+  timeline?: Array<{ date: string; content: string }>;
+  international_reactions?: string[];
+  didYouKnow?: string;
 }
 export interface CategoryResponse {
   category: string;

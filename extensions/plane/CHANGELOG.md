@@ -1,5 +1,7 @@
 # Plane Changelog
 
+## [Fix README] - 2025-10-31
+
 ## [Cycle and Member Filtering Improvements] - 2025-10-15
 
 ## Enhanced

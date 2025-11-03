@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { APIKey, CreateAPIKeyRequest, CreateAPIKeyRequestForm } from "./utils/types";
-import { createApiKey, deleteApiKey } from "./utils/api";
+import { useState } from "react";
+import { CreateAPIKeyRequestForm } from "./utils/types";
+import { isApiError } from "./utils/api";
 import {
   Action,
   ActionPanel,
@@ -17,23 +17,14 @@ import {
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { CREATE_API_KEY_PERMISSIONS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
-import { useGetAPIKeys, useGetDomains } from "./lib/hooks";
+import { onError, useGetAPIKeys, useGetDomains } from "./lib/hooks";
+import { resend } from "./lib/resend";
+import { ApiKey, CreateApiKeyOptions } from "resend";
 
 export default function APIKeys() {
-  const { push } = useNavigation();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { isLoading, keys, error, revalidate, mutate } = useGetAPIKeys();
 
-  const { isLoading: isLoadingKeys, keys, error: errorKeys, revalidate } = useGetAPIKeys();
-
-  useEffect(() => {
-    if (!errorKeys) return;
-    if (errorKeys.cause === "validation_error" || errorKeys.cause === "restricted_api_key") {
-      setError(errorKeys.message);
-    }
-  }, [errorKeys]);
-
-  async function confirmAndDelete(item: APIKey) {
+  async function confirmAndDelete(item: ApiKey) {
     if (
       await confirmAlert({
         title: `Delete '${item.name}'?`,
@@ -41,21 +32,33 @@ export default function APIKeys() {
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      const response = await deleteApiKey(item.id);
-      if (!("statusCode" in response)) {
-        await showToast(Toast.Style.Success, "Deleted API Key");
-        revalidate();
+      const toast = await showToast(Toast.Style.Animated, "Deleting API Key", item.name);
+      try {
+        await mutate(
+          resend.apiKeys.remove(item.id).then(({ error }) => {
+            if (error) throw new Error(error.message, { cause: error.name });
+          }),
+          {
+            optimisticUpdate(data) {
+              return data.filter((k) => k.id !== item.id);
+            },
+            shouldRevalidateAfter: false,
+          },
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted API Key";
+      } catch (error) {
+        onError(error as Error);
       }
-      setIsLoading(false);
     }
   }
 
   const numOfKeys = keys.length;
   const title = `${numOfKeys} ${numOfKeys === 1 ? "API Key" : "API Keys"}`;
-  return error ? (
+  return error && isApiError(error) ? (
     <ErrorComponent error={error} />
   ) : (
-    <List isLoading={isLoading || isLoadingKeys} searchBarPlaceholder="Search key">
+    <List isLoading={isLoading} searchBarPlaceholder="Search key">
       <List.Section title={title}>
         {keys.map((item) => (
           <List.Item
@@ -75,10 +78,10 @@ export default function APIKeys() {
                   onAction={() => confirmAndDelete(item)}
                 />
                 <ActionPanel.Section>
-                  <Action
+                  <Action.Push
                     title="Create New API Key"
                     icon={Icon.Plus}
-                    onAction={() => push(<APIKeysCreate onKeyCreated={revalidate} />)}
+                    target={<APIKeysCreate onKeyCreated={revalidate} />}
                   />
                   <Action title="Reload API Keys" icon={Icon.Redo} onAction={revalidate} />
                   <Action.OpenInBrowser
@@ -91,17 +94,17 @@ export default function APIKeys() {
           />
         ))}
       </List.Section>
-      {!isLoading && !isLoadingKeys && (
+      {!isLoading && (
         <List.Section title="Actions">
           <List.Item
             title="Create New API Key"
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create New API Key"
                   icon={Icon.Plus}
-                  onAction={() => push(<APIKeysCreate onKeyCreated={revalidate} />)}
+                  target={<APIKeysCreate onKeyCreated={revalidate} />}
                 />
                 <Action.OpenInBrowser
                   title="View API Reference"
@@ -137,15 +140,16 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
     async onSubmit(values) {
       setIsLoading(true);
 
-      const newKey: CreateAPIKeyRequest = {
+      const newKey: CreateApiKeyOptions = {
         ...values,
         permission: values.permission === "full_access" ? "full_access" : "sending_access",
       };
       if (newKey.domain_id === "all") delete newKey.domain_id;
 
-      const response = await createApiKey(newKey);
-      if (!("statusCode" in response)) {
-        showToast(Toast.Style.Success, "Created API Key", response.token);
+      try {
+        const { error, data } = await resend.apiKeys.create(newKey);
+        if (error) throw new Error(error.message, { cause: error.name });
+        showToast(Toast.Style.Success, "Created API Key", data.token);
         if (
           await confirmAlert({
             title: "Copy Token?",
@@ -153,12 +157,15 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
             primaryAction: { title: "Copy" },
           })
         ) {
-          await Clipboard.copy(response.token);
+          await Clipboard.copy(data.token);
         }
         onKeyCreated();
         pop();
+      } catch (error) {
+        onError(error as Error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     },
     validation: {
       name: FormValidation.Required,

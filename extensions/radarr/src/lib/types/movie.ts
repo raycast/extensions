@@ -1,10 +1,3 @@
-export interface RadarrInstance {
-  name: string;
-  url: string;
-  apiKey: string;
-  isDefault: boolean;
-}
-
 export interface Movie {
   id: number;
   title: string;
@@ -91,75 +84,10 @@ export interface MovieImage {
   remoteUrl: string;
 }
 
-export interface QueueItem {
-  id: number;
-  movieId: number;
-  movie: Movie;
-  size: number;
-  title: string;
-  sizeleft: number;
-  status: string;
-  trackedDownloadStatus: "ok" | "warning" | "error";
-  trackedDownloadState:
-    | "downloading"
-    | "downloadFailed"
-    | "downloadFailedPending"
-    | "importPending"
-    | "importing"
-    | "imported"
-    | "failedPending"
-    | "failed"
-    | "ignored";
-  statusMessages: Array<{
-    title: string;
-    messages: string[];
-  }>;
-  downloadId: string;
-  protocol: "unknown" | "usenet" | "torrent";
-  downloadClient: string;
-  indexer: string;
-  outputPath: string;
-  timeleft?: string;
-  estimatedCompletionTime?: string;
-}
-
 export interface CalendarMovie extends Movie {
   inCinemas?: string;
   digitalRelease?: string;
   physicalRelease?: string;
-}
-
-export interface HealthCheck {
-  source: string;
-  type: "ok" | "notice" | "warning" | "error";
-  message: string;
-  wikiUrl?: string;
-}
-
-export interface SystemStatus {
-  version: string;
-  buildTime: string;
-  isDebug: boolean;
-  isProduction: boolean;
-  isAdmin: boolean;
-  isUserInteractive: boolean;
-  startupPath: string;
-  appData: string;
-  osName: string;
-  osVersion: string;
-  isMonoRuntime: boolean;
-  isMono: boolean;
-  isLinux: boolean;
-  isOsx: boolean;
-  isWindows: boolean;
-  mode: string;
-  branch: string;
-  authentication: string;
-  sqliteVersion: string;
-  urlBase?: string;
-  runtimeVersion: string;
-  runtimeName: string;
-  migrationVersion: number;
 }
 
 export interface HistoryRecord {

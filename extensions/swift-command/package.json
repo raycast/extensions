@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "swift-command",
   "title": "Swift Command",
-  "description": "Efficiently manage and access Linux command snippets for faster execution",
+  "description": "Minimalist Linux command and AI prompt management",
   "icon": "extension-icon-512.png",
   "author": "aaron_lin",
   "contributors": [
@@ -12,11 +12,15 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "manage-commands",
       "title": "Manage Swift Command",
-      "description": "Manage command snippets",
+      "description": "Manage command and prompt snippets",
       "mode": "view"
     },
     {

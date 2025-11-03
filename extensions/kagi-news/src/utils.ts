@@ -33,10 +33,18 @@ export function clustersToArticles(clusters: Cluster[]): Article[] {
       title: cluster.title,
       summary: cluster.short_summary,
       sources: uniqueSources,
-      highlights: cluster.talking_points || [],
-      didYouKnow: cluster.did_you_know,
       emoji: cluster.emoji,
       category: cluster.category,
+      primary_image: cluster.primary_image,
+      highlights: cluster.talking_points || [],
+      secondary_image: cluster.secondary_image,
+      perspectives: cluster.perspectives,
+      historical_background: cluster.historical_background,
+      technical_details: cluster.technical_details,
+      industry_impact: cluster.industry_impact,
+      timeline: cluster.timeline,
+      international_reactions: cluster.international_reactions,
+      didYouKnow: cluster.did_you_know,
     };
   });
 }

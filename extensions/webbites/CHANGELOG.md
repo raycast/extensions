@@ -1,5 +1,8 @@
 # Webbites Raycast Extension Changelog
 
+## [Improvement] - 2025-11-03
+ - Updated name of endpoints to use the new convention.
+
 ## [Improvement] - 2025-10-06
 
 - Fixed bug where the user could not login due to a typo.

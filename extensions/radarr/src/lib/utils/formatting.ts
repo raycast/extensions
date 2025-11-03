@@ -1,4 +1,4 @@
-import type { MovieLookup, Movie } from "./types";
+import type { MovieLookup, Movie } from "@/lib/types/movie";
 
 export function formatMovieTitle(movie: MovieLookup | Movie): string {
   return `${movie.title} (${movie.year})`;
@@ -36,6 +36,28 @@ export function formatReleaseDate(dateString?: string): string {
   } catch {
     return dateString;
   }
+}
+
+export function getNextReleaseDate(movie: {
+  digitalRelease?: string;
+  inCinemas?: string;
+  physicalRelease?: string;
+}): string | null {
+  const today = new Date();
+
+  if (movie.digitalRelease && new Date(movie.digitalRelease) > today) {
+    return movie.digitalRelease;
+  }
+
+  if (movie.inCinemas && new Date(movie.inCinemas) > today) {
+    return movie.inCinemas;
+  }
+
+  if (movie.physicalRelease && new Date(movie.physicalRelease) > today) {
+    return movie.physicalRelease;
+  }
+
+  return movie.digitalRelease || movie.inCinemas || movie.physicalRelease || null;
 }
 
 export function getMoviePoster(movie: MovieLookup | Movie): string | undefined {
@@ -108,16 +130,13 @@ export function formatOverview(overview: string): string {
     return "No overview available";
   }
 
-  // Split into sentences and add line breaks for better readability
   const sentences = overview.split(/(?<=[.!?])\s+/);
 
-  // Group sentences into paragraphs (every 2-3 sentences)
   const paragraphs: string[] = [];
   for (let i = 0; i < sentences.length; i += 2) {
     const paragraph = sentences.slice(i, i + 2).join(" ");
     paragraphs.push(paragraph);
   }
 
-  // Join paragraphs with double line breaks
   return paragraphs.join("\n\n");
 }

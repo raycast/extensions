@@ -16,10 +16,6 @@
     "News"
   ],
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mickaphd/Kagi-News-for-Raycast"
-  },
   "commands": [
     {
       "name": "kagi-news",
@@ -143,6 +139,96 @@
           "value": "lb"
         }
       ]
+    },
+    {
+      "name": "showPrimaryImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Display Sections",
+      "label": "Show Primary Image",
+      "description": "Display the main article image",
+      "default": true
+    },
+    {
+      "name": "showTalkingPoints",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Talking Points",
+      "description": "Display key talking points from the article",
+      "default": true
+    },
+    {
+      "name": "showSecondaryImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Secondary Image",
+      "description": "Display the secondary article image",
+      "default": false
+    },
+    {
+      "name": "showPerspectives",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Perspectives",
+      "description": "Display different perspectives on the story",
+      "default": false
+    },
+    {
+      "name": "showHistoricalBackground",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Historical Background",
+      "description": "Display historical context",
+      "default": false
+    },
+    {
+      "name": "showTechnicalDetails",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Technical Details",
+      "description": "Display technical information",
+      "default": false
+    },
+    {
+      "name": "showIndustryImpact",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Industry Impact",
+      "description": "Display industry-related impacts",
+      "default": false
+    },
+    {
+      "name": "showTimeline",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Timeline",
+      "description": "Display timeline of events",
+      "default": false
+    },
+    {
+      "name": "showInternationalReactions",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show International Reactions",
+      "description": "Display reactions from international entities",
+      "default": false
+    },
+    {
+      "name": "showDidYouKnow",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Did You Know",
+      "description": "Display the 'Did You Know' section",
+      "default": true
     }
   ],
   "dependencies": {
@@ -164,5 +250,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mickaphd/Kagi-News-for-Raycast"
   }
 }

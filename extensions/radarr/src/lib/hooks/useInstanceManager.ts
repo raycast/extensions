@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { getActiveRadarrInstance, getRadarrInstances } from "../config";
-import type { RadarrInstance } from "../types";
+import { getActiveRadarrInstance, getRadarrInstances } from "@/lib/types/config";
+import type { RadarrInstance } from "@/lib/types/config";
 
 export function useInstanceManager() {
   const [currentInstance, setCurrentInstanceState] = useState<RadarrInstance | null>(null);

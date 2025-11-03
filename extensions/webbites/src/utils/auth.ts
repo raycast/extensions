@@ -41,6 +41,38 @@ export const isLoggedIn = async (): Promise<boolean> => {
   }
 };
 
+export const generateKey = async (sessionToken: string) => {
+  const generateKeyResponse = await fetch(
+    buildApiUrl(API_ENDPOINTS.GENERATE_KEY),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    },
+  );
+
+  if (!generateKeyResponse.ok) {
+    const errorData = await generateKeyResponse
+      .json()
+      .catch(() => ({ message: "Key generation failed" }));
+    throw new Error(
+      errorData.message ||
+        `HTTP ${generateKeyResponse.status}: ${generateKeyResponse.statusText}`,
+    );
+  }
+
+  const keyData = await generateKeyResponse.json();
+  console.log("Key generation response:", keyData);
+
+  if (!keyData.success) {
+    throw new Error(keyData.message || "Key generation failed");
+  }
+
+  return keyData.key;
+};
+
 /**
  * Login with username and password using backend API
  * @param username User's email or username
@@ -53,6 +85,7 @@ export const login = async (
 ): Promise<Parse.User> => {
   try {
     // Call backend API for login
+
     const response = await fetch(buildApiUrl(API_ENDPOINTS.LOGIN), {
       method: "POST",
       headers: {

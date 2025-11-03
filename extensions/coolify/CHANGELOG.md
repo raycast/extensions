@@ -1,5 +1,7 @@
 # Coolify Changelog
 
+## [Add Windows Support] - 2025-11-03
+
 ## [View Environment Variable + Fix DB Deletion] - 2025-06-23
 
 - fix: Unable to delete Databases in `Resources`
