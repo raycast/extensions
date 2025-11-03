@@ -1,4 +1,5 @@
-import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { openNewPrivateWindow } from "./actions";
 
 export default async function Command() {
@@ -6,10 +7,6 @@ export default async function Command() {
     await closeMainWindow();
     await openNewPrivateWindow();
   } catch (error) {
-    await showToast({
-      title: "Failed opening new private window",
-      style: Toast.Style.Failure,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Failed opening new private window" });
   }
 }
