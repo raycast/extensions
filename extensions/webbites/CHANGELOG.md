@@ -1,6 +1,6 @@
 # Webbites Raycast Extension Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-11-03
  - Updated name of endpoints to use the new convention.
 
 ## [Improvement] - 2025-10-06
