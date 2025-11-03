@@ -1,6 +1,6 @@
 # Eagle Changelog
 
-## [Major Update] - {PR_MERGE_DATE}
+## [Major Update] - 2025-11-03
 
 ### Added
 - Grid layout option for item viewing
