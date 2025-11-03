@@ -1,6 +1,6 @@
 # Coolify Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support] - 2025-11-03
 
 ## [View Environment Variable + Fix DB Deletion] - 2025-06-23
 
