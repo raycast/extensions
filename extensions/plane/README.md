@@ -46,10 +46,40 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 
 ## Installation
 
-1. Install the extension from the Raycast Store
-2. Open Raycast (⌘ Space)
-3. Type "Plane" and select the extension
-4. Authenticate with your Plane workspace when prompted
+Install the extension from the Raycast Store, then follow the authentication steps below.
+
+## Authentication
+
+### OAuth Authentication (Recommended)
+
+For **Plane Cloud** users, OAuth provides the simplest authentication experience:
+
+1. Open Raycast and run any Plane command
+2. Click "Authorize" when prompted
+3. Complete the OAuth flow in your browser
+4. Return to Raycast - you're ready to go!
+
+### API Key Authentication
+
+For both **Plane Cloud** and **Self-Hosted** instances:
+
+1. Get your API key from Plane:
+   - Go to your Plane workspace
+   - Navigate to **Settings** → **Account** → **Personal Access Tokens** 
+   - Create a personal access token
+
+2. Configure the extension:
+   - Open Raycast preferences (⌘,)
+   - Navigate to **Extensions** → **Plane**
+   - Enter your **API Key**
+   - For self-hosted instances, also provide:
+     - **API Base Path** (e.g., `https://your-plane.com/api`)
+     - **App Base URL** (e.g., `https://your-plane.com`)
+
+3. Set your workspace:
+   - Run any Plane command
+   - Enter your **workspace slug** when prompted
+   - You can find your workspace slug in your Plane URL: `plane.so/your-workspace-slug`
 
 ## Usage
 

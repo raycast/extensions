@@ -3,6 +3,9 @@ import { OAuthService } from "@raycast/utils";
 import { PlaneClient } from "./client";
 import { STORAGE_WORKSPACE_SLUG_KEY } from "../helpers/keys";
 import { getAppInstallations } from "./installations";
+import { getPreferenceValues } from "@raycast/api";
+
+const preferences = getPreferenceValues<Preferences>();
 
 let planeClient: PlaneClient | undefined;
 
@@ -24,17 +27,29 @@ const plane = new OAuthService({
   refreshTokenUrl:
     "https://oauth.raycast.com/v1/refresh-token/dERRhlRqcHTtXPJLaZZqs7h8JYsRPZrQeWpVvNN_5F9qd_Z6Hb1q6xr_iVeLUmKBj9Ewk3xHAuADSKCpQ1fb0rJq07vziFLkate0VW2zkV0a-xfj23KBoVM2y50aA4geUo7XQT4PS0MKFBIt44ZaD0QRnr3gdZIf37xWollM66pK35YAmuIgo4uFDFJnj1-A1zJ8FvuYL16tHK5qO4nK6SBKE-AktYpraqpziJUINAwN6ByKe_JO1MdvtGGeMb-5",
   scope: "read write",
+  personalAccessToken: preferences.API_KEY,
   onAuthorize: async ({ token }) => {
     const tokenKey = STORAGE_WORKSPACE_SLUG_KEY(token);
     let workspaceSlug = await LocalStorage.getItem(tokenKey);
+    if (preferences.API_KEY) {
+      if (workspaceSlug) {
+        planeClient = new PlaneClient(workspaceSlug?.toString(), undefined, token);
+      }
+      return;
+    }
     if (!workspaceSlug) {
       const installations = await getAppInstallations({ accessToken: token });
       workspaceSlug = installations[0].workspace_detail.slug;
       await LocalStorage.setItem(tokenKey, workspaceSlug);
     }
-    planeClient = new PlaneClient(token, workspaceSlug?.toString());
+    planeClient = new PlaneClient(workspaceSlug?.toString(), token, undefined);
   },
 });
+
+export function initializePlaneClient(workspaceSlug: string, accessToken?: string, apiKey?: string) {
+  planeClient = new PlaneClient(workspaceSlug, accessToken, apiKey);
+  return planeClient;
+}
 
 export { plane };
 export { planeClient };
