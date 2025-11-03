@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-03
 
 - Feature: Added dynamic model retrieval removing the need to update the extension with each model release.
 
