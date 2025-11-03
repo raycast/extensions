@@ -1,6 +1,6 @@
 # Search Any Site Changelog
 
-## [Update] - 2025-11-01
+## [Update] - {PR_MERGE_DATE}
 
 - **Windows**: Toggled on windows support
 - **Bug fix**: Fixed issue where it wouldn't open correct url if suggestions were toggled off.
