@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-11-03
 
 - Add a "Note" field to the bookmark creation and editing forms.
 
