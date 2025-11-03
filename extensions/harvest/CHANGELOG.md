@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2025-11-03
 
 - Fix: Changing task in the form didn't save properly
 - Added: Loading indicator for the "Start on Today" action
