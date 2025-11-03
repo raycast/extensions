@@ -11,7 +11,7 @@ const getMarkdown = () => {
       "1. LastPass CLI is correctly installed",
       "2. Install via [Chocolatey](https://chocolatey.org/): `choco install lastpass-cli`",
       "3. Or download from [LastPass CLI releases](https://github.com/lastpass/lastpass-cli/releases)",
-      "4. Verify installation: `powershell -Command 'lpass --version'`",
+      "4. Verify installation: `lpass --version`",
     ].join("\n");
   }
 
