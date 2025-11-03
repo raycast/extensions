@@ -11,7 +11,9 @@ import {
 } from "@raycast/api";
 import * as React from "react";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
-import { ReferenceSearchResult, search } from "./bibleGatewayApi";
+import { ReferenceSearchResult } from "./types";
+import { useBibleSearch } from "./useBibleSearch";
+import { DEFAULT_BIBLE_VERSION, useBibleVersion } from "./useBibleVersion";
 
 type Preferences = Preferences.BibleSearch;
 type FormattingOptions = Pick<
@@ -19,18 +21,17 @@ type FormattingOptions = Pick<
   "includeVerseNumbers" | "includeReferences" | "includeCopyright" | "oneVersePerLine"
 >;
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.BibleSearch }>) {
-  const {
-    defaultBibleVersion,
-    includeCopyright,
-    includeVerseNumbers,
-    includeReferences,
-    oneVersePerLine,
-    separatePassages,
-  } = getPreferenceValues<Preferences>();
-  const { ref, version = defaultBibleVersion } = props.arguments;
-  const [query, setQuery] = React.useState({ search: ref, version: version.trim().toUpperCase() });
-  const { data: searchResult, isLoading, error } = useBibleSearch(query);
+export default function Command(props: LaunchProps<{ arguments: Partial<Arguments.BibleSearch> }>) {
+  const { includeCopyright, includeVerseNumbers, includeReferences, oneVersePerLine, separatePassages } =
+    getPreferenceValues<Preferences>();
+
+  const { ref: initialRef, version: initialVersion } = props.arguments;
+  const parsedVersion = initialVersion ? parseVersionAbbreviation(initialVersion, bibleVersions) : undefined;
+
+  const [ref, setRef] = React.useState(initialRef ?? "");
+  const [version, setVersion] = useBibleVersion(parsedVersion);
+
+  const { data: searchResult, isLoading, error } = useBibleSearch({ search: ref, version: version });
 
   React.useEffect(() => {
     // If opened with a hotkey, the arguments object will be empty (despite the types not reflecting this!)
@@ -43,8 +44,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.BibleS
       getSelectedText()
         .then((selectedText) => {
           if (selectedText.trim()) {
-            const { ref, version } = parseReference(selectedText);
-            setQuery((old) => ({ search: ref, version: version || old.version }));
+            const parsed = parseReference(selectedText);
+            setRef(parsed.ref);
+            if (parsed.version) {
+              setVersion(parsed.version);
+            }
           }
         })
         .catch(() => {
@@ -63,7 +67,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.BibleS
     if (!searchResult || searchResult.passages.length === 0) {
       return (
         <List.EmptyView
-          title={isLoading ? "Searching..." : query.search === "" ? "Start Typing to Search" : "No Results"}
+          title={isLoading ? "Searching..." : ref === "" ? "Start Typing to Search" : "No Results"}
           icon="../assets/extension-icon-64.png"
         />
       );
@@ -132,65 +136,24 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.BibleS
     <List
       isLoading={isLoading}
       isShowingDetail={searchResult && searchResult.passages.length > 0}
-      searchText={query.search}
+      searchText={ref}
       throttle={true}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Bible Version"
-          onChange={(version) => setQuery((old) => ({ ...old, version }))}
-          value={query.version || undefined}
-          defaultValue={defaultBibleVersion}
+          onChange={(version) => setVersion(version)}
+          value={version ?? DEFAULT_BIBLE_VERSION}
         >
           {bibleVersions.map(([name, abbreviation]) => (
             <List.Dropdown.Item title={name} value={abbreviation} key={abbreviation} />
           ))}
         </List.Dropdown>
       }
-      onSearchTextChange={(search) => setQuery((old) => ({ ...old, search }))}
+      onSearchTextChange={(search) => setRef(search)}
     >
       {renderSearchResults()}
     </List>
   );
-}
-
-function useBibleSearch(query: { search: string; version: string }) {
-  const [data, setData] = React.useState<ReferenceSearchResult | undefined>(undefined);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<Error | null>(null);
-  React.useEffect(() => {
-    if (!query.search) {
-      setData(undefined);
-      setError(null);
-      setIsLoading(false);
-      return;
-    }
-
-    let ignore = false;
-    setIsLoading(true);
-    search(query.search, query.version)
-      .then((result) => {
-        if (!ignore) {
-          setData(result);
-          setError(null);
-        }
-      })
-      .catch((err) => {
-        if (!ignore) {
-          setData(undefined);
-          setError(err);
-        }
-      })
-      .finally(() => {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [query.search, query.version]);
-  return { data, error, isLoading };
 }
 
 function createMarkdown(prefs: FormattingOptions, searchResult: ReferenceSearchResult) {
