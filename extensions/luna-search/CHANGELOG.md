@@ -1,6 +1,6 @@
 # Luna Search Changelog
 
-## [Compatibility fix, Windows Release, Version Updates] - {PR_MERGE_DATE}
+## [Compatibility fix, Windows Release, Version Updates] - 2025-11-03
 - Address Off by 1 error in the menu-bar command fix (Top 5 games is now 5, not 6)
 - Fix compatibility with new Luna UI + API
 - Add Windows support
