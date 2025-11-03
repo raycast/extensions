@@ -1,5 +1,4 @@
-import { Action, ActionPanel, LocalStorage, showToast, Toast } from "@raycast/api";
-import { Form } from "@raycast/api";
+import { Action, ActionPanel, LocalStorage, showToast, Toast, Form } from "@raycast/api";
 import { STORAGE_WORKSPACE_SLUG_KEY } from "../helpers/keys";
 
 function WorkspaceSlugForm({

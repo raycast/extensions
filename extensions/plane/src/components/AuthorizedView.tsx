@@ -33,7 +33,6 @@ function AuthorizedView({ children }: { children: React.ReactNode }) {
     // Initialize planeClient with the workspace slug
     initializePlaneClient(workspaceSlug, undefined, preferences.API_KEY);
     setWorkspaceSlug(workspaceSlug);
-    setIsLoading(false);
   }
 
   if (!preferences.API_KEY) {
