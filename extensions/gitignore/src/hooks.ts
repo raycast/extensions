@@ -80,7 +80,7 @@ async function loadGitignoreFiles(dir: string): Promise<GitignoreFile[]> {
         }
       }
       return [];
-    })
+    }),
   );
   return files.flat();
 }
