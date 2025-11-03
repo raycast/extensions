@@ -1,6 +1,6 @@
 # Filament Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-03
 - Upgrade to version 4.x of filament docs
 
 ## [Update] - 2023-09-11
