@@ -1,18 +1,4 @@
 /**
- * Base class for tracking-related errors
- */
-export class TrackingError extends Error {
-  constructor(
-    message: string,
-    public readonly category: ErrorCategory,
-    public readonly userMessage: string,
-  ) {
-    super(message);
-    this.name = "TrackingError";
-  }
-}
-
-/**
  * Error categories for better user guidance
  */
 export enum ErrorCategory {
@@ -25,77 +11,36 @@ export enum ErrorCategory {
 }
 
 /**
- * Network-related errors (connection, timeout, DNS)
+ * User-friendly messages for each error category
  */
-export class NetworkError extends TrackingError {
-  constructor(
-    message: string,
-    public readonly originalError?: Error,
-  ) {
-    super(message, ErrorCategory.NETWORK, "Network connection issue. Check your internet connection and try again.");
-  }
-}
+const ERROR_MESSAGES: Record<ErrorCategory, string> = {
+  [ErrorCategory.NETWORK]: "Network connection issue. Check your internet connection and try again.",
+  [ErrorCategory.AUTHENTICATION]: "Authentication failed. Please check your API credentials in settings.",
+  [ErrorCategory.RATE_LIMIT]: "Rate limit exceeded. Please try again later.",
+  [ErrorCategory.INVALID_TRACKING]: "Invalid tracking number. Please verify the tracking number is correct.",
+  [ErrorCategory.CARRIER_API]: "Carrier API error. The service may be temporarily unavailable.",
+  [ErrorCategory.UNKNOWN]: "An unexpected error occurred. Please try again.",
+};
 
 /**
- * Authentication/authorization errors
+ * Tracking error with automatic categorization
  */
-export class AuthenticationError extends TrackingError {
-  constructor(message: string) {
-    super(
-      message,
-      ErrorCategory.AUTHENTICATION,
-      "Authentication failed. Please check your API credentials in settings.",
-    );
-  }
-}
+export class TrackingError extends Error {
+  public readonly category: ErrorCategory;
+  public readonly userMessage: string;
 
-/**
- * Rate limiting errors
- */
-export class RateLimitError extends TrackingError {
-  constructor(
-    message: string,
-    public readonly retryAfter?: number,
-  ) {
-    const userMsg = retryAfter
-      ? `Rate limit exceeded. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`
-      : "Rate limit exceeded. Please try again later.";
-    super(message, ErrorCategory.RATE_LIMIT, userMsg);
-  }
-}
-
-/**
- * Invalid tracking number errors
- */
-export class InvalidTrackingError extends TrackingError {
-  constructor(
-    message: string,
-    public readonly trackingNumber: string,
-  ) {
-    super(
-      message,
-      ErrorCategory.INVALID_TRACKING,
-      "Invalid tracking number. Please verify the tracking number is correct.",
-    );
-  }
-}
-
-/**
- * Carrier API errors (4xx/5xx responses)
- */
-export class CarrierAPIError extends TrackingError {
-  constructor(
-    message: string,
-    public readonly statusCode?: number,
-  ) {
-    super(message, ErrorCategory.CARRIER_API, "Carrier API error. The service may be temporarily unavailable.");
+  constructor(message: string, category?: ErrorCategory) {
+    super(message);
+    this.name = "TrackingError";
+    this.category = category ?? ErrorCategory.UNKNOWN;
+    this.userMessage = ERROR_MESSAGES[this.category];
   }
 }
 
 /**
  * Categorizes an unknown error into a TrackingError
  */
-export function categorizeError(error: unknown, deliveryName: string): TrackingError {
+export function categorizeError(error: unknown): TrackingError {
   // Already a TrackingError
   if (error instanceof TrackingError) {
     return error;
@@ -114,7 +59,7 @@ export function categorizeError(error: unknown, deliveryName: string): TrackingE
     errorLower.includes("fetch failed") ||
     errorLower.includes("connection")
   ) {
-    return new NetworkError(errorMessage, error instanceof Error ? error : undefined);
+    return new TrackingError(errorMessage, ErrorCategory.NETWORK);
   }
 
   // Authentication errors
@@ -127,15 +72,12 @@ export function categorizeError(error: unknown, deliveryName: string): TrackingE
     errorLower.includes("invalid credentials") ||
     errorLower.includes("api key")
   ) {
-    return new AuthenticationError(errorMessage);
+    return new TrackingError(errorMessage, ErrorCategory.AUTHENTICATION);
   }
 
   // Rate limit errors
   if (errorLower.includes("rate limit") || errorLower.includes("429") || errorLower.includes("too many requests")) {
-    // Try to extract retry-after time if present
-    const retryMatch = errorMessage.match(/retry.*?(\d+)/i);
-    const retryAfter = retryMatch ? parseInt(retryMatch[1], 10) : undefined;
-    return new RateLimitError(errorMessage, retryAfter);
+    return new TrackingError(errorMessage, ErrorCategory.RATE_LIMIT);
   }
 
   // Invalid tracking number
@@ -145,17 +87,16 @@ export function categorizeError(error: unknown, deliveryName: string): TrackingE
     errorLower.includes("not found") ||
     errorLower.includes("404")
   ) {
-    return new InvalidTrackingError(errorMessage, deliveryName);
+    return new TrackingError(errorMessage, ErrorCategory.INVALID_TRACKING);
   }
 
   // Carrier API errors (HTTP status codes)
-  const statusMatch = errorMessage.match(/\b([45]\d{2})\b/);
-  if (statusMatch) {
-    return new CarrierAPIError(errorMessage, parseInt(statusMatch[1], 10));
+  if (/\b([45]\d{2})\b/.test(errorMessage)) {
+    return new TrackingError(errorMessage, ErrorCategory.CARRIER_API);
   }
 
   // Unknown error
-  return new TrackingError(errorMessage, ErrorCategory.UNKNOWN, "An unexpected error occurred. Please try again.");
+  return new TrackingError(errorMessage, ErrorCategory.UNKNOWN);
 }
 
 /**

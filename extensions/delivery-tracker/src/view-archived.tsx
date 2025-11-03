@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useDeliveries } from "./hooks/useDeliveries";
 import { usePackages } from "./hooks/usePackages";
 import { deliveryIcon, deliveryStatus } from "./package";
@@ -51,7 +51,7 @@ export default function ViewArchivedCommand() {
                 />
                 <Action.OpenInBrowser
                   url={carriers.get(delivery.carrier)?.urlToTrackingWebpage(delivery) ?? ""}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
               </ActionPanel>
             }

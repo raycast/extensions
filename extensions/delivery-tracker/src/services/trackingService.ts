@@ -52,7 +52,7 @@ export async function refreshTracking(
         };
       });
     } catch (error) {
-      const categorizedError = categorizeError(error, delivery.name);
+      const categorizedError = categorizeError(error);
       errors.push(categorizedError);
     }
   }
