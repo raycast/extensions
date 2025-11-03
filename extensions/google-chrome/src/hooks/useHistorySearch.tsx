@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { HistoryEntry, SearchResult } from "../interfaces";
 import { getHistoryDbPath } from "../util";
 import { NotInstalledError } from "../components";
-import { parseSearchQuery, matchesQuery } from "../util/search-parser";
+import { parseSearchQuery } from "../util/search-parser";
 
 const whereClauses = (tableTitle: string, includeTerms: string[], excludeTerms: string[]) => {
   // Escape single quotes to prevent SQL injection

@@ -9,6 +9,27 @@ export class ChromeListItems {
   public static TabHistory = HistoryItem;
 }
 
+// Helper function to safely get favicon for potentially invalid URLs
+function getSafeFavicon(url: string) {
+  // Filter out known problematic URL schemes
+  const invalidSchemes = ['javascript:', 'data:', 'about:', 'chrome:', 'file:'];
+  const urlLower = url.toLowerCase().trim();
+  
+  // Check if URL starts with any invalid scheme
+  if (invalidSchemes.some(scheme => urlLower.startsWith(scheme))) {
+    return { source: "" };
+  }
+  
+  // Validate URL format
+  try {
+    new URL(url);
+    return getFavicon(url);
+  } catch {
+    // Return empty icon for any other invalid URLs
+    return { source: "" };
+  }
+}
+
 function HistoryItem({
   profile,
   entry: { url, title, id },
@@ -23,7 +44,7 @@ function HistoryItem({
       id={`${profile}-${type}-${id}`}
       title={title}
       subtitle={url}
-      icon={getFavicon(url)}
+      icon={getSafeFavicon(url)}
       actions={<ChromeActions.TabHistory title={title} url={url} profile={profile} />}
     />
   );
