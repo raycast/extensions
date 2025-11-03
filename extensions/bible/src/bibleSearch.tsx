@@ -26,10 +26,10 @@ export default function Command(props: LaunchProps<{ arguments: Partial<Argument
     getPreferenceValues<Preferences>();
 
   const { ref: initialRef, version: initialVersion } = props.arguments;
-  const parsedVersion = initialVersion ? parseVersionAbbreviation(initialVersion, bibleVersions) : undefined;
+  const parsedVersion = initialVersion ? versionFromAbbrev(initialVersion, bibleVersions) : undefined;
 
   const [ref, setRef] = React.useState(initialRef ?? "");
-  const [version, setVersion] = useBibleVersion(parsedVersion);
+  const [version, setVersion] = useBibleVersion(parsedVersion?.id);
 
   const { data: searchResult, isLoading, error } = useBibleSearch({ search: ref, version: version });
 
@@ -144,8 +144,8 @@ export default function Command(props: LaunchProps<{ arguments: Partial<Argument
           onChange={(version) => setVersion(version)}
           value={version ?? DEFAULT_BIBLE_VERSION}
         >
-          {bibleVersions.map(([name, abbreviation]) => (
-            <List.Dropdown.Item title={name} value={abbreviation} key={abbreviation} />
+          {bibleVersions.map(({ id, name, abbrev }) => (
+            <List.Dropdown.Item title={`${name} (${abbrev})`} value={id} key={id} />
           ))}
         </List.Dropdown>
       }
@@ -223,16 +223,16 @@ function getContentsOfLastParenthesis(version: string): string {
  */
 function parseReference(reference: string): { ref: string; version: string | undefined } {
   const trimmedReference = reference.trim();
-  const lastWord = trimmedReference.split(" ").pop();
-  const version = lastWord ? parseVersionAbbreviation(lastWord, bibleVersions) : undefined;
-  const refWithoutVersion = lastWord && version ? trimmedReference.slice(0, -lastWord.length).trim() : trimmedReference;
-  return { ref: refWithoutVersion, version };
+  const parts = trimmedReference.split(" ");
+  const lastWord = parts.pop();
+  const version = lastWord ? versionFromAbbrev(lastWord, bibleVersions) : undefined;
+  const refWithoutVersion = lastWord && version ? parts.join(" ") : trimmedReference;
+  return { ref: refWithoutVersion, version: version?.id };
 }
 
-function parseVersionAbbreviation(maybeVersionAbbrev: string, validVersions: typeof bibleVersions): string | undefined {
+function versionFromAbbrev(maybeVersionAbbrev: string, validVersions: typeof bibleVersions) {
   maybeVersionAbbrev = maybeVersionAbbrev
     .replace(/[()[\]]/gi, "") // remove brackets and parentheses
     .toUpperCase();
-  const isVersion = validVersions.some(([, abbreviation]) => abbreviation === maybeVersionAbbrev);
-  return isVersion ? maybeVersionAbbrev : undefined;
+  return validVersions.find(({ abbrev }) => abbrev === maybeVersionAbbrev);
 }

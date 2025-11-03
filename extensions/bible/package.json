@@ -97,6 +97,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "update-bible-versions": "node ./scripts/updateBibleVersions.js"
+    "update-bible-versions": "node ./scripts/updateBibleVersions.mts ./assets/bible-versions.json"
   }
 }
