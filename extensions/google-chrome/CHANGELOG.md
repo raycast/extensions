@@ -6,6 +6,9 @@
 - Users can now filter out unwanted results by prefixing terms with "/"
 - Example: "raycast /firefox" finds items containing "raycast" but not "firefox"
 - Works across all search functions: tabs, history, bookmarks, and search all
+- Fix SQL injection vulnerability in history search
+- Improve performance by skipping filtering when no search query is provided
+- Handle invalid URLs (e.g., javascript: protocol) gracefully to prevent crashes
 
 ## [Improvements] - 2025-10-13
 

@@ -29,15 +29,26 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
   const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
   const { isLoading, data: tabData } = usePromise(
-    (useOriginalFavicon: boolean, query: string) => {
-      return getOpenTabs(useOriginalFavicon).then((tabs) => {
-        const parsedQuery = parseSearchQuery(query);
-        setErrorView(undefined);
-        setIsEmpty(tabs.length === 0);
-        return tabs
-          .map((tab): [Tab, string] => [tab, `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`])
-          .filter(([, searchable]) => matchesQuery(searchable, parsedQuery))
-          .map(([tab]) => tab);
+    async (useOriginalFavicon: boolean, query: string) => {
+      const tabs = await getOpenTabs(useOriginalFavicon);
+      const parsedQuery = parseSearchQuery(query);
+      setErrorView(undefined);
+      setIsEmpty(tabs.length === 0);
+      
+      // Early return if no search query
+      if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
+        return tabs;
+      }
+      
+      return tabs.filter((tab) => {
+        try {
+          const searchable = `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`;
+          return matchesQuery(searchable, parsedQuery);
+        } catch {
+          // Handle invalid URLs gracefully
+          const searchable = `${tab.title.toLowerCase()} ${tab.url.toLowerCase()}`;
+          return matchesQuery(searchable, parsedQuery);
+        }
       });
     },
     [useOriginalFavicon, query],

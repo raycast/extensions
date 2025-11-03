@@ -18,16 +18,23 @@ export function useBookmarkSearch(
     data: bookmarkData,
     revalidate,
   } = usePromise(
-    (profile: string, query?: string) =>
-      getBookmarks(profile).then((bookmarks) => {
-        setErrorView(undefined);
-        setIsEmpty(bookmarks.length === 0);
-        const parsedQuery = parseSearchQuery(query || "");
-        return bookmarks.filter((bookmark) => {
-          const searchableText = `${bookmark.title.toLowerCase()} ${bookmark.url.toLowerCase()}`;
-          return matchesQuery(searchableText, parsedQuery);
-        });
-      }),
+    async (profile: string, query?: string) => {
+      const bookmarks = await getBookmarks(profile);
+      setErrorView(undefined);
+      setIsEmpty(bookmarks.length === 0);
+      
+      const parsedQuery = parseSearchQuery(query || "");
+      
+      // Early return if no search query
+      if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
+        return bookmarks;
+      }
+      
+      return bookmarks.filter((bookmark) => {
+        const searchableText = `${bookmark.title.toLowerCase()} ${bookmark.url.toLowerCase()}`;
+        return matchesQuery(searchableText, parsedQuery);
+      });
+    },
     [profile, query],
     {
       onError(error) {
