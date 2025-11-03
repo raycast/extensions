@@ -85,7 +85,7 @@ export default function MathToLatexLivePanel({
                     latex={latex}
                     wrapStyle={wrapStyle}
                     onEdit={pop}
-                  />
+                  />,
                 )
               }
               shortcut={{ modifiers: [], key: "enter" }}
