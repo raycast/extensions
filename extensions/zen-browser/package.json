@@ -50,6 +50,13 @@
       "mode": "no-view"
     },
     {
+      "name": "new-private-window",
+      "title": "Create New Private Window",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser private window.",
+      "mode": "no-view"
+    },
+    {
       "name": "search-history",
       "title": "Search History",
       "subtitle": "Zen Browser",
