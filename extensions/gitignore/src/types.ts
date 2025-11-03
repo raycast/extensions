@@ -10,3 +10,8 @@ export type State = {
   loading: boolean;
   lastUpdated: Date | null;
 };
+
+export interface Preferences {
+  listdetail: boolean;
+  autoselect: boolean;
+}

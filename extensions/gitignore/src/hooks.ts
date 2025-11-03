@@ -134,101 +134,100 @@ export function useGitignore(): [
   refresh: () => void,
   favorites: Set<string>,
   toggleFavorite: (gitignoreFile: GitignoreFile) => void,
+  selectMultiple: (gitignoreFiles: GitignoreFile[]) => void,
 ] {
   const [state, setState] = useState<State>({ gitignoreFiles: [], loading: true, lastUpdated: null });
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [favorites, toggleFavorite] = useFavorites();
 
-  const refresh = useCallback(
-    async (shouldDownload: boolean) => {
-      // Start loading
-      setState((oldState) => {
-        return {
-          ...oldState,
-          loading: true,
-        };
-      });
+  const refresh = useCallback(async (shouldDownload: boolean) => {
+    // Start loading
+    setState((prev) => ({ ...prev, loading: true }));
 
-      // If files are not downloaded we shouldDownload
-      if (!shouldDownload) {
-        try {
-          await fs.access(LATEST_PATH);
-        } catch (error) {
-          shouldDownload = true;
-        }
-      }
-
+    // If files are not downloaded we shouldDownload
+    if (!shouldDownload) {
       try {
-        if (shouldDownload) {
-          // Download and process files
-          await updateCache();
-          // After files downloaded, reset selection
-          setSelected(new Set());
-          showToast({
-            title: "Successfully downloaded gitignore files",
-          });
-        }
-        // Create list of Gitignore files
-        const gitignoreFiles = await loadGitignoreFiles(LATEST_PATH);
-        const lastUpdated = new Date((await LocalStorage.getItem("last-updated")) as number);
-        // Update state
-        setState((oldState) => {
-          return {
-            ...oldState,
-            gitignoreFiles,
-            lastUpdated,
-            loading: false,
-          };
-        });
+        await fs.access(LATEST_PATH);
       } catch (error) {
-        let message = "Unknown error occurred";
-        if (error instanceof FetchError) {
-          message = "Please check your internet connection and try again";
-        } else if (error instanceof Error) {
-          message = error.message;
-        }
-        console.log(error);
+        shouldDownload = true;
+        console.error(`Could not access ${LATEST_PATH}.`, error);
+      }
+    }
+
+    try {
+      if (shouldDownload) {
+        // Download and process files
+        await updateCache();
+        // After files downloaded, reset selection
+        setSelected(new Set());
         await showToast({
-          style: Toast.Style.Failure,
-          title: "Unable to refresh",
-          message,
-        });
-        setState((oldState) => {
-          return {
-            ...oldState,
-            loading: false,
-          };
+          title: "Successfully downloaded gitignore files",
         });
       }
-    },
-    [setState]
-  );
+      // Create list of Gitignore files
+      const gitignoreFiles = await loadGitignoreFiles(LATEST_PATH);
+      const lastUpdated = (await LocalStorage.getItem("last-updated")) as number | null;
+      // Update state
+      setState({
+        gitignoreFiles,
+        lastUpdated: lastUpdated ? new Date(lastUpdated) : null,
+        loading: false,
+      });
+    } catch (error) {
+      let message = "Unknown error occurred";
+      if (error instanceof FetchError) {
+        message = "Please check your internet connection and try again";
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to refresh",
+        message,
+      });
+      setState((prev) => ({ ...prev, loading: false }));
+    }
+  }, []);
 
   // Toggle selection of a GitIgnoreFile
-  const toggleSelection = useCallback(
-    async (gitignore: GitignoreFile) => {
-      const id = gitignore.id;
-      setSelected((selected) => {
-        if (selected.has(id)) {
-          selected.delete(id);
-        } else {
-          selected.add(id);
-        }
-        return new Set(selected);
+  const toggleSelection = useCallback((gitignore: GitignoreFile) => {
+    setSelected((prevSelected) => {
+      const newSelected = new Set(prevSelected);
+      if (newSelected.has(gitignore.id)) {
+        newSelected.delete(gitignore.id);
+      } else {
+        newSelected.add(gitignore.id);
+      }
+      return newSelected;
+    });
+  }, []);
+
+  // Select multiple GitIgnoreFiles at once (for batch operations)
+  const selectMultiple = useCallback((gitignoreFiles: GitignoreFile[]) => {
+    setSelected((prevSelected) => {
+      const newSelected = new Set(prevSelected);
+      gitignoreFiles.forEach((file) => {
+        newSelected.add(file.id);
       });
-    },
-    [setSelected]
-  );
+      return newSelected;
+    });
+  }, []);
 
   // Load files on first call
   useEffect(() => {
     refresh(false);
   }, [refresh]);
 
-  return [state, selected, toggleSelection, () => refresh(true), favorites, toggleFavorite];
+  return [state, selected, toggleSelection, () => refresh(true), favorites, toggleFavorite, selectMultiple];
 }
 
 export function useListDetailPreference(): boolean {
-  const preferences = getPreferenceValues();
-  return preferences["listdetail"];
+  const preferences = getPreferenceValues<Preferences>();
+  return preferences.listdetail;
+}
+
+export function useAutoSelectPreference(): boolean {
+  const preferences = getPreferenceValues<Preferences>();
+  return preferences.autoselect;
 }
