@@ -5,8 +5,8 @@ import { resolve, parse, basename } from "path";
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { pipeline } from "stream/promises";
 import { useCallback, useEffect, useState } from "react";
-import { GitignoreFile, State } from "./types";
-import { spawn } from "./utils";
+import { GitignoreFile, Preferences, State } from "./types";
+import AdmZip from "adm-zip";
 
 const GITHUB_URL = "https://codeload.github.com/github/gitignore/zip/main";
 
@@ -42,9 +42,11 @@ async function updateCache() {
   try {
     // Extract to directory (remove if exists already)
     await fs.rm(EXTRACTED_PATH, { recursive: true, force: true });
-    await spawn("tar", ["-xf", ZIP_PATH, "--directory", environment.supportPath]);
+    // Use adm-zip for cross-platform ZIP extraction
+    const zip = new AdmZip(ZIP_PATH);
+    zip.extractAllTo(environment.supportPath, true);
   } catch (error) {
-    throw new UpdateError("Could not unzip. Please file a bug report.");
+    throw new UpdateError(`Could not unzip. Please file a bug report. ${error}`);
   }
 
   // Successfully downloaded, now replace previous cache if exists

@@ -34,10 +34,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.5",
+    "adm-zip": "^0.5.16",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@types/adm-zip": "^0.5.7",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "eslint": "^9.39.1",
