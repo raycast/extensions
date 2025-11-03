@@ -1,6 +1,6 @@
 # Resend Changelog
 
-## [Use Resend SDK + Add Windows Support] - {PR_MERGE_DATE}
+## [Use Resend SDK + Add Windows Support] - 2025-11-03
 
 - Add Windows Support
 - We now use Resend Node SDK
