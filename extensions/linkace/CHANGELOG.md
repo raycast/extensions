@@ -1,6 +1,6 @@
 # LinkAce Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-11-03
 
 - Add Link command with full form for saving links with custom title, description, tags, and privacy settings
 - Quick Add Link command for instantly saving links from clipboard or argument
