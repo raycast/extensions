@@ -1,6 +1,6 @@
 # Currency Exchange Changelog
 
-## [Update] - 2025-11-03
+## [Update] - {PR_MERGE_DATE}
 
 - Toggled on windows support
 
