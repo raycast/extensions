@@ -12,14 +12,14 @@ export class ChromeListItems {
 // Helper function to safely get favicon for potentially invalid URLs
 function getSafeFavicon(url: string) {
   // Filter out known problematic URL schemes
-  const invalidSchemes = ['javascript:', 'data:', 'about:', 'chrome:', 'file:'];
+  const invalidSchemes = ["javascript:", "data:", "about:", "chrome:", "file:"];
   const urlLower = url.toLowerCase().trim();
-  
+
   // Check if URL starts with any invalid scheme
-  if (invalidSchemes.some(scheme => urlLower.startsWith(scheme))) {
+  if (invalidSchemes.some((scheme) => urlLower.startsWith(scheme))) {
     return { source: "" };
   }
-  
+
   // Validate URL format
   try {
     new URL(url);

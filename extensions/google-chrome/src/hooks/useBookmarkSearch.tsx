@@ -22,14 +22,14 @@ export function useBookmarkSearch(
       const bookmarks = await getBookmarks(profile);
       setErrorView(undefined);
       setIsEmpty(bookmarks.length === 0);
-      
+
       const parsedQuery = parseSearchQuery(query || "");
-      
+
       // Early return if no search query
       if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
         return bookmarks;
       }
-      
+
       return bookmarks.filter((bookmark) => {
         const searchableText = `${bookmark.title.toLowerCase()} ${bookmark.url.toLowerCase()}`;
         return matchesQuery(searchableText, parsedQuery);

@@ -34,12 +34,12 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
       const parsedQuery = parseSearchQuery(query);
       setErrorView(undefined);
       setIsEmpty(tabs.length === 0);
-      
+
       // Early return if no search query
       if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
         return tabs;
       }
-      
+
       return tabs.filter((tab) => {
         try {
           const searchable = `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`;

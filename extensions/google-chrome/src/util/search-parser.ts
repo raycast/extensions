@@ -2,11 +2,11 @@
  * Parses search query to extract include and exclude terms
  * @param query - The search query string
  * @returns Object containing include and exclude terms
- * 
+ *
  * @example
- * parseSearchQuery("foo bar /baz") 
+ * parseSearchQuery("foo bar /baz")
  * // returns { includeTerms: ["foo", "bar"], excludeTerms: ["baz"] }
- * 
+ *
  * parseSearchQuery("hello /world /test")
  * // returns { includeTerms: ["hello"], excludeTerms: ["world", "test"] }
  */
@@ -25,10 +25,10 @@ export function parseSearchQuery(query: string): ParsedQuery {
   const excludeTerms: string[] = [];
 
   for (const term of terms) {
-    if (term.startsWith('/') && term.length > 1) {
+    if (term.startsWith("/") && term.length > 1) {
       // Remove the leading '/' and add to exclude terms
       excludeTerms.push(term.slice(1).toLowerCase());
-    } else if (term.length > 0 && term !== '/') {
+    } else if (term.length > 0 && term !== "/") {
       // Add to include terms (ignore standalone '/')
       includeTerms.push(term.toLowerCase());
     }
@@ -45,14 +45,12 @@ export function parseSearchQuery(query: string): ParsedQuery {
  */
 export function matchesQuery(text: string, parsedQuery: ParsedQuery): boolean {
   const { includeTerms, excludeTerms } = parsedQuery;
-  
+
   // Check if all include terms are present
-  const hasAllIncludeTerms = includeTerms.length === 0 || 
-    includeTerms.every(term => text.includes(term));
-  
+  const hasAllIncludeTerms = includeTerms.length === 0 || includeTerms.every((term) => text.includes(term));
+
   // Check if none of the exclude terms are present
-  const hasNoExcludeTerms = excludeTerms.length === 0 || 
-    !excludeTerms.some(term => text.includes(term));
-  
+  const hasNoExcludeTerms = excludeTerms.length === 0 || !excludeTerms.some((term) => text.includes(term));
+
   return hasAllIncludeTerms && hasNoExcludeTerms;
 }

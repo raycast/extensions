@@ -11,9 +11,13 @@ import { parseSearchQuery } from "../util/search-parser";
 const whereClauses = (tableTitle: string, includeTerms: string[], excludeTerms: string[]) => {
   // Escape single quotes to prevent SQL injection
   const escapeSql = (str: string) => str.replace(/'/g, "''");
-  const includeClauses = includeTerms.map((t) => `(${tableTitle}.title LIKE '%${escapeSql(t)}%' OR ${tableTitle}.url LIKE '%${escapeSql(t)}%')`);
-  const excludeClauses = excludeTerms.map((t) => `NOT (${tableTitle}.title LIKE '%${escapeSql(t)}%' OR ${tableTitle}.url LIKE '%${escapeSql(t)}%')`);
-  
+  const includeClauses = includeTerms.map(
+    (t) => `(${tableTitle}.title LIKE '%${escapeSql(t)}%' OR ${tableTitle}.url LIKE '%${escapeSql(t)}%')`,
+  );
+  const excludeClauses = excludeTerms.map(
+    (t) => `NOT (${tableTitle}.title LIKE '%${escapeSql(t)}%' OR ${tableTitle}.url LIKE '%${escapeSql(t)}%')`,
+  );
+
   const allClauses = [...includeClauses, ...excludeClauses];
   return allClauses.length > 0 ? allClauses.join(" AND ") : "1=1";
 };
