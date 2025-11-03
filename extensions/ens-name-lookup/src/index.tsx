@@ -1,36 +1,28 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import fetch, { AbortError } from "node-fetch";
-import useSWR from "swr";
+import { ActionPanel, List, Action } from "@raycast/api";
+import { useState } from "react";
+import { useFetch } from "@raycast/utils";
 import cheerio from "cheerio";
 
 export default function Command() {
   const [query, setQuery] = useState("");
-  const {
-    data: result,
-    error,
-    isValidating,
-  } = useSWR(
-    () => (query ? `/ens-query/${query}` : null),
-    () => performSearch(query),
-  );
-
-  useEffect(() => {
-    if (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-
-      showToast(Toast.Style.Failure, "Could not perform search", String(error));
-    }
-  }, [error]);
+  const { data: result, isLoading } = useFetch(`https://etherscan.io/enslookup-search?search=${query}`, {
+    parseResponse: async (response) => {
+      const html = await response.text();
+      return html;
+    },
+    mapResult: (html) => {
+      return { data: parseSearchResult(html) };
+    },
+    execute: query.length > 0,
+    keepPreviousData: true,
+  });
 
   const showEnsResult = result?.found && result.ens;
   const showAddressResult = result?.found && result.address;
 
   return (
     <List
-      isLoading={isValidating}
+      isLoading={isLoading}
       onSearchTextChange={(value) => setQuery(value)}
       searchBarPlaceholder="Search by Ethereum name or address..."
       throttle
@@ -153,18 +145,7 @@ function TransactionListItem({ transaction }: { transaction: Transaction }) {
   );
 }
 
-async function performSearch(searchText: string): Promise<SearchResult> {
-  const params = new URLSearchParams();
-
-  params.append("search", searchText);
-
-  const response = await fetch(`https://etherscan.io/enslookup-search?${params.toString()}`);
-
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
-  }
-
-  const html = await response.text();
+function parseSearchResult(html: string): SearchResult {
   const $ = cheerio.load(html);
 
   const ensResult = $("#ContentPlaceHolder1_ensNameResult");
@@ -264,12 +245,6 @@ async function performSearch(searchText: string): Promise<SearchResult> {
   return {
     found: false,
   };
-}
-
-interface SearchState {
-  result: SearchResult | null;
-  isLoading: boolean;
-  searchText: string;
 }
 
 interface Transaction {
