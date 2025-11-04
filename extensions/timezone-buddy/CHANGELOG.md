@@ -1,5 +1,7 @@
 # Timezone Buddy Changelog
 
+## [Added Windows Support] - 2025-10-30
+
 ## [New Feature] - 2025-08-06
 
 - Added time offset functionality to view times in the future or past

@@ -128,14 +128,20 @@ export default function Command() {
           title: "Launched background agent",
           primaryAction: {
             title: "Open in Browser",
-            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            shortcut: {
+              macOS: { modifiers: ["cmd", "shift"], key: "o" },
+              windows: { modifiers: ["ctrl", "shift"], key: "o" },
+            },
             async onAction() {
               await open(response.target.url);
             },
           },
           secondaryAction: {
             title: "Copy URL",
-            shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+            shortcut: {
+              macOS: { modifiers: ["cmd", "shift"], key: "c" },
+              windows: { modifiers: ["ctrl", "shift"], key: "c" },
+            },
             async onAction() {
               await Clipboard.copy(response.target.url);
             },

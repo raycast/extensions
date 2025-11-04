@@ -3,7 +3,7 @@
   "name": "attio",
   "title": "Attio",
   "description": "The next gen of CRM",
-  "icon": "extension_icon.png",
+  "icon": "attio.png",
   "author": "xmok",
   "platforms": [
     "macOS",

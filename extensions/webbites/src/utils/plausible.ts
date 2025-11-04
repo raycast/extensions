@@ -9,21 +9,20 @@ interface PlausibleEventProps {
 class PlausibleAnalytics {
   private domain: string;
   private apiEndpoint: string;
-  private isInitialized: boolean;
+  private initPromise: Promise<void> | null;
   private userId: string | null;
 
   constructor() {
     this.domain = "webbites.io";
     this.apiEndpoint = "https://plausible.macosicons.com/api/event";
-    this.isInitialized = false;
+    this.initPromise = null;
     this.userId = null;
-    this.init();
   }
 
   /**
    * Initialize Plausible analytics
    */
-  private async init() {
+  private async init(): Promise<void> {
     try {
       // Get user ID from local storage if available
       const { LocalStorage } = await import("@raycast/api");
@@ -38,21 +37,26 @@ class PlausibleAnalytics {
           console.error("Error parsing user data for Plausible:", error);
         }
       }
-
-      this.isInitialized = true;
     } catch (error) {
       console.error("Error initializing Plausible:", error);
-      this.isInitialized = true; // Still mark as initialized even on error
     }
+  }
+
+  /**
+   * Ensure initialization is complete
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initPromise) {
+      this.initPromise = this.init();
+    }
+    await this.initPromise;
   }
 
   /**
    * Send an event to Plausible
    */
   private async sendEvent(eventName: string, props: PlausibleEventProps = {}) {
-    if (!this.isInitialized) {
-      await this.init();
-    }
+    await this.ensureInitialized();
 
     try {
       const eventData = {
@@ -73,8 +77,6 @@ class PlausibleAnalytics {
         },
         body: JSON.stringify(eventData),
       });
-
-      console.log(`Plausible event sent: ${eventName}`, eventData.props);
     } catch (error) {
       console.error("Error sending Plausible event:", error);
       // Fail silently - we don't want analytics to break the app

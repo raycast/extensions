@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-11-03
+
+- Add a "Note" field to the bookmark creation and editing forms.
+
 ## [Open in Secondary Browser] - 2025-10-01
 
 - Specify a secondary browser for opening bookmarks (ref: [Issue #21699](https://github.com/raycast/extensions/issues/21699))
