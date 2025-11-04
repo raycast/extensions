@@ -1,0 +1,995 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Default module",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/instance/create": {
+      "post": {
+        "summary": "Create Instance",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instanceName": {
+                    "type": "string"
+                  },
+                  "qrcode": {
+                    "type": "boolean"
+                  },
+                  "integration": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "instanceName",
+                  "qrcode",
+                  "integration"
+                ]
+              },
+              "example": "{\r\n    // instance\r\n    \"instanceName\": \"{{instance}}\",\r\n    // \"token\": \"{{apikey}}\", // (Optional)\r\n    // \"number\": \"{{number}}\", // (Optional)\r\n    \"qrcode\": true, // (Optional)\r\n    \"integration\": \"WHATSAPP-BAILEYS\" // WHATSAPP-BAILEYS | WHATSAPP-BUSINESS | EVOLUTION (Default WHATSAPP-BAILEYS) \r\n    // settings (Optional)\r\n    // \"rejectCall\": false,\r\n    // \"msgCall\": \"\",\r\n    // \"groupsIgnore\": false,\r\n    // \"alwaysOnline\": false,\r\n    // \"readMessages\": false,\r\n    // \"readStatus\": false,\r\n    // \"syncFullHistory\": false,\r\n    // // proxy (Optional)\r\n    // \"proxyHost\": \"\",\r\n    // \"proxyPort\": \"\",\r\n    // \"proxyProtocol\": \"\",\r\n    // \"proxyUsername\": \"\",\r\n    // \"proxyPassword\": \"\",\r\n    // webhook (Optional)\r\n    // \"webhook\": {\r\n    //     \"url\": \"\",\r\n    //     \"byEvents\": false,\r\n    //     \"base64\": true,\r\n    //     \"headers\": {\r\n    //         \"autorization\": \"Bearer TOKEN\",\r\n    //         \"Content-Type\": \"application/json\"\r\n    //     },\r\n    //     \"events\": [\r\n    //         \"APPLICATION_STARTUP\",\r\n    //         \"QRCODE_UPDATED\",\r\n    //         \"MESSAGES_SET\",\r\n    //         \"MESSAGES_UPSERT\",\r\n    //         \"MESSAGES_UPDATE\",\r\n    //         \"MESSAGES_DELETE\",\r\n    //         \"SEND_MESSAGE\",\r\n    //         \"CONTACTS_SET\",\r\n    //         \"CONTACTS_UPSERT\",\r\n    //         \"CONTACTS_UPDATE\",\r\n    //         \"PRESENCE_UPDATE\",\r\n    //         \"CHATS_SET\",\r\n    //         \"CHATS_UPSERT\",\r\n    //         \"CHATS_UPDATE\",\r\n    //         \"CHATS_DELETE\",\r\n    //         \"GROUPS_UPSERT\",\r\n    //         \"GROUP_UPDATE\",\r\n    //         \"GROUP_PARTICIPANTS_UPDATE\",\r\n    //         \"CONNECTION_UPDATE\",\r\n    //         \"LABELS_EDIT\",\r\n    //         \"LABELS_ASSOCIATION\",\r\n    //         \"CALL\",\r\n    //         \"TYPEBOT_START\",\r\n    //         \"TYPEBOT_CHANGE_STATUS\"\r\n    //     ]\r\n    // },\r\n    // // rabbitmq (Optional)\r\n    // \"rabbitmq\": {\r\n    //     \"enabled\": true,\r\n    //     \"events\": [\r\n    //         \"APPLICATION_STARTUP\",\r\n    //         \"QRCODE_UPDATED\",\r\n    //         \"MESSAGES_SET\",\r\n    //         \"MESSAGES_UPSERT\",\r\n    //         \"MESSAGES_UPDATE\",\r\n    //         \"MESSAGES_DELETE\",\r\n    //         \"SEND_MESSAGE\",\r\n    //         \"CONTACTS_SET\",\r\n    //         \"CONTACTS_UPSERT\",\r\n    //         \"CONTACTS_UPDATE\",\r\n    //         \"PRESENCE_UPDATE\",\r\n    //         \"CHATS_SET\",\r\n    //         \"CHATS_UPSERT\",\r\n    //         \"CHATS_UPDATE\",\r\n    //         \"CHATS_DELETE\",\r\n    //         \"GROUPS_UPSERT\",\r\n    //         \"GROUP_UPDATE\",\r\n    //         \"GROUP_PARTICIPANTS_UPDATE\",\r\n    //         \"CONNECTION_UPDATE\",\r\n    //         \"LABELS_EDIT\",\r\n    //         \"LABELS_ASSOCIATION\",\r\n    //         \"CALL\",\r\n    //         \"TYPEBOT_START\",\r\n    //         \"TYPEBOT_CHANGE_STATUS\"\r\n    //     ]\r\n    // },\r\n    // // sqs (Optional)\r\n    // \"sqs\": {\r\n    //     \"enabled\": true,\r\n    //     \"events\": [\r\n    //         \"APPLICATION_STARTUP\",\r\n    //         \"QRCODE_UPDATED\",\r\n    //         \"MESSAGES_SET\",\r\n    //         \"MESSAGES_UPSERT\",\r\n    //         \"MESSAGES_UPDATE\",\r\n    //         \"MESSAGES_DELETE\",\r\n    //         \"SEND_MESSAGE\",\r\n    //         \"CONTACTS_SET\",\r\n    //         \"CONTACTS_UPSERT\",\r\n    //         \"CONTACTS_UPDATE\",\r\n    //         \"PRESENCE_UPDATE\",\r\n    //         \"CHATS_SET\",\r\n    //         \"CHATS_UPSERT\",\r\n    //         \"CHATS_UPDATE\",\r\n    //         \"CHATS_DELETE\",\r\n    //         \"GROUPS_UPSERT\",\r\n    //         \"GROUP_UPDATE\",\r\n    //         \"GROUP_PARTICIPANTS_UPDATE\",\r\n    //         \"CONNECTION_UPDATE\",\r\n    //         \"LABELS_EDIT\",\r\n    //         \"LABELS_ASSOCIATION\",\r\n    //         \"CALL\",\r\n    //         \"TYPEBOT_START\",\r\n    //         \"TYPEBOT_CHANGE_STATUS\"\r\n    //     ]\r\n    // },\r\n    // // chatwoot (Optional)\r\n    // \"chatwootAccountId\": \"1\",\r\n    // \"chatwootToken\": \"TOKEN\",\r\n    // \"chatwootUrl\": \"https://chatoot.com\",\r\n    // \"chatwootSignMsg\": true,\r\n    // \"chatwootReopenConversation\": true,\r\n    // \"chatwootConversationPending\": false,\r\n    // \"chatwootImportContacts\": true,\r\n    // \"chatwootNameInbox\": \"evolution\",\r\n    // \"chatwootMergeBrazilContacts\": true,\r\n    // \"chatwootImportMessages\": true,\r\n    // \"chatwootDaysLimitImportMessages\": 3,\r\n    // \"chatwootOrganization\": \"Evolution Bot\",\r\n    // \"chatwootLogo\": \"https://evolution-api.com/files/evolution-api-favicon.png\",\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "apikey-header-apikey": []
+          }
+        ]
+      }
+    },
+    "/instance/fetchInstances": {
+      "get": {
+        "summary": "Fetch Instances",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "instanceName",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "{{instance}}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instanceId",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "{{instanceId}}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "apikey-header-apikey": []
+          }
+        ]
+      }
+    },
+    "/instance/connect/instance": {
+      "get": {
+        "summary": "Instance Connect",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "number",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "{{number}}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/instance/restart/instance": {
+      "post": {
+        "summary": "Restart Instance",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/instance/setPresence/instance": {
+      "post": {
+        "summary": "Set Presence",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "presence": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "presence"
+                ]
+              },
+              "example": "{\n    \"presence\": \"available\" /* available, unavailable */\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/instance/connectionState/instance": {
+      "get": {
+        "summary": "Connection Status",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/instance/logout/instance": {
+      "delete": {
+        "summary": "Logout Instance",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/instance/delete/instance": {
+      "delete": {
+        "summary": "Delete Instance",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "apikey-header-apikey": []
+          }
+        ]
+      }
+    },
+    "/message/sendText/instance": {
+      "post": {
+        "summary": "Send Text",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "number",
+                  "text"
+                ]
+              },
+              "example": "{\r\n    \"number\": \"{{remoteJid}}\",\r\n    \"text\": \"teste de envio\"\r\n    // options\r\n    // \"delay\": 1200,\r\n    // \"quoted\": {\r\n    //     // payload message or key.id only for get message in database\r\n    //     \"key\": {\r\n    //         \"id\": \" MESSAGE_ID\"\r\n    //     },\r\n    //     \"message\": {\r\n    //         \"conversation\": \"CONTENT_MESSAGE\"\r\n    //     }\r\n    // },\r\n    // \"linkPreview\": false,\r\n    // \"mentionsEveryOne\": false,\r\n    // \"mentioned\": [\r\n    //     \"{{remoteJid}}\"\r\n    // ]\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendMedia/instance": {
+      "post": {
+        "summary": "Send Media File",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendPtv/instance": {
+      "post": {
+        "summary": "Send PTV File",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "example": "{{remoteJid}}",
+                    "type": "string"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "number",
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendWhatsAppAudio/instance": {
+      "post": {
+        "summary": "Send Narrated Audio",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "string"
+                  },
+                  "audio": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "number",
+                  "audio"
+                ]
+              },
+              "example": "{\r\n    \"number\": \"{{remoteJid}}\",\r\n    \"audio\": \"https://evolution-api.com/files/narratedaudio.mp3\" /* url or base64 */\r\n    // options\r\n    // \"delay\": 1200,\r\n    // \"quoted\": {\r\n    //     // payload message or key.id only for get message in database\r\n    //     \"key\": {\r\n    //         \"id\": \" MESSAGE_ID\"\r\n    //     },\r\n    //     \"message\": {\r\n    //         \"conversation\": \"CONTENT_MESSAGE\"\r\n    //     }\r\n    // },\r\n    // \"mentionsEveryOne\": false,\r\n    // \"mentioned\": [\r\n    //     \"{{remoteJid}}\"\r\n    // ],\r\n    // \"encoding\": true\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendStatus/instance": {
+      "post": {
+        "summary": "Send Status/Stories",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "caption": {
+                    "type": "string"
+                  },
+                  "backgroundColor": {
+                    "type": "string"
+                  },
+                  "font": {
+                    "type": "integer"
+                  },
+                  "allContacts": {
+                    "type": "boolean"
+                  },
+                  "statusJidList": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "content",
+                  "caption",
+                  "backgroundColor",
+                  "font",
+                  "allContacts",
+                  "statusJidList"
+                ]
+              },
+              "example": "{\r\n    \"type\": \"text\", /* text, image, video, audio */\r\n    \"content\": \"Hi, how are you today?\", /* text or url */\r\n    \"caption\": \"This is my status/storie image\", /* Optional for image or video */\r\n    \"backgroundColor\": \"#008000\",\r\n    \"font\": 1, /* Optional for text only. Accept the options below:\r\n                      1 = SERIF\r\n                      2 = NORICAN_REGULAR\r\n                      3 = BRYNDAN_WRITE\r\n                      4 = BEBASNEUE_REGULAR\r\n                      5 = OSWALD_HEAVY */\r\n    \"allContacts\": false, /* true to send to all contacts or false to send to statusJidList below */\r\n    \"statusJidList\": [\r\n        \"{{remoteJid}}@s.whatsapp.net\"\r\n    ]\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendSticker/instance": {
+      "post": {
+        "summary": "Send Sticker",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "string"
+                  },
+                  "sticker": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "number",
+                  "sticker"
+                ]
+              },
+              "example": "{\r\n    \"number\": \"{{remoteJid}}\",\r\n    \"sticker\": \"https://evolution-api.com/files/sticker.png\" /* url or base64 */\r\n    // options\r\n    // \"delay\": 1200,\r\n    // \"quoted\": {\r\n    //     // payload message or key.id only for get message in database\r\n    //     \"key\": {\r\n    //         \"id\": \" MESSAGE_ID\"\r\n    //     },\r\n    //     \"message\": {\r\n    //         \"conversation\": \"CONTENT_MESSAGE\"\r\n    //     }\r\n    // },\r\n    // \"mentionsEveryOne\": false,\r\n    // \"mentioned\": [\r\n    //     \"{{remoteJid}}\"\r\n    // ]\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendLocation/instance": {
+      "post": {
+        "summary": "Send Location",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "latitude": {
+                    "type": "number"
+                  },
+                  "longitude": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "number",
+                  "name",
+                  "address",
+                  "latitude",
+                  "longitude"
+                ]
+              },
+              "example": "{\r\n    \"number\": \"{{remoteJid}}\",\r\n    \"name\": \"Bora Bora\",\r\n    \"address\": \"French Polynesian\",\r\n    \"latitude\": -16.505538233564373,\r\n    \"longitude\": -151.7422770494996\r\n    // options\r\n    // \"delay\": 1200,\r\n    // \"quoted\": {\r\n    //     // payload message or key.id only for get message in database\r\n    //     \"key\": {\r\n    //         \"id\": \" MESSAGE_ID\"\r\n    //     },\r\n    //     \"message\": {\r\n    //         \"conversation\": \"CONTENT_MESSAGE\"\r\n    //     }\r\n    // },\r\n    // \"mentionsEveryOne\": false,\r\n    // \"mentioned\": [\r\n    //     \"{{remoteJid}}\"\r\n    // ]\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendContact/instance": {
+      "post": {
+        "summary": "Send Contact",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "string"
+                  },
+                  "contact": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "fullName": {
+                          "type": "string"
+                        },
+                        "wuid": {
+                          "type": "string"
+                        },
+                        "phoneNumber": {
+                          "type": "string"
+                        },
+                        "organization": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "fullName",
+                        "wuid",
+                        "phoneNumber",
+                        "organization",
+                        "email",
+                        "url"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "number",
+                  "contact"
+                ]
+              },
+              "example": "{\r\n    \"number\": \"{{remoteJid}}\",\r\n    \"contact\": [\r\n        {\r\n            \"fullName\": \"Contact Name\",\r\n            \"wuid\": \"559999999999\",\r\n            \"phoneNumber\": \"+55 99 9 9999-9999\",\r\n            \"organization\": \"Company Name\", /* Optional */\r\n            \"email\": \"email\", /* Optional */\r\n            \"url\": \"url page\" /* Optional */\r\n        },\r\n        {\r\n            \"fullName\": \"Contact Name\",\r\n            \"wuid\": \"559911111111\",\r\n            \"phoneNumber\": \"+55 99 9 1111-1111\",\r\n            \"organization\": \"Company Name\", /* Optional */\r\n            \"email\": \"email\", /* Optional */\r\n            \"url\": \"url page\" /* Optional */\r\n        }\r\n    ]\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendReaction/instance": {
+      "post": {
+        "summary": "Send Reaction",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "remoteJid": {
+                        "type": "string"
+                      },
+                      "fromMe": {
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "remoteJid",
+                      "fromMe",
+                      "id"
+                    ]
+                  },
+                  "reaction": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key",
+                  "reaction"
+                ]
+              },
+              "example": "{\r\n    // key of the message or key.id only for get message in database\r\n    \"key\": {\r\n        \"remoteJid\": \"{{remoteJid}}@s.whatsapp.net\", // or {{groupJid}}@g.us\"\r\n        \"fromMe\": true,\r\n        \"id\": \"BAE5A75CB0F39712\"\r\n    },\r\n    \"reaction\": \"🚀\"\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendPoll/instance": {
+      "post": {
+        "summary": "Send Poll",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "selectableCount": {
+                    "type": "integer"
+                  },
+                  "values": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "number",
+                  "name",
+                  "selectableCount",
+                  "values"
+                ]
+              },
+              "example": "{\r\n    \"number\": \"{{remoteJid}}\",\r\n    \"name\": \"Main text of the poll\",\r\n    \"selectableCount\": 1,\r\n    \"values\": [\r\n        \"Question 1\",\r\n        \"Question 2\",\r\n        \"Question 3\"\r\n    ]\r\n    // options\r\n    // \"delay\": 1200,\r\n    // \"quoted\": {\r\n    //     // payload message or key.id only for get message in database\r\n    //     \"key\": {\r\n    //         \"id\": \" MESSAGE_ID\"\r\n    //     },\r\n    //     \"message\": {\r\n    //         \"conversation\": \"CONTENT_MESSAGE\"\r\n    //     }\r\n    // },\r\n    // \"mentionsEveryOne\": false,\r\n    // \"mentioned\": [\r\n    //     \"{{remoteJid}}\"\r\n    // ]\r\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/message/sendList/instance": {
+      "post": {
+        "summary": "Send List",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "buttonText": {
+                    "type": "string"
+                  },
+                  "footerText": {
+                    "type": "string"
+                  },
+                  "sections": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "rowId": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "title",
+                              "description",
+                              "rowId"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "title",
+                        "rows"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "number",
+                  "title",
+                  "description",
+                  "buttonText",
+                  "footerText",
+                  "sections"
+                ]
+              },
+              "example": "{\n    \"number\": \"{{remoteJid}}\",\n    \"title\": \"List Title\",\n    \"description\": \"List description\",\n    \"buttonText\": \"Click Here\",\n    \"footerText\": \"footer list\\nhttps://examplelink.com.br\",\n    \"sections\": [\n        {\n            \"title\": \"Row tilte 01\",\n            \"rows\": [\n                {\n                    \"title\": \"Title row 01\",\n                    \"description\": \"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,\",\n                    \"rowId\": \"rowId 001\"\n                },\n                {\n                    \"title\": \"Title row 02\",\n                    \"description\": \"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,\",\n                    \"rowId\": \"rowId 002\"\n                }\n            ]\n        },\n        {\n            \"title\": \"Row tilte 02\",\n            \"rows\": [\n                {\n                    \"title\": \"Title row 01\",\n                    \"description\": \"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,\",\n                    \"rowId\": \"rowId 001\"\n                },\n                {\n                    \"title\": \"Title row 02\",\n                    \"description\": \"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,\",\n                    \"rowId\": \"rowId 002\"\n                }\n            ]\n        }\n    ]\n    // options\n    // \"delay\": 1200,\n    // \"quoted\": {\n    //     // payload message or key.id only for get message in database\n    //     \"key\": {\n    //         \"id\": \" MESSAGE_ID\"\n    //     },\n    //     \"message\": {\n    //         \"conversation\": \"CONTENT_MESSAGE\"\n    //     }\n    // },\n    // \"mentionsEveryOne\": false,\n    // \"mentioned\": [\n    //     \"{{remoteJid}}\"\n    // ]\n}"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/chat/whatsappNumbers/instance": {
+      "post": {
+        "summary": "Check is WhatsApp Number",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "numbers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "numbers"
+                ]
+              },
+              "example": {
+                "numbers": [
+                  "55911111111",
+                  "55922222222",
+                  "55933333333",
+                  "55944444444",
+                  "55955555555"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "webhooks": {},
+  "components": {
+    "schemas": {},
+    "securitySchemes": {
+      "apikey-header-apikey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "apikey"
+      }
+    }
+  },
+  "servers": [],
+  "security": []
+}
