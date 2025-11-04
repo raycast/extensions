@@ -100,7 +100,8 @@ export default function Command() {
       const totalSeconds = parseDuration(newDuration);
 
       if (totalSeconds <= 0) {
-        await showFailureToast({
+        await showToast({
+          style: Toast.Style.Failure,
           title: "Invalid duration",
           message: "Please enter a valid duration (e.g., 1h30m, 2h, 45m)",
         });
@@ -239,7 +240,8 @@ export default function Command() {
                         onAction={async () => {
                           const isAlreadyFavorite = await isFavorite(worklog.issue?.key || "");
                           if (isAlreadyFavorite) {
-                            await showFailureToast({
+                            await showToast({
+                              style: Toast.Style.Failure,
                               title: "Already in Favorites",
                               message: worklog.issue?.key || "",
                             });

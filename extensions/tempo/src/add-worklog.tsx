@@ -252,7 +252,11 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
     try {
       // Validate date is provided
       if (!values.date) {
-        await showFailureToast({ title: "Date required", message: "Please select a date for the worklog" });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Date required",
+          message: "Please select a date for the worklog",
+        });
         return;
       }
 
@@ -260,7 +264,8 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       let dateStr = values.date;
       if (values.date === "custom") {
         if (!values.customDate) {
-          await showFailureToast({
+          await showToast({
+            style: Toast.Style.Failure,
             title: "Custom date required",
             message: "Please enter a date in YYYY-MM-DD format",
           });
@@ -269,7 +274,8 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         // Validate custom date format (YYYY-MM-DD)
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(values.customDate)) {
-          await showFailureToast({
+          await showToast({
+            style: Toast.Style.Failure,
             title: "Invalid date format",
             message: "Please use YYYY-MM-DD format (e.g., 2025-11-01)",
           });
@@ -289,7 +295,8 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       const timeSpentSeconds = parseDuration(values.timeSpent);
 
       if (timeSpentSeconds === 0) {
-        await showFailureToast({
+        await showToast({
+          style: Toast.Style.Failure,
           title: "Invalid duration",
           message: "Please enter a valid duration (e.g., 1h, 1h30m, 30m)",
         });
@@ -298,7 +305,11 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
 
       // Check if issue was loaded successfully
       if (!issue) {
-        await showFailureToast({ title: "Failed to add worklog", message: "Could not find issue" });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to add worklog",
+          message: "Could not find issue",
+        });
         return;
       }
 
