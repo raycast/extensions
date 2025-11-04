@@ -33,8 +33,8 @@ async function versions() {
  *
  * Returns the original string if no parentheses are found.
  *
- * @param {string} version The full version name, e.g. "English Standard Version (ESV)"
- * @returns {string} The abbreviation of the version, e.g. "ESV"
+ * @param version The full version name, e.g. "English Standard Version (ESV)"
+ * @returns The abbreviation of the version, e.g. "ESV"
  */
 function getContentsOfLastParenthesis(version: string): string {
   const lastOpenParenIndex = version.lastIndexOf("(");

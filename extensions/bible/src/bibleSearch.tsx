@@ -34,11 +34,11 @@ export default function Command(props: LaunchProps<{ arguments: Partial<Argument
   const { data: searchResult, isLoading, error } = useBibleSearch({ search: ref, version: version });
 
   React.useEffect(() => {
-    // If opened with a hotkey, the arguments object will be empty (despite the types not reflecting this!)
-    const isHotkeyLaunch = Object.keys(props.arguments).length === 0;
+    // If opened with a hotkey, the arguments will be undefined
+    const isHotkeyLaunch = initialRef === undefined && initialVersion === undefined;
     // If not launched with a hotkey, but provided no arguments (user triggers command without typing anything),
     // the arguments will be empty strings
-    const launchedWithNoArguments = props.arguments.ref === "" && props.arguments.version === "";
+    const launchedWithNoArguments = initialRef === "" && initialVersion === "";
     // In either of these cases, try to get the selected text and use that as the search query
     if (isHotkeyLaunch || launchedWithNoArguments) {
       getSelectedText()
@@ -55,7 +55,7 @@ export default function Command(props: LaunchProps<{ arguments: Partial<Argument
           // No text is selected – do nothing
         });
     }
-  }, []);
+  }, [initialRef, initialVersion]);
 
   React.useEffect(() => {
     if (error) {
