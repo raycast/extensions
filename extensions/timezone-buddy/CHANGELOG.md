@@ -1,5 +1,9 @@
 # Timezone Buddy Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Toggled on windows support in package.json
+
 ## [Added Windows Support] - 2025-10-30
 
 ## [New Feature] - 2025-08-06
