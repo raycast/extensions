@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Add Exclude Search Feature] - 2025-11-03
+## [Add Exclude Search Feature] - {PR_MERGE_DATE}
 
 - Add support for excluding search terms using "/" prefix
 - Users can now filter out unwanted results by prefixing terms with "/"
