@@ -91,10 +91,8 @@ export default function ViewTasks() {
         throw new Error(response.error || "Failed to update task status");
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Action Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -114,10 +112,8 @@ export default function ViewTasks() {
         throw new Error(response.error || "Failed to archive task");
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Action Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -147,10 +143,8 @@ export default function ViewTasks() {
           throw new Error(response.error || "Failed to delete task");
         }
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(error, {
           title: "Action Failed",
-          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }

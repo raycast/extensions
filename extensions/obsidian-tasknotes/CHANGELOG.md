@@ -1,14 +1,15 @@
 # Obsidian TaskNotes Changelog
 
-## [Code Quality Improvements] - 2025-11-04
+## [Code Quality Improvements] - {PR_MERGE_DATE}
 
 ### Fixed
 - Renamed internal `fetch` method to `request` in API client to avoid shadowing global `fetch` function
-- Replaced manual error toast handling with `showFailureToast` from `@raycast/utils` for better error UX
+- Replaced manual error toast handling with `showFailureToast` from `@raycast/utils` for better error UX across all error handlers
 - Fixed useEffect dependency array in Pomodoro timer by wrapping `loadStatus` in `useCallback`
 - Made "Resume Pomodoro" action conditional - only shows when there's a paused session to resume
 - Updated status handling in Edit Task to allow explicitly setting status back to 'open'
 - Fixed grammar in README: "a awesome" → "an awesome"
+- Applied consistent error handling patterns throughout view-tasks.tsx for all action handlers
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
