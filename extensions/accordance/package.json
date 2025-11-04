@@ -31,7 +31,7 @@
         "name": "search",
         "title": "Search Texts",
         "subtitle": "Accordance",
-        "description": "Quick search in default a Accordance text.",
+        "description": "Quick search of your default Accordance text.",
         "mode": "no-view",
         "arguments": [
           {
