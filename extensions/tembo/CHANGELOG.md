@@ -1,6 +1,6 @@
 # Tembo Changelog
 
-## [Cache menubar results, fetch in background, add missing code repo icons] - {PR_MERGE_DATE}
+## [Cache menubar results, fetch in background, add missing code repo icons] - 2025-11-04
 
 - Eliminate flickering from the menubar by caching API results
 - Fetch new tasks from the API every 10 minutes in the background
