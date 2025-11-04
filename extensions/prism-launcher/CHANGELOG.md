@@ -1,5 +1,9 @@
 # Prism Launcher Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed an issue where favorite server were duplicated in the list
+
 ## [New Additions] - 2025-11-04
 
 - Add command: Join Server – browse servers per instance and join directly
