@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "winscp",
   "title": "WinSCP",
-  "description": "launch into a winscp session.",
+  "description": "Launch WinSCP sessions quickly from Raycast.",
   "icon": "extension_icon.png",
   "license": "MIT",
   "commands": [
