@@ -1,17 +1,21 @@
 /**
  * Parses search query to extract include and exclude terms.
  * Filters items where the url and title match all space-separated words in search query (case insensitive).
- * Supports exclude terms with "/" prefix to filter out results containing those terms.
+ * Supports exclude terms with "-" prefix to filter out results containing those terms.
+ * Use "\-" to search for literal "-" character.
  * 
  * @param query - The search query string
  * @returns Object containing include and exclude terms
  *
  * @example
- * parseSearchQuery("foo bar /baz")
+ * parseSearchQuery("foo bar -baz")
  * // returns { includeTerms: ["foo", "bar"], excludeTerms: ["baz"] }
  *
- * parseSearchQuery("hello /world /test")
+ * parseSearchQuery("hello -world -test")
  * // returns { includeTerms: ["hello"], excludeTerms: ["world", "test"] }
+ *
+ * parseSearchQuery("foo \\-bar")
+ * // returns { includeTerms: ["foo", "-bar"], excludeTerms: [] }
  * 
  * @example Given an item with title "foo bar" and url "example.com":
  * - search "foo bar" succeeds (contains both foo and bar)
@@ -20,9 +24,10 @@
  * - search "example foo" succeeds (matches url and title)
  * - search "foo" succeeds (partial match)
  * - search "example" succeeds (matches url)
- * - search "foo /bar" succeeds (contains foo but not bar)
- * - search "/example" fails (excludes example.com)
+ * - search "foo -bar" succeeds (contains foo but not bar)
+ * - search "-example" fails (excludes example.com)
  * - search "asdf" fails (no match)
+ * - search "\\-foo" succeeds for items containing literal "-foo"
  */
 export interface ParsedQuery {
   includeTerms: string[];
@@ -39,11 +44,14 @@ export function parseSearchQuery(query: string): ParsedQuery {
   const excludeTerms: string[] = [];
 
   for (const term of terms) {
-    if (term.startsWith("/") && term.length > 1) {
-      // Remove the leading '/' and add to exclude terms
+    if (term.startsWith("\\-") && term.length > 1) {
+      // Escaped dash: remove the backslash and add to include terms
+      includeTerms.push(term.slice(1).toLowerCase());
+    } else if (term.startsWith("-") && term.length > 1) {
+      // Remove the leading '-' and add to exclude terms
       excludeTerms.push(term.slice(1).toLowerCase());
-    } else if (term.length > 0 && term !== "/") {
-      // Add to include terms (ignore standalone '/')
+    } else if (term.length > 0 && term !== "-") {
+      // Add to include terms (ignore standalone '-')
       includeTerms.push(term.toLowerCase());
     }
   }

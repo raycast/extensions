@@ -2,9 +2,9 @@
 
 ## [Add Exclude Search Feature] - {PR_MERGE_DATE}
 
-- Add support for excluding search terms using "/" prefix
-- Users can now filter out unwanted results by prefixing terms with "/"
-- Example: "raycast /firefox" finds items containing "raycast" but not "firefox"
+- Add support for excluding search terms using " -" (space + dash) prefix
+- Example: "raycast -firefox" finds items containing "raycast" but not "firefox"
+- Support for searching literal "-" character using "\-" escape sequence (e.g., "foo \-bar" to find "foo-bar")
 - Works across all search functions: tabs, history, bookmarks, and search all
 - Fix SQL injection vulnerability in history search
 - Improve performance by skipping filtering when no search query is provided
