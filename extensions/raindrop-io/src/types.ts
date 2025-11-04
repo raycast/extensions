@@ -112,4 +112,5 @@ export interface FormValues {
   collection?: string;
   tags: string[];
   newCollection?: string;
+  note?: string;
 }

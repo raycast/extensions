@@ -51,14 +51,6 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 3. Type "Plane" and select the extension
 4. Authenticate with your Plane workspace when prompted
 
-## Configuration
-
-The extension works with both Plane Cloud and self-hosted instances. Configure your instance in Raycast preferences:
-
-- **API Base Path**: Your Plane API endpoint (default: `https://api.plane.so`)
-- **App Base URL**: Your Plane app URL (default: `https://app.plane.so`)
-- **API Key**: Your Plane API key (optional, OAuth is preferred)
-
 ## Usage
 
 ### Creating Work Items
