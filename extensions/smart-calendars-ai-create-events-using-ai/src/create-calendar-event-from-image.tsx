@@ -71,15 +71,6 @@ async function processImageData(imageData: Buffer, imageSource: string, fileName
 
     const base64String = jpegImageData.toString("base64");
 
-    if (!base64String) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to process image",
-        message: "Could not convert image to base64",
-      });
-      return;
-    }
-
     // Log the size for debugging
     console.log(`Original image size: ${imageData.length} bytes`);
     console.log(`Processed image size: ${jpegImageData.length} bytes`);
@@ -105,8 +96,7 @@ async function processImageData(imageData: Buffer, imageSource: string, fileName
     });
   } catch (error) {
     // Show error toast
-    await showFailureToast("Failed to create calendar event/reminder");
-    console.error("Error creating calendar event:", error);
+    await showFailureToast(error, { title: "Failed to create calendar event/reminder" });
   }
 }
 
