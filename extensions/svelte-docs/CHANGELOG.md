@@ -4,10 +4,6 @@
 
 Added Compose CLI command to quickly pick and chose the options for the `sv` cli. Thanks to @SikandarJODD for the idea and implementation.
 
-## [Add cli composer command] - {PR_MERGE_DATE}
-
-Added Compose CLI command to quickly pick and chose the options for the `sv` cli. Thanks to @SikandarJODD for the idea and implementation.
-
 ## [Update Platforms to include windows] - 2025-11-04
 
 Updated the list of platforms to allow for windows users to download the extension

@@ -21,7 +21,7 @@
     },
     {
       "name": "cli",
-      "title": "Compose CLI command",
+      "title": "Compose CLI Command",
       "description": "Compose an sv cli command",
       "mode": "view"
     }
