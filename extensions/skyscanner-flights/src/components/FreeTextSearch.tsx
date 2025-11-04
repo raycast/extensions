@@ -4,11 +4,15 @@ import { searchAirportsLocal, Airport } from "../data/airports";
 import { showFailureToast } from "@raycast/utils";
 import { trackFlightSearch } from "../utils/analytics";
 import { parseFreeTextQuery, ParsedFlight } from "../utils/flightParser";
-
-// Constants
-const IATA_CODE_LENGTH = 3;
-const MIN_ADULTS = 1;
-const MAX_ADULTS = 8;
+import {
+  buildSkyscannerURL,
+  formatDateForSkyscanner,
+  formatDateObjectForSkyscanner,
+  IATA_CODE_LENGTH,
+  MIN_ADULTS,
+  MAX_ADULTS,
+} from "../utils/flightUtils";
+import FlightSearchForm from "./FlightSearchForm";
 
 interface FormValues {
   origin: string;
@@ -77,47 +81,14 @@ export default function FreeTextSearch() {
     }
   }
 
-  /**
-   * Build Skyscanner URL with flight parameters
-   */
-  function buildSkyscannerURL(params: {
-    origin: string;
-    destination: string;
-    departureDate: string;
-    returnDate?: string;
-    adults: number;
-    stops: "any" | "direct" | "multiStop";
-  }): string {
-    const isRoundTrip = !!params.returnDate;
-    const returnPart = isRoundTrip ? `/${params.returnDate}` : "";
-
-    // Build stops parameter
-    let stopsParam = "";
-    if (params.stops === "direct") {
-      stopsParam = "&stops=!oneStop,!twoPlusStops";
-    } else if (params.stops === "multiStop") {
-      stopsParam = "&stops=!direct";
-    }
-
-    return `https://www.skyscanner.com/transport/flights/${params.origin.toLowerCase()}/${params.destination.toLowerCase()}/${params.departureDate}${returnPart}/?adultsv2=${params.adults}&cabinclass=economy&childrenv2=&ref=home&rtn=${isRoundTrip ? "1" : "0"}&preferdirects=false&outboundaltsenabled=false&inboundaltsenabled=false${stopsParam}`;
+  function handleOriginSearch(text: string) {
+    const results = searchAirportsLocal(text);
+    setOriginAirports(results);
   }
 
-  /**
-   * Format date from YYYY-MM-DD to YYMMDD for Skyscanner
-   */
-  function formatDateForSkyscanner(dateStr: string): string {
-    const cleaned = dateStr.replace(/-/g, "");
-    return cleaned.substring(2);
-  }
-
-  /**
-   * Format Date object to YYMMDD for Skyscanner
-   */
-  function formatDateObjectForSkyscanner(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}${month}${day}`.substring(2); // YYYYMMDD -> YYMMDD
+  function handleDestinationSearch(text: string) {
+    const results = searchAirportsLocal(text);
+    setDestinationAirports(results);
   }
 
   async function handleFreeTextSubmit() {
@@ -331,7 +302,7 @@ export default function FreeTextSearch() {
     >
       <Form.TextField
         id="freeText"
-        title="Where do you want to fly?"
+        title="Where are we going?"
         placeholder="eg. NYC to LA next Monday for 2"
         value={searchText}
         onChange={setSearchText}
@@ -347,86 +318,24 @@ export default function FreeTextSearch() {
           <Form.Separator />
           <Form.Description text="⚠️ Fallback to manual entry - Fill the form below:" />
 
-          <Form.Dropdown
-            id="origin"
-            title="Origin Airport"
-            value={selectedOrigin}
-            onChange={setSelectedOrigin}
-            onSearchTextChange={(text) => {
-              if (text.trim().length >= 2) {
-                const results = searchAirportsLocal(text);
-                setOriginAirports(results);
-              } else if (text.trim().length === 0 && originAirports.length > 0) {
-                // Keep existing airports if cleared
-              }
-            }}
-            throttle
-          >
-            {originAirports.length === 0 ? (
-              <Form.Dropdown.Item value="" title="Type at least 2 characters to search..." />
-            ) : (
-              originAirports.map((airport) => {
-                const displayName = `${airport.name} (${airport.iata}) - ${airport.city}, ${airport.country}`;
-                return <Form.Dropdown.Item key={airport.iata} value={airport.iata} title={displayName} />;
-              })
-            )}
-          </Form.Dropdown>
-
-          <Form.Dropdown
-            id="destination"
-            title="Destination Airport"
-            value={selectedDestination}
-            onChange={setSelectedDestination}
-            onSearchTextChange={(text) => {
-              if (text.trim().length >= 2) {
-                const results = searchAirportsLocal(text);
-                setDestinationAirports(results);
-              } else if (text.trim().length === 0 && destinationAirports.length > 0) {
-                // Keep existing airports if cleared
-              }
-            }}
-            throttle
-          >
-            {destinationAirports.length === 0 ? (
-              <Form.Dropdown.Item value="" title="Type at least 2 characters to search..." />
-            ) : (
-              destinationAirports.map((airport) => {
-                const displayName = `${airport.name} (${airport.iata}) - ${airport.city}, ${airport.country}`;
-                return <Form.Dropdown.Item key={airport.iata} value={airport.iata} title={displayName} />;
-              })
-            )}
-          </Form.Dropdown>
-
-          <Form.DatePicker
-            id="departureDate"
-            title="Departure Date"
-            type={Form.DatePicker.Type.Date}
-            value={departureDate}
-            onChange={setDepartureDate}
+          <FlightSearchForm
+            originAirports={originAirports}
+            destinationAirports={destinationAirports}
+            selectedOrigin={selectedOrigin}
+            selectedDestination={selectedDestination}
+            departureDate={departureDate}
+            returnDate={returnDate}
+            adults={adults}
+            stops={stops}
+            onOriginChange={setSelectedOrigin}
+            onDestinationChange={setSelectedDestination}
+            onOriginSearch={handleOriginSearch}
+            onDestinationSearch={handleDestinationSearch}
+            onDepartureDateChange={setDepartureDate}
+            onReturnDateChange={setReturnDate}
+            onAdultsChange={setAdults}
+            onStopsChange={setStops}
           />
-
-          <Form.DatePicker
-            id="returnDate"
-            title="Return Date (Optional)"
-            type={Form.DatePicker.Type.Date}
-            value={returnDate}
-            onChange={setReturnDate}
-          />
-
-          <Form.TextField
-            id="adults"
-            title="Number of Adults"
-            placeholder="1"
-            value={adults}
-            onChange={setAdults}
-            info="Number of adult passengers (1-8)"
-          />
-
-          <Form.Dropdown id="stops" title="Stops" value={stops} onChange={setStops} info="Filter by number of stops">
-            <Form.Dropdown.Item value="any" title="Any Number of Stops" />
-            <Form.Dropdown.Item value="direct" title="Direct Flights Only" />
-            <Form.Dropdown.Item value="multiStop" title="Flights with Stops" />
-          </Form.Dropdown>
         </>
       )}
     </Form>
