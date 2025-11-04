@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="./assets/plane-icon.png" width="150" height="150" />
-</p>
-
 # Plane Raycast Extension
 
 A powerful Raycast extension for managing work items in [Plane](https://plane.so), the open-source project management tool. This extension allows you to create, search, view, and manage work items directly from your macOS command palette.
@@ -73,7 +69,7 @@ For both **Plane Cloud** and **Self-Hosted** instances:
    - Navigate to **Extensions** → **Plane**
    - Enter your **API Key**
    - For self-hosted instances, also provide:
-     - **API Base Path** (e.g., `https://your-plane.com/api`)
+     - **API Base Path** (e.g., `https://your-plane.com`)
      - **App Base URL** (e.g., `https://your-plane.com`)
 
 3. Set your workspace:
