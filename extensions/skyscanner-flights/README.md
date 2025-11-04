@@ -5,7 +5,7 @@ A Raycast extension to quickly search for flights on Skyscanner using natural la
 ## Features
 
 - 🤖 **AI-Powered Natural Language Search**: Describe your flight in plain English (requires Raycast Pro)
-- 📝 **Fallback Manual Form**: Works without Raycast Pro with smart airport search
+- 📝 **Fallback Manual Form**: Incase your query is faulty then you can continue with smart airport search form
 - ✈️ **6,000+ Airports**: Search worldwide airports by name, city, or IATA code
 - 🌐 **Direct Browser Launch**: Opens your search directly on Skyscanner.com
 - 🚀 **Fast & Offline**: Airport database works without internet connection
@@ -39,12 +39,14 @@ If AI parsing fails or you don't have Raycast Pro, use the manual form:
 ## Airport Search
 
 The extension includes a comprehensive database of 6,054 airports worldwide. Search by:
+
 - **IATA Code**: JFK, LAX, LHR
 - **Airport Name**: Kennedy, Heathrow, Changi
 - **City Name**: New York, London, Tokyo
 - **Country Name**: United States, Japan, Singapore
 
 Example results:
+
 ```
 John F Kennedy International Airport (JFK) - New York, United States
 Los Angeles International Airport (LAX) - Los Angeles, United States
