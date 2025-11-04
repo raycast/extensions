@@ -3,11 +3,7 @@ import crypto from "crypto";
 import { useEffect, useRef } from "react";
 import { useLocalStorage } from "@raycast/utils";
 
-interface GeneratePortArguments {
-  projectName: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: GeneratePortArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.GeneratePort }>) {
   const { projectName } = props.arguments;
 
   const hash = crypto.createHash("md5").update(projectName).digest("hex");
