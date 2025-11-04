@@ -1,6 +1,6 @@
 # Punto Changelog
 
-## [Use TIS API to switch layouts] - 2025-11-04
+## [Use TIS API to switch layouts] - {PR_MERGE_DATE}
 
 - Uses Text Input Source Services API to switch layouts instead of keyboard shortcuts approach
 
