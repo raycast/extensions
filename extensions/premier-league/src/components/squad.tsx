@@ -16,7 +16,7 @@ export default function ClubSquad(club: Club) {
     [seasons[0]?.seasonId],
   );
 
-  const positionMap = groupBy(data?.players, "position");
+  const playersByPosition = groupBy(data?.players, "position");
 
   return (
     <Grid
@@ -25,7 +25,7 @@ export default function ClubSquad(club: Club) {
       navigationTitle={`Squad | ${club.name} | Club`}
     >
       {positions.map((position) => {
-        const players = positionMap[position] || [];
+        const players = playersByPosition[position] || [];
 
         return (
           <Grid.Section

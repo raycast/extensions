@@ -317,7 +317,7 @@ export const getMatchReports = async (
   try {
     const { data }: AxiosResponse<EPLContentReport> = await axios(config);
 
-    return data.content[0];
+    return data.content?.[0];
   } catch (e) {
     showFailureToast(e);
 

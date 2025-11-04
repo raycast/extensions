@@ -1,5 +1,15 @@
 # Premier League Changelog
 
+## [Endpoint Exodus] - {PR_MERGE_DATE}
+
+- Upgrade to new Premier League API with cursor pagination and updated IDs.
+- Merge "Fixtures" and "Results" into a single "Matches" command.
+- Add match reports, improved player stats, and updated lineup/commentary components.
+- Add Windows support; migrate ESLint to flat config and TS to ES2023.
+- Update types and utilities to match new API structure.
+- Fix edge cases.
+- Remove legacy command: Manager.
+
 ## [Enhanced Data and Performance] - 2024-12-02
 
 - Added match reports for completed fixtures, providing detailed insights into each match.

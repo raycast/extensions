@@ -55,7 +55,7 @@
     {
       "name": "filter",
       "title": "Search Bar Filter",
-      "description": "Select your preferred filtering method in the search bar for Fixtures & Results.",
+      "description": "Select your preferred filtering method in the search bar for Matches.",
       "required": false,
       "type": "dropdown",
       "default": "competition",

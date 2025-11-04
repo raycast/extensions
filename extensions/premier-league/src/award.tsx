@@ -16,7 +16,7 @@ export default function EPLAward() {
     [seasonId],
   );
 
-  const awards = data?.player_awards.concat(data?.manager_awards);
+  const awards = data?.player_awards?.concat(data?.manager_awards ?? []) ?? [];
 
   const getAwardGrids = (awards: Player[] | undefined) => {
     return awards
@@ -26,7 +26,7 @@ export default function EPLAward() {
           <Grid.Item
             key={[award.id, award.type].join()}
             title={awardMap[award.type]}
-            subtitle={award.name.display || award.currentTeam?.name}
+            subtitle={award.name?.display || award.currentTeam?.name}
             content={{
               source: getProfileImg(award.id),
               fallback: "player-missing.png",
