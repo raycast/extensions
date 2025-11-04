@@ -5,10 +5,12 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { en_ru, ru_en } from "./Dict";
-import { getAvailableInputSourceIds, selectInputSource } from "swift:../swift/Punto";
+import {
+  getAvailableInputSourceIds,
+  selectInputSource,
+} from "swift:../swift/Punto";
 
 interface Preferences {
-  layoutSwitchModifier: string;
   latLayoutID: string;
   cyrLayoutID: string;
   showSuccessHUD: boolean;
@@ -51,7 +53,8 @@ async function switchKeyboardLayout(
   preferences: Preferences,
   targetLayout: Layout,
 ): Promise<void> {
-  const languageIds = await getAvailableInputSourceIds() as unknown as string[];
+  const languageIds =
+    (await getAvailableInputSourceIds()) as unknown as string[];
   // console.log("installed layout names are " + languageIds.join(", "));
   // console.log("target layout is " + targetLayout);
 
@@ -63,16 +66,16 @@ async function switchKeyboardLayout(
   if (!languageIds.includes(targetLayoutID)) {
     await showHUD(
       "Layout " +
-      targetLayoutID +
-      " is not installed. Please install it or update the preferences." +
-      `Available layouts include: ${languageIds.join(", ")}`,
+        targetLayoutID +
+        " is not installed. Please install it or update the preferences." +
+        `Available layouts include: ${languageIds.join(", ")}`,
     );
     return;
   }
 
   // console.log("switching to " + targetLayoutID);
-  
-  await selectInputSource(targetLayoutID)
+
+  await selectInputSource(targetLayoutID);
 }
 
 function detectLayout(input: string): Layout {
