@@ -1,6 +1,6 @@
 # Svelte Docs Changelog
 
-## [Update Platforms to include windows] - 2025-10-30
+## [Update Platforms to include windows] - {PR_MERGE_DATE}
 
 Updated the list of platforms to allow for windows users to download the extension
 
