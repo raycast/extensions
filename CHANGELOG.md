@@ -1,7 +1,7 @@
 # SimpleLogin Changelog
 
 ## [Multi-Platform Support Added] - 2025-10-15
-- Introduced support for Windows platform using Node.js APIs.
+- Introduced support for Windows platform using Node.js APIs (doesn't support prefill).
 - Retained macOS functionality with AppleScript.
 - Updated documentation to reflect multi-platform compatibility.
 
