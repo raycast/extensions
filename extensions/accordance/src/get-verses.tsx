@@ -1,8 +1,9 @@
-import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { ModuleSelector } from "./components/ModuleSelector";
 import { fetchModules } from "./utils/moduleUtils";
+import { cleanVerseText, normalizeReference, validateReference } from "./utils/bibleUtils";
 
 interface Preferences {
   defaultText: string;
@@ -37,22 +38,6 @@ export default function Command() {
     initializeModule();
   }, []);
 
-  // Function to clean verse text by removing extra spaces
-  const cleanVerseText = (text: string): string => {
-    return text
-      .trim() // Remove leading/trailing whitespace
-      .replace(/\s+/g, " "); // Replace multiple consecutive spaces with single space
-  };
-
-  // Normalize Bible reference capitalization
-  const normalizeReference = (ref: string): string => {
-    return ref
-      .trim()
-      .toLowerCase()
-      .replace(/\b\w/g, (char) => char.toUpperCase())
-      .replace(/(\d+)[:.](\d+)/g, "$1:$2"); // Ensure chapter:verse format
-  };
-
   // Handle initial selection of cached results
   useEffect(() => {
     if (isInitialLoad && results.length > 0) {
@@ -62,6 +47,14 @@ export default function Command() {
   }, [results, isInitialLoad]);
 
   async function fetchVerses(reference: string) {
+    const validation = validateReference(reference);
+    if (!validation.isValid) {
+      await showFailureToast(validation.error!);
+      setResults([]);
+      setSelectedItemId(undefined);
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Clean the input reference using JavaScript (simpler than AppleScript)
@@ -72,8 +65,8 @@ export default function Command() {
         tell application "Accordance"
           if not running then launch
           try
-            set theModule to "${selectedModule}"
-            set verseText to «event AccdTxRf» {theModule, "${cleanReference}", true}
+            set theModule to "${selectedModule.replace(/"/g, '""')}"
+            set verseText to «event AccdTxRf» {theModule, "${cleanReference.replace(/"/g, '""')}", true}
             return verseText
           on error errMsg
             return "Error: " & errMsg
@@ -84,11 +77,7 @@ export default function Command() {
       const stdout = await runAppleScript(appleScript);
 
       if (stdout.trim().startsWith("Error:")) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: stdout.trim().substring(7),
-        });
+        await showFailureToast(stdout.trim().substring(7));
         setResults([]);
         setSelectedItemId(undefined);
       } else {
@@ -114,11 +103,7 @@ export default function Command() {
         setTimeout(() => setSelectedItemId(`verse-0-${cleanReference}-${selectedModule}`), 0);
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Execution Error",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error instanceof Error ? error.message : String(error));
       setResults([]);
       setSelectedItemId(undefined);
     } finally {

@@ -1,9 +1,10 @@
-import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { ModuleSelector } from "./components/ModuleSelector";
-import { BibleData, BibleBook } from "./components/BibleData";
 import { fetchModules } from "./utils/moduleUtils";
+import { validateReference, findBookData, normalizeReference, Reference } from "./utils/bibleUtils";
+import { BibleData } from "./components/BibleData";
 
 interface Preferences {
   defaultText: string;
@@ -18,11 +19,8 @@ interface VerseResult {
   verse: number;
 }
 
-interface Reference {
-  book: string;
-  chapter: number;
-  verse: number;
-}
+// Global cache for verses - persists across component renders
+const verseCache = new Map<string, VerseResult>();
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -52,60 +50,6 @@ export default function Command() {
     return text
       .trim() // Remove leading/trailing whitespace
       .replace(/\s+/g, " "); // Replace multiple consecutive spaces with single space
-  };
-
-  // Cache for verses
-  const verseCache = new Map<string, VerseResult>();
-
-  // Find BibleData entry for a book name, handling abbreviations
-  const findBookData = (bookName: string): BibleBook | null => {
-    const normalizedInput = bookName.toLowerCase().trim();
-
-    // Try exact match first
-    let match = BibleData.find((b) => b.name.toLowerCase() === normalizedInput);
-    if (match) return match;
-
-    // Try prefix matching (handles abbreviations like "1 cor" -> "1 Corinthians")
-    match = BibleData.find((b) => b.name.toLowerCase().startsWith(normalizedInput));
-    if (match) return match;
-
-    // Try if input matches start of any word in book name (handles "1cor" -> "1 Corinthians")
-    match = BibleData.find((b) => {
-      const bookWords = b.name.toLowerCase().split(" ");
-      return bookWords.some((word) => word.startsWith(normalizedInput));
-    });
-    if (match) return match;
-
-    // Try contains matching as last resort
-    match = BibleData.find((b) => b.name.toLowerCase().includes(normalizedInput));
-    return match || null;
-  };
-
-  // Parse reference from string like "John 3:16", "John 3.16", "John 3", or just "John"
-  const parseReference = (ref: string): Reference | null => {
-    const trimmedRef = ref.trim();
-
-    // Try to match with chapter and/or verse first
-    const fullMatch = trimmedRef.match(/^(.+?)\s+(\d+)(?:[:.](\d+))?$/);
-    if (fullMatch) {
-      const [, book, chapter, verse] = fullMatch;
-      return {
-        book: book.trim(),
-        chapter: parseInt(chapter),
-        verse: verse ? parseInt(verse) : 1,
-      };
-    }
-
-    // If no numbers found, treat the whole string as a book name and start at chapter 1, verse 1
-    if (trimmedRef.length > 0) {
-      return {
-        book: trimmedRef,
-        chapter: 1,
-        verse: 1,
-      };
-    }
-
-    return null;
   };
 
   // Generate next verse reference
@@ -142,13 +86,16 @@ export default function Command() {
 
     return refs;
   }; // Load verses progressively, updating state as each one loads
-  const loadVersesProgressively = async (references: Reference[]) => {
+  const loadVersesProgressively = async (references: Reference[]): Promise<number> => {
+    let loadedCount = 0;
+
     for (const ref of references) {
       const cacheKey = `${selectedModule}-${ref.book}-${ref.chapter}-${ref.verse}`;
 
       if (verseCache.has(cacheKey)) {
         const cachedVerse = verseCache.get(cacheKey)!;
         setVerses((prev) => [...prev, cachedVerse]);
+        loadedCount++;
         continue;
       }
 
@@ -156,12 +103,13 @@ export default function Command() {
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       try {
+        const referenceString = `${ref.book} ${ref.chapter}:${ref.verse}`.replace(/"/g, '""');
         const appleScript = `
           tell application "Accordance"
             if not running then launch
             try
-              set theModule to "${selectedModule}"
-              set verseText to «event AccdTxRf» {theModule, "${ref.book} ${ref.chapter}:${ref.verse}", true}
+              set theModule to "${selectedModule.replace(/"/g, '""')}"
+              set verseText to «event AccdTxRf» {theModule, "${referenceString}", true}
               return verseText
             on error errMsg
               return "Error: " & errMsg
@@ -173,11 +121,21 @@ export default function Command() {
 
         if (stdout.trim().startsWith("Error:")) {
           console.error(`Error loading ${ref.book} ${ref.chapter}:${ref.verse}:`, stdout.trim());
+          // Create an error verse to show in the UI
+          const errorVerse: VerseResult = {
+            reference: normalizeReference(`${ref.book} ${ref.chapter}:${ref.verse}`),
+            text: `❌ Failed to load verse: ${stdout.trim().substring(7)}`,
+            module: selectedModule,
+            book: ref.book,
+            chapter: ref.chapter,
+            verse: ref.verse,
+          };
+          setVerses((prev) => [...prev, errorVerse]);
           continue;
         }
 
         const result: VerseResult = {
-          reference: `${ref.book} ${ref.chapter}:${ref.verse}`,
+          reference: normalizeReference(`${ref.book} ${ref.chapter}:${ref.verse}`),
           text: cleanVerseText(stdout.trim()),
           module: selectedModule,
           book: ref.book,
@@ -187,31 +145,43 @@ export default function Command() {
 
         verseCache.set(cacheKey, result);
         setVerses((prev) => [...prev, result]);
-      } catch {
-        console.error(`Failed to load ${ref.book} ${ref.chapter}:${ref.verse}`);
+        loadedCount++;
+      } catch (error) {
+        console.error(`Failed to load ${ref.book} ${ref.chapter}:${ref.verse}:`, error);
+        // Create an error verse to show in the UI
+        const errorVerse: VerseResult = {
+          reference: `${ref.book} ${ref.chapter}:${ref.verse}`,
+          text: `❌ Failed to load verse: ${error instanceof Error ? error.message : String(error)}`,
+          module: selectedModule,
+          book: ref.book,
+          chapter: ref.chapter,
+          verse: ref.verse,
+        };
+        setVerses((prev) => [...prev, errorVerse]);
       }
     }
+
+    return loadedCount;
   };
 
   // Handle search input
   const handleSearch = async (searchQuery: string) => {
-    const startRef = parseReference(searchQuery);
-    if (!startRef) return;
+    const validation = validateReference(searchQuery);
+    if (!validation.isValid) {
+      await showFailureToast(validation.error!);
+      return;
+    }
 
     setIsLoading(true);
-    setCurrentStartRef(startRef);
+    setCurrentStartRef(validation.reference!);
     setVerses([]);
 
     try {
-      const references = generateVerseReferences(startRef, 20);
-      await loadVersesProgressively(references);
-      setHasMore(references.length === 20);
+      const references = generateVerseReferences(validation.reference!, 20);
+      const loadedCount = await loadVersesProgressively(references);
+      setHasMore(references.length === 20 && loadedCount === references.length);
     } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to load verses",
-      });
+      await showFailureToast("Failed to load verses");
     } finally {
       setIsLoading(false);
     }
@@ -231,14 +201,10 @@ export default function Command() {
       });
 
       const references = generateVerseReferences(nextStartRef, 20);
-      await loadVersesProgressively(references);
-      setHasMore(references.length === 20);
+      const loadedCount = await loadVersesProgressively(references);
+      setHasMore(references.length === 20 && loadedCount === references.length);
     } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to load more verses",
-      });
+      await showFailureToast("Failed to load more verses");
     } finally {
       setIsLoading(false);
     }

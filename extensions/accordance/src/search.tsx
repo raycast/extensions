@@ -1,4 +1,5 @@
-import { showToast, Toast, open } from "@raycast/api";
+import { open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface Arguments {
   query: string;
@@ -23,11 +24,7 @@ export default async function Command(props: { arguments?: Arguments }) {
     const module = args?.module?.trim();
 
     if (!searchQuery) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Query Required",
-        message: "Please provide a search term",
-      });
+      await showFailureToast("Please provide a search term");
       return;
     }
 
@@ -38,11 +35,7 @@ export default async function Command(props: { arguments?: Arguments }) {
     await open(url);
   } catch (error) {
     console.error("Failed to open Accordance search:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: "Failed to open Accordance search",
-    });
+    await showFailureToast("Failed to open Accordance search");
   } finally {
     // Reset the flag after a short delay to allow subsequent calls
     setTimeout(() => {

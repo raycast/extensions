@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { readdirSync, readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
+import { showFailureToast } from "@raycast/utils";
 
 interface Workspace {
   id: string;
@@ -38,11 +39,7 @@ export default function Command() {
       const workspacePath = preferences.workspacePath.replace(/^~/, homedir());
 
       if (!existsSync(workspacePath)) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Workspace Path Not Found",
-          message: `The configured workspace path does not exist: ${workspacePath}`,
-        });
+        await showFailureToast(`The configured workspace path does not exist: ${workspacePath}`);
         setLoading(false);
         return;
       }
@@ -64,11 +61,7 @@ export default function Command() {
       setWorkspaces(workspaceObjects);
     } catch (error) {
       console.error("Failed to load workspaces:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to load Accordance workspaces",
-      });
+      await showFailureToast("Failed to load Accordance workspaces");
     } finally {
       setLoading(false);
     }
@@ -123,11 +116,7 @@ export default function Command() {
       });
     } catch (error) {
       console.error("Failed to open workspace:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to open workspace",
-      });
+      await showFailureToast("Failed to open workspace");
     }
   }
 

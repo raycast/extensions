@@ -1,7 +1,8 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, open, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, open, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { discoverAllModules, ModuleInfo } from "./utils/moduleUtils";
 import { CONTENT_CATEGORIES } from "./utils/categories";
+import { showFailureToast } from "@raycast/utils";
 
 interface ModuleGroup {
   type: number;
@@ -38,11 +39,7 @@ function ModuleSearchList({ module }: { module: ModuleInfo }) {
 
   const handleExecuteSearch = async () => {
     if (!searchQuery.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Query Required",
-        message: "Please enter a search term",
-      });
+      await showFailureToast("Please enter a search term");
       return;
     }
 
@@ -53,11 +50,7 @@ function ModuleSearchList({ module }: { module: ModuleInfo }) {
       pop(); // Go back to the main list after successful search
     } catch (error) {
       console.error("Failed to open Accordance search:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to open Accordance search",
-      });
+      await showFailureToast("Failed to open Accordance search");
     }
   };
 
@@ -99,11 +92,7 @@ export default function Command() {
       setAllModules(modules);
     } catch (error) {
       console.error("Failed to load modules:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to discover Accordance modules",
-      });
+      await showFailureToast("Failed to discover Accordance modules");
     } finally {
       setLoading(false);
     }
@@ -252,11 +241,7 @@ export default function Command() {
                         await open(url);
                       } catch (error) {
                         console.error("Failed to open module:", error);
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: "Error",
-                          message: "Failed to open Accordance module",
-                        });
+                        await showFailureToast("Failed to open Accordance module");
                       }
                     }}
                     icon={Icon.Book}

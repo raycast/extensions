@@ -1,18 +1,9 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  open,
-  useNavigation,
-  getPreferenceValues,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, open, useNavigation, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ModuleSelector } from "./components/ModuleSelector";
 import { SEARCH_SCOPES } from "./utils/categories";
 import { fetchModules } from "./utils/moduleUtils";
+import { showFailureToast } from "@raycast/utils";
 
 interface Preferences {
   defaultText: string;
@@ -38,37 +29,42 @@ function SearchList({ item, initialModule }: { item: SearchItem; initialModule: 
   const [selectedModule, setSelectedModule] = useState(initialModule);
   const [selectedScope, setSelectedScope] = useState("all");
 
-  const handleExecuteSearch = async () => {
-    if (item.requiresQuery && !searchQuery.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Query Required",
-        message: `Please enter a search term for ${item.title}`,
-      });
-      return;
-    }
-
+  // Helper function to construct Accordance URLs
+  const constructAccordanceUrl = (
+    item: SearchItem,
+    query: string,
+    module: string,
+    scope: string,
+    encodeParams = true,
+  ): string => {
     let url = item.urlTemplate
-      .replace("{query}", encodeURIComponent(searchQuery))
-      .replace("{module}", encodeURIComponent(selectedModule));
+      .replace("{query}", encodeParams ? encodeURIComponent(query) : query)
+      .replace("{module}", encodeParams ? encodeURIComponent(module) : module);
 
     // For research searches, add scope if not "all"
-    if (item.id.startsWith("research") && selectedScope !== "all") {
-      const scopeName = SEARCH_SCOPES.find((s) => s.id === selectedScope)?.name || "All";
+    if (item.id.startsWith("research") && scope !== "all") {
+      const scopeName = SEARCH_SCOPES.find((s) => s.id === scope)?.name || "All";
       // Insert scope in brackets before the language part
       url = url.replace("accord://research/", `accord://research/[${scopeName}];`);
     }
+
+    return url;
+  };
+
+  const handleExecuteSearch = async () => {
+    if (item.requiresQuery && !searchQuery.trim()) {
+      await showFailureToast(`Please enter a search term for ${item.title}`);
+      return;
+    }
+
+    const url = constructAccordanceUrl(item, searchQuery, selectedModule, selectedScope, true);
 
     try {
       await open(url);
       pop(); // Go back to the main list after successful search
     } catch (error) {
       console.error("Failed to open Accordance URL:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to open Accordance",
-      });
+      await showFailureToast("Failed to open Accordance");
     }
   };
 
@@ -102,16 +98,7 @@ function SearchList({ item, initialModule }: { item: SearchItem; initialModule: 
             ? [{ text: SEARCH_SCOPES.find((s) => s.id === selectedScope)?.name || "All", icon: Icon.List }]
             : []),
           {
-            text: (() => {
-              let url = item.urlTemplate.replace("{query}", searchQuery).replace("{module}", selectedModule);
-
-              if (item.id.startsWith("research") && selectedScope !== "all") {
-                const scopeName = SEARCH_SCOPES.find((s) => s.id === selectedScope)?.name || "All";
-                url = url.replace("accord://research/", `accord://research/[${scopeName}];`);
-              }
-
-              return url;
-            })(),
+            text: constructAccordanceUrl(item, searchQuery, selectedModule, selectedScope, false),
             tooltip: "Generated URL",
           },
         ]}
@@ -310,11 +297,7 @@ export default function Command() {
                         await open(url);
                       } catch (error) {
                         console.error("Failed to open Accordance URL:", error);
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: "Error",
-                          message: "Failed to open Accordance",
-                        });
+                        await showFailureToast("Failed to open Accordance");
                       }
                     }}
                   />
