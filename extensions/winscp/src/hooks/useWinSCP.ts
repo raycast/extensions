@@ -15,8 +15,6 @@ function getWinSCPExtendedIniPath(): string | null {
   const { programPath } = getPreferenceValues<{ programPath: string }>();
   const winSCPDir = programPath || join(homedir(), "AppData", "Local", "Programs", "WinSCP");
 
-  console.log("Using WinSCP path from preferences:", programPath);
-
   if (existsSync(winSCPDir)) {
     return winSCPDir;
   }
@@ -99,7 +97,6 @@ export function useWinSCP() {
     const winSCPExe = join(winSCPDir, "WinSCP.exe");
     try {
       const command = `start "" "${winSCPExe}" "${session.name}"`;
-      console.log("Executing command:", command);
       await execAsync(command);
 
       await showToast({
@@ -108,7 +105,6 @@ export function useWinSCP() {
         message: `Starting ${session.name}`,
       });
     } catch (err) {
-      console.error("Failed to launch session:", err);
       await showFailureToast(err, {
         title: "Launch Failed",
         message: `Could not launch ${session.name}. Make sure WinSCP is in your PATH.`,
