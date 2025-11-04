@@ -4,7 +4,6 @@ import Mixpanel from "mixpanel";
 const MIXPANEL_TOKEN = "496d87f57d932be35607e9c2f3408538";
 const mixpanel = Mixpanel.init(MIXPANEL_TOKEN, {
   protocol: "https",
-  debug: true, // Enable debug mode to see what's being sent
 });
 
 interface FlightSearchProperties {
@@ -14,12 +13,6 @@ interface FlightSearchProperties {
   adults: number;
   departureDate?: string;
   returnDate?: string;
-}
-
-interface AirportSearchProperties {
-  searchQuery: string;
-  field: "origin" | "destination";
-  resultCount: number;
 }
 
 export function trackFlightSearch(properties: FlightSearchProperties) {
@@ -40,22 +33,5 @@ export function trackFlightSearch(properties: FlightSearchProperties) {
     });
   } catch (error) {
     console.error("❌ Failed to track flight search:", error);
-  }
-}
-
-export function trackAirportSearch(properties: AirportSearchProperties) {
-  try {
-    const distinctId = `raycast_user_${Date.now()}`;
-
-    mixpanel.track("Airport Search Performed", {
-      distinct_id: distinctId,
-      searchQuery: properties.searchQuery,
-      field: properties.field,
-      resultCount: properties.resultCount,
-      timestamp: new Date().toISOString(),
-      source: "raycast_extension",
-    });
-  } catch (error) {
-    console.error("❌ Failed to track airport search:", error);
   }
 }
