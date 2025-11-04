@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-11-04
 
 - Fixed an issue where favorite server were duplicated in the list
 
