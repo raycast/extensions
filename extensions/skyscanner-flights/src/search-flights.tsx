@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, Icon, open, Toast, showToast } from "@raycas
 import { useState } from "react";
 import { searchAirportsLocal, Airport } from "./data/airports";
 import { showFailureToast } from "@raycast/utils";
+import { trackFlightSearch } from "./utils/analytics";
 
 interface FormValues {
   origin: string;
@@ -99,6 +100,16 @@ export default function OpenSkyscanner() {
       const returnPart = isRoundTrip ? `/${formatDate(values.returnDate!)}` : "";
 
       const url = `https://www.skyscanner.com/transport/flights/${origin}/${destination}/${formattedDate}${returnPart}/?adults=${adults}&adultsv2=${adults}&cabinclass=economy&children=0&childrenv2=&inboundaltsenabled=false&infants=0&outboundaltsenabled=false&preferdirects=false&ref=home&rtn=${isRoundTrip ? "1" : "0"}`;
+
+      // Track flight search in Mixpanel
+      trackFlightSearch({
+        origin,
+        destination,
+        tripType: isRoundTrip ? "round-trip" : "one-way",
+        adults,
+        departureDate: formattedDate,
+        returnDate: isRoundTrip ? formatDate(values.returnDate!) : undefined,
+      });
 
       // Open URL in browser
       await open(url);
