@@ -1,6 +1,6 @@
 # Bible Search Changelog
 
-## [Remember last used version] - {PR_MERGE_DATE}
+## [Remember last used version] - 2025-11-04
 
 - Remember the Bible version between searches (and remove the default version setting)
 - Update dependencies
