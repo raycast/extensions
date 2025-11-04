@@ -141,15 +141,14 @@ export default function Command() {
     }
 
     return refs;
-  }; // Load verses from Accordance
-  const loadVerses = async (references: Reference[]): Promise<VerseResult[]> => {
-    const results: VerseResult[] = [];
-
+  }; // Load verses progressively, updating state as each one loads
+  const loadVersesProgressively = async (references: Reference[]) => {
     for (const ref of references) {
       const cacheKey = `${selectedModule}-${ref.book}-${ref.chapter}-${ref.verse}`;
 
       if (verseCache.has(cacheKey)) {
-        results.push(verseCache.get(cacheKey)!);
+        const cachedVerse = verseCache.get(cacheKey)!;
+        setVerses((prev) => [...prev, cachedVerse]);
         continue;
       }
 
@@ -187,13 +186,11 @@ export default function Command() {
         };
 
         verseCache.set(cacheKey, result);
-        results.push(result);
+        setVerses((prev) => [...prev, result]);
       } catch {
         console.error(`Failed to load ${ref.book} ${ref.chapter}:${ref.verse}`);
       }
     }
-
-    return results;
   };
 
   // Handle search input
@@ -207,9 +204,8 @@ export default function Command() {
 
     try {
       const references = generateVerseReferences(startRef, 20);
-      const loadedVerses = await loadVerses(references);
-      setVerses(loadedVerses);
-      setHasMore(references.length === 20 && loadedVerses.length === 20);
+      await loadVersesProgressively(references);
+      setHasMore(references.length === 20);
     } catch {
       await showToast({
         style: Toast.Style.Failure,
@@ -235,10 +231,8 @@ export default function Command() {
       });
 
       const references = generateVerseReferences(nextStartRef, 20);
-      const loadedVerses = await loadVerses(references);
-
-      setVerses((prev) => [...prev, ...loadedVerses]);
-      setHasMore(references.length === 20 && loadedVerses.length === 20);
+      await loadVersesProgressively(references);
+      setHasMore(references.length === 20);
     } catch {
       await showToast({
         style: Toast.Style.Failure,
