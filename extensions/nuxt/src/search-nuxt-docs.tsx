@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Icon, List, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import type { NuxtDocsLink } from "./types/docs";
 import { getNuxtDocsUrl } from "./utils/search";
 import NAV_TREE from "./data/nuxt-docs-nav";
-import { flattenDocsTree } from "./utils/docs";
+import { flattenDocsTree, fetchNuxtDocMarkdown } from "./utils/docs";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -87,6 +87,31 @@ export default function Command() {
                     }}
                   />
                   <Action.OpenInBrowser title="Open at Nuxt.com" url={`${getNuxtDocsUrl()}${item.path}`} />
+                  <Action
+                    title="Copy Page Markdown"
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                    onAction={async () => {
+                      try {
+                        await showToast({
+                          style: Toast.Style.Animated,
+                          title: "Fetching markdown...",
+                        });
+                        const markdown = await fetchNuxtDocMarkdown(item.path);
+                        await Clipboard.copy(markdown);
+                        await showToast({
+                          style: Toast.Style.Success,
+                          title: "Markdown copied to clipboard",
+                        });
+                      } catch (e) {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to copy markdown",
+                          message: String(e),
+                        });
+                      }
+                    }}
+                  />
                 </ActionPanel>
               }
             />

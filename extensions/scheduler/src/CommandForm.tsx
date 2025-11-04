@@ -60,6 +60,7 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
       command: (draftValues?.command as string) ?? (command ? command.command.deeplink : ""),
       name: (draftValues?.name as string) ?? (command?.name || ""),
       runInBackground: (draftValues?.runInBackground as boolean | undefined) ?? command?.command.type === "background",
+      runIfMissed: (draftValues?.runIfMissed as boolean | undefined) ?? command?.runIfMissed ?? false,
       scheduleType: (draftValues?.scheduleType as ScheduleType) ?? (command?.schedule.type || "daily"),
       time: (draftValues?.time as string) ?? (command?.schedule.time || "09:00"),
       date: (draftValues?.date as string) ?? (command?.schedule.date || ""),
@@ -248,6 +249,12 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
         label="Execute this command in the background."
         info="When enabled, the command will run silently without user interaction. Best for automated tasks and scripts."
       />
+      <Form.Checkbox
+        {...itemProps.runIfMissed}
+        title="Run Immediately if Missed"
+        label="Execute this command immediately if it was missed."
+        info="When enabled, the command will run as soon as possible if it was scheduled to run while your machine was asleep."
+      />
       {parsedCommand && (
         <>
           {!permission || !permission.hasPermission ? (
@@ -328,7 +335,11 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
 
       {/* Monthly: Day of Month */}
       {currentScheduleType === "monthly" && (
-        <Form.Dropdown title="Day of Month" {...itemProps.dayOfMonth}>
+        <Form.Dropdown
+          title="Day of Month"
+          info="If the selected day is not present in the month, the command will run on the last day of the month."
+          {...itemProps.dayOfMonth}
+        >
           {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
             <Form.Dropdown.Item key={day} value={day.toString()} title={`Day ${day}`} />
           ))}

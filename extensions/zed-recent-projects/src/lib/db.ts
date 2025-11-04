@@ -26,9 +26,10 @@ export function getZedDbName(build: ZedBuild): string {
 // Current migration step for Zed Stable as of 2025-09-09
 export const DEFAULT_WORKSPACE_DB_VERSION = 28;
 
-export async function queryDb(dbPath: string, query: string) {
+export async function queryDb(dbPath: string, query: string): Promise<string> {
   try {
-    const result = await execFilePromise("sqlite3", [dbPath, query]);
+    // Apply `--init /dev/null` to ignore user sqlite configuration
+    const result = await execFilePromise("sqlite3", ["--init", "/dev/null", dbPath, query]);
 
     if (result.stderr) {
       console.error(`Error querying Zed workspace DB: ${result.stderr}`);

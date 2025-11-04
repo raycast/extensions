@@ -14,6 +14,12 @@
       "mode": "view"
     },
     {
+      "name": "manage-features",
+      "title": "Manage Features",
+      "description": "List Features",
+      "mode": "view"
+    },
+    {
       "name": "manage-products",
       "title": "Manage Products",
       "description": "List and Create Products",
@@ -46,10 +52,14 @@
       "required": false
     }
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.102.7",
-    "@raycast/utils": "^1.17.0",
-    "autumn-js": "^0.1.33"
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "autumn-js": "^0.1.40"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

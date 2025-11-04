@@ -31,7 +31,7 @@ export const useDocker = (docker: Dockerode) => {
     const [images, setImages] = useState<ImageInfo[]>();
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
-    const interval = useRef<NodeJS.Timeout>();
+    const interval = useRef<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
       async function fetchImages() {
@@ -62,7 +62,7 @@ export const useDocker = (docker: Dockerode) => {
   const useImageInfo = ({ Id }: { Id: string }) => {
     const [imageInfo, setImageInfo] = useState<ImageInspectInfo>();
     const [isLoading, setLoading] = useState(false);
-    const interval = useRef<NodeJS.Timeout>();
+    const interval = useRef<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
       async function fetchImageInfo() {
@@ -83,7 +83,7 @@ export const useDocker = (docker: Dockerode) => {
     const [containers, setContainers] = useState<ContainerInfo[]>();
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
-    const interval = useRef<NodeJS.Timeout>();
+    const interval = useRef<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
       async function fetchContainers() {
@@ -118,7 +118,7 @@ export const useDocker = (docker: Dockerode) => {
   const useContainerInfo = (containerId: string) => {
     const [containerInfo, setContainerInfo] = useState<ContainerInspectInfo>();
     const [isLoading, setLoading] = useState(false);
-    const interval = useRef<NodeJS.Timeout>();
+    const interval = useRef<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
       async function fetchContainerInfo() {
@@ -147,7 +147,7 @@ export const useDocker = (docker: Dockerode) => {
     const [projects, setProjects] = useState<ComposeProject[]>();
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
-    const interval = useRef<NodeJS.Timeout>();
+    const interval = useRef<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
       async function fetchContainers() {

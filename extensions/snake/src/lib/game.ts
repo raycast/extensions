@@ -1,5 +1,5 @@
 import { TextSize } from "../components/snake";
-import { getRandomInt } from "./utils";
+import { getRandomInt, isWindows } from "./utils";
 
 const foodSymbol = "O";
 const snakeSymbol = "▉";
@@ -9,6 +9,7 @@ function addCoords(c1: Coord, c2: Coord): Coord {
   return { x: c1.x + c2.x, y: c1.y + c2.y };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function deltaMoveCoordRelative(dir: Move, coord: Coord): Coord {
   let moveX = 0;
   let moveY = 0;
@@ -106,8 +107,13 @@ export class Field {
 
   setSize(textSize: TextSize) {
     if (textSize === "medium") {
-      this.width = 104;
-      this.height = 18;
+      if (isWindows) {
+        this.height = 15;
+        this.width = 100;
+      } else {
+        this.width = 104;
+        this.height = 18;
+      }
     } else {
       this.width = 90;
       this.height = 14;
@@ -331,6 +337,7 @@ export class Game {
       this.snake.move({ x: moveX, y: moveY }, this);
 
       this.setField(this.field.toString());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       this.setError(error.message);
     }

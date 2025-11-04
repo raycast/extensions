@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import useInterval from "use-interval";
 import { Game, GameScore, Move } from "../lib/game";
+import { isWindows } from "../lib/utils";
 
 function CursorAction(props: {
   game: Game;
@@ -21,7 +22,7 @@ function CursorAction(props: {
   title: string;
   shortcut?: Keyboard.Shortcut | undefined;
   icon?: Image.ImageLike | undefined;
-}): JSX.Element {
+}) {
   return (
     <Action
       title={props.title}
@@ -34,7 +35,7 @@ function CursorAction(props: {
 
 export type TextSize = Environment["textSize"];
 
-export function SnakeGame(): JSX.Element {
+export function SnakeGame() {
   const [error, setError] = useState<string>();
   const [pause, setPause] = useState<boolean>(false);
   const textSize: TextSize = environment.textSize;
@@ -81,6 +82,7 @@ export function SnakeGame(): JSX.Element {
   parts.push(codefence);
 
   const md = textSize !== undefined ? parts.join("\n\n") : "---";
+  const modifiers: Keyboard.KeyModifier[] = isWindows ? ["alt", "shift"] : ["cmd", "shift"];
   return (
     <Detail
       isLoading={textSize === undefined}
@@ -101,28 +103,28 @@ export function SnakeGame(): JSX.Element {
             title="Up"
             icon={{ source: "⬆️" }}
             move={Move.up}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+            shortcut={{ modifiers: modifiers, key: "arrowUp" }}
           />
           <CursorAction
             game={game}
             title="Down"
             icon={{ source: "⬇️" }}
             move={Move.down}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+            shortcut={{ modifiers: modifiers, key: "arrowDown" }}
           />
           <CursorAction
             game={game}
             title="Left"
             icon={{ source: "⬅️" }}
             move={Move.left}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
+            shortcut={{ modifiers: modifiers, key: "arrowLeft" }}
           />
           <CursorAction
             game={game}
             title="Right"
             icon={{ source: "➡️" }}
             move={Move.right}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
+            shortcut={{ modifiers: modifiers, key: "arrowRight" }}
           />
         </ActionPanel>
       }

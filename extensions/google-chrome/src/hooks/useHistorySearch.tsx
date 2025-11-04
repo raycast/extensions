@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as api from "@raycast/api";
 import { useSQL } from "@raycast/utils";
-import { handleErrorToastAction } from "@raycast/utils/dist/handle-error-toast-action";
+import { handleErrorToastAction } from "../util/handleErrorToastAction";
 import { useState, useEffect } from "react";
 import { HistoryEntry, SearchResult } from "../interfaces";
 import { getHistoryDbPath } from "../util";

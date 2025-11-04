@@ -1,20 +1,20 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import { Categories, DEFAULT_CATEGORY } from "./Categories";
+import { useMemo, useState } from "react";
 import { Item } from "../types";
 import {
-  getCategoryIcon,
   actionsForItem,
-  useAccount,
   CommandLineMissingError,
   ConnectionError,
   ExtensionError,
+  getCategoryIcon,
+  useAccount,
   usePasswords2,
 } from "../utils";
+import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { Error as ErrorGuide } from "./Error";
 import { ItemActionPanel } from "./ItemActionPanel";
-import { useMemo, useState } from "react";
 
 export function Items({ flags }: { flags?: string[] }) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
@@ -34,7 +34,7 @@ export function Items({ flags }: { flags?: string[] }) {
   }, [items, category]);
 
   const onCategoryChange = (newCategory: string) => {
-    category !== newCategory && setCategory(newCategory);
+    if (category !== newCategory) setCategory(newCategory);
   };
 
   if (itemsError instanceof CommandLineMissingError || accountError instanceof CommandLineMissingError)

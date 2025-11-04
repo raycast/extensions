@@ -7,7 +7,8 @@
   "author": "franzwilhelm",
   "contributors": [
     "lachero",
-    "raeperd"
+    "raeperd",
+    "ahetzm"
   ],
   "categories": [
     "Web"
@@ -30,8 +31,8 @@
         "bangs",
         "kagi"
       ],
-      "subtitle": "Search the Web using Kagi's Bangs",
-      "description": "Search the Web using any of the available search engines. Powered by Kagi's Bangs",
+      "subtitle": "Search the Web with !bangs",
+      "description": "Search the Web using any of the available search engines. Powered by Kagi's Bangs and custom search engines",
       "mode": "no-view",
       "arguments": [
         {
@@ -46,13 +47,30 @@
       "name": "browse-search-engines",
       "title": "Browse Search Engines",
       "subtitle": "Browse and select your default search engine",
-      "description": "View all available search engines and set your default search engine to use with the search command.",
+      "description": "View all available search engines, manage custom engines, and set your default search engine to use with the search command.",
       "mode": "view",
       "keywords": [
         "unduck",
         "duckduckgo",
         "bangs",
-        "kagi"
+        "kagi",
+        "custom",
+        "manage"
+      ]
+    },
+    {
+      "name": "add-custom-search-engine",
+      "title": "Add Custom Search Engine",
+      "subtitle": "Create a new custom search engine",
+      "description": "Add a new custom search engine with a personalized trigger and URL.",
+      "mode": "view",
+      "keywords": [
+        "add",
+        "custom",
+        "search",
+        "engine",
+        "bang",
+        "create"
       ]
     }
   ],
@@ -77,5 +95,8 @@
     "download-kagi-bangs": "npx ts-node scripts/download-kagi-bangs.ts && npm run fix-lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

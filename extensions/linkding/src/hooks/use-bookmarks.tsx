@@ -12,7 +12,7 @@ const useBookmarks = () => {
         Authorization: `Token ${apiKey}`,
       },
     }),
-    [apiKey]
+    [apiKey],
   );
 
   const [filter, setFilter] = useState("");
@@ -31,7 +31,7 @@ const useBookmarks = () => {
       mapResult: (response: GetLinkdingBookmarkResponse) => ({ data: response.results }),
       initialData: [] as LinkdingBookmark[],
       keepPreviousData: true,
-    }
+    },
   );
 
   const createBookmark = async (payload: PostLinkdingBookmarkPayload) => {
@@ -42,7 +42,7 @@ const useBookmarks = () => {
           ...requestOpts,
           method: "POST",
           body: JSON.stringify(payload),
-        })
+        }),
       );
       toast.style = Toast.Style.Success;
       toast.title = "Created bookmark";

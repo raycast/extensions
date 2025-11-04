@@ -10,7 +10,8 @@
     "danielferguson",
     "ridemountainpig",
     "yusifaliyevpro",
-    "xmok"
+    "xmok",
+    "j3lte"
   ],
   "categories": [
     "Design Tools",
@@ -115,17 +116,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
+    "@raycast/api": "^1.103.3",
     "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^22.18.3",
     "@types/react": "^19.1.12",
-    "eslint": "^9.35.0",
+    "eslint": "^9.37.0",
     "prettier": "^3.6.2",
     "react": "^19.1.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

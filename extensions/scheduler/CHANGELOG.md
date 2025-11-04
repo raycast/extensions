@@ -1,5 +1,9 @@
 # Scheduler Changelog
 
+## [Run missed schedules immediately] - 2025-10-10
+
+- ▶️ Added an option to immediately run a scheduled command if it was missed (e.g., the machine was asleep). Note: in this case "immediately" means within one minute of Raycast starting.
+
 ## [Added new schedule types] - 2025-09-10
 
 - You can now schedule commands to run every 15 or 30 minutes (works well for scheduling AI commands)

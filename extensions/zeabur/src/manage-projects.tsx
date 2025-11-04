@@ -1,13 +1,29 @@
 import { useState, useEffect, useMemo } from "react";
-import { List, ActionPanel, Action, Icon, Image, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Image,
+  confirmAlert,
+  showToast,
+  Toast,
+  Alert,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ProjectInfo } from "./type";
-import { getProjects, deleteProject } from "./utils/zeabur-graphql";
+import { getProjects, getProjectUsage, deleteProject } from "./utils/zeabur-graphql";
 import ProjectServices from "./components/project-services";
 
 export default function Command() {
+  const preferences = getPreferenceValues();
+  const zeaburToken = preferences.zeaburToken;
+
   const [isLoading, setIsLoading] = useState(true);
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
+  const [projectUsages, setProjectUsages] = useState<{ [key: string]: string }>({});
   const [isReloading, setIsReloading] = useState(false);
   const [sortBy, setSortBy] = useState("");
 
@@ -16,14 +32,35 @@ export default function Command() {
       try {
         const projects = await getProjects();
         setProjects(projects);
+
+        const usages: { [key: string]: string } = {};
+        await Promise.all(
+          projects.map(async (project) => {
+            if (project.region.id.includes("server")) {
+              usages[project._id] = "Free";
+            } else {
+              try {
+                const usage = await getProjectUsage(project._id);
+                usages[project._id] = "$" + usage.usages.reduce((acc, curr) => acc + curr.usage, 0).toFixed(2);
+              } catch {
+                usages[project._id] = "$0";
+              }
+            }
+          }),
+        );
+        setProjectUsages(usages);
+
         setIsLoading(false);
       } catch {
         showFailureToast("Failed to fetch projects");
         setIsLoading(false);
       }
     };
-    fetchProjects();
-  }, [isReloading]);
+
+    if (zeaburToken !== undefined && zeaburToken !== "") {
+      fetchProjects();
+    }
+  }, [isReloading, zeaburToken]);
 
   const sortedProjects = useMemo(() => {
     if (sortBy === "") {
@@ -38,6 +75,20 @@ export default function Command() {
       return 0;
     });
   }, [sortBy, projects]);
+
+  if (zeaburToken === undefined || zeaburToken === "") {
+    return (
+      <List
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      >
+        <List.EmptyView icon={Icon.Key} title="Please set Zeabur Token in the extension preferences" />
+      </List>
+    );
+  }
 
   return (
     <List
@@ -61,6 +112,14 @@ export default function Command() {
               mask: Image.Mask.RoundedRectangle,
             }}
             accessories={[
+              ...(project.region.providerInfo?.code && projectUsages[project._id] !== undefined
+                ? [
+                    {
+                      tag: projectUsages[project._id],
+                      tooltip: "Usage",
+                    },
+                  ]
+                : []),
               ...(project.region.providerInfo?.code
                 ? [
                     {
