@@ -1,6 +1,6 @@
 # Plane Changelog
 
-## [Add API Key Authentication and Support for Self-Hosted Plane Instances] - {PR_MERGE_DATE}
+## [Add API Key Authentication and Support for Self-Hosted Plane Instances] - 2025-11-04
 
 - **API Key Authentication**
 - **Support for Self-Hosted Plane Instances**
