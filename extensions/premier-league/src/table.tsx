@@ -3,27 +3,27 @@ import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { getTables } from "./api";
 import SearchBarSeason from "./components/searchbar_season";
-import { convertToLocalTime, getClubLogo } from "./utils";
+import { convertISOToLocalTime, getClubLogo } from "./utils";
 
-const qualificationMap: Record<string, string> = {
-  EU_CL: "UEFA Champions League",
-  EU_EL: "UEFA Europa League",
-  EU_ECL: "UEFA Conference League",
-  EN_CH: "EFL Championship",
-};
+// const annotationMap: Record<string, string> = {
+//   Q: "Qualification",
+//   R: "Relegation",
+//   PD: "Points Deduction",
+// };
 
-const qualificationColor: Record<string, string> = {
-  EU_CL: Color.Blue,
-  EU_EL: Color.Orange,
-  EU_ECL: Color.Green,
-  EN_CH: Color.Red,
-};
+// const qualificationMap: Record<string, string> = {
+//   EU_CL: "UEFA Champions League",
+//   EU_EL: "UEFA Europa League",
+//   EU_CF: "UEFA Conference League",
+//   EN_CH: "EFL Championship",
+// };
 
-const annotationMap: Record<string, string> = {
-  Q: "Qualification",
-  R: "Relegation",
-  PD: "Points Deduction",
-};
+// const qualificationColor: Record<string, string> = {
+//   EU_CL: Color.Blue,
+//   EU_EL: Color.Orange,
+//   EU_CF: Color.Green,
+//   EN_CH: Color.Red,
+// };
 
 export default function EPLTables() {
   const [seasonId, setSeasonId] = useState<string>();
@@ -44,21 +44,16 @@ export default function EPLTables() {
       isLoading={isLoading}
       isShowingDetail={true}
     >
-      {tables?.map((table) => {
+      {tables?.map((table, idx) => {
         const isEnded = table.entries.every((e) => e.overall.played === 38);
 
         return (
-          <List.Section key={table.gameWeek}>
+          <List.Section key={idx}>
             {table.entries.map((entry) => {
-              const {
-                overall,
-                team,
-                position,
-                form,
-                next,
-                startingPosition,
-                annotations,
-              } = entry;
+              const { overall, team, form, next } = entry;
+
+              const position = overall.position;
+              const startingPosition = overall.startingPosition || 0;
 
               let icon: Image.ImageLike | undefined;
 
@@ -116,9 +111,9 @@ export default function EPLTables() {
                   key={position}
                   title={position.toString()}
                   subtitle={team.shortName}
-                  keywords={[team.name, team.shortName, team.club.abbr]}
+                  keywords={[team.name, team.shortName, team.abbr]}
                   icon={{
-                    source: getClubLogo(team.altIds.opta),
+                    source: getClubLogo(team.id),
                     fallback: "default.png",
                   }}
                   accessories={accessories}
@@ -153,42 +148,44 @@ export default function EPLTables() {
                           />
                           <List.Item.Detail.Metadata.Label
                             title="Goal Difference"
-                            text={overall.goalsDifference.toString()}
+                            text={String(
+                              overall.goalsFor - overall.goalsAgainst,
+                            )}
                           />
 
                           <List.Item.Detail.Metadata.Separator />
                           <List.Item.Detail.Metadata.TagList title="Form">
-                            {form?.map((m) => {
-                              const isHome =
-                                m.teams[0].team.shortName === team.shortName;
+                            {form
+                              ?.map((m) => {
+                                const isHome =
+                                  m.homeTeam.shortName === team.shortName;
 
-                              let isWinner;
-                              if (isHome) {
-                                isWinner = m.teams[0].score > m.teams[1].score;
-                              } else {
-                                isWinner = m.teams[0].score < m.teams[1].score;
-                              }
+                                let color;
+                                let text;
+                                if (m.homeTeam.score > m.awayTeam.score) {
+                                  color = isHome ? Color.Green : Color.Red;
+                                  text = isHome ? "W" : "L";
+                                } else if (
+                                  m.homeTeam.score < m.awayTeam.score
+                                ) {
+                                  color = isHome ? Color.Red : Color.Green;
+                                  text = isHome ? "L" : "W";
+                                } else {
+                                  color = Color.SecondaryText;
+                                  text = "D";
+                                }
 
-                              let color;
-                              let text;
-                              if (m.outcome !== "D") {
-                                color = isWinner ? Color.Green : Color.Red;
-                                text = isWinner ? "W" : "L";
-                              } else {
-                                color = Color.SecondaryText;
-                                text = "D";
-                              }
-
-                              return (
-                                <List.Item.Detail.Metadata.TagList.Item
-                                  key={m.id}
-                                  text={text}
-                                  color={color}
-                                />
-                              );
-                            })}
+                                return (
+                                  <List.Item.Detail.Metadata.TagList.Item
+                                    key={m.matchId}
+                                    text={text}
+                                    color={color}
+                                  />
+                                );
+                              })
+                              .reverse()}
                           </List.Item.Detail.Metadata.TagList>
-                          {Array.isArray(annotations) &&
+                          {/* {Array.isArray(annotations) &&
                             annotations.length &&
                             annotations.map((annotation) => {
                               return annotation.type === "Q" ? (
@@ -212,21 +209,24 @@ export default function EPLTables() {
                                   text={annotation.description}
                                 />
                               );
-                            })}
+                            })} */}
                           {next && (
                             <>
                               <List.Item.Detail.Metadata.Separator />
                               <List.Item.Detail.Metadata.Label
                                 title="Next Fixture"
-                                text={`${next.teams[0].team.name} - ${next.teams[1].team.name}`}
+                                text={`${next.homeTeam.name} - ${next.awayTeam.name}`}
                               />
                               <List.Item.Detail.Metadata.Label
                                 title="Kick Off"
-                                text={convertToLocalTime(next.kickoff.label)}
+                                text={convertISOToLocalTime(
+                                  next.kickoff,
+                                  next.kickoffTimezone,
+                                )}
                               />
                               <List.Item.Detail.Metadata.Label
                                 title="Stadium"
-                                text={`${next.ground.name}, ${next.ground.city}`}
+                                text={next.ground}
                               />
                             </>
                           )}
