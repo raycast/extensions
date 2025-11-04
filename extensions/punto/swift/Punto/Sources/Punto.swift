@@ -81,16 +81,8 @@ extension TISInputSource {
         return getProperty(kTISPropertyInputSourceID) as! String
     }
 
-    var category: String {
-        return getProperty(kTISPropertyInputSourceCategory) as! String
-    }
-
     var isSelectable: Bool {
         return getProperty(kTISPropertyInputSourceIsSelectCapable) as! Bool
-    }
-
-    var sourceLanguages: [String] {
-        return getProperty(kTISPropertyInputSourceLanguages) as! [String]
     }
 
     var localizedName: String {
