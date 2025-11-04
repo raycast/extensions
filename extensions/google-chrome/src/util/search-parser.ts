@@ -3,7 +3,7 @@
  * Filters items where the url and title match all space-separated words in search query (case insensitive).
  * Supports exclude terms with "-" prefix to filter out results containing those terms.
  * Use "\-" to search for literal "-" character.
- * 
+ *
  * @param query - The search query string
  * @returns Object containing include and exclude terms
  *
@@ -16,7 +16,7 @@
  *
  * parseSearchQuery("foo \\-bar")
  * // returns { includeTerms: ["foo", "-bar"], excludeTerms: [] }
- * 
+ *
  * @example Given an item with title "foo bar" and url "example.com":
  * - search "foo bar" succeeds (contains both foo and bar)
  * - search "bar foo" succeeds (order doesn't matter)

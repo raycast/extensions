@@ -47,7 +47,7 @@ function HistoryItem({
   type: "History" | "Bookmark";
 }): ReactElement {
   const { icon, isInvalid } = getSafeFavicon(url);
-  
+
   return (
     <List.Item
       id={`${profile}-${type}-${id}`}
