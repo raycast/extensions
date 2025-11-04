@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List, useNavigation } from "@raycast/api";
-import { useConversations } from "./hooks/use-conversations";
 import { Conversation } from "./components/conversation";
+import { useConversations } from "./hooks/use-conversations";
 
 export default function Command() {
   const { value: conversations, setValue: setConversations, isLoading } = useConversations();

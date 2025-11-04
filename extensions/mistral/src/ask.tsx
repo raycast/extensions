@@ -1,51 +1,58 @@
-import { Action, ActionPanel, Form, useNavigation, TextArea } from "@raycast/api";
-import { useState, useRef } from "react";
-import { ModelDropdown } from "./components/models-dropdown";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { useState } from "react";
 import { Conversation } from "./components/conversation";
+import { DEFAULT_MODEL_ID, FALLBACK_MODELS, type ModelId } from "./utils/models";
 
 export default function Command() {
-  const [question, setQuestion] = useState("");
   const { push } = useNavigation();
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [model, setModel] = useState<ModelId>(DEFAULT_MODEL_ID);
+  const [question, setQuestion] = useState("");
 
-  const handleTextChange = (value: string) => {
-    setQuestion(value);
-    if (textAreaRef.current) {
-      textAreaRef.current.style.height = 'auto';
-      textAreaRef.current.style.height = Math.min(textAreaRef.current.scrollHeight, 200) + 'px';
-    }
-  };
+  const modelName = FALLBACK_MODELS.find((m) => m.id === model)?.name || "Unknown";
 
-  async function handleSubmit() {
-    if (question.length) {
-      const newConversation = {
-        id: Math.random().toString(36).slice(7),
-        title: question,
-        date: new Date().toString(),
-        chats: [{ question, answer: "" }],
-      };
-      push(<Conversation conversation={newConversation} />);
-    }
+  function handleSubmit() {
+    if (!question.length) return;
+
+    push(
+      <Conversation
+        conversation={{
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          title: question,
+          date: new Date().toISOString(),
+          chats: [{ question, answer: "" }],
+        }}
+        model={model}
+      />,
+    );
   }
 
   return (
-    <Form
+    <List
+      searchBarPlaceholder="Ask Mistral..."
+      searchText={question}
+      onSearchTextChange={setQuestion}
       actions={
         <ActionPanel>
-          <Action.SubmitAction title="Ask" onSubmit={handleSubmit} />
+          <Action title="Ask Mistral" icon={Icon.Message} onAction={handleSubmit} />
+          <ActionPanel.Section title="🤖 Select Model">
+            {FALLBACK_MODELS.map((m, index) => (
+              <Action
+                key={m.id}
+                title={m.name}
+                icon={model === m.id ? Icon.CheckCircle : Icon.Circle}
+                onAction={() => setModel(m.id)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: (index + 1).toString() as "1" | "2" | "3" | "4" }}
+              />
+            ))}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="question"
-        value={question}
-        onChange={handleTextChange}
-        placeholder="Ask Mistral..."
-        ref={textAreaRef}
-        enableMultiline={true}
-        style={{ resize: "none", minHeight: "40px", maxHeight: "200px", overflowY: "auto" }}
+      <List.EmptyView
+        icon="mistral-icon.svg"
+        title="Ask Mistral"
+        description={`Type your message and hit enter\n\n🤖 ${modelName}`}
       />
-      <Form.Description text="Select model via dropdown if needed" />
-    </Form>
+    </List>
   );
 }

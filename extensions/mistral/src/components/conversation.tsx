@@ -1,133 +1,162 @@
-import { ActionPanel, Action, Form, showToast, Toast, TextArea } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
-import { Conversation as ConversationType, getConversations, setConversations } from "../hooks/use-conversations";
-import { ModelDropdown } from "./models-dropdown";
-import { useCurrentModel } from "../hooks/use-current-model";
-import { client } from "../utils/mistral-client";
-import { showFailureToast } from "@raycast/utils";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { startTransition, useEffect, useState } from "react";
+import { type Conversation as ConversationType, getConversations, setConversations } from "../hooks/use-conversations";
 import { getSystemPrompt } from "../hooks/use-system-prompt";
+import type { Preferences } from "../types/preferences";
+import { client } from "../utils/mistral-client";
+import { DEFAULT_MODEL_ID, FALLBACK_MODELS, validateModelId } from "../utils/models";
 
 type Props = {
   conversation: ConversationType;
+  model?: string;
 };
 
-export function Conversation({ conversation }: Props) {
+export function Conversation({ conversation, model: propModel }: Props) {
   const [chats, setChats] = useState(conversation.chats);
-  const { value: model } = useCurrentModel();
-  const [question, setQuestion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showInput, setShowInput] = useState(false);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [searchText, setSearchText] = useState("");
 
-  const hasRunEffect = useRef(false);
+  const preferences = getPreferenceValues<Preferences>();
+  const defaultModel = preferences.defaultModel || DEFAULT_MODEL_ID;
+  const { value: storedModel, setValue: setCurrentModel } = useLocalStorage<string>("mistral-model", defaultModel);
+  const currentModel = validateModelId(storedModel, defaultModel);
+  const effectiveModel = propModel || currentModel;
+
   useEffect(() => {
-    if (!hasRunEffect.current && conversation.chats[0].answer === "") {
-      streamAnswer(conversation.chats[0].question);
-      hasRunEffect.current = true;
+    if (conversation.chats.length > 0 && conversation.chats[0].answer === "") {
+      queueMicrotask(() => {
+        streamAnswer(conversation.chats[0].question, effectiveModel);
+      });
     }
-  }, []);
-
-  const handleTextChange = (value: string) => {
-    setQuestion(value);
-    if (textAreaRef.current) {
-      textAreaRef.current.style.height = 'auto';
-      textAreaRef.current.style.height = Math.min(textAreaRef.current.scrollHeight, 200) + 'px';
-    }
-  };
+  }, [conversation.chats, effectiveModel]);
 
   function handleSubmit() {
-    if (!question.length) return;
-    setQuestion("");
-    setShowInput(false);
-    setChats((prev) => [{ question, answer: "" }, ...prev]);
-    streamAnswer(question);
+    if (!searchText.trim().length) return;
+
+    const newChat = { question: searchText, answer: "" };
+    setChats((prev) => [newChat, ...prev]);
+    setSearchText("");
+    streamAnswer(searchText, currentModel);
   }
 
-  async function streamAnswer(question: string) {
+  async function streamAnswer(question: string, model: string) {
     setIsLoading(true);
-    const toast = await showToast({ title: "Thinking...", style: Toast.Style.Animated });
-    const conversations = await getConversations();
-    const systemPrompt = await getSystemPrompt();
+    showToast({ title: "Thinking...", style: Toast.Style.Animated });
+
+    const [conversationsPromise, systemPromptPromise] = [getConversations(), getSystemPrompt()];
 
     try {
-      const previousMessages = [...chats]
+      const previousMessages = chats
+        .filter((chat) => chat.answer && chat.answer.trim().length > 0)
         .reverse()
         .reduce<{ role: "system" | "user" | "assistant"; content: string }[]>((previous, current) => {
-          if (!current.answer) return previous;
           previous.push({ role: "user", content: current.question });
           previous.push({ role: "assistant", content: current.answer });
           return previous;
         }, []);
+
+      const systemPrompt = await systemPromptPromise;
       const messages = [
         ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
         ...previousMessages,
         { role: "user" as const, content: question },
       ];
-      const result = await client.chat.stream({
-        messages,
-        model: model ?? "mistral-small-latest",
-      });
+
+      const result = await client.chat.stream({ messages, model });
 
       let currentAnswer = "";
+
       for await (const chunk of result) {
-        const streamText = chunk.data.choices[0].delta.content;
-        currentAnswer += streamText;
-        setChats((prev) => {
-          const [first, ...rest] = prev;
-          return [{ ...first, answer: currentAnswer }, ...rest];
+        const streamText = chunk.data.choices[0].delta?.content || "";
+        if (streamText) {
+          currentAnswer += streamText;
+          const answer = currentAnswer;
+
+          startTransition(() => {
+            setChats((prev) => {
+              const [first, ...rest] = prev;
+              return [{ ...first, answer }, ...rest];
+            });
+          });
+        }
+      }
+
+      const conversations = await conversationsPromise;
+      const currentConvIndex = conversations.findIndex((conv) => conv.id === conversation.id);
+      const newChat = { question, answer: currentAnswer };
+
+      if (currentAnswer.trim().length > 0) {
+        if (currentConvIndex === -1) {
+          conversations.unshift({ ...conversation, chats: [newChat] });
+        } else {
+          conversations[currentConvIndex].chats = [newChat, ...conversations[currentConvIndex].chats];
+        }
+
+        queueMicrotask(() => setConversations(conversations));
+      }
+
+      showToast({ title: "Response complete", style: Toast.Style.Success });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const is429 = errorMessage.includes("429") || errorMessage.includes("capacity exceeded");
+      const modelName = FALLBACK_MODELS.find((m) => m.id === model)?.name || model;
+
+      if (is429) {
+        showFailureToast(error, {
+          title: `${modelName} capacity exceeded`,
+          message:
+            "This model is currently overloaded. Try selecting a different model using the 🤖 dropdown or wait a moment.",
+        });
+      } else {
+        showFailureToast(error, {
+          title: "Could not stream answer",
+          message:
+            "Your API key may be invalid. If you just created it, you may need to wait a few minutes for it to become active.",
         });
       }
 
-      const currentConvIndex = conversations.findIndex((conv) => conv.id === conversation.id);
-      const newChat = { question, answer: currentAnswer };
-      if (currentConvIndex === -1) {
-        conversations.unshift({ ...conversation, chats: [newChat] });
-      } else {
-        conversations[currentConvIndex].chats.unshift(newChat);
-      }
-      await setConversations(conversations);
-
-      toast.hide();
-    } catch (error) {
-      showFailureToast(error, {
-        title: "Could not stream answer",
-        message:
-          "Your API key may be invalid. If you just created it, you may need to wait a few minutes for it to become active.",
-      });
-      setShowInput(true);
+      setChats((prev) => prev.slice(1));
     }
 
     setIsLoading(false);
   }
 
-  if (showInput) {
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitAction onSubmit={handleSubmit} isLoading={isLoading} />
-            <Action title="Cancel" onAction={() => setShowInput(false)} />
-          </ActionPanel>
-        }
-      >
-        <Form.TextArea
-          id="question"
-          value={question}
-          onChange={handleTextChange}
-          placeholder="Ask another question..."
-          ref={textAreaRef}
-          enableMultiline={true}
-          style={{ resize: "none", minHeight: "40px", maxHeight: "200px", overflowY: "auto" }}
-        />
-      </Form>
-    );
-  }
-
   return (
-    <ActionPanel>
-      <Action title="New Question" icon={{ source: "mistral-logo.svg" }} onAction={() => setShowInput(true)} />
-    </ActionPanel>
-    // Note: The chat list is rendered in the parent or via navigation; adjust as needed for full view
-    // For now, focusing on input fix; full List integration may require more context
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      navigationTitle={conversation.title}
+      searchBarPlaceholder="Type your message here..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select Model" value={currentModel} onChange={(newValue) => setCurrentModel(newValue)}>
+          <List.Dropdown.Item title="🤖 Mistral Small" value="mistral-small-latest" />
+          <List.Dropdown.Item title="🤖 Mistral Medium" value="mistral-medium-latest" />
+          <List.Dropdown.Item title="🤖 Mistral Large" value="mistral-large-latest" />
+          <List.Dropdown.Item title="🤖 Codestral" value="codestral-latest" />
+        </List.Dropdown>
+      }
+    >
+      {chats.map((chat, index) => (
+        <List.Item
+          key={index}
+          title={chat.question}
+          subtitle={`Message ${chats.length - index}`}
+          icon={Icon.Person}
+          detail={
+            <List.Item.Detail
+              markdown={`**You:** ${chat.question}\n\n---\n\n**Mistral:**\n\n${chat.answer || "_Thinking..._"}`}
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Send Message" icon={Icon.ArrowRight} onAction={handleSubmit} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }
