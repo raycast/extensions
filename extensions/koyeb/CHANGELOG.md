@@ -1,6 +1,6 @@
 # Koyeb Changelog
 
-## [Paginate Activities] - {PR_MERGE_DATE}
+## [Paginate Activities] - 2025-11-04
 
 - Activities are now paginated
 - Activities accounts for apps, services
