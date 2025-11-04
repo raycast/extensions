@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, Detail, Icon } from "@raycast/api";
 import { validateResume } from "./utils/validateResume";
 import { useFetch, useForm } from "@raycast/utils";
 import { getSavedResumes, saveResume, removeResume, SavedResume } from "./utils/storage";
+import { Resume, Profile, Skill, Work, Education, Language } from "./types/resume";
 
-function makeMarkdownFromResume(resume: any) {
+function makeMarkdownFromResume(resume: Resume) {
   const basics = resume?.basics || {};
   const lines: string[] = [];
 
@@ -31,7 +31,7 @@ function makeMarkdownFromResume(resume: any) {
   if (profiles.length) {
     lines.push("---");
     lines.push(`**Profiles**`);
-    profiles.forEach((p: any) => lines.push(`- ${p.network ? `${p.network}` : p.username || p.url}: ${p.url}`));
+    profiles.forEach((p: Profile) => lines.push(`- ${p.network ? `${p.network}` : p.username || p.url}: ${p.url}`));
   }
 
   // Skills
@@ -39,7 +39,7 @@ function makeMarkdownFromResume(resume: any) {
   if (skills.length) {
     lines.push("---");
     lines.push(`## Skills`);
-    skills.forEach((s: any) => {
+    skills.forEach((s: Skill) => {
       const keywords = (s.keywords || []).slice(0, 8).join(", ");
       lines.push(`- **${s.name || "Skill"}** — ${keywords}`);
     });
@@ -50,7 +50,7 @@ function makeMarkdownFromResume(resume: any) {
   if (work.length) {
     lines.push("---");
     lines.push(`## Work Experience`);
-    work.forEach((w: any) => {
+    work.forEach((w: Work) => {
       lines.push(`\n### ${w.position || "(position)"} — ${w.company || "(company)"}`);
       const dates = `${w.startDate || ""}${w.endDate ? ` — ${w.endDate}` : ""}`.trim();
       if (dates) lines.push(`*${dates}*`);
@@ -58,7 +58,7 @@ function makeMarkdownFromResume(resume: any) {
       const highlights = w.highlights || [];
       if (highlights.length) {
         lines.push(`\n**Highlights**`);
-        highlights.forEach((h: any) => lines.push(`- ${h}`));
+        highlights.forEach((h: string) => lines.push(`- ${h}`));
       }
     });
   }
@@ -68,7 +68,7 @@ function makeMarkdownFromResume(resume: any) {
   if (education.length) {
     lines.push("---");
     lines.push(`## Education`);
-    education.forEach((e: any) => {
+    education.forEach((e: Education) => {
       lines.push(`\n**${e.institution || "(institution)"}** — ${e.area || ""}`);
       const edDates = `${e.startDate || ""}${e.endDate ? ` — ${e.endDate}` : ""}`.trim();
       if (edDates) lines.push(`*${edDates}*`);
@@ -81,7 +81,7 @@ function makeMarkdownFromResume(resume: any) {
   if (languages.length) {
     lines.push("---");
     lines.push(`## Languages`);
-    languages.forEach((l: any) => lines.push(`- ${l.language} — ${l.fluency || ""}`));
+    languages.forEach((l: Language) => lines.push(`- ${l.language} — ${l.fluency || ""}`));
   }
 
   return lines.join("\n\n");
@@ -93,7 +93,7 @@ export default function Command() {
   const [inputUrl, setInputUrl] = useState<string>("");
   const [fetchUrl, setFetchUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
-  const [resume, setResume] = useState<any | null>(null);
+  const [resume, setResume] = useState<Resume | null>(null);
   const [markdown, setMarkdown] = useState<string>("# Hello World");
   const [isValidating, setIsValidating] = useState(false);
 
@@ -138,7 +138,7 @@ export default function Command() {
         try {
           const r = await fetch(urlToSave);
           if (r.ok) {
-            const j = (await r.json()) as any;
+            const j = (await r.json()) as Resume;
             title = j?.basics?.name;
           }
         } catch {
@@ -149,11 +149,11 @@ export default function Command() {
       const list = await getSavedResumes();
       setSavedList(list);
       await showToast({ style: Toast.Style.Success, title: "Saved URL" });
-    } catch (e: any) {
+    } catch (e: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to save URL",
-        message: String(e?.message || e),
+        message: e instanceof Error ? e.message : String(e),
       });
     }
   }
@@ -175,11 +175,11 @@ export default function Command() {
         style: Toast.Style.Success,
         title: "Cleared saved URL",
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to clear URL",
-        message: String(e?.message || e),
+        message: e instanceof Error ? e.message : String(e),
       });
     }
   }
@@ -204,13 +204,16 @@ export default function Command() {
       if (!fetchedData) return;
       try {
         // Ensure we use an object for rendering even if useFetch returned a string
-        let resumeObj: any = fetchedData;
+        let resumeObj: Resume;
         if (typeof fetchedData === "string") {
           try {
-            resumeObj = JSON.parse(fetchedData);
+            resumeObj = JSON.parse(fetchedData) as Resume;
           } catch {
             // leave as string; validateResume will report error
+            resumeObj = fetchedData as unknown as Resume;
           }
+        } else {
+          resumeObj = fetchedData as Resume;
         }
 
         const validated = await validateResume(resumeObj);
@@ -244,12 +247,12 @@ export default function Command() {
           const list = await getSavedResumes();
           setSavedList(list);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         // On unexpected errors, show toast and return to input screen
         await showToast({
           style: Toast.Style.Failure,
           title: "Error Validating Resume",
-          message: String(err?.message || err),
+          message: err instanceof Error ? err.message : String(err),
         });
         setResume(null);
         setMarkdown("# Hello World");

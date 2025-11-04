@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast, Detail } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Detail, launchCommand, LaunchType } from "@raycast/api";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import { getSavedResumes, removeResume, SavedResume } from "./utils/storage";
 import { validateResume } from "./utils/validateResume";
+import { Resume, Profile, Skill, Work, Education, Language } from "./types/resume";
 
-function makeMarkdownFromResume(resume: any) {
+function makeMarkdownFromResume(resume: Resume) {
   const basics = resume?.basics || {};
   const lines: string[] = [];
 
@@ -31,7 +31,7 @@ function makeMarkdownFromResume(resume: any) {
   if (profiles.length) {
     lines.push("---");
     lines.push(`**Profiles**`);
-    profiles.forEach((p: any) => lines.push(`- ${p.network ? `${p.network}` : p.username || p.url}: ${p.url}`));
+    profiles.forEach((p: Profile) => lines.push(`- ${p.network ? `${p.network}` : p.username || p.url}: ${p.url}`));
   }
 
   // Skills
@@ -39,7 +39,7 @@ function makeMarkdownFromResume(resume: any) {
   if (skills.length) {
     lines.push("---");
     lines.push(`## Skills`);
-    skills.forEach((s: any) => {
+    skills.forEach((s: Skill) => {
       const keywords = (s.keywords || []).slice(0, 8).join(", ");
       lines.push(`- **${s.name || "Skill"}** — ${keywords}`);
     });
@@ -50,7 +50,7 @@ function makeMarkdownFromResume(resume: any) {
   if (work.length) {
     lines.push("---");
     lines.push(`## Work Experience`);
-    work.forEach((w: any) => {
+    work.forEach((w: Work) => {
       lines.push(`\n### ${w.position || "(position)"} — ${w.company || "(company)"}`);
       const dates = `${w.startDate || ""}${w.endDate ? ` — ${w.endDate}` : ""}`.trim();
       if (dates) lines.push(`*${dates}*`);
@@ -58,7 +58,7 @@ function makeMarkdownFromResume(resume: any) {
       const highlights = w.highlights || [];
       if (highlights.length) {
         lines.push(`\n**Highlights**`);
-        highlights.forEach((h: any) => lines.push(`- ${h}`));
+        highlights.forEach((h: string) => lines.push(`- ${h}`));
       }
     });
   }
@@ -68,7 +68,7 @@ function makeMarkdownFromResume(resume: any) {
   if (education.length) {
     lines.push("---");
     lines.push(`## Education`);
-    education.forEach((e: any) => {
+    education.forEach((e: Education) => {
       lines.push(`\n**${e.institution || "(institution)"}** — ${e.area || ""}`);
       const edDates = `${e.startDate || ""}${e.endDate ? ` — ${e.endDate}` : ""}`.trim();
       if (edDates) lines.push(`*${edDates}*`);
@@ -81,14 +81,14 @@ function makeMarkdownFromResume(resume: any) {
   if (languages.length) {
     lines.push("---");
     lines.push(`## Languages`);
-    languages.forEach((l: any) => lines.push(`- ${l.language} — ${l.fluency || ""}`));
+    languages.forEach((l: Language) => lines.push(`- ${l.language} — ${l.fluency || ""}`));
   }
 
   return lines.join("\n\n");
 }
 
 function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) {
-  const [resume, setResume] = useState<any | null>(null);
+  const [resume, setResume] = useState<Resume | null>(null);
   const [markdown, setMarkdown] = useState<string>("# Loading...");
   const [isValidating, setIsValidating] = useState(false);
 
@@ -109,13 +109,16 @@ function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) 
       setIsValidating(true);
       try {
         // Ensure we use an object for rendering even if useFetch returned a string
-        let resumeObj: any = fetchedData;
+        let resumeObj: Resume;
         if (typeof fetchedData === "string") {
           try {
-            resumeObj = JSON.parse(fetchedData);
+            resumeObj = JSON.parse(fetchedData) as Resume;
           } catch {
             // leave as string; validateResume will report error
+            resumeObj = fetchedData as unknown as Resume;
           }
+        } else {
+          resumeObj = fetchedData as Resume;
         }
 
         const validationResult = await validateResume(resumeObj);
@@ -134,11 +137,11 @@ function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) 
         // Use resumeObj as the resume object after validation
         setResume(resumeObj);
         setMarkdown(makeMarkdownFromResume(resumeObj));
-      } catch (err: any) {
+      } catch (err: unknown) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Error Validating Resume",
-          message: String(err?.message || err),
+          message: err instanceof Error ? err.message : String(err),
         });
         setResume(null);
         setMarkdown("# Error");
@@ -212,11 +215,28 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search saved resumes...">
-      <List.EmptyView
-        icon={Icon.Person}
-        title="No Saved Resumes"
-        description="Open a resume first using the 'Open Resume' command to save it"
-      />
+      {!isLoading && items.length === 0 && (
+        <List.EmptyView
+          icon={Icon.Person}
+          title="No Saved Resumes"
+          description="Open a resume first using the 'Open Resume' command to save it"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Resume"
+                icon={Icon.Globe}
+                onAction={async () => {
+                  try {
+                    await launchCommand({ name: "open-resume", type: LaunchType.UserInitiated });
+                  } catch (err) {
+                    await showFailureToast(err, { title: "Failed to Open Resume command" });
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {items.map((item) => (
         <List.Item
           key={item.url}
