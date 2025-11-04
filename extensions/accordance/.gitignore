@@ -10,6 +10,17 @@ raycast-env.d.ts
 compiled_raycast_swift
 compiled_raycast_rust
 
+# Development and build files
+.gitignore
+.prettierrc
+eslint.config.js
+tsconfig.json
+
+# Documentation and metadata
+.github/
+metadata/
+.docs
+.design
+
 # misc
 .DS_Store
-.docs
