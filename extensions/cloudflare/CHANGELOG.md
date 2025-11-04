@@ -1,9 +1,5 @@
 # Cloudflare Changelog
 
-## [Update] - {PR_MERGE_DATE}
-
-- Added windows support
-
 ## [DNS Record Enhancements] - 2025-06-03
 
 - Add DNS Records:
