@@ -55,6 +55,5 @@ export default async function Command() {
   } catch (error) {
     // Show error toast
     await showFailureToast(error, { title: "Failed to create calendar event/reminder" });
-
   }
 }
