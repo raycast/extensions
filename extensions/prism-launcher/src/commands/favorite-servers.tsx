@@ -83,7 +83,13 @@ export default function FavoriteServers() {
       }
 
       const favoriteServersOnly = allServers.filter((s) => storedFavorites!.includes(s.address));
-      return sortServers(favoriteServersOnly, storedFavorites!);
+
+      // Deduplicate servers by IP address - keep only the first occurrence
+      const uniqueServers = favoriteServersOnly.filter(
+        (server, index, self) => index === self.findIndex((s) => s.address === server.address),
+      );
+
+      return sortServers(uniqueServers, storedFavorites!);
     },
     [],
     { execute: Boolean(installed && storedFavorites) },
