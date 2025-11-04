@@ -1,6 +1,6 @@
 # Roblox Creator Docs Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2025-11-04
 
 ### Added
 - Cache invalidation when extension version changes - ensures fresh data after updates
@@ -20,7 +20,7 @@
 - Refactored codebase for improved maintainability (~30% code reduction)
 - Optimized markdown rendering with array-based string building
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-11-04
 
 ### Added
 - Initial release of Roblox Creator Docs extension
