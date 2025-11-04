@@ -27,7 +27,7 @@ export function buildSkyscannerURL(params: {
     stopsParam = "&stops=!direct";
   }
 
-  return `https://www.skyscanner.com/transport/flights/${params.origin.toLowerCase()}/${params.destination.toLowerCase()}/${params.departureDate}${returnPart}/?adultsv2=${params.adults}&cabinclass=economy&childrenv2=&ref=home&rtn=${isRoundTrip ? "1" : "0"}&preferdirects=false&outboundaltsenabled=false&inboundaltsenabled=false${stopsParam}`;
+  return `https://www.skyscanner.com/transport/flights/${params.origin.toLowerCase()}/${params.destination.toLowerCase()}/${params.departureDate}${returnPart}/?adultsv2=${params.adults}&cabinclass=economy&childrenv2=&ref=raycast&rtn=${isRoundTrip ? "1" : "0"}&preferdirects=false&outboundaltsenabled=false&inboundaltsenabled=false${stopsParam}`;
 }
 
 /**
