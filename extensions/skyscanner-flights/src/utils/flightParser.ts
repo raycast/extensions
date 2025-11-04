@@ -41,6 +41,8 @@ Extract and return ONLY a valid JSON object (no markdown, no code blocks, no exp
 Rules:
 - For locations, return the CITY NAME or full location name (e.g., "New York", "London", "San Francisco")
 - If user provides IATA code (e.g., "JFK"), convert it to the city name (e.g., "New York")
+- Parse dates in various formats: "Nov 11", "November 11", "11 Nov", "11th November", "11/11", etc.
+- Parse "on [date]" format (e.g., "on Nov 11" means departure date is Nov 11)
 - Parse relative dates like "tomorrow", "next week", "in 3 days" relative to ${todayStr}
 - If "return", "round trip", or "returning" is mentioned, extract returnDate
 - Default adults to 1 if not mentioned

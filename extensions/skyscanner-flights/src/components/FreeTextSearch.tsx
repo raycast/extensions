@@ -131,7 +131,7 @@ export default function FreeTextSearch() {
         if (!parsed.departureDate) missing.push("date");
 
         prefillFormFromParsedData(parsed);
-        await showFailureToast(`AI couldn't parse: ${missing.join(", ")}. Try rephrasing or use manual form.`);
+        await showFailureToast(`AI couldn't parse: ${missing.join(", ")}. Check form below or rephrase.`);
         setIsParsingQuery(false);
         setShowFallbackForm(true);
         return;
@@ -287,12 +287,7 @@ export default function FreeTextSearch() {
           {showFallbackForm ? (
             <>
               <Action.SubmitForm title="Search on Skyscanner" onSubmit={handleFormSubmit} icon={Icon.Globe} />
-              <Action
-                title="Try AI Parse Again"
-                icon={Icon.MagnifyingGlass}
-                onAction={handleFreeTextSubmit}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
-              />
+              <Action title="Try AI Parse Again" icon={Icon.MagnifyingGlass} onAction={handleFreeTextSubmit} />
             </>
           ) : (
             <Action.SubmitForm title="Search Flights" onSubmit={handleFreeTextSubmit} icon={Icon.Airplane} />
