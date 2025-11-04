@@ -14,7 +14,7 @@ let package = Package(
     targets: [
       .executableTarget(
         name: "Punto",
-       dependencies: [
+        dependencies: [
          .product(name: "RaycastSwiftMacros", package: "extensions-swift-tools"),
          .product(name: "RaycastSwiftPlugin", package: "extensions-swift-tools"),
          .product(name: "RaycastTypeScriptPlugin", package: "extensions-swift-tools"),
