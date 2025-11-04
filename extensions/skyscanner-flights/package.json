@@ -13,7 +13,7 @@
     {
       "name": "search-flights",
       "title": "Search Flights",
-      "description": "Search for flights and open results in browser",
+      "description": "Search for flights using natural language or form (requires Raycast Pro for AI parsing)",
       "mode": "view"
     }
   ],

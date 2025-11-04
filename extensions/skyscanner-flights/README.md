@@ -1,27 +1,40 @@
 # Skyscanner Flight Search
 
-A Raycast extension to quickly search for flights on Skyscanner.
+A Raycast extension to quickly search for flights on Skyscanner using natural language or a manual form.
 
 ## Features
 
-- 🔍 **Search Flights**: Search for flights with intuitive airport selection
-- ✈️ **Airport Autocomplete**: Search from 6,000+ airports worldwide by name, city, or IATA code
+- 🤖 **AI-Powered Natural Language Search**: Describe your flight in plain English (requires Raycast Pro)
+- 📝 **Fallback Manual Form**: Works without Raycast Pro with smart airport search
+- ✈️ **6,000+ Airports**: Search worldwide airports by name, city, or IATA code
 - 🌐 **Direct Browser Launch**: Opens your search directly on Skyscanner.com
 - 🚀 **Fast & Offline**: Airport database works without internet connection
-- 🎯 **One-way & Round-trip**: Support for both trip types
+- 🎯 **One-way & Round-trip**: Automatically detected from your query
+- 🛑 **Stops Filter**: Choose direct flights, flights with stops, or any
 
 ## Usage
 
+### AI-Powered Search (Raycast Pro)
+
 1. Open Raycast (Cmd+Space)
 2. Type "Search Flights"
-3. Fill in your flight details:
-   - **Origin Airport**: Start typing airport name, city, or code (e.g., "JFK", "New York")
-   - **Destination Airport**: Same as origin
-   - **Trip Type**: One-way or Round-trip
-   - **Departure Date**: Select your departure date
-   - **Return Date**: For round-trip flights
-   - **Number of Adults**: 1-8 passengers
-4. Press Enter to open Skyscanner in your browser with your search pre-filled
+3. Describe your flight in natural language:
+   - "New York to London tomorrow"
+   - "Direct flight from Mumbai to Dubai next Monday for 2 adults"
+   - "JFK to LAX returning Friday"
+4. Press Enter - AI parses your query and opens Skyscanner
+
+### Manual Form (Fallback)
+
+If AI parsing fails or you don't have Raycast Pro, use the manual form:
+
+1. **Origin Airport**: Type to search (e.g., "Mumbai", "BOM")
+2. **Destination Airport**: Type to search (e.g., "New York", "JFK")
+3. **Departure Date**: Select your departure date
+4. **Return Date** (Optional): For round-trip flights
+5. **Number of Adults**: 1-8 passengers
+6. **Stops**: Any, direct only, or with stops
+7. Press Enter to open Skyscanner
 
 ## Airport Search
 
