@@ -50,11 +50,7 @@ export default function PomodoroTimer() {
       }
 
       // Load open tasks for starting pomodoro
-      const tasksResponse = await client.listTasks({
-        completed: false,
-        archived: false,
-        limit: 20,
-      });
+      const tasksResponse = await client.listTasks();
 
       if (tasksResponse.success && tasksResponse.data) {
         setTasks(tasksResponse.data.tasks);

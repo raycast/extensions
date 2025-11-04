@@ -20,6 +20,20 @@ interface Preferences {
   obsidianVault: string;
 }
 
+interface TasksBySection {
+  today: Task[];
+  overdue: Task[];
+}
+
+interface TaskData {
+  tasks: TasksBySection;
+  counts: {
+    today: number;
+    overdue: number;
+  };
+  error: string | null;
+}
+
 function getObsidianURI(task: Task, vaultName: string): string {
   // Use Obsidian Advanced URI plugin format
   // Remove .md extension if present
@@ -70,13 +84,21 @@ export default function TaskMenuBar() {
         // Check API health first
         await client.checkHealth();
       } catch {
-        return { tasks: [], counts: { today: 0, overdue: 0 }, error: "API not available" };
+        return {
+          tasks: { today: [], overdue: [] },
+          counts: { today: 0, overdue: 0 },
+          error: "API not available",
+        } as TaskData;
       }
 
       const response = await client.listTasks();
 
       if (!response.success || !response.data) {
-        return { tasks: [], counts: { today: 0, overdue: 0 }, error: "Failed to load tasks" };
+        return {
+          tasks: { today: [], overdue: [] },
+          counts: { today: 0, overdue: 0 },
+          error: "Failed to load tasks",
+        } as TaskData;
       }
 
       const tasks = response.data.tasks;
@@ -178,7 +200,7 @@ export default function TaskMenuBar() {
       {overdueTasks.length > 0 && (
         <>
           <MenuBarExtra.Section title={`Overdue (${overdueTasks.length})`}>
-            {overdueTasks.map((task) => {
+            {overdueTasks.map((task: Task) => {
               const taskIcon = getTaskIcon(task);
               const subtitle = formatProjects(task.projects) || formatDate(task.due);
 
@@ -212,7 +234,7 @@ export default function TaskMenuBar() {
       {todayTasks.length > 0 && (
         <>
           <MenuBarExtra.Section title={`Today (${todayTasks.length})`}>
-            {todayTasks.map((task) => {
+            {todayTasks.map((task: Task) => {
               const taskIcon = getTaskIcon(task);
               const subtitle = formatProjects(task.projects) || formatDate(task.due);
 
