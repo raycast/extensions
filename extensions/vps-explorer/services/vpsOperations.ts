@@ -225,7 +225,7 @@ expect {
       return fileItems;
     } catch (error) {
       console.error(`Listing failed: ${error}`);
-      return [];
+      throw new Error(`Failed to list files: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       if (scriptPath) {
         try {
