@@ -10,6 +10,7 @@ import {
   getPreferenceValues,
   open,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { fetchFromTempoAPI } from "./services/tempo.service";
 import {
@@ -70,7 +71,7 @@ function IssueSelector({ onSelect }: { onSelect: (issueKey: string) => void }) {
         setProjectName(projectInfo.name);
       }
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to load issues", message: String(error) });
+      await showFailureToast(error, { title: "Failed to load issues" });
     } finally {
       setIsLoading(false);
     }
@@ -81,11 +82,7 @@ function IssueSelector({ onSelect }: { onSelect: (issueKey: string) => void }) {
       await resetCachedAccountId();
       await showToast({ style: Toast.Style.Success, title: "Cache reset", message: "Cache has been cleared" });
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to reset cache",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to reset cache" });
     }
   }
 
@@ -255,11 +252,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
     try {
       // Validate date is provided
       if (!values.date) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Date required",
-          message: "Please select a date for the worklog",
-        });
+        await showFailureToast({ title: "Date required", message: "Please select a date for the worklog" });
         return;
       }
 
@@ -267,8 +260,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       let dateStr = values.date;
       if (values.date === "custom") {
         if (!values.customDate) {
-          showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast({
             title: "Custom date required",
             message: "Please enter a date in YYYY-MM-DD format",
           });
@@ -277,8 +269,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         // Validate custom date format (YYYY-MM-DD)
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(values.customDate)) {
-          showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast({
             title: "Invalid date format",
             message: "Please use YYYY-MM-DD format (e.g., 2025-11-01)",
           });
@@ -298,8 +289,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       const timeSpentSeconds = parseDuration(values.timeSpent);
 
       if (timeSpentSeconds === 0) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Invalid duration",
           message: "Please enter a valid duration (e.g., 1h, 1h30m, 30m)",
         });
@@ -308,7 +298,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
 
       // Check if issue was loaded successfully
       if (!issue) {
-        showToast({ style: Toast.Style.Failure, title: "Failed to add worklog", message: "Could not find issue" });
+        await showFailureToast({ title: "Failed to add worklog", message: "Could not find issue" });
         return;
       }
 
@@ -351,11 +341,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       // Redirect back to issue selector
       onSuccess();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to add worklog",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to add worklog" });
     }
   }
 

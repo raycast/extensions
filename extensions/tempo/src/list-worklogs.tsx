@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast, Color, Form } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { fetchFromTempoAPI } from "./services/tempo.service";
 import { getIssueKeysMap } from "./services/jira.service";
@@ -58,11 +59,7 @@ export default function Command() {
       setWorklogs(grouped);
       setIsLoading(false);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch worklogs",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to fetch worklogs" });
       setIsLoading(false);
     }
   }
@@ -78,11 +75,7 @@ export default function Command() {
       setIsLoadingMore(false);
     } catch (error) {
       setIsLoadingMore(false);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load more",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to load more" });
     }
   }
 
@@ -98,11 +91,7 @@ export default function Command() {
       // Refresh worklogs with current weeks loaded
       await fetchWorklogs(weeksLoaded);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to delete worklog",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to delete worklog" });
     }
   }
 
@@ -111,8 +100,7 @@ export default function Command() {
       const totalSeconds = parseDuration(newDuration);
 
       if (totalSeconds <= 0) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Invalid duration",
           message: "Please enter a valid duration (e.g., 1h30m, 2h, 45m)",
         });
@@ -142,11 +130,7 @@ export default function Command() {
       // Refresh worklogs with current weeks loaded
       await fetchWorklogs(weeksLoaded);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update worklog",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to update worklog" });
     }
   }
 
@@ -158,11 +142,7 @@ export default function Command() {
       setWeeksLoaded(1);
       await fetchWorklogs(1);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to reset cache",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to reset cache" });
     }
   }
 
@@ -259,8 +239,7 @@ export default function Command() {
                         onAction={async () => {
                           const isAlreadyFavorite = await isFavorite(worklog.issue?.key || "");
                           if (isAlreadyFavorite) {
-                            await showToast({
-                              style: Toast.Style.Failure,
+                            await showFailureToast({
                               title: "Already in Favorites",
                               message: worklog.issue?.key || "",
                             });
