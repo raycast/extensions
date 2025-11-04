@@ -1,6 +1,6 @@
 # Tempo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-11-04
 
 - Add Worklog command with issue selection
 - List Worklogs command with pagination
