@@ -9,18 +9,8 @@ import { parseSearchQuery, matchesQuery } from "../util/search-parser";
 
 /**
  * @name useTabSearch
- * @description Filters chrome tabs where the url and title match all tab-or-space-separated words in search query (case insensitive).
- * Supports exclude terms with "/" prefix to filter out results containing those terms.
- * @example Given title "foo bar" with url "example.com":
- * search "foo bar" succeeds
- * search "bar foo" succeeds
- * search "foo example" succeeds
- * search "example foo" succeeds
- * search "foo" succeeds
- * search "example" succeeds
- * search "foo /bar" succeeds (contains foo but not bar)
- * search "/example" fails (excludes example.com)
- * search "asdf" fails
+ * Hook to search Chrome tabs using the search parser.
+ * See parseSearchQuery() in search-parser.ts for detailed search syntax and examples.
  */
 export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullable<Tab[]> } {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();

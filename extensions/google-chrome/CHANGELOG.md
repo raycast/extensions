@@ -10,6 +10,7 @@
 - Improve performance by skipping filtering when no search query is provided
 - Handle invalid URLs (e.g., javascript: protocol) gracefully to prevent crashes
 - Fix `ERR_INVALID_URL` error in Tab class methods (realFavicon, googleFavicon, urlWithoutScheme)
+- Display warning icon and helpful message for bookmarks/history with unsupported URL protocols
 
 ## [Improvements] - 2025-10-13
 

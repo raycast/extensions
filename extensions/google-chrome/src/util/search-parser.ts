@@ -1,5 +1,8 @@
 /**
- * Parses search query to extract include and exclude terms
+ * Parses search query to extract include and exclude terms.
+ * Filters items where the url and title match all space-separated words in search query (case insensitive).
+ * Supports exclude terms with "/" prefix to filter out results containing those terms.
+ * 
  * @param query - The search query string
  * @returns Object containing include and exclude terms
  *
@@ -9,6 +12,17 @@
  *
  * parseSearchQuery("hello /world /test")
  * // returns { includeTerms: ["hello"], excludeTerms: ["world", "test"] }
+ * 
+ * @example Given an item with title "foo bar" and url "example.com":
+ * - search "foo bar" succeeds (contains both foo and bar)
+ * - search "bar foo" succeeds (order doesn't matter)
+ * - search "foo example" succeeds (matches title and url)
+ * - search "example foo" succeeds (matches url and title)
+ * - search "foo" succeeds (partial match)
+ * - search "example" succeeds (matches url)
+ * - search "foo /bar" succeeds (contains foo but not bar)
+ * - search "/example" fails (excludes example.com)
+ * - search "asdf" fails (no match)
  */
 export interface ParsedQuery {
   includeTerms: string[];
@@ -46,10 +60,8 @@ export function parseSearchQuery(query: string): ParsedQuery {
 export function matchesQuery(text: string, parsedQuery: ParsedQuery): boolean {
   const { includeTerms, excludeTerms } = parsedQuery;
 
-  // Check if all include terms are present
   const hasAllIncludeTerms = includeTerms.length === 0 || includeTerms.every((term) => text.includes(term));
 
-  // Check if none of the exclude terms are present
   const hasNoExcludeTerms = excludeTerms.length === 0 || !excludeTerms.some((term) => text.includes(term));
 
   return hasAllIncludeTerms && hasNoExcludeTerms;

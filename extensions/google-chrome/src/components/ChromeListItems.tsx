@@ -1,7 +1,7 @@
 import { HistoryEntry, Tab } from "../interfaces";
 import { ReactElement } from "react";
 import { getFavicon } from "@raycast/utils";
-import { List } from "@raycast/api";
+import { List, Icon, Color } from "@raycast/api";
 import { ChromeActions } from ".";
 
 export class ChromeListItems {
@@ -10,23 +10,30 @@ export class ChromeListItems {
 }
 
 // Helper function to safely get favicon for potentially invalid URLs
-function getSafeFavicon(url: string) {
+// Returns { icon, isInvalid } to allow caller to handle invalid URLs appropriately
+function getSafeFavicon(url: string): { icon: List.Item.Props["icon"]; isInvalid: boolean } {
   // Filter out known problematic URL schemes
   const invalidSchemes = ["javascript:", "data:", "about:", "chrome:", "file:"];
   const urlLower = url.toLowerCase().trim();
 
   // Check if URL starts with any invalid scheme
   if (invalidSchemes.some((scheme) => urlLower.startsWith(scheme))) {
-    return { source: "" };
+    return {
+      icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
+      isInvalid: true,
+    };
   }
 
   // Validate URL format
   try {
     new URL(url);
-    return getFavicon(url);
+    return { icon: getFavicon(url), isInvalid: false };
   } catch {
-    // Return empty icon for any other invalid URLs
-    return { source: "" };
+    // Return warning icon for any other invalid URLs
+    return {
+      icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
+      isInvalid: true,
+    };
   }
 }
 
@@ -39,12 +46,19 @@ function HistoryItem({
   profile: string;
   type: "History" | "Bookmark";
 }): ReactElement {
+  const { icon, isInvalid } = getSafeFavicon(url);
+  
   return (
     <List.Item
       id={`${profile}-${type}-${id}`}
       title={title}
       subtitle={url}
-      icon={getSafeFavicon(url)}
+      icon={icon}
+      accessories={
+        isInvalid
+          ? [{ text: "⚠️ Invalid URL - Cannot open", tooltip: "This URL uses an unsupported protocol" }]
+          : undefined
+      }
       actions={<ChromeActions.TabHistory title={title} url={url} profile={profile} />}
     />
   );
