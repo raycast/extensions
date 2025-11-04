@@ -18,6 +18,12 @@
       "title": "Search Svelte Docs",
       "description": "Search the svelte docs directly in Raycast",
       "mode": "view"
+    },
+    {
+      "name": "cli",
+      "title": "Compose CLI command",
+      "description": "Compose an sv cli command",
+      "mode": "view"
     }
   ],
   "tools": [
