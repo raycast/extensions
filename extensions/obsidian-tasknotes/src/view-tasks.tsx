@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, Icon, Color, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getClient } from "./api/client";
 import { Task } from "./api/types";
@@ -40,10 +41,8 @@ export default function ViewTasks() {
         throw new Error(response.error || "Failed to load tasks");
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to Load Tasks",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);

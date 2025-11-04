@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Icon, Color, showToast, Toast, Form, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getClient } from "./api/client";
 import { formatTimeRemaining } from "./utils/formatters";
 import { Task } from "./api/types";
@@ -23,7 +23,7 @@ export default function PomodoroTimer() {
   const [isLoading, setIsLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const loadStatus = async () => {
+  const loadStatus = useCallback(async () => {
     setIsLoading(true);
     try {
       const client = getClient();
@@ -64,7 +64,7 @@ export default function PomodoroTimer() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadStatus();
@@ -77,7 +77,7 @@ export default function PomodoroTimer() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [status?.isRunning]);
+  }, [status?.isRunning, loadStatus]);
 
   const handleStart = async (taskId?: string) => {
     try {
@@ -218,7 +218,9 @@ export default function PomodoroTimer() {
               ) : (
                 <>
                   <Action title="Start Pomodoro" icon={Icon.Play} onAction={() => handleStart()} />
-                  <Action title="Resume Pomodoro" icon={Icon.Play} onAction={handleResume} />
+                  {status?.currentSession && (
+                    <Action title="Resume Pomodoro" icon={Icon.Play} onAction={handleResume} />
+                  )}
                   <Action.Push
                     title="Start with Task"
                     icon={Icon.List}

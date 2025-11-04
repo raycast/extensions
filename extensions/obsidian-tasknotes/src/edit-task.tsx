@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { getClient } from "./api/client";
 import { Task, UpdateTaskInput } from "./api/types";
@@ -48,7 +49,8 @@ export default function EditTaskForm({ task, onSave }: EditTaskFormProps) {
         updates.priority = values.priority;
       }
 
-      if (values.status && values.status !== "open") {
+      // Always include status in updates to allow explicitly setting it back to 'open'
+      if (values.status) {
         updates.status = values.status;
       }
 
@@ -106,10 +108,8 @@ export default function EditTaskForm({ task, onSave }: EditTaskFormProps) {
         throw new Error(response.error || "Failed to update task");
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to Update Task",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);

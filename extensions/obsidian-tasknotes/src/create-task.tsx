@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Form, showToast, Toast, popToRoot, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { getClient } from "./api/client";
 import { CreateTaskInput } from "./api/types";
@@ -107,10 +108,8 @@ export default function CreateTask() {
         throw new Error(response.error || "Failed to create task");
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to Create Task",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);

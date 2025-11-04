@@ -33,7 +33,7 @@ export class TaskNotesClient {
     this.token = preferences.apiToken;
   }
 
-  private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -65,94 +65,94 @@ export class TaskNotesClient {
 
   // Health Check
   async checkHealth(): Promise<HealthResponse> {
-    return this.fetch<HealthResponse>("/health");
+    return this.request<HealthResponse>("/health");
   }
 
   // Task Operations
   async listTasks(): Promise<TasksResponse> {
     // The API doesn't support query parameters on GET /api/tasks
     // We just fetch all tasks and filter client-side
-    return this.fetch<TasksResponse>("/tasks");
+    return this.request<TasksResponse>("/tasks");
   }
 
   async getTask(taskId: string): Promise<TaskResponse> {
-    return this.fetch<TaskResponse>(`/tasks/${encodeURIComponent(taskId)}`);
+    return this.request<TaskResponse>(`/tasks/${encodeURIComponent(taskId)}`);
   }
 
   async createTask(task: CreateTaskInput): Promise<TaskResponse> {
-    return this.fetch<TaskResponse>("/tasks", {
+    return this.request<TaskResponse>("/tasks", {
       method: "POST",
       body: JSON.stringify(task),
     });
   }
 
   async updateTask(taskId: string, updates: UpdateTaskInput): Promise<TaskResponse> {
-    return this.fetch<TaskResponse>(`/tasks/${encodeURIComponent(taskId)}`, {
+    return this.request<TaskResponse>(`/tasks/${encodeURIComponent(taskId)}`, {
       method: "PUT",
       body: JSON.stringify(updates),
     });
   }
 
   async deleteTask(taskId: string): Promise<ApiResponse> {
-    return this.fetch<ApiResponse>(`/tasks/${encodeURIComponent(taskId)}`, {
+    return this.request<ApiResponse>(`/tasks/${encodeURIComponent(taskId)}`, {
       method: "DELETE",
     });
   }
 
   // Task Actions
   async toggleTaskStatus(taskId: string): Promise<TaskResponse> {
-    return this.fetch<TaskResponse>(`/tasks/${encodeURIComponent(taskId)}/toggle-status`, {
+    return this.request<TaskResponse>(`/tasks/${encodeURIComponent(taskId)}/toggle-status`, {
       method: "POST",
     });
   }
 
   async toggleArchive(taskId: string): Promise<TaskResponse> {
-    return this.fetch<TaskResponse>(`/tasks/${encodeURIComponent(taskId)}/archive`, {
+    return this.request<TaskResponse>(`/tasks/${encodeURIComponent(taskId)}/archive`, {
       method: "POST",
     });
   }
 
   // Pomodoro Operations
   async getPomodoroStatus(): Promise<PomodoroStatusResponse> {
-    return this.fetch<PomodoroStatusResponse>("/pomodoro/status");
+    return this.request<PomodoroStatusResponse>("/pomodoro/status");
   }
 
   async startPomodoro(taskId?: string): Promise<PomodoroStartResponse> {
     const body = taskId ? { taskId } : {};
-    return this.fetch<PomodoroStartResponse>("/pomodoro/start", {
+    return this.request<PomodoroStartResponse>("/pomodoro/start", {
       method: "POST",
       body: JSON.stringify(body),
     });
   }
 
   async stopPomodoro(): Promise<ApiResponse> {
-    return this.fetch<ApiResponse>("/pomodoro/stop", {
+    return this.request<ApiResponse>("/pomodoro/stop", {
       method: "POST",
     });
   }
 
   async pausePomodoro(): Promise<ApiResponse> {
-    return this.fetch<ApiResponse>("/pomodoro/pause", {
+    return this.request<ApiResponse>("/pomodoro/pause", {
       method: "POST",
     });
   }
 
   async resumePomodoro(): Promise<ApiResponse> {
-    return this.fetch<ApiResponse>("/pomodoro/resume", {
+    return this.request<ApiResponse>("/pomodoro/resume", {
       method: "POST",
     });
   }
 
   // NLP Operations
   async parseNLP(input: NLPParseInput): Promise<NLPParseResponse> {
-    return this.fetch<NLPParseResponse>("/nlp/parse", {
+    return this.request<NLPParseResponse>("/nlp/parse", {
       method: "POST",
       body: JSON.stringify(input),
     });
   }
 
   async createTaskNLP(input: NLPParseInput): Promise<NLPCreateResponse> {
-    return this.fetch<NLPCreateResponse>("/nlp/create", {
+    return this.request<NLPCreateResponse>("/nlp/create", {
       method: "POST",
       body: JSON.stringify(input),
     });
