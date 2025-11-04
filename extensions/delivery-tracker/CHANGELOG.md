@@ -1,6 +1,6 @@
 # Delivery Tracker Changelog
 
-## [Major Refactor and Feature Additions] - {PR_MERGE_DATE}
+## [Major Refactor and Feature Additions] - 2025-11-04
 
 ### New Features
 - **Delivery Notes**: Add optional notes to any delivery for better organization and context
