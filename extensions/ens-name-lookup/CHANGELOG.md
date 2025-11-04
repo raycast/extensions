@@ -1,6 +1,6 @@
 # ENS extension Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-11-04
 
 - Fixed broken ENS lookup by using ethers.js instead of web scraping
 - Migrated to latest Raycast API
