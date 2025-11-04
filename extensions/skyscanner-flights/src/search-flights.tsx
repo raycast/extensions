@@ -18,6 +18,10 @@ export default function OpenSkyscanner() {
   const [originAirports, setOriginAirports] = useState<Airport[]>([]);
   const [destinationAirports, setDestinationAirports] = useState<Airport[]>([]);
 
+  // Get today's date for minimum date validation
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   function handleOriginSearch(text: string) {
     setOriginSearchText(text);
     if (text.trim().length >= 2) {
@@ -52,27 +56,36 @@ export default function OpenSkyscanner() {
 
     // Validation
     if (!origin || origin.length !== 3) {
-      await showFailureToast({
-        title: "Invalid Origin",
-        message: "Please enter a valid 3-letter airport code (e.g., JFK)",
-      });
+      await showFailureToast("Please enter a valid 3-letter airport code (e.g., JFK)");
       return;
     }
 
     if (!destination || destination.length !== 3) {
-      await showFailureToast({
-        title: "Invalid Destination",
-        message: "Please enter a valid 3-letter airport code (e.g., LAX)",
-      });
+      await showFailureToast("Please enter a valid 3-letter airport code (e.g., LAX)");
       return;
     }
 
     if (isNaN(adults) || adults < 1 || adults > 8) {
-      await showFailureToast({
-        title: "Invalid Number of Adults",
-        message: "Please enter a number between 1 and 8",
-      });
+      await showFailureToast("Please enter a number between 1 and 8");
       return;
+    }
+
+    // Validate departure date is not in the past
+    const departureDate = new Date(values.date);
+    departureDate.setHours(0, 0, 0, 0);
+    if (departureDate < today) {
+      await showFailureToast("Departure date must be in the future");
+      return;
+    }
+
+    // Validate return date if provided
+    if (values.returnDate) {
+      const returnDate = new Date(values.returnDate);
+      returnDate.setHours(0, 0, 0, 0);
+      if (returnDate < departureDate) {
+        await showFailureToast("Return date must be after departure date");
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -95,11 +108,8 @@ export default function OpenSkyscanner() {
         title: "Opening Skyscanner",
         message: "Flight search page opened in browser",
       });
-    } catch (error) {
-      await showFailureToast({
-        title: "Failed to Open",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+    } catch {
+      await showFailureToast("Failed to Open");
     } finally {
       setIsLoading(false);
     }
@@ -114,8 +124,6 @@ export default function OpenSkyscanner() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Search for flights and open results on Skyscanner.com" />
-
       <Form.Dropdown
         id="origin"
         title="Origin Airport"
