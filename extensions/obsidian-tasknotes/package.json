@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-tasknotes",
+  "title": "Obsidian TaskNotes",
+  "description": "Manage your Obsidian TaskNotes tasks with smart filters, menu bar access, and Pomodoro timer integration.",
+  "icon": "extension_icon.png",
+  "author": "devathu",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "task-menu-bar",
+      "title": "TaskNotes Menu Bar",
+      "subtitle": "Obsidian",
+      "description": "Quick access to today's and overdue tasks from the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "subtitle": "Obsidian",
+      "description": "Browse and manage your TaskNotes tasks with smart filters",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Obsidian",
+      "description": "Create a new task in TaskNotes",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "subtitle": "Obsidian",
+      "description": "Rapidly create tasks using natural language",
+      "mode": "view"
+    },
+    {
+      "name": "pomodoro",
+      "title": "Pomodoro Timer",
+      "subtitle": "Obsidian",
+      "description": "Control your Pomodoro timer sessions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API URL",
+      "description": "The base URL for the TaskNotes API (default: http://localhost)",
+      "default": "http://localhost",
+      "placeholder": "http://localhost"
+    },
+    {
+      "name": "apiPort",
+      "type": "textfield",
+      "required": false,
+      "title": "API Port",
+      "description": "The port number for the TaskNotes API (default: 8080)",
+      "default": "8080",
+      "placeholder": "8080"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": false,
+      "title": "API Token",
+      "description": "Optional bearer token for API authentication",
+      "placeholder": "Leave empty if no authentication is configured"
+    },
+    {
+      "name": "obsidianVault",
+      "type": "textfield",
+      "required": true,
+      "title": "Obsidian Vault Name",
+      "description": "The name of your Obsidian vault (required for opening tasks in Obsidian)",
+      "placeholder": "My Vault"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
