@@ -15,20 +15,18 @@
       "mode": "view"
     }
   ],
-  "platforms": ["macos"],
+  "platforms": ["macOS"],
   "dependencies": {
     "@raycast/api": "^1.103.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "ray build --skip-types",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

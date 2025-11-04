@@ -8,12 +8,9 @@ import {
   showToast,
   Toast,
   LocalStorage,
+  open,
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execAsync = promisify(exec);
 
 // Detect system language from system preferences
 const getLocale = (): "en" | "ko" | "ja" => {
@@ -316,25 +313,29 @@ export default function Command() {
 
   const updateUsageData = useCallback(
     async (app: Application) => {
-      const bundleId = app.bundleId || "";
-      const newUsageData = { ...usageData };
+      const bundleId = app.bundleId || app.path; // Use path as fallback if bundleId is missing
 
-      newUsageData[bundleId] = {
-        lastUsed: new Date().toISOString(),
-        usageCount: (newUsageData[bundleId]?.usageCount || 0) + 1,
-      };
+      setUsageData((prevUsageData) => {
+        const newUsageData = { ...prevUsageData };
+        newUsageData[bundleId] = {
+          lastUsed: new Date().toISOString(),
+          usageCount: (newUsageData[bundleId]?.usageCount || 0) + 1,
+        };
 
-      setUsageData(newUsageData);
-      await LocalStorage.setItem("appUsageData", JSON.stringify(newUsageData));
+        // Save to LocalStorage asynchronously
+        LocalStorage.setItem("appUsageData", JSON.stringify(newUsageData));
+
+        return newUsageData;
+      });
     },
-    [usageData],
+    [],
   );
 
   const launchApp = useCallback(
     async (app: Application) => {
       try {
         await updateUsageData(app);
-        await execAsync(`open -a "${app.name}"`);
+        await open(app.path);
         await showToast({
           style: Toast.Style.Success,
           title: `${t.launching} ${app.name}`,
@@ -363,8 +364,8 @@ export default function Command() {
     if (viewMode === "flat") {
       const sortedApps = [...filtered].sort((a, b) => {
         if (sortBy === "usage") {
-          const aUsage = usageData[a.bundleId || ""]?.usageCount || 0;
-          const bUsage = usageData[b.bundleId || ""]?.usageCount || 0;
+          const aUsage = usageData[a.bundleId || a.path]?.usageCount || 0;
+          const bUsage = usageData[b.bundleId || b.path]?.usageCount || 0;
           if (aUsage !== bUsage) {
             return bUsage - aUsage;
           }
@@ -393,7 +394,7 @@ export default function Command() {
 
     // Categorize apps
     filtered.forEach((app) => {
-      const usage = usageData[app.bundleId || ""]?.usageCount || 0;
+      const usage = usageData[app.bundleId || app.path]?.usageCount || 0;
 
       // Frequently used apps (more than 5 uses)
       if (usage > 5) {
@@ -413,8 +414,8 @@ export default function Command() {
       groups[category].sort((a, b) => {
         if (sortBy === "usage") {
           // Sort by usage count first
-          const aUsage = usageData[a.bundleId || ""]?.usageCount || 0;
-          const bUsage = usageData[b.bundleId || ""]?.usageCount || 0;
+          const aUsage = usageData[a.bundleId || a.path]?.usageCount || 0;
+          const bUsage = usageData[b.bundleId || b.path]?.usageCount || 0;
           if (aUsage !== bUsage) {
             return bUsage - aUsage;
           }
@@ -524,15 +525,15 @@ export default function Command() {
       {groupedApps.map((group) => (
         <Grid.Section key={group.name} title={group.name}>
           {group.apps.map((app) => {
-            const usage = usageData[app.bundleId || ""];
+            const usage = usageData[app.bundleId || app.path];
             const usageCount = usage?.usageCount || 0;
 
             return (
               <Grid.Item
-                key={app.bundleId || app.name}
+                key={app.bundleId || app.path}
                 content={{ fileIcon: app.path }}
                 title={app.name}
-                subtitle={usageCount > 0 ? `${usageCount}${t.usageCount}` : ""}
+                subtitle={usageCount > 0 ? `${usageCount} ${t.usageCount}` : ""}
                 actions={
                   <ActionPanel>
                     <Action
