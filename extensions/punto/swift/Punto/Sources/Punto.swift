@@ -3,11 +3,7 @@ import Cocoa
 import Foundation
 import Carbon
 
-struct InputSource: Equatable {
-
-    static func == (lhs: InputSource, rhs: InputSource) -> Bool {
-        return lhs.id == rhs.id
-    }
+struct InputSource {
 
     private let tisInputSource: TISInputSource
 
