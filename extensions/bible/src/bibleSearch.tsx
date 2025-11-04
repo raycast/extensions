@@ -11,15 +11,11 @@ import {
 } from "@raycast/api";
 import * as React from "react";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
-import { ReferenceSearchResult } from "./types";
+import { FormattingOptions, ReferenceSearchResult } from "./types";
 import { useBibleSearch } from "./useBibleSearch";
 import { DEFAULT_BIBLE_VERSION, useBibleVersion } from "./useBibleVersion";
 
 type Preferences = Preferences.BibleSearch;
-type FormattingOptions = Pick<
-  Preferences,
-  "includeVerseNumbers" | "includeReferences" | "includeCopyright" | "oneVersePerLine"
->;
 
 export default function Command(props: LaunchProps<{ arguments: Partial<Arguments.BibleSearch> }>) {
   const { includeCopyright, includeVerseNumbers, includeReferences, oneVersePerLine, separatePassages } =
@@ -93,11 +89,13 @@ export default function Command(props: LaunchProps<{ arguments: Partial<Argument
             <ActionPanel>
               <Action.CopyToClipboard content={clipboardText} />
               <Action.Paste content={clipboardText} shortcut={copyShortcut} />
-              <Action.OpenInBrowser
-                title="Open at BibleGateway.com"
-                url={searchResult.url.toString()}
-                shortcut={Keyboard.Shortcut.Common.Open}
-              />
+              {searchResult.url && (
+                <Action.OpenInBrowser
+                  title={`Open at ${searchResult.url.hostname}`}
+                  url={searchResult.url.toString()}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+              )}
             </ActionPanel>
           }
         />
@@ -105,8 +103,8 @@ export default function Command(props: LaunchProps<{ arguments: Partial<Argument
     }
     return searchResult.passages.map((passage) => {
       // Create a temporary search result with just this passage
-      const passageUrl = new URL(searchResult.url);
-      passageUrl.searchParams.set("search", passage.reference);
+      const passageUrl = searchResult.url ? new URL(searchResult.url) : undefined;
+      passageUrl?.searchParams.set("search", passage.reference);
       const passageResult = { ...searchResult, passages: [passage], url: passageUrl };
 
       const markdown = createMarkdown(formattingOptions, passageResult);
@@ -120,11 +118,13 @@ export default function Command(props: LaunchProps<{ arguments: Partial<Argument
             <ActionPanel>
               <Action.CopyToClipboard content={clipboardText} />
               <Action.Paste content={clipboardText} shortcut={copyShortcut} />
-              <Action.OpenInBrowser
-                title="Open at BibleGateway.com"
-                url={passageResult.url.toString()}
-                shortcut={Keyboard.Shortcut.Common.Open}
-              />
+              {passageResult.url && (
+                <Action.OpenInBrowser
+                  title={`Open at ${passageResult.url.hostname}`}
+                  url={passageResult.url.toString()}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+              )}
             </ActionPanel>
           }
         />
@@ -161,9 +161,12 @@ function createMarkdown(prefs: FormattingOptions, searchResult: ReferenceSearchR
 
   const formattedPassages = searchResult.passages
     .map((passage) => {
-      const verses = passage.verses
-        .map((v) => (includeVerseNumbers ? `[${v.verse}] ${v.text}` : v.text))
-        .join(oneVersePerLine ? "  \n" : " ");
+      const verses =
+        typeof passage.verses == "string"
+          ? passage.verses
+          : passage.verses
+              .map((v) => (includeVerseNumbers ? `[${v.verse}] ${v.text}` : v.text))
+              .join(oneVersePerLine ? "  \n" : " ");
       if (includeReferences) {
         const reference = `${passage.reference} (${getContentsOfLastParenthesis(searchResult.version)})`;
         return `${verses}  \n${reference}`;
@@ -183,9 +186,12 @@ function createClipboardText(prefs: FormattingOptions, searchResult: ReferenceSe
 
   const formattedPassages = searchResult.passages
     .map((p) => {
-      const verses = p.verses
-        .map((v) => (includeVerseNumbers ? `[${v.verse}] ${v.text}` : v.text))
-        .join(oneVersePerLine ? "\n" : " ");
+      const verses =
+        typeof p.verses == "string"
+          ? p.verses
+          : p.verses
+              .map((v) => (includeVerseNumbers ? `[${v.verse}] ${v.text}` : v.text))
+              .join(oneVersePerLine ? "\n" : " ");
       if (includeReferences) {
         const reference = `${p.reference} (${getContentsOfLastParenthesis(searchResult.version)})`;
         return `${verses}\n${reference}`;
