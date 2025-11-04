@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, open, Toast, showToast } from "@raycast/api";
 import { useState } from "react";
 import { searchAirportsLocal, Airport } from "./data/airports";
+import { showFailureToast } from "@raycast/utils";
 
 interface FormValues {
   origin: string;
@@ -51,8 +52,7 @@ export default function OpenSkyscanner() {
 
     // Validation
     if (!origin || origin.length !== 3) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Invalid Origin",
         message: "Please enter a valid 3-letter airport code (e.g., JFK)",
       });
@@ -60,8 +60,7 @@ export default function OpenSkyscanner() {
     }
 
     if (!destination || destination.length !== 3) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Invalid Destination",
         message: "Please enter a valid 3-letter airport code (e.g., LAX)",
       });
@@ -69,8 +68,7 @@ export default function OpenSkyscanner() {
     }
 
     if (isNaN(adults) || adults < 1 || adults > 8) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Invalid Number of Adults",
         message: "Please enter a number between 1 and 8",
       });
@@ -98,8 +96,7 @@ export default function OpenSkyscanner() {
         message: "Flight search page opened in browser",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Failed to Open",
         message: error instanceof Error ? error.message : "Unknown error occurred",
       });
