@@ -1,6 +1,6 @@
 # Premier League Changelog
 
-## [Endpoint Exodus] - {PR_MERGE_DATE}
+## [Endpoint Exodus] - 2025-11-05
 
 - Upgrade to new Premier League API with cursor pagination and updated IDs.
 - Merge "Fixtures" and "Results" into a single "Matches" command.
