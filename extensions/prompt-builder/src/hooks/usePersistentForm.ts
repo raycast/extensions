@@ -12,7 +12,7 @@ export const usePersistentForm = (initialValues: FormValues, storageKey = "promp
       if (saved) setFormValues(JSON.parse(saved));
     };
     loadValues();
-  }, []);
+  }, [storageKey]);
 
   // Save values on change
   const handleChange = (id: keyof FormValues, value: string | boolean) => {
