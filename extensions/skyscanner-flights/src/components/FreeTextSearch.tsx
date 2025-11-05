@@ -109,7 +109,7 @@ export default function FreeTextSearch() {
     try {
       await showToast({
         style: Toast.Style.Animated,
-        title: "Parsing your query...",
+        title: "Looking for flights...",
       });
 
       const parsed = await parseFreeTextQuery(searchText);
