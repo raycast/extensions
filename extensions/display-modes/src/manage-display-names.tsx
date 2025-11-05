@@ -72,7 +72,10 @@ function RenameDisplayForm({ display, onRename }: { display: DisplayInfo; onRena
         <ActionPanel>
           <Action.SubmitForm
             title="Rename Display"
-            onSubmit={() => onRename(display.display.id, newName)}
+            onSubmit={() => {
+              if (!newName.trim()) return;
+              onRename(display.display.id, newName);
+            }}
           />
         </ActionPanel>
       }
