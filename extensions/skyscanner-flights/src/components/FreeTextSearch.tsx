@@ -1,11 +1,9 @@
-import { Action, ActionPanel, Form, Icon, open, Toast, showToast, environment, AI } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, environment, AI } from "@raycast/api";
 import { useState } from "react";
-import { searchAirportsLocal, Airport, getAirportByIATA } from "../data/airports";
+import { searchAirportsLocal, Airport, preprocessIATACodes, getCodeForSkyscanner } from "../data/airports";
 import { showFailureToast } from "@raycast/utils";
-import { trackFlightSearch } from "../utils/analytics";
 import { parseFreeTextQuery, ParsedFlight } from "../utils/flightParser";
 import {
-  buildSkyscannerURL,
   formatDateForSkyscanner,
   formatDateObjectForSkyscanner,
   IATA_CODE_LENGTH,
@@ -13,7 +11,7 @@ import {
   MAX_ADULTS,
 } from "../utils/flightUtils";
 import FlightSearchForm from "./FlightSearchForm";
-import { getCityCode, hasMultipleAirports } from "../data/multiAirportCities";
+import { buildAndOpenSkyscannerURL } from "../utils/ui";
 
 interface FormValues {
   origin: string;
@@ -22,59 +20,6 @@ interface FormValues {
   returnDate?: Date;
   adults: string;
   stops: string;
-}
-
-interface PreProcessedQuery {
-  originCode?: string; // Valid IATA code
-  destinationCode?: string; // Valid IATA code
-  remainingQuery: string; // Text for AI to parse
-  fullMatch: boolean; // Whether both codes were found and validated
-}
-
-/**
- * Pre-process query to detect and validate IATA codes
- * Handles patterns like: "AAL to CPH", "JFK-LAX", "SFO → NRT"
- * @param query - User's free text query
- * @returns PreProcessedQuery object with codes and remaining text
- */
-function preprocessIATACodes(query: string): PreProcessedQuery {
-  // Regex to match patterns like "XXX to YYY", "XXX-YYY", "XXX → YYY"
-  // Matches 3-letter codes separated by common delimiters
-  const pattern = /\b([A-Z]{3})\b[\s-→>]*(?:to|->|→)?[\s-→>]*\b([A-Z]{3})\b/i;
-  const match = query.match(pattern);
-
-  if (!match) {
-    return { remainingQuery: query, fullMatch: false };
-  }
-
-  const originCode = match[1].toUpperCase();
-  const destinationCode = match[2].toUpperCase();
-
-  // CRITICAL: Validate against actual airport database to prevent false positives
-  // (e.g., "USA to CPH", "New to Old", etc.)
-  const originAirport = getAirportByIATA(originCode);
-  const destinationAirport = getAirportByIATA(destinationCode);
-
-  if (!originAirport || !destinationAirport) {
-    // Invalid codes - fall back to AI parsing
-    return { remainingQuery: query, fullMatch: false };
-  }
-
-  // Check if origin and destination are the same
-  if (originCode === destinationCode) {
-    // Allow but will show warning later
-    // Still considered a full match
-  }
-
-  // Extract remaining query (everything except the matched codes)
-  const remainingQuery = query.replace(match[0], "").trim();
-
-  return {
-    originCode,
-    destinationCode,
-    remainingQuery: remainingQuery || "today", // Default to "today" if nothing left
-    fullMatch: true,
-  };
 }
 
 export default function FreeTextSearch() {
@@ -93,57 +38,10 @@ export default function FreeTextSearch() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  /**
-   * Get the appropriate code for Skyscanner
-   * Flow:
-   * 1. AI parses city name
-   * 2. Check if city has multiple airports
-   * 3. If true → use city code
-   * 4. If false → use airport code of the city
-   * 5. Construct URL
-   *
-   * @param cityName - The parsed city name from AI
-   * @param airportMatches - Airports found matching the city
-   * @returns City code or airport code
-   */
-  function getCodeForSkyscanner(cityName: string, airportMatches: Airport[]): string {
-    if (airportMatches.length === 0) return "";
-
-    // Strategy: Prioritize cities that have multiple airports and city codes
-    // This handles cases like "London" matching both London, Canada and London, UK
-    // We want London, UK (which has LON city code) over London, Canada (single airport)
-
-    let selectedAirport = airportMatches[0];
-    let selectedCity = selectedAirport.city;
-    let selectedCountry = selectedAirport.country;
-
-    // Check all matching airports and prioritize those with city codes
-    for (const airport of airportMatches) {
-      const hasMultiple = hasMultipleAirports(airport.city, airport.country);
-      const cityCode = getCityCode(airport.city, airport.country);
-
-      // If this city has multiple airports AND a city code, prefer it
-      if (hasMultiple && cityCode) {
-        selectedAirport = airport;
-        selectedCity = airport.city;
-        selectedCountry = airport.country;
-        break; // Use the first match with a city code
-      }
-    }
-
-    // Check if the selected city has multiple airports
-    const hasMultiple = hasMultipleAirports(selectedCity, selectedCountry);
-
-    if (hasMultiple) {
-      // Use city code
-      const cityCode = getCityCode(selectedCity, selectedCountry);
-      if (cityCode) {
-        return cityCode.toUpperCase();
-      }
-    }
-
-    // Use airport code of the city
-    return selectedAirport.iata.toUpperCase();
+  async function handleFallback(message: string) {
+    await showFailureToast(message);
+    setShowFallbackForm(true);
+    setIsParsingQuery(false);
   }
 
   /**
@@ -210,15 +108,6 @@ export default function FreeTextSearch() {
         const originCode = preprocessed.originCode;
         const destinationCode = preprocessed.destinationCode;
 
-        // Show warning if origin and destination are the same
-        if (originCode === destinationCode) {
-          await showToast({
-            style: Toast.Style.Animated,
-            title: "Same origin and destination",
-            message: "Searching anyway...",
-          });
-        }
-
         // Parse remaining text for dates and parameters
         // Check if user has AI access for date parsing
         let parsed: ParsedFlight;
@@ -233,6 +122,12 @@ export default function FreeTextSearch() {
           };
         }
 
+        // Show failure if origin and destination are the same
+        if (originCode === destinationCode) {
+          await handleFallback("Same origin and destination");
+          return;
+        }
+
         // Validate we have a departure date
         if (!parsed.departureDate) {
           parsed.departureDate = new Date().toISOString().split("T")[0]; // Default to today
@@ -241,33 +136,15 @@ export default function FreeTextSearch() {
         const adultsCount = parsed.adults || 1;
         const departureDate = formatDateForSkyscanner(parsed.departureDate);
         const returnDate = parsed.returnDate ? formatDateForSkyscanner(parsed.returnDate) : undefined;
-        const isRoundTrip = !!returnDate;
 
-        // Build Skyscanner URL with exact codes provided by user
-        const url = buildSkyscannerURL({
+        // Build and open URL with exact codes provided by user
+        await buildAndOpenSkyscannerURL({
           origin: originCode,
           destination: destinationCode,
           departureDate,
           returnDate,
           adults: adultsCount,
           stops: parsed.stops || "any",
-        });
-
-        trackFlightSearch({
-          origin: originCode,
-          destination: destinationCode,
-          tripType: isRoundTrip ? "round-trip" : "one-way",
-          adults: adultsCount,
-          departureDate,
-          returnDate,
-        });
-
-        await open(url);
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Opening Skyscanner",
-          message: `${originCode}→${destinationCode} | Date: ${departureDate}`,
         });
 
         setIsParsingQuery(false);
@@ -277,9 +154,7 @@ export default function FreeTextSearch() {
       // Step 2: Fall back to AI-based parsing for city names
       // Check if user has AI access
       if (!environment.canAccess(AI)) {
-        await showFailureToast("AI Access Required");
-        setShowFallbackForm(true);
-        setIsParsingQuery(false);
+        await handleFallback("AI Access Required");
         return;
       }
 
@@ -288,9 +163,7 @@ export default function FreeTextSearch() {
       // Handle parsing errors
       if (parsed.error) {
         prefillFormFromParsedData(parsed);
-        await showFailureToast(parsed.error + ". Use manual form below.");
-        setIsParsingQuery(false);
-        setShowFallbackForm(true);
+        await handleFallback(parsed.error + ". Use manual form below.");
         return;
       }
 
@@ -319,17 +192,15 @@ export default function FreeTextSearch() {
         setDestinationAirports(destinationMatches);
 
         if (originMatches.length === 0) {
-          await showFailureToast(
+          await handleFallback(
             `No airports found for origin: "${parsed.originLocation}". Try using city name or airport code.`,
           );
         } else {
-          await showFailureToast(
+          await handleFallback(
             `No airports found for destination: "${parsed.destinationLocation}". Try using city name or airport code.`,
           );
         }
 
-        setIsParsingQuery(false);
-        setShowFallbackForm(true);
         return;
       }
 
@@ -344,41 +215,22 @@ export default function FreeTextSearch() {
         if (!destinationCode) missing.push("destination code");
 
         prefillFormFromParsedData(parsed);
-        await showFailureToast(`Failed to get ${missing.join(", ")}. Check form below.`);
-        setIsParsingQuery(false);
-        setShowFallbackForm(true);
+        await handleFallback(`Failed to get ${missing.join(", ")}. Check form below.`);
         return;
       }
 
       const adultsCount = parsed.adults || 1;
       const departureDate = formatDateForSkyscanner(parsed.departureDate);
       const returnDate = parsed.returnDate ? formatDateForSkyscanner(parsed.returnDate) : undefined;
-      const isRoundTrip = !!returnDate;
-      // Build Skyscanner URL
-      const url = buildSkyscannerURL({
+
+      // Build and open URL
+      await buildAndOpenSkyscannerURL({
         origin: originCode,
         destination: destinationCode,
         departureDate,
         returnDate,
         adults: adultsCount,
         stops: parsed.stops || "any",
-      });
-
-      trackFlightSearch({
-        origin: originCode,
-        destination: destinationCode,
-        tripType: isRoundTrip ? "round-trip" : "one-way",
-        adults: adultsCount,
-        departureDate,
-        returnDate,
-      });
-
-      await open(url);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Opening Skyscanner",
-        message: `${originCode}→${destinationCode} | Date: ${departureDate}`,
       });
     } catch {
       await showFailureToast("Failed to parse query");
@@ -429,33 +281,15 @@ export default function FreeTextSearch() {
     try {
       const departureDate = formatDateObjectForSkyscanner(values.departureDate);
       const returnDate = values.returnDate ? formatDateObjectForSkyscanner(values.returnDate) : undefined;
-      const isRoundTrip = !!returnDate;
 
-      // Build Skyscanner URL
-      const url = buildSkyscannerURL({
+      // Build and open URL
+      await buildAndOpenSkyscannerURL({
         origin,
         destination,
         departureDate,
         returnDate,
         adults: adultsCount,
         stops: values.stops as "any" | "direct" | "multiStop",
-      });
-
-      trackFlightSearch({
-        origin,
-        destination,
-        tripType: isRoundTrip ? "round-trip" : "one-way",
-        adults: adultsCount,
-        departureDate,
-        returnDate,
-      });
-
-      await open(url);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Opening Skyscanner",
-        message: "Flight search page opened in browser",
       });
     } catch {
       await showFailureToast("Failed to Open");

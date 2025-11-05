@@ -2,6 +2,8 @@
 // Source: https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat
 // Total airports: 5853
 
+import { getCityCode, hasMultipleAirports } from "./multiAirportCities";
+
 export interface Airport {
   iata: string;
   name: string;
@@ -35160,4 +35162,110 @@ export function getAirportByIATA(iata: string): Airport | undefined {
 
   const code = iata.toUpperCase().trim();
   return airports.find((airport) => airport.iata.toUpperCase() === code);
+}
+
+interface PreProcessedQuery {
+  originCode?: string; // Valid IATA code
+  destinationCode?: string; // Valid IATA code
+  remainingQuery: string; // Text for AI to parse
+  fullMatch: boolean; // Whether both codes were found and validated
+}
+
+/**
+ * Pre-process query to detect and validate IATA codes
+ * Handles patterns like: "AAL to CPH", "JFK-LAX", "SFO → NRT"
+ * @param query - User's free text query
+ * @returns PreProcessedQuery object with codes and remaining text
+ */
+export function preprocessIATACodes(query: string): PreProcessedQuery {
+  // Regex to match patterns like "XXX to YYY", "XXX-YYY", "XXX → YYY"
+  // Matches 3-letter codes separated by common delimiters
+  const pattern = /\b([A-Z]{3})\b[\s-→>]*(?:to|->|→)?[\s-→>]*\b([A-Z]{3})\b/i;
+  const match = query.match(pattern);
+
+  if (!match) {
+    return { remainingQuery: query, fullMatch: false };
+  }
+
+  const originCode = match[1].toUpperCase();
+  const destinationCode = match[2].toUpperCase();
+
+  // CRITICAL: Validate against actual airport database to prevent false positives
+  // (e.g., "USA to CPH", "New to Old", etc.)
+  const originAirport = getAirportByIATA(originCode);
+  const destinationAirport = getAirportByIATA(destinationCode);
+
+  if (!originAirport || !destinationAirport) {
+    // Invalid codes - fall back to AI parsing
+    return { remainingQuery: query, fullMatch: false };
+  }
+
+  // Check if origin and destination are the same
+  if (originCode === destinationCode) {
+    // Allow but will show warning later
+    // Still considered a full match
+  }
+
+  // Extract remaining query (everything except the matched codes)
+  const remainingQuery = query.replace(match[0], "").trim();
+
+  return {
+    originCode,
+    destinationCode,
+    remainingQuery: remainingQuery || "today", // Default to "today" if nothing left
+    fullMatch: true,
+  };
+}
+
+/**
+ * Get the appropriate code for Skyscanner
+ * Flow:
+ * 1. AI parses city name
+ * 2. Check if city has multiple airports
+ * 3. If true → use city code
+ * 4. If false → use airport code of the city
+ * 5. Construct URL
+ *
+ * @param cityName - The parsed city name from AI
+ * @param airportMatches - Airports found matching the city
+ * @returns City code or airport code
+ */
+export function getCodeForSkyscanner(cityName: string, airportMatches: Airport[]): string {
+  if (airportMatches.length === 0) return "";
+
+  // Strategy: Prioritize cities that have multiple airports and city codes
+  // This handles cases like "London" matching both London, Canada and London, UK
+  // We want London, UK (which has LON city code) over London, Canada (single airport)
+
+  let selectedAirport = airportMatches[0];
+  let selectedCity = selectedAirport.city;
+  let selectedCountry = selectedAirport.country;
+
+  // Check all matching airports and prioritize those with city codes
+  for (const airport of airportMatches) {
+    const hasMultiple = hasMultipleAirports(airport.city, airport.country);
+    const cityCode = getCityCode(airport.city, airport.country);
+
+    // If this city has multiple airports AND a city code, prefer it
+    if (hasMultiple && cityCode) {
+      selectedAirport = airport;
+      selectedCity = airport.city;
+      selectedCountry = airport.country;
+      break; // Use the first match with a city code
+    }
+  }
+
+  // Check if the selected city has multiple airports
+  const hasMultiple = hasMultipleAirports(selectedCity, selectedCountry);
+
+  if (hasMultiple) {
+    // Use city code
+    const cityCode = getCityCode(selectedCity, selectedCountry);
+    if (cityCode) {
+      return cityCode.toUpperCase();
+    }
+  }
+
+  // Use airport code of the city
+  return selectedAirport.iata.toUpperCase();
 }

@@ -1,16 +1,10 @@
-import { Action, ActionPanel, Form, Icon, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { searchAirportsLocal, Airport } from "../data/airports";
-import { trackFlightSearch } from "../utils/analytics";
-import {
-  buildSkyscannerURL,
-  formatDateObjectForSkyscanner,
-  IATA_CODE_LENGTH,
-  MIN_ADULTS,
-  MAX_ADULTS,
-} from "../utils/flightUtils";
+import { formatDateObjectForSkyscanner, IATA_CODE_LENGTH, MIN_ADULTS, MAX_ADULTS } from "../utils/flightUtils";
 import FlightSearchForm from "./FlightSearchForm";
+import { buildAndOpenSkyscannerURL } from "../utils/ui";
 
 interface FormValues {
   origin: string;
@@ -86,33 +80,15 @@ export default function ManualFormSearch() {
     try {
       const departureDate = formatDateObjectForSkyscanner(values.departureDate);
       const returnDate = values.returnDate ? formatDateObjectForSkyscanner(values.returnDate) : undefined;
-      const isRoundTrip = !!returnDate;
 
-      // Build Skyscanner URL
-      const url = buildSkyscannerURL({
-        origin,
-        destination,
+      // Build and open URL with exact codes provided by user
+      await buildAndOpenSkyscannerURL({
+        origin: origin,
+        destination: destination,
         departureDate,
         returnDate,
         adults: adultsCount,
         stops: values.stops as "any" | "direct" | "multiStop",
-      });
-
-      trackFlightSearch({
-        origin,
-        destination,
-        tripType: isRoundTrip ? "round-trip" : "one-way",
-        adults: adultsCount,
-        departureDate,
-        returnDate,
-      });
-
-      await open(url);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Opening Skyscanner",
-        message: "Flight search page opened in browser",
       });
     } catch {
       await showFailureToast("Failed to Open");
