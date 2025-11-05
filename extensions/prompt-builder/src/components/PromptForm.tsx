@@ -28,9 +28,6 @@ const PromptForm = () => {
 
   useEffect(() => {
     const hasAdvancedValues =
-      formValues.tone !== "None" ||
-      formValues.audience ||
-      formValues.creativity !== "None" ||
       formValues.example ||
       formValues.meta ||
       formValues.reasoning ||
@@ -176,7 +173,12 @@ const PromptForm = () => {
         ))}
       </Form.Dropdown>
 
-      <Form.Checkbox id="showAdvanced" label="Show advanced options" checked={showAdvanced} onChange={(checked) => setShowAdvanced(checked)} />
+      <Form.Checkbox
+        id="showAdvanced"
+        label="Show advanced options"
+        value={showAdvanced}
+        onChange={(checked) => setShowAdvanced(checked)}
+      />
 
       {showAdvanced && (
         <>
