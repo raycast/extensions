@@ -1,8 +1,8 @@
-import { ActionPanel, Action, getPreferenceValues, Form, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
 import { useEffect, useRef } from "react";
-import { API_URL, fetchErrorHandler, useCapacitiesStore } from "./helpers/storage";
+import { API_HEADERS, API_URL, fetchErrorHandler, useCapacitiesStore } from "./helpers/storage";
 import ErrorView from "./components/ErrorView";
 
 interface SaveToDailyNoteBody {
@@ -12,7 +12,6 @@ interface SaveToDailyNoteBody {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   useEffect(() => {
     checkCapacitiesApp();
   }, []);
@@ -38,11 +37,7 @@ export default function Command() {
       try {
         const response = await fetch(`${API_URL}/save-to-daily-note`, {
           method: "POST",
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${preferences.bearerToken}`,
-            "Content-Type": "application/json",
-          },
+          headers: API_HEADERS,
           body: JSON.stringify(body),
         });
         if (!response.ok) throw new Error(fetchErrorHandler(response.status));

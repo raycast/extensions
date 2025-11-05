@@ -1,7 +1,8 @@
 # Capacities Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance + Windows Support] - {PR_MERGE_DATE}
 
+- add Windows Support (no App actions) (ref: [Issue #21353](https://github.com/raycast/extensions/issues/21353), [Issue #22647](https://github.com/raycast/extensions/issues/22647))
 - in `Create Weblink` toasts show progress
 - in `Save Daily Note` toasts show progress
 - chore: replace axios with fetch

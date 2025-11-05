@@ -1,4 +1,4 @@
-import { List, ActionPanel, getPreferenceValues, Icon, Cache } from "@raycast/api";
+import { List, ActionPanel, Icon, Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import OpenInCapacities from "./components/OpenInCapacities";
 import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
