@@ -6,7 +6,8 @@
   "icon": "currency.png",
   "author": "xeric",
   "contributors": [
-    "daudln"
+    "daudln",
+    "taken"
   ],
   "license": "MIT",
   "commands": [
