@@ -1,7 +1,7 @@
 import { useExec } from "@raycast/utils";
 import { closeMainWindow, showToast, Toast } from "@raycast/api";
 
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { useMemo } from "react";
 import { runAppleScript } from "run-applescript";
 
@@ -36,26 +36,37 @@ function openVM(vm: VM): void {
 
 function runVMAction(vm: VM, action: VMAction): void {
   closeMainWindow();
-  switch (action) {
-    case VMAction.Resume:
-      exec(`prlctl resume ${vm.id}`);
-      break;
-    case VMAction.Start:
-      exec(`prlctl start ${vm.id}`);
-      break;
-    case VMAction.Suspend:
-      exec(`prlctl suspend ${vm.id}`);
-      break;
-    case VMAction.Stop:
-      exec(`prlctl stop ${vm.id}`);
-      break;
-    case VMAction.ForceStop:
-      exec(`prlctl stop ${vm.id} --kill`);
-      break;
-    case VMAction.Reset:
-      exec(`prlctl reset ${vm.id}`);
-      break;
-  }
+  (async () => {
+    try {
+      switch (action) {
+        case VMAction.Resume:
+          await execPrlctl(["resume", vm.id]);
+          break;
+        case VMAction.Start:
+          await execPrlctl(["start", vm.id]);
+          break;
+        case VMAction.Suspend:
+          await execPrlctl(["suspend", vm.id]);
+          break;
+        case VMAction.Stop:
+          await execPrlctl(["stop", vm.id]);
+          break;
+        case VMAction.ForceStop:
+          await execPrlctl(["stop", vm.id, "--kill"]);
+          break;
+        case VMAction.Reset:
+          await execPrlctl(["reset", vm.id]);
+          break;
+      }
+    } catch (error: any) {
+      console.error(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: `Failed to perform VM action`,
+        message: error?.message || String(error),
+      });
+    }
+  })();
 }
 
 function showCommandError(error: Error): void {
@@ -67,17 +78,33 @@ function showCommandError(error: Error): void {
   });
 }
 
-function shutPrl(): void {
+function shutPrl(): Promise<void> {
   closeMainWindow();
-  exec("prlsrvctl shutdown -f", (error) => {
-    if (error) {
-      console.error(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Could not shut down Parallels",
-        message: error.message || "Failed to run prlsrvctl shutdown",
-      });
-      return;
-    }
+  return execPrlsrvctl(["shutdown", "-f"]);
+}
+
+function execPrlctl(args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    execFile("/usr/local/bin/prlctl", args, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`prlctl ${args.join(" ")}\nstdout: ${stdout}\nstderr: ${stderr}\n`, error);
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
+function execPrlsrvctl(args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    execFile("/usr/local/bin/prlsrvctl", args, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`prlsrvctl ${args.join(" ")}\nstdout: ${stdout}\nstderr: ${stderr}\n`, error);
+        reject(error);
+        return;
+      }
+      resolve();
+    });
   });
 }

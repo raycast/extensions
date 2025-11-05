@@ -45,15 +45,8 @@ function VMItem({ vm }: { vm: VM }) {
                   icon={Icon.Power}
                   onAction={() => {
                     closeMainWindow();
-                    exec(`prlctl start ${vm.id} && sleep 5 && prlctl stop ${vm.id} --kill`, (error: Error | null) => {
-                      if (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Failed to Start then Force Stop",
-                          message: error.message,
-                        });
-                      }
-                    });
+                    runVMAction(vm, VMAction.Start);
+                    setTimeout(() => runVMAction(vm, VMAction.ForceStop), 5000);
                   }}
                 />
               </>
