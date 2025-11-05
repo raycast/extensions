@@ -1,4 +1,4 @@
-# Skyscanner Flight Search
+# Flight Search
 
 A Raycast extension to quickly search for flights on Skyscanner using natural language or a manual form.
 
@@ -24,7 +24,7 @@ A Raycast extension to quickly search for flights on Skyscanner using natural la
    - "JFK to LAX returning Friday"
 4. Press Enter - AI parses your query and opens Skyscanner
 
-### Manual Form (Fallback)
+### Manual Form
 
 If AI parsing fails or you don't have Raycast Pro, use the manual form:
 
@@ -44,34 +44,6 @@ The extension includes a comprehensive database of 6,054 airports worldwide. Sea
 - **Airport Name**: Kennedy, Heathrow, Changi
 - **City Name**: New York, London, Tokyo
 - **Country Name**: United States, Japan, Singapore
-
-Example results:
-
-```
-John F Kennedy International Airport (JFK) - New York, United States
-Los Angeles International Airport (LAX) - Los Angeles, United States
-London Heathrow Airport (LHR) - London, United Kingdom
-```
-
-## Development
-
-### Prerequisites
-
-- Node.js 16+
-- Raycast app installed
-
-### Setup
-
-```bash
-npm install
-npm run dev
-```
-
-### Build
-
-```bash
-npm run build
-```
 
 ## Data Sources
 
