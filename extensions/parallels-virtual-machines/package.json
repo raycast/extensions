@@ -5,6 +5,9 @@
   "description": "Launch and control virtual machines in Parallels Desktop.",
   "icon": "command-icon.png",
   "author": "danpalmer",
+  "contributors": [
+    "jacpd"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -22,6 +25,18 @@
         "vm"
       ],
       "mode": "view"
+    },
+    {
+      "name": "shutdown",
+      "title": "Shut Down",
+      "subtitle": "Parallels Desktop",
+      "description": "Correctly shuts down Parallels Desktop and hard-stops services.",
+      "keywords": [
+        "shutdown",
+        "parallels",
+        "vm"
+      ],
+      "mode": "no-view"
     }
   ],
   "dependencies": {

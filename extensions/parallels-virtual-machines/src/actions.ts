@@ -8,7 +8,7 @@ import { runAppleScript } from "run-applescript";
 import { VM, VMAction, SearchState } from "./types";
 import { parseVM } from "./utils";
 
-export { findVMs, openVM, runVMAction };
+export { findVMs, openVM, runVMAction, shutPrl };
 
 function findVMs(): SearchState {
   const { isLoading, data } = useExec("/usr/local/bin/prlctl", ["list", "--all", "--full", "--json", "--info"], {
@@ -49,6 +49,12 @@ function runVMAction(vm: VM, action: VMAction): void {
     case VMAction.Stop:
       exec(`prlctl stop ${vm.id}`);
       break;
+    case VMAction.ForceStop:
+      exec(`prlctl stop ${vm.id} --kill`);
+      break;
+    case VMAction.Reset:
+      exec(`prlctl reset ${vm.id}`);
+      break;
   }
 }
 
@@ -57,6 +63,21 @@ function showCommandError(error: Error): void {
   showToast({
     style: Toast.Style.Failure,
     title: "Could not access virtual machines",
-    message: "You must have Parallels Pro to use this extension",
+    message: "You must have Parallels Pro or Business/Enterprise Editions to use this extension",
+  });
+}
+
+function shutPrl(): void {
+  closeMainWindow();
+  exec("prlsrvctl shutdown -f", (error) => {
+    if (error) {
+      console.error(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could not shut down Parallels",
+        message: error.message || "Failed to run prlsrvctl shutdown",
+      });
+      return;
+    }
   });
 }
