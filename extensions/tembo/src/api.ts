@@ -1,4 +1,9 @@
 import { withAccessToken } from "./auth";
+import { Readable } from "stream";
+import { parser } from "stream-json";
+import { streamArray } from "stream-json/streamers/StreamArray";
+import { pick } from "stream-json/filters/Pick";
+import { ignore } from "stream-json/filters/Ignore";
 
 const TEMBO_API_BASE = "https://api.tembo.io";
 const TEMBO_UI_BASE = "https://app.tembo.io";
@@ -150,6 +155,31 @@ class TemboAPI {
     });
   }
 
+  private async requestStream(endpoint: string, options: RequestInit = {}): Promise<Readable> {
+    return withAccessToken(async (token) => {
+      const url = `${TEMBO_API_BASE}${endpoint}`;
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request to ${endpoint} failed: ${response.status} ${response.statusText}\n${errorText}`);
+      }
+
+      if (!response.body) {
+        throw new Error(`No response body received from ${TEMBO_API_BASE}${endpoint}`);
+      }
+
+      return Readable.fromWeb(response.body);
+    });
+  }
+
   async getIssues(params?: {
     pageSize?: number;
     sources?: string[];
@@ -165,8 +195,44 @@ class TemboAPI {
     const queryString = searchParams.toString();
     const endpoint = `/public-api/task/list${queryString ? `?${queryString}` : ""}`;
 
-    const response = await this.request<IssueListResponse>(endpoint);
-    return response.issues || [];
+    const stream = await this.requestStream(endpoint);
+
+    const pipeline = stream
+      .pipe(parser())
+      .pipe(pick({ filter: "issues" }))
+      .pipe(
+        ignore({
+          filter: (stack) => {
+            // Ignore `Issue.solutions.metadata`
+            // Stack looks like: ['issues', 0, 'solutions', 0, 'metadata', ...]
+            const len = stack.length;
+            return (
+              len >= 3 &&
+              stack[len - 1] === "metadata" &&
+              typeof stack[len - 2] === "number" &&
+              stack[len - 3] === "solutions"
+            );
+          },
+        }),
+      )
+      .pipe(streamArray());
+
+    const issues: Issue[] = [];
+
+    return new Promise((resolve, reject) => {
+      pipeline.on("data", ({ value }: { key: number; value: unknown }) => {
+        issues.push(value as Issue);
+      });
+
+      pipeline.on("end", () => {
+        resolve(issues);
+      });
+
+      pipeline.on("error", (error: Error) => {
+        console.error("Stream error:", error);
+        reject(error);
+      });
+    });
   }
 
   async createIssue(data: CreateIssueRequest): Promise<Issue> {

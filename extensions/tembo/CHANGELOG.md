@@ -1,5 +1,9 @@
 # Tembo Changelog
 
+## [Optimize memory usage] - {PR_MERGE_DATE}
+
+- Avoid JS worker OOM by reducing memory usage when hitting the API, by parsing the response with a streaming parser, filtering out unnecessary metadata
+
 ## [Cache menubar results, fetch in background, add missing code repo icons] - 2025-11-04
 
 - Eliminate flickering from the menubar by caching API results

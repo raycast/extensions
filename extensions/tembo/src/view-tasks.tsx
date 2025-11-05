@@ -13,7 +13,7 @@ import {
 type FilterType = "all" | "active" | "recently-done" | "queued" | "open" | "closed" | "merged" | "failed";
 
 const cache = new Cache();
-const ISSUES_CACHE_KEY = "tasks";
+const ISSUES_CACHE_KEY = "tembo-task-cache";
 
 export default function ViewTasks() {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,8 +29,9 @@ export default function ViewTasks() {
     const fetchIssues = async () => {
       try {
         setIsLoading(true);
+
         const fetchedIssues = await temboAPI.getIssues({
-          pageSize: 30,
+          pageSize: 50,
         });
 
         fetchedIssues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

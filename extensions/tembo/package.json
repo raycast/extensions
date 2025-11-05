@@ -35,12 +35,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.102.6",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "stream-json": "^1.9.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@types/stream-json": "^1.7.8",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

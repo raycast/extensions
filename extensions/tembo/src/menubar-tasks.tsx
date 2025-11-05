@@ -4,7 +4,7 @@ import { temboAPI, TEMBO_UI_BASE, type Issue } from "./api";
 import { getIssueStatus, getIssueIntegrationType, getIssueRepo, getIntegrationIcon } from "./issue-utils";
 
 const cache = new Cache();
-const ISSUES_CACHE_KEY = "tasks";
+const ISSUES_CACHE_KEY = "tembo-task-cache";
 
 export default function MenubarTasks() {
   const [issues, setIssues] = useState<Issue[]>(() => {
@@ -15,7 +15,7 @@ export default function MenubarTasks() {
   const fetchIssues = async () => {
     try {
       const fetchedIssues = await temboAPI.getIssues({
-        pageSize: 20,
+        pageSize: 50,
       });
 
       fetchedIssues.sort((a, b) => {
