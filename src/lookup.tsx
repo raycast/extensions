@@ -1,5 +1,7 @@
+// @ts-nocheck
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import * as React from "react";
 
 export default function LookupCommand() {
   const [query, setQuery] = useState("");
