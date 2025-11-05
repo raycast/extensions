@@ -1,6 +1,6 @@
 # URL Parse Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2025-11-05
 
 - Add paste from clipboard action to parse long URLs
 - Add support for Windows platform.
