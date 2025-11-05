@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "generate-password",
+  "title": "Generate Password",
+  "description": "Quickly generate secure 12-character passwords with a single command. All passwords are generated locally for your privacy.",
+  "icon": "extension-icon.png",
+  "author": "shubhamwhocodes",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "description": "Generates Password",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeLowercase",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Include Lowercase Letters",
+          "description": "Include lowercase letters (a-z) in generated passwords"
+        },
+        {
+          "name": "includeUppercase",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Include Uppercase Letters",
+          "description": "Include uppercase letters (A-Z) in generated passwords"
+        },
+        {
+          "name": "includeDigits",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Include Digits",
+          "description": "Include digits (0-9) in generated passwords"
+        },
+        {
+          "name": "includeSymbols",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Include Symbols",
+          "description": "Include symbols (!@#$%^&*...) in generated passwords"
+        },
+        {
+          "name": "passwordLength",
+          "type": "textfield",
+          "required": false,
+          "default": "16",
+          "title": "Password Length",
+          "label": "Password Length",
+          "description": "Default length for generated passwords (1-128)"
+        },
+        {
+          "name": "passwordCount",
+          "type": "textfield",
+          "required": false,
+          "default": "5",
+          "title": "Password Count",
+          "label": "Password Count",
+          "description": "Number of passwords to generate at once (1-50)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
