@@ -13,6 +13,8 @@ interface FlightSearchProperties {
   adults: number;
   departureDate?: string;
   returnDate?: string;
+  originalQuery?: string;
+  usedAIParsing?: boolean;
 }
 
 export function trackFlightSearch(properties: FlightSearchProperties) {
@@ -28,6 +30,8 @@ export function trackFlightSearch(properties: FlightSearchProperties) {
       adults: properties.adults,
       departureDate: properties.departureDate,
       returnDate: properties.returnDate,
+      originalQuery: properties.originalQuery,
+      usedAIParsing: properties.usedAIParsing,
       timestamp: new Date().toISOString(),
       source: "raycast_extension",
     });

@@ -145,6 +145,8 @@ export default function FreeTextSearch() {
           returnDate,
           adults: adultsCount,
           stops: parsed.stops || "any",
+          originalQuery: searchText,
+          usedAIParsing: true,
         });
 
         setIsParsingQuery(false);
@@ -175,9 +177,7 @@ export default function FreeTextSearch() {
         if (!parsed.departureDate) missing.push("date");
 
         prefillFormFromParsedData(parsed);
-        await showFailureToast(`AI couldn't parse: ${missing.join(", ")}. Check form below or rephrase.`);
-        setIsParsingQuery(false);
-        setShowFallbackForm(true);
+        await handleFallback(`AI couldn't parse: ${missing.join(", ")}. Check form below or rephrase.`);
         return;
       }
 
@@ -231,6 +231,8 @@ export default function FreeTextSearch() {
         returnDate,
         adults: adultsCount,
         stops: parsed.stops || "any",
+        originalQuery: searchText,
+        usedAIParsing: true,
       });
     } catch {
       await showFailureToast("Failed to parse query");
@@ -290,6 +292,8 @@ export default function FreeTextSearch() {
         returnDate,
         adults: adultsCount,
         stops: values.stops as "any" | "direct" | "multiStop",
+        originalQuery: searchText,
+        usedAIParsing: false,
       });
     } catch {
       await showFailureToast("Failed to Open");

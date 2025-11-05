@@ -12,6 +12,8 @@ export async function buildAndOpenSkyscannerURL(params: {
   returnDate?: string;
   adults: number;
   stops: "any" | "direct" | "multiStop";
+  originalQuery?: string;
+  usedAIParsing?: boolean;
 }) {
   const isRoundTrip = !!params.returnDate;
 
@@ -26,6 +28,8 @@ export async function buildAndOpenSkyscannerURL(params: {
     adults: params.adults,
     departureDate: params.departureDate,
     returnDate: params.returnDate,
+    originalQuery: params.originalQuery,
+    usedAIParsing: params.usedAIParsing,
   });
 
   // Open URL
