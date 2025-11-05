@@ -1,6 +1,6 @@
 # Svelte Docs Changelog
 
-## [Fix cli composer generation] - {PR_MERGE_DATE}
+## [Fix cli composer generation] - 2025-11-05
 
 Take into account skip_addons for the create generation and show package manager dropdown in add cli
 
