@@ -58,7 +58,13 @@ function iconForVM(vm: VM): Image {
     icon = "kali";
   } else if (os.includes("centos")) {
     icon = "centos";
-  } else if (os.includes("mac") || os.includes("os x") || os.includes("osx") || os.includes("darwin") || os.includes("macos")) {
+  } else if (
+    os.includes("mac") ||
+    os.includes("os x") ||
+    os.includes("osx") ||
+    os.includes("darwin") ||
+    os.includes("macos")
+  ) {
     icon = "macos";
   } else if (os.includes("windows") || os.includes("win")) {
     if (os.includes("11")) {

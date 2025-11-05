@@ -23,7 +23,7 @@ enum VMAction {
   Resume,
   Stop,
   ForceStop,
-  Reset
+  Reset,
 }
 
 interface SearchState {

@@ -40,8 +40,8 @@ function VMItem({ vm }: { vm: VM }) {
             {vm.state == VMState.Suspended && (
               <>
                 <Action title="Resume" icon={Icon.Play} onAction={() => runVMAction(vm, VMAction.Resume)} />
-                <Action 
-                  title="Start then Force Stop" 
+                <Action
+                  title="Start then Force Stop"
                   icon={Icon.Power}
                   onAction={() => {
                     closeMainWindow();
