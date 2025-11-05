@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Add Exclude Search Feature] - {PR_MERGE_DATE}
+## [Add Exclude Search Feature] - 2025-11-05
 
 - Add support for excluding search terms using " -" (space + dash) prefix
 - Example: "raycast -firefox" finds items containing "raycast" but not "firefox"
