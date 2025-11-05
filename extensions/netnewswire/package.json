@@ -2,25 +2,26 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netnewswire",
   "title": "NetNewsWire",
-  "description": "",
-  "icon": "extension-icon.png",
+  "description": "NetNewsWire is a free and open source RSS reader for Mac, iPhone, and iPad",
+  "icon": "nnw-6-icon-256.png",
   "author": "xmok",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-feeds",
       "title": "Search Feeds",
-      "description": "",
+      "description": "Search Feeds and Articles. Toggle Read and Starred.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/utils": "^2.2.2",
+    "@types/turndown": "^5.0.6",
+    "turndown": "^7.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
