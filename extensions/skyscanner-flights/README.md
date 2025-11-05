@@ -2,6 +2,11 @@
 
 A Raycast extension to quickly search for flights on Skyscanner using natural language.
 
+## Demo
+
+<video src="./media/raycast.mp4" width="100%" controls></video>
+
+
 ## Features
 
 - 🤖 **AI-Powered Natural Language Search**: Describe your flight in plain English
@@ -23,7 +28,7 @@ A Raycast extension to quickly search for flights on Skyscanner using natural la
    - "JFK to LAX returning Friday"
 4. Press Enter - AI parses your query and opens Skyscanner
 
-PS: If AI parsing fails, use the quick form:
+PS: If AI parsing fails, use the quick form.
 
 ## Airport Search
 
