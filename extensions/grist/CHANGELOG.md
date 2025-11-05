@@ -1,6 +1,6 @@
 # Grist Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-11-05
 
 - List Organizations
 - List, Create, Delete Workspaces
