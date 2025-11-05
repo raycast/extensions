@@ -35132,6 +35132,57 @@ export const airports: Airport[] = [
   },
 ];
 
+/**
+ * Calculate relevance score for an airport based on search query
+ * Higher scores indicate better matches
+ */
+function calculateRelevanceScore(airport: Airport, query: string): number {
+  const q = query.toLowerCase();
+  const iata = airport.iata.toLowerCase();
+  const city = airport.city.toLowerCase();
+  const name = airport.name.toLowerCase();
+  const country = airport.country.toLowerCase();
+
+  // Exact IATA code match (highest priority)
+  if (iata === q) return 1000;
+
+  // Exact city name match
+  if (city === q) return 900;
+
+  // City starts with query
+  if (city.startsWith(q)) return 500;
+
+  // IATA code starts with query
+  if (iata.startsWith(q)) return 450;
+
+  // Complete word match in city name (word boundary)
+  const wordBoundaryRegex = new RegExp(`\\b${q}\\b`, "i");
+  if (wordBoundaryRegex.test(city)) return 400;
+
+  // Complete word match in airport name
+  if (wordBoundaryRegex.test(name)) return 250;
+
+  // Airport name starts with query
+  if (name.startsWith(q)) return 200;
+
+  // Substring match in city (lower priority)
+  if (city.includes(q)) return 100;
+
+  // Country name starts with query
+  if (country.startsWith(q)) return 75;
+
+  // Substring match in airport name (lowest priority)
+  if (name.includes(q)) return 50;
+
+  // Substring match in country
+  if (country.includes(q)) return 25;
+
+  // Substring match in IATA code
+  if (iata.includes(q)) return 10;
+
+  return 0;
+}
+
 export function searchAirportsLocal(query: string): Airport[] {
   if (!query || query.trim().length < 2) {
     return [];
@@ -35139,15 +35190,25 @@ export function searchAirportsLocal(query: string): Airport[] {
 
   const searchTerm = query.toLowerCase().trim();
 
-  return airports
-    .filter(
-      (airport) =>
-        airport.iata.toLowerCase().includes(searchTerm) ||
-        airport.name.toLowerCase().includes(searchTerm) ||
-        airport.city.toLowerCase().includes(searchTerm) ||
-        airport.country.toLowerCase().includes(searchTerm),
-    )
-    .slice(0, 50); // Limit to 50 results for performance
+  // Filter airports that match the query
+  const matches = airports.filter(
+    (airport) =>
+      airport.iata.toLowerCase().includes(searchTerm) ||
+      airport.name.toLowerCase().includes(searchTerm) ||
+      airport.city.toLowerCase().includes(searchTerm) ||
+      airport.country.toLowerCase().includes(searchTerm),
+  );
+
+  // Sort by relevance score (highest first)
+  const sortedMatches = matches
+    .map((airport) => ({
+      airport,
+      score: calculateRelevanceScore(airport, searchTerm),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .map((item) => item.airport);
+
+  return sortedMatches.slice(0, 50); // Limit to 50 results for performance
 }
 
 /**
