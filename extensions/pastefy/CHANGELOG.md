@@ -1,6 +1,6 @@
 # Pastefy Changelog
 
-## [Windows Support + 2 New Create Preferences] - {PR_MERGE_DATE}
+## [Windows Support + 2 New Create Preferences] - 2025-11-05
 
 - Add Windows Support
 - "Delete Paste" `Action` now has a `shortcut` and destructive `style`
