@@ -31,9 +31,9 @@ export default function Command() {
   const [skip_addons_check, set_skip_addons_checks] = useState<boolean>(false);
 
   // sv add options
-  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [selected_addons, set_selected_addons] = useState<string[]>([]);
 
-  const skip_addons = skip_addons_check || selectedAddons.length > 0;
+  const skip_addons = skip_addons_check || selected_addons.length > 0;
 
   let command = get_base_command(package_manager);
 
@@ -66,7 +66,7 @@ export default function Command() {
     }
 
     // Add no-add-ons flag
-    if (skip_addons_check) {
+    if (skip_addons) {
       command += " --no-add-ons";
     }
   } else {
@@ -75,12 +75,28 @@ export default function Command() {
     // Add space-separated add-ons
   }
 
-  if (selectedAddons.length > 0) {
+  if (selected_addons.length > 0) {
     if (command_type === "create") {
       command += ` && ${get_base_command(package_manager)}add`;
     }
-    command += ` ${selectedAddons.join(" ")}`;
+    command += ` ${selected_addons.join(" ")}`;
   }
+
+  const package_manager_ui = (
+    <Form.Dropdown
+      id="packageManager"
+      title="Package Manager"
+      value={package_manager}
+      onChange={(value) => set_package_manager(value as PackageManager)}
+      info="Which package manager to use"
+    >
+      <Form.Dropdown.Item value="npm" title="npm" icon={Icon.Box} />
+      <Form.Dropdown.Item value="pnpm" title="pnpm" icon={Icon.Box} />
+      <Form.Dropdown.Item value="yarn" title="yarn" icon={Icon.Box} />
+      <Form.Dropdown.Item value="bun" title="bun" icon={Icon.Bolt} />
+      <Form.Dropdown.Item value="deno" title="deno" icon={Icon.Bolt} />
+    </Form.Dropdown>
+  );
 
   async function handle_copy_command() {
     await Clipboard.copy(command);
@@ -177,19 +193,7 @@ export default function Command() {
             />
           </Form.Dropdown>
 
-          <Form.Dropdown
-            id="packageManager"
-            title="Package Manager"
-            value={package_manager}
-            onChange={(value) => set_package_manager(value as PackageManager)}
-            info="Which package manager to use"
-          >
-            <Form.Dropdown.Item value="npm" title="npm" icon={Icon.Box} />
-            <Form.Dropdown.Item value="pnpm" title="pnpm" icon={Icon.Box} />
-            <Form.Dropdown.Item value="yarn" title="yarn" icon={Icon.Box} />
-            <Form.Dropdown.Item value="bun" title="bun" icon={Icon.Bolt} />
-            <Form.Dropdown.Item value="deno" title="deno" icon={Icon.Bolt} />
-          </Form.Dropdown>
+          {package_manager_ui}
 
           <Form.Checkbox
             id="skipInstall"
@@ -201,10 +205,10 @@ export default function Command() {
 
           <Form.Checkbox
             id="skipAddons"
-            label={`Skip add-ons prompt${selectedAddons.length > 0 ? " (must be enabled if addons are selected)" : ""}`}
+            label={`Skip add-ons prompt${selected_addons.length > 0 ? " (must be enabled if addons are selected)" : ""}`}
             value={skip_addons}
             onChange={(value) => {
-              if (selectedAddons.length === 0) {
+              if (selected_addons.length === 0) {
                 set_skip_addons_checks(value);
               }
             }}
@@ -217,11 +221,13 @@ export default function Command() {
 
       <Form.Description title="Select Add-ons" text="Choose one or more integrations to add to your project" />
 
+      {command_type === "add" ? package_manager_ui : null}
+
       <Form.TagPicker
         id="addons"
         title="Add-ons"
-        value={selectedAddons}
-        onChange={setSelectedAddons}
+        value={selected_addons}
+        onChange={set_selected_addons}
         placeholder="Select add-ons..."
       >
         <Form.TagPicker.Item value="tailwindcss" title="Tailwind CSS" icon={Icon.Brush} />
