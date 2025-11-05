@@ -14,7 +14,8 @@ export default function Command() {
         const displays = await listDisplays();
         setDisplays(displays);
       } catch (error) {
-        showHUD("❌ Failed to list displays");
+        console.error("Failed to list displays: ", error);
+        showHUD("❌ Failed to list displays: ");
       }
     }
     fetchDisplays();
@@ -63,7 +64,13 @@ export default function Command() {
   );
 }
 
-function RenameDisplayForm({ display, onRename }: { display: DisplayInfo; onRename: (displayId: number, newName: string) => void }) {
+function RenameDisplayForm({
+  display,
+  onRename,
+}: {
+  display: DisplayInfo;
+  onRename: (displayId: number, newName: string) => void;
+}) {
   const [newName, setNewName] = React.useState("");
 
   return (

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { showHUD, getPreferenceValues, LocalStorage, ActionPanel, List, Action, useNavigation } from "@raycast/api";
 import { listDisplays, setMode, formatDisplayMode, formatDisplayTitle } from "./utils";
@@ -15,6 +14,7 @@ export default function Command() {
         const displays = await listDisplays();
         setDisplays(displays);
       } catch (error) {
+        console.error("Failed to list displays: ", error);
         showHUD("❌ Failed to list displays");
       }
     }
@@ -46,7 +46,7 @@ export default function Command() {
   if (!display) {
     if (displays.length === 1) {
       display = displays[0];
-toggleResolutionLogic(display).then(() => pop());
+      toggleResolutionLogic(display).then(() => pop());
       return null;
     } else {
       // If there are multiple displays, show a list to choose from
@@ -103,7 +103,7 @@ async function toggleResolutionLogic(display: DisplayInfo) {
         mode.width === currentMode.width &&
         mode.height === currentMode.height &&
         mode.refreshRate === currentMode.refreshRate &&
-        mode.scale === currentMode.scale
+        mode.scale === currentMode.scale,
     );
     const nextModeIndex = (currentModeIndex + 1) % modes.length;
     const nextMode = modes[nextModeIndex];
@@ -117,6 +117,3 @@ async function toggleResolutionLogic(display: DisplayInfo) {
     }
   }
 }
-
-
-

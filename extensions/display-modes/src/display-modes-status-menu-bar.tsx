@@ -75,7 +75,11 @@ export default function Command() {
             const displayIcon = getDisplayIcon(display.display.kind);
 
             return (
-              <MenuBarExtra.Submenu key={display.display.id} title={displayNames[display.display.id] || formatDisplayTitle(display)} icon={displayIcon}>
+              <MenuBarExtra.Submenu
+                key={display.display.id}
+                title={displayNames[display.display.id] || formatDisplayTitle(display)}
+                icon={displayIcon}
+              >
                 <MenuBarExtra.Section>
                   <MenuBarExtra.Item
                     title={`Current: ${formatDisplayMode(display.currentMode)}`}
