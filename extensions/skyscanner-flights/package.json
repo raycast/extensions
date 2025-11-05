@@ -14,7 +14,7 @@
     {
       "name": "search-flights",
       "title": "Search",
-      "description": "Search for flights using natural language (requires Raycast Pro for AI parsing)",
+      "description": "Search for flights using natural language",
       "mode": "view"
     },
     {
