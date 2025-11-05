@@ -1,5 +1,11 @@
 # GitLab Changelog
 
+## [Search projects preferences] - 2025-10-23
+
+Add Search projects preference that allows to search only active projects
+
+## [AI Extension] - 2025-09-18
+
 ## [Added support for Windows] - 2025-08-07
 
 ## [Group milestones in MRs and Issues] - 2025-06-27

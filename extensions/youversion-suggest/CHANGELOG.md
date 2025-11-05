@@ -1,5 +1,11 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.7.0] - 2025-08-26
+
+- Fixed a bug where the Reference Format field was not properly editable in the Set Bible Preferences UI
+- Refactored command code to follow Raycast best practices
+- Updated all dependencies to their latest versions
+
 ## [v3.6.0] - 2025-07-31
 
 - Adopted more modern engine for fetching Bible data

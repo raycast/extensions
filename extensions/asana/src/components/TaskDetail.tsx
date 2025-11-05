@@ -42,6 +42,16 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
             text={task.assignee?.name || "Unassigned"}
           />
 
+          {task.memberships && task.memberships.length > 0 && task.memberships.some((m) => m.section) ? (
+            <Detail.Metadata.TagList title="Section">
+              {task.memberships
+                .filter((membership) => membership.section)
+                .map((membership) => (
+                  <Detail.Metadata.TagList.Item key={membership.section!.gid} text={membership.section!.name} />
+                ))}
+            </Detail.Metadata.TagList>
+          ) : null}
+
           <Detail.Metadata.Label
             title="Due Date"
             icon={{ source: Icon.Calendar, tintColor: getDueDateColor(task) }}
@@ -58,6 +68,14 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
                     color={project.color ? asanaToRaycastColor(project.color) : Color.PrimaryText}
                   />
                 );
+              })}
+            </Detail.Metadata.TagList>
+          ) : null}
+
+          {task.tags && task.tags.length > 0 ? (
+            <Detail.Metadata.TagList title={task.tags.length === 1 ? "Tag" : "Tags"}>
+              {task.tags.map((tag) => {
+                return <Detail.Metadata.TagList.Item key={tag.gid} text={tag.name} />;
               })}
             </Detail.Metadata.TagList>
           ) : null}

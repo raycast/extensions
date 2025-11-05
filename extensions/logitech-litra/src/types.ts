@@ -1,6 +1,7 @@
 export interface Device {
   device_type: string;
   serial_number: string;
+  device_path: string;
   is_on: boolean;
   brightness_in_lumen: number;
   temperature_in_kelvin: number;

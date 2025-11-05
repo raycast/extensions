@@ -1,5 +1,9 @@
 # Multi Links Changelog
 
+## [Enhancements] - 2025-08-24
+
+- Added Dia browser support
+
 ## [Fix] - 2023-11-04
 
 - Browser dropdown was showing incorrect value

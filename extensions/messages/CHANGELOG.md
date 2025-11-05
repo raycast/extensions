@@ -1,5 +1,13 @@
 # Messages Changelog
 
+## [Spam and Unknown Sender Filtering] - 2025-10-03
+
+- Added backward-compatible support for the `is_filtered` field to filter spam and unknown sender messages
+- Added "Filter Out Spam" extension-level preference to hide messages marked as spam
+- Added "Filter Out Unknown Senders" extension-level preference to hide messages from unknown senders
+- Filters apply across My Latest Messages, Unread Messages, and AI tools
+- Filter status values documented as constants for maintainability
+
 ## [Start New Chat on No Results] - 2025-07-09
 
 When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number. 

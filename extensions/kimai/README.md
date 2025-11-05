@@ -16,7 +16,7 @@ To connect the extension to your Kimai instance you need to add the following se
 - **API Token:** Recommended for use in extension. You can find it in your `API Access` settings.
 - **Email:** Email you use to login into Kimai
 - **API Password:** Password different from password you use to login into Kimai. You need to create it in your `API Access` settings.
-- **Default time log duration (in minutes):** Duration that will be used to prepopulate duration field when adding new time log
+- **Default time log duration (in minutes):** Duration that will be used to pre-populate the duration field when adding a new time log. You can leave this field empty to start live/running timesheet instead.
 
 You can find your settings by going to `https://{your-organization}.kimai.cloud/en/profile/{your-email}/api-token` or
 

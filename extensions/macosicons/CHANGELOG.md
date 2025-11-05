@@ -1,5 +1,11 @@
 # macOSIcons.com Changelog
 
+## [Enhanced Error Handling] - 2025-10-15
+
+- Fix response body consumption bug preventing proper error messages
+- Add validation for API response structure to prevent crashes
+- Improve error display with full Detail view for long error messages
+
 ## [Fix API Error Handling] - 2025-07-17
 
 - Fix error handling to check HTTP status before parsing JSON response

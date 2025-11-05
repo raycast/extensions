@@ -1,6 +1,7 @@
 import axios from "axios";
 import { OpdsBook } from "../types";
 import * as xml2js from "xml2js";
+import { getBaseSiteUrl } from "./configService";
 
 interface OpdsLink {
   rel: string;
@@ -36,7 +37,6 @@ interface OpdsFeed {
   };
 }
 
-export const baseSiteUrl = "https://flibusta.site";
 const defaultHeaders = {
   "User-Agent":
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -118,6 +118,7 @@ export async function searchBooks(query: string, signal?: AbortSignal): Promise<
   }
 
   try {
+    const baseSiteUrl = getBaseSiteUrl();
     const url = `${baseSiteUrl}/opds/search?searchType=books&searchTerm=${encodeURIComponent(query)}`;
     const xml = await fetchOpdsXml(url, signal);
     const result = (await parser.parseStringPromise(xml)) as OpdsFeed;

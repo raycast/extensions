@@ -4,7 +4,8 @@ Quickly open WeChat mini program project with plans to support additional featur
 
 ## ✨ Features
 
-- **Quick Project Opening** - Open configured mini program project via WeChat DevTool CLI.
+- **Open Project** - Open configured mini program project via WeChat DevTool CLI.
+- **Preview Project** - Generate QR Code for mini program project preview.
 - **Graphical Configuration** - Complete graphical interface for dynamic project management.
 
 ## 📦 Installation

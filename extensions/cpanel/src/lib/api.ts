@@ -5,12 +5,13 @@ import { ErrorResponse, SuccessResponse } from "./types";
 type callUAPIOptions = {
   animatedToastTitle: string;
   successToastTitle: string;
+  throwError?: boolean;
 };
 export async function callUAPI<T>(
   module: string,
   functionName: string,
   params?: Record<string, string | number>,
-  options: callUAPIOptions = { animatedToastTitle: "Processing", successToastTitle: "Processed" },
+  options: callUAPIOptions = { animatedToastTitle: "Processing", successToastTitle: "Processed", throwError: false },
 ) {
   const toast = await showToast(Toast.Style.Animated, options.animatedToastTitle);
   try {
@@ -32,7 +33,7 @@ export async function callUAPI<T>(
     toast.style = Toast.Style.Failure;
     toast.title = "cPanel Error";
     toast.message = `${error}`;
-    throw error;
+    if (options.throwError) throw error;
   }
 }
 
@@ -45,5 +46,17 @@ export const revokeAPIToken = (name: string) =>
     {
       animatedToastTitle: "Revoking Api Token",
       successToastTitle: "Revoked Api Token",
+    },
+  );
+
+// DNS
+export const deleteDNSZoneRecord = (serial: string, zone: string, remove: number) =>
+  callUAPI<{ new_serial: string }>(
+    "DNS",
+    "mass_edit_zone",
+    { serial, zone, remove },
+    {
+      animatedToastTitle: "Removing Dns Record",
+      successToastTitle: "Removed Dns Record",
     },
   );

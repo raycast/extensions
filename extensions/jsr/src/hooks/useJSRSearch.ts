@@ -1,77 +1,19 @@
-import * as cheerio from "cheerio";
-import fetch, { FormData } from "node-fetch";
 import { useMemo, useRef } from "react";
 
-import { captureException, environment } from "@raycast/api";
-import { useCachedPromise, useFetch } from "@raycast/utils";
+import { captureException } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 
 import type { ErrorResult, SearchResult, SearchResults } from "@/types";
 
-type SearchAPIData = {
-  apiKey: string;
-  indexId: string;
-};
-type SearchAPIDataResponse = {
-  v: Array<Array<object | SearchAPIData> | Array<never>>;
-};
+import { generateFormData } from "@/lib/formdata";
 
-/**
- * This function will download the frontpage of jsr.io and extract the apiKey + indexId from the script tags.
- */
-const useSearchAPIData = () => {
-  return useFetch<SearchAPIData | null>("https://jsr.io", {
-    method: "GET",
-    headers: {
-      Agent: `Raycast/${environment.raycastVersion} ${environment.extensionName} (https://raycast.com)`,
-    },
-    keepPreviousData: true,
-    parseResponse: async (response) => {
-      let res: SearchAPIData | null = null;
-      const text = await response.text();
-      const $ = cheerio.load(text);
+import { useQueryParser } from "@/hooks/useQueryParser";
+import { useSearchAPIData } from "@/hooks/useSearchAPIData";
 
-      const scriptElements = $("script");
-
-      scriptElements.each((index, element) => {
-        const script = $(element).html();
-
-        if (script?.includes(`apiKey`)) {
-          const start = script.indexOf(`"[[`) + 1;
-          const end = script.indexOf(`]"`) + 1;
-          const slice = script.slice(start, end).replace(/\\/g, "");
-          try {
-            const arr = JSON.parse(slice);
-            // find element that is string and starts with 'jsr-'
-            const indexIdPosition = arr.findIndex(
-              (item: unknown) => typeof item === "string" && item.startsWith("jsr-"),
-            );
-            if (indexIdPosition !== -1 && indexIdPosition > 0 && typeof arr[indexIdPosition - 1] === "string") {
-              res = { apiKey: arr[indexIdPosition - 1], indexId: arr[indexIdPosition] };
-            }
-            // eslint-disable-next-line no-empty
-          } catch (_) {}
-        }
-
-        if (script?.includes(`"apiKey"`)) {
-          const json = JSON.parse(script) as SearchAPIDataResponse;
-          const searchAPIData = json.v[0].find((item) => "apiKey" in item && "indexId" in item) as
-            | SearchAPIData
-            | undefined;
-          if (searchAPIData) {
-            res = searchAPIData;
-          }
-        }
-      });
-
-      return res;
-    },
-  });
-};
-
-export const useJSRSearch = (queryString: string) => {
-  const query = queryString?.trim() || "";
+export const useJSRSearch = (queryString: string, scoped: string | null) => {
+  const { query, scope, triggerQuery, runtimes } = useQueryParser(queryString, scoped);
   const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError } = useSearchAPIData();
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
 
   const searchURL = useMemo(() => {
     if (!apiData || isLoadingAPIData) {
@@ -81,19 +23,16 @@ export const useJSRSearch = (queryString: string) => {
   }, [apiData, isLoadingAPIData]);
 
   const formData = useMemo(() => {
-    const body = { term: query, limit: 20, mode: "fulltext" };
-    const formData = new FormData();
-    formData.append("q", JSON.stringify(body));
-    return formData;
-  }, [query]);
+    return generateFormData(query, scope, runtimes);
+  }, [query, scope, runtimes]);
 
   const {
     isLoading,
     error: dataError,
     ...rest
   } = useCachedPromise(
-    async (url: string | null, query: string) => {
-      if (!url || !query) {
+    async (url: string | null, triggerQuery: string) => {
+      if (!url || !triggerQuery) {
         return [] as SearchResult[];
       }
       return fetch(url, {
@@ -111,7 +50,7 @@ export const useJSRSearch = (queryString: string) => {
           return data.hits.filter((h) => !!h.id && !!h.document.id);
         });
     },
-    [searchURL, query],
+    [searchURL, triggerQuery],
     {
       abortable,
       initialData: [] as SearchResult[],

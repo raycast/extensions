@@ -1,5 +1,25 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-11-03
+
+- Add a "Note" field to the bookmark creation and editing forms.
+
+## [Open in Secondary Browser] - 2025-10-01
+
+- Specify a secondary browser for opening bookmarks (ref: [Issue #21699](https://github.com/raycast/extensions/issues/21699))
+- Modernize to use latest eslint configuration
+- Removed `node-fetch`
+
+## [Enhancements] - 2025-09-09
+
+- Show collection cover icons in dropdowns (search filter and add/edit forms); fall back to folder icon when no cover is available.
+
+## [Moved contributor] - 2025-09-09
+
+## [Enhancements] - 2025-08-30
+
+- Prefill Add form from launch context (URL/title) for smoother adding from external sources; increases universality and works well with minimal/keyboard-centric browsers like QuteBrowser.
+
 ## [Enhancements] - 2025-08-06
 
 - Use Browser Extension API when available for retrieving URL and title

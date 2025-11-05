@@ -5,11 +5,18 @@
   "description": "HackMD Raycast extension",
   "icon": "command-icon.png",
   "author": "Yukai",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity",
     "Web",
     "Applications",
     "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -932,20 +939,20 @@
     ]
   },
   "dependencies": {
-    "@hackmd/api": "2.4.0",
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.0.7",
-    "mdast-util-to-markdown": "^1.3.0",
-    "minisearch": "^5.0.0",
-    "remark": "^14.0.2"
+    "@hackmd/api": "2.5.0",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "mdast-util-to-markdown": "^2.1.2",
+    "minisearch": "^7.2.0",
+    "remark": "^15.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.7.0",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

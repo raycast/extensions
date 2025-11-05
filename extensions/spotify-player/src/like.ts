@@ -41,7 +41,7 @@ export default async function Command() {
     });
     await showHUD(`Liked ${item.name}${artistNameSuffix}`);
     await safeLaunchCommandInBackground("current-track");
-  } catch (error) {
+  } catch {
     await showHUD("Nothing is currently playing");
   }
 }

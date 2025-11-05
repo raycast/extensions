@@ -1,58 +1,26 @@
-import { ComponentType, createContext, useContext } from "react";
-import { List, Action, Application, getApplications, Detail, Icon, ActionPanel } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { existsSync } from "fs";
-import { URL } from "url";
-import { getEntry } from "./lib/entry";
-import { zedBuild } from "./lib/preferences";
-import { getZedBundleId } from "./lib/zed";
-import { useZedRecentWorkspaces, ZedEntry } from "./lib/zedEntries";
-import { usePinnedEntries } from "./hooks/usePinnedEntries";
-import { EntryItem } from "./components/EntryItem";
-
-const ZedContext = createContext<{
-  zed?: Application;
-}>({
-  zed: undefined,
-});
-
-function exists(p: string) {
-  try {
-    return existsSync(new URL(p));
-  } catch {
-    return false;
-  }
-}
-
-export const withZed = <P extends object>(Component: ComponentType<P>) => {
-  return (props: P) => {
-    const { data: zed, isLoading } = usePromise(async () =>
-      (await getApplications()).find((a) => a.bundleId === getZedBundleId(zedBuild)),
-    );
-
-    if (!zed) {
-      return <Detail isLoading={isLoading} markdown={isLoading ? "" : `No Zed app detected`} />;
-    }
-
-    return (
-      <ZedContext.Provider value={{ zed }}>
-        <Component {...props} />
-      </ZedContext.Provider>
-    );
-  };
-};
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useZedContext, withZed } from "./components/with-zed";
+import { exists } from "./lib/utils";
+import { Entry, getEntry } from "./lib/entry";
+import { EntryItem } from "./components/entry-item";
+import { usePinnedEntries } from "./hooks/use-pinned-entries";
+import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 
 export function Command() {
-  const { zed } = useContext(ZedContext);
-  const { entries, isLoading, error, removeEntry, removeAllEntries } = useZedRecentWorkspaces();
+  const { app, dbPath, workspaceDbVersion } = useZedContext();
+  const { workspaces, isLoading, error, removeEntry, removeAllEntries } = useRecentWorkspaces(
+    dbPath,
+    workspaceDbVersion,
+  );
   const { pinnedEntries, pinEntry, unpinEntry, unpinAllEntries, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)
-    .filter((e) => exists(e.uri) || e.host)
+    .filter((e) => e.type === "remote" || exists(e.uri))
     .sort((a, b) => a.order - b.order);
-  const zedIcon = zed ? { fileIcon: zed?.path } : undefined;
 
-  const removeAndUnpinEntry = async (entry: Pick<ZedEntry, "id" | "uri">) => {
+  const zedIcon = { fileIcon: app.path };
+
+  const removeAndUnpinEntry = async (entry: Pick<Entry, "id" | "uri">) => {
     await removeEntry(entry.id);
     unpinEntry(entry);
   };
@@ -70,9 +38,7 @@ export function Command() {
         icon="no-view.png"
       />
       <List.Section title="Pinned Projects">
-        {pinned.map((e) => {
-          const entry = getEntry(e);
-
+        {pinned.map((entry) => {
           if (!entry) {
             return null;
           }
@@ -83,32 +49,32 @@ export function Command() {
               entry={entry}
               actions={
                 <ActionPanel>
-                  <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={zedIcon} />
-                  {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
+                  <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
+                  {entry.type === "local" && <Action.ShowInFinder path={entry.path} />}
                   <Action
                     title="Unpin Entry"
                     icon={Icon.PinDisabled}
-                    onAction={() => unpinEntry(e)}
+                    onAction={() => unpinEntry(entry)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                   />
-                  {e.order > 0 ? (
+                  {entry.order > 0 ? (
                     <Action
                       title="Move up"
                       icon={Icon.ArrowUp}
-                      onAction={() => moveUp(e)}
+                      onAction={() => moveUp(entry)}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
                     />
                   ) : null}
-                  {e.order < pinned.length - 1 ? (
+                  {entry.order < pinned.length - 1 ? (
                     <Action
                       title="Move Down"
                       icon={Icon.ArrowDown}
-                      onAction={() => moveDown(e)}
+                      onAction={() => moveDown(entry)}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
                     />
                   ) : null}
                   <RemoveActionSection
-                    onRemoveEntry={() => removeAndUnpinEntry(e)}
+                    onRemoveEntry={() => removeAndUnpinEntry(entry)}
                     onRemoveAllEntries={removeAllAndUnpinEntries}
                   />
                 </ActionPanel>
@@ -119,7 +85,7 @@ export function Command() {
       </List.Section>
 
       <List.Section title="Recent Projects">
-        {Object.values(entries)
+        {Object.values(workspaces)
           .filter((e) => !pinnedEntries[e.uri] && (!!e.host || exists(e.uri)))
           .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
           .map((e) => {
@@ -135,16 +101,16 @@ export function Command() {
                 entry={entry}
                 actions={
                   <ActionPanel>
-                    <Action.Open title="Open in Zed" target={entry.uri} application={zed} icon={zedIcon} />
-                    {!entry.is_remote && <Action.ShowInFinder path={entry.path} />}
+                    <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
+                    {entry.type === "local" && <Action.ShowInFinder path={entry.path} />}
                     <Action
                       title="Pin Entry"
                       icon={Icon.Pin}
-                      onAction={() => pinEntry(e)}
+                      onAction={() => pinEntry(entry)}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     />
                     <RemoveActionSection
-                      onRemoveEntry={() => removeAndUnpinEntry(e)}
+                      onRemoveEntry={() => removeAndUnpinEntry(entry)}
                       onRemoveAllEntries={removeAllAndUnpinEntries}
                     />
                   </ActionPanel>

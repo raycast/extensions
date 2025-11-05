@@ -1,0 +1,59 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parseZedWorkspace > parse local workspace with single path 1`] = `
+{
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "path": "/Users/raycast/Projects/zed-project-1",
+  "type": "local",
+  "uri": "file:///Users/raycast/Projects/zed-project-1",
+}
+`;
+
+exports[`parseZedWorkspace > parse remote workspace with single path, no user, no port 1`] = `
+{
+  "host": "example.com",
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "path": "home/user/project",
+  "type": "remote",
+  "uri": "ssh://example.com/home/user/project",
+}
+`;
+
+exports[`parseZedWorkspace > parse remote workspace with single path, no user, with port 1`] = `
+{
+  "host": "example.com",
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "path": "home/user/project",
+  "type": "remote",
+  "uri": "ssh://example.com:22/home/user/project",
+}
+`;
+
+exports[`parseZedWorkspace > parse remote workspace with single path, with user and port 1`] = `
+{
+  "host": "example.com",
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "path": "home/user/project",
+  "type": "remote",
+  "uri": "ssh://testuser@example.com:22/home/user/project",
+}
+`;
+
+exports[`parseZedWorkspace > parse remote workspace with single path, with user, no port 1`] = `
+{
+  "host": "example.com",
+  "id": 1,
+  "lastOpened": 1757750879526,
+  "path": "home/user/project",
+  "type": "remote",
+  "uri": "ssh://testuser@example.com/home/user/project",
+}
+`;
+
+exports[`parseZedWorkspace > skips local workspace with multiple paths 1`] = `null`;
+
+exports[`parseZedWorkspace > skips remote workspace with multiple paths 1`] = `null`;

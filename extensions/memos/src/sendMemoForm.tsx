@@ -6,9 +6,9 @@ import {
   getOriginUrl,
   getRecentTags,
   getRequestUrl,
-  getResourceBinToBase64,
+  getAttachmentBinToBase64,
   postFile,
-  postMemoResources,
+  postMemoAttachments,
   sendMemo,
 } from "./api";
 import { VISIBILITY } from "./constant";
@@ -60,11 +60,11 @@ export default function SendMemoFormCommand(): JSX.Element {
     try {
       const memoData = await getMemoByName(data.name);
 
-      const { content, resources } = memoData;
+      const { content, attachments } = memoData;
       let markdown = content;
 
-      for (const resource of resources) {
-        const resourceUrl = await getResourceBinToBase64(resource.name, resource.filename);
+      for (const resource of attachments) {
+        const resourceUrl = await getAttachmentBinToBase64(resource.name, resource.filename);
         console.log("resourceUrl", resourceUrl);
         markdown += `\n\n ![${resource.filename}](${resourceUrl})`;
       }
@@ -132,7 +132,7 @@ export default function SendMemoFormCommand(): JSX.Element {
       });
 
       if (uploadedFiles) {
-        await postMemoResources(memos.name, uploadedFiles).catch((err) => {
+        await postMemoAttachments(memos.name, uploadedFiles).catch((err) => {
           showToast(Toast.Style.Failure, `Upload Files Failed. ${err?.message}`);
           throw new Error(err);
         });

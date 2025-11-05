@@ -6,7 +6,7 @@ import { PullRequestsList } from "./pullRequestsList";
 export function ShowPipelinesActions(props: { repo: any }) {
   return (
     <Action.Push
-      title="Show pipelines"
+      title="Show Pipelines"
       target={<PipelinesList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
@@ -18,7 +18,7 @@ export function ShowPipelinesActions(props: { repo: any }) {
 export function ShowPullRequestsActions(props: { repo: any }) {
   return (
     <Action.Push
-      title="Show pull requests"
+      title="Show Pull Requests"
       target={<PullRequestsList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -30,7 +30,7 @@ export function ShowPullRequestsActions(props: { repo: any }) {
 export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any; pageNumber: number }) {
   return (
     <Action
-      title="Goes to next page"
+      title="Goes to Next Page"
       shortcut={{ modifiers: ["cmd"], key: "n" }}
       onAction={() => setPageNumber(pageNumber + 1)}
     />
@@ -41,7 +41,7 @@ export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageN
 export function GoesToPreviousPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any; pageNumber: number }) {
   return (
     <Action
-      title="Goes to previous page"
+      title="Goes to Previous Page"
       shortcut={{ modifiers: ["cmd"], key: "p" }}
       onAction={() => setPageNumber(pageNumber - 1)}
     />

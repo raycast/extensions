@@ -53,6 +53,7 @@ const flatChildCollections = (childColls: Collection[], prefix = "") => {
       value: elem._id,
       label: title,
       name: elem.title,
+      cover: Array.isArray(elem.cover) && elem.cover.length > 0 ? elem.cover[0] : undefined,
     });
 
     if (elem.children) {
@@ -70,6 +71,10 @@ const flatCollections = (sortedColls: OrderedCollections) => {
       value: coll[2]?._id,
       label: title,
       name: coll[2]?.title,
+      cover:
+        Array.isArray(coll[2]?.cover) && (coll[2]?.cover as unknown as string[])?.length > 0
+          ? (coll[2]?.cover as unknown as string[])[0]
+          : undefined,
     });
 
     if (coll[2]?.children) {

@@ -1,5 +1,8 @@
 # Slack Changelog
 
+## [Fix Send Message Missing Scope Error] - 2025-08-25
+- Add missing `chat:write` scope to fix “missing_scope” error when using the **Send Message** command.
+
 ## [Channel, Channel History bug fixes and "Search Message" to Tools] - 2025-07-10
 - Added the `search.message` slack api to enable AI to use the tool (search for full messages)
 - Fixed failure to find channelId when using get-channel-history with AI

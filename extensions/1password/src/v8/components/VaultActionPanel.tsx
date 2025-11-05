@@ -10,7 +10,7 @@ export function VaultActionPanel({ vault }: { account: User | undefined; vault: 
       <ActionPanel.Section>
         <Action
           title="Enter Vault"
-          icon={Icon.Trash}
+          icon={Icon.Folder}
           onAction={() => push(<Items flags={[`--vault=${vault.id}`]} />)}
         />
         {SwitchAccount()}

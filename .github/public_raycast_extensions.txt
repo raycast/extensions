@@ -19,6 +19,7 @@ devutils
 arc
 netlify
 pinata
+plane
 grafbase
 tailscale
 todoist
@@ -61,4 +62,8 @@ clipmate
 send-ai
 kaleidoscope
 exa
+v0-by-vercel
+github-copilot
+cursor-agents
+circleback
 pieces-raycast

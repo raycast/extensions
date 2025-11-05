@@ -79,7 +79,7 @@ export interface Document {
 
 export type Doc = Pick<
   Document,
-  "id" | "title" | "created_at" | "creation_source" | "public" | "notes_markdown" | "sharing_link_visibility"
+  "id" | "title" | "created_at" | "creation_source" | "public" | "notes_markdown" | "sharing_link_visibility" | "people"
 >;
 
 // Notes structure
@@ -187,6 +187,24 @@ export interface Creator {
 export interface Attendee {
   name?: string;
   email?: string;
+  details?: {
+    person?: {
+      name?: {
+        fullName?: string;
+      };
+      avatar?: string;
+      linkedin?: {
+        handle?: string;
+      };
+      employment?: {
+        name?: string;
+        title?: string;
+      };
+    };
+    company?: {
+      name?: string;
+    };
+  };
 }
 
 export interface TranscriptSegment {
@@ -240,4 +258,80 @@ export interface FoldersResponse {
   lists: {
     [key: string]: Folder;
   };
+}
+
+// Person type from cache
+export interface Person {
+  id: string;
+  created_at: string;
+  user_id: string;
+  name: string;
+  job_title: string;
+  company_name: string;
+  company_description: string;
+  links: Array<{
+    url: string;
+    title: string;
+  }>;
+  email: string;
+  avatar: string;
+  favorite_panel_templates?: Array<{
+    template_id: string;
+  }>;
+  user_type?: string;
+  subscription_name?: string;
+  // Meeting metadata
+  meetingCount?: number;
+  lastMeetingDate?: string;
+  meetingIds?: string[];
+}
+
+// Company type (extracted from people)
+export interface Company {
+  name: string;
+  description: string;
+  people: Person[];
+  // Company metadata
+  totalMeetings?: number;
+  lastMeetingDate?: string;
+}
+
+// Recipes types
+export interface RecipeConfig {
+  instructions: string;
+  generate_artifact?: boolean;
+  examples?: unknown[];
+}
+
+export interface Recipe {
+  slug: string;
+  config: RecipeConfig;
+  creation_context?: string;
+  id?: string;
+  user_id?: string;
+  workspace_id?: string | null;
+  visibility?: string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  source_recipe_id?: string | null;
+}
+
+export interface DefaultRecipe {
+  slug: string;
+  defaultConfig: RecipeConfig;
+}
+
+export interface RecipesApiResponse {
+  userRecipes?: Recipe[];
+  defaultRecipes?: DefaultRecipe[];
+  sharedRecipes?: Recipe[];
+  publicRecipes?: Recipe[];
+}
+
+export interface RecipesListResult {
+  featureEnabled: boolean;
+  userRecipes: Recipe[];
+  defaultRecipes?: DefaultRecipe[];
+  sharedRecipes?: Recipe[];
 }

@@ -174,7 +174,7 @@ function SearchListItem({ repo, isFavorite, onToggleFavorite }: SearchListItemPr
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy Links">
-            <Action.CopyToClipboard title={"Copy Repository link"} content={repo.url} icon={Icon.CopyClipboard} />
+            <Action.CopyToClipboard title={"Copy Repository Link"} content={repo.url} icon={Icon.CopyClipboard} />
             {repo.clone.ssh ? (
               <Action.CopyToClipboard
                 title={"Copy Git Clone Command (SSH)"}

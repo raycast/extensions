@@ -1,8 +1,9 @@
-import { List } from "@raycast/api";
-import type { BranchInfo } from "../../utils/branch.js";
-import type { StatusInfo } from "../../utils/status.js";
+import { Color, List } from "@raycast/api";
+import type { BranchInfo } from "../../utils/git-status/branch.js";
+import type { StatusInfo } from "../../utils/git-status/porcelain.js";
 import { GitStatusTags } from "./GitStatusTags.js";
 import { useMemo } from "react";
+import { getProgressIcon } from "@raycast/utils";
 
 interface Props {
   branch: BranchInfo;
@@ -25,6 +26,24 @@ export function GitStatusItemDetail({ branch, status, diff }: Props) {
     );
   }, [branch.ahead, branch.behind, branch.upstream]);
 
+  const renamedFile = useMemo(() => {
+    if (!status.changes.changeScore && !status.origPath) {
+      return null;
+    }
+
+    const progressIcon = getProgressIcon(status.changes.changeScore ?? 0 / 100, Color.Magenta);
+    return (
+      <>
+        <List.Item.Detail.Metadata.Label title="Original path" text={status.origPath} />
+        <List.Item.Detail.Metadata.Label
+          title="Similarity to original file"
+          text={status.changes.changeScore + "%"}
+          icon={progressIcon}
+        />
+      </>
+    );
+  }, [status.changes.changeScore, status.origPath]);
+
   const diffMarkdown = useMemo(() => {
     if (!diff) {
       return null;
@@ -39,8 +58,8 @@ export function GitStatusItemDetail({ branch, status, diff }: Props) {
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="File path" text={status.fileName} />
-          {status.origPath ? <List.Item.Detail.Metadata.Label title="Original path" text={status.origPath} /> : null}
-          <GitStatusTags stagedStatus={status.staged} unstagedStatus={status.unstaged} />
+          {renamedFile}
+          <GitStatusTags changes={status.changes} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Branch" text={branch.name} />
           {upstreamData}

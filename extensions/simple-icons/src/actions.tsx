@@ -1,11 +1,10 @@
 /* eslint @raycast/prefer-title-case: off */
 import { useEffect, useState } from "react";
-import path from "node:path";
-import { Action, Icon, environment } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
 import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, LaunchContext } from "./types.js";
-import { copySvg, getFileLink, makeCopyToDownload } from "./utils.js";
+import { copySvg, getAbsoluteFileLink, launchSocialBadge, makeCopyToDownload } from "./utils.js";
 import Releases from "./views/releases.js";
 
 type ActionProps = {
@@ -23,6 +22,10 @@ export const OpenWith = ({ icon, version }: ActionProps) => {
   }, []);
   return destinationPath ? <Action.OpenWith path={destinationPath} /> : null;
 };
+
+export const MakeBadge = ({ icon, version }: ActionProps) => (
+  <Action icon="shieldsdotio.svg" title="Make Badge" onAction={() => launchSocialBadge(icon, version)} />
+);
 
 export const CopySvg = ({ icon, version }: ActionProps) => {
   return <Action title="Copy SVG" onAction={() => copySvg({ version, icon })} icon={Icon.Clipboard} />;
@@ -71,7 +74,7 @@ export const Supports = () => (
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml"
     />
     <Action.OpenInBrowser
-      title="Report an Oudated Icon"
+      title="Report an Outdated Icon"
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=update+icon%2Fdata&template=icon_update.yml"
     />
   </>
@@ -83,7 +86,7 @@ export const LaunchCommand = ({ callbackLaunchOptions, icon, version }: LaunchCo
     icon={Icon.Checkmark}
     onAction={async () => {
       callbackLaunchCommand(callbackLaunchOptions, {
-        icon: { ...icon, file: path.join(environment.assetsPath, getFileLink(icon.slug, version)) },
+        icon: { ...icon, file: getAbsoluteFileLink(icon.slug, version) },
       });
     }}
   />
@@ -91,6 +94,7 @@ export const LaunchCommand = ({ callbackLaunchOptions, icon, version }: LaunchCo
 
 export const actions = {
   OpenWith,
+  MakeBadge,
   CopySvg,
   CopyColor,
   CopyTitle,
@@ -105,6 +109,7 @@ export type ActionType = keyof typeof actions;
 
 export const defaultActionsOrder: ActionType[] = [
   "OpenWith",
+  "MakeBadge",
   "CopySvg",
   "CopyColor",
   "CopyTitle",

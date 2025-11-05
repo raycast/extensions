@@ -8,7 +8,7 @@ export default async function Command() {
   try {
     await changeVolume(100);
     await showHUD("Volume set to 100%");
-  } catch (error) {
+  } catch {
     await showHUD("No active device");
   }
 }

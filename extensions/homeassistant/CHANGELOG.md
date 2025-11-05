@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Windows] - 2025-08-25
+
+Add Windows support
+
 ## [AI Tools Enhancement] - 2025-04-29
 
 - Improved `get-entities` tool to only return essential entity information

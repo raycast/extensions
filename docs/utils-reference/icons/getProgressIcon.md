@@ -2,7 +2,7 @@
 
 Icon to represent the progress of a task, a project, _something_.
 
-![Progress Icon example](../../.gitbook/assets/utils-progress-icon.png)
+![Progress Icon example](../.gitbook/assets/utils-progress-icon.png)
 
 ## Signature
 

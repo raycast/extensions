@@ -1,5 +1,10 @@
 # Time Tracking Changelog
 
+## [Rename Timers + Modernize] - 2025-08-14
+
+- Rename timers using Edit Form (ref: [Issue #20915](https://github.com/raycast/extensions/issues/20915))
+- Modernize to use latest Raycast config
+
 ## [Editing Timers] - 2025-02-28
 
 Edit stopped timers to correct any issues with the start/end times.

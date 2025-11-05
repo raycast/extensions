@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import useSWR, { useSWRConfig } from "swr";
 import { fakeGameData, fakeGameDataSimpleMany, fakeGames, isFakeData } from "./fake";
 import { GameData, GameDataResponse, GameDataSimple, GameDataSimpleResponse, GameSimple } from "../types";

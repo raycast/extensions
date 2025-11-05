@@ -1,21 +1,15 @@
+import path from "path";
+import { mkdir } from "fs/promises";
 import { exec } from "child_process";
 import { promisify } from "util";
 
-import { REPOSITORY_TYPE, COMMAND } from "../constants";
+import { REPOSITORY_TYPE, COMMAND, PREVIEW_QRCODE_DIR } from "../constants";
 import { RepositoryType } from "../types";
 
 const execAsync = promisify(exec);
 
-function getEnvPathWithBrew() {
-  return [process.env.PATH, "/usr/bin", "/usr/local/bin", "/opt/homebrew/bin"].join(":");
-}
-
-function getExecEnv() {
-  return { ...process.env, PATH: getEnvPathWithBrew() };
-}
-
 export async function openProject(cliPath: string, projectPath: string) {
-  const command = `${cliPath} open --project ${projectPath}`;
+  const command = `${cliPath} open --project ${JSON.stringify(projectPath)}`;
 
   const { stderr, stdout } = await execAsync(command);
 
@@ -31,6 +25,35 @@ export async function openProject(cliPath: string, projectPath: string) {
 
   if (stderr && ideStarted && stderr.includes("✔ open")) {
     return true;
+  }
+
+  if (stderr && ideStarted && stderr.includes("✖ preparing")) {
+    throw new Error(stderr);
+  }
+
+  throw new Error(stderr || stdout);
+}
+
+export async function previewProject(cliPath: string, projectPath: string, projectId: string) {
+  await mkdir(PREVIEW_QRCODE_DIR, { recursive: true });
+
+  const qrcodePath = path.resolve(PREVIEW_QRCODE_DIR, `${projectId}.png`);
+
+  const command = `${cliPath} preview --project ${JSON.stringify(projectPath)} --qr-size small --qr-format image --qr-output ${qrcodePath}`;
+  const { stderr, stdout } = await execAsync(command);
+
+  console.log("🚀 ~ previewProject ~ stdout:", stdout);
+  console.log("🚀 ~ previewProject ~ stderr:", stderr);
+
+  const ideStarted =
+    stderr && (stderr.includes("IDE server has started") || stderr.includes("IDE server started successfully"));
+
+  if (stderr && !ideStarted) {
+    throw new Error(stderr);
+  }
+
+  if (stderr && ideStarted && stderr.includes("✔ preview")) {
+    return qrcodePath;
   }
 
   if (stderr && ideStarted && stderr.includes("✖ preparing")) {
@@ -69,4 +92,12 @@ export async function getRepositoryBranch(cwd: string, repositoryType: Repositor
 
   if (stderr) return null;
   return stdout.trim();
+}
+
+function getExecEnv() {
+  return { ...process.env, PATH: joinHomebrewPath() };
+}
+
+function joinHomebrewPath() {
+  return [process.env.PATH, "/usr/local/bin", "/opt/homebrew/bin", "/opt/homebrew/sbin"].filter(Boolean).join(":");
 }

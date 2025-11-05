@@ -17,6 +17,24 @@
     "2fa"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "filterSpam",
+      "type": "checkbox",
+      "label": "Filter Out Spam",
+      "description": "When enabled, messages labeled as spam will not be shown.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "filterUnknownSenders",
+      "type": "checkbox",
+      "label": "Filter Out Unknown Senders",
+      "description": "When enabled, messages from unknown senders will not be shown.",
+      "default": false,
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "open-chat",

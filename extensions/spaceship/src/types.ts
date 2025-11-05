@@ -12,6 +12,7 @@ export type DomainInfo = {
   autoRenew: boolean;
   registrationDate: string;
   expirationDate: string;
+  lifecycleStatus: "creating" | "registered" | "grace1" | "grace2" | "redemption";
   privacyProtection: {
     level: "public" | "high";
     contactForm: boolean;

@@ -1,5 +1,9 @@
 # JWT-Decoder Changelog
 
+## [Windows Support] - 2025-10-13
+
+- Added support for Windows platform
+
 ## [Maintenance] - 2025-03-24
 
 - Updated dependencies

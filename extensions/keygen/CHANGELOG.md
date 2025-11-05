@@ -1,5 +1,16 @@
 # Keygen Changelog
 
+## [List & Revoke API Tokens + Windows Support] - 2025-09-09
+
+- List API Tokens and Revoke old ones
+- Add Windows Support
+
+## [List Users + API Usage] - 2025-08-12
+
+- List, Create and Delete Users
+- View API Usage
+- Fix typo in command title: "Voew Licenses" -> "View Licenses"
+
 ## [List & Add Products + License Enhancements] - 2025-07-07
 
 - List Products and Create new ones

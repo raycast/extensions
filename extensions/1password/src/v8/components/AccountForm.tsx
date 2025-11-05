@@ -17,7 +17,7 @@ export function AccountForm({ reset = false }: { reset?: boolean }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Sign In"
+            title="Sign in"
             icon={Icon.Key}
             onSubmit={async (values) => {
               const toast = await showToast({

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { Contact, Preferences, InvoiceFormValues } from "./types";
 import { fetchContacts, createInvoice } from "./services/freeagent";
-import { getContactDisplayName } from "./utils/formatting";
+import { getContactDisplayName, formatDateForAPI } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 
 const CreateNewInvoice = function Command() {
@@ -35,7 +35,7 @@ const CreateNewInvoice = function Command() {
     try {
       const invoiceData = {
         contact: values.contact,
-        dated_on: values.dated_on?.toISOString().split("T")[0] || new Date().toISOString().split("T")[0],
+        dated_on: values.dated_on ? formatDateForAPI(values.dated_on) : formatDateForAPI(new Date()),
         payment_terms_in_days: parseInt(values.payment_terms_in_days) || 30,
         send_new_invoice_emails: values.send_new_invoice_emails || false,
         ...(values.reference && { reference: values.reference }),
