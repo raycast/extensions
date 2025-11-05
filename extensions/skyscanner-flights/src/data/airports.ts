@@ -1,6 +1,6 @@
 // Auto-generated airport data from OpenFlights
 // Source: https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat
-// Total airports: 6054
+// Total airports: 5853
 
 export interface Airport {
   iata: string;
@@ -62,12 +62,6 @@ export const airports: Airport[] = [
     iata: "SFJ",
     name: "Kangerlussuaq Airport",
     city: "Sondrestrom",
-    country: "Greenland",
-  },
-  {
-    iata: "THU",
-    name: "Thule Air Base",
-    city: "Thule",
     country: "Greenland",
   },
   {
@@ -2267,12 +2261,6 @@ export const airports: Airport[] = [
     country: "Finland",
   },
   {
-    iata: "UTI",
-    name: "Utti Air Base",
-    city: "Utti",
-    country: "Finland",
-  },
-  {
     iata: "VAA",
     name: "Vaasa Airport",
     city: "Vaasa",
@@ -2813,12 +2801,6 @@ export const airports: Airport[] = [
     country: "Netherlands",
   },
   {
-    iata: "GLZ",
-    name: "Gilze Rijen Air Base",
-    city: "Gilze-rijen",
-    country: "Netherlands",
-  },
-  {
     iata: "DHR",
     name: "De Kooy Airport",
     city: "De Kooy",
@@ -2831,39 +2813,15 @@ export const airports: Airport[] = [
     country: "Netherlands",
   },
   {
-    iata: "LWR",
-    name: "Leeuwarden Air Base",
-    city: "Leeuwarden",
-    country: "Netherlands",
-  },
-  {
     iata: "RTM",
     name: "Rotterdam The Hague Airport",
     city: "Rotterdam",
     country: "Netherlands",
   },
   {
-    iata: "UTC",
-    name: "Soesterberg Air Base",
-    city: "Soesterberg",
-    country: "Netherlands",
-  },
-  {
     iata: "ENS",
     name: "Twente Airport",
     city: "Enschede",
-    country: "Netherlands",
-  },
-  {
-    iata: "LID",
-    name: "Valkenburg Naval Air Base",
-    city: "Valkenburg",
-    country: "Netherlands",
-  },
-  {
-    iata: "WOE",
-    name: "Woensdrecht Air Base",
-    city: "Woensdrecht",
     country: "Netherlands",
   },
   {
@@ -2978,12 +2936,6 @@ export const airports: Airport[] = [
     iata: "SGD",
     name: "Sønderborg Airport",
     city: "Soenderborg",
-    country: "Denmark",
-  },
-  {
-    iata: "SKS",
-    name: "Skrydstrup Air Base",
-    city: "Skrydstrup",
     country: "Denmark",
   },
   {
@@ -3230,12 +3182,6 @@ export const airports: Airport[] = [
     iata: "SZZ",
     name: "Szczecin-Goleniów Solidarność Airport",
     city: "Szczecin",
-    country: "Poland",
-  },
-  {
-    iata: "OSP",
-    name: "Redzikowo Air Base",
-    city: "Slupsk",
     country: "Poland",
   },
   {
@@ -3497,18 +3443,6 @@ export const airports: Airport[] = [
     country: "Sweden",
   },
   {
-    iata: "SPM",
-    name: "Spangdahlem Air Base",
-    city: "Spangdahlem",
-    country: "Germany",
-  },
-  {
-    iata: "RMS",
-    name: "Ramstein Air Base",
-    city: "Ramstein",
-    country: "Germany",
-  },
-  {
     iata: "GHF",
     name: "[Duplicate] Giebelstadt Army Air Field",
     city: "Giebelstadt",
@@ -3545,21 +3479,9 @@ export const airports: Airport[] = [
     country: "Germany",
   },
   {
-    iata: "GKE",
-    name: "Geilenkirchen Air Base",
-    city: "Geilenkirchen",
-    country: "Germany",
-  },
-  {
     iata: "RLG",
     name: "Rostock-Laage Airport",
     city: "Laage",
-    country: "Germany",
-  },
-  {
-    iata: "WBG",
-    name: "Schleswig Air Base",
-    city: "Schleswig",
     country: "Germany",
   },
   {
@@ -3569,21 +3491,9 @@ export const airports: Airport[] = [
     country: "Germany",
   },
   {
-    iata: "FEL",
-    name: "Fürstenfeldbruck Air Base",
-    city: "Fuerstenfeldbruck",
-    country: "Germany",
-  },
-  {
     iata: "IGS",
     name: "Ingolstadt Manching Airport",
     city: "Ingolstadt",
-    country: "Germany",
-  },
-  {
-    iata: "GUT",
-    name: "Gütersloh Air Base",
-    city: "Guetersloh",
     country: "Germany",
   },
   {
@@ -3650,12 +3560,6 @@ export const airports: Airport[] = [
     iata: "HRS",
     name: "Harrismith Airport",
     city: "Harrismith",
-    country: "South Africa",
-  },
-  {
-    iata: "HDS",
-    name: "Hoedspruit Air Force Base Airport",
-    city: "Hoedspruit",
     country: "South Africa",
   },
   {
@@ -3878,12 +3782,6 @@ export const airports: Airport[] = [
     iata: "PRY",
     name: "Wonderboom Airport",
     city: "Pretoria",
-    country: "South Africa",
-  },
-  {
-    iata: "WKF",
-    name: "Waterkloof Air Force Base",
-    city: "Waterkloof",
     country: "South Africa",
   },
   {
@@ -4610,12 +4508,6 @@ export const airports: Airport[] = [
     iata: "MVZ",
     name: "Masvingo International Airport",
     city: "Masvingo",
-    country: "Zimbabwe",
-  },
-  {
-    iata: "GWE",
-    name: "Thornhill Air Base",
-    city: "Gwert",
     country: "Zimbabwe",
   },
   {
@@ -5759,21 +5651,9 @@ export const airports: Airport[] = [
     country: "Spain",
   },
   {
-    iata: "OZP",
-    name: "Moron Air Base",
-    city: "Sevilla",
-    country: "Spain",
-  },
-  {
     iata: "PNA",
     name: "Pamplona Airport",
     city: "Pamplona",
-    country: "Spain",
-  },
-  {
-    iata: "REU",
-    name: "Reus Air Base",
-    city: "Reus",
     country: "Spain",
   },
   {
@@ -5843,12 +5723,6 @@ export const airports: Airport[] = [
     country: "Spain",
   },
   {
-    iata: "ZAZ",
-    name: "Zaragoza Air Base",
-    city: "Zaragoza",
-    country: "Spain",
-  },
-  {
     iata: "SVQ",
     name: "Sevilla Airport",
     city: "Sevilla",
@@ -5894,12 +5768,6 @@ export const airports: Airport[] = [
     iata: "EGC",
     name: "Bergerac-Roumanière Airport",
     city: "Bergerac",
-    country: "France",
-  },
-  {
-    iata: "CNG",
-    name: "Cognac-Châteaubernard (BA 709) Air Base",
-    city: "Cognac",
     country: "France",
   },
   {
@@ -6071,12 +5939,6 @@ export const airports: Airport[] = [
     country: "France",
   },
   {
-    iata: "SOZ",
-    name: "Solenzara (BA 126) Air Base",
-    city: "Solenzara",
-    country: "France",
-  },
-  {
     iata: "AUF",
     name: "Auxerre-Branches Airport",
     city: "Auxerre",
@@ -6197,12 +6059,6 @@ export const airports: Airport[] = [
     country: "France",
   },
   {
-    iata: "XOG",
-    name: "Orange-Caritat (BA 115) Air Base",
-    city: "Orange",
-    country: "France",
-  },
-  {
     iata: "PGF",
     name: "Perpignan-Rivesaltes (Llabanère) Airport",
     city: "Perpignan",
@@ -6245,12 +6101,6 @@ export const airports: Airport[] = [
     country: "France",
   },
   {
-    iata: "EVX",
-    name: "Évreux-Fauville (BA 105) Air Base",
-    city: "Evreux",
-    country: "France",
-  },
-  {
     iata: "LEH",
     name: "Le Havre Octeville Airport",
     city: "Le Havre",
@@ -6260,12 +6110,6 @@ export const airports: Airport[] = [
     iata: "XAB",
     name: "Abbeville",
     city: "Abbeville",
-    country: "France",
-  },
-  {
-    iata: "ORE",
-    name: "Orléans-Bricy (BA 123) Air Base",
-    city: "Orleans",
     country: "France",
   },
   {
@@ -6305,12 +6149,6 @@ export const airports: Airport[] = [
     country: "France",
   },
   {
-    iata: "CSF",
-    name: "Creil Air Base",
-    city: "Creil",
-    country: "France",
-  },
-  {
     iata: "CDG",
     name: "Charles de Gaulle International Airport",
     city: "Paris",
@@ -6332,12 +6170,6 @@ export const airports: Airport[] = [
     iata: "POX",
     name: "Pontoise - Cormeilles-en-Vexin Airport",
     city: "Pontoise",
-    country: "France",
-  },
-  {
-    iata: "VIY",
-    name: "Villacoublay-Vélizy (BA 107) Air Base",
-    city: "Villacoublay",
     country: "France",
   },
   {
@@ -6419,12 +6251,6 @@ export const airports: Airport[] = [
     country: "France",
   },
   {
-    iata: "LDV",
-    name: "Landivisiau Air Base",
-    city: "Landivisiau",
-    country: "France",
-  },
-  {
     iata: "CFR",
     name: "Caen-Carpiquet Airport",
     city: "Caen",
@@ -6497,12 +6323,6 @@ export const airports: Airport[] = [
     country: "France",
   },
   {
-    iata: "MZM",
-    name: "Metz-Frescaty (BA 128) Air Base",
-    city: "Metz",
-    country: "France",
-  },
-  {
     iata: "EPL",
     name: "Épinal-Mirecourt Airport",
     city: "Epinal",
@@ -6512,12 +6332,6 @@ export const airports: Airport[] = [
     iata: "ENC",
     name: "Nancy-Essey Airport",
     city: "Nancy",
-    country: "France",
-  },
-  {
-    iata: "RHE",
-    name: "Reims-Champagne (BA 112) Air Base",
-    city: "Reims",
     country: "France",
   },
   {
@@ -6549,18 +6363,6 @@ export const airports: Airport[] = [
     name: "St Pierre Airport",
     city: "St.-pierre",
     country: "Saint Pierre and Miquelon",
-  },
-  {
-    iata: "PYR",
-    name: "Andravida Air Base",
-    city: "Andravida",
-    country: "Greece",
-  },
-  {
-    iata: "AGQ",
-    name: "Agrinion Air Base",
-    city: "Agrinion",
-    country: "Greece",
   },
   {
     iata: "AXD",
@@ -6791,12 +6593,6 @@ export const airports: Airport[] = [
     country: "Italy",
   },
   {
-    iata: "LCC",
-    name: "Lecce Galatina Air Base",
-    city: "Lecce",
-    country: "Italy",
-  },
-  {
     iata: "PSR",
     name: "Pescara International Airport",
     city: "Pescara",
@@ -6851,21 +6647,9 @@ export const airports: Airport[] = [
     country: "Italy",
   },
   {
-    iata: "NSY",
-    name: "Sigonella Navy Air Base",
-    city: "Sigonella",
-    country: "Italy",
-  },
-  {
     iata: "AHO",
     name: "Alghero-Fertilia Airport",
     city: "Alghero",
-    country: "Italy",
-  },
-  {
-    iata: "DCI",
-    name: "Decimomannu Air Base",
-    city: "Decimomannu",
     country: "Italy",
   },
   {
@@ -6932,12 +6716,6 @@ export const airports: Airport[] = [
     iata: "CUF",
     name: "Cuneo International Airport",
     city: "Cuneo",
-    country: "Italy",
-  },
-  {
-    iata: "AVB",
-    name: "Aviano Air Base",
-    city: "Aviano",
     country: "Italy",
   },
   {
@@ -7031,12 +6809,6 @@ export const airports: Airport[] = [
     country: "Italy",
   },
   {
-    iata: "QLT",
-    name: "Latina Air Base",
-    city: "Latina",
-    country: "Italy",
-  },
-  {
     iata: "NAP",
     name: "Naples International Airport",
     city: "Naples",
@@ -7052,12 +6824,6 @@ export const airports: Airport[] = [
     iata: "FLR",
     name: "Peretola Airport",
     city: "Florence",
-    country: "Italy",
-  },
-  {
-    iata: "GRS",
-    name: "Grosseto Air Base",
-    city: "Grosseto",
     country: "Italy",
   },
   {
@@ -7106,12 +6872,6 @@ export const airports: Airport[] = [
     iata: "PED",
     name: "Pardubice Airport",
     city: "Pardubice",
-    country: "Czech Republic",
-  },
-  {
-    iata: "PRV",
-    name: "Přerov Air Base",
-    city: "Prerov",
     country: "Czech Republic",
   },
   {
@@ -7175,21 +6935,9 @@ export const airports: Airport[] = [
     country: "Israel",
   },
   {
-    iata: "VTM",
-    name: "Nevatim Air Base",
-    city: "Nevatim",
-    country: "Israel",
-  },
-  {
     iata: "VDA",
     name: "Ovda International Airport",
     city: "Ovda",
-    country: "Israel",
-  },
-  {
-    iata: "MIP",
-    name: "Ramon Air Base",
-    city: "Ramon",
     country: "Israel",
   },
   {
@@ -7233,12 +6981,6 @@ export const airports: Airport[] = [
     name: "Vienna International Airport",
     city: "Vienna",
     country: "Austria",
-  },
-  {
-    iata: "AVR",
-    name: "Alverca Air Base",
-    city: "Alverca",
-    country: "Portugal",
   },
   {
     iata: "SMA",
@@ -7298,12 +7040,6 @@ export const airports: Airport[] = [
     iata: "TER",
     name: "Lajes Airport",
     city: "Lajes (terceira Island)",
-    country: "Portugal",
-  },
-  {
-    iata: "QLR",
-    name: "Monte Real Air Base",
-    city: "Monte Real",
     country: "Portugal",
   },
   {
@@ -7487,12 +7223,6 @@ export const airports: Airport[] = [
     country: "Switzerland",
   },
   {
-    iata: "EML",
-    name: "Emmen Air Base",
-    city: "Emmen",
-    country: "Switzerland",
-  },
-  {
     iata: "LUG",
     name: "Lugano Airport",
     city: "Lugano",
@@ -7535,20 +7265,8 @@ export const airports: Airport[] = [
     country: "Turkey",
   },
   {
-    iata: "ANK",
-    name: "Etimesgut Air Base",
-    city: "Ankara",
-    country: "Turkey",
-  },
-  {
     iata: "ADA",
     name: "Adana Airport",
-    city: "Adana",
-    country: "Turkey",
-  },
-  {
-    iata: "UAB",
-    name: "İncirlik Air Base",
     city: "Adana",
     country: "Turkey",
   },
@@ -7628,12 +7346,6 @@ export const airports: Airport[] = [
     iata: "BDM",
     name: "Bandırma Airport",
     city: "Bandirma",
-    country: "Turkey",
-  },
-  {
-    iata: "ESK",
-    name: "Eskişehir Air Base",
-    city: "Eskisehir",
     country: "Turkey",
   },
   {
@@ -9413,12 +9125,6 @@ export const airports: Airport[] = [
     country: "Saudi Arabia",
   },
   {
-    iata: "DHA",
-    name: "King Abdulaziz Air Base",
-    city: "Dhahran",
-    country: "Saudi Arabia",
-  },
-  {
     iata: "GIZ",
     name: "Jizan Regional Airport",
     city: "Gizan",
@@ -9851,12 +9557,6 @@ export const airports: Airport[] = [
     country: "Lebanon",
   },
   {
-    iata: "KYE",
-    name: "Rene Mouawad Air Base",
-    city: "Kleiat",
-    country: "Lebanon",
-  },
-  {
     iata: "AUH",
     name: "Abu Dhabi International Airport",
     city: "Abu Dhabi",
@@ -9865,12 +9565,6 @@ export const airports: Airport[] = [
   {
     iata: "AZI",
     name: "Bateen Airport",
-    city: "Abu Dhabi",
-    country: "United Arab Emirates",
-  },
-  {
-    iata: "DHF",
-    name: "Al Dhafra Air Base",
     city: "Abu Dhabi",
     country: "United Arab Emirates",
   },
@@ -9899,18 +9593,6 @@ export const airports: Airport[] = [
     country: "United Arab Emirates",
   },
   {
-    iata: "KHS",
-    name: "Khasab Air Base",
-    city: "Khasab",
-    country: "Oman",
-  },
-  {
-    iata: "MSH",
-    name: "Masirah Air Base",
-    city: "Masirah",
-    country: "Oman",
-  },
-  {
     iata: "MCT",
     name: "Muscat International Airport",
     city: "Muscat",
@@ -9920,12 +9602,6 @@ export const airports: Airport[] = [
     iata: "SLL",
     name: "Salalah Airport",
     city: "Salalah",
-    country: "Oman",
-  },
-  {
-    iata: "TTH",
-    name: "Thumrait Air Base",
-    city: "Thumrait",
     country: "Oman",
   },
   {
@@ -9953,12 +9629,6 @@ export const airports: Airport[] = [
     country: "Pakistan",
   },
   {
-    iata: "JAG",
-    name: "Shahbaz Air Base",
-    city: "Jacobsbad",
-    country: "Pakistan",
-  },
-  {
     iata: "KHI",
     name: "Jinnah International Airport",
     city: "Karachi",
@@ -9980,12 +9650,6 @@ export const airports: Airport[] = [
     iata: "MFG",
     name: "Muzaffarabad Airport",
     city: "Muzaffarabad",
-    country: "Pakistan",
-  },
-  {
-    iata: "MWD",
-    name: "Mianwali Air Base",
-    city: "Mianwali",
     country: "Pakistan",
   },
   {
@@ -10097,12 +9761,6 @@ export const airports: Airport[] = [
     country: "Syria",
   },
   {
-    iata: "DEZ",
-    name: "Deir ez-Zor Air Base",
-    city: "Deire Zor",
-    country: "Syria",
-  },
-  {
     iata: "LTK",
     name: "Bassel Al-Assad International Airport",
     city: "Latakia",
@@ -10137,12 +9795,6 @@ export const airports: Airport[] = [
     name: "Saipan International Airport",
     city: "Saipan",
     country: "Northern Mariana Islands",
-  },
-  {
-    iata: "UAM",
-    name: "Andersen Air Force Base",
-    city: "Andersen",
-    country: "Guam",
   },
   {
     iata: "GUM",
@@ -10256,12 +9908,6 @@ export const airports: Airport[] = [
     iata: "TNN",
     name: "Tainan Airport",
     city: "Tainan",
-    country: "Taiwan",
-  },
-  {
-    iata: "HSZ",
-    name: "Hsinchu Air Base",
-    city: "Hsinchu",
     country: "Taiwan",
   },
   {
@@ -10571,12 +10217,6 @@ export const airports: Airport[] = [
     country: "Japan",
   },
   {
-    iata: "TKS",
-    name: "Tokushima Airport/JMSDF Air Base",
-    city: "Tokushima",
-    country: "Japan",
-  },
-  {
     iata: "TAK",
     name: "Takamatsu Airport",
     city: "Takamatsu",
@@ -10619,12 +10259,6 @@ export const airports: Airport[] = [
     country: "Japan",
   },
   {
-    iata: "MSJ",
-    name: "Misawa Air Base",
-    city: "Misawa",
-    country: "Japan",
-  },
-  {
     iata: "SDJ",
     name: "Sendai Airport",
     city: "Sendai",
@@ -10652,12 +10286,6 @@ export const airports: Airport[] = [
     iata: "HND",
     name: "Tokyo Haneda International Airport",
     city: "Tokyo",
-    country: "Japan",
-  },
-  {
-    iata: "OKO",
-    name: "Yokota Air Base",
-    city: "Yokota",
     country: "Japan",
   },
   {
@@ -10709,18 +10337,6 @@ export const airports: Airport[] = [
     country: "South Korea",
   },
   {
-    iata: "SSN",
-    name: "Seoul Air Base (K-16)",
-    city: "Seoul East",
-    country: "South Korea",
-  },
-  {
-    iata: "OSN",
-    name: "Osan Air Base",
-    city: "Osan",
-    country: "South Korea",
-  },
-  {
     iata: "GMP",
     name: "Gimpo International Airport",
     city: "Seoul",
@@ -10754,12 +10370,6 @@ export const airports: Airport[] = [
     iata: "OKA",
     name: "Naha Airport",
     city: "Okinawa",
-    country: "Japan",
-  },
-  {
-    iata: "DNA",
-    name: "Kadena Air Base",
-    city: "Kadena",
     country: "Japan",
   },
   {
@@ -11804,12 +11414,6 @@ export const airports: Airport[] = [
     iata: "RAO",
     name: "Leite Lopes Airport",
     city: "Ribeirao Preto",
-    country: "Brazil",
-  },
-  {
-    iata: "SNZ",
-    name: "Santa Cruz Air Force Base",
-    city: "Rio De Janeiro",
     country: "Brazil",
   },
   {
@@ -13661,12 +13265,6 @@ export const airports: Airport[] = [
     country: "Russia",
   },
   {
-    iata: "KLD",
-    name: "Migalovo Air Base",
-    city: "Tver",
-    country: "Russia",
-  },
-  {
     iata: "VOZ",
     name: "Voronezh International Airport",
     city: "Voronezh",
@@ -13886,12 +13484,6 @@ export const airports: Airport[] = [
     iata: "CMB",
     name: "Bandaranaike International Colombo Airport",
     city: "Colombo",
-    country: "Sri Lanka",
-  },
-  {
-    iata: "ACJ",
-    name: "Anuradhapura Air Force Base",
-    city: "Anuradhapura",
     country: "Sri Lanka",
   },
   {
@@ -14465,12 +14057,6 @@ export const airports: Airport[] = [
     country: "India",
   },
   {
-    iata: "TJV",
-    name: "Tanjore Air Force Base",
-    city: "Tanjore",
-    country: "India",
-  },
-  {
     iata: "TIR",
     name: "Tirupati Airport",
     city: "Tirupeti",
@@ -14636,12 +14222,6 @@ export const airports: Airport[] = [
     iata: "HAN",
     name: "Noi Bai International Airport",
     city: "Hanoi",
-    country: "Vietnam",
-  },
-  {
-    iata: "NHA",
-    name: "Nha Trang Air Base",
-    city: "Nhatrang",
     country: "Vietnam",
   },
   {
@@ -14999,12 +14579,6 @@ export const airports: Airport[] = [
     country: "Indonesia",
   },
   {
-    iata: "MES",
-    name: "Soewondo Air Force Base",
-    city: "Medan",
-    country: "Indonesia",
-  },
-  {
     iata: "FLZ",
     name: "Dr Ferdinand Lumban Tobing Airport",
     city: "Sibolga",
@@ -15153,18 +14727,6 @@ export const airports: Airport[] = [
     name: "Cakung Airport",
     city: "Baucau",
     country: "East Timor",
-  },
-  {
-    iata: "QPG",
-    name: "Paya Lebar Air Base",
-    city: "Paya Lebar",
-    country: "Singapore",
-  },
-  {
-    iata: "TGA",
-    name: "Tengah Air Base",
-    city: "Tengah",
-    country: "Singapore",
   },
   {
     iata: "XSP",
@@ -15881,12 +15443,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "SUU",
-    name: "Travis Air Force Base",
-    city: "Fairfield",
-    country: "United States",
-  },
-  {
     iata: "RME",
     name: "Griffiss International Airport",
     city: "Rome",
@@ -16055,12 +15611,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "LRF",
-    name: "Little Rock Air Force Base",
-    city: "Jacksonville",
-    country: "United States",
-  },
-  {
     iata: "HUA",
     name: "Redstone Army Air Field",
     city: "Redstone",
@@ -16100,12 +15650,6 @@ export const airports: Airport[] = [
     iata: "CLE",
     name: "Cleveland Hopkins International Airport",
     city: "Cleveland",
-    country: "United States",
-  },
-  {
-    iata: "DOV",
-    name: "Dover Air Force Base",
-    city: "Dover",
     country: "United States",
   },
   {
@@ -16151,12 +15695,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "INS",
-    name: "Creech Air Force Base",
-    city: "Indian Springs",
-    country: "United States",
-  },
-  {
     iata: "GCK",
     name: "Garden City Regional Airport",
     city: "Garden City",
@@ -16172,12 +15710,6 @@ export const airports: Airport[] = [
     iata: "HHI",
     name: "Wheeler Army Airfield",
     city: "Wahiawa",
-    country: "United States",
-  },
-  {
-    iata: "MXF",
-    name: "Maxwell Air Force Base",
-    city: "Montgomery",
     country: "United States",
   },
   {
@@ -16205,12 +15737,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "LUF",
-    name: "Luke Air Force Base",
-    city: "Phoenix",
-    country: "United States",
-  },
-  {
     iata: "HHR",
     name: "Jack Northrop Field Hawthorne Municipal Airport",
     city: "Hawthorne",
@@ -16223,21 +15749,9 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "END",
-    name: "Vance Air Force Base",
-    city: "Enid",
-    country: "United States",
-  },
-  {
     iata: "NTD",
     name: "Point Mugu Naval Air Station (Naval Base Ventura Co)",
     city: "Point Mugu",
-    country: "United States",
-  },
-  {
-    iata: "EDW",
-    name: "Edwards Air Force Base",
-    city: "Edwards Afb",
     country: "United States",
   },
   {
@@ -16313,12 +15827,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "TIK",
-    name: "Tinker Air Force Base",
-    city: "Oklahoma City",
-    country: "United States",
-  },
-  {
     iata: "ECG",
     name: "Elizabeth City Regional Airport & Coast Guard Air Station",
     city: "Elizabeth City",
@@ -16376,12 +15884,6 @@ export const airports: Airport[] = [
     iata: "CDS",
     name: "Childress Municipal Airport",
     city: "Childress",
-    country: "United States",
-  },
-  {
-    iata: "BIX",
-    name: "Keesler Air Force Base",
-    city: "Biloxi",
     country: "United States",
   },
   {
@@ -16511,12 +16013,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "DMA",
-    name: "Davis Monthan Air Force Base",
-    city: "Tucson",
-    country: "United States",
-  },
-  {
     iata: "NPA",
     name: "Pensacola Naval Air Station/Forrest Sherman Field",
     city: "Pensacola",
@@ -16529,21 +16025,9 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "RDR",
-    name: "Grand Forks Air Force Base",
-    city: "Red River",
-    country: "United States",
-  },
-  {
     iata: "HOU",
     name: "William P Hobby Airport",
     city: "Houston",
-    country: "United States",
-  },
-  {
-    iata: "BFK",
-    name: "Buckley Air Force Base",
-    city: "Buckley",
     country: "United States",
   },
   {
@@ -16586,12 +16070,6 @@ export const airports: Airport[] = [
     iata: "ALI",
     name: "Alice International Airport",
     city: "Alice",
-    country: "United States",
-  },
-  {
-    iata: "VAD",
-    name: "Moody Air Force Base",
-    city: "Valdosta",
     country: "United States",
   },
   {
@@ -16652,12 +16130,6 @@ export const airports: Airport[] = [
     iata: "IND",
     name: "Indianapolis International Airport",
     city: "Indianapolis",
-    country: "United States",
-  },
-  {
-    iata: "SZL",
-    name: "Whiteman Air Force Base",
-    city: "Knobnoster",
     country: "United States",
   },
   {
@@ -16811,12 +16283,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "HIF",
-    name: "Hill Air Force Base",
-    city: "Ogden",
-    country: "United States",
-  },
-  {
     iata: "OME",
     name: "Nome Airport",
     city: "Nome",
@@ -16859,21 +16325,9 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "COF",
-    name: "Patrick Air Force Base",
-    city: "Coco Beach",
-    country: "United States",
-  },
-  {
     iata: "TEB",
     name: "Teterboro Airport",
     city: "Teterboro",
-    country: "United States",
-  },
-  {
-    iata: "RCA",
-    name: "Ellsworth Air Force Base",
-    city: "Rapid City",
     country: "United States",
   },
   {
@@ -16931,39 +16385,15 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "LTS",
-    name: "Altus Air Force Base",
-    city: "Altus",
-    country: "United States",
-  },
-  {
     iata: "TUS",
     name: "Tucson International Airport",
     city: "Tucson",
     country: "United States",
   },
   {
-    iata: "MIB",
-    name: "Minot Air Force Base",
-    city: "Minot",
-    country: "United States",
-  },
-  {
-    iata: "BAB",
-    name: "Beale Air Force Base",
-    city: "Marysville",
-    country: "United States",
-  },
-  {
     iata: "IKK",
     name: "Greater Kankakee Airport",
     city: "Kankakee",
-    country: "United States",
-  },
-  {
-    iata: "GSB",
-    name: "Seymour Johnson Air Force Base",
-    city: "Goldsboro",
     country: "United States",
   },
   {
@@ -17009,12 +16439,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "EIL",
-    name: "Eielson Air Force Base",
-    city: "Fairbanks",
-    country: "United States",
-  },
-  {
     iata: "HIB",
     name: "Range Regional Airport",
     city: "Hibbing",
@@ -17042,12 +16466,6 @@ export const airports: Airport[] = [
     iata: "ADM",
     name: "Ardmore Municipal Airport",
     city: "Ardmore",
-    country: "United States",
-  },
-  {
-    iata: "WRI",
-    name: "Mc Guire Air Force Base",
-    city: "Wrightstown",
     country: "United States",
   },
   {
@@ -17105,21 +16523,9 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "SKA",
-    name: "Fairchild Air Force Base",
-    city: "Spokane",
-    country: "United States",
-  },
-  {
     iata: "HTL",
     name: "Roscommon County - Blodgett Memorial Airport",
     city: "Houghton Lake",
-    country: "United States",
-  },
-  {
-    iata: "PAM",
-    name: "Tyndall Air Force Base",
-    city: "Panama City",
     country: "United States",
   },
   {
@@ -17132,12 +16538,6 @@ export const airports: Airport[] = [
     iata: "MLB",
     name: "Melbourne International Airport",
     city: "Melbourne",
-    country: "United States",
-  },
-  {
-    iata: "TCM",
-    name: "McChord Air Force Base",
-    city: "Tacoma",
     country: "United States",
   },
   {
@@ -17180,12 +16580,6 @@ export const airports: Airport[] = [
     iata: "MIV",
     name: "Millville Municipal Airport",
     city: "Millville",
-    country: "United States",
-  },
-  {
-    iata: "SPS",
-    name: "Sheppard Air Force Base-Wichita Falls Municipal Airport",
-    city: "Wichita Falls",
     country: "United States",
   },
   {
@@ -17255,12 +16649,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "EDF",
-    name: "Elmendorf Air Force Base",
-    city: "Anchorage",
-    country: "United States",
-  },
-  {
     iata: "OTZ",
     name: "Ralph Wien Memorial Airport",
     city: "Kotzebue",
@@ -17270,12 +16658,6 @@ export const airports: Airport[] = [
     iata: "AOO",
     name: "Altoona Blair County Airport",
     city: "Altoona",
-    country: "United States",
-  },
-  {
-    iata: "DYS",
-    name: "Dyess Air Force Base",
-    city: "Abilene",
     country: "United States",
   },
   {
@@ -17453,12 +16835,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "SKF",
-    name: "Lackland Air Force Base",
-    city: "San Antonio",
-    country: "United States",
-  },
-  {
     iata: "HNL",
     name: "Daniel K Inouye International Airport",
     city: "Honolulu",
@@ -17486,12 +16862,6 @@ export const airports: Airport[] = [
     iata: "MLU",
     name: "Monroe Regional Airport",
     city: "Monroe",
-    country: "United States",
-  },
-  {
-    iata: "SSC",
-    name: "Shaw Air Force Base",
-    city: "Sumter",
     country: "United States",
   },
   {
@@ -17633,12 +17003,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "RND",
-    name: "Randolph Air Force Base",
-    city: "San Antonio",
-    country: "United States",
-  },
-  {
     iata: "NJK",
     name: "El Centro NAF Airport (Vraciu Field)",
     city: "El Centro",
@@ -17663,12 +17027,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "FFO",
-    name: "Wright-Patterson Air Force Base",
-    city: "Dayton",
-    country: "United States",
-  },
-  {
     iata: "GAL",
     name: "Edward G. Pitka Sr Airport",
     city: "Galena",
@@ -17678,12 +17036,6 @@ export const airports: Airport[] = [
     iata: "MWL",
     name: "Mineral Wells Airport",
     city: "Mineral Wells",
-    country: "United States",
-  },
-  {
-    iata: "IAB",
-    name: "Mc Connell Air Force Base",
-    city: "Wichita",
     country: "United States",
   },
   {
@@ -17807,18 +17159,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "MCF",
-    name: "Mac Dill Air Force Base",
-    city: "Tampa",
-    country: "United States",
-  },
-  {
-    iata: "BLV",
-    name: "Scott AFB/Midamerica Airport",
-    city: "Belleville",
-    country: "United States",
-  },
-  {
     iata: "OPF",
     name: "Opa-locka Executive Airport",
     city: "Miami",
@@ -17885,12 +17225,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "HMN",
-    name: "Holloman Air Force Base",
-    city: "Alamogordo",
-    country: "United States",
-  },
-  {
     iata: "NXX",
     name: "Willow Grove Naval Air Station/Joint Reserve Base",
     city: "Willow Grove",
@@ -17906,12 +17240,6 @@ export const airports: Airport[] = [
     iata: "SCK",
     name: "Stockton Metropolitan Airport",
     city: "Stockton",
-    country: "United States",
-  },
-  {
-    iata: "CHS",
-    name: "Charleston Air Force Base-International Airport",
-    city: "Charleston",
     country: "United States",
   },
   {
@@ -17933,12 +17261,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "VBG",
-    name: "Vandenberg Air Force Base",
-    city: "Lompoc",
-    country: "United States",
-  },
-  {
     iata: "BHM",
     name: "Birmingham-Shuttlesworth International Airport",
     city: "Birmingham",
@@ -17954,12 +17276,6 @@ export const airports: Airport[] = [
     iata: "SYA",
     name: "Eareckson Air Station",
     city: "Shemya",
-    country: "United States",
-  },
-  {
-    iata: "LSV",
-    name: "Nellis Air Force Base",
-    city: "Las Vegas",
     country: "United States",
   },
   {
@@ -18008,12 +17324,6 @@ export const airports: Airport[] = [
     iata: "PAE",
     name: "Snohomish County (Paine Field) Airport",
     city: "Everett",
-    country: "United States",
-  },
-  {
-    iata: "MUO",
-    name: "Mountain Home Air Force Base",
-    city: "Mountain Home",
     country: "United States",
   },
   {
@@ -18071,21 +17381,9 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "CVS",
-    name: "Cannon Air Force Base",
-    city: "Clovis",
-    country: "United States",
-  },
-  {
     iata: "NGF",
     name: "Kaneohe Bay MCAS (Marion E. Carl Field) Airport",
     city: "Kaneohe Bay",
-    country: "United States",
-  },
-  {
-    iata: "OFF",
-    name: "Offutt Air Force Base",
-    city: "Omaha",
     country: "United States",
   },
   {
@@ -18116,12 +17414,6 @@ export const airports: Airport[] = [
     iata: "FOD",
     name: "Fort Dodge Regional Airport",
     city: "Fort Dodge",
-    country: "United States",
-  },
-  {
-    iata: "BAD",
-    name: "Barksdale Air Force Base",
-    city: "Shreveport",
     country: "United States",
   },
   {
@@ -18257,21 +17549,9 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "LFI",
-    name: "Langley Air Force Base",
-    city: "Hampton",
-    country: "United States",
-  },
-  {
     iata: "SNA",
     name: "John Wayne Airport-Orange County Airport",
     city: "Santa Ana",
-    country: "United States",
-  },
-  {
-    iata: "CBM",
-    name: "Columbus Air Force Base",
-    city: "Colombus",
     country: "United States",
   },
   {
@@ -18359,12 +17639,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "WRB",
-    name: "Robins Air Force Base",
-    city: "Macon",
-    country: "United States",
-  },
-  {
     iata: "BKK",
     name: "Suvarnabhumi Airport",
     city: "Bangkok",
@@ -18440,12 +17714,6 @@ export const airports: Airport[] = [
     iata: "CXP",
     name: "Tunggul Wulung Airport",
     city: "Cilacap",
-    country: "Indonesia",
-  },
-  {
-    iata: "PCB",
-    name: "Pondok Cabe Air Base",
-    city: "Jakarta",
     country: "Indonesia",
   },
   {
@@ -18752,12 +18020,6 @@ export const airports: Airport[] = [
     iata: "VNO",
     name: "Vilnius International Airport",
     city: "Vilnius",
-    country: "Lithuania",
-  },
-  {
-    iata: "PNV",
-    name: "Panevėžys Air Base",
-    city: "Panevezys",
     country: "Lithuania",
   },
   {
@@ -19647,18 +18909,6 @@ export const airports: Airport[] = [
     name: "Blythe Airport",
     city: "Blythe",
     country: "United States",
-  },
-  {
-    iata: "IQA",
-    name: "Al Asad Air Base",
-    city: "Al Asad",
-    country: "Iraq",
-  },
-  {
-    iata: "TQD",
-    name: "Al Taqaddum Air Base",
-    city: "Al Taqaddum",
-    country: "Iraq",
   },
   {
     iata: "XQC",
@@ -23927,39 +23177,15 @@ export const airports: Airport[] = [
     country: "Japan",
   },
   {
-    iata: "KUV",
-    name: "Kunsan Air Base",
-    city: "Kunsan",
-    country: "South Korea",
-  },
-  {
     iata: "MPK",
     name: "Mokpo Heliport",
     city: "Mokpo",
     country: "South Korea",
   },
   {
-    iata: "WJU",
-    name: "Wonju/Hoengseong Air Base (K-38/K-46)",
-    city: "Wonju",
-    country: "South Korea",
-  },
-  {
     iata: "YNY",
     name: "Yangyang International Airport",
     city: "Sokcho / Gangneung",
-    country: "South Korea",
-  },
-  {
-    iata: "HIN",
-    name: "Sacheon Air Base/Airport",
-    city: "Sacheon",
-    country: "South Korea",
-  },
-  {
-    iata: "CJJ",
-    name: "Cheongju International Airport/Cheongju Air Base (K-59/G-513)",
-    city: "Chongju",
     country: "South Korea",
   },
   {
@@ -27053,18 +26279,6 @@ export const airports: Airport[] = [
     country: "Australia",
   },
   {
-    iata: "KIK",
-    name: "Kirkuk Air Base",
-    city: "Kirkuk",
-    country: "Iraq",
-  },
-  {
-    iata: "XJD",
-    name: "Al Udeid Air Base",
-    city: "Doha",
-    country: "Qatar",
-  },
-  {
     iata: "GBZ",
     name: "Great Barrier Aerodrome",
     city: "Claris",
@@ -27327,12 +26541,6 @@ export const airports: Airport[] = [
     name: "Drake Bay Airport",
     city: "Puntarenas",
     country: "Costa Rica",
-  },
-  {
-    iata: "AAT",
-    name: "Altay Air Base",
-    city: "Altay",
-    country: "China",
   },
   {
     iata: "TZL",
@@ -27617,12 +26825,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "ZIN",
-    name: "Interlaken Air Base",
-    city: "Interlaken",
-    country: "Switzerland",
-  },
-  {
     iata: "INQ",
     name: "Inisheer Aerodrome",
     city: "Inisheer",
@@ -27639,18 +26841,6 @@ export const airports: Airport[] = [
     name: "Hutchinson Municipal Airport",
     city: "Hutchinson",
     country: "United States",
-  },
-  {
-    iata: "OAI",
-    name: "Bagram Air Base",
-    city: "Kabul",
-    country: "Afghanistan",
-  },
-  {
-    iata: "AKH",
-    name: "Prince Sultan Air Base",
-    city: "Al Kharj",
-    country: "Saudi Arabia",
   },
   {
     iata: "STJ",
@@ -29939,12 +29129,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "QYD",
-    name: "Oksywie Military Air Base",
-    city: "Gdynia",
-    country: "Poland",
-  },
-  {
     iata: "OLV",
     name: "Olive Branch Airport",
     city: "Olive Branch",
@@ -30023,12 +29207,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "NHD",
-    name: "Al Minhad Air Base",
-    city: "Minhad AB",
-    country: "United Arab Emirates",
-  },
-  {
     iata: "KGO",
     name: "Kirovograd Airport",
     city: "Kirovograd",
@@ -30045,12 +29223,6 @@ export const airports: Airport[] = [
     name: "Bryce Canyon Airport",
     city: "Bryce Canyon",
     country: "United States",
-  },
-  {
-    iata: "CKL",
-    name: "Chkalovskiy Air Base",
-    city: "Shchyolkovo",
-    country: "Russia",
   },
   {
     iata: "TCZ",
@@ -30863,12 +30035,6 @@ export const airports: Airport[] = [
     country: "Turkey",
   },
   {
-    iata: "OAA",
-    name: "Shank Air Base",
-    city: "Shank",
-    country: "Afghanistan",
-  },
-  {
     iata: "FPR",
     name: "St Lucie County International Airport",
     city: "Fort Pierce",
@@ -31245,12 +30411,6 @@ export const airports: Airport[] = [
     name: "Cesar Lim Rodriguez Airport",
     city: "Taytay",
     country: "Philippines",
-  },
-  {
-    iata: "RKZ",
-    name: "Shigatse Air Base",
-    city: "Shigatse",
-    country: "China",
   },
   {
     iata: "TIW",
@@ -32501,12 +31661,6 @@ export const airports: Airport[] = [
     country: "United States",
   },
   {
-    iata: "GIU",
-    name: "Sigiriya Air Force Base",
-    city: "Sigiriya",
-    country: "Sri Lanka",
-  },
-  {
     iata: "EUM",
     name: "Neumünster Airport",
     city: "Neumuenster",
@@ -32679,12 +31833,6 @@ export const airports: Airport[] = [
     name: "Bairnsdale Airport",
     city: "Bairnsdale",
     country: "Australia",
-  },
-  {
-    iata: "TZR",
-    name: "Taszár Air Base",
-    city: "Columbus",
-    country: "United States",
   },
   {
     iata: "FBR",
@@ -32993,12 +32141,6 @@ export const airports: Airport[] = [
     country: "China",
   },
   {
-    iata: "AOG",
-    name: "Anshan Air Base",
-    city: "Anshan",
-    country: "China",
-  },
-  {
     iata: "DQA",
     name: "Saertu Airport",
     city: "Daqing",
@@ -33161,12 +32303,6 @@ export const airports: Airport[] = [
     country: "Canada",
   },
   {
-    iata: "HMY",
-    name: "Seosan Air Base",
-    city: "Seosan",
-    country: "South Korea",
-  },
-  {
     iata: "EMT",
     name: "San Gabriel Valley Airport",
     city: "El Monte",
@@ -33189,12 +32325,6 @@ export const airports: Airport[] = [
     name: "Kramatorsk Airport",
     city: "Kramatorsk",
     country: "Ukraine",
-  },
-  {
-    iata: "QKX",
-    name: "Kautokeino Air Base",
-    city: "Kautokeino",
-    country: "Norway",
   },
   {
     iata: "SSF",
@@ -34631,28 +33761,10 @@ export const airports: Airport[] = [
     country: "Spain",
   },
   {
-    iata: "QLP",
-    name: "Sarzana-Luni Air Base",
-    city: "Sarzana (SP)",
-    country: "Italy",
-  },
-  {
-    iata: "BJY",
-    name: "Batajnica Air Base",
-    city: "Batajnica",
-    country: "Serbia",
-  },
-  {
     iata: "RUV",
     name: "Rubelsanto Airport",
     city: "Rubelsanto",
     country: "Guatemala",
-  },
-  {
-    iata: "XPL",
-    name: "Coronel Enrique Soto Cano Air Base",
-    city: "Comayagua",
-    country: "Honduras",
   },
   {
     iata: "UPL",
@@ -34667,30 +33779,6 @@ export const airports: Airport[] = [
     country: "Cuba",
   },
   {
-    iata: "SNJ",
-    name: "San Julian Air Base",
-    city: "Pinar Del Rio",
-    country: "Cuba",
-  },
-  {
-    iata: "DWD",
-    name: "King Salman Abdulaziz Airport",
-    city: "",
-    country: "Saudi Arabia",
-  },
-  {
-    iata: "KMX",
-    name: "King Khaled Air Base",
-    city: "",
-    country: "Saudi Arabia",
-  },
-  {
-    iata: "XXN",
-    name: "Riyadh Air Base",
-    city: "Riyadh",
-    country: "Saudi Arabia",
-  },
-  {
     iata: "KNR",
     name: "Jam Airport",
     city: "Kangan",
@@ -34701,24 +33789,6 @@ export const airports: Airport[] = [
     name: "Payam International Airport",
     city: "Karaj",
     country: "Iran",
-  },
-  {
-    iata: "XIJ",
-    name: "Ahmed Al Jaber Air Base",
-    city: "Ahmed Al Jaber AB",
-    country: "Kuwait",
-  },
-  {
-    iata: "ATG",
-    name: "Minhas Air Base",
-    city: "Kamra",
-    country: "Pakistan",
-  },
-  {
-    iata: "SGI",
-    name: "Mushaf Air Base",
-    city: "Sargodha",
-    country: "Pakistan",
   },
   {
     iata: "RQW",
@@ -34754,18 +33824,6 @@ export const airports: Airport[] = [
     iata: "AAV",
     name: "Allah Valley Airport",
     city: "Surallah",
-    country: "Philippines",
-  },
-  {
-    iata: "BPH",
-    name: "Bislig Airport",
-    city: "",
-    country: "Philippines",
-  },
-  {
-    iata: "MXI",
-    name: "Mati National Airport",
-    city: "",
     country: "Philippines",
   },
   {
@@ -34811,33 +33869,15 @@ export const airports: Airport[] = [
     country: "Chile",
   },
   {
-    iata: "API",
-    name: "Gomez Nino Apiay Air Base",
-    city: "Apiay",
-    country: "Colombia",
-  },
-  {
     iata: "CVE",
     name: "Coveñas Airport",
     city: "Coveñas",
     country: "Colombia",
   },
   {
-    iata: "PAL",
-    name: "German Olano Air Base",
-    city: "La Dorada",
-    country: "Colombia",
-  },
-  {
     iata: "PZA",
     name: "Paz De Ariporo Airport",
     city: "Paz De Ariporo",
-    country: "Colombia",
-  },
-  {
-    iata: "TQS",
-    name: "Tres Esquinas Air Base",
-    city: "Tres Esquinas",
     country: "Colombia",
   },
   {
@@ -34865,12 +33905,6 @@ export const airports: Airport[] = [
     country: "Russia",
   },
   {
-    iata: "BGN",
-    name: "Belaya Gora Airport",
-    city: "",
-    country: "Russia",
-  },
-  {
     iata: "GVN",
     name: "Maygatka Airport.",
     city: "Sovetskaya Gavan",
@@ -34880,12 +33914,6 @@ export const airports: Airport[] = [
     iata: "NLI",
     name: "Nikolayevsk-na-Amure Airport",
     city: "Nikolayevsk-na-Amure Airport",
-    country: "Russia",
-  },
-  {
-    iata: "VLK",
-    name: "Volgodonsk Airport",
-    city: "",
     country: "Russia",
   },
   {
@@ -34899,18 +33927,6 @@ export const airports: Airport[] = [
     name: "Zhigansk Airport",
     city: "Zhigansk",
     country: "Russia",
-  },
-  {
-    iata: "RTC",
-    name: "Ratnagiri Airport",
-    city: "",
-    country: "India",
-  },
-  {
-    iata: "HIM",
-    name: "Hingurakgoda Air Force Base",
-    city: "Polonnaruwa Town",
-    country: "Sri Lanka",
   },
   {
     iata: "RDP",
@@ -34937,75 +33953,9 @@ export const airports: Airport[] = [
     country: "Australia",
   },
   {
-    iata: "ARY",
-    name: "Ararat Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "BLN",
-    name: "Benalla Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "BZD",
-    name: "Balranald Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "BWQ",
-    name: "Brewarrina Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "CVC",
-    name: "Cleve Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "CWW",
-    name: "Corowa Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "CYG",
-    name: "Corryong Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "CMD",
-    name: "Cootamundra Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "DRN",
-    name: "Dirranbandi Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
     iata: "DNQ",
     name: "Deniliquin Airport",
     city: "Deniliquin",
-    country: "Australia",
-  },
-  {
-    iata: "DYA",
-    name: "Dysart Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "ECH",
-    name: "Echuca Airport",
-    city: "",
     country: "Australia",
   },
   {
@@ -35015,117 +33965,9 @@ export const airports: Airport[] = [
     country: "Australia",
   },
   {
-    iata: "GUH",
-    name: "Gunnedah Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "HXX",
-    name: "Hay Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "HTU",
-    name: "Hopetoun Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "KRA",
-    name: "Kerang Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "KPS",
-    name: "Kempsey Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "KGY",
-    name: "Kingaroy Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
     iata: "TGN",
     name: "Latrobe Valley Airport",
     city: "Morwell",
-    country: "Australia",
-  },
-  {
-    iata: "MRG",
-    name: "Mareeba Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "RPM",
-    name: "Ngukurr Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "QRM",
-    name: "Narromine Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "PPI",
-    name: "Port Pirie Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "SIO",
-    name: "Smithton Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "SNB",
-    name: "Snake Bay Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "SWC",
-    name: "Stawell Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "TYB",
-    name: "Tibooburra Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "TUM",
-    name: "Tumut Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "WGT",
-    name: "Wangaratta Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "WKB",
-    name: "Warracknabeal Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "QRR",
-    name: "Warren Airport",
-    city: "",
     country: "Australia",
   },
   {
@@ -35141,18 +33983,6 @@ export const airports: Airport[] = [
     country: "Australia",
   },
   {
-    iata: "NGA",
-    name: "Young Airport",
-    city: "",
-    country: "Australia",
-  },
-  {
-    iata: "LHK",
-    name: "Guangzhou MR Air Base",
-    city: "Guanghua",
-    country: "China",
-  },
-  {
     iata: "WDS",
     name: "Shiyan Wudangshan Airport",
     city: "Shiyan",
@@ -35165,27 +33995,9 @@ export const airports: Airport[] = [
     country: "China",
   },
   {
-    iata: "UUN",
-    name: "Baruun Urt Airport",
-    city: "",
-    country: "Mongolia",
-  },
-  {
     iata: "BFU",
     name: "Bengbu Airport",
     city: "Bengbu",
-    country: "China",
-  },
-  {
-    iata: "RUG",
-    name: "Rugao Air Base",
-    city: "Rugao",
-    country: "China",
-  },
-  {
-    iata: "WHU",
-    name: "Wuhu Air Base",
-    city: "Wuhu",
     country: "China",
   },
   {
@@ -36273,24 +35085,6 @@ export const airports: Airport[] = [
     name: "Zabrat Airport",
     city: "Baku",
     country: "Azerbaijan",
-  },
-  {
-    iata: "JAM",
-    name: "Bezmer Air Base",
-    city: "Yambol",
-    country: "Bulgaria",
-  },
-  {
-    iata: "YUA",
-    name: "Yuanmou Air Base",
-    city: "Yuanmou",
-    country: "China",
-  },
-  {
-    iata: "XEN",
-    name: "Xingcheng Air Base",
-    city: "",
-    country: "China",
   },
   {
     iata: "GEC",

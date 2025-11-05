@@ -13,6 +13,7 @@ import {
   MAX_ADULTS,
 } from "../utils/flightUtils";
 import FlightSearchForm from "./FlightSearchForm";
+import { getCityCode, hasMultipleAirports } from "../data/multiAirportCities";
 
 interface FormValues {
   origin: string;
@@ -40,13 +41,56 @@ export default function FreeTextSearch() {
   today.setHours(0, 0, 0, 0);
 
   /**
-   * Get the first airport's IATA code for Skyscanner
-   * Uses individual airport codes, not city codes
-   * Example: BOM (Mumbai), GOI (Goa), JFK (New York)
+   * Get the appropriate code for Skyscanner
+   * Flow:
+   * 1. AI parses city name
+   * 2. Check if city has multiple airports
+   * 3. If true → use city code
+   * 4. If false → use airport code of the city
+   * 5. Construct URL
+   *
+   * @param cityName - The parsed city name from AI
+   * @param airportMatches - Airports found matching the city
+   * @returns City code or airport code
    */
-  function getAirportCode(airports: Airport[]): string {
-    if (airports.length === 0) return "";
-    return airports[0].iata.toUpperCase();
+  function getCodeForSkyscanner(cityName: string, airportMatches: Airport[]): string {
+    if (airportMatches.length === 0) return "";
+
+    // Strategy: Prioritize cities that have multiple airports and city codes
+    // This handles cases like "London" matching both London, Canada and London, UK
+    // We want London, UK (which has LON city code) over London, Canada (single airport)
+
+    let selectedAirport = airportMatches[0];
+    let selectedCity = selectedAirport.city;
+    let selectedCountry = selectedAirport.country;
+
+    // Check all matching airports and prioritize those with city codes
+    for (const airport of airportMatches) {
+      const hasMultiple = hasMultipleAirports(airport.city, airport.country);
+      const cityCode = getCityCode(airport.city, airport.country);
+
+      // If this city has multiple airports AND a city code, prefer it
+      if (hasMultiple && cityCode) {
+        selectedAirport = airport;
+        selectedCity = airport.city;
+        selectedCountry = airport.country;
+        break; // Use the first match with a city code
+      }
+    }
+
+    // Check if the selected city has multiple airports
+    const hasMultiple = hasMultipleAirports(selectedCity, selectedCountry);
+
+    if (hasMultiple) {
+      // Use city code
+      const cityCode = getCityCode(selectedCity, selectedCountry);
+      if (cityCode) {
+        return cityCode.toUpperCase() + "a";
+      }
+    }
+
+    // Use airport code of the city
+    return selectedAirport.iata.toUpperCase();
   }
 
   /**
@@ -162,9 +206,9 @@ export default function FreeTextSearch() {
         return;
       }
 
-      // Get airport codes for Skyscanner
-      const originCode = getAirportCode(originMatches);
-      const destinationCode = getAirportCode(destinationMatches);
+      // Get codes for Skyscanner (city code if multiple airports, else airport code)
+      const originCode = getCodeForSkyscanner(parsed.originLocation, originMatches);
+      const destinationCode = getCodeForSkyscanner(parsed.destinationLocation, destinationMatches);
 
       const adultsCount = parsed.adults || 1;
       const departureDate = formatDateForSkyscanner(parsed.departureDate);
