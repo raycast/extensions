@@ -85,7 +85,7 @@ export class MacOSPlatformAdapter implements PlatformAdapter {
 
       // Use osascript to quit the application
       const appName = targetWindow.application.name;
-      const command = `osascript -e 'tell application "${appName}" to quit'`;
+      const command = `osascript -e 'tell application ${JSON.stringify(appName)} to quit'`;
 
       await execAsync(command);
       await showHUD(`✅ Closed ${programTitle}`);
@@ -106,7 +106,7 @@ export class MacOSPlatformAdapter implements PlatformAdapter {
 
       // Use killall to force kill the application
       const appName = targetWindow.application.name;
-      const command = `killall -9 "${appName}"`;
+      const command = `killall -9 ${JSON.stringify(appName)}`;
 
       await execAsync(command);
       await showHUD(`✅ Force killed ${programTitle}`);

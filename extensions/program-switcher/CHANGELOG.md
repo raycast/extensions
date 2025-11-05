@@ -3,9 +3,11 @@
 ## [Initial Release - 0.1.0] - {PR_MERGE_DATE}
 
 ### Added
+
 - Initial release of Program Switcher Raycast Extension
 
 ### Features
+
 - List and switch to running programs on Windows
 - Search by program name or window title
 - Close programs gracefully

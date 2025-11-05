@@ -6,6 +6,15 @@ import { join } from "path";
 import { Icon, WindowManagement, showHUD, closeMainWindow } from "@raycast/api";
 import { ProgramInfo, PlatformAdapter, FilterOption } from "./types";
 
+function parsePowerShellJson(jsonLine: string): Record<string, unknown>[] {
+  try {
+    return JSON.parse(jsonLine) as Record<string, unknown>[];
+  } catch (error) {
+    console.error("Failed to parse PowerShell JSON output:", jsonLine);
+    throw new Error(`Invalid JSON from PowerShell: ${error}`);
+  }
+}
+
 const execAsync = promisify(exec);
 
 // Optimize exec with larger buffer and performance settings
@@ -44,13 +53,7 @@ export class WindowsPlatformAdapter implements PlatformAdapter {
     const jsonLine = lines[lines.length - 1].trim();
 
     // Parse JSON with error handling
-    let psWindows = [];
-    try {
-      psWindows = JSON.parse(jsonLine);
-    } catch (error) {
-      console.error("Failed to parse PowerShell JSON output:", jsonLine);
-      throw new Error(`Invalid JSON from PowerShell: ${error}`);
-    }
+    const psWindows = parsePowerShellJson(jsonLine);
 
     return psWindows
       .map((psWin: Record<string, unknown>) => ({
@@ -85,13 +88,7 @@ export class WindowsPlatformAdapter implements PlatformAdapter {
     const jsonLine = lines[lines.length - 1].trim();
 
     // Parse JSON with error handling
-    let psWindows = [];
-    try {
-      psWindows = JSON.parse(jsonLine);
-    } catch (error) {
-      console.error("Failed to parse PowerShell JSON output:", jsonLine);
-      throw new Error(`Invalid JSON from PowerShell: ${error}`);
-    }
+    const psWindows = parsePowerShellJson(jsonLine);
 
     // Create a map of handle to title from PowerShell
     const titleMap = new Map<string, string>();
