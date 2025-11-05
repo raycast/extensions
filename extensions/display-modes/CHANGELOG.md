@@ -1,6 +1,6 @@
 # Display Modes Changelog
 
-## [Enhance display management with resolution toggling and custom naming] - 2025-11-05
+## [Enhance display management with resolution toggling and custom naming] - {PR_MERGE_DATE}
 
 - Add a new command to toggle display resolution.
 - Add a new command to manage display names.
