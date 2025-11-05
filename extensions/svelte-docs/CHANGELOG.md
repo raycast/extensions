@@ -1,6 +1,6 @@
 # Svelte Docs Changelog
 
-## [Add cli composer command] - {PR_MERGE_DATE}
+## [Add cli composer command] - 2025-11-05
 
 Added Compose CLI command to quickly pick and chose the options for the `sv` cli. Thanks to @SikandarJODD for the idea and implementation.
 
