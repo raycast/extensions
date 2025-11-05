@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rg-adguard-links",
   "title": "RG Adguard Links",
   "version": "1.0.0",
@@ -8,6 +9,9 @@
   "license": "MIT",
   "categories": [
     "Developer Tools"
+  ],
+  "contributors": [
+    "Gunk"
   ],
   "commands": [
     {
