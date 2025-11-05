@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, useNavigation, showHUD, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, useNavigation, showHUD, Icon, LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { listDisplays, setMode, formatDisplayMode, formatDisplayTitle, formatDisplaySubtitle } from "./utils";
@@ -6,6 +6,7 @@ import { DisplayInfo, areModesEqual } from "./types";
 
 export default function Command() {
   const [displays, setDisplays] = useState<DisplayInfo[] | undefined>();
+  const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
 
   async function fetchDisplaysInfo() {
     const displays = await listDisplays();
@@ -13,6 +14,13 @@ export default function Command() {
   }
 
   useEffect(() => {
+    async function fetchDisplayNames() {
+      const names = await LocalStorage.getItem<string>("displayNames");
+      if (names) {
+        setDisplayNames(JSON.parse(names));
+      }
+    }
+    fetchDisplayNames();
     fetchDisplaysInfo();
   }, []);
 
@@ -67,7 +75,7 @@ export default function Command() {
           <List.Item
             key={index}
             icon="display-icon.png"
-            title={formatDisplayTitle(display)}
+            title={displayNames[display.display.id] || formatDisplayTitle(display)}
             subtitle={formatDisplaySubtitle(display)}
             actions={
               <ActionPanel>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon, MenuBarExtra, showHUD } from "@raycast/api";
+import { Icon, MenuBarExtra, showHUD, LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { listDisplays, setMode, sortModes, formatDisplayMode, formatDisplayTitle, getDisplayIcon } from "./utils";
 import { DisplayInfo, Mode, areModesEqual } from "./types";
@@ -9,6 +9,8 @@ const useDisplays = () => {
     displays: [],
     isLoading: true,
   });
+
+  const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
 
   const fetchDisplays = async () => {
     try {
@@ -28,14 +30,21 @@ const useDisplays = () => {
   };
 
   useEffect(() => {
+    async function fetchDisplayNames() {
+      const names = await LocalStorage.getItem<string>("displayNames");
+      if (names) {
+        setDisplayNames(JSON.parse(names));
+      }
+    }
+    fetchDisplayNames();
     fetchDisplays();
   }, []);
 
-  return { ...state, refetch: fetchDisplays };
+  return { ...state, refetch: fetchDisplays, displayNames };
 };
 
 export default function Command() {
-  const { displays, isLoading, refetch } = useDisplays();
+  const { displays, isLoading, refetch, displayNames } = useDisplays();
 
   const handleModeChange = async (displayId: number, mode: Mode) => {
     try {
@@ -66,7 +75,7 @@ export default function Command() {
             const displayIcon = getDisplayIcon(display.display.kind);
 
             return (
-              <MenuBarExtra.Submenu key={display.display.id} title={formatDisplayTitle(display)} icon={displayIcon}>
+              <MenuBarExtra.Submenu key={display.display.id} title={displayNames[display.display.id] || formatDisplayTitle(display)} icon={displayIcon}>
                 <MenuBarExtra.Section>
                   <MenuBarExtra.Item
                     title={`Current: ${formatDisplayMode(display.currentMode)}`}

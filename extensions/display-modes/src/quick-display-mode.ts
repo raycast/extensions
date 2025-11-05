@@ -1,4 +1,4 @@
-import { LaunchProps, showHUD } from "@raycast/api";
+import { LaunchProps, showHUD, LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { listDisplays, setMode, formatDisplayMode } from "./utils";
 import { DisplayInfo, Mode, areModesEqual } from "./types";
@@ -10,16 +10,10 @@ const SUITABLE_FOR_UI_BONUS = 500;
 const SAFE_FOR_HARDWARE_BONUS = 500;
 
 export default async function QuickDisplayMode(props: LaunchProps<{ arguments: Arguments.QuickDisplayMode }>) {
-  const { display, height, refreshRate } = props.arguments;
+  const { display: displayIdentifier, height, refreshRate } = props.arguments;
 
-  const displayId = parseInt(display, 10);
   const targetHeight = parseInt(height, 10);
   const targetRefreshRate = refreshRate ? parseInt(refreshRate, 10) : undefined;
-
-  if (isNaN(displayId)) {
-    showFailureToast("Invalid display ID");
-    return;
-  }
 
   if (isNaN(targetHeight) || targetHeight <= 0) {
     showFailureToast("Invalid height value");
@@ -33,40 +27,49 @@ export default async function QuickDisplayMode(props: LaunchProps<{ arguments: A
 
   try {
     const displays = await listDisplays();
+    const displayNames = JSON.parse((await LocalStorage.getItem<string>("displayNames")) || "{}");
 
     if (!displays) {
       showFailureToast("Failed to get display list");
       return;
     }
 
-    const targetDisplay = displays.find((d) => d.display.id === displayId);
+    let targetDisplay: DisplayInfo | undefined;
+
+    const displayId = parseInt(displayIdentifier, 10);
+    if (!isNaN(displayId)) {
+      targetDisplay = displays.find((d) => d.display.id === displayId);
+    } else {
+      const lowerCaseIdentifier = displayIdentifier.toLowerCase();
+      targetDisplay = displays.find((d) => (displayNames[d.display.id] || "").toLowerCase() === lowerCaseIdentifier);
+    }
 
     if (!targetDisplay) {
-      const availableDisplays = displays.map((d) => d.display.id).join(", ");
-      showFailureToast(`Display ${displayId} not found. Available: ${availableDisplays}`);
+      const availableDisplays = displays.map((d) => displayNames[d.display.id] || d.display.id).join(", ");
+      showFailureToast(`Display "${displayIdentifier}" not found. Available: ${availableDisplays}`);
       return;
     }
 
     const closestMode = findClosestMode(targetDisplay, targetHeight, targetRefreshRate);
 
     if (!closestMode) {
-      showFailureToast(`No suitable mode found for display ${displayId}`);
+      showFailureToast(`No suitable mode found for display ${targetDisplay.display.id}`);
       return;
     }
 
     if (areModesEqual(closestMode, targetDisplay.currentMode)) {
       const modeDescription = formatDisplayMode(closestMode);
-      await showHUD(`✅ Display ${displayId} already at ${modeDescription}`);
+      await showHUD(`✅ Display ${targetDisplay.display.id} already at ${modeDescription}`);
       return;
     }
 
-    const result = await setMode(displayId, closestMode);
+    const result = await setMode(targetDisplay.display.id, closestMode);
 
     if (result) {
       const modeDescription = formatDisplayMode(closestMode);
-      await showHUD(`✅ Display ${displayId} changed to ${modeDescription}`);
+      await showHUD(`✅ Display ${targetDisplay.display.id} changed to ${modeDescription}`);
     } else {
-      showFailureToast(`Failed to change display ${displayId} mode`);
+      showFailureToast(`Failed to change display ${targetDisplay.display.id} mode`);
     }
   } catch (error) {
     console.error("Error in quick display modes:", error);

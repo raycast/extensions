@@ -50,6 +50,27 @@
       "description": "Change the display mode of your monitors from the status menu bar.",
       "mode": "menu-bar",
       "interval": "5m"
+    },
+    {
+      "name": "toggle-display-resolution-wrapper",
+      "title": "Toggle Display Resolution",
+      "description": "Toggle the display resolution of your monitor.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-display-names",
+      "title": "Manage Display Names",
+      "description": "Assign and manage short names for your displays.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "selectedDisplay",
+      "title": "Selected Display",
+      "description": "The display to toggle the resolution of.",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {
