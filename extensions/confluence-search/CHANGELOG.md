@@ -1,5 +1,9 @@
 # Confluence Changelog
 
+## [Handle Error] - {PR_MERGE_DATE}
+
+- Handle error when fetching favourite spaces to avoid the extension from crashing
+
 ## [Maintenance] - 2025-06-19
 
 - Get rid of `use-async-effect` dependency
