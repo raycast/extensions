@@ -34,3 +34,9 @@ coverage/
 .nyc_output/
 # Build artifacts
 tsconfig.tsbuildinfo
+
+# Swift build artifacts
+swift/**/Package.resolved
+swift/**/.build/
+swift/**/.raycast-swift-build/
+assets/compiled_raycast_swift/

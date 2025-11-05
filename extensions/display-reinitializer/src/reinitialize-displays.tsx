@@ -9,8 +9,10 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execSync } from "child_process";
-import { resolve } from "path";
+import {
+  getAllDisplays as getDisplaysSwift,
+  reinitializeDisplay as reinitializeDisplaySwift,
+} from "swift:../swift/display-helper";
 
 interface Display {
   id: number;
@@ -291,15 +293,8 @@ function DisplayDetails({ display }: { display: Display }) {
 // MARK: - Helper Functions
 
 async function getDisplays(): Promise<Display[]> {
-  const binaryPath = getBinaryPath();
-
   try {
-    const output = execSync(`"${binaryPath}" list`, {
-      encoding: "utf-8",
-      maxBuffer: 10 * 1024 * 1024, // 10MB
-    });
-
-    const displays: Display[] = JSON.parse(output);
+    const displays = await getDisplaysSwift();
     return displays;
   } catch (error) {
     if (error instanceof Error) {
@@ -313,44 +308,12 @@ async function reinitializeDisplay(
   displayId: number,
   method: ReinitMethod,
 ): Promise<void> {
-  const binaryPath = getBinaryPath();
-  const methodMap: Record<ReinitMethod, string> = {
-    auto: "redetect-auto",
-    ddc: "redetect-ddc",
-    refresh: "redetect-refresh",
-    resolution: "redetect-resolution",
-    soft: "redetect-soft",
-  };
-
-  const command = methodMap[method];
-
   try {
-    execSync(`"${binaryPath}" ${command} ${displayId}`, {
-      encoding: "utf-8",
-      maxBuffer: 1024 * 1024, // 1MB
-    });
+    await reinitializeDisplaySwift(displayId, method);
   } catch (error) {
     if (error instanceof Error) {
-      // Extract stderr message if available
-      const execError = error as Error & { stderr?: Buffer };
-      const errorOutput = execError.stderr?.toString() || error.message;
-      throw new Error(errorOutput);
+      throw new Error(error.message);
     }
     throw error;
-  }
-}
-
-function getBinaryPath(): string {
-  // In development, the binary is in assets/
-  // In production (built), it's in dist/assets/
-  const devPath = resolve(__dirname, "../assets/display-helper");
-  const prodPath = resolve(__dirname, "./assets/display-helper");
-
-  // Try production path first, then fall back to dev path
-  try {
-    execSync(`test -f "${prodPath}"`);
-    return prodPath;
-  } catch {
-    return devPath;
   }
 }

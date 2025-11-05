@@ -46,8 +46,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prebuild": "npm run compile-swift",
-    "compile-swift": "swiftc -o assets/display-helper scripts/DisplayHelper.swift -framework CoreGraphics -framework IOKit -framework Foundation",
     "publish": "npx @raycast/api@latest publish"
   }
 }
