@@ -4,7 +4,6 @@ import {
 } from "swift:../swift";
 import { getUserSelectedLanguages } from "./hooks";
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
 
 export const recognizeText = async (isFullScreen = false) => {
   const preference = getPreferenceValues<Preferences>();
