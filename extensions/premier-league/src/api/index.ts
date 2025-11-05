@@ -26,7 +26,7 @@ import {
 } from "../types";
 import { competitions } from "../components/searchbar_competition";
 
-const competition = competitions[0].value;
+const epl = competitions[0].value;
 
 const endpoint = "https://sdp-prem-prod.premier-league-prod.pulselive.com/api";
 
@@ -73,7 +73,7 @@ export const getMatchweek = async (): Promise<number> => {
 export const getAwards = async (season: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/v1/competitions/${competition}/seasons/${season}/awards`,
+    url: `${endpoint}/v1/competitions/${epl}/seasons/${season}/awards`,
   };
 
   try {
@@ -90,7 +90,7 @@ export const getAwards = async (season: string) => {
 export const getClubs = async (season: string): Promise<Club[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/v1/competitions/${competition}/seasons/${season}/teams`,
+    url: `${endpoint}/v1/competitions/${epl}/seasons/${season}/teams`,
     params: {
       _limit: 60,
     },
@@ -129,7 +129,7 @@ export const getClubMetadata = async (
 export const getTeamForm = async (season: string): Promise<TeamForm[]> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/v1/competitions/${competition}/seasons/${season}/teamform`,
+    url: `${endpoint}/v1/competitions/${epl}/seasons/${season}/teamform`,
   };
 
   try {
@@ -149,7 +149,7 @@ export const getTeamSquad = async (
 ): Promise<EPLTeamSquad | undefined> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/v2/competitions/${competition}/seasons/${season}/teams/${teamId}/squad`,
+    url: `${endpoint}/v2/competitions/${epl}/seasons/${season}/teams/${teamId}/squad`,
   };
 
   try {
@@ -166,7 +166,7 @@ export const getTeamSquad = async (
 export const getTables = async (season: string): Promise<Table[]> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/v5/competitions/${competition}/seasons/${season}/standings`,
+    url: `${endpoint}/v5/competitions/${epl}/seasons/${season}/standings`,
   };
 
   try {
@@ -193,17 +193,9 @@ export const getTables = async (season: string): Promise<Table[]> => {
   }
 };
 
-export const getMatches = async (props: {
-  season: string;
-  competition: string;
-  team?: string;
-  matchweek?: number;
-  _next?: string;
-}): Promise<Pagination<Fixture>> => {
-  if (props.competition !== competition) {
-    delete props.matchweek;
-  }
-
+export const getMatches = async (
+  props: Record<string, string | number>,
+): Promise<Pagination<Fixture>> => {
   const config: AxiosRequestConfig = {
     method: "get",
     url: `${endpoint}/v2/matches`,
@@ -384,7 +376,7 @@ export const getPlayerInformation = async (
 ): Promise<Player | undefined> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/v1/competitions/${competition}/seasons/${season}/playerinfo/${playerId}`,
+    url: `${endpoint}/v1/competitions/${epl}/seasons/${season}/playerinfo/${playerId}`,
   };
 
   try {
@@ -405,7 +397,7 @@ export const getPlayerStats = async (
   const config: AxiosRequestConfig = {
     method: "get",
     // url: `${endpoint}/v1/competitions/${competition}/players/${playerId}/stats`, // seems use for overall stats
-    url: `${endpoint}/v2/competitions/${competition}/seasons/${season}/players/${playerId}/stats`,
+    url: `${endpoint}/v2/competitions/${epl}/seasons/${season}/players/${playerId}/stats`,
   };
 
   try {
