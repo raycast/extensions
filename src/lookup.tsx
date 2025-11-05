@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function LookupCommand() {
   const [query, setQuery] = useState("");
@@ -140,27 +140,28 @@ export default function LookupCommand() {
 
       {results.length > 0 ? (
         <List.Section title="Download Links" subtitle={`${results.length}`}>
-          {results.map((result) => (
-            <List.Item
-              key={result.url}
-              title={result.name}
-              subtitle={result.size}
-              accessories={[
-                result.expire ? { icon: Icon.Clock, text: result.expire } : undefined,
-                result.sha1 ? { icon: Icon.Fingerprint, text: `${result.sha1.slice(0, 8)}…` } : undefined,
-              ].filter(Boolean)}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={result.url} />
-                  <Action.CopyToClipboard title="Copy Download URL" content={result.url} />
-                  <Action.Paste title="Paste Download URL" content={result.url} />
-                  {result.sha1 ? (
-                    <Action.CopyToClipboard title="Copy SHA-1" content={result.sha1} />
-                  ) : null}
-                </ActionPanel>
-              }
-            />
-          ))}
+          {results.map((result) => {
+            const accessories = [];
+            if (result.expire) accessories.push({ icon: Icon.Clock, text: result.expire });
+            if (result.sha1) accessories.push({ icon: Icon.Fingerprint, text: `${result.sha1.slice(0, 8)}…` });
+            
+            return (
+              <List.Item
+                key={result.url}
+                title={result.name}
+                subtitle={result.size}
+                accessories={accessories}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser url={result.url} />
+                    <Action.CopyToClipboard title="Copy Download URL" content={result.url} />
+                    <Action.Paste title="Paste Download URL" content={result.url} />
+                    {result.sha1 && <Action.CopyToClipboard title="Copy SHA-1" content={result.sha1} />}
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ) : null}
     </List>
