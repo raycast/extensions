@@ -311,31 +311,33 @@ export default function Command() {
     }
   };
 
-  const updateUsageData = useCallback(
-    async (app: Application) => {
-      const bundleId = app.bundleId || app.path; // Use path as fallback if bundleId is missing
+  const updateUsageData = useCallback(async (app: Application) => {
+    const bundleId = app.bundleId || app.path; // Use path as fallback if bundleId is missing
 
-      setUsageData((prevUsageData) => {
-        const newUsageData = { ...prevUsageData };
-        newUsageData[bundleId] = {
-          lastUsed: new Date().toISOString(),
-          usageCount: (newUsageData[bundleId]?.usageCount || 0) + 1,
-        };
+    setUsageData((prevUsageData) => {
+      const newUsageData = { ...prevUsageData };
+      newUsageData[bundleId] = {
+        lastUsed: new Date().toISOString(),
+        usageCount: (newUsageData[bundleId]?.usageCount || 0) + 1,
+      };
 
-        // Save to LocalStorage asynchronously
-        LocalStorage.setItem("appUsageData", JSON.stringify(newUsageData));
+      // Save to LocalStorage asynchronously
+      LocalStorage.setItem("appUsageData", JSON.stringify(newUsageData));
 
-        return newUsageData;
-      });
-    },
-    [],
-  );
+      return newUsageData;
+    });
+  }, []);
 
   const launchApp = useCallback(
     async (app: Application) => {
       try {
         await updateUsageData(app);
-        await open(app.path);
+        // Use bundle ID to open application, which is more reliable
+        if (app.bundleId) {
+          await open("", app.bundleId);
+        } else {
+          await open(app.path);
+        }
         await showToast({
           style: Toast.Style.Success,
           title: `${t.launching} ${app.name}`,
