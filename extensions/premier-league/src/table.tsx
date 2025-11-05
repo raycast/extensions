@@ -1,32 +1,22 @@
 import { Color, Icon, Image, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { getTables } from "./api";
+import { getSeasons, getTables } from "./api";
 import SearchBarSeason from "./components/searchbar_season";
 import { convertISOToLocalTime, getClubLogo } from "./utils";
+import { competitions } from "./components/searchbar_competition";
 
-// const annotationMap: Record<string, string> = {
-//   Q: "Qualification",
-//   R: "Relegation",
-//   PD: "Points Deduction",
-// };
-
-// const qualificationMap: Record<string, string> = {
-//   EU_CL: "UEFA Champions League",
-//   EU_EL: "UEFA Europa League",
-//   EU_CF: "UEFA Conference League",
-//   EN_CH: "EFL Championship",
-// };
-
-// const qualificationColor: Record<string, string> = {
-//   EU_CL: Color.Blue,
-//   EU_EL: Color.Orange,
-//   EU_CF: Color.Green,
-//   EN_CH: Color.Red,
-// };
+const qualificationColor: Record<string, string> = {
+  5: Color.Blue, // UEFA Champions League
+  6: Color.Orange, // UEFA Europa League
+  1125: Color.Green, // UEFA Conference League
+};
 
 export default function EPLTables() {
   const [seasonId, setSeasonId] = useState<string>();
+
+  const { data: seasons } = usePromise(getSeasons, [competitions[0].value]);
+  const currentSeason = seasons?.find((s) => s.seasonId === seasonId);
 
   const { data: tables, isLoading } = usePromise(
     async (season) => {
@@ -105,6 +95,17 @@ export default function EPLTables() {
                   },
                 ];
               }
+
+              const qualification = currentSeason?.qualification.find((q) =>
+                q.positions.includes(position.toString()),
+              );
+              const relegation = currentSeason?.relegation.includes(
+                position.toString(),
+              );
+
+              const annotations = currentSeason?.annotations.filter(
+                (a) => a.teamId === team.id,
+              );
 
               return (
                 <List.Item
@@ -185,31 +186,36 @@ export default function EPLTables() {
                               })
                               .reverse()}
                           </List.Item.Detail.Metadata.TagList>
-                          {/* {Array.isArray(annotations) &&
-                            annotations.length &&
-                            annotations.map((annotation) => {
-                              return annotation.type === "Q" ? (
-                                <List.Item.Detail.Metadata.TagList
-                                  key={annotation.type}
-                                  title={annotationMap[annotation.type]}
-                                >
-                                  <List.Item.Detail.Metadata.TagList.Item
-                                    text={
-                                      qualificationMap[annotation.description]
-                                    }
-                                    color={
-                                      qualificationColor[annotation.description]
-                                    }
-                                  />
-                                </List.Item.Detail.Metadata.TagList>
-                              ) : (
-                                <List.Item.Detail.Metadata.Label
-                                  key={annotation.type}
-                                  title={annotationMap[annotation.type]}
-                                  text={annotation.description}
-                                />
-                              );
-                            })} */}
+                          {qualification && (
+                            <List.Item.Detail.Metadata.TagList
+                              key={qualification.competitionId}
+                              title="Qualification"
+                            >
+                              <List.Item.Detail.Metadata.TagList.Item
+                                text={qualification.label}
+                                color={
+                                  qualificationColor[
+                                    qualification.competitionId
+                                  ]
+                                }
+                              />
+                            </List.Item.Detail.Metadata.TagList>
+                          )}
+                          {relegation && (
+                            <List.Item.Detail.Metadata.TagList title="Relegation">
+                              <List.Item.Detail.Metadata.TagList.Item
+                                text="Championship"
+                                color={Color.Red}
+                              />
+                            </List.Item.Detail.Metadata.TagList>
+                          )}
+                          {Array.isArray(annotations) &&
+                            annotations.length > 0 && (
+                              <List.Item.Detail.Metadata.Label
+                                title=""
+                                text={annotations[0].comment ?? ""}
+                              />
+                            )}
                           {next && (
                             <>
                               <List.Item.Detail.Metadata.Separator />
