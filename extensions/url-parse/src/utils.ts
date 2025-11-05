@@ -35,6 +35,6 @@ export function toMarkdown(url: Detail) {
 }
 
 export function isURLLike(url: string) {
-  const reg = /^[a-zA-Z]+:\/\/.+/gi;
+  const reg = /^[a-zA-Z]+:\/\/.+/i;
   return reg.test(url.trim());
 }
