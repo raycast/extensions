@@ -16,8 +16,8 @@
         {
           "name": "query",
           "type": "text",
-          "description": "The query to search for",
-          "placeholder": "Search with ChatGPT..."
+          "placeholder": "Search with ChatGPT...",
+          "required": true
         }
       ],
       "preferences": [
