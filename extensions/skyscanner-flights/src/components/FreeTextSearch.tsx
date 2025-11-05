@@ -321,7 +321,7 @@ export default function FreeTextSearch() {
         info={
           showFallbackForm
             ? "AI parse failed. Edit your query or enter details below"
-            : "Type in natural language and press Enter (requires Raycast Pro)"
+            : "Type in natural language and press Enter"
         }
       />
 
