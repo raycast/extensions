@@ -163,7 +163,7 @@ export default function FreeTextSearch() {
       // Handle parsing errors
       if (parsed.error) {
         prefillFormFromParsedData(parsed);
-        await handleFallback(parsed.error + ". Use manual form below.");
+        await handleFallback(parsed.error + ". Use quick form below.");
         return;
       }
 
@@ -320,7 +320,7 @@ export default function FreeTextSearch() {
         onChange={setSearchText}
         info={
           showFallbackForm
-            ? "AI parse failed. Edit your query or use manual form below"
+            ? "AI parse failed. Edit your query or enter details below"
             : "Type in natural language and press Enter (requires Raycast Pro)"
         }
       />
@@ -328,7 +328,7 @@ export default function FreeTextSearch() {
       {showFallbackForm && (
         <>
           <Form.Separator />
-          <Form.Description text="⚠️ Fallback to manual entry - Fill the form below:" />
+          <Form.Description text="Sorry we couldn't understand your query! Can you please fill the details below:" />
 
           <FlightSearchForm
             originAirports={originAirports}

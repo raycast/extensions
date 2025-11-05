@@ -20,7 +20,7 @@
     {
       "name": "search-flights-manual",
       "title": "Search Flights Form",
-      "description": "Search for flights using a manual form",
+      "description": "Search for flights using a quick form",
       "mode": "view"
     }
   ],

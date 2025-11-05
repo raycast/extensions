@@ -23,7 +23,7 @@ A Raycast extension to quickly search for flights on Skyscanner using natural la
    - "JFK to LAX returning Friday"
 4. Press Enter - AI parses your query and opens Skyscanner
 
-PS: If AI parsing fails or you don't have Raycast Pro, use the manual form:
+PS: If AI parsing fails or you don't have Raycast Pro, use the quick form:
 
 ## Airport Search
 
