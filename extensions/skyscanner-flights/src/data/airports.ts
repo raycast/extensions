@@ -35147,3 +35147,17 @@ export function searchAirportsLocal(query: string): Airport[] {
     )
     .slice(0, 50); // Limit to 50 results for performance
 }
+
+/**
+ * Get airport by exact IATA code
+ * @param iata - The IATA code to lookup (case-insensitive)
+ * @returns Airport object or undefined if not found
+ */
+export function getAirportByIATA(iata: string): Airport | undefined {
+  if (!iata || iata.trim().length !== 3) {
+    return undefined;
+  }
+
+  const code = iata.toUpperCase().trim();
+  return airports.find((airport) => airport.iata.toUpperCase() === code);
+}

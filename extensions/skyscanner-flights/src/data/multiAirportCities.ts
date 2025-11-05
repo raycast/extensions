@@ -35,7 +35,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Los Angeles",
     country: "United States",
-    cityCode: "LAX",
+    cityCode: "LAXA",
     airports: [
       {
         iata: "LAX",
@@ -73,7 +73,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Houston",
     country: "United States",
-    cityCode: "HOU",
+    cityCode: "HOUA",
     airports: [
       {
         iata: "IAH",
@@ -123,7 +123,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Miami",
     country: "United States",
-    cityCode: "MIA",
+    cityCode: "MIAA",
     airports: [
       {
         iata: "MIA",
@@ -142,7 +142,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Dallas",
     country: "United States",
-    cityCode: "DFW",
+    cityCode: "DFWA",
     airports: [
       {
         iata: "DAL",
@@ -161,7 +161,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Seattle",
     country: "United States",
-    cityCode: "SEA",
+    cityCode: "SEAA",
     airports: [
       {
         iata: "SEA",
@@ -176,7 +176,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Atlanta",
     country: "United States",
-    cityCode: "ATL",
+    cityCode: "ATLA",
     airports: [
       {
         iata: "ATL",
@@ -195,7 +195,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Las Vegas",
     country: "United States",
-    cityCode: "LAS",
+    cityCode: "LASA",
     airports: [
       {
         iata: "LAS",
@@ -214,7 +214,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Philadelphia",
     country: "United States",
-    cityCode: "PHL",
+    cityCode: "PHLA",
     airports: [
       {
         iata: "PNE",
@@ -233,7 +233,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "San Diego",
     country: "United States",
-    cityCode: "SAN",
+    cityCode: "SANA",
     airports: [
       {
         iata: "NZY",
@@ -252,7 +252,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Toronto",
     country: "Canada",
-    cityCode: "YTO",
+    cityCode: "YTOA",
     airports: [
       {
         iata: "YKZ",
@@ -275,7 +275,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Montreal",
     country: "Canada",
-    cityCode: "YMQ",
+    cityCode: "YMQA",
     airports: [
       {
         iata: "YHU",
@@ -294,7 +294,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Vancouver",
     country: "Canada",
-    cityCode: "YVR",
+    cityCode: "YVRA",
     airports: [
       {
         iata: "YVR",
@@ -309,7 +309,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "London",
     country: "United Kingdom",
-    cityCode: "LON",
+    cityCode: "LOND",
     airports: [
       {
         iata: "LTN",
@@ -353,44 +353,6 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
     ],
   },
   {
-    city: "Berlin",
-    country: "Germany",
-    cityCode: "BER",
-    airports: [
-      {
-        iata: "SXF",
-        name: "Berlin-Schönefeld Airport",
-      },
-      {
-        iata: "THF",
-        name: "Berlin-Tempelhof International Airport",
-      },
-      {
-        iata: "TXL",
-        name: "Berlin-Tegel Airport",
-      },
-    ],
-  },
-  {
-    city: "Madrid",
-    country: "Spain",
-    cityCode: "MAD",
-    airports: [
-      {
-        iata: "MAD",
-        name: "Adolfo Suárez Madrid–Barajas Airport",
-      },
-      {
-        iata: "TOJ",
-        name: "Torrejón Airport",
-      },
-      {
-        iata: "ECV",
-        name: "Cuatro Vientos Airport",
-      },
-    ],
-  },
-  {
     city: "Rome",
     country: "Italy",
     cityCode: "ROM",
@@ -425,21 +387,6 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
     ],
   },
   {
-    city: "Copenhagen",
-    country: "Denmark",
-    cityCode: "CPH",
-    airports: [
-      {
-        iata: "CPH",
-        name: "Copenhagen Kastrup Airport",
-      },
-      {
-        iata: "RKE",
-        name: "Copenhagen Roskilde Airport",
-      },
-    ],
-  },
-  {
     city: "Moscow",
     country: "Russia",
     cityCode: "MOW",
@@ -469,7 +416,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Istanbul",
     country: "Turkey",
-    cityCode: "IST",
+    cityCode: "ISTA",
     airports: [
       {
         iata: "ISL",
@@ -482,21 +429,6 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
       {
         iata: "IST",
         name: "Istanbul Airport",
-      },
-    ],
-  },
-  {
-    city: "Athens",
-    country: "Greece",
-    cityCode: "ATH",
-    airports: [
-      {
-        iata: "ATH",
-        name: "Eleftherios Venizelos International Airport",
-      },
-      {
-        iata: "HEW",
-        name: "Athen Helenikon Airport",
       },
     ],
   },
@@ -537,7 +469,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Shanghai",
     country: "China",
-    cityCode: "SHA",
+    cityCode: "csha",
     airports: [
       {
         iata: "SHA",
@@ -546,21 +478,6 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
       {
         iata: "PVG",
         name: "Shanghai Pudong International Airport",
-      },
-    ],
-  },
-  {
-    city: "Hong Kong",
-    country: "Hong Kong",
-    cityCode: "HKG",
-    airports: [
-      {
-        iata: "HKG",
-        name: "Hong Kong International Airport",
-      },
-      {
-        iata: "HHP",
-        name: "Shun Tak Heliport",
       },
     ],
   },
@@ -612,7 +529,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Dubai",
     country: "United Arab Emirates",
-    cityCode: "DXB",
+    cityCode: "DXBA",
     airports: [
       {
         iata: "DXB",
@@ -657,7 +574,7 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
   {
     city: "Melbourne",
     country: "Australia",
-    cityCode: "MEL",
+    cityCode: "MELA",
     airports: [
       {
         iata: "MEB",
@@ -670,36 +587,6 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
       {
         iata: "MEL",
         name: "Melbourne International Airport",
-      },
-    ],
-  },
-  {
-    city: "Brisbane",
-    country: "Australia",
-    cityCode: "BNE",
-    airports: [
-      {
-        iata: "ACF",
-        name: "Brisbane Archerfield Airport",
-      },
-      {
-        iata: "BNE",
-        name: "Brisbane International Airport",
-      },
-    ],
-  },
-  {
-    city: "Perth",
-    country: "Australia",
-    cityCode: "PER",
-    airports: [
-      {
-        iata: "JAD",
-        name: "Perth Jandakot Airport",
-      },
-      {
-        iata: "PER",
-        name: "Perth International Airport",
       },
     ],
   },
@@ -749,24 +636,9 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
     ],
   },
   {
-    city: "Cairo",
-    country: "Egypt",
-    cityCode: "CAI",
-    airports: [
-      {
-        iata: "CAI",
-        name: "Cairo International Airport",
-      },
-      {
-        iata: "CWE",
-        name: "Cairo West Airport",
-      },
-    ],
-  },
-  {
     city: "Johannesburg",
     country: "South Africa",
-    cityCode: "JNB",
+    cityCode: "JNBA",
     airports: [
       {
         iata: "GCJ",
@@ -783,21 +655,6 @@ export const citiesWithMultipleAirports: MultiAirportCity[] = [
       {
         iata: "QRA",
         name: "Rand Airport",
-      },
-    ],
-  },
-  {
-    city: "Tel-aviv",
-    country: "Israel",
-    cityCode: "TLV",
-    airports: [
-      {
-        iata: "TLV",
-        name: "Ben Gurion International Airport",
-      },
-      {
-        iata: "SDV",
-        name: "Sde Dov Airport",
       },
     ],
   },

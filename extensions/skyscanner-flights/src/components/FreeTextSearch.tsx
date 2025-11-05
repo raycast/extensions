@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, open, Toast, showToast, environment, AI } from "@raycast/api";
 import { useState } from "react";
-import { searchAirportsLocal, Airport } from "../data/airports";
+import { searchAirportsLocal, Airport, getAirportByIATA } from "../data/airports";
 import { showFailureToast } from "@raycast/utils";
 import { trackFlightSearch } from "../utils/analytics";
 import { parseFreeTextQuery, ParsedFlight } from "../utils/flightParser";
@@ -22,6 +22,59 @@ interface FormValues {
   returnDate?: Date;
   adults: string;
   stops: string;
+}
+
+interface PreProcessedQuery {
+  originCode?: string; // Valid IATA code
+  destinationCode?: string; // Valid IATA code
+  remainingQuery: string; // Text for AI to parse
+  fullMatch: boolean; // Whether both codes were found and validated
+}
+
+/**
+ * Pre-process query to detect and validate IATA codes
+ * Handles patterns like: "AAL to CPH", "JFK-LAX", "SFO → NRT"
+ * @param query - User's free text query
+ * @returns PreProcessedQuery object with codes and remaining text
+ */
+function preprocessIATACodes(query: string): PreProcessedQuery {
+  // Regex to match patterns like "XXX to YYY", "XXX-YYY", "XXX → YYY"
+  // Matches 3-letter codes separated by common delimiters
+  const pattern = /\b([A-Z]{3})\b[\s-→>]*(?:to|->|→)?[\s-→>]*\b([A-Z]{3})\b/i;
+  const match = query.match(pattern);
+
+  if (!match) {
+    return { remainingQuery: query, fullMatch: false };
+  }
+
+  const originCode = match[1].toUpperCase();
+  const destinationCode = match[2].toUpperCase();
+
+  // CRITICAL: Validate against actual airport database to prevent false positives
+  // (e.g., "USA to CPH", "New to Old", etc.)
+  const originAirport = getAirportByIATA(originCode);
+  const destinationAirport = getAirportByIATA(destinationCode);
+
+  if (!originAirport || !destinationAirport) {
+    // Invalid codes - fall back to AI parsing
+    return { remainingQuery: query, fullMatch: false };
+  }
+
+  // Check if origin and destination are the same
+  if (originCode === destinationCode) {
+    // Allow but will show warning later
+    // Still considered a full match
+  }
+
+  // Extract remaining query (everything except the matched codes)
+  const remainingQuery = query.replace(match[0], "").trim();
+
+  return {
+    originCode,
+    destinationCode,
+    remainingQuery: remainingQuery || "today", // Default to "today" if nothing left
+    fullMatch: true,
+  };
 }
 
 export default function FreeTextSearch() {
@@ -85,7 +138,7 @@ export default function FreeTextSearch() {
       // Use city code
       const cityCode = getCityCode(selectedCity, selectedCountry);
       if (cityCode) {
-        return cityCode.toUpperCase() + "a";
+        return cityCode.toUpperCase();
       }
     }
 
@@ -141,13 +194,6 @@ export default function FreeTextSearch() {
       return;
     }
 
-    // Check if user has AI access
-    if (!environment.canAccess(AI)) {
-      await showFailureToast("AI Access Required");
-      setShowFallbackForm(true);
-      return;
-    }
-
     setIsParsingQuery(true);
 
     try {
@@ -155,6 +201,87 @@ export default function FreeTextSearch() {
         style: Toast.Style.Animated,
         title: "Looking for flights...",
       });
+
+      // Step 1: Try to pre-process for IATA codes
+      const preprocessed = preprocessIATACodes(searchText);
+
+      if (preprocessed.fullMatch && preprocessed.originCode && preprocessed.destinationCode) {
+        // IATA codes detected and validated - use direct code path
+        const originCode = preprocessed.originCode;
+        const destinationCode = preprocessed.destinationCode;
+
+        // Show warning if origin and destination are the same
+        if (originCode === destinationCode) {
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "Same origin and destination",
+            message: "Searching anyway...",
+          });
+        }
+
+        // Parse remaining text for dates and parameters
+        // Check if user has AI access for date parsing
+        let parsed: ParsedFlight;
+        if (environment.canAccess(AI)) {
+          parsed = await parseFreeTextQuery(preprocessed.remainingQuery);
+        } else {
+          // No AI access - use defaults
+          parsed = {
+            adults: 1,
+            stops: "any",
+            departureDate: new Date().toISOString().split("T")[0], // today
+          };
+        }
+
+        // Validate we have a departure date
+        if (!parsed.departureDate) {
+          parsed.departureDate = new Date().toISOString().split("T")[0]; // Default to today
+        }
+
+        const adultsCount = parsed.adults || 1;
+        const departureDate = formatDateForSkyscanner(parsed.departureDate);
+        const returnDate = parsed.returnDate ? formatDateForSkyscanner(parsed.returnDate) : undefined;
+        const isRoundTrip = !!returnDate;
+
+        // Build Skyscanner URL with exact codes provided by user
+        const url = buildSkyscannerURL({
+          origin: originCode,
+          destination: destinationCode,
+          departureDate,
+          returnDate,
+          adults: adultsCount,
+          stops: parsed.stops || "any",
+        });
+
+        trackFlightSearch({
+          origin: originCode,
+          destination: destinationCode,
+          tripType: isRoundTrip ? "round-trip" : "one-way",
+          adults: adultsCount,
+          departureDate,
+          returnDate,
+        });
+
+        await open(url);
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Opening Skyscanner",
+          message: `${originCode}→${destinationCode} | Date: ${departureDate}`,
+        });
+
+        setIsParsingQuery(false);
+        return;
+      }
+
+      // Step 2: Fall back to AI-based parsing for city names
+      // Check if user has AI access
+      if (!environment.canAccess(AI)) {
+        await showFailureToast("AI Access Required");
+        setShowFallbackForm(true);
+        setIsParsingQuery(false);
+        return;
+      }
 
       const parsed = await parseFreeTextQuery(searchText);
 
@@ -210,11 +337,23 @@ export default function FreeTextSearch() {
       const originCode = getCodeForSkyscanner(parsed.originLocation, originMatches);
       const destinationCode = getCodeForSkyscanner(parsed.destinationLocation, destinationMatches);
 
+      // Validate that we got valid codes
+      if (!originCode || !destinationCode) {
+        const missing = [];
+        if (!originCode) missing.push("origin code");
+        if (!destinationCode) missing.push("destination code");
+
+        prefillFormFromParsedData(parsed);
+        await showFailureToast(`Failed to get ${missing.join(", ")}. Check form below.`);
+        setIsParsingQuery(false);
+        setShowFallbackForm(true);
+        return;
+      }
+
       const adultsCount = parsed.adults || 1;
       const departureDate = formatDateForSkyscanner(parsed.departureDate);
       const returnDate = parsed.returnDate ? formatDateForSkyscanner(parsed.returnDate) : undefined;
       const isRoundTrip = !!returnDate;
-
       // Build Skyscanner URL
       const url = buildSkyscannerURL({
         origin: originCode,
