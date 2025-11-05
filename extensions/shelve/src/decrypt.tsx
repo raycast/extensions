@@ -10,6 +10,7 @@ interface VaultResponse {
 
 interface DecryptFormValues {
   vaultUrl: string;
+  password?: string;
 }
 
 function DecryptResult({ data }: { data: VaultResponse }) {
@@ -19,8 +20,8 @@ function DecryptResult({ data }: { data: VaultResponse }) {
 ${data.decryptedValue}
 \`\`\`
 
-**Remaining reads:** ${data.reads}
-**Time to live:** ${data.ttl}
+**Reads left:** ${data.reads}
+**Time left:** ${data.ttl}
 
 The decrypted value has been automatically copied to your clipboard.
   `;
@@ -68,7 +69,18 @@ export default function Command() {
           throw new Error("Could not extract secret ID from the provided input. Please check the format.");
         }
 
-        const response = await fetch(`https://vault.shelve.cloud/api/vault?id=${secretId}`);
+        const requestBody: { password?: string } = {};
+        if (values.password && values.password.trim()) {
+          requestBody.password = values.password;
+        }
+
+        const response = await fetch(`https://vault.shelve.cloud/api/vault?id=${secretId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -119,7 +131,7 @@ export default function Command() {
 
         // Basic validation for supported formats
         const trimmedValue = value.trim();
-        const isUrl = trimmedValue.startsWith("https://vault.shelve.cloud/");
+        const isUrl = trimmedValue.startsWith("https://vault.shelve.cloud");
         const isId = /^[a-zA-Z0-9_-]+$/.test(trimmedValue);
 
         if (!isUrl && !isId) {
@@ -143,8 +155,15 @@ export default function Command() {
       <Form.TextField
         {...itemProps.vaultUrl}
         title="Vault URL or Secret ID"
-        placeholder="https://vault.shelve.cloud/decrypt?id=... or just the ID"
+        placeholder="Enter your share ID (e.g. o75adqf...)"
         info="You can paste either the full vault URL or just the secret ID. The secret will be automatically copied to your clipboard upon successful decryption."
+      />
+
+      <Form.PasswordField
+        {...itemProps.password}
+        title="Password (Optional)"
+        placeholder="Leave empty if not password-protected"
+        info="Enter password if the secret is password-protected. Leave empty otherwise."
       />
     </Form>
   );
@@ -153,17 +172,17 @@ export default function Command() {
 function extractSecretId(input: string): string | null {
   const trimmedInput = input.trim();
 
-  if (trimmedInput.startsWith("https://vault.shelve.cloud/")) {
+  if (trimmedInput.startsWith("https://vault.shelve.cloud")) {
+    // Handle https://vault.shelve.cloud?id={id}
+    const queryMatch = trimmedInput.match(/https:\/\/vault\.shelve\.cloud(?:\/)?(?:\?|&)id=([^&\s]+)/);
+    if (queryMatch) {
+      return queryMatch[1];
+    }
+
     // Handle https://vault.shelve.cloud/secret/{id}
     const secretMatch = trimmedInput.match(/https:\/\/vault\.shelve\.cloud\/secret\/([^/?]+)/);
     if (secretMatch) {
       return secretMatch[1];
-    }
-
-    // Handle https://vault.shelve.cloud/decrypt?id={id}
-    const decryptMatch = trimmedInput.match(/https:\/\/vault\.shelve\.cloud\/decrypt\?id=([^&\s]+)/);
-    if (decryptMatch) {
-      return decryptMatch[1];
     }
 
     return null;
