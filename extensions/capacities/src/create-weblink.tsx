@@ -75,12 +75,18 @@ export default function Command() {
     },
     validation: {
       value(value) {
-        if (!value || value.trim() === "") return "A link is required";
-        if (!isValidURL(value)) return "Invalid URL";
+        if (!value || value.trim() === "") {
+          return "A link is required";
+        }
+        if (!isValidURL(value)) {
+          return "Invalid URL";
+        }
       },
       spaceId: spacesDropdown.current ? FormValidation.Required : undefined,
       tags(value) {
-        if (value && value.split(",").length > 10) return "Maximum of 10 tags allowed.";
+        if (value && value.split(",").length > 10) {
+          return "Maximum of 10 tags allowed.";
+        }
       },
     },
   });
