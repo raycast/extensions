@@ -129,7 +129,7 @@ export default function Command() {
         })
         .map((item) => item.action);
     },
-    [],
+    [defaultOpenAction],
   );
 
   async function search(v: string): Promise<void> {
