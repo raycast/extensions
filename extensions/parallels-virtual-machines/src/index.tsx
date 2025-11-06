@@ -1,5 +1,4 @@
-import { ActionPanel, Action, List, Icon, closeMainWindow, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { ActionPanel, Action, List, Icon, closeMainWindow } from "@raycast/api";
 
 import { VM, VMState, VMAction } from "./types";
 import { findVMs, openVM, runVMAction } from "./actions";
@@ -41,7 +40,7 @@ function VMItem({ vm }: { vm: VM }) {
               <>
                 <Action title="Resume" icon={Icon.Play} onAction={() => runVMAction(vm, VMAction.Resume)} />
                 <Action
-                  title="Start then Force Stop"
+                  title="Start Then Force Stop"
                   icon={Icon.Power}
                   onAction={() => {
                     closeMainWindow();

@@ -3,7 +3,7 @@ import { closeMainWindow, showToast, Toast } from "@raycast/api";
 
 import { execFile } from "child_process";
 import { useMemo } from "react";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 import { VM, VMAction, SearchState } from "./types";
 import { parseVM } from "./utils";
@@ -14,7 +14,7 @@ function findVMs(): SearchState {
   const { isLoading, data } = useExec("/usr/local/bin/prlctl", ["list", "--all", "--full", "--json", "--info"], {
     onError: showCommandError,
   });
-  const results = useMemo<unknown[]>(() => JSON.parse(data || "[]"), [data]);
+  const results = useMemo<Record<string, string>[]>(() => JSON.parse(data || "[]"), [data]);
   return {
     vms: results.map(parseVM),
     isLoading,
@@ -58,12 +58,10 @@ function runVMAction(vm: VM, action: VMAction): void {
           await execPrlctl(["reset", vm.id]);
           break;
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to perform VM action`,
-        message: error?.message || String(error),
+      await showFailureToast(error, {
+        message: "Failed to perform VM action",
       });
     }
   })();

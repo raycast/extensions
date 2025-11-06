@@ -4,7 +4,7 @@ import { VM, VMState } from "./types";
 
 export { parseVM, stateFromText, stateToDescription, iconForVM };
 
-function parseVM(data: any): VM {
+function parseVM(data: Record<string, string>): VM {
   const id: string = data["ID"];
   const name: string = data["Name"];
   const description: string = data["Description"];
