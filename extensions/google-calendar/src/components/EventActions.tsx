@@ -14,8 +14,11 @@ const EventActions = ({
 }) => {
   return (
     <ActionPanel>
-      {event.conferenceData?.entryPoints?.[0]?.uri ? <Action.OpenInBrowser title="Open Meeting" url={event.conferenceData?.entryPoints?.[0]?.uri} />
-      : event.htmlLink && <Action.OpenInBrowser title="Open in Google Calendar" url={event.htmlLink} />}
+      {event.conferenceData?.entryPoints?.[0]?.uri ? (
+        <Action.OpenInBrowser title="Open Meeting" url={event.conferenceData?.entryPoints?.[0]?.uri} />
+      ) : (
+        event.htmlLink && <Action.OpenInBrowser title="Open in Google Calendar" url={event.htmlLink} />
+      )}
       <ActionPanel.Section>
         {event.id && (
           <ActionPanel.Submenu
