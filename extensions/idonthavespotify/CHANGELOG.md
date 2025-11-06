@@ -1,6 +1,6 @@
 # I Don't Have Spotify Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-11-06
 
 - Update hostname
 
