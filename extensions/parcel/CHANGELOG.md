@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Add Delivery Overhaul] - {PR_MERGE_DATE}
+## [Add Delivery Overhaul] - 2025-11-06
 
 - Add Delivery now works on both Mac and Windows without requiring the Parcel Mac app to be installed by using Parcel's Add Delivery API
 - The Add Delivery form now prevents leaving required form fields empty
