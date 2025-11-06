@@ -47,7 +47,7 @@
     },
     {
       "name": "refresh-blocking",
-      "title": "Force Re-block & Fix",
+      "title": "Force Re-Block & Fix",
       "description": "Troubleshoot blocking issues by re-applying blocks, clearing DNS cache, and refreshing connections",
       "mode": "no-view",
       "icon": "force_reblock.png",
