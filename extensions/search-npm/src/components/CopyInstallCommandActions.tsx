@@ -38,7 +38,7 @@ const defaultShortcut: Keyboard.Shortcut = {
   },
   Windows: {
     key: "c",
-    modifiers: ["shift", "cmd"],
+    modifiers: ["shift", "ctrl"],
   },
 };
 const alternateShortcut: Keyboard.Shortcut = {
@@ -48,7 +48,7 @@ const alternateShortcut: Keyboard.Shortcut = {
   },
   Windows: {
     key: "c",
-    modifiers: ["opt", "cmd"],
+    modifiers: ["alt", "ctrl"],
   },
 };
 
