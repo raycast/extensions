@@ -10,10 +10,6 @@
     "sourceMap": true,
     "outDir": "./",
     "rootDir": "./src",
-    "baseUrl": "./src",
-    "paths": {
-      "./lib/*": ["./*"]
-    },
     "removeComments": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
