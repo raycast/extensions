@@ -144,18 +144,19 @@ export function useGitignore(): [
     // Start loading
     setState((prev) => ({ ...prev, loading: true }));
 
-    // If files are not downloaded we shouldDownload
-    if (!shouldDownload) {
+    // Determine if we need to download based on parameter and file existence
+    let needsDownload = shouldDownload;
+    if (!needsDownload) {
       try {
         await fs.access(LATEST_PATH);
       } catch (error) {
-        shouldDownload = true;
+        needsDownload = true;
         console.error(`Could not access ${LATEST_PATH}.`, error);
       }
     }
 
     try {
-      if (shouldDownload) {
+      if (needsDownload) {
         // Download and process files
         await updateCache();
         // After files downloaded, reset selection

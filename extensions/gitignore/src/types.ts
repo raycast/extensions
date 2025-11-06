@@ -11,7 +11,7 @@ export type State = {
   lastUpdated: Date | null;
 };
 
-export interface Preferences {
+export type Preferences = {
   listdetail: boolean;
   autoselect: boolean;
-}
+};

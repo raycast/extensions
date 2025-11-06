@@ -22,13 +22,13 @@ Quickly create a `.gitignore` file for your project by selecting from hundreds o
 
 ### Favourites
 
-- Press `⌘⇧P` (or `Ctrl⇧P` on Windows) to add/remove templates from your favourites
+- Press `⌘⇧P` (or `Ctrl + .` on Windows) to add/remove templates from your favourites
 - Favourites appear at the top in a dedicated section
 - Enable "Auto Select Favorites" in preferences to automatically select favourites when opening the extension
 
 ### Keyboard Shortcuts
 
-- `⌘⇧P` / `Ctrl⇧P`: Toggle favourite status (Pin)
+- `⌘⇧P` / `Ctrl + .`: Toggle favourite status (Pin)
 - `⌘Y` / `CtrlY`: Preview selected templates
 - `⌘⇧↩` / `Ctrl⇧↩`: Paste to active application
 
