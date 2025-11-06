@@ -39,7 +39,11 @@ export function escapeShellContent(content: string): string {
 /**
  * Validates file path to ensure it's safe to access
  *
- * @param filePath The file path to validate
+ * Note: This function expects paths to be already expanded (e.g., ~ should be
+ * expanded to the home directory before calling this function). Path expansion
+ * is handled upstream in getZshrcPath().
+ *
+ * @param filePath The file path to validate (must be already expanded)
  * @returns True if the path is safe and points to the expected .zshrc file
  */
 export async function validateFilePath(filePath: string): Promise<boolean> {
@@ -59,8 +63,10 @@ export async function validateFilePath(filePath: string): Promise<boolean> {
       return false;
     }
 
-    // Check for tilde expansion attempts
-    if (filePath.includes("~")) {
+    // Check if path starts with ~ or contains ~/ (unexpanded path indicators)
+    // This enforces the contract that paths must be expanded before calling this function
+    // and prevents security bypass if validateFilePath is called directly with unexpanded paths
+    if (filePath.startsWith("~") || filePath.includes("~/")) {
       return false;
     }
 
