@@ -1,8 +1,12 @@
+// Temporarily keep type checking disabled for this file because enabling it surfaced complex
+// declaration mismatches in the workspace types (React / Raycast API). See TODO to follow up.
+// TODO: remove this and fix types once the project's type config or @types/react alignment is resolved.
 // @ts-nocheck
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import React from "react";
 import { showFailureToast } from "@raycast/utils";
+import { load } from "cheerio";
 
 type LookupResult = {
   name: string;
@@ -53,8 +57,8 @@ export default function LookupCommand() {
     }
   }
 
-  const queryTrimmed = query.trim();
-  const isMsStoreUrl = queryTrimmed && isValidMicrosoftStoreUrl(queryTrimmed);
+  const queryTrimmed = useMemo(() => query.trim(), [query]);
+  const isMsStoreUrl = useMemo(() => (queryTrimmed ? isValidMicrosoftStoreUrl(queryTrimmed) : false), [queryTrimmed]);
 
   useEffect(() => {
     setResults([]);
@@ -78,13 +82,21 @@ export default function LookupCommand() {
         lang: "en-US",
       });
 
+      // Abort fetch if it takes too long to avoid hanging the UI
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15_000);
+
       const response = await fetch("https://store.rg-adguard.net/api/GetFiles", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
+          // Identify as Raycast extension without sending sensitive info
+          "User-Agent": "Raycast-Extension rg-adguard-links/1.0",
         },
         body: params.toString(),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
 
       if (!response.ok) {
         throw new Error(`Request failed (${response.status})`);
@@ -141,7 +153,7 @@ export default function LookupCommand() {
       {results.length > 0 ? (
         <List.Section title="Download Links" subtitle={`${results.length}`}>
           {results.map((result) => {
-            const accessories = [];
+            const accessories: List.Item.Accessory[] = [];
             if (result.expire) accessories.push({ icon: Icon.Clock, text: result.expire });
             if (result.sha1) accessories.push({ icon: Icon.Fingerprint, text: `${result.sha1.slice(0, 8)}…` });
             
@@ -185,33 +197,28 @@ function determineLookupType(value: string): "url" | "ProductId" | "PackageFamil
 }
 
 function parseLookupResults(html: string): LookupResult[] {
-  const rows = Array.from(html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g));
-  if (rows.length <= 1) {
-    return [];
-  }
+  const $ = load(html);
+  const rows = $("table tr");
+  if (rows.length <= 1) return [];
 
-  return rows
-    .slice(1)
-    .map((row) => {
-      const cells = Array.from(row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g));
-      if (cells.length < 4) {
-        return null;
-      }
+  const items: LookupResult[] = [];
+  // Skip header row (index 0)
+  rows.slice(1).each((_, tr) => {
+    const tds = $(tr).find("td");
+    if (tds.length < 4) return;
 
-      const linkMatch = cells[0][1].match(/href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i);
-      if (!linkMatch) {
-        return null;
-      }
+    const link = $(tds[0]).find("a");
+    const url = (link.attr("href") || "").trim();
+    const name = link.text().trim();
+    const expire = $(tds[1]).text().trim();
+    const sha1 = $(tds[2]).text().trim();
+    const size = $(tds[3]).text().trim();
 
-      return {
-        url: decodeHtml(linkMatch[1]),
-        name: decodeHtml(stripHtml(linkMatch[2])),
-        expire: decodeHtml(stripHtml(cells[1][1])),
-        sha1: decodeHtml(stripHtml(cells[2][1])),
-        size: decodeHtml(stripHtml(cells[3][1])),
-      } satisfies LookupResult;
-    })
-    .filter(Boolean) as LookupResult[];
+    if (!url || !name) return;
+    items.push({ url, name, expire, sha1, size });
+  });
+
+  return items;
 }
 
 function stripHtml(value: string): string {

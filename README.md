@@ -18,6 +18,10 @@ Generate direct download links for Microsoft Store apps using store.rg-adguard.n
 4. Press Enter to open the lookup page, or use Generate Download Links to fetch files automatically
 5. Browse generated download links with file details
 
+## Third-party service and privacy
+
+This extension uses the public service `store.rg-adguard.net` to generate direct download links for Microsoft Store apps. The extension sends the user-provided query to that service and displays links returned by it; it does not host or serve the files itself. Be aware that queries and results are exchanged with that third-party service. If you have concerns about privacy or availability, please review `store.rg-adguard.net`'s terms and policies.
+
 ## Development
 
 ```

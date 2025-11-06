@@ -4,7 +4,7 @@
   "title": "RG Adguard Links",
   "version": "1.0.0",
   "description": "Generate direct download links from store.rg-adguard.net for Microsoft Store apps.",
-  "icon": "extension-icon.png",
+  "icon": "assets/extension-icon.png",
   "author": "Gunk",
   "license": "MIT",
   "categories": [
@@ -16,22 +16,24 @@
       "title": "Get Download Links",
       "description": "Generate download links for Microsoft Store apps using RG Adguard.",
       "mode": "view",
-      "icon": "command-icon.png",
+  "icon": "assets/command-icon.png",
       "path": "src/lookup.tsx"
     }
   ],
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build -e dist --skip-types",
-    "lint": "ray lint"
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@raycast/api": "^1.82.0"
+    "@raycast/api": "^1.82.0",
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "@raycast/utils": "^1.10.0",
     "@types/node": "20.8.10",
-    "@types/react": "18.0.9",
-    "typescript": "^5.2.2"
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.0"
   }
 }
