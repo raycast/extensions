@@ -285,3 +285,12 @@ export const Toast = {
     Success: "success" as const,
   },
 };
+
+// Mock Keyboard
+export const Keyboard = {
+  Shortcut: {
+    Common: {
+      New: { key: "n", modifiers: ["cmd"] } as const,
+    },
+  },
+};
