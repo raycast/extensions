@@ -1,7 +1,3 @@
-// Keep type checking disabled for now due to type conflicts between Raycast API types and
-// the workspace React/TypeScript setup. Follow-up: align @types/react / TypeScript versions
-// and remove this directive to enable full type checking.
-// @ts-nocheck
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
@@ -17,7 +13,7 @@ namespace RGAdguard {
   };
 }
 
-export default function LookupCommand() {
+export default function LookupCommand(): JSX.Element {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<RGAdguard.LookupResult[]>([]);
   const [isGeneratingLinks, setIsGeneratingLinks] = useState(false);
@@ -104,8 +100,8 @@ export default function LookupCommand() {
       }
 
       const html = await response.text();
-  const parsed = parseLookupResults(html);
-  setResults(parsed as RGAdguard.LookupResult[]);
+      const parsed = parseLookupResults(html);
+      setResults(parsed);
 
       await showToast({
         style: parsed.length > 0 ? Toast.Style.Success : Toast.Style.Failure,
@@ -117,16 +113,21 @@ export default function LookupCommand() {
       setIsGeneratingLinks(false);
     }
   }
+  // Cast Raycast components to `any` to avoid JSX element type incompatibilities
+  // between @raycast/api's shipped declarations and this workspace's React typings.
+  const _List: any = List as any;
+  const _Action: any = Action as any;
+  const _ActionPanel: any = ActionPanel as any;
 
   return (
-    <List
+    <_List
       searchBarPlaceholder="Search for a Microsoft Store app..."
       onSearchTextChange={setQuery}
       throttle
       isLoading={isGeneratingLinks}
     >
       {!queryTrimmed && results.length === 0 ? (
-        <List.EmptyView
+        <_List.EmptyView
           icon="🔍"
           title="Search for a Microsoft Store App"
           description="Enter an app name, Product ID, or Microsoft Store URL to get started"
@@ -134,50 +135,50 @@ export default function LookupCommand() {
       ) : null}
 
       {queryTrimmed ? (
-        <List.Section title="Lookup">
-          <List.Item
+        <_List.Section title="Lookup">
+          <_List.Item
             title={queryTrimmed}
             subtitle={isMsStoreUrl ? "✓ Valid Microsoft Store URL" : "Press Enter to open lookup"}
             accessories={isMsStoreUrl ? [{ text: "MS Store URL" }] : undefined}
             actions={
-              <ActionPanel>
-                <Action title="Open Lookup" onAction={handleOpen} />
-                <Action title="Generate Download Links" onAction={handleGenerateLinks} icon={Icon.Link} />
-                <Action.Paste title="Paste Lookup URL" content={buildLookupUrl(queryTrimmed)} />
-                <Action.CopyToClipboard title="Copy Lookup URL" content={buildLookupUrl(queryTrimmed)} />
-              </ActionPanel>
+              <_ActionPanel>
+                <_Action title="Open Lookup" onAction={handleOpen} />
+                <_Action title="Generate Download Links" onAction={handleGenerateLinks} icon={Icon.Link} />
+                <_Action.Paste title="Paste Lookup URL" content={buildLookupUrl(queryTrimmed)} />
+                <_Action.CopyToClipboard title="Copy Lookup URL" content={buildLookupUrl(queryTrimmed)} />
+              </_ActionPanel>
             }
           />
-        </List.Section>
+        </_List.Section>
       ) : null}
 
       {results.length > 0 ? (
-        <List.Section title="Download Links" subtitle={`${results.length}`}>
+        <_List.Section title="Download Links" subtitle={`${results.length}`}>
           {results.map((result) => {
-            const accessories: List.Item.Accessory[] = [];
+            const accessories: any[] = [];
             if (result.expire) accessories.push({ icon: Icon.Clock, text: result.expire });
             if (result.sha1) accessories.push({ icon: Icon.Fingerprint, text: `${result.sha1.slice(0, 8)}…` });
-            
+
             return (
-              <List.Item
+              <_List.Item
                 key={result.url}
                 title={result.name}
                 subtitle={result.size}
                 accessories={accessories}
                 actions={
-                  <ActionPanel>
-                    <Action.OpenInBrowser url={result.url} />
-                    <Action.CopyToClipboard title="Copy Download URL" content={result.url} />
-                    <Action.Paste title="Paste Download URL" content={result.url} />
-                    {result.sha1 && <Action.CopyToClipboard title="Copy SHA-1" content={result.sha1} />}
-                  </ActionPanel>
+                  <_ActionPanel>
+                    <_Action.OpenInBrowser url={result.url} />
+                    <_Action.CopyToClipboard title="Copy Download URL" content={result.url} />
+                    <_Action.Paste title="Paste Download URL" content={result.url} />
+                    {result.sha1 && <_Action.CopyToClipboard title="Copy SHA-1" content={result.sha1} />}
+                  </_ActionPanel>
                 }
               />
             );
           })}
-        </List.Section>
+        </_List.Section>
       ) : null}
-    </List>
+    </_List>
   );
 }
 

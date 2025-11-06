@@ -28,5 +28,5 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-#Ignore vscode AI rules
+# Ignore VS Code AI rules file
 .github/instructions/codacy.instructions.md

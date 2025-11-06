@@ -1,0 +1,28 @@
+# .codacyignore — ignore generated files and dependencies
+# Purpose: stop Codacy analyzers (especially PMD) from scanning third-party libs
+
+# Dependency folders
+**/node_modules/**
+/node_modules/**
+node_modules/
+
+# Build / distribution artifacts
+**/dist/**
+dist/
+**/build/**
+build/
+
+# Coverage and test outputs
+coverage/
+**/coverage/**
+/.nyc_output/
+
+# Tooling caches
+.parcel-cache/
+.cache/
+
+# Misc logs and local-only files
+*.log
+
+# Keep CI / config / docs
+!.github/**
