@@ -1,14 +1,13 @@
-// Temporarily keep type checking disabled for this file because enabling it surfaced complex
-// declaration mismatches in the workspace types (React / Raycast API). See TODO to follow up.
-// TODO: remove this and fix types once the project's type config or @types/react alignment is resolved.
+// Keep type checking disabled for now due to type conflicts between Raycast API types and
+// the workspace React/TypeScript setup. Follow-up: align @types/react / TypeScript versions
+// and remove this directive to enable full type checking.
 // @ts-nocheck
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import React from "react";
 import { showFailureToast } from "@raycast/utils";
 import { load } from "cheerio";
 
-type LookupResult = {
+type RGLookupResult = {
   name: string;
   url: string;
   expire: string;
@@ -18,7 +17,7 @@ type LookupResult = {
 
 export default function LookupCommand() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<LookupResult[]>([]);
+  const [results, setResults] = useState<RGLookupResult[]>([]);
   const [isGeneratingLinks, setIsGeneratingLinks] = useState(false);
 
   function buildLookupUrl(input: string): string {
@@ -103,8 +102,8 @@ export default function LookupCommand() {
       }
 
       const html = await response.text();
-      const parsed = parseLookupResults(html);
-      setResults(parsed);
+  const parsed = parseLookupResults(html);
+  setResults(parsed as RGLookupResult[]);
 
       await showToast({
         style: parsed.length > 0 ? Toast.Style.Success : Toast.Style.Failure,
@@ -196,12 +195,12 @@ function determineLookupType(value: string): "url" | "ProductId" | "PackageFamil
   return "url";
 }
 
-function parseLookupResults(html: string): LookupResult[] {
+function parseLookupResults(html: string): RGLookupResult[] {
   const $ = load(html);
   const rows = $("table tr");
   if (rows.length <= 1) return [];
 
-  const items: LookupResult[] = [];
+  const items: RGLookupResult[] = [];
   // Skip header row (index 0)
   rows.slice(1).each((_, tr) => {
     const tds = $(tr).find("td");
