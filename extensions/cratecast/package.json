@@ -32,7 +32,6 @@
       "description": "How to open the selected package when Enter is pressed",
       "required": false,
       "default": "copyToClipboard",
-      "value": "copyToClipboard",
       "data": [
         {
           "title": "Copy Dependency Line",

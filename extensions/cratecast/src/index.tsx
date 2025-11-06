@@ -17,7 +17,7 @@ interface Preferences {
 }
 
 function getShortcut(action: CrateActions, defaultAction: CrateActions): Keyboard.Shortcut | undefined {
-  if (action == defaultAction) {
+  if (action === defaultAction) {
     return;
   }
   switch (action) {
@@ -122,7 +122,7 @@ export default function Command() {
       ]
         .filter((item) => !!item.action)
         .sort((a) => {
-          if (a.actionName == defaultOpenAction) {
+          if (a.actionName === defaultOpenAction) {
             return -1;
           }
           return 0;
