@@ -3,16 +3,21 @@
 /**
  * Backend API base URL
  */
+// export const BACKEND_API_URL = "http://localhost:3003/";
+// export const BACKEND_API_URL = "https://api-pre.webbites.io/";
 export const BACKEND_API_URL = "https://api.webbites.io/";
 
 /**
  * API endpoints
  */
 export const API_ENDPOINTS = {
-  LOGIN: "raycast-login",
-  LOGOUT: "raycast-logout",
-  USER: "raycast-user",
-  BOOKMARKS: "raycast-bookmarks",
+  // LOGIN: "raycast/raycast-login",
+  LOGIN: "v1/auth/login",
+  LOGOUT: "v1/auth/logout",
+  USER: "v1/raycast/raycast-user",
+  SAVE_BOOKMARK: "v1/content/startSaveProcess",
+  SEARCH: "v1/search",
+  GENERATE_KEY: "v1/keys/create",
 } as const;
 
 /**

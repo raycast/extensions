@@ -99,7 +99,7 @@ export interface IssueListResponse {
 
 export interface CreateIssueRequest {
   title?: string;
-  description: string;
+  prompt: string;
   json: string;
   queueRightAway: boolean;
   codeRepoIds?: string[];

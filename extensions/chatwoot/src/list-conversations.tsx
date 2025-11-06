@@ -1,25 +1,44 @@
-import { FormValidation, getAvatarIcon, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, getAvatarIcon, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { chatwoot } from "./chatwoot";
 import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
-import { Conversation, MessageType } from "./types";
+import { Conversation, Message, MessageType } from "./types";
 
+const MESSAGE_STATUS_ACCESSORY: Record<Message["status"], List.Item.Accessory> = {
+  read: { icon: { source: Icon.Checkmark, tintColor: Color.Blue }, tooltip: "Read" },
+  sent: { icon: Icon.Checkmark, tooltip: "Delivered successfully" },
+  failed: { icon: { source: Icon.Warning, tintColor: Color.Red } },
+  delivered: {},
+};
 export default function ListConversations() {
+  const [filter, setFilter] = useCachedState("LIST_CONVERSATIONS_FILTER", "status_open");
   const {
     isLoading,
     data: conversations,
     mutate,
   } = useCachedPromise(
-    async () => {
-      const { data } = await chatwoot.conversations.list();
+    async (filter: string) => {
+      const [, val] = filter.split("_");
+      const { data } = await chatwoot.conversations.list({ status: val });
       return data.payload;
     },
-    [],
+    [filter],
     { initialData: [] },
   );
 
   return (
-    <List isLoading={isLoading}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter" onChange={setFilter} defaultValue={filter}>
+          <List.Dropdown.Item title="All" value="status_all" />
+          <List.Dropdown.Item title="Open" value="status_open" />
+          <List.Dropdown.Item title="Resolved" value="status_resolved" />
+          <List.Dropdown.Item title="Pending" value="status_pending" />
+          <List.Dropdown.Item title="Snoozed" value="status_snoozed" />
+        </List.Dropdown>
+      }
+    >
       {!isLoading && !conversations.length ? (
         <List.EmptyView title="There are no active conversations in this group." />
       ) : (
@@ -36,6 +55,17 @@ export default function ListConversations() {
                   : "") + (conversation.messages[0].content || "No content available")
             }
             accessories={[
+              MESSAGE_STATUS_ACCESSORY[conversation.messages[0].status],
+              {
+                tag: {
+                  value: conversation.status,
+                  color: conversation.status === "snoozed" ? Color.Yellow : undefined,
+                },
+                tooltip:
+                  conversation.status === "snoozed"
+                    ? `Snoozed until ${conversation.snoozed_until ? formatDistanceToNow(conversation.snoozed_until) : "next reply"}`
+                    : "",
+              },
               conversation.meta.sender.email
                 ? {}
                 : {
@@ -62,7 +92,7 @@ export default function ListConversations() {
                 <Action.Push
                   icon={Icon.SpeechBubbleActive}
                   title="Create Message"
-                  target={<CreateMessage conversation={conversation} />}
+                  target={<CreateMessage conversationId={conversation.id} />}
                   onPop={mutate}
                 />
               </ActionPanel>
@@ -74,17 +104,27 @@ export default function ListConversations() {
   );
 }
 
+const getMessageIcon = (message: Message) => {
+  switch (message.message_type) {
+    case MessageType.Activity:
+      return "chatwoot.png";
+    case MessageType.Bot:
+      return getAvatarIcon("B");
+    default:
+      return getAvatarIcon(message.sender.name);
+  }
+};
 function ListMessages({ conversation }: { conversation: Conversation }) {
   const {
     isLoading,
     data: messages,
     mutate,
   } = useCachedPromise(
-    async () => {
-      const { payload } = await chatwoot.messages.list({ conversationId: conversation.id });
+    async (conversationId) => {
+      const { payload } = await chatwoot.messages.list({ conversationId });
       return payload;
     },
-    [],
+    [conversation.id],
     { initialData: [] },
   );
   return (
@@ -92,12 +132,13 @@ function ListMessages({ conversation }: { conversation: Conversation }) {
       {messages.map((message) => (
         <List.Item
           key={message.id}
-          icon={getAvatarIcon(message.message_type === MessageType.Bot ? "B" : message.sender.name)}
-          title={message.content || ""}
+          icon={getMessageIcon(message)}
+          title=""
           subtitle={message.content ? "" : "No content available"}
           accessories={[
             { icon: message.private ? Icon.Lock : undefined },
             { text: format(new Date(message.created_at * 1000), "MMM d, h:mm a") },
+            MESSAGE_STATUS_ACCESSORY[message.status],
           ]}
           detail={<List.Item.Detail markdown={message.content} />}
           actions={
@@ -105,7 +146,9 @@ function ListMessages({ conversation }: { conversation: Conversation }) {
               <Action.Push
                 icon={Icon.SpeechBubbleActive}
                 title="Create Message"
-                target={<CreateMessage conversation={conversation} />}
+                target={
+                  <CreateMessage conversationId={conversation.id} lastMessageContent={messages.at(-1)?.content} />
+                }
                 onPop={mutate}
               />
             </ActionPanel>
@@ -115,7 +158,13 @@ function ListMessages({ conversation }: { conversation: Conversation }) {
     </List>
   );
 }
-function CreateMessage({ conversation }: { conversation: Conversation }) {
+function CreateMessage({
+  conversationId,
+  lastMessageContent,
+}: {
+  conversationId: number;
+  lastMessageContent?: string | null;
+}) {
   const { pop } = useNavigation();
   type FormValues = {
     private: boolean;
@@ -125,7 +174,7 @@ function CreateMessage({ conversation }: { conversation: Conversation }) {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, values.private ? "Adding" : "Sending", values.content);
       try {
-        await chatwoot.messages.create({ conversationId: conversation.id, message: values });
+        await chatwoot.messages.create({ conversationId, message: values });
         toast.style = Toast.Style.Success;
         toast.title = values.private ? "Added" : "Sent";
         pop();
@@ -141,13 +190,14 @@ function CreateMessage({ conversation }: { conversation: Conversation }) {
   });
   return (
     <Form
-      navigationTitle={`List Conversations / ${conversation.id} / ${values.private ? "Add Note" : "Send"}`}
+      navigationTitle={`List Conversations / ${conversationId} / ${values.private ? "Add Note" : "Send"}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.SpeechBubbleActive} title="Create Message" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      <Form.Description title="Last Message" text={lastMessageContent || ""} />
       <Form.Checkbox label="Private Note" {...itemProps.private} />
       <Form.TextArea
         title="Content"

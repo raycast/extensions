@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vartiq",
+  "title": "Vartiq",
+  "description": "Webhook Infra for High-Velocity Dev Teams",
+  "icon": "vartiq.png",
+  "author": "xmok",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key_dev",
+      "title": "API Key (Development)",
+      "type": "password",
+      "required": true,
+      "placeholder": "sk_XXX...XX",
+      "description": "Development API Key"
+    },
+    {
+      "name": "api_key_prod",
+      "title": "API Key (Production)",
+      "type": "password",
+      "required": true,
+      "placeholder": "sk_XXX...XX",
+      "description": "Production API Key"
+    },
+    {
+      "name": "environment",
+      "title": "Environment",
+      "type": "dropdown",
+      "default": "dev",
+      "required": true,
+      "data": [
+        {
+          "title": "Development",
+          "value": "dev"
+        },
+        {
+          "title": "Production",
+          "value": "prod"
+        }
+      ],
+      "description": "Select Environment and API Key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "projects",
+      "title": "Manage Projects",
+      "description": "Manage Projects, Apps, Webhooks, Webhook Messages",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "vartiq": "^1.0.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

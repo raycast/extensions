@@ -1,0 +1,206 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ivpn",
+  "title": "IVPN",
+  "description": "Extension for interacting with IVPN.",
+  "icon": "extension-icon.png",
+  "author": "boradatti",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "preferredProtocol",
+      "title": "Preferred Protocol",
+      "description": "The VPN protocol this extension will use by default.",
+      "default": "any",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Any",
+          "value": "any"
+        },
+        {
+          "title": "OpenVPN",
+          "value": "OpenVPN"
+        },
+        {
+          "title": "WireGuard",
+          "value": "WireGuard"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "defaultConnectStrategy",
+      "title": "Default Connect Strategy",
+      "description": "How to choose an IVPN server in quick-connect commands (Connect, Toggle, and Quick Toggle).",
+      "type": "dropdown",
+      "default": "FASTEST",
+      "data": [
+        {
+          "title": "Pick fastest server",
+          "value": "FASTEST"
+        },
+        {
+          "title": "Pick last-used server",
+          "value": "LAST"
+        },
+        {
+          "title": "Pick random server",
+          "value": "RANDOM"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "flagIconSource",
+      "title": "Flag Icon Source",
+      "description": "Where flag icons are retrieved from.",
+      "type": "dropdown",
+      "default": "flagsapi.com",
+      "data": [
+        {
+          "title": "flagsapi.com (flat)",
+          "value": "flagsapi.com"
+        },
+        {
+          "title": "flagcdn.com (wavy)",
+          "value": "flagcdn.com"
+        }
+      ],
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "check-concise",
+      "title": "Peek Status",
+      "description": "Checks if IVPN is currently connected.",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-verbose",
+      "title": "View Status Details",
+      "description": "Displays detailed information about your current IVPN connection status.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-concise",
+      "title": "Quick Toggle",
+      "description": "Toggles connection status and shows a concise, unintrusive toast message.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-verbose",
+      "title": "Toggle",
+      "description": "Toggles connection status and shows a detailed info window.",
+      "mode": "view"
+    },
+    {
+      "name": "servers-list",
+      "title": "Browse Servers",
+      "description": "Lets you pick from a list of servers to connect to.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "connectDisconnectBehavior",
+          "title": "Connect/Disconnect Behavior",
+          "description": "Desired UI behavior when connecting & disconnecting.",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Stay in list",
+              "value": "stayInList"
+            },
+            {
+              "title": "Show interactive view",
+              "value": "showInteractiveView"
+            }
+          ],
+          "required": false,
+          "default": "stayInList"
+        }
+      ]
+    },
+    {
+      "name": "quick-connect",
+      "title": "Connect",
+      "description": "Connects with last-used parameters.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-connect-random",
+      "title": "Connect to Random Server",
+      "description": "Connects to a random IVPN server.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "quick-connect-fastest",
+      "title": "Connect to Fastest Server",
+      "description": "Connects to the fastest IVPN server.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "quick-disconnect",
+      "title": "Disconnect",
+      "description": "Closes current connection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "account-info",
+      "title": "View Account Details",
+      "description": "Shows information about the currently authenticated IVPN account.",
+      "mode": "view"
+    },
+    {
+      "name": "login",
+      "title": "Log in",
+      "description": "Logs you into your IVPN account given an account ID.",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "accountId",
+          "placeholder": "Account ID",
+          "required": true
+        }
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "logout",
+      "title": "Log out",
+      "description": "Logs you out of your IVPN account.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0",
+    "fuse.js": "^7.1.0",
+    "use-error-boundary": "^2.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@trivago/prettier-plugin-sort-imports": "4.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -28,7 +28,7 @@ import { getOffsetHrsDisplay } from "./helpers/getOffsetHrsDisplay";
 
 const ALL_TIMEZONES = Intl.supportedValuesOf("timeZone");
 
-function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }): JSX.Element {
+function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }) {
   const { pop } = useNavigation();
   const allTimezones = useMemo(() => ALL_TIMEZONES, []);
   const [nameError, setNameError] = useState<string | undefined>();
@@ -92,7 +92,7 @@ function EditBuddyForm(props: {
   buddy: TimezoneBuddy;
   index: number;
   onUpdate: (buddy: TimezoneBuddy, index: number) => void;
-}): JSX.Element {
+}) {
   const { pop } = useNavigation();
   const allTimezones = useMemo(() => ALL_TIMEZONES, []);
   const [nameError, setNameError] = useState<string | undefined>();

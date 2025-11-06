@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Added Create New Window Command] - 2025-10-29
+
+- Added a command to create a new window in Zen Browser.
+
 ## [Added Open Workspace Command] - 2025-10-09
 
 - Added a command to open a specific workspace in Zen Browser.
