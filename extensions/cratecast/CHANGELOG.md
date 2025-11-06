@@ -1,5 +1,9 @@
 # Crates Search
 
+## [Added a new default action configuration feature] - {PR_MERGE_DATE}
+
+- Added possibility to choose default action
+
 ## [Added] - 2023-11-13
 
 - Added keywords to make it easier to find in the store
