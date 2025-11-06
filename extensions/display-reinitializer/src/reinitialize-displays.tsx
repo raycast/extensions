@@ -197,7 +197,7 @@ export default function Command() {
               <ActionPanel>
                 <ActionPanel.Section title="Primary Actions">
                   <Action
-                    title="Reinitialize Display (auto)"
+                    title="Reinitialize Display (Auto)"
                     icon={Icon.ArrowClockwise}
                     onAction={() => handleReinitialize(display, "auto")}
                   />
