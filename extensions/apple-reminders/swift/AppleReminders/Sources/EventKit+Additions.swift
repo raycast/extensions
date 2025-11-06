@@ -1,3 +1,4 @@
+import AppKit
 import EventKit
 
 let isoDateFormatter: ISO8601DateFormatter = {
@@ -241,8 +242,26 @@ extension EKAlarm {
 
 extension EKCalendar {
   func toStruct(defaultCalendarId: String?) -> ReminderList {
-    let color = self.cgColor?.components
-    let hexColor = color != nil ? rgbaToHex(color![0], color![1], color![2]) : "#000000"
+    var hexColor = "#000000"
+
+    if let cgColor = self.cgColor {
+      // Get the color space name for debugging
+      let colorSpaceName = cgColor.colorSpace?.name as String? ?? "unknown"
+
+      // Convert to sRGB color space to ensure consistent color values
+      let nsColor = NSColor(cgColor: cgColor) ?? NSColor.black
+      let srgbColor = nsColor.usingColorSpace(.sRGB) ?? nsColor
+
+      hexColor = rgbaToHex(
+        srgbColor.redComponent,
+        srgbColor.greenComponent,
+        srgbColor.blueComponent
+      )
+
+      // Debug: print color space info for troubleshooting
+      // NSLog("List '\(self.title)' color space: \(colorSpaceName), hex: \(hexColor)")
+    }
+
     let isDefault = self.calendarIdentifier == defaultCalendarId
 
     return ReminderList(

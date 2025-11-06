@@ -654,11 +654,22 @@ func hexStringToUIColor(hex: String) -> NSColor {
   var rgbValue: UInt64 = 0
   Scanner(string: cString).scanHexInt64(&rgbValue)
 
+  let red = CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0
+  let green = CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0
+  let blue = CGFloat(rgbValue & 0x0000FF) / 255.0
+
+  // Create color in generic RGB color space first, then let the system convert it
+  // This matches how Apple Reminders handles colors internally
+  let genericRGB = NSColorSpace.genericRGB
   return NSColor(
-    red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
-    green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
-    blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
-    alpha: CGFloat(1.0)
+    colorSpace: genericRGB,
+    components: [red, green, blue, 1.0],
+    count: 4
+  ) ?? NSColor(
+    red: red,
+    green: green,
+    blue: blue,
+    alpha: 1.0
   )
 }
 

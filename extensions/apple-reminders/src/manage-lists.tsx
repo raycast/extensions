@@ -3,6 +3,7 @@ import { deleteList } from "swift:../swift/AppleReminders";
 
 import { UpdateListForm } from "./components/UpdateListForm";
 import { CreateListForm } from "./create-list";
+import { getListColorIcon } from "./helpers";
 import { useData } from "./hooks/useData";
 
 export default function ManageLists() {
@@ -36,25 +37,12 @@ export default function ManageLists() {
     }
   };
 
-  const getColorIcon = (colorHex: string) => {
-    const colorMap: Record<string, Color> = {
-      "#FF3B30": Color.Red,
-      "#FF9500": Color.Orange,
-      "#FFCC00": Color.Yellow,
-      "#34C759": Color.Green,
-      "#007AFF": Color.Blue,
-      "#AF52DE": Color.Purple,
-      "#FF2D55": Color.Magenta,
-    };
-    return { source: Icon.Circle, tintColor: colorMap[colorHex] || colorHex };
-  };
-
   return (
     <List isLoading={isLoading}>
       {data?.lists.map((list) => (
         <List.Item
           key={list.id}
-          icon={getColorIcon(list.color)}
+          icon={getListColorIcon(list.color)}
           title={list.title}
           subtitle={list.isDefault ? "Default" : ""}
           accessories={[

@@ -1,7 +1,8 @@
-import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation, Color } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { updateList } from "swift:../../swift/AppleReminders";
 
+import { colorOptions } from "../helpers";
 import { List } from "../hooks/useData";
 
 type UpdateListValues = {
@@ -13,18 +14,6 @@ type UpdateListFormProps = {
   list: List;
   onUpdate: () => Promise<void>;
 };
-
-const colorOptions = [
-  { title: "Red", value: "#FF3B30", color: Color.Red },
-  { title: "Orange", value: "#FF9500", color: Color.Orange },
-  { title: "Yellow", value: "#FFCC00", color: Color.Yellow },
-  { title: "Green", value: "#34C759", color: Color.Green },
-  { title: "Blue", value: "#007AFF", color: Color.Blue },
-  { title: "Purple", value: "#AF52DE", color: Color.Purple },
-  { title: "Magenta", value: "#FF2D55", color: Color.Magenta },
-  { title: "Brown", value: "#A2845E", color: "#A2845E" },
-  { title: "Gray", value: "#8E8E93", color: Color.SecondaryText },
-];
 
 export function UpdateListForm({ list, onUpdate }: UpdateListFormProps) {
   const { pop } = useNavigation();
