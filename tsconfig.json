@@ -4,7 +4,7 @@
     "lib": ["ES2021"],
     "module": "commonjs",
     "jsx": "react",
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "node",

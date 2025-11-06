@@ -1,7 +1,16 @@
 // @ts-nocheck
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import * as React from "react";
+import React from "react";
+import { showFailureToast } from "@raycast/utils";
+
+type LookupResult = {
+  name: string;
+  url: string;
+  expire: string;
+  sha1: string;
+  size: string;
+};
 
 export default function LookupCommand() {
   const [query, setQuery] = useState("");
@@ -25,10 +34,7 @@ export default function LookupCommand() {
 
   async function handleOpen() {
     if (!query.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Enter an app identifier or URL",
-      });
+      await showFailureToast({ title: "Enter an app identifier or URL" });
       return;
     }
 
@@ -43,11 +49,7 @@ export default function LookupCommand() {
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to open URL",
-        message: errorMessage,
-      });
+      await showFailureToast({ title: "Failed to open URL", message: errorMessage });
     }
   }
 
@@ -97,11 +99,7 @@ export default function LookupCommand() {
         title: parsed.length > 0 ? `Found ${parsed.length} download link${parsed.length === 1 ? "" : "s"}` : "No download links found",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to generate links",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      await showFailureToast({ title: "Failed to generate links", message: error instanceof Error ? error.message : "Unknown error occurred" });
     } finally {
       setIsGeneratingLinks(false);
     }
@@ -169,14 +167,6 @@ export default function LookupCommand() {
     </List>
   );
 }
-
-type LookupResult = {
-  name: string;
-  url: string;
-  expire: string;
-  sha1: string;
-  size: string;
-};
 
 function determineLookupType(value: string): "url" | "ProductId" | "PackageFamilyName" | "CategoryId" {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) {
