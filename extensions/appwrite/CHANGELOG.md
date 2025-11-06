@@ -1,6 +1,13 @@
 # Appwrite Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Show Sites, Deployments, Variables] - {PR_MERGE_DATE}
+
+- In **Collections**:
+    1. `show` createdAt, updatedAt
+- In **Documents**:
+    1. `show` record in metadata
+- In **Sites**:
+    1. `view` sites, deployments, variables
 
 ## [DB, Storage, User Enhancements] - 2025-07-14
 
