@@ -181,32 +181,28 @@ export function getSectionFormatsInOrder(): SectionFormatConfig[] {
   const customPatterns = getCustomPatterns();
   const formats: SectionFormatConfig[] = [];
 
-  // Add custom patterns first (highest priority)
-  if (customPatterns.startPattern) {
-    formats.push({
-      type: SectionMarkerType.CUSTOM_START,
-      regex: customPatterns.startPattern,
-    });
-  }
+  // Add custom start/end patterns first (highest priority) if enabled
+  if (prefs["enableCustomStartEndPatterns"]) {
+    if (customPatterns.startPattern) {
+      formats.push({
+        type: SectionMarkerType.CUSTOM_START,
+        regex: customPatterns.startPattern,
+      });
+    }
 
-  if (customPatterns.endPattern) {
-    formats.push({
-      type: SectionMarkerType.CUSTOM_END,
-      regex: customPatterns.endPattern,
-    });
+    if (customPatterns.endPattern) {
+      formats.push({
+        type: SectionMarkerType.CUSTOM_END,
+        regex: customPatterns.endPattern,
+      });
+    }
   }
 
   // Add default patterns if enabled
+  // Skip default CUSTOM_START and CUSTOM_END if custom patterns are enabled
+  // to avoid duplicate types (custom patterns are already checked first)
   if (prefs["enableDefaults"]) {
-    formats.push(
-      {
-        type: SectionMarkerType.CUSTOM_START,
-        regex: DEFAULT_SECTION_FORMATS.CUSTOM_START,
-      },
-      {
-        type: SectionMarkerType.CUSTOM_END,
-        regex: DEFAULT_SECTION_FORMATS.CUSTOM_END,
-      },
+    const defaultPatterns: SectionFormatConfig[] = [
       {
         type: SectionMarkerType.DASHED_END,
         regex: DEFAULT_SECTION_FORMATS.DASHED_END,
@@ -235,11 +231,30 @@ export function getSectionFormatsInOrder(): SectionFormatConfig[] {
         type: SectionMarkerType.LABELED,
         regex: DEFAULT_SECTION_FORMATS.LABELED,
       },
-    );
+    ];
+
+    // Only add default CUSTOM_START/CUSTOM_END if custom patterns are not enabled
+    // or if custom patterns are enabled but no actual patterns were provided
+    const hasCustomPatterns =
+      prefs["enableCustomStartEndPatterns"] && (customPatterns.startPattern || customPatterns.endPattern);
+    if (!hasCustomPatterns) {
+      defaultPatterns.unshift(
+        {
+          type: SectionMarkerType.CUSTOM_START,
+          regex: DEFAULT_SECTION_FORMATS.CUSTOM_START,
+        },
+        {
+          type: SectionMarkerType.CUSTOM_END,
+          regex: DEFAULT_SECTION_FORMATS.CUSTOM_END,
+        },
+      );
+    }
+
+    formats.push(...defaultPatterns);
   }
 
   // Add custom header pattern if enabled
-  if (customPatterns.headerPattern) {
+  if (prefs["enableCustomHeaderPattern"] && customPatterns.headerPattern) {
     formats.push({
       type: SectionMarkerType.LABELED,
       regex: customPatterns.headerPattern,

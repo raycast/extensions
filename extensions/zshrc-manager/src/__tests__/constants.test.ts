@@ -81,8 +81,9 @@ describe("constants.ts", () => {
 
       const formats = getSectionFormatsInOrder();
 
-      // Should have custom patterns (2) + defaults (9) = 11 total
-      expect(formats).toHaveLength(11);
+      // Should have custom patterns (2) + defaults without CUSTOM_START/END (7) = 9 total
+      // Default CUSTOM_START/CUSTOM_END are skipped when custom patterns are enabled
+      expect(formats).toHaveLength(9);
       // Custom patterns should come first
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
       expect(formats[0]?.regex).toBe(customStartPattern);
@@ -154,8 +155,9 @@ describe("constants.ts", () => {
 
       const formats = getSectionFormatsInOrder();
 
-      // Should have custom start/end (2) + defaults (9) + custom header (1) = 12 total
-      expect(formats).toHaveLength(12);
+      // Should have custom start/end (2) + defaults without CUSTOM_START/END (7) + custom header (1) = 10 total
+      // Default CUSTOM_START/CUSTOM_END are skipped when custom patterns are enabled
+      expect(formats).toHaveLength(10);
       // Custom start/end should be first
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
       expect(formats[0]?.regex).toBe(customStartPattern);
@@ -230,16 +232,17 @@ describe("constants.ts", () => {
 
       const formats = getSectionFormatsInOrder();
 
-      // Order should be: custom start, custom end, defaults (9 patterns), custom header
-      expect(formats.length).toBe(12); // 2 custom + 9 defaults + 1 custom header
+      // Order should be: custom start, custom end, defaults without CUSTOM_START/END (7 patterns), custom header
+      // Default CUSTOM_START/CUSTOM_END are skipped when custom patterns are enabled
+      expect(formats.length).toBe(10); // 2 custom + 7 defaults + 1 custom header
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
       expect(formats[1]?.type).toBe(SectionMarkerType.CUSTOM_END);
-      // Defaults follow
-      expect(formats[2]?.type).toBe(SectionMarkerType.CUSTOM_START);
-      expect(formats[3]?.type).toBe(SectionMarkerType.CUSTOM_END);
+      // Defaults follow (without CUSTOM_START/CUSTOM_END)
+      expect(formats[2]?.type).toBe(SectionMarkerType.DASHED_END);
+      expect(formats[3]?.type).toBe(SectionMarkerType.DASHED_START);
       // Custom header is last
-      expect(formats[11]?.type).toBe(SectionMarkerType.LABELED);
-      expect(formats[11]?.regex).toBe(customHeaderPattern);
+      expect(formats[9]?.type).toBe(SectionMarkerType.LABELED);
+      expect(formats[9]?.regex).toBe(customHeaderPattern);
     });
 
     it("should handle null custom patterns gracefully", () => {
@@ -257,7 +260,9 @@ describe("constants.ts", () => {
 
       const formats = getSectionFormatsInOrder();
 
-      // Should only have defaults (9 patterns)
+      // When custom patterns feature is enabled but patterns are null, defaults still include CUSTOM_START/CUSTOM_END
+      // because no actual custom patterns exist to replace them
+      // Should have defaults (9 patterns) - CUSTOM_START/CUSTOM_END are included since no actual custom patterns exist
       expect(formats).toHaveLength(9);
       expect(formats[0]?.type).toBe(SectionMarkerType.CUSTOM_START);
       expect(formats[8]?.type).toBe(SectionMarkerType.LABELED);
