@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import React from "react";
 import { showFailureToast } from "@raycast/utils";
 import { load } from "cheerio";
 
-namespace RGAdguard {
+namespace RGAdguardExt {
   export type LookupResult = {
     name: string;
     url: string;
@@ -14,9 +14,9 @@ namespace RGAdguard {
 }
 
 export default function LookupCommand(): JSX.Element {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<RGAdguard.LookupResult[]>([]);
-  const [isGeneratingLinks, setIsGeneratingLinks] = useState(false);
+  const [query, setQuery] = React.useState("");
+  const [results, setResults] = React.useState<RGAdguardExt.LookupResult[]>([]);
+  const [isGeneratingLinks, setIsGeneratingLinks] = React.useState(false);
 
   function buildLookupUrl(input: string): string {
     const trimmed = input.trim();
@@ -54,10 +54,10 @@ export default function LookupCommand(): JSX.Element {
     }
   }
 
-  const queryTrimmed = useMemo(() => query.trim(), [query]);
-  const isMsStoreUrl = useMemo(() => (queryTrimmed ? isValidMicrosoftStoreUrl(queryTrimmed) : false), [queryTrimmed]);
+  const queryTrimmed = React.useMemo(() => query.trim(), [query]);
+  const isMsStoreUrl = React.useMemo(() => (queryTrimmed ? isValidMicrosoftStoreUrl(queryTrimmed) : false), [queryTrimmed]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setResults([]);
   }, [queryTrimmed]);
 
@@ -100,8 +100,8 @@ export default function LookupCommand(): JSX.Element {
       }
 
       const html = await response.text();
-      const parsed = parseLookupResults(html);
-      setResults(parsed);
+  const parsed = parseLookupResults(html);
+  setResults(parsed as RGAdguardExt.LookupResult[]);
 
       await showToast({
         style: parsed.length > 0 ? Toast.Style.Success : Toast.Style.Failure,
@@ -198,12 +198,12 @@ function determineLookupType(value: string): "url" | "ProductId" | "PackageFamil
   return "url";
 }
 
-function parseLookupResults(html: string): RGAdguard.LookupResult[] {
+function parseLookupResults(html: string): RGAdguardExt.LookupResult[] {
   const $ = load(html);
   const rows = $("table tr");
   if (rows.length <= 1) return [];
 
-  const items: RGAdguard.LookupResult[] = [];
+  const items: RGAdguardExt.LookupResult[] = [];
   // Skip header row (index 0)
   rows.slice(1).each((_, tr) => {
     const tds = $(tr).find("td");
