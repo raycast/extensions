@@ -61,7 +61,7 @@ export const getArticles = async (feedName: string) => {
             return theText
         end replaceText
         
-        set targetFeed to "${feedName}"
+        set targetFeed to quoted form of ${feedName}
         set output to ""
         
         tell application "NetNewsWire"

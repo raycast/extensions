@@ -1,4 +1,4 @@
-export interface Feed {
+export type Feed = {
   account: string;
   name: string;
   url: string;
@@ -6,4 +6,4 @@ export interface Feed {
   readArticles: number;
   starredArticles: number;
   icon: string | null;
-}
+};

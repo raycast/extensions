@@ -1,10 +1,10 @@
 <p align="center">
-    <img src="./assets//nnw-6-icon-256.png" width="150" height="150" />
+    <img src="./assets/nnw-6-icon-256.png" width="150" height="150" />
 </p>
 
 # NetNewsWire
 
-This is an extension for [NetNewWire](https://netnewswire.com/) - _a free and open source RSS reader for Mac, iPhone, and iPad_.
+This is an extension for [NetNewsWire](https://netnewswire.com/) - _a free and open source RSS reader for Mac, iPhone, and iPad_.
 
 > NOTE: this extension requires the application to be installed.
 
