@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-06
 
 - Add support for Bun, implemented suggestion from [#22693](https://github.com/raycast/extensions/issues/22693)
 
