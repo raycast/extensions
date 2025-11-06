@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Form, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
-import {  Organization } from "./types";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, Image, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {  Organization, Tag } from "./types";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { papra, PAPRA_COLOR } from "./papra";
+import OpenInPapra from "./open-in-papra";
 
 export default function Tags({ organization }: { organization: Organization }) {
   const { isLoading, data: tags,mutate } = useCachedPromise(
@@ -13,14 +14,52 @@ export default function Tags({ organization }: { organization: Organization }) {
     { initialData: [] },
   );
 
+  const confirmAndDelete = (tag: Tag) => {
+    confirmAlert({
+      title: "Delete Tag",
+      message: "Are you sure you want to delete this tag? Deleting a tag will remove it from all documents.",
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Delete",
+        async onAction() {
+          const toast = await showToast(Toast.Style.Animated, "Deleting", tag.name);
+              try {
+                await mutate(
+                  papra.tags.delete({organizationId: organization.id, id: tag.id}), {
+                    optimisticUpdate(data) {
+                      return data.filter(t => t.id!==tag.id)
+                    },
+                    shouldRevalidateAfter: false
+                  }
+                )
+                toast.style = Toast.Style.Success;
+                toast.title = "Deleted";
+              } catch (error) {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Failed";
+                toast.message = `${error}`;
+              }
+        },
+      }
+    })
+  }
+
   return (
     <List isLoading={isLoading} navigationTitle={`Organizations / ${organization.name} / Tags`}>
       {!isLoading && !tags.length ? <List.EmptyView icon={{source: Icon.Tag, tintColor: PAPRA_COLOR}} title="No tags yet" description="This organization has no tags yet. Tags are used to categorize documents. You can add tags to your documents to make them easier to find and organize." actions={<ActionPanel>
           <Action.Push icon={Icon.Plus} title="Create Tag" target={<CreateTag organization={organization} />} onPop={mutate} />
 
       </ActionPanel>} /> : tags.map((tag) => (
-        <List.Item key={tag.id} icon={{source: Icon.Tag, tintColor: PAPRA_COLOR}} title={tag.name} accessories={[{date: new Date(tag.createdAt)}]} actions={<ActionPanel>
+        <List.Item key={tag.id} icon={{source: Icon.Dot, tintColor: tag.color}} title={tag.name} subtitle={tag.description || "No description"} accessories={[{icon: Icon.Document, text: `${tag.documentsCount}`}, {date: new Date(tag.createdAt)}]} actions={<ActionPanel>
+                                  <OpenInPapra route={`tags/${tag.id}`} />
           <Action.Push icon={Icon.Plus} title="Create Tag" target={<CreateTag organization={organization} />} onPop={mutate} />
+          <Action
+                          icon={Icon.Trash}
+                          title="Delete Tag"
+                          onAction={() => confirmAndDelete(tag)}
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                        />
         </ActionPanel>} />
       ))}
     </List>

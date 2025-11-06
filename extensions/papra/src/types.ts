@@ -5,13 +5,24 @@ export type Organization = {
 export type Document = {
   id: string;
   createdAt: string;
+  originalSize: number
   name: string;
-      "mimeType": "image/svg+xml",
+  mimeType: string
 };
+export type SearchResult = {
+  id: string;
+  created_at: string;
+  original_size: number
+  name: string;
+  mime_type: string
+}
 export type Tag= {
   id: string;
   createdAt: string;
   name: string;
+  "color": string
+  "description": string
+    "documentsCount": number
 };
 
 export type ErrorResult = {
@@ -19,8 +30,8 @@ export type ErrorResult = {
     message: string;
     code: string;
     details?: Array<{
-      path: "name";
-      message: "Required";
+      path: string
+      message: string
     }>;
   };
 };

@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { buildPapraUrl, papra, PAPRA_COLOR } from "./papra";
 import Documents from "./documents";
 import Tags from "./tags";
 import { Organization } from "./types";
+import OpenInPapra from "./open-in-papra";
 
 export default function Command() {
   try {
@@ -14,6 +15,7 @@ export default function Command() {
   }
 }
 function Organizations() {
+  const [, setSelectedOrganizationId] = useCachedState<string | null>("selected-organization-id");
   const {
     isLoading,
     data: organizations,
@@ -58,9 +60,10 @@ function Organizations() {
 }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} onSelectionChange={setSelectedOrganizationId}>
       {organizations.map((organization) => (
         <List.Item
+        id={organization.id}
           key={organization.id}
           icon={{ source: Icon.Building, tintColor: PAPRA_COLOR }}
           title={organization.name}
@@ -68,6 +71,7 @@ function Organizations() {
             <ActionPanel>
               <Action.Push icon={Icon.Document} title="Documents" target={<Documents organization={organization} />} />
               <Action.Push icon={Icon.Tag} title="Tags" target={<Tags organization={organization} />} />
+              <OpenInPapra route="" />
               <Action.Push
                 icon={Icon.Plus}
                 title="Create Organization"
