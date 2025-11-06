@@ -9,13 +9,24 @@ node_modules/
 # Build / distribution artifacts
 **/dist/**
 dist/
+# .codacyignore — ignore generated files and dependencies
+# Purpose: stop Codacy analyzers (especially PMD) from scanning third-party libs
+
+# Dependency folders
+**/node_modules/**
+/node_modules/**
+node_modules/
+
+# Build / distribution artifacts
+**/dist/**
+dist/
 **/build/**
 build/
 
 # Coverage and test outputs
 coverage/
 **/coverage/**
-/.nyc_output/
+.nyc_output/
 
 # Tooling caches
 .parcel-cache/
