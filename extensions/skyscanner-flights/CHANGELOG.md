@@ -2,7 +2,7 @@
 
 ## [Initial Version] - 2025-11-05
 
-## [Update Command Readme , Name, Search Scoring] - {PR_MERGE_DATE}
+## [Update Command Readme , Name, Search Scoring] - 2025-11-06
 
 We had a shabby README.md catered to developers so we make it more user friendly.
 We also make our command more easily searchable.
