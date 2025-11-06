@@ -36,18 +36,6 @@ This extension:
 
 The conversion logic is inspired by [Firecrawl's HTML to Markdown implementation](https://github.com/mendableai/firecrawl).
 
-## Development
-
-```bash
-# Install dependencies
-bun install
-
-# Run in development mode
-bun run dev
-
-# Build for production
-bun run build
-```
 
 ## License
 
