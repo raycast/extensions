@@ -49,6 +49,19 @@ interface EditItemFormProps {
 
 /**
  * Generic form component for creating or editing zshrc items (aliases, exports, etc.)
+ *
+ * This component provides a reusable form interface for managing zshrc configuration items.
+ * It handles both creation and editing of items, with support for:
+ * - Section-based organization
+ * - Validation of key/value pairs
+ * - Atomic file writes with verification
+ * - Section creation and item movement
+ *
+ * @param existingKey - Existing key value (for editing mode)
+ * @param existingValue - Existing value (for editing mode)
+ * @param sectionLabel - Section where this item belongs
+ * @param onSave - Callback invoked after successful save
+ * @param config - Configuration object defining item-specific behavior
  */
 export default function EditItemForm({ existingKey, existingValue, sectionLabel, onSave, config }: EditItemFormProps) {
   const { pop } = useNavigation();

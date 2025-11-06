@@ -352,14 +352,27 @@ const ENTRY_PARSERS: EntryParserStrategy[] = [
 /**
  * Parses zshrc content into structured entries
  *
- * Supports two section formats:
- * 1) "# Section: Name" (case-insensitive)
- * 2) "# --- Name --- #" (ignore lines like "# --- End ... --- #")
+ * This function processes zshrc file content line by line, detecting:
+ * - Section markers (using configurable patterns from preferences)
+ * - Various entry types (aliases, exports, functions, plugins, etc.)
+ * - Section context for organizing entries
  *
- * @param content The raw zshrc file content
- * @returns Array of parsed entries with metadata
+ * The parser uses a strategy pattern with multiple entry parsers that are
+ * tried in order. Each parser has a regex pattern, validation function,
+ * and extraction function to convert matches into structured entries.
+ *
+ * Section detection supports multiple formats:
+ * - "# Section: Name" (labeled sections)
+ * - "# --- Name --- #" (dashed sections)
+ * - "# [Name]" (bracketed sections)
+ * - "# ## Name" (hash sections)
+ * - Custom patterns from user preferences
+ * - Function-style sections: function_name() { ... }
+ *
+ * @param content The raw zshrc file content to parse
+ * @returns Array of parsed entries with metadata including line numbers,
+ *          section labels, and type-specific data
  */
-
 export function parseZshrc(content: string): ReadonlyArray<ZshEntry> {
   const lines = content.split(/\r?\n/);
   const entries: ZshEntry[] = [];
