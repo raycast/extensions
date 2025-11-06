@@ -4,12 +4,12 @@ import { Crate, getCrates } from "./api";
 import Symbols from "./symbols";
 
 enum CrateActions {
-  copyToClipboard = "copyToClipboard",
-  viewOnCratesIo = "viewOnCratesIo",
-  openCrateDocumentation = "openCrateDocumentation",
-  openHomepage = "openHomepage",
-  openRepository = "openRepository",
-  viewSymbols = "viewSymbols",
+  COPY_TO_CLIPBOARD = "copyToClipboard",
+  VIEW_ON_CRATES_IO = "viewOnCratesIo",
+  OPEN_CRATE_DOCUMENTATION = "openCrateDocumentation",
+  OPEN_HOMEPAGE = "openHomepage",
+  OPEN_REPOSITORY = "openRepository",
+  VIEW_SYMBOLS = "viewSymbols",
 }
 
 interface Preferences {
@@ -21,17 +21,17 @@ function getShortcut(action: CrateActions, defaultAction: CrateActions): Keyboar
     return;
   }
   switch (action) {
-    case CrateActions.copyToClipboard:
+    case CrateActions.COPY_TO_CLIPBOARD:
       return { modifiers: ["cmd"], key: "c" };
-    case CrateActions.viewOnCratesIo:
+    case CrateActions.VIEW_ON_CRATES_IO:
       return { modifiers: ["cmd"], key: "o" };
-    case CrateActions.openCrateDocumentation:
+    case CrateActions.OPEN_CRATE_DOCUMENTATION:
       return { modifiers: ["cmd"], key: "d" };
-    case CrateActions.openHomepage:
+    case CrateActions.OPEN_HOMEPAGE:
       return { modifiers: ["cmd"], key: "h" };
-    case CrateActions.openRepository:
+    case CrateActions.OPEN_REPOSITORY:
       return { modifiers: ["cmd"], key: "r" };
-    case CrateActions.viewSymbols:
+    case CrateActions.VIEW_SYMBOLS:
       return { modifiers: ["cmd"], key: "i" };
   }
 }
@@ -53,68 +53,68 @@ export default function Command() {
     ) => {
       return [
         {
-          actionName: CrateActions.copyToClipboard,
+          actionName: CrateActions.COPY_TO_CLIPBOARD,
           action: (
             <Action.CopyToClipboard
-              key={CrateActions.copyToClipboard}
+              key={CrateActions.COPY_TO_CLIPBOARD}
               content={`${name} = "${version}"`}
               title="Copy Dependency Line"
-              shortcut={getShortcut(CrateActions.copyToClipboard, defaultOpenAction)}
+              shortcut={getShortcut(CrateActions.COPY_TO_CLIPBOARD, defaultOpenAction)}
             />
           ),
         },
         {
-          actionName: CrateActions.viewOnCratesIo,
+          actionName: CrateActions.VIEW_ON_CRATES_IO,
           action: (
             <Action.OpenInBrowser
-              key={CrateActions.viewOnCratesIo}
+              key={CrateActions.VIEW_ON_CRATES_IO}
               url={`https://crates.io/crates/${name}`}
               title="View on crates.io"
-              shortcut={getShortcut(CrateActions.viewOnCratesIo, defaultOpenAction)}
+              shortcut={getShortcut(CrateActions.VIEW_ON_CRATES_IO, defaultOpenAction)}
             />
           ),
         },
         {
-          actionName: CrateActions.openCrateDocumentation,
+          actionName: CrateActions.OPEN_CRATE_DOCUMENTATION,
           action: documentationURL && (
             <Action.OpenInBrowser
-              key={CrateActions.openCrateDocumentation}
+              key={CrateActions.OPEN_CRATE_DOCUMENTATION}
               url={documentationURL}
               title="Open Crate Documentation"
-              shortcut={getShortcut(CrateActions.openCrateDocumentation, defaultOpenAction)}
+              shortcut={getShortcut(CrateActions.OPEN_CRATE_DOCUMENTATION, defaultOpenAction)}
             />
           ),
         },
         {
-          actionName: CrateActions.openHomepage,
+          actionName: CrateActions.OPEN_HOMEPAGE,
           action: homepageURL && (
             <Action.OpenInBrowser
-              key={CrateActions.openHomepage}
+              key={CrateActions.OPEN_HOMEPAGE}
               url={homepageURL}
               title="Open Homepage"
-              shortcut={getShortcut(CrateActions.openHomepage, defaultOpenAction)}
+              shortcut={getShortcut(CrateActions.OPEN_HOMEPAGE, defaultOpenAction)}
             />
           ),
         },
         {
-          actionName: CrateActions.openRepository,
+          actionName: CrateActions.OPEN_REPOSITORY,
           action: repositoryURL && (
             <Action.OpenInBrowser
-              key={CrateActions.openRepository}
+              key={CrateActions.OPEN_REPOSITORY}
               url={repositoryURL}
               title="Open Repository"
-              shortcut={getShortcut(CrateActions.openRepository, defaultOpenAction)}
+              shortcut={getShortcut(CrateActions.OPEN_REPOSITORY, defaultOpenAction)}
             />
           ),
         },
         {
-          actionName: CrateActions.viewSymbols,
+          actionName: CrateActions.VIEW_SYMBOLS,
           action: (
             <Action.Push
-              key={CrateActions.viewSymbols}
+              key={CrateActions.VIEW_SYMBOLS}
               title="View Symbols"
               target={<Symbols crate={crate} />}
-              shortcut={getShortcut(CrateActions.viewSymbols, defaultOpenAction)}
+              shortcut={getShortcut(CrateActions.VIEW_SYMBOLS, defaultOpenAction)}
               icon={Icon.Info}
             />
           ),
