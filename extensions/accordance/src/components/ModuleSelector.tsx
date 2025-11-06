@@ -2,10 +2,6 @@ import { List, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetchModules, discoverAllModules } from "../utils/moduleUtils";
 
-interface Preferences {
-  defaultText: string;
-}
-
 interface ModuleSelectorProps {
   onModuleChange: (module: string) => void;
   initialModule?: string;

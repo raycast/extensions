@@ -4,11 +4,8 @@ import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { ModuleSelector } from "./components/ModuleSelector";
 import { fetchModules } from "./utils/moduleUtils";
 import { validateReference, findBookData, normalizeReference, Reference } from "./utils/bibleUtils";
+import { generateAccordanceAppleScript } from "./utils/applescriptUtils";
 import { BibleData } from "./components/BibleData";
-
-interface Preferences {
-  defaultText: string;
-}
 
 interface VerseResult {
   reference: string;
@@ -103,19 +100,8 @@ export default function Command() {
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       try {
-        const referenceString = `${ref.book} ${ref.chapter}:${ref.verse}`.replace(/"/g, '""');
-        const appleScript = `
-          tell application "Accordance"
-            if not running then launch
-            try
-              set theModule to "${selectedModule.replace(/"/g, '""')}"
-              set verseText to «event AccdTxRf» {theModule, "${referenceString}", true}
-              return verseText
-            on error errMsg
-              return "Error: " & errMsg
-            end try
-          end tell
-        `;
+        const referenceString = normalizeReference(`${ref.book} ${ref.chapter}:${ref.verse}`);
+        const appleScript = generateAccordanceAppleScript(selectedModule, referenceString);
 
         const stdout = await runAppleScript(appleScript);
 

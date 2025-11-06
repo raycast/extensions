@@ -5,10 +5,6 @@ import { SEARCH_SCOPES } from "./utils/categories";
 import { fetchModules } from "./utils/moduleUtils";
 import { showFailureToast } from "@raycast/utils";
 
-interface Preferences {
-  defaultText: string;
-}
-
 interface SearchItem {
   id: string;
   title: string;

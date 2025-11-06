@@ -21,10 +21,6 @@ interface Workspace {
   path: string;
 }
 
-interface Preferences {
-  workspacePath: string;
-}
-
 export default function Command() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +31,7 @@ export default function Command() {
 
   async function loadWorkspaces() {
     try {
-      const preferences = getPreferenceValues<Preferences>();
+      const preferences = getPreferenceValues<Preferences.OpenWorkspace>();
       const workspacePath = preferences.workspacePath.replace(/^~/, homedir());
 
       if (!existsSync(workspacePath)) {

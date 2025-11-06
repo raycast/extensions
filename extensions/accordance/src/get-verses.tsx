@@ -4,10 +4,7 @@ import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { ModuleSelector } from "./components/ModuleSelector";
 import { fetchModules } from "./utils/moduleUtils";
 import { cleanVerseText, normalizeReference, validateReference } from "./utils/bibleUtils";
-
-interface Preferences {
-  defaultText: string;
-}
+import { generateAccordanceAppleScript } from "./utils/applescriptUtils";
 
 interface VerseResult {
   reference: string;
@@ -60,19 +57,8 @@ export default function Command() {
       // Clean the input reference using JavaScript (simpler than AppleScript)
       const cleanReference = normalizeReference(reference);
 
-      // AppleScript logic based on decompiled source - simplified
-      const appleScript = `
-        tell application "Accordance"
-          if not running then launch
-          try
-            set theModule to "${selectedModule.replace(/"/g, '""')}"
-            set verseText to «event AccdTxRf» {theModule, "${cleanReference.replace(/"/g, '""')}", true}
-            return verseText
-          on error errMsg
-            return "Error: " & errMsg
-          end try
-        end tell
-      `;
+      // Generate safe AppleScript for Accordance
+      const appleScript = generateAccordanceAppleScript(selectedModule, cleanReference);
 
       const stdout = await runAppleScript(appleScript);
 
