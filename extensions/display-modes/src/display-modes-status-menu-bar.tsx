@@ -1,46 +1,29 @@
-import { useEffect, useState } from "react";
 import { Icon, MenuBarExtra, showHUD, LocalStorage } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { listDisplays, setMode, sortModes, formatDisplayMode, formatDisplayTitle, getDisplayIcon } from "./utils";
-import { DisplayInfo, Mode, areModesEqual } from "./types";
+import { Mode, areModesEqual } from "./types";
 
 const useDisplays = () => {
-  const [state, setState] = useState<{ displays: DisplayInfo[]; isLoading: boolean }>({
-    displays: [],
-    isLoading: true,
-  });
-
-  const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
-
-  const fetchDisplays = async () => {
-    try {
-      const displays = await listDisplays();
-      setState({
-        displays: displays || [],
-        isLoading: false,
-      });
-    } catch (error) {
-      console.error("Failed to fetch displays:", error);
-      showFailureToast("Failed to fetch displays");
-      setState({
-        displays: [],
-        isLoading: false,
-      });
-    }
-  };
-
-  useEffect(() => {
-    async function fetchDisplayNames() {
+  const {
+    data: displays,
+    isLoading: isLoadingDisplays,
+    revalidate: revalidateDisplays,
+  } = useCachedPromise(listDisplays);
+  const { data: displayNames, isLoading: isLoadingDisplayNames } = useCachedPromise(
+    async () => {
       const names = await LocalStorage.getItem<string>("displayNames");
-      if (names) {
-        setDisplayNames(JSON.parse(names));
-      }
-    }
-    fetchDisplayNames();
-    fetchDisplays();
-  }, []);
+      return names ? JSON.parse(names) : {};
+    },
+    [],
+    { initialData: {} },
+  );
 
-  return { ...state, refetch: fetchDisplays, displayNames };
+  return {
+    displays: displays || [],
+    isLoading: isLoadingDisplays || isLoadingDisplayNames,
+    refetch: revalidateDisplays,
+    displayNames: displayNames || {},
+  };
 };
 
 export default function Command() {

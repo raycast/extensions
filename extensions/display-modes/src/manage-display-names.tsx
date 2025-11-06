@@ -2,53 +2,38 @@ import React from "react";
 import { ActionPanel, List, Action, showHUD, LocalStorage, Form, useNavigation } from "@raycast/api";
 import { listDisplays, formatDisplayTitle } from "./utils";
 import { DisplayInfo } from "./types";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const [displays, setDisplays] = React.useState<DisplayInfo[] | undefined>();
-  const [displayNames, setDisplayNames] = React.useState<Record<string, string>>({});
-  const { pop } = useNavigation();
-
-  React.useEffect(() => {
-    async function fetchDisplays() {
-      try {
-        const displays = await listDisplays();
-        setDisplays(displays);
-      } catch (error) {
-        console.error("Failed to list displays: ", error);
-        showHUD("❌ Failed to list displays: ");
-      }
-    }
-    fetchDisplays();
-  }, []);
-
-  React.useEffect(() => {
-    async function fetchDisplayNames() {
+  const { data: displays, isLoading: isLoadingDisplays } = useCachedPromise(listDisplays);
+  const { data: displayNames, revalidate: revalidateDisplayNames } = useCachedPromise(
+    async () => {
       const names = await LocalStorage.getItem<string>("displayNames");
-      if (names) {
-        setDisplayNames(JSON.parse(names));
-      }
-    }
-    fetchDisplayNames();
-  }, []);
+      return names ? JSON.parse(names) : {};
+    },
+    [],
+    { initialData: {} },
+  );
+  const { pop } = useNavigation();
 
   async function handleRename(displayId: number, newName: string) {
     const newDisplayNames = { ...displayNames, [displayId]: newName };
     await LocalStorage.setItem("displayNames", JSON.stringify(newDisplayNames));
-    setDisplayNames(newDisplayNames);
+    revalidateDisplayNames();
     showHUD(`✅ Display ${displayId} renamed to "${newName}"`);
     pop();
   }
 
-  if (!displays) {
+  if (isLoadingDisplays) {
     return <List isLoading={true} />;
   }
 
   return (
     <List>
-      {displays.map((display) => (
+      {displays?.map((display) => (
         <List.Item
           key={display.display.id}
-          title={displayNames[display.display.id] || formatDisplayTitle(display)}
+          title={displayNames?.[display.display.id] || formatDisplayTitle(display)}
           subtitle={formatDisplayTitle(display)}
           actions={
             <ActionPanel>

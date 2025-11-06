@@ -1,28 +1,22 @@
 import { ActionPanel, List, Action, useNavigation, showHUD, Icon, LocalStorage } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { listDisplays, setMode, formatDisplayMode, formatDisplayTitle, formatDisplaySubtitle } from "./utils";
 import { DisplayInfo, areModesEqual } from "./types";
 
 export default function Command() {
-  const [displays, setDisplays] = useState<DisplayInfo[] | undefined>();
-  const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
-
-  async function fetchDisplaysInfo() {
-    const displays = await listDisplays();
-    setDisplays(displays);
-  }
-
-  useEffect(() => {
-    async function fetchDisplayNames() {
+  const {
+    data: displays,
+    isLoading: isLoadingDisplays,
+    revalidate: revalidateDisplays,
+  } = useCachedPromise(listDisplays);
+  const { data: displayNames, isLoading: isLoadingDisplayNames } = useCachedPromise(
+    async () => {
       const names = await LocalStorage.getItem<string>("displayNames");
-      if (names) {
-        setDisplayNames(JSON.parse(names));
-      }
-    }
-    fetchDisplayNames();
-    fetchDisplaysInfo();
-  }, []);
+      return names ? JSON.parse(names) : {};
+    },
+    [],
+    { initialData: {} },
+  );
 
   const navigation = useNavigation();
 
@@ -34,7 +28,7 @@ export default function Command() {
     }));
 
     return (
-      <List navigationTitle={formatDisplayTitle(display)}>
+      <List navigationTitle={formatDisplayTitle(display)} isLoading={isLoadingDisplays || isLoadingDisplayNames}>
         {modesWithComparison.map((modeInfo, index) => {
           return (
             <List.Item
@@ -52,7 +46,7 @@ export default function Command() {
 
                       if (result) {
                         await showHUD(`✅ Mode changed successfully ${formatDisplayMode(modeInfo.mode)}`);
-                        await fetchDisplaysInfo();
+                        await revalidateDisplays();
                         navigation.pop();
                       } else {
                         showFailureToast("Failed to change display mode");
@@ -69,7 +63,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={displays === undefined}>
+    <List isLoading={isLoadingDisplays || isLoadingDisplayNames}>
       {displays?.map((display, index) => {
         return (
           <List.Item
