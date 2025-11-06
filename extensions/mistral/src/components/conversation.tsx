@@ -1,6 +1,6 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
-import { startTransition, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { type Conversation as ConversationType, getConversations, setConversations } from "../hooks/use-conversations";
 import { getSystemPrompt } from "../hooks/use-system-prompt";
 import type { Preferences } from "../types/preferences";
@@ -40,6 +40,33 @@ export function Conversation({ conversation, model: propModel }: Props) {
     streamAnswer(searchText, currentModel);
   }
 
+  function extractCodeBlocks(text: string): string[] {
+    const codeBlockRegex = /```[\s\S]*?```/g;
+    const matches = text.match(codeBlockRegex);
+    if (!matches) return [];
+    return matches.map((block) =>
+      block
+        .replace(/```[\w]*\n?/g, "")
+        .replace(/```$/g, "")
+        .trim(),
+    );
+  }
+
+  async function copyCode(answer: string) {
+    const codeBlocks = extractCodeBlocks(answer);
+    if (codeBlocks.length === 0) {
+      showToast({ title: "No code found", style: Toast.Style.Failure });
+      return;
+    }
+    await Clipboard.copy(codeBlocks.join("\n\n"));
+    showToast({ title: "Code copied", style: Toast.Style.Success });
+  }
+
+  async function copyAnswer(answer: string) {
+    await Clipboard.copy(answer);
+    showToast({ title: "Response copied", style: Toast.Style.Success });
+  }
+
   async function streamAnswer(question: string, model: string) {
     setIsLoading(true);
     showToast({ title: "Thinking...", style: Toast.Style.Animated });
@@ -66,21 +93,33 @@ export function Conversation({ conversation, model: propModel }: Props) {
       const result = await client.chat.stream({ messages, model });
 
       let currentAnswer = "";
+      let lastUpdateTime = 0;
+      const UPDATE_THROTTLE_MS = 50;
 
       for await (const chunk of result) {
         const streamText = chunk.data.choices[0].delta?.content || "";
         if (streamText) {
           currentAnswer += streamText;
-          const answer = currentAnswer;
+          const now = Date.now();
 
-          startTransition(() => {
-            setChats((prev) => {
-              const [first, ...rest] = prev;
-              return [{ ...first, answer }, ...rest];
+          if (now - lastUpdateTime >= UPDATE_THROTTLE_MS) {
+            lastUpdateTime = now;
+            const answer = currentAnswer;
+
+            queueMicrotask(() => {
+              setChats((prev) => {
+                const [first, ...rest] = prev;
+                return [{ ...first, answer }, ...rest];
+              });
             });
-          });
+          }
         }
       }
+
+      setChats((prev) => {
+        const [first, ...rest] = prev;
+        return [{ ...first, answer: currentAnswer }, ...rest];
+      });
 
       const conversations = await conversationsPromise;
       const currentConvIndex = conversations.findIndex((conv) => conv.id === conversation.id);
@@ -153,6 +192,22 @@ export function Conversation({ conversation, model: propModel }: Props) {
           actions={
             <ActionPanel>
               <Action title="Send Message" icon={Icon.ArrowRight} onAction={handleSubmit} />
+              {chat.answer && (
+                <ActionPanel.Section>
+                  <Action
+                    title="Copy Code"
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                    onAction={() => copyCode(chat.answer)}
+                  />
+                  <Action
+                    title="Copy Response"
+                    icon={Icon.CopyClipboard}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onAction={() => copyAnswer(chat.answer)}
+                  />
+                </ActionPanel.Section>
+              )}
             </ActionPanel>
           }
         />
