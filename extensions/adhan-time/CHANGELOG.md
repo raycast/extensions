@@ -1,6 +1,6 @@
 # Adhan time Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-06
 
 - Added Windows support
 
