@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.3.1] - 2025-11-06
+## [1.3.1] - {PR_MERGE_DATE}
 
 - Modified the default action for a google calendar event to open the meeting url in browser where one exists with a fallback to opening the calendar.
 
