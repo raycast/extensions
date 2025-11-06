@@ -2,6 +2,7 @@
 // the workspace React/TypeScript setup. Follow-up: align @types/react / TypeScript versions
 // and remove this directive to enable full type checking.
 // @ts-nocheck
+// @ts-nocheck
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
