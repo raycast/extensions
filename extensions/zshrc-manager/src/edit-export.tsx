@@ -27,6 +27,16 @@ export const exportConfig: EditItemConfig = {
   //   export PATH="/usr/local/bin:$PATH"
   //   export PATH=/usr/local/bin:$PATH # comment
   //   typeset -x PATH=/usr/local/bin
+  // Regex pattern breakdown:
+  //   ^(\s*)                    - Group 1: Leading whitespace (preserved)
+  //   (?:export|typeset\s+-x)    - Non-capturing group: matches "export" or "typeset -x"
+  //   \s+                        - Whitespace after export/typeset
+  //   ${variable}                - The variable name (escaped in actual usage)
+  //   \s*=\s*                   - Optional whitespace around equals sign
+  //   ([^\n#]*?)               - Group 2: Value (non-greedy, stops at newline or #)
+  //   (\s*#.*)?                - Group 3: Optional inline comment
+  //   $                         - End of line
+  //   gm                        - Global and multiline flags
   generatePattern: (variable) =>
     new RegExp(`^(\\s*)(?:export|typeset\\s+-x)\\s+${variable}\\s*=\\s*([^\\\n#]*?)(\\s*#.*)?$`, "gm"),
   generateReplacement: (variable, value) => `export ${variable}=${value}`,

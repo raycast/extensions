@@ -28,6 +28,15 @@ export const aliasConfig: EditItemConfig = {
   //   alias ll='ls -la'
   //   alias ll=ls -la # comment
   //   alias ll = "ls -la"
+  // Regex pattern breakdown:
+  //   ^(\s*)           - Group 1: Leading whitespace (preserved)
+  //   alias\s+          - Literal "alias" followed by whitespace
+  //   ${name}           - The alias name (escaped in actual usage)
+  //   \s*=\s*           - Optional whitespace around equals sign
+  //   ([^\\\n#]*?)     - Group 2: Command value (non-greedy, stops at backslash, newline, or #)
+  //   (\s*#.*)?        - Group 3: Optional inline comment
+  //   $                 - End of line
+  //   gm                - Global and multiline flags
   generatePattern: (name) => new RegExp(`^(\\s*)alias\\s+${name}\\s*=\\s*([^\\\n#]*?)(\\s*#.*)?$`, "gm"),
   generateReplacement: (name, command) => `alias ${name}='${command}'`,
   itemType: "alias",
