@@ -1,0 +1,54 @@
+import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
+
+interface StepSizeFormProps {
+  currentStepSize: string;
+  onStepSizeChanged: (stepSize: string) => void;
+}
+
+export function StepSizeForm({ currentStepSize, onStepSizeChanged }: StepSizeFormProps) {
+  const { pop } = useNavigation();
+  const [stepSize, setStepSize] = useState<string>(currentStepSize);
+
+  async function handleSubmit(values: { stepSize: string }) {
+    try {
+      const stepValue = parseInt(values.stepSize || "1", 10);
+      if (isNaN(stepValue) || stepValue <= 0 || !Number.isInteger(stepValue)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Step Size",
+          message: "Step size must be a positive integer",
+        });
+        return;
+      }
+      // Ensure it's a whole number string
+      onStepSizeChanged(stepValue.toString());
+      pop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error instanceof Error ? error.message : "Failed to set step size",
+      });
+    }
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Set Step Size" onSubmit={(values: { stepSize: string }) => handleSubmit(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="stepSize"
+        title="Step Size"
+        value={stepSize}
+        onChange={setStepSize}
+        placeholder="1"
+        info="The increment/decrement step for pixel size and blur adjustments"
+      />
+    </Form>
+  );
+}

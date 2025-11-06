@@ -1,0 +1,72 @@
+import { ShaderConfig, ShaderParameter, ParametersRecord, ParameterValue } from "../config/types";
+
+/**
+ * Maps parameter name from config to processor parameter name
+ * Used when parameter names differ between config and processor interface
+ */
+const PARAMETER_NAME_MAP: Record<string, Record<string, string>> = {};
+
+/**
+ * Converts a parameter value to the correct type based on parameter definition
+ */
+function convertParameterValue(
+  param: ShaderParameter,
+  value: ParameterValue,
+  rawParameters: ParametersRecord & { _shaderId?: string },
+): ParameterValue {
+  // Check if parameter name needs mapping
+  const shaderId = rawParameters._shaderId;
+  const mappedName = shaderId ? PARAMETER_NAME_MAP[shaderId]?.[param.id] || param.id : param.id;
+
+  // Get the raw value (might be under mapped name)
+  const rawValue = rawParameters[param.id] ?? rawParameters[mappedName] ?? param.default;
+
+  switch (param.type) {
+    case "int":
+      return parseInt(String(rawValue), 10);
+    case "float":
+      return parseFloat(String(rawValue));
+    case "bool":
+      return Boolean(rawValue);
+    case "string":
+      return String(rawValue ?? param.default);
+    case "enum": {
+      // Enum values are stored as strings, convert to number if needed
+      const enumValue = String(rawValue);
+      // Try to parse as number if it's a numeric string
+      const numValue = parseInt(enumValue, 10);
+      return isNaN(numValue) ? enumValue : numValue;
+    }
+    default:
+      return rawValue;
+  }
+}
+
+/**
+ * Dynamically converts generic parameters to shader-specific parameter object
+ * This is a universal mapper that works for all shaders
+ */
+export function mapParametersToShader<T>(shaderConfig: ShaderConfig, rawParameters: ParametersRecord): T {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: Record<string, any> = {};
+
+  // Create extended parameters object with shader ID for mapping lookup
+  const extendedParams = { ...rawParameters, _shaderId: shaderConfig.id };
+
+  // Convert each parameter based on its configuration
+  shaderConfig.parameters.forEach((param) => {
+    const mappedName = PARAMETER_NAME_MAP[shaderConfig.id]?.[param.id] || param.id;
+    const convertedValue = convertParameterValue(param, rawParameters[param.id], extendedParams);
+    result[mappedName] = convertedValue;
+  });
+
+  return result as T;
+}
+
+/**
+ * Universal parameter mapper function
+ * Automatically maps parameters for any shader - no need for shader-specific functions
+ */
+export function createShaderParams<T>(shaderConfig: ShaderConfig, rawParameters: ParametersRecord): T {
+  return mapParametersToShader<T>(shaderConfig, rawParameters);
+}
