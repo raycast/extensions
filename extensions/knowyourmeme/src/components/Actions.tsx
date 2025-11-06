@@ -82,7 +82,7 @@ export function ActionCopyTemplateImage({ templateImageUrl }: { templateImageUrl
       icon={Icon.Clipboard}
       onAction={async () => {
         if (templateImageUrl) {
-          await copyImage(templateImageUrl ?? "");
+          await copyImage(templateImageUrl);
           await showHUD("Copied to Clipboard");
         } else {
           await showToast({
