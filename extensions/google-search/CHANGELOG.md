@@ -1,6 +1,6 @@
 # Google Search Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2025-11-06
 
 - Release extension for Windows
 
