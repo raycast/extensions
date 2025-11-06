@@ -26,9 +26,7 @@
     "lint": "ray lint"
   },
   "dependencies": {
-    "@raycast/api": "^1.82.0",
-    "@types/cheerio": "^0.22.35",
-    "cheerio": "^1.1.2"
+    "@raycast/api": "^1.82.0"
   },
   "devDependencies": {
     "@raycast/utils": "^1.10.0",
