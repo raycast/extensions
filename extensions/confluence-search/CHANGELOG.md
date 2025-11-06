@@ -1,6 +1,6 @@
 # Confluence Changelog
 
-## [Handle Error] - {PR_MERGE_DATE}
+## [Handle Error] - 2025-11-06
 
 - Handle error when fetching favourite spaces to avoid the extension from crashing
 
