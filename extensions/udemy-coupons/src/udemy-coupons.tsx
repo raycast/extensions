@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { ActionPanel, Action, Icon, Grid, showToast, Toast, Detail, Color } from "@raycast/api";
+import { useState } from "react";
+import { ActionPanel, Action, Icon, Grid, Detail, Color } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { formatDistance } from "date-fns";
 
 // Define the structure of a course item based on the Android app
@@ -102,90 +103,57 @@ function getStarDisplay(rating: number): string {
 }
 
 export default function Command() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  useEffect(() => {
-    async function fetchCourses() {
-      try {
-        const apiUrl = "https://api.couponcode.dev";
+  // Build query string similar to the Android app
+  const queryParams = new URLSearchParams({
+    fields: ["courseid", "title", "image", "rating", "author", "category", "slug", "updatedAt", "expired", "body"].join(
+      ",",
+    ),
+    "pagination[page]": "1",
+    "pagination[pageSize]": "100",
+    "sort[0]": "updatedAt:desc",
+    "filters[expired][$eq]": "false",
+  });
 
-        if (!apiUrl) {
-          throw new Error("API URL is not set.");
-        }
+  const apiUrl = `https://api.couponcode.dev/api/udemy-courses?${queryParams}`;
 
-        // Build query string similar to the Android app
-        const queryParams = new URLSearchParams({
-          fields: [
-            "courseid",
-            "title",
-            "image",
-            "rating",
-            "author",
-            "category",
-            "slug",
-            "updatedAt",
-            "expired",
-            "body",
-          ].join(","),
-          "pagination[page]": "1",
-          "pagination[pageSize]": "100",
-          "sort[0]": "updatedAt:desc",
-          "filters[expired][$eq]": "false",
-        });
+  const { isLoading, data, error } = useFetch<Course[]>(apiUrl, {
+    parseResponse: async (response: Response) => {
+      const result = (await response.json()) as ApiResponse;
 
-        // Make request without authentication (same as Android app)
-        const response = await fetch(`${apiUrl}/api/udemy-courses?${queryParams}`);
+      // Transform the data to match our Course interface
+      const transformedCourses: Course[] = result.data.map((item: RawCourseItem) => ({
+        id: item.id,
+        courseid: item.courseid,
+        title: item.title || "Untitled Course",
+        image: item.image || "",
+        author: item.author || {
+          displayName: "Unknown Author",
+        },
+        category: item.category || "General",
+        rating: item.rating || 0,
+        slug: item.slug || "",
+        expired: item.expired || false,
+        updatedAt: item.updatedAt || new Date().toISOString(),
+        body: item.body,
+      }));
 
-        if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
-        }
-
-        const data = (await response.json()) as ApiResponse;
-
-        // Transform the data to match our Course interface
-        const transformedCourses: Course[] = data.data.map((item: RawCourseItem) => ({
-          id: item.id,
-          courseid: item.courseid,
-          title: item.title || "Untitled Course",
-          image: item.image || "",
-          author: item.author || {
-            displayName: "Unknown Author",
-          },
-          category: item.category || "General",
-          rating: item.rating || 0,
-          slug: item.slug || "",
-          expired: item.expired || false,
-          updatedAt: item.updatedAt || new Date().toISOString(),
-          body: item.body,
-        }));
-
-        setCourses(transformedCourses);
-      } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : "An unknown error occurred";
-        setError(errorMessage);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch courses",
-          message: errorMessage,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchCourses();
-  }, []);
+      return transformedCourses;
+    },
+    failureToastOptions: {
+      title: "Failed to fetch courses",
+      message: "Could not retrieve the latest course information",
+    },
+  });
 
   // Filter courses by category
   const filteredCourses =
-    selectedCategory === "all" ? courses : courses.filter((course) => course.category === selectedCategory);
+    selectedCategory === "all" ? data || [] : (data || []).filter((course) => course.category === selectedCategory);
 
   // Get unique categories sorted alphabetically
-  const categories = ["all", ...Array.from(new Set(courses.map((c) => c.category))).sort()];
+  const categories = ["all", ...Array.from(new Set((data || []).map((c) => c.category))).sort()];
 
   if (error) {
     return (
@@ -193,7 +161,7 @@ export default function Command() {
         <Grid.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Something went wrong"
-          description={error}
+          description={error.message}
         />
       </Grid>
     );
@@ -305,12 +273,16 @@ This course is available **FREE** with a coupon code! Click the button below to 
       navigationTitle={`${filteredCourses.length} Free Udemy Courses`}
       searchBarAccessory={
         <Grid.Dropdown tooltip="Filter by Category" storeValue value={selectedCategory} onChange={setSelectedCategory}>
-          <Grid.Dropdown.Item title={`All Categories (${courses.length})`} value="all" icon={Icon.AppWindowGrid3x3} />
+          <Grid.Dropdown.Item
+            title={`All Categories (${data?.length || 0})`}
+            value="all"
+            icon={Icon.AppWindowGrid3x3}
+          />
           <Grid.Dropdown.Section title="Categories">
             {categories
               .filter((cat) => cat !== "all")
               .map((category) => {
-                const count = courses.filter((c) => c.category === category).length;
+                const count = (data || []).filter((c) => c.category === category).length;
                 return (
                   <Grid.Dropdown.Item
                     key={category}
