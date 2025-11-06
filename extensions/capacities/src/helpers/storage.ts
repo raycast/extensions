@@ -1,10 +1,11 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 
+const { bearerToken } = getPreferenceValues<Preferences>();
 export const API_URL = "https://api.capacities.io";
 export const API_HEADERS = {
   Accept: "application/json",
-  Authorization: `Bearer ${getPreferenceValues<Preferences>().bearerToken}`,
+  Authorization: `Bearer ${bearerToken}`,
   "Content-Type": "application/json",
 };
 const SPACES_UPDATE_INTERVAL = 1000 * 60 * 10;

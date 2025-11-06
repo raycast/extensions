@@ -62,7 +62,7 @@ export default function Command() {
         });
         if (!response.ok) throw new Error(fetchErrorHandler(response.status));
 
-        toast.style = Toast.Style.Animated;
+        toast.style = Toast.Style.Success;
         toast.title = "Saved";
         await closeMainWindow({
           popToRootType: PopToRootType.Immediate,
