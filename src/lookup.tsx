@@ -2,23 +2,24 @@
 // the workspace React/TypeScript setup. Follow-up: align @types/react / TypeScript versions
 // and remove this directive to enable full type checking.
 // @ts-nocheck
-// @ts-nocheck
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { load } from "cheerio";
 
-type RGLookupResult = {
-  name: string;
-  url: string;
-  expire: string;
-  sha1: string;
-  size: string;
-};
+namespace RGAdguard {
+  export type LookupResult = {
+    name: string;
+    url: string;
+    expire: string;
+    sha1: string;
+    size: string;
+  };
+}
 
 export default function LookupCommand() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<RGLookupResult[]>([]);
+  const [results, setResults] = useState<RGAdguard.LookupResult[]>([]);
   const [isGeneratingLinks, setIsGeneratingLinks] = useState(false);
 
   function buildLookupUrl(input: string): string {
@@ -104,7 +105,7 @@ export default function LookupCommand() {
 
       const html = await response.text();
   const parsed = parseLookupResults(html);
-  setResults(parsed as RGLookupResult[]);
+  setResults(parsed as RGAdguard.LookupResult[]);
 
       await showToast({
         style: parsed.length > 0 ? Toast.Style.Success : Toast.Style.Failure,
@@ -196,12 +197,12 @@ function determineLookupType(value: string): "url" | "ProductId" | "PackageFamil
   return "url";
 }
 
-function parseLookupResults(html: string): RGLookupResult[] {
+function parseLookupResults(html: string): RGAdguard.LookupResult[] {
   const $ = load(html);
   const rows = $("table tr");
   if (rows.length <= 1) return [];
 
-  const items: RGLookupResult[] = [];
+  const items: RGAdguard.LookupResult[] = [];
   // Skip header row (index 0)
   rows.slice(1).each((_, tr) => {
     const tds = $(tr).find("td");
