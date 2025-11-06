@@ -1,5 +1,9 @@
 # I Don't Have Spotify Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Update hostname
+
 ## [New Commands] - 2024-07-31
 
 - Convert link from clipboard and copy it back for each platform.
