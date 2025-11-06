@@ -1,6 +1,6 @@
 # Accordance Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-11-06
 
 ### Added
 - **Verse Lookup**: Search and display Bible verses directly from Raycast search bar
