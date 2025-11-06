@@ -1,6 +1,6 @@
 # JSR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-11-06
 
 - Add link to search page (open in browser action)
 - Add option to copy a [esm/sh](https://esm.sh/) import command
