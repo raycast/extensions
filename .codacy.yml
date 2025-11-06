@@ -1,0 +1,12 @@
+exclusions:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.nyc_output/**"
+  - "**/.cache/**"
+  - "**/.parcel-cache/**"
+  - "**/.pnp.cjs"
+  - "**/coverage/**"
+  - "**/*.min.js"
+  - "assets/**"
+  - "README.md"
