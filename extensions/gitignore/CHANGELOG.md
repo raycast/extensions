@@ -1,6 +1,6 @@
 # Gitignore Changelog
 
-## [Favourites & Windows Support] - {PR_MERGE_DATE}
+## [Favourites & Windows Support] - 2025-11-06
 
 - Added Favourites section to pin frequently used gitignore templates, and a preference to auto-select favorites
 - Added cross-platform Windows support
