@@ -1,4 +1,5 @@
 import { Icon } from "@raycast/api";
+import type { SimpleIcon } from "simple-icons";
 import { MODERN_COLORS } from "../constants";
 import * as SimpleIcons from "simple-icons";
 
@@ -82,7 +83,69 @@ function normalizeSectionName(name: string): string {
 }
 
 /**
+ * Memoized icon index to avoid rebuilding on every call
+ */
+let cachedIconIndex: Array<{
+  key: string;
+  name: string;
+  slug: string;
+  slugNormalized: string;
+  titleNorm: string;
+  icon: SimpleIcon;
+}> | null = null;
+
+/**
+ * Gets or creates the cached icon index
+ *
+ * @returns Cached icon index array
+ */
+function getIconIndex(): Array<{
+  key: string;
+  name: string;
+  slug: string;
+  slugNormalized: string;
+  titleNorm: string;
+  icon: SimpleIcon;
+}> {
+  if (cachedIconIndex === null) {
+    cachedIconIndex = Object.keys(SimpleIcons)
+      .filter((key) => key.startsWith("si"))
+      .map((key) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const icon = (SimpleIcons as any)[key];
+        const name = key.substring(2).toLowerCase();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const slug: string = (icon as any)?.slug || name;
+        const slugNormalized = slug.replace(/-/g, "");
+        const titleNorm = (icon?.title || name).toLowerCase().replace(/[^a-z0-9]/g, "");
+        return {
+          key,
+          name,
+          slug,
+          slugNormalized,
+          titleNorm,
+          icon,
+        };
+      })
+      .filter((item) => item.icon && item.icon.svg && item.icon.hex);
+  }
+  return cachedIconIndex;
+}
+
+/**
  * Finds the best matching Simple Icon for a section name
+ *
+ * Uses fuzzy matching with multiple strategies:
+ * 1. Direct match on normalized name
+ * 2. Exact slug/name/title matches
+ * 3. Starts-with matching for sufficiently long tokens
+ * 4. Contains matching with similar length
+ * 5. Levenshtein distance matching
+ * 6. Word-based matching for compound names
+ * 7. Substring matching as fallback
+ *
+ * @param sectionName The section name to find an icon for
+ * @returns Object with icon name and icon data, or null if no match found
  */
 function findBestSimpleIcon(sectionName: string): { name: string; icon: { svg: string; hex?: string } } | null {
   const normalized = normalizeSectionName(sectionName);
@@ -135,36 +198,8 @@ function findBestSimpleIcon(sectionName: string): { name: string; icon: { svg: s
     return { name: normalized, icon: directMatch };
   }
 
-  // Build a lightweight cached index of all icons
-  type IndexedIcon = {
-    key: string;
-    name: string;
-    slug: string;
-    slugNormalized: string;
-    titleNorm: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    icon: any;
-  };
-  const allIcons: IndexedIcon[] = Object.keys(SimpleIcons)
-    .filter((key) => key.startsWith("si"))
-    .map((key) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const icon = (SimpleIcons as any)[key];
-      const name = key.substring(2).toLowerCase();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const slug: string = (icon as any)?.slug || name;
-      const slugNormalized = slug.replace(/-/g, "");
-      const titleNorm = (icon?.title || name).toLowerCase().replace(/[^a-z0-9]/g, "");
-      return {
-        key,
-        name,
-        slug,
-        slugNormalized,
-        titleNorm,
-        icon,
-      } as IndexedIcon;
-    })
-    .filter((item) => item.icon && item.icon.svg && item.icon.hex);
+  // Use cached icon index (memoized for performance)
+  const allIcons = getIconIndex();
 
   // Enhanced fuzzy matching strategies
   // 1) Exact slug/name/title matches
