@@ -1,5 +1,11 @@
 # Google Calendar Changelog
+
+## [1.3.1] - 2025-11-06
+
+- Modified the default action for a google calendar event to open the meeting url in browser where one exists with a fallback to opening the calendar.
+
 ## [1.3.0] - 2025-05-30
+
 - Feat(create-event): Enable creating events with natural language duration string input.
 - Chore(deps): Added `parse-duration`.
 
