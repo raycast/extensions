@@ -1,6 +1,6 @@
 # Cloudflare Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-06
 
 - Toggled on windows support
 
