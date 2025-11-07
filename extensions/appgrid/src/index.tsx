@@ -16,8 +16,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 const getLocale = (): "en" | "ko" | "ja" => {
   try {
     // Use Intl API to detect system language
-    const systemLocale =
-      Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
+    const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
     if (systemLocale.startsWith("ko")) return "ko";
     if (systemLocale.startsWith("ja")) return "ja";
     return "en";
@@ -332,12 +331,8 @@ export default function Command() {
     async (app: Application) => {
       try {
         await updateUsageData(app);
-        // Use bundle ID to open application, which is more reliable
-        if (app.bundleId) {
-          await open("", app.bundleId);
-        } else {
-          await open(app.path);
-        }
+        // Open application using its path
+        await open(app.path);
         await showToast({
           style: Toast.Style.Success,
           title: `${t.launching} ${app.name}`,
@@ -357,9 +352,7 @@ export default function Command() {
   const groupedApps = useMemo(() => {
     // Apply search filter first
     const filtered = searchText
-      ? apps.filter((app) =>
-          app.name.toLowerCase().includes(searchText.toLowerCase()),
-        )
+      ? apps.filter((app) => app.name.toLowerCase().includes(searchText.toLowerCase()))
       : apps;
 
     // Flat view mode: no grouping, just sort all apps
@@ -440,8 +433,7 @@ export default function Command() {
     ];
 
     // Apply category filter
-    const categoriesToShow =
-      filterCategory === "all" ? categoryOrder : [filterCategory];
+    const categoriesToShow = filterCategory === "all" ? categoryOrder : [filterCategory];
 
     categoriesToShow.forEach((category) => {
       if (groups[category].length > 0) {
@@ -477,49 +469,19 @@ export default function Command() {
           }}
         >
           <Grid.Dropdown.Section title={t.dropdownSections.allView}>
-            <Grid.Dropdown.Item
-              value="flat|name|all"
-              title={t.viewModes.flatName}
-            />
-            <Grid.Dropdown.Item
-              value="flat|usage|all"
-              title={t.viewModes.flatUsage}
-            />
+            <Grid.Dropdown.Item value="flat|name|all" title={t.viewModes.flatName} />
+            <Grid.Dropdown.Item value="flat|usage|all" title={t.viewModes.flatUsage} />
           </Grid.Dropdown.Section>
 
           <Grid.Dropdown.Section title={t.dropdownSections.categoryView}>
-            <Grid.Dropdown.Item
-              value="grouped|usage|all"
-              title={t.viewModes.grouped}
-            />
-            <Grid.Dropdown.Item
-              value="grouped|usage|frequently-used"
-              title={t.categories["frequently-used"]}
-            />
-            <Grid.Dropdown.Item
-              value="grouped|usage|development"
-              title={t.categories.development}
-            />
-            <Grid.Dropdown.Item
-              value="grouped|usage|productivity"
-              title={t.categories.productivity}
-            />
-            <Grid.Dropdown.Item
-              value="grouped|usage|communication"
-              title={t.categories.communication}
-            />
-            <Grid.Dropdown.Item
-              value="grouped|usage|entertainment"
-              title={t.categories.entertainment}
-            />
-            <Grid.Dropdown.Item
-              value="grouped|usage|utilities"
-              title={t.categories.utilities}
-            />
-            <Grid.Dropdown.Item
-              value="grouped|usage|others"
-              title={t.categories.others}
-            />
+            <Grid.Dropdown.Item value="grouped|usage|all" title={t.viewModes.grouped} />
+            <Grid.Dropdown.Item value="grouped|usage|frequently-used" title={t.categories["frequently-used"]} />
+            <Grid.Dropdown.Item value="grouped|usage|development" title={t.categories.development} />
+            <Grid.Dropdown.Item value="grouped|usage|productivity" title={t.categories.productivity} />
+            <Grid.Dropdown.Item value="grouped|usage|communication" title={t.categories.communication} />
+            <Grid.Dropdown.Item value="grouped|usage|entertainment" title={t.categories.entertainment} />
+            <Grid.Dropdown.Item value="grouped|usage|utilities" title={t.categories.utilities} />
+            <Grid.Dropdown.Item value="grouped|usage|others" title={t.categories.others} />
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
@@ -538,15 +500,8 @@ export default function Command() {
                 subtitle={usageCount > 0 ? `${usageCount} ${t.usageCount}` : ""}
                 actions={
                   <ActionPanel>
-                    <Action
-                      title={t.launchApp}
-                      icon={Icon.Play}
-                      onAction={() => launchApp(app)}
-                    />
-                    <Action.ShowInFinder
-                      title={t.showInFinder}
-                      path={app.path}
-                    />
+                    <Action title={t.launchApp} icon={Icon.Play} onAction={() => launchApp(app)} />
+                    <Action.ShowInFinder title={t.showInFinder} path={app.path} />
                     <Action.CopyToClipboard
                       title={t.copyPath}
                       content={app.path}
