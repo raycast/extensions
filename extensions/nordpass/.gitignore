@@ -1,0 +1,24 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# Test files
+test-export*.csv
+
+# Documentation files (not needed for store)
+LOGO_INSTRUCTIONS.md
+create_extension.md
+PRE_PUBLISH_CHECKLIST.md
+PUBLISHING.md
+PUBLISHING_SUMMARY.md
+
+# misc
+.DS_Store

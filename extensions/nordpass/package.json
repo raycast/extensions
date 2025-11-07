@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nordpass",
+  "title": "NordPass",
+  "description": "Search through your NordPass passwords, credit cards, and secure notes directly from Raycast. Fast, secure, and encrypted local search.",
+  "icon": "extension-icon.png",
+  "author": "mxkel",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-passwords",
+      "title": "Search Passwords",
+      "description": "Search through your NordPass passwords",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "search-credit-cards",
+      "title": "Search Credit Cards",
+      "description": "Search through your NordPass credit cards",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "search-secure-notes",
+      "title": "Search Secure Notes",
+      "description": "Search through your NordPass secure notes",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "exportFilePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Export File Path",
+      "description": "Path to your NordPass CSV export file (e.g., ~/Downloads/nordpass-export.csv). Leave empty to auto-detect.",
+      "placeholder": "~/Downloads/nordpass-export.csv"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0",
+    "csv-parse": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
