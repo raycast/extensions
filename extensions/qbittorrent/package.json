@@ -6,7 +6,8 @@
   "icon": "qbittorrent.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "timmevandermeer"
+    "timmevandermeer",
+    "taken"
   ],
   "pastContributors": [
     "J3n5en"
@@ -85,5 +86,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }
