@@ -291,7 +291,10 @@ export default function Command() {
       // Validate image file before processing
       const validation = validateImageFile(filePath);
       if (!validation.valid) {
-        showFailureToast({ title: "Invalid Image", message: validation.errors.join(", ") || "Image validation failed" });
+        showFailureToast({
+          title: "Invalid Image",
+          message: validation.errors.join(", ") || "Image validation failed",
+        });
         setInputImagePath(null);
         setFullOutputPath(null);
         setPreviewBase64(null);
@@ -445,7 +448,10 @@ export default function Command() {
               if (tempImagePath && fs.existsSync(tempImagePath)) {
                 safeDeleteFile(tempImagePath);
               }
-              showFailureToast({ title: "No Image in Clipboard", message: "Please copy an image or image file to clipboard first" });
+              showFailureToast({
+                title: "No Image in Clipboard",
+                message: "Please copy an image or image file to clipboard first",
+              });
               return;
             }
 
@@ -463,11 +469,17 @@ export default function Command() {
           }
         }
 
-        showFailureToast({ title: "No Image in Clipboard", message: "Please copy an image file to clipboard first (right-click file → Copy)" });
+        showFailureToast({
+          title: "No Image in Clipboard",
+          message: "Please copy an image file to clipboard first (right-click file → Copy)",
+        });
       }
     } catch (error) {
       console.error("Failed to paste from clipboard:", error);
-      showFailureToast({ title: "Error", message: error instanceof Error ? error.message : "Failed to read from clipboard" });
+      showFailureToast({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Failed to read from clipboard",
+      });
     }
   }
 

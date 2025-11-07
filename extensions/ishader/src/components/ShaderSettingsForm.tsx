@@ -74,13 +74,13 @@ export function ShaderSettingsForm({ shaderConfig, parameters, onSettingsChanged
         switch (param.type) {
           case "int": {
             const parsed = parseInt(String(value), 10);
-            const numValue = isNaN(parsed) ? (param.default as number) ?? 0 : parsed;
+            const numValue = isNaN(parsed) ? ((param.default as number) ?? 0) : parsed;
             updates[param.id] = numValue;
             break;
           }
           case "float": {
             const parsed = parseFloat(String(value));
-            const numValue = isNaN(parsed) ? (param.default as number) ?? 0 : parsed;
+            const numValue = isNaN(parsed) ? ((param.default as number) ?? 0) : parsed;
             updates[param.id] = numValue;
             break;
           }
@@ -95,7 +95,10 @@ export function ShaderSettingsForm({ shaderConfig, parameters, onSettingsChanged
       onSettingsChanged(updates);
       pop();
     } catch (error) {
-      showFailureToast({ title: "Error", message: error instanceof Error ? error.message : "Failed to update settings" });
+      showFailureToast({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Failed to update settings",
+      });
     }
   }
 
