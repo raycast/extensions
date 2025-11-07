@@ -27,7 +27,8 @@ export function getAlertVolumePreference() {
 export async function toggleSilentMode(action?: "on" | "off") {
   try {
     const currentAction = action || ((await checkIfSilentMode()) ? "off" : "on");
-    await setAlertVolume(currentAction === "on" ? 0 : getAlertVolumePreference());
+    const targetVolume = currentAction === "on" ? 0 : getAlertVolumePreference();
+    await setAlertVolume(targetVolume);
     launchCommand({ name: "silent-mode-menu-bar", type: LaunchType.Background }).catch(() => {});
     showHUD(`Silent mode ${currentAction}`);
   } catch (error) {

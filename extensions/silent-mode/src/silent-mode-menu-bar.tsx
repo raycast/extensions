@@ -1,5 +1,5 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { usePromise, showFailureToast } from "@raycast/utils";
 import { checkIfSilentMode, toggleSilentMode } from "./utils/alert";
 
 export default function Command() {
@@ -10,8 +10,12 @@ export default function Command() {
       <MenuBarExtra.Item
         title={`Turn ${isSilentMode ? "off" : "on"} Silent Mode`}
         onAction={async () => {
-          await toggleSilentMode();
-          await revalidateSilentMode();
+          try {
+            await toggleSilentMode();
+            await revalidateSilentMode();
+          } catch (error) {
+            showFailureToast(error);
+          }
         }}
       />
     </MenuBarExtra>
