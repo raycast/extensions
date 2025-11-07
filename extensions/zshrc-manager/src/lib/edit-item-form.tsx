@@ -66,7 +66,8 @@ interface EditItemFormProps {
 export default function EditItemForm({ existingKey, existingValue, sectionLabel, onSave, config }: EditItemFormProps) {
   const { pop } = useNavigation();
   const isEditing = !!existingKey;
-  const [sections, setSections] = useState<string[]>([]);
+  // Initialize sections with sectionLabel if it exists to avoid dropdown value mismatch
+  const [sections, setSections] = useState<string[]>(sectionLabel ? [sectionLabel] : []);
   const [isLoadingSections, setIsLoadingSections] = useState(true);
 
   // Load sections for dropdown
@@ -76,15 +77,27 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
         const content = await readZshrcFile();
         const logicalSections = toLogicalSections(content);
         const sectionNames = logicalSections.map((s) => s.label).filter((name) => name !== "Unlabeled");
-        setSections(Array.from(new Set(sectionNames)).sort());
+        const uniqueSections = Array.from(new Set(sectionNames));
+
+        // If editing and sectionLabel exists but isn't in the detected sections, add it
+        // This handles cases where a section exists but wasn't detected properly
+        if (sectionLabel && !uniqueSections.includes(sectionLabel)) {
+          uniqueSections.push(sectionLabel);
+        }
+
+        setSections(uniqueSections.sort());
       } catch {
         // If loading fails, continue with empty sections
+        // Still add sectionLabel if it exists
+        if (sectionLabel) {
+          setSections([sectionLabel]);
+        }
       } finally {
         setIsLoadingSections(false);
       }
     };
     loadSections();
-  }, []);
+  }, [sectionLabel]);
 
   const { itemProps, handleSubmit } = useForm({
     initialValues: {
