@@ -1,6 +1,6 @@
 # Udemy Coupons Changelog
 
-## [Store Listing Optimization] - {PR_MERGE_DATE}
+## [Store Listing Optimization] - 2025-11-07
 - Enhanced extension title and description for better visibility in Raycast Store
 - Added SEO-optimized keywords including "Free", "Premium", "Verified Coupons"
 - Expanded categories to include "Education" and "Productivity" for broader reach
