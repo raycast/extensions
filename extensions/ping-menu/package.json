@@ -3,7 +3,7 @@
   "name": "ping-menu",
   "title": "Ping Menu",
   "description": "Monitor ping latency in the menu bar",
-  "icon": "icon.png",
+  "icon": "assets/icon.png",
   "author": "domonkos_nagy",
   "license": "MIT",
   "commands": [
@@ -13,6 +13,35 @@
       "description": "Shows ping latency in menu bar",
       "mode": "menu-bar",
       "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "site",
+      "type": "textfield",
+      "title": "Site to Ping",
+      "description": "The hostname or IP address to ping",
+      "required": false,
+      "default": "google.com",
+      "placeholder": "e.g., google.com"
+    },
+    {
+      "name": "method",
+      "type": "dropdown",
+      "title": "Ping Method",
+      "description": "How frequently to ping the target",
+      "required": false,
+      "default": "standard",
+      "data": [
+        {
+          "title": "Standard (10s, background by Raycast)",
+          "value": "standard"
+        },
+        {
+          "title": "Aggressive (1s, in-app timer)",
+          "value": "aggressive"
+        }
+      ]
     }
   ],
   "dependencies": {

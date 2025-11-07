@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, LocalStorage, Color } from "@raycast/api";
+import { MenuBarExtra, Icon, LocalStorage, Color, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -11,9 +11,14 @@ interface PingResult {
   error?: string;
 }
 
-async function pingGoogle(): Promise<number | null> {
+interface Preferences {
+  site: string;
+  method: "standard" | "aggressive";
+}
+
+async function pingHost(host: string): Promise<number | null> {
   try {
-    const { stdout } = await execAsync("/sbin/ping -c 1 -W 1000 google.com");
+    const { stdout } = await execAsync(`/sbin/ping -c 1 -W 1000 ${host}`);
     const match = stdout.match(/time=(\d+\.?\d*)\s*ms/);
     if (match && match[1]) {
       return parseFloat(match[1]);
@@ -50,9 +55,9 @@ interface PingData {
   history: PingResult[];
 }
 
-async function pingWithHistory(): Promise<PingData> {
+async function pingWithHistory(host: string): Promise<PingData> {
   // Perform ping
-  const latency = await pingGoogle();
+  const latency = await pingHost(host);
 
   // Load existing history
   const history = await loadHistory();
@@ -77,6 +82,7 @@ async function pingWithHistory(): Promise<PingData> {
 export default function Command() {
   const [data, setData] = useState<PingData>({ latency: null, history: [] });
   const [isLoading, setIsLoading] = useState(true);
+  const { site, method } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     let cancelled = false;
@@ -100,7 +106,7 @@ export default function Command() {
         }
       }
 
-      const result = await pingWithHistory();
+      const result = await pingWithHistory(site);
       if (!cancelled) {
         console.log("[Ping Monitor] Got result, latency:", result.latency);
         setData(result);
@@ -114,16 +120,19 @@ export default function Command() {
     // Fetch immediately on mount
     fetchPing();
 
-    // Set up interval to fetch every second
-    const intervalId = setInterval(() => {
-      if (!cancelled) {
-        fetchPing();
-      }
-    }, 1000);
+    // In aggressive mode, poll every second with in-app timer. Standard mode relies on Raycast's background interval.
+    let intervalId: NodeJS.Timeout | undefined;
+    if (method === "aggressive") {
+      intervalId = setInterval(() => {
+        if (!cancelled) {
+          fetchPing();
+        }
+      }, 1000);
+    }
 
     return () => {
       cancelled = true;
-      clearInterval(intervalId);
+      if (intervalId) clearInterval(intervalId);
     };
   }, []);
 
@@ -143,8 +152,8 @@ export default function Command() {
 
   const tooltip =
     currentLatency !== null
-      ? `google.com: ${Math.round(currentLatency)}ms\nLast ${pingHistory.length > 0 ? pingHistory[0].timestamp.toLocaleTimeString() : "now"}`
-      : "Pinging google.com...";
+      ? `${site}: ${Math.round(currentLatency)}ms\nLast ${pingHistory.length > 0 ? pingHistory[0].timestamp.toLocaleTimeString() : "now"}`
+      : `Pinging ${site}...`;
 
   return (
     <MenuBarExtra icon={menuBarIcon} title={menuBarTitle} isLoading={isLoading} tooltip={tooltip}>
