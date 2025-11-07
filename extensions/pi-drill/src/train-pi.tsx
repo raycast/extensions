@@ -161,9 +161,6 @@ export default function PiTrain() {
       <Form.Description title="Current Streak" text={history.length.toString()} />
       <Form.Description title="Mistakes" text={mistakes.toString()} />
       <Form.Description title="Hints used" text={hints.toString()} />
-      {!finished && hasHintedCurrentDigit && (
-        <Form.Description title="💡" text="You've already used a hint for this digit" />
-      )}
       {finished && <Form.Description title="Well Done!" text={`You recalled all ${piDigits.length} digits of π!`} />}
     </Form>
   );
