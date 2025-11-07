@@ -1,6 +1,6 @@
 # Udemy Coupons Changelog
 
-## [Store Listing Optimization] - 2025-11-06
+## [Store Listing Optimization] - {PR_MERGE_DATE}
 - Enhanced extension title and description for better visibility in Raycast Store
 - Added SEO-optimized keywords including "Free", "Premium", "Verified Coupons"
 - Expanded categories to include "Education" and "Productivity" for broader reach
@@ -9,7 +9,7 @@
 - Included system requirements and additional resources for users
 - Added disclaimer about coupon availability for transparency
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-11-06
 - Initial release of Udemy Coupons extension
 - Browse and search for free Udemy courses with verified coupons
 - Filter courses by category
