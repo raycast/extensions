@@ -1,6 +1,6 @@
 # Parallels Virtual Machines Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2025-11-07
 
 - Improve action panel by removing duplicate commands
 - Improve OS icon matching when viewing list of VMs
