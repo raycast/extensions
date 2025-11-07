@@ -30,13 +30,15 @@ Smart app launcher for macOS with grid view and intelligent category grouping.
 
 ## Screenshots
 
-![AppGrid Main View](./metadata/appgrid-1.png)
+![](./metadata/appgrid-1.png)
 
-![AppGrid Categories](./metadata/appgrid-2.png)
+![](./metadata/appgrid-2.png)
+
+![](./metadata/appgrid-3.png)
 
 ## Commands
 
-### AppGrid
+### Search AppGrid
 
 Launch your macOS applications with smart categorization and grid view.
 
