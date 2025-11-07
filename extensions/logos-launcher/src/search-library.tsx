@@ -148,7 +148,7 @@ export default function Command() {
         toast.message = undefined;
       } catch (error) {
         const message = extractErrorMessage(error);
-        showFailureToast("Indexing failed", message);
+        showFailureToast({ title: "Indexing failed", message });
         setState({ resources: [], isLoading: false, error: message });
       } finally {
         setIsIndexing(false);
@@ -178,7 +178,10 @@ export default function Command() {
         }
       }
 
-      showFailureToast("Could not open Logos", `${extractErrorMessage(lastError)} — Tried ${primaryFirst.join(", ")}`);
+      showFailureToast({
+        title: "Could not open Logos",
+        message: `${extractErrorMessage(lastError)} — Tried ${primaryFirst.join(", ")}`,
+      });
     },
     [preferences.openScheme],
   );
