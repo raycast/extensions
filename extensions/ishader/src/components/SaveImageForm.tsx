@@ -46,11 +46,7 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
 
       // Validate path safety - ensure no path traversal
       if (!validatePathSafety(targetDirectory, os.homedir())) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Save Error",
-          message: "Invalid save directory path",
-        });
+        showFailureToast({ title: "Save Error", message: "Invalid save directory path" });
         return;
       }
 
@@ -58,11 +54,7 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
 
       // Final path safety check
       if (!validatePathSafety(savePath, targetDirectory)) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Save Error",
-          message: "Invalid file path",
-        });
+        showFailureToast({ title: "Save Error", message: "Invalid file path" });
         return;
       }
 
