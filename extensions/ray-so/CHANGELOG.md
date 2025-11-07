@@ -1,5 +1,9 @@
 # Ray.so Changelog
 
+## [New theme] - {PR_MERGE_DATE}
+
+- Added Nuxt theme
+
 ## [Maintenance] - 2025-08-25
 
 - Added Windows support
