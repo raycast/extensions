@@ -1,6 +1,6 @@
 # Chatwoot Changelog
 
-## [Search "Contacts" + Show Unread Count] - {PR_MERGE_DATE}
+## [Search "Contacts" + Show Unread Count] - 2025-11-07
 
 ### Contacts
 - delete contact
