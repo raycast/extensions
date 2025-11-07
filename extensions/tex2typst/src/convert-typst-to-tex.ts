@@ -23,7 +23,7 @@ export default async function Command() {
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     await showToast({
-      title: "変換に失敗しました。",
+      title: "Failed to convert",
       message,
       style: Toast.Style.Failure,
     });
