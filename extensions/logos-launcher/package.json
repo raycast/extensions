@@ -3,7 +3,8 @@
   "name": "logos-launcher",
   "title": "Logos Launcher",
   "description": "Opens books, verses or resources in Logos Bible Software",
-  "icon": "./logos_resize.png",
+  "type": "module",
+  "icon": "logos_resize.png",
   "author": "michael_marvive",
   "platforms": [
     "macOS",
@@ -94,7 +95,7 @@
           "placeholder": "0.3",
           "defaultValue": "0.3",
           "description": "Fuse.js threshold between 0 (exact) and 1 (fuzzy).",
-          "required": true
+          "required": false
         },
         {
           "name": "openScheme",
@@ -113,6 +114,37 @@
               "value": "logos4"
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "search-all",
+      "title": "Logos All Search",
+      "subtitle": "Search all Logos datasets",
+      "description": "Runs an All Search in Logos using the ref.ly endpoint.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "holiness"
+        }
+      ]
+    },
+    {
+      "name": "search-factbook",
+      "title": "Search Factbook",
+      "subtitle": "Open a topic in Logos Factbook",
+      "description": "Browse indexed Factbook topics from Logos' AutoComplete database and open them instantly.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autocompletePath",
+          "type": "textfield",
+          "title": "AutoComplete DB Path Override",
+          "placeholder": "~/Library/Application Support/Logos4/Data/.../AutoComplete/AutoComplete.db",
+          "description": "Optional path to AutoComplete.db. Leave empty for auto-discovery.",
+          "required": false
         }
       ]
     }
