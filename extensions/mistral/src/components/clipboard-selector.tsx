@@ -49,7 +49,7 @@ export function ClipboardSelector({ clipboardItems, onSelectImage, onSelectText 
         })
       ) : (
         <Action
-          title="No items in clipboard history"
+          title="No Items in Clipboard History"
           icon={Icon.XMarkCircle}
           onAction={() => showToast({ title: "No clipboard items found", style: Toast.Style.Failure })}
         />

@@ -27,8 +27,9 @@ export function useClipboardHistory() {
             const filePath = parseFileUrl(clipboardContent.file);
             const lastDot = filePath.lastIndexOf(".");
             const ext = lastDot !== -1 ? filePath.toLowerCase().slice(lastDot) : "";
+            const isMacOSClipboardImage = !ext && filePath.includes("/Image ");
 
-            if (imageExtensions.includes(ext) || !ext) {
+            if (imageExtensions.includes(ext) || isMacOSClipboardImage) {
               items.push({ offset, type: "image", content: filePath });
             }
           } catch {

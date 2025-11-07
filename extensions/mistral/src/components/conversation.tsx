@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { useClipboardHistory } from "../hooks/use-clipboard-history";
@@ -264,7 +264,7 @@ export function Conversation({ conversation, model: propModel }: Props) {
 
       const conversations = await conversationsPromise;
       const currentConvIndex = conversations.findIndex((conv) => conv.id === conversation.id);
-      const newChat = { question, answer: currentAnswer };
+      const newChat = { question, answer: currentAnswer, images: images.length > 0 ? images : undefined };
 
       if (currentAnswer.trim().length > 0) {
         if (currentConvIndex === -1) {
@@ -322,9 +322,7 @@ export function Conversation({ conversation, model: propModel }: Props) {
       isShowingDetail
       navigationTitle={conversation.title}
       searchBarPlaceholder={
-        imagePaths.length > 0
-          ? `📎 Image attached - Type your message...`
-          : "Type your message here..."
+        imagePaths.length > 0 ? `📎 Image attached - Type your message...` : "Type your message here..."
       }
       searchText={searchText}
       onSearchTextChange={setSearchText}
