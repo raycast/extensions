@@ -8,15 +8,14 @@
   "contributors": [
     "pernielsentikaer"
   ],
-  "license": "MIT",
-  "repository": "https://github.com/Jumitti/dice-tiles",
-  "categories": [
-    "Fun"
-  ],
   "platforms": [
     "macOS",
     "Windows"
   ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
@@ -49,5 +48,6 @@
       "changelog": "CHANGELOG.md",
       "screenshot": "metadata/screen_base.png"
     }
-  }
+  },
+  "repository": "https://github.com/Jumitti/dice-tiles"
 }
