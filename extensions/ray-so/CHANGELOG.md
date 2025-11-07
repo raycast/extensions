@@ -1,6 +1,6 @@
 # Ray.so Changelog
 
-## [New theme] - {PR_MERGE_DATE}
+## [New theme] - 2025-11-07
 
 - Added Nuxt theme
 
