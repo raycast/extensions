@@ -7,6 +7,23 @@ import { ShaderConfig, ShaderParameter, ParametersRecord, ParameterValue } from 
 const PARAMETER_NAME_MAP: Record<string, Record<string, string>> = {};
 
 /**
+ * Clamps a numeric value to min/max bounds if defined
+ */
+function clampIfNeeded(value: number, param: ShaderParameter): number {
+  let v = value;
+  if (!isFinite(v)) {
+    v = Number(param.default ?? 0);
+  }
+  if (param.min !== undefined) {
+    v = Math.max(param.min, v);
+  }
+  if (param.max !== undefined) {
+    v = Math.min(param.max, v);
+  }
+  return v;
+}
+
+/**
  * Converts a parameter value to the correct type based on parameter definition
  */
 function convertParameterValue(
@@ -22,17 +39,23 @@ function convertParameterValue(
   const rawValue = rawParameters[param.id] ?? rawParameters[mappedName] ?? param.default;
 
   switch (param.type) {
-    case "int":
-      return parseInt(String(rawValue), 10);
-    case "float":
-      return parseFloat(String(rawValue));
+    case "int": {
+      const parsed = parseInt(String(rawValue), 10);
+      const safe = isNaN(parsed) ? Number(param.default ?? 0) : parsed;
+      return Math.trunc(clampIfNeeded(safe, param));
+    }
+    case "float": {
+      const parsed = parseFloat(String(rawValue));
+      const safe = isNaN(parsed) ? Number(param.default ?? 0) : parsed;
+      return clampIfNeeded(safe, param);
+    }
     case "bool":
       return Boolean(rawValue);
     case "string":
-      return String(rawValue);
+      return String(rawValue ?? "");
     case "enum":
       // Enum values are always stored as strings for consistency with Form.Dropdown
-      return String(rawValue);
+      return String(rawValue ?? "");
     default:
       return rawValue;
   }

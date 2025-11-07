@@ -1,4 +1,5 @@
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { ShaderConfig, ShaderParameter } from "../config/shaders";
 import { ParametersRecord } from "../config/types";
@@ -21,7 +22,7 @@ export function ShaderSettingsForm({ shaderConfig, parameters, onSettingsChanged
     return initial;
   });
 
-  async function handleSubmit() {
+  function handleSubmit() {
     try {
       // Validate all parameters
       const errors: string[] = [];
@@ -62,11 +63,7 @@ export function ShaderSettingsForm({ shaderConfig, parameters, onSettingsChanged
       });
 
       if (errors.length > 0) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Validation Error",
-          message: errors[0], // Show first error
-        });
+        showFailureToast({ title: "Validation Error", message: errors[0] });
         return;
       }
 
@@ -76,13 +73,15 @@ export function ShaderSettingsForm({ shaderConfig, parameters, onSettingsChanged
         const value = formValues[param.id];
         switch (param.type) {
           case "int": {
-            const numValue = parseInt(String(value), 10);
-            updates[param.id] = isNaN(numValue) ? (param.default ?? 0) : numValue;
+            const parsed = parseInt(String(value), 10);
+            const numValue = isNaN(parsed) ? (param.default as number) ?? 0 : parsed;
+            updates[param.id] = numValue;
             break;
           }
           case "float": {
-            const numValue = parseFloat(String(value));
-            updates[param.id] = isNaN(numValue) ? (param.default ?? 0) : numValue;
+            const parsed = parseFloat(String(value));
+            const numValue = isNaN(parsed) ? (param.default as number) ?? 0 : parsed;
+            updates[param.id] = numValue;
             break;
           }
           case "bool":
@@ -96,11 +95,7 @@ export function ShaderSettingsForm({ shaderConfig, parameters, onSettingsChanged
       onSettingsChanged(updates);
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: error instanceof Error ? error.message : "Failed to update settings",
-      });
+      showFailureToast({ title: "Error", message: error instanceof Error ? error.message : "Failed to update settings" });
     }
   }
 

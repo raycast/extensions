@@ -11,7 +11,7 @@ export function StepSizeForm({ currentStepSize, onStepSizeChanged }: StepSizeFor
   const { pop } = useNavigation();
   const [stepSize, setStepSize] = useState<string>(currentStepSize);
 
-  async function handleSubmit(values: { stepSize: string }): Promise<void> {
+  function handleSubmit(values: { stepSize: string }): void {
     try {
       const stepValue = parseInt(values.stepSize || "1", 10);
       if (isNaN(stepValue) || stepValue <= 0) {

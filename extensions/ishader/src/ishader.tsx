@@ -1,4 +1,5 @@
-import { showToast, Toast, Detail, Form, useNavigation, ActionPanel, Action, Clipboard, Icon } from "@raycast/api";
+import { Detail, Form, useNavigation, ActionPanel, Action, Clipboard, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useRef } from "react";
 import fs from "fs";
 import path from "path";
@@ -163,11 +164,7 @@ export default function Command() {
         }
 
         if (!cancelledRef.current) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Error",
-            message: "Failed to apply filter",
-          });
+          showFailureToast({ title: "Error", message: "Failed to apply filter" });
         }
       } finally {
         if (!cancelledRef.current) {
@@ -294,11 +291,7 @@ export default function Command() {
       // Validate image file before processing
       const validation = validateImageFile(filePath);
       if (!validation.valid) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid Image",
-          message: validation.errors.join(", ") || "Image validation failed",
-        });
+        showFailureToast({ title: "Invalid Image", message: validation.errors.join(", ") || "Image validation failed" });
         setInputImagePath(null);
         setFullOutputPath(null);
         setPreviewBase64(null);
@@ -353,11 +346,7 @@ export default function Command() {
   function handleSaveClick() {
     const fullPath = fullOutputPathRef.current || fullOutputPath;
     if (!fullPath || !fs.existsSync(fullPath)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "No processed image to save",
-      });
+      showFailureToast({ title: "Error", message: "No processed image to save" });
       return;
     }
     const imageName = inputImagePath ? path.basename(inputImagePath) : "";
@@ -402,20 +391,12 @@ export default function Command() {
 
         // Validate that file exists and is a file (not directory)
         if (!fs.existsSync(filePath)) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "File Not Found",
-            message: "The file in clipboard no longer exists",
-          });
+          showFailureToast({ title: "File Not Found", message: "The file in clipboard no longer exists" });
           return;
         }
 
         if (!fs.lstatSync(filePath).isFile()) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Invalid Selection",
-            message: "Clipboard contains a directory, not a file",
-          });
+          showFailureToast({ title: "Invalid Selection", message: "Clipboard contains a directory, not a file" });
           return;
         }
 
@@ -464,11 +445,7 @@ export default function Command() {
               if (tempImagePath && fs.existsSync(tempImagePath)) {
                 safeDeleteFile(tempImagePath);
               }
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "No Image in Clipboard",
-                message: "Please copy an image or image file to clipboard first",
-              });
+              showFailureToast({ title: "No Image in Clipboard", message: "Please copy an image or image file to clipboard first" });
               return;
             }
 
@@ -486,19 +463,11 @@ export default function Command() {
           }
         }
 
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "No Image in Clipboard",
-          message: "Please copy an image file to clipboard first (right-click file → Copy)",
-        });
+        showFailureToast({ title: "No Image in Clipboard", message: "Please copy an image file to clipboard first (right-click file → Copy)" });
       }
     } catch (error) {
       console.error("Failed to paste from clipboard:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: error instanceof Error ? error.message : "Failed to read from clipboard",
-      });
+      showFailureToast({ title: "Error", message: error instanceof Error ? error.message : "Failed to read from clipboard" });
     }
   }
 
