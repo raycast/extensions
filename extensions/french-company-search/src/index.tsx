@@ -1,10 +1,36 @@
-import { Action, ActionPanel, Detail, Form, useNavigation, environment } from "@raycast/api";
-import { useState } from "react";
+// Disable ANSI styling so Raycast developer console keeps logs readable
+process.env.FORCE_COLOR = "0";
+process.env.NO_COLOR = "1";
+const ansiEscapePattern = `${String.fromCharCode(27)}\\[[0-9;]*m`;
+const ansiPattern = new RegExp(ansiEscapePattern, "g");
+const wrapConsoleMethod =
+  (method: (...args: unknown[]) => void) =>
+  (...args: unknown[]) => {
+    method(...args.map((arg) => (typeof arg === "string" ? arg.replace(ansiPattern, "") : arg)));
+  };
+console.log = wrapConsoleMethod(console.log.bind(console));
+console.warn = wrapConsoleMethod(console.warn.bind(console));
+console.error = wrapConsoleMethod(console.error.bind(console));
+
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Detail,
+  Form,
+  Toast,
+  environment,
+  getPreferenceValues,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
 import { validateAndExtractSiren } from "./lib/utils";
+import { AVAILABLE_TEMPLATE_VARIABLES, findUnsupportedTemplateVariables } from "./lib/markdown-builder";
 import { useCompanyData } from "./lib/useCompanyData";
 import { ErrorView } from "./components/ErrorView";
 import { CompanyDetailsView } from "./components/CompanyDetailsView";
-import { CompanyData } from "./types";
+import { CompanyData, Preferences } from "./types";
 
 export default function Command() {
   return <SearchForm />;
@@ -12,21 +38,84 @@ export default function Command() {
 
 function SearchForm() {
   const { push } = useNavigation();
+  const preferences = getPreferenceValues<Preferences>();
+  const shouldReadClipboard = preferences.autoReadClipboard ?? true;
   const [sirenInput, setSirenInput] = useState<string>("");
   const [sirenError, setSirenError] = useState<string | undefined>();
+  const [hasInitialisedFromClipboard, setHasInitialisedFromClipboard] = useState(false);
+  const [templateOverride, setTemplateOverride] = useState<string>(preferences.outputTemplate ?? "");
+  const hasUserInput = sirenInput.trim().length > 0;
+
+  useEffect(() => {
+    if (!shouldReadClipboard || hasInitialisedFromClipboard) {
+      return;
+    }
+
+    if (hasUserInput) {
+      setHasInitialisedFromClipboard(true);
+      return;
+    }
+
+    let isMounted = true;
+
+    async function bootstrapFromClipboard() {
+      try {
+        const clipboardContent = await Clipboard.readText();
+        if (!isMounted) {
+          return;
+        }
+
+        const trimmedValue = clipboardContent?.trim();
+        const detectedSiren = trimmedValue ? validateAndExtractSiren(trimmedValue) : undefined;
+
+        if (!trimmedValue || !detectedSiren) {
+          setHasInitialisedFromClipboard(true);
+          return;
+        }
+
+        setSirenInput(trimmedValue);
+        if (sirenError) {
+          setSirenError(undefined);
+        }
+
+        setHasInitialisedFromClipboard(true);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        if (environment.isDevelopment) {
+          console.error("Failed to read clipboard", error);
+        }
+
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Unable to read clipboard",
+          message: "Please check Raycast permissions.",
+        });
+        setHasInitialisedFromClipboard(true);
+      }
+    }
+
+    void bootstrapFromClipboard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [shouldReadClipboard, hasInitialisedFromClipboard, sirenError, hasUserInput]);
 
   function handleAction() {
     if (!sirenInput) {
-      setSirenError("⚠️ Veuillez saisir un numéro SIREN (9 chiffres) ou SIRET (14 chiffres).");
+      setSirenError("⚠️ Please enter a SIREN (9 digits) or a SIRET (14 digits).");
       return;
     }
     const siren = validateAndExtractSiren(sirenInput);
     if (!siren) {
-      setSirenError("❌ Format invalide. Le SIREN doit contenir 9 chiffres, le SIRET 14 chiffres.");
+      setSirenError("❌ Invalid format. A SIREN must contain 9 digits and a SIRET 14 digits.");
       return;
     }
     setSirenError(undefined);
-    push(<CompanyDetail siren={siren} />);
+    push(<CompanyDetail siren={siren} templateOverride={templateOverride} />);
   }
 
   return (
@@ -34,6 +123,18 @@ function SearchForm() {
       actions={
         <ActionPanel>
           <Action title="Search Company" onAction={handleAction} shortcut={{ modifiers: [], key: "return" }} />
+          <Action.Push
+            title="Edit Template"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+            target={
+              <TemplateEditor
+                initialTemplate={templateOverride}
+                onSave={(value) => {
+                  setTemplateOverride(value);
+                }}
+              />
+            }
+          />
         </ActionPanel>
       }
     >
@@ -54,7 +155,7 @@ function SearchForm() {
   );
 }
 
-function CompanyDetail({ siren }: { siren: string }) {
+function CompanyDetail({ siren, templateOverride }: { siren: string; templateOverride?: string }) {
   const { data, isLoading, error } = useCompanyData(siren);
 
   // Log API response for debugging in development
@@ -66,7 +167,7 @@ function CompanyDetail({ siren }: { siren: string }) {
   if (error) {
     return (
       <Detail
-        markdown={`## ⚠️ Impossible de charger les données\n\nUn problème est survenu. Veuillez vérifier le message d'erreur qui est apparu et réessayer.\n\n**SIREN recherché :** ${siren}`}
+        markdown={`## ⚠️ Unable to load data\n\nSomething went wrong while fetching the company information. Please review the error message that appeared and try again.\n\n**SIREN searched:** ${siren}`}
       />
     );
   }
@@ -85,10 +186,10 @@ function CompanyDetail({ siren }: { siren: string }) {
 
   // Handle successful data state
   if (data) {
-    return <CompanyDetailsView data={data} />;
+    return <CompanyDetailsView data={data} templateOverride={templateOverride} />;
   }
 
-  return <Detail markdown="Aucune information disponible." />;
+  return <Detail markdown="No information available." />;
 }
 
 function logApiResponse(data: CompanyData) {
@@ -109,4 +210,84 @@ function logApiResponse(data: CompanyData) {
       hasAdresse: !!data.formality.content.personneMorale.adresseEntreprise,
     });
   }
+}
+
+function TemplateEditor({ initialTemplate, onSave }: { initialTemplate: string; onSave: (value: string) => void }) {
+  const { pop } = useNavigation();
+  const [value, setValue] = useState(initialTemplate ?? "");
+  const invalidVariables = findUnsupportedTemplateVariables(value);
+  const hasInvalidVariables = invalidVariables.length > 0;
+
+  function handleSave() {
+    if (hasInvalidVariables) {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Unsupported placeholders detected",
+        message: invalidVariables.join(", "),
+      });
+      return;
+    }
+
+    onSave(value.trim());
+    void showToast({
+      style: Toast.Style.Success,
+      title: "Template updated",
+    });
+    pop();
+  }
+
+  return (
+    <Form
+      enableDrafts
+      navigationTitle="Edit Template"
+      actions={
+        <ActionPanel>
+          <Action title="Save Template" onAction={handleSave} shortcut={{ modifiers: ["cmd"], key: "s" }} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextArea
+        id="template"
+        title="Custom Template"
+        placeholder="{{company_header}}\n\n{{company_details}}\n\n{{representative_line}}"
+        value={value}
+        onChange={setValue}
+        info="Leave empty to use the default template."
+      />
+      {hasInvalidVariables ? (
+        <>
+          <Form.Separator />
+          <Form.Description
+            title="Unsupported placeholders"
+            text={invalidVariables.map((variable) => `• ${variable}`).join("\n")}
+          />
+        </>
+      ) : null}
+      <Form.Separator />
+      <Form.Description title="Available Variables" text="The template supports the following placeholders:" />
+      {buildVariableSections()}
+    </Form>
+  );
+}
+
+function buildVariableSections() {
+  const sections: JSX.Element[] = [];
+
+  const entries = Object.entries(AVAILABLE_TEMPLATE_VARIABLES);
+  for (const [index, [groupKey, variables]] of entries.entries()) {
+    const groupTitle =
+      groupKey === "personneMorale"
+        ? "Corporate entities"
+        : groupKey === "personnePhysique"
+          ? "Individual entrepreneurs"
+          : "Common";
+
+    const text = variables.map((variable) => `• ${variable}`).join("\n");
+    if (index > 0) {
+      sections.push(<Form.Separator key={`separator-${groupKey}`} />);
+    }
+    sections.push(<Form.Description key={groupKey} title={groupTitle} text={text} />);
+  }
+
+  return sections;
 }

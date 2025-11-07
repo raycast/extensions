@@ -37,6 +37,23 @@
       "description": "Your password for the INPI API access.",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "autoReadClipboard",
+      "title": "Read Clipboard on Launch",
+      "description": "Automatically paste SIREN/SIRET or company name from the clipboard when the extension opens.",
+      "type": "checkbox",
+      "label": "Enable clipboard prefilling",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "outputTemplate",
+      "title": "Output Template",
+      "description": "Define your custom output template. Use {{variable}} for placeholders. See documentation for available variables.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "{{company_header}}\\n\\n{{company_details}}\\n\\n{{representative_line}}"
     }
   ],
   "devDependencies": {

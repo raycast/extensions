@@ -1,7 +1,7 @@
 import { CompanyData, RepresentativeInfo } from "../types";
 import { createINPIApiService } from "./inpi-api-mock";
 import { extractRepresentativeInfo } from "./markdown-builder";
-import { validateAndExtractSiren } from "./utils";
+import { validateAndExtractSiren, getRoleNameEnglish, getRoleNameEnglishByCode } from "./utils";
 
 /**
  * Recursively searches for the physical person representative of a holding company.
@@ -18,9 +18,13 @@ export async function findPhysicalRepresentative(
   holdingName: string,
   holdingSiren: string | null,
   originalRole: string,
+  originalRoleCode?: string,
   maxDepth: number = 3,
 ): Promise<RepresentativeInfo> {
   console.log(`🔍 Searching for physical representative of ${holdingName} (SIREN: ${holdingSiren})`);
+  const originalRoleEnglish = originalRoleCode
+    ? getRoleNameEnglishByCode(originalRoleCode)
+    : getRoleNameEnglish(originalRole);
 
   // Fallback if no SIREN available or max depth reached
   if (!holdingSiren || maxDepth <= 0) {
@@ -28,6 +32,8 @@ export async function findPhysicalRepresentative(
     return {
       name: holdingName,
       role: originalRole,
+      roleCode: originalRoleCode,
+      roleEnglish: originalRoleEnglish,
       gender: null,
       isHolding: true,
     };
@@ -40,6 +46,8 @@ export async function findPhysicalRepresentative(
     return {
       name: holdingName,
       role: originalRole,
+      roleCode: originalRoleCode,
+      roleEnglish: originalRoleEnglish,
       gender: null,
       isHolding: true,
     };
@@ -55,6 +63,8 @@ export async function findPhysicalRepresentative(
       return {
         name: holdingName,
         role: originalRole,
+        roleCode: originalRoleCode,
+        roleEnglish: originalRoleEnglish,
         gender: null,
         isHolding: true,
       };
@@ -72,11 +82,15 @@ export async function findPhysicalRepresentative(
       return {
         name: holdingName,
         role: originalRole,
+        roleCode: originalRoleCode,
+        roleEnglish: originalRoleEnglish,
         gender: null,
         isHolding: true,
         holdingRepresentative: {
           name: holdingRep.name,
           role: holdingRep.role,
+          roleCode: holdingRep.roleCode,
+          roleEnglish: holdingRep.roleEnglish,
           gender: holdingRep.gender,
         },
       };
@@ -88,11 +102,15 @@ export async function findPhysicalRepresentative(
       return {
         name: holdingName,
         role: originalRole,
+        roleCode: originalRoleCode,
+        roleEnglish: originalRoleEnglish,
         gender: null,
         isHolding: true,
         holdingRepresentative: {
           name: holdingRep.name,
           role: holdingRep.role,
+          roleCode: holdingRep.roleCode,
+          roleEnglish: holdingRep.roleEnglish,
           gender: holdingRep.gender,
         },
       };
@@ -103,6 +121,8 @@ export async function findPhysicalRepresentative(
     return {
       name: holdingName,
       role: originalRole,
+      roleCode: originalRoleCode,
+      roleEnglish: originalRoleEnglish,
       gender: null,
       isHolding: true,
     };
@@ -111,6 +131,8 @@ export async function findPhysicalRepresentative(
     return {
       name: holdingName,
       role: originalRole,
+      roleCode: originalRoleCode,
+      roleEnglish: originalRoleEnglish,
       gender: null,
       isHolding: true,
     };
