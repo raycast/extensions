@@ -83,7 +83,10 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
       onSaved();
       pop();
     } catch (error) {
-      showFailureToast({ title: "Save Error", message: error instanceof Error ? error.message : "Failed to save image" });
+      showFailureToast({
+        title: "Save Error",
+        message: error instanceof Error ? error.message : "Failed to save image",
+      });
     }
   }
 
