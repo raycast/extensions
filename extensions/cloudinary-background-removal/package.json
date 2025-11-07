@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudinary-background-removal",
+  "title": "Cloudinary Background Removal",
+  "description": "Remove backgrounds from images using Cloudinary's AI-powered image processing. Supports multiple removal methods with automatic fallback.",
+  "icon": "icon.png",
+  "author": "j8kes",
+  "authorURL": "https://www.milkmoonstudio.com",
+  "version": "1.0.0",
+  "categories": [
+    "Media",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "remove-background",
+      "title": "Remove Background",
+      "description": "Remove background from selected image",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cloudName",
+      "type": "textfield",
+      "required": true,
+      "title": "Cloudinary Cloud Name",
+      "description": "Your Cloudinary cloud name (found in dashboard)",
+      "placeholder": "your-cloud-name"
+    },
+    {
+      "name": "uploadPreset",
+      "type": "textfield",
+      "required": false,
+      "title": "Upload Preset",
+      "description": "Upload preset name (default: background_removal_preset)",
+      "default": "background_removal_preset",
+      "placeholder": "background_removal_preset"
+    },
+    {
+      "name": "outputDirectory",
+      "type": "textfield",
+      "required": false,
+      "title": "Output Directory",
+      "description": "Where to save processed images",
+      "default": "~/Downloads",
+      "placeholder": "~/Downloads"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
+
