@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [v2.0.3] - {PR_MERGE_DATE}
+## [v2.0.3] - 2025-11-07
 
 ### Added
 
