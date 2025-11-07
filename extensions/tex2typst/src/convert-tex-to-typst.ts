@@ -1,14 +1,11 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { tex2typst } from "tex2typst";
 
 export default async function Command() {
   const { text } = await Clipboard.read();
   if (!text || text.trim().length === 0) {
-    await showToast({
-      title: "Failed to convert",
-      message: "No TeX text found in clipboard.",
-      style: Toast.Style.Failure,
-    });
+    await showFailureToast("No TeX text found in clipboard.");
     return;
   }
 
@@ -22,10 +19,6 @@ export default async function Command() {
     });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
-    await showToast({
-      title: "Conversion failed",
-      message,
-      style: Toast.Style.Failure,
-    });
+    await showFailureToast(message);
   }
 }
