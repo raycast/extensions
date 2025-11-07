@@ -1,5 +1,10 @@
 # Steam Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Toggled on windows support
+- Fixed some typos and deprecation warnings
+
 ## [Routine Maintenance] - 2025-08-26
 
 - Remove the typo dependency `data-fns`
