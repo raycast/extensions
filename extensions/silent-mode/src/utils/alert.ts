@@ -1,5 +1,5 @@
-import { getPreferenceValues, launchCommand, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { getPreferenceValues, launchCommand, LaunchType, openExtensionPreferences, showHUD } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export function setAlertVolume(volume: number) {
   const script = `set volume alert volume ${volume}`;
@@ -31,10 +31,14 @@ export async function toggleSilentMode(action?: "on" | "off") {
     launchCommand({ name: "silent-mode-menu-bar", type: LaunchType.Background }).catch(() => {});
     showHUD(`Silent mode ${currentAction}`);
   } catch (error) {
-    showToast({
-      title: "Failed to toggle silent mode",
-      message: error instanceof Error ? error.message : String(error),
-      style: Toast.Style.Failure,
-    });
+    if (error instanceof Error && error.message === "Invalid alert volume preference") {
+      showFailureToast(error, {
+        primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+      });
+
+      return;
+    }
+
+    showFailureToast(error);
   }
 }

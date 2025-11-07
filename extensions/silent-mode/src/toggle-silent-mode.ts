@@ -1,5 +1,5 @@
 import { toggleSilentMode } from "./utils/alert";
 
 export default async function Command() {
-  return toggleSilentMode();
+  return await toggleSilentMode();
 }
