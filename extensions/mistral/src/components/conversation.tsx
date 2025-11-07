@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { useClipboardHistory } from "../hooks/use-clipboard-history";
 import { type Conversation as ConversationType, getConversations, setConversations } from "../hooks/use-conversations";
 import { getSystemPrompt } from "../hooks/use-system-prompt";
 import type { Preferences } from "../types/preferences";
@@ -12,6 +13,7 @@ import {
   supportsVision,
   validateModelId,
 } from "../utils/models";
+import { ClipboardSelector } from "./clipboard-selector";
 
 type Props = {
   conversation: ConversationType;
@@ -22,6 +24,8 @@ export function Conversation({ conversation, model: propModel }: Props) {
   const [chats, setChats] = useState(conversation.chats);
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [imagePaths, setImagePaths] = useState<string[]>([]);
+  const { clipboardItems } = useClipboardHistory();
 
   const preferences = getPreferenceValues<Preferences>();
   const defaultModel = preferences.defaultModel || DEFAULT_MODEL_ID;
@@ -40,10 +44,11 @@ export function Conversation({ conversation, model: propModel }: Props) {
   function handleSubmit() {
     if (!searchText.trim().length) return;
 
-    const newChat = { question: searchText, answer: "", images: [] };
+    const newChat = { question: searchText, answer: "", images: imagePaths };
     setChats((prev) => [newChat, ...prev]);
     setSearchText("");
-    streamAnswer(searchText, currentModel, []);
+    setImagePaths([]);
+    streamAnswer(searchText, currentModel, imagePaths);
   }
 
   function extractCodeBlocks(text: string): string[] {
@@ -316,7 +321,11 @@ export function Conversation({ conversation, model: propModel }: Props) {
       isLoading={isLoading}
       isShowingDetail
       navigationTitle={conversation.title}
-      searchBarPlaceholder="Type your message here..."
+      searchBarPlaceholder={
+        imagePaths.length > 0
+          ? `📎 Image attached - Type your message...`
+          : "Type your message here..."
+      }
       searchText={searchText}
       onSearchTextChange={setSearchText}
       selectedItemId="chat-0"
@@ -346,6 +355,22 @@ export function Conversation({ conversation, model: propModel }: Props) {
           actions={
             <ActionPanel>
               <Action title="Send Message" icon={Icon.ArrowRight} onAction={handleSubmit} />
+              <ClipboardSelector
+                clipboardItems={clipboardItems}
+                onSelectImage={(filePath) => setImagePaths([filePath])}
+                onSelectText={(text) => setSearchText(text)}
+              />
+              {imagePaths.length > 0 && (
+                <Action
+                  title="Clear Image"
+                  icon={Icon.XMarkCircle}
+                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  onAction={() => {
+                    setImagePaths([]);
+                    showToast({ title: "Image cleared", style: Toast.Style.Success });
+                  }}
+                />
+              )}
               {chat.answer && (
                 <ActionPanel.Section>
                   <Action

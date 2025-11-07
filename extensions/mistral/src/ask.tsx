@@ -1,6 +1,8 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { ClipboardSelector } from "./components/clipboard-selector";
 import { Conversation } from "./components/conversation";
+import { useClipboardHistory } from "./hooks/use-clipboard-history";
 import { DEFAULT_MODEL_ID, FALLBACK_MODELS, getDefaultVisionModel, supportsVision, type ModelId } from "./utils/models";
 
 export default function Command() {
@@ -8,51 +10,7 @@ export default function Command() {
   const [model, setModel] = useState<ModelId>(DEFAULT_MODEL_ID);
   const [question, setQuestion] = useState("");
   const [imagePaths, setImagePaths] = useState<string[]>([]);
-  const [clipboardItems, setClipboardItems] = useState<{ offset: number; type: "image" | "text"; content: string }[]>(
-    [],
-  );
-
-  useEffect(() => {
-    loadClipboardHistory();
-  }, []);
-
-  async function loadClipboardHistory() {
-    const items: { offset: number; type: "image" | "text"; content: string }[] = [];
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".heic", ".heif"];
-
-    for (let offset = 0; offset <= 5; offset++) {
-      try {
-        const clipboardContent = await Clipboard.read({ offset });
-
-        if (clipboardContent.file) {
-          try {
-            const filePath = parseFileUrl(clipboardContent.file);
-            const lastDot = filePath.lastIndexOf(".");
-            const ext = lastDot !== -1 ? filePath.toLowerCase().slice(lastDot) : "";
-
-            if (imageExtensions.includes(ext) || !ext) {
-              items.push({ offset, type: "image", content: filePath });
-            }
-          } catch {
-            continue;
-          }
-        }
-
-        if (
-          clipboardContent.text &&
-          !items.find((i) => i.offset === offset) &&
-          !clipboardContent.text?.startsWith("Image (")
-        ) {
-          const text = clipboardContent.text.slice(0, 100);
-          items.push({ offset, type: "text", content: text });
-        }
-      } catch {
-        continue;
-      }
-    }
-
-    setClipboardItems(items);
-  }
+  const { clipboardItems } = useClipboardHistory();
 
   const hasImages = imagePaths.length > 0;
   const needsVision = hasImages && !supportsVision(model);
@@ -60,21 +18,6 @@ export default function Command() {
 
   const modelName = FALLBACK_MODELS.find((m) => m.id === model)?.name || "Unknown";
   const effectiveModelName = FALLBACK_MODELS.find((m) => m.id === effectiveModel)?.name || "Unknown";
-
-  function parseFileUrl(fileUrl: string): string {
-    const url = new URL(fileUrl);
-    return decodeURIComponent(url.pathname);
-  }
-
-  function selectClipboardItem(item: { type: "image" | "text"; content: string }) {
-    if (item.type === "image") {
-      setImagePaths([item.content]);
-      showToast({ title: "Image selected from clipboard", style: Toast.Style.Success });
-    } else {
-      setQuestion(item.content);
-      showToast({ title: "Text pasted from clipboard", style: Toast.Style.Success });
-    }
-  }
 
   async function previewImage() {
     if (imagePaths.length > 0) {
@@ -158,42 +101,11 @@ export default function Command() {
               icon={Icon.Message}
               onAction={() => handleSubmit({ question, images: imagePaths })}
             />
-            <ActionPanel.Submenu
-              title="Select from Clipboard"
-              icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-            >
-              {clipboardItems.length > 0 ? (
-                clipboardItems.map((item, index) => {
-                  if (item.type === "image") {
-                    const filename = item.content.split("/").pop() || "Unknown";
-                    return (
-                      <Action
-                        key={item.offset}
-                        title={`${filename}${index === 0 ? " (Latest)" : ""}`}
-                        icon={{ source: item.content }}
-                        onAction={() => selectClipboardItem(item)}
-                      />
-                    );
-                  } else {
-                    return (
-                      <Action
-                        key={item.offset}
-                        title={`${item.content}${index === 0 ? " (Latest)" : ""}`}
-                        icon={Icon.Text}
-                        onAction={() => selectClipboardItem(item)}
-                      />
-                    );
-                  }
-                })
-              ) : (
-                <Action
-                  title="No Items in Clipboard History"
-                  icon={Icon.XMarkCircle}
-                  onAction={() => showToast({ title: "No clipboard items found", style: Toast.Style.Failure })}
-                />
-              )}
-            </ActionPanel.Submenu>
+            <ClipboardSelector
+              clipboardItems={clipboardItems}
+              onSelectImage={(filePath) => setImagePaths([filePath])}
+              onSelectText={(text) => setQuestion(text)}
+            />
             {hasImages && (
               <Action
                 title="Quick Look"
