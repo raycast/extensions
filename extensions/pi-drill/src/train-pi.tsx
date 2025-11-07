@@ -61,6 +61,7 @@ export default function PiTrain() {
           setPiIndex(nextIndex);
           setHistory((prev) => [...prev, singleDigit]);
           setInput("");
+          setHintedIndexes(new Set()); // Clear for next digit
 
           if (nextIndex === piDigits.length) {
             setFinished(true);
@@ -88,7 +89,6 @@ export default function PiTrain() {
             });
             return newCount;
           });
-          // Reset streak on mistake (but keep piIndex so progress continues)
           setHistory([]);
           setInput("");
         }
@@ -101,26 +101,21 @@ export default function PiTrain() {
     if (finished) return;
     const currIndex = piIndex;
 
-    // Only count hint if we haven't hinted at this index before
-    setHintedIndexes((prev) => {
-      if (prev.has(currIndex)) {
-        // Already hinted at this index, don't increment counter
-        return prev;
-      }
-      // New hint for this index, increment counter
-      const next = new Set(prev);
-      next.add(currIndex);
+    if (!hintedIndexes.has(currIndex)) {
       setHints((h) => h + 1);
-      return next;
-    });
-
+      setHintedIndexes((prev) => {
+        const next = new Set(prev);
+        next.add(currIndex);
+        return next;
+      });
+    }
     const nextDigit = piDigits[currIndex] ?? "";
     showToast({
       style: Toast.Style.Success,
       title: "Hint",
       message: `The next digit is: ${nextDigit}`,
     });
-  }, [finished, piIndex, piDigits]);
+  }, [finished, piIndex, piDigits, hintedIndexes]);
 
   const handleReset = useCallback(() => {
     setInput("");

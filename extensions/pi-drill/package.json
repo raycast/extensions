@@ -29,7 +29,8 @@
   "dependencies": {
     "@raycast/api": "^1.103.6",
     "@raycast/utils": "^2.2.0",
-    "pi-digits": "^1.0.1"
+    "pi-digits": "^1.0.1",
+    "ray": "^0.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
