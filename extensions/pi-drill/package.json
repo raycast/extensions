@@ -5,6 +5,9 @@
   "description": "Sharpen your memory and challenge yourself to recall as many digits of pi as you can with this interactive Raycast extension. Type each digit in sequence and see how far you get—perfect for students, pi enthusiasts, or anyone up for a fun brain exercise. Track your progress, practice at your own pace, and improve your recall directly from your Raycast command bar.",
   "icon": "extension-icon.png",
   "author": "jiri_krystof_jedlicka",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -25,11 +28,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^2.2.0",
     "pi-digits": "^1.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
