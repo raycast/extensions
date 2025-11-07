@@ -1,6 +1,6 @@
 # Capacities Changelog
 
-## [Maintenance + Windows Support] - {PR_MERGE_DATE}
+## [Maintenance + Windows Support] - 2025-11-07
 
 - add Windows Support (no App actions) (ref: [Issue #21353](https://github.com/raycast/extensions/issues/21353), [Issue #22647](https://github.com/raycast/extensions/issues/22647))
 - in `Create Weblink` toasts show progress
