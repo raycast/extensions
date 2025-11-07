@@ -1,28 +1,30 @@
 export type Organization = {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
 };
 export type Document = {
   id: string;
   createdAt: string;
-  originalSize: number
+  originalSize: number;
   name: string;
-  mimeType: string
+  mimeType: string;
+  tags: Array<Omit<Tag, "documentsCount">>;
 };
 export type SearchResult = {
   id: string;
   created_at: string;
-  original_size: number
+  original_size: number;
   name: string;
-  mime_type: string
-}
-export type Tag= {
+  mime_type: string;
+  tags: Array<Omit<Tag, "documentsCount">>;
+};
+export type Tag = {
   id: string;
   createdAt: string;
   name: string;
-  "color": string
-  "description": string
-    "documentsCount": number
+  color: string;
+  description: string;
+  documentsCount: number;
 };
 
 export type ErrorResult = {
@@ -30,8 +32,8 @@ export type ErrorResult = {
     message: string;
     code: string;
     details?: Array<{
-      path: string
-      message: string
+      path: string;
+      message: string;
     }>;
   };
 };

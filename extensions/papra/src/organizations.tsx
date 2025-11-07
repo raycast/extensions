@@ -1,4 +1,17 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Detail,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { buildPapraUrl, papra, PAPRA_COLOR } from "./papra";
 import Documents from "./documents";
@@ -30,40 +43,39 @@ function Organizations() {
   );
 
   const confirmAndDelete = (organization: Organization) => {
-  confirmAlert({
-    title: "Delete Organization",
-    message: "Are you sure you want to delete this organization? The organization will be marked for deletion and permanently removed after 30 days. During this period, you can restore it from your organizations list. All documents and data will be permanently deleted after this delay.",
-    primaryAction: {
-      style: Alert.ActionStyle.Destructive,
+    confirmAlert({
       title: "Delete Organization",
-      async onAction() {
-        const toast = await showToast(Toast.Style.Animated, "Deleting", organization.name);
-            try {
-              await mutate(
-                papra.organizations.delete({id: organization.id}), {
-                  optimisticUpdate(data) {
-                    return data.filter(o => o.id!==organization.id)
-                  },
-                  shouldRevalidateAfter: false
-                }
-              )
-              toast.style = Toast.Style.Success;
-              toast.title = "Deleted";
-            } catch (error) {
-              toast.style = Toast.Style.Failure;
-              toast.title = "Failed";
-              toast.message = `${error}`;
-            }
+      message:
+        "Are you sure you want to delete this organization? The organization will be marked for deletion and permanently removed after 30 days. During this period, you can restore it from your organizations list. All documents and data will be permanently deleted after this delay.",
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Delete Organization",
+        async onAction() {
+          const toast = await showToast(Toast.Style.Animated, "Deleting", organization.name);
+          try {
+            await mutate(papra.organizations.delete({ id: organization.id }), {
+              optimisticUpdate(data) {
+                return data.filter((o) => o.id !== organization.id);
+              },
+              shouldRevalidateAfter: false,
+            });
+            toast.style = Toast.Style.Success;
+            toast.title = "Deleted";
+          } catch (error) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed";
+            toast.message = `${error}`;
+          }
+        },
       },
-    }
-  })
-}
+    });
+  };
 
   return (
     <List isLoading={isLoading} onSelectionChange={setSelectedOrganizationId}>
       {organizations.map((organization) => (
         <List.Item
-        id={organization.id}
+          id={organization.id}
           key={organization.id}
           icon={{ source: Icon.Building, tintColor: PAPRA_COLOR }}
           title={organization.name}
