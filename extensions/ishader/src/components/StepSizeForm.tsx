@@ -30,13 +30,7 @@ export function StepSizeForm({ currentStepSize, onStepSizeChanged }: StepSizeFor
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Set Step Size"
-            onSubmit={async (values: { stepSize: string }) => {
-              await handleSubmit(values);
-              return;
-            }}
-          />
+          <Action.SubmitForm title="Set Step Size" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

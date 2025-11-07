@@ -94,13 +94,7 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Image"
-            onSubmit={async (values: { fileName: string; saveDirectory: string[] }) => {
-              await handleSave(values);
-              return;
-            }}
-          />
+          <Action.SubmitForm title="Save Image" onSubmit={handleSave} />
         </ActionPanel>
       }
     >
