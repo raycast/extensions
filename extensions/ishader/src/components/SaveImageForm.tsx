@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
@@ -22,12 +23,7 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
       // Validate source file size
       const sourceFileCheck = validateFileSize(fullImagePath);
       if (!sourceFileCheck.valid) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Save Error",
-          message: sourceFileCheck.error || "Source file is too large",
-        });
-        return;
+        return showFailureToast("Save Error", sourceFileCheck.error || "Source file is too large");
       }
 
       // Sanitize filename
@@ -86,11 +82,7 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
       onSaved();
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Save Error",
-        message: error instanceof Error ? error.message : "Failed to save image",
-      });
+      showFailureToast("Save Error", error instanceof Error ? error.message : "Failed to save image");
     }
   }
 

@@ -114,7 +114,7 @@ export const BRICK_PARAMETERS: ShaderParameter[] = [
     max: 10,
     step: 0.5,
     shortcut: { modifiers: [], key: "f" },
-    decrementShortcut: { modifiers: [], key: "x" },
+    decrementShortcut: { modifiers: [], key: "b" },
     category: "effect",
     metadata: true,
     order: 8,

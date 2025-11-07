@@ -185,13 +185,12 @@ function formatFileSize(bytes: number): string {
 }
 
 /**
- * Validates image dimensions using Jimp
- * Should be called asynchronously after loading image
+ * Validates image dimensions
  */
-export async function validateImageDimensions(
+export function validateImageDimensions(
   imageWidth: number,
   imageHeight: number,
-): Promise<{ valid: boolean; error?: string }> {
+): { valid: boolean; error?: string } {
   if (imageWidth > MAX_IMAGE_WIDTH || imageHeight > MAX_IMAGE_HEIGHT) {
     return {
       valid: false,

@@ -203,7 +203,7 @@ export default function Command() {
         return prev;
       });
 
-      const dimensionsCheck = await validateImageDimensions(width, height);
+      const dimensionsCheck = validateImageDimensions(width, height);
       if (!dimensionsCheck.valid) {
         console.warn("Image dimensions validation failed:", dimensionsCheck.error);
         // Continue anyway, but log the warning
@@ -528,7 +528,6 @@ export default function Command() {
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Select Image" onSubmit={() => {}} />
             <Action
               icon={Icon.Clipboard}
               title="Paste from Clipboard"

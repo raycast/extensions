@@ -1,4 +1,5 @@
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 
 interface StepSizeFormProps {
@@ -13,23 +14,14 @@ export function StepSizeForm({ currentStepSize, onStepSizeChanged }: StepSizeFor
   async function handleSubmit(values: { stepSize: string }) {
     try {
       const stepValue = parseInt(values.stepSize || "1", 10);
-      if (isNaN(stepValue) || stepValue <= 0 || !Number.isInteger(stepValue)) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid Step Size",
-          message: "Step size must be a positive integer",
-        });
-        return;
+      if (isNaN(stepValue) || stepValue <= 0) {
+        return showFailureToast("Invalid Step Size", "Step size must be a positive integer");
       }
       // Ensure it's a whole number string
       onStepSizeChanged(stepValue.toString());
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: error instanceof Error ? error.message : "Failed to set step size",
-      });
+      showFailureToast("Error", error instanceof Error ? error.message : "Failed to set step size");
     }
   }
 

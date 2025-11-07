@@ -41,16 +41,15 @@ export async function processImageWithEdit(
     let g = rgba.g / 255.0;
     let b = rgba.b / 255.0;
 
-    r = Math.pow(r, 1.0 / params.gamma);
-    g = Math.pow(g, 1.0 / params.gamma);
-    b = Math.pow(b, 1.0 / params.gamma);
+    const gamma = Math.max(0.001, params.gamma);
+    r = Math.pow(Math.max(0, r), 1.0 / gamma);
+    g = Math.pow(Math.max(0, g), 1.0 / gamma);
+    b = Math.pow(Math.max(0, b), 1.0 / gamma);
 
-    const range = params.whitePoint - params.blackPoint;
-    if (range > 0) {
-      r = saturate((r * 255.0 - params.blackPoint) / range);
-      g = saturate((g * 255.0 - params.blackPoint) / range);
-      b = saturate((b * 255.0 - params.blackPoint) / range);
-    }
+    const range = Math.max(1.0, params.whitePoint - params.blackPoint);
+    r = saturate((r * 255.0 - params.blackPoint) / range);
+    g = saturate((g * 255.0 - params.blackPoint) / range);
+    b = saturate((b * 255.0 - params.blackPoint) / range);
 
     if (params.grain > 0) {
       const grainR = (grainNoise(x, y, 0) - 0.5) * params.grain;

@@ -75,12 +75,16 @@ export function ShaderSettingsForm({ shaderConfig, parameters, onSettingsChanged
       shaderConfig.parameters.forEach((param) => {
         const value = formValues[param.id];
         switch (param.type) {
-          case "int":
-            updates[param.id] = parseInt(String(value), 10);
+          case "int": {
+            const numValue = parseInt(String(value), 10);
+            updates[param.id] = isNaN(numValue) ? (param.default ?? 0) : numValue;
             break;
-          case "float":
-            updates[param.id] = parseFloat(String(value));
+          }
+          case "float": {
+            const numValue = parseFloat(String(value));
+            updates[param.id] = isNaN(numValue) ? (param.default ?? 0) : numValue;
             break;
+          }
           case "bool":
             updates[param.id] = Boolean(value);
             break;
@@ -111,7 +115,6 @@ export function ShaderSettingsForm({ shaderConfig, parameters, onSettingsChanged
             key={fieldId}
             id={fieldId}
             label={param.label}
-            title={param.label}
             value={Boolean(value)}
             onChange={(checked) => setFormValues((prev) => ({ ...prev, [fieldId]: checked }))}
             info={param.info}

@@ -99,15 +99,12 @@ export async function processImageWithBrick(
     const gridMask =
       gridGap > 0 ? Math.max(gridUVX <= gapThreshold ? 1.0 : 0.0, gridUVY <= gapThreshold ? 1.0 : 0.0) : 0.0;
 
-    const cellUVX = gridUVX;
-    const cellUVY = gridUVY;
-
     const sz = Math.max(0.0, Math.min(1.0, params.circleSize || 0.3));
     const studRadius = Math.min(0.48, 0.3 + 0.4 * sz);
     const bevel = Math.max(0.0, params.circleBorder / 100.0);
 
-    const dx = (cellUVX - 0.5) / (studRadius + 1e-6);
-    const dy = (cellUVY - 0.5) / (studRadius + 1e-6);
+    const dx = (gridUVX - 0.5) / (studRadius + 1e-6);
+    const dy = (gridUVY - 0.5) / (studRadius + 1e-6);
     const rr = Math.sqrt(dx * dx + dy * dy);
 
     const plateR = baseR * 0.88 + 0.12;

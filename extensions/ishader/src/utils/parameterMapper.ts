@@ -29,14 +29,10 @@ function convertParameterValue(
     case "bool":
       return Boolean(rawValue);
     case "string":
-      return String(rawValue ?? param.default);
-    case "enum": {
-      // Enum values are stored as strings, convert to number if needed
-      const enumValue = String(rawValue);
-      // Try to parse as number if it's a numeric string
-      const numValue = parseInt(enumValue, 10);
-      return isNaN(numValue) ? enumValue : numValue;
-    }
+      return String(rawValue);
+    case "enum":
+      // Enum values are always stored as strings for consistency with Form.Dropdown
+      return String(rawValue);
     default:
       return rawValue;
   }
