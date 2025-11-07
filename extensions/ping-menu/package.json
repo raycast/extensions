@@ -3,7 +3,7 @@
   "name": "ping-menu",
   "title": "Ping Menu",
   "description": "Monitor ping latency in the menu bar",
-  "icon": "assets/icon.png",
+  "icon": "icon.png",
   "author": "domonkos_nagy",
   "license": "MIT",
   "commands": [
