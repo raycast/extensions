@@ -153,44 +153,39 @@ export function Conversation({ conversation, model: propModel }: Props) {
 
       const systemPrompt = await systemPromptPromise;
 
-      let userMessage: { role: "user"; content: string | { type: string; text?: string; image_url?: string }[] };
-
-      if (images.length > 0) {
-        console.log("Processing", images.length, "images:", images);
-        const imageUrls = await Promise.all(images.map((img) => imageToBase64(img)));
-        console.log("Converted to", imageUrls.length, "base64 data URLs");
-
-        userMessage = {
-          role: "user" as const,
-          content: [
-            { type: "text", text: question },
-            ...imageUrls.map((url) => ({ type: "image_url", image_url: url })),
-          ],
-        };
-        console.log("User message with images:", JSON.stringify(userMessage, null, 2).substring(0, 500));
-      } else {
-        userMessage = { role: "user" as const, content: question };
-      }
-
-      const messages = [
-        ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
-        ...previousMessages,
-        userMessage,
-      ];
-
       const hasImages = images.length > 0;
       const needsVision = hasImages && !supportsVision(model);
       const effectiveModel = needsVision ? getDefaultVisionModel() : model;
 
       console.log("Sending to Mistral with model:", effectiveModel);
       console.log("Has images:", hasImages, "Needs vision switch:", needsVision);
-      console.log("Total messages:", messages.length);
 
       let currentAnswer = "";
       let chunkBuffer = "";
       const CHUNK_SIZE = 100;
 
       if (hasImages) {
+        console.log("Processing", images.length, "images:", images);
+        const imageUrls = await Promise.all(images.map((img) => imageToBase64(img)));
+        console.log("Converted to", imageUrls.length, "base64 data URLs");
+
+        const visionMessages = [
+          ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
+          ...previousMessages,
+          {
+            role: "user" as const,
+            content: [
+              { type: "text", text: question },
+              ...imageUrls.map((url) => ({ type: "image_url", image_url: url })),
+            ],
+          },
+        ];
+
+        console.log(
+          "User message with images:",
+          JSON.stringify(visionMessages[visionMessages.length - 1], null, 2).substring(0, 500),
+        );
+
         const apiKey = preferences.apiKey;
         const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
           method: "POST",
@@ -200,7 +195,7 @@ export function Conversation({ conversation, model: propModel }: Props) {
           },
           body: JSON.stringify({
             model: effectiveModel,
-            messages,
+            messages: visionMessages,
             stream: true,
           }),
         });
@@ -230,6 +225,12 @@ export function Conversation({ conversation, model: propModel }: Props) {
           }
         }
       } else {
+        const messages = [
+          ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
+          ...previousMessages,
+          { role: "user" as const, content: question },
+        ];
+
         const result = await client.chat.stream({ messages, model: effectiveModel });
 
         for await (const chunk of result) {

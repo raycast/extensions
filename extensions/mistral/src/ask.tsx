@@ -8,15 +8,17 @@ export default function Command() {
   const [model, setModel] = useState<ModelId>(DEFAULT_MODEL_ID);
   const [question, setQuestion] = useState("");
   const [imagePaths, setImagePaths] = useState<string[]>([]);
-  const [clipboardItems, setClipboardItems] = useState<{ offset: number; type: 'image' | 'text'; content: string }[]>([]);
+  const [clipboardItems, setClipboardItems] = useState<{ offset: number; type: "image" | "text"; content: string }[]>(
+    [],
+  );
 
   useEffect(() => {
     loadClipboardHistory();
   }, []);
 
   async function loadClipboardHistory() {
-    const items: { offset: number; type: 'image' | 'text'; content: string }[] = [];
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.heic', '.heif'];
+    const items: { offset: number; type: "image" | "text"; content: string }[] = [];
+    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".heic", ".heif"];
 
     for (let offset = 0; offset <= 5; offset++) {
       try {
@@ -25,22 +27,26 @@ export default function Command() {
         if (clipboardContent.file) {
           try {
             const filePath = parseFileUrl(clipboardContent.file);
-            const lastDot = filePath.lastIndexOf('.');
-            const ext = lastDot !== -1 ? filePath.toLowerCase().slice(lastDot) : '';
+            const lastDot = filePath.lastIndexOf(".");
+            const ext = lastDot !== -1 ? filePath.toLowerCase().slice(lastDot) : "";
 
             if (imageExtensions.includes(ext) || !ext) {
-              items.push({ offset, type: 'image', content: filePath });
+              items.push({ offset, type: "image", content: filePath });
             }
-          } catch (parseError) {
+          } catch {
             continue;
           }
         }
 
-        if (clipboardContent.text && !items.find(i => i.offset === offset) && !clipboardContent.text?.startsWith('Image (')) {
+        if (
+          clipboardContent.text &&
+          !items.find((i) => i.offset === offset) &&
+          !clipboardContent.text?.startsWith("Image (")
+        ) {
           const text = clipboardContent.text.slice(0, 100);
-          items.push({ offset, type: 'text', content: text });
+          items.push({ offset, type: "text", content: text });
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }
@@ -60,8 +66,8 @@ export default function Command() {
     return decodeURIComponent(url.pathname);
   }
 
-  function selectClipboardItem(item: { type: 'image' | 'text'; content: string }) {
-    if (item.type === 'image') {
+  function selectClipboardItem(item: { type: "image" | "text"; content: string }) {
+    if (item.type === "image") {
       setImagePaths([item.content]);
       showToast({ title: "Image selected from clipboard", style: Toast.Style.Success });
     } else {
@@ -83,7 +89,7 @@ export default function Command() {
         <Detail
           markdown={`![Preview](${dataUrl})`}
           navigationTitle={imagePaths[0].split("/").pop() || "Image Preview"}
-        />
+        />,
       );
     }
   }
@@ -127,9 +133,10 @@ export default function Command() {
     loadImagePreview();
   }, [imagePaths]);
 
-  const previewMarkdown = hasImages && imagePreviewData
-    ? `![Mistral AI](mistral-logo.png?raycast-width=80&raycast-height=80)\n\n## Selected Image\n\n![Preview](${imagePreviewData})\n\n---\n\n${needsVision ? `🖼️ Image detected - Using **${effectiveModelName}**` : `🖼️ Using **${effectiveModelName}**`}\n\n**Filename:** ${imagePaths[0].split("/").pop()}`
-    : `![Mistral AI](mistral-logo.png?raycast-width=100&raycast-height=100)\n\n## Ask Mistral\n\n🤖 **${modelName}**\n\nType your question in the search bar above and press Enter to submit.${clipboardItems.length > 0 ? `\n\n💡 Press **Cmd+Shift+I** to select from clipboard` : ""}`;
+  const previewMarkdown =
+    hasImages && imagePreviewData
+      ? `![Mistral AI](mistral-logo.png?raycast-width=80&raycast-height=80)\n\n## Selected Image\n\n![Preview](${imagePreviewData})\n\n---\n\n${needsVision ? `🖼️ Image detected - Using **${effectiveModelName}**` : `🖼️ Using **${effectiveModelName}**`}\n\n**Filename:** ${imagePaths[0].split("/").pop()}`
+      : `![Mistral AI](mistral-logo.png?raycast-width=100&raycast-height=100)\n\n## Ask Mistral\n\n🤖 **${modelName}**\n\nType your question in the search bar above and press Enter to submit.${clipboardItems.length > 0 ? `\n\n💡 Press **Cmd+Shift+I** to select from clipboard` : ""}`;
 
   return (
     <List
@@ -158,7 +165,7 @@ export default function Command() {
             >
               {clipboardItems.length > 0 ? (
                 clipboardItems.map((item, index) => {
-                  if (item.type === 'image') {
+                  if (item.type === "image") {
                     const filename = item.content.split("/").pop() || "Unknown";
                     return (
                       <Action
@@ -181,7 +188,7 @@ export default function Command() {
                 })
               ) : (
                 <Action
-                  title="No items in clipboard history"
+                  title="No Items in Clipboard History"
                   icon={Icon.XMarkCircle}
                   onAction={() => showToast({ title: "No clipboard items found", style: Toast.Style.Failure })}
                 />
