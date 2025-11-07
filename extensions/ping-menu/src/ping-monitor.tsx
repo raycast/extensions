@@ -120,19 +120,19 @@ export default function Command() {
     // Fetch immediately on mount
     fetchPing();
 
-    // In aggressive mode, poll every second with in-app timer. Standard mode relies on Raycast's background interval.
-    let intervalId: NodeJS.Timeout | undefined;
-    if (method === "aggressive") {
-      intervalId = setInterval(() => {
-        if (!cancelled) {
-          fetchPing();
-        }
-      }, 1000);
-    }
+    // Set up polling interval based on mode.
+    // Standard: 10s (matches Raycast background interval for consistency when menu is open)
+    // Aggressive: 1s (more frequent updates)
+    const pollInterval = method === "aggressive" ? 1000 : 10000;
+    const intervalId = setInterval(() => {
+      if (!cancelled) {
+        fetchPing();
+      }
+    }, pollInterval);
 
     return () => {
       cancelled = true;
-      if (intervalId) clearInterval(intervalId);
+      clearInterval(intervalId);
     };
   }, []);
 
