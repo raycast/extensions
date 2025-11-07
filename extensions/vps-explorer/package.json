@@ -22,33 +22,38 @@
   "preferences": [
     {
       "name": "vps-host",
-      "title": "VPS Host",
-      "description": "The host of the VPS",
       "type": "textfield",
-      "required": true
+      "required": true,
+      "title": "VPS Host",
+      "description": "IP address or hostname"
     },
     {
       "name": "vps-port",
-      "title": "VPS Port",
-      "description": "The port of the VPS",
       "type": "textfield",
-      "default": "22",
-      "required": true
+      "required": true,
+      "title": "VPS Port",
+      "description": "SSH port (default: 22)"
     },
     {
       "name": "vps-username",
-      "title": "VPS Username",
-      "description": "The username of the VPS",
       "type": "textfield",
-      "default": "root",
-      "required": true
+      "required": true,
+      "title": "VPS Username",
+      "description": "SSH username"
+    },
+    {
+      "name": "vps-key-path",
+      "type": "textfield",
+      "required": false,
+      "title": "SSH Private Key Path (Optional)",
+      "description": "Path to private key (e.g., ~/.ssh/id_rsa). Leave empty to use default."
     },
     {
       "name": "vps-password",
-      "title": "VPS Password",
-      "description": "The password of the VPS",
       "type": "password",
-      "required": true
+      "required": false,
+      "title": "VPS Password (Optional)",
+      "description": "SSH password (not recommended, use SSH keys instead)"
     }
   ],
   "dependencies": {
