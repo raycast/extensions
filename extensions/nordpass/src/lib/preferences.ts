@@ -3,7 +3,7 @@
  * Handles storing and retrieving user preferences like export file path
  */
 
-import { getPreferenceValues, setPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import * as fs from "fs";
 import * as path from "path";
 import { environment } from "@raycast/api";
@@ -63,11 +63,14 @@ export function getPreferences(): Preferences {
 
 /**
  * Set the export file path preference
+ * Note: Preferences are managed through Raycast's UI, not programmatically
+ * This function is kept for API compatibility but doesn't actually modify preferences
  */
-export async function setExportFilePath(filePath: string): Promise<void> {
-  await setPreferenceValues({
-    exportFilePath: filePath,
-  });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function setExportFilePath(_filePath: string): Promise<void> {
+  // Preferences can only be set through Raycast's preferences UI
+  // Users should set the export file path in Raycast Preferences → Extensions → NordPass
+  console.log("Note: Export file path should be set in Raycast Preferences UI");
 }
 
 /**
