@@ -11,14 +11,17 @@ interface PingResult {
   error?: string;
 }
 
-interface Preferences {
-  site: string;
-  method: "standard" | "aggressive";
-}
-
 async function pingHost(host: string): Promise<number | null> {
+  // Basic validation - only allow alphanumeric, dots, dashes, and colons (for IPv6)
+  // This prevents command injection by ensuring only safe characters are used
+  if (!/^[a-zA-Z0-9.\-:]+$/.test(host)) {
+    console.error("Invalid host format:", host);
+    return null;
+  }
+
   try {
-    const { stdout } = await execAsync(`/sbin/ping -c 1 -W 1000 ${host}`);
+    // Validation ensures host is safe, but we still quote it as an extra precaution
+    const { stdout } = await execAsync(`/sbin/ping -c 1 -W 1000 "${host.replace(/"/g, '\\"')}"`);
     const match = stdout.match(/time=(\d+\.?\d*)\s*ms/);
     if (match && match[1]) {
       return parseFloat(match[1]);
@@ -91,29 +94,25 @@ export default function Command() {
     async function fetchPing() {
       console.log("[Ping Monitor] Fetching ping at:", new Date().toLocaleTimeString());
 
-      // Load cached data first to prevent flickering
+      // Load cached data first to prevent flickering on initial load
       if (isFirstLoad) {
         const cachedHistory = await loadHistory();
         if (cachedHistory.length > 0 && !cancelled) {
-          // If we have cached data, use it immediately and skip loading state
+          // If we have cached data, use it immediately
           setData({
             latency: cachedHistory[0].latency,
             history: cachedHistory,
           });
-          setIsLoading(false);
-        } else {
-          setIsLoading(true);
         }
+        setIsLoading(true);
       }
 
       const result = await pingWithHistory(site);
       if (!cancelled) {
         console.log("[Ping Monitor] Got result, latency:", result.latency);
         setData(result);
-        if (isFirstLoad) {
-          setIsLoading(false);
-          isFirstLoad = false;
-        }
+        setIsLoading(false);
+        isFirstLoad = false;
       }
     }
 
@@ -134,7 +133,7 @@ export default function Command() {
       cancelled = true;
       clearInterval(intervalId);
     };
-  }, []);
+  }, [site, method]);
 
   const currentLatency = data?.latency ?? null;
   const pingHistory = data?.history ?? [];
