@@ -1,3 +1,3 @@
 # Dice Tiles Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-11-07
