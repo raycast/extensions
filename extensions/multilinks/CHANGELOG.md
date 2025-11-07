@@ -1,6 +1,6 @@
 # Multi Links Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-11-07
 
 - Added Perplexity Comet browser support
 
