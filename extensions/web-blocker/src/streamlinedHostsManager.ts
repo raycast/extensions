@@ -257,25 +257,19 @@ set -e  # Exit on any error
 
 echo "✅ Starting complete website unblocking..."
 
-# 1. Remove ALL WebBlocker entries from hosts file
+# 1. Remove ONLY WebBlocker entries from hosts file (preserve user's custom entries)
 echo "📝 Cleaning hosts file..."
-# Create clean hosts file with only localhost entries
-cat > /tmp/hosts_clean.txt << 'HOSTS_EOF'
-##
-# Host Database
-#
-# localhost is used to configure the loopback interface
-# when the system is booting.  Do not change this entry.
-##
-127.0.0.1       localhost
-255.255.255.255 broadcasthost
-::1             localhost
-HOSTS_EOF
 
-# Replace hosts file with clean version
+# Remove only lines tagged with WebBlocker, preserve everything else
+grep -v "${WEBGLOCKER_TAG}" "${HOSTS_FILE_PATH}" > /tmp/hosts_clean.txt 2>/dev/null || {
+  # If grep fails (no WebBlocker entries found), just copy the original file
+  cat "${HOSTS_FILE_PATH}" > /tmp/hosts_clean.txt
+}
+
+# Replace hosts file with cleaned version
 cp /tmp/hosts_clean.txt "${HOSTS_FILE_PATH}"
 rm /tmp/hosts_clean.txt
-echo "✅ Hosts file cleaned!"
+echo "✅ WebBlocker entries removed from hosts file!"
 
 # 2. COMPLETELY disable and clean PF firewall
 echo "🔥 Disabling all firewall rules..."
