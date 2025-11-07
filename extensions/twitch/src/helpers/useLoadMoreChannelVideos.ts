@@ -15,6 +15,9 @@ export default function useLoadMoreChannelVideos(channelId: string | undefined, 
       .then((headers) => fetch(`https://api.twitch.tv/helix/videos?user_id=${channelId}&after=${cursor}`, { headers }))
       .then((response) => response.json())
       .then((data: any) => {
+        // TODO: Remove this console log later
+        console.log(data);
+
         setIsLoading(false);
         if (data && data.data) {
           setCursor(data.pagination.cursor);

@@ -24,7 +24,7 @@ export function useTwitchRequest<T>({
   const abortable = useRef<AbortController>();
 
   const { data, isLoading } = useCachedPromise(
-    (url: string) => {
+    async (url: string) => {
       const signal = abortable.current?.signal;
       return getHeaders()
         .then((headers) => fetch(url, { headers, signal }))
