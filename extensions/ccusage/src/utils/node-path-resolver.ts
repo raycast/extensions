@@ -1,6 +1,7 @@
 import { readdirSync, existsSync } from "fs";
 import { join } from "path";
 import { cpus } from "os";
+import semver from "semver";
 
 // Performance optimization: Cache expensive operations
 let cachedPaths: string | null = null;
@@ -12,13 +13,12 @@ const getAppleSiliconStatus = (): boolean => {
   return cachedIsAppleSilicon;
 };
 
-// Parse Node.js version string to comparable number (e.g., "18.17.1" -> 18017001)
+// Parse Node.js version string to comparable number using semver library
 const parseVersion = (version: string): number => {
-  const versionMatch = version.match(/^v?(\d+)\.(\d+)\.(\d+)/);
-  if (!versionMatch) return 0;
+  const coerced = semver.coerce(version);
+  if (!coerced) return 0;
 
-  const [, major, minor, patch] = versionMatch;
-  return parseInt(major) * 1000000 + parseInt(minor) * 1000 + parseInt(patch);
+  return coerced.major * 1000000 + coerced.minor * 1000 + coerced.patch;
 };
 
 const sortPathsByVersion = (paths: Array<{ path: string; version: string }>): string[] => {
