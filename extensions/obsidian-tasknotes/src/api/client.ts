@@ -15,12 +15,6 @@ import {
   NLPCreateResponse,
 } from "./types";
 
-interface Preferences {
-  apiUrl: string;
-  apiPort: string;
-  apiToken?: string;
-}
-
 export class TaskNotesClient {
   private baseUrl: string;
   private token?: string;
