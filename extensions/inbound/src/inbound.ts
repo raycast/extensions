@@ -5,6 +5,7 @@ import {
   GetDomainsResponse,
   GetEmailAddressesRequest,
   GetEmailAddressesResponse,
+  GetEndpointsResponse,
   PostDomainsRequest,
   PostEmailAddressesRequest,
   PostEmailsRequest,
@@ -30,7 +31,6 @@ const makeRequest = async <T>(endpoint: string, options?: RequestInit) => {
 };
 export const inbound = {
   domain: {
-    list: () => makeRequest<GetDomainsResponse>("domains"),
     create: (params: PostDomainsRequest) =>
       makeRequest("domains", {
         method: "POST",
@@ -41,11 +41,10 @@ export const inbound = {
         method: "DELETE",
       }),
     getDnsRecords: (id: string) => makeRequest<GetDNSRecordsResponse>(`domains/${id}/dns-records`),
+    list: () => makeRequest<GetDomainsResponse>("domains"),
   },
   email: {
     address: {
-      list: (params: GetEmailAddressesRequest) =>
-        makeRequest<GetEmailAddressesResponse>(`email-addresses?domainId=${params.domainId}`),
       create: (params: PostEmailAddressesRequest) =>
         makeRequest("email-addresses", {
           method: "POST",
@@ -55,10 +54,20 @@ export const inbound = {
         makeRequest(`email-addresses/${id}`, {
           method: "DELETE",
         }),
+      list: (params: GetEmailAddressesRequest) =>
+        makeRequest<GetEmailAddressesResponse>(`email-addresses?domainId=${params.domainId}`),
     },
-    send: (params: PostEmailsRequest) => makeRequest("emails", {
+    send: (params: PostEmailsRequest) =>
+      makeRequest("emails", {
         method: "POST",
-        body: JSON.stringify(params)
-    })
-  }
+        body: JSON.stringify(params),
+      }),
+  },
+  endpoints: {
+    delete: (id: string) =>
+      makeRequest(`endpoints/${id}`, {
+        method: "DELETE",
+      }),
+    list: () => makeRequest<GetEndpointsResponse>("endpoints"),
+  },
 };

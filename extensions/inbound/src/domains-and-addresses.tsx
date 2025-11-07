@@ -33,17 +33,16 @@ export default function DomainsAndAddresses() {
     },
   );
 
-  const confirmAndDelete = async(domain: DomainWithStats) => {
+  const confirmAndDelete = async (domain: DomainWithStats) => {
     const options: Alert.Options = {
       title: "Delete Domain",
       message: `This action cannot be undone. This will permanently delete the domain "${domain.domain}" and all associated email addresses and data.`,
       primaryAction: {
         style: Alert.ActionStyle.Destructive,
         title: "Delete Domain",
-      }
-
-    }
-    if (!await confirmAlert(options)) return;
+      },
+    };
+    if (!(await confirmAlert(options))) return;
     const toast = await showToast(Toast.Style.Animated, "Deleting Domain", domain.domain);
     try {
       await mutate(inbound.domain.delete(domain.id), {

@@ -31,6 +31,12 @@
       "mode": "view"
     },
     {
+      "name": "endpoints",
+      "title": "Endpoints",
+      "description": "Manage Endpoints",
+      "mode": "view"
+    },
+    {
       "name": "send-email",
       "title": "Send Email",
       "description": "Send an Email",
