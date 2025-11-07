@@ -1,6 +1,6 @@
 # Bitbucket Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-07
 
 - Bump dependencies to latest versions
 - Add Windows as a supported platform
