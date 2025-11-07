@@ -18,12 +18,13 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
   const [fileName, setFileName] = useState<string>(`${baseName}-${Date.now()}.png`);
   const [saveDirectory, setSaveDirectory] = useState<string[]>([]);
 
-  async function handleSave(values: { fileName: string; saveDirectory: string[] }) {
+  async function handleSave(values: { fileName: string; saveDirectory: string[] }): Promise<void> {
     try {
       // Validate source file size
       const sourceFileCheck = validateFileSize(fullImagePath);
       if (!sourceFileCheck.valid) {
-        return showFailureToast("Save Error", sourceFileCheck.error || "Source file is too large");
+        showFailureToast({ title: "Save Error", message: sourceFileCheck.error || "Source file is too large" });
+        return;
       }
 
       // Sanitize filename
@@ -82,7 +83,7 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
       onSaved();
       pop();
     } catch (error) {
-      showFailureToast("Save Error", error instanceof Error ? error.message : "Failed to save image");
+      showFailureToast({ title: "Save Error", message: error instanceof Error ? error.message : "Failed to save image" });
     }
   }
 
@@ -92,7 +93,10 @@ export function SaveImageForm({ fullImagePath, onSaved, originalFileName }: Save
         <ActionPanel>
           <Action.SubmitForm
             title="Save Image"
-            onSubmit={(values: { fileName: string; saveDirectory: string[] }) => handleSave(values)}
+            onSubmit={async (values: { fileName: string; saveDirectory: string[] }) => {
+              await handleSave(values);
+              return;
+            }}
           />
         </ActionPanel>
       }

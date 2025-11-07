@@ -11,17 +11,18 @@ export function StepSizeForm({ currentStepSize, onStepSizeChanged }: StepSizeFor
   const { pop } = useNavigation();
   const [stepSize, setStepSize] = useState<string>(currentStepSize);
 
-  async function handleSubmit(values: { stepSize: string }) {
+  async function handleSubmit(values: { stepSize: string }): Promise<void> {
     try {
       const stepValue = parseInt(values.stepSize || "1", 10);
       if (isNaN(stepValue) || stepValue <= 0) {
-        return showFailureToast("Invalid Step Size", "Step size must be a positive integer");
+        showFailureToast({ title: "Invalid Step Size", message: "Step size must be a positive integer" });
+        return;
       }
       // Ensure it's a whole number string
       onStepSizeChanged(stepValue.toString());
       pop();
     } catch (error) {
-      showFailureToast("Error", error instanceof Error ? error.message : "Failed to set step size");
+      showFailureToast({ title: "Error", message: error instanceof Error ? error.message : "Failed to set step size" });
     }
   }
 
@@ -29,7 +30,13 @@ export function StepSizeForm({ currentStepSize, onStepSizeChanged }: StepSizeFor
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Set Step Size" onSubmit={(values: { stepSize: string }) => handleSubmit(values)} />
+          <Action.SubmitForm
+            title="Set Step Size"
+            onSubmit={async (values: { stepSize: string }) => {
+              await handleSubmit(values);
+              return;
+            }}
+          />
         </ActionPanel>
       }
     >
