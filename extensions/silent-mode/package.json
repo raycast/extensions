@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "silent-mode",
+  "title": "Silent Mode",
+  "description": "Mute notifications without turning on DND, Just like on iPhone!",
+  "icon": "extension-icon.png",
+  "author": "matan",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "turn-on-silent-mode",
+      "title": "Turn on Silent Mode",
+      "description": "Silence the alert sound for all notifications",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-off-silent-mode",
+      "title": "Turn off Silent Mode",
+      "description": "Enable the alert sound for all notifications",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-silent-mode",
+      "title": "Toggle Silent Mode",
+      "description": "Toggle the alert sound for all notifications",
+      "mode": "no-view"
+    },
+    {
+      "name": "silent-mode-menu-bar",
+      "title": "Silent Mode Menu Bar",
+      "description": "Show Silent Mode in the Menu Bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "alert-volume",
+      "title": "Alert Volume",
+      "description": "The volume of the alert sound when Silent Mode is disabled",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Value between 1 and 100",
+      "default": "100"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
