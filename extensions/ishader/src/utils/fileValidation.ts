@@ -187,10 +187,7 @@ function formatFileSize(bytes: number): string {
 /**
  * Validates image dimensions
  */
-export function validateImageDimensions(
-  imageWidth: number,
-  imageHeight: number,
-): { valid: boolean; error?: string } {
+export function validateImageDimensions(imageWidth: number, imageHeight: number): { valid: boolean; error?: string } {
   if (imageWidth > MAX_IMAGE_WIDTH || imageHeight > MAX_IMAGE_HEIGHT) {
     return {
       valid: false,
