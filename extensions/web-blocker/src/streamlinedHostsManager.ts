@@ -23,6 +23,7 @@ const HOSTS_FILE_PATH = "/etc/hosts";
 const BACKUP_FILE_PATH = "/etc/hosts.webblocker.bak";
 const WEBGLOCKER_TAG = "# WebBlocker";
 const REDIRECT_IP = "127.0.0.1";
+const PF_ANCHOR_NAME = "com.webblocker.blocking";
 
 export interface BlockingResult {
   success: boolean;
@@ -116,7 +117,7 @@ async function createBlockingScript(domains: string[]): Promise<string> {
   const domainEntries = uniqueDomains
     .map(
       (domain) =>
-        `echo "${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}" >> "${HOSTS_FILE_PATH}"`,
+        `echo "${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}" >> "${HOSTS_FILE_PATH}"`
     )
     .join("\n");
 
@@ -271,21 +272,22 @@ cp /tmp/hosts_clean.txt "${HOSTS_FILE_PATH}"
 rm /tmp/hosts_clean.txt
 echo "✅ WebBlocker entries removed from hosts file!"
 
-# 2. COMPLETELY disable and clean PF firewall
-echo "🔥 Disabling all firewall rules..."
+# 2. Remove ONLY WebBlocker PF firewall rules (preserve other firewall rules)
+echo "🔥 Removing WebBlocker firewall rules..."
 
-# Disable PF firewall entirely
-pfctl -d 2>/dev/null || true
-echo "  ✓ Firewall disabled"
+# Flush only WebBlocker anchor rules (not all firewall rules)
+pfctl -a "${PF_ANCHOR_NAME}" -F all 2>/dev/null || true
+echo "  ✓ WebBlocker anchor rules flushed"
 
-# Flush ALL firewall rules
-pfctl -F all 2>/dev/null || true
-echo "  ✓ All rules flushed"
+# Clear only WebBlocker blocked IPs table
+pfctl -t webblocker_blocked -T flush 2>/dev/null || true
+echo "  ✓ WebBlocker IP table cleared"
 
-# Flush ALL connection states (this is critical!)
-pfctl -F states 2>/dev/null || true
-pfctl -F state 2>/dev/null || true
-echo "  ✓ All connection states cleared"
+# Kill connections only for WebBlocker blocked IPs (before clearing table)
+pfctl -t webblocker_blocked -T show 2>/dev/null | while read ip; do
+  [ -n "$ip" ] && pfctl -k "$ip" 2>/dev/null || true
+done || true
+echo "  ✓ WebBlocker connection states cleared"
 
 # Remove WebBlocker from pf.conf
 if [ -f /etc/pf.conf ]; then
@@ -326,8 +328,8 @@ echo "🎉  ALL BLOCKING REMOVED!"
 echo "🎉 ================================"
 echo ""
 echo "✅ Hosts file cleaned"
-echo "✅ Firewall disabled"
-echo "✅ All connection states cleared"
+echo "✅ WebBlocker firewall rules removed"
+echo "✅ WebBlocker connection states cleared"
 echo "✅ DNS caches flushed"
 echo ""
 echo "📌 Websites should work immediately!"
@@ -342,7 +344,7 @@ echo ""
  * @returns Promise resolving to blocking result
  */
 export async function enableBlocking(
-  domains: string[],
+  domains: string[]
 ): Promise<BlockingResult> {
   if (!domains || domains.length === 0) {
     return {
@@ -380,7 +382,7 @@ export async function enableBlocking(
     console.log("🔐 Requesting Touch ID/password...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to modify system files to block websites",
+      "WebBlocker needs to modify system files to block websites"
     );
 
     if (!execResult.success) {
@@ -448,7 +450,7 @@ export async function disableBlocking(): Promise<BlockingResult> {
     console.log("🔐 Requesting Touch ID/password...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to modify system files to unblock websites",
+      "WebBlocker needs to modify system files to unblock websites"
     );
 
     if (!execResult.success) {
@@ -491,7 +493,7 @@ export async function disableBlocking(): Promise<BlockingResult> {
  * @returns Promise resolving to object indicating which domains are blocked
  */
 export async function checkDomainsBlocked(
-  domains: string[],
+  domains: string[]
 ): Promise<{ [domain: string]: boolean }> {
   try {
     const hostsContent = await fs.readFile(HOSTS_FILE_PATH, "utf-8");
@@ -499,7 +501,7 @@ export async function checkDomainsBlocked(
 
     domains.forEach((domain) => {
       result[domain] = hostsContent.includes(
-        `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`,
+        `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`
       );
     });
 
@@ -543,9 +545,9 @@ export async function getBlockedDomainsFromHosts(): Promise<string[]> {
 /**
  * Clears the password session (useful for testing or security)
  */
-export function clearPasswordSession(): void {
+export async function clearPasswordSession(): Promise<void> {
   const passwordManager = PasswordManager.getInstance();
-  passwordManager.clearSession();
+  await passwordManager.clearSession();
 }
 
 /**

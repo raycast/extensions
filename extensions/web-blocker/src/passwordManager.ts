@@ -5,6 +5,7 @@
 
 import { exec } from "child_process";
 import { promisify } from "util";
+import { escapeShellArg } from "./securityUtils";
 
 const execAsync = promisify(exec);
 
@@ -44,7 +45,7 @@ class PasswordManager {
     try {
       // Run a simple command with AppleScript to authenticate
       await execAsync(
-        "osascript -e 'do shell script \"sudo -v\" with administrator privileges'",
+        "osascript -e 'do shell script \"sudo -v\" with administrator privileges'"
       );
 
       // Create a new session
@@ -74,11 +75,13 @@ class PasswordManager {
 
     try {
       // Execute the command with sudo using AppleScript (uses cached admin session)
-      const escapedCommand = command.replace(/'/g, "'\\\\\"'\\\\\"'");
-      const applescriptCmd = `osascript -e 'do shell script "${escapedCommand}" with administrator privileges'`;
+      // Properly escape the command for shell execution
+      const escapedCommand = escapeShellArg(command);
+      const applescriptCmd = `osascript -e 'do shell script ${escapedCommand} with administrator privileges'`;
       const { stdout } = await execAsync(applescriptCmd);
       return stdout.trim();
-    } catch (error: any) {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
       // If execution fails, might be session expired
       if (error.message.includes("User canceled")) {
         throw new Error("Authentication was canceled by user");
@@ -113,11 +116,11 @@ class PasswordManager {
   /**
    * Clears the current password session
    */
-  public clearSession(): void {
+  public async clearSession(): Promise<void> {
     this.session = null;
     // Also clear sudo timestamp
     try {
-      execAsync("sudo -k");
+      await execAsync("sudo -k");
     } catch (error) {
       // Ignore errors when clearing sudo timestamp
     }

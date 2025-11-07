@@ -11,6 +11,11 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import * as fs from "fs/promises";
 import { executeScriptWithAuth } from "./biometricAuth";
+import {
+  escapeShellArg,
+  isValidIP,
+  sanitizeDomainForShell,
+} from "./securityUtils";
 
 const execAsync = promisify(exec);
 
@@ -87,20 +92,22 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
   const ips: Set<string> = new Set();
 
   for (const domain of domains) {
+    // Sanitize domain before using in shell command
+    const sanitizedDomain = sanitizeDomainForShell(domain);
+    if (!sanitizedDomain) {
+      console.warn(`Skipping invalid domain: ${domain}`);
+      continue;
+    }
+
     try {
-      // Use dig to resolve domain to IPs
+      // Use dig to resolve domain to IPs - escape domain for shell safety
       const { stdout } = await execAsync(
-        `dig +short ${domain} A ${domain} AAAA 2>/dev/null || true`,
+        `dig +short ${escapeShellArg(sanitizedDomain)} A ${escapeShellArg(sanitizedDomain)} AAAA 2>/dev/null || true`
       );
       const resolvedIPs = stdout.split("\n").filter((line) => {
         const trimmed = line.trim();
-        // Filter valid IPv4 and IPv6 addresses
-        return (
-          trimmed &&
-          !trimmed.endsWith(".") &&
-          (trimmed.match(/^\d+\.\d+\.\d+\.\d+$/) ||
-            trimmed.match(/^[0-9a-f:]+$/i))
-        );
+        // Filter valid IPv4 and IPv6 addresses using proper validation
+        return trimmed && !trimmed.endsWith(".") && isValidIP(trimmed);
       });
 
       resolvedIPs.forEach((ip) => ips.add(ip));
@@ -118,7 +125,7 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
 async function isPFEnabled(): Promise<boolean> {
   try {
     const { stdout } = await execAsync(
-      "sudo pfctl -s info 2>/dev/null || true",
+      "sudo pfctl -s info 2>/dev/null || true"
     );
     return stdout.includes("Status: Enabled");
   } catch {
@@ -130,7 +137,7 @@ async function isPFEnabled(): Promise<boolean> {
  * Enable PF firewall blocking
  */
 export async function enablePFBlocking(
-  domains: string[],
+  domains: string[]
 ): Promise<FirewallResult> {
   if (!domains || domains.length === 0) {
     return {
@@ -141,7 +148,7 @@ export async function enablePFBlocking(
 
   try {
     console.log(
-      `🔥 Enabling PF firewall blocking for ${domains.length} domains...`,
+      `🔥 Enabling PF firewall blocking for ${domains.length} domains...`
     );
 
     // Step 1: Resolve domains to IPs
@@ -157,14 +164,25 @@ export async function enablePFBlocking(
       }
     });
 
-    const ips = await resolveDomains(expandedDomains);
-    console.log(`✅ Resolved ${ips.length} IP addresses`);
+    const resolvedIPs = await resolveDomains(expandedDomains);
+    console.log(`✅ Resolved ${resolvedIPs.length} IP addresses`);
+
+    // Filter and validate IPs before using in shell commands
+    const validIPs = resolvedIPs.filter((ip) => isValidIP(ip));
+    console.log(`✅ Validated ${validIPs.length} valid IP addresses`);
+
+    if (validIPs.length === 0) {
+      return {
+        success: false,
+        message: "Could not resolve any valid IPs for the provided domains",
+      };
+    }
 
     // Step 2: Generate PF rules
     const rules = await generatePFRules(domains);
     await fs.writeFile(PF_RULES_FILE, rules);
 
-    // Step 3: Create installation script
+    // Step 3: Create installation script with properly escaped IPs
     const scriptContent = `#!/bin/bash
 set +e
 
@@ -183,7 +201,7 @@ fi
 echo "📋 Populating blocked IPs table..."
 pfctl -t webblocker_blocked -T flush 2>/dev/null || true
 
-${ips.map((ip) => `pfctl -t webblocker_blocked -T add ${ip} 2>/dev/null || true`).join("\n")}
+${validIPs.map((ip) => `pfctl -t webblocker_blocked -T add ${escapeShellArg(ip)} 2>/dev/null || true`).join("\n")}
 
 # Load rules into the anchor
 echo "🔧 Loading firewall rules..."
@@ -197,13 +215,13 @@ fi
 
 # Kill existing connections to blocked IPs
 echo "🔪 Killing existing connections to blocked sites..."
-${ips.map((ip) => `pfctl -k ${ip} 2>/dev/null || true`).join("\n")}
+${validIPs.map((ip) => `pfctl -k ${escapeShellArg(ip)} 2>/dev/null || true`).join("\n")}
 
 # Flush state table to drop existing connections
 pfctl -F state 2>/dev/null || true
 
 echo "✅ PF firewall blocking enabled!"
-echo "Blocking ${domains.length} domains (${ips.length} IPs)"
+echo "Blocking ${domains.length} domains (${validIPs.length} IPs)"
 `;
 
     const tempScriptPath = "/tmp/webblocker_pf_enable.sh";
@@ -214,7 +232,7 @@ echo "Blocking ${domains.length} domains (${ips.length} IPs)"
     console.log("🔐 Requesting authentication...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to configure firewall rules to block websites",
+      "WebBlocker needs to configure firewall rules to block websites"
     );
 
     if (!execResult.success) {
@@ -232,7 +250,8 @@ echo "Blocking ${domains.length} domains (${ips.length} IPs)"
       success: true,
       message: `PF firewall blocking enabled for ${domains.length} domain(s) - blocks are instant!`,
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("PF blocking error:", error);
     return {
       success: false,
@@ -283,7 +302,7 @@ echo "✅ PF firewall blocking disabled!"
     console.log("🔐 Requesting authentication...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to remove firewall rules to unblock websites",
+      "WebBlocker needs to remove firewall rules to unblock websites"
     );
 
     if (!execResult.success) {
@@ -300,7 +319,8 @@ echo "✅ PF firewall blocking disabled!"
       success: true,
       message: "PF firewall blocking disabled - all sites accessible",
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("PF disable error:", error);
     return {
       success: false,
@@ -315,7 +335,7 @@ echo "✅ PF firewall blocking disabled!"
 export async function isPFBlockingActive(): Promise<boolean> {
   try {
     const { stdout } = await execAsync(
-      `sudo pfctl -a "${PF_ANCHOR_NAME}" -sr 2>/dev/null || echo ""`,
+      `sudo pfctl -a "${PF_ANCHOR_NAME}" -sr 2>/dev/null || echo ""`
     );
     return stdout.includes("webblocker_blocked");
   } catch {

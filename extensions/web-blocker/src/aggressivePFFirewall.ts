@@ -8,6 +8,11 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import * as fs from "fs/promises";
 import { executeScriptWithAuth } from "./biometricAuth";
+import {
+  escapeShellArg,
+  isValidIP,
+  sanitizeDomainForShell,
+} from "./securityUtils";
 
 const execAsync = promisify(exec);
 
@@ -42,38 +47,45 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
   const ips: Set<string> = new Set();
 
   for (const domain of domains) {
+    // Sanitize domain before using in shell command
+    const sanitizedDomain = sanitizeDomainForShell(domain);
+    if (!sanitizedDomain) {
+      console.warn(`Skipping invalid domain: ${domain}`);
+      continue;
+    }
+
     try {
-      // Resolve IPv4
+      // Resolve IPv4 - escape domain for shell safety
       const { stdout: ipv4 } = await execAsync(
-        `dig +short ${domain} A 2>/dev/null || true`,
+        `dig +short ${escapeShellArg(sanitizedDomain)} A 2>/dev/null || true`
       );
       ipv4.split("\n").forEach((ip) => {
         const trimmed = ip.trim();
-        if (trimmed && trimmed.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+        if (trimmed && isValidIP(trimmed)) {
           ips.add(trimmed);
         }
       });
 
-      // Resolve IPv6
+      // Resolve IPv6 - escape domain for shell safety
       const { stdout: ipv6 } = await execAsync(
-        `dig +short ${domain} AAAA 2>/dev/null || true`,
+        `dig +short ${escapeShellArg(sanitizedDomain)} AAAA 2>/dev/null || true`
       );
       ipv6.split("\n").forEach((ip) => {
         const trimmed = ip.trim();
-        if (trimmed && trimmed.match(/^[0-9a-f:]+$/i)) {
+        if (trimmed && isValidIP(trimmed)) {
           ips.add(trimmed);
         }
       });
 
       // Also try with www prefix if not already there
-      if (!domain.startsWith("www.")) {
-        const wwwDomain = `www.${domain}`;
+      if (!sanitizedDomain.startsWith("www.")) {
+        const wwwDomain = `www.${sanitizedDomain}`;
         const { stdout: wwwIpv4 } = await execAsync(
-          `dig +short ${wwwDomain} A 2>/dev/null || true`,
+          `dig +short ${escapeShellArg(wwwDomain)} A 2>/dev/null || true`
         );
         wwwIpv4.split("\n").forEach((ip) => {
           const trimmed = ip.trim();
-          if (trimmed && trimmed.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+          if (trimmed && isValidIP(trimmed)) {
             ips.add(trimmed);
           }
         });
@@ -91,7 +103,7 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
  */
 async function generateAggressivePFRules(domains: string[]): Promise<string> {
   const uniqueDomains = Array.from(new Set(domains.map(extractDomain))).filter(
-    Boolean,
+    Boolean
   );
 
   const rules = `# WebBlocker Aggressive PF Rules
@@ -140,12 +152,18 @@ async function killConnectionsToIPs(ips: string[]): Promise<void> {
   const killCommands: string[] = [];
 
   for (const ip of ips) {
-    // Kill connections using pfctl
-    killCommands.push(`pfctl -k ${ip} 2>/dev/null || true`);
-    killCommands.push(`pfctl -k 0.0.0.0/0 -k ${ip} 2>/dev/null || true`);
+    // Validate IP before using in commands
+    if (!isValidIP(ip)) {
+      console.warn(`Skipping invalid IP: ${ip}`);
+      continue;
+    }
+    // Kill connections using pfctl - escape IP for safety
+    const escapedIp = escapeShellArg(ip);
+    killCommands.push(`pfctl -k ${escapedIp} 2>/dev/null || true`);
+    killCommands.push(`pfctl -k 0.0.0.0/0 -k ${escapedIp} 2>/dev/null || true`);
 
     // Also use tcpkill if available (more aggressive)
-    // killCommands.push(`timeout 1 tcpkill -i any host ${ip} 2>/dev/null &`);
+    // killCommands.push(`timeout 1 tcpkill -i any host ${escapedIp} 2>/dev/null &`);
   }
 
   // Execute all kill commands
@@ -167,7 +185,7 @@ async function killConnectionsToIPs(ips: string[]): Promise<void> {
  * Enable aggressive PF firewall blocking with immediate connection termination
  */
 export async function enableAggressivePFBlocking(
-  domains: string[],
+  domains: string[]
 ): Promise<FirewallResult> {
   if (!domains || domains.length === 0) {
     return {
@@ -178,7 +196,7 @@ export async function enableAggressivePFBlocking(
 
   try {
     console.log(
-      `🔥 Enabling AGGRESSIVE PF firewall blocking for ${domains.length} domains...`,
+      `🔥 Enabling AGGRESSIVE PF firewall blocking for ${domains.length} domains...`
     );
 
     // Step 1: Expand domains (www and non-www)
@@ -197,13 +215,17 @@ export async function enableAggressivePFBlocking(
 
     // Step 2: Resolve all domains to IPs
     console.log("🔍 Resolving domains to IP addresses...");
-    const ips = await resolveDomains(expandedDomains);
-    console.log(`✅ Resolved ${ips.length} IP addresses to block`);
+    const resolvedIPs = await resolveDomains(expandedDomains);
+    console.log(`✅ Resolved ${resolvedIPs.length} IP addresses to block`);
 
-    if (ips.length === 0) {
+    // Filter and validate IPs before using in shell commands
+    const validIPs = resolvedIPs.filter((ip) => isValidIP(ip));
+    console.log(`✅ Validated ${validIPs.length} valid IP addresses`);
+
+    if (validIPs.length === 0) {
       return {
         success: false,
-        message: "Could not resolve any IPs for the provided domains",
+        message: "Could not resolve any valid IPs for the provided domains",
       };
     }
 
@@ -211,7 +233,7 @@ export async function enableAggressivePFBlocking(
     const rules = await generateAggressivePFRules(domains);
     await fs.writeFile(PF_RULES_FILE, rules);
 
-    // Step 4: Create installation script
+    // Step 4: Create installation script with properly escaped IPs
     const scriptContent = `#!/bin/bash
 set -e
 
@@ -249,8 +271,8 @@ echo "📋 Flushing old blocked IPs..."
 pfctl -t webblocker_blocked -T flush 2>/dev/null || true
 
 # Add all blocked IPs to the table
-echo "📋 Adding ${ips.length} IPs to block list..."
-${ips.map((ip) => `pfctl -t webblocker_blocked -T add ${ip} 2>/dev/null || true`).join("\n")}
+echo "📋 Adding ${validIPs.length} IPs to block list..."
+${validIPs.map((ip) => `pfctl -t webblocker_blocked -T add ${escapeShellArg(ip)} 2>/dev/null || true`).join("\n")}
 
 # Load the aggressive rules
 echo "🔧 Loading aggressive firewall rules..."
@@ -260,10 +282,10 @@ pfctl -a "${PF_ANCHOR_NAME}" -f "${PF_RULES_FILE}" 2>/dev/null || true
 echo "🔪 Terminating ALL existing connections to blocked sites..."
 
 # Method 1: Use pfctl to kill connections by IP
-${ips.map((ip) => `pfctl -k ${ip} 2>/dev/null || true`).join("\n")}
+${validIPs.map((ip) => `pfctl -k ${escapeShellArg(ip)} 2>/dev/null || true`).join("\n")}
 
 # Method 2: Kill connections bidirectionally
-${ips.map((ip) => `pfctl -k 0.0.0.0/0 -k ${ip} 2>/dev/null || true`).join("\n")}
+${validIPs.map((ip) => `pfctl -k 0.0.0.0/0 -k ${escapeShellArg(ip)} 2>/dev/null || true`).join("\n")}
 
 # Method 3: Flush ALL state entries (nuclear option but effective)
 echo "💥 Flushing connection state table..."
@@ -278,7 +300,7 @@ pfctl -a "${PF_ANCHOR_NAME}" -sr 2>/dev/null | head -5
 
 echo ""
 echo "✅ AGGRESSIVE PF firewall blocking enabled!"
-echo "📊 Blocking ${domains.length} domains at ${ips.length} IP addresses"
+echo "📊 Blocking ${domains.length} domains at ${validIPs.length} IP addresses"
 echo "🔪 All existing connections terminated"
 echo "🚫 NO CACHE BYPASS POSSIBLE - Blocking at network layer"
 `;
@@ -291,7 +313,7 @@ echo "🚫 NO CACHE BYPASS POSSIBLE - Blocking at network layer"
     console.log("🔐 Requesting authentication for aggressive blocking...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to configure aggressive firewall rules to block websites and terminate existing connections",
+      "WebBlocker needs to configure aggressive firewall rules to block websites and terminate existing connections"
     );
 
     if (!execResult.success) {
@@ -309,10 +331,11 @@ echo "🚫 NO CACHE BYPASS POSSIBLE - Blocking at network layer"
 
     return {
       success: true,
-      message: `🔥 Aggressive firewall blocking enabled!\nBlocked ${domains.length} domains at ${ips.length} IPs\n🔪 All existing connections terminated\n🚫 Network-layer blocking - NO BYPASS POSSIBLE`,
-      ipsBlocked: ips.length,
+      message: `🔥 Aggressive firewall blocking enabled!\nBlocked ${domains.length} domains at ${validIPs.length} IPs\n🔪 All existing connections terminated\n🚫 Network-layer blocking - NO BYPASS POSSIBLE`,
+      ipsBlocked: validIPs.length,
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("Aggressive PF blocking error:", error);
     return {
       success: false,

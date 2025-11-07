@@ -42,7 +42,7 @@ export default function ViewBlockedSites() {
   const [isLoading, setIsLoading] = useState(true);
   const [isBlockingActive, setIsBlockingActive] = useState(false);
   const [selectedDomains, setSelectedDomains] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [categories, setCategories] = useState<Array<{ name: string }>>([]);
@@ -68,7 +68,7 @@ export default function ViewBlockedSites() {
         setTempUnblockExpiry(tempUnblock.expiresAt);
 
         console.log(
-          `✅ Loaded ${blockedDomains.length} domains. Blocking is ${actualStatus ? "ACTIVE" : "INACTIVE"} (verified from hosts file)`,
+          `✅ Loaded ${blockedDomains.length} domains. Blocking is ${actualStatus ? "ACTIVE" : "INACTIVE"} (verified from hosts file)`
         );
       } catch (error) {
         console.error("Error loading blocked sites:", error);
@@ -93,8 +93,8 @@ export default function ViewBlockedSites() {
       // Update local state
       setDomains((prevDomains) =>
         prevDomains.map((d) =>
-          d.domain === domain ? { ...d, isEnabled: newStatus } : d,
-        ),
+          d.domain === domain ? { ...d, isEnabled: newStatus } : d
+        )
       );
 
       await showToast({
@@ -137,7 +137,7 @@ export default function ViewBlockedSites() {
       if (success) {
         // Update local state
         setDomains((prevDomains) =>
-          prevDomains.filter((d) => d.domain !== domain),
+          prevDomains.filter((d) => d.domain !== domain)
         );
 
         await showToast({
@@ -203,12 +203,12 @@ export default function ViewBlockedSites() {
     try {
       const count = await bulkToggleDomains(
         Array.from(selectedDomains),
-        enable,
+        enable
       );
       setDomains((prev) =>
         prev.map((d) =>
-          selectedDomains.has(d.domain) ? { ...d, isEnabled: enable } : d,
-        ),
+          selectedDomains.has(d.domain) ? { ...d, isEnabled: enable } : d
+        )
       );
       setSelectedDomains(new Set());
 
@@ -518,11 +518,6 @@ export default function ViewBlockedSites() {
   }
 
   const filteredDomains = getFilteredDomains();
-  const statusText = tempUnblockExpiry
-    ? `⏱️ Temporarily unblocked (${domains.length} domains)`
-    : isBlockingActive
-      ? `🚫 ${domains.length} websites blocked`
-      : `✅ ${domains.length} websites ready`;
 
   return (
     <List
@@ -664,7 +659,7 @@ export default function ViewBlockedSites() {
                     onAction={() =>
                       handleToggleDomain(
                         blockedDomain.domain,
-                        blockedDomain.isEnabled,
+                        blockedDomain.isEnabled
                       )
                     }
                   />

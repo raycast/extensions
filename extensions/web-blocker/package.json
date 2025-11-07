@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension",
   "schemaVersion": 1,
   "name": "web-blocker",
-  "title": "Webblocker",
+  "title": "Web Blocker",
   "version": "1.0.0",
   "description": "Stay focused and block distracting websites instantly. Works in all browsers, blocks even open tabs, and can't be easily bypassed.",
   "icon": "icon.png",
@@ -16,46 +16,46 @@
     {
       "name": "add-website",
       "title": "Add Website to Block",
+      "subtitle": "Web Blocker",
       "description": "Add websites to your block list with optional scheduling and categorization",
       "mode": "view",
-      "icon": "add_website_to_block.png",
-      "main": "src/add-website.tsx"
+      "icon": "add_website_to_block.png"
     },
     {
       "name": "streamlined-enable-blocking",
       "title": "Enable Website Blocking",
+      "subtitle": "Web Blocker",
       "description": "Activate blocking for all enabled websites with biometric authentication and instant effect",
       "mode": "no-view",
-      "icon": "enable_website_blocking.png",
-      "main": "src/streamlined-enable-blocking.tsx"
+      "icon": "enable_website_blocking.png"
     },
     {
       "name": "streamlined-disable-blocking",
       "title": "Disable Website Blocking",
+      "subtitle": "Web Blocker",
       "description": "Deactivate website blocking and restore access to all blocked sites",
       "mode": "no-view",
-      "icon": "disable_website_blocking.png",
-      "main": "src/streamlined-disable-blocking.tsx"
+      "icon": "disable_website_blocking.png"
     },
     {
       "name": "view-blocked-sites",
       "title": "Manage Blocked Sites",
+      "subtitle": "Web Blocker",
       "description": "View, organize, and manage your blocked websites with schedules and categories",
       "mode": "view",
-      "icon": "manage_blocked_sites.png",
-      "main": "src/view-blocked-sites.tsx"
+      "icon": "manage_blocked_sites.png"
     },
     {
       "name": "refresh-blocking",
       "title": "Force Re-Block & Fix",
+      "subtitle": "Web Blocker",
       "description": "Troubleshoot blocking issues by re-applying blocks, clearing DNS cache, and refreshing connections",
       "mode": "no-view",
-      "icon": "force_reblock.png",
-      "main": "src/refresh-blocking.tsx"
+      "icon": "force_reblock.png"
     }
   ],
   "scripts": {
-    "build": "npx tsc",
+    "build": "ray build",
     "clean": "rm -f *.js *.js.map *.d.ts *.d.ts.map && rm -rf lib/ dist/",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
