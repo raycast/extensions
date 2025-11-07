@@ -5,8 +5,8 @@ export default async function Command() {
   const { text } = await Clipboard.read();
   if (!text || text.trim().length === 0) {
     await showToast({
-      title: "変換できません",
-      message: "クリップボードに Typst テキストが見つかりませんでした。",
+      title: "Failed to convert",
+      message: "No Typst text found in clipboard.",
       style: Toast.Style.Failure,
     });
     return;
@@ -16,8 +16,8 @@ export default async function Command() {
     const tex = typst2tex(text);
     await Clipboard.copy(tex);
     await showToast({
-      title: "変換が完了しました。",
-      message: "クリップボードに TeX テキストがコピーされました。",
+      title: "Conversion completed",
+      message: "TeX text copied to clipboard.",
       style: Toast.Style.Success,
     });
   } catch (e: unknown) {
