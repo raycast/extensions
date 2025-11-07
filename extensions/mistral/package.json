@@ -66,6 +66,14 @@
         {
           "title": "Codestral",
           "value": "codestral-latest"
+        },
+        {
+          "title": "Pixtral 12B (Vision)",
+          "value": "pixtral-12b-latest"
+        },
+        {
+          "title": "Pixtral Large (Vision)",
+          "value": "pixtral-large-latest"
         }
       ]
     }

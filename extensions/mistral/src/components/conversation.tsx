@@ -5,7 +5,13 @@ import { type Conversation as ConversationType, getConversations, setConversatio
 import { getSystemPrompt } from "../hooks/use-system-prompt";
 import type { Preferences } from "../types/preferences";
 import { client } from "../utils/mistral-client";
-import { DEFAULT_MODEL_ID, FALLBACK_MODELS, validateModelId } from "../utils/models";
+import {
+  DEFAULT_MODEL_ID,
+  FALLBACK_MODELS,
+  getDefaultVisionModel,
+  supportsVision,
+  validateModelId,
+} from "../utils/models";
 
 type Props = {
   conversation: ConversationType;
@@ -26,7 +32,7 @@ export function Conversation({ conversation, model: propModel }: Props) {
   useEffect(() => {
     if (conversation.chats.length > 0 && conversation.chats[0].answer === "") {
       queueMicrotask(() => {
-        streamAnswer(conversation.chats[0].question, effectiveModel);
+        streamAnswer(conversation.chats[0].question, effectiveModel, conversation.chats[0].images || []);
       });
     }
   }, [conversation.chats, effectiveModel]);
@@ -34,10 +40,10 @@ export function Conversation({ conversation, model: propModel }: Props) {
   function handleSubmit() {
     if (!searchText.trim().length) return;
 
-    const newChat = { question: searchText, answer: "" };
+    const newChat = { question: searchText, answer: "", images: [] };
     setChats((prev) => [newChat, ...prev]);
     setSearchText("");
-    streamAnswer(searchText, currentModel);
+    streamAnswer(searchText, currentModel, []);
   }
 
   function extractCodeBlocks(text: string): string[] {
@@ -67,51 +73,180 @@ export function Conversation({ conversation, model: propModel }: Props) {
     showToast({ title: "Response copied", style: Toast.Style.Success });
   }
 
-  async function streamAnswer(question: string, model: string) {
+  async function imageToBase64(filePath: string): Promise<string> {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    const { exec } = await import("child_process");
+    const { promisify } = await import("util");
+    const execAsync = promisify(exec);
+    const os = await import("os");
+
+    console.log("Reading image from:", filePath);
+
+    let finalPath = filePath;
+    const ext = path.extname(filePath).toLowerCase().slice(1);
+
+    if (ext === "heic" || ext === "heif" || ext === "") {
+      const tempJpgPath = path.join(os.tmpdir(), `mistral-converted-${Date.now()}.jpg`);
+      console.log("Converting HEIC/HEIF to JPEG:", tempJpgPath);
+
+      try {
+        await execAsync(`sips -s format jpeg "${filePath}" --out "${tempJpgPath}"`);
+        finalPath = tempJpgPath;
+      } catch (error) {
+        console.error("Failed to convert image:", error);
+        throw new Error("Unsupported image format. Please use JPEG, PNG, or WebP.");
+      }
+    }
+
+    const imageBuffer = await fs.readFile(finalPath);
+    const base64 = imageBuffer.toString("base64");
+    const mimeType = "jpeg";
+
+    console.log("Image size:", imageBuffer.length, "bytes, MIME type:", mimeType);
+
+    return `data:image/${mimeType};base64,${base64}`;
+  }
+
+  async function* parseSSEStream(reader: ReadableStreamDefaultReader<Uint8Array>) {
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const data = line.slice(6);
+          if (data === "[DONE]") return;
+          try {
+            yield JSON.parse(data);
+          } catch (error) {
+            console.error("Failed to parse SSE data:", error);
+          }
+        }
+      }
+    }
+  }
+
+  async function streamAnswer(question: string, model: string, images: string[]) {
     setIsLoading(true);
     showToast({ title: "Thinking...", style: Toast.Style.Animated });
 
     const [conversationsPromise, systemPromptPromise] = [getConversations(), getSystemPrompt()];
 
     try {
-      const previousMessages = chats
-        .filter((chat) => chat.answer && chat.answer.trim().length > 0)
-        .reverse()
-        .reduce<{ role: "system" | "user" | "assistant"; content: string }[]>((previous, current) => {
-          previous.push({ role: "user", content: current.question });
-          previous.push({ role: "assistant", content: current.answer });
-          return previous;
-        }, []);
+      const previousMessages: {
+        role: "user" | "assistant";
+        content: string;
+      }[] = [];
+
+      for (const chat of chats.filter((chat) => chat.answer && chat.answer.trim().length > 0).reverse()) {
+        previousMessages.push({ role: "user", content: chat.question });
+        previousMessages.push({ role: "assistant", content: chat.answer });
+      }
 
       const systemPrompt = await systemPromptPromise;
+
+      let userMessage: { role: "user"; content: string | { type: string; text?: string; image_url?: string }[] };
+
+      if (images.length > 0) {
+        console.log("Processing", images.length, "images:", images);
+        const imageUrls = await Promise.all(images.map((img) => imageToBase64(img)));
+        console.log("Converted to", imageUrls.length, "base64 data URLs");
+
+        userMessage = {
+          role: "user" as const,
+          content: [
+            { type: "text", text: question },
+            ...imageUrls.map((url) => ({ type: "image_url", image_url: url })),
+          ],
+        };
+        console.log("User message with images:", JSON.stringify(userMessage, null, 2).substring(0, 500));
+      } else {
+        userMessage = { role: "user" as const, content: question };
+      }
+
       const messages = [
         ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
         ...previousMessages,
-        { role: "user" as const, content: question },
+        userMessage,
       ];
 
-      const result = await client.chat.stream({ messages, model });
+      const hasImages = images.length > 0;
+      const needsVision = hasImages && !supportsVision(model);
+      const effectiveModel = needsVision ? getDefaultVisionModel() : model;
+
+      console.log("Sending to Mistral with model:", effectiveModel);
+      console.log("Has images:", hasImages, "Needs vision switch:", needsVision);
+      console.log("Total messages:", messages.length);
 
       let currentAnswer = "";
-      let lastUpdateTime = 0;
-      const UPDATE_THROTTLE_MS = 50;
+      let chunkBuffer = "";
+      const CHUNK_SIZE = 100;
 
-      for await (const chunk of result) {
-        const streamText = chunk.data.choices[0].delta?.content || "";
-        if (streamText) {
-          currentAnswer += streamText;
-          const now = Date.now();
+      if (hasImages) {
+        const apiKey = preferences.apiKey;
+        const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: effectiveModel,
+            messages,
+            stream: true,
+          }),
+        });
 
-          if (now - lastUpdateTime >= UPDATE_THROTTLE_MS) {
-            lastUpdateTime = now;
-            const answer = currentAnswer;
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
 
-            queueMicrotask(() => {
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("No response body");
+
+        for await (const chunk of parseSSEStream(reader)) {
+          const streamText = chunk.choices?.[0]?.delta?.content || "";
+          if (streamText) {
+            currentAnswer += streamText;
+            chunkBuffer += streamText;
+
+            if (chunkBuffer.length >= CHUNK_SIZE) {
+              chunkBuffer = "";
+              const answer = currentAnswer;
+
               setChats((prev) => {
                 const [first, ...rest] = prev;
                 return [{ ...first, answer }, ...rest];
               });
-            });
+            }
+          }
+        }
+      } else {
+        const result = await client.chat.stream({ messages, model: effectiveModel });
+
+        for await (const chunk of result) {
+          const streamText = chunk.data.choices[0].delta?.content || "";
+          if (streamText) {
+            currentAnswer += streamText;
+            chunkBuffer += streamText;
+
+            if (chunkBuffer.length >= CHUNK_SIZE) {
+              chunkBuffer = "";
+              const answer = currentAnswer;
+
+              setChats((prev) => {
+                const [first, ...rest] = prev;
+                return [{ ...first, answer }, ...rest];
+              });
+            }
           }
         }
       }
@@ -137,11 +272,26 @@ export function Conversation({ conversation, model: propModel }: Props) {
 
       showToast({ title: "Response complete", style: Toast.Style.Success });
     } catch (error: unknown) {
+      console.error("Stream error:", error);
+      console.error("Error type:", typeof error);
+      if (error && typeof error === "object") {
+        console.error("Error keys:", Object.keys(error));
+        console.error("Error JSON:", JSON.stringify(error, null, 2).substring(0, 1000));
+      }
+
       const errorMessage = error instanceof Error ? error.message : String(error);
       const is429 = errorMessage.includes("429") || errorMessage.includes("capacity exceeded");
+      const isVisionError =
+        errorMessage.includes("image_url") ||
+        (errorMessage.includes("invalid_enum_value") && errorMessage.includes('"text"'));
       const modelName = FALLBACK_MODELS.find((m) => m.id === model)?.name || model;
 
-      if (is429) {
+      if (isVisionError && images.length > 0) {
+        showFailureToast(error, {
+          title: "Model doesn't support images",
+          message: `${modelName} doesn't support vision. Try using Pixtral Large or a vision-capable model for image analysis.`,
+        });
+      } else if (is429) {
         showFailureToast(error, {
           title: `${modelName} capacity exceeded`,
           message:
@@ -150,8 +300,7 @@ export function Conversation({ conversation, model: propModel }: Props) {
       } else {
         showFailureToast(error, {
           title: "Could not stream answer",
-          message:
-            "Your API key may be invalid. If you just created it, you may need to wait a few minutes for it to become active.",
+          message: errorMessage.substring(0, 200),
         });
       }
 
@@ -169,18 +318,22 @@ export function Conversation({ conversation, model: propModel }: Props) {
       searchBarPlaceholder="Type your message here..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      selectedItemId="chat-0"
       searchBarAccessory={
         <List.Dropdown tooltip="Select Model" value={currentModel} onChange={(newValue) => setCurrentModel(newValue)}>
           <List.Dropdown.Item title="🤖 Mistral Small" value="mistral-small-latest" />
           <List.Dropdown.Item title="🤖 Mistral Medium" value="mistral-medium-latest" />
           <List.Dropdown.Item title="🤖 Mistral Large" value="mistral-large-latest" />
           <List.Dropdown.Item title="🤖 Codestral" value="codestral-latest" />
+          <List.Dropdown.Item title="🖼️ Pixtral 12B" value="pixtral-12b-latest" />
+          <List.Dropdown.Item title="🖼️ Pixtral Large" value="pixtral-large-latest" />
         </List.Dropdown>
       }
     >
       {chats.map((chat, index) => (
         <List.Item
-          key={index}
+          key={`${chat.question}-${index}`}
+          id={`chat-${index}`}
           title={chat.question}
           subtitle={`Message ${chats.length - index}`}
           icon={Icon.Person}
