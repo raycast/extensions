@@ -1,43 +1,42 @@
-# tex2typst (Raycast Extension)
+# tex2typst
 
-TeX と Typst の相互変換を、Raycast からワンアクションで行う拡張機能です。
+tex2typst lets you convert between TeX and Typst with a single Raycast action.
 
-## 機能
+## Features
 
-- TeX -> Typst 変換（クリップボードの TeX を Typst に変換してコピー）
-- Typst -> TeX 変換（クリップボードの Typst を TeX に変換してコピー）
-- 成功/失敗を Raycast のトーストで通知
+- Convert TeX to Typst (reads TeX from the clipboard, converts it to Typst, and replaces the clipboard content)
+- Convert Typst to TeX (reads Typst from the clipboard, converts it to TeX, and replaces the clipboard content)
+- Show success or failure notifications via Raycast toast
 
-変換ロジックは `tex2typst` ライブラリに依存しています。
+The conversion logic relies on the [`tex2typst`](https://github.com/qwinsi/tex2typst) library.
 
+## Usage
 
-## 使い方
+1. Copy the text you want to convert to the clipboard.
+   - To convert TeX to Typst: copy the TeX text and run “Convert TeX to Typst”.
+   - To convert Typst to TeX: copy the Typst text and run “Convert Typst to TeX”.
+2. After the command runs, the converted result overwrites the clipboard content.
+3. Raycast toast notifications indicate whether the conversion succeeded or failed.
 
-1. 変換したいテキストをクリップボードにコピーします。
-   - TeX を Typst にしたい場合: TeX をコピーして「Convert TeX to Typst」を実行
-   - Typst を TeX にしたい場合: Typst をコピーして「Convert Typst to TeX」を実行
-2. 実行後、結果はクリップボードへ上書きコピーされます。
-3. 成功/失敗はトーストで表示されます。
+Notes:
 
-補足:
+- The extension runs in `no-view` mode, so no UI is rendered other than toast notifications.
 
-- 本拡張は `no-view` モードで動作し、UI は表示しません（トーストのみ）。
-
-## コマンド一覧
+## Commands
 
 - Convert TeX to Typst (`convert-tex-to-typst`)
 - Convert Typst to TeX (`convert-typst-to-tex`)
 
-## 開発
+## Development
 
-インストールと開発サーバー起動:
+Install dependencies and start the development server:
 
 ```bash
 npm install
 npm run dev
 ```
 
-ビルド:
+Build:
 
 ```bash
 npm run build
@@ -50,12 +49,12 @@ npm run lint
 npm run fix-lint
 ```
 
-公開（Raycast Store へ）:
+Publish to the Raycast Store:
 
 ```bash
 npm run publish
 ```
 
-## ライセンス
+## License
 
 Apache License 2.0
