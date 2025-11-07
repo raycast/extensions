@@ -51,7 +51,7 @@ function spawnQalc(
   isDead: [0 | 1],
   errors: [string, Error][] = [],
 ) {
-  const p = spawn(pathsToTry[0], ["+u8"], { env: { ...process.env, QALCULATE_USER_DIR: environment.supportPath } }); // Start qalc
+  const p = spawn(pathsToTry[0], [], { env: { ...process.env, QALCULATE_USER_DIR: environment.supportPath } }); // Start qalc
   p.on("error", (err) => {
     errors.push([pathsToTry[0], err]);
     if (!isDead[0] && pathsToTry.length > 1) spawnQalc(pathsToTry.slice(1), callback, setErr, isDead, errors);
@@ -88,7 +88,6 @@ function processMsg(s: string): string[] {
     if (rest && restt !== "=" && restt !== "≈") lines.push(rest);
   }
   if (lines.length == 0) lines.push(""); // To be able to submit it
-  if (lines.length == 1) lines.push("");
   //console.log(lines);
   return lines;
 }
@@ -116,7 +115,7 @@ function ActualCommand(props: { rerender: () => void }) {
   const prevSearchText = usePreviousState(searchText);
   const [data, setData] = useState<{ a: string[]; loading: boolean }>({ a: [], loading: true }); // Response
   const [err404, set404] = useState<[string, Error][] | false>(false);
-  const history = useRef<[string, string][]>([]); // Calculation history
+  const history = useRef<{ a: [string, string][]; loading: boolean }>({ a: [], loading: true }); // Calculation history
   //console.log(data);
 
   function onQalcData(data: Buffer) {
@@ -126,13 +125,13 @@ function ActualCommand(props: { rerender: () => void }) {
     const parsedLines = processMsg(rawData);
     //console.log("Lines: %s", parsedLines);
     const lastLine = parsedLines[parsedLines.length - 1];
-    if (lastLine && history.current.length)
-      if (history.current[0][1] === historyAnsPlaceholder) history.current[0][1] = lastLine; // Fill history ans
+    if (lastLine && history.current.a.length)
+      if (history.current.a[0][1] === historyAnsPlaceholder) history.current.a[0][1] = lastLine; // Fill history ans
     setData({ a: parsedLines, loading: false });
   }
 
   function onExecute() {
-    if (searchText.trim().length > 0) history.current.unshift([searchText, historyAnsPlaceholder]);
+    if (searchText.trim().length > 0) history.current.a.unshift([searchText, historyAnsPlaceholder]);
     qalcProcess?.stdin?.write("\x08".repeat(searchText.length) + searchText + "\n");
   }
 
@@ -146,7 +145,13 @@ function ActualCommand(props: { rerender: () => void }) {
     const isDead: [0 | 1] = [0];
     let destructor = () => (isDead[0] = 1) as unknown;
     ensureCfg();
-    loadHistory().then((hist) => (history.current = [...history.current, ...hist]));
+    loadHistory().then((hist) => {
+      // Strict mode does this twice, but with same Ref, so dedup
+      if (history.current.loading) {
+        history.current.loading = false;
+        history.current.a = [...history.current.a, ...hist];
+      }
+    });
     spawnQalc(
       pathsToTry,
       (p) => {
@@ -175,6 +180,8 @@ function ActualCommand(props: { rerender: () => void }) {
   const universalActions = (
     <Action title="Execute" shortcut={{ modifiers: ["alt"], key: "enter" }} onAction={onExecute} />
   );
+  const is_result_empty = searchText.trim() === "";
+  const is_emptyview = is_result_empty && history.current.a.length === 0;
   return (
     <List
       isLoading={data.loading}
@@ -182,39 +189,60 @@ function ActualCommand(props: { rerender: () => void }) {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Qalc anything..."
     >
-      <List.Section title={data.a[0]}>
-        {data.a.slice(1).map((line, i) => (
-          <List.Item
-            title={line}
-            key={i}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy"
-                  content={line.slice(2)} // TODO better parse
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
+      {is_emptyview ? (
+        <List.EmptyView title="Start typing a calculation" />
+      ) : (
+        // !is_emptyview
+        <>
+          {is_result_empty ? (
+            <></>
+          ) : (
+            // !is_result_empty
+            <List.Section title={data.a[0]}>
+              {data.a.length > 1 ? (
+                data.a.slice(1).map((line, i) => (
+                  <List.Item
+                    title={line}
+                    key={i}
+                    actions={
+                      <ActionPanel>
+                        <Action.CopyToClipboard
+                          title="Copy"
+                          content={line.slice(2)} // TODO better parse
+                          shortcut={{ modifiers: ["cmd"], key: "." }}
+                        />
+                        {universalActions}
+                      </ActionPanel>
+                    }
+                  />
+                ))
+              ) : (
+                // data.a.length == 1 (no result)
+                <List.Item
+                  title="Execute to see the result"
+                  key={-1}
+                  actions={<ActionPanel>{universalActions}</ActionPanel>}
                 />
-                {universalActions}
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-      <List.Section title="History">
-        {history.current.map(([expr, ans], i) => (
-          <List.Item
-            title={expr}
-            accessories={[{ text: ans }]}
-            key={i}
-            actions={
-              <ActionPanel>
-                <Action title="Replace Input" onAction={() => setSearchText(expr)} />
-                {universalActions}
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+              )}
+            </List.Section>
+          )}
+          <List.Section title="History">
+            {history.current.a.map(([expr, ans], i) => (
+              <List.Item
+                title={expr}
+                accessories={[{ text: ans }]}
+                key={i}
+                actions={
+                  <ActionPanel>
+                    <Action title="Replace Input" onAction={() => setSearchText(expr)} />
+                    {universalActions}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        </>
+      )}
     </List>
   );
 }
