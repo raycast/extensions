@@ -65,7 +65,7 @@
     },
     {
       "name": "redirectAfterAdding",
-      "title": "Go to current torrents after adding",
+      "title": "Go To Current Torrents After Adding",
       "type": "checkbox",
       "description": "Whether to redirect to the current torrents view after adding new torrents.",
       "default": false,
