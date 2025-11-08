@@ -53,6 +53,7 @@
     {
       "name": "streamlinkConfig",
       "type": "file",
+      "default": "",
       "title": "Custom Streamlink Config",
       "required": false,
       "description": "(optional) Path to custom streamlink config file"
