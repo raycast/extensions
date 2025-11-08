@@ -172,7 +172,7 @@ export const INSTALL_COMMAND = {
   [SupportedBrowsers.Arc]: undefined,
   [SupportedBrowsers.Opera]: "brew cask install opera",
   [SupportedBrowsers.Iridium]: undefined,
-  [SupportedBrowsers.Orion]: "brew cask install opera",
+  [SupportedBrowsers.Orion]: "brew cask install orion",
   [SupportedBrowsers.Sidekick]: "brew install --cask pushplaylabs-sidekick",
   [SupportedBrowsers.Dia]: undefined,
   [SupportedBrowsers.Comet]: undefined,

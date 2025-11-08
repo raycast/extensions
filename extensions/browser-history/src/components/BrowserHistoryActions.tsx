@@ -110,7 +110,7 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
       <Action
         title={"Open in Comet"}
         icon={"comet-logo.png"}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         onAction={() => openNewTab(SupportedBrowsers.Comet, url)}
       />
     ),

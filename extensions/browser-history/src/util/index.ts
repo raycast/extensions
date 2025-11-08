@@ -1,8 +1,6 @@
-import fs from "fs";
-import path from "path";
-import { resolve } from "path";
+import fs, { readFileSync } from "fs";
+import path, { resolve } from "path";
 import { homedir } from "os";
-import { readFileSync } from "fs";
 import { ChatGPTAtlasLocalState, Preferences, SupportedBrowsers } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
 import {
