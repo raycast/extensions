@@ -1,5 +1,11 @@
 # SimpleLogin Changelog
 
+## [Multi-Platform Support] - {PR_MERGE_DATE}
+- Added support for Windows platform with core alias management functionality.
+- Browser URL pre-fill feature remains macOS-exclusive due to unreliable extraction on Windows across different browsers and configurations.
+- macOS continues to use AppleScript for reliable browser integration and automatic URL detection.
+- Updated documentation to clarify platform-specific feature availability.
+
 ## [Enable Alias Description Prefill Based on Active Browser Tab URL] - 2024-06-19
 * Added a new preference option: "Prefill Alias Description".
 * When enabled, the default alias description will be automatically populated using the hostname of the active browser tab.

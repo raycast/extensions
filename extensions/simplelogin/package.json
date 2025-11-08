@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simplelogin",
   "title": "SimpleLogin",
-  "description": "Mange your SimpleLogin Account, view and create aliases",
+  "description": "Manage your SimpleLogin Account, view and create aliases. Now supports macOS and Windows!",
   "icon": "simplelogin_logo.png",
   "author": "adrian-schnell",
   "contributors": [
-    "marcelruhf"
+    "marcelruhf",
+    "Rediwed"
   ],
   "categories": [
     "Productivity"
@@ -34,7 +35,7 @@
       "name": "mode",
       "description": "Choose between UUID and word mode",
       "type": "dropdown",
-      "default": "https://app.simplelogin.io",
+      "default": "word",
       "data": [
         {
           "title": "Word",
@@ -84,15 +85,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.15.0",
-    "axios": "^1.8.4",
-    "moment": "^2.29.4"
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.2.2",
+    "moment": "^2.29.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
     "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.2.2",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
@@ -103,5 +106,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "version": "1.1.0",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

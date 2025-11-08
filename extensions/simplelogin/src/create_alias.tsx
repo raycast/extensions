@@ -1,5 +1,6 @@
 import { Form, ActionPanel, Action, showHUD, Clipboard, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
+import getActiveSite from "./utils/browser";
 import { getAliasOptions, createAlias, getMailboxes } from "./api/simplelogin_api";
 import { Suffix, ParamNewAlias } from "./models/alias_options";
 import { Mailboxes } from "./models/mailboxes";
@@ -8,6 +9,8 @@ export default function Command() {
   const [signedSuffixes, setSignedSuffixes] = useState<Suffix[] | null>(null);
   const [mailboxes, setMailboxes] = useState<Mailboxes[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // prefix state (controlled) - will be populated from active browser tab when possible
+  const [prefix, setPrefix] = useState<string>("");
 
   // validation
   const [prefixError, setPrefixError] = useState<string | undefined>();
@@ -19,7 +22,13 @@ export default function Command() {
   }
 
   function handleSubmit(values: ParamNewAlias) {
-    createAlias(values).then((result) => {
+    // Ensure we use the controlled prefix state when the form payload doesn't include it
+    const payload: ParamNewAlias = {
+      ...values,
+      alias_prefix: values.alias_prefix && values.alias_prefix.length > 0 ? values.alias_prefix : prefix,
+    } as ParamNewAlias;
+
+    createAlias(payload).then((result) => {
       if (result != null) {
         console.log(result.email);
         showHUD("Alias created and copied to clipboard");
@@ -30,15 +39,10 @@ export default function Command() {
   }
 
   useEffect(() => {
-    const loadingIndicator = {
-      options: false,
-      mailboxes: false,
-    };
     function fetchAliasOptions() {
       try {
         getAliasOptions().then((result) => {
           setSignedSuffixes(result.suffixes);
-          loadingIndicator["options"] = true;
         });
       } catch (error) {
         console.log("error while loading");
@@ -50,7 +54,6 @@ export default function Command() {
       try {
         getMailboxes().then((result) => {
           setMailboxes(result);
-          loadingIndicator["options"] = true;
         });
       } catch (error) {
         console.log("error while loading");
@@ -64,6 +67,32 @@ export default function Command() {
       setIsLoading(false);
     }
   }, [signedSuffixes, mailboxes]);
+
+  // attempt to populate prefix from the active browser tab (macOS only - Windows lacks reliable extraction)
+  useEffect(() => {
+    // Only attempt prefill on macOS where AppleScript provides reliable browser access
+    if (process.platform !== "darwin") {
+      return;
+    }
+
+    let mounted = true;
+    (async () => {
+      try {
+        const host = await getActiveSite();
+        if (!mounted || !host) return;
+        // Optional: derive a nice prefix from hostname by stripping leading www.
+        const cleaned = host.replace(/^www\./i, "");
+        // For now store the full hostname (example.com). If you prefer just the left-most label use split('.')[0]
+        setPrefix(cleaned);
+        console.debug("Prefilled alias prefix from browser host:", cleaned);
+      } catch (error) {
+        console.error("Failed to read active site for prefix prefill", error);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <Form
@@ -80,8 +109,12 @@ export default function Command() {
         id="alias_prefix"
         title="Alias prefix"
         placeholder="Enter prefix"
+        value={prefix}
         error={prefixError}
-        onChange={dropAliasPrefixErrorIfNeeded}
+        onChange={(value) => {
+          dropAliasPrefixErrorIfNeeded();
+          setPrefix(value);
+        }}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
             setPrefixError("A prefix is required");

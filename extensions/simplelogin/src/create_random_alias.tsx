@@ -24,11 +24,14 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(prefill_alias_note);
 
   useEffect(() => {
-    if (prefill_alias_note) {
+    // Only attempt prefill on macOS where AppleScript provides reliable browser access
+    if (prefill_alias_note && process.platform === "darwin") {
       getHostname().then((hostname) => {
         setDefaultNote(hostname ?? "");
         setIsLoading(false);
       });
+    } else {
+      setIsLoading(false);
     }
   }, []);
 
