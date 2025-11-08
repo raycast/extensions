@@ -1,6 +1,6 @@
 # Steam Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-08
 
 - Toggled on windows support
 - Fixed some typos and deprecation warnings
