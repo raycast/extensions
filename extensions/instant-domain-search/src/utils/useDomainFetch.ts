@@ -2,26 +2,24 @@ import { useFetch, useLocalStorage } from "@raycast/utils";
 import type { DomainSearchResponse } from "./types";
 import { useMemo } from "react";
 import { randomUUID } from "node:crypto";
-import { ANONYMOUS_USER_ID_KEY, ROOT_URL, TLDs } from "./config";
+import { ANONYMOUS_USER_ID_KEY, ROOT_URL, POPULAR_TLDs, ALL_TLDs } from "./config";
 import getUserAgent from "./getUserAgent";
 
 export default function useDomainFetch(query: string) {
+  const regex = useMemo(() => {
+    const tldsPattern = Array.from(ALL_TLDs)
+      .sort((a, b) => b.length - a.length)
+      .map((tld) => tld.replace(".", "\\."))
+      .join("|");
+    return new RegExp(`^(?<domain>.+?)(\\.(?<tld>${tldsPattern}))?$`);
+  }, []);
   const parsedSearch = useMemo(() => {
-    const trimmedText = query.trim();
-
-    // Check if searchText contains a dot (indicating a TLD)
-    const dotIndex = trimmedText.indexOf(".");
-
-    if (dotIndex > 0) {
-      // Has an extension
-      const query = trimmedText.substring(0, dotIndex);
-      const tld = trimmedText.substring(dotIndex); // includes the dot
-      return { query, tld };
-    } else {
-      // No extension, use .com as default
-      return { query: trimmedText, tld: ".com" };
-    }
-  }, [query]);
+    const trimmedQuery = query.trim();
+    const match = trimmedQuery.match(regex);
+    const domain = match?.groups?.domain ?? trimmedQuery;
+    const tld = match?.groups?.tld ?? "com";
+    return { domain, tld };
+  }, [query, regex]);
 
   const { value: anonymousUserID, isLoading: isAnonymousUserIDLoading } = useLocalStorage(
     ANONYMOUS_USER_ID_KEY,
@@ -31,11 +29,11 @@ export default function useDomainFetch(query: string) {
   const searchParams = useMemo(() => {
     return new URLSearchParams({
       index: "semantic",
-      tlds: TLDs.join(","),
+      tlds: [...new Set([parsedSearch.tld, ...POPULAR_TLDs])].slice(0, POPULAR_TLDs.length).join(","),
     });
-  }, []);
+  }, [parsedSearch.tld]);
 
-  return useFetch(`${ROOT_URL}/api/v1/domain/${parsedSearch.query}${parsedSearch.tld}?${searchParams.toString()}`, {
+  return useFetch(`${ROOT_URL}/api/v1/domain/${parsedSearch.domain}.${parsedSearch.tld}?${searchParams.toString()}`, {
     execute: query.length >= 2 && anonymousUserID !== undefined && !isAnonymousUserIDLoading,
     keepPreviousData: true,
     headers: {

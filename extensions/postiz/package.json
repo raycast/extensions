@@ -45,6 +45,12 @@
   ],
   "commands": [
     {
+      "name": "create-post",
+      "title": "Create Post",
+      "description": "Create Draft Post",
+      "mode": "view"
+    },
+    {
       "name": "search-channels",
       "title": "Search Channels",
       "description": "Search Channels",

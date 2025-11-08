@@ -79,6 +79,7 @@ export default function ErrorView({ error, onRetry }: ErrorViewProps) {
 
   const buildMarkdown = (data: ErrorData, error: Error): string => {
     const originalError = error instanceof ThingsError ? error.originalError : error.message;
+    const operation = error instanceof ThingsError ? error.operation : undefined;
 
     return `# ${data.title}
 
@@ -90,7 +91,7 @@ ${data.solutions.map((solution, i) => `${i + 1}. ${solution}`).join('\n')}
 
 ## Technical Details
 
-- Error Type: \`${data.errorType}\`
+- Error Type: \`${data.errorType}\`${operation ? `\n- Operation: \`${operation}\`` : ''}
 - Original Error: \`${originalError || 'N/A'}\``;
   };
 

@@ -1,11 +1,15 @@
 # Cloudflare Changelog
 
+## [Update] - 2025-11-06
+
+- Toggled on windows support
+
 ## [DNS Record Enhancements] - 2025-06-03
 
 - Add DNS Records:
-    - A
-    - AAAA
-    - TXT
+  - A
+  - AAAA
+  - TXT
 - Delete any DNS Record
 - Improve error handling function so it shows the proper error message
 - Modernize extension to use latest Raycast config

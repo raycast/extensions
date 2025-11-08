@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { JSX } from "react/jsx-runtime";
 import { Detail, getPreferenceValues } from "@raycast/api";
 import { KeePassLoader } from "./utils/keepass-loader";
 import { InactivityTimer } from "./utils/inactivity-timer";
@@ -25,7 +26,7 @@ const lockAfterInactivity = Number(preferences.lockAfterInactivity);
  *
  * @returns {JSX.Element} The rendered component.
  */
-export default function Command() {
+export default function Command(): JSX.Element {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
 

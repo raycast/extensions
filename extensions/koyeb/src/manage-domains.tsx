@@ -65,8 +65,9 @@ export default function ManageDomains() {
             },
           },
         );
+        toast.title = "Removed";
         toast.style = Toast.Style.Success;
-      } catch {
+      } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed";
         toast.message = `${error}`;
@@ -118,7 +119,7 @@ export default function ManageDomains() {
 
 function AddDomain() {
   const { pop } = useNavigation();
-  const { isLoading, data: apps } = useFetch("https://app.koyeb.com/v1/apps", {
+  const { isLoading, data: apps } = useFetch(API_URL + "apps", {
     headers,
     parseResponse,
     mapResult(result: { apps: App[] }) {

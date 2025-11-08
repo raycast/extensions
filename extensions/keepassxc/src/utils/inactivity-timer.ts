@@ -14,7 +14,7 @@ class InactivityTimer {
    *
    * @returns {Promise<boolean>} Whether the user has performed an activity in the last lockAfterInactivity minutes.
    */
-  static hasRecentActivity = async () => {
+  static hasRecentActivity = async (): Promise<boolean> => {
     const lastActivity = await LocalStorage.getItem("lastActivity");
     if (lastActivity) {
       const timeDiff = (Date.now() - Number(lastActivity)) / 60000;

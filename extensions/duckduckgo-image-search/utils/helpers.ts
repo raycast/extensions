@@ -103,7 +103,7 @@ export async function downloadImage(
   await fs.promises.writeFile(filePath, response.data);
   setCachedImagePath(image_token, filePath);
 
-  if (showToast) {
+  if (showToastMessage) {
     await showToast({
       title: "Image Downloaded!",
       style: Toast.Style.Success,
@@ -155,7 +155,7 @@ export async function saveImage(image: DuckDuckGoImage) {
   });
 
   try {
-    // Download the image to temp folder first
+    // Download the image to the temp folder first
     const tempFile = await downloadImage(image, false);
 
     // Create a clean filename from the image title
@@ -164,13 +164,17 @@ export async function saveImage(image: DuckDuckGoImage) {
       .replace(/\s+/g, "_") // Replace spaces with underscores
       .substring(0, 100); // Limit filename length
 
-    // Get file extension from temp file
+    // Get file extension from a temp file
     const extension = path.extname(tempFile);
     const filename = `${cleanTitle || "duckduckgo_image"}_${image.image_token}${extension}`;
 
     // Get save directory from preferences (with fallback to ~/Downloads)
-    const allPreferences = getPreferenceValues<Preferences & { saveDirectory?: string }>();
+    const allPreferences = getPreferenceValues<Preferences>();
     const saveDirectory = expandTildePath(allPreferences.saveDirectory || "~/Downloads");
+    if (!saveDirectory) {
+      // noinspection ExceptionCaughtLocallyJS
+      throw new Error("Save directory is not set");
+    }
 
     // Ensure the save directory exists
     await fs.promises.mkdir(saveDirectory, { recursive: true });

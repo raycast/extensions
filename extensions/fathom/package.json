@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fathom",
+  "title": "Fathom",
+  "description": "Search Fathom meetings, recordings, and team members",
+  "icon": "extension-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-meetings",
+      "title": "Search Meetings",
+      "description": "Search Fathom meetings",
+      "mode": "view"
+    },
+    {
+      "name": "search-team-members",
+      "title": "Search Team Members",
+      "description": "Search Fathom team members",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-meetings",
+      "title": "List Meetings",
+      "description": "Search and list Fathom meetings with full-text search across titles, summaries, and transcripts, plus filters for participants, date ranges, topics, and meeting types"
+    },
+    {
+      "name": "get-meeting-details",
+      "title": "Get Meeting Details",
+      "description": "Retrieve detailed information about a specific Fathom meeting including summary, transcript, action items, participants, and duration"
+    },
+    {
+      "name": "list-team-members",
+      "title": "List Team Members",
+      "description": "List Fathom team members with their names, emails, and team affiliations"
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.0.0",
+    "@raycast/api": "^1.103.2",
+    "fathom-typescript": "0.0.30"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/utils": "^2.2.1",
+    "@types/node": "^20.17.10",
+    "@types/react": "19.1.13",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "fathomApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Fathom API Key",
+      "description": "Generate in Fathom → Settings → API Access"
+    },
+    {
+      "name": "exportDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Export Directory",
+      "description": "Directory for exported summaries and transcripts",
+      "default": "~/Downloads"
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Verbose Logging",
+      "description": "Enable detailed console logging for debugging purposes",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    }
+  ]
+}

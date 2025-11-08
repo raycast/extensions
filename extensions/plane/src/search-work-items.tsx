@@ -14,7 +14,7 @@ function SearchWorkItems() {
   const { projects } = useProjects({});
   const { isLoading, workItems, mutate } = useWorkItems(query, projectId);
 
-  const numberOfIssues = workItems?.length === 1 ? "1 issue" : `${workItems?.length} issues`;
+  const workItemsSectionSubtitle = workItems?.length === 1 ? "1 work item" : `${workItems?.length} work items`;
 
   return (
     <List
@@ -42,7 +42,7 @@ function SearchWorkItems() {
       }
     >
       <List.EmptyView title={!query ? "Search for work items" : "No work items found"} />
-      <List.Section title="Work Items" subtitle={numberOfIssues}>
+      <List.Section title="Work Items" subtitle={workItemsSectionSubtitle}>
         {workItems?.map((workItem) => (
           <WorkItemListItem workItem={workItem} key={workItem.id} mutateWorkItemList={mutate} />
         ))}

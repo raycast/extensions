@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { CopyToClipboard } from "./ActionCopyToClipboard";
-import { ShareItem } from "./ActionShareItem";
+import resetCache from "../../reset-cache";
 import { Item, User } from "../types";
 import { ActionID, hrefToOpenInBrowser } from "../utils";
-import resetCache from "../../reset-cache";
+import { CopyToClipboard } from "./ActionCopyToClipboard";
+import { ShareItem } from "./ActionShareItem";
 import { SwitchAccount } from "./ActionSwitchAccount";
 
 export function ItemActionPanel({
@@ -52,7 +52,6 @@ function OpenIn1Password(account: User | undefined, item: Item) {
     return (
       <Action.Open
         key="open-in-1password"
-        // eslint-disable-next-line @raycast/prefer-title-case
         title="Open in 1Password"
         target={`onepassword://view-item/?a=${account.account_uuid}&v=${item.vault.id}&i=${item.id}`}
         application="com.1password.1password"

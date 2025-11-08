@@ -1,4 +1,4 @@
-import { getPreferenceValues, LocalStorage, Toast, showToast } from "@raycast/api";
+import { getApplications, getPreferenceValues, LocalStorage, Toast, showToast } from "@raycast/api";
 import { parse } from "csv-parse/sync";
 import child_process from "child_process";
 import process from "process";
@@ -15,7 +15,7 @@ interface Preference {
  * Takes the error message from the CLI and shows a toast message with a human-readable description.
  * If the error is due to an invalid preference, the toast message will be "Invalid Preference: <preference name>".
  */
-const showToastCliErrors = (e: { message: string }) => {
+const showToastCliErrors = (e: { message: string }): void => {
   let invalidPreference = "";
   let toastMessage = e.message.trim();
   if (e.message.includes("Invalid credentials") || e.message.includes("Failed to load key file")) {
@@ -43,10 +43,6 @@ class KeePassLoader {
   static {
     const preferences: Preference = getPreferenceValues();
     this.database = preferences.database;
-    this.keepassxcCli =
-      process.platform === "win32"
-        ? "C:\\Program Files\\KeePassXC\\keepassxc-cli.exe"
-        : "/Applications/KeePassXC.app/Contents/MacOS/keepassxc-cli";
   }
 
   /**
@@ -55,16 +51,13 @@ class KeePassLoader {
    * KeePassXC's search doesn't include all folders.
    * That function aims to replicate which folder are used.
    *
-   * @param {string} entryStr - The folder to check.
+   * @param {string} folder - The folder to check.
    * @returns {boolean} - True if the folder is valid, false otherwise.
    */
-  private static isValidFolder = (folder: string) => {
-    return (
-      folder !== undefined &&
-      folder.length > 0 &&
-      !["Deprecated", "Recycle Bin", "Trash", "回收站"].some((exclude) => folder.startsWith(exclude))
-    );
-  };
+  private static isValidFolder = (folder: string): boolean =>
+    folder !== undefined &&
+    folder.length > 0 &&
+    !["Deprecated", "Recycle Bin", "Trash", "回收站"].some((exclude) => folder.startsWith(exclude));
 
   /**
    * Error handler for the KeePassXC CLI's STDERR stream.
@@ -75,17 +68,15 @@ class KeePassLoader {
    * @param {function} reject - The function to call with the error message.
    * @returns {function} - A function to handle errors on the stderr stream.
    */
-  private static cliStderrErrorHandler = (reject: (reason: Error) => void) => {
-    return (data: Buffer) => {
-      if (
-        data.toString().indexOf("Enter password to unlock") != -1 ||
-        data.toString().indexOf("Maximum depth of replacement has been reached") != -1 ||
-        data.toString().trim().length == 0
-      ) {
-        return;
-      }
-      reject(new Error(data.toString()));
-    };
+  private static cliStderrErrorHandler = (reject: (reason: Error) => void) => (data: Buffer) => {
+    if (
+      data.toString().indexOf("Enter password to unlock") != -1 ||
+      data.toString().indexOf("Maximum depth of replacement has been reached") != -1 ||
+      data.toString().trim().length == 0
+    ) {
+      return;
+    }
+    reject(new Error(data.toString()));
   };
 
   /**
@@ -97,9 +88,8 @@ class KeePassLoader {
    * @param {string} keyFile - The key file path.
    * @returns {string[]} - An array with the "-k" option and the key file path, or an empty array.
    */
-  private static convertIntoKeyFileOption = (keyFile: string) => {
-    return keyFile != "" && keyFile != null ? ["-k", `${keyFile}`] : [];
-  };
+  private static convertIntoKeyFileOption = (keyFile: string) =>
+    keyFile != "" && keyFile != null ? ["-k", `${keyFile}`] : [];
 
   /**
    * Converts a string from the KeePassXC CLI into a sorted array of strings.
@@ -112,7 +102,7 @@ class KeePassLoader {
    * @returns {string[][]} - A sorted array of strings, where each string contains the
    * information of an entry.
    */
-  private static parseCsvEntries = (entries: string) => {
+  private static parseCsvEntries = (entries: string): string[][] => {
     let entriesArray = parse(entries, {
       delimiter: ",",
       from_line: 2,
@@ -161,6 +151,29 @@ class KeePassLoader {
   };
 
   /**
+   * Find the installed KeePassXC application.
+   *
+   * @returns {Promise<void>} A promise that resolves nothing.
+   *
+   * This function uses the `getApplications` function from the `@raycast/api` library
+   * to get a list of all installed applications on the system. It then filters the list
+   * to only include applications with the name "KeePassXC". If the list is not empty,
+   * it sets the `keepassxcCli` class variable to the path of the found application.
+   * If the list is empty, it does nothing.
+   */
+  static findApplication = async (): Promise<void> => {
+    if (process.platform === "win32") {
+      this.keepassxcCli = "C:\\Program Files\\KeePassXC\\keepassxc-cli.exe";
+    } else {
+      const installedApplications = await getApplications();
+      const apps = installedApplications.filter((application) => application.name == "KeePassXC");
+      if (apps.length > 0) {
+        this.keepassxcCli = apps[0].path + "/Contents/MacOS/keepassxc-cli";
+      }
+    }
+  };
+
+  /**
    * Cache the given credentials for later use.
    *
    * @param password The password to cache.
@@ -178,28 +191,29 @@ class KeePassLoader {
    * @param keyFile The path to the key file to unlock the KeePass database.
    * @returns A Promise that resolves if the credentials are valid, and rejects otherwise.
    */
-  static checkCredentials = (databasePassword: string, keyFile: string) => {
-    return new Promise<void>((resolve, reject) => {
-      const cli = this.spawn(`${this.keepassxcCli}`, [
-        "db-info",
-        ...this.convertIntoKeyFileOption(keyFile),
-        "-q",
-        `${this.database}`,
-      ]);
+  static checkCredentials = (databasePassword: string, keyFile: string) =>
+    KeePassLoader.findApplication().then(() => {
+      return new Promise<void>((resolve, reject) => {
+        const cli = this.spawn(`${this.keepassxcCli}`, [
+          "db-info",
+          ...this.convertIntoKeyFileOption(keyFile),
+          "-q",
+          `${this.database}`,
+        ]);
 
-      cli.stdin.write(`${databasePassword}\n`);
-      cli.stdin.end();
-      cli.on("error", reject);
-      cli.stderr.on("data", this.cliStderrErrorHandler(reject));
-      cli.on("exit", (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error("Invalid Credentials"));
-        }
+        cli.stdin.write(`${databasePassword}\n`);
+        cli.stdin.end();
+        cli.on("error", reject);
+        cli.stderr.on("data", this.cliStderrErrorHandler(reject));
+        cli.on("exit", (code) => {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error("Invalid Credentials"));
+          }
+        });
       });
     });
-  };
 
   /**
    * Removes the stored credentials from LocalStorage.
@@ -223,42 +237,43 @@ class KeePassLoader {
    * @param {string[]} options - The options to pass to the keepassxc-cli command.
    * @returns {Promise<string>} The result of the command.
    */
-  static execKeepassXCCli = (options: string[]) => {
-    return new Promise<string>((resolve, reject) => {
-      const chuncks: Buffer[] = [];
-      const cli = this.spawn(`${this.keepassxcCli}`, options);
-      const tryResolve = () => {
-        if (ended && exited) {
-          resolve(result);
-        }
-      };
-      let ended = false;
-      let exited = false;
-      let result: string;
+  static execKeepassxcCli = (options: string[]): Promise<string> =>
+    KeePassLoader.findApplication().then(() => {
+      return new Promise<string>((resolve, reject) => {
+        const chuncks: Buffer[] = [];
+        const cli = this.spawn(`${this.keepassxcCli}`, options);
+        const tryResolve = () => {
+          if (ended && exited) {
+            resolve(result);
+          }
+        };
+        let ended = false;
+        let exited = false;
+        let result: string;
 
-      cli.stdin.write(`${this.databasePassword}\n`);
-      cli.stdin.end();
-      cli.on("error", reject);
-      cli.stderr.on("data", this.cliStderrErrorHandler(reject));
-      cli.stdout.on("data", (chunck) => {
-        chuncks.push(chunck);
-      });
-      cli.stdout.on("end", () => {
-        result = chuncks.join("").toString();
-        result = result.slice(0, result.length - 1);
-        ended = true;
-        tryResolve();
-      });
-      cli.on("exit", (code) => {
-        if (code === 0) {
-          exited = true;
+        cli.stdin.write(`${this.databasePassword}\n`);
+        cli.stdin.end();
+        cli.on("error", reject);
+        cli.stderr.on("data", this.cliStderrErrorHandler(reject));
+        cli.stdout.on("data", (chunck) => {
+          chuncks.push(chunck);
+        });
+        cli.stdout.on("end", () => {
+          result = chuncks.join("").toString();
+          result = result.slice(0, result.length - 1);
+          ended = true;
           tryResolve();
-        } else {
-          reject(new Error(`Something went wrong when accessing the database (exit code: ${code})`));
-        }
+        });
+        cli.on("exit", (code) => {
+          if (code === 0) {
+            exited = true;
+            tryResolve();
+          } else {
+            reject(new Error(`Something went wrong when accessing the database (exit code: ${code})`));
+          }
+        });
       });
     });
-  };
 
   /**
    * Load credentials from LocalStorage.
@@ -268,7 +283,7 @@ class KeePassLoader {
    *
    * @returns {Promise<{ databasePassword: string; keyFile: string }>} The loaded credentials.
    */
-  static loadCredentialsCache = async () => {
+  static loadCredentialsCache = async (): Promise<{ databasePassword: string; keyFile: string }> => {
     const credentials: { databasePassword: string; keyFile: string } = {
       databasePassword: "",
       keyFile: "",
@@ -290,15 +305,14 @@ class KeePassLoader {
    *
    * @returns {Promise<string[][]>} The entries in a CSV format.
    */
-  static loadEntriesCache = () => {
-    return LocalStorage.getItem("entries").then((entries) => {
+  static loadEntriesCache = (): Promise<string[][]> =>
+    LocalStorage.getItem("entries").then((entries) => {
       if (entries == undefined) {
         return [];
       } else {
         return this.parseCsvEntries(entries as string);
       }
     });
-  };
 
   /**
    * Refreshes the cache of the KeePass database entries.
@@ -310,8 +324,8 @@ class KeePassLoader {
    * @returns {Promise<string[][]>} - A promise that resolves to the parsed
    * entries.
    */
-  static refreshEntriesCache = () => {
-    return this.execKeepassXCCli([
+  static refreshEntriesCache = (): Promise<string[][]> =>
+    this.execKeepassxcCli([
       "export",
       ...this.convertIntoKeyFileOption(this.keyFile),
       "-q",
@@ -322,7 +336,6 @@ class KeePassLoader {
       LocalStorage.setItem("entries", entries);
       return this.parseCsvEntries(entries);
     });
-  };
 
   /**
    * Sets the database password and key file path.
@@ -330,7 +343,7 @@ class KeePassLoader {
    * @param {string} password - The password for the KeePass database.
    * @param {string} [keyFile=""] - The optional path to the key file.
    */
-  static setCredentials = (password: string, keyFile = "") => {
+  static setCredentials = (password: string, keyFile: string = "") => {
     this.setDatabasePassword(password);
     this.setKeyFile(keyFile);
   };

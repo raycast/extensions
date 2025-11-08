@@ -8,7 +8,7 @@ import { planeClient } from "../api/auth";
 export default function ProjectWorkItemsList({ projectItem }: { projectItem: Project }) {
   const { isLoading, workItems, pagination } = useProjectWorkItems(projectItem.id as string);
   return (
-    <List isLoading={isLoading} isShowingDetail pagination={pagination}>
+    <List isLoading={isLoading} isShowingDetail pagination={pagination} searchBarPlaceholder="Search work items">
       {workItems.map((workItem, i) => (
         <List.Item
           key={i}
@@ -18,11 +18,6 @@ export default function ProjectWorkItemsList({ projectItem }: { projectItem: Pro
           detail={
             <List.Item.Detail
               markdown={`# ${workItem.name} \n\n --- \n\n ${parseHtmlToMarkdown(workItem.descriptionHtml ?? "")}`}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title={projectItem.identifier} text={`${workItem.sequenceId}`} />
-                </List.Item.Detail.Metadata>
-              }
             />
           }
           actions={

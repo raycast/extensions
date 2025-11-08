@@ -9,10 +9,10 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getRandomGreetingForName, getWorkspaceId, setUser } from "./utils";
+import { extractAndStoreRegion, getRandomGreetingForName, getWorkspaceId, setUser } from "./utils";
 import { useCallback } from "react";
 import { MeResponseType } from "@dust-tt/client";
-import { withDustClient, getDustClient } from "./dust_api/oauth";
+import { withDustClient, getDustClient, getCurrentToken } from "./dust_api/oauth";
 
 type WorkspaceWithRegion = {
   sId: string;
@@ -27,7 +27,10 @@ export default withDustClient(function PickWorkspaceCommand() {
     const workspaces: WorkspaceWithRegion[] = [];
     let user: MeResponseType["user"] | undefined = undefined;
 
+    await extractAndStoreRegion(getCurrentToken());
+
     const dustAPI = getDustClient();
+
     const me = await dustAPI.me();
     if (me.isOk()) {
       user = me.value;
