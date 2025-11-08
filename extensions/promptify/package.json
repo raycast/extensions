@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "promptify",
+  "title": "Promptify",
+  "description": "One-key prompt enhancer for any AI. Select → copy → Promptify shows a clean, structured version. Works locally with Ollama. History + JSON export.",
+  "icon": "extension-icon-512.png",
+  "author": "thomas-basadonne",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "enhance-prompt-general",
+      "title": "Enhance Prompt - General",
+      "subtitle": "Preview → Copy/Paste",
+      "description": "Reads text from Clipboard, applies the General preset, shows a Markdown preview, then Copy / Paste into the active app. Saves to History and lets you export JSON.",
+      "mode": "view"
+    },
+    {
+      "name": "enhance-prompt---images",
+      "title": "Enhance Prompt — Images",
+      "subtitle": "NanoBanana / Sora / Midjourney / FLUX / SD",
+      "description": "Optimizes prompts for image models: subject, style, composition, lens, lighting, color, extras, negative prompts. Preview, Copy/Paste, History, JSON export.",
+      "mode": "view"
+    },
+    {
+      "name": "enhance-prompt---code",
+      "title": "Enhance Prompt — Code",
+      "subtitle": "Tech tasks & specs",
+      "description": "Optimizes technical prompts: language/version, constraints, output format (diff/snippet/tests), edge cases. Preview, Copy/Paste, History, JSON export.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Recent results",
+      "description": "Browse the last enhanced prompts. Copy, Paste, Copy JSON, or delete items.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-presets",
+      "title": "Manage Presets",
+      "subtitle": "Create, edit, import/export",
+      "description": "Manage custom presets: create new, edit existing, duplicate, import/export JSON, delete. Built-in presets can be duplicated and customized.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "AI Provider",
+      "description": "Choose which AI provider to use for prompt enhancement",
+      "type": "dropdown",
+      "required": true,
+      "default": "ollama",
+      "data": [
+        { "title": "Ollama (Local)", "value": "ollama" },
+        { "title": "OpenAI Compatible (Future)", "value": "openai" }
+      ]
+    },
+    {
+      "name": "ollamaUrl",
+      "title": "Ollama URL",
+      "description": "URL where Ollama is running",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:11434"
+    },
+    {
+      "name": "ollamaModel",
+      "title": "Ollama Model",
+      "description": "Model name to use for enhancement",
+      "type": "textfield",
+      "required": false,
+      "default": "llama3.2:3b"
+    },
+    {
+      "name": "autoPaste",
+      "title": "Auto Paste",
+      "description": "Automatically paste after copying enhanced prompt",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable auto paste"
+    },
+    {
+      "name": "saveToHistory",
+      "title": "Save to History",
+      "description": "Automatically save enhanced prompts to history",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable history saving"
+    },
+    {
+      "name": "maxHistoryItems",
+      "title": "Max History Items",
+      "description": "Maximum number of items to keep in history (10-100)",
+      "type": "dropdown",
+      "required": false,
+      "default": "50",
+      "data": [
+        { "title": "10 items", "value": "10" },
+        { "title": "25 items", "value": "25" },
+        { "title": "50 items (recommended)", "value": "50" },
+        { "title": "75 items", "value": "75" },
+        { "title": "100 items", "value": "100" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
