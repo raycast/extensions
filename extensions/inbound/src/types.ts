@@ -15,7 +15,10 @@ interface WebhookConfig {
   headers?: Record<string, string>;
 }
 interface EmailConfig {
-  email: string;
+  forwardTo: string;
+  senderName: string;
+  subjectPrefix: string;
+  includeAttachments: boolean;
 }
 interface EmailGroupConfig {
   emails: string[];
@@ -42,6 +45,21 @@ interface EndpointWithStats {
 interface GetEndpointsResponse {
   data: EndpointWithStats[];
   pagination: Pagination;
+}
+interface PostEndpointsRequest {
+  name: string;
+  type: "webhook" | "email" | "email_group";
+  description?: string;
+  config: EndpointConfig;
+}
+interface PostEndpointsResponse {
+  id: string;
+  name: string;
+  type: string;
+  config: EndpointConfig;
+  isActive: boolean;
+  description: string | null;
+  createdAt: Date;
 }
 interface DomainWithStats {
   id: string;
@@ -171,9 +189,12 @@ export type {
   DomainWithStats,
   PostDomainsRequest,
   PostEmailsRequest,
+  PostEndpointsRequest,
+  PostEndpointsResponse,
   GetEmailAddressesResponse,
   PostEmailAddressesRequest,
   EmailAddressWithDomain,
+  EmailConfig,
   EndpointWithStats,
   GetDNSRecordsResponse,
   GetEmailAddressesRequest,

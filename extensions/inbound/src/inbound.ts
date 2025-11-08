@@ -9,6 +9,8 @@ import {
   PostDomainsRequest,
   PostEmailAddressesRequest,
   PostEmailsRequest,
+  PostEndpointsRequest,
+  PostEndpointsResponse,
 } from "./types";
 
 const { api_key } = getPreferenceValues<Preferences>();
@@ -64,6 +66,11 @@ export const inbound = {
       }),
   },
   endpoints: {
+    create: (params: PostEndpointsRequest) =>
+      makeRequest<PostEndpointsResponse>("endpoints", {
+        method: "POST",
+        body: JSON.stringify(params),
+      }),
     delete: (id: string) =>
       makeRequest(`endpoints/${id}`, {
         method: "DELETE",
