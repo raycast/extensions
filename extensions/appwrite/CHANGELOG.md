@@ -1,6 +1,6 @@
 # Appwrite Changelog
 
-## [Show Sites, Deployments, Variables] - {PR_MERGE_DATE}
+## [Show Sites, Deployments, Variables] - 2025-11-08
 
 - In **Collections**:
     1. `show` createdAt, updatedAt
