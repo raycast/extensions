@@ -1,16 +1,7 @@
-import type {
-  MeetingFilter,
-  Paginated,
-  Meeting,
-  Recording,
-  Summary,
-  Transcript,
-  Team,
-  TeamMember,
-} from "../types/Types";
+import type { MeetingFilter, Paginated, Meeting, Summary, Transcript, Team, TeamMember } from "../types/Types";
 import { getFathomClient, getApiKey } from "./client";
 import { isNumber, toStringOrUndefined } from "../utils/typeGuards";
-import { convertSDKMeeting, convertSDKTeam, convertSDKTeamMember, mapRecordingFromMeeting } from "../utils/converters";
+import { convertSDKMeeting, convertSDKTeam, convertSDKTeamMember } from "../utils/converters";
 import { formatTranscriptToMarkdown } from "../utils/formatting";
 import { parseTimestamp } from "../utils/dates";
 import { logger } from "@chrismessina/raycast-logger";
@@ -116,6 +107,7 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
     let nextCursor: string | undefined = undefined;
 
     for await (const response of result) {
+      if (!response) continue;
       const meetingListResponse = response.result;
       items.push(...meetingListResponse.items.map(convertSDKMeeting));
       nextCursor = meetingListResponse.nextCursor || undefined;
@@ -125,7 +117,7 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
     return { items, nextCursor };
   } catch (error) {
     // Fallback to direct HTTP if SDK validation fails
-    // This is expected with SDK v0.0.30 - the API returns valid data but SDK validation is strict
+    // SDK v0.0.36 has improved validation, but fallback remains for edge cases
     if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
       // Silent fallback - API returned 200, just SDK validation failed
       return await listMeetingsHTTP(filter);
@@ -347,17 +339,6 @@ function mapMeetingFromHTTP(raw: unknown): Meeting | undefined {
   };
 }
 
-export async function listRecentRecordings(
-  args: { pageSize?: number; cursor?: string } = {},
-): Promise<Paginated<Recording>> {
-  // Fallback: derive recordings from meetings until a dedicated recordings list endpoint is available.
-  const page = await listMeetings({ cursor: args.cursor });
-  return {
-    items: page.items.map(mapRecordingFromMeeting),
-    nextCursor: page.nextCursor,
-  };
-}
-
 export async function getMeetingSummary(recordingId: string): Promise<Summary> {
   logger.log(`[API] 📝 getMeetingSummary called for recordingId: ${recordingId}`);
   const resp = await authGet<unknown>(`/recordings/${encodeURIComponent(recordingId)}/summary`);
@@ -438,12 +419,20 @@ export async function listTeams(
   try {
     const client = getFathomClient();
 
-    const response = await client.listTeams({
+    const result = await client.listTeams({
       cursor: args.cursor,
     });
 
-    const items = response.items.map(convertSDKTeam);
-    const nextCursor = response.nextCursor || undefined;
+    const items: Team[] = [];
+    let nextCursor: string | undefined = undefined;
+
+    for await (const response of result) {
+      if (!response?.result) continue;
+      const teamListResponse = response.result;
+      items.push(...teamListResponse.items.map(convertSDKTeam));
+      nextCursor = teamListResponse.nextCursor || undefined;
+      break; // Only get first page
+    }
 
     return { items, nextCursor };
   } catch (error) {
@@ -514,10 +503,18 @@ export async function listTeamMembers(
       requestParams.team = teamId;
     }
 
-    const response = await client.listTeamMembers(requestParams);
+    const result = await client.listTeamMembers(requestParams);
 
-    const items = response.items.map((tm) => convertSDKTeamMember(tm, teamId));
-    const nextCursor = response.nextCursor || undefined;
+    const items: TeamMember[] = [];
+    let nextCursor: string | undefined = undefined;
+
+    for await (const response of result) {
+      if (!response?.result) continue;
+      const teamMemberListResponse = response.result;
+      items.push(...teamMemberListResponse.items.map((tm) => convertSDKTeamMember(tm, teamId)));
+      nextCursor = teamMemberListResponse.nextCursor || undefined;
+      break; // Only get first page
+    }
 
     return { items, nextCursor };
   } catch (error) {

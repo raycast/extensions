@@ -141,9 +141,9 @@ class CacheManager {
    * Cache API results (deduplicated by data hash)
    */
   private async cacheApiResults(meetings: Meeting[]): Promise<void> {
-    // Create a hash of the meeting IDs to detect duplicates
+    // Create a hash of the meeting IDs AND their update times to detect changes
     const dataHash = meetings
-      .map((m) => m.recordingId)
+      .map((m) => `${m.recordingId}:${m.createdAt || m.startTimeISO}`)
       .sort()
       .join(",");
 
