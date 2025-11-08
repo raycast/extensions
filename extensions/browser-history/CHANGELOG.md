@@ -1,6 +1,6 @@
 # Browser History Changelog
 
-## [Add Dia, Comet and ChatGPT Atlas browser support] - {PR_MERGE_DATE}
+## [Add Dia, Comet and ChatGPT Atlas browser support] - 2025-11-08
 
 - Added Dia history search support.
 - Added Comet history search support.

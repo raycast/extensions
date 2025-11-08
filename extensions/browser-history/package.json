@@ -385,7 +385,7 @@
         {
           "name": "profilePathComet",
           "type": "textfield",
-          "required": false,  
+          "required": false,
           "title": "Comet Profile Path",
           "description": "Path to Comet profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Comet/Default",
           "placeholder": "/Users/username/Library/Application Support/Comet/Default"
@@ -421,5 +421,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
