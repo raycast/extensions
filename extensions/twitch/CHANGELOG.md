@@ -3,7 +3,7 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - Added windows support.
-- Moved player configuation to streamlink
+- Moved player configuration to streamlink
 - Added audio only option for quality
 
 ## [OAuth & Rich Results] - 2023-12-21
