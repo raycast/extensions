@@ -1,5 +1,9 @@
 # qBittorrent Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added an option to redirect to current torrents after adding.
+
 ## [Update] - 2025-03-04
 
 - Improved error handling for qBittorrent Web UI connection issues
