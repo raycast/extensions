@@ -148,6 +148,18 @@
             {
               "title": "Sidekick",
               "value": "Sidekick"
+            },
+            {
+              "title": "Dia",
+              "value": "Dia"
+            },
+            {
+              "title": "Comet",
+              "value": "Comet"
+            },
+            {
+              "title": "ChatGPT Atlas",
+              "value": "ChatGPTAtlas"
             }
           ]
         },
