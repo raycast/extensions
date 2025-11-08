@@ -81,7 +81,7 @@ export default function Documents({ organization }: { organization: Organization
 
   const buildAccessories = (document: Document) => {
     const accessories: List.Item.Accessory[] = [];
-    document.tags.map((tag) => accessories.push({ tag: { value: tag.name, color: tag.color } }));
+    document.tags.forEach((tag) => accessories.push({ tag: { value: tag.name, color: tag.color } }));
     accessories.push({ date: new Date(document.createdAt) });
     return accessories;
   };
