@@ -46,10 +46,14 @@
       "required": false,
       "description": "Specify how the `uni` utility is executed.",
       "default": {
-        "macOS": "wasm",
+        "macOS": "node",
         "Windows": "bundled"
       },
       "data": [
+        {
+          "title": "Node.js Native Binding",
+          "value": "node"
+        },
         {
           "title": "WebAssembly (WASM)",
           "value": "wasm"
@@ -87,10 +91,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/utils": "^2.2.1",
+    "adm-zip": "^0.5.16"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@types/adm-zip": "^0.5.7",
     "@types/node": "22.13.10",
     "@types/react": "19.2.2",
     "eslint": "^9.37.0",

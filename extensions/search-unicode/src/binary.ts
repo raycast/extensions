@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import { gunzipSync } from "node:zlib";
 import { environment, getPreferenceValues } from "@raycast/api";
+import AdmZip from "adm-zip";
 
 const BINARIES: Record<
   string,
@@ -17,33 +18,52 @@ const BINARIES: Record<
 > = {
   darwin: {
     x64: {
-      url: "https://github.com/blueset/uni/releases/download/pre-eb04126/uni-eb04126-darwin-amd64.gz",
+      url: "https://github.com/blueset/uni/releases/download/pre-91ed07f/uni-91ed07f-darwin-amd64.gz",
       sha256:
-        "sha256:320153f706447dc446f2e22515e896afb8a011f8feb28bda9a3495766f82dad4",
+        "sha256:6231fe742b7b43fec7802f4afb33a0a3520ae3714e5d1fc17c86c9edb3042ea3",
     },
     arm64: {
-      url: "https://github.com/blueset/uni/releases/download/pre-eb04126/uni-eb04126-darwin-arm64.gz",
+      url: "https://github.com/blueset/uni/releases/download/pre-91ed07f/uni-91ed07f-darwin-arm64.gz",
       sha256:
-        "sha256:a58100522adef96a06a3e14d697ad3dfab7d7c59456c6909271b5ab3504d2e1f",
+        "sha256:7e281442878a1bea76b4941027599a8db29912518cec6e332b005e996393470c",
     },
   },
   win32: {
     x64: {
-      url: "https://github.com/blueset/uni/releases/download/pre-eb04126/uni-eb04126-windows-amd64.exe.gz",
+      url: "https://github.com/blueset/uni/releases/download/pre-91ed07f/uni-91ed07f-windows-amd64.exe.gz",
       sha256:
-        "sha256:a5dde329675915678186d4b49a148b86443c6cb76b68d39a8a88e817f5fb7b4e",
+        "sha256:ff7ee30d3b577b958ac6ddcdc81d40ffa5aa1793ce71c5f605e8e0403e5f8294",
     },
     arm64: {
-      url: "https://github.com/blueset/uni/releases/download/pre-eb04126/uni-eb04126-windows-arm64.exe.gz",
+      url: "https://github.com/blueset/uni/releases/download/pre-91ed07f/uni-91ed07f-windows-arm64.exe.gz",
       sha256:
-        "sha256:db98e7339e7940886294b33136f9b1406df49223356d743b98d7a3e51f29d1ee",
+        "sha256:c03ce96d2b0e53a6e0f537dad08c3e849674887b525610933a419564f5bfc9fe",
+    },
+  },
+  nodeDarwin: {
+    x64: {
+      url: "https://github.com/blueset/uni/releases/download/pre-91ed07f/uni-node-91ed07f-darwin-x64.zip",
+      sha256:
+        "sha256:bbebb5a0fd235349e1a9e038b46ef0a0a1f143ee819002bc8e26cf0b3b1d389e",
+    },
+    arm64: {
+      url: "https://github.com/blueset/uni/releases/download/pre-91ed07f/uni-node-91ed07f-darwin-arm64.zip",
+      sha256:
+        "sha256:3dfa2e2e00ff5b62c30b8f929ad24c4b82b1ec0cd4638f54f0c23242aa1c9972",
+    },
+  },
+  nodeWin32: {
+    x64: {
+      url: "https://github.com/blueset/uni/releases/download/pre-91ed07f/uni-node-91ed07f-windows-x64.zip",
+      sha256:
+        "sha256:274eaf5e4fb2f3cf61280295040855f496af3047ca8e361c0e37cca8e433d377",
     },
   },
   js: {
     wasm: {
-      url: "https://github.com/blueset/uni/releases/download/pre-eb04126/uni-eb04126-wasm.wasm.gz",
+      url: "https://github.com/blueset/uni/releases/download/pre-91ed07f/uni-91ed07f-wasm.wasm.gz",
       sha256:
-        "sha256:5084a6cbebe223804108038c0c62485a8ada4e7935ae6ebb92c50798d7145dc3",
+        "sha256:73f57212f6a71be21efd5467905374340cb222fac56fc6f2b98d636d73247711",
     },
   },
 };
@@ -54,7 +74,7 @@ export type BinaryInfo =
       wasmBinary: Buffer<ArrayBufferLike>;
     }
   | {
-      execSource: "bundled" | "path" | "custom";
+      execSource: "bundled" | "path" | "custom" | "node";
       execPath: string;
     };
 
@@ -72,7 +92,10 @@ export async function ensureBinaryAvailable(): Promise<BinaryInfo> {
     const preferences = getPreferenceValues<Preferences>();
     let execSource = preferences.execSource;
 
-    const platform = os.platform();
+    const platform =
+      execSource === "node"
+        ? `node${os.platform().charAt(0).toUpperCase()}${os.platform().slice(1)}`
+        : os.platform();
     const arch = os.arch();
 
     // If execSource is bundled and platform+arch not in binaries, change to wasm
@@ -103,7 +126,10 @@ export async function ensureBinaryAvailable(): Promise<BinaryInfo> {
     let binaryInfo: { url: string; sha256: string };
     let filename: string;
 
-    if (execSource === "bundled") {
+    if (execSource === "node") {
+      binaryInfo = BINARIES[platform][arch];
+      filename = path.basename(binaryInfo.url).replace(/\.zip$/, ".node");
+    } else if (execSource === "bundled") {
       binaryInfo = BINARIES[platform][arch];
       filename = path.basename(binaryInfo.url).replace(/\.gz$/, "");
     } else {
@@ -116,6 +142,7 @@ export async function ensureBinaryAvailable(): Promise<BinaryInfo> {
 
     // 2. Check if the binary already exists
     try {
+      console.log(`Checking existence of binary at ${targetPath}`);
       await fs.access(targetPath);
       // File exists, skip download
     } catch {
@@ -125,12 +152,11 @@ export async function ensureBinaryAvailable(): Promise<BinaryInfo> {
       if (!response.ok) {
         throw new Error(`Failed to download binary: ${response.statusText}`);
       }
-
-      const gzBuffer = Buffer.from(await response.arrayBuffer());
+      const downloadBuffer = Buffer.from(await response.arrayBuffer());
 
       // Check SHA256
       const hash = crypto.createHash("sha256");
-      hash.update(gzBuffer);
+      hash.update(downloadBuffer);
       const calculatedHash = `sha256:${hash.digest("hex")}`;
 
       if (calculatedHash !== binaryInfo.sha256) {
@@ -139,21 +165,47 @@ export async function ensureBinaryAvailable(): Promise<BinaryInfo> {
         );
       }
 
-      // Decompress and write
-      const decompressed = gunzipSync(gzBuffer);
+      if (execSource === "node") {
+        // Load zip archive
+        const zip = new AdmZip(downloadBuffer);
+        const zipEntries = zip.getEntries();
 
-      // Ensure support directory exists
-      await fs.mkdir(environment.supportPath, { recursive: true });
-      await fs.writeFile(targetPath, decompressed);
+        // Ensure support directory exists
+        await fs.mkdir(environment.supportPath, { recursive: true });
 
-      // Set executable permissions (for bundled binaries)
-      if (execSource === "bundled") {
-        await fs.chmod(targetPath, 0o755);
+        // Extract each file
+        for (const entry of zipEntries) {
+          if (entry.isDirectory) continue;
+
+          const entryBasename = path.basename(entry.entryName);
+          const extractPath =
+            entryBasename === "@eana+uni.node"
+              ? targetPath
+              : path.join(environment.supportPath, entryBasename);
+          await fs.writeFile(extractPath, entry.getData());
+        }
+      } else {
+        // Decompress and write
+        const decompressed = gunzipSync(downloadBuffer);
+
+        // Ensure support directory exists
+        await fs.mkdir(environment.supportPath, { recursive: true });
+        await fs.writeFile(targetPath, decompressed);
+
+        // Set executable permissions (for bundled binaries)
+        if (execSource === "bundled") {
+          await fs.chmod(targetPath, 0o755);
+        }
       }
     }
 
     // 4. Return
-    if (execSource === "bundled") {
+    if (execSource === "node") {
+      return {
+        execSource: "node",
+        execPath: targetPath,
+      };
+    } else if (execSource === "bundled") {
       return {
         execSource: "bundled",
         execPath: targetPath,
