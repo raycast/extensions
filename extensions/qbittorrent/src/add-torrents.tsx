@@ -112,10 +112,18 @@ export default function AddTorrents() {
     torrentURLsRef.current?.reset();
 
     if (redirectAfterAdding) {
-      await launchCommand({
-        name: "torrents",
-        type: LaunchType.UserInitiated,
-      });
+      try {
+        await launchCommand({
+          name: "torrents",
+          type: LaunchType.UserInitiated,
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to open torrents",
+          message: error instanceof Error ? error.message : "Unknown error occurred",
+        });
+      }
     }
   };
 
