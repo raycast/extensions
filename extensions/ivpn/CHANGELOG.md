@@ -1,6 +1,7 @@
-# iVPN Changelog
+# IVPN Changelog
 
-## [1.0.1] - 2025-11-08
-- Better error handling in logout command.
+## [Better error handling in logout command] - {PR_MERGE_DATE}
+
+- Improve error handling in logout command.
 
 ## [Initial Version] - 2025-10-30
