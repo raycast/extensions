@@ -116,13 +116,7 @@ export async function listMeetings(filter: MeetingFilter): Promise<Paginated<Mee
 
     return { items, nextCursor };
   } catch (error) {
-    // Fallback to direct HTTP if SDK validation fails
-    // SDK v0.0.36 has improved validation, but fallback remains for edge cases
-    if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
-      // Silent fallback - API returned 200, just SDK validation failed
-      return await listMeetingsHTTP(filter);
-    }
-    // For other errors, log and fallback
+    // Fallback to direct HTTP for network/connection errors
     logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listMeetingsHTTP(filter);
   }
@@ -431,15 +425,12 @@ export async function listTeams(
       const teamListResponse = response.result;
       items.push(...teamListResponse.items.map(convertSDKTeam));
       nextCursor = teamListResponse.nextCursor || undefined;
-      break; // Only get first page
+      // Continue fetching all pages automatically
     }
 
     return { items, nextCursor };
   } catch (error) {
-    // Fallback to direct HTTP if SDK validation fails
-    if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
-      return await listTeamsHTTP(args);
-    }
+    // Fallback to direct HTTP for network/connection errors
     logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listTeamsHTTP(args);
   }
@@ -513,15 +504,12 @@ export async function listTeamMembers(
       const teamMemberListResponse = response.result;
       items.push(...teamMemberListResponse.items.map((tm) => convertSDKTeamMember(tm, teamId)));
       nextCursor = teamMemberListResponse.nextCursor || undefined;
-      break; // Only get first page
+      // Continue fetching all pages automatically
     }
 
     return { items, nextCursor };
   } catch (error) {
-    // Fallback to direct HTTP if SDK validation fails
-    if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
-      return await listTeamMembersHTTP(teamId, args);
-    }
+    // Fallback to direct HTTP for network/connection errors
     logger.warn("Fathom SDK error, using HTTP fallback:", error instanceof Error ? error.message : String(error));
     return await listTeamMembersHTTP(teamId, args);
   }

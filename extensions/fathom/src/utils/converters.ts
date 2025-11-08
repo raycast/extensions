@@ -49,21 +49,14 @@ export function convertSDKMeeting(m: SDKMeeting): Meeting {
     recordingId,
     actionItemsCount,
     actionItems: m.actionItems || undefined,
-    calendarInvitees: (() => {
-      const emails = m.calendarInvitees
-        .map((inv: { email: string | null | undefined }) => inv.email)
-        .filter((email: string | null | undefined): email is string => email !== null && email !== undefined);
-      return emails;
-    })(),
-    calendarInviteesDomains: (() => {
-      const emails = m.calendarInvitees
-        .map((inv: { email: string | null | undefined }) => inv.email)
-        .filter((email: string | null | undefined): email is string => email !== null && email !== undefined);
-      const domains = emails
-        .map((email: string | null | undefined) => email?.split("@")[1])
-        .filter((domain: string | undefined): domain is string => domain !== undefined && domain !== "");
-      return Array.from(new Set(domains));
-    })(),
+    calendarInvitees: m.calendarInvitees.map((inv) => inv.email).filter((email): email is string => email != null),
+    calendarInviteesDomains: Array.from(
+      new Set(
+        m.calendarInvitees
+          .map((inv) => inv.email?.split("@")[1])
+          .filter((domain): domain is string => domain != null && domain !== ""),
+      ),
+    ),
   };
 }
 
