@@ -1,5 +1,9 @@
 # qBittorrent Changelog
 
+## [Update] - 2025-11-07
+
+- Toggled on windows support
+
 ## [Update] - 2025-03-04
 
 - Improved error handling for qBittorrent Web UI connection issues
