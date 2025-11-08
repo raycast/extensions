@@ -1,5 +1,17 @@
 # Google Chrome Changelog
 
+## [Add Exclude Search Feature] - 2025-11-05
+
+- Add support for excluding search terms using " -" (space + dash) prefix
+- Example: "raycast -firefox" finds items containing "raycast" but not "firefox"
+- Support for searching literal "-" character using "\-" escape sequence (e.g., "foo \-bar" to find "foo-bar")
+- Works across all search functions: tabs, history, bookmarks, and search all
+- Fix SQL injection vulnerability in history search
+- Improve performance by skipping filtering when no search query is provided
+- Handle invalid URLs (e.g., javascript: protocol) gracefully to prevent crashes
+- Fix `ERR_INVALID_URL` error in Tab class methods (realFavicon, googleFavicon, urlWithoutScheme)
+- Display warning icon and helpful message for bookmarks/history with unsupported URL protocols
+
 ## [Improvements] - 2025-10-13
 
 - Fix weird issue with a constant not working (ref: [#22053](https://github.com/raycast/extensions/issues/22053), [#22026](https://github.com/raycast/extensions/issues/22026), [#21966](https://github.com/raycast/extensions/issues/21966), [#21973](https://github.com/raycast/extensions/issues/21973), [#21928](https://github.com/raycast/extensions/issues/21928))

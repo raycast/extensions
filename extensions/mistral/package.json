@@ -41,6 +41,33 @@
       "placeholder": "Your Mistral API key",
       "required": true,
       "type": "password"
+    },
+    {
+      "name": "defaultModel",
+      "label": "Default Model",
+      "title": "Default Model",
+      "description": "The default Mistral model to use for new conversations",
+      "required": false,
+      "type": "dropdown",
+      "default": "mistral-small-latest",
+      "data": [
+        {
+          "title": "Mistral Small",
+          "value": "mistral-small-latest"
+        },
+        {
+          "title": "Mistral Medium",
+          "value": "mistral-medium-latest"
+        },
+        {
+          "title": "Mistral Large",
+          "value": "mistral-large-latest"
+        },
+        {
+          "title": "Codestral",
+          "value": "codestral-latest"
+        }
+      ]
     }
   ],
   "scripts": {
@@ -48,20 +75,25 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api publish"
   },
   "dependencies": {
-    "@mistralai/mistralai": "^1.5.2",
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.17.0"
+    "@mistralai/mistralai": "^1.10.0",
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
-  }
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.6"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
