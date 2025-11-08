@@ -2,7 +2,7 @@ import { Action, ActionPanel, getPreferenceValues, Icon } from "@raycast/api";
 import { watchStream } from "./streamlink";
 import { type ComponentProps } from "react";
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues();
 const streamlinkLocation = preferences.streamlink;
 const quality = preferences.quality;
 const lowlatency = preferences.lowlatency;
