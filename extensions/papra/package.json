@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "papra",
   "title": "Papra",
-  "description": "Simple &amp; Secure Document Archiving for Long-Term Storage",
+  "description": "Simple & Secure Document Archiving for Long-Term Storage",
   "icon": "papra-1.png",
   "author": "xmok",
   "platforms": [
