@@ -1,5 +1,9 @@
 # UploadThing Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Toggled on windows support
+
 ## [2.0.1 - Add "List Files"] - 2025-01-31
 
 - Add "List Files" command
