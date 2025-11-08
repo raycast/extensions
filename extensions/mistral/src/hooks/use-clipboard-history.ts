@@ -1,5 +1,6 @@
 import { Clipboard } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { IMAGE_FORMATS, FORMATS_REQUIRING_CONVERSION } from "../utils/image-formats";
 
 export type ClipboardItem = {
   offset: number;
@@ -16,7 +17,12 @@ export function useClipboardHistory() {
 
   async function loadClipboardHistory() {
     const items: ClipboardItem[] = [];
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".heic", ".heif"];
+    const supportedExtensions = [
+      ...Object.values(IMAGE_FORMATS).flatMap((fmt) => fmt.extensions.map((ext) => `.${ext}`)),
+      ...FORMATS_REQUIRING_CONVERSION.map((ext) => `.${ext}`),
+      ".gif",
+      ".bmp",
+    ];
 
     for (let offset = 0; offset <= 5; offset++) {
       try {
@@ -29,7 +35,7 @@ export function useClipboardHistory() {
             const ext = lastDot !== -1 ? filePath.toLowerCase().slice(lastDot) : "";
             const isMacOSClipboardImage = !ext && filePath.includes("/Image ");
 
-            if (imageExtensions.includes(ext) || isMacOSClipboardImage) {
+            if (supportedExtensions.includes(ext) || isMacOSClipboardImage) {
               items.push({ offset, type: "image", content: filePath });
             }
           } catch {

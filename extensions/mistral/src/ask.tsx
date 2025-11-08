@@ -59,14 +59,18 @@ export default function Command() {
     async function loadImagePreview() {
       if (imagePaths.length > 0) {
         try {
+          const { getMimeTypeFromExtension } = await import("./utils/image-formats");
           const fs = await import("fs/promises");
+
+          const ext = (imagePaths[0].toLowerCase().split(".").pop() || "").toLowerCase();
+          const mimeType = getMimeTypeFromExtension(ext) || "image/png";
+
           const imageBuffer = await fs.readFile(imagePaths[0]);
           const base64 = imageBuffer.toString("base64");
-          const ext = imagePaths[0].toLowerCase().split(".").pop();
-          const mimeType = ext === "png" ? "png" : ext === "jpg" || ext === "jpeg" ? "jpeg" : "png";
-          setImagePreviewData(`data:image/${mimeType};base64,${base64}`);
-        } catch (error) {
-          console.error("Failed to load image preview:", error);
+          const dataUrl = `data:${mimeType};base64,${base64}`;
+
+          setImagePreviewData(dataUrl);
+        } catch {
           setImagePreviewData("");
         }
       } else {

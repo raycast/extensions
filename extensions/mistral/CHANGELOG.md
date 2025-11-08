@@ -13,17 +13,23 @@
 - Real-time image preview when images are selected
 - HEIC/HEIF to JPEG conversion for iPhone screenshot compatibility
 - Image support in conversation history with `images` field
+- Support for JPEG, PNG, and WebP image formats
+- Centralised image format handling with typed constants
 
 ### Changed
 - Switched Ask Question UI from Form to List view to enable image previews
 - Updated streaming to use character-based chunking (100 chars) for smoother rendering
 - Enhanced model selection with vision-capable Pixtral models in preferences
+- Refactored clipboard functionality into shared hook and component
+- Added visual feedback for attached images in conversation view
 
 ### Technical
 - Direct REST API integration for vision requests (bypassing SDK limitation)
 - Custom SSE stream parser for Mistral vision API responses
 - Smart model switching: automatically upgrades to vision model when images detected
 - Base64 image encoding for vision API compatibility
+- Dynamic MIME type detection based on file extension
+- Shared image format constants in `utils/image-formats.ts`
 
 ## [Enhancement] - 2025-11-04
 

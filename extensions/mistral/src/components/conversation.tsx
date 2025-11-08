@@ -85,32 +85,35 @@ export function Conversation({ conversation, model: propModel }: Props) {
     const { promisify } = await import("util");
     const execAsync = promisify(exec);
     const os = await import("os");
-
-    console.log("Reading image from:", filePath);
+    const { IMAGE_FORMATS, FORMATS_REQUIRING_CONVERSION } = await import("../utils/image-formats");
 
     let finalPath = filePath;
-    const ext = path.extname(filePath).toLowerCase().slice(1);
+    let currentExt = path.extname(filePath).toLowerCase().slice(1);
 
-    if (ext === "heic" || ext === "heif" || ext === "") {
+    const shouldConvert = FORMATS_REQUIRING_CONVERSION.includes(currentExt) || !currentExt;
+
+    if (shouldConvert) {
       const tempJpgPath = path.join(os.tmpdir(), `mistral-converted-${Date.now()}.jpg`);
-      console.log("Converting HEIC/HEIF to JPEG:", tempJpgPath);
 
       try {
         await execAsync(`sips -s format jpeg "${filePath}" --out "${tempJpgPath}"`);
         finalPath = tempJpgPath;
-      } catch (error) {
-        console.error("Failed to convert image:", error);
+        currentExt = "jpg";
+      } catch {
         throw new Error("Unsupported image format. Please use JPEG, PNG, or WebP.");
       }
     }
 
+    const format = Object.values(IMAGE_FORMATS).find((fmt) => fmt.extensions.includes(currentExt));
+
+    if (!format) {
+      throw new Error(`Unsupported image format: ${currentExt}`);
+    }
+
     const imageBuffer = await fs.readFile(finalPath);
     const base64 = imageBuffer.toString("base64");
-    const mimeType = "jpeg";
 
-    console.log("Image size:", imageBuffer.length, "bytes, MIME type:", mimeType);
-
-    return `data:image/${mimeType};base64,${base64}`;
+    return `data:${format.mimeType};base64,${base64}`;
   }
 
   async function* parseSSEStream(reader: ReadableStreamDefaultReader<Uint8Array>) {
@@ -131,8 +134,8 @@ export function Conversation({ conversation, model: propModel }: Props) {
           if (data === "[DONE]") return;
           try {
             yield JSON.parse(data);
-          } catch (error) {
-            console.error("Failed to parse SSE data:", error);
+          } catch {
+            continue;
           }
         }
       }
@@ -162,17 +165,12 @@ export function Conversation({ conversation, model: propModel }: Props) {
       const needsVision = hasImages && !supportsVision(model);
       const effectiveModel = needsVision ? getDefaultVisionModel() : model;
 
-      console.log("Sending to Mistral with model:", effectiveModel);
-      console.log("Has images:", hasImages, "Needs vision switch:", needsVision);
-
       let currentAnswer = "";
       let chunkBuffer = "";
       const CHUNK_SIZE = 100;
 
       if (hasImages) {
-        console.log("Processing", images.length, "images:", images);
         const imageUrls = await Promise.all(images.map((img) => imageToBase64(img)));
-        console.log("Converted to", imageUrls.length, "base64 data URLs");
 
         const visionMessages = [
           ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
@@ -185,11 +183,6 @@ export function Conversation({ conversation, model: propModel }: Props) {
             ],
           },
         ];
-
-        console.log(
-          "User message with images:",
-          JSON.stringify(visionMessages[visionMessages.length - 1], null, 2).substring(0, 500),
-        );
 
         const apiKey = preferences.apiKey;
         const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
@@ -278,13 +271,6 @@ export function Conversation({ conversation, model: propModel }: Props) {
 
       showToast({ title: "Response complete", style: Toast.Style.Success });
     } catch (error: unknown) {
-      console.error("Stream error:", error);
-      console.error("Error type:", typeof error);
-      if (error && typeof error === "object") {
-        console.error("Error keys:", Object.keys(error));
-        console.error("Error JSON:", JSON.stringify(error, null, 2).substring(0, 1000));
-      }
-
       const errorMessage = error instanceof Error ? error.message : String(error);
       const is429 = errorMessage.includes("429") || errorMessage.includes("capacity exceeded");
       const isVisionError =
