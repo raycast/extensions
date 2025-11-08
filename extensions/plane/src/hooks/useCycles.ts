@@ -13,8 +13,9 @@ export function useCycles(projectId: string, config: { execute?: boolean }) {
     },
   );
 
+  const filteredCycles = data.filter((cycle) => cycle.endDate && new Date(cycle.endDate) > new Date());
   return {
-    cycles: data,
+    cycles: filteredCycles,
     error,
     isLoading,
     mutate,

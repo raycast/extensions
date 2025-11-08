@@ -274,6 +274,28 @@ struct SetTitleAndNotesPayload: Decodable {
   try eventStore.save(item, commit: true)
 }
 
+struct MoveToListPayload: Decodable {
+  let reminderId: String
+  let listId: String
+}
+
+@raycast func moveToList(payload: MoveToListPayload) throws {
+  let eventStore = EKEventStore()
+
+  guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
+    throw RemindersError.noReminderFound
+  }
+
+  let calendars = eventStore.calendars(for: .reminder)
+  guard let newCalendar = (calendars.first { $0.calendarIdentifier == payload.listId }) else {
+    throw RemindersError.noReminderFound
+  }
+
+  item.calendar = newCalendar
+
+  try eventStore.save(item, commit: true)
+}
+
 @raycast func toggleCompletionStatus(reminderId: String) throws {
   let eventStore = EKEventStore()
 

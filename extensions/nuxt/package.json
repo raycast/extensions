@@ -42,6 +42,19 @@
       "title": "Nuxt Documentation",
       "description": "Search and browse Nuxt documentation",
       "mode": "view"
+    },
+    {
+      "name": "quick-create",
+      "title": "Quick Create",
+      "description": "Create Nuxt files from templates (components, pages, API routes, layouts, composables)",
+      "mode": "view"
+    },
+    {
+      "name": "nuxt-dev-server",
+      "title": "Nuxt Dev Server",
+      "description": "Monitor and control running Nuxt development servers",
+      "mode": "menu-bar",
+      "interval": "30s"
     }
   ],
   "tools": [
@@ -95,33 +108,6 @@
       "placeholder": "U",
       "required": false,
       "default": "U"
-    },
-    {
-      "name": "docsUrl",
-      "title": "Nuxt UI Docs URL",
-      "type": "textfield",
-      "description": "Base URL for Nuxt UI docs (no trailing slash)",
-      "placeholder": "https://ui.nuxt.com/docs",
-      "required": false,
-      "default": "https://ui.nuxt.com/docs"
-    },
-    {
-      "name": "nuxtDocsUrl",
-      "title": "Nuxt Docs URL",
-      "type": "textfield",
-      "description": "Base URL for Nuxt framework docs including version (no trailing slash)",
-      "placeholder": "https://nuxt.com/docs/4.x",
-      "required": false,
-      "default": "https://nuxt.com/docs/4.x"
-    },
-    {
-      "name": "branch",
-      "title": "UI Branch",
-      "type": "textfield",
-      "description": "nuxt/ui GitHub branch or ref used to fetch theme files",
-      "placeholder": "main",
-      "required": false,
-      "default": "main"
     }
   ],
   "dependencies": {
@@ -149,6 +135,7 @@
     "evals": "npx ray evals"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

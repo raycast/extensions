@@ -31,6 +31,17 @@ export const getUserLogo = (user: UserLite): Image.ImageLike => {
 };
 
 export const getProjectIcon = (logo: Project["logoProps"]): Image.ImageLike => {
-  if (logo.in_use === "emoji") return logo.emoji.url;
-  return { source: Icon.Folder, tintColor: logo.icon.color };
+  let source: Image.Source = Icon.Folder;
+  let tintColor: Color.ColorLike | undefined;
+  if (logo && typeof logo === "object") {
+    switch (logo.in_use) {
+      case "emoji":
+        if (logo.emoji?.url) source = logo.emoji.url;
+        break;
+      case "icon":
+        tintColor = logo.icon?.color;
+        break;
+    }
+  }
+  return { source, tintColor };
 };

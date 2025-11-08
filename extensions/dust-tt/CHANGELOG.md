@@ -1,5 +1,10 @@
 # Dust.tt Changelog
 
+## [Fixes] - 2025-10-14
+
+- Move gpt4 and claude3 defaults to gpt5 and claude4
+- Fix a login bug for users in EU workspaces
+
 ## [Update] - 2025-10-07
 
 - Remove deprecated API Key flow.

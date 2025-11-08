@@ -9,8 +9,12 @@ export function useProjectMembers(projectId: string, config: { execute?: boolean
       execute: config.execute !== false,
     },
   );
+  const filteredMembers = data?.filter(
+    (member) => !member.email?.endsWith("-intake@plane.so") && !member.email?.endsWith("_bot@plane.so"),
+  );
+
   return {
-    members: data || [],
+    members: filteredMembers || [],
     error,
     isLoading,
     mutate,

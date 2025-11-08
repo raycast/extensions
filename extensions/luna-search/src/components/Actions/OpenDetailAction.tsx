@@ -1,4 +1,6 @@
 import { Action, Icon, useNavigation } from "@raycast/api";
+import { JSX } from "react";
+
 import { SearchCallback, SearchInput } from "../..";
 import { DISPLAY_VALUES } from "../../constants";
 import { GameDetail } from "../GameDetail";

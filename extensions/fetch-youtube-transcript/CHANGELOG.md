@@ -1,5 +1,11 @@
 # Fetch Youtube Transcript Changelog
 
+## [2.0.2] - 2025-10-17
+
+### 2.0.2 Added
+
+- Added the second argument to the command to choose the action (save to txt file or copy to clipboard) - You can set the default action in preferences.
+
 ## [2.0.1] - 2025-10-01
 
 ### 2.0.1 Breaking Changes

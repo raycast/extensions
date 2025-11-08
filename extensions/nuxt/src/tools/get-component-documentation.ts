@@ -1,7 +1,4 @@
-import { $fetch } from "ofetch";
-import { getDocsUrl } from "../utils/search";
-import { sanitizeComponentName } from "../utils/components";
-import { getPreferenceValues } from "@raycast/api";
+import { fetchComponentMarkdown } from "../utils/components";
 
 type Input = {
   /**
@@ -25,13 +22,5 @@ type Input = {
  * @returns The full documentation of the component as a string
  */
 export default async function tool(input: Input) {
-  const { prefix } = getPreferenceValues();
-  const sanitizedComponentName = sanitizeComponentName(input.componentName, prefix ?? "U");
-  const url = getDocsUrl().replace("/docs", "/raw/docs/components");
-  return await $fetch(`${url}/${sanitizedComponentName}.md`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "text/plain",
-    },
-  });
+  return await fetchComponentMarkdown(input.componentName);
 }

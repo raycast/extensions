@@ -5,6 +5,9 @@
   "description": "Effortlessly convert Spotify links to your preferred streaming service",
   "version": "1.0.0",
   "author": "sjdonado",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "icon": "icon.png",
   "categories": [
     "Media"
@@ -82,5 +85,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

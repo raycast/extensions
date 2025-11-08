@@ -23,28 +23,35 @@ export async function search(
 
   if (searchResponse.ok) {
     const data = await searchResponse.json();
+
+    if (!data.hits || !Array.isArray(data.hits)) {
+      throw new Error("Invalid API response: missing or invalid hits array");
+    }
+
     return {
       ...data,
-      hits: data.hits.map((icon: SearchIcon) => {
-        const result: IconMetadata = {
-          ...icon,
-          name: icon.appName,
-          uploadedAt: icon.timeStamp,
-          updatedAt: Date.now(),
-        };
-        return result;
-      }),
+      hits: data.hits
+        .filter((icon: SearchIcon) => icon.appName)
+        .map((icon: SearchIcon) => {
+          const result: IconMetadata = {
+            ...icon,
+            name: icon.appName,
+            uploadedAt: icon.timeStamp,
+            updatedAt: Date.now(),
+          };
+          return result;
+        }),
     };
   }
 
   let errorMessage: string;
+  const responseText = await searchResponse.text();
 
   try {
-    const errorData: { message?: string } = await searchResponse.json();
+    const errorData: { message?: string } = JSON.parse(responseText);
     errorMessage =
       errorData.message || searchResponse.statusText || "Search request failed";
   } catch {
-    const responseText = await searchResponse.text();
     errorMessage = `API returned HTTP error ${searchResponse.status} with non-JSON body:\n\n${responseText}`;
   }
 
