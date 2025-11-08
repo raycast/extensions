@@ -44,7 +44,7 @@ export function useFrecencySortingExtended<T extends { id?: string }>(
   } = useFrecencySorting<T>(data, options as any);
 
   const key = (item: T) => {
-    if (options?.key) return options.key;
+    if (options?.key) return options.key(item);
     if (!("id" in item)) throw new Error(`property "id" expected in item`);
     return String(item.id);
   };
