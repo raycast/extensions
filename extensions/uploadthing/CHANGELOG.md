@@ -1,6 +1,6 @@
 # UploadThing Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [2.0.2] - {PR_MERGE_DATE}
 
 - Toggled on windows support
 
