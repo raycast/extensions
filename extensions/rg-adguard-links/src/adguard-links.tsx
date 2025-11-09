@@ -12,27 +12,34 @@ export default function AdguardLinks() {
     setIsLoading(false);
   }, []);
 
+  // Workaround for JSX typing incompatibilities in this workspace's React/TS types:
+  const ListAny = List as unknown as any;
+  const ListItem: any = (ListAny.Item as unknown) as any;
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search AdGuard filter lists">
+    <ListAny isLoading={isLoading} searchBarPlaceholder="Search AdGuard filter lists">
       {items.map((l) => (
-        <List.Item
+        <ListItem
           key={l.id}
-            title={l.name}
-            subtitle={l.category}
-            accessories={[{ icon: Icon.Link }]}            
-            actions={<Actions list={l} />}
+          title={l.name}
+          subtitle={l.category}
+          accessories={[{ icon: Icon.Link }]}
+          actions={<Actions list={l} />}
         />
       ))}
-    </List>
+    </ListAny>
   );
 }
 
 function Actions({ list }: { list: AdguardList }) {
+  const ActionPanelAny: any = ActionPanel as unknown as any;
+  const ActionAny: any = Action as unknown as any;
+
   return (
-    <ActionPanel>
-      <Action.OpenInBrowser title="Open Homepage" url={list.homepage} />
-      <Action.OpenInBrowser title="Open Raw" url={list.rawUrl} />
-      <Action
+    <ActionPanelAny>
+      <ActionAny.OpenInBrowser title="Open Homepage" url={list.homepage} />
+      <ActionAny.OpenInBrowser title="Open Raw" url={list.rawUrl} />
+      <ActionAny
         title="Copy Raw URL"
         icon={Icon.Clipboard}
         onAction={async () => {
@@ -40,6 +47,6 @@ function Actions({ list }: { list: AdguardList }) {
           showToast({ style: Toast.Style.Success, title: "Copied raw URL" });
         }}
       />
-    </ActionPanel>
+    </ActionPanelAny>
   );
 }
