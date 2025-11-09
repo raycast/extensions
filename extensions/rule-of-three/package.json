@@ -18,7 +18,7 @@
     {
       "name": "index",
       "title": "Rule of Three",
-      "subtitle": "Rule of Three",
+      "subtitle": "Cross Multiplication",
       "description": "Calculate X in the proportion: A is to B as C is to X",
       "mode": "view"
     }
