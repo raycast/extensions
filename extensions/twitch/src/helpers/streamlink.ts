@@ -8,6 +8,15 @@ export function watchStream(
   lowlatency: boolean | undefined,
   streamlinkConfig: string,
 ) {
+  if (!streamlinkLocation || streamlinkLocation === "") {
+    showToast({
+      title: "Streamlink not found",
+      message: "Please set the Streamlink path in the extension settings.",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
   if (name.includes("twitch.tv/")) {
     name = name.replace(/^(https?:\/\/)?(www\.)?twitch\.tv\//, "");
   }
