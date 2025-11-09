@@ -8,7 +8,7 @@ export function watchStream(
   lowlatency: boolean | undefined,
   streamlinkConfig: string | undefined,
 ) {
-  if (!streamlinkLocation || streamlinkLocation === "") {
+  if (!streamlinkLocation) {
     showToast({
       title: "Streamlink not found",
       message: "Please set the Streamlink path in the extension settings.",
