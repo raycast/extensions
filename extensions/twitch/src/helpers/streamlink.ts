@@ -30,7 +30,7 @@ export function watchStream(
   // For low latency streams
   if (lowlatency) {
     let command = `${streamlinkLocation} twitch.tv/${name} ${quality} --twitch-low-latency`;
-    if (streamlinkConfig && streamlinkConfig !== "") {
+    if (streamlinkConfig) {
       command += ` --config ${streamlinkConfig}`;
     }
 
