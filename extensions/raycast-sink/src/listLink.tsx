@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { List, Icon, ActionPanel, Action, Toast, showToast } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Toast, showToast, launchCommand, LaunchType } from "@raycast/api";
 import { useLinks } from "./hooks/useLinks";
 import { useTranslation } from "./hooks/useTranslation";
 import { useConfig } from "./hooks/useConfig";
@@ -91,6 +91,17 @@ export default function LinkListView() {
           title={t.noLinks || "No Links"}
           description={t.createLinkDescription || "Create a new short link"}
           icon={Icon.Link}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Plus}
+                title="Create Link"
+                onAction={() =>
+                  launchCommand({ name: "createLink", extensionName: "raycast-sink", type: LaunchType.UserInitiated })
+                }
+              />
+            </ActionPanel>
+          }
         />
       </List>
     );
