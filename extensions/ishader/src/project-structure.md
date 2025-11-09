@@ -15,6 +15,7 @@ src/
 │   ├── common.ts                # Common parameters shared by all shaders
 │   ├── shaders.ts               # Central shader registry
 │   └── shaders/                 # Individual shader configurations
+│       ├── edit.ts              # Edit shader configuration
 │       ├── dither.ts            # Dither shader configuration
 │       ├── ascii.ts             # ASCII art shader configuration
 │       └── brick.ts             # Brick (LEGO-like) shader configuration
@@ -33,14 +34,18 @@ src/
 │   ├── processors/              # Modular shader processors
 │   │   ├── common.ts            # Common utility functions (hash, saturate, etc.)
 │   │   ├── index.ts             # Processor registry and exports
+│   │   ├── edit.ts              # Edit processor
 │   │   ├── dither.ts            # Dither processor
 │   │   ├── ascii.ts             # ASCII processor
 │   │   └── brick.ts             # Brick processor
 │   ├── imageProcessor.ts        # Legacy file (backwards compatibility)
 │   ├── shaderProcessor.ts       # Dynamic shader router
-│   └── parameterMapper.ts       # Universal parameter mapping system
+│   ├── parameterMapper.ts       # Universal parameter mapping system
+│   ├── tempFileManager.ts       # Temporary file management utilities
+│   └── fileValidation.ts        # File validation and sanitization utilities
 │
-└── editingtools.tsx             # Main application component
+├── instruction-add-shader.md    # Instructions for adding new shaders
+└── ishader.tsx                  # Main application component
 ```
 
 ## Architecture Overview
@@ -93,7 +98,7 @@ All UI components are dynamically generated from shader configurations:
 - **processors/**: Modular shader processor system:
   - **common.ts**: Shared utility functions (hash21, saturate, luminance, etc.)
   - **index.ts**: Central processor registry - single place to register all processors
-  - Each processor is in its own file (dither.ts, ascii.ts, brick.ts, etc.)
+  - Each processor is in its own file (edit.ts, dither.ts, ascii.ts, brick.ts, etc.)
   - Each processor exports both the function and parameter types
 
 - **shaderProcessor.ts**: Dynamic router that:
@@ -106,6 +111,16 @@ All UI components are dynamically generated from shader configurations:
   - Maps parameter names when needed (can be configured per shader)
   - Handles type conversion automatically
   - No need for shader-specific mapper functions
+
+- **tempFileManager.ts**: Temporary file management utilities:
+  - Safe file deletion with error handling
+  - Automatic cleanup of old temporary files
+  - Prevents file system clutter
+
+- **fileValidation.ts**: File validation and sanitization utilities:
+  - Image file format validation
+  - File size and dimension checks
+  - Filename sanitization for safe file operations
 
 - **imageProcessor.ts**: Legacy file kept for backwards compatibility
   - Re-exports types and processors from processors/
