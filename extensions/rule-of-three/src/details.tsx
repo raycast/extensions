@@ -1,6 +1,5 @@
 // details.tsx
 import { Detail } from "@raycast/api";
-import path from "path";
 
 interface DetailsProps {
   a: string;
