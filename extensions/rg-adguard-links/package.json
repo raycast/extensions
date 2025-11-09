@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "title": "RG AdGuard Links",
   "description": "Browse and open AdGuard filter list resources (official + community).",
-  "icon": "icon.png",
+  "icon": "icon.svg",
   "author": "jergensturdley",
   "license": "MIT",
   "categories": ["Developer Tools"],
