@@ -11,7 +11,8 @@
     "thomas",
     "aeorge",
     "hayden_barnes",
-    "micha_van_eijk"
+    "micha_van_eijk",
+    "islamtayeb"
   ],
   "keywords": [
     "2fa"
@@ -32,6 +33,14 @@
       "label": "Filter Out Unknown Senders",
       "description": "When enabled, messages from unknown senders will not be shown.",
       "default": false,
+      "required": false
+    },
+    {
+      "name": "loadContactPhotos",
+      "type": "checkbox",
+      "label": "Load Contact Photos",
+      "description": "When enabled, contact photos will be displayed. Disabling this significantly improves performance (~3s faster).",
+      "default": true,
       "required": false
     }
   ],

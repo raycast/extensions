@@ -40,7 +40,7 @@ class Chatwoot {
     });
     if (!response.headers.get("content-type")?.includes("application/json")) throw new Error(response.statusText);
     const contentLength = response.headers.get("content-length");
-    if (response.ok && contentLength === "0") return undefined as T; // edge case when notification is marked as read
+    if (response.ok && contentLength === "0") return undefined as T; // edge case when: notification is marked as read, contact deleted
     const result = await response.json();
     if (!response.ok) {
       const errorResult = result as { error: string } | { message: string; attributes: string[] };
@@ -58,8 +58,16 @@ class ContactsService {
       body: JSON.stringify(props.contact),
     });
   }
+  async delete(props: { contactId: number }) {
+    return this.client["request"](`contacts/${props.contactId}`, {
+      method: "DELETE",
+    });
+  }
   async list(props: { page: number }) {
     return this.client["request"]<ListResult<Contact>>(`contacts?page=${props.page}`);
+  }
+  async search(props: { page: number; q: string }) {
+    return this.client["request"]<ListResult<Contact>>(`contacts/search?page=${props.page}&q=${props.q}`);
   }
 }
 class ConversationsService {

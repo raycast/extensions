@@ -1,5 +1,11 @@
 # Twitch Changelog
 
+## [Update] - 2025-11-09
+
+- Added windows support.
+- Moved player configuration to streamlink
+- Added audio only option for quality
+
 ## [OAuth & Rich Results] - 2023-12-21
 
 - Added Twitch Oauth support
@@ -14,7 +20,7 @@
   - Shows detailed backlog of past streams (VODs)
 - Improved existing commands
   - Use caching to improve performance
-  - Use *frecency* sorting to improve results
+  - Use _frecency_ sorting to improve results
   - Store past searches, displayed in the "empty search" state
 
 ## [Streamlink Bug Fix] - 2022-08-10
@@ -28,7 +34,6 @@
 - Added metadata for raycast store
 - Optimizing + Refactoring + restructuring underlying codebase
 - A lot of other small bug and QOL fixes + improvements
-
 
 ## [UI improvements] - 2022-05-10
 

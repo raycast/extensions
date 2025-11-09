@@ -1,62 +1,77 @@
-import { Action, ActionPanel, closeMainWindow, Form, Icon, open, PopToRootType, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useState } from "react";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
+import { useEffect } from "react";
+import { useCarriers } from "./hooks/useCarriers";
+import { addDelivery } from "./api";
 
 interface FormValues {
   trackingNumber: string;
+  carrierCode: string;
   description: string;
+  confirmationNotification: boolean;
 }
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(false);
+  const { carriers, isLoading: carriersLoading, error: carriersError } = useCarriers();
 
-  async function handleSubmit(values: FormValues) {
-    if (!values.trackingNumber.trim()) {
-      await showFailureToast({
-        title: "Tracking Number Required",
-        message: "Please enter a tracking number",
-      });
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit: async (values) => {
+      try {
+        // Trim whitespace from inputs
+        const trackingNumber = values.trackingNumber.trim();
+        const description = values.description.trim();
+        const confirmationNotification = values.confirmationNotification;
 
-    try {
-      setIsLoading(true);
+        // Use the API to add delivery
+        await addDelivery(trackingNumber, values.carrierCode, description, confirmationNotification);
 
-      // Trim whitespace from tracking number
-      const trackingNumber = values.trackingNumber.trim();
-      const description = values.description.trim();
+        // Show a success HUD
+        await showHUD(`📦 Delivery Added`, {
+          popToRootType: PopToRootType.Immediate,
+        });
+      } catch (error) {
+        console.error("Error adding delivery:", error);
 
-      // Choose the appropriate protocol based on whether a description is provided
-      let url = "";
-      if (description) {
-        // Use labeled protocol when description is provided
-        url = `parcel://automaticwithlabel/${encodeURIComponent(description)}/?${encodeURIComponent(trackingNumber)}`;
-      } else {
-        // Use automatic protocol when no description is provided
-        url = `parcel://automatic/?${encodeURIComponent(trackingNumber)}`;
+        let errorMessage = "Something went wrong";
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === "string") {
+          errorMessage = error;
+        } else {
+          errorMessage = String(error);
+        }
+
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error adding delivery",
+          message: errorMessage,
+        });
       }
+    },
+    validation: {
+      trackingNumber: (value) => {
+        if (!value || !value.trim()) {
+          return "Tracking number is required";
+        }
+      },
+      carrierCode: FormValidation.Required,
+      description: (value) => {
+        if (!value || !value.trim()) {
+          return "Description is required";
+        }
+      },
+    },
+  });
 
-      // Open the URL with the appropriate protocol
-      await open(url);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Delivery Added",
-        message: description || trackingNumber,
+  useEffect(() => {
+    if (carriersError) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load carriers",
+        message: carriersError.message || "Unable to fetch supported carriers. Please try again later.",
       });
-
-      // Always close the window after adding a package
-      await closeMainWindow({ popToRootType: PopToRootType.Immediate });
-    } catch (error) {
-      console.error("Error adding delivery:", error);
-      await showFailureToast({
-        title: "Failed to Add Delivery",
-        message: String(error),
-      });
-    } finally {
-      setIsLoading(false);
     }
-  }
+  }, [carriersError]);
 
   return (
     <Form
@@ -65,13 +80,28 @@ export default function Command() {
           <Action.SubmitForm title="Add Delivery" icon={Icon.Plus} onSubmit={handleSubmit} />
         </ActionPanel>
       }
-      isLoading={isLoading}
+      isLoading={carriersLoading}
     >
-      <Form.TextField id="trackingNumber" title="Tracking Number" placeholder="Enter the tracking number" autoFocus />
       <Form.TextField
-        id="description"
+        title="Tracking Number"
+        placeholder="Enter the tracking number"
+        autoFocus
+        {...itemProps.trackingNumber}
+      />
+      <Form.Dropdown title="Carrier" placeholder="Select a carrier" {...itemProps.carrierCode}>
+        {carriers.map((carrier) => (
+          <Form.Dropdown.Item key={carrier.code} value={carrier.code} title={carrier.name} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextField
         title="Description"
-        placeholder="Enter a description for this package (optional)"
+        placeholder="Enter a description for this package"
+        {...itemProps.description}
+      />
+      <Form.Checkbox
+        title="Confirmation"
+        label="Receive a push notification when the delivery is added."
+        {...itemProps.confirmationNotification}
       />
     </Form>
   );

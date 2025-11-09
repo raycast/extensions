@@ -6,6 +6,10 @@
 - Added delete option action
 - Fixed error with crypto
 
+## [2.0.2] - 2025-11-09
+
+- Toggled on windows support
+
 ## [2.0.1 - Add "List Files"] - 2025-01-31
 
 - Add "List Files" command
