@@ -35,5 +35,5 @@ Add or adjust filter list entries in `src/data/lists.ts` (will be added in a sub
 
 ## Notes
 
-Screenshots will be added in `metadata/` once the list view is implemented.
+Screenshots (PNG, light & dark) will be added under `metadata/` following Raycast guidelines once UI stabilizes.
 

@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function refreshAdguardIndex() {
   try {
@@ -8,10 +9,6 @@ export default async function refreshAdguardIndex() {
     await new Promise((r) => setTimeout(r, 800));
     await showToast({ style: Toast.Style.Success, title: "AdGuard index refreshed" });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to refresh index",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error);
   }
 }
