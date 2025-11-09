@@ -10,12 +10,11 @@ interface DetailsProps {
 }
 
 export default function Details({ a, b, c, x }: DetailsProps) {
-  const illustrationPath = path.join(__dirname, "assets", "illustration.png");
-
+  
   const markdown = `
 # Illustration
 
-![](${illustrationPath})
+![](illustration.png)
 
 ## How Rule of Three Works
 
