@@ -8,7 +8,7 @@ import {
   getLocalStorageItem,
   setLocalStorageItem,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import { URLSearchParams } from "node:url";
 
@@ -243,8 +243,7 @@ export default function Command() {
   const { data, isLoading, error } = useFetch<KalshiSearchResponse>(apiUrl, {
     parseResponse: parseFetchResponse,
     onError: async (error) => {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Failed to fetch markets",
         message: error.message,
       });
