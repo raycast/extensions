@@ -1,6 +1,6 @@
 # Shelve Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-11-09
 
 Added the initial version of Shelve for Raycast with the following commands:
   - `Encrypt` command for creating secure, encrypted secrets with customizable expiration times and read limitations
