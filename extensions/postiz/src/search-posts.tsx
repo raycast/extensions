@@ -36,12 +36,12 @@ const generateMarkdown = (post: Post) => {
         .replace(/@(\w+)/g, (match, handle) => {
           return postiz_version === "1"
             ? `[${match}](https://x.com/${handle})`
-            : `<a href="https://x.com/${handle}">${match}<a/>`;
+            : `<a href="https://x.com/${handle}">${match}</a>`;
         })
         .replace(/#(\w+)/g, (match, hashtag) => {
           return postiz_version === "1"
             ? `[${match}](https://x.com/hashtag/${hashtag})`
-            : `<a href="https://x.com/hashtag/${hashtag}">${match}<a/>`;
+            : `<a href="https://x.com/hashtag/${hashtag}">${match}</a>`;
         });
     default:
       return post.content;
