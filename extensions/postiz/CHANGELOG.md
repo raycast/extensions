@@ -1,6 +1,6 @@
 # Postiz Changelog
 
-## [View Post as Markdown + Month Display Extends till EoM] - {PR_MERGE_DATE}
+## [View Post as Markdown + Month Display Extends till EoM] - 2025-11-09
 
 - Posts are now shown in **markdown** to give a better idea
 - Post preview links can be copied for easy sharing
