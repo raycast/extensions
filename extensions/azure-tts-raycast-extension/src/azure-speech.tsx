@@ -1,4 +1,4 @@
-import { showToast, Toast, getSelectedText, closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, getSelectedText, closeMainWindow, getPreferenceValues, trash } from "@raycast/api";
 import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
 import { exec } from "child_process";
 import { promisify } from "util";
