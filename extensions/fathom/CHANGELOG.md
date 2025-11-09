@@ -1,6 +1,6 @@
 # Fathom for Raycast Changelog
 
-## Update to Fathom SDK 0.0.36 - {PR_MERGE_DATE}
+## Update to Fathom SDK 0.0.36 - 2025-11-09
 
 ### Changed
 
