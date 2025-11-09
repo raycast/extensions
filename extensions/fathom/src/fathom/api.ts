@@ -406,12 +406,13 @@ export async function getMeetingTranscript(recordingId: string): Promise<Transcr
 }
 
 export async function listTeams(
-  args: { pageSize?: number; cursor?: string; query?: string } = {},
+  args: { pageSize?: number; cursor?: string; query?: string; maxPages?: number } = {},
 ): Promise<Paginated<Team>> {
   logger.log(`[API] 👥 listTeams called with args:`, args);
   logger.log(`[API] 🔵 Calling Fathom SDK client.listTeams()...`);
   try {
     const client = getFathomClient();
+    const maxPages = args.maxPages ?? 10; // Generous default: ~100-500 teams depending on page size
 
     const result = await client.listTeams({
       cursor: args.cursor,
@@ -419,13 +420,31 @@ export async function listTeams(
 
     const items: Team[] = [];
     let nextCursor: string | undefined = undefined;
+    let pageCount = 0;
 
     for await (const response of result) {
       if (!response?.result) continue;
+
+      pageCount++;
+      if (pageCount > maxPages) {
+        logger.log(`[API] 👥 Reached maxPages limit (${maxPages}), stopping pagination`);
+        break;
+      }
+
       const teamListResponse = response.result;
-      items.push(...teamListResponse.items.map(convertSDKTeam));
+      const pageItems = teamListResponse.items.map(convertSDKTeam);
+      items.push(...pageItems);
       nextCursor = teamListResponse.nextCursor || undefined;
-      // Continue fetching all pages automatically
+
+      if (pageCount > 1) {
+        logger.log(`[API] 👥 Fetched page ${pageCount}: ${pageItems.length} teams (total: ${items.length})`);
+      }
+
+      // Continue fetching all pages automatically unless maxPages limit is reached
+      if (!nextCursor) {
+        logger.log(`[API] 👥 Pagination complete: ${pageCount} pages, ${items.length} total teams`);
+        break;
+      }
     }
 
     return { items, nextCursor };
