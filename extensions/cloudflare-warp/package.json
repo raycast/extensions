@@ -27,6 +27,13 @@
       "subtitle": "Cloudflare Warp",
       "description": "Switches between available virtual networks",
       "mode": "view"
+    },
+    {
+      "name": "switch-mdm-profile",
+      "title": "WARP Switch MDM Profile",
+      "subtitle": "Cloudflare Warp",
+      "description": "Switches between available MDM profiles",
+      "mode": "view"
     }
   ],
   "preferences": [
