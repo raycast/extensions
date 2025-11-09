@@ -1,5 +1,11 @@
 # Postiz Changelog
 
+## [View Post as Markdown + Month Display Extends till EoM] - {PR_MERGE_DATE}
+
+- Posts are now shown in **markdown** to give a better idea
+- Post preview links can be copied for easy sharing
+- v2 "Month" now shows posts including end-of-month
+
 ## [Fix Creation Failing + Post Enhancements] - 2025-10-24
 
 ### Search Posts
