@@ -30,11 +30,11 @@ export function watchStream(
   // For low latency streams
   if (lowlatency) {
     let command = `${streamlinkLocation} twitch.tv/${name} ${quality} --twitch-low-latency`;
-    if (streamlinkConfig !== "") {
+    if (streamlinkConfig && streamlinkConfig !== "") {
       command += ` --config ${streamlinkConfig}`;
     }
 
-    exec(command, (error, stdout, stderr) => {
+    exec(command, (error, _, stderr) => {
       if (error) {
         showToast({ style: Toast.Style.Failure, title: "Failed to watch stream", message: error.message });
         return;
@@ -49,9 +49,8 @@ export function watchStream(
     return;
   }
 
-  // For m3u8 Streams
-  // this gets the m3u8 url from the streamlink api
-  exec(`${streamlinkLocation} twitch.tv/${name} ${quality} --stream-url`, (error, m3u8URL, stderr) => {
+  // this will open the stream in the default player configured in streamlink
+  exec(`${streamlinkLocation} twitch.tv/${name} ${quality}`, (error, _, stderr) => {
     if (error) {
       showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
       return;
@@ -61,18 +60,7 @@ export function watchStream(
       return;
     }
 
-    // this opens the m3u8 url in the quicktime player
-    exec(`open -a "Quicktime Player" "${m3u8URL}"`, (error, _, stderr) => {
-      if (error) {
-        showToast({ title: "Error Opening QuickTime", message: error.message, style: Toast.Style.Failure });
-        return;
-      }
-      if (stderr) {
-        showToast({ title: "Error Opening QuickTime", message: stderr, style: Toast.Style.Failure });
-        return;
-      }
-      popToRoot();
-      showHUD("⭕ Stream started");
-    });
+    popToRoot();
+    showHUD("⭕ Stream started");
   });
 }

@@ -1,12 +1,14 @@
-import { closeMainWindow, popToRoot } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { closeMainWindow, open, popToRoot } from "@raycast/api";
 import { SupportedBrowsers } from "../interfaces";
 
-export async function openNewTab(browser: SupportedBrowsers, url: string): Promise<boolean | string> {
+export async function openNewTab(browser: SupportedBrowsers, url: string): Promise<void> {
   let appName = "";
   switch (browser) {
     case SupportedBrowsers.Chrome:
       appName = "Google Chrome";
+      break;
+    case SupportedBrowsers.Firefox:
+      appName = "Firefox";
       break;
     case SupportedBrowsers.Safari:
       appName = "Safari";
@@ -20,6 +22,9 @@ export async function openNewTab(browser: SupportedBrowsers, url: string): Promi
     case SupportedBrowsers.Vivaldi:
       appName = "Vivaldi";
       break;
+    case SupportedBrowsers.Arc:
+      appName = "Arc";
+      break;
     case SupportedBrowsers.Opera:
       appName = "Opera";
       break;
@@ -32,59 +37,20 @@ export async function openNewTab(browser: SupportedBrowsers, url: string): Promi
     case SupportedBrowsers.Sidekick:
       appName = "Sidekick";
       break;
+    case SupportedBrowsers.Dia:
+      appName = "Dia";
+      break;
+    case SupportedBrowsers.Comet:
+      appName = "Comet";
+      break;
+    case SupportedBrowsers.ChatGPTAtlas:
+      appName = "ChatGPT Atlas";
+      break;
     default:
       throw new Error(`Unsupported browser: ${browser}`);
   }
 
   popToRoot();
   closeMainWindow({ clearRootSearch: true });
-
-  const script = `
-    tell application "${appName}"
-      activate
-      tell window 1
-          set ${
-            browser === SupportedBrowsers.Safari ? "current tab" : "newTab"
-          } to make new tab with properties {URL:"${url}"}
-      end tell
-    end tell
-    return
-  `;
-
-  return await runAppleScript(script);
-}
-
-export async function openNewArcTab(url: string): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  const script = `
-    return do shell script "open -a Arc ${url}"
-  `;
-
-  return await runAppleScript(script);
-}
-
-export async function openNewFirefoxTab(url: string): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  const script = `
-    tell application "Firefox"
-      activate
-      repeat while not frontmost
-        delay 0.1
-      end repeat
-      tell application "System Events"
-        keystroke "t" using {command down}
-        keystroke "l" using {command down}
-           keystroke "a" using {command down}
-           key code 51
-           keystroke "${url}"
-           key code 36
-      end tell
-    end tell
-  `;
-
-  return await runAppleScript(script);
+  await open(url, appName);
 }

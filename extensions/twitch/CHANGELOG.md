@@ -4,6 +4,12 @@
 
 - Added default value for streamlink config
 
+## [Update] - 2025-11-09
+
+- Added windows support.
+- Moved player configuration to streamlink
+- Added audio only option for quality
+
 ## [OAuth & Rich Results] - 2023-12-21
 
 - Added Twitch Oauth support
