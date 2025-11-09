@@ -43,9 +43,7 @@ export const getACLInfoForApp = async () => {
 
   const appInfo = await fetch("https://api.uploadthing.com/v7/getAppInfo", {
     method: "POST",
-    headers: {
-      "x-uploadthing-api-key": apiKey,
-    },
+    headers: { "x-uploadthing-api-key": apiKey },
   }).then(
     (r) => r.json() as Promise<{ defaultACL: ACL; allowACLOverride: boolean }>,
   );

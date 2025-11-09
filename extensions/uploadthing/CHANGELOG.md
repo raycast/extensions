@@ -1,5 +1,11 @@
 # UploadThing Changelog
 
+## [2.0.3] - {PR_MERGE_DATE}
+
+- Added copy to clipboard action
+- Added delete option action
+- Fixed error with crypto
+
 ## [2.0.1 - Add "List Files"] - 2025-01-31
 
 - Add "List Files" command

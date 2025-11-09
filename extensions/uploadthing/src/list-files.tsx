@@ -6,6 +6,9 @@ import {
   showToast,
   Toast,
   open,
+  Clipboard,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { useFiles } from "./lib/hooks";
 import { filesize } from "filesize";
@@ -16,6 +19,16 @@ import { StatusIconMap, getToken } from "./lib/utils";
 export default () => {
   const { isLoading, files, pagination } = useFiles();
   const [filter, setFilter] = useState("");
+  const utapi = new UTApi({ token: getToken() });
+
+  const deleteFile = async (fileKey: string) => {
+    await utapi.deleteFiles(fileKey);
+  };
+
+  const getURL = async (file: ReturnType<typeof useFiles>["files"][number]) => {
+    const { url } = await utapi.getSignedURL(file.key);
+    return url;
+  };
 
   return (
     <List
@@ -65,17 +78,59 @@ export default () => {
                   icon={Icon.Globe}
                   title="Open in Browser"
                   onAction={async () => {
+                    const fileUrl = await getURL(file);
                     const toast = await showToast(
                       Toast.Style.Animated,
                       "Getting URL",
                       file.name,
                     );
-                    const utapi = new UTApi({ token: getToken() });
-                    const { url } = await utapi.getSignedURL(file.key);
+                    await open(fileUrl);
                     await toast.hide();
-                    await open(url);
                   }}
                 />
+                <Action
+                  icon={Icon.Paperclip}
+                  title="Copy URL to Clipboard"
+                  onAction={async () => {
+                    const toast = await showToast(
+                      Toast.Style.Animated,
+                      "Getting URL",
+                      file.name,
+                    );
+                    const fileUrl = await getURL(file);
+                    await Clipboard.copy(fileUrl);
+                    await toast.hide();
+                  }}
+                />
+                <ActionPanel.Section>
+                  <Action
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    title="Delete File"
+                    onAction={async () => {
+                      if (
+                        await confirmAlert({
+                          title: "Are you sure you want to delete this file?",
+                          message: file.name,
+                          primaryAction: {
+                            title: "Delete",
+                            style: Alert.ActionStyle.Destructive,
+                          },
+                        })
+                      ) {
+                        const toast = await showToast(
+                          Toast.Style.Animated,
+                          "Deleting File",
+                          file.name,
+                        );
+                        await deleteFile(file.key);
+                        await toast.hide();
+                      } else {
+                        return;
+                      }
+                    }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
