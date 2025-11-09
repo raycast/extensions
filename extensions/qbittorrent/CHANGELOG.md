@@ -1,6 +1,6 @@
 # qBittorrent Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-09
 
 - Added an option to redirect to current torrents after adding.
 
