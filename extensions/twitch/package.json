@@ -19,7 +19,7 @@
       "type": "dropdown",
       "title": "Primary Action",
       "required": false,
-      "default": "detail",
+      "default": "web",
       "data": [
         {
           "title": "Open via Browser",
@@ -53,6 +53,7 @@
       "name": "streamlinkConfig",
       "type": "textfield",
       "title": "Custom Streamlink Config",
+      "default": "",
       "required": false,
       "description": "(optional) Path to custom streamlink config file"
     },
