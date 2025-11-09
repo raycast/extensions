@@ -1,6 +1,6 @@
 # Twitch Changelog
 
-## [Fix] - ${PR_MERGE_DATE}
+## [Fix] - $2025-11-09
 
 - Added default value for streamlink config
 
