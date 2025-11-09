@@ -6,7 +6,7 @@ export function watchStream(
   streamlinkLocation: string | undefined,
   quality: string | undefined,
   lowlatency: boolean | undefined,
-  streamlinkConfig: string,
+  streamlinkConfig: string | undefined,
 ) {
   if (!streamlinkLocation || streamlinkLocation === "") {
     showToast({
