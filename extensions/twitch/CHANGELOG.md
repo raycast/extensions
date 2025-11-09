@@ -1,6 +1,6 @@
 # Twitch Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-09
 
 - Added windows support.
 - Moved player configuration to streamlink
