@@ -76,7 +76,7 @@ export default async function Command() {
               });
 
               // Clean up temporary file
-              await execAsync(`rm "${audioFile}"`).catch(() => {
+              await trash(audioFile).catch(() => {
                 // Ignore deletion errors
               });
 
