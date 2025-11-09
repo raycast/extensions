@@ -1,5 +1,3 @@
-import "./web-polyfill";
-
 import { Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
