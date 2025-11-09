@@ -9,7 +9,6 @@ interface DetailsProps {
 }
 
 export default function Details({ a, b, c, x }: DetailsProps) {
-  
   const markdown = `
 # Illustration
 
