@@ -166,7 +166,7 @@ export function getSupportedTimezones(): string[] {
 export function convertToAllFormats(
   date: Date,
   primaryTimezone: string,
-  showMultipleTimezones: boolean
+  showMultipleTimezones: boolean,
 ): ConversionResult[] {
   const results: ConversionResult[] = [];
 

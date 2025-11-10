@@ -62,15 +62,21 @@ export default function Command() {
       case "iso":
         return 0; // ISO 8601
       case "full":
-        return results.findIndex((r) => r.title === "Full Format");
+        return Math.max(
+          0,
+          results.findIndex((r) => r.title === "Full Format"),
+        );
       case "localized":
-        return results.findIndex((r) => r.title === "Localized");
+        return Math.max(
+          0,
+          results.findIndex((r) => r.title === "Localized"),
+        );
       default:
         return 0;
     }
   };
 
-  const handleCopy = async (value: string, title: string) => {
+  const handleCopy = async (_value: string, title: string) => {
     await showToast({
       style: Toast.Style.Success,
       title: "Copied to clipboard",
