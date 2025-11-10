@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2025-11-10
 
 - Improved error handling for directory reading.
 
