@@ -1,5 +1,5 @@
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { API_TOKEN } from "./config";
+import { API_HEADERS } from "./config";
 import { generateCoolifyUrl } from "./utils";
 
 type UseCoolify<T> = {
@@ -16,10 +16,7 @@ export default function useCoolify<T>(
   const url = generateCoolifyUrl("api/v1/");
   const { isLoading, data, revalidate } = useFetch<T>(url + endpoint, {
     method,
-    headers: {
-      Authorization: `Bearer ${API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
+    headers: API_HEADERS,
     body: body ? JSON.stringify(body) : undefined,
     execute,
     onData,
