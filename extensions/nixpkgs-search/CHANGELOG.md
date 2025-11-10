@@ -1,6 +1,6 @@
 # NixPkgs Search Changelog
 
-## [Fix] - 2025-11-08
+## [Fix] - {PR_MERGE_DATE}
 - Change search URL by parsing frontend version to match the upstream change.
 
 ## [Fix] - 2025-05-13
