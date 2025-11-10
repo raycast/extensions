@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timestamp-converter",
+  "title": "Timestamp Converter",
+  "description": "Convert between timestamps and datetime formats with ease",
+  "icon": "command-icon.png",
+  "author": "liluo",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Timestamp Converter",
+      "subtitle": "Convert timestamp, datetime, or get current time",
+      "description": "Smart converter: Enter timestamp/datetime to convert, or leave empty for current time",
+      "mode": "view",
+      "keywords": [
+        "timestamp",
+        "ts",
+        "time",
+        "unix",
+        "unixtime",
+        "datetime",
+        "date",
+        "convert",
+        "epoch"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultTimezone",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Timezone",
+      "description": "Default timezone for displaying datetime",
+      "default": "local",
+      "data": [
+        {
+          "title": "Local Time",
+          "value": "local"
+        },
+        {
+          "title": "UTC",
+          "value": "UTC"
+        },
+        {
+          "title": "Asia/Shanghai (Beijing)",
+          "value": "Asia/Shanghai"
+        },
+        {
+          "title": "America/New_York (EST/EDT)",
+          "value": "America/New_York"
+        },
+        {
+          "title": "America/Los_Angeles (PST/PDT)",
+          "value": "America/Los_Angeles"
+        },
+        {
+          "title": "Europe/London (GMT/BST)",
+          "value": "Europe/London"
+        },
+        {
+          "title": "Asia/Tokyo",
+          "value": "Asia/Tokyo"
+        },
+        {
+          "title": "Asia/Singapore",
+          "value": "Asia/Singapore"
+        }
+      ]
+    },
+    {
+      "name": "showMultipleTimezones",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Multiple Timezones",
+      "description": "Display time in both local and UTC timezones",
+      "default": true,
+      "label": "Show both local and UTC time"
+    },
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Preferred Date Format",
+      "description": "Preferred date format for display",
+      "default": "iso",
+      "data": [
+        {
+          "title": "ISO 8601",
+          "value": "iso"
+        },
+        {
+          "title": "Full Format (YYYY-MM-DD HH:mm:ss)",
+          "value": "full"
+        },
+        {
+          "title": "Localized",
+          "value": "localized"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "date-fns": "^3.0.0",
+    "date-fns-tz": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
+
