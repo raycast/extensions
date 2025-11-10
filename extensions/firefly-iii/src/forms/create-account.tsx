@@ -10,7 +10,7 @@ export default function CreateAccount() {
       const toast = await showToast(Toast.Style.Animated, "Creating", values.name);
       try {
         const { data } = await firefly.accounts.create(values);
-        toast.style = Toast.Style.Failure;
+        toast.style = Toast.Style.Success;
         toast.title = "Created";
         toast.message = data.attributes.name;
         pop();

@@ -1,5 +1,5 @@
 import CreateTransaction from "./forms/create-transaction";
 
-export default function () {
+export default function Command() {
   return <CreateTransaction />;
 }

@@ -30,11 +30,10 @@ export default function CreateTransaction() {
             {
               ...values,
               date: (values.date as Date).toUTCString(),
-              amount: +values.amount,
             },
           ],
         });
-        toast.style = Toast.Style.Failure;
+        toast.style = Toast.Style.Success;
         toast.title = "Created";
         pop();
       } catch (error) {

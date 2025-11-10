@@ -60,7 +60,7 @@ export type Transaction = {
 export type TransactionSplitStore = {
   type: TransactionType;
   date: string;
-  amount: number;
+  amount: string;
   description: string;
   source_id: string;
   destination_id: string;
