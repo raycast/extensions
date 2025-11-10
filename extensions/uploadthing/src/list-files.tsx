@@ -29,7 +29,7 @@ const deleteFile = async (key: string) => {
 };
 
 export default () => {
-  const { isLoading, files, pagination } = useFiles();
+  const { isLoading, files, pagination, revalidate } = useFiles();
   const [filter, setFilter] = useState("");
   const { defaultAction } = getPreferenceValues<Preferences.ListFiles>();
 
@@ -77,18 +77,18 @@ export default () => {
             ]}
             actions={
               <ActionPanel>
+                {defaultAction === "open" ? (
+                  <>
+                    <OpenInBrowserAction name={file.name} key={file.key} />
+                    <CopyToClipboardAction name={file.name} key={file.key} />
+                  </>
+                ) : (
+                  <>
+                    <CopyToClipboardAction name={file.name} key={file.key} />
+                    <OpenInBrowserAction name={file.name} key={file.key} />
+                  </>
+                )}
                 <ActionPanel.Section>
-                  {defaultAction === "open" ? (
-                    <>
-                      <OpenInBrowserAction name={file.name} key={file.key} />
-                      <CopyToClipboardAction name={file.name} key={file.key} />
-                    </>
-                  ) : (
-                    <>
-                      <CopyToClipboardAction name={file.name} key={file.key} />
-                      <OpenInBrowserAction name={file.name} key={file.key} />
-                    </>
-                  )}
                   <Action
                     icon={Icon.Trash}
                     title="Delete File"
@@ -110,6 +110,7 @@ export default () => {
                           file.name,
                         );
                         await deleteFile(file.key);
+                        revalidate();
                         await toast.hide();
                         showToast(
                           Toast.Style.Success,
