@@ -1,6 +1,6 @@
 # Caps N Case Changelog
 
-## [2.0.0] - 2025-01-10
+## [2.0.0] - {PR_MERGE_DATE}
 
 ### Breaking Changes
 
@@ -24,7 +24,7 @@
 - Enhanced user experience with clear action buttons
 - More intuitive workflow for text conversion
 
-## [1.0.0] - 2025-01-10
+## [1.0.0] - {PR_MERGE_DATE}
 
 Initial release of Caps N Case extension.
 

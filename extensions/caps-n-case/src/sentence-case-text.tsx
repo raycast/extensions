@@ -3,8 +3,19 @@ import { useEffect, useState } from "react";
 
 function toSentenceCase(text: string): string {
   if (!text || text.length === 0) return text;
+  // Convert to lowercase first
   const lowercased = text.toLowerCase();
-  return lowercased.charAt(0).toUpperCase() + lowercased.slice(1);
+
+  // Capitalize first letter of the entire text
+  let result = lowercased.charAt(0).toUpperCase() + lowercased.slice(1);
+
+  // Capitalize first letter after sentence-ending punctuation (. ! ?)
+  // followed by one or more spaces
+  result = result.replace(/([.!?]\s+)([a-z])/g, (match, punctuation, letter) => {
+    return punctuation + letter.toUpperCase();
+  });
+
+  return result;
 }
 
 export default function Command() {
