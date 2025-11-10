@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "token-terminal-search",
+  "title": "TokenTerminal Search",
+  "description": "Search TokenTerminal projects and chains, copy project logos",
+  "icon": "command-icon.png",
+  "author": "sambernhardt",
+  "categories": [
+    "Finance",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Search TokenTerminal projects and chains",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your TokenTerminal API token",
+      "placeholder": "Enter your API token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.5.0",
+    "jiti": "^2.6.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.46.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

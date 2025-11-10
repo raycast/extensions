@@ -1,0 +1,11 @@
+Icon Placeholder
+================
+
+Raycast requires a command-icon.png file in the root directory of the extension.
+
+To add an icon:
+1. Find or create a PNG image (512x512px recommended)
+2. Save it as "command-icon.png" in the root directory (same level as package.json)
+3. The icon will appear in Raycast when you search for the command
+
+For now, you can use any crypto or finance-related icon, or the TokenTerminal logo if available.
