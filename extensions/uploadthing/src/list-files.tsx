@@ -79,13 +79,19 @@ export default () => {
               <ActionPanel>
                 {defaultAction === "open" ? (
                   <>
-                    <OpenInBrowserAction name={file.name} key={file.key} />
-                    <CopyToClipboardAction name={file.name} key={file.key} />
+                    <OpenInBrowserAction name={file.name} fileKey={file.key} />
+                    <CopyToClipboardAction
+                      name={file.name}
+                      fileKey={file.key}
+                    />
                   </>
                 ) : (
                   <>
-                    <CopyToClipboardAction name={file.name} key={file.key} />
-                    <OpenInBrowserAction name={file.name} key={file.key} />
+                    <CopyToClipboardAction
+                      name={file.name}
+                      fileKey={file.key}
+                    />
+                    <OpenInBrowserAction name={file.name} fileKey={file.key} />
                   </>
                 )}
                 <ActionPanel.Section>
@@ -117,8 +123,6 @@ export default () => {
                           "File Deleted",
                           file.name,
                         );
-                      } else {
-                        return;
                       }
                     }}
                   />
@@ -131,7 +135,13 @@ export default () => {
   );
 };
 
-function CopyToClipboardAction({ name, key }: { name: string; key: string }) {
+function CopyToClipboardAction({
+  name,
+  fileKey,
+}: {
+  name: string;
+  fileKey: string;
+}) {
   return (
     <Action
       icon={Icon.Paperclip}
@@ -142,7 +152,7 @@ function CopyToClipboardAction({ name, key }: { name: string; key: string }) {
           "Getting URL",
           name,
         );
-        const url = await getUrl(key);
+        const url = await getUrl(fileKey);
         await toast.hide();
         await Clipboard.copy(url);
       }}
@@ -150,7 +160,13 @@ function CopyToClipboardAction({ name, key }: { name: string; key: string }) {
   );
 }
 
-function OpenInBrowserAction({ name, key }: { name: string; key: string }) {
+function OpenInBrowserAction({
+  name,
+  fileKey,
+}: {
+  name: string;
+  fileKey: string;
+}) {
   return (
     <Action
       icon={Icon.Globe}
@@ -161,7 +177,7 @@ function OpenInBrowserAction({ name, key }: { name: string; key: string }) {
           "Getting URL",
           name,
         );
-        const url = await getUrl(key);
+        const url = await getUrl(fileKey);
         await toast.hide();
         await open(url);
       }}
