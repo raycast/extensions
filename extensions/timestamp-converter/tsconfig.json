@@ -17,7 +17,6 @@
     "checkJs": false,
     "noEmit": false,
     "isolatedModules": false,
-    "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*"],
