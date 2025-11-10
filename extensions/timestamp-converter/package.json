@@ -107,12 +107,12 @@
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "date-fns": "^3.0.0",
-    "date-fns-tz": "^3.0.0"
+    "date-fns-tz": "^3.0.0",
+    "react": "18.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
-    "@types/react": "18.0.9",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
