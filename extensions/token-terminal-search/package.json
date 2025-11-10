@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "token-terminal-search",
-  "title": "TokenTerminal Search",
-  "description": "Search TokenTerminal projects and chains, copy project logos",
+  "title": "Token Terminal Search",
+  "description": "Search Token Terminal projects and chains, copy project logos",
   "icon": "command-icon.png",
   "author": "sambernhardt",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "search-projects",
       "title": "Search Projects",
-      "description": "Search TokenTerminal projects and chains",
+      "description": "Search Token Terminal projects and chains",
       "mode": "view"
     }
   ],
@@ -24,7 +24,7 @@
       "type": "password",
       "required": true,
       "title": "API Token",
-      "description": "Your TokenTerminal API token",
+      "description": "Your Token Terminal API token",
       "placeholder": "Enter your API token"
     }
   ],

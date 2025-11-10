@@ -193,7 +193,7 @@ export default function SearchProjects() {
         // Transform products to SearchItems
         const productItems: SearchItem[] = productsData.result.data.data.map(
           (product) => ({
-            id: `product-${product.asset_metadata.unique_asset_id || product.product_id}`,
+            id: `product-${product.project_slug}-${product.asset_metadata.unique_asset_id || product.product_id}`,
             name: product.product_name,
             symbol: product.symbol,
             logo: product.logo,
@@ -279,7 +279,6 @@ export default function SearchProjects() {
                     ? `https://tokenterminal.com/explorer/projects/${item.slug}`
                     : `https://tokenterminal.com/explorer/projects/${item.projectSlug}/${item.slug}`
                 }
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
               <Action.CopyToClipboard
                 title="Copy Logo URL"
