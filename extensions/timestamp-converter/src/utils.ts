@@ -13,12 +13,18 @@ export interface ConversionResult {
  * Detect if input is a timestamp (seconds or milliseconds)
  */
 export function isTimestamp(input: string): boolean {
-  const num = Number(input);
+  const str = input.trim();
+
+  // Must be pure digits (no spaces, no special characters)
+  if (!/^\d+$/.test(str)) return false;
+
+  const num = Number(str);
   if (isNaN(num)) return false;
 
-  // Check if it's a valid timestamp (10 or 13 digits)
-  const str = input.trim();
-  return /^\d{10}$/.test(str) || /^\d{13}$/.test(str);
+  // Distinguish between seconds and milliseconds based on magnitude
+  // If >= 10 digits, treat as milliseconds
+  // Otherwise, treat as seconds
+  return true;
 }
 
 /**

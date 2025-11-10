@@ -127,7 +127,7 @@ export default function Command() {
                     <Action.Paste
                       title="Paste to Active App"
                       content={result.value}
-                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                     />
                   </ActionPanel>
                 }
