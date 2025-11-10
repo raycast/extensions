@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List, getPreferenceValues, showToast, Toast, Icon } from "@raycast/api";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { isTimestamp, timestampToDate, parseDatetime, convertToAllFormats, ConversionResult } from "./utils";
 
 interface Preferences {

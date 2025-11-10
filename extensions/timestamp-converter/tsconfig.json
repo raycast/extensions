@@ -13,8 +13,15 @@
     "outDir": "dist",
     "noImplicitAny": false,
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "noEmit": false,
+    "isolatedModules": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
 }
