@@ -1,6 +1,6 @@
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { API_HEADERS } from "./config";
-import { generateCoolifyUrl } from "./utils";
+import { generateCoolifyUrl, parseCoolifyResponse } from "./utils";
 
 type UseCoolify<T> = {
   method: string;
@@ -20,6 +20,7 @@ export default function useCoolify<T>(
     body: body ? JSON.stringify(body) : undefined,
     execute,
     onData,
+    parseResponse: parseCoolifyResponse,
     async onError(error) {
       await showFailureToast(error);
       onError?.();

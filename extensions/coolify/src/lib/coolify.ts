@@ -1,5 +1,6 @@
 import { API_HEADERS } from "./config";
-import { generateCoolifyUrl } from "./utils";
+import { MessageResult } from "./types";
+import { generateCoolifyUrl, parseCoolifyResponse } from "./utils";
 
 async function makeRequest<T>(endpoint: string, options: RequestInit) {
   const url = generateCoolifyUrl(`api/v1/${endpoint}`);
@@ -7,14 +8,13 @@ async function makeRequest<T>(endpoint: string, options: RequestInit) {
     ...options,
     headers: API_HEADERS,
   });
-  if (!response.ok) throw new Error(response.statusText);
-  const result = await response.json();
-  return result as T;
+  const result = await parseCoolifyResponse<T>(response);
+  return result;
 }
 export const coolify = {
   projects: {
     delete: (id: string) =>
-      makeRequest(`projects/${id}`, {
+      makeRequest<MessageResult>(`projects/${id}`, {
         method: "DELETE",
       }),
   },

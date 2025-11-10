@@ -1,6 +1,10 @@
 # Coolify Changelog
 
-## [Delete Project] - {PR_MERGE_DATE}
+## [Delete Project + Better Error Message] - {PR_MERGE_DATE}
+
+- Better Error Messages are shown
+- In `Projects`:
+    - Delete Project
 
 ## [Add Windows Support] - 2025-11-03
 
