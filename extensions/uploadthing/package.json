@@ -32,7 +32,27 @@
       "name": "list-files",
       "title": "List Files",
       "description": "List files in your UploadThing app",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultAction",
+          "type": "dropdown",
+          "title": "Default Action",
+          "description": "The default action when selecting a file",
+          "required": false,
+          "default": "open",
+          "data": [
+            {
+              "title": "Open in Browser",
+              "value": "open"
+            },
+            {
+              "title": "Copy URL to Clipboard",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -46,22 +66,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.18.1",
-    "@tanstack/react-query": "^5.28.4",
-    "@uploadthing/mime-types": "0.3.0",
-    "@uploadthing/shared": "7.0.2",
-    "filesize": "^10.1.6",
-    "undici": "^6.19.8",
-    "uploadthing": "^7.4.4"
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "@tanstack/react-query": "^5.90.7",
+    "@uploadthing/mime-types": "0.3.6",
+    "@uploadthing/shared": "7.1.10",
+    "filesize": "^11.0.13",
+    "uploadthing": "^7.7.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",
-    "@types/node": "20.11.30",
-    "@types/react": "^18.3.3",
+    "@types/node": "24.10.0",
+    "@types/react": "^19.2.2",
     "eslint": "8.57.0",
-    "prettier": "3.2.5",
-    "typescript": "5.4.2"
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
   },
   "scripts": {
     "build": "ray build",
