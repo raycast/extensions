@@ -12,9 +12,10 @@ export default function AdguardLinks() {
     setIsLoading(false);
   }, []);
 
-  // Workaround for JSX typing incompatibilities in this workspace's React/TS types:
-  const ListAny = List as unknown as any;
-  const ListItem: any = (ListAny.Item as unknown) as any;
+  // Lightweight typed aliases to avoid untyped `any` while keeping JSX usable.
+  type RCComp = import("react").ComponentType<any>;
+  const ListAny = List as unknown as RCComp & { Item: RCComp };
+  const ListItem = ListAny.Item;
 
   return (
     <ListAny isLoading={isLoading} searchBarPlaceholder="Search AdGuard filter lists">
@@ -32,13 +33,13 @@ export default function AdguardLinks() {
 }
 
 function Actions({ list }: { list: AdguardList }) {
-  const ActionPanelAny: any = ActionPanel as unknown as any;
-  const ActionAny: any = Action as unknown as any;
+  const ActionPanelAny = ActionPanel as unknown as import("react").ComponentType<any>;
+  const ActionAny = Action as unknown as import("react").ComponentType<any>;
 
   return (
     <ActionPanelAny>
-      <ActionAny.OpenInBrowser title="Open Homepage" url={list.homepage} />
-      <ActionAny.OpenInBrowser title="Open Raw" url={list.rawUrl} />
+      <ActionAny title="Open Homepage" onAction={async () => { await open(list.homepage); }} />
+      <ActionAny title="Open Raw" onAction={async () => { await open(list.rawUrl); }} />
       <ActionAny
         title="Copy Raw URL"
         icon={Icon.Clipboard}

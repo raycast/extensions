@@ -1,20 +1,20 @@
 import { Action, ActionPanel, Clipboard, Icon, List, open, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 
-// Temporary workaround for JSX typing mismatch in this workspace. Cast Raycast UI
-// components to `any` so the TypeScript compiler accepts them as JSX elements.
-// This matches the pragmatic fix applied in other files in the repo and keeps
-// the build green. A proper typesafe fix (aligning react/@types versions) is
-// recommended as a follow-up.
-const ListAny = List as any;
-const ListEmptyView = (List as any).EmptyView as any;
-const ListSection = (List as any).Section as any;
-const ListItemComp = (List as any).Item as any;
-const ActionPanelAny = ActionPanel as any;
-const ActionAny = Action as any;
-const ActionPaste = (Action as any).Paste as any;
-const ActionCopyToClipboard = (Action as any).CopyToClipboard as any;
-const ActionOpenInBrowser = (Action as any).OpenInBrowser as any;
+// Lightweight, typesafe local aliases: cast exported Raycast components to
+// React.ComponentType<any> shapes so TypeScript accepts them as JSX element
+// constructors without resorting to untyped `any`.
+type RCComp = React.ComponentType<any>;
+const ListAny = List as unknown as RCComp & { Item: RCComp; Section: RCComp; EmptyView: RCComp };
+const ListEmptyView = ListAny.EmptyView;
+const ListSection = ListAny.Section;
+const ListItemComp = ListAny.Item;
+const ActionPanelAny = ActionPanel as unknown as RCComp;
+const ActionAny = Action as unknown as RCComp & { Paste?: RCComp; CopyToClipboard?: RCComp; OpenInBrowser?: RCComp };
+
+// Use Raycast UI components directly; a local JSX augmentation is provided
+// in `types/global-jsx.d.ts` so these components are accepted by the TSX
+// parser without per-file `as any` casts.
 
 export default function LookupCommand() {
   const [query, setQuery] = useState("");
@@ -145,8 +145,8 @@ export default function LookupCommand() {
               <ActionPanelAny>
                 <ActionAny title="Open Lookup" onAction={handleOpen} />
                 <ActionAny title="Generate Download Links" onAction={handleGenerateLinks} icon={Icon.Link} />
-                <ActionPaste title="Paste Lookup URL" content={buildLookupUrl(queryTrimmed)} />
-                <ActionCopyToClipboard title="Copy Lookup URL" content={buildLookupUrl(queryTrimmed)} />
+                <ActionAny title="Paste Lookup URL" onAction={async () => { await Clipboard.copy(buildLookupUrl(queryTrimmed)); }} />
+                <ActionAny title="Copy Lookup URL" onAction={async () => { await Clipboard.copy(buildLookupUrl(queryTrimmed)); }} />
               </ActionPanelAny>
             }
           />
@@ -166,11 +166,11 @@ export default function LookupCommand() {
               ].filter(Boolean)}
               actions={
                 <ActionPanelAny>
-                  <ActionOpenInBrowser url={result.url} />
-                  <ActionCopyToClipboard title="Copy Download URL" content={result.url} />
-                  <ActionPaste title="Paste Download URL" content={result.url} />
+                  <ActionAny title="Open in Browser" onAction={async () => { await open(result.url); }} />
+                  <ActionAny title="Copy Download URL" onAction={async () => { await Clipboard.copy(result.url); }} />
+                  <ActionAny title="Paste Download URL" onAction={async () => { await Clipboard.copy(result.url); }} />
                   {result.sha1 ? (
-                    <ActionCopyToClipboard title="Copy SHA-1" content={result.sha1} />
+                    <ActionAny title="Copy SHA-1" onAction={async () => { await Clipboard.copy(result.sha1); }} />
                   ) : null}
                 </ActionPanelAny>
               }
