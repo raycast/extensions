@@ -1,7 +1,15 @@
+/**
+ * @ts-nocheck is required due to a known TypeScript/React type incompatibility issue.
+ * The Raycast API uses React 18 types that are incompatible with @types/react,
+ * causing JSX component type errors (bigint not assignable to ReactNode).
+ * This is a framework-level issue that cannot be resolved without updating
+ * Raycast's type definitions. See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/58000
+ */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+/* eslint-enable @typescript-eslint/ban-ts-comment */
 import { Action, ActionPanel, Form, Icon, showToast, Toast, LaunchProps, List, Color } from "@raycast/api";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { analyzeHTTPPerformance, formatBytes, formatSpeed, formatTime } from "./utils/httpPerf";
 import { HTTPPerformanceMetrics, FormValues } from "./types";
 
@@ -9,11 +17,6 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
   const { url: initialUrl } = props.arguments;
   const [metrics, setMetrics] = useState<HTTPPerformanceMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // If URL is provided as argument, analyze it immediately
-  if (initialUrl && !metrics && !isLoading) {
-    handleAnalyze({ url: initialUrl, method: "GET", headers: "", followRedirects: true });
-  }
 
   async function handleAnalyze(values: FormValues) {
     const { url, method, headers: headersString, followRedirects } = values;
@@ -71,6 +74,13 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
     }
   }
 
+  // If URL is provided as argument, analyze it immediately
+  useEffect(() => {
+    if (initialUrl && !metrics && !isLoading) {
+      handleAnalyze({ url: initialUrl, method: "GET", headers: "", followRedirects: true });
+    }
+  }, [initialUrl]);
+
   if (metrics) {
     return <ResultView metrics={metrics} onBack={() => setMetrics(null)} />;
   }
@@ -116,12 +126,12 @@ function ResultView({ metrics, onBack }: { metrics: HTTPPerformanceMetrics; onBa
   const statusInfo = getStatusCodeInfo(metrics.statusCode);
   const total = metrics.totalTime;
 
-  // Calculate percentages
-  const dnsPercent = ((metrics.dnsTime / total) * 100).toFixed(1);
-  const tcpPercent = ((metrics.tcpTime / total) * 100).toFixed(1);
-  const tlsPercent = ((metrics.tlsTime / total) * 100).toFixed(1);
-  const serverPercent = ((metrics.serverTime / total) * 100).toFixed(1);
-  const transferPercent = ((metrics.transferTime / total) * 100).toFixed(1);
+  // Calculate percentages (handle division by zero)
+  const dnsPercent = total > 0 ? ((metrics.dnsTime / total) * 100).toFixed(1) : "0.0";
+  const tcpPercent = total > 0 ? ((metrics.tcpTime / total) * 100).toFixed(1) : "0.0";
+  const tlsPercent = total > 0 ? ((metrics.tlsTime / total) * 100).toFixed(1) : "0.0";
+  const serverPercent = total > 0 ? ((metrics.serverTime / total) * 100).toFixed(1) : "0.0";
+  const transferPercent = total > 0 ? ((metrics.transferTime / total) * 100).toFixed(1) : "0.0";
 
   // Status helpers
   const getPhaseStatus = (time: number, thresholds: [number, number]) => {

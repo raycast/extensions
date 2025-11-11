@@ -96,7 +96,8 @@ function parseCurlOutput(
   const data: Record<string, string> = {};
 
   for (const line of lines) {
-    const [key, value] = line.split("=");
+    const [key, ...valueParts] = line.split("=");
+    const value = valueParts.join("=");
     if (key && value) {
       data[key.trim()] = value.trim();
     }
@@ -125,7 +126,8 @@ function parseCurlOutput(
 export function formatTime(seconds: number): string {
   const ms = seconds * 1000;
   if (ms < 1) {
-    return `${(ms * 1000).toFixed(0)}μs`;
+    const microseconds = ms * 1000;
+    return `${microseconds.toFixed(0)}μs`;
   }
   return `${ms.toFixed(2)}ms`;
 }
