@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mute-app",
+  "title": "Mute App",
+  "description": "Control audio output for individual Windows applications. Quickly mute or unmute running apps without affecting system volume.",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mute-app",
+      "title": "Mute App",
+      "description": "View and control audio for running applications",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-custom-app-1",
+      "title": "Toggle Mute for App 1",
+      "description": "Quickly toggle mute for configured app",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "processName",
+          "type": "textfield",
+          "required": true,
+          "title": "Window Title / Process Name",
+          "description": "Window title or name of the process to toggle (e.g., Google Chrome, chrome.exe)",
+          "placeholder": "chrome.exe"
+        },
+        {
+          "name": "showToast",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Toast Notification",
+          "description": "Display notification when toggling mute status",
+          "default": true,
+          "label": "Show notification"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "type": "dropdown",
+      "required": false,
+      "title": "Refresh Interval",
+      "description": "How often to refresh the list of sound sources",
+      "default": "3",
+      "data": [
+        {
+          "title": "3 seconds",
+          "value": "3"
+        },
+        {
+          "title": "5 seconds",
+          "value": "5"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        },
+        {
+          "title": "Never",
+          "value": "0"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "eli_revah",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ]
+}
