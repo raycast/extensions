@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-11-11
 
 - Updated extension icon.
 
