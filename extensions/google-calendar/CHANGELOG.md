@@ -2,7 +2,7 @@
 
 ## [1.3.1] - {PR_MERGE_DATE}
 
-- Modified the default action for a google calendar event to open the meeting url in browser where one exists with a fallback to opening the calendar.
+- Allow the user to configure if they wish to open a meeting directly as the default action instead of the calendar event, defaults to the existing behaviour.
 
 ## [1.3.0] - 2025-05-30
 
