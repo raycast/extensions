@@ -1,4 +1,4 @@
-# VPS File Manager
+# VPS Explorer
 
 Browse, upload, download, and manage files on your VPS server directly from Raycast.
 
@@ -11,12 +11,11 @@ Browse, upload, download, and manage files on your VPS server directly from Rayc
 - ✏️ **Rename Files** - Rename files and directories
 - 🗑️ **Delete Files** - Remove files and directories
 - 🔍 **Sort Files** - Sort by name, size, date, or type
-- 🔐 **Secure** - Uses SSH/SCP for secure file transfers
 
 ## Setup
 
 1. Install the extension
-2. Open Raycast preferences for "VPS File Manager"
+2. Open Raycast preferences for "VPS Explorer"
 3. Enter your VPS credentials:
    - **Host**: Your VPS IP address or hostname
    - **Port**: SSH port (default: 22)
@@ -37,11 +36,3 @@ Browse, upload, download, and manage files on your VPS server directly from Rayc
 - macOS (Raycast requirement)
 - SSH access to your VPS server
 - `scp` command available (comes with macOS)
-
-## Security Note
-
-This extension uses system SSH/SCP commands with your credentials stored securely in Raycast preferences.
-
-## License
-
-MIT
