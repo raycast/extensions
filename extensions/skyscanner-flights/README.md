@@ -1,8 +1,6 @@
-# Search Flights
+# Flight Search
 
 A Raycast extension to quickly search for flights on Skyscanner using natural language.
-
-https://github.com/user-attachments/assets/ee79a300-8472-41db-b5a9-1f5ede030793
 
 ## Features
 

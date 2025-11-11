@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "firefly-iii",
+  "title": "Firefly III",
+  "description": "A free and open source personal finance manager",
+  "icon": "extension-icon.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "firefly_url",
+      "title": "Firefly III URL",
+      "placeholder": "https://demo.firefly-iii.org/",
+      "description": "Firefly III URL",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "firefly_pat",
+      "title": "Firefly PAT",
+      "placeholder": "ey...xxx",
+      "description": "Firefly III Personal Access Token",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-transaction",
+      "title": "Create Transaction",
+      "description": "Create Transaction",
+      "mode": "view"
+    },
+    {
+      "name": "search-accounts",
+      "title": "Search Accounts",
+      "description": "Search Accounts",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

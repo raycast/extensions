@@ -1,7 +1,7 @@
 # Fathom TypeScript SDK Feedback
 
-**SDK Version**: `fathom-typescript@0.0.30`  
-**Date**: September 29, 2025  
+**SDK Version**: `fathom-typescript@0.0.36`  
+**Date**: October 31, 2025  
 **Integration**: Raycast Extension for Fathom  
 **Reporter**: Chris Messina (via AI pair programming)
 
@@ -23,6 +23,7 @@ The Fathom TypeScript SDK is well-structured and follows modern patterns, but ha
 #### Description
 
 The SDK throws `ResponseValidationError` even when:
+
 - API returns HTTP 200 (success)
 - Response body contains valid, well-formed JSON
 - All required fields are present
@@ -262,6 +263,7 @@ ResponseValidationError: Response validation failed
 ```
 
 **API Response Structure** (Teams):
+
 ```json
 {
   "items": [
@@ -275,6 +277,7 @@ ResponseValidationError: Response validation failed
 ```
 
 **API Response Structure** (Team Members):
+
 ```json
 {
   "items": [
@@ -324,6 +327,7 @@ GET /team_members?team=Product
 **Workaround Implemented** (in `src/search-team-members.tsx`):
 
 To build a team filter dropdown, we must:
+
 1. Fetch teams list separately from `/teams` endpoint
 2. Use team names to populate the dropdown
 3. When a team is selected, fetch members with `?team=TeamName` filter
@@ -342,7 +346,8 @@ const { data: membersData } = useCachedPromise(
 
 **Impact**: This requires two separate API calls and makes it impossible to show a grouped view of all members by team without N+1 queries (one per team).
 
-**Recommendation**: 
+**Recommendation**:
+
 1. ✅ **High Priority**: Always return the `team` field in team member responses (regardless of filter)
 2. ✅ Add `team?: string | null` field to SDK's `TeamMember` interface
 3. ✅ Add `createdAt?: string` (ISO 8601 timestamp) to `TeamMember` interface
@@ -367,6 +372,7 @@ The current API design forces inefficient patterns:
 **Real-World Impact**:
 
 In our Raycast extension, we had to choose between:
+
 - ❌ Making N+1 API calls to show grouped members (slow, rate limit risk)
 - ✅ Showing ungrouped "All Members" when no filter is selected (less useful UX)
 
@@ -400,7 +406,7 @@ This simple change would enable efficient client-side grouping and filtering wit
 
 **Observation**: HTTP 429 responses are returned as HTML, not JSON:
 
-```
+```html
 Status 429 Content-Type text/html. Body: ""
 ```
 
@@ -489,7 +495,7 @@ For questions or clarification about this feedback:
 
 ## Appendix: Full Error Stack
 
-```
+```typescript
 ResponseValidationError: Response validation failed
     at safeParseResponse (/Users/messina/.config/raycast/extensions/fathom/search-meetings.js:17840:16)
     at matchFunc (/Users/messina/.config/raycast/extensions/fathom/search-meetings.js:17822:9)
@@ -503,7 +509,7 @@ ResponseValidationError: Response validation failed
 
 ---
 
-**Last Updated**: October 1, 2025  
-**SDK Version Tested**: 0.0.30  
+**Last Updated**: October 31, 2025  
+**SDK Version Tested**: 0.0.36  
 **Features Tested**: Meetings, Teams, Team Members, Summaries, Transcripts  
 **Latest Issue Added**: Missing `team` field in TeamMember TypeScript interface

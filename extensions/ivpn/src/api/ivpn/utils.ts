@@ -144,7 +144,7 @@ export function simplifyIvpnStatus(ivpnStatus: IvpnStatusType) {
 
 // * parse account info
 
-export function parseIvpnAccountOuput(stdout: string) {
+export function parseIvpnAccountOutput(stdout: string) {
   const regex =
     /Account ID:\s+(?<accountId>[^\n]+)\nDevice name:\s+(?<deviceName>[^\n]+)\nPlan:\s+(?<plan>[^\n]+)\nActive until:\s+(?<activeUntil>[^\n]+)/;
   const match = stdout.match(regex);
