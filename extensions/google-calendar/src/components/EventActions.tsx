@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Color, Icon, Keyboard, Toast, confirmAlert, getPreferenceValues, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  Keyboard,
+  Toast,
+  confirmAlert,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { getCalendarClient } from "../lib/google";
 import { showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "@googleapis/calendar";
