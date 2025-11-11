@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2025-11-11
 
 - Added windows support
 
