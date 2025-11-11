@@ -94,7 +94,7 @@ export default function GetTables() {
                       text={team.goalsDifference.toString()}
                     />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.TagList title="Forme">
+                    <List.Item.Detail.Metadata.TagList title="Form">
                       {team.seasonResults.map((result, idx) => {
                         let color = Color.SecondaryText;
                         if (result.resultLetter === "l") {
