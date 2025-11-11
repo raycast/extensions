@@ -1,5 +1,9 @@
 # Search Router Changelog
 
+## [Make Windows Compatible] - {PR_MERGE_DATE}
+
+- Update package.json to include Windows platform compatibility
+
 ## [Feature] - {2025-10-09}
 
 - Added custom search engines functionality
