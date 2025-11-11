@@ -1,6 +1,9 @@
 ---
 title: ActiveAdmin
 category: Ruby
+tech: activeadmin
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Listing scopes

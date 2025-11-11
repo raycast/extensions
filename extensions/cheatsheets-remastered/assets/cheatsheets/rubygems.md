@@ -3,6 +3,9 @@ title: Rubygems
 category: Ruby
 intro: |
   A quick reference to common [rubygems](https://rubygems.org) CLI commands.
+tech: rubygems
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Building and publishing

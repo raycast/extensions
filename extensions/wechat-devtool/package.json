@@ -3,7 +3,7 @@
   "name": "wechat-devtool",
   "title": "WeChat DevTool",
   "description": "Quickly open WeChat mini program project via official CLI.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "type": "module",
   "icon": "icon.png",
   "author": "tofrankie",
@@ -44,6 +44,12 @@
       "name": "open-project",
       "title": "Open Project",
       "description": "Open mini program project via WeChat DevTool.",
+      "mode": "view"
+    },
+    {
+      "name": "preview-project",
+      "title": "Preview Project",
+      "description": "Generate QR Code for mini program project.",
       "mode": "view"
     },
     {

@@ -39,8 +39,10 @@ function icon(xcodeRelease: XcodeRelease): Image {
   const imageSourceComponents = ["xcode"];
   // Initialize version number
   const versionNumber = Number(xcodeRelease.versionNumber.split(".").at(0));
-  // Check if version number is greater or equal 13
-  if (versionNumber >= 15) {
+  // Check if the version number is greater or equal 26
+  if (versionNumber >= 26) {
+    imageSourceComponents.push("26");
+  } else if (versionNumber >= 15) {
     // Use 15
     imageSourceComponents.push("15");
   } else if (versionNumber >= 13) {

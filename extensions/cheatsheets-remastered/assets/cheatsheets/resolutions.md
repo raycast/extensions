@@ -1,7 +1,10 @@
 ---
 title: Screen resolutions
-updated: 2020-07-03
+updated: 2020-07-03T00:00:00.000Z
 weight: -1
+tech: resolutions
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Resolutions

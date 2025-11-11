@@ -93,7 +93,6 @@
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^4.28.4",
     "typescript": "^5.2.2"
   },
   "scripts": {

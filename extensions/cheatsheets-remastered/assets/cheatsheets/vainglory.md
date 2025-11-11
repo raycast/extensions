@@ -1,5 +1,8 @@
 ---
 title: Vainglory
+tech: vainglory
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## T3 items by use

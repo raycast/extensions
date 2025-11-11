@@ -1,11 +1,16 @@
 ---
 title: ES2015+
 category: JavaScript
-tags: [Featured]
-updated: 2019-11-14
+tags:
+  - Featured
+updated: 2019-11-14T00:00:00.000Z
 weight: -10
-intro: |
-  A quick overview of new JavaScript features in ES2015, ES2016, ES2017, ES2018 and beyond.
+intro: >
+  A quick overview of new JavaScript features in ES2015, ES2016, ES2017, ES2018
+  and beyond.
+tech: es6
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Block scoping

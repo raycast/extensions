@@ -1,6 +1,9 @@
 ---
 title: Vimscript snippets
 category: Vim
+tech: vimscript-snippets
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Bind function to key and command

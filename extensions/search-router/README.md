@@ -26,7 +26,22 @@ Type your query with an optional bang prefix/suffix:
 
 ### Browse Search Engines 🧭
 
-View and manage all available search engines and set your default search engine.
+View and manage all available search engines with filtering options. You can:
+
+- **Filter by type**: View all engines, only custom engines, or only built-in engines
+- **Search**: Find engines by name or trigger
+- **Set default**: Choose your default search engine
+- **Manage custom engines**: Add, edit, or delete your custom search engines directly
+- **Copy details**: Copy shortcuts or domains to clipboard
+
+### Add Custom Search Engine ➕
+
+Quickly add a new custom search engine with a personalized trigger and URL.
+
+Example custom search engines:
+
+- `!jira` for your company's Jira issue tracker: `https://company.atlassian.net/browse/{{{s}}}`
+- `!cgitlab` for a self hosted GitLab: `https://gitlab.company.com/search?search={{{s}}}`
 
 ## Setting Up as a Fallback Command ⚡
 
@@ -44,7 +59,7 @@ Contributions welcome! Submit a pull request to add more search engines or impro
 
 This extension uses search engine definitions from [Kagi's bangs repository](https://github.com/kagisearch/bangs). Here's how to add or update search engines:
 
-1. To add a new search engine:
+1. To add a new built-in search engine:
    - Fork [Kagi's bangs repository](https://github.com/kagisearch/bangs)
    - Add your search engine definition following their schema
    - Submit a PR to Kagi's repository
@@ -54,8 +69,6 @@ This extension uses search engine definitions from [Kagi's bangs repository](htt
    - Run `npm run download-kagi-bangs` to fetch latest definitions
    - Test locally with `npm run dev`
    - Submit a PR
-
-Want to add custom search engines directly in the extension? We plan to add UI configuration in the future. In the meantime, PRs implementing this feature are welcome! 🙂
 
 ## Credits 🙏
 

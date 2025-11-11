@@ -1,5 +1,7 @@
 export type ForkedExtension = {
+  /** The absolute path to the extension folder. */
   folderPath: string;
+  /** The folder name without `extensions/` prefix. */
   folderName: string;
   name: string;
   title: string;
@@ -11,10 +13,8 @@ export type ForkedExtension = {
   categories?: string[];
   scripts?: Record<string, string>;
   license: string;
-  commands: string[];
-  preferences: string[];
   dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
+  devDependencies?: Record<string, string>;
 };
 
 export type ExtentionNameFolder = { name: string; folder: string };

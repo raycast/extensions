@@ -1,6 +1,5 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
-import { Preferences } from "./interfaces";
 import { CometListItems } from "./components";
 import { useTabSearch } from "./hooks/useTabSearch";
 

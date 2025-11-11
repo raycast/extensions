@@ -3,6 +3,9 @@ title: sed
 category: CLI
 intro: |
   Here's some hints on using sed.
+tech: sed
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Replacements

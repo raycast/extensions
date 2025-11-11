@@ -1,7 +1,10 @@
 ---
 title: Git branches
 category: Git
-updated: 2020-02-13
+updated: 2020-02-13T00:00:00.000Z
+tech: git-branch
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Working with branches

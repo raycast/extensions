@@ -1,6 +1,7 @@
 import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { PullRequestWithAgentSessions } from "../services/copilot";
 import { getIcon } from "../utils";
+import { reauthorize } from "../lib/oauth";
 
 export function PullRequestWithAgentSessionsItem(props: {
   pullRequestWithAgentSessions: PullRequestWithAgentSessions;
@@ -43,6 +44,7 @@ export function PullRequestWithAgentSessionsItem(props: {
               })
             }
           />
+          <Action title="Log out" icon={Icon.Logout} onAction={reauthorize} />
         </ActionPanel>
       }
     />

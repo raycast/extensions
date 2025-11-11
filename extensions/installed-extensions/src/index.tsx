@@ -14,14 +14,14 @@ import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { ExtensionMetadata, Option } from "./types";
 import { extensionTypes } from "./constants";
-import { formatItem, formatOutput } from "./utils";
+import { formatItem, formatOutput, isWindows } from "./utils";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
 
 async function getPackageJsonFiles() {
   try {
-    const extensionsDir = path.join(os.homedir(), ".config", "raycast", "extensions");
+    const extensionsDir = path.join(os.homedir(), ".config", isWindows ? "raycast-x" : "raycast", "extensions");
     const extensions = await fs.readdir(extensionsDir);
     const packageJsonFiles = await Promise.all(
       extensions.map(async (extension) => {
@@ -184,7 +184,9 @@ export default function IndexCommand() {
             return (
               <List.Item
                 key={index}
-                icon={`${item.path}/assets/${item.icon}`}
+                // [TODO] Raycast Windows does not support relative image path yet.
+                // Remove the condition when it is supported.
+                icon={isWindows ? undefined : `${item.path}/assets/${item.icon}`}
                 title={item.title}
                 keywords={[item.author]}
                 actions={

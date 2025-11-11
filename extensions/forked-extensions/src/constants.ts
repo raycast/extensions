@@ -21,4 +21,4 @@ export const defaultGitExecutableFilePath = "git";
 /**
  * The GitHub OAuth required scope.
  */
-export const githubOauthScope = "repo workflow";
+export const githubOauthScope = "public_repo workflow";

@@ -1,6 +1,9 @@
 ---
 title: Rails plugins
 category: Rails
+tech: rails-plugins
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Generate a plugin

@@ -1,8 +1,11 @@
 ---
 title: HTML meta tags
 category: HTML
-updated: 2020-03-20
+updated: 2020-03-20T00:00:00.000Z
 weight: -3
+tech: html-meta
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Meta tags

@@ -1,6 +1,9 @@
 ---
 title: Nock
 category: JavaScript libraries
+tech: nock
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Nock

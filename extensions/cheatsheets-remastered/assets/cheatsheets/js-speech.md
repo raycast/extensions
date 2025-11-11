@@ -2,6 +2,9 @@
 title: JavaScript speech synthesis
 category: JavaScript
 weight: -1
+tech: js-speech
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## SpeechSynthesisUtterance

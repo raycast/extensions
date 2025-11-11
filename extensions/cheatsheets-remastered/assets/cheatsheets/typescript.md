@@ -1,6 +1,9 @@
 ---
 title: TypeScript
 category: JavaScript libraries
+tech: typescript
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

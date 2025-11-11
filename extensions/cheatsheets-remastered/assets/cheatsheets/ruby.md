@@ -1,9 +1,13 @@
 ---
 title: Ruby
 category: Ruby
-tags: [WIP]
+tags:
+  - WIP
 intro: |
   Quick reference to some features of the Ruby programming language.
+tech: ruby
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Reference

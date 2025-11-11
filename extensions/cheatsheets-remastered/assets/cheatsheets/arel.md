@@ -1,6 +1,9 @@
 ---
 title: Arel
 category: Rails
+tech: arel
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

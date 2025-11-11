@@ -1,6 +1,9 @@
 ---
 title: Vimscript functions
 category: Vim
+tech: vimscript-functions
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Dictionaries and lists

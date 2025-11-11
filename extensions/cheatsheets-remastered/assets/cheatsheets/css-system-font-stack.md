@@ -1,8 +1,12 @@
 ---
-title: "CSS system fonts"
+title: CSS system fonts
 category: CSS
 weight: -3
-tags: [Featurable]
+tags:
+  - Featurable
+tech: css-system-font-stack
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### System fonts

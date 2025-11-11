@@ -19,7 +19,7 @@ export function useCometInstallation() {
           setIsInstalled(installed);
           setIsChecking(false);
         }
-      } catch (error) {
+      } catch {
         if (mounted) {
           setIsInstalled(false);
           setIsChecking(false);

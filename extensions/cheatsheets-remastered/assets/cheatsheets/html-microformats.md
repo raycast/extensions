@@ -1,6 +1,9 @@
 ---
 title: Microformats
 category: HTML
+tech: html-microformats
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Author

@@ -2,6 +2,7 @@ name: 🧩 🐞 Extension Bug Report
 description: Report a reproducible bug or regression related to extension(s) published in the Store
 title: "[Extension Name] ..."
 labels: [extension, bug]
+type: "Bug"
 body:
   - type: markdown
     attributes:

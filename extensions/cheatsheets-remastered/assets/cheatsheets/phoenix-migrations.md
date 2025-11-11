@@ -1,8 +1,11 @@
 ---
-title: "Phoenix: Ecto migrations"
+title: 'Phoenix: Ecto migrations'
 category: Elixir
 weight: -1
-updated: 2020-02-23
+updated: 2020-02-23T00:00:00.000Z
+tech: phoenix-migrations
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Creating

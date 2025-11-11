@@ -3,7 +3,7 @@ import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import { catchError } from "../errors.js";
 import * as git from "../git.js";
-import { getCommitDiffMessage, repositoryConfigurationPath } from "../utils.js";
+import { getCommitDiffMessage } from "../utils.js";
 
 export default function Diagnostics() {
   const [status, setStatus] = useState<string>("Running diagnostics...");
@@ -13,64 +13,75 @@ export default function Diagnostics() {
     catchError(async () => {
       const isGitInstalled = await git.checkIfGitIsValid();
       const isStatusClean = await git
-        .isStatusClean()
+        .checkIfStatusClean()
         .then(() => true)
         .catch(() => false);
+      const currentBranch = await git.getCurrentBranch().catch(() => undefined);
+      const isMainBranch = currentBranch === "main";
       const localForkedRepository = await git.getForkedRepository();
       const remoteForkedRepository = localForkedRepository
         ? await api.repositoryExists(localForkedRepository)
         : "✅ Cannot determine (no local repository found)";
 
+      const commitDiffMessageOptions = { includeAhead: true, includeZeroAhead: true, alwaysShow: true };
+
       const githubCommitDiff = localForkedRepository ? await api.compareTwoCommits(localForkedRepository) : undefined;
       const githubCommitDiffPass = githubCommitDiff && !(githubCommitDiff.ahead > 0 || githubCommitDiff.behind > 0);
-      const githubCommitDiffMessage = getCommitDiffMessage(githubCommitDiff, {
-        includeAhead: true,
-        includeZeroAhead: true,
-        alwaysShow: true,
-      }).trim();
-      const githubCommitDiffGuide = githubCommitDiffPass ? "" : ' (You can use "Sync Remote" action to sync changes)';
+      const githubCommitDiffAhead = githubCommitDiff && githubCommitDiff.ahead > 0;
+      const githubCommitDiffMessage = getCommitDiffMessage(githubCommitDiff, commitDiffMessageOptions).trim();
+      const githubCommitDiffGuide = githubCommitDiffPass
+        ? ""
+        : githubCommitDiffAhead
+          ? " (You have commits ahead of remote on GitHub, please reset them if necessary)"
+          : ' (You can use "Sync Remote" action to sync changes)';
 
-      const localCommitDiff = await git.getAheadBehindCommits();
-      const localCommitDiffPass = !(localCommitDiff.ahead > 0 || localCommitDiff.behind > 0);
-      const localCommitDiffMessage = getCommitDiffMessage(localCommitDiff, {
-        includeAhead: true,
-        includeZeroAhead: true,
-        alwaysShow: true,
-      }).trim();
-      const localCommitDiffGuide = localCommitDiffPass ? "" : ' (You can use "Pull Changes" action to sync changes)';
+      const localCommitDiff = await git.getAheadBehindCommits().catch(() => undefined);
+      const localCommitDiffPass = localCommitDiff && !(localCommitDiff.ahead > 0 || localCommitDiff.behind > 0);
+      const localCommitDiffAhead = localCommitDiff && localCommitDiff.ahead > 0;
+      const localCommitDiffMessage = getCommitDiffMessage(localCommitDiff, commitDiffMessageOptions).trim();
+      const localCommitDiffGuide = localCommitDiffPass
+        ? ""
+        : localCommitDiffAhead
+          ? " (You have local commits ahead of remote, please reset them if necessary)"
+          : ' (You can use "Pull Changes" action to sync changes)';
 
+      // [TODO] The conditions need to be refactored to be more clear and robust.
       const status = [
         "## Diagnostics",
-        "### Git installed",
+        "### Git status",
         isGitInstalled
-          ? "- ✅ Good"
+          ? isMainBranch
+            ? isStatusClean
+              ? "- ✅ Good"
+              : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations."
+            : `- ⚠️ You're not on the 'main' branch (current on '${currentBranch}'). Please switch to the 'main' branch to ensure proper functionality.`
           : "- ⚠️ Git is not installed or not found. Please set up your Git executable file path manually in the extension preferences.",
-        "### Git status clean",
-        isStatusClean
-          ? "- ✅ Good"
-          : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations.",
         "### Local forked repository",
-        localForkedRepository
-          ? [
-              `- ✅ [${localForkedRepository} 📁](file://$${repositoryConfigurationPath})`,
-              `- ${localCommitDiffPass ? "✅" : "⚠️"} ${localCommitDiffMessage}${localCommitDiffGuide}`,
-            ]
-              .filter(Boolean)
-              .join("\n")
-          : "- ⚠️ Not found, please rerun the extension to re-initialize the repository.",
+        isMainBranch
+          ? localForkedRepository
+            ? [
+                `- ✅ [${localForkedRepository} 📁](file://${git.repositoryPath})`,
+                `- ${localCommitDiffPass ? "✅" : "⚠️"} ${localCommitDiffMessage}${localCommitDiffGuide}`,
+              ]
+                .filter(Boolean)
+                .join("\n")
+            : "- ⚠️ Not found, please rerun the extension to re-initialize the repository."
+          : "- ⚠️ Not on a main branch",
         "###  Remote forked repository",
-        remoteForkedRepository === true
-          ? [
-              `- ✅ [${localForkedRepository} 🌐](https://github.com/${localForkedRepository})`,
-              localForkedRepository
-                ? `- ${githubCommitDiffPass ? "✅" : "⚠️"} ${githubCommitDiffMessage}${githubCommitDiffGuide}`
-                : "",
-            ]
-              .filter(Boolean)
-              .join("\n")
-          : remoteForkedRepository === false
-            ? "- ⚠️ Not found, please check if the repository still exists on GitHub or if your GitHub token has the necessary permissions."
-            : remoteForkedRepository,
+        isMainBranch
+          ? remoteForkedRepository === true
+            ? [
+                `- ✅ [${localForkedRepository} 🌐](https://github.com/${localForkedRepository})`,
+                localForkedRepository
+                  ? `- ${githubCommitDiffPass ? "✅" : "⚠️"} ${githubCommitDiffMessage}${githubCommitDiffGuide}`
+                  : "",
+              ]
+                .filter(Boolean)
+                .join("\n")
+            : remoteForkedRepository !== false
+              ? remoteForkedRepository
+              : "- ⚠️ Not found, please check if the repository still exists on GitHub or if your GitHub token has the necessary permissions."
+          : "- ⚠️ Not on a main branch",
       ].join("\n\n");
       setStatus(status);
     })();

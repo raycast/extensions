@@ -1,8 +1,11 @@
 ---
-title: "Ansible quickstart"
+title: Ansible quickstart
 category: Ansible
 description: |
   A quick guide to getting started with your first Ansible playbook.
+tech: ansible-guide
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Install Ansible

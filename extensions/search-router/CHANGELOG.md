@@ -1,5 +1,9 @@
 # Search Router Changelog
 
+## [Feature] - {2025-10-09}
+
+- Added custom search engines functionality
+
 ## [Fixed & Improvements] - 2025-04-02
 
 - Removed Kagi-specific search bangs

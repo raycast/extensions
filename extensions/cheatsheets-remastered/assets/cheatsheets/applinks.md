@@ -1,6 +1,9 @@
 ---
 title: Applinks
 category: HTML
+tech: applinks
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

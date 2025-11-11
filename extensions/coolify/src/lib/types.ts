@@ -97,6 +97,7 @@ export type PrivateKey = {
   description: string;
   fingerprint: string | null;
   private_key: string;
+  public_key: string;
   is_git_related: true;
   team_id: number;
   created_at: string;
@@ -180,4 +181,9 @@ export type EnvironmentVariable = {
 
 export type MessageResult = {
   message: string;
+};
+export type ErrorResult = MessageResult & {
+  errors?: {
+    [key: string]: string[];
+  };
 };

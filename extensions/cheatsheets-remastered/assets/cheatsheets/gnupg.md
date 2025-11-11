@@ -2,10 +2,14 @@
 title: GnuPG
 category: CLI
 tags: []
-updated: 2017-10-22
+updated: 2017-10-22T00:00:00.000Z
 weight: 0
-intro: |
-  [GnuPG](https://gnupg.org/) is a complete and free implementation of the OpenPGP standard.
+intro: >
+  [GnuPG](https://gnupg.org/) is a complete and free implementation of the
+  OpenPGP standard.
+tech: gnupg
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Basics

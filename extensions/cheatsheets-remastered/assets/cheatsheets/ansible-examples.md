@@ -1,6 +1,9 @@
 ---
 title: Ansible examples
 category: Ansible
+tech: ansible-examples
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Examples

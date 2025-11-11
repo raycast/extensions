@@ -96,20 +96,37 @@ export const fetchRepositoryByNwo = async (nwo: string): Promise<Repository | nu
   }
 };
 
+type RepositoryDefaultBranchResponse = {
+  repository: {
+    defaultBranchRef?: {
+      name: string;
+    };
+  };
+};
+const REPOSITORY_DEFAULT_BRANCH_QUERY = `
+  query GetRepositoryDefaultBranch($name: String!, $owner: String!) {
+    repository(owner: $owner, name: $name) {
+      defaultBranchRef {
+        name
+      }
+    }
+  }
+`;
+
 export const fetchRepositoryDefaultBranch = async (nwo: string): Promise<string | null> => {
   if (!nwo) return null;
 
-  const [owner, repo] = nwo.split("/");
+  const [owner, name] = nwo.split("/");
 
   const octokit = getOctokit();
 
   try {
-    const repositoryResponse = await octokit.rest.repos.get({
+    const result = await octokit.graphql<RepositoryDefaultBranchResponse>(REPOSITORY_DEFAULT_BRANCH_QUERY, {
+      name,
       owner,
-      repo,
     });
 
-    return repositoryResponse.data.default_branch;
+    return result.repository.defaultBranchRef?.name || null;
   } catch (error) {
     throw handleGitHubError(error);
   }

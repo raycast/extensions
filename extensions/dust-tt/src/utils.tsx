@@ -1,6 +1,7 @@
 import { Color, Icon, Image, LocalStorage } from "@raycast/api";
 import Asset = Image.Asset;
 import { ConnectorProvider, GetAgentConfigurationsResponseType, MeResponseType } from "@dust-tt/client";
+import { jwtDecode } from "jwt-decode";
 
 export interface AgentType {
   sId: string;
@@ -84,6 +85,11 @@ export const ConnectorProviders: Record<ConnectorProvider, ConnectorProviderConf
     icon: "icons/gong.svg",
     color: Color.Green,
     name: "Gong",
+  },
+  slack_bot: {
+    icon: "icons/slack_bot.svg",
+    color: Color.Red,
+    name: "Slack Bot",
   },
 };
 
@@ -174,4 +180,18 @@ export async function setWorkspaceId(workspaceId: string) {
 
 export async function getWorkspaceId(): Promise<string | undefined> {
   return await LocalStorage.getItem("workspaceId");
+}
+
+export async function extractAndStoreRegion(token: string) {
+  try {
+    const decoded = jwtDecode<{ [key: string]: string }>(token);
+    const region = decoded["https://dust.tt/region"];
+    if (region) {
+      await LocalStorage.setItem("selectedRegion", region);
+      return region;
+    }
+  } catch (error) {
+    console.error("Failed to decode JWT or extract region:", error);
+  }
+  return null;
 }

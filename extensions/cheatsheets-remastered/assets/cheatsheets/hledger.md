@@ -1,6 +1,9 @@
 ---
 title: Hledger
 category: Ledger
+tech: hledger
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

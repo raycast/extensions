@@ -1,13 +1,18 @@
 ---
 title: Bulma
 category: CSS
-prism_languages: [css, html]
+prism_languages:
+  - css
+  - html
 weight: -1
-updated: 2018-11-19
+updated: 2018-11-19T00:00:00.000Z
 authors:
   - github: benolot
 description: |
   Basic guide on how to use Bulma, the lightweight css flexbox framework.
+tech: bulma
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Screen sizes

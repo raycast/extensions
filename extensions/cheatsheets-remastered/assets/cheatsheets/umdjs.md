@@ -1,6 +1,9 @@
 ---
 title: Universal JS module loader
 category: JavaScript libraries
+tech: umdjs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Reference

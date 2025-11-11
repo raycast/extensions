@@ -1,5 +1,13 @@
 # GitHub Changelog
 
+## [Checkout PR project action] - 2025-10-24
+
+- My Pull Requests: Added "Check Out PR" action to clone repository and switch to PR branch locally
+
+## [Unified handle notification icon retrieval error] - 2025-10-02
+
+- Notifications Command and Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
 ## [Fix clone with options action] - 2025-09-08
 
 - Fix the clone action by adding the quote to the command to prevent issues with spaces in the path

@@ -1,7 +1,10 @@
 ---
 title: Share links
 category: HTML
-updated: 2017-09-04
+updated: 2017-09-04T00:00:00.000Z
+tech: html-share
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Share links

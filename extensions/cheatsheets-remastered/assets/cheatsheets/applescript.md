@@ -1,8 +1,12 @@
 ---
 title: AppleScript
-updated: 2018-12-06
+updated: 2018-12-06T00:00:00.000Z
 category: macOS
-prism_languages: [applescript]
+prism_languages:
+  - applescript
+tech: applescript
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Running

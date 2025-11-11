@@ -1,6 +1,9 @@
 ---
 title: Deis
 category: Devops
+tech: deis
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Deploy

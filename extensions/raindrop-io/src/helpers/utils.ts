@@ -1,6 +1,5 @@
 import { BrowserExtension, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import fetch from "node-fetch";
 import { CollectionCreationResponse, FormValues } from "../types";
 
 export async function createCollection({
@@ -53,6 +52,7 @@ export async function createBookmark({
       items: values.link.split(/[ ,;]/).map((link) => ({
         link: link.trim(),
         title: values.title,
+        note: values.note,
         collectionId,
         tags: values.tags,
         pleaseParse: {},

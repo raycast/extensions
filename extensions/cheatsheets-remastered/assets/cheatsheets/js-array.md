@@ -1,6 +1,9 @@
 ---
 title: JavaScript Arrays
 category: JavaScript
+tech: js-array
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Arrays

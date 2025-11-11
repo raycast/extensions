@@ -1,8 +1,12 @@
 ---
 title: Date & time formats
 weight: -5
-updated: 2017-11-27
-tags: [Featurable]
+updated: 2017-11-27T00:00:00.000Z
+tags:
+  - Featurable
+tech: datetime
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Common time formats

@@ -1,6 +1,9 @@
 ---
 title: Mixpanel
 category: Analytics
+tech: mixpanel
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Identify

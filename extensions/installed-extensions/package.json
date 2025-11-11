@@ -10,6 +10,10 @@
     "tonka3000",
     "litomore"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Fun"
   ],
@@ -60,16 +64,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.5",
+    "@raycast/api": "^1.103.3",
     "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.3.0",
-    "@types/react": "19.1.11",
-    "eslint": "^9.34.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.7.0",
+    "@types/react": "19.2.2",
+    "eslint": "^9.37.0",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

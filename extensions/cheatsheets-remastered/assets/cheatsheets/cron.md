@@ -1,8 +1,11 @@
 ---
 title: Cron
 category: CLI
-updated: 2024-03-17
+updated: 2024-03-17T00:00:00.000Z
 weight: -3
+tech: cron
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Format

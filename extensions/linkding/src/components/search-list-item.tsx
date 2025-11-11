@@ -33,7 +33,7 @@ const SearchListItem = ({ bookmark, preferences, onDelete, onCopy }: Props) => {
   return (
     <List.Item
       icon={getFavicon(bookmark.url, { fallback: Icon.Globe })}
-      title={bookmark.title.length > 0 ? bookmark.title : bookmark.website_title ?? bookmark.url}
+      title={bookmark.title.length > 0 ? bookmark.title : (bookmark.website_title ?? bookmark.url)}
       subtitle={subtitle}
       accessories={tags}
       actions={

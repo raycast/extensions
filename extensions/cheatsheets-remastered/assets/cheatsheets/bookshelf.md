@@ -1,6 +1,9 @@
 ---
 title: Bookshelf.js
 category: JavaScript libraries
+tech: bookshelf
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Model

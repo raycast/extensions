@@ -1,7 +1,12 @@
 ---
 title: Firebase
-prism_languages: [coffeescript]
-tags: [WIP]
+prism_languages:
+  - coffeescript
+tags:
+  - WIP
+tech: firebase
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Authenticating

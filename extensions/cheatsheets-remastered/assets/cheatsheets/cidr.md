@@ -1,7 +1,10 @@
 ---
 title: CIDR
 category: Misc
-updated: 2018-05-14
+updated: 2018-05-14T00:00:00.000Z
+tech: cidr
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### CIDR ranges

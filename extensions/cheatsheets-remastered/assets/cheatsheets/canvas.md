@@ -1,6 +1,9 @@
 ---
 title: Canvas
 category: JavaScript
+tech: canvas
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Getting the context

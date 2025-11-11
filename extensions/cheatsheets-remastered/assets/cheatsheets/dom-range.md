@@ -1,8 +1,12 @@
 ---
 title: DOM Range
 category: JavaScript
-intro: |
-  Quick reference to the HTML [DOM createRange API](https://devdocs.io/dom/range).
+intro: >
+  Quick reference to the HTML [DOM createRange
+  API](https://devdocs.io/dom/range).
+tech: dom-range
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Reference

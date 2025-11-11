@@ -3,12 +3,15 @@ title: CSS
 category: CSS
 weight: -1
 keywords:
-  - "margin, padding, border"
-  - "div, .class, #id, [attr]"
-  - "font, background"
-  - "display: block, inline, flex"
+  - 'margin, padding, border'
+  - 'div, .class, #id, [attr]'
+  - 'font, background'
+  - 'display: block, inline, flex'
   - Selectors
   - Properties
+tech: css
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Basics

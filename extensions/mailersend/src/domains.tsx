@@ -5,6 +5,7 @@ import { Activity, ActivityEventType, Domain } from "./interfaces";
 import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import DNSRecords from "./domain/dns-records";
 import Webhooks from "./webhooks";
 dayjs.extend(localizedFormat);
 
@@ -28,6 +29,8 @@ export default function Domains() {
             <ActionPanel>
               <Action.Push icon={Icon.Envelope} title="Activities" target={<Activities domain={domain} />} />
               <Action.Push icon={Icon.Plug} title="Webhooks" target={<Webhooks domain={domain} />} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
+              <Action.Push icon={Icon.Text} title="DNS Records" target={<DNSRecords domain={domain} />} />
             </ActionPanel>
           }
         />

@@ -2,6 +2,9 @@
 title: Erlang ETS
 category: Elixir
 weight: -1
+tech: ets
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## ETS

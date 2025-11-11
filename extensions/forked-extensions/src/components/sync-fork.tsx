@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Action, Icon, confirmAlert, useNavigation } from "@raycast/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Action, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import Diagnostics from "./diagnostics.js";
 import { catchError } from "../errors.js";
@@ -10,49 +10,61 @@ import { getCommitDiffMessage } from "../utils.js";
 
 export default function SyncFork({
   forkedRepository,
-  lastCommitHash,
   onSyncFinished,
 }: {
-  forkedRepository: string | undefined;
-  lastCommitHash: string | undefined;
-  onSyncFinished: () => void;
+  readonly forkedRepository: string | undefined;
+  readonly onSyncFinished: () => void;
 }) {
   const { push } = useNavigation();
   const [commitDiff, setCommitDiff] = useState<{ github: CommitDiff; local: CommitDiff }>();
 
-  const diagnosticsAction = {
-    primaryAction: {
-      title: "Run Diagnostics",
-      onAction: () => {
-        push(<Diagnostics />);
+  const diagnosticsAction = useMemo(
+    () => ({
+      primaryAction: {
+        title: "Run Diagnostics",
+        onAction: () => {
+          push(<Diagnostics />);
+        },
       },
-    },
-  };
+    }),
+    [push],
+  );
+
+  const loadDiff = useCallback(async () => {
+    if (!forkedRepository) return;
+    // Run local Git command before requesting GitHub in case the network request is too slow to block the execution of other Git operations.
+    // But this still has a chance to be conflicted if the user execute another Git operation at the same time.
+    const localCommitDiff = await git.getAheadBehindCommits();
+    const githubCommitDiff = await api.compareTwoCommits(forkedRepository);
+    setCommitDiff({ github: githubCommitDiff, local: localCommitDiff });
+  }, [forkedRepository]);
 
   useEffect(() => {
-    catchError(async () => {
-      if (!forkedRepository) return;
-      const githubCommitDiff = await api.compareTwoCommits(forkedRepository);
-      const localCommitDiff = await git.getAheadBehindCommits();
-      setCommitDiff({ github: githubCommitDiff, local: localCommitDiff });
-    }, diagnosticsAction)();
-  }, [forkedRepository, lastCommitHash]);
+    catchError(loadDiff, diagnosticsAction)();
+  }, [loadDiff, diagnosticsAction]);
 
-  const diffMessageOptions = {
-    prependSpace: true,
-    includeAhead: true,
-    includeParentheses: true,
-  };
-
+  const diffMessageOptions = { prependSpace: true, includeAhead: true, includeParentheses: true };
   const remoteDiff = getCommitDiffMessage(commitDiff?.github, diffMessageOptions);
   const localDiff = getCommitDiffMessage(commitDiff?.local, diffMessageOptions);
+  const hasRemoteDiffAhead = commitDiff?.github.ahead && commitDiff.github.ahead > 0;
+  const hasLocalDiffAhead = commitDiff?.local.ahead && commitDiff.local.ahead > 0;
 
   return (
     <>
       <Action
         icon={Icon.Repeat}
         title={`Sync Remote${remoteDiff}`}
-        onAction={async () =>
+        onAction={async () => {
+          if (hasRemoteDiffAhead) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Cannot Sync Remote",
+              message: "You have commits ahead of remote on GitHub, please reset them if necessary.",
+              ...diagnosticsAction,
+            });
+            return;
+          }
+
           await confirmAlert({
             title: "Sync Remote",
             message:
@@ -61,17 +73,28 @@ export default function SyncFork({
               title: "Sync",
               onAction: catchError(async () => {
                 await operation.sync();
-                onSyncFinished?.();
+                loadDiff();
+                onSyncFinished();
               }, diagnosticsAction),
             },
-          })
-        }
+          });
+        }}
       />
       <Action
         icon={Icon.ArrowDown}
         title={`Pull Changes${localDiff}`}
-        onAction={() => {
-          confirmAlert({
+        onAction={async () => {
+          if (hasLocalDiffAhead) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Cannot Pull Changes",
+              message: "You have commits ahead of remote on GitHub, please reset them if necessary.",
+              ...diagnosticsAction,
+            });
+            return;
+          }
+
+          await confirmAlert({
             title: "Pull Changes",
             message:
               "This will pull the latest changes from the remote forked repository to your local machine. Do you want to continue?",
@@ -79,7 +102,8 @@ export default function SyncFork({
               title: "Pull",
               onAction: catchError(async () => {
                 await operation.pull();
-                onSyncFinished?.();
+                loadDiff();
+                onSyncFinished();
               }, diagnosticsAction),
             },
           });

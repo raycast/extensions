@@ -28,14 +28,17 @@ export function VaultActionsSection() {
     <ActionPanel.Section title="Vault Actions">
       <Action
         title="Sync Vault"
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={{ macOS: { key: "r", modifiers: ["opt"] }, windows: { key: "r", modifiers: ["alt"] } }}
         icon={Icon.ArrowClockwise}
         onAction={vault.syncItems}
       />
       <Action
         icon={{ source: "sf_symbols_lock.svg", tintColor: Color.PrimaryText }} // Does not immediately follow theme
         title="Lock Vault"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+        shortcut={{
+          macOS: { key: "l", modifiers: ["opt", "shift"] },
+          windows: { key: "l", modifiers: ["alt", "shift"] },
+        }}
         onAction={handleLockVault}
       />
       <Action style={Action.Style.Destructive} title="Logout" icon={Icon.Logout} onAction={handleLogoutVault} />

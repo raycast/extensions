@@ -1,7 +1,10 @@
 ---
 title: tmux
 category: CLI
-updated: 2024-04-08
+updated: 2024-04-08T00:00:00.000Z
+tech: tmux
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Commands

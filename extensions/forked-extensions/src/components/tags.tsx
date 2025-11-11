@@ -7,9 +7,9 @@ export default function Tags({
   color,
   link,
 }: {
-  title: string;
-  tags?: string[];
-  color?: Color;
+  readonly title: string;
+  readonly tags?: string[];
+  readonly color?: Color;
   link?: (tag: string) => string;
 }) {
   const [expanded, setExpanded] = useState(false);

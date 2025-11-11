@@ -20,31 +20,32 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.103.0",
     "better-sqlite3": "12.1.1",
     "fuse.js": "6.6.2",
     "node-fetch": "^3.0.0",
     "sql.js": "1.7.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
     "@types/better-sqlite3": "7.5.0",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "@types/sql.js": "1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "overrides": {
-    "tar-fs": ">=3.0.9"
+    "tar-fs": ">=3.1.1"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

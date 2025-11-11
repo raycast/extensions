@@ -1,8 +1,12 @@
 ---
 title: Mocha blanket
 category: JavaScript libraries
-intro: |
-  Use [blanket](https://npmjs.com/package/blanket) for easy coverage reporting for Mocha JavaScript tests.
+intro: >
+  Use [blanket](https://npmjs.com/package/blanket) for easy coverage reporting
+  for Mocha JavaScript tests.
+tech: mocha-blanket
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Quickstart guide

@@ -1,8 +1,12 @@
 ---
 title: Git extras
 category: Git
-intro: |
-  Quick reference to some utilities in the [git-extras](https://github.com/tj/git-extras) utilities.
+intro: >
+  Quick reference to some utilities in the
+  [git-extras](https://github.com/tj/git-extras) utilities.
+tech: git-extras
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## References

@@ -1,6 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import { OAuth } from "@raycast/api";
-import { OAuthService } from "@raycast/utils";
+import { OAuthService, useCachedState } from "@raycast/utils";
+import { Repository } from "../services/repositories";
 
 const CLIENT_ID = "Ov23ctJbHO0idEBx76J5";
 const SCOPES = "repo,workflow,read:org";
@@ -25,6 +26,9 @@ export const provider = new OAuthService({
   tokenUrl: TOKEN_URL,
   scope: SCOPES,
   onAuthorize: ({ token }) => {
+    const [, setPreviousRepositories] = useCachedState<Repository[]>("previousRepositories", []);
+    setPreviousRepositories([]);
+
     octokitInstance = new Octokit({ auth: token });
   },
   extraParameters: {
