@@ -9,6 +9,8 @@ import {
   Keyboard,
   environment,
   Clipboard,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import useAsyncEffect from "use-async-effect";
 import { useState } from "react";
@@ -24,6 +26,8 @@ import {
   sortServers,
   loadFavoriteInstanceIds,
   instancesPath,
+  isWin,
+  winPrismLauncherPath,
 } from "../utils/prism";
 import { Server, Instance } from "../types";
 
@@ -91,6 +95,32 @@ export default function JoinServer() {
     await loadInstanceServers(instance);
   };
 
+  const joinServer = async (instanceId: string, serverAddress: string) => {
+    try {
+      if (isWin) {
+        child_process.exec(`${winPrismLauncherPath} --launch "${instanceId}" --server "${serverAddress}"`);
+      } else {
+        child_process.exec(
+          `open -b "org.prismlauncher.PrismLauncher" --args --launch "${instanceId}" --server "${serverAddress}"`,
+        );
+      }
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
+    }
+  };
+
+  const launchInstance = async (instanceId: string) => {
+    try {
+      if (isWin) {
+        child_process.exec(`${winPrismLauncherPath} --launch "${instanceId}"`);
+      } else {
+        child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instanceId}"`);
+      }
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
+    }
+  };
+
   // If an instance is selected, show its servers
   if (selectedInstance) {
     return (
@@ -120,9 +150,7 @@ export default function JoinServer() {
                       icon={Icon.Network}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
                       onAction={async () => {
-                        child_process.exec(
-                          `open -b "org.prismlauncher.PrismLauncher" --args --launch "${server.instanceId}" --server "${server.address}"`,
-                        );
+                        await joinServer(server.instanceId, server.address);
                         await closeMainWindow({
                           popToRootType: PopToRootType.Immediate,
                           clearRootSearch: true,
@@ -133,9 +161,7 @@ export default function JoinServer() {
                       title="Launch Instance"
                       icon={Icon.Rocket}
                       onAction={async () => {
-                        child_process.exec(
-                          `open -b "org.prismlauncher.PrismLauncher" --args --launch "${server.instanceId}"`,
-                        );
+                        await launchInstance(server.instanceId);
                         await closeMainWindow({
                           popToRootType: PopToRootType.Immediate,
                           clearRootSearch: true,
