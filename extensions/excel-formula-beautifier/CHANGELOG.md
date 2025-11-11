@@ -1,5 +1,5 @@
 # Excel Formula Beautifier Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-11-11
 
 Initial Version
