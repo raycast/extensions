@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, getPreferenceValues, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, getPreferenceValues, showToast, Toast, Icon, LaunchProps } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { isTimestamp, timestampToDate, parseDatetime, convertToAllFormats, ConversionResult } from "./utils";
 
@@ -8,8 +8,13 @@ interface Preferences {
   dateFormat: string;
 }
 
-export default function Command() {
-  const [searchText, setSearchText] = useState("");
+interface Arguments {
+  input?: string;
+}
+
+export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+  const { input: initialInput = "" } = props.arguments;
+  const [searchText, setSearchText] = useState(initialInput);
   const [currentTime, setCurrentTime] = useState(new Date());
   const preferences = getPreferenceValues<Preferences>();
 

@@ -16,6 +16,14 @@
       "subtitle": "Convert timestamp, datetime, or get current time",
       "description": "Smart converter: Enter timestamp/datetime to convert, or leave empty for current time",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "input",
+          "type": "text",
+          "placeholder": "timestamp or datetime",
+          "required": false
+        }
+      ],
       "keywords": [
         "timestamp",
         "ts",
