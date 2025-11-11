@@ -1,6 +1,5 @@
 import { Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { spawnSync, SpawnSyncReturns } from "child_process";
+import { runPowerShellScript, showFailureToast } from "@raycast/utils";
 
 const appThemePref = "AppsUseLightTheme" as const;
 const systemThemePref = "SystemUsesLightTheme" as const;
@@ -27,58 +26,48 @@ async function makeDarkTheme() {
 }
 
 async function getValue(name: ThemePref): Promise<ThemeValue> {
-  const { stdout, exitCode } = await runPowerShellScript([
+  const res = await safePowershellExec(
     `Get-ItemProperty -Path ${regPath} -Name ${name} | Select-Object -ExpandProperty ${name}`,
-  ]);
+  );
 
-  if (exitCode !== 0) {
+  if (res === null) {
     return "light";
   }
 
-  const value = parseInt(stdout.trim(), 10);
+  const value = parseInt(res, 10);
   return value === 0 ? "dark" : "light";
 }
 
 async function setValue(name: ThemePref, value: number) {
-  const { exitCode } = await runPowerShellScript([`Get-ItemProperty -Path ${regPath} -Name ${name}`]);
+  const current = await safePowershellExec(`Get-ItemProperty -Path ${regPath} -Name ${name}`);
 
-  if (exitCode !== 0) {
-    const { exitCode: newExitCode, stderr: newStderr } = await runPowerShellScript([
-      `New-ItemProperty -Path ${regPath} -Name ${name} -Value ${value} -PropertyType DWord`,
-    ]);
-
-    if (newExitCode === 0 || newStderr) {
+  if (current !== null) {
+    const res = await safePowershellExec(`Set-ItemProperty -Path ${regPath} -Name ${name} -Value ${value}`);
+    if (res === null) {
       await showFailureToast({
-        title: `Failed to create ${name} property`,
+        title: `Failed to set ${name} property`,
         style: Toast.Style.Failure,
       });
     }
+    return;
   }
 
-  const { exitCode: setExitCode, stderr: setStderr } = await runPowerShellScript([
-    `Set-ItemProperty -Path ${regPath} -Name ${name} -Value ${value}`,
-  ]);
+  const res = await safePowershellExec(
+    `New-ItemProperty -Path ${regPath} -Name ${name} -Value ${value} -PropertyType DWord`,
+  );
 
-  if (setExitCode !== 0 || setStderr) {
+  if (res === null) {
     await showFailureToast({
-      title: `Failed to set ${name} property`,
+      title: `Failed to create ${name} property`,
       style: Toast.Style.Failure,
     });
   }
 }
 
-async function runPowerShellScript(args: string[]) {
-  const result = await new Promise<SpawnSyncReturns<string>>((resolve) => {
-    const res = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", ...args], {
-      encoding: "utf8",
-    });
-
-    resolve(res);
-  });
-
-  const stdout = typeof result.stdout === "string" ? result.stdout : "";
-  const stderr = typeof result.stderr === "string" ? result.stderr : "";
-  const exitCode: number = typeof result.status === "number" ? result.status : result.error ? 1 : 0;
-
-  return { stdout, stderr, exitCode };
+async function safePowershellExec(script: string) {
+  try {
+    return await runPowerShellScript(script);
+  } catch {
+    return null;
+  }
 }
