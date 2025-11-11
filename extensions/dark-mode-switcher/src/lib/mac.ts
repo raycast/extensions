@@ -1,4 +1,4 @@
-import { Toast } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const appleScript = `
