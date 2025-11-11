@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, Toast, showToast, environment, AI } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, environment, AI, closeMainWindow } from "@raycast/api";
 import { useState } from "react";
 import { searchAirportsLocal, Airport, preprocessIATACodes, getCodeForSkyscanner } from "../data/airports";
 import { showFailureToast } from "@raycast/utils";
@@ -93,6 +93,8 @@ export default function FreeTextSearch() {
     }
 
     setIsParsingQuery(true);
+
+    await closeMainWindow();
 
     try {
       await showToast({
