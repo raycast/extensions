@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "browse-vps-files",
-      "title": "Browse Vps Files",
+      "title": "Browse VPS Files",
       "description": "Browse, upload, download, and manage files on your VPS",
       "mode": "view"
     }
