@@ -177,13 +177,6 @@
       "mode": "no-view"
     },
     {
-      "name": "reset-speed",
-      "title": "Reset Speed",
-      "subtitle": "Reset playback speed to 1.0x",
-      "description": "Reset playback speed to 1.0x (normal speed).",
-      "mode": "no-view"
-    },
-    {
       "name": "playlist",
       "title": "Playlist",
       "subtitle": "View and play items from VLC playlist",
