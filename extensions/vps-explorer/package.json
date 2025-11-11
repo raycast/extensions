@@ -42,17 +42,10 @@
       "description": "SSH username"
     },
     {
-      "name": "vps-key-path",
-      "type": "textfield",
-      "required": false,
-      "title": "SSH Private Key Path (Optional)",
-      "description": "Path to private key (e.g., ~/.ssh/id_rsa). Leave empty to use default."
-    },
-    {
       "name": "vps-password",
       "type": "password",
-      "required": false,
-      "title": "VPS Password (Optional)",
+      "required": true,
+      "title": "VPS Password",
       "description": "SSH password (not recommended, use SSH keys instead)"
     }
   ],
