@@ -1,5 +1,4 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const appleScript = `
 tell application "System Events"
