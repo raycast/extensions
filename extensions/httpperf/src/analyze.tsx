@@ -165,7 +165,7 @@ Downloaded: ${formatBytes(metrics.sizeDownload)} · Speed: ${formatSpeed(metrics
       <List.Item
         title="Downloaded"
         subtitle={`${formatBytes(metrics.sizeDownload)} at ${formatSpeed(metrics.speedDownload)}`}
-        icon={{ source: Icon.HardDrive, tintColor: Color.SecondaryText }}
+        icon={{ source: Icon.Download, tintColor: Color.SecondaryText }}
         actions={actions}
       />
 
@@ -198,7 +198,7 @@ Downloaded: ${formatBytes(metrics.sizeDownload)} · Speed: ${formatSpeed(metrics
       <List.Item
         title="Server Processing"
         subtitle={formatTime(metrics.serverTime)}
-        icon={{ source: Icon.Layers, tintColor: Color.Purple }}
+        icon={{ source: Icon.MemoryChip, tintColor: Color.Purple }}
         accessories={[{ text: `${serverPercent}%` }, { text: getPhaseStatus(metrics.serverTime, [500, 1500]) }]}
         actions={actions}
       />
@@ -206,7 +206,7 @@ Downloaded: ${formatBytes(metrics.sizeDownload)} · Speed: ${formatSpeed(metrics
       <List.Item
         title="Content Transfer"
         subtitle={formatTime(metrics.transferTime)}
-        icon={{ source: Icon.Download, tintColor: Color.Green }}
+        icon={{ source: Icon.Switch, tintColor: Color.Green }}
         accessories={[{ text: `${transferPercent}%` }, { text: getPhaseStatus(metrics.transferTime, [200, 600]) }]}
         actions={actions}
       />
