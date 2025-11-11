@@ -28,21 +28,19 @@ const EventActions = ({
   const meetingAction = {
     title: "Open Meeting",
     url: event.conferenceData?.entryPoints?.[0]?.uri,
-    shortcut: { modifiers: ["cmd"], key: "m"} as Keyboard.Shortcut,
-  }
+    shortcut: { modifiers: ["cmd"], key: "m" } as Keyboard.Shortcut,
+  };
   const eventAction = {
     title: "Open in Google Calendar",
     url: event.htmlLink,
-    shortcut: { modifiers: ["cmd"], key: "o"} as Keyboard.Shortcut,
-  }
+    shortcut: { modifiers: ["cmd"], key: "o" } as Keyboard.Shortcut,
+  };
   const openCommandJoinsMeeting = preferences.openCommandJoinsMeeting && meetingAction.url;
   const primaryAction = openCommandJoinsMeeting ? meetingAction : eventAction;
   const secondaryAction = openCommandJoinsMeeting ? eventAction : meetingAction;
   return (
     <ActionPanel>
-      {primaryAction.url && (
-        <Action.OpenInBrowser title={primaryAction.title} url={primaryAction.url} />
-      )}
+      {primaryAction.url && <Action.OpenInBrowser title={primaryAction.title} url={primaryAction.url} />}
       {secondaryAction.url && (
         <Action.OpenInBrowser
           title={secondaryAction.title}
