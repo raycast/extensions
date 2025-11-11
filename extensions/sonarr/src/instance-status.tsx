@@ -26,13 +26,21 @@ export default function Command() {
 
   const handleTestConnection = async () => {
     setIsLoading(true);
-    const result = await testConnection();
-    setConnectionStatus({
-      success: result.success,
-      message: result.message,
-      version: result.status?.version,
-    });
-    setIsLoading(false);
+    try {
+      const result = await testConnection();
+      setConnectionStatus({
+        success: result.success,
+        message: result.message,
+        version: result.status?.version,
+      });
+    } catch (error) {
+      setConnectionStatus({
+        success: false,
+        message: error instanceof Error ? error.message : "Connection test failed",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const statusIcon = connectionStatus?.success ? Icon.CheckCircle : Icon.XMarkCircle;

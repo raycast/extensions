@@ -1,4 +1,4 @@
-import { useFetch } from "@raycast/utils";
+import { useFetch, showFailureToast } from "@raycast/utils";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { addDays, format } from "date-fns";
 import { z } from "zod";
@@ -42,11 +42,7 @@ export function useSonarrAPI<T>(endpoint: string, options?: { execute?: boolean 
     headers,
     execute: options?.execute ?? true,
     onError: (error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch data from Sonarr",
-        message: error.message,
-      });
+      showFailureToast("Failed to fetch data from Sonarr", { message: error.message });
     },
   });
 }

@@ -16,7 +16,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "upcoming-calendar",
+      "name": "index",
       "title": "View Upcoming Shows",
       "subtitle": "Sonarr",
       "description": "View calendar of upcoming episodes with search and monitoring actions",

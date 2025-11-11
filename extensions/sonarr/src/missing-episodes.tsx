@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List, Color, Image } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { isFuture, isPast } from "date-fns";
 import type { WantedMissingEpisode } from "@/lib/types/wanted";
@@ -148,7 +149,9 @@ function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissing
       await searchEpisode([episode.id]);
       onRefresh();
     } catch (error) {
-      console.error("Failed to search episode:", error);
+      showFailureToast("Failed to search episode", {
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
