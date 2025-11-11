@@ -25,6 +25,7 @@ import {
   sortInstances,
   getMinecraftFolderPath,
   instancesPath,
+  isWin,
 } from "../utils/prism";
 import { launchInstance, showInstance } from "../utils/instance";
 
@@ -115,7 +116,7 @@ export default function ManageInstances() {
                     }}
                   />
                   <Action
-                    title="Open Minecraft Folder in Finder"
+                    title={`Open Minecraft Folder in ${isWin ? "File Explorer" : "Finder"}`}
                     icon={Icon.Finder}
                     shortcut={{ modifiers: ["shift", "cmd"], key: "o" }}
                     onAction={async () => {
