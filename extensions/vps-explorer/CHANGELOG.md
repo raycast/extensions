@@ -1,8 +1,6 @@
 # VPS Explorer Changelog
 
-## [Initial Version] - 2025-11-11
-
-## [1.0.0] - 2025-11-11
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -24,3 +22,6 @@
 - Passwords passed to expect scripts via `VPS_SSH_PASSWORD` environment variable
 - Temporary scripts are created with owner-only permissions (0o700)
 - Automatic cleanup of temporary authentication scripts
+
+
+## [Initial Version] - 2025-11-11
