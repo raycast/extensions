@@ -16,7 +16,6 @@ import useAsyncEffect from "use-async-effect";
 import { useState } from "react";
 import { Instance } from "../types";
 import * as path from "path";
-import * as child_process from "child_process";
 import { When } from "react-if";
 import {
   isPrismLauncherInstalled,
@@ -26,9 +25,8 @@ import {
   sortInstances,
   getMinecraftFolderPath,
   instancesPath,
-  isWin,
-  winPrismLauncherPath,
 } from "../utils/prism";
+import { launchInstance, showInstance } from "../utils/instance";
 
 export default function ManageInstances() {
   const [instances, setInstances] = useState<Instance[]>();
@@ -69,30 +67,6 @@ export default function ManageInstances() {
     const instancesList = await loadInstances(parsedFavorites);
     setInstances(instancesList);
   }, []);
-
-  const launchInstance = async (instanceId: string) => {
-    try {
-      if (isWin) {
-        child_process.exec(`${winPrismLauncherPath} --launch "${instanceId}"`);
-      } else {
-        child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instanceId}"`);
-      }
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
-    }
-  };
-
-  const showInstance = async (instanceId: string) => {
-    try {
-      if (isWin) {
-        child_process.exec(`${winPrismLauncherPath} --show "${instanceId}"`);
-      } else {
-        child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --show "${instanceId}"`);
-      }
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
-    }
-  };
 
   return (
     <List

@@ -2,18 +2,15 @@ import {
   Action,
   ActionPanel,
   Clipboard,
-  Toast,
   Icon,
   Keyboard,
   List,
   LocalStorage,
   PopToRootType,
-  showToast,
   closeMainWindow,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { usePromise } from "@raycast/utils";
-import * as child_process from "child_process";
 import {
   isPrismLauncherInstalled,
   loadInstances,
@@ -22,10 +19,9 @@ import {
   saveFavoriteServers,
   parseServersFromInstance,
   sortServers,
-  isWin,
-  winPrismLauncherPath,
 } from "../utils/prism";
 import { Instance, Server } from "../types";
+import { joinServer } from "../utils/instance";
 
 export default function FavoriteServers() {
   const [isPrismInstalled, setIsPrismInstalled] = useState<boolean>();
@@ -103,21 +99,6 @@ export default function FavoriteServers() {
     }
   }, [loadedServers]);
 
-  const launchServer = async (instanceId: string, address: string) => {
-    try {
-      if (isWin) {
-        child_process.exec(`${winPrismLauncherPath} --launch "${instanceId}" --server "${address}"`);
-      } else {
-        child_process.exec(
-          `open -b "org.prismlauncher.PrismLauncher" --args --launch "${instanceId}" --server "${address}"`,
-        );
-      }
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
-      return;
-    }
-  };
-
   return (
     <List
       searchBarPlaceholder={"Search favorite servers..."}
@@ -138,7 +119,7 @@ export default function FavoriteServers() {
                   icon={Icon.GameController}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
                   onAction={async () => {
-                    await launchServer(server.instanceId, server.address);
+                    await joinServer(server.instanceId, server.address);
                     await closeMainWindow({
                       popToRootType: PopToRootType.Immediate,
                       clearRootSearch: true,

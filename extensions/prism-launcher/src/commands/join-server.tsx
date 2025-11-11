@@ -9,8 +9,6 @@ import {
   Keyboard,
   environment,
   Clipboard,
-  showToast,
-  Toast,
 } from "@raycast/api";
 import useAsyncEffect from "use-async-effect";
 import { useState } from "react";
@@ -26,10 +24,9 @@ import {
   sortServers,
   loadFavoriteInstanceIds,
   instancesPath,
-  isWin,
-  winPrismLauncherPath,
 } from "../utils/prism";
 import { Server, Instance } from "../types";
+import { joinServer, launchInstance } from "../utils/instance";
 
 export default function JoinServer() {
   const [instances, setInstances] = useState<Instance[]>();
@@ -93,32 +90,6 @@ export default function JoinServer() {
   const handleInstanceSelect = async (instance: Instance) => {
     setSelectedInstance(instance);
     await loadInstanceServers(instance);
-  };
-
-  const joinServer = async (instanceId: string, serverAddress: string) => {
-    try {
-      if (isWin) {
-        child_process.exec(`${winPrismLauncherPath} --launch "${instanceId}" --server "${serverAddress}"`);
-      } else {
-        child_process.exec(
-          `open -b "org.prismlauncher.PrismLauncher" --args --launch "${instanceId}" --server "${serverAddress}"`,
-        );
-      }
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
-    }
-  };
-
-  const launchInstance = async (instanceId: string) => {
-    try {
-      if (isWin) {
-        child_process.exec(`${winPrismLauncherPath} --launch "${instanceId}"`);
-      } else {
-        child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instanceId}"`);
-      }
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
-    }
   };
 
   // If an instance is selected, show its servers
