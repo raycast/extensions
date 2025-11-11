@@ -156,9 +156,9 @@ Downloaded: ${formatBytes(metrics.sizeDownload)} · Speed: ${formatSpeed(metrics
   return (
     <List navigationTitle={`${performanceGrade.icon} ${formatTime(total)}`}>
       <List.Item
-        title="Connection"
+        title={`${metrics.method} ${metrics.url}`}
         subtitle={`${metrics.remoteIp} · HTTP/${metrics.httpVersion} · ${statusInfo.icon} ${metrics.statusCode} ${statusInfo.text} · ${performanceGrade.icon} ${performanceGrade.grade}`}
-        icon={{ source: Icon.Network, tintColor: statusColor }}
+        icon={{ source: Icon.Link, tintColor: statusColor }}
         actions={actions}
       />
 
