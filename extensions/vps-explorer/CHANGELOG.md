@@ -1,6 +1,6 @@
 # VPS Explorer Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-11-11
 
 ### Added
 
