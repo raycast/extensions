@@ -1,4 +1,4 @@
-import child_process from "child_process";
+import { spawn } from "child_process";
 
 import { isWin, winPrismLauncherPath } from "./prism";
 import { showToast, Toast } from "@raycast/api";
@@ -6,11 +6,17 @@ import { showToast, Toast } from "@raycast/api";
 export const joinServer = async (instanceId: string, serverAddress: string) => {
   try {
     if (isWin) {
-      child_process.exec(`${winPrismLauncherPath} --launch "${instanceId}" --server "${serverAddress}"`);
+      spawn(winPrismLauncherPath, ["--launch", instanceId, "--server", serverAddress]);
     } else {
-      child_process.exec(
-        `open -b "org.prismlauncher.PrismLauncher" --args --launch "${instanceId}" --server "${serverAddress}"`,
-      );
+      spawn("open", [
+        "-b",
+        "org.prismlauncher.PrismLauncher",
+        "--args",
+        "--launch",
+        instanceId,
+        "--server",
+        serverAddress,
+      ]);
     }
   } catch {
     await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
@@ -20,9 +26,9 @@ export const joinServer = async (instanceId: string, serverAddress: string) => {
 export const launchInstance = async (instanceId: string) => {
   try {
     if (isWin) {
-      child_process.exec(`${winPrismLauncherPath} --launch "${instanceId}"`);
+      spawn(winPrismLauncherPath, ["--launch", instanceId]);
     } else {
-      child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instanceId}"`);
+      spawn("open", ["-b", "org.prismlauncher.PrismLauncher", "--args", "--launch", instanceId]);
     }
   } catch {
     await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
@@ -32,9 +38,9 @@ export const launchInstance = async (instanceId: string) => {
 export const showInstance = async (instanceId: string) => {
   try {
     if (isWin) {
-      child_process.exec(`${winPrismLauncherPath} --show "${instanceId}"`);
+      spawn(winPrismLauncherPath, ["--show", instanceId]);
     } else {
-      child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --show "${instanceId}"`);
+      spawn("open", ["-b", "org.prismlauncher.PrismLauncher", "--args", "--show", instanceId]);
     }
   } catch {
     await showToast({ style: Toast.Style.Failure, title: "Failed to launch Prism Launcher" });
