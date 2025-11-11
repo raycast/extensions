@@ -6,8 +6,7 @@
   "icon": "extension-icon.png",
   "author": "kishan_vagale",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Productivity"
