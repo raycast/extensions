@@ -1,6 +1,6 @@
 # Coolify Changelog
 
-## [Delete Project + Better Error Message] - {PR_MERGE_DATE}
+## [Delete Project + Better Error Message] - 2025-11-11
 
 - Better Error Messages are shown
 - In `Projects`:
