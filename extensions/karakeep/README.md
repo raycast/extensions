@@ -33,6 +33,7 @@ npm install && npm run dev
 - **List Management**: Browse and organize bookmarks through customized lists
 - **Tag Organization**: Efficiently manage and filter content using tags
 - **Fast Bookmark Creation**: Create new bookmarks directly from Raycast with just a few keystrokes
+- **Quick Bookmark**: Instantly bookmark the current browser tab with a hotkey
 
 ### Additional Conveniences
 
@@ -77,7 +78,9 @@ Here's how to make the most of the Raycast Karakeep extension:
 - **Search Content**: Utilize full-text search across all bookmarked content
 - **AI Tagging**: Automatically categorize bookmarks using AI
 - **Create New Bookmarks**: Add new bookmarks with ease
+- **Quick Bookmark**: Assign a hotkey to instantly bookmark the current browser tab
 - **Edit Bookmarks**: Edit bookmark title and notes
+- **Browser Integration**: Automatically prefill URLs from your active browser tab (can be disabled in preferences)
 
 ## 🔧 Troubleshooting
 

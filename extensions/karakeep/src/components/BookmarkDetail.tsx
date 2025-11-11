@@ -158,13 +158,13 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
 
     switch (bookmark.content.type) {
       case "link":
-        images.screenshot && parts.push(`![${bookmark.content.title}](${images.screenshot})`);
+        void (images.screenshot && parts.push(`![${bookmark.content.title}](${images.screenshot})`));
         addTitle(displayTitle);
         break;
 
       case "text":
-        customTitle && addTitle(displayTitle);
-        bookmark.content.text && parts.push(`\n${bookmark.content.text}`);
+        void (customTitle && addTitle(displayTitle));
+        void (bookmark.content.text && parts.push(`\n${bookmark.content.text}`));
         break;
 
       case "asset": {
@@ -172,7 +172,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
         const assetDisplayTitle = customTitle ? bookmark.title : fileName || t("bookmark.untitledImage");
 
         if (assetType === "image") {
-          images.asset && parts.push(`\n![${fileName}](${images.asset})`);
+          void (images.asset && parts.push(`\n![${fileName}](${images.asset})`));
           addTitle(assetDisplayTitle || "");
           addFileName(fileName || "", "🖼️");
         } else if (assetType === "pdf") {
@@ -183,8 +183,8 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
       }
     }
 
-    bookmark.summary && parts.push(`\n### ${t("bookmark.sections.summary")}\n${bookmark.summary}`);
-    bookmark.note && parts.push(`\n### ${t("bookmark.sections.note")}\n${bookmark.note}`);
+    void (bookmark.summary && parts.push(`\n### ${t("bookmark.sections.summary")}\n${bookmark.summary}`));
+    void (bookmark.note && parts.push(`\n### ${t("bookmark.sections.note")}\n${bookmark.note}`));
 
     return parts.join("\n");
   }

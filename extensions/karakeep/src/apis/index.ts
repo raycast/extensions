@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { URL } from "url";
 import { GetBookmarksParams } from "../types";
 import { getApiConfig } from "../utils/config";

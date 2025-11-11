@@ -20,6 +20,7 @@ interface BookmarkItemProps {
   config: Config;
   onRefresh: () => void;
   onCleanCache?: () => void;
+  onVisit?: (bookmark: Bookmark) => void;
 }
 
 function useBookmarkImages(bookmark: Bookmark) {
@@ -264,6 +265,7 @@ function BookmarkActions({
   handlers,
   images,
   t,
+  onVisit,
 }: {
   bookmark: Bookmark;
   config: Config;
@@ -272,6 +274,7 @@ function BookmarkActions({
   handlers: ReturnType<typeof useBookmarkHandlers>;
   images: ReturnType<typeof useBookmarkImages>;
   t: (key: string) => string;
+  onVisit?: (bookmark: Bookmark) => void;
 }) {
   const getMainAction = () => {
     const pushDetailAction = (
@@ -299,6 +302,7 @@ function BookmarkActions({
               url={bookmark.content.url}
               title={t("bookmark.actions.openLink")}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onOpen={() => onVisit?.(bookmark)}
             />
           );
 
@@ -321,6 +325,7 @@ function BookmarkActions({
               content={bookmark.content.text}
               title={t("bookmark.actions.copyContent")}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onCopy={() => onVisit?.(bookmark)}
             />
           );
 
@@ -385,11 +390,13 @@ function BookmarkActions({
                 url={bookmark.content.url}
                 title={t("bookmark.actions.openLink")}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
+                onOpen={() => onVisit?.(bookmark)}
               />
               <Action.CopyToClipboard
                 content={bookmark.content.url}
                 title={t("bookmark.actions.copyLink")}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
+                onCopy={() => onVisit?.(bookmark)}
               />
             </>
           )}
@@ -400,6 +407,7 @@ function BookmarkActions({
               content={bookmark.content.text}
               title={t("bookmark.actions.copyContent")}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onCopy={() => onVisit?.(bookmark)}
             />
           )}
         {bookmark.content.type === "asset" &&
@@ -457,7 +465,13 @@ function BookmarkActions({
   );
 }
 
-export function BookmarkItem({ bookmark: initialBookmark, config, onRefresh, onCleanCache }: BookmarkItemProps) {
+export function BookmarkItem({
+  bookmark: initialBookmark,
+  config,
+  onRefresh,
+  onCleanCache,
+  onVisit,
+}: BookmarkItemProps) {
   const { t } = useTranslation();
   const images = useBookmarkImages(initialBookmark);
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
@@ -534,6 +548,7 @@ export function BookmarkItem({ bookmark: initialBookmark, config, onRefresh, onC
           handlers={handlers}
           images={images}
           t={t}
+          onVisit={onVisit}
         />
       }
     />
