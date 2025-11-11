@@ -13,7 +13,6 @@ import {
 import useAsyncEffect from "use-async-effect";
 import { useState } from "react";
 import * as path from "path";
-import * as child_process from "child_process";
 import { When } from "react-if";
 import {
   isPrismLauncherInstalled,
@@ -196,7 +195,7 @@ export default function JoinServer() {
                     title="Launch Instance"
                     icon={Icon.Rocket}
                     onAction={async () => {
-                      child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instance.id}"`);
+                      await launchInstance(instance.id);
                       await closeMainWindow({
                         popToRootType: PopToRootType.Immediate,
                         clearRootSearch: true,
