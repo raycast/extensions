@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "httpperf",
+  "title": "HTTP Performance Analyzer",
+  "description": "Analyze and visualize HTTP/HTTPS request performance metrics including DNS lookup, TCP connection, TLS handshake, and content transfer times",
+  "icon": "command-icon.png",
+  "author": "liluo",
+  "version": "1.0.0",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "analyze",
+      "title": "Analyze HTTP Performance",
+      "subtitle": "HTTP Performance Analyzer",
+      "description": "Measure and visualize HTTP request performance metrics",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL (e.g., https://example.com)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.12.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
+
