@@ -53,9 +53,20 @@ function convertParameterValue(
       return Boolean(rawValue);
     case "string":
       return String(rawValue ?? "");
-    case "enum":
-      // Enum values are always stored as strings for consistency with Form.Dropdown
+    case "enum": {
+      // Check if all enum options are numeric strings - if so, convert to number
+      const options = param.options || [];
+      const allNumeric = options.length > 0 && options.every((opt) => !isNaN(Number(opt.value)));
+
+      if (allNumeric) {
+        // Convert to number for numeric enums
+        const parsed = Number(rawValue);
+        return isNaN(parsed) ? Number(param.default ?? 0) : parsed;
+      }
+
+      // Otherwise keep as string for consistency with Form.Dropdown
       return String(rawValue ?? "");
+    }
     default:
       return rawValue;
   }
