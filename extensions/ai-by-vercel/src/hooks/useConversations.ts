@@ -24,31 +24,48 @@ export function useConversations() {
   }
 
   const addConversation = useCallback(async (conversation: Conversation) => {
+    let updatedConversations: Conversation[] = [];
     setConversations((prev) => {
-      const updated = [conversation, ...prev];
-      LocalStorage.setItem("conversations", JSON.stringify(updated));
-      return updated;
+      updatedConversations = [conversation, ...prev];
+      return updatedConversations;
     });
+    try {
+      await LocalStorage.setItem("conversations", JSON.stringify(updatedConversations));
+    } catch (error) {
+      console.error("Failed to save conversation:", error);
+    }
   }, []);
 
   const updateConversation = useCallback(async (id: string, updates: Partial<Conversation>) => {
+    let updatedConversations: Conversation[] = [];
     setConversations((prev) => {
-      const updated = prev.map((conv) => (conv.id === id ? { ...conv, ...updates, timestamp: Date.now() } : conv));
-      LocalStorage.setItem("conversations", JSON.stringify(updated));
-      return updated;
+      updatedConversations = prev.map((conv) =>
+        conv.id === id ? { ...conv, ...updates, timestamp: Date.now() } : conv,
+      );
+      return updatedConversations;
     });
+    try {
+      await LocalStorage.setItem("conversations", JSON.stringify(updatedConversations));
+    } catch (error) {
+      console.error("Failed to update conversation:", error);
+    }
   }, []);
 
   const deleteConversation = useCallback(async (id: string) => {
+    let updatedConversations: Conversation[] = [];
     setConversations((prev) => {
-      const updated = prev.filter((c) => c.id !== id);
-      LocalStorage.setItem("conversations", JSON.stringify(updated));
-      return updated;
+      updatedConversations = prev.filter((c) => c.id !== id);
+      return updatedConversations;
     });
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Conversation deleted",
-    });
+    try {
+      await LocalStorage.setItem("conversations", JSON.stringify(updatedConversations));
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Conversation deleted",
+      });
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
+    }
   }, []);
 
   const deleteAllConversations = useCallback(async () => {

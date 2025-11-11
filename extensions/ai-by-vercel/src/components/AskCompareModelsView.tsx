@@ -1,4 +1,5 @@
 import { List, showToast, Toast, Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { CompareFormValues, Message, AIPreferences, ModelStatus } from "../types";
 import { askMultipleModels } from "../services/ai";
@@ -51,18 +52,12 @@ export function AskCompareModelsView() {
     const userQuestion = values.question.trim();
 
     if (!userQuestion) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Please enter a question",
-      });
+      await showFailureToast("Please enter a question");
       return;
     }
 
     if (!values.models || values.models.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Please select at least one model",
-      });
+      await showFailureToast("Please select at least one model");
       return;
     }
 

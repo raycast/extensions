@@ -1,4 +1,5 @@
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useCallback, useMemo } from "react";
 import type { Conversation, FormValues, Message } from "../types";
 import { streamAIResponse } from "../services/ai";
@@ -67,10 +68,7 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
       const question = values.question.trim();
 
       if (!question) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Please enter a question",
-        });
+        await showFailureToast("Please enter a question");
         return;
       }
 

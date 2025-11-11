@@ -1,4 +1,5 @@
 import { Action, ActionPanel, List, Icon, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { Conversation, FormValues, Message } from "../types";
 import { streamAIResponse } from "../services/ai";
@@ -71,10 +72,7 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
       const question = values.question.trim();
 
       if (!question) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Please enter a question",
-        });
+        await showFailureToast("Please enter a question");
         return;
       }
 
@@ -130,7 +128,7 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
         onCancel={handleCancel}
         additionalDescription={{
           title: "Context",
-          text: `Continuing conversation with ${localMessages.length / 2} messages`,
+          text: `Continuing conversation with ${Math.floor(localMessages.length / 2)} messages`,
         }}
       />
     );
