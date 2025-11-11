@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vpn-manager",
+  "title": "VPN Manager",
+  "version": "0.1.0",
+  "description": "A package for managing VPNs and instantly change their state.",
+  "icon": "extension_icon.png",
+  "author": "abtinokhovat",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "vpn",
+      "title": "List VPNs",
+      "description": "List available VPNs on system, and Toggle their status",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle",
+      "description": "Toggles the most recent used VPN.",
+      "mode": "no-view"
+    },
+    {
+      "name": "ping",
+      "title": "Ping",
+      "description": "Ping google.com",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2",
+    "run-applescript": "^6.0.0",
+    "@raycast/utils": "^1.4.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.37",
+    "eslint": "^8.53.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
