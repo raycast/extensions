@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Make Windows Compatible] - {PR_MERGE_DATE}
+## [Make Windows Compatible] - 2025-11-11
 
 - Update package.json to include Windows platform compatibility
 
