@@ -1,6 +1,6 @@
 # Ligue 1 Changelog
 
-## [Maintenance & Windows Support] - 2025-11-08
+## [Maintenance & Windows Support] - {PR_MERGE_DATE}
 
 - Updated the Fixtures & Results view to default to displaying the latest season upon opening.
 - Added Windows support, making the extension accessible to a wider audience on the Raycast platform.
