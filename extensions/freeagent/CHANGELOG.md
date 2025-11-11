@@ -2,7 +2,7 @@
 
 ## [Added new command to create tasks in projects] - {PR_MERGE_DATE}
 
-- New `Create a new task in Freeagent` command
+- New `Create a new task in FreeAgent` command
 
 ## [Timezone Fix for Date Handling] - 2025-08-27
 

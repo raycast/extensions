@@ -8,7 +8,6 @@ import { showFailureToast } from "@raycast/utils";
 
 const CreateTask = function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>("");
   const { isLoading, isAuthenticated, accessToken, handleError } = useFreeAgent();
 
   useEffect(() => {
@@ -33,12 +32,18 @@ const CreateTask = function Command() {
     }
 
     if (!values.project) {
-      handleError(new Error("Please select a project"), "Failed to create task");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Please select a project",
+      });
       return;
     }
 
     if (!values.name || values.name.trim() === "") {
-      handleError(new Error("Please enter a task name"), "Failed to create task");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Please enter a task name",
+      });
       return;
     }
 
@@ -85,15 +90,7 @@ const CreateTask = function Command() {
     >
       <Form.Description text="Create a new task in FreeAgent" />
 
-      <Form.Dropdown
-        id="project"
-        title="Project"
-        placeholder="Select a project"
-        value={selectedProject}
-        onChange={(value) => {
-          setSelectedProject(value);
-        }}
-      >
+      <Form.Dropdown id="project" title="Project" placeholder="Select a project">
         {projects.map((project) => (
           <Form.Dropdown.Item
             key={project.url}
