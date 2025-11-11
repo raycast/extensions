@@ -1,7 +1,9 @@
-import { Action, ActionPanel, Alert, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, Keyboard, Toast, confirmAlert, getPreferenceValues, showToast } from "@raycast/api";
 import { getCalendarClient } from "../lib/google";
 import { showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "@googleapis/calendar";
+
+const preferences: Preferences.ListEvents = getPreferenceValues();
 
 const EventActions = ({
   event,
@@ -14,7 +16,7 @@ const EventActions = ({
 }) => {
   return (
     <ActionPanel>
-      {event.conferenceData?.entryPoints?.[0]?.uri ? (
+      {preferences.openCommandJoinsMeeting && event.conferenceData?.entryPoints?.[0]?.uri ? (
         <Action.OpenInBrowser title="Open Meeting" url={event.conferenceData?.entryPoints?.[0]?.uri} />
       ) : (
         event.htmlLink && <Action.OpenInBrowser title="Open in Google Calendar" url={event.htmlLink} />
