@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { Config, Preferences } from "../types";
 
 const getConfig = (): Config => {
@@ -22,7 +23,7 @@ const getConfig = (): Config => {
       displaySummary: preferences.displaySummary ?? false,
     };
   } catch (error) {
-    console.error("Config load failed:", error);
+    logger.error("Config load failed, using defaults", error);
     return {
       apiUrl: "",
       apiKey: "",

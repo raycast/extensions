@@ -28,12 +28,11 @@ Successfully migrated from manual pagination state management to Raycast's nativ
 - Applied consistent pattern across all three hooks
 - Total reduction: 384 → 136 lines (248 lines saved, 65%)
 
-### ✅ Phase 4: Added Frecency Sorting
-- Integrated `useFrecencySorting` from `@raycast/utils`
-- Tracks bookmark visits on "open in browser" actions
-- Tracks bookmark visits on "copy to clipboard" actions
-- Bookmarks users interact with most frequently appear first
-- Seamless integration with native pagination
+### ⚠️ Phase 4: Frecency Sorting (Reverted)
+- Initially integrated `useFrecencySorting` from `@raycast/utils`
+- **Reverted due to memory issues** - client-side sorting doesn't work well with pagination
+- Bookmarks now display in reverse chronological order (server-side sorting)
+- Frecency sorting should be implemented server-side for proper pagination support
 
 ## Key Benefits
 
@@ -45,9 +44,9 @@ Successfully migrated from manual pagination state management to Raycast's nativ
 
 ### Performance
 - **Fixed rendering loop** - no more infinite re-renders
-- **Optimized pagination** - Raycast handles data accumulation
-- **Smart sorting** - frecency algorithm prioritizes frequently-used bookmarks
-- **No performance overhead** - sorting happens client-side
+- **Optimized pagination** - each page loads independently without memory accumulation
+- **Reverse chronological order** - newest bookmarks first, older as you scroll
+- **Memory efficient** - removed `keepPreviousData` to prevent memory exhaustion
 
 ### Developer Experience
 - **Simpler API** - pass `pagination` prop directly to `<List />`

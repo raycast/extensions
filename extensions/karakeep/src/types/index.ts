@@ -108,4 +108,5 @@ export interface GetBookmarksParams {
   cursor?: string;
   favourited?: boolean;
   archived?: boolean;
+  limit?: number;
 }

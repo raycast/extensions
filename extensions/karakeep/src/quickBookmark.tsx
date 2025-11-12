@@ -1,4 +1,5 @@
 import { showToast, Toast, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { fetchCreateBookmark } from "./apis";
 import { getBrowserLink } from "./hooks/useBrowserLink";
 import { Bookmark } from "./types";
@@ -40,8 +41,7 @@ export default async function QuickBookmark() {
 
     await showHUD("✓ Bookmark created");
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Failed to create quick bookmark",
       message: String(error),
     });

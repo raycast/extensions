@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteTag } from "./apis";
 import { BookmarkList } from "./components/BookmarkList";
 import { useConfig } from "./hooks/useConfig";
@@ -50,7 +51,8 @@ export default function Tags() {
       toast.message = "Tag deleted successfully";
       toast.style = Toast.Style.Success;
       await revalidate();
-    } catch {
+    } catch (error) {
+      logger.error("Failed to delete tag", { tagId, error });
       toast.title = "Delete tag";
       toast.message = "Tag deletion failed";
       toast.style = Toast.Style.Failure;

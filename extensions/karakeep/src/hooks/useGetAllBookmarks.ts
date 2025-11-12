@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { fetchGetAllBookmarks } from "../apis";
 import { ApiResponse, Bookmark, GetBookmarksParams } from "../types";
 
@@ -8,6 +8,8 @@ import { ApiResponse, Bookmark, GetBookmarksParams } from "../types";
  * Eliminates manual state management and cursor tracking.
  */
 export function useGetAllBookmarks({ favourited, archived }: GetBookmarksParams = {}) {
+  const abortable = useRef<AbortController | null>(null);
+
   const { isLoading, data, error, revalidate, pagination } = useCachedPromise(
     (favourited, archived) => async (options) => {
       const result = (await fetchGetAllBookmarks({
@@ -24,8 +26,8 @@ export function useGetAllBookmarks({ favourited, archived }: GetBookmarksParams 
     },
     [favourited, archived],
     {
-      keepPreviousData: true,
       initialData: [],
+      abortable,
     },
   );
 

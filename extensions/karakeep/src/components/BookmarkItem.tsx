@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
 import {
   ARCHIVED_COLOR,
@@ -11,7 +12,6 @@ import {
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark, Config } from "../types";
-import { getScreenshot } from "../utils/screenshot";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
 const { Metadata } = List.Item.Detail;
@@ -23,38 +23,24 @@ interface BookmarkItemProps {
   onVisit?: (bookmark: Bookmark) => void;
 }
 
-function useBookmarkImages(bookmark: Bookmark) {
-  const [images, setImages] = useState({
+function useBookmarkImages(bookmark: Bookmark, config: Config) {
+  // Construct authenticated image URLs using the screenshot utility format
+  // These URLs will work in markdown with Raycast's image handling
+  const images = {
     screenshot: DEFAULT_SCREENSHOT_FILENAME,
     asset: DEFAULT_SCREENSHOT_FILENAME,
-  });
+  };
 
-  useEffect(() => {
-    async function loadImages() {
-      const newImages = { ...images };
+  const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
+  if (screenshot?.id) {
+    const encodedUrl = encodeURIComponent(`/api/assets/${screenshot.id}`);
+    images.screenshot = `${config.apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
+  }
 
-      const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
-      if (screenshot?.id) {
-        try {
-          newImages.screenshot = await getScreenshot(screenshot.id);
-        } catch (error) {
-          console.error("Failed to get screenshot:", error);
-        }
-      }
-
-      if (bookmark.content.type === "asset" && bookmark.content.assetType === "image" && bookmark.content.assetId) {
-        try {
-          newImages.asset = await getScreenshot(bookmark.content.assetId);
-        } catch (error) {
-          console.error("Failed to get asset image:", error);
-        }
-      }
-
-      setImages(newImages);
-    }
-
-    loadImages();
-  }, [bookmark]);
+  if (bookmark.content.type === "asset" && bookmark.content.assetType === "image" && bookmark.content.assetId) {
+    const encodedUrl = encodeURIComponent(`/api/assets/${bookmark.content.assetId}`);
+    images.asset = `${config.apiUrl}/_next/image?url=${encodedUrl}&w=1200&q=75`;
+  }
 
   return images;
 }
@@ -78,7 +64,7 @@ function useBookmarkHandlers({
         setBookmark(latest as Bookmark);
       }
     } catch (error) {
-      console.error("Failed to fetch latest bookmark:", error);
+      logger.error("Failed to fetch latest bookmark", { bookmarkId: bookmark.id, error });
     }
   }, [bookmark.id, setBookmark]);
 
@@ -97,6 +83,7 @@ function useBookmarkHandlers({
           await fetchLatestBookmark();
         }
       } catch (error) {
+        logger.error(`Bookmark action '${action}' failed`, error);
         toast.style = Toast.Style.Failure;
         toast.message = String(error);
         if (action !== "delete") {
@@ -473,7 +460,7 @@ export function BookmarkItem({
   onVisit,
 }: BookmarkItemProps) {
   const { t } = useTranslation();
-  const images = useBookmarkImages(initialBookmark);
+  const images = useBookmarkImages(initialBookmark, config);
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
   useEffect(() => {
     setBookmark(initialBookmark);

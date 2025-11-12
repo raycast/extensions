@@ -1,5 +1,6 @@
 import { BrowserExtension, environment, getFrontmostApplication } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { logger } from "@chrismessina/raycast-logger";
 
 /**
  * Get the current URL from the active browser tab.
@@ -28,7 +29,7 @@ export async function getBrowserLink(): Promise<string | null> {
       }
     } catch (error) {
       // Fallback to AppleScript if Browser Extension API fails
-      console.warn("Browser Extension API failed:", error);
+      logger.warn("Browser Extension API failed, falling back to AppleScript", error);
     }
   }
 
@@ -85,10 +86,10 @@ export async function getBrowserLink(): Promise<string | null> {
       return runAppleScript(`tell application "Vivaldi" to return URL of active tab of front window`);
     }
 
-    console.warn(`Unsupported browser: ${app.name}`);
+    logger.warn(`Unsupported browser: ${app.name}`);
     return null;
   } catch (error) {
-    console.error("Failed to get browser link:", error);
+    logger.error("Failed to get browser link", error);
     return null;
   }
 }

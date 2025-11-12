@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation, closeMainWindow, showHUD } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchAddBookmarkToList, fetchCreateBookmark } from "./apis";
 import { BookmarkDetail } from "./components/BookmarkDetail";
 import { useGetAllLists } from "./hooks/useGetAllLists";
@@ -74,6 +75,7 @@ export default function CreateNoteView() {
       showHUD(t("bookmark.createSuccess"));
       await closeMainWindow({ clearRootSearch: true });
     } catch (error) {
+      logger.error("Failed to create note", { contentLength: values.content.length, error });
       toast.style = Toast.Style.Failure;
       toast.title = t("bookmark.createFailed");
       toast.message = String(error);

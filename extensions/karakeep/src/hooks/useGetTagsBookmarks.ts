@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { fetchGetSingleTagBookmarks } from "../apis";
 import { ApiResponse, Bookmark } from "../types";
 
@@ -8,6 +8,8 @@ import { ApiResponse, Bookmark } from "../types";
  * Eliminates manual state management and cursor tracking.
  */
 export function useGetTagsBookmarks(tagId: string) {
+  const abortable = useRef<AbortController | null>(null);
+
   const { isLoading, data, error, revalidate, pagination } = useCachedPromise(
     (tagId) => async (options) => {
       const result = (await fetchGetSingleTagBookmarks(tagId, options.cursor)) as ApiResponse<Bookmark>;
@@ -20,8 +22,8 @@ export function useGetTagsBookmarks(tagId: string) {
     },
     [tagId],
     {
-      keepPreviousData: true,
       initialData: [],
+      abortable,
     },
   );
 

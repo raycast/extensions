@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchAddBookmarkToList, fetchCreateBookmark } from "./apis";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
@@ -57,6 +58,7 @@ export default function CreateBookmarkView() {
         toast.style = Toast.Style.Success;
         toast.title = t("bookmark.createSuccess");
       } catch (error) {
+        logger.error("Failed to create bookmark", { url: values.url, error });
         toast.style = Toast.Style.Failure;
         toast.title = t("bookmark.createFailed");
         toast.message = String(error);
@@ -76,7 +78,7 @@ export default function CreateBookmarkView() {
         }
       } catch (error) {
         // Browser extension not available or no permission
-        console.error("Failed to get browser tab:", error);
+        logger.log("Failed to prefill URL from browser", error);
       } finally {
         setIsLoadingTab(false);
       }

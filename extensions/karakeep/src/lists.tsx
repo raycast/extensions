@@ -1,5 +1,6 @@
 import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useMemo } from "react";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteList } from "./apis";
 import { BookmarkList } from "./components/BookmarkList";
 import { useConfig } from "./hooks/useConfig";
@@ -137,7 +138,8 @@ export default function Lists() {
           toast.style = Toast.Style.Success;
           toast.message = t("common.deleteSuccess");
           revalidate();
-        } catch {
+        } catch (error) {
+          logger.error("Failed to delete list", { listId: id, listName, error });
           toast.style = Toast.Style.Failure;
           toast.message = t("common.deleteFailed");
         }

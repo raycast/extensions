@@ -13,6 +13,7 @@
   - [ ] Add list deletion
   - [ ] Add list renaming
 - [ ] Add support for Raycast AI Tools
+- [X] Integrate support for logging with @chrismessina/raycast-logger package
 
 ## Raycast API Optimization (Native Pagination & Frecency Sorting)
 

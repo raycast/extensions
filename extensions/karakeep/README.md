@@ -1,8 +1,8 @@
 # 🚀 Raycast Karakeep
 
-![Raycast](https://shields.io/badge/Raycast-black?logo=raycast&style=style=fla)
-![React](https://shields.io/badge/react-black?logo=react&style=style=fla)
-![TypeScript](https://shields.io/badge/typescript-black?logo=typescript&style=style=fla)
+![Raycast](https://shields.io/badge/Raycast-black?logo=raycast&style=style=flat)
+![React](https://shields.io/badge/react-black?logo=react&style=style=flat)
+![TypeScript](https://shields.io/badge/typescript-black?logo=typescript&style=style=flat)
 
 A user-friendly Raycast extension that seamlessly integrates with [Karakeep (previously Hoarder)](https://github.com/karakeep-app/karakeep), bringing powerful bookmark management to your fingertips. Quickly save, search, and organize your bookmarks, texts, and images—all through Raycast's intuitive interface.
 
@@ -38,7 +38,7 @@ npm install && npm run dev
 ### Additional Conveniences
 
 - **Intuitive Search**: Quickly locate any bookmark or content using the online search feature of Karakeep and the powerful search capabilities of Raycast.
-- **One-Click Actions**:Open bookmarks in your browser, copy links, or delete instantly.
+- **One-Click Actions**: Open bookmarks in your browser, copy links, or delete instantly.
 - **Preview Support**: View bookmark details and screenshots without leaving Raycast
 - **Keyboard Navigation**: Fully keyboard-accessible for maximum efficiency
 - **Customizable Display**:Set up your preferred information display for bookmarks
