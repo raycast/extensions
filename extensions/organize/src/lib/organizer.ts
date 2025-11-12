@@ -145,12 +145,17 @@ async function findDuplicates(
   for (const [, files] of hashGroups) {
     if (files.length > 1) {
       // Sort by modification time (keep oldest)
-      files.sort((a, b) => {
-        const statA = a;
-        const statB = b;
-        return statA.localeCompare(statB);
-      });
-      duplicatesToRemove.push(...files.slice(1)); // All except the first (oldest)
+      const filesWithStats = await Promise.all(
+        files.map(async (filePath) => {
+          const info = await getFileInfo(filePath);
+          return { filePath, mtime: info?.mtime?.getTime() || 0 };
+        }),
+      );
+
+      filesWithStats.sort((a, b) => a.mtime - b.mtime);
+      const sortedFiles = filesWithStats.map((f) => f.filePath);
+
+      duplicatesToRemove.push(...sortedFiles.slice(1)); // All except the first (oldest)
     }
   }
 
@@ -591,7 +596,7 @@ async function cleanEmptyDateFolders(dirPath: string): Promise<void> {
       const visibleContents = contents.filter((name) => !name.startsWith("."));
 
       if (visibleContents.length === 0) {
-        await fs.rmdir(dir);
+        await fs.rm(dir, { recursive: false });
         console.log(`   🗑️ Removed empty folder: ${dirName}`);
       }
     } catch (error) {

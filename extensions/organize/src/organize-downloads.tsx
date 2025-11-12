@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { organizeDownloads } from "./lib/organizer";
 import { UndoManager } from "./lib/undoManager";
@@ -30,18 +31,14 @@ export default function Command() {
         const errorMessage = err instanceof Error ? err.message : String(err);
         setError(errorMessage);
 
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to organize Downloads",
-          message: errorMessage,
-        });
+        await showFailureToast("Failed to organize Downloads", { message: errorMessage });
       } finally {
         setIsLoading(false);
       }
     }
 
     organize();
-  }, []);
+  }, [undoManager]);
 
   if (isLoading) {
     return null; // Toast will show loading state

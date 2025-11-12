@@ -16,6 +16,7 @@
     {
       "name": "organize-downloads",
       "title": "Organize Downloads",
+      "subtitle": "Organize",
       "description": "Organize your Downloads folder by removing duplicates, archiving old files, and sorting by file type. Includes undo option.",
       "mode": "view",
       "entryPoint": "src/organize-downloads.tsx"
@@ -23,6 +24,7 @@
     {
       "name": "organize-desktop",
       "title": "Organize Desktop",
+      "subtitle": "Organize",
       "description": "Organize your Desktop by removing duplicates, archiving old files, and sorting by file type. Includes undo option.",
       "mode": "view",
       "entryPoint": "src/organize-desktop.tsx"
@@ -30,6 +32,7 @@
     {
       "name": "organize-temp",
       "title": "Organize Temp Folder",
+      "subtitle": "Organize",
       "description": "Organize your Documents/Temp folder by removing duplicates and organizing files by type. Includes undo option.",
       "mode": "view",
       "entryPoint": "src/organize-temp.tsx"

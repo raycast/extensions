@@ -1,11 +1,8 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import * as crypto from "crypto";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { trash } from "@raycast/api";
 import { UndoManager } from "./undoManager";
-
-const execAsync = promisify(exec);
 
 export interface FileInfo {
   path: string;
@@ -17,12 +14,11 @@ export interface FileInfo {
 }
 
 /**
- * Move a file to macOS Trash using AppleScript
+ * Move a file to macOS Trash using Raycast's built-in trash method
  */
 export async function moveToTrash(filePath: string, undoManager?: UndoManager): Promise<boolean> {
   try {
-    // Use AppleScript to move file to Trash on macOS
-    await execAsync(`osascript -e 'tell application "Finder" to delete POSIX file "${filePath}"'`);
+    await trash(filePath);
 
     // Record the operation for undo
     if (undoManager) {
