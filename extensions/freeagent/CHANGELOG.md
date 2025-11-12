@@ -1,6 +1,6 @@
 # FreeAgent Changelog
 
-## [Added new command to create tasks in projects] - {PR_MERGE_DATE}
+## [Added new command to create tasks in projects] - 2025-11-12
 
 - New `Create a new task in FreeAgent` command
 
