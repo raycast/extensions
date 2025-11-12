@@ -1,6 +1,6 @@
 # Raycast Sink Changelog
 
-## [Add Windows Support and Enhancments] - {PR_MERGE_DATE}
+## [Add Windows Support and Enhancements] - {PR_MERGE_DATE}
 
 - Added Windows Support
 - Added action to go to "Create Link" command when there are no links

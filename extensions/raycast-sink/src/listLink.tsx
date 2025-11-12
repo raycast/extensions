@@ -9,6 +9,7 @@ import { LinkItem } from "./components/LinkItem";
 import { useState } from "react";
 import { LinkDetail } from "./components/LinkDetail";
 import { useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default function LinkListView() {
   const { links, isLoading: isLinksLoading, refreshLinks, cleanCache } = useLinks();
@@ -96,9 +97,17 @@ export default function LinkListView() {
               <Action
                 icon={Icon.Plus}
                 title="Create Link"
-                onAction={() =>
-                  launchCommand({ name: "createLink", extensionName: "raycast-sink", type: LaunchType.UserInitiated })
-                }
+                onAction={async () => {
+                  try {
+                    await launchCommand({
+                      name: "createLink",
+                      extensionName: "raycast-sink",
+                      type: LaunchType.UserInitiated,
+                    });
+                  } catch (error) {
+                    await showFailureToast(error, { title: "Failed to launch Create Link command" });
+                  }
+                }}
               />
             </ActionPanel>
           }

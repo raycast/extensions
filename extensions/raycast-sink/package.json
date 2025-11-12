@@ -78,7 +78,7 @@
       "type": "textfield",
       "required": true,
       "title": "API Host",
-      "description": "Enter the API host UR",
+      "description": "Enter the API host URL",
       "placeholder": "https://your-sink-instance.com"
     },
     {
