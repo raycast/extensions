@@ -10,7 +10,7 @@ import {
   Icon,
 } from "@raycast/api";
 import { useEffect, useState, useMemo } from "react";
-import { exec, execSync } from "child_process";
+import { spawn, spawnSync, SpawnSyncReturns } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import os from "os";
@@ -20,9 +20,22 @@ interface Preferences {
   ytdlPath?: string;
 }
 
-// Sanitize input to prevent shell injection
-function sanitizeInput(input: string): string {
-  return input.replace(/[^\w\s\-:/.?=&]/g, "");
+// Sanitize URL input to prevent shell injection (only for URLs)
+function sanitizeUrl(input: string): string {
+  try {
+    const url = new URL(input);
+    return url.toString();
+  } catch {
+    return "";
+  }
+}
+
+// Ensure a path is normalized and points to an existing executable file
+function validateExecutable(p: string): string | null {
+  if (!p) return null;
+  const resolved = path.resolve(p);
+  if (fs.existsSync(resolved)) return resolved;
+  return null;
 }
 
 export default function Command() {
@@ -47,24 +60,37 @@ export default function Command() {
     }
   };
 
-  // Get yt-dlp path
+  // Get yt-dlp path (safe: don't use shell; use spawnSync where necessary)
   const getytdlPath = () => {
-    if (ytdlPathPreference && fs.existsSync(ytdlPathPreference)) return ytdlPathPreference;
+    // prefer user-provided pref if valid
+    const prefPath = validateExecutable(ytdlPathPreference || "");
+    if (prefPath) return prefPath;
+
     try {
-      const defaultPath = isMac
-        ? "/opt/homebrew/bin/yt-dlp"
-        : isWindows
-          ? execSync("where yt-dlp").toString().trim().split("\n")[0]
-          : "/usr/bin/yt-dlp";
-      if (fs.existsSync(defaultPath)) return defaultPath;
-    } catch {
-      //
+      if (isMac) {
+        const candidate = "/opt/homebrew/bin/yt-dlp";
+        if (fs.existsSync(candidate)) return candidate;
+      } else if (isWindows) {
+        // use spawnSync to avoid shell interpolation
+        const result: SpawnSyncReturns<Buffer> = spawnSync("where", ["yt-dlp"]);
+        if (result.status === 0 && result.stdout) {
+          const out = result.stdout.toString().trim().split(/\r?\n/)[0];
+          const resolved = validateExecutable(out);
+          if (resolved) return resolved;
+        }
+      } else {
+        const candidate = "/usr/bin/yt-dlp";
+        if (fs.existsSync(candidate)) return candidate;
+      }
+    } catch (e) {
+      // ignore and fallthrough
+      console.error("getytdlPath error:", e);
     }
     return "";
   };
 
   const ytdlPath = useMemo(() => getytdlPath(), [ytdlPathPreference]);
-  const missingExecutable = useMemo(() => (!fs.existsSync(ytdlPath) ? "yt-dlp" : ""), [ytdlPath]);
+  const missingExecutable = useMemo(() => (!ytdlPath || !fs.existsSync(ytdlPath) ? "yt-dlp" : ""), [ytdlPath]);
 
   // Load saved folder
   useEffect(() => {
@@ -101,34 +127,83 @@ export default function Command() {
     })();
   }, [outputDir]);
 
-  // Fetch video title
+  // Fetch video title + uploader using yt-dlp JSON output (spawn, no shell)
   useEffect(() => {
-    if (!url || !isYouTubeUrl(url) || !fs.existsSync(ytdlPath)) {
+    if (!url || !isYouTubeUrl(url) || !ytdlPath || !fs.existsSync(ytdlPath)) {
       setTitle(null);
       return;
     }
 
-    const fetchTitle = async () => {
+    const fetchInfo = async () => {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Fetching title...",
+        title: "Fetching video info...",
       });
 
-      const safeUrl = sanitizeInput(url);
-      exec(`"${ytdlPath}" --get-title --no-playlist "${safeUrl}"`, (error, stdout) => {
+      const safeUrl = sanitizeUrl(url);
+      if (!safeUrl) {
         toast.hide();
-        if (error || !stdout?.trim()) {
-          setTitle(null);
+        setTitle(null);
+        return;
+      }
+
+      // spawn yt-dlp -j --no-playlist <url> with args array (safe)
+      const child = spawn(ytdlPath, ["-j", "--no-playlist", safeUrl], { windowsHide: true });
+
+      let stdout = "";
+      let stderr = "";
+
+      child.stdout?.on("data", (chunk: Buffer) => {
+        stdout += chunk.toString();
+      });
+
+      child.stderr?.on("data", (chunk: Buffer) => {
+        stderr += chunk.toString();
+      });
+
+      child.on("close", (code) => {
+        toast.hide();
+
+        if (code !== 0 || !stdout) {
+          // fallback to get-title + get-uploader using spawn as well
+          try {
+            const t = spawnSync(ytdlPath, ["--get-title", "--no-playlist", safeUrl]);
+            const u = spawnSync(ytdlPath, ["--get-uploader", "--no-playlist", safeUrl]);
+            const videoTitle = t.stdout?.toString().trim() || null;
+            const uploader = u.stdout?.toString().trim() || null;
+            if (!videoTitle) {
+              setTitle(null);
+            } else {
+              setTitle(uploader ? `${uploader} - ${videoTitle}` : videoTitle);
+            }
+          } catch (fallbackErr) {
+            console.error("yt-dlp JSON and fallback both failed:", fallbackErr, stderr);
+            setTitle(null);
+          }
           return;
         }
-        setTitle(stdout.trim());
+
+        try {
+          const firstLine = stdout.trim().split(/\r?\n/)[0];
+          const json = JSON.parse(firstLine);
+          const videoTitle = json.title || null;
+          const uploader = json.uploader || json.uploader_id || json.channel || null;
+          if (!videoTitle) {
+            setTitle(null);
+            return;
+          }
+          setTitle(uploader ? `${uploader} - ${videoTitle}` : videoTitle);
+        } catch (parseError) {
+          console.error("Failed to parse yt-dlp JSON:", parseError, stdout);
+          setTitle(null);
+        }
       });
     };
 
-    fetchTitle();
+    fetchInfo();
   }, [url, ytdlPath]);
 
-  // Download MP3
+  // Download MP3 (spawn, args array)
   const handleDownload = async () => {
     if (missingExecutable) {
       await showHUD("yt-dlp not found! Set the path in preferences.");
@@ -145,8 +220,13 @@ export default function Command() {
       return;
     }
 
-    const safeUrl = sanitizeInput(url);
-    const safeOutput = sanitizeInput(outputDir);
+    const safeUrl = sanitizeUrl(url);
+    if (!safeUrl) {
+      await showHUD("Link inválida!");
+      return;
+    }
+
+    const safeOutput = path.resolve(outputDir); // keep raw path, but normalized
 
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -155,25 +235,53 @@ export default function Command() {
     });
 
     const outputTemplate = path.join(safeOutput, "%(title)s.%(ext)s");
-    const command = `"${ytdlPath}" --no-playlist -x --audio-format mp3 --audio-quality 320k -o "${outputTemplate}" "${safeUrl}"`;
+    // Build args array instead of single command string
+    const args = [
+      "--no-playlist",
+      "-x",
+      "--audio-format",
+      "mp3",
+      "--audio-quality",
+      "320k",
+      "-o",
+      outputTemplate,
+      safeUrl,
+    ];
 
-    const process = exec(command);
+    const child = spawn(ytdlPath, args, { windowsHide: true });
 
-    process.stdout?.on("data", (data) => {
-      const match = data.toString().match(/(\d{1,3}\.\d)%/);
-      if (match) {
-        toast.message = `${match[1]}%`;
+    const onData = (data: Buffer | string) => {
+      try {
+        const text = data.toString();
+        const match = text.match(/(\d{1,3}(?:\.\d)?)%/);
+        if (match) {
+          toast.message = `${match[1]}%`;
+        }
+      } catch {
+        // ignore parse errors
       }
+    };
+
+    child.stdout?.on("data", onData);
+    child.stderr?.on("data", onData);
+
+    child.on("error", (err) => {
+      console.error("Download spawn error:", err);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Download failed";
+      toast.message = err.message || "";
     });
 
-    process.on("exit", async (code) => {
+    child.on("close", (code) => {
       if (code === 0) {
         toast.style = Toast.Style.Success;
         toast.title = "Download complete!";
         toast.message = "MP3 saved!";
       } else {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Download failed";
+        if (toast.style !== Toast.Style.Failure) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Download failed";
+        }
       }
     });
   };
