@@ -31,17 +31,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.4",
+    "@raycast/api": "^1.103.6",
     "csv-parse": "^6.1.0",
-    "jose": "^6.1.0",
+    "jose": "^6.1.1",
     "node-fetch": "^3.3.2",
     "raycast-hooks": "^1.0.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "19.0.0",
+    "react": "19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.10.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.38.0",
