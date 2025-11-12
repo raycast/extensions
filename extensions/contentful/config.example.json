@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Marketing Site",
+    "spaceId": "abc123xyz",
+    "accessToken": "CFPAT-your-token-here",
+    "environment": "master"
+  },
+  {
+    "name": "Blog Content",
+    "spaceId": "def456uvw",
+    "accessToken": "CFPAT-another-token-here",
+    "environment": "master"
+  },
+  {
+    "name": "E-commerce Staging",
+    "spaceId": "ghi789rst",
+    "accessToken": "CFPAT-staging-token",
+    "environment": "staging"
+  }
+]
