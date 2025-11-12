@@ -5,27 +5,40 @@ import { Instance, Server } from "../types";
 import * as async from "modern-async";
 import nbt from "prismarine-nbt";
 
-export const instancesPath = path.join(
+export const isWin = process.platform === "win32";
+
+const macInstancesPath = path.join(process.env.HOME!, "Library", "Application Support", "PrismLauncher", "instances");
+const winInstancesPath = path.join(process.env.HOME!, "AppData", "Roaming", "PrismLauncher", "instances");
+
+export const instancesPath = isWin ? winInstancesPath : macInstancesPath;
+
+export const winPrismLauncherPath = path.join(
   process.env.HOME!,
-  "Library",
-  "Application Support",
+  "AppData",
+  "Local",
+  "Programs",
   "PrismLauncher",
-  "instances",
+  "prismlauncher.exe",
 );
+const macPrismLauncherApp = path.join("/Applications", "PrismLauncher.app");
+const macPrismLauncherWithSpace = path.join("/Applications", "Prism Launcher.app");
 
 /**
  * Get the PrismLauncher installation path dynamically
  */
 async function getPrismLauncherPath(): Promise<string | null> {
-  const prismLauncherApp = path.join("/Applications", "PrismLauncher.app");
-  const prismLauncherWithSpace = path.join("/Applications", "Prism Launcher.app");
-
-  if (await fs.pathExists(prismLauncherApp)) {
-    return prismLauncherApp;
+  if (isWin) {
+    if (await fs.pathExists(winPrismLauncherPath)) {
+      return winPrismLauncherPath;
+    }
   }
 
-  if (await fs.pathExists(prismLauncherWithSpace)) {
-    return prismLauncherWithSpace;
+  if (await fs.pathExists(macPrismLauncherApp)) {
+    return macPrismLauncherApp;
+  }
+
+  if (await fs.pathExists(macPrismLauncherWithSpace)) {
+    return macPrismLauncherWithSpace;
   }
 
   return null;
