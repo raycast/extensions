@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "npx ultracite fix"
+      },
+      {
+        "command": "npm run knip"
+      },
+      {
+        "command": "npm run typescript:check"
+      }
+    ]
+  }
+}
