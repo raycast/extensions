@@ -18,8 +18,8 @@ export default function SearchBarSeason(props: {
       {seasons?.map((season) => {
         return (
           <List.Dropdown.Item
-            key={season.id}
-            value={season.id.toString()}
+            key={season.seasonId}
+            value={season.seasonId}
             title={season.label}
           />
         );

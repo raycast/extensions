@@ -1,0 +1,354 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "json-resume",
+  "title": "JSON Resume",
+  "description": "Parse JSON Resume",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-resume",
+      "title": "Open Resume",
+      "description": "Open a resume by providing a JSON resume URL",
+      "mode": "view"
+    },
+    {
+      "name": "search-resumes",
+      "title": "View Saved Resumes",
+      "description": "View and manage saved resumes",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "text-to-resume",
+      "title": "Convert Text to JSON Resume",
+      "description": "Converts plain text (like a resume, CV, or bio) into a validated JSON Resume schema format",
+      "confirmation": true
+    }
+  ],
+  "ai": {
+    "instructions": "IMPORTANT: Use the text-to-resume tool whenever users want to convert text into JSON Resume format. Trigger phrases include:\n- 'convert to JSON Resume'\n- 'parse into JSON Resume format'\n- 'convert my CV/resume'\n- 'format as JSON Resume'\n- 'parse this work experience/education/skills'\n- @json-resume or @text-to-resume mentions\n\nThe tool accepts any plain text (structured or unstructured) and converts it to valid JSON Resume schema. Always use the tool instead of generating JSON directly.",
+    "evals": [
+      {
+        "input": "@json-resume convert this to JSON resume formatted education: ## Education **Bachelor of Science in Computer Science**   University of Washington, Seattle, WA | Graduated: June 2017   GPA: 3.7/4.0 | Dean's List (4 quarters)",
+        "mocks": {
+          "text-to-resume": {
+            "education": [
+              {
+                "area": "Computer Science",
+                "courses": [],
+                "endDate": "2017-06-01",
+                "institution": "University of Washington",
+                "score": "3.7/4.0",
+                "startDate": "2013-09-01",
+                "studyType": "Bachelor of Science",
+                "summary": "Dean's List (4 quarters)"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "text": [
+                  {
+                    "includes": "Education"
+                  },
+                  {
+                    "includes": "Bachelor of Science in Computer Science"
+                  },
+                  {
+                    "includes": "University of Washington, Seattle, WA"
+                  },
+                  {
+                    "includes": "Graduated: June 2017"
+                  },
+                  {
+                    "includes": "GPA: 3.7/4.0"
+                  },
+                  {
+                    "includes": "Dean's List (4 quarters)"
+                  }
+                ]
+              },
+              "name": "text-to-resume"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@json-resume convert this full resume: John Doe, Software Engineer. Email: john@example.com, Phone: 555-0123. Work: Acme Corp, Senior Developer, 2020-2023. Built scalable web applications. Education: MIT, Computer Science, BS, 2016-2020. Skills: JavaScript, Python, React, Node.js",
+        "mocks": {
+          "text-to-resume": {
+            "basics": {
+              "name": "John Doe",
+              "label": "Software Engineer",
+              "email": "john@example.com",
+              "phone": "555-0123"
+            },
+            "work": [
+              {
+                "company": "Acme Corp",
+                "position": "Senior Developer",
+                "startDate": "2020-01-01",
+                "endDate": "2023-12-31",
+                "summary": "Built scalable web applications"
+              }
+            ],
+            "education": [
+              {
+                "institution": "MIT",
+                "area": "Computer Science",
+                "studyType": "Bachelor of Science",
+                "startDate": "2016-09-01",
+                "endDate": "2020-06-01"
+              }
+            ],
+            "skills": [
+              {
+                "name": "Programming",
+                "keywords": [
+                  "JavaScript",
+                  "Python",
+                  "React",
+                  "Node.js"
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "text": [
+                  {
+                    "includes": "John Doe"
+                  },
+                  {
+                    "includes": "Software Engineer"
+                  },
+                  {
+                    "includes": "john@example.com"
+                  },
+                  {
+                    "includes": "Acme Corp"
+                  },
+                  {
+                    "includes": "MIT"
+                  }
+                ]
+              },
+              "name": "text-to-resume"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@json-resume I need to convert these skills to JSON Resume format:\n\nExpert: Python, JavaScript, TypeScript\nProficient: React, Node.js, PostgreSQL, Docker\nFamiliar: Kubernetes, AWS, GraphQL",
+        "mocks": {
+          "text-to-resume": {
+            "skills": [
+              {
+                "name": "Expert",
+                "level": "Expert",
+                "keywords": [
+                  "Python",
+                  "JavaScript",
+                  "TypeScript"
+                ]
+              },
+              {
+                "name": "Proficient",
+                "level": "Proficient",
+                "keywords": [
+                  "React",
+                  "Node.js",
+                  "PostgreSQL",
+                  "Docker"
+                ]
+              },
+              {
+                "name": "Familiar",
+                "level": "Beginner",
+                "keywords": [
+                  "Kubernetes",
+                  "AWS",
+                  "GraphQL"
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "text": [
+                  {
+                    "includes": "Python"
+                  },
+                  {
+                    "includes": "JavaScript"
+                  },
+                  {
+                    "includes": "React"
+                  },
+                  {
+                    "includes": "Docker"
+                  }
+                ]
+              },
+              "name": "text-to-resume"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@json-resume help me format these projects:\n\nProjects:\n- Built an e-commerce platform with 100k users using React and Node.js\n- Created open-source library for data visualization with 5k GitHub stars\n- Developed mobile app with React Native, 10k+ downloads",
+        "mocks": {
+          "text-to-resume": {
+            "projects": [
+              {
+                "name": "E-commerce Platform",
+                "description": "Built an e-commerce platform with 100k users using React and Node.js",
+                "keywords": [
+                  "React",
+                  "Node.js"
+                ]
+              },
+              {
+                "name": "Data Visualization Library",
+                "description": "Created open-source library for data visualization with 5k GitHub stars",
+                "keywords": [
+                  "open-source",
+                  "data visualization"
+                ]
+              },
+              {
+                "name": "Mobile App",
+                "description": "Developed mobile app with React Native, 10k+ downloads",
+                "keywords": [
+                  "React Native",
+                  "mobile"
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "text": [
+                  {
+                    "includes": "e-commerce"
+                  },
+                  {
+                    "includes": "100k users"
+                  },
+                  {
+                    "includes": "open-source"
+                  },
+                  {
+                    "includes": "React Native"
+                  }
+                ]
+              },
+              "name": "text-to-resume"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@json-resume parse this markdown resume:\n\n# Alex Johnson\n\n## Contact\nEmail: alex@example.com\nPhone: 555-0123\n\n## Education\nHarvard University - MBA - 2015-2017\n\n## Experience\nConsultant at McKinsey, 2017-present\nAnalyst at Goldman Sachs, 2013-2015",
+        "mocks": {
+          "text-to-resume": {
+            "basics": {
+              "name": "Alex Johnson",
+              "email": "alex@example.com",
+              "phone": "555-0123"
+            },
+            "education": [
+              {
+                "institution": "Harvard University",
+                "studyType": "MBA",
+                "startDate": "2015-09-01",
+                "endDate": "2017-06-01"
+              }
+            ],
+            "work": [
+              {
+                "company": "McKinsey",
+                "position": "Consultant",
+                "startDate": "2017-01-01"
+              },
+              {
+                "company": "Goldman Sachs",
+                "position": "Analyst",
+                "startDate": "2013-01-01",
+                "endDate": "2015-12-31"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "text": [
+                  {
+                    "includes": "Alex Johnson"
+                  },
+                  {
+                    "includes": "alex@example.com"
+                  },
+                  {
+                    "includes": "Harvard"
+                  },
+                  {
+                    "includes": "McKinsey"
+                  }
+                ]
+              },
+              "name": "text-to-resume"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^1.17.0",
+    "@jsonresume/schema": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "./node_modules/.bin/tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

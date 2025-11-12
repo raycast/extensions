@@ -88,7 +88,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   },
   "platforms": [
     "macOS"

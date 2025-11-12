@@ -64,6 +64,10 @@ function Collections({ databaseId }: { databaseId: string }) {
           key={collection.$id}
           icon={Icon.Box}
           title={collection.name}
+          accessories={[
+            { icon: Icon.Plus, date: new Date(collection.$createdAt), tooltip: `Created: ${collection.$createdAt}` },
+            { icon: Icon.Pencil, date: new Date(collection.$updatedAt), tooltip: `Updated: ${collection.$updatedAt}` },
+          ]}
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.Document} title="Documents" target={<Documents collection={collection} />} />
@@ -87,15 +91,30 @@ function Documents({ collection }: { collection: sdk.Models.Collection }) {
       initialData: [],
     },
   );
+  function buildMetadata(document: sdk.Models.Document) {
+    return `
+| - | - |
+|---|---|
+${Object.entries(document)
+  .map(([key, val]) => `| ${key} | ${val} |`)
+  .join("\n")}`;
+  }
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} isShowingDetail>
       {!isLoading && !documents.length ? (
         <List.EmptyView
           title="Create your first document"
           description="Need a hand? Learn more in our documentation."
         />
       ) : (
-        documents.map((document) => <List.Item key={document.$id} icon={Icon.Document} title={document.$id} />)
+        documents.map((document) => (
+          <List.Item
+            key={document.$id}
+            icon={Icon.Document}
+            title={document.$id}
+            detail={<List.Item.Detail markdown={buildMetadata(document)} />}
+          />
+        ))
       )}
     </List>
   );

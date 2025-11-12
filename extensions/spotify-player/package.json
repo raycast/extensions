@@ -449,7 +449,7 @@
     },
     {
       "name": "copyArtistAndTitle",
-      "title": "Copy Artist And Title",
+      "title": "Copy Artist and Title",
       "subtitle": "Spotify",
       "description": "Copy the artist and track title of the current song/episode",
       "mode": "no-view",

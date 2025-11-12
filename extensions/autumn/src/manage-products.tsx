@@ -2,13 +2,14 @@ import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation 
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { autumn } from "./autumn";
 import { CreateProductParams } from "autumn-js";
+import DeleteProductAction from "./components/DeleteProductAction";
 
 export default function ManageProducts() {
   const {
     isLoading,
     data: products,
     error,
-    revalidate,
+    mutate,
   } = useCachedPromise(
     async () => {
       const { data, error } = await autumn.products.list();
@@ -28,7 +29,7 @@ export default function ManageProducts() {
           description="Each product defines features your customers get access to and how much they cost. Create separate products for any free plans, paid plans and any add-on or top up products ☝️"
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} onPop={revalidate} />
+              <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct onCreate={mutate} />} />
             </ActionPanel>
           }
         />
@@ -38,9 +39,12 @@ export default function ManageProducts() {
             key={product.id}
             icon={Icon.Box}
             title={product.name}
+            subtitle={product.id}
+            accessories={[{ date: new Date(product.created_at) }]}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} onPop={revalidate} />
+                <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct onCreate={mutate} />} />
+                <DeleteProductAction productId={product.id} mutateProducts={mutate} />
               </ActionPanel>
             }
           />
@@ -50,7 +54,7 @@ export default function ManageProducts() {
   );
 }
 
-function CreateProduct() {
+function CreateProduct({ onCreate }: { onCreate: () => void }) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<CreateProductParams>({
     async onSubmit(values) {
@@ -60,6 +64,7 @@ function CreateProduct() {
         if (error) throw new Error(error.message);
         toast.style = Toast.Style.Success;
         toast.title = "Created";
+        onCreate();
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -68,6 +73,7 @@ function CreateProduct() {
       }
     },
     validation: {
+      name: FormValidation.Required,
       id: FormValidation.Required,
     },
   });
