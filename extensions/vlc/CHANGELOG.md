@@ -1,6 +1,6 @@
 # VLC Changelog
 
-## [Speed Controls & Playlist] - {PR_MERGE_DATE}
+## [Speed Controls & Playlist] - 2025-11-12
 
 - Added playback speed controls:
   - Speed Up: Increase speed by 0.25x increments (up to 4.0x)
