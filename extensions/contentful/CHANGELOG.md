@@ -1,29 +1,61 @@
-# Contentful Changelog
+# Changelog
 
-## [Modernize + Show Video Asset Thumbnail] - 2025-04-08
+All notable changes to this project will be documented in this file.
 
-- Modernize extension w/ updated deps
-- Fix: `Assets` would not show thumbnail for video
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Fixes] - 2024-11-17
+## [1.0.0] - 2025-11-12
 
-- Fix: `Assets` crashing when an item has no _file_
-- Fix: `Content` displaying incorrect _status_ `tag`
+### Added
 
-## [`View Roles` in `Users`] - 2024-10-23
+- Initial release of Contentful extension
+- Search entries across multiple Contentful spaces
+- Multi-space configuration via preferences
+- Real-time debounced search (300ms delay)
+- Smart title extraction from common field names (title, name, internalName, displayName, label, heading)
+- Display space name, content type, and last modified date for each entry
+- Quick actions:
+  - Open entry in Contentful Web App
+  - Copy entry ID to clipboard
+  - Copy entry URL to clipboard
+  - Copy space ID to clipboard
+  - Copy content type to clipboard
+- Comprehensive error handling:
+  - Invalid configuration detection
+  - API error handling
+  - Empty state messaging
+- Enterprise-level architecture:
+  - Type-safe TypeScript implementation
+  - Modular architecture with separation of concerns
+  - Reusable components
+  - Pure utility functions
+  - Custom React hooks
+- Parallel API calls for optimal performance
+- Proper handling of Contentful API rate limits
+- Extensible design for future features
 
-- Add `tooltip` to Date accessories
-- Toggle between `Users` and `Roles` via `Argument`
+### Technical Details
 
-## [New `Search Users` command] - 2024-09-05
+- Uses official Contentful SDK (v11.8.12)
+- Built with Raycast API (v1.103.6)
+- TypeScript 5.8.2 for type safety
+- React for component-based UI
+- Follows functional programming principles
+- Implements best practices for error handling and user experience
 
-## [New `Search Assets` command] - 2024-07-26
+## Future Enhancements
 
-- Search your assets library (pagination included 🚀)
-- Add the `Contentful Management JS SDK` for better TS support
+### Planned Features
 
-## [Bug fix] - 2023-03-02
-
-- Fixed bug when entry have no title field
-
-## [Initial Version] - 2023-01-05
+- Content type filtering
+- Preview mode support (Content Preview API)
+- Asset search
+- Entry creation and editing
+- Status filtering (published/draft)
+- Locale selection
+- Advanced search operators
+- Bulk operations
+- Favorites/bookmarks
+- Recent searches
+- Search history
