@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paynow",
+  "title": "Paynow.gg",
+  "description": "Unofficial PayNow.gg extension",
+  "icon": "extension-icon.png",
+  "author": "maxijonson",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "list-stores",
+      "title": "Manage Stores",
+      "subtitle": "Shows configured stores",
+      "description": "List all you PayNow stores",
+      "mode": "view"
+    },
+    {
+      "name": "list-products",
+      "title": "List Products",
+      "description": "List your store's products",
+      "mode": "view"
+    },
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List your store's tags",
+      "mode": "view"
+    },
+    {
+      "name": "list-orders",
+      "title": "List Orders",
+      "description": "List your store's orders",
+      "mode": "view"
+    },
+    {
+      "name": "list-webhooks",
+      "title": "List Webhooks",
+      "description": "List your store's webhooks",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "currency",
+      "title": "Currency",
+      "default": "USD",
+      "description": "The displayed currency for money values",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "USD",
+          "value": "USD"
+        },
+        {
+          "title": "EUR",
+          "value": "EUR"
+        },
+        {
+          "title": "GBP",
+          "value": "GBP"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@paynow-gg/typescript-sdk": "^1.0.20",
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.7.0",
+    "@types/react": "19.2.2",
+    "eslint": "^9.37.0",
+    "eslint-plugin-react-hooks": "^6.1.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix && tsc --noEmit",
+    "lint": "ray lint && tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

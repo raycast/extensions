@@ -32,3 +32,9 @@ export default class DiskSection {
     return diskSection;
   }
 }
+
+export const parseDiskSections = (diskOutput: string): DiskSection[] => {
+  const sectionRegex = /(\/.*?:.*?)(?=(?:\/|$))/gs;
+  const sectionStrings = diskOutput.match(sectionRegex) ?? [];
+  return sectionStrings.map(DiskSection.createFromString);
+};

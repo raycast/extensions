@@ -1,6 +1,7 @@
 import dedupe from "dedupe";
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import type { Package } from "@/model/npmResponse.model";
+import type { ExtensionPreferences } from "@/types";
 
 const LOCAL_STORAGE_KEY = "npm-history";
 

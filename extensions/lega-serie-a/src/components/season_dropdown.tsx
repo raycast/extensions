@@ -1,6 +1,9 @@
 import { Grid, List } from "@raycast/api";
 
 export const seasons = [
+  "2025-26_266660_5f0e080fc3a44073984b75b3a8e06a8a",
+  "2024-25_264681_1e32f55e98fc408a9d1fc27c0ba43243",
+  "2023-24_157617_104a84bc07f641e685f70a850c6399eb",
   "2022-23_150052",
   "2021-22_30030",
   "2020-21_150051",
@@ -59,7 +62,7 @@ export default function SeasonDropdown(props: {
         return (
           <DropdownComponent.Item
             key={season_id}
-            value={`${title}_${season_id}`}
+            value={season}
             title={title}
           />
         );

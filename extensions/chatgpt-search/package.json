@@ -10,31 +10,33 @@
     {
       "name": "chatgpt-search",
       "title": "ChatGPT Search",
-      "description": "Initiate ChatGPT Search (aka SearchGPT) from within Raycast. \nhttps://openai.com/index/introducing-chatgpt-search/",
+      "description": "Initiate ChatGPT Search (aka SearchGPT) from within Raycast.",
       "mode": "view",
       "arguments": [
         {
           "name": "query",
           "type": "text",
-          "description": "The query to search for",
-          "placeholder": "Search with ChatGPT..."
+          "placeholder": "Search with ChatGPT...",
+          "required": true
         }
       ],
       "preferences": [
         {
-          "label": "Use temporary chat (only Web)",
-          "description": "Use a temporary chat to search for your query. This will create a new chat and search for your query. The chat will be deleted after the search is complete.",
+          "label": "Temporary Chat",
+          "title": "Options",
+          "description": "This chat won't appear in history or be used to train our models. For safety purposes, OpenAI may keep a copy of this chat for up to 30 days.",
           "default": false,
           "type": "checkbox",
-          "name": "useTemporaryChat",
+          "name": "isTemporaryChat",
           "required": false
         },
         {
-          "label": "Use ChatGPT App (App must be installed)",
-          "description": "Open your query in ChatGPT app, instead of the default Browser",
-          "default": false,
-          "type": "checkbox",
-          "name": "useChatgptApp",
+          "title": "Extra Query Params",
+          "description": "Comma-separated list of additional query parameters to include in the ChatGPT Search URL. Useful for customizations. E.g., discard non-authorized modal or auto-submit chat with TamperMonkey or Automa script like https://gist.github.com/kopach/ef5fc3db69ffb4bfd38d65ef700f545d.",
+          "default": "ref=raycast-chatgpt-search",
+          "type": "textfield",
+          "name": "extraQueryParams",
+          "placeholder": "param1=value1,param2=value2",
           "required": false
         }
       ]
@@ -59,5 +61,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
