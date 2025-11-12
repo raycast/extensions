@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mongo-tools",
+  "title": "Mongo Tools",
+  "description": "Simple tools to work with mongodb",
+  "icon": "extension-icon.png",
+  "author": "turbak",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "objectid-to-timestamp",
+      "title": "ObjectID to Timestamp",
+      "subtitle": "Convert MongoDB ObjectID to timestamp",
+      "description": "Uses the ObjectID from Clipboard to extract the timestamp.",
+      "mode": "no-view"
+    },
+    {
+      "name": "timestamp-to-objectid",
+      "title": "Timestamp to ObjectID",
+      "subtitle": "Convert MongoDB Timestamp to ObjectID",
+      "description": "Uses the selected date to create a MongoDB ObjectID.",
+      "mode": "view"
+    }
+  ],
+  "version": "0.1.0",
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
