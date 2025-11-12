@@ -1,4 +1,3 @@
-import { Toast } from "@raycast/api";
 import { runPowerShellScript, showFailureToast } from "@raycast/utils";
 
 const appThemePref = "AppsUseLightTheme" as const;
@@ -26,11 +25,11 @@ async function makeDarkTheme() {
 }
 
 async function getValue(name: ThemePref): Promise<ThemeValue> {
-  const res = await safePowershellExec(
+  const { error, data: res } = await safePowershellExec(
     `Get-ItemProperty -Path ${regPath} -Name ${name} | Select-Object -ExpandProperty ${name}`,
   );
 
-  if (res === null) {
+  if (error) {
     return "light";
   }
 
@@ -39,35 +38,31 @@ async function getValue(name: ThemePref): Promise<ThemeValue> {
 }
 
 async function setValue(name: ThemePref, value: number) {
-  const current = await safePowershellExec(`Get-ItemProperty -Path ${regPath} -Name ${name}`);
+  const { error: currentError } = await safePowershellExec(`Get-ItemProperty -Path ${regPath} -Name ${name}`);
 
-  if (current !== null) {
-    const res = await safePowershellExec(`Set-ItemProperty -Path ${regPath} -Name ${name} -Value ${value}`);
-    if (res === null) {
-      await showFailureToast({
-        title: `Failed to set ${name} property`,
-        style: Toast.Style.Failure,
-      });
+  if (currentError === null) {
+    const { error: setError } = await safePowershellExec(
+      `Set-ItemProperty -Path ${regPath} -Name ${name} -Value ${value}`,
+    );
+    if (setError) {
+      await showFailureToast(setError, { title: `Failed to set ${name} property` });
     }
     return;
   }
 
-  const res = await safePowershellExec(
+  const { error: newError } = await safePowershellExec(
     `New-ItemProperty -Path ${regPath} -Name ${name} -Value ${value} -PropertyType DWord`,
   );
 
-  if (res === null) {
-    await showFailureToast({
-      title: `Failed to create ${name} property`,
-      style: Toast.Style.Failure,
-    });
+  if (newError === null) {
+    await showFailureToast(newError, { title: `Failed to create ${name} property` });
   }
 }
 
 async function safePowershellExec(script: string) {
   try {
-    return await runPowerShellScript(script);
-  } catch {
-    return null;
+    return { error: null, data: await runPowerShellScript(script) };
+  } catch (error) {
+    return { error: error as Error, data: null };
   }
 }

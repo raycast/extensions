@@ -11,10 +11,7 @@ end tell
 export async function macToggleTheme() {
   try {
     await runAppleScript(appleScript);
-  } catch {
-    await showFailureToast({
-      title: "Failed to toggle theme",
-      style: Toast.Style.Failure,
-    });
+  } catch (e) {
+    await showFailureToast(e, { title: "Failed to toggle theme" });
   }
 }
