@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { BASE_API_URL } from "../constants";
 import {
   extractCountryCode,
@@ -63,7 +64,7 @@ export default function ContestResultsView({ year }: ContestResultsViewProps) {
           setSelectedRound(finalRound?.name || roundsData[0].name || null);
         }
       } catch (error) {
-        console.error("Failed to fetch Eurovision API data. Please try again later.", error);
+        showFailureToast(error, { title: "Failed to fetch Eurovision API data" });
       } finally {
         setIsLoading(false);
       }
@@ -116,7 +117,9 @@ export default function ContestResultsView({ year }: ContestResultsViewProps) {
                   points: totalPoints,
                 } as ResultEntry;
               } catch (error) {
-                console.error(`Failed to fetch entry data for contestant ${performance.contestantId}:`, error);
+                showFailureToast(error, {
+                  title: `Failed to fetch entry data for contestant ${performance.contestantId}`,
+                });
                 return null;
               }
             }),
@@ -125,7 +128,7 @@ export default function ContestResultsView({ year }: ContestResultsViewProps) {
         const validResults = resultsData.filter((r): r is ResultEntry => r !== null).sort((a, b) => a.place - b.place);
         setResults(validResults);
       } catch (error) {
-        console.error("Failed to fetch results:", error);
+        showFailureToast(error, { title: "Failed to fetch results" });
         setResults([]);
       } finally {
         setIsLoadingResults(false);

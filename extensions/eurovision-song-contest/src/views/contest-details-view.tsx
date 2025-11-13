@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, open, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { BASE_API_URL } from "../constants";
 import {
   extractCountryCode,
@@ -109,12 +110,12 @@ export default function ContestDetails({ year }: ContestDetailsProps) {
                 });
               }
             } catch (error) {
-              console.error("Failed to fetch winner entry data:", error);
+              showFailureToast(error, { title: "Failed to fetch winner entry data" });
             }
           }
         }
       } catch (error) {
-        console.error("Failed to fetch Eurovision API data. Please try again later.", error);
+        showFailureToast(error, { title: "Failed to fetch Eurovision API data" });
       } finally {
         setIsLoading(false);
       }

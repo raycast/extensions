@@ -14,9 +14,7 @@ View entries for any year with search and year dropdown. View full entry details
 Toggle between "Wins by Country" (ranked) and "Winners by Year" (chronological).
 
 ### Explore Countries
-Browse participating countries with appearance counts. 
-
-## Features
+Browse participating countries with appearance counts.
 
 - Complete data from 1956 to present
 - Visual indicators: country flags, emoji placements (🏆🥈🥉), color-coded results

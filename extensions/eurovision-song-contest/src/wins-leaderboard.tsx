@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { BASE_API_URL } from "./constants";
 import { extractCountryCode, formatCountryWithFlag, getCountryNameFromCode } from "./utils/helpers";
 import { cachedFetch } from "./utils/cache";
@@ -105,7 +106,7 @@ export default function WinsLeaderboard() {
 
               return yearWinners.filter((w): w is Winner => w !== null);
             } catch (error) {
-              console.error(`Failed to fetch winner for year ${year}:`, error);
+              showFailureToast(error, { title: `Failed to fetch winner for year ${year}` });
               return [];
             }
           }),
@@ -143,7 +144,7 @@ export default function WinsLeaderboard() {
           setCountryWinCounts(counts);
         }
       } catch (error) {
-        console.error("Failed to fetch Eurovision API data. Please try again later.", error);
+        showFailureToast(error, { title: "Failed to fetch Eurovision API data" });
         setWinners([]);
         setCountryWinCounts([]);
       } finally {

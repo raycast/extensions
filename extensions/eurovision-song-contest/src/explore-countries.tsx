@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { BASE_API_URL } from "./constants";
 import { extractCountryCode, formatCountryWithFlag, getCountryNameFromCode } from "./utils/helpers";
 import { cachedFetch } from "./utils/cache";
@@ -34,7 +35,7 @@ export default function ExploreCountries() {
               const data = (await response.json()) as { contestants?: Entry[] };
               return data.contestants || [];
             } catch (error) {
-              console.error(`Failed to fetch contestants for year ${year}:`, error);
+              showFailureToast(error, { title: `Failed to fetch contestants for year ${year}` });
               return [];
             }
           }),
@@ -58,14 +59,14 @@ export default function ExploreCountries() {
         const countriesData: CountryAppearance[] = Array.from(countryMap.values())
           .map((data) => ({
             countryCode: data.countryCode,
-            countryName: getCountryNameFromCode(data.countryCode, data.countryCode),
+            countryName: getCountryNameFromCode(data.countryCode),
             appearances: data.appearances,
           }))
           .sort((a, b) => a.countryName.localeCompare(b.countryName));
 
         setCountries(countriesData);
       } catch (error) {
-        console.error("Failed to fetch Eurovision API data. Please try again later.", error);
+        showFailureToast(error, { title: "Failed to fetch Eurovision API data" });
       } finally {
         setIsLoading(false);
       }

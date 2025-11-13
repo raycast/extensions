@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { BASE_API_URL } from "../constants";
 import { extractCountryCode, formatCountryWithFlag } from "../utils/helpers";
 import { cachedFetch } from "../utils/cache";
@@ -55,7 +56,7 @@ export default function CountryAppearancesView({ countryCode, countryName }: Cou
 
               return entry ? { year, artist: entry.artist, song: entry.song, entryId: entry.id } : null;
             } catch (error) {
-              console.error(`Failed to fetch contestants for year ${year}:`, error);
+              showFailureToast(error, { title: `Failed to fetch contestants for year ${year}` });
               return null;
             }
           }),
@@ -66,7 +67,7 @@ export default function CountryAppearancesView({ countryCode, countryName }: Cou
           .sort((a, b) => b.year - a.year);
         setAppearances(validAppearances);
       } catch (error) {
-        console.error("Failed to fetch Eurovision API data. Please try again later.", error);
+        showFailureToast(error, { title: "Failed to fetch Eurovision API data" });
       } finally {
         setIsLoading(false);
       }

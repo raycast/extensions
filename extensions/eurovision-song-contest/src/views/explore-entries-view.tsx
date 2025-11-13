@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { BASE_API_URL } from "../constants";
 import { extractCountryCode, formatCountryWithFlag, getCountryNameFromCode, getPlaceEmoji } from "../utils/helpers";
 import { cachedFetch } from "../utils/cache";
@@ -51,7 +52,7 @@ export default function ExploreEntriesView({ initialYear }: ExploreEntriesViewPr
           setSelectedYear(sortedYears[0]);
         }
       } catch (error) {
-        console.error("Failed to fetch Eurovision API data. Please try again later.", error);
+        showFailureToast(error, { title: "Failed to fetch Eurovision API data" });
       } finally {
         setIsLoadingYears(false);
       }
@@ -82,7 +83,7 @@ export default function ExploreEntriesView({ initialYear }: ExploreEntriesViewPr
           .sort((a, b) => a.country.localeCompare(b.country));
         setEntries(sortedEntries);
       } catch (error) {
-        console.error("Failed to fetch Eurovision API data. Please try again later.", error);
+        showFailureToast(error, { title: "Failed to fetch Eurovision API data" });
         setEntries([]);
       } finally {
         setIsLoadingEntries(false);
