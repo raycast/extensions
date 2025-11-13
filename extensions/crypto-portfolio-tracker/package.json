@@ -18,7 +18,7 @@
     {
       "name": "add-ethereum-address",
       "title": "Add Ethereum Address",
-      "subtitle": "Import an Ethereum address",
+      "subtitle": "Crypto Portfolio Tracker",
       "description": "Import an Ethereum address to add to your portfolio.",
       "mode": "no-view",
       "arguments": [
@@ -38,8 +38,8 @@
     },
     {
       "name": "portfolio",
-      "title": "Portfolio",
-      "subtitle": "View Your Crypto Portfolio",
+      "title": "View Portfolio",
+      "subtitle": "Crypto Portfolio Tracker",
       "description": "View the total value and breakdown of your crypto portfolio.",
       "mode": "view"
     }
