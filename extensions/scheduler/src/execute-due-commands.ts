@@ -1,4 +1,4 @@
-import { showToast, Toast, environment, LaunchType } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { ScheduledCommand, ExecutionLog } from "./types";
 import { generateId } from "./utils";
 import { STORAGE_KEYS } from "./utils/constants";
@@ -81,13 +81,10 @@ async function disableCommand(command: ScheduledCommand): Promise<void> {
 export default async function ExecuteDueCommands() {
   console.log(LOG_MESSAGES.CHECKING);
 
-  // Track if background refresh has been enabled by detecting background launches
-  if (environment.launchType === LaunchType.Background) {
-    await setStoredData(STORAGE_KEYS.BACKGROUND_REFRESH_STATUS, {
-      enabled: true,
-      lastBackgroundRun: new Date().toISOString(),
-    });
-  }
+  setStoredData(STORAGE_KEYS.BACKGROUND_REFRESH_STATUS, {
+    enabled: true,
+    lastBackgroundRun: new Date().toISOString(),
+  });
 
   try {
     const commands = await getCommands();
