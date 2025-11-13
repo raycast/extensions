@@ -12,7 +12,7 @@ import {
 import { useEffect } from "react";
 import { useImmer } from "use-immer";
 import supportedLanguages from "../../data/supportedLanguages";
-import { Language, Preferences } from "../../types";
+import { Language } from "../../types";
 
 export function LanguagesManagerItem({
   language,
