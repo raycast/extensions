@@ -9,7 +9,7 @@
 // @ts-nocheck
 /* eslint-enable @typescript-eslint/ban-ts-comment */
 import { Action, ActionPanel, Form, Icon, showToast, Toast, LaunchProps, List, Color } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { analyzeHTTPPerformance, formatBytes, formatSpeed, formatTime } from "./utils/httpPerf";
 import { HTTPPerformanceMetrics, FormValues } from "./types";
 
@@ -17,6 +17,7 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
   const { url: initialUrl } = props.arguments;
   const [metrics, setMetrics] = useState<HTTPPerformanceMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingUrl, setPendingUrl] = useState("");
 
   async function handleAnalyze(values: FormValues) {
     const { url, method, headers: headersString, followRedirects } = values;
@@ -59,6 +60,7 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
       });
 
       setMetrics(result);
+      setPendingUrl(""); // Clear pendingUrl after successful analysis
       showToast({
         style: Toast.Style.Success,
         title: "Analysis complete",
@@ -74,19 +76,21 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
     }
   }
 
-  // If URL is provided as argument, analyze it immediately
-  useEffect(() => {
-    if (initialUrl && !metrics && !isLoading) {
-      handleAnalyze({ url: initialUrl, method: "GET", headers: "", followRedirects: true });
-    }
-  }, [initialUrl]);
+  const handleBackWithUrl = (url: string) => {
+    setPendingUrl(url);
+    setMetrics(null);
+  };
 
   if (metrics) {
-    return <ResultView metrics={metrics} onBack={() => setMetrics(null)} />;
+    return <ResultView metrics={metrics} onBack={() => setMetrics(null)} onBackWithUrl={handleBackWithUrl} />;
   }
+
+  // Use pendingUrl if set, otherwise use initialUrl
+  const urlDefaultValue = pendingUrl || initialUrl;
 
   return (
     <Form
+      key={urlDefaultValue}
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -98,7 +102,7 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
         id="url"
         title="URL"
         placeholder="https://example.com"
-        defaultValue={initialUrl}
+        defaultValue={urlDefaultValue}
         info="Enter the URL to analyze (protocol is optional, defaults to HTTPS)"
       />
       <Form.Dropdown id="method" title="HTTP Method" defaultValue="GET">
@@ -121,7 +125,16 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
   );
 }
 
-function ResultView({ metrics, onBack }: { metrics: HTTPPerformanceMetrics; onBack: () => void }) {
+function ResultView({
+  metrics,
+  onBack,
+  onBackWithUrl,
+}: {
+  metrics: HTTPPerformanceMetrics;
+  onBack: () => void;
+  onBackWithUrl: (url: string) => void;
+}) {
+  const [searchText, setSearchText] = useState("");
   const performanceGrade = getPerformanceGrade(metrics.totalTime);
   const statusInfo = getStatusCodeInfo(metrics.statusCode);
   const total = metrics.totalTime;
@@ -138,6 +151,13 @@ function ResultView({ metrics, onBack }: { metrics: HTTPPerformanceMetrics; onBa
     if (time < thresholds[0]) return "✅";
     if (time < thresholds[1]) return "⚠️";
     return "🔴";
+  };
+
+  // Handle new URL input from search bar - go back to form with URL
+  const handleSearchSubmit = () => {
+    if (searchText.trim()) {
+      onBackWithUrl(searchText.trim());
+    }
   };
 
   const textSummary = `${metrics.method} ${metrics.url}
@@ -157,14 +177,32 @@ Downloaded: ${formatBytes(metrics.sizeDownload)} · Speed: ${formatSpeed(metrics
 
   const actions = (
     <ActionPanel>
-      <Action title="Analyze Again" onAction={onBack} icon={Icon.RotateClockwise} />
+      <Action title="Back to Form" onAction={onBack} icon={Icon.RotateClockwise} />
       <Action.CopyToClipboard title="Copy Results" content={textSummary} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       <Action.CopyToClipboard title="Copy URL" content={metrics.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
     </ActionPanel>
   );
 
   return (
-    <List navigationTitle={`${performanceGrade.icon} ${formatTime(total)}`}>
+    <List
+      navigationTitle={`${performanceGrade.icon} ${formatTime(total)}`}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Enter a new URL (press Enter to go to form)"
+    >
+      {searchText.trim() && (
+        <List.Item
+          title={`Go to form with: ${searchText}`}
+          subtitle="Press Enter to analyze this URL"
+          icon={{ source: Icon.ArrowRight, tintColor: Color.Blue }}
+          actions={
+            <ActionPanel>
+              <Action title="Go to Form" onAction={handleSearchSubmit} icon={Icon.ArrowRight} />
+            </ActionPanel>
+          }
+        />
+      )}
+
       <List.Item
         title={`${metrics.method} ${metrics.url}`}
         subtitle={`${metrics.remoteIp} · HTTP/${metrics.httpVersion} · ${statusInfo.icon} ${metrics.statusCode} ${statusInfo.text} · ${performanceGrade.icon} ${performanceGrade.grade}`}
