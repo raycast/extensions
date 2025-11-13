@@ -1,4 +1,4 @@
-import { RGB, miredToK } from "@lib/color";
+import { RGB } from "@lib/color";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { ensureMinMax } from "@lib/utils";
@@ -16,11 +16,11 @@ export function getLightRGBFromState(state: State): RGB | undefined {
 }
 
 export function getLightMinMaxK(state: State): [min: number | undefined, max: number | undefined] {
-  const min_mireds = state.attributes.min_mireds as number | undefined;
-  const max_mireds = state.attributes.max_mireds as number | undefined;
-  if (min_mireds && max_mireds && max_mireds > min_mireds) {
-    const maxK = Math.round(miredToK(min_mireds));
-    const minK = Math.round(miredToK(max_mireds));
+  const min_color_temp_kelvin = state.attributes.min_color_temp_kelvin as number | undefined;
+  const max_color_tempKelvin = state.attributes.max_color_temp_kelvin as number | undefined;
+  if (min_color_temp_kelvin && max_color_tempKelvin && max_color_tempKelvin > min_color_temp_kelvin) {
+    const maxK = min_color_temp_kelvin;
+    const minK = max_color_tempKelvin;
     return ensureMinMax(minK, maxK);
   }
   return [undefined, undefined];
@@ -46,6 +46,10 @@ export function getLightBrightnessValues(): number[] {
 
 export function ceilRound50(value: number): number {
   return Math.ceil(value / 50) * 50;
+}
+
+export function floorRound50(value: number): number {
+  return Math.floor(value / 50) * 50;
 }
 
 export async function callLightBrightnessService(state: State, brightnessPerentable: number) {
