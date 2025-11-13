@@ -1,6 +1,6 @@
 // Common types shared across all platforms
 
-export interface ProgramInfo {
+export interface AppInfo {
   id: string;
   title: string;
   appName: string;
@@ -23,36 +23,35 @@ export interface PlatformAdapter {
   checkNativeApiAccess(): Promise<boolean>;
 
   /**
-   * Get list of open programs using native platform API
+   * Get list of open apps using native platform API
    * @param options Platform-specific options (e.g., showAllMonitors on Windows)
    */
-  getProgramsNative(options?: Record<string, unknown>): Promise<ProgramInfo[]>;
+  getAppsNative(options?: Record<string, unknown>): Promise<AppInfo[]>;
 
   /**
-   * Get list of open programs using Raycast WindowManagement API
+   * Get list of open apps using Raycast WindowManagement API
    * Enhanced with native data if needed
    */
-  getProgramsAPI(): Promise<ProgramInfo[]>;
+  getAppsAPI(): Promise<AppInfo[]>;
 
   /**
-   * Switch to a program by ID
-   * @param programId Platform-specific program identifier
-   * @param programTitle Display title for user feedback
+   * Switch to an application by ID
+   * @param appId Platform-specific application identifier
+   * @param appTitle Display title for user feedback
    */
-  switchToProgram(programId: string, programTitle: string): Promise<void>;
+  switchToApp(appId: string, appTitle: string): Promise<void>;
 
   /**
-   * Close a program by ID
-   * @param programId Platform-specific program identifier
-   * @param programTitle Display title for user feedback
+   * Close an application by ID
+   * @param appId Platform-specific application identifier
+   * @param appTitle Display title for user feedback
    */
-  closeProgram(programId: string, programTitle: string): Promise<void>;
-
+  closeApp(appId: string, appTitle: string): Promise<void>;
   /**
-   * Get icon for a program
-   * @param program Program info
+   * Get icon for an application
+   * @param app Application info
    */
-  getProgramIcon(program: ProgramInfo): { fileIcon: string } | string;
+  getAppIcon(app: AppInfo): { fileIcon: string } | string;
 
   /**
    * Get platform-specific filter options for the UI

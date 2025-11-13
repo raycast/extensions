@@ -1,16 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "program-switcher",
-  "title": "Program Switcher",
+  "name": "app-switcher",
+  "title": "App Switcher",
   "version": "0.1.0",
-  "description": "Seamlessly list, search and switch between open programs",
+  "description": "Find and switch between open apps",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
     {
-      "name": "program-switcher",
-      "title": "Program Switcher",
-      "description": "Seamlessly list, search and switch between open programs.",
+      "name": "app-switcher",
+      "title": "Switch App",
+      "description": "Find and switch between open apps.",
       "mode": "view"
     }
   ],

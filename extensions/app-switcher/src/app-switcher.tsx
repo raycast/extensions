@@ -1,6 +1,6 @@
 import { List, Action, ActionPanel, Icon, showToast, Toast, WindowManagement, LocalStorage } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
-import { getPlatformAdapter, ProgramInfo, PlatformMode } from "./platform";
+import { getPlatformAdapter, AppInfo, PlatformMode } from "./platform";
 
 const API_ACCESS_CACHE_KEY = "windowManagementApiAccess";
 const FILTER_VALUE_CACHE_KEY = "monitorFilterValue";
@@ -10,7 +10,7 @@ const TOAST_ERROR_DURATION = 3000;
 const platformAdapter = getPlatformAdapter();
 
 export default function Command() {
-  const [programs, setPrograms] = useState<ProgramInfo[]>([]);
+  const [applications, setApplications] = useState<AppInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [filterValue, setFilterValue] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export default function Command() {
   useEffect(() => {
     if (filterValue === null) return;
     // Initial load and whenever filter/mode changes
-    loadPrograms();
+    loadApps();
   }, [filterValue, mode]);
 
   async function checkApiAccess(): Promise<PlatformMode> {
@@ -58,7 +58,7 @@ export default function Command() {
     }
   }
 
-  async function loadPrograms(showRefreshToast: boolean = false) {
+  async function loadApps(showRefreshToast: boolean = false) {
     // Prevent concurrent loads
     if (isLoadingRef.current) {
       return;
@@ -69,7 +69,7 @@ export default function Command() {
     // Show animated toast while loading
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
-      title: showRefreshToast ? "Refreshing programs..." : "Loading programs...",
+      title: showRefreshToast ? "Refreshing apps..." : "Loading apps...",
     });
 
     try {
@@ -85,25 +85,25 @@ export default function Command() {
         return;
       }
 
-      let programList: ProgramInfo[];
+      let appList: AppInfo[];
 
       if (mode === PlatformMode.API) {
-        programList = await platformAdapter.getProgramsAPI();
+        appList = await platformAdapter.getAppsAPI();
       } else {
         const options: Record<string, unknown> = {};
         if (filterOptions) {
           options.showAllMonitors = filterValue === "all";
         }
-        programList = await platformAdapter.getProgramsNative(options);
+        appList = await platformAdapter.getAppsNative(options);
       }
 
-      setPrograms(programList);
+      setApplications(appList);
 
       // Update toast to success
       loadingToast.style = Toast.Style.Success;
       loadingToast.title = showRefreshToast
-        ? `Refreshed ${programList.length} program${programList.length !== 1 ? "s" : ""}`
-        : `Loaded ${programList.length} program${programList.length !== 1 ? "s" : ""}`;
+        ? `Refreshed ${appList.length} app${appList.length !== 1 ? "s" : ""}`
+        : `Loaded ${appList.length} app${appList.length !== 1 ? "s" : ""}`;
 
       // Auto-hide success toast
       setTimeout(() => loadingToast.hide(), TOAST_SUCCESS_DURATION);
@@ -111,7 +111,7 @@ export default function Command() {
       setError(err instanceof Error ? err.message : String(err));
       // Update toast to failure
       loadingToast.style = Toast.Style.Failure;
-      loadingToast.title = showRefreshToast ? "Failed to refresh" : "Failed to load programs";
+      loadingToast.title = showRefreshToast ? "Failed to refresh" : "Failed to load apps";
       loadingToast.message = err instanceof Error ? err.message : String(err);
       setTimeout(() => loadingToast.hide(), TOAST_ERROR_DURATION);
     } finally {
@@ -120,23 +120,23 @@ export default function Command() {
     }
   }
 
-  async function switchToProgram(programId: string, programTitle: string) {
+  async function switchToApp(appId: string, appTitle: string) {
     try {
-      await platformAdapter.switchToProgram(programId, programTitle);
+      await platformAdapter.switchToApp(appId, appTitle);
     } catch {
       // Error handling is done in platform adapter
     }
   }
 
-  async function closeProgram(programId: string, programTitle: string) {
+  async function closeApp(appId: string, appTitle: string) {
     try {
-      await platformAdapter.closeProgram(programId, programTitle);
+      await platformAdapter.closeApp(appId, appTitle);
       // Refresh the list after closing
-      await loadPrograms(true);
+      await loadApps(true);
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to close program",
+        title: "Failed to close app",
         message: err instanceof Error ? err.message : String(err),
       });
     }
@@ -146,7 +146,7 @@ export default function Command() {
     await LocalStorage.removeItem(API_ACCESS_CACHE_KEY);
     setMode(null);
     setApiCheckMessage("Rechecking API access...");
-    await loadPrograms();
+    await loadApps();
   }
 
   async function toggleMode() {
@@ -170,11 +170,11 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={Icon.XMarkCircle}
-          title="Error Loading Programs"
+          title="Error Loading Apps"
           description={error}
           actions={
             <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadPrograms} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadApps} />
               <Action title="Reset API Cache" icon={Icon.Trash} onAction={resetApiCache} />
             </ActionPanel>
           }
@@ -185,21 +185,21 @@ export default function Command() {
 
   const modeText = mode === PlatformMode.API ? "API Mode" : "Native Mode";
   const filterText = filterValue === "all" ? "All Desktops" : "Current Desktop";
-  const programCountText =
+  const appCountText =
     mode === PlatformMode.NATIVE && filterOptions
-      ? `${programs.length} program${programs.length !== 1 ? "s" : ""} • ${filterText} • ${modeText}`
-      : `${programs.length} program${programs.length !== 1 ? "s" : ""} • ${modeText}`;
+      ? `${applications.length} app${applications.length !== 1 ? "s" : ""} • ${filterText} • ${modeText}`
+      : `${applications.length} app${applications.length !== 1 ? "s" : ""} • ${modeText}`;
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search open programs..."
-      navigationTitle={programCountText}
+      searchBarPlaceholder="Search open apps..."
+      navigationTitle={appCountText}
       searchBarAccessory={
         // Only show dropdown if platform supports filtering and filter is loaded
         filterOptions && mode === PlatformMode.NATIVE && filterValue !== null ? (
           <List.Dropdown
-            tooltip="Filter Programs"
+            tooltip="Filter Apps"
             defaultValue={filterValue}
             onChange={async (newValue) => {
               // Ignore empty string or same value
@@ -217,43 +217,39 @@ export default function Command() {
         ) : undefined
       }
     >
-      {programs.length === 0 ? (
+      {applications.length === 0 ? (
         <List.EmptyView
           icon={isLoading ? { source: "extension-icon.png" } : Icon.Window}
-          title={isLoading ? "Scanning Running Programs..." : "No Programs Found"}
-          description={isLoading ? "Please wait..." : "Could not find any running programs."}
+          title={isLoading ? "Scanning Running Apps..." : "No Apps Found"}
+          description={isLoading ? "Please wait..." : "Could not find any running apps."}
         />
       ) : (
         <List.Section title="The list does not get updated automatically. Use action or Alt+R to refresh.">
-          {programs.map((program) => (
+          {applications.map((app) => (
             <List.Item
-              key={program.id}
-              title={program.title}
-              icon={platformAdapter.getProgramIcon(program)}
-              keywords={[program.appName, program.title]}
+              key={app.id}
+              title={app.title}
+              icon={platformAdapter.getAppIcon(app)}
+              keywords={[app.appName, app.title]}
               accessories={[
-                ...(program.isActive ? [{ tag: { value: "Active", color: "#00FF00" } }] : []),
-                { text: program.appName },
+                ...(app.isActive ? [{ tag: { value: "Active", color: "#00FF00" } }] : []),
+                { text: app.appName },
               ]}
               actions={
                 <ActionPanel>
+                  <Action title="Switch to App" icon={Icon.Window} onAction={() => switchToApp(app.id, app.title)} />
                   <Action
-                    title="Switch to Program"
-                    icon={Icon.Window}
-                    onAction={() => switchToProgram(program.id, program.title)}
-                  />
-                  <Action
-                    title="Close Program"
+                    title="Close App"
                     icon={Icon.XMarkCircle}
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["alt"], key: "x" }}
-                    onAction={() => closeProgram(program.id, program.title)}
+                    onAction={() => closeApp(app.id, app.title)}
                   />
                   <Action
                     title="Refresh List"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["alt"], key: "r" }}
-                    onAction={() => loadPrograms(true)}
+                    onAction={() => loadApps(true)}
                   />
                   <Action
                     title={mode === PlatformMode.API ? "Switch to Native Mode" : "Switch to API Mode"}

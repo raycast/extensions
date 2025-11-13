@@ -1,10 +1,9 @@
 // Windows platform implementation
 
-import { exec } from "child_process";
-import { promisify } from "util";
 import { join } from "path";
-import { Icon, WindowManagement, showHUD, closeMainWindow } from "@raycast/api";
-import { ProgramInfo, PlatformAdapter, FilterOption } from "./types";
+import { Icon, WindowManagement, showHUD, closeMainWindow, showToast, Toast } from "@raycast/api";
+import { AppInfo, PlatformAdapter, FilterOption } from "./types";
+import PowerShellManager from "./PowerShellManager";
 
 function parsePowerShellJson(jsonLine: string): Record<string, unknown>[] {
   try {
@@ -15,15 +14,7 @@ function parsePowerShellJson(jsonLine: string): Record<string, unknown>[] {
   }
 }
 
-const execAsync = promisify(exec);
-
-// Optimize exec with larger buffer and performance settings
-const execAsyncOptimized = (command: string) =>
-  execAsync(command, {
-    maxBuffer: 1024 * 1024 * 10, // 10MB buffer (prevent truncation)
-    windowsHide: true, // Don't flash console window
-    encoding: "utf8", // Explicit UTF-8 encoding
-  });
+const psManager = PowerShellManager.getInstance();
 
 export class WindowsPlatformAdapter implements PlatformAdapter {
   private static readonly SCRIPTS_DIR = join(__dirname, "assets", "windows");
@@ -31,23 +22,22 @@ export class WindowsPlatformAdapter implements PlatformAdapter {
   async checkNativeApiAccess(): Promise<boolean> {
     // Check if PowerShell is available (should always be true on Windows)
     try {
-      await execAsync("powershell -Command \"Write-Output 'test'\"");
+      const psManager = PowerShellManager.getInstance();
+      await psManager.runScript("Write-Output 'test'");
       return true;
     } catch {
       return false;
     }
   }
 
-  async getProgramsNative(options?: Record<string, unknown>): Promise<ProgramInfo[]> {
+  async getAppsNative(options?: Record<string, unknown>): Promise<AppInfo[]> {
     const showAllMonitors = options?.showAllMonitors ?? false;
 
     const scriptPath = join(WindowsPlatformAdapter.SCRIPTS_DIR, "enum-windows.ps1");
     const allMonitorsFlag = showAllMonitors ? "-AllMonitors" : "";
 
-    const command =
-      `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}" ${allMonitorsFlag}`.trim();
-    const { stdout } = await execAsyncOptimized(command);
-
+    const args = allMonitorsFlag ? [allMonitorsFlag] : [];
+    const stdout = await psManager.runScript(scriptPath, args);
     // Find the JSON output (should be the last non-empty line)
     const lines = stdout.trim().split("\n");
     const jsonLine = lines[lines.length - 1].trim();
@@ -65,23 +55,21 @@ export class WindowsPlatformAdapter implements PlatformAdapter {
         positionable: true,
         resizable: true,
       }))
-      .sort((a: ProgramInfo, b: ProgramInfo) => {
+      .sort((a: AppInfo, b: AppInfo) => {
         if (a.isActive) return -1;
         if (b.isActive) return 1;
         return a.appName.localeCompare(b.appName);
       });
   }
 
-  async getProgramsAPI(): Promise<ProgramInfo[]> {
+  async getAppsAPI(): Promise<AppInfo[]> {
     // Get windows from Raycast API
     const apiWindows = await WindowManagement.getWindowsOnActiveDesktop();
     const activeWindow = await WindowManagement.getActiveWindow();
 
-    // Also get program info from PowerShell (has actual window titles)
+    // Also get application info from PowerShell (has actual window titles)
     const scriptPath = join(WindowsPlatformAdapter.SCRIPTS_DIR, "enum-windows.ps1");
-    const { stdout } = await execAsyncOptimized(
-      `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}"`,
-    );
+    const stdout = await psManager.runScript(scriptPath);
 
     // Find the JSON output (should be the last non-empty line)
     const lines = stdout.trim().split("\n");
@@ -113,7 +101,7 @@ export class WindowsPlatformAdapter implements PlatformAdapter {
           isActive: w.id === activeWindow.id,
           positionable: w.positionable,
           resizable: w.resizable,
-        } as ProgramInfo;
+        } as AppInfo;
       })
       .sort((a, b) => {
         if (a.isActive) return -1;
@@ -122,42 +110,53 @@ export class WindowsPlatformAdapter implements PlatformAdapter {
       });
   }
 
-  async switchToProgram(programId: string, programTitle: string): Promise<void> {
+  async switchToApp(appId: string, appTitle: string): Promise<void> {
     // Convert program ID to decimal handle for PowerShell
     // API mode: hex format (0x1234), PowerShell mode: already decimal
-    const handle = programId.startsWith("0x") ? parseInt(programId, 16).toString() : programId;
+    const handle = appId.startsWith("0x") ? parseInt(appId, 16).toString() : appId;
 
     const scriptPath = join(WindowsPlatformAdapter.SCRIPTS_DIR, "switch-window.ps1");
-    const command = `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}" -handle ${handle}`;
-
-    await execAsyncOptimized(command);
-    await showHUD(`✅ Switched to ${programTitle}`);
-    await closeMainWindow();
+    try {
+      const result = await psManager.runScript(scriptPath, ["-handle", handle]);
+      // PowerShell script exits with 0 on success, 1 on failure
+      if (result.includes("Window handle is not valid") || result.includes("exit 1")) {
+        await showHUD(`❌ Failed to switch to ${appTitle}: Invalid handle or window not found.`);
+        throw new Error(`Failed to switch: ${result}`);
+      }
+      await showHUD(`✅ Switched to ${appTitle}`);
+      await closeMainWindow();
+    } catch (err) {
+      await showHUD(`❌ Failed to switch to ${appTitle}: ${err instanceof Error ? err.message : String(err)}`);
+      throw err;
+    }
   }
 
-  async closeProgram(programId: string, programTitle: string): Promise<void> {
-    const handle = programId.startsWith("0x") ? parseInt(programId, 16).toString() : programId;
+  async closeApp(appId: string, appTitle: string): Promise<void> {
+    const handle = appId.startsWith("0x") ? parseInt(appId, 16).toString() : appId;
     const scriptPath = join(WindowsPlatformAdapter.SCRIPTS_DIR, "close-window.ps1");
-    const command = `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}" -handle ${handle}`;
-    await execAsyncOptimized(command);
-    await showHUD(`Closed ${programTitle}`);
+    await psManager.runScript(scriptPath, ["-handle", handle]);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Success",
+      message: `Closed ${appTitle}`,
+    });
   }
 
-  getProgramIcon(program: ProgramInfo): { fileIcon: string } | string {
+  getAppIcon(app: AppInfo): { fileIcon: string } | string {
     // Use executable path for icon if available
-    if (program.executablePath && program.executablePath !== "") {
-      return { fileIcon: program.executablePath };
+    if (app.executablePath && app.executablePath !== "") {
+      return { fileIcon: app.executablePath };
     }
     return Icon.Window;
   }
 
   getFilterOptions(preferredFirst?: string): FilterOption[] {
     // Windows supports desktop filtering
-    const allOption = { label: "All Desktops", value: "all", tooltip: "Show programs from all desktops" };
+    const allOption = { label: "All Desktops", value: "all", tooltip: "Show apps from all desktops" };
     const visibleOption = {
       label: "Current Desktop Only",
       value: "active",
-      tooltip: "Show programs from current desktop only",
+      tooltip: "Show apps from current desktop only",
     };
 
     // Put preferred option first to work around Raycast dropdown bug (resets to first option)

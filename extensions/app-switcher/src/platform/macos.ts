@@ -3,7 +3,7 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import { Icon, WindowManagement, showHUD, closeMainWindow } from "@raycast/api";
-import { ProgramInfo, PlatformAdapter, FilterOption } from "./types";
+import { AppInfo, PlatformAdapter, FilterOption } from "./types";
 
 const execAsync = promisify(exec);
 
@@ -14,14 +14,14 @@ export class MacOSPlatformAdapter implements PlatformAdapter {
     return true;
   }
 
-  async getProgramsNative(): Promise<ProgramInfo[]> {
+  async getAppsNative(): Promise<AppInfo[]> {
     // TODO: Implement using AppleScript to get window list
     // Example: osascript -e 'tell application "System Events" to get name of every window of every process'
 
     throw new Error("macOS native implementation not yet available. Please use API mode.");
   }
 
-  async getProgramsAPI(): Promise<ProgramInfo[]> {
+  async getAppsAPI(): Promise<AppInfo[]> {
     // Get windows from Raycast API (should work better on macOS)
     const apiWindows = await WindowManagement.getWindowsOnActiveDesktop();
     const activeWindow = await WindowManagement.getActiveWindow();
@@ -29,7 +29,7 @@ export class MacOSPlatformAdapter implements PlatformAdapter {
     return apiWindows
       .filter((w) => w.application?.name)
       .map(
-        (w): ProgramInfo => ({
+        (w): AppInfo => ({
           id: w.id,
           title: w.application?.name || "Untitled",
           appName: w.application?.name || "Unknown",
@@ -47,16 +47,16 @@ export class MacOSPlatformAdapter implements PlatformAdapter {
       });
   }
 
-  async switchToProgram(programId: string, programTitle: string): Promise<void> {
+  async switchToApp(appId: string, appTitle: string): Promise<void> {
     // TODO: Implement using AppleScript or WindowManagement API
     // For now, try using the API's setWindowBounds which might trigger focus
 
     try {
       const windows = await WindowManagement.getWindowsOnActiveDesktop();
-      const targetWindow = windows.find((w) => w.id === programId);
+      const targetWindow = windows.find((w) => w.id === appId);
 
       if (!targetWindow) {
-        throw new Error(`Window with ID ${programId} not found`);
+        throw new Error(`Window with ID ${appId} not found`);
       }
       if (targetWindow.positionable) {
         await WindowManagement.setWindowBounds({
@@ -65,22 +65,22 @@ export class MacOSPlatformAdapter implements PlatformAdapter {
         });
       }
 
-      await showHUD(`✅ Switched to ${programTitle}`);
+      await showHUD(`✅ Switched to ${appTitle}`);
       await closeMainWindow();
     } catch (err) {
-      console.error("Error switching to program:", err);
+      console.error("Error switching to app:", err);
       await showHUD(`❌ Failed to switch: ${err instanceof Error ? err.message : String(err)}`);
       throw err;
     }
   }
 
-  async closeProgram(programId: string, programTitle: string): Promise<void> {
+  async closeApp(appId: string, appTitle: string): Promise<void> {
     try {
       const windows = await WindowManagement.getWindowsOnActiveDesktop();
-      const targetWindow = windows.find((w) => w.id === programId);
+      const targetWindow = windows.find((w) => w.id === appId);
 
       if (!targetWindow || !targetWindow.application) {
-        throw new Error(`Window with ID ${programId} not found`);
+        throw new Error(`Window with ID ${appId} not found`);
       }
 
       // Use osascript to quit the application
@@ -88,38 +88,17 @@ export class MacOSPlatformAdapter implements PlatformAdapter {
       const command = `osascript -e 'tell application ${JSON.stringify(appName)} to quit'`;
 
       await execAsync(command);
-      await showHUD(`✅ Closed ${programTitle}`);
+      await showHUD(`✅ Closed ${appTitle}`);
     } catch (err) {
       await showHUD(`❌ Failed to close: ${err instanceof Error ? err.message : String(err)}`);
       throw err;
     }
   }
 
-  async forceKillProgram(programId: string, programTitle: string): Promise<void> {
-    try {
-      const windows = await WindowManagement.getWindowsOnActiveDesktop();
-      const targetWindow = windows.find((w) => w.id === programId);
-
-      if (!targetWindow || !targetWindow.application) {
-        throw new Error(`Window with ID ${programId} not found`);
-      }
-
-      // Use killall to force kill the application
-      const appName = targetWindow.application.name;
-      const command = `killall -9 ${JSON.stringify(appName)}`;
-
-      await execAsync(command);
-      await showHUD(`✅ Force killed ${programTitle}`);
-    } catch (err) {
-      await showHUD(`❌ Failed to force kill: ${err instanceof Error ? err.message : String(err)}`);
-      throw err;
-    }
-  }
-
-  getProgramIcon(program: ProgramInfo): { fileIcon: string } | string {
+  getAppIcon(app: AppInfo): { fileIcon: string } | string {
     // macOS: Use bundle path if available
-    if (program.executablePath && program.executablePath !== "") {
-      return { fileIcon: program.executablePath };
+    if (app.executablePath && app.executablePath !== "") {
+      return { fileIcon: app.executablePath };
     }
     return Icon.Window;
   }
