@@ -1,5 +1,5 @@
 # Drug Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-11-13
 
 - Initial release of the Drug Search Raycast extension
