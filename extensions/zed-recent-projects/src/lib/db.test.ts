@@ -44,6 +44,40 @@ describe("Zed DB Integration Tests", () => {
     });
   });
 
+  describe("v30 Schema", () => {
+    const dbPath = "test/fixtures/zed-db-v30.sqlite";
+
+    it("should detect correct version", async () => {
+      const result = await getZedWorkspaceDbVersion(dbPath);
+      expect(result.version).toBe(30);
+      expect(result.supported).toBe(true);
+    });
+
+    it("should fetch and parse workspaces correctly", async () => {
+      const query = getZedWorkspacesQuery(30);
+      const output = await queryDb(dbPath, query);
+      const rows = output
+        .split("\n")
+        .filter((line) => line.trim())
+        .map((line) => line.split("\t"));
+
+      const zedWorkspaces: ZedWorkspace[] = rows.map((row) => ({
+        type: row[0] as "local",
+        id: parseInt(row[1], 10),
+        paths: row[2],
+        timestamp: parseInt(row[3], 10),
+        host: row[4] || undefined,
+        user: row[5] || undefined,
+        port: row[6] ? parseInt(row[6], 10) : undefined,
+      }));
+
+      const parsedWorkspaces = zedWorkspaces
+        .map(parseZedWorkspace)
+        .filter((ws): ws is NonNullable<typeof ws> => ws !== null);
+      expect(parsedWorkspaces).toMatchSnapshot();
+    });
+  });
+
   describe("Query Selection", () => {
     it("should select v24 query for version 24", () => {
       expect(getZedWorkspacesQuery(24)).toBe(ZED_WORKSPACES_QUERY_24);

@@ -47,7 +47,7 @@
   "dependencies": {
     "@chrismessina/raycast-logger": "^1.0.0",
     "@raycast/api": "^1.103.2",
-    "fathom-typescript": "0.0.30"
+    "fathom-typescript": "^0.0.36"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

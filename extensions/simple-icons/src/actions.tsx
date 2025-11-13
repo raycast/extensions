@@ -74,7 +74,7 @@ export const Supports = () => (
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml"
     />
     <Action.OpenInBrowser
-      title="Report an Oudated Icon"
+      title="Report an Outdated Icon"
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=update+icon%2Fdata&template=icon_update.yml"
     />
   </>

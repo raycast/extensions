@@ -9,9 +9,9 @@ import {
   Alert,
   confirmAlert,
   Icon,
-  LocalStorage,
   getPreferenceValues,
 } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { formatHours, isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
@@ -34,13 +34,23 @@ export default function Command({
 }) {
   const { pop } = useNavigation();
   const { data: company, error } = useCompany();
-  const { data: projects } = useMyProjects();
+  const { data: projects, isLoading: isLoadingProjects } = useMyProjects();
   const [projectId, setProjectId] = useState<string | null>(entry?.project.id.toString() ?? null);
   const [taskId, setTaskId] = useState<string | null>(entry?.task.id.toString() ?? null);
   const [notes, setNotes] = useState<string>(entry?.notes ?? "");
   const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
   const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
   const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
+
+  // Use useLocalStorage for persisting last used project/task
+  const {
+    value: lastProject,
+    setValue: setLastProject,
+    isLoading: isLoadingLastProject,
+  } = useLocalStorage<{
+    projectId: string;
+    taskId: string;
+  }>("lastProject");
 
   useEffect(() => {
     if (error) {
@@ -67,25 +77,16 @@ export default function Command({
   }, [projects]);
 
   useEffect(() => {
-    if (!entry) {
-      // no entry was passed, recall last submitted project/task
-      LocalStorage.getItem("lastProject").then((value) => {
-        console.log("restoring last used entry...", { value });
-        if (value) {
-          const { projectId, taskId } = JSON.parse(value.toString());
-          setProjectId(projectId);
-          setTaskId(taskId);
-          // setTaskAssignments(projectId);
-        }
-      });
-    } else {
-      // setTaskAssignments();
+    if (!entry && lastProject) {
+      setProjectId(lastProject?.projectId?.toString());
+      setTaskId(lastProject?.taskId?.toString());
     }
+  }, [entry, lastProject]);
 
-    return () => {
-      setProjectId(null);
-    };
-  }, [entry]);
+  // Watch for changes to projectId to reset taskId unless the change is related to lastProject being loaded
+  useEffect(() => {
+    if (lastProject && lastProject.projectId !== projectId) setTaskId(null);
+  }, [projectId]);
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
@@ -140,7 +141,7 @@ export default function Command({
       });
     });
 
-    await LocalStorage.setItem("lastProject", JSON.stringify({ projectId: values.project_id, taskId: values.task_id }));
+    await setLastProject({ projectId: values.project_id.toString(), taskId: values.task_id.toString() });
 
     if (timeEntry) {
       toast.hide();
@@ -156,14 +157,6 @@ export default function Command({
     });
     return project ? project.task_assignments : [];
   }, [projects, projectId]);
-
-  useEffect(() => {
-    if (tasks.length === 0) setTaskId(null);
-    if (tasks.some((o) => o.task.id.toString() === taskId)) return;
-    const defaultTask = tasks[0];
-
-    setTaskId(defaultTask ? defaultTask.task.id.toString() : null);
-  }, [tasks, taskId]);
 
   function setTimeFormat(value?: string) {
     // This function can be called directly from the onBlur event to better match the Harvest app behavior when it exists
@@ -201,6 +194,7 @@ export default function Command({
   return (
     <Form
       navigationTitle={entry?.id ? "Edit Time Entry" : "New Time Entry"}
+      isLoading={!entry && ((!tasks.length && isLoadingProjects) || isLoadingLastProject)}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -221,10 +215,7 @@ export default function Command({
         title="Project"
         key={`project-${entry?.id}`}
         value={projectId ?? ""}
-        onChange={(newValue) => {
-          setProjectId(newValue);
-          // setTaskAssignments(newValue);
-        }}
+        onChange={setProjectId}
       >
         {groupedProjects?.map((groupedProject) => {
           const client = groupedProject[0].client;
@@ -245,7 +236,7 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" value={taskId ?? ""} onChange={setTaskId}>
+      <Form.Dropdown id="task_id" title="Task" value={taskId ?? ""} onChange={onSave}>
         {tasks?.map((task) => {
           return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}

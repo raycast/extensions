@@ -20,67 +20,45 @@
   ],
   "preferences": [
     {
-      "name": "layoutSwitchModifier",
-      "title": "Layout Switch Shortcut",
-      "description": "The shortcut to switch the layout of the selected text",
-      "type": "dropdown",
-      "required": true,
-      "data": [
-        {
-          "title": "⌘Space",
-          "value": "command"
-        },
-        {
-          "title": "⌃Space",
-          "value": "control"
-        },
-        {
-          "title": "⌥Space",
-          "value": "option"
-        }
-      ],
-      "default": "control"
-    },
-    {
-      "name": "cyrLayoutName",
-      "title": "Cyrillic Layout",
-      "description": "The name of the Cyrillic layout",
+      "name": "cyrLayoutID",
+      "title": "Cyrillic Layout ID",
+      "description": "The id of the Cyrillic layout",
       "type": "dropdown",
       "required": true,
       "data": [
         {
           "title": "Russian",
-          "value": "Russian"
+          "value": "com.apple.keylayout.Russian"
         },
         {
           "title": "Russian - PC",
-          "value": "RussianWin"
+          "value": "com.apple.keylayout.RussianWin"
         },
         {
           "title": "Russian - QWERTY",
-          "value": "Russian - Phonetic"
+          "value": "com.apple.keylayout.Russian-Phonetic"
         },
         {
           "title": "Ukrainian",
-          "value": "Ukrainian - PC"
+          "value": "com.apple.keylayout.Ukrainian-PC"
         },
         {
           "title": "Ukrainian - Legacy",
-          "value": "Ukrainian"
+          "value": "com.apple.keylayout.Ukrainian"
         },
         {
           "title": "Ukrainian - QWERTY",
-          "value": "Ukrainian-QWERTY"
+          "value": "com.apple.keylayout.Ukrainian-QWERTY"
         }
       ]
     },
     {
-      "name": "latLayoutName",
-      "title": "Latin Layout",
-      "description": "The name of the Latin layout",
+      "name": "latLayoutID",
+      "title": "Latin Layout ID",
+      "description": "The id of the Latin layout",
       "type": "textfield",
       "required": true,
-      "default": "ABC"
+      "default": "com.apple.keylayout.ABC"
     },
     {
       "name": "showSuccessHUD",
@@ -93,7 +71,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.89.0"
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@types/node": "22.10.7",
