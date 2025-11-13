@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-11-13
 
 - Added option to hide toast messages
 - Added option to mute shutter sound
