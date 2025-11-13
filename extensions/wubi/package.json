@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "wubi86",
-      "title": "Look Up the 86 Version Wubi Character Roots And Visualize",
+      "title": "Look up the 86 Version Wubi Character Roots and Visualize",
       "description": "Search The Code Of WuBi By Pinyin, Support The 86 Version",
       "mode": "view"
     }
