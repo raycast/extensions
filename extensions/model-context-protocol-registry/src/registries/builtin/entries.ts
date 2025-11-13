@@ -522,12 +522,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "nuxt",
     title: "Nuxt",
-    description: "Access Nuxt documentation and modules with the public Nuxt MCP server",
+    description: "Access Nuxt documentation, migration guide, modules, and blog posts with the public Nuxt MCP server",
     icon: "nuxt.svg",
-    homepage: "https://mcp.nuxt.com/",
+    homepage: "https://nuxt.com/mcp",
     configuration: {
       command: "npx",
-      args: ["mcp-remote", "https://mcp.nuxt.space/sse"],
+      args: ["mcp-remote", "https://nuxt.com/mcp"],
     },
   },
   {
