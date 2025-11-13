@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "get-localhost-url-from-current-tab",
+  "title": "Get Localhost URL from Current Tab",
+  "description": "Used to convert the current preview url into a localhost equivalent so we can easily open the current tab in localhost",
+  "icon": "fuxam.png",
+  "author": "hosnipogi",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-localhost-url-to-clipboard",
+      "title": "Copy Localhost URL to Clipboard",
+      "description": "Copy the localhost URL to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-localhost-url-in-browser",
+      "title": "Open Localhost URL in Browser",
+      "description": "Open the localhost URL in the browser.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "port",
+      "title": "Port",
+      "description": "The default port to use to apply the localhost URL.",
+      "type": "textfield",
+      "required": true,
+      "default": "3000"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
