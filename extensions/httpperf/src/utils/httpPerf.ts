@@ -90,7 +90,7 @@ export async function analyzeHTTPPerformance(options: HTTPPerformanceOptions): P
  * Parse curl output with timing information
  */
 function parseCurlOutput(
-  output: string
+  output: string,
 ): Omit<HTTPPerformanceMetrics, "url" | "method" | "dnsTime" | "tcpTime" | "tlsTime" | "serverTime" | "transferTime"> {
   const lines = output.trim().split("\n");
   const data: Record<string, string> = {};
@@ -157,11 +157,12 @@ export function generateTimeline(metrics: HTTPPerformanceMetrics): string {
   const { dnsTime, tcpTime, tlsTime, serverTime, transferTime, totalTime } = metrics;
 
   // Calculate percentages
-  const dnsPercent = (dnsTime / totalTime) * 100;
-  const tcpPercent = (tcpTime / totalTime) * 100;
-  const tlsPercent = (tlsTime / totalTime) * 100;
-  const serverPercent = (serverTime / totalTime) * 100;
-  const transferPercent = (transferTime / totalTime) * 100;
+  // Safeguard against division by zero
+  const dnsPercent = totalTime > 0 ? (dnsTime / totalTime) * 100 : 0;
+  const tcpPercent = totalTime > 0 ? (tcpTime / totalTime) * 100 : 0;
+  const tlsPercent = totalTime > 0 ? (tlsTime / totalTime) * 100 : 0;
+  const serverPercent = totalTime > 0 ? (serverTime / totalTime) * 100 : 0;
+  const transferPercent = totalTime > 0 ? (transferTime / totalTime) * 100 : 0;
 
   // Create timeline bar (40 characters wide for better display)
   const barWidth = 40;

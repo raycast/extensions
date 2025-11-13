@@ -1,13 +1,3 @@
-/**
- * @ts-nocheck is required due to a known TypeScript/React type incompatibility issue.
- * The Raycast API uses React 18 types that are incompatible with @types/react,
- * causing JSX component type errors (bigint not assignable to ReactNode).
- * This is a framework-level issue that cannot be resolved without updating
- * Raycast's type definitions. See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/58000
- */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-/* eslint-enable @typescript-eslint/ban-ts-comment */
 import { Action, ActionPanel, Form, Icon, showToast, Toast, List, Color } from "@raycast/api";
 import React, { useState } from "react";
 import { analyzeHTTPPerformance, formatBytes, formatSpeed, formatTime } from "./utils/httpPerf";
