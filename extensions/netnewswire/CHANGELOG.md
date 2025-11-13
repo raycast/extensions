@@ -1,6 +1,6 @@
 # NetNewsWire Changelog
 
-## [Fix Articles Not Loading] - {PR_MERGE_DATE}
+## [Fix Articles Not Loading] - 2025-11-13
 
 - Fixed issue where articles were not loading when feed name not properly parsed (ref: [Issue #22808](https://github.com/raycast/extensions/issues/22808))
 - Added `Action` to copy article url
