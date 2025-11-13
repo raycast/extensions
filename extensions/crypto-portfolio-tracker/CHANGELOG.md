@@ -1,3 +1,3 @@
 # Crypto Portfolio Tracker Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-11-13
