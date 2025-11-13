@@ -21,8 +21,7 @@
       "subtitle": "Eurovision",
       "description": "Discover more aboutthe contests over the years",
       "mode": "view"
-    }
-  ,
+    },
     {
       "name": "explore-entries",
       "title": "Explore Entries",
@@ -44,15 +43,16 @@
       "description": "Discover past and participating countries and their Eurovision entries",
       "mode": "view"
     }
-      ],
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.2.2",
+    "react": "^19.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.4",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
