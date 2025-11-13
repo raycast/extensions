@@ -101,7 +101,15 @@ export function getIntervalValidationError(interval?: string): string | undefine
 
 // Colors that Apple Reminders uses (sRGB values that display as Display P3 on screen)
 // These are the values we SET, which render as the Display P3 colors users see
-export const colorOptions = [
+type TintColor = Color.ColorLike;
+
+type ColorOption = {
+  title: string;
+  value: string;
+  color: TintColor;
+};
+
+export const colorOptions: ColorOption[] = [
   { title: "Red", value: "#FF2968", color: Color.Red },
   { title: "Orange", value: "#FF9500", color: Color.Orange },
   { title: "Yellow", value: "#FFCC00", color: Color.Yellow },
@@ -115,32 +123,32 @@ export const colorOptions = [
   { title: "Gray", value: "#5B626A", color: Color.SecondaryText },
 ];
 
-const colorMap = colorOptions.reduce(
-  (acc, option) => {
-    acc[option.value] = option.color;
-    return acc;
-  },
-  {
-    // Display P3 screen colors (what users actually see) - for recognition when reading
-    "#FF453A": Color.Red,
-    "#FF9F0B": Color.Orange,
-    "#FED709": Color.Yellow,
-    "#31D15B": Color.Green,
-    "#78C3FF": Color.Blue,
-    "#5E5CE6": Color.Blue,
-    "#D57FF5": Color.Purple,
-    "#FF4F79": Color.Magenta,
-    "#C9A675": Color.Brown,
-    "#EBB5AE": "#EBB5AE",
-    "#727E87": Color.SecondaryText,
-    // Legacy/alternative color mappings
-    "#FF3B30": Color.Red,
-    "#34C759": Color.Green,
-    "#007AFF": Color.Blue,
-    "#AF52DE": Color.Purple,
-    "#8E8E93": Color.SecondaryText,
-  } as Record<string, Color>,
-);
+const baseColorMap: Record<string, TintColor> = {
+  // Display P3 screen colors (what users actually see) - for recognition when reading
+  "#FF453A": Color.Red,
+  "#FF9F0B": Color.Orange,
+  "#FED709": Color.Yellow,
+  "#31D15B": Color.Green,
+  "#78C3FF": Color.Blue,
+  "#5E5CE6": Color.Blue,
+  "#D57FF5": Color.Purple,
+  "#FF4F79": Color.Magenta,
+  "#C9A675": Color.Brown,
+  "#EBB5AE": "#EBB5AE",
+  "#727E87": Color.SecondaryText,
+  // Legacy/alternative color mappings
+  "#FF3B30": Color.Red,
+  "#34C759": Color.Green,
+  "#007AFF": Color.Blue,
+  "#AF52DE": Color.Purple,
+  "#8E8E93": Color.SecondaryText,
+};
+
+colorOptions.forEach((option) => {
+  baseColorMap[option.value] = option.color;
+});
+
+const colorMap = baseColorMap;
 
 export function getListColorIcon(colorHex: string) {
   return { source: Icon.Circle, tintColor: colorMap[colorHex] || colorHex };
