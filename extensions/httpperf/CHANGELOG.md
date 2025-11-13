@@ -2,7 +2,7 @@
 
 All notable changes to the HTTP Performance Analyzer extension will be documented in this file.
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-11-13
 
 ### Added
 
