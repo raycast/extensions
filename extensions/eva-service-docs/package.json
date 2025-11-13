@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "eva-service-docs",
+  "title": "EVA Information",
+  "description": "Find information about EVA services and settings.",
+  "icon": "eva_raycast.png",
+  "author": "tkapitein",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "endpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "EVA API Endpoint",
+      "description": "The EVA API endpoint URL",
+      "default": "https://api.euw.newblack.test.eva-online.cloud",
+      "placeholder": "https://api.euw.newblack.test.eva-online.cloud"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": false,
+      "title": "EVA API Token",
+      "description": "Your EVA API authentication token",
+      "default": "12B0A0710BEDB29ED1D6B9AAFA423164224FA8A45D5A6632A9324A59F46210B9",
+      "placeholder": "Enter your EVA API token"
+    },
+    {
+      "name": "useStringIds",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use String IDs",
+      "label": "Use String IDs mode (Eva-Ids-Mode: StringIDs)",
+      "description": "Enable to use StringIDs mode, disable for numeric mode",
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "find-service",
+      "title": "Search EVA Service",
+      "subtitle": "Find EVA service information",
+      "description": "The command displays a list of EVA services which holds information and useful links.",
+      "mode": "view"
+    },
+    {
+      "name": "find-setting",
+      "title": "Search EVA Setting",
+      "subtitle": "Find EVA setting information",
+      "description": "The command displays a list of EVA settings which holds information and useful links.",
+      "mode": "view"
+    },
+    {
+      "name": "find-app-setting",
+      "title": "Search EVA App Setting",
+      "subtitle": "Find EVA app setting",
+      "description": "The command displays a list of EVA app settings which holds information and useful links.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.2.4",
+    "eslint": "^7.32.0",
+    "knip": "^5.69.1",
+    "prettier": "^2.5.1",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "update-eva-types": "./scripts/update-eva-types.sh",
+    "knip": "knip",
+    "cleanup-eva-types": "./scripts/knip-eva-types/cleanup.sh"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
