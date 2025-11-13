@@ -8,13 +8,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 /* eslint-enable @typescript-eslint/ban-ts-comment */
-import { Action, ActionPanel, Form, Icon, showToast, Toast, LaunchProps, List, Color } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, List, Color } from "@raycast/api";
 import React, { useState } from "react";
 import { analyzeHTTPPerformance, formatBytes, formatSpeed, formatTime } from "./utils/httpPerf";
 import { HTTPPerformanceMetrics, FormValues } from "./types";
 
-export default function Command(props: LaunchProps<{ arguments: { url: string } }>) {
-  const { url: initialUrl } = props.arguments;
+export default function Command() {
   const [metrics, setMetrics] = useState<HTTPPerformanceMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [pendingUrl, setPendingUrl] = useState("");
@@ -85,12 +84,9 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
     return <ResultView metrics={metrics} onBack={() => setMetrics(null)} onBackWithUrl={handleBackWithUrl} />;
   }
 
-  // Use pendingUrl if set, otherwise use initialUrl
-  const urlDefaultValue = pendingUrl || initialUrl;
-
   return (
     <Form
-      key={urlDefaultValue}
+      key={pendingUrl}
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -102,7 +98,7 @@ export default function Command(props: LaunchProps<{ arguments: { url: string } 
         id="url"
         title="URL"
         placeholder="https://example.com"
-        defaultValue={urlDefaultValue}
+        defaultValue={pendingUrl}
         info="Enter the URL to analyze (protocol is optional, defaults to HTTPS)"
       />
       <Form.Dropdown id="method" title="HTTP Method" defaultValue="GET">

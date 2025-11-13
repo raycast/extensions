@@ -17,15 +17,7 @@
       "title": "Analyze HTTP Performance",
       "subtitle": "HTTP Performance Analyzer",
       "description": "Measure and visualize HTTP request performance metrics",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "url",
-          "placeholder": "URL (e.g., https://example.com)",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {
