@@ -2,6 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git",
   "title": "Git",
+  "description": "Full-fledged Git Client for managing local repositories",
+  "icon": "extension-icon.png",
+  "author": "ernest0n",
   "keywords": [
     "repository",
     "project",
@@ -14,9 +17,6 @@
     "azure devops",
     "gitea"
   ],
-  "description": "Full-fledged Git Client for managing local repositories",
-  "icon": "extension-icon.png",
-  "author": "ernest0n",
   "platforms": [
     "macOS"
   ],
