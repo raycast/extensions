@@ -17,11 +17,9 @@ export function getLightRGBFromState(state: State): RGB | undefined {
 
 export function getLightMinMaxK(state: State): [min: number | undefined, max: number | undefined] {
   const min_color_temp_kelvin = state.attributes.min_color_temp_kelvin as number | undefined;
-  const max_color_tempKelvin = state.attributes.max_color_temp_kelvin as number | undefined;
-  if (min_color_temp_kelvin && max_color_tempKelvin && max_color_tempKelvin > min_color_temp_kelvin) {
-    const maxK = min_color_temp_kelvin;
-    const minK = max_color_tempKelvin;
-    return ensureMinMax(minK, maxK);
+  const max_color_temp_kelvin = state.attributes.max_color_temp_kelvin as number | undefined;
+  if (min_color_temp_kelvin && max_color_temp_kelvin && max_color_temp_kelvin > min_color_temp_kelvin) {
+    return ensureMinMax(min_color_temp_kelvin, max_color_temp_kelvin);
   }
   return [undefined, undefined];
 }
