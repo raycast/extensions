@@ -28,15 +28,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "yaml": "^2.8.1"
+    "@raycast/api": "^1.103.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "^9.39.1",
-    "js-yaml": "^4.1.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
   },
