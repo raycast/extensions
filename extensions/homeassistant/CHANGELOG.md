@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-11-14
 
 - Replaced deprecated `kelvin` attribute with `color_temp_kelvin` for lights actions
 - Fixed max_color_temp_kelvin always being rounded incorrectly in the `Color Temperature` action
