@@ -7,6 +7,7 @@ import {
   List,
   Icon,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import React from "react";
 
@@ -199,8 +200,7 @@ export default function Command() {
       const { links, metadata } = await fetchDownloadLinks(productId);
 
       if (links.length === 0) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "No Downloads Found",
           message: "No download links were found for this product",
         });
@@ -217,10 +217,8 @@ export default function Command() {
         message: `Found ${links.length} download(s)`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Fetch Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
