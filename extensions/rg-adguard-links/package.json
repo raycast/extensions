@@ -1,37 +1,36 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rg-adguard-links",
-  "version": "1.0.0",
   "title": "RG AdGuard Links",
-  "description": "Browse and open AdGuard filter list resources (official + community).",
+  "description": "Convert Microsoft Store URLs to rg-adguard.net download links",
   "icon": "icon.png",
   "author": "jergensturdley",
   "license": "MIT",
-  "categories": ["Developer Tools"],
-  "keywords": ["adguard", "filters", "privacy", "blocklists"],
-  "repository": "https://github.com/jergensturdley/raycast-extensions",
   "commands": [
     {
-      "name": "adguard-links",
-      "title": "AdGuard Links",
-      "subtitle": "AdGuard",
-      "description": "Search and open AdGuard filter lists",
+      "name": "convert-url",
+      "title": "Convert Store URL",
+      "description": "Convert Microsoft Store URL to rg-adguard.net link",
       "mode": "view"
-    },
-    {
-      "name": "refresh-adguard-index",
-      "title": "Refresh AdGuard Index",
-      "subtitle": "AdGuard",
-      "description": "Refresh cached filter list metadata",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6"
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@types/node": "^20.8.10",
-    "@types/react": "18.2.0",
-    "react": "18.2.0",
-    "typescript": "^5.3.0"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
