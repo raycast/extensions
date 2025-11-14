@@ -73,7 +73,6 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "22.18.12",
-    "@types/node-fetch": "^2.6.13",
     "@types/react": "19.2.2",
     "eslint": "^9.38.0",
     "prettier": "^3.5.3",
