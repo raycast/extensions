@@ -102,7 +102,7 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
     try {
       // Use dig to resolve domain to IPs - escape domain for shell safety
       const { stdout } = await execAsync(
-        `dig +short ${escapeShellArg(sanitizedDomain)} A ${escapeShellArg(sanitizedDomain)} AAAA 2>/dev/null || true`
+        `dig +short ${escapeShellArg(sanitizedDomain)} A ${escapeShellArg(sanitizedDomain)} AAAA 2>/dev/null || true`,
       );
       const resolvedIPs = stdout.split("\n").filter((line) => {
         const trimmed = line.trim();
@@ -120,24 +120,10 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
 }
 
 /**
- * Check if PF is enabled
- */
-async function isPFEnabled(): Promise<boolean> {
-  try {
-    const { stdout } = await execAsync(
-      "sudo pfctl -s info 2>/dev/null || true"
-    );
-    return stdout.includes("Status: Enabled");
-  } catch {
-    return false;
-  }
-}
-
-/**
  * Enable PF firewall blocking
  */
 export async function enablePFBlocking(
-  domains: string[]
+  domains: string[],
 ): Promise<FirewallResult> {
   if (!domains || domains.length === 0) {
     return {
@@ -148,7 +134,7 @@ export async function enablePFBlocking(
 
   try {
     console.log(
-      `🔥 Enabling PF firewall blocking for ${domains.length} domains...`
+      `🔥 Enabling PF firewall blocking for ${domains.length} domains...`,
     );
 
     // Step 1: Resolve domains to IPs
@@ -232,7 +218,7 @@ echo "Blocking ${domains.length} domains (${validIPs.length} IPs)"
     console.log("🔐 Requesting authentication...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to configure firewall rules to block websites"
+      "WebBlocker needs to configure firewall rules to block websites",
     );
 
     if (!execResult.success) {
@@ -302,7 +288,7 @@ echo "✅ PF firewall blocking disabled!"
     console.log("🔐 Requesting authentication...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to remove firewall rules to unblock websites"
+      "WebBlocker needs to remove firewall rules to unblock websites",
     );
 
     if (!execResult.success) {
@@ -335,7 +321,7 @@ echo "✅ PF firewall blocking disabled!"
 export async function isPFBlockingActive(): Promise<boolean> {
   try {
     const { stdout } = await execAsync(
-      `sudo pfctl -a "${PF_ANCHOR_NAME}" -sr 2>/dev/null || echo ""`
+      `sudo pfctl -a "${PF_ANCHOR_NAME}" -sr 2>/dev/null || echo ""`,
     );
     return stdout.includes("webblocker_blocked");
   } catch {

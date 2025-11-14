@@ -57,7 +57,7 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
     try {
       // Resolve IPv4 - escape domain for shell safety
       const { stdout: ipv4 } = await execAsync(
-        `dig +short ${escapeShellArg(sanitizedDomain)} A 2>/dev/null || true`
+        `dig +short ${escapeShellArg(sanitizedDomain)} A 2>/dev/null || true`,
       );
       ipv4.split("\n").forEach((ip) => {
         const trimmed = ip.trim();
@@ -68,7 +68,7 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
 
       // Resolve IPv6 - escape domain for shell safety
       const { stdout: ipv6 } = await execAsync(
-        `dig +short ${escapeShellArg(sanitizedDomain)} AAAA 2>/dev/null || true`
+        `dig +short ${escapeShellArg(sanitizedDomain)} AAAA 2>/dev/null || true`,
       );
       ipv6.split("\n").forEach((ip) => {
         const trimmed = ip.trim();
@@ -81,7 +81,7 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
       if (!sanitizedDomain.startsWith("www.")) {
         const wwwDomain = `www.${sanitizedDomain}`;
         const { stdout: wwwIpv4 } = await execAsync(
-          `dig +short ${escapeShellArg(wwwDomain)} A 2>/dev/null || true`
+          `dig +short ${escapeShellArg(wwwDomain)} A 2>/dev/null || true`,
         );
         wwwIpv4.split("\n").forEach((ip) => {
           const trimmed = ip.trim();
@@ -103,7 +103,7 @@ async function resolveDomains(domains: string[]): Promise<string[]> {
  */
 async function generateAggressivePFRules(domains: string[]): Promise<string> {
   const uniqueDomains = Array.from(new Set(domains.map(extractDomain))).filter(
-    Boolean
+    Boolean,
   );
 
   const rules = `# WebBlocker Aggressive PF Rules
@@ -140,52 +140,10 @@ block drop out quick on any proto tcp from any to <webblocker_blocked> port 80
 }
 
 /**
- * Kill ALL existing connections to specific IPs
- * This is more aggressive than pfctl -F state
- */
-async function killConnectionsToIPs(ips: string[]): Promise<void> {
-  if (ips.length === 0) return;
-
-  console.log(`🔪 Killing ${ips.length} existing connections...`);
-
-  // Build script to kill connections
-  const killCommands: string[] = [];
-
-  for (const ip of ips) {
-    // Validate IP before using in commands
-    if (!isValidIP(ip)) {
-      console.warn(`Skipping invalid IP: ${ip}`);
-      continue;
-    }
-    // Kill connections using pfctl - escape IP for safety
-    const escapedIp = escapeShellArg(ip);
-    killCommands.push(`pfctl -k ${escapedIp} 2>/dev/null || true`);
-    killCommands.push(`pfctl -k 0.0.0.0/0 -k ${escapedIp} 2>/dev/null || true`);
-
-    // Also use tcpkill if available (more aggressive)
-    // killCommands.push(`timeout 1 tcpkill -i any host ${escapedIp} 2>/dev/null &`);
-  }
-
-  // Execute all kill commands
-  for (const cmd of killCommands) {
-    try {
-      await execAsync(cmd);
-    } catch {
-      // Ignore errors
-    }
-  }
-
-  // Flush state table entries for blocked IPs
-  await execAsync(`sudo pfctl -F states 2>/dev/null || true`).catch(() => {});
-
-  console.log("✅ Existing connections terminated");
-}
-
-/**
  * Enable aggressive PF firewall blocking with immediate connection termination
  */
 export async function enableAggressivePFBlocking(
-  domains: string[]
+  domains: string[],
 ): Promise<FirewallResult> {
   if (!domains || domains.length === 0) {
     return {
@@ -196,7 +154,7 @@ export async function enableAggressivePFBlocking(
 
   try {
     console.log(
-      `🔥 Enabling AGGRESSIVE PF firewall blocking for ${domains.length} domains...`
+      `🔥 Enabling AGGRESSIVE PF firewall blocking for ${domains.length} domains...`,
     );
 
     // Step 1: Expand domains (www and non-www)
@@ -313,7 +271,7 @@ echo "🚫 NO CACHE BYPASS POSSIBLE - Blocking at network layer"
     console.log("🔐 Requesting authentication for aggressive blocking...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to configure aggressive firewall rules to block websites and terminate existing connections"
+      "WebBlocker needs to configure aggressive firewall rules to block websites and terminate existing connections",
     );
 
     if (!execResult.success) {

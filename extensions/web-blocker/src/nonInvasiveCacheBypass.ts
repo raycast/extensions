@@ -55,7 +55,8 @@ async function forceHardRefreshBlockedTabs(
 
     await execAsync(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
     console.log(`✅ Hard refreshed tabs in ${browser}`);
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error(`Error hard refreshing tabs in ${browser}:`, error.message);
   }
 }
@@ -205,7 +206,8 @@ async function clearSystemDNSCache(): Promise<void> {
     await execAsync("sudo killall -HUP mDNSResponder 2>/dev/null || true");
 
     console.log("✅ System DNS cache cleared");
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("Error clearing DNS cache:", error.message);
   }
 }
@@ -269,7 +271,8 @@ export async function preventCacheBypass(domains: string[]): Promise<void> {
     await Promise.allSettled(refreshPromises);
 
     console.log("✅ Cache bypass prevention complete (browser stayed open!)");
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("Error preventing cache bypass:", error.message);
   }
 }
@@ -279,7 +282,7 @@ export async function preventCacheBypass(domains: string[]): Promise<void> {
  * This is more aggressive but still doesn't close the browser
  * Use only if preventCacheBypass() is not enough
  */
-export async function clearBrowserCacheFiles(domains: string[]): Promise<void> {
+export async function clearBrowserCacheFiles(): Promise<void> {
   console.log("🧹 Clearing browser cache files (browser will stay open)...");
 
   const homeDir = process.env.HOME || "/Users/" + process.env.USER;
@@ -295,7 +298,7 @@ export async function clearBrowserCacheFiles(domains: string[]): Promise<void> {
     try {
       // Use background deletion to not block
       execAsync(`rm -rf "${cachePath}" 2>/dev/null &`).catch(() => {});
-    } catch (error) {
+    } catch {
       // Ignore errors
     }
   }

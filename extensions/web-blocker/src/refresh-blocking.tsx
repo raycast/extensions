@@ -16,20 +16,12 @@
 
 import { showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 
-import {
-  getBlockedDomainList,
-  getBlockingStatus,
-  setBlockingStatus,
-} from "./storage";
+import { getBlockedDomainList, getBlockingStatus } from "./storage";
 import { showLongHUD } from "./hudHelper";
 import { syncBlockingStatus } from "./statusVerifier";
 import { closeBlockedTabs } from "./browserRefresher";
 // Use 100% guaranteed blocking for maximum effectiveness
 import { enable100PercentBlocking } from "./guaranteed100PercentBlocking";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execAsync = promisify(exec);
 
 export default async function RefreshBlocking() {
   try {
@@ -103,23 +95,11 @@ export default async function RefreshBlocking() {
       } else {
         throw new Error(result.message);
       }
-    } catch (error: any) {
+    } catch (err) {
       loadingToast.hide();
-
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Refresh Error",
-        message: error.message || "Failed to refresh blocking",
-      });
-
-      console.error("Error refreshing blocking:", error);
+      await showFailureToast(err, { title: "Refresh Error" });
     }
-  } catch (error: any) {
-    console.error("Error in RefreshBlocking command:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Unexpected Error",
-      message: "Failed to refresh blocking",
-    });
+  } catch (err) {
+    await showFailureToast(err, { title: "Unexpected Error" });
   }
 }

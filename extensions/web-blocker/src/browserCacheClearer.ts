@@ -6,7 +6,6 @@
 
 import { exec } from "child_process";
 import { promisify } from "util";
-import * as path from "path";
 import * as fs from "fs/promises";
 
 const execAsync = promisify(exec);
@@ -41,7 +40,7 @@ async function clearChromiumBrowserCache(
       try {
         // Remove cache directories
         await execAsync(`rm -rf "${cachePath}"/* 2>/dev/null || true`);
-      } catch (error) {
+      } catch {
         // Ignore errors for non-existent paths
       }
     }
@@ -56,7 +55,7 @@ async function clearChromiumBrowserCache(
     for (const dbPath of dnsDbPaths) {
       try {
         await execAsync(`rm -f "${dbPath}" 2>/dev/null || true`);
-      } catch (error) {
+      } catch {
         // Ignore errors
       }
     }
@@ -98,13 +97,13 @@ async function clearFirefoxCache(): Promise<void> {
           for (const cachePath of cacheBasePaths) {
             try {
               await execAsync(`rm -rf "${cachePath}"/* 2>/dev/null || true`);
-            } catch (error) {
+            } catch {
               // Ignore errors
             }
           }
         }
       }
-    } catch (error) {
+    } catch {
       console.log("Firefox profiles not found");
     }
 
@@ -134,7 +133,7 @@ async function clearSafariCache(): Promise<void> {
     for (const cachePath of cacheBasePaths) {
       try {
         await execAsync(`rm -rf "${cachePath}"/* 2>/dev/null || true`);
-      } catch (error) {
+      } catch {
         // Ignore errors
       }
     }
@@ -178,7 +177,7 @@ async function killAllBrowsers(): Promise<void> {
   for (const browser of browsers) {
     try {
       await execAsync(`pkill -f "${browser}" 2>/dev/null || true`);
-    } catch (error) {
+    } catch {
       // Ignore errors for browsers that aren't running
     }
   }
@@ -228,7 +227,7 @@ async function clearSystemDNSCache(): Promise<void> {
     try {
       await execAsync(cmd);
       await new Promise((resolve) => setTimeout(resolve, 200));
-    } catch (error) {
+    } catch {
       // Some commands may fail on certain systems, that's okay
     }
   }
@@ -363,7 +362,9 @@ export async function forceBrowserDNSFlush(): Promise<void> {
             await execAsync(
               `osascript -e '${browser.script.replace(/'/g, "'\\''")}'`,
             ).catch(() => {});
-          } catch {}
+          } catch {
+            // Ignore errors
+          }
         }
 
         // Force quit and restart browser (more aggressive)
@@ -372,7 +373,7 @@ export async function forceBrowserDNSFlush(): Promise<void> {
         // await new Promise(resolve => setTimeout(resolve, 500));
         // await execAsync(`open -a "${browser.name}" 2>/dev/null || true`);
       }
-    } catch (error) {
+    } catch {
       // Browser not installed or not running
     }
   }
@@ -380,12 +381,16 @@ export async function forceBrowserDNSFlush(): Promise<void> {
   // Method 3: Clear Firefox DNS cache via command line
   try {
     await execAsync(`pkill -USR1 firefox 2>/dev/null || true`); // Signal Firefox to reload
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 
   // Method 4: Reset Safari
   try {
     await execAsync(`killall -HUP Safari 2>/dev/null || true`);
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 
   console.log("✅ Browser DNS flush completed");
 }
@@ -423,7 +428,7 @@ export async function restartNetworkServices(): Promise<void> {
             await new Promise((resolve) => setTimeout(resolve, 500));
             await execAsync(`sudo networksetup -setairportpower en0 on`);
           }
-        } catch (error) {
+        } catch {
           // Some commands might fail on certain network configurations
         }
       }

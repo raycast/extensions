@@ -282,7 +282,8 @@ echo "NO BYPASS POSSIBLE!"
         ipsBlocked: ips.length,
       },
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("100% blocking error:", error);
     return {
       success: false,
@@ -347,7 +348,8 @@ echo "✅ All blocking disabled"
       success: true,
       message: "All blocking methods disabled - websites accessible",
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return {
       success: false,
       message: `Failed to disable blocking: ${error.message}`,

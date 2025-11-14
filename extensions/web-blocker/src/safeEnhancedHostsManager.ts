@@ -155,7 +155,8 @@ export async function safeEnableBlocking(
       success: true,
       message: `✅ Successfully blocked ${domains.length} website(s)!`,
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("Error in safeEnableBlocking:", error);
 
     if (error.message?.includes("User canceled")) {

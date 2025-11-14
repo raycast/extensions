@@ -45,7 +45,7 @@ class PasswordManager {
     try {
       // Run a simple command with AppleScript to authenticate
       await execAsync(
-        "osascript -e 'do shell script \"sudo -v\" with administrator privileges'"
+        "osascript -e 'do shell script \"sudo -v\" with administrator privileges'",
       );
 
       // Create a new session
@@ -56,7 +56,8 @@ class PasswordManager {
       };
 
       console.log("Password session established");
-    } catch (error: any) {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
       if (error.message.includes("User canceled")) {
         throw new Error("Authentication was canceled by user");
       }
@@ -121,7 +122,7 @@ class PasswordManager {
     // Also clear sudo timestamp
     try {
       await execAsync("sudo -k");
-    } catch (error) {
+    } catch {
       // Ignore errors when clearing sudo timestamp
     }
   }

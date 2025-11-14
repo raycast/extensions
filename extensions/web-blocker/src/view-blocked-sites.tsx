@@ -15,14 +15,13 @@ import {
   Icon,
   Color,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import {
   BlockedDomain,
   getBlockedDomains,
   removeBlockedDomain,
-  getBlockingStatus,
   toggleDomainEnabled,
-  getTemporaryUnblock,
   bulkDeleteDomains,
   bulkToggleDomains,
   bulkAssignCategories,
@@ -31,22 +30,20 @@ import {
   importData,
 } from "./storage";
 import { formatDomainForDisplay } from "./domainUtils";
-import { verifyBlockingStatus, syncBlockingStatus } from "./statusVerifier";
+import { syncBlockingStatus } from "./statusVerifier";
 import AddWebsite from "./add-website";
-import { Clipboard, open, getSelectedFinderItems } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
 import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
 
 export default function ViewBlockedSites() {
   const [domains, setDomains] = useState<BlockedDomain[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isBlockingActive, setIsBlockingActive] = useState(false);
   const [selectedDomains, setSelectedDomains] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [categories, setCategories] = useState<Array<{ name: string }>>([]);
-  const [tempUnblockExpiry, setTempUnblockExpiry] = useState<string>();
 
   // Load domains and blocking status
   useEffect(() => {
@@ -55,20 +52,17 @@ export default function ViewBlockedSites() {
         // First, sync the blocking status with actual hosts file
         const actualStatus = await syncBlockingStatus();
 
-        // Then get the domains, categories, and temp unblock status
-        const [blockedDomains, cats, tempUnblock] = await Promise.all([
+        // Then get the domains and categories
+        const [blockedDomains, cats] = await Promise.all([
           getBlockedDomains(),
           getCategories(),
-          getTemporaryUnblock(),
         ]);
 
         setDomains(blockedDomains);
         setCategories(cats);
-        setIsBlockingActive(actualStatus);
-        setTempUnblockExpiry(tempUnblock.expiresAt);
 
         console.log(
-          `✅ Loaded ${blockedDomains.length} domains. Blocking is ${actualStatus ? "ACTIVE" : "INACTIVE"} (verified from hosts file)`
+          `✅ Loaded ${blockedDomains.length} domains. Blocking is ${actualStatus ? "ACTIVE" : "INACTIVE"} (verified from hosts file)`,
         );
       } catch (error) {
         console.error("Error loading blocked sites:", error);
@@ -86,15 +80,15 @@ export default function ViewBlockedSites() {
   }, []);
 
   // Handle domain toggle
-  async function handleToggleDomain(domain: string, currentStatus: boolean) {
+  async function handleToggleDomain(domain: string) {
     try {
       const newStatus = await toggleDomainEnabled(domain);
 
       // Update local state
       setDomains((prevDomains) =>
         prevDomains.map((d) =>
-          d.domain === domain ? { ...d, isEnabled: newStatus } : d
-        )
+          d.domain === domain ? { ...d, isEnabled: newStatus } : d,
+        ),
       );
 
       await showToast({
@@ -102,13 +96,8 @@ export default function ViewBlockedSites() {
         title: newStatus ? "Domain Enabled" : "Domain Disabled",
         message: `${domain} is now ${newStatus ? "enabled" : "disabled"} for blocking`,
       });
-    } catch (error: any) {
-      console.error("Error toggling domain:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Toggle",
-        message: error.message || "Could not toggle domain status",
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed to Toggle" });
     }
   }
 
@@ -137,7 +126,7 @@ export default function ViewBlockedSites() {
       if (success) {
         // Update local state
         setDomains((prevDomains) =>
-          prevDomains.filter((d) => d.domain !== domain)
+          prevDomains.filter((d) => d.domain !== domain),
         );
 
         await showToast({
@@ -152,13 +141,8 @@ export default function ViewBlockedSites() {
           message: `${domain} was not found in your block list`,
         });
       }
-    } catch (error: any) {
-      console.error("Error removing domain:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Remove",
-        message: error.message || "Could not remove website from block list",
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed to Remove" });
     }
   }
 
@@ -187,12 +171,8 @@ export default function ViewBlockedSites() {
         title: "Websites Removed",
         message: `${count} website${count > 1 ? "s" : ""} removed`,
       });
-    } catch (error: any) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed",
-        message: error.message,
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed" });
     }
   }
 
@@ -203,12 +183,12 @@ export default function ViewBlockedSites() {
     try {
       const count = await bulkToggleDomains(
         Array.from(selectedDomains),
-        enable
+        enable,
       );
       setDomains((prev) =>
         prev.map((d) =>
-          selectedDomains.has(d.domain) ? { ...d, isEnabled: enable } : d
-        )
+          selectedDomains.has(d.domain) ? { ...d, isEnabled: enable } : d,
+        ),
       );
       setSelectedDomains(new Set());
 
@@ -217,12 +197,8 @@ export default function ViewBlockedSites() {
         title: `Domains ${enable ? "Enabled" : "Disabled"}`,
         message: `${count} domain${count > 1 ? "s" : ""} updated`,
       });
-    } catch (error: any) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed",
-        message: error.message,
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed" });
     }
   }
 
@@ -245,12 +221,8 @@ export default function ViewBlockedSites() {
         title: "Category Assigned",
         message: `${count} domain${count > 1 ? "s" : ""} updated`,
       });
-    } catch (error: any) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed",
-        message: error.message,
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed" });
     }
   }
 
@@ -304,13 +276,8 @@ export default function ViewBlockedSites() {
         title: "Exported Successfully",
         message: `Saved to Downloads/${filename} and copied to clipboard`,
       });
-    } catch (error: any) {
-      console.error("Export error:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Export Failed",
-        message: error.message,
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Export Failed" });
     }
   }
 
@@ -331,7 +298,7 @@ export default function ViewBlockedSites() {
       // Validate JSON format first
       try {
         JSON.parse(clipboardText);
-      } catch (parseError) {
+      } catch {
         await showToast({
           style: Toast.Style.Failure,
           title: "Invalid JSON",
@@ -374,13 +341,8 @@ export default function ViewBlockedSites() {
         title: "Imported Successfully",
         message: "Block list has been updated",
       });
-    } catch (error: any) {
-      console.error("Import error:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Import Failed",
-        message: error.message || "Invalid JSON data",
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Import Failed" });
     }
   }
 
@@ -403,7 +365,7 @@ export default function ViewBlockedSites() {
       let filePath: string;
       try {
         filePath = execSync(script, { encoding: "utf-8" }).trim();
-      } catch (error) {
+      } catch {
         // User cancelled
         return;
       }
@@ -420,7 +382,7 @@ export default function ViewBlockedSites() {
       // Validate JSON format
       try {
         JSON.parse(fileContent);
-      } catch (parseError) {
+      } catch {
         await showToast({
           style: Toast.Style.Failure,
           title: "Invalid JSON",
@@ -462,13 +424,8 @@ export default function ViewBlockedSites() {
         title: "Imported Successfully",
         message: "Block list has been updated",
       });
-    } catch (error: any) {
-      console.error("Import from file error:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Import Failed",
-        message: error.message || "Could not import file",
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Import Failed" });
     }
   }
 
@@ -656,12 +613,7 @@ export default function ViewBlockedSites() {
                         : Icon.CheckCircle
                     }
                     shortcut={{ modifiers: ["cmd"], key: "t" }}
-                    onAction={() =>
-                      handleToggleDomain(
-                        blockedDomain.domain,
-                        blockedDomain.isEnabled
-                      )
-                    }
+                    onAction={() => handleToggleDomain(blockedDomain.domain)}
                   />
                   <Action
                     title="Remove Website"

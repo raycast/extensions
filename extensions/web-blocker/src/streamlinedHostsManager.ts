@@ -14,7 +14,6 @@ import {
   restartNetworkServices,
 } from "./browserCacheClearer";
 import { executeScriptWithAuth } from "./biometricAuth";
-import { getEnabledDomains } from "./storage";
 
 const execAsync = promisify(exec);
 
@@ -29,35 +28,6 @@ export interface BlockingResult {
   success: boolean;
   message: string;
   browsersRestarted?: string[];
-}
-
-/**
- * Detects which browsers are currently running
- * @returns Promise resolving to array of running browser names
- */
-async function getRunningBrowsers(): Promise<string[]> {
-  const browsers = [
-    { name: "Safari", process: "Safari" },
-    { name: "Google Chrome", process: "Google Chrome" },
-    { name: "Firefox", process: "firefox" },
-    { name: "Microsoft Edge", process: "Microsoft Edge" },
-    { name: "Arc", process: "Arc" },
-  ];
-
-  const runningBrowsers: string[] = [];
-
-  for (const browser of browsers) {
-    try {
-      const { stdout } = await execAsync(`pgrep -f "${browser.process}"`);
-      if (stdout.trim()) {
-        runningBrowsers.push(browser.name);
-      }
-    } catch (error) {
-      // Browser is not running
-    }
-  }
-
-  return runningBrowsers;
 }
 
 /**
@@ -117,7 +87,7 @@ async function createBlockingScript(domains: string[]): Promise<string> {
   const domainEntries = uniqueDomains
     .map(
       (domain) =>
-        `echo "${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}" >> "${HOSTS_FILE_PATH}"`
+        `echo "${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}" >> "${HOSTS_FILE_PATH}"`,
     )
     .join("\n");
 
@@ -126,7 +96,7 @@ async function createBlockingScript(domains: string[]): Promise<string> {
 # Function: return active network service names
 get_active_services() {
   networksetup -listnetworkserviceorder | awk '
-    /\([0-9]+\) / { svc=$0; sub(/^\([0-9]+\) /, "", svc); getline; if (match($0, /Device: ([^\)]+)/, m)) { dev=m[1]; printf "%s|%s\n", svc, dev; } }
+    /([0-9]+) / { svc=$0; sub(/^([0-9]+) /, "", svc); getline; if (match($0, /Device: ([^)]+)/, m)) { dev=m[1]; printf "%s|%s\n", svc, dev; } }
   ' | while IFS='|' read -r svc dev; do
       if ifconfig "$dev" 2>/dev/null | grep -q "status: active"; then
         echo "$svc"
@@ -344,7 +314,7 @@ echo ""
  * @returns Promise resolving to blocking result
  */
 export async function enableBlocking(
-  domains: string[]
+  domains: string[],
 ): Promise<BlockingResult> {
   if (!domains || domains.length === 0) {
     return {
@@ -382,7 +352,7 @@ export async function enableBlocking(
     console.log("🔐 Requesting Touch ID/password...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to modify system files to block websites"
+      "WebBlocker needs to modify system files to block websites",
     );
 
     if (!execResult.success) {
@@ -414,7 +384,8 @@ export async function enableBlocking(
       success: true,
       message: `Successfully blocked ${domains.length} website(s) with immediate effect`,
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     if (error.message.includes("User canceled")) {
       return {
         success: false,
@@ -434,8 +405,8 @@ export async function enableBlocking(
  */
 export async function disableBlocking(): Promise<BlockingResult> {
   try {
-    // Get currently blocked domains before removing them
-    const blockedDomains = await getBlockedDomainsFromHosts();
+    // Get currently blocked domains before removing them (for logging/debugging)
+    await getBlockedDomainsFromHosts();
 
     // Create the comprehensive unblocking script
     console.log("📝 Creating unblocking script...");
@@ -450,7 +421,7 @@ export async function disableBlocking(): Promise<BlockingResult> {
     console.log("🔐 Requesting Touch ID/password...");
     const execResult = await executeScriptWithAuth(
       tempScriptPath,
-      "WebBlocker needs to modify system files to unblock websites"
+      "WebBlocker needs to modify system files to unblock websites",
     );
 
     if (!execResult.success) {
@@ -473,7 +444,8 @@ export async function disableBlocking(): Promise<BlockingResult> {
       success: true,
       message: "Successfully disabled all website blocking",
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     if (error.message.includes("User canceled")) {
       return {
         success: false,
@@ -493,7 +465,7 @@ export async function disableBlocking(): Promise<BlockingResult> {
  * @returns Promise resolving to object indicating which domains are blocked
  */
 export async function checkDomainsBlocked(
-  domains: string[]
+  domains: string[],
 ): Promise<{ [domain: string]: boolean }> {
   try {
     const hostsContent = await fs.readFile(HOSTS_FILE_PATH, "utf-8");
@@ -501,12 +473,13 @@ export async function checkDomainsBlocked(
 
     domains.forEach((domain) => {
       result[domain] = hostsContent.includes(
-        `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`
+        `${REDIRECT_IP} ${domain} ${WEBGLOCKER_TAG}`,
       );
     });
 
     return result;
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("Error checking blocked domains:", error);
     const result: { [domain: string]: boolean } = {};
     domains.forEach((domain) => {
@@ -536,7 +509,8 @@ export async function getBlockedDomainsFromHosts(): Promise<string[]> {
     });
 
     return blockedDomains;
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("Error reading blocked domains from hosts file:", error);
     return [];
   }

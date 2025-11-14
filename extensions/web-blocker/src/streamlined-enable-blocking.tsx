@@ -3,14 +3,10 @@
  * Single password prompt, smart browser detection, comprehensive blocking
  */
 
-import { showToast, Toast, showHUD, confirmAlert, Alert } from "@raycast/api";
+import { showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
-import {
-  getBlockedDomainList,
-  setBlockingStatus,
-  getEnabledDomains,
-  getBlockedDomains,
-} from "./storage";
+import { getBlockedDomains, getEnabledDomains } from "./storage";
 import { syncBlockingStatus } from "./statusVerifier";
 import { showLongHUD } from "./hudHelper";
 import { enable100PercentBlocking } from "./guaranteed100PercentBlocking";
@@ -104,30 +100,20 @@ export default async function StreamlinedEnableBlocking() {
           message: result.message,
         });
       }
-    } catch (error: any) {
+    } catch (err) {
       loadingToast.hide();
+      const errorMessage = err instanceof Error ? err.message : String(err);
 
       if (
-        error.message.includes("Authentication failed") ||
-        error.message.includes("canceled")
+        errorMessage.includes("Authentication failed") ||
+        errorMessage.includes("canceled")
       ) {
         await showLongHUD("⚠️ Authentication canceled - blocking not enabled");
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error Enabling Blocking",
-          message: error.message || "An unexpected error occurred",
-        });
+        await showFailureToast(err, { title: "Error Enabling Blocking" });
       }
-
-      console.error("Error enabling blocking:", error);
     }
-  } catch (error: any) {
-    console.error("Error in StreamlinedEnableBlocking command:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Unexpected Error",
-      message: "Failed to enable website blocking",
-    });
+  } catch (err) {
+    await showFailureToast(err, { title: "Unexpected Error" });
   }
 }

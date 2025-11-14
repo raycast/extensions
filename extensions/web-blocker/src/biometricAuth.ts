@@ -49,14 +49,16 @@ export async function authenticateWithBiometric(
       success: true,
       usedBiometric: true, // We'll assume Touch ID if available on device
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("Authentication error:", error);
 
     // Check if user canceled
+    const errorCode = (err as { code?: number }).code;
     if (
       error.message?.includes("User canceled") ||
       error.message?.includes("-128") ||
-      error.code === 128
+      errorCode === 128
     ) {
       console.log("⚠️ Authentication canceled by user");
       return {
@@ -101,13 +103,15 @@ export async function executeScriptWithAuth(
       success: true,
       output: stdout,
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("Error executing script:", error);
 
+    const errorCode = (err as { code?: number }).code;
     if (
       error.message?.includes("User canceled") ||
       error.message?.includes("-128") ||
-      error.code === 128
+      errorCode === 128
     ) {
       return {
         success: false,

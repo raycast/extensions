@@ -4,14 +4,11 @@
  */
 
 import { showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
-import { setBlockingStatus } from "./storage";
 import { showLongHUD } from "./hudHelper";
 import { syncBlockingStatus } from "./statusVerifier";
-import {
-  disableBlocking,
-  getPasswordSessionInfo,
-} from "./streamlinedHostsManager";
+import { disableBlocking } from "./streamlinedHostsManager";
 
 export default async function StreamlinedDisableBlocking() {
   try {
@@ -67,32 +64,22 @@ export default async function StreamlinedDisableBlocking() {
           message: result.message,
         });
       }
-    } catch (error: any) {
+    } catch (err) {
       loadingToast.hide();
+      const errorMessage = err instanceof Error ? err.message : String(err);
 
       if (
-        error.message.includes("Authentication failed") ||
-        error.message.includes("canceled")
+        errorMessage.includes("Authentication failed") ||
+        errorMessage.includes("canceled")
       ) {
         await showLongHUD(
           "⚠️ Authentication canceled - blocking remains active",
         );
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error Disabling Blocking",
-          message: error.message || "An unexpected error occurred",
-        });
+        await showFailureToast(err, { title: "Error Disabling Blocking" });
       }
-
-      console.error("Error disabling blocking:", error);
     }
-  } catch (error: any) {
-    console.error("Error in StreamlinedDisableBlocking command:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Unexpected Error",
-      message: "Failed to disable website blocking",
-    });
+  } catch (err) {
+    await showFailureToast(err, { title: "Unexpected Error" });
   }
 }

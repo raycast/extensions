@@ -224,8 +224,8 @@ export async function forceBrowserInternalDNSClear(): Promise<void> {
           try
             execute javascript "
               // Firefox DNS clear
-              if (document.querySelector('button[data-l10n-id=\"about-networking-dns-clear-cache-button\"]')) {
-                document.querySelector('button[data-l10n-id=\"about-networking-dns-clear-cache-button\"]').click();
+              if (document.querySelector('button[data-l10n-id="about-networking-dns-clear-cache-button"]')) {
+                document.querySelector('button[data-l10n-id="about-networking-dns-clear-cache-button"]').click();
               }
             " in newTab
           end try
@@ -321,7 +321,8 @@ export async function enableEnhancedBlocking(
       success: true,
       message: `✅ Successfully blocked ${domains.length} website(s) with IMMEDIATE effect!`,
     };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     if (error.message?.includes("User canceled")) {
       return {
         success: false,

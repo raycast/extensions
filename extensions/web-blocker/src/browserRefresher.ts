@@ -23,22 +23,6 @@ function extractDomain(input: string): string {
 }
 
 /**
- * Checks if a URL matches any of the blocked domains
- */
-function urlMatchesDomain(url: string, domains: string[]): boolean {
-  const urlDomain = extractDomain(url);
-  return domains.some((domain) => {
-    const cleanDomain = extractDomain(domain);
-    // Match both www and non-www versions
-    return (
-      urlDomain === cleanDomain ||
-      urlDomain === `www.${cleanDomain}` ||
-      urlDomain === cleanDomain.replace(/^www\./, "")
-    );
-  });
-}
-
-/**
  * Creates AppleScript to refresh tabs in Safari for specified domains
  */
 function createSafariRefreshScript(domains: string[]): string {
@@ -51,7 +35,7 @@ tell application "Safari"
           set tabURL to URL of t
           -- Check if tab URL contains any blocked domain
           ${domains
-            .map((domain, idx) => {
+            .map((domain) => {
               const cleanDomain = extractDomain(domain);
               const wwwVersion = cleanDomain.startsWith("www.")
                 ? cleanDomain
@@ -83,7 +67,7 @@ tell application "Google Chrome"
           set tabURL to URL of t
           -- Check if tab URL contains any blocked domain
           ${domains
-            .map((domain, idx) => {
+            .map((domain) => {
               const cleanDomain = extractDomain(domain);
               const wwwVersion = cleanDomain.startsWith("www.")
                 ? cleanDomain
@@ -115,7 +99,7 @@ tell application "Arc"
           set tabURL to URL of t
           -- Check if tab URL contains any blocked domain
           ${domains
-            .map((domain, idx) => {
+            .map((domain) => {
               const cleanDomain = extractDomain(domain);
               const wwwVersion = cleanDomain.startsWith("www.")
                 ? cleanDomain
@@ -147,7 +131,7 @@ tell application "Microsoft Edge"
           set tabURL to URL of t
           -- Check if tab URL contains any blocked domain
           ${domains
-            .map((domain, idx) => {
+            .map((domain) => {
               const cleanDomain = extractDomain(domain);
               const wwwVersion = cleanDomain.startsWith("www.")
                 ? cleanDomain
@@ -198,7 +182,8 @@ async function refreshBrowserTabs(
 
     // Execute the AppleScript
     await execAsync(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error(`Error refreshing tabs in ${browser}:`, error.message);
     // Don't throw - we want to continue with other browsers even if one fails
   }
@@ -223,7 +208,7 @@ async function getRunningBrowsers(): Promise<string[]> {
       if (stdout.trim()) {
         runningBrowsers.push(browser.name);
       }
-    } catch (error) {
+    } catch {
       // Browser is not running
     }
   }
@@ -472,7 +457,8 @@ async function closeBrowserTabs(
 
     // Execute the AppleScript
     await execAsync(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
-  } catch (error: any) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error(`Error closing tabs in ${browser}:`, error.message);
     // Don't throw - we want to continue with other browsers even if one fails
   }

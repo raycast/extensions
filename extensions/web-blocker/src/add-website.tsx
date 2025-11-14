@@ -10,10 +10,9 @@ import {
   Action,
   showToast,
   Toast,
-  showHUD,
-  popToRoot,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { processDomainInput, isDuplicateDomain } from "./domainUtils";
 import {
@@ -73,13 +72,8 @@ export default function AddWebsite() {
 
       // Close the form
       pop();
-    } catch (error: any) {
-      console.error("Error adding website:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Add Website",
-        message: error.message || "An unexpected error occurred",
-      });
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed to Add Website" });
     } finally {
       setIsLoading(false);
     }

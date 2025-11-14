@@ -109,7 +109,7 @@ export function sanitizeDomainForShell(domain: string): string {
   // Basic domain format check
   if (
     !sanitized.match(
-      /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
+      /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/,
     )
   ) {
     return "";
