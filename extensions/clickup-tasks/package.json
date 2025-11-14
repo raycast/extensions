@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "author": "snelling-a",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "description": "Browse and open ClickUp lists",
+      "mode": "view",
+      "name": "lists",
+      "title": "Browse Lists"
+    },
+    {
+      "description": "View all tasks in a specific list",
+      "mode": "view",
+      "name": "tasks",
+      "title": "List Tasks"
+    },
+    {
+      "description": "View all tasks assigned to you",
+      "mode": "view",
+      "name": "my-tasks",
+      "title": "My Tasks"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "description": "Browse and manage your ClickUp tasks directly from Raycast. View all list tasks, filter by assignee, navigate subtasks, and access full task details with instant cached loading.",
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "eslint-plugin-perfectionist": "4.15.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "clickup-icon.png",
+  "license": "MIT",
+  "name": "clickup-tasks",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "description": "Your ClickUp personal API token. Generate one in ClickUp Settings > Apps > API Token.",
+      "name": "clickupApiToken",
+      "placeholder": "Enter your ClickUp API token",
+      "required": true,
+      "title": "ClickUp API Token",
+      "type": "password"
+    },
+    {
+      "description": "The ID of the ClickUp list to fetch tasks from. Find it in the list URL or use the ClickUp API.",
+      "name": "listId",
+      "placeholder": "Enter your board/list ID",
+      "required": true,
+      "title": "ClickUp List/Board ID",
+      "type": "textfield"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "title": "ClickUp Tasks"
+}
