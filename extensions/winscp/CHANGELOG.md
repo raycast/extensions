@@ -1,6 +1,6 @@
 # WinSCP Changelog
 
-## [Fixed Session Parsing] - {PR_MERGE_DATE}
+## [Fixed Session Parsing] - 2025-11-14
 
 - Fixed parsing of WinSCP.ini to correctly extract session names
 - Added support for workspace sessions (e.g., "Media/0000", "My Workspace/0000")
