@@ -206,18 +206,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.0.1",
+    "@1password/sdk": "^0.4.0-beta.1",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
+    "eslint": "^9.39.1",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-perfectionist": "^4.15.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
+  "type": "module",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",

@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Add stricter, opinionated eslint rules for clarity
+
 ## [Chore] - 2025-10-14
 
 - Adopt the latest available extension template
