@@ -1,6 +1,6 @@
 # WeChat DevTool Changelog
 
-## [1.4.0] - {PR_MERGE_DATE}
+## [1.4.0] - 2025-11-14
 
 ### Features
 
