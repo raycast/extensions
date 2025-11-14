@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-11-14
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of RG AdGuard Links extension
@@ -30,17 +30,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for x64, x86, ARM64 architectures
 - Handles .appx, .msix, .appxbundle file formats
 
-## [Unreleased]
+## Roadmap
 
-### Planned Features
-- File size information display
-- App metadata (name, version, publisher)
 - Download history tracking
 - Favorite apps bookmarking
 - Batch URL conversion
 - Integration with download managers
-- Screenshots for Raycast Store submission
+
 
 ---
 
 For more information about this extension, visit the [README](README.md).
+
+
