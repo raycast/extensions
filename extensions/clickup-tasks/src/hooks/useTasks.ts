@@ -1,4 +1,5 @@
-import { useCachedPromise, UseCachedPromiseReturnType } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
+import { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 import { getClickUpClient } from "../api/clickup";
 import { ClickUpTask, GetTasksParams } from "../types/clickup";
 import { sortTasksHierarchically } from "../utils/task-helpers";

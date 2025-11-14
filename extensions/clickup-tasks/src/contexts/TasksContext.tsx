@@ -16,7 +16,7 @@ interface TasksProviderProps {
 
 export function TasksProvider({ children, tasks: initialTasks }: TasksProviderProps) {
   const [tasks, setTasks] = useState(initialTasks);
-  const prevTasksRef = useRef<string>();
+  const prevTasksRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const currentTasksStr = JSON.stringify(initialTasks);

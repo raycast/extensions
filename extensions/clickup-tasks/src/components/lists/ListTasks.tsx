@@ -13,9 +13,9 @@ interface Props {
 }
 
 export function ListTasks({ list }: Props) {
-  const fetchTasks = async () => {
+  const fetchTasks = async (listId: string) => {
     const client = getClickUpClient();
-    return await client.getAllTasksFromList(list.id, { archived: false, subtasks: true });
+    return await client.getAllTasksFromList(listId, { archived: false, subtasks: true });
   };
 
   const { data: tasks = [], error, isLoading } = useCachedPromise(fetchTasks, [list.id]);
@@ -23,7 +23,11 @@ export function ListTasks({ list }: Props) {
   if (error && !isLoading && tasks.length === 0) {
     return (
       <List navigationTitle={list.name}>
-        <List.EmptyView description={error.message} icon={{ source: EXTENSION_ICON }} title="Failed to load tasks" />
+        <List.EmptyView
+          description={error instanceof Error ? error.message : String(error)}
+          icon={{ source: EXTENSION_ICON }}
+          title="Failed to load tasks"
+        />
       </List>
     );
   }
