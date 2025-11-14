@@ -67,9 +67,12 @@ function getRandomWord(): string {
 }
 
 function getRandomString(length: number = 6): string {
-  return Math.random()
-    .toString(36)
-    .substring(2, 2 + length);
+  let result = '';
+  while (result.length < length) {
+    result += Math.random().toString(36).substring(2);
+  }
+  return result.substring(0, length);
+}
 }
 
 function generateMeetingId(format: Preferences["meetingNameFormat"], customPrefix: string): string {
