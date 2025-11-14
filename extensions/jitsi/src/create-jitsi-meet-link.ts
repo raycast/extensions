@@ -73,7 +73,6 @@ function getRandomString(length: number = 6): string {
   }
   return result.substring(0, length);
 }
-}
 
 function generateMeetingId(format: Preferences["meetingNameFormat"], customPrefix: string): string {
   switch (format) {
