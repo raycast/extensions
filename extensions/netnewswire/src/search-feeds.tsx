@@ -98,7 +98,7 @@ function Articles({ feed }: { feed: Feed }) {
           actions={
             <ActionPanel>
               <Action
-                icon={article.isRead ? Icon.EyeDisabled : Icon.Eye}
+                icon={article.isRead ? Icon.Circle : Icon.CircleProgress100}
                 title={`Mark as ${article.isRead ? "Unread" : "Read"}`}
                 onAction={() => toggle(article.id, "read", !article.isRead)}
               />
@@ -108,6 +108,11 @@ function Articles({ feed }: { feed: Feed }) {
                 onAction={() => toggle(article.id, "starred", !article.isStarred)}
               />
               <Action.OpenInBrowser url={article.url} shortcut={Keyboard.Shortcut.Common.Open} />
+              <Action.CopyToClipboard
+                title="Copy Article URL"
+                content={article.url}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
             </ActionPanel>
           }
         />

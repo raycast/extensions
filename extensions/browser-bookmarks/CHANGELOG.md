@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fixes] - 2025-11-10
+
+- Improved error handling for directory reading.
+
 ## [Support for ChatGPT Atlas Browser] - 2025-10-23
 
 - Added support for `ChatGPT Atlas` browser.

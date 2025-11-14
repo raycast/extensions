@@ -12,7 +12,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { compareDesc, endOfDay, format, getISOWeek, startOfMonth, subDays } from "date-fns";
+import { compareDesc, endOfMonth, format, getISOWeek, startOfMonth, subDays } from "date-fns";
 import { useFetch } from "@raycast/utils";
 import {
   buildPostizApiUrl,
@@ -24,37 +24,42 @@ import {
 } from "./postiz";
 import { Identifier, Post } from "./types";
 import CreatePost from "./create-post";
+import TurndownService from "turndown";
 
 const { postiz_version } = getPreferenceValues<Preferences>();
 
+const turndownService = new TurndownService();
 const generateMarkdown = (post: Post) => {
   switch (post.integration.providerIdentifier) {
     case Identifier.X:
       return post.content
         .replace(/@(\w+)/g, (match, handle) => {
-          return `[${match}](https://x.com/${handle})`;
+          return postiz_version === "1"
+            ? `[${match}](https://x.com/${handle})`
+            : `<a href="https://x.com/${handle}">${match}</a>`;
         })
         .replace(/#(\w+)/g, (match, hashtag) => {
-          return `[${match}](https://x.com/hashtag/${hashtag})`;
+          return postiz_version === "1"
+            ? `[${match}](https://x.com/hashtag/${hashtag})`
+            : `<a href="https://x.com/hashtag/${hashtag}">${match}</a>`;
         });
     default:
       return post.content;
   }
 };
 const getProviderIdentifierIcon = (providerIdentifier: string) => `platforms/${providerIdentifier}.png`;
-
 export default function SearchPosts() {
   type Display = "day" | "week" | "month";
   const [display, setDisplay] = useState<Display>("week");
   const date = useMemo(() => new Date(), []);
-  const startDate = useMemo(() => {
+  const { startDate, endDate } = useMemo(() => {
     switch (display) {
       case "day":
-        return date;
+        return { startDate: date, endDate: date };
       case "week":
-        return subDays(date, 6);
+        return { startDate: subDays(date, 6), endDate: date };
       case "month":
-        return startOfMonth(date);
+        return { startDate: startOfMonth(date), endDate: endOfMonth(date) };
     }
   }, [date, display]);
 
@@ -76,7 +81,7 @@ export default function SearchPosts() {
           }
         : {
             startDate: startDate.toISOString(),
-            endDate: endOfDay(date).toISOString(),
+            endDate: endDate.toISOString(),
           },
     ),
     {
@@ -129,7 +134,7 @@ export default function SearchPosts() {
       toast.message = `${error}`;
     }
   };
-  const subtitle = `${format(postiz_version === "1" ? subDays(date, 6) : startDate, "MM/dd/yyyy")} - ${format(date, "MM/dd/yyyy")}`;
+  const subtitle = `${format(postiz_version === "1" ? subDays(date, 6) : startDate, "MM/dd/yyyy")} - ${format(endDate, "MM/dd/yyyy")}`;
   return (
     <List
       isLoading={isLoading}
@@ -161,7 +166,9 @@ export default function SearchPosts() {
             ]}
             detail={
               <List.Item.Detail
-                markdown={generateMarkdown(post)}
+                markdown={
+                  postiz_version === "1" ? generateMarkdown(post) : turndownService.turndown(generateMarkdown(post))
+                }
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label
@@ -189,6 +196,11 @@ export default function SearchPosts() {
                   icon={Icon.Eye}
                   title="Preview Post"
                   url={buildPostizPlatformUrl(`p/${post.id}`)}
+                />
+                <Action.CopyToClipboard
+                  title="Share with a Client"
+                  content={buildPostizPlatformUrl(`p/${post.id}`)}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action.Push
                   icon={Icon.Plus}
