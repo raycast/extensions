@@ -1,6 +1,6 @@
 # Crates Search
 
-## [Added a new default action configuration feature] - {PR_MERGE_DATE}
+## [Added a new default action configuration feature] - 2025-11-14
 
 - Added possibility to choose default action
 
