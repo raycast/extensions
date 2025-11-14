@@ -15,6 +15,7 @@
  */
 
 import { showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { getBlockedDomainList, getBlockingStatus } from "./storage";
 import { showLongHUD } from "./hudHelper";
