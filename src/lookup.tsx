@@ -168,7 +168,7 @@ export default function LookupCommand() {
                 <ActionPanelAny>
                   <ActionAny title="Open in Browser" onAction={async () => { await open(result.url); }} />
                   <ActionAny title="Copy Download URL" onAction={async () => { await Clipboard.copy(result.url); }} />
-                  <ActionAny title="Paste Download URL" onAction={async () => { await Clipboard.copy(result.url); }} />
+                  <ActionAny title="Copy Download URL" onAction={async () => { await Clipboard.copy(result.url); }} />
                   {result.sha1 ? (
                     <ActionAny title="Copy SHA-1" onAction={async () => { await Clipboard.copy(result.sha1); }} />
                   ) : null}
