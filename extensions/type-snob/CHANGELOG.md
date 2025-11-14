@@ -1,6 +1,6 @@
 # Type Snob Changelog
 
-## [Major update] - {PR_MERGE_DATE}
+## [Major update] - 2025-11-14
 
 - Moved characters to JSON for easier upkeep and maintenance
 - Added 96 characters to the catalog (including quotes, punctuation, math symbols, superscripts, currency, and UI elements)
