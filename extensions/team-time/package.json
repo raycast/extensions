@@ -37,6 +37,10 @@
   "contributors": [
     "0xdhrv"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
