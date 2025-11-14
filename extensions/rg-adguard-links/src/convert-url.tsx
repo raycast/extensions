@@ -1,4 +1,12 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, List, Icon } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  List,
+  Icon,
+} from "@raycast/api";
 import { useState } from "react";
 import React from "react";
 
@@ -26,9 +34,11 @@ export default function Command() {
   function extractProductId(microsoftStoreUrl: string): string {
     // Extract product ID from various Microsoft Store URL formats
     const productIdMatch = microsoftStoreUrl.match(/([0-9][A-Z0-9]{11,13})/i);
-    
+
     if (!productIdMatch) {
-      throw new Error("Invalid Microsoft Store URL - could not find product ID");
+      throw new Error(
+        "Invalid Microsoft Store URL - could not find product ID",
+      );
     }
 
     return productIdMatch[1];
@@ -40,10 +50,10 @@ export default function Command() {
     if (match) {
       const size = parseFloat(match[1]);
       const unit = match[2].toUpperCase();
-      
-      if (size >= 1024 && unit === 'KB') {
+
+      if (size >= 1024 && unit === "KB") {
         return `${(size / 1024).toFixed(2)} MB`;
-      } else if (size >= 1024 && unit === 'MB') {
+      } else if (size >= 1024 && unit === "MB") {
         return `${(size / 1024).toFixed(2)} GB`;
       }
       return `${size.toFixed(2)} ${unit}`;
@@ -52,43 +62,45 @@ export default function Command() {
   }
 
   function getFileType(fileName: string): string {
-    if (fileName.includes('.appxbundle') || fileName.includes('.msixbundle')) {
-      return 'Bundle';
-    } else if (fileName.includes('.appx')) {
-      return 'APPX';
-    } else if (fileName.includes('.msix')) {
-      return 'MSIX';
-    } else if (fileName.includes('.eappx')) {
-      return 'Encrypted APPX';
-    } else if (fileName.includes('.emsix')) {
-      return 'Encrypted MSIX';
+    if (fileName.includes(".appxbundle") || fileName.includes(".msixbundle")) {
+      return "Bundle";
+    } else if (fileName.includes(".appx")) {
+      return "APPX";
+    } else if (fileName.includes(".msix")) {
+      return "MSIX";
+    } else if (fileName.includes(".eappx")) {
+      return "Encrypted APPX";
+    } else if (fileName.includes(".emsix")) {
+      return "Encrypted MSIX";
     }
-    
+
     // Detect architecture
-    if (fileName.includes('x64') || fileName.includes('_x64_')) {
-      return 'x64';
-    } else if (fileName.includes('x86') || fileName.includes('_x86_')) {
-      return 'x86';
-    } else if (fileName.includes('arm64') || fileName.includes('_arm64_')) {
-      return 'ARM64';
-    } else if (fileName.includes('arm') || fileName.includes('_arm_')) {
-      return 'ARM';
+    if (fileName.includes("x64") || fileName.includes("_x64_")) {
+      return "x64";
+    } else if (fileName.includes("x86") || fileName.includes("_x86_")) {
+      return "x86";
+    } else if (fileName.includes("arm64") || fileName.includes("_arm64_")) {
+      return "ARM64";
+    } else if (fileName.includes("arm") || fileName.includes("_arm_")) {
+      return "ARM";
     }
-    
-    return 'Package';
+
+    return "Package";
   }
 
-  async function fetchDownloadLinks(productId: string): Promise<{ links: DownloadLink[], metadata: AppMetadata }> {
+  async function fetchDownloadLinks(
+    productId: string,
+  ): Promise<{ links: DownloadLink[]; metadata: AppMetadata }> {
     const formData = new URLSearchParams();
-    formData.append('type', 'ProductId');
-    formData.append('url', productId);
-    formData.append('ring', 'Retail');
-    formData.append('lang', 'en-US');
+    formData.append("type", "ProductId");
+    formData.append("url", productId);
+    formData.append("ring", "Retail");
+    formData.append("lang", "en-US");
 
-    const response = await fetch('https://store.rg-adguard.net/api/GetFiles', {
-      method: 'POST',
+    const response = await fetch("https://store.rg-adguard.net/api/GetFiles", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: formData.toString(),
     });
@@ -98,7 +110,7 @@ export default function Command() {
     }
 
     const html = await response.text();
-    
+
     // Extract app metadata from HTML
     const metadata: AppMetadata = {
       productId: productId,
@@ -106,7 +118,7 @@ export default function Command() {
 
     // Try to extract app name from title or headers
     const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-    if (titleMatch && titleMatch[1] && !titleMatch[1].includes('GetFiles')) {
+    if (titleMatch && titleMatch[1] && !titleMatch[1].includes("GetFiles")) {
       metadata.name = titleMatch[1].trim();
     }
 
@@ -118,21 +130,25 @@ export default function Command() {
 
     // Parse the HTML response to extract download links with sizes
     const links: DownloadLink[] = [];
-    
+
     // Match table rows with links and file sizes
-    const tableRowRegex = /<tr[^>]*>[\s\S]*?<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>[\s\S]*?<\/tr>/gi;
+    const tableRowRegex =
+      /<tr[^>]*>[\s\S]*?<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>[\s\S]*?<\/tr>/gi;
     let match;
-    
+
     while ((match = tableRowRegex.exec(html)) !== null) {
       const url = match[1];
       const fileName = match[2].trim();
-      
+
       // Only include actual download links
-      if (url.includes('tlu.dl.delivery.mp.microsoft.com') || url.includes('.windowsupdate.com')) {
+      if (
+        url.includes("tlu.dl.delivery.mp.microsoft.com") ||
+        url.includes(".windowsupdate.com")
+      ) {
         // Extract file size from the same row
         const rowHtml = match[0];
         const sizeMatch = rowHtml.match(/>(\d+\.?\d*\s*[KMGT]?B)</i);
-        
+
         let size = undefined;
         if (sizeMatch && sizeMatch[1]) {
           size = parseFileSize(sizeMatch[1]);
@@ -160,7 +176,7 @@ export default function Command() {
         const firstFile = links[0].fileName;
         const nameMatch = firstFile.match(/^([^_]+)/);
         if (nameMatch) {
-          metadata.name = nameMatch[1].replace(/([A-Z])/g, ' $1').trim();
+          metadata.name = nameMatch[1].replace(/([A-Z])/g, " $1").trim();
         }
       }
     }
@@ -170,10 +186,10 @@ export default function Command() {
 
   async function handleSubmit(values: { url: string }) {
     setIsLoading(true);
-    
+
     try {
       const productId = extractProductId(values.url);
-      
+
       await showToast({
         style: Toast.Style.Animated,
         title: "Fetching Downloads",
@@ -181,7 +197,7 @@ export default function Command() {
       });
 
       const { links, metadata } = await fetchDownloadLinks(productId);
-      
+
       if (links.length === 0) {
         await showToast({
           style: Toast.Style.Failure,
@@ -226,11 +242,11 @@ export default function Command() {
               accessories={[
                 appMetadata.version ? { text: `v${appMetadata.version}` } : {},
                 appMetadata.publisher ? { text: appMetadata.publisher } : {},
-              ].filter(acc => Object.keys(acc).length > 0)}
+              ].filter((acc) => Object.keys(acc).length > 0)}
             />
           </List.Section>
         )}
-        
+
         <List.Section title={`Available Downloads (${downloadLinks.length})`}>
           {downloadLinks.map((link, index) => (
             <List.Item
@@ -240,13 +256,25 @@ export default function Command() {
               subtitle={link.type}
               accessories={[
                 link.size ? { text: link.size, icon: Icon.HardDrive } : {},
-              ].filter(acc => Object.keys(acc).length > 0)}
+              ].filter((acc) => Object.keys(acc).length > 0)}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={link.url} title="Download" />
-                  <Action.CopyToClipboard content={link.url} title="Copy URL" shortcut={{ modifiers: ["cmd"], key: "c" }} />
-                  <Action.CopyToClipboard content={link.fileName} title="Copy Filename" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
-                  <Action title="Back to Input" onAction={() => setShowResults(false)} shortcut={{ modifiers: ["cmd"], key: "b" }} />
+                  <Action.CopyToClipboard
+                    content={link.url}
+                    title="Copy URL"
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action.CopyToClipboard
+                    content={link.fileName}
+                    title="Copy Filename"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                  <Action
+                    title="Back to Input"
+                    onAction={() => setShowResults(false)}
+                    shortcut={{ modifiers: ["cmd"], key: "b" }}
+                  />
                 </ActionPanel>
               }
             />
@@ -261,7 +289,10 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Get Download Links" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Get Download Links"
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
