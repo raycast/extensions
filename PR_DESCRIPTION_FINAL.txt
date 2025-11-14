@@ -1,0 +1,100 @@
+# RG AdGuard Links — Microsoft Store URL Converter
+
+## Summary
+
+This extension converts Microsoft Store URLs to direct download links via rg-adguard.net, allowing users to download Microsoft Store apps without using the Microsoft Store itself.
+
+## What This Extension Does
+
+- Converts Microsoft Store URLs or Product IDs to downloadable .appx/.msix files
+- Makes POST requests to rg-adguard.net API
+- Displays all available downloads with file sizes and metadata
+- Shows app information including name, version, and product ID
+- Supports multiple architectures (x64, x86, ARM64)
+
+###  Features / Items Included
+- ✅ Proper API integration with rg-adguard.net (POST requests)
+- ✅ File size information for each download
+- ✅ App metadata display (name, version, product ID)
+- ✅ Multiple download links with architecture detection
+- ✅ Screenshot included in `metadata/` folder
+- ✅ Clean list view with sections and accessories
+- ✅ Keyboard shortcuts for common actions
+
+### Files Added
+- **Added**: `src/convert-url.tsx` - Main command implementation
+- **Added**: `icon.png` - 512x512 extension icon
+- **Added**: `metadata/rg-adguard-links-1.png` - Screenshot (2000x1250)
+- **Added**: `.eslintrc.json` - ESLint configuration
+- **Added**: `package.json` - Extension manifest
+- **Added**: `package-lock.json` - Dependency lock file
+- **Added**: `README.md` - Documentation
+- **Added**: `CHANGELOG.md` - Version history
+- **Added**: `tsconfig.json` - TypeScript configuration
+- **Added**: `.gitignore` - Git ignore rules
+
+## Technical Implementation
+
+### API Integration
+```typescript
+POST https://store.rg-adguard.net/api/GetFiles
+Content-Type: application/x-www-form-urlencoded
+
+type=ProductId&url={productId}&ring=Retail&lang=en-US
+```
+
+### Features
+1. **Product ID Extraction** - Parses various Microsoft Store URL formats
+2. **HTML Response Parsing** - Extracts download links and metadata from HTML
+3. **File Size Display** - Shows formatted file sizes (KB, MB, GB)
+4. **Architecture Detection** - Identifies x64, x86, ARM64 packages
+5. **App Metadata** - Displays app name, version, and product ID
+
+### Supported URL Formats
+- `https://www.microsoft.com/store/productId/9XXXXXXXXXXXXX`
+- `https://apps.microsoft.com/detail/9XXXXXXXXXXXXX`
+- `https://apps.microsoft.com/store/detail/9XXXXXXXXXXXXX`
+- Product ID only: `9XXXXXXXXXXXXX`
+
+## Quality Checks
+
+### Build & Lint
+- ✅ `npm run build` - Builds successfully
+- ✅ `npm run dev` - Development server runs without errors
+- ✅ `npm run lint` - All linting passes (ESLint, Prettier, metadata validation)
+- ✅ TypeScript compilation passes with no errors
+
+### Testing
+- ✅ Tested with multiple Microsoft Store URLs
+- ✅ Download links work correctly
+- ✅ File sizes display accurately
+- ✅ App metadata extracted successfully
+- ✅ All actions (open in browser, copy URL, copy filename) function properly
+
+### Code Quality
+- ✅ Proper error handling with toast notifications
+- ✅ TypeScript strict mode enabled
+- ✅ Clean separation of concerns
+- ✅ Proper use of Raycast APIs (@raycast/api)
+- ✅ No console.log or debug code
+- ✅ Follows Raycast extension guidelines
+
+## Screenshot
+
+The extension includes a properly sized screenshot (2000x1250 pixels) in the `metadata/` folder showing the results list with download links, file sizes, and app metadata.
+
+## Notes for Reviewers
+
+This extension:
+- Solves a real use case (downloading MS Store apps without the Microsoft Store)
+- Has proper API integration with rg-adguard.net service
+- Includes all required metadata and screenshot
+- Follows Raycast extension best practices
+- Is fully functional and tested
+- All linting and validation checks pass
+
+**Note**: The extension name "RG AdGuard Links" refers to the rg-adguard.net service (a Microsoft Store download tool), not AdGuard the ad blocker.
+
+## Ready for Review
+
+This extension is ready for review and publication to the Raycast Store.

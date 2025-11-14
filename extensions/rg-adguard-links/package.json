@@ -10,6 +10,7 @@
     {
       "name": "convert-url",
       "title": "Convert Store URL",
+      "subtitle": "RG AdGuard Links",
       "description": "Convert Microsoft Store URL to rg-adguard.net link",
       "mode": "view"
     }

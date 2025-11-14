@@ -13,10 +13,13 @@ RG AdGuard Links is a Raycast extension that converts Microsoft Store applicatio
 
 - **API Integration** - Makes proper POST requests to rg-adguard.net API
 - **Direct Downloads** - Get actual download links for .appx, .msix, and other app packages
-- **Multiple Files** - View and download all available files for an app (x64, x86, ARM versions, etc.)
-- **Quick Actions** - Open download links directly or copy URLs to clipboard
+- **File Size Information** - Shows formatted file sizes (KB, MB, GB) for each download
+- **App Metadata** - Displays app name, version, and product ID
+- **Architecture Detection** - Identifies x64, x86, ARM64 packages automatically
+- **Multiple Files** - View and download all available files for an app
+- **Quick Actions** - Open download links, copy URLs, or copy filenames to clipboard
 - **Product ID Support** - Works with full URLs or just the product ID
-- **Simple Interface** - Clean form input with results list view
+- **Simple Interface** - Clean form input with organized results list view
 
 ## Installation
 
@@ -46,12 +49,17 @@ Coming soon - Extension will be submitted to Raycast Store
 
 1. Open Raycast (⌘ + Space or your configured hotkey)
 2. Type "Convert Store URL" or search for the extension
-3. Paste a Microsoft Store URL or product ID
+3. Paste a Microsoft Store URL or product ID in the form
 4. Press Enter to fetch download links
-5. Browse the list of available downloads
-6. Press Enter on any file to download it, or:
-   - Copy URL to clipboard
-   - View file details
+5. Browse the list showing:
+   - App Information section with name, version, and product ID
+   - Available Downloads section with all files
+   - File sizes and architecture types for each download
+6. Select a file and press Enter to download it in your browser
+7. Or use keyboard shortcuts:
+   - ⌘ + C: Copy download URL to clipboard
+   - ⌘ + Shift + C: Copy filename to clipboard
+   - ⌘ + B: Return to input form
 
 ## Example
 
@@ -66,11 +74,13 @@ https://apps.microsoft.com/detail/9n0kwg910ldh
 ```
 
 **Output:**
-The extension will display a list of all available downloads for that app, including:
-- Different architectures (x64, x86, ARM64)
-- Dependencies
-- Framework packages
-- Various file formats (.appx, .msix, .appxbundle, etc.)
+The extension displays:
+- **App Information Section**: Shows the app name, product ID, and version (if available)
+- **Available Downloads Section**: Lists all downloadable files with:
+  - File name
+  - File type/architecture (x64, x86, ARM64, Bundle, etc.)
+  - File size in a readable format (MB/GB)
+  - Icons indicating download and storage information
 
 ## Supported URL Formats
 
@@ -153,10 +163,8 @@ Contributions are welcome! Here's how you can help:
 - Support for batch URL conversion
 - History of converted URLs
 - Favorites/bookmarks for frequently used apps
-- Better error handling and user feedback
-- Additional metadata display (app name, version, etc.)
-- Filtering options for file types
-- Download size information
+- Filtering options for file types (show only x64, ARM64, etc.)
+- Search within results
 - Integration with download managers
 
 ### Development Guidelines
@@ -178,11 +186,13 @@ Contributions are welcome! Here's how you can help:
 - [x] Support multiple URL formats
 - [x] Product ID extraction
 - [x] List view for results
-- [ ] Add file size information
-- [ ] Show app metadata (name, version, publisher)
+- [x] Add file size information
+- [x] Show app metadata (name, version, product ID)
+- [x] Architecture detection and display
+- [x] Keyboard shortcuts for actions
 - [ ] Add download history
-- [ ] Create screenshots for Raycast Store
-- [ ] Submit to Raycast Store
+- [ ] Add favorites/bookmarks
+- [ ] Batch URL conversion
 
 ## Technical Details
 
