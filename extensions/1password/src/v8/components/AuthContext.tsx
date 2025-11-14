@@ -12,7 +12,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React, { createContext, ReactNode, useContext, useMemo, useState } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 import {
   checkZsh,
@@ -125,11 +125,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  useMemo(() => {
+  useEffect(() => {
     if (!isAuthenticated && !zshMissing) {
       authenticate();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, zshMissing]);
 
   if (!accountSelected) {
     return (
