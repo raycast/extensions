@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "todo-quick-add",
+  "title": "To-Do Quick Add",
+  "description": "Quickly add tasks to your To-Do app with smart parsing for tags, priorities, and dates",
+  "icon": "icon.png",
+  "author": "peter_sauer",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add a new task with smart parsing (#tags, @priority, /dates)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.12.0",
+    "date-fns": "^3.0.6",
+    "firebase": "^10.7.2",
+    "firebase-admin": "^12.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.10.6",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "generate-token": "node scripts/generate-token.js"
+  }
+}
