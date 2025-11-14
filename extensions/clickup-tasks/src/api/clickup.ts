@@ -151,6 +151,33 @@ class ClickUpClient {
   }
 
   /**
+   * Get a single task by ID
+   */
+  async getTask(taskId: string): Promise<ClickUpTask> {
+    return this.request<ClickUpTask>(`/task/${taskId}`);
+  }
+
+  /**
+   * Get all tasks with nested subtasks at any depth
+   * Note: The ClickUp API with subtasks=true returns all subtasks in a flat array,
+   * regardless of nesting depth. The hierarchy is represented via the parent field.
+   * This method exists as an alias for clarity but doesn't make additional API calls.
+   */
+  async getAllTasksRecursively(params?: Omit<GetTasksParams, "page">): Promise<ClickUpTask[]> {
+    return this.getAllTasks({ ...params, subtasks: true });
+  }
+
+  /**
+   * Get all tasks from a specific list with nested subtasks at any depth
+   * Note: The ClickUp API with subtasks=true returns all subtasks in a flat array,
+   * regardless of nesting depth. The hierarchy is represented via the parent field.
+   * This method exists as an alias for clarity but doesn't make additional API calls.
+   */
+  async getAllTasksFromListRecursively(listId: string, params?: Omit<GetTasksParams, "page">): Promise<ClickUpTask[]> {
+    return this.getAllTasksFromList(listId, { ...params, subtasks: true });
+  }
+
+  /**
    * Update a task
    */
   async updateTask(taskId: string, updates: UpdateTaskParams): Promise<ClickUpTask> {

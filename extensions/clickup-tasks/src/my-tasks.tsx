@@ -1,13 +1,13 @@
 import { List } from "@raycast/api";
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 import { TaskListItem } from "./components/tasks/TaskListItem";
 import { EXTENSION_ICON } from "./constants";
 import { TasksProvider } from "./contexts/TasksContext";
 import { useMyTasks } from "./hooks/useMyTasks";
-import { groupTasksWithSubtasks } from "./utils/task-helpers";
+import { flattenTasksWithDepthAndContext } from "./utils/task-helpers";
 
 export default function () {
-  const { error, isLoading, tasks, userName } = useMyTasks();
+  const { assignedTaskIds, error, isLoading, tasks, userName } = useMyTasks();
 
   if (error && !isLoading && tasks.length === 0) {
     return (
@@ -16,7 +16,11 @@ export default function () {
       </List>
     );
   }
-  const taskGroups = useMemo(() => groupTasksWithSubtasks(tasks), [tasks]);
+
+  const tasksWithContext = useMemo(
+    () => flattenTasksWithDepthAndContext(tasks, assignedTaskIds),
+    [tasks, assignedTaskIds],
+  );
 
   return (
     <TasksProvider tasks={tasks}>
@@ -28,13 +32,8 @@ export default function () {
             title="No tasks assigned to you"
           />
         )}
-        {taskGroups.map((group) => (
-          <Fragment key={group.parent.id}>
-            <TaskListItem task={group.parent} />
-            {group.subtasks.map((subtask) => (
-              <TaskListItem key={`${group.parent.id}_${subtask.id}`} task={subtask} />
-            ))}
-          </Fragment>
+        {tasksWithContext.map(({ depth, isAssignedToUser, task }) => (
+          <TaskListItem depth={depth} isAssignedToUser={isAssignedToUser} key={task.id} task={task} />
         ))}
       </List>
     </TasksProvider>

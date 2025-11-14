@@ -1,11 +1,11 @@
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 import { getClickUpClient } from "../../api/clickup";
 import { EXTENSION_ICON } from "../../constants";
 import { TasksProvider } from "../../contexts/TasksContext";
 import { ClickUpList } from "../../types/clickup";
-import { groupTasksWithSubtasks } from "../../utils/task-helpers";
+import { flattenTasksWithDepth } from "../../utils/task-helpers";
 import { TaskListItem } from "../tasks/TaskListItem";
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
 export function ListTasks({ list }: Props) {
   const fetchTasks = async (listId: string) => {
     const client = getClickUpClient();
-    return await client.getAllTasksFromList(listId, { archived: false, subtasks: true });
+    return await client.getAllTasksFromListRecursively(listId, { archived: false });
   };
 
   const { data: tasks = [], error, isLoading } = useCachedPromise(fetchTasks, [list.id]);
@@ -32,7 +32,7 @@ export function ListTasks({ list }: Props) {
     );
   }
 
-  const taskGroups = useMemo(() => groupTasksWithSubtasks(tasks), [tasks]);
+  const tasksWithDepth = useMemo(() => flattenTasksWithDepth(tasks), [tasks]);
 
   return (
     <TasksProvider tasks={tasks}>
@@ -44,13 +44,8 @@ export function ListTasks({ list }: Props) {
             title="No tasks found"
           />
         )}
-        {taskGroups.map((group) => (
-          <Fragment key={group.parent.id}>
-            <TaskListItem task={group.parent} />
-            {group.subtasks.map((subtask) => (
-              <TaskListItem key={`${group.parent.id}_${subtask.id}`} task={subtask} />
-            ))}
-          </Fragment>
+        {tasksWithDepth.map(({ depth, task }) => (
+          <TaskListItem depth={depth} key={task.id} task={task} />
         ))}
       </List>
     </TasksProvider>

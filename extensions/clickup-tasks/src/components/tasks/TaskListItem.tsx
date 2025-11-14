@@ -10,10 +10,12 @@ import { OpenInClickUp } from "../actions/OpenInClickUp";
 import { NextStatus, ChangeStatus } from "../actions/StatusActions";
 
 interface Props {
+  depth?: number;
+  isAssignedToUser?: boolean;
   task: ClickUpTask;
 }
 
-export function TaskListItem({ task }: Props) {
+export function TaskListItem({ depth = 0, isAssignedToUser = true, task }: Props) {
   const { tasks: allTasks } = useTasksContext();
   const isSubTask = isSubtask(task);
   const parentTask = isSubTask ? getParentTask(task, allTasks) : undefined;
@@ -32,11 +34,23 @@ export function TaskListItem({ task }: Props) {
     task.status.status,
   ].filter(Boolean);
 
-  const iconValue: ListItemProps["icon"] = isSubTask
-    ? { source: Icon.Minus, tintColor: Color.SecondaryText }
-    : task.priority
-      ? { source: Icon.Flag, tintColor: task.priority.color }
-      : undefined;
+  // Determine icon based on depth
+  // Non-assigned tasks are treated as top-level with muted priority colors
+  const iconValue: ListItemProps["icon"] =
+    depth === 0
+      ? task.priority
+        ? {
+            source: Icon.Flag,
+            tintColor: isAssignedToUser ? task.priority.color : Color.SecondaryText,
+          }
+        : undefined
+      : depth === 1
+        ? { source: Icon.Minus, tintColor: Color.SecondaryText }
+        : { source: Icon.ChevronRight, tintColor: Color.SecondaryText };
+
+  // Add indentation to title based on depth (2 spaces per level)
+  const indentation = "  ".repeat(depth);
+  const displayTitle = `${indentation}${task.name}`;
 
   let markdown = `# ${task.name}`;
   if (task.description) {
@@ -70,7 +84,7 @@ export function TaskListItem({ task }: Props) {
       key={task.id}
       keywords={keywords}
       subtitle={subtitle}
-      title={task.name}
+      title={displayTitle}
     />
   );
 }

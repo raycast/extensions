@@ -16,7 +16,7 @@ type UseTasksResult = Pick<UseCachedPromiseReturnType<ClickUpTask[], never[]>, "
 export function useTasks({ params, sortHierarchically = true }: UseTasksOptions = {}): UseTasksResult {
   const fetchTasks = async () => {
     const client = getClickUpClient();
-    const fetchedTasks = await client.getAllTasks({ archived: false, subtasks: true, ...params });
+    const fetchedTasks = await client.getAllTasksRecursively({ archived: false, ...params });
     return sortHierarchically ? sortTasksHierarchically(fetchedTasks) : fetchedTasks;
   };
 
