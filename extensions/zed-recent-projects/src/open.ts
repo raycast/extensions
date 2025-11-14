@@ -1,22 +1,39 @@
 import { closeMainWindow, getSelectedFinderItems, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, runPowerShellScript } from "@raycast/utils";
 import { getZedBundleId, ZedBuild } from "./lib/zed";
+import { isWindows } from "./lib/utils";
 
 const preferences: Record<string, string> = getPreferenceValues();
 const zedBuild: ZedBuild = preferences.build as ZedBuild;
 
-const getCurrentFinderPathScript = `
-try
-  tell application "Finder"
-    return POSIX path of (insertion location as alias)
-  end tell
-on error
-  return ""
-end try
-`;
-
 export const getCurrentFinderPath = async () => {
-  return await runAppleScript(getCurrentFinderPathScript);
+  if (isWindows) {
+    // Get selected path in Windows Expl
+    const script = `
+      Add-Type -AssemblyName Microsoft.VisualBasic
+      Add-Type -AssemblyName System.Windows.Forms
+      $explorer = New-Object -ComObject Shell.Application
+      $window = $explorer.Windows() | Where-Object { $_.Document.Folder.Self.Path } | Select-Object -First 1
+      if ($window) {
+        $window.Document.Folder.Self.Path
+      } else {
+        ""
+      }
+    `;
+    return await runPowerShellScript(script);
+  } else {
+    // macOS Finder path
+    const getCurrentFinderPathScript = `
+      try
+        tell application "Finder"
+          return POSIX path of (insertion location as alias)
+        end tell
+      on error
+        return ""
+      end try
+    `;
+    return await runAppleScript(getCurrentFinderPathScript);
+  }
 };
 
 export default async function openWithZed() {

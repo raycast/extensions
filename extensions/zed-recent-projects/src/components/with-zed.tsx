@@ -3,8 +3,9 @@ import { ComponentType, createContext, useContext } from "react";
 import { Application, Detail, getApplications, LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { zedBuild } from "../lib/preferences";
-import { getZedBundleId, getZedDbPath } from "../lib/zed";
+import { getZedBundleId, getZedDbPath, getZedWindowsMetadata } from "../lib/zed";
 import { getZedWorkspaceDbVersion } from "../lib/db";
+import { isMac, isWindows } from "../lib/utils";
 
 interface ZedContextType {
   app: Application;
@@ -27,7 +28,15 @@ function useZed() {
       getZedWorkspaceDbVersion(dbPath, defaultDbVersion),
     ]);
     const zedBundleId = getZedBundleId(zedBuild);
-    const app = applications.find((a) => a.bundleId === zedBundleId);
+    const windowsMetadata = getZedWindowsMetadata(zedBuild);
+    const app = applications.find((a) => {
+      if(isMac) {
+        return a.bundleId === zedBundleId
+      }
+      if(isWindows) {
+        return a.name === windowsMetadata.name;
+      }
+    });
 
     if (workspaceDbVersion.supported) {
       await LocalStorage.setItem(defaultDbVersionKey, workspaceDbVersion.version);

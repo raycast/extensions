@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Application, Icon, List } from "@raycast/api";
 import { useZedContext, withZed } from "./components/with-zed";
+import { execWindowsZed, isWindows } from "./lib/utils";
 import { exists } from "./lib/utils";
 import { Entry, getEntry } from "./lib/entry";
 import { EntryItem } from "./components/entry-item";
@@ -12,13 +13,14 @@ export function Command() {
     dbPath,
     workspaceDbVersion,
   );
+
+  // console.log(workspaces)
   const { pinnedEntries, pinEntry, unpinEntry, unpinAllEntries, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)
     .filter((e) => e.type === "remote" || exists(e.uri))
     .sort((a, b) => a.order - b.order);
 
-  const zedIcon = { fileIcon: app.path };
 
   const removeAndUnpinEntry = async (entry: Pick<Entry, "id" | "uri">) => {
     await removeEntry(entry.id);
@@ -29,6 +31,9 @@ export function Command() {
     await removeAllEntries();
     unpinAllEntries();
   };
+
+  // console.log(Object.values(workspaces)
+  //   .filter((e) => !pinnedEntries[e.uri] && (!!e.host || exists(e.uri))))
 
   return (
     <List isLoading={isLoading}>
@@ -49,8 +54,13 @@ export function Command() {
               entry={entry}
               actions={
                 <ActionPanel>
-                  <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
-                  {entry.type === "local" && <Action.ShowInFinder path={entry.path} />}
+                  <OpenOnZed entry={entry} app={app} />
+                  {entry.type === "local" &&
+                    (isWindows ? (
+                      <Action.Open title="Show in File Explorer" target={entry.path} />
+                    ) : (
+                      <Action.ShowInFinder path={entry.path} />
+                    ))}
                   <Action
                     title="Unpin Entry"
                     icon={Icon.PinDisabled}
@@ -86,7 +96,7 @@ export function Command() {
 
       <List.Section title="Recent Projects">
         {Object.values(workspaces)
-          .filter((e) => !pinnedEntries[e.uri] && (!!e.host || exists(e.uri)))
+          .filter((e) => !pinnedEntries[e.uri] && (!!e.host || exists(e.uri) || !!e.wsl))
           .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
           .map((e) => {
             const entry = getEntry(e);
@@ -101,8 +111,13 @@ export function Command() {
                 entry={entry}
                 actions={
                   <ActionPanel>
-                    <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
-                    {entry.type === "local" && <Action.ShowInFinder path={entry.path} />}
+                    <OpenOnZed entry={entry} app={app} />
+                    {entry.type === "local" &&
+                      (isWindows ? (
+                        <Action.Open title="Show in File Explorer" target={entry.path} />
+                      ) : (
+                        <Action.ShowInFinder path={entry.path} />
+                      ))}
                     <Action
                       title="Pin Entry"
                       icon={Icon.Pin}
@@ -121,6 +136,20 @@ export function Command() {
       </List.Section>
     </List>
   );
+}
+
+function OpenOnZed({ entry, app }: { entry: Entry, app: Application }) {
+  const zedIcon = { fileIcon: app.path };
+  const openWsl = () => execWindowsZed(["--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${entry.path}`]);
+  return entry.wsl ? (
+    <Action
+      title="Open in Zed"
+      onAction={openWsl}
+      icon={zedIcon}
+    />
+  ) : (
+    <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
+  )
 }
 
 function RemoveActionSection({

@@ -21,7 +21,14 @@ export interface ZedRemoteWorkspace extends ZedBaseWorkspace {
   port: number | null;
 }
 
-export type ZedWorkspace = ZedLocalWorkspace | ZedRemoteWorkspace;
+export interface ZedWorkspaceWithWsl extends ZedRemoteWorkspace {
+  type: "remote";
+  kind: string;
+  distro: string | null;
+  user: string | null;
+}
+
+export type ZedWorkspace = ZedLocalWorkspace | ZedRemoteWorkspace | ZedWorkspaceWithWsl;
 
 //
 // Unified types for extension
@@ -34,6 +41,7 @@ export interface Workspace {
   path: string;
   uri: string;
   host?: string;
+  wsl?: { user: string | null; distro: string | null } | null;
 }
 
 export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null {
@@ -69,6 +77,10 @@ export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null 
       zedWorkspace.port ? ":" + zedWorkspace.port : ""
     }/${processedPath}`;
 
+    const wsl =
+      "kind" in zedWorkspace && zedWorkspace.kind === "wsl" && zedWorkspace.user && zedWorkspace.distro
+        ? { user: zedWorkspace.user, distro: zedWorkspace.distro }
+        : null;
     return {
       id: zedWorkspace.id,
       lastOpened: zedWorkspace.timestamp,
@@ -76,6 +88,7 @@ export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null 
       uri,
       path: processedPath,
       host: zedWorkspace.host,
+      wsl,
     };
   }
 

@@ -17,7 +17,8 @@
     "Developer Tools"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
