@@ -1,5 +1,9 @@
 # GrammariX Changelog
 
+## [Fix] - 2025-11-15
+
+- Change the order of the copy/paste actions and the shortcut.
+
 ## [Fix] - 2025-08-18
 
 - Fix minor issue related to temperature
