@@ -1,4 +1,5 @@
 import { Clipboard, Toast, getSelectedText, showToast } from "@raycast/api";
+import { recognizeTextFromScreenshot } from "swift:../swift";
 
 export async function readFromClipboard() {
   const clipboard = await Clipboard.readText();
@@ -32,4 +33,19 @@ export async function readFromSelection() {
   }
 
   return "";
+}
+
+export async function readFromScreenshot(playSound = false, language = "en-US"): Promise<string> {
+  try {
+    const recognizedText = await recognizeTextFromScreenshot(playSound, language);
+
+    if (!recognizedText || recognizedText.startsWith("Error:")) {
+      return "";
+    }
+
+    return recognizedText.trim();
+  } catch (error) {
+    console.error("Screenshot OCR error:", error);
+    return "";
+  }
 }

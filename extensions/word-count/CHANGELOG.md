@@ -1,5 +1,16 @@
 # Word Count Changelog
 
+## [New Feature] - {PR_MERGE_DATE}
+
+- **Added screenshot-based word counting** - Capture any text on screen and get instant counts using OCR
+  - New "Count from Screenshot" command with hotkey support
+  - Uses Apple Vision framework for accurate text recognition
+  - Displays results in HUD notification
+  - Optional camera shutter sound preference
+  - Requires Xcode for building
+- Updated dependencies to the latest Raycast stack
+- Updated ESLint tooling to v9 using the provided guide
+
 ## [Update] - 2025-04-07
 
 - Added logic for properly counting CJK characters as "words"
