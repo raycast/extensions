@@ -184,7 +184,7 @@ export default function IndexCommand() {
             return (
               <List.Item
                 key={index}
-                icon={isWindows ? `${item.path}\\assets\\${item.icon}` : `${item.path}/assets/${item.icon}`}
+                icon={path.join(item.path, "assets", item.icon)}
                 title={item.title}
                 keywords={[item.author]}
                 actions={
