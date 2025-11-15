@@ -107,7 +107,8 @@
           "value": "ar"
         }
       ]
-    },    {
+    },
+    {
       "name": "playSound",
       "description": "Play camera shutter sound when capturing screenshots",
       "type": "checkbox",

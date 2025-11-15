@@ -35,7 +35,7 @@ export async function readFromSelection() {
   return "";
 }
 
-export async function readFromScreenshot(playSound = false, language = "en-US"): Promise<string> {
+export async function readFromScreenshot(playSound = false, language = "en"): Promise<string> {
   try {
     const recognizedText = await recognizeTextFromScreenshot(playSound, language);
 

@@ -12,7 +12,7 @@ export default async function Command() {
 
   try {
     const preferences = getPreferenceValues<Preferences>();
-    const text = await readFromScreenshot(preferences.playSound ?? false, preferences.ocrLanguage ?? "en-US");
+    const text = await readFromScreenshot(preferences.playSound ?? false, preferences.ocrLanguage ?? "en");
 
     if (!text) {
       await showHUD("❌ Nothing to count!");

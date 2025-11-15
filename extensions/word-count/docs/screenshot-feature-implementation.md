@@ -53,7 +53,7 @@ The `recognizeTextFromScreenshot()` function:
 - Employs Vision framework's `VNRecognizeTextRequest` for OCR
 - Uses fast recognition mode for better performance
 - Enables language correction for improved accuracy
-- Defaults to English (en-US) language
+- Defaults to English (en) language
 
 ### Screenshot Capture Process
 
@@ -68,7 +68,7 @@ The `recognizeTextFromScreenshot()` function:
 
 - Recognition level: Fast (optimized for speed)
 - Language correction: Enabled
-- Default language: English (en-US)
+- Default language: English (en)
 - Line breaks: Preserved in output
 - Error handling: Returns error message string on failure
 
