@@ -63,10 +63,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -127,10 +123,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -195,10 +187,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -259,10 +247,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -327,10 +311,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -391,10 +371,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -473,10 +449,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -558,10 +530,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -623,10 +591,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -692,10 +656,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -757,10 +717,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -826,10 +782,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -891,10 +843,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -960,10 +908,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -1016,10 +960,6 @@
         {
           "value": "llama-3.1-8b-instant",
           "title": "Llama 3.1 8B 128k"
-        },
-        {
-          "value": "deepseek-r1-distill-llama-70b",
-          "title": "DeepSeek R1 70B 128k"
         },
         {
           "value": "qwen/qwen3-32b",
