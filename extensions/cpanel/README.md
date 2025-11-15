@@ -47,6 +47,7 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 - FTP Accounts
     - Create FTP Account
 - API Tokens
+    - Create API Token
     - Revoke API Token
     
 </details>
@@ -73,6 +74,7 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 | Postgresql | dump_database_schema | Databases > View Schema |
 | Postgresql | list_databases | Databases |
 | ResourceUsage | get_usages | Account |
+| Tokens | create_full_access | API Tokens |
 | Tokens | list | API Tokens |
 | Tokens | revoke | API Tokens |
 | UserManager | change_password | Account > Update Password |

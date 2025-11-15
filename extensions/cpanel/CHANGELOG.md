@@ -1,5 +1,9 @@
 # cPanel Changelog
 
+## [Add Windows Support] - {PR_MERGE_DATE}
+
+- Extension now works in Windows
+
 ## [Delete DNS Zone] - 2025-08-18
 
 - Show more file icons based on MIME types
