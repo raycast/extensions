@@ -395,7 +395,6 @@ export class ExcelFormulaParser {
     try {
       const baseExpression = new ExcelExpression(cleanFormula);
       this.parseExpressions(baseExpression, 0, cleanFormula, separator);
-      console.log(JSON.stringify(baseExpression));
 
       return baseExpression;
     } catch (error) {
