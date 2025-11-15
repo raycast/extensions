@@ -182,11 +182,11 @@ See `docs/setup-guide.md` for detailed testing procedures.
 
 ## Future Enhancement Opportunities
 
-- [ ] Multi-language OCR support
+- [X] Multi-language OCR support
 - [ ] Fullscreen capture option
 - [ ] Copy results to clipboard action
 - [ ] Accuracy mode preference (fast vs. accurate)
-- [ ] Custom language selection
+- [X] Custom language selection
 - [ ] Batch processing support
 - [ ] Screenshot history
 

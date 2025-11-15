@@ -1,10 +1,27 @@
 # Setup Guide for Screenshot Feature
 
-## Prerequisites
+## For Users
 
-The screenshot word count feature requires Xcode to be installed for Swift compilation.
+**No special setup required!** The screenshot word count feature is ready to use once you install the extension.
 
-### Installing Xcode
+### Using the Screenshot Feature
+
+1. Install the Word Count extension in Raycast
+2. Go to Raycast preferences
+3. Assign a hotkey to the "Count from Screenshot" command
+4. Configure optional preferences:
+   - **OCR Language**: Select the language for text recognition (default: English)
+   - **Play screenshot sound**: Enable/disable camera shutter sound
+
+That's it! Press your hotkey to start counting text from screenshots.
+
+## For Developers
+
+Xcode is **only required if you want to modify the Swift implementation** of the screenshot feature. Regular users do not need Xcode.
+
+### Installing Xcode (Development Only)
+
+If you plan to modify the Swift OCR code:
 
 1. **Download Xcode from the Mac App Store**
    - Open the Mac App Store
@@ -28,7 +45,7 @@ The screenshot word count feature requires Xcode to be installed for Swift compi
    sudo xcodebuild -license accept
    ```
 
-## Building the Extension
+### Building the Extension (Development)
 
 Once Xcode is installed:
 

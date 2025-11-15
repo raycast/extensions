@@ -56,11 +56,11 @@
       "type": "dropdown",
       "required": false,
       "label": "OCR Language",
-      "default": "en-US",
+      "default": "en",
       "data": [
         {
           "title": "English",
-          "value": "en-US"
+          "value": "en"
         },
         {
           "title": "Spanish",

@@ -34,6 +34,9 @@ func recognizeTextFromScreenshot(
   request.recognitionLevel = .fast
   request.usesLanguageCorrection = true
   request.recognitionLanguages = [language]
+  if #available(macOS 13.0, *) {
+    request.automaticallyDetectsLanguage = true
+  }
   
   do {
     try VNImageRequestHandler(cgImage: capturedImage, options: [:]).perform([request])
