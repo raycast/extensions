@@ -68,7 +68,10 @@ export default async function Command() {
 
               // Play audio using afplay
               // Play audio using platform-specific command
-              const playCommand = process.platform === 'darwin' ? `afplay "${audioFile}"` : `powershell -c (New-Object Media.SoundPlayer "${audioFile}").PlaySync()`;
+              const playCommand =
+                process.platform === "darwin"
+                  ? `afplay "${audioFile}"`
+                  : `powershell -c (New-Object Media.SoundPlayer "${audioFile}").PlaySync()`;
               await execAsync(playCommand);
 
               console.log("Playback completed");
