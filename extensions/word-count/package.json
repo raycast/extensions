@@ -115,6 +115,55 @@
       "required": false,
       "label": "Play screenshot sound",
       "default": false
+    },
+    {
+      "name": "showStatCharacters",
+      "title": "Screenshot Result Stats",
+      "description": "Choose which metrics appear in the screenshot HUD",
+      "type": "checkbox",
+      "required": false,
+      "label": "Characters",
+      "default": true
+    },
+    {
+      "name": "showStatWords",
+      "description": "Show the total word count in the screenshot HUD",
+      "type": "checkbox",
+      "required": false,
+      "label": "Words",
+      "default": true
+    },
+    {
+      "name": "showStatSentences",
+      "description": "Show the sentence count in the screenshot HUD",
+      "type": "checkbox",
+      "required": false,
+      "label": "Sentences",
+      "default": true
+    },
+    {
+      "name": "showStatParagraphs",
+      "description": "Show the paragraph count in the screenshot HUD",
+      "type": "checkbox",
+      "required": false,
+      "label": "Paragraphs",
+      "default": false
+    },
+    {
+      "name": "showStatReadingTime",
+      "description": "Show the estimated time to read in the screenshot HUD",
+      "type": "checkbox",
+      "required": false,
+      "label": "Time to Read",
+      "default": false
+    },
+    {
+      "name": "showStatSpeakingTime",
+      "description": "Show the estimated time to speak in the screenshot HUD",
+      "type": "checkbox",
+      "required": false,
+      "label": "Time to Speak",
+      "default": false
     }
   ],
   "dependencies": {
