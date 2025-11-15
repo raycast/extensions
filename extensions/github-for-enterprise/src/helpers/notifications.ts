@@ -14,9 +14,6 @@ function generateNotificationReferrerId(notificationId: string, userId: string) 
 }
 
 export function generateGitHubUrl(url: string, notificationId: string, userId?: string, comment = "") {
-  console.log(
-    `generateGitHubUrl: url = ${url}, notificationId = ${notificationId}, userId = ${userId}, comment = ${comment}`,
-  );
   let newUrl: string = url;
 
   // Handle both GitHub Enterprise Cloud (subdomain) and Server (path-based) API patterns:
