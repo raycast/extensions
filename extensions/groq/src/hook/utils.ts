@@ -13,8 +13,8 @@ export const allModels = [
 ];
 
 const MODEL_RATES: Record<string, { input: number; output: number }> = {
-  "openai/gpt-oss-120b": { input: 0.15, output: 0.75 },
-  "openai/gpt-oss-20b": { input: 0.1, output: 0.5 },
+  "openai/gpt-oss-120b": { input: 0.15, output: 0.6 },
+  "openai/gpt-oss-20b": { input: 0.075, output: 0.3 },
   "meta-llama/llama-4-scout-17b-16e-instruct": { input: 0.11, output: 0.34 },
   "meta-llama/llama-4-maverick-17b-128e-instruct": { input: 0.2, output: 0.6 },
   "llama-3.3-70b-versatile": { input: 0.59, output: 0.79 },
