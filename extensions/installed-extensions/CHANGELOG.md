@@ -1,6 +1,6 @@
 # Installed Extensions Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-11-15
 
 - Add icon path for Windows
 
