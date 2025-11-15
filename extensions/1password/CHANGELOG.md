@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2025-11-15
 
 - Add stricter, opinionated eslint rules for clarity
 
