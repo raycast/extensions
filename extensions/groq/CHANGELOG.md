@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Updated Models] - 2025-11-15
+## [Updated Models] - {PR_MERGE_DATE}
 
 - Removed deprecated `DeepSeek R1 70B 128k`
 
