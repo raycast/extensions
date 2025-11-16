@@ -12,7 +12,7 @@ import {
 import { ConnectPayload } from "./types";
 import {
   constructCliConnectCommand,
-  parseIvpnAccountOuput,
+  parseIvpnAccountOutput,
   parseIvpnServersOutput,
   parseIvpnStatusOutput,
 } from "./utils";
@@ -58,7 +58,7 @@ export class IVPN {
   @ivpnErrorInterpreter
   static async getAccountInfo() {
     const { stdout } = await execPromise("ivpn account");
-    return parseIvpnAccountOuput(stdout);
+    return parseIvpnAccountOutput(stdout);
   }
 
   @ivpnErrorInterpreter

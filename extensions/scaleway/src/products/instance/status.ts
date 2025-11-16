@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { Instance } from '@scaleway/sdk'
+import { Instancev1 } from '@scaleway/sdk'
 
-export const SERVER_STATUSES = Instance.v1.SERVER_TRANSIENT_STATUSES.reduce(
+export const SERVER_STATUSES = Instancev1.SERVER_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -22,7 +22,7 @@ export const SERVER_STATUSES = Instance.v1.SERVER_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getServerStatusIcon = (server: Instance.v1.Server) => SERVER_STATUSES[server.state]
+export const getServerStatusIcon = (server: Instancev1.Server) => SERVER_STATUSES[server.state]
 
-export const isServerTransient = (server?: Instance.v1.Server) =>
-  server ? Instance.v1.SERVER_TRANSIENT_STATUSES.includes(server.state) : false
+export const isServerTransient = (server?: Instancev1.Server) =>
+  server ? Instancev1.SERVER_TRANSIENT_STATUSES.includes(server.state) : false

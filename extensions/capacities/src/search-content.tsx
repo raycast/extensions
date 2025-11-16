@@ -1,11 +1,11 @@
-import { List, ActionPanel, getPreferenceValues, showToast, Toast, Icon, Cache } from "@raycast/api";
+import { List, ActionPanel, Icon, Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import OpenInCapacities from "./components/OpenInCapacities";
 import { checkCapacitiesApp } from "./helpers/isCapacitiesInstalled";
-import axios from "axios";
-import { API_URL, useCapacitiesStore } from "./helpers/storage";
+import { API_HEADERS, API_URL, fetchErrorHandler, useCapacitiesStore } from "./helpers/storage";
 import { ColorKey, colorValues } from "./helpers/color";
 import ErrorView from "./components/ErrorView";
+import { usePromise } from "@raycast/utils";
 
 type Space = { title: string; id: string };
 
@@ -67,7 +67,6 @@ function SpaceDropdown({
 const cache = new Cache();
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   useEffect(() => {
     checkCapacitiesApp();
   }, []);
@@ -78,10 +77,8 @@ export default function Command() {
     triggerLoading();
   }, []);
 
-  const [isLoading, setIsLoading] = useState(false);
   const [spaceId, _setSpaceId] = useState<string>(cache.get("searchSpaceId") || "all");
   const [searchText, setSearchText] = useState<string>("");
-  const [results, setResults] = useState<SearchContentResponse["results"]>();
 
   function runSetSpaceId(id: string) {
     _setSpaceId(id);
@@ -94,46 +91,25 @@ export default function Command() {
     }
   }, [spaceId, store]);
 
-  useEffect(() => {
-    searchContent();
-  }, [searchText, spaceId]);
-
-  const searchContent = () => {
-    const spaceIds = spaceId === "all" ? store?.spaces?.map((el) => el.id) || [] : [spaceId];
-    if (!spaceIds.length) return;
-
-    if (!searchText.length) {
-      setResults([]);
-      return;
-    }
-
-    setIsLoading(true);
-    axios
-      .post<SearchContentResponse>(
-        `${API_URL}/search`,
-        {
+  const { isLoading, data: results } = usePromise(
+    async (searchText, spaceId) => {
+      const spaceIds = spaceId === "all" ? store?.spaces?.map((el) => el.id) || [] : [spaceId];
+      if (!searchText.length || !spaceIds.length) return [];
+      const response = await fetch(`${API_URL}/search`, {
+        method: "POST",
+        headers: API_HEADERS,
+        body: JSON.stringify({
           mode: "title",
           searchTerm: searchText,
           spaceIds: spaceIds,
-        },
-        {
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${preferences.bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        },
-      )
-      .then((response) => {
-        setResults(response.data.results);
-      })
-      .catch((error) => {
-        showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: error.message });
-      })
-      .finally(() => {
-        setIsLoading(false);
+        }),
       });
-  };
+      if (!response.ok) throw new Error(fetchErrorHandler(response.status));
+      const result = (await response.json()) as SearchContentResponse;
+      return result.results;
+    },
+    [searchText, spaceId],
+  );
 
   return error ? (
     <ErrorView error={error} />

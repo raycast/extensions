@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { AuthProvider } from "./v8/components/AuthContext";
 
+import { AuthProvider } from "./v8/components/AuthContext";
 import { Items as ItemsV8 } from "./v8/components/Vaults";
 
 export default function Command() {

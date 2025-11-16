@@ -89,6 +89,7 @@ export default function ManualFormSearch() {
         returnDate,
         adults: adultsCount,
         stops: values.stops as "any" | "direct" | "multiStop",
+        usedAIParsing: false,
       });
     } catch {
       await showFailureToast("Failed to Open");

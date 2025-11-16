@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ActionPanel, Action, List, Icon, Detail } from "@raycast/api";
 import { Character, characterSections } from "./characters";
 
@@ -33,11 +34,40 @@ function getKeywords(char: Character) {
 }
 
 export default function Command() {
+  const [selectedSection, setSelectedSection] = useState<string>("Show All");
+
   if (DEBUG) return <Debug />;
 
+  const sectionsToDisplay =
+    selectedSection === "Show All"
+      ? characterSections
+      : characterSections.filter(
+          (section) => section.title === selectedSection,
+        );
+
   return (
-    <List isShowingDetail>
-      {characterSections.map((section) => (
+    <List
+      isShowingDetail
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter by section"
+          value={selectedSection}
+          onChange={setSelectedSection}
+        >
+          <List.Dropdown.Item title="Show All" value="Show All" />
+          <List.Dropdown.Section>
+            {characterSections.map((section) => (
+              <List.Dropdown.Item
+                key={section.title}
+                title={section.title}
+                value={section.title}
+              />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
+      {sectionsToDisplay.map((section) => (
         <List.Section title={section.title} key={section.title}>
           {section.characters.map((char) => (
             <List.Item
@@ -65,7 +95,7 @@ export default function Command() {
                   <Action.Paste content={char.value} />
                   {char.html && (
                     <Action.CopyToClipboard
-                      title="Copy HTML"
+                      title="Copy HTML Entity"
                       content={char.html}
                       icon={Icon.Code}
                       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}

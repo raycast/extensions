@@ -2,10 +2,10 @@
  * Type conversion utilities for mapping between SDK types and internal types
  */
 
-import type { Meeting, Recording, Team, TeamMember } from "../types/Types";
-import type { Meeting as SDKMeeting } from "fathom-typescript/models/meeting";
-import type { Team as SDKTeam } from "fathom-typescript/models/team";
-import type { TeamMember as SDKTeamMember } from "fathom-typescript/models/teammember";
+import type { Meeting, Team, TeamMember } from "../types/Types";
+import type { Meeting as SDKMeeting } from "fathom-typescript/sdk/models/shared/meeting";
+import type { Team as SDKTeam } from "fathom-typescript/sdk/models/shared/team";
+import type { TeamMember as SDKTeamMember } from "fathom-typescript/sdk/models/shared/teammember";
 
 /**
  * Extended SDK TeamMember type that includes undocumented API response fields
@@ -22,20 +22,40 @@ export function convertSDKMeeting(m: SDKMeeting): Meeting {
   const durationMs = m.recordingEndTime.getTime() - m.recordingStartTime.getTime();
   const durationSeconds = Math.floor(durationMs / 1000);
 
+  // SDK v0.0.36+ provides recordingId as a number
+  const recordingId = String(m.recordingId);
+
+  // Extract team info from recordedBy
+  const recordedByTeam = m.recordedBy?.team;
+  const recordedByName = m.recordedBy?.name;
+
+  // Extract action items count
+  const actionItemsCount = m.actionItems?.length || 0;
+
   return {
-    id: m.url.split("/").pop() || m.url,
+    id: recordingId,
     title: m.title || "Untitled",
+    meetingTitle: m.meetingTitle || undefined,
     startTimeISO: recordingStart,
+    createdAt: m.createdAt.toISOString(),
     durationSeconds,
     teamId: undefined,
-    teamName: null,
-    url: m.shareUrl,
+    teamName: recordedByTeam || null,
+    recordedByTeam,
+    recordedByName,
+    url: m.url,
+    shareUrl: m.shareUrl,
     recordedByUserId: m.recordedBy.email,
-    recordingId: m.url.split("/").pop() || m.url,
-    isExternal: m.meetingType === "external",
-    calendarInvitees: m.calendarInvitees.map((inv) => inv.email).filter((email): email is string => email !== null),
+    recordingId,
+    actionItemsCount,
+    actionItems: m.actionItems || undefined,
+    calendarInvitees: m.calendarInvitees.map((inv) => inv.email).filter((email): email is string => email != null),
     calendarInviteesDomains: Array.from(
-      new Set(m.calendarInvitees.map((inv) => inv.email?.split("@")[1] || "").filter(Boolean)),
+      new Set(
+        m.calendarInvitees
+          .map((inv) => inv.email?.split("@")[1])
+          .filter((domain): domain is string => domain != null && domain !== ""),
+      ),
     ),
   };
 }
@@ -67,22 +87,5 @@ export function convertSDKTeamMember(tm: SDKTeamMemberWithExtras, teamName?: str
     emailDomain,
     teamId: undefined,
     team: teamFromSDK || teamName || undefined,
-  };
-}
-
-/**
- * Map Meeting to Recording (for backwards compatibility)
- */
-export function mapRecordingFromMeeting(m: Meeting): Recording {
-  return {
-    id: m.recordingId ?? m.id,
-    meetingId: m.id,
-    title: m.title,
-    startTimeISO: m.startTimeISO,
-    durationSeconds: m.durationSeconds,
-    teamId: m.teamId,
-    teamName: m.teamName ?? null,
-    url: m.url,
-    ownerUserId: m.recordedByUserId,
   };
 }

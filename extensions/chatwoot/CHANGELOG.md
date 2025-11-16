@@ -1,5 +1,14 @@
 # Chatwoot Changelog
 
+## [Search "Contacts" + Show Unread Count] - 2025-11-07
+
+### Contacts
+- delete contact
+- search contact w/ pagination
+
+### Conversations
+- show unread count
+
 ## [Add "My Inbox" + Fix "List Messages"] - 2025-10-29
 
 ### My Inbox

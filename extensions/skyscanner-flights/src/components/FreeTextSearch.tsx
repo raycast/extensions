@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, Toast, showToast, environment, AI } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, environment, AI, closeMainWindow } from "@raycast/api";
 import { useState } from "react";
 import { searchAirportsLocal, Airport, preprocessIATACodes, getCodeForSkyscanner } from "../data/airports";
 import { showFailureToast } from "@raycast/utils";
@@ -94,6 +94,8 @@ export default function FreeTextSearch() {
 
     setIsParsingQuery(true);
 
+    await closeMainWindow();
+
     try {
       await showToast({
         style: Toast.Style.Animated,
@@ -145,6 +147,8 @@ export default function FreeTextSearch() {
           returnDate,
           adults: adultsCount,
           stops: parsed.stops || "any",
+          originalQuery: searchText,
+          usedAIParsing: true,
         });
 
         setIsParsingQuery(false);
@@ -163,7 +167,7 @@ export default function FreeTextSearch() {
       // Handle parsing errors
       if (parsed.error) {
         prefillFormFromParsedData(parsed);
-        await handleFallback(parsed.error + ". Use manual form below.");
+        await handleFallback(parsed.error + ". Use quick form below.");
         return;
       }
 
@@ -175,9 +179,7 @@ export default function FreeTextSearch() {
         if (!parsed.departureDate) missing.push("date");
 
         prefillFormFromParsedData(parsed);
-        await showFailureToast(`AI couldn't parse: ${missing.join(", ")}. Check form below or rephrase.`);
-        setIsParsingQuery(false);
-        setShowFallbackForm(true);
+        await handleFallback(`AI couldn't parse: ${missing.join(", ")}. Check form below or rephrase.`);
         return;
       }
 
@@ -231,6 +233,8 @@ export default function FreeTextSearch() {
         returnDate,
         adults: adultsCount,
         stops: parsed.stops || "any",
+        originalQuery: searchText,
+        usedAIParsing: true,
       });
     } catch {
       await showFailureToast("Failed to parse query");
@@ -290,6 +294,8 @@ export default function FreeTextSearch() {
         returnDate,
         adults: adultsCount,
         stops: values.stops as "any" | "direct" | "multiStop",
+        originalQuery: searchText,
+        usedAIParsing: false,
       });
     } catch {
       await showFailureToast("Failed to Open");
@@ -320,15 +326,15 @@ export default function FreeTextSearch() {
         onChange={setSearchText}
         info={
           showFallbackForm
-            ? "AI parse failed. Edit your query or use manual form below"
-            : "Type in natural language and press Enter (requires Raycast Pro)"
+            ? "AI parse failed. Edit your query or enter details below"
+            : "Type in natural language and press Enter"
         }
       />
 
       {showFallbackForm && (
         <>
           <Form.Separator />
-          <Form.Description text="⚠️ Fallback to manual entry - Fill the form below:" />
+          <Form.Description text="Sorry we couldn't understand your query! Can you please fill the details below:" />
 
           <FlightSearchForm
             originAirports={originAirports}
