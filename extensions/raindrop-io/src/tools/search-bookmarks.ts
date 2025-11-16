@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { Bookmark, BookmarksResponse } from "../types";
+import { Bookmark, BookmarksResponse, CollectionsResponse } from "../types";
 
 type Input = {
   /**
@@ -8,7 +8,7 @@ type Input = {
    */
   query?: string;
   /**
-   * Tags to narrow the search. Each tag is converted to the `tag:tag-name` syntax.
+   * Tags to narrow the search.
    */
   tags?: string[];
   /**
@@ -33,6 +33,7 @@ type SearchResult = {
   note: string;
   tags: string[];
   collectionId: number;
+  collectionTitle: string;
   created: string;
   lastUpdate: string;
   highlights: { text: string; note: string }[];
@@ -80,14 +81,25 @@ export default async function searchBookmarks(input: Input = {}) {
   }
 
   const data = (await response.json()) as BookmarksResponse;
-  return data.items.slice(0, perPage).map(mapBookmarkToResult);
+  const items = data.items.slice(0, perPage);
+
+  let collectionTitleMap: Record<number, string> | undefined;
+  if (items.some((bookmark) => bookmark.collection?.$id && !bookmark.collection?.title)) {
+    collectionTitleMap = await fetchCollectionTitleMap(preferences.token);
+  }
+
+  return items.map((bookmark) => mapBookmarkToResult(bookmark, collectionTitleMap));
 }
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(value, max));
 }
 
-function mapBookmarkToResult(bookmark: Bookmark): SearchResult {
+function mapBookmarkToResult(bookmark: Bookmark, collectionTitleMap?: Record<number, string>): SearchResult {
+  const collectionId = bookmark.collection?.$id ?? -1;
+  const collectionTitle =
+    bookmark.collection?.title ?? collectionTitleMap?.[collectionId] ?? (collectionId === -1 ? "Unsorted" : "Unknown");
+
   return {
     id: bookmark._id,
     title: bookmark.title,
@@ -95,9 +107,29 @@ function mapBookmarkToResult(bookmark: Bookmark): SearchResult {
     excerpt: bookmark.excerpt ?? "",
     note: bookmark.note ?? "",
     tags: bookmark.tags ?? [],
-    collectionId: bookmark.collection?.$id ?? -1,
+    collectionId,
+    collectionTitle,
     created: bookmark.created,
     lastUpdate: bookmark.lastUpdate,
     highlights: bookmark.highlights?.map((highlight) => ({ text: highlight.text, note: highlight.note })) ?? [],
   };
+}
+
+async function fetchCollectionTitleMap(token: string) {
+  try {
+    const response = await fetch("https://api.raindrop.io/rest/v1/collections/all", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      return {};
+    }
+
+    const data = (await response.json()) as CollectionsResponse;
+    return Object.fromEntries(data.items.map((collection) => [collection._id, collection.title]));
+  } catch {
+    return {};
+  }
 }
