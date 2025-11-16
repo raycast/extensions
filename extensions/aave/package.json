@@ -5,6 +5,9 @@
   "description": "Get Aave markets information",
   "icon": "extension.png",
   "author": "vimtor",
+  "contributors": [
+    "smbdy"
+  ],
   "license": "MIT",
   "categories": [
     "Data",
@@ -18,6 +21,17 @@
       "subtitle": "Aave",
       "description": "Search Aave markets",
       "mode": "view"
+    },
+    {
+      "name": "search-addresses",
+      "title": "Search Addresses",
+      "subtitle": "Aave",
+      "description": "Search Aave smart contract addresses",
+      "mode": "view",
+      "keywords": [
+        "smart",
+        "contracts"
+      ]
     }
   ],
   "tools": [
@@ -63,7 +77,9 @@
   "dependencies": {
     "@aave/client": "^0.6.1",
     "@raycast/api": "^1.102.7",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "@bgd-labs/toolbox": "^0.0.15",
+    "@leeoniya/ufuzzy": "^1.0.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
