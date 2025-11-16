@@ -28,30 +28,27 @@ export default async function main() {
     }
 
     if (isWin) {
-      const isFileExplorerWindows = currentApp.name === "Windows Explorer";
-
-      if (isFileExplorerWindows) {
-        const paths = await getSelectedFileExplorerItems();
-        selectedItems = paths.map((p) => ({ path: p }));
-      }
+      const paths = await getSelectedFileExplorerItems();
+      selectedItems = paths.map((p) => ({ path: p }));
 
       if (selectedItems.length === 0) {
-        let currentPath = "";
-        if (isFileExplorerWindows) {
-          currentPath = await getCurrentExplorerPath();
-        }
+        const currentPath = await getCurrentExplorerPath();
 
         if (currentPath.length === 0) {
           throw new Error("Not a valid directory or no selection in active application.");
         }
 
-        await open(currentPath, editorApp);
+        selectedItems = [{ path: currentPath }];
       }
     }
 
     if (selectedItems.length > 0) {
       for (const item of selectedItems) {
-        await open(item.path, editorApp);
+        const path =
+          isWin && item.path.includes(" ") && !item.path.startsWith('"') && !item.path.endsWith('"')
+            ? `"${item.path}"`
+            : item.path;
+        await open(path, editorApp);
       }
     }
 

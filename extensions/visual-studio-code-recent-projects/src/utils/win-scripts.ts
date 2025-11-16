@@ -34,27 +34,17 @@ Get-SelectedExplorerItemsInternal | ForEach-Object { Write-Output $_ }
   return paths;
 };
 
-export const getCurrentExplorerPath = async () => {
+export async function getCurrentExplorerPath() {
   const script = `
-        function Get-CurrentExplorerPathInternal {
-            $shell = New-Object -ComObject Shell.Application
-            $foundPath = ""
+$url = (New-Object -ComObject Shell.Application).Windows() |
+  Where-Object { $_.LocationName -ne $null -and $_.LocationName -ne "Desktop" } |
+  Select-Object -First 1 -ExpandProperty LocationURL
 
-            foreach ($window in $shell.Windows()) {
-                try {
-                    if ($window.Document -and $window.Document.Folder -and $window.Document.Folder.Self.Path) {
-                        $path = $window.Document.Folder.Self.Path
-                        $foundPath = $path
-                        break
-                    }
-                }
-                catch { }
-            }
-            return $foundPath
-        }
-        Get-CurrentExplorerPathInternal
-    `;
-  const path = (await runPowerShellScript(script)).trim();
+Write-Output $url
+`;
+  const path = decodeURI(await runPowerShellScript(script))
+    .trim()
+    .replace("file:///", "");
 
   return path;
-};
+}
