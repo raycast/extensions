@@ -1,5 +1,5 @@
 import {
-  PackageDetail,
+  ApiPackageDetail,
   PaginatedResponse,
   CategorySummary,
   GridSummary,
@@ -29,7 +29,13 @@ async function request<T>(
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed (${response.status})`);
+    if (response.status === 429) {
+      throw new Error("Rate limit exceeded. Please try again later.");
+    }
+    if (response.status >= 500) {
+      throw new Error("Server error. Please try again later.");
+    }
+    throw new Error(`Request failed (${response.status}): ${response.statusText}`);
   }
 
   return (await response.json()) as T;
@@ -50,8 +56,8 @@ export async function searchPackages(query: string): Promise<SearchResponseItem[
   return await request<SearchResponseItem[]>("/search/", { q: query.trim() });
 }
 
-export async function fetchPackageDetail(slug: string): Promise<PackageDetail> {
-  return await request<PackageDetail>(`/packages/${slug}/`);
+export async function fetchPackageDetail(slug: string): Promise<ApiPackageDetail> {
+  return await request<ApiPackageDetail>(`/packages/${slug}/`);
 }
 
 export async function fetchCategoryByUrl(url: string): Promise<CategorySummary> {

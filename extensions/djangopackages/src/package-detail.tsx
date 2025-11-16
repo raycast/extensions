@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/api";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import {
   buildPackageUrl,
   getCategoryDetailByUrl,
@@ -7,6 +7,7 @@ import {
   getPackageDetailWithCache,
 } from "./data";
 import { PackageDetail } from "./types";
+import { normalizeExternalUrl } from "./url";
 
 interface PackageDetailViewProps {
   slug: string;
@@ -24,6 +25,11 @@ export function PackageDetailView({ slug, fallbackDescription }: PackageDetailVi
   const [error, setError] = useState<string>();
   const [categoryTag, setCategoryTag] = useState<TagValue>();
   const [gridTags, setGridTags] = useState<TagValue[]>([]);
+  const categoryRef = packageDetail?.category;
+  const rawGridRefs = packageDetail?.grids ?? [];
+  const gridRefsKey = rawGridRefs.join("|");
+  const gridRefs = useMemo(() => rawGridRefs, [gridRefsKey]);
+  const hasDetail = Boolean(packageDetail);
 
   const loadDetail = useCallback(
     async (forceRefresh = false): Promise<boolean> => {
@@ -53,15 +59,15 @@ export function PackageDetailView({ slug, fallbackDescription }: PackageDetailVi
     let ignore = false;
 
     async function hydrateLinkedMetadata() {
-      if (!packageDetail) {
+      if (!hasDetail) {
         setCategoryTag(undefined);
         setGridTags([]);
         return;
       }
 
       const [resolvedCategory, resolvedGrids] = await Promise.all([
-        resolveCategoryTag(packageDetail.category),
-        resolveGridTags(packageDetail.grids),
+        resolveCategoryTag(categoryRef),
+        resolveGridTags(gridRefs),
       ]);
 
       if (!ignore) {
@@ -75,7 +81,7 @@ export function PackageDetailView({ slug, fallbackDescription }: PackageDetailVi
     return () => {
       ignore = true;
     };
-  }, [packageDetail]);
+  }, [hasDetail, categoryRef, gridRefsKey, gridRefs]);
 
   const markdown = buildMarkdown(
     packageDetail,
@@ -87,6 +93,10 @@ export function PackageDetailView({ slug, fallbackDescription }: PackageDetailVi
   );
   const packageUrl = packageDetail?.slug ? buildPackageUrl(packageDetail.slug) : undefined;
 
+  const documentationUrl = normalizeExternalUrl(packageDetail?.documentation_url);
+  const pypiUrl = normalizeExternalUrl(packageDetail?.pypi_url);
+  const repoUrl = normalizeExternalUrl(packageDetail?.repo_url);
+
   return (
     <Detail
       isLoading={isLoading}
@@ -95,22 +105,16 @@ export function PackageDetailView({ slug, fallbackDescription }: PackageDetailVi
       metadata={packageDetail ? <PackageMetadata detail={packageDetail} slug={slug} /> : undefined}
       actions={
         <ActionPanel>
-          {packageDetail?.documentation_url && (
+          {documentationUrl && (
             <Action.OpenInBrowser
               title="Open Documentation"
-              url={packageDetail.documentation_url}
+              url={documentationUrl}
               icon={Icon.Book}
             />
           )}
-          {packageDetail?.pypi_url && (
-            <Action.OpenInBrowser title="Open PyPI" url={packageDetail.pypi_url} icon={Icon.Box} />
-          )}
-          {packageDetail?.repo_url && (
-            <Action.OpenInBrowser
-              title="Open Repository"
-              url={packageDetail.repo_url}
-              icon={Icon.Terminal}
-            />
+          {pypiUrl && <Action.OpenInBrowser title="Open PyPI" url={pypiUrl} icon={Icon.Box} />}
+          {repoUrl && (
+            <Action.OpenInBrowser title="Open Repository" url={repoUrl} icon={Icon.Terminal} />
           )}
           {packageUrl && (
             <Action.OpenInBrowser
@@ -180,14 +184,17 @@ function buildMarkdown(
   if (packageUrl) {
     quickLinks.push(`[DjangoPackages Page](${packageUrl})`);
   }
-  if (detail.repo_url) {
-    quickLinks.push(`[Repository](${detail.repo_url})`);
+  const normalizedRepo = normalizeExternalUrl(detail.repo_url);
+  const normalizedDocs = normalizeExternalUrl(detail.documentation_url);
+  const normalizedPypi = normalizeExternalUrl(detail.pypi_url);
+  if (normalizedRepo) {
+    quickLinks.push(`[Repository](${normalizedRepo})`);
   }
-  if (detail.documentation_url) {
-    quickLinks.push(`[Documentation](${detail.documentation_url})`);
+  if (normalizedDocs) {
+    quickLinks.push(`[Documentation](${normalizedDocs})`);
   }
-  if (detail.pypi_url) {
-    quickLinks.push(`[PyPI Project](${detail.pypi_url})`);
+  if (normalizedPypi) {
+    quickLinks.push(`[PyPI Project](${normalizedPypi})`);
   }
 
   const highlightsMarkdown =
@@ -213,7 +220,7 @@ function formatBadgeLine(label: string, values: TagValue[]): string {
 }
 
 async function resolveCategoryTag(
-  category: PackageDetail["category"],
+  category: PackageDetail["category"] | undefined,
 ): Promise<TagValue | undefined> {
   if (!category) {
     return undefined;
@@ -248,9 +255,14 @@ async function resolveGridTags(gridRefs?: string[]): Promise<TagValue[]> {
 
   const tags = await Promise.all(
     gridRefs.map(async (gridRef) => {
-      if (gridRef.startsWith("http")) {
+      const trimmedRef = gridRef.trim();
+      if (!trimmedRef) {
+        return undefined;
+      }
+
+      if (trimmedRef.startsWith("http")) {
         try {
-          const grid = await getGridDetailByUrl(gridRef);
+          const grid = await getGridDetailByUrl(trimmedRef);
           return {
             text: grid.title,
             url: grid.slug ? buildGridPageUrl(grid.slug) : undefined,
@@ -260,7 +272,7 @@ async function resolveGridTags(gridRefs?: string[]): Promise<TagValue[]> {
           return undefined;
         }
       }
-      return { text: gridRef };
+      return { text: trimmedRef };
     }),
   );
 
@@ -277,6 +289,9 @@ function buildGridPageUrl(slug: string): string {
 
 function PackageMetadata({ detail, slug }: { detail: PackageDetail; slug: string }) {
   const packageUrl = buildPackageUrl(slug);
+  const repoUrl = normalizeExternalUrl(detail.repo_url);
+  const documentationUrl = normalizeExternalUrl(detail.documentation_url);
+  const pypiUrl = normalizeExternalUrl(detail.pypi_url);
   const overviewItems = [
     detail.pypi_version ? (
       <Detail.Metadata.Label title="PyPI Version" text={detail.pypi_version} key="pypi" />
@@ -286,45 +301,21 @@ function PackageMetadata({ detail, slug }: { detail: PackageDetail; slug: string
     ) : null,
   ].filter(Boolean);
 
-  const activityItems = [
-    detail.last_released ? (
-      <Detail.Metadata.Label
-        title="Last Release"
-        text={formatDate(detail.last_released)}
-        key="release"
-      />
-    ) : null,
-    detail.last_committed ? (
-      <Detail.Metadata.Label
-        title="Last Commit"
-        text={formatDate(detail.last_committed)}
-        key="commit"
-      />
-    ) : null,
-    detail.last_updated ? (
-      <Detail.Metadata.Label
-        title="Last Updated"
-        text={formatDate(detail.last_updated)}
-        key="updated"
-      />
-    ) : null,
-    detail.last_fetched ? (
-      <Detail.Metadata.Label
-        title="Last Fetched"
-        text={formatDate(detail.last_fetched)}
-        key="fetched"
-      />
-    ) : null,
-  ].filter(Boolean);
+  const activityEntries: Array<{ title: string; value?: string | null }> = [
+    { title: "Last Release", value: detail.last_released },
+    { title: "Last Commit", value: detail.last_committed },
+    { title: "Last Updated", value: detail.last_updated },
+    { title: "Last Fetched", value: detail.last_fetched },
+  ];
+  const activityItems = activityEntries
+    .map(({ title, value }) =>
+      value ? <Detail.Metadata.Label title={title} text={formatDate(value)} key={title} /> : null,
+    )
+    .filter(Boolean);
 
   const repoItems = [
-    detail.repo_url ? (
-      <Detail.Metadata.Link
-        title="Repository"
-        target={detail.repo_url}
-        text={detail.repo_url}
-        key="repo"
-      />
+    repoUrl ? (
+      <Detail.Metadata.Link title="Repository" target={repoUrl} text={repoUrl} key="repo" />
     ) : null,
     typeof detail.repo_watchers === "number" ? (
       <Detail.Metadata.Label
@@ -345,25 +336,31 @@ function PackageMetadata({ detail, slug }: { detail: PackageDetail; slug: string
       text="DjangoPackages"
       key="pkg"
     />,
-    detail.documentation_url ? (
+    documentationUrl ? (
       <Detail.Metadata.Link
         title="Documentation"
-        target={detail.documentation_url}
-        text={detail.documentation_url}
+        target={documentationUrl}
+        text={documentationUrl}
         key="docs"
       />
     ) : null,
-    detail.pypi_url ? (
-      <Detail.Metadata.Link
-        title="PyPI"
-        target={detail.pypi_url}
-        text={detail.pypi_url}
-        key="pypi-link"
-      />
+    pypiUrl ? (
+      <Detail.Metadata.Link title="PyPI" target={pypiUrl} text={pypiUrl} key="pypi-link" />
     ) : null,
   ].filter(Boolean);
 
-  const sections = [overviewItems, activityItems, repoItems, linkItems].filter(
+  const participantsItems =
+    detail.participants && detail.participants.length > 0
+      ? [
+          <Detail.Metadata.TagList title="Participants" key="participants">
+            {detail.participants.map((participant, index) => (
+              <Detail.Metadata.TagList.Item text={participant} key={`${participant}-${index}`} />
+            ))}
+          </Detail.Metadata.TagList>,
+        ]
+      : [];
+
+  const sections = [overviewItems, activityItems, repoItems, linkItems, participantsItems].filter(
     (items) => items.length > 0,
   );
 
@@ -379,11 +376,51 @@ function PackageMetadata({ detail, slug }: { detail: PackageDetail; slug: string
   );
 }
 
+const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleString(undefined, {
+  if (Number.isNaN(date.getTime())) {
+    return dateString;
+  }
+
+  const absolute = date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
+
+  const relative = formatRelativeToNow(date);
+  return relative ? `${absolute} (${relative})` : absolute;
+}
+
+function formatRelativeToNow(date: Date): string | undefined {
+  const seconds = (date.getTime() - Date.now()) / 1000;
+  if (!Number.isFinite(seconds)) {
+    return undefined;
+  }
+
+  const divisions: Array<{ amount: number; unit: Intl.RelativeTimeFormatUnit }> = [
+    { amount: 60, unit: "second" },
+    { amount: 60, unit: "minute" },
+    { amount: 24, unit: "hour" },
+    { amount: 7, unit: "day" },
+    { amount: 4.34524, unit: "week" },
+    { amount: 12, unit: "month" },
+    { amount: Number.POSITIVE_INFINITY, unit: "year" },
+  ];
+
+  let duration = seconds;
+  for (const division of divisions) {
+    if (Math.abs(duration) < division.amount) {
+      const rounded = Math.round(duration);
+      if (rounded === 0) {
+        return "just now";
+      }
+      return RELATIVE_TIME_FORMATTER.format(rounded, division.unit);
+    }
+    duration /= division.amount;
+  }
+
+  return undefined;
 }

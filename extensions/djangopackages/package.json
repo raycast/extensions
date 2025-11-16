@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "djangopackages",
   "title": "Django Packages",
   "version": "1.0.0",
@@ -15,7 +16,13 @@
   "author": "saadmk11",
   "platforms": ["macOS", "Windows"],
   "categories": ["Developer Tools"],
-  "keywords": ["django", "python", "packages", "search", "djangopackages"],
+  "keywords": [
+    "django",
+    "python",
+    "packages",
+    "search",
+    "djangopackages"
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.6"
   },
@@ -37,7 +44,7 @@
       "subtitle": "djangopackages.org",
       "description": "Search Django packages, filter by category, and open related resources.",
       "mode": "view",
-      "keywords": ["django", "packages", "python", "search"]
+      "keywords": ["django", "packages", "python", "search", "djangopackages"]
     }
   ],
   "permissions": [

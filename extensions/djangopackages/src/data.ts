@@ -6,7 +6,14 @@ import {
   searchPackages,
 } from "./api";
 import { getCachedValue, setCachedValue } from "./cache";
-import { CategorySummary, GridSummary, PackageDetail, SearchResponseItem } from "./types";
+import { FIFTEEN_MINUTES_MS, MAX_SEARCH_RESULTS, SIX_HOURS_MS, TWELVE_HOURS_MS } from "./constants";
+import {
+  ApiPackageDetail,
+  CategorySummary,
+  GridSummary,
+  PackageDetail,
+  SearchResponseItem,
+} from "./types";
 
 const CATEGORY_CACHE_KEY = "categories";
 const SEARCH_CACHE_PREFIX = "search:";
@@ -14,9 +21,9 @@ const PACKAGE_CACHE_PREFIX = "package:";
 const CATEGORY_DETAIL_CACHE_PREFIX = "category-detail:";
 const GRID_DETAIL_CACHE_PREFIX = "grid-detail:";
 
-const FIFTEEN_MINUTES = 15 * 60 * 1000;
-const TWELVE_HOURS = 12 * 60 * 60 * 1000;
-const SIX_HOURS = 6 * 60 * 60 * 1000;
+function buildCacheKey(prefix: string, raw: string): string {
+  return `${prefix}${encodeURIComponent(raw)}`;
+}
 
 export async function getCategories(forceRefresh = false): Promise<CategorySummary[]> {
   if (!forceRefresh) {
@@ -27,7 +34,7 @@ export async function getCategories(forceRefresh = false): Promise<CategorySumma
   }
 
   const fresh = await fetchCategories();
-  await setCachedValue(CATEGORY_CACHE_KEY, fresh, TWELVE_HOURS);
+  await setCachedValue(CATEGORY_CACHE_KEY, fresh, TWELVE_HOURS_MS);
   return fresh;
 }
 
@@ -35,7 +42,12 @@ export async function getSearchResults(
   query: string,
   forceRefresh = false,
 ): Promise<SearchResponseItem[]> {
-  const cacheKey = `${SEARCH_CACHE_PREFIX}${query.toLowerCase()}`;
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) {
+    return [];
+  }
+
+  const cacheKey = buildCacheKey(SEARCH_CACHE_PREFIX, normalizedQuery);
 
   if (!forceRefresh) {
     const cached = await getCachedValue<SearchResponseItem[]>(cacheKey);
@@ -44,16 +56,17 @@ export async function getSearchResults(
     }
   }
 
-  const fresh = await searchPackages(query);
-  await setCachedValue(cacheKey, fresh, FIFTEEN_MINUTES);
-  return fresh;
+  const fresh = await searchPackages(normalizedQuery);
+  const limited = fresh.slice(0, MAX_SEARCH_RESULTS);
+  await setCachedValue(cacheKey, limited, FIFTEEN_MINUTES_MS);
+  return limited;
 }
 
 export async function getPackageDetailWithCache(
   slug: string,
   forceRefresh = false,
 ): Promise<PackageDetail> {
-  const cacheKey = `${PACKAGE_CACHE_PREFIX}${slug}`;
+  const cacheKey = buildCacheKey(PACKAGE_CACHE_PREFIX, slug);
 
   if (!forceRefresh) {
     const cached = await getCachedValue<PackageDetail>(cacheKey);
@@ -63,8 +76,9 @@ export async function getPackageDetailWithCache(
   }
 
   const fresh = await fetchPackageDetail(slug);
-  await setCachedValue(cacheKey, fresh, SIX_HOURS);
-  return fresh;
+  const normalized = normalizePackageDetail(fresh);
+  await setCachedValue(cacheKey, normalized, SIX_HOURS_MS);
+  return normalized;
 }
 
 export function buildPackageUrl(slug: string): string {
@@ -88,16 +102,36 @@ async function getCachedResource<T>(
 
 export async function getCategoryDetailByUrl(url: string): Promise<CategorySummary> {
   return getCachedResource(
-    `${CATEGORY_DETAIL_CACHE_PREFIX}${url}`,
+    buildCacheKey(CATEGORY_DETAIL_CACHE_PREFIX, url),
     () => fetchCategoryByUrl(url),
-    TWELVE_HOURS,
+    TWELVE_HOURS_MS,
   );
 }
 
 export async function getGridDetailByUrl(url: string): Promise<GridSummary> {
   return getCachedResource(
-    `${GRID_DETAIL_CACHE_PREFIX}${url}`,
+    buildCacheKey(GRID_DETAIL_CACHE_PREFIX, url),
     () => fetchGridByUrl(url),
-    TWELVE_HOURS,
+    TWELVE_HOURS_MS,
   );
+}
+
+function normalizePackageDetail(detail: ApiPackageDetail): PackageDetail {
+  const participants = detail.participants;
+  let normalizedParticipants: string[] | undefined;
+  if (typeof participants === "string") {
+    normalizedParticipants = participants
+      .split(/,|\n/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  } else if (Array.isArray(participants)) {
+    normalizedParticipants = participants
+      .map((part) => part?.trim())
+      .filter((part): part is string => Boolean(part));
+  }
+
+  return {
+    ...detail,
+    participants: normalizedParticipants,
+  };
 }

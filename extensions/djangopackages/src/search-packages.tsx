@@ -8,18 +8,22 @@ import {
   getSearchResults,
 } from "./data";
 import { CategorySummary, SearchResponseItem } from "./types";
+import { PAGE_SIZE } from "./constants";
+import { normalizeExternalUrl } from "./url";
 
-const PAGE_SIZE = 15;
+type LoadingState = "initial" | "search" | "idle";
 export default function SearchPackagesCommand() {
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [categories, setCategories] = useState<CategorySummary[]>([]);
   const [results, setResults] = useState<SearchResponseItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadingState, setLoadingState] = useState<LoadingState>("initial");
   const [errorMessage, setErrorMessage] = useState<string>();
   const [page, setPage] = useState<number>(1);
+  const [isPaginating, setIsPaginating] = useState(false);
 
   const debouncedSearchText = useDebouncedValue(searchText, 400);
+  const isLoading = loadingState !== "idle";
 
   useEffect(() => {
     let ignore = false;
@@ -29,10 +33,12 @@ export default function SearchPackagesCommand() {
         const data = await getCategories();
         if (!ignore) {
           setCategories(data);
+          setLoadingState((current: LoadingState) => (current === "initial" ? "idle" : current));
         }
       } catch (error) {
         if (!ignore) {
           console.error(error);
+          setLoadingState((current: LoadingState) => (current === "initial" ? "idle" : current));
         }
       }
     }
@@ -49,12 +55,12 @@ export default function SearchPackagesCommand() {
     async function runSearch() {
       if (!debouncedSearchText.trim()) {
         setResults([]);
-        setIsLoading(false);
+        setLoadingState((current: LoadingState) => (current === "initial" ? current : "idle"));
         setErrorMessage(undefined);
         return;
       }
 
-      setIsLoading(true);
+      setLoadingState("search");
       setErrorMessage(undefined);
 
       try {
@@ -72,7 +78,7 @@ export default function SearchPackagesCommand() {
         await showToast({ style: Toast.Style.Failure, title: "Search failed", message });
       } finally {
         if (!ignore) {
-          setIsLoading(false);
+          setLoadingState((current: LoadingState) => (current === "initial" ? current : "idle"));
         }
       }
     }
@@ -96,7 +102,7 @@ export default function SearchPackagesCommand() {
     );
   }, [results, categoryFilter]);
 
-  const paginatedResults = useMemo(
+  const paginatedResults = useMemo<SearchResponseItem[]>(
     () => filteredResults.slice(0, page * PAGE_SIZE),
     [filteredResults, page],
   );
@@ -107,7 +113,7 @@ export default function SearchPackagesCommand() {
       {canResetFilters && (
         <Action
           icon={Icon.ArrowCounterClockwise}
-          title="Reset Search & Filters"
+          title="Reset Search and Filters"
           onAction={() => {
             setSearchText("");
             setCategoryFilter("all");
@@ -137,21 +143,38 @@ export default function SearchPackagesCommand() {
         pageSize: PAGE_SIZE,
         hasMore,
         onLoadMore: () => {
-          if (hasMore) {
-            setPage((prevPage) => prevPage + 1);
+          if (!hasMore || isPaginating) {
+            return;
           }
+          setIsPaginating(true);
+          setTimeout(() => {
+            setPage((prevPage: number) => prevPage + 1);
+            setIsPaginating(false);
+          }, 50);
         },
       }}
     >
       {paginatedResults.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={errorMessage ? Icon.ExclamationMark : Icon.MagnifyingGlass}
-          title={errorMessage ? "Unable to load packages" : "No packages yet"}
-          description={errorMessage ?? "Try a different keyword or category."}
+          title={getEmptyStateTitle({ errorMessage, searchText, loadingState })}
+          description={getEmptyStateDescription({ errorMessage, searchText })}
           actions={emptyViewActions}
         />
       ) : (
-        paginatedResults.map((item) => <PackageListItem key={item.slug} item={item} />)
+        <>
+          {paginatedResults.map((item: SearchResponseItem) => (
+            <PackageListItem key={item.slug} item={item} />
+          ))}
+          {isPaginating && (
+            <List.Item
+              key="pagination-spinner"
+              title="Loading more results"
+              subtitle="Preparing the next page"
+              icon={Icon.CircleProgress}
+            />
+          )}
+        </>
       )}
     </List>
   );
@@ -172,13 +195,14 @@ function PackageListItem({ item }: { item: SearchResponseItem }) {
   if (item.category) {
     accessories.push({
       tag: { value: item.category, color: Color.Blue },
+      tooltip: `Category: ${item.category}`,
     });
   }
 
   if (typeof item.repo_watchers === "number") {
     accessories.push({
       text: `${item.repo_watchers.toLocaleString()} ★`,
-      tooltip: "GitHub watchers",
+      tooltip: "Repository watchers",
     });
   }
 
@@ -194,7 +218,7 @@ function PackageListItem({ item }: { item: SearchResponseItem }) {
 }
 
 function PackageActions({ item }: { item: SearchResponseItem }) {
-  const packageUrl = buildPackageUrl(item.absolute_url);
+  const packageUrl = buildPackageUrl(item.slug);
 
   return (
     <ActionPanel>
@@ -232,13 +256,16 @@ function OpenResourceAction({ slug, field, title }: OpenResourceActionProps) {
         try {
           const detail = await getPackageDetailWithCache(slug);
           const url = detail[field];
-          if (url) {
+          const normalizedUrl = normalizeExternalUrl(url);
+          if (normalizedUrl) {
             toast.hide();
-            await open(url.startsWith("http") ? url : `https://${url}`);
+            await open(normalizedUrl);
           } else {
             toast.style = Toast.Style.Failure;
             toast.title = "Link unavailable";
-            toast.message = `${title} is not provided for this package.`;
+            toast.message = url
+              ? `${title} link looks invalid. Please check the package metadata.`
+              : `${title} is not provided for this package.`;
           }
         } catch (error) {
           toast.style = Toast.Style.Failure;
@@ -267,4 +294,41 @@ function CategoryDropdown({
       ))}
     </List.Dropdown>
   );
+}
+
+function getEmptyStateTitle({
+  errorMessage,
+  searchText,
+  loadingState,
+}: {
+  errorMessage?: string;
+  searchText: string;
+  loadingState: LoadingState;
+}): string {
+  if (errorMessage) {
+    return "Unable to load packages";
+  }
+  if (loadingState === "initial") {
+    return "Loading categories";
+  }
+  if (!searchText.trim()) {
+    return "Start searching";
+  }
+  return "No packages yet";
+}
+
+function getEmptyStateDescription({
+  errorMessage,
+  searchText,
+}: {
+  errorMessage?: string;
+  searchText: string;
+}): string | undefined {
+  if (errorMessage) {
+    return errorMessage;
+  }
+  if (!searchText.trim()) {
+    return "Type a keyword to search Django packages.";
+  }
+  return "Try a different keyword or category.";
 }

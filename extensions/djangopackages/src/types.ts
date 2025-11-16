@@ -40,7 +40,7 @@ export interface SearchResponseItem {
   last_released?: string;
 }
 
-export interface PackageDetail extends Omit<SearchResponseItem, "category"> {
+interface BasePackageDetail extends Omit<SearchResponseItem, "category"> {
   id: number;
   repo_url?: string;
   documentation_url?: string;
@@ -51,7 +51,13 @@ export interface PackageDetail extends Omit<SearchResponseItem, "category"> {
   last_fetched?: string;
   created?: string;
   modified?: string;
-  participants?: string[] | string;
+  participants?: string[];
   grids?: string[];
   category: string | CategorySummary | null;
 }
+
+export interface ApiPackageDetail extends Omit<BasePackageDetail, "participants"> {
+  participants?: string[] | string;
+}
+
+export type PackageDetail = BasePackageDetail;
