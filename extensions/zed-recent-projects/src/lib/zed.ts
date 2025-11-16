@@ -46,10 +46,10 @@ export async function getZedApp() {
   const windowsMetadata = getZedWindowsMetadata(zedBuild);
 
   const app = applications.find((a) => {
-    if(isMac) {
-      return a.bundleId === zedBundleId
+    if (isMac) {
+      return a.bundleId === zedBundleId;
     }
-    if(isWindows) {
+    if (isWindows) {
       return a.name === windowsMetadata.name;
     }
   });

@@ -77,10 +77,9 @@ export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null 
       zedWorkspace.port ? ":" + zedWorkspace.port : ""
     }/${processedPath}`;
 
-    const hasWsl =
-      "kind" in zedWorkspace && zedWorkspace.kind === "wsl" && zedWorkspace.user && zedWorkspace.distro;
+    const hasWsl = "kind" in zedWorkspace && zedWorkspace.kind === "wsl" && zedWorkspace.user && zedWorkspace.distro;
     const wsl = hasWsl ? { user: zedWorkspace.user, distro: zedWorkspace.distro } : null;
-    const base: any = {
+    const base: Workspace = {
       id: zedWorkspace.id,
       lastOpened: zedWorkspace.timestamp,
       type: zedWorkspace.type,
@@ -89,7 +88,7 @@ export function parseZedWorkspace(zedWorkspace: ZedWorkspace): Workspace | null 
       host: zedWorkspace.host,
     };
     if (hasWsl) base.wsl = wsl;
-    return base as Workspace;
+    return base;
   }
 
   return null;

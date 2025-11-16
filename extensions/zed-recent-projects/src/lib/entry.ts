@@ -8,7 +8,7 @@ export interface Entry {
   uri: string;
   title: string;
   subtitle: string;
-  wsl?: { user: string | null; distro: string | null; } | null
+  wsl?: { user: string | null; distro: string | null } | null;
   type: ZedWorkspaceType;
 }
 
@@ -16,10 +16,13 @@ export function getEntry(workspace: Workspace): Entry | null {
   try {
     const title = decodeURIComponent(basename(workspace.path)) || workspace.path;
 
-    const suffix = workspace.wsl ? ` [WSL: ${workspace.wsl.distro}]` : workspace.type === "remote" ? " [SSH: " + workspace.host + "]" : "";
+    const suffix = workspace.wsl
+      ? ` [WSL: ${workspace.wsl.distro}]`
+      : workspace.type === "remote"
+        ? " [SSH: " + workspace.host + "]"
+        : "";
 
-    const subtitle =
-      tildify(dirname(workspace.path)) + (suffix);
+    const subtitle = tildify(dirname(workspace.path)) + suffix;
 
     return {
       id: workspace.id,

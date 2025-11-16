@@ -22,7 +22,6 @@ export function Command() {
     .filter((e) => e.type === "remote" || exists(e.uri))
     .sort((a, b) => a.order - b.order);
 
-
   const removeAndUnpinEntry = async (entry: Pick<Entry, "id" | "uri">) => {
     await removeEntry(entry.id);
     unpinEntry(entry);
@@ -139,18 +138,14 @@ export function Command() {
   );
 }
 
-function OpenOnZed({ entry, app }: { entry: Entry, app: Application }) {
+function OpenOnZed({ entry, app }: { entry: Entry; app: Application }) {
   const zedIcon = { fileIcon: app.path };
   const openWsl = () => execWindowsZed(["--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${entry.path}`]);
   return entry.wsl ? (
-    <Action
-      title="Open in Zed"
-      onAction={openWsl}
-      icon={zedIcon}
-    />
+    <Action title="Open in Zed" onAction={openWsl} icon={zedIcon} />
   ) : (
     <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />
-  )
+  );
 }
 
 function RemoveActionSection({

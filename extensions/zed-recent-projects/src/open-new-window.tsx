@@ -9,7 +9,7 @@ const zedBuild: ZedBuild = preferences.build as ZedBuild;
 
 const makeNewWindow = async () => {
   if (isWindows) {
-    await execWindowsZed(["-n"])
+    await execWindowsZed(["-n"]);
   } else {
     await runAppleScript(`
       tell application "${zedBuild}"

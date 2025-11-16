@@ -12,6 +12,5 @@ export function exists(p: string) {
   }
 }
 
-
 export const isWindows = process.platform === "win32";
 export const isMac = process.platform === "darwin";

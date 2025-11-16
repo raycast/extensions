@@ -43,9 +43,7 @@ export async function queryDb(dbPath: string, query: string): Promise<string> {
           return String(Object.values(firstRow)[0]);
         }
 
-        return res
-          .map(row => Object.values(row as Record<string, unknown>).join("\t"))
-          .join("\n");
+        return res.map((row) => Object.values(row as Record<string, unknown>).join("\t")).join("\n");
       } catch (error) {
         console.error(`Error querying Zed workspace DB (executeSQL): ${error}`);
         throw error;
