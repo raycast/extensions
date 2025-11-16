@@ -1,29 +1,11 @@
-import { closeMainWindow, getSelectedFinderItems, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
-import { runAppleScript, runPowerShellScript } from "@raycast/utils";
-import { getZedBundleId, ZedBuild } from "./lib/zed";
-import { isWindows } from "./lib/utils";
-
-const preferences: Record<string, string> = getPreferenceValues();
-const zedBuild: ZedBuild = preferences.build as ZedBuild;
+import { closeMainWindow, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { getZedApp } from "./lib/zed";
+import { isMac, isWindows } from "./lib/utils";
+import { getCurrentExplorerPath, getSelectedFileExplorerItems } from "./lib/windows";
 
 export const getCurrentFinderPath = async () => {
-  if (isWindows) {
-    // Get selected path in Windows Expl
-    const script = `
-      Add-Type -AssemblyName Microsoft.VisualBasic
-      Add-Type -AssemblyName System.Windows.Forms
-      $explorer = New-Object -ComObject Shell.Application
-      $window = $explorer.Windows() | Where-Object { $_.Document.Folder.Self.Path } | Select-Object -First 1
-      if ($window) {
-        $window.Document.Folder.Self.Path
-      } else {
-        ""
-      }
-    `;
-    return await runPowerShellScript(script);
-  } else {
-    // macOS Finder path
-    const getCurrentFinderPathScript = `
+  const getCurrentFinderPathScript = `
       try
         tell application "Finder"
           return POSIX path of (insertion location as alias)
@@ -32,34 +14,53 @@ export const getCurrentFinderPath = async () => {
         return ""
       end try
     `;
-    return await runAppleScript(getCurrentFinderPathScript);
-  }
+  return await runAppleScript(getCurrentFinderPathScript);
 };
+
+const fileExplorerApp = isWindows ? "Windows Explorer" : "Finder";
 
 export default async function openWithZed() {
   try {
     let selectedItems: { path: string }[] = [];
 
-    const finderItems = await getSelectedFinderItems();
-    if (finderItems.length === 0) {
-      const currentPath = await getCurrentFinderPath();
-      if (currentPath) {
-        selectedItems = [{ path: currentPath }];
+    if (isMac) {
+      const finderItems = await getSelectedFinderItems();
+      if (finderItems.length === 0) {
+        const currentPath = await getCurrentFinderPath();
+        if (currentPath) {
+          selectedItems = [{ path: currentPath }];
+        } else {
+          throw new Error("No Finder item selected");
+        }
       } else {
-        throw new Error("No Finder item selected");
+        selectedItems = finderItems.map((i) => ({ path: i.path }));
       }
-    } else {
-      selectedItems = finderItems.map((i) => ({ path: i.path }));
     }
 
-    for (const finderItem of selectedItems) {
-      await open(finderItem.path, getZedBundleId(zedBuild));
+    if (isWindows) {
+      const explorerItems = await getSelectedFileExplorerItems();
+      if (explorerItems.length === 0) {
+        const currentPath = await getCurrentExplorerPath();
+        if (currentPath) {
+          selectedItems = [{ path: currentPath }];
+        } else {
+          throw new Error("No Explorer item selected");
+        }
+      } else {
+        selectedItems = explorerItems.map((path) => ({ path }));
+      }
+    }
+
+    const app = await getZedApp();
+    for (const { path } of selectedItems) {
+      // on windows it just opens the first item, it is a raycast issue
+      await open(encodeURI(path), app);
     }
 
     await closeMainWindow();
   } catch (e) {
     await showToast({
-      title: "Failed opening selected Finder item",
+      title: `Failed opening selected ${fileExplorerApp} item`,
       style: Toast.Style.Failure,
       message: e instanceof Error ? e.message : String(e),
     });

@@ -1,5 +1,7 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getApplications, getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
+import { zedBuild } from "./preferences";
+import { isMac, isWindows } from "./utils";
 
 export type ZedBuild = Preferences["build"];
 export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview" | "dev.zed.Zed-Dev";
@@ -36,4 +38,21 @@ export function getZedDbPath() {
   } else {
     return `${homedir()}\\AppData\\Local\\Zed\\db\\${getZedDbName(zedBuild)}\\db.sqlite`;
   }
+}
+
+export async function getZedApp() {
+  const applications = await getApplications();
+  const zedBundleId = getZedBundleId(zedBuild);
+  const windowsMetadata = getZedWindowsMetadata(zedBuild);
+
+  const app = applications.find((a) => {
+    if(isMac) {
+      return a.bundleId === zedBundleId
+    }
+    if(isWindows) {
+      return a.name === windowsMetadata.name;
+    }
+  });
+
+  return app;
 }

@@ -1,9 +1,8 @@
 import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { ZedBuild } from "./lib/zed";
-import { execWindowsZed, isWindows } from "./lib/utils";
-import { execFileSync } from "node:child_process";
-import { join } from "node:path";
+import { isWindows } from "./lib/utils";
+import { execWindowsZed } from "./lib/windows";
 
 const preferences: Record<string, string> = getPreferenceValues();
 const zedBuild: ZedBuild = preferences.build as ZedBuild;

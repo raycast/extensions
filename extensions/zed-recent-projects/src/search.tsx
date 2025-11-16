@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Application, Icon, List } from "@raycast/api";
 import { useZedContext, withZed } from "./components/with-zed";
-import { execWindowsZed, isWindows } from "./lib/utils";
+import { isWindows } from "./lib/utils";
 import { exists } from "./lib/utils";
 import { Entry, getEntry } from "./lib/entry";
 import { EntryItem } from "./components/entry-item";
 import { usePinnedEntries } from "./hooks/use-pinned-entries";
 import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
+import { execWindowsZed } from "./lib/windows";
 
 export function Command() {
   const { app, dbPath, workspaceDbVersion } = useZedContext();
