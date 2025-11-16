@@ -1,5 +1,9 @@
 # Raycast Fork Extensions Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fix init repository when user path has spaces
+
 ## [Improvements] - 2025-09-29
 
 - Add support for checking if commits are ahead
