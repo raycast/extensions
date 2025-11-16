@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support.
+
 ## [Update] - 2025-11-03
 
 Update to @raycast/api 1.103, fix types, and add tests to Zed db schema v30.
