@@ -8,13 +8,7 @@ import { defaultGitExecutableFilePath } from "./constants.js";
 import { catchError } from "./errors.js";
 import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
-import {
-  gitExecutableFilePath,
-  getRemoteUrl,
-  repositoryConfigurationPath,
-  isWindows,
-  addQuotesOnWindows,
-} from "./utils.js";
+import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, addQuotesOnWindows } from "./utils.js";
 
 /**
  * The path to the Git executable file.
