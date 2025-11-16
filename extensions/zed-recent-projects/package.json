@@ -94,6 +94,7 @@
   "scripts": {
     "build": "ray build",
     "create-fixtures": "./scripts/create-fixtures.sh",
+    "create-fixtures:ts": "node --experimental-transform-types scripts/create-fixtures.ts",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
