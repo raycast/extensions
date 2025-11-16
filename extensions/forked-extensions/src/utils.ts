@@ -108,6 +108,6 @@ export const getCommitDiffMessage = (
  * @param path The path to add quotes to.
  * @returns The path with quotes added if necessary.
  */
-export const addQuotesOnWindows = (path: string) => {
+export const addQuotesIfInWindows = (path: string) => {
   return isWindows && path.includes(" ") && !(path.startsWith('"') && path.endsWith('"')) ? `"${path}"` : path;
 };

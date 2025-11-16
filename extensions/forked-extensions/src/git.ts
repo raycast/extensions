@@ -8,7 +8,7 @@ import { defaultGitExecutableFilePath } from "./constants.js";
 import { catchError } from "./errors.js";
 import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
-import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, addQuotesOnWindows } from "./utils.js";
+import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, addQuotesIfInWindows } from "./utils.js";
 
 /**
  * The path to the Git executable file.
@@ -16,7 +16,7 @@ import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, addQu
  * Windows does not support paths with spaces without quotes, like `C:\Program Files\Git\cmd\git.exe`.
  * So we need to add quotes around the path if it contains spaces and is not already quoted.
  */
-const gitFilePath = addQuotesOnWindows(gitExecutableFilePath || defaultGitExecutableFilePath);
+const gitFilePath = addQuotesIfInWindows(gitExecutableFilePath || defaultGitExecutableFilePath);
 
 /**
  * Resolves the path to the repository configuration.
@@ -156,7 +156,7 @@ export const initRepository = async () => {
       "--filter=blob:none",
       "--no-checkout",
       getRemoteUrl(forkedRepository),
-      addQuotesOnWindows(repositoryPath),
+      addQuotesIfInWindows(repositoryPath),
     ],
     {
       shell: true,
