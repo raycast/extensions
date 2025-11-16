@@ -15,7 +15,6 @@ export function Command() {
     workspaceDbVersion,
   );
 
-  // console.log(workspaces)
   const { pinnedEntries, pinEntry, unpinEntry, unpinAllEntries, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)
@@ -31,9 +30,6 @@ export function Command() {
     await removeAllEntries();
     unpinAllEntries();
   };
-
-  // console.log(Object.values(workspaces)
-  //   .filter((e) => !pinnedEntries[e.uri] && (!!e.host || exists(e.uri))))
 
   return (
     <List isLoading={isLoading}>
