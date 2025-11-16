@@ -41,8 +41,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.0.1"
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "@upstash/redis": "^1.35.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

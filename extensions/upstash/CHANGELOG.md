@@ -1,5 +1,9 @@
 # Upstash Changelog
 
+## [Redis Data Browser] - {PR_MERGE_DATE}
+
+- Add a basic Data Browser in Redis
+
 ## [Initial Version - Redis + Vector] - 2025-07-07
 
 - List Redis Databases
