@@ -57,7 +57,8 @@ export async function getSearchResults(
   }
 
   const fresh = await searchPackages(normalizedQuery);
-  const limited = fresh.slice(0, MAX_SEARCH_RESULTS);
+  const uniqueResults = dedupeSearchResults(fresh);
+  const limited = uniqueResults.slice(0, MAX_SEARCH_RESULTS);
   await setCachedValue(cacheKey, limited, FIFTEEN_MINUTES_MS);
   return limited;
 }
@@ -134,4 +135,17 @@ function normalizePackageDetail(detail: ApiPackageDetail): PackageDetail {
     ...detail,
     participants: normalizedParticipants,
   };
+}
+
+// Removes duplicate packages based on slug to keep UI keys stable.
+function dedupeSearchResults(results: SearchResponseItem[]): SearchResponseItem[] {
+  const seen = new Set<string>();
+  return results.filter((item) => {
+    const slugKey = item.slug.toLowerCase();
+    if (seen.has(slugKey)) {
+      return false;
+    }
+    seen.add(slugKey);
+    return true;
+  });
 }

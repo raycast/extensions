@@ -6,6 +6,7 @@ import {
   getGridDetailByUrl,
   getPackageDetailWithCache,
 } from "./data";
+import { MAX_VISIBLE_PARTICIPANTS } from "./constants";
 import { PackageDetail } from "./types";
 import { normalizeExternalUrl } from "./url";
 
@@ -351,13 +352,24 @@ function PackageMetadata({ detail, slug }: { detail: PackageDetail; slug: string
 
   const participantsItems =
     detail.participants && detail.participants.length > 0
-      ? [
-          <Detail.Metadata.TagList title="Participants" key="participants">
-            {detail.participants.map((participant, index) => (
-              <Detail.Metadata.TagList.Item text={participant} key={`${participant}-${index}`} />
-            ))}
-          </Detail.Metadata.TagList>,
-        ]
+      ? (() => {
+          const visibleParticipants = detail.participants.slice(0, MAX_VISIBLE_PARTICIPANTS);
+          const remainingCount = detail.participants.length - visibleParticipants.length;
+
+          return [
+            <Detail.Metadata.TagList title="Participants" key="participants">
+              {visibleParticipants.map((participant, index) => (
+                <Detail.Metadata.TagList.Item text={participant} key={`${participant}-${index}`} />
+              ))}
+              {remainingCount > 0 && (
+                <Detail.Metadata.TagList.Item
+                  text={`+${remainingCount} more`}
+                  key="participants-more"
+                />
+              )}
+            </Detail.Metadata.TagList>,
+          ];
+        })()
       : [];
 
   const sections = [overviewItems, activityItems, repoItems, linkItems, participantsItems].filter(
