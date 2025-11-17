@@ -7,14 +7,14 @@ export function useMatchDay(date: Date) {
     async (date): Promise<MatchDayResponse> => {
       const dateStr = date.toISOString().split("T")[0].replace(/-/g, "");
       const url = `https://www.fotmob.com/api/matches?date=${dateStr}`;
-      const token = await getHeaderToken();
-      const searchResponse = await fetch(url, { headers: token });
+      const headers = await getHeaderToken();
+      const searchResponse = await fetch(url, { headers });
 
       if (!searchResponse.ok) {
         throw new Error("Failed to fetch search results");
       }
 
-      const response: MatchDayResponse = await searchResponse.json();
+      const response: MatchDayResponse = (await searchResponse.json()) as MatchDayResponse;
       return response;
     },
     [date],

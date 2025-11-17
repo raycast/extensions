@@ -5,7 +5,7 @@ import { favoriteAccessories } from "@/utils/item-accessories/favoriteAccessory"
 import { buildPlayerImageUrl } from "@/utils/url-builder";
 
 export function usePlayerSearch(searchText: string) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const { data, error, isLoading, revalidate } = useCachedPromise(
     async (query: string): Promise<SearchResultItem[]> => {
       if (!query || query.trim().length === 0) {
@@ -24,7 +24,7 @@ export function usePlayerSearch(searchText: string) {
           return [];
         }
 
-        const searchResults: SearchResponse = await searchResponse.json();
+        const searchResults: SearchResponse = (await searchResponse.json()) as SearchResponse;
 
         // Parse Players only
         const players = await Promise.all(

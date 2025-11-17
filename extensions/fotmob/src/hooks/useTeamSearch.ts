@@ -5,7 +5,7 @@ import { favoriteAccessories } from "@/utils/item-accessories/favoriteAccessory"
 import { buildTeamLogoUrl } from "@/utils/url-builder";
 
 export function useTeamSearch(searchText: string) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const { data, error, isLoading, revalidate } = useCachedPromise(
     async (query: string): Promise<SearchResultItem[]> => {
       const url = `https://apigw.fotmob.com/searchapi/suggest?term=${query}&lang=en`;
@@ -17,7 +17,7 @@ export function useTeamSearch(searchText: string) {
         throw new Error("Failed to fetch search results");
       }
 
-      const searchResults: SearchResponse = await searchResponse.json();
+      const searchResults: SearchResponse = (await searchResponse.json()) as SearchResponse;
 
       // Parse Teams only
       const teams = await Promise.all(

@@ -30,7 +30,7 @@ export function usePlayerDetail(playerId: string) {
           throw new Error(`Search API failed: ${searchResponse.status}`);
         }
 
-        let searchResults = await searchResponse.json();
+        let searchResults = (await searchResponse.json()) as any; // Complex nested structure requires type assertion
         let playerOptions = searchResults.squadMemberSuggest?.[0]?.options || [];
 
         // Try to find the player by ID in search results
@@ -47,7 +47,7 @@ export function usePlayerDetail(playerId: string) {
               searchResponse = await fetch(searchUrl);
 
               if (searchResponse.ok) {
-                searchResults = await searchResponse.json();
+                searchResults = (await searchResponse.json()) as any;
                 playerOptions = searchResults.squadMemberSuggest?.[0]?.options || [];
 
                 playerResult = playerOptions.find(

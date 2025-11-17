@@ -6,14 +6,14 @@ export function useMatchDetail(matchId: string) {
   const { data, error, isLoading } = useCachedPromise(
     async (matchId: string): Promise<MatchDetailData> => {
       const url = `https://www.fotmob.com/api/matchDetails?matchId=${matchId}`;
-      const token = await getHeaderToken();
+      const headers = await getHeaderToken();
 
-      const response = await fetch(url, { headers: token });
+      const response = await fetch(url, { headers });
       if (!response.ok) {
         throw new Error(`Failed to fetch match details: ${response.status} ${response.statusText}`);
       }
 
-      const rawData = await response.json();
+      const rawData = (await response.json()) as any; // Use type assertion for complex nested data structure
 
       if (!rawData) {
         throw new Error("No match data received from API");

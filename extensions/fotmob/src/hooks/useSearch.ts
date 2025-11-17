@@ -20,7 +20,7 @@ export function useSearch(searchText: string) {
         throw new Error("Failed to fetch search results");
       }
 
-      const searchResults: SearchResponse = await searchResponse.json();
+      const searchResults: SearchResponse = (await searchResponse.json()) as SearchResponse;
 
       // Parse Team
       const teams = Promise.all(
