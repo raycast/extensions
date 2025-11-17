@@ -6,8 +6,7 @@
   "icon": "icon-light.png",
   "author": "garrick_zhang",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Developer Tools",
