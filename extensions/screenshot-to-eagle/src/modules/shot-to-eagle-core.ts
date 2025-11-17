@@ -41,7 +41,6 @@ export async function shotToEagle(mode?: ScreenshotMode) {
     }
 
     // 3. Take screenshot
-    // Close toast and prepare for screenshot (HUD automatically closes Raycast)
     await showHUD("Taking Screenshot...");
 
     // Wait for Raycast window to close, ensuring screenshot interface displays properly
@@ -94,7 +93,7 @@ export async function shotToEagle(mode?: ScreenshotMode) {
     // Upload screenshot
     const uploadResult = await uploadScreenshot({
       url: base64Data,
-      name: fileName.replace(".png", ""), // Remove extension
+      name: fileName.replace(".png", ""),
       folderId: config.folderId,
       modificationTime: Date.now(),
     });
