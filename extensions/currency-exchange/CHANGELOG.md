@@ -1,5 +1,7 @@
 # Currency Exchange Changelog
 
+## [Added issing contributor] - {PR_MERGE_DATE}
+
 ## [Update] - 2024-10-01
 - Add currency formating to all display
 
