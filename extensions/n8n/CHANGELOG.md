@@ -1,6 +1,6 @@
 # n8n Changelog
 
-## [Fix Crash on Invalid URL] - {PR_MERGE_DATE}
+## [Fix Crash on Invalid URL] - 2025-11-17
 
 - Fix crash when Invalid URL in `Preferences` (ref: [Issue #22317](https://github.com/raycast/extensions/issues/22317))
 
