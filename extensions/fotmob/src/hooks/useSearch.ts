@@ -8,7 +8,7 @@ import { favoriteAccessories } from "@/utils/item-accessories/favoriteAccessory"
 import { buildLeagueLogoUrl, buildPlayerImageUrl, buildTeamLogoUrl } from "@/utils/url-builder";
 
 export function useSearch(searchText: string) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const { data, error, isLoading, revalidate } = useCachedPromise(
     async (query: string): Promise<SearchResultSection[]> => {
       const url = `https://apigw.fotmob.com/searchapi/suggest?term=${query}&lang=en`;
