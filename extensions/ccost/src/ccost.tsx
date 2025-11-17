@@ -1,5 +1,6 @@
 // src/index.tsx
-import { List, ActionPanel, Action, showToast, Toast, Color, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Color, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState, useMemo } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -125,8 +126,7 @@ export default function Command() {
 
       setDays(normalized);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      showToast({ style: Toast.Style.Failure, title: "Error", message });
+      showFailureToast(error, { title: "Error" });
     } finally {
       setIsLoading(false);
     }
@@ -197,7 +197,6 @@ export default function Command() {
               { text: { value: `In: ${day.inputTokens ?? 0}`, color: Color.SecondaryText } },
               { text: { value: `Out: ${day.outputTokens ?? 0}`, color: Color.SecondaryText } },
               { text: { value: `Tokens: ${day.totalTokens ?? 0}`, color: Color.Blue } },
-              // --- MODIFIED: Changed this from `text` to `tag` ---
               { tag: { value: `$${(day.totalCost ?? 0).toFixed(2)}`, color: Color.Green } },
             ]}
             actions={
