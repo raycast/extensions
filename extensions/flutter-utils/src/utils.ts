@@ -17,7 +17,15 @@ import path from "node:path";
  * Throws if no valid path is found.
  */
 export async function resolveProjectPath(): Promise<string> {
-  const { projectPath } = getPreferenceValues<Preferences>();
+  type Preferences = {
+  projectPath?: string;
+  flutterSdkPath?: string;
+};
+
+/**
+ * Global extension preferences.
+ * projectPath: default Flutter project path.
+ */
 
   if (projectPath) {
     const valid = await isExistingPath(projectPath);
