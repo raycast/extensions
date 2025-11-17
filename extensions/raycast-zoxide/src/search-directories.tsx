@@ -1,9 +1,9 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import { SearchResult } from "@components/search-result";
 import { AddFromFinderAction } from "@components/add-from-finder-action";
-import { SpotlightResults } from "@components/spotlight-results";
+import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-action";
 import { useZoxide } from "@hooks/use-zoxide";
 import { useFzf } from "@hooks/use-fzf";
 import { makeFriendly, base64Encode } from "@utils/path-helpers";
@@ -61,7 +61,7 @@ export default function Command() {
     >
       <List.Section title="Results" subtitle={searchResults.length.toString()}>
         {searchResults.map((result: SearchResult) => (
-          <SearchResult key={result.key} searchResult={result} />
+          <SearchResult key={result.key} searchResult={result} searchText={searchText} />
         ))}
       </List.Section>
       <List.EmptyView
@@ -69,11 +69,7 @@ export default function Command() {
         description="Would you like to search using Spotlight? Directories found and opened using Spotlight will be added to zoxide."
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Search Using Spotlight"
-              icon={Icon.MagnifyingGlass}
-              target={<SpotlightResults query={searchText} />}
-            />
+            <SearchUsingSpotlightAction searchText={searchText} />
             <AddFromFinderAction />
           </ActionPanel>
         }

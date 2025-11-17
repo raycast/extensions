@@ -3,6 +3,7 @@ import type { Meeting } from "../types/Types";
 import { exportMeeting } from "../utils/export";
 import { MeetingSummaryDetail, MeetingTranscriptDetail } from "../search-meetings";
 import { MeetingActionItemsDetail } from "../view-action-items";
+import { RefreshCacheAction } from "./RefreshCacheAction";
 
 // Shared Copy Actions Section
 export function MeetingCopyActions(props: {
@@ -141,8 +142,8 @@ export function MeetingDetailActions(props: {
 }
 
 // Main Meeting Actions (for list view)
-export function MeetingActions(props: { meeting: Meeting }) {
-  const { meeting } = props;
+export function MeetingActions(props: { meeting: Meeting; onRefresh?: () => Promise<void> }) {
+  const { meeting, onRefresh } = props;
   const recordingId = meeting.recordingId ?? meeting.id;
 
   return (
@@ -169,6 +170,12 @@ export function MeetingActions(props: { meeting: Meeting }) {
       <MeetingCopyActions meeting={meeting} />
       <MeetingOpenActions meeting={meeting} />
       <MeetingExportActions meeting={meeting} recordingId={recordingId} />
+
+      {onRefresh && (
+        <ActionPanel.Section>
+          <RefreshCacheAction onRefresh={onRefresh} />
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
 }

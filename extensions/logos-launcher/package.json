@@ -1,0 +1,175 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "logos-launcher",
+  "title": "Logos Launcher",
+  "description": "Opens books, verses or resources in Logos Bible Software",
+  "type": "module",
+  "icon": "logos_resize.png",
+  "author": "michael_marvive",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-verse",
+      "title": "Open Verse in Logos",
+      "subtitle": "Open a Bible verse in Logos",
+      "description": "Open a Bible reference in Logos. Configure aliases (e.g. niv=niv2011, nasb=nasb95) in preferences to pick versions quickly. Version codes: niv, nasb95, message, esv, lsb, leb, nlt, kjv, nkjv, rsv. Enter aliases as JSON (e.g. {\"esv\":\"esv\"}) or comma-separated alias=version entries.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "input",
+          "type": "text",
+          "placeholder": "nasb John 3:16"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultVersion",
+          "type": "textfield",
+          "title": "Default Version",
+          "placeholder": "esv",
+          "description": "The Bible version to use when no alias prefix is provided.",
+          "required": true
+        },
+        {
+          "name": "versionAliases",
+          "type": "textfield",
+          "title": "Version Aliases",
+          "placeholder": "alias=version",
+          "description": "Add aliases such as niv=niv2011, nasb=nasb95, msg=message, esv=esv, lsb=lsb, leb=leb, nlt=nlt, kjv=kjv, nkjv=nkjv, rsv=rsv. Accepts JSON or comma-separated alias=version pairs (e.g. esv=esv, nasb=nasb95).",
+          "required": false
+        },
+        {
+          "name": "openMethod",
+          "type": "dropdown",
+          "title": "Open Method",
+          "description": "Choose how Raycast opens the verse in Logos.",
+          "defaultValue": "ref.ly URL",
+          "required": true,
+          "data": [
+            {
+              "title": "ref.ly URL",
+              "value": "ref.ly URL"
+            },
+            {
+              "title": "logosres scheme",
+              "value": "logosres scheme"
+            }
+          ]
+        },
+        {
+          "name": "copyUrlToClipboard",
+          "type": "checkbox",
+          "title": "Copy final URL to clipboard",
+          "label": "Copy final URL to clipboard",
+          "description": "Copies the computed URL to the clipboard for troubleshooting.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-library",
+      "title": "Search Library",
+      "subtitle": "Find and open a Logos resource",
+      "description": "Search your Logos library by title or author and open a resource",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "catalogPath",
+          "type": "textfield",
+          "title": "Catalog DB Path Override",
+          "placeholder": "~/Library/Application Support/Logos4/Data/.../LibraryCatalog/catalog.db",
+          "description": "Optional path to catalog.db. Leave empty for auto-discovery.",
+          "required": false
+        },
+        {
+          "name": "fuzzyThreshold",
+          "type": "textfield",
+          "title": "Fuzzy Match Threshold",
+          "placeholder": "0.3",
+          "defaultValue": "0.3",
+          "description": "Fuse.js threshold between 0 (exact) and 1 (fuzzy).",
+          "required": false
+        },
+        {
+          "name": "openScheme",
+          "type": "dropdown",
+          "title": "Open Scheme",
+          "description": "Choose the first URL scheme to try when opening a resource.",
+          "defaultValue": "logosres",
+          "required": true,
+          "data": [
+            {
+              "title": "logosres",
+              "value": "logosres"
+            },
+            {
+              "title": "logos4",
+              "value": "logos4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-all",
+      "title": "Logos All Search",
+      "subtitle": "Search all Logos datasets",
+      "description": "Runs an All Search in Logos using the ref.ly endpoint.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "holiness"
+        }
+      ]
+    },
+    {
+      "name": "search-factbook",
+      "title": "Search Factbook",
+      "subtitle": "Open a topic in Logos Factbook",
+      "description": "Browse indexed Factbook topics from Logos' AutoComplete database and open them instantly.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autocompletePath",
+          "type": "textfield",
+          "title": "AutoComplete DB Path Override",
+          "placeholder": "~/Library/Application Support/Logos4/Data/.../AutoComplete/AutoComplete.db",
+          "description": "Optional path to AutoComplete.db. Leave empty for auto-discovery.",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^1.17.0",
+    "fuse.js": "^6.6.2",
+    "sql.js": "^1.10.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/sql.js": "^1.4.9",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

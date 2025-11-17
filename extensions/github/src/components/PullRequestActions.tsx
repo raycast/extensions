@@ -17,6 +17,7 @@ import { getGitHubUser } from "../helpers/users";
 import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import AddPullRequestReview from "./AddPullRequestReview";
+import CheckoutPullRequestForm from "./CheckoutPullRequestForm";
 import PullRequestCommits from "./PullRequestCommits";
 import { SortAction, SortActionProps } from "./SortAction";
 
@@ -303,6 +304,13 @@ export default function PullRequestActions({
         title="See Commits"
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         target={<PullRequestCommits pullRequest={pullRequest} />}
+      />
+
+      <Action.Push
+        icon={Icon.Download}
+        title="Check out PR"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+        target={<CheckoutPullRequestForm pullRequest={pullRequest} />}
       />
 
       {anyMergeActionAvailable && (

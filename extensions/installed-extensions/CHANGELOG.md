@@ -1,5 +1,9 @@
 # Installed Extensions Changelog
 
+## [Enhancement] - 2025-11-15
+
+- Add icon path for Windows
+
 ## [Enhancement] - 2025-10-08
 
 - Add support for Windows

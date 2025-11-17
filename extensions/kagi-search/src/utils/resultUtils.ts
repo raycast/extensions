@@ -15,4 +15,5 @@ export const getIcon = (item: SearchResult) => {
   }
 };
 
-export const apiEnabled = getPreferenceValues()["useApiForSearch"] && getPreferenceValues()["apiKey"].length > 0;
+const preferences = getPreferenceValues();
+export const apiEnabled = preferences["useApiForSearch"] && preferences["apiKey"]?.length > 0;

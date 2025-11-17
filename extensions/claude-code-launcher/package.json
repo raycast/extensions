@@ -36,6 +36,10 @@
         {
           "title": "Alacritty",
           "value": "Alacritty"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
         }
       ]
     },
