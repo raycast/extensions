@@ -7,8 +7,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [0.5.5] - {PR_MERGE_DATE}
 
 ### Changed
-- Optimisation des images de la galerie du Store: formats, dimensions et poids normalisés dans `metadata/screenshots/` pour un rendu net et conforme.
-- Bump de version à 0.5.5.
+- Store gallery image optimization: normalized formats, dimensions and weights in `metadata/screenshots/` for sharp and compliant rendering.
+- Bump version to 0.5.5.
 
 ## [0.5.4] - {PR_MERGE_DATE}
 
