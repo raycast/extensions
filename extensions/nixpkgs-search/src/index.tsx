@@ -1,10 +1,10 @@
-import { ActionPanel, Action, Color, getPreferenceValues, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, Color, getPreferenceValues, List, Icon, Keyboard } from "@raycast/api";
 import { useState } from "react";
 import { URL } from "node:url";
 import { useFetch, showFailureToast } from "@raycast/utils";
 
 export default function Command() {
-  const { searchSize, branchName } = getPreferenceValues<Preferences>();
+  const { searchSize = "20", branchName = "unstable" } = getPreferenceValues<Preferences>();
 
   const [url, setUrl] = useState<string | undefined>(undefined);
   if (!url) {
@@ -44,18 +44,32 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             {searchResult.homepage[0] ? (
-              <Action.OpenInBrowser
-                title="Open Package Homepage"
-                url={searchResult.homepage[0]}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-              />
+              <>
+                <Action.OpenInBrowser
+                  title="Open Package Homepage"
+                  url={searchResult.homepage[0]}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Package Homepage URL"
+                  content={searchResult.homepage[0]}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                />
+              </>
             ) : null}
             {searchResult.source && (
-              <Action.OpenInBrowser
-                title="Open Package Source Code"
-                url={searchResult.source!}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
-              />
+              <>
+                <Action.OpenInBrowser
+                  title="Open Package Source Code"
+                  url={searchResult.source!}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Package Source URL"
+                  content={searchResult.source!}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                />
+              </>
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -72,7 +86,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
                   <List.Item.Detail.Metadata.Link key={url} title="Homepage" target={url} text={new URL(url).host} />
                 ) : (
                   <List.Item.Detail.Metadata.Label key={idx} title="Homepage" icon={Icon.Minus} />
-                )
+                ),
               )}
               {searchResult.source && (
                 <List.Item.Detail.Metadata.Link
@@ -91,7 +105,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
                   />
                 ) : (
                   <List.Item.Detail.Metadata.Label key={license.name} title="License" text={license.name} />
-                )
+                ),
               )}
               <List.Item.Detail.Metadata.TagList title="Outputs">
                 {searchResult.outputs.map((text) => (
@@ -240,7 +254,7 @@ function useSearch({ url, searchText, searchSize }: { url?: string; searchText: 
           outputs: result.package_outputs,
           defaultOutput: result.package_default_output,
           platforms: result.package_platforms.filter((platform) =>
-            ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(platform)
+            ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(platform),
           ),
           licenses: result.package_license.map((license) => {
             let url: string | null;
@@ -289,4 +303,9 @@ interface SearchResult {
   defaultOutput: string | null;
   platforms: string[];
   licenses: { name: string; url: string | null }[];
+}
+
+interface Preferences {
+  searchSize?: string;
+  branchName?: string;
 }
