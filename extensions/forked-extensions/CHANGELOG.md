@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-11-17
 
 - Fix init repository when user path has spaces
 
