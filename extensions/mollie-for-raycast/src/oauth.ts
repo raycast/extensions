@@ -1,8 +1,8 @@
 // src/oauth.ts
 import { OAuth } from "@raycast/api";
 
-// --- CONFIGURATIE ---
-// Jouw ingevulde sleutels
+// --- CONFIGURATION ---
+// Your app credentials
 const clientId = "app_aLGHhWSHe8e3d494VRiNtac2";
 const proxiedAuthorizeUrl =
   "https://oauth.raycast.com/v1/authorize/NxaZKqcp7vp8pAw3Mp8r8UOXy_z3pnka8zfft5NcBEoB09N36m-7Y6r_EBUphunBEkTTec8UnAC_hq1ENW73rgp77by3LF_mXqJ4ct1g9kqbLRe8Hx1ezlHoU2sxnqKZfzHWkdV7hGugdqZksA";
@@ -11,7 +11,7 @@ const proxiedTokenUrl =
 const proxiedRefreshTokenUrl =
   "https://oauth.raycast.com/v1/refresh-token/hiXK17eErlQSoxjH5w0qTI3fjCmQt-Qw7TWqV0PhNEi6xvSqLjnklSkwNy7D0g67FwQAfXV3udahWqjl2tFPa5b7zO_rFNtJQTvPto9gQMrQDdQFFC6VvdGZstEn8K2juivJh2SwmBzBfg";
 
-// Definieer de permissies die je app nodig heeft
+// Define the permissions your app needs
 const SCOPES =
   "organizations.read profiles.read payments.read payments.write sales-invoices.read sales-invoices.write balances.read settlements.read payment-links.read payment-links.write subscriptions.read subscriptions.write refunds.write refunds.read";
 
