@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ccost",
-  "title": "ccost",
-  "description": "claude code costs",
+  "title": "CCost",
+  "description": "Claude Code Costs",
   "icon": "extension-icon.png",
   "author": "thisisadityapatel",
   "platforms": [
@@ -14,9 +14,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "ccost",
-      "title": "ccost",
-      "description": "claude code costs",
+      "name": "ost",
+      "title": "CCost",
+      "description": "Claude Code Costs",
       "mode": "view"
     }
   ],
