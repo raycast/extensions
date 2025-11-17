@@ -18,7 +18,6 @@ import path from "node:path";
  */
 export async function resolveProjectPath(): Promise<string> {
   const { projectPath } = getPreferenceValues<Preferences>();
-};
 
 /**
  * Global extension preferences.
