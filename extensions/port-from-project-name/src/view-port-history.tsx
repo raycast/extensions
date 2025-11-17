@@ -1,5 +1,19 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Detail,
+  Icon,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
 
 type HistoryEntry = {
   port: number;
@@ -26,20 +40,49 @@ export default function Command() {
   }
 
   async function handleClearAll() {
+    const confirmed = await confirmAlert({
+      title: "Clear All History",
+      message: "Are you sure you want to clear all port history? This action cannot be undone.",
+      primaryAction: {
+        title: "Clear",
+        style: Alert.ActionStyle.Destructive,
+      },
+      rememberUserChoice: true,
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     await setHistory({});
     await showToast({ style: Toast.Style.Success, title: "Cleared history" });
   }
 
   if (!isLoading && items.length === 0) {
     return (
-      <Detail
-        markdown={"# No Port History\n\nGenerate a port from the other command to start building history."}
+      <List
         actions={
           <ActionPanel>
+            <Action
+              title="Generate Port"
+              onAction={async () => {
+                try {
+                  await launchCommand({ name: "generate-port", type: LaunchType.UserInitiated });
+                } catch (error) {
+                  await showFailureToast(error, { title: "Failed to launch command" });
+                }
+              }}
+            />
             <Action title="Clear History" onAction={handleClearAll} style={Action.Style.Destructive} />
           </ActionPanel>
         }
-      />
+      >
+        <List.EmptyView
+          title="No Port History Found"
+          description="Generate a port to start building your history."
+          icon={Icon.Warning}
+        />
+      </List>
     );
   }
 
@@ -60,12 +103,14 @@ export default function Command() {
                   title="Delete Entry"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => void handleDelete(item.projectName)}
                 />
                 <Action
                   title="Clear All History"
-                  icon={Icon.XmarkCircle}
+                  icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.RemoveAll}
                   onAction={() => void handleClearAll()}
                 />
               </ActionPanel.Section>
