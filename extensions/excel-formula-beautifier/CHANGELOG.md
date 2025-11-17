@@ -1,6 +1,6 @@
 # Excel Formula Beautifier Changelog
 
-## [General Improvements & Fixes] - {PR_MERGE_DATE}
+## [General Improvements & Fixes] - 2025-11-17
 
 - Fix issue with strings being parsed as part of formulas
 - Improve beautification & UI/UX improvements for bigger formulas.
