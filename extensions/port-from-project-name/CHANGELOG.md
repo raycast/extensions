@@ -1,6 +1,6 @@
 # Port from Project Name Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-11-17
 
 Initial version with:
 - Generate deterministic 4-digit ports from project names
