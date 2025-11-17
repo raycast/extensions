@@ -1,6 +1,6 @@
 # Bitbucket Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-17
 
 - Update shortcuts to be consistent across MacOS and Windows
 
