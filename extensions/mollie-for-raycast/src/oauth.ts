@@ -24,7 +24,7 @@ export const client = new OAuth.PKCEClient({
   description: "Connect your Mollie account to Raycast.",
 });
 
-// --- KERN AUTHENTICATIE LOGICA ---
+// --- CORE AUTHENTICATION LOGIC ---
 export async function authorize(): Promise<string> {
   const tokenSet = await client.getTokens();
 
