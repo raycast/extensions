@@ -231,7 +231,7 @@ export default function EnhancedMatchItem({
             {isHomeTeamFavorited ? (
               <Action
                 icon={Icon.StarDisabled}
-                title={`Remove From Favorites`}
+                title={`Remove`}
                 onAction={async () => {
                   await favoriteService.removeItems("team", match.home?.id?.toString() || "");
                   showToast({
@@ -264,7 +264,7 @@ export default function EnhancedMatchItem({
             {isAwayTeamFavorited ? (
               <Action
                 icon={Icon.StarDisabled}
-                title={`Remove From Favorites`}
+                title={`Remove`}
                 onAction={async () => {
                   await favoriteService.removeItems("team", match.away?.id?.toString() || "");
                   showToast({

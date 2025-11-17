@@ -13,6 +13,7 @@ export function useMatchDetail(matchId: string) {
         throw new Error(`Failed to fetch match details: ${response.status} ${response.statusText}`);
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rawData = (await response.json()) as any; // Use type assertion for complex nested data structure
 
       if (!rawData) {

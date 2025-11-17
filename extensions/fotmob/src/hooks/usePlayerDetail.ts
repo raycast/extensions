@@ -30,6 +30,7 @@ export function usePlayerDetail(playerId: string) {
           throw new Error(`Search API failed: ${searchResponse.status}`);
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let searchResults = (await searchResponse.json()) as any; // Complex nested structure requires type assertion
         let playerOptions = searchResults.squadMemberSuggest?.[0]?.options || [];
 
@@ -47,6 +48,7 @@ export function usePlayerDetail(playerId: string) {
               searchResponse = await fetch(searchUrl);
 
               if (searchResponse.ok) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 searchResults = (await searchResponse.json()) as any;
                 playerOptions = searchResults.squadMemberSuggest?.[0]?.options || [];
 
