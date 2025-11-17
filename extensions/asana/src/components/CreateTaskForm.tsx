@@ -17,11 +17,13 @@ import { useWorkspaces } from "../hooks/useWorkspaces";
 import { useProjects } from "../hooks/useProjects";
 import { useUsers } from "../hooks/useUsers";
 import { useMe } from "../hooks/useMe";
+import { useSections } from "../hooks/useSections";
+import { useTags } from "../hooks/useTags";
 import { getErrorMessage } from "../helpers/errors";
 import { TaskFormValues } from "../create-task";
 import { getProjectIcon } from "../helpers/project";
 import TaskDetail from "./TaskDetail";
-import { createTask } from "../api/tasks";
+import { createTask, TaskPayload } from "../api/tasks";
 import { asanaToRaycastColor } from "../helpers/colors";
 
 export default function CreateTaskForm(props: {
@@ -50,16 +52,28 @@ export default function CreateTaskForm(props: {
           return { ...acc, [fieldId]: field[1] };
         }, {});
 
-        const task = await createTask({
+        const taskPayload: TaskPayload = {
           workspace: values.workspace,
           name: values.name,
           custom_fields: customFields,
-          ...(values.projects && values.projects.length > 0 ? { projects: values.projects } : {}),
           ...(values.description ? { html_notes: htmlNotes } : {}),
           ...(values.assignee ? { assignee: values.assignee } : {}),
           ...(values.start_date ? { start_on: format(values.start_date, "yyyy-MM-dd") } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
-        });
+          ...(values.tags && values.tags.length > 0 ? { tags: values.tags } : {}),
+        };
+
+        // Use memberships to atomically set project and section together
+        if (values.projects && values.projects.length > 0) {
+          if (values.section && values.projects.length === 1) {
+            // Use memberships API for atomic project + section assignment
+            taskPayload.memberships = [{ project: values.projects[0], section: values.section }];
+          } else {
+            taskPayload.projects = values.projects;
+          }
+        }
+
+        const task = await createTask(taskPayload);
 
         if (shouldCloseMainWindow) {
           await closeMainWindow();
@@ -94,6 +108,7 @@ export default function CreateTaskForm(props: {
           assignee: values.assignee,
           workspace: values.workspace,
           projects: values.projects,
+          section: values.section,
         });
 
         focus("name");
@@ -115,6 +130,8 @@ export default function CreateTaskForm(props: {
       assignee: props.draftValues?.assignee || props.assignee,
       start_date: props.draftValues?.start_date,
       due_date: props.draftValues?.due_date,
+      section: props.draftValues?.section,
+      tags: props.draftValues?.tags,
     },
   });
 
@@ -126,6 +143,9 @@ export default function CreateTaskForm(props: {
   const { data: allProjects, isLoading: isLoadingProjects } = useProjects(values.workspace);
   const { data: users, isLoading: isLoadingUsers } = useUsers(values.workspace);
   const { data: me, isLoading: isLoadingMe } = useMe();
+  const selectedProjectId = values.projects && values.projects.length === 1 ? values.projects[0] : undefined;
+  const { data: sections, isLoading: isLoadingSections } = useSections(selectedProjectId);
+  const { data: tags, isLoading: isLoadingTags } = useTags(values.workspace);
 
   const customFields = useMemo(() => {
     const selectedProjects = allProjects?.filter((project) => {
@@ -150,7 +170,9 @@ export default function CreateTaskForm(props: {
         </ActionPanel>
       }
       enableDrafts={!props.fromEmptyView}
-      isLoading={isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe}
+      isLoading={
+        isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe || isLoadingSections || isLoadingTags
+      }
     >
       <Form.Dropdown title="Workspace" storeValue {...itemProps.workspace}>
         {workspaces?.map((workspace) => {
@@ -170,6 +192,15 @@ export default function CreateTaskForm(props: {
           );
         })}
       </Form.TagPicker>
+
+      {selectedProjectId && sections && sections.length > 0 ? (
+        <Form.Dropdown title="Section" storeValue {...itemProps.section}>
+          <Form.Dropdown.Item title="No Section" value="" />
+          {sections?.map((section) => {
+            return <Form.Dropdown.Item key={section.gid} value={section.gid} title={section.name} />;
+          })}
+        </Form.Dropdown>
+      ) : null}
 
       <Form.Separator />
 
@@ -191,6 +222,13 @@ export default function CreateTaskForm(props: {
           );
         })}
       </Form.Dropdown>
+
+      <Form.TagPicker title="Tags" placeholder="Select tags (optional)" storeValue {...itemProps.tags}>
+        {tags?.map((tag) => {
+          return <Form.TagPicker.Item key={tag.gid} title={tag.name} value={tag.gid} />;
+        })}
+      </Form.TagPicker>
+
       {selectedWorkspace?.is_organization && showStartDate ? (
         <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.start_date} />
       ) : null}

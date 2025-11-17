@@ -1,7 +1,6 @@
-import { runAppleScript } from "@raycast/utils";
-import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
 import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
+import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 import { getMyDevices } from "./getMyDevices";
 
@@ -103,17 +102,12 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
 async function launchSpotifyAndPlay({ id, type }: { id?: string; type?: ContextTypes }) {
   try {
     if (!type || !id) {
-      const script = buildScriptEnsuringSpotifyIsRunning("play");
-      await runAppleScript(script);
+      await runSpotifyScript(SpotifyScriptType.Play);
     } else if (type === "track") {
-      const script = buildScriptEnsuringSpotifyIsRunning(`play track "${uriForType[type]}${id}"`);
-      await runAppleScript(script);
+      await runSpotifyScript(SpotifyScriptType.PlayTrack, false, `${uriForType[type]}${id}`);
     } else {
       // For albums/artists/etc we seem to need a delay. Trying 1 second.
-      const script = buildScriptEnsuringSpotifyIsRunning(`
-        delay 1
-        play track "${uriForType[type]}${id}"`);
-      await runAppleScript(script);
+      await runSpotifyScript(SpotifyScriptType.PlayTrack, false, `${uriForType[type]}${id}`, 1);
     }
   } catch (error) {
     const message = getErrorMessage(error);

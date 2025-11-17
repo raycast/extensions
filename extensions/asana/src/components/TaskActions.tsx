@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Icon, ActionPanel, Action, confirmAlert, Color, showToast, Toast, useNavigation } from "@raycast/api";
 import { getAvatarIcon, MutatePromise } from "@raycast/utils";
 import { User } from "../api/users";
-import { Project, addProject, removeProject } from "../api/projects";
+import { Project, addProject, removeProject, Section, addTaskToSection } from "../api/projects";
 import { useUsers } from "../hooks/useUsers";
 import { useProjects } from "../hooks/useProjects";
+import { useSections } from "../hooks/useSections";
 import { asanaToRaycastColor } from "../helpers/colors";
 import { getErrorMessage } from "../helpers/errors";
 import { Task, updateTask, deleteTask as apiDeleteTask, CustomField, EnumValue } from "../api/tasks";
@@ -166,6 +167,7 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
         <UsersSubmenu workspace={workspace} task={task} mutate={mutate} />
         <DueOnSubMenu task={task} mutate={mutate} />
         <ProjectsSubmenu workspace={workspace} task={task} mutate={mutate} />
+        <SectionsSubmenu task={task} mutate={mutate} />
 
         {task.custom_fields &&
           task.custom_fields.length > 0 &&
@@ -234,6 +236,7 @@ type UsersSubmenuProps = {
 
 type ProjectsSubmenuProps = UsersSubmenuProps;
 type DueOnSubmenuProps = UsersSubmenuProps;
+type SectionsSubmenuProps = Omit<UsersSubmenuProps, "workspace">;
 
 function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
   const [load, setLoad] = useState(false);
@@ -418,6 +421,58 @@ type CustomFieldSubmenuProps = {
   field: CustomField;
   mutate: (params: MutateParams) => void;
 };
+
+function SectionsSubmenu({ task, mutate }: SectionsSubmenuProps) {
+  const selectedProjectId = task.projects && task.projects.length === 1 ? task.projects[0].gid : undefined;
+  const { data: sections, isLoading } = useSections(selectedProjectId);
+
+  async function moveToSection(section: Section) {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Moving to section" });
+
+      const asyncUpdate = addTaskToSection(task.gid, section.gid);
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, assignee_section: section };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Moved to section",
+        message: section.name,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to move to section",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  if (!selectedProjectId) {
+    return null;
+  }
+
+  return (
+    <ActionPanel.Submenu title="Move to Section" icon={Icon.Tag} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        <>
+          {sections?.map((section) => {
+            return (
+              <Action key={section.gid} title={section.name} icon={Icon.List} onAction={() => moveToSection(section)} />
+            );
+          })}
+        </>
+      )}
+    </ActionPanel.Submenu>
+  );
+}
 
 function CustomFieldSubmenu({ task, mutate, field }: CustomFieldSubmenuProps) {
   async function updateField(option: EnumValue | null) {

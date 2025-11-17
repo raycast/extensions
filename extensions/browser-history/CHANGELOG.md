@@ -1,5 +1,12 @@
 # Browser History Changelog
 
+## [Add Dia, Comet and ChatGPT Atlas browser support] - 2025-11-08
+
+- Added Dia history search support.
+- Added Comet history search support.
+- Added ChatGPT Atlas history search support.
+- Update new tab action to use native `open` command instead of AppleScript.
+
 ## [Enhancement] - 2025-03-31
 
 - Add a `search in browser` action when no search history is available.

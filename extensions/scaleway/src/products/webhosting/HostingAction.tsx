@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { Webhosting } from '@scaleway/sdk'
+import type { Webhostingv1 } from '@scaleway/sdk'
 import { getHostingUrl } from './urls'
 
 type HostingActionProps = {
-  hosting: Webhosting.v1alpha1.Hosting
+  hosting: Webhostingv1.HostingSummary
   toggleIsDetailOpen: () => void
 }
 

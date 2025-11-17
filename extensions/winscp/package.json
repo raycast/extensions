@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "winscp",
+  "title": "WinSCP",
+  "description": "Launch WinSCP sessions quickly from Raycast.",
+  "icon": "extension_icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "scp",
+      "title": "SCP",
+      "description": "Launch into a SCP session.",
+      "mode": "view",
+      "subtitle": "WinSCP"
+    }
+  ],
+  "preferences": [ 
+    {
+      "name": "programPath",
+      "type": "directory",
+      "required": false,
+      "title": "WinSCP Installation Folder",
+      "default": "",
+      "description": "The folder where WinSCP is installed, only change this if the program is returning errors. You should find it at C:\\Users\\{user}\\AppData\\Local\\Programs\\WinSCP"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "bossdaily",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ]
+}

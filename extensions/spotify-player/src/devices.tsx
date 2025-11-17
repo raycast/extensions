@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   List,
   Toast,
   getPreferenceValues,
@@ -32,7 +33,7 @@ function Devices() {
               onAction={async () => {
                 myDevicesRevalidate();
               }}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel>
         }
@@ -54,7 +55,7 @@ function Devices() {
                 onAction={async () => {
                   myDevicesRevalidate();
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
@@ -110,7 +111,7 @@ function Devices() {
                 onAction={async () => {
                   myDevicesRevalidate();
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
