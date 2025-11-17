@@ -108,7 +108,7 @@ export function formatRecurrence(recurrence: string[]): string {
 }
 
 export function isInternal() {
-  return environment.supportPath.includes("com.raycast.macos.internal");
+  return environment.supportPath.includes(".internal");
 }
 
 export function toISO8601WithTimezoneOffset(date = new Date()) {
