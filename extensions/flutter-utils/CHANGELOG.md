@@ -13,8 +13,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [0.5.4] - {PR_MERGE_DATE}
 
 ### Changed
-- Icône du manifeste Raycast désormais `assets/icon.png`.
-- Bump de version à 0.5.4.
+- Raycast manifest icon now `assets/icon.png`.
+- Bump version to 0.5.4.
 
 ### Fixed
 - Conformité Store: alignement structure `assets/` et métadonnées.
