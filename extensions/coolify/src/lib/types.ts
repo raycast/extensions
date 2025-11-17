@@ -182,3 +182,8 @@ export type EnvironmentVariable = {
 export type MessageResult = {
   message: string;
 };
+export type ErrorResult = MessageResult & {
+  errors?: {
+    [key: string]: string[];
+  };
+};

@@ -2,12 +2,18 @@
 
 ## [Added issing contributor] - {PR_MERGE_DATE}
 
+## [Update] - 2025-11-04
+
+- Toggled on windows support
+
 ## [Update] - 2024-10-01
+
 - Add currency formating to all display
 
 ## [Upgraded dependencies] - 2023-04-11
 
 ## [Update] - 2023-01-02
+
 - Add query based on historical currency new function
 
 ## [Update] - 2022-09-20

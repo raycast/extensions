@@ -30,10 +30,11 @@ export function extractCode(original: string): string | null {
   if ((m = /^(\d{4,8})(\sis your.*code)/.exec(message)) !== null) {
     code = m[1];
   } else if (
-    // Look for the last occurrence of "code: DIGITS" pattern
+    // Look for the last occurrence of "code: DIGITS" pattern (including Japanese and full-width colons)
     // This helps with cases like "test code: test code: 883848" where we want the last match
+    // Supports: code:, is:, 码 (with or without colon), use code, passcode:, autorização:, código:, パスワード： (Japanese password)
     (m =
-      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+      /(code\s*[：:]|is\s*[：:]|码[：:]?|use code|passcode\s*[：:]|autoriza(?:ca|çã)o\s*[：:]|c(?:o|ó)digo\s*[：:]|パスワード[：:])\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
         message
       )) !== null
   ) {
@@ -41,12 +42,12 @@ export function extractCode(original: string): string | null {
     code = findLastMatchingCode(
       message,
       m,
-      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i
+      /(code\s*[：:]|is\s*[：:]|码[：:]?|use code|passcode\s*[：:]|autoriza(?:ca|çã)o\s*[：:]|c(?:o|ó)digo\s*[：:]|パスワード[：:])\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i
     );
   } else if (
-    // Modified to match alphanumeric codes
+    // Modified to match alphanumeric codes (including Japanese and full-width colons)
     (m =
-      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+      /(code\s*[：:]|is\s*[：:]|码[：:]?|use code|passcode\s*[：:]|autoriza(?:ca|çã)o\s*[：:]|c(?:o|ó)digo\s*[：:]|パスワード[：:])\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
         message
       )) !== null
   ) {
@@ -54,7 +55,7 @@ export function extractCode(original: string): string | null {
     code = findLastMatchingCode(
       message,
       m,
-      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i
+      /(code\s*[：:]|is\s*[：:]|码[：:]?|use code|passcode\s*[：:]|autoriza(?:ca|çã)o\s*[：:]|c(?:o|ó)digo\s*[：:]|パスワード[：:])\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i
     );
   } else {
     // more generic, brute force patterns
@@ -65,15 +66,15 @@ export function extractCode(original: string): string | null {
 
     message = message.replaceAll(phoneRegex, "");
 
-    if ((m = /(^|\s|\\R|\t|\b|G-|:)(\d{5,8})($|\s|\\R|\t|\b|\.|,)/.exec(message)) !== null) {
+    if ((m = /(^|\s|\\R|\t|\b|G-|[：:])(\d{5,8})($|\s|\\R|\t|\b|\.|,)/.exec(message)) !== null) {
       code = m[2];
     } else if ((m = /\b(?=[A-Z]*[0-9])(?=[0-9]*[A-Z])[0-9A-Z]{3,8}\b/.exec(message)) !== null) {
       code = m[0];
-    } else if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    } else if ((m = /(^|code[：:]|is[：:]|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
       const first = m[2];
       const second = m[3];
       code = `${first}${second}`;
-    } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    } else if ((m = /(code|is)[：:]?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
       code = m[2];
     }
   }

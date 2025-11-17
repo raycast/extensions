@@ -1,8 +1,19 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, open, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  Toast,
+  launchCommand,
+  LaunchType,
+  showToast,
+  open,
+} from "@raycast/api";
 import { isValid, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useEffect, useState } from "react";
-import { Delivery, FilterMode, STATUS_DESCRIPTIONS } from "./api";
+import { Delivery, FilterMode, STATUS_DESCRIPTIONS, getStatusIcon } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
 
 /**
@@ -11,33 +22,23 @@ import { useDeliveries } from "./hooks/useDeliveries";
  */
 const UNKNOWN_DATE_PLACEHOLDER = "--//--";
 
-// Map status codes to icons that represent state
-const STATUS_ICONS_UI: Record<number, Icon> = {
-  0: Icon.CheckCircle,
-  1: Icon.Snowflake,
-  2: Icon.Lorry,
-  3: Icon.Box,
-  4: Icon.Lorry,
-  5: Icon.QuestionMark,
-  6: Icon.Warning,
-  7: Icon.ExclamationMark,
-  8: Icon.Dot,
-};
+/**
+ * Supported date formats for parsing delivery dates.
+ */
+const DATE_FORMATS = [
+  "dd.MM.yyyy HH:mm:ss", // European with seconds
+  "dd.MM.yyyy HH:mm", // European without seconds
+  "MMMM dd, yyyy HH:mm", // American
+  "yyyy-MM-dd HH:mm:ss", // ISO 8601
+  "EEEE, d MMMM h:mm a", // Day name, date, 12-hour time (e.g. "Saturday, 31 May 5:26 am")
+  "EEEE, d MMMM", // Day name and date (e.g. "Saturday, 31 May")
+  "EEEE d MMMM h:mm a", // Portuguese format (e.g. "domingo 24 agosto 11:23 PM")
+  "EEEE d MMMM", // Portuguese format without time (e.g. "domingo 24 agosto")
+] as const;
 
 export default function Command() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
   const { deliveries, isLoading, error } = useDeliveries(filterMode);
-
-  const DATE_FORMATS = [
-    "dd.MM.yyyy HH:mm:ss", // European with seconds
-    "dd.MM.yyyy HH:mm", // European without seconds
-    "MMMM dd, yyyy HH:mm", // American
-    "yyyy-MM-dd HH:mm:ss", // ISO 8601
-    "EEEE, d MMMM h:mm a", // Day name, date, 12-hour time (e.g. "Saturday, 31 May 5:26 am")
-    "EEEE, d MMMM", // Day name and date (e.g. "Saturday, 31 May")
-    "EEEE d MMMM h:mm a", // Portuguese format (e.g. "domingo 24 agosto 11:23 PM")
-    "EEEE d MMMM", // Portuguese format without time (e.g. "domingo 24 agosto")
-  ];
 
   /**
    * Calculate the number of days until the expected delivery date.
@@ -265,6 +266,12 @@ export default function Command() {
                   open("https://web.parcelapp.net/");
                 }}
               />
+              <Action
+                title="Add Delivery"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                onAction={() => launchCommand({ name: "add-delivery", type: LaunchType.UserInitiated })}
+              />
             </ActionPanel>
           }
         />
@@ -279,6 +286,12 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
+              <Action
+                title="Add Delivery"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                onAction={() => launchCommand({ name: "add-delivery", type: LaunchType.UserInitiated })}
+              />
               <Action
                 title="Switch to Recent Deliveries"
                 icon={Icon.Clock}
@@ -305,7 +318,7 @@ export default function Command() {
               accessories={
                 [
                   {
-                    icon: STATUS_ICONS_UI[delivery.status_code],
+                    icon: getStatusIcon(delivery.status_code),
                     tooltip: STATUS_DESCRIPTIONS[delivery.status_code],
                   },
                   daysUntil !== null
@@ -338,6 +351,12 @@ export default function Command() {
                   />
                   <Action.CopyToClipboard title="Copy Tracking Number" content={delivery.tracking_number} />
                   <Action.OpenInBrowser title="Open Parcel Web" url="https://web.parcelapp.net/" />
+                  <Action
+                    title="Add New Delivery"
+                    icon={Icon.Plus}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    onAction={() => launchCommand({ name: "add-delivery", type: LaunchType.UserInitiated })}
+                  />
                 </ActionPanel>
               }
             />
