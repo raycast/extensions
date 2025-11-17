@@ -2,7 +2,7 @@
 
 ## [1.2.2] - {PR_MERGE_DATE}
 
-* Fix api key lenght error
+* Fix api key length error.
 * Add support for Windows platform.
 * Bump all dependencies to the latest.
 
