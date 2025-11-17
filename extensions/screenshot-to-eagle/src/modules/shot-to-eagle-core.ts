@@ -100,8 +100,8 @@ export async function shotToEagle(mode?: ScreenshotMode) {
     });
 
     // 6. Clean up temporary file
-    await deleteFile(screenshotResult.filePath); // This is necessary. The above has been successfully saved to Eagle. The following only shows the saving information. Even if it fails, you should clear the buffer and take a screenshot again.
-
+    await deleteFile(screenshotResult.filePath);
+    
     // 7. Display result
     if (uploadResult.success) {
       await showHUD("✓ Saved to Eagle");
