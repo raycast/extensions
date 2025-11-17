@@ -1,6 +1,6 @@
 # Tududi Changelog
 
-## [1.7.0] - 2025-11-17
+## [1.7.0] - {PR_MERGE_DATE}
 
 ### Features
 
