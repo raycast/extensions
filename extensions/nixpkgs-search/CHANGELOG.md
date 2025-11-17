@@ -1,8 +1,10 @@
 # NixPkgs Search Changelog
 
 ## [Update] - {PR_MERGE_DATE}
+
 - Bump dependencies to latest versions.
-- Added copy action to package details view.- Added Windows as supported platform.
+- Added copy action to package details view
+- Added Windows as supported platform.
 
 ## [Fix] - 2025-11-10
 - Change search URL by parsing frontend version to match the upstream change.

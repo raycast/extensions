@@ -40,7 +40,7 @@
       "description": "Branch name of NixOS/nixpkgs to query against",
       "type": "textfield",
       "required": false,
-      "title": "NixPkgs verison",
+      "title": "NixPkgs version",
       "default": "unstable"
     }
   ],
