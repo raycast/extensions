@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Support for Guest Profile] - {PR_MERGE_DATE}
+## [Support for Guest Profile] - 2025-11-17
 
 - Add support for Guest profile in all commands
 - Update dependencies to latest versions
