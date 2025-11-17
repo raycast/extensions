@@ -22,7 +22,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [0.5.3] - {PR_MERGE_DATE}
 
 ### Added
-- Ajout du dossier `metadata/` avec `screenshots/` et descriptions pour le Store.
+- Added `metadata/` folder with `screenshots/` and Store descriptions.
 
 ### Changed
 - Amélioration conformité soumission Raycast Store.
