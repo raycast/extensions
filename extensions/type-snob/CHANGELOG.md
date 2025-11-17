@@ -1,6 +1,6 @@
 # Type Snob Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-11-17
 
 - Added keyboard shortcut for copying HTML entity (Cmd+Opt+C on Mac, Ctrl+Alt+C on Windows)
 
