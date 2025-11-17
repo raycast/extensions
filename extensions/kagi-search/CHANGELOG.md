@@ -1,6 +1,6 @@
 # Kagi Search Changelog
 
-## [1.2.2] - {PR_MERGE_DATE}
+## [1.2.2] - 2025-11-17
 
 * Fix api key length error.
 * Add support for Windows platform.
