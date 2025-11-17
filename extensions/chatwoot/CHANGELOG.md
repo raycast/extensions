@@ -1,6 +1,6 @@
 # Chatwoot Changelog
 
-## [Fix "List Messages"] - {PR_MERGE_DATE}
+## [Fix "List Messages"] - 2025-11-17
 
 ### Messages
 - `fix` messages not loading when **sender** has no **name** (ref: [Issue #22918](https://github.com/raycast/extensions/issues/22918))
