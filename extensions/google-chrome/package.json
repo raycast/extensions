@@ -209,6 +209,61 @@
         ]
       },
       {
+        "input": "@google-chrome open a new guest window",
+        "mocks": {
+          "new-guest-window": "New guest window opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-guest-window",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new guest window"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open a new guest window to github.com",
+        "mocks": {
+          "new-guest-window": "New guest window opened to https://github.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-guest-window",
+              "arguments": {
+                "website": {
+                  "includes": "github.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new guest window to https://github.com"
+          }
+        ]
+      },
+      {
+        "input": "@google-chrome open current tab in guest",
+        "mocks": {
+          "open-current-in-guest": "Opened current tab URL in guest window"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-current-in-guest",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opens the current tab in a guest window"
+          }
+        ]
+      },
+      {
         "input": "@google-chrome search bookmarks for raycast",
         "mocks": {
           "search-bookmarks": [
@@ -280,7 +335,7 @@
             }
           },
           {
-            "meetsCriteria": "Returns the history for Raycast"
+            "meetsCriteria": "Lists history results including Raycast"
           }
         ]
       },
@@ -306,7 +361,7 @@
             }
           },
           {
-            "meetsCriteria": "Returns Chrome profiles with their names and IDs"
+            "meetsCriteria": "Lists available Chrome profiles"
           }
         ]
       }
