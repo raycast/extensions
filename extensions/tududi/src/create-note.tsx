@@ -13,7 +13,7 @@ interface Tag {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<{ apiUrl: string; email: string; password: string }>();
+  const preferences = getPreferenceValues<{ apiUrl: string; token: string }>();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
@@ -24,20 +24,9 @@ export default function Command() {
   useEffect(() => {
     async function loadData() {
       try {
-        // Login to get session cookie
-        const loginRes = await fetch(`${preferences.apiUrl}/api/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: preferences.email, password: preferences.password }),
-        });
-        if (!loginRes.ok) {
-          throw new Error("Login failed");
-        }
-        const cookie = loginRes.headers.get("set-cookie");
-
         // Fetch projects
         const projectsRes = await fetch(`${preferences.apiUrl}/api/projects`, {
-          headers: cookie ? { Cookie: cookie } : undefined,
+          headers: { Authorization: `Bearer ${preferences.token}` },
         });
         if (projectsRes.ok) {
           const projectsData = (await projectsRes.json()) as { projects: Project[] };
@@ -46,7 +35,7 @@ export default function Command() {
 
         // Fetch tags
         const tagsRes = await fetch(`${preferences.apiUrl}/api/tags`, {
-          headers: cookie ? { Cookie: cookie } : undefined,
+          headers: { Authorization: `Bearer ${preferences.token}` },
         });
         if (tagsRes.ok) {
           const tagsData = (await tagsRes.json()) as Tag[];
@@ -58,21 +47,10 @@ export default function Command() {
     }
 
     loadData();
-  }, [preferences.apiUrl, preferences.email, preferences.password]);
+  }, [preferences.apiUrl, preferences.token]);
 
   async function handleSubmit() {
     try {
-      // Always login to get session cookie
-      const loginRes = await fetch(`${preferences.apiUrl}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: preferences.email, password: preferences.password }),
-      });
-      if (!loginRes.ok) {
-        throw new Error("Login failed");
-      }
-      const cookie = loginRes.headers.get("set-cookie");
-
       // Create note
       const selectedTagObjects = selectedTags.map((uid) => tags.find((t) => t.uid === uid)).filter(Boolean);
       const selectedProjectObj = projects.find((p) => p.id.toString() === selectedProject);
@@ -89,7 +67,7 @@ export default function Command() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(cookie ? { Cookie: cookie } : {}),
+          Authorization: `Bearer ${preferences.token}`,
         },
         body: JSON.stringify(body),
       });
