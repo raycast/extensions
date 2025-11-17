@@ -1,6 +1,6 @@
 # LLMs Txt Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-11-17
 
 - Added Windows support
 
