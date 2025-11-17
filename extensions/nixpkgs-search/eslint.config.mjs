@@ -1,6 +1,5 @@
 import { defineConfig } from "eslint/config";
 import raycastConfig from "@raycast/eslint-config";
 
-export default defineConfig([
-    ...raycastConfig,
-]);
+// `@raycast/eslint-config` exports the base config; pass it directly to defineConfig
+export default defineConfig(raycastConfig);

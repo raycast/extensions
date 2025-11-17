@@ -62,12 +62,18 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
                 <Action.OpenInBrowser
                   title="Open Package Source Code"
                   url={searchResult.source!}
-                  shortcut={Keyboard.Shortcut.Common.Open}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "o" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+                  }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Package Source URL"
                   content={searchResult.source!}
-                  shortcut={Keyboard.Shortcut.Common.Copy}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                  }}
                 />
               </>
             )}
