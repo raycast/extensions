@@ -32,7 +32,6 @@ export default function Command() {
         const projectsRes = await fetch(`${preferences.apiUrl}/api/projects`, {
           headers: { Authorization: `Bearer ${preferences.token}` },
         });
-        console.log(projectsRes);
         if (projectsRes.ok) {
           const projectsData = (await projectsRes.json()) as { projects: Project[] };
           setProjects(projectsData.projects.filter((p: Project) => p && p.id != null && p.name));
