@@ -14,7 +14,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "ost",
+      "name": "ccost",
       "title": "CCost",
       "description": "Claude Code Costs",
       "mode": "view"
