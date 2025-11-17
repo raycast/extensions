@@ -4,7 +4,6 @@ import {
   Alert,
   Color,
   confirmAlert,
-  Detail,
   Icon,
   Keyboard,
   launchCommand,
